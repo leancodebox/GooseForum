@@ -1,0 +1,32 @@
+{
+  "name": "actor",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite --mode development",
+    "build": "vite build --mode production",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@vicons/ionicons5": "^0.11.0",
+    "axios": "^0.21.1",
+    "clipboard": "^2.0.11",
+    "date-fns": "^2.27.0",
+    "katex": "^0.13.24",
+    "markdown-it": "^12.3.2",
+    "mavon-editor": "^3.0.1",
+    "mermaid": "^8.13.9",
+    "moment": "^2.29.3",
+    "pinia": "^2.0.33",
+    "vue": "^3.2.38",
+    "vue-router": "^4.0.11"
+  },
+  "devDependencies": {
+    "@vicons/antd": "^0.12.0",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "@vue/compiler-sfc": "^3.0.5",
+    "naive-ui": "^2.34.3",
+    "vfonts": "^0.1.0",
+    "vite": "^4.1.4",
+    "vooks": "^0.2.10"
+  }
+}
