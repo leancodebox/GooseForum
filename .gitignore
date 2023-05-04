@@ -19,3 +19,10 @@
 
 # Go workspace file
 go.work
+
+.idea
+.fleet
+.vscode
+GooseForum
+storage
+tmp
