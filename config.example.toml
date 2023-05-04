@@ -1,24 +1,24 @@
 [app]
-name = 'app'
-env = 'production' # APP_ENV in local,production
-url = 'http://localhost'
+name = "app"
+env = "production" # APP_ENV in local,production
+url = "http://localhost"
 port = 99
 debug = true
 
 [db]
-migration = 'off' # OPEN_MIGRATION in on,off
-connection = 'sqlite'# in mysql sqlite
-url = 'db_user:db_pass@tcp(db_host:3306)/db_name?charset=utf8mb4&parseTime=True&loc=Local'
-path = './storage/data/sqlite.db'# :memory:|./storage/data/sqlite.db
+migration = "off" # OPEN_MIGRATION in on,off
+connection = "sqlite"# in mysql sqlite
+url = "db_user:db_pass@tcp(db_host:3306)/db_name?charset=utf8mb4&parseTime=True&loc=Local"
+path = "./storage/data/sqlite.db"# :memory:|./storage/data/sqlite.db
 
 maxIdleConnections = 50
 maxOpenConnections = 50
 maxLifeSeconds = 300
 
 [log]
-type = 'stdout'# LOG_TYPE stdout,file
-path = './storage/logs/thh.log'
+type = "stdout"# LOG_TYPE stdout,file
+path = "./storage/logs/thh.log"
 
 [PATH]
-hexo = ''
-workspace = ''
+hexo = ""
+workspace = ""
