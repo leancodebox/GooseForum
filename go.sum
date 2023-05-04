@@ -198,6 +198,10 @@ github.com/leancodebox/goose v0.0.1 h1:UXMo6g0g3YNsRbdZgjv67Cbf+2NF5IEENgsvweFaE
 github.com/leancodebox/goose v0.0.1/go.mod h1:jEhzyx05ZNeKCPMww9Jm8ME7V3srVvWdi2hmLvdqteg=
 github.com/leancodebox/goose v0.0.2 h1:FU2t8qc9VeyPQmxybY/GloCjDwsMh3qpY2sgxROTFN8=
 github.com/leancodebox/goose v0.0.2/go.mod h1:jEhzyx05ZNeKCPMww9Jm8ME7V3srVvWdi2hmLvdqteg=
+github.com/leancodebox/goose v0.0.3 h1:8hnz4DHyrjubPB3OoPHO8RbO3Vpskziwit61a1jEk04=
+github.com/leancodebox/goose v0.0.3/go.mod h1:jEhzyx05ZNeKCPMww9Jm8ME7V3srVvWdi2hmLvdqteg=
+github.com/leancodebox/goose v0.0.4 h1:978LQSNhKYSHCNAHjjGqb82P8UANZvDlx+m+hoaGOLw=
+github.com/leancodebox/goose v0.0.4/go.mod h1:jEhzyx05ZNeKCPMww9Jm8ME7V3srVvWdi2hmLvdqteg=
 github.com/leodido/go-urn v1.2.1/go.mod h1:zt4jvISO2HfUBqxjfIshjdMTYS56ZS/qv49ictyFfxY=
 github.com/leodido/go-urn v1.2.2 h1:7z68G0FCGvDk646jz1AelTYNYWrTNm0bEcFAo147wt4=
 github.com/leodido/go-urn v1.2.2/go.mod h1:kUaIbLZWttglzwNuG0pgsh5vuV6u2YcGBYz1hIPjtOQ=
