@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/bundles/logger"
+	"github.com/leancodebox/GooseForum/bundles/logging"
 	"github.com/leancodebox/goose/serverinfo"
 	"net/http"
 	"runtime"
@@ -54,16 +54,16 @@ func SysInfo() component.Response {
 	var err error
 	s.Os = serverinfo.InitOS()
 	if s.Cpu, err = serverinfo.InitCPU(); err != nil {
-		logger.ErrIf(err)
+		logging.ErrIf(err)
 
 	}
 
 	if s.Ram, err = serverinfo.InitRAM(); err != nil {
-		logger.ErrIf(err)
+		logging.ErrIf(err)
 	}
 
 	if s.Disk, err = serverinfo.InitDisk(); err != nil {
-		logger.ErrIf(err)
+		logging.ErrIf(err)
 	}
 
 	return component.SuccessResponse(s)

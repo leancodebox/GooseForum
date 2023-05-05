@@ -7,7 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/bbs/Comment"
 	"github.com/leancodebox/GooseForum/bundles/app"
 	"github.com/leancodebox/GooseForum/bundles/dbconnect"
-	"github.com/leancodebox/GooseForum/bundles/logger"
+	"github.com/leancodebox/GooseForum/bundles/logging"
 
 	"gorm.io/gorm"
 )
@@ -30,8 +30,8 @@ func migration(migration bool, db *gorm.DB) {
 		&Comment.Comment{},
 		&Articles.Articles{},
 	); err != nil {
-		logger.Error(err)
+		logging.Error(err)
 	} else {
-		logger.Info("migration end")
+		logging.Info("migration end")
 	}
 }
