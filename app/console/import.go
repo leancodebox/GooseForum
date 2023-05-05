@@ -1,10 +1,10 @@
 package console
 
 import (
-	"github.com/leancodebox/GooseForum/bundles/logger"
+	"github.com/leancodebox/GooseForum/bundles/logging"
 )
 
 var (
-	info  = logger.Info
-	error = logger.Error
+	info  = logging.Info
+	error = logging.Error
 )

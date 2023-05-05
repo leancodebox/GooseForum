@@ -2,10 +2,10 @@ package dbconnect
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/bundles/logger"
-	"github.com/leancodebox/goose/preferences"
+	"github.com/leancodebox/GooseForum/bundles/logging"
 
 	"github.com/glebarez/sqlite"
+	"github.com/leancodebox/goose/preferences"
 
 	"log"
 	"os"
@@ -19,14 +19,22 @@ import (
 	"gorm.io/driver/mysql"
 )
 
+//func init() {
+//	bootstrap.AddDInit(connectDB)
+//}
+
 var (
-	connection         = preferences.Get(`db.connection`, `sqlite`)
-	debug              = preferences.GetBool(`app.debug`, `sqlite`)
-	dbUrl              = preferences.Get(`db.url`)
-	dbPath             = preferences.Get(`db.path`, `:memory:`)
-	maxIdleConnections = preferences.GetInt(`db.maxIdleConnections`, 2)
-	maxOpenConnections = preferences.GetInt(`db.maxOpenConnections`, 2)
-	maxLifeSeconds     = preferences.GetInt(`db.maxLifeSeconds`, 60)
+	debug    = dbConfig.GetBool(`app.debug`, true)
+	dbConfig = preferences.GetExclusivePreferences("db.default")
+)
+
+var (
+	connection         = dbConfig.Get(`connection`, `sqlite`)
+	dbUrl              = dbConfig.Get(`url`)
+	dbPath             = dbConfig.Get(`path`, `:memory:`)
+	maxIdleConnections = dbConfig.GetInt(`maxIdleConnections`, 2)
+	maxOpenConnections = dbConfig.GetInt(`maxOpenConnections`, 2)
+	maxLifeSeconds     = dbConfig.GetInt(`maxLifeSeconds`, 60)
 )
 
 func init() {
@@ -40,29 +48,22 @@ func Std() *gorm.DB {
 	return dbIns
 }
 
-// NewMysql dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-// NewMysql
-func NewMysql(dsn string) (*gorm.DB, error) {
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	return db, err
-}
-
 // ConnectDB 初始化模型
 func connectDB() {
 
 	var err error
 	switch connection {
 	case "sqlite":
-		logger.Info("use sqlite")
-		dbIns, err = connectSqlLiteDB(logger.NewGormLogger())
+		logging.Info("use sqlite")
+		dbIns, err = connectSqlLiteDB(logging.NewGormLogger())
 		break
 	case "mysql":
-		logger.Info("use mysql")
-		dbIns, err = connectMysqlDB(logger.NewGormLogger())
+		logging.Info("use mysql")
+		dbIns, err = connectMysqlDB(logging.NewGormLogger())
 		break
 	default:
-		logger.Info("use sqlite because unselect db")
-		dbIns, err = connectSqlLiteDB(logger.NewGormLogger())
+		logging.Info("use sqlite because unselect db")
+		dbIns, err = connectSqlLiteDB(logging.NewGormLogger())
 		break
 	}
 

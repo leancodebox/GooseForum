@@ -2,7 +2,7 @@ package eh
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/bundles/logger"
+	"github.com/leancodebox/GooseForum/bundles/logging"
 )
 
 func init() {
@@ -15,7 +15,7 @@ func bundleInit() {
 
 func IfErr(err error) bool {
 	if err != nil {
-		logger.Error(err)
+		logging.Error(err)
 		return true
 	}
 	return false

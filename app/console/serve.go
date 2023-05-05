@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/leancodebox/GooseForum/bundles/app"
-	"github.com/leancodebox/GooseForum/bundles/logger"
+	"github.com/leancodebox/GooseForum/bundles/logging"
 	"github.com/leancodebox/GooseForum/routes"
 	"github.com/leancodebox/goose/preferences"
 	"log"
@@ -94,11 +94,11 @@ func ginServe() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 
-	logger.Println("Shutdown Server ...")
+	logging.Println("Shutdown Server ...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.Println("Server Shutdown:", err)
+		logging.Println("Server Shutdown:", err)
 	}
-	logger.Println("Server exiting")
+	logging.Println("Server exiting")
 }
