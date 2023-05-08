@@ -1,7 +1,7 @@
 package Users
 
 import (
-	"github.com/leancodebox/goose/luckrand"
+	"github.com/leancodebox/GooseForum/bundles/algorithm"
 	"github.com/leancodebox/goose/querymaker"
 )
 
@@ -16,7 +16,7 @@ func Verify(username string, password string) (*Users, error) {
 	if err != nil {
 		return &user, err
 	}
-	err = luckrand.VerifyPassword(user.Password, password)
+	err = algorithm.VerifyEncryptPassword(user.Password, password)
 	if err != nil {
 		return &Users{}, err
 	}
