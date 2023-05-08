@@ -1,7 +1,7 @@
 package Users
 
 import (
-	"github.com/leancodebox/goose/luckrand"
+	"github.com/leancodebox/GooseForum/bundles/algorithm"
 	"time"
 )
 
@@ -39,6 +39,6 @@ func (itself *Users) TableName() string {
 }
 
 func (itself *Users) SetPassword(password string) *Users {
-	itself.Password = luckrand.MakePassword(password)
+	itself.Password, _ = algorithm.MakePassword(password)
 	return itself
 }
