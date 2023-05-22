@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/leancodebox/goose/fileopt"
-	"github.com/leancodebox/goose/luckrand"
 	"github.com/leancodebox/goose/preferences"
 	"os"
 	"path/filepath"
@@ -96,13 +95,13 @@ func (m *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	timestamp := entry.Time.Format("2006-01-02 15:04:05.000")
 	var msg string
-	trace := luckrand.MyTrace()
+
 	if entry.HasCaller() {
 		fName := filepath.Base(entry.Caller.File)
-		msg = fmt.Sprintf("[%-7s] %v [%s] [%s:%d %s] %s\n",
-			timestamp, entry.Level.String(), trace.GetNextTrace(), fName, entry.Caller.Line, entry.Caller.Function, entry.Message)
+		msg = fmt.Sprintf("[%-7s] %v  [%s:%d %s] %s\n",
+			timestamp, entry.Level.String(), fName, entry.Caller.Line, entry.Caller.Function, entry.Message)
 	} else {
-		msg = fmt.Sprintf("[%v] [%s] [%s] %s\n", trace.GetNextTrace(), timestamp, entry.Level, entry.Message)
+		msg = fmt.Sprintf("[%s] [%s] %s\n", timestamp, entry.Level, entry.Message)
 	}
 
 	b.WriteString(msg)

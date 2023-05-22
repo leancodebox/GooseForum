@@ -2,8 +2,6 @@ package logging
 
 import (
 	"bytes"
-	"fmt"
-	"github.com/leancodebox/goose/luckrand"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,8 +17,7 @@ func (f *TextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	} else {
 		b = &bytes.Buffer{}
 	}
-	trace := luckrand.MyTrace()
-	b.WriteString(fmt.Sprintf("%v %v", trace.GetNextTrace(), entry.Message))
+	b.WriteString(entry.Message)
 	b.WriteByte('\n')
 	return b.Bytes(), nil
 }
