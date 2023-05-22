@@ -91,6 +91,5 @@ func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 
 // logger 内用的辅助方法，
 func (l GormLogger) logger() *logrus.Logger {
-
 	return l.LogrusLogger
 }
