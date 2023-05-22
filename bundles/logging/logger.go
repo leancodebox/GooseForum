@@ -25,7 +25,7 @@ type Entry struct {
 
 var (
 	log        = logrus.StandardLogger()
-	logChannel = make(chan *Entry, 1024*1024)
+	logChannel = make(chan *Entry, 1024*512)
 	wg         sync.WaitGroup
 )
 
