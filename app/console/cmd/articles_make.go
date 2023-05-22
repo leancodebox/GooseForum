@@ -6,7 +6,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/Users"
 	Articles2 "github.com/leancodebox/GooseForum/app/models/bbs/Articles"
 	Comment2 "github.com/leancodebox/GooseForum/app/models/bbs/Comment"
-	"github.com/leancodebox/goose/luckrand"
 	"time"
 
 	"github.com/spf13/cast"
@@ -70,8 +69,7 @@ func runArticlesMake(_ *cobra.Command, _ []string) {
 
 	userList := Users.All()
 	fmt.Print(userList)
-	ctx := context.WithValue(context.Background(), "traceId", luckrand.GetTrace())
-	fmt.Println(ctx.Value("traceId"))
+	ctx := context.Background()
 
 	ArticlesRep := Articles2.NewRep(&ctx)
 	CommentRep := Comment2.NewRep(&ctx)
