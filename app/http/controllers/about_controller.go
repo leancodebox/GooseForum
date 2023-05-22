@@ -40,7 +40,7 @@ func NotFound(c *gin.Context) {
 func GetUseMem() component.Response {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	return component.SuccessResponse(cast.ToString(m.Alloc/1024/8) + "kb")
+	return component.SuccessResponse(cast.ToString(m.Alloc/1024) + "KB")
 }
 
 func About() component.Response {
