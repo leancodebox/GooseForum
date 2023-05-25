@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -24,8 +23,6 @@ func (w cachingResponseWriter) Write(b []byte) (int, error) {
 	return w.ResponseWriter.Write(b)
 }
 
-var counter uint64
-
 func CacheMiddleware(c *gin.Context) {
 	// 如果浏览器支持 Gzip 那么就开启缓存，否则就直接执行下个中间件
 	if acceptEncoding := c.Request.Header.Get("Accept-Encoding"); strings.Contains(acceptEncoding, "gzip") {
@@ -35,10 +32,6 @@ func CacheMiddleware(c *gin.Context) {
 			cachedResp := val.(cachedResponse)
 			c.Header("Content-Encoding", "gzip")
 			c.Data(http.StatusOK, cachedResp.contentType, cachedResp.body)
-			counter++
-			if counter%1000 == 0 {
-				fmt.Println("use cache:", counter)
-			}
 			c.Abort()
 			return
 		}
