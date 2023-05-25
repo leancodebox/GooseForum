@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/bundles/app"
 
 	"github.com/gin-contrib/gzip"
@@ -10,7 +11,7 @@ import (
 
 func ginWeb(ginApp *gin.Engine) {
 	if app.IsProduction() {
-		ginApp.Use(gzip.Gzip(gzip.DefaultCompression)).StaticFS("/actor", PFilSystem("./actor/dist", app.GetActorFS()))
+		ginApp.Use(middleware.CacheMiddleware).Use(gzip.Gzip(gzip.DefaultCompression)).StaticFS("/actor", PFilSystem("./actor/dist", app.GetActorFS()))
 	} else {
 		ginApp.Use(gzip.Gzip(gzip.DefaultCompression)).Static("/actor", "./actor/dist")
 	}
