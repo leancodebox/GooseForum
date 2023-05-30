@@ -10,9 +10,10 @@ import (
 )
 
 func ginWeb(ginApp *gin.Engine) {
+	actGroup := ginApp.Group("/actor")
 	if app.IsProduction() {
-		ginApp.Use(middleware.CacheMiddleware).Use(gzip.Gzip(gzip.DefaultCompression)).StaticFS("/actor", PFilSystem("./actor/dist", app.GetActorFS()))
+		actGroup.Use(middleware.CacheMiddleware).Use(gzip.Gzip(gzip.DefaultCompression)).StaticFS("", PFilSystem("./actor/dist", app.GetActorFS()))
 	} else {
-		ginApp.Use(gzip.Gzip(gzip.DefaultCompression)).Static("/actor", "./actor/dist")
+		actGroup.Use(gzip.Gzip(gzip.DefaultCompression)).Static("", "./actor/dist")
 	}
 }
