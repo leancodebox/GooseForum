@@ -49,20 +49,28 @@ func BuildResponse(code int, data any) Response {
 
 func SuccessResponse(data any) Response {
 	return BuildResponse(http.StatusOK,
-		map[string]any{
-			"msg":    nil,
-			"result": data,
-			"code":   SUCCESS,
-		},
+		SuccessData(data),
 	)
+}
+
+func SuccessData(data any) map[string]any {
+	return map[string]any{
+		"msg":    nil,
+		"result": data,
+		"code":   SUCCESS,
+	}
 }
 
 func FailResponse(msg any) Response {
 	return BuildResponse(http.StatusOK,
-		map[string]any{
-			"msg":    msg,
-			"result": nil,
-			"code":   FAIL,
-		},
+		FailData(msg),
 	)
+}
+
+func FailData(msg any) map[string]any {
+	return map[string]any{
+		"msg":    msg,
+		"result": nil,
+		"code":   FAIL,
+	}
 }

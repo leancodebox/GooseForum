@@ -10,11 +10,11 @@ import (
 func ginBBS(ginApp *gin.Engine) {
 	bbs := ginApp.Group("api/bbs")
 	// 文章列表
-	bbs.POST("get-articles", ginUpJP(controllers.GetArticles))
+	bbs.POST("get-articles", ginUpP(controllers.GetArticles))
 	// 文章分页
-	bbs.POST("get-articles-page", ginUpJP(controllers.GetArticlesPage))
+	bbs.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
 	// 文章详情
-	bbs.POST("get-articles-detail", ginUpJP(controllers.GetArticlesDetail))
+	bbs.POST("get-articles-detail", ginUpP(controllers.GetArticlesDetail))
 	// 热门链接
 	// 用户主页
 	// tag/分类
@@ -23,7 +23,7 @@ func ginBBS(ginApp *gin.Engine) {
 	// 发布文章
 	bbsAuth.POST("write-articles", UpButterReq(controllers.WriteArticles))
 	// 发布评论
-	bbsAuth.POST("articles-comment", ginUpJP(controllers.ArticleComment))
+	bbsAuth.POST("articles-comment", ginUpP(controllers.ArticleComment))
 	// 申请展示 todo
 	bbsAuth.POST("apply-show", UpButterReq(controllers.ApplyShow))
 

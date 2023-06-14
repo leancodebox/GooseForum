@@ -9,8 +9,8 @@ import (
 
 func ginAuth(ginApp *gin.Engine) {
 	ginApp.Group("api").
-		POST("reg", ginUpJP(controllers.Register)).
-		POST("login", ginUpJP(controllers.Login)).
+		POST("reg", ginUpP(controllers.Register)).
+		POST("login", ginUpP(controllers.Login)).
 		POST("get-captcha", ginUpNP(controllers.GetCaptcha))
 
 	ginApp.Group("api").Use(middleware.JWTAuth4Gin).
