@@ -88,6 +88,7 @@ func ginServe() {
 
 	info("GooseForum:listen " + port)
 	fmt.Printf("use port:%s\n", port)
+	fmt.Printf("if in local you can http://localhost:%s\n", port)
 	fmt.Println("start use:" + cast.ToString(app.GetUnitTime()))
 
 	quit := make(chan os.Signal, 1)
