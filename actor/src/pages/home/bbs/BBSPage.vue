@@ -14,6 +14,7 @@ import {
 } from 'naive-ui'
 import {onMounted, onUnmounted, ref} from "vue";
 import {getArticlesPageApi} from "@/service/remote";
+import {useIsMobile} from "@/utils/composables";
 
 const listData = ref([])
 
@@ -67,6 +68,8 @@ onMounted(() => {
 onUnmounted(() => {
     clearInterval(interval)
 })
+
+const isMobile = useIsMobile()
 </script>
 <template>
     <n-layout>
@@ -112,6 +115,7 @@ onUnmounted(() => {
                     :width="360"
                     content-style="padding: 24px;"
                     bordered
+                    v-show="!isMobile"
             >
                 <n-card>
                     <n-h2>海淀桥</n-h2>

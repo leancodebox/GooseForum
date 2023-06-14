@@ -5,6 +5,7 @@ import {useRouter} from "vue-router";
 import {getArticlesDetailApi} from "@/service/remote";
 import ArticlesMdPage from "@/pages/home/bbs/ArticlesMdPage.vue";
 import '@/assets/github-markdown.css'
+import {useIsMobile} from "@/utils/composables";
 
 
 const commentList = ref([])
@@ -52,6 +53,8 @@ onMounted(() => {
     getArticlesDetail()
 })
 
+const isMobile = useIsMobile()
+
 </script>
 <template>
 
@@ -91,6 +94,7 @@ onMounted(() => {
                     :width="360"
                     content-style="padding: 24px;"
                     bordered
+                    v-show="!isMobile"
             >
                 <n-card>
                     <n-h2>海淀桥biubiubiu</n-h2>
