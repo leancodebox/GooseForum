@@ -19,7 +19,7 @@ let articlesEdit = () => import("@/pages/home/bbs/ArticlesEdit.vue")
 
 export default [
     {
-        path: '/:catchAll(.*)*', name: '', redirect: '/manager/'
+        path: '/:catchAll(.*)*', name: '', redirect: '/home/'
     },
     {
         path: '/login', component: login
