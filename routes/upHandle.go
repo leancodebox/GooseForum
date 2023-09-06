@@ -31,7 +31,7 @@ func init() {
 	trans, _ = uni.GetTranslator("zh")
 	err := zhTranslations.RegisterDefaultTranslations(validate, trans)
 	if err != nil {
-		logging.Error(err)
+		logging.Error(cast.ToString(err))
 	}
 }
 

@@ -4,17 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"gorm.io/gorm"
-	gLogger "gorm.io/gorm/logger"
+	gormLogger "gorm.io/gorm/logger"
 )
 
-// GormLogger 操作对象，实现 gLogger.Interface
+// GormLogger 操作对象，实现 gormLogger.Interface
 type GormLogger struct {
-	LogrusLogger  *logrus.Logger
+	SlogLogger    *slog.Logger
 	SlowThreshold time.Duration
 }
 
@@ -25,35 +24,35 @@ type GormLogger struct {
 //	})
 func NewGormLogger() GormLogger {
 	return GormLogger{
-		LogrusLogger:  log,                    // 使用全局的 logger.Logger 对象
+		SlogLogger:    log,                    // 使用全局的 logger.Logger 对象
 		SlowThreshold: 200 * time.Millisecond, // 慢查询阈值，单位为千分之一秒
 	}
 }
 
-// LogMode 实现 gLogger.Interface 的 LogMode 方法
-func (l GormLogger) LogMode(level gLogger.LogLevel) gLogger.Interface {
+// LogMode 实现 gormLogger.Interface 的 LogMode 方法
+func (l GormLogger) LogMode(level gormLogger.LogLevel) gormLogger.Interface {
 	return GormLogger{
-		LogrusLogger:  l.LogrusLogger,
+		SlogLogger:    l.SlogLogger,
 		SlowThreshold: l.SlowThreshold,
 	}
 }
 
-// Info 实现 gLogger.Interface 的 Info 方法
-func (l GormLogger) Info(ctx context.Context, str string, args ...any) {
-	l.logger().Infof(str, args...)
+// Info 实现 gormLogger.Interface 的 Info 方法
+func (l GormLogger) Info(ctx context.Context, format string, args ...any) {
+	l.logger().Info(fmt.Sprintf(format, args...))
 }
 
-// Warn 实现 gLogger.Interface 的 Warn 方法
-func (l GormLogger) Warn(ctx context.Context, str string, args ...any) {
-	l.logger().Warnf(str, args...)
+// Warn 实现 gormLogger.Interface 的 Warn 方法
+func (l GormLogger) Warn(ctx context.Context, format string, args ...any) {
+	l.logger().Warn(fmt.Sprintf(format, args...))
 }
 
-// Error 实现 gLogger.Interface 的 Error 方法
-func (l GormLogger) Error(ctx context.Context, str string, args ...any) {
-	l.logger().Errorf(str, args...)
+// Error 实现 gormLogger.Interface 的 Error 方法
+func (l GormLogger) Error(ctx context.Context, format string, args ...any) {
+	l.logger().Error(fmt.Sprintf(format, args...))
 }
 
-// Trace 实现 gLogger.Interface 的 Trace 方法
+// Trace 实现 gormLogger.Interface 的 Trace 方法
 func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
 	// 获取运行时间
 	elapsed := time.Since(begin)
@@ -61,11 +60,12 @@ func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 	sql, rows := fc()
 
 	// 通用字段
-	logFields := logrus.Fields{
-		"sql":  sql,
-		"time": fmt.Sprintf("%.3fms", float64(elapsed.Nanoseconds())/1e6),
-		"rows": rows,
-	}
+	logFields := slog.Group(
+		"gorm",
+		"sql", sql,
+		"time", fmt.Sprintf("%.3fms", float64(elapsed.Nanoseconds())/1e6),
+		"rows", rows,
+	)
 
 	// Gorm 错误
 	if err != nil {
@@ -75,7 +75,6 @@ func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 		} else {
 			// 其他错误使用 error 等级
 			fields := logFields
-			fields["err"] = err
 			l.logger().Error("Database Error", fields)
 		}
 	}
@@ -90,6 +89,6 @@ func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 }
 
 // logger 内用的辅助方法，
-func (l GormLogger) logger() *logrus.Logger {
-	return l.LogrusLogger
+func (l GormLogger) logger() *slog.Logger {
+	return l.SlogLogger
 }

@@ -95,12 +95,12 @@ func ginServe() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 
-	logging.Println("Shutdown Server ...")
+	logging.Info("Shutdown Server ...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		logging.Println("Server Shutdown:", err)
+		logging.Info("Server Shutdown:", err)
 	}
-	logging.Println("Server exiting")
+	logging.Info("Server exiting")
 	logging.Shutdown()
 }
