@@ -60,12 +60,12 @@ func Login(r LoginReq) component.Response {
 	}
 	userEntity, err := Users.Verify(r.Username, r.Password)
 	if err != nil {
-		logging.Info(err)
+		logging.Info(cast.ToString(err))
 		return component.FailResponse("验证失败")
 	}
 	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
 	if err != nil {
-		logging.Info(err)
+		logging.Info(cast.ToString(err))
 		return component.FailResponse("验证失败")
 	}
 	return component.SuccessResponse(component.DataMap{
