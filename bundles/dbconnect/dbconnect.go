@@ -1,13 +1,12 @@
 package dbconnect
 
 import (
-	"fmt"
 	"github.com/leancodebox/GooseForum/bundles/logging"
+	"log/slog"
 
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/goose/preferences"
 
-	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -68,12 +67,12 @@ func connectDB() {
 	}
 
 	if err != nil {
-		log.Println(err)
+		slog.Error("db connect", "err", err)
 		panic(err)
 	}
 
 	if debug {
-		fmt.Println("开启debug")
+		slog.Info("开启debug")
 		dbIns = dbIns.Debug()
 	}
 

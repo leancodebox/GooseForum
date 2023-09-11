@@ -8,6 +8,7 @@ import (
 	"github.com/leancodebox/GooseForum/routes"
 	"github.com/leancodebox/goose/preferences"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -34,14 +35,14 @@ func runWeb(_ *cobra.Command, _ []string) {
 	)
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	info("GooseForum:start")
-	info(fmt.Sprintf("GooseForum:useMem %d KB", m.Alloc/1024/8))
+	slog.Info("GooseForum:start")
+	slog.Info(fmt.Sprintf("GooseForum:useMem %d KB", m.Alloc/1024/8))
 
 	if debug {
 		go func() {
 			err := http.ListenAndServe("0.0.0.0:7071", nil)
 			if err != nil {
-				fmt.Println(err)
+				slog.Error("debug listen ", "err", err)
 			}
 		}()
 	}
@@ -86,10 +87,10 @@ func ginServe() {
 		}
 	}()
 
-	info("GooseForum:listen " + port)
-	fmt.Printf("use port:%s\n", port)
-	fmt.Printf("if in local you can http://localhost:%s\n", port)
-	fmt.Println("start use:" + cast.ToString(app.GetUnitTime()))
+	slog.Info("GooseForum:listen " + port)
+	slog.Info(fmt.Sprintf("use port:%s", port))
+	slog.Info(fmt.Sprintf("if in local you can http://localhost:%s", port))
+	slog.Info("start use:" + cast.ToString(app.GetUnitTime()))
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
