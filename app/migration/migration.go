@@ -1,7 +1,6 @@
 package migration
 
 import (
-	"fmt"
 	"github.com/leancodebox/GooseForum/app/models/Users"
 	"github.com/leancodebox/GooseForum/app/models/bbs/Articles"
 	"github.com/leancodebox/GooseForum/app/models/bbs/Comment"
@@ -14,7 +13,6 @@ import (
 )
 
 func M() {
-	fmt.Println("init migration")
 	// 数据库迁移
 	migration(app.UseMigration(), dbconnect.Std())
 }
