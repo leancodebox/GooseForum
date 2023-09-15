@@ -1,8 +1,8 @@
 <script setup>
-import {NAvatar, NGi, NGrid, NIcon, NLayout, NLayoutHeader,NLayoutFooter, NMenu} from 'naive-ui';
+import {NGi, NGrid, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu,NButton} from 'naive-ui';
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from '@/utils/composables';
 
-import {FastFoodOutline as CashIcon, FishOutline, GameController, InfiniteOutline} from '@vicons/ionicons5'
+import {FastFoodOutline as CashIcon, FishOutline, InfiniteOutline} from '@vicons/ionicons5'
 import {h, ref} from "vue";
 import {RouterLink} from "vue-router";
 import UserInfoCard from "@/pages/home/UserInfoCard.vue";
@@ -63,7 +63,11 @@ const menuOptions = [
         </n-gi>
         <n-gi span="0 800:8">
           <n-gi style="float:right;padding-right: 30px">
-          <user-info-card></user-info-card>
+            <user-info-card></user-info-card>
+          </n-gi>
+
+          <n-gi style="float:right;padding-right: 30px">
+            <router-link :to="'/home/bbs/articlesEdit'"><n-button>我也写一篇</n-button></router-link>
           </n-gi>
 
         </n-gi>

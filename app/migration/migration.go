@@ -8,7 +8,6 @@ import (
 	"github.com/leancodebox/GooseForum/bundles/dbconnect"
 	"github.com/leancodebox/GooseForum/bundles/logging"
 	"github.com/spf13/cast"
-
 	"gorm.io/gorm"
 )
 
