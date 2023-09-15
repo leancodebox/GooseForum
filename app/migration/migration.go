@@ -25,9 +25,9 @@ func migration(migration bool, db *gorm.DB) {
 	var err error
 
 	if err = db.AutoMigrate(
-		&Users.Users{},
-		&Comment.Comment{},
-		&Articles.Articles{},
+		&Users.Entity{},
+		&Comment.Entity{},
+		&Articles.Entity{},
 	); err != nil {
 		logging.Error(cast.ToString(err))
 	} else {

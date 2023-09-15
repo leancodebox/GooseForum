@@ -39,7 +39,7 @@ func runHexoTool(_ *cobra.Command, _ []string) {
 		return
 	}
 	for _, data := range blogs {
-		art := Articles2.Articles{UserId: 1, Content: data.Content, Title: data.Title}
+		art := Articles2.Entity{UserId: 1, Content: data.Content, Title: data.Title}
 		Articles2.Save(&art)
 	}
 	fmt.Println(len(blogs))

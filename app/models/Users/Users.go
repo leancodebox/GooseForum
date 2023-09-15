@@ -14,7 +14,7 @@ const fieldUsername = "username"
 const fieldEmail = "email"
 const fieldPassword = "password"
 
-type Users struct {
+type Entity struct {
 	Id        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                             //
 	CreatedAt time.Time  `gorm:"column:created_at;autoCreateTime;type:datetime;" json:"createdAt"`                   //
 	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;type:datetime;" json:"updatedAt"`                   //
@@ -24,21 +24,21 @@ type Users struct {
 	Password  string     `gorm:"column:password;type:varchar(255);not null;default:'';" json:"-"`                    //
 }
 
-// func (itself *Users) BeforeSave(tx *gorm.DB) (err error) {}
-// func (itself *Users) BeforeCreate(tx *gorm.DB) (err error) {}
-// func (itself *Users) AfterCreate(tx *gorm.DB) (err error) {}
-// func (itself *Users) BeforeUpdate(tx *gorm.DB) (err error) {}
-// func (itself *Users) AfterUpdate(tx *gorm.DB) (err error) {}
-// func (itself *Users) AfterSave(tx *gorm.DB) (err error) {}
-// func (itself *Users) BeforeDelete(tx *gorm.DB) (err error) {}
-// func (itself *Users) AfterDelete(tx *gorm.DB) (err error) {}
-// func (itself *Users) AfterFind(tx *gorm.DB) (err error) {}
+// func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
+// func (itself *Entity) BeforeCreate(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterCreate(tx *gorm.DB) (err error) {}
+// func (itself *Entity) BeforeUpdate(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterUpdate(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterSave(tx *gorm.DB) (err error) {}
+// func (itself *Entity) BeforeDelete(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterDelete(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterFind(tx *gorm.DB) (err error) {}
 
-func (itself *Users) TableName() string {
+func (itself *Entity) TableName() string {
 	return tableName
 }
 
-func (itself *Users) SetPassword(password string) *Users {
+func (itself *Entity) SetPassword(password string) *Entity {
 	itself.Password, _ = algorithm.MakePassword(password)
 	return itself
 }

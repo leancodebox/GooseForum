@@ -15,42 +15,42 @@ func NewRep(ctx *context.Context) Rep {
 	}
 }
 
-func (itself Rep) Save(entity *Comment) int64 {
+func (itself Rep) Save(entity *Entity) int64 {
 	result := builder().WithContext(*itself.ctx).Save(entity)
 	return result.RowsAffected
 }
 
-func Create(entity *Comment) int64 {
+func Create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
 }
 
-func Save(entity *Comment) int64 {
+func Save(entity *Entity) int64 {
 	result := builder().Save(entity)
 	return result.RowsAffected
 }
 
-func SaveAll(entities *[]Comment) int64 {
+func SaveAll(entities *[]Entity) int64 {
 	result := builder().Save(entities)
 	return result.RowsAffected
 }
 
-func Delete(entity *Comment) int64 {
+func Delete(entity *Entity) int64 {
 	result := builder().Delete(entity)
 	return result.RowsAffected
 }
 
-func Get(id any) (entity Comment) {
+func Get(id any) (entity Entity) {
 	builder().Where(pid, id).First(entity)
 	return
 }
 
-func GetBy(field, value string) (entity Comment) {
+func GetBy(field, value string) (entity Entity) {
 	builder().Where(field+" = ?", value).First(&entity)
 	return
 }
 
-func All() (entities []Comment) {
+func All() (entities []Entity) {
 	builder().Find(&entities)
 	return
 }
@@ -61,7 +61,7 @@ func IsExist(field, value string) bool {
 	return count > 0
 }
 
-func GetByMaxIdPage(articleId uint64, id uint64, pageSize int) (entities []Comment) {
+func GetByMaxIdPage(articleId uint64, id uint64, pageSize int) (entities []Entity) {
 	builder().Where(querymaker.Eq(fieldArticleId, articleId)).Where(querymaker.Gt(pid, id)).Limit(pageSize).Find(&entities)
 	return
 }
