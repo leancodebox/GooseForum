@@ -3,7 +3,7 @@ package Articles
 import "testing"
 
 func TestName(t *testing.T) {
-	var article *Articles
+	var article *Entity
 	article.UserId = 1
 
 }

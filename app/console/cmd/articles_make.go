@@ -35,7 +35,7 @@ func init() {
 }
 
 func createAndUpdate(_ *cobra.Command, _ []string) {
-	art := Articles2.Articles{UserId: 1, Content: `
+	art := Articles2.Entity{UserId: 1, Content: `
 你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好
 `}
 	Articles2.Save(&art)
@@ -50,7 +50,7 @@ func createAndUpdate(_ *cobra.Command, _ []string) {
 }
 
 func createAndDeleted(_ *cobra.Command, _ []string) {
-	art := Articles2.Articles{UserId: 1, Content: `
+	art := Articles2.Entity{UserId: 1, Content: `
 你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好
 `}
 	Articles2.Save(&art)
@@ -76,16 +76,16 @@ func runArticlesMake(_ *cobra.Command, _ []string) {
 	for _, user := range userList {
 		for i := 0; i < 10; i++ {
 
-			art := Articles2.Articles{UserId: user.Id, Content: `
+			art := Articles2.Entity{UserId: user.Id, Content: `
 你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好
 `}
 			ArticlesRep.Save(&art)
 			for _, cUser := range userList {
-				comment := Comment2.Comment{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
+				comment := Comment2.Entity{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
 				CommentRep.Save(&comment)
-				comment = Comment2.Comment{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
+				comment = Comment2.Entity{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
 				CommentRep.Save(&comment)
-				comment = Comment2.Comment{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
+				comment = Comment2.Entity{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
 				CommentRep.Save(&comment)
 			}
 		}

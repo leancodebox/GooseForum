@@ -16,42 +16,42 @@ func NewRep(ctx *context.Context) Rep {
 	}
 }
 
-func (itself Rep) Save(entity *Articles) int64 {
+func (itself Rep) Save(entity *Entity) int64 {
 	result := builder().WithContext(*itself.ctx).Save(entity)
 	return result.RowsAffected
 }
 
-func Create(entity *Articles) int64 {
+func Create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
 }
 
-func Save(entity *Articles) int64 {
+func Save(entity *Entity) int64 {
 	result := builder().Save(entity)
 	return result.RowsAffected
 }
 
-func SaveAll(entities *[]Articles) int64 {
+func SaveAll(entities *[]Entity) int64 {
 	result := builder().Save(entities)
 	return result.RowsAffected
 }
 
-func Delete(entity *Articles) int64 {
+func Delete(entity *Entity) int64 {
 	result := builder().Delete(entity)
 	return result.RowsAffected
 }
 
-func Get(id any) (entity Articles) {
+func Get(id any) (entity Entity) {
 	builder().Where(querymaker.Eq(pid, id)).First(&entity)
 	return
 }
 
-func GetBy(field, value string) (entity Articles) {
+func GetBy(field, value string) (entity Entity) {
 	builder().Where(field+" = ?", value).First(&entity)
 	return
 }
 
-func All() (entities []Articles) {
+func All() (entities []Entity) {
 	builder().Find(&entities)
 	return
 }
@@ -62,7 +62,7 @@ func IsExist(field, value string) bool {
 	return count > 0
 }
 
-func GetByMaxIdPage(id uint64, pageSize int) (entities []*Articles) {
+func GetByMaxIdPage(id uint64, pageSize int) (entities []*Entity) {
 	builder().Where(querymaker.Gt(pid, id)).Order(querymaker.Desc(fieldUpdateTime)).Limit(pageSize).Find(&entities)
 	return
 }
@@ -82,9 +82,9 @@ func Page(q PageQuery) struct {
 	Page     int
 	PageSize int
 	Total    int64
-	Data     []Articles
+	Data     []Entity
 } {
-	var list []Articles
+	var list []Entity
 	if q.Page > 0 {
 		q.Page -= 1
 	} else {
@@ -109,6 +109,6 @@ func Page(q PageQuery) struct {
 		Page     int
 		PageSize int
 		Total    int64
-		Data     []Articles
+		Data     []Entity
 	}{Page: q.Page, PageSize: q.PageSize, Data: list, Total: total}
 }

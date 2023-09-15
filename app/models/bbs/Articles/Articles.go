@@ -13,7 +13,7 @@ const fieldUserId = "user_id"
 const fieldCreateTime = "create_time"
 const fieldUpdateTime = "update_time"
 
-type Articles struct {
+type Entity struct {
 	Id         uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"` // 主键
 	Title      string    `gorm:"type:varchar(512);not null;default:'';" json:"title"`
 	Content    string    `gorm:"column:content;type:text;default:'';" json:"content"`                              //
@@ -23,16 +23,16 @@ type Articles struct {
 	DeletedAt  gorm.DeletedAt
 }
 
-// func (itself *Articles) BeforeSave(tx *gorm.DB) (err error) {}
-// func (itself *Articles) BeforeCreate(tx *gorm.DB) (err error) {}
-// func (itself *Articles) AfterCreate(tx *gorm.DB) (err error) {}
-// func (itself *Articles) BeforeUpdate(tx *gorm.DB) (err error) {}
-// func (itself *Articles) AfterUpdate(tx *gorm.DB) (err error) {}
-// func (itself *Articles) AfterSave(tx *gorm.DB) (err error) {}
-// func (itself *Articles) BeforeDelete(tx *gorm.DB) (err error) {}
-// func (itself *Articles) AfterDelete(tx *gorm.DB) (err error) {}
-// func (itself *Articles) AfterFind(tx *gorm.DB) (err error) {}
+// func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
+// func (itself *Entity) BeforeCreate(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterCreate(tx *gorm.DB) (err error) {}
+// func (itself *Entity) BeforeUpdate(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterUpdate(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterSave(tx *gorm.DB) (err error) {}
+// func (itself *Entity) BeforeDelete(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterDelete(tx *gorm.DB) (err error) {}
+// func (itself *Entity) AfterFind(tx *gorm.DB) (err error) {}
 
-func (Articles) TableName() string {
+func (Entity) TableName() string {
 	return tableName
 }

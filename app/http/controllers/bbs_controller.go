@@ -29,7 +29,7 @@ func GetArticles(request GetArticlesRequest) component.Response {
 	if len(articles) > 0 {
 		maxId = articles[0].Id
 	}
-	list := array.ArrayMap(func(t *Articles.Articles) ArticlesDto {
+	list := array.ArrayMap(func(t *Articles.Entity) ArticlesDto {
 		return ArticlesDto{
 			Id:             t.Id,
 			Title:          t.Title,
@@ -54,7 +54,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 	pageData := Articles.Page(Articles.PageQuery{Page: param.Page, PageSize: param.PageSize})
 
 	return component.SuccessResponse(component.DataMap{
-		"list": array.ArrayMap(func(t Articles.Articles) ArticlesDto {
+		"list": array.ArrayMap(func(t Articles.Entity) ArticlesDto {
 			return ArticlesDto{Id: t.Id,
 				Title:          t.Title,
 				Content:        t.Content,
@@ -87,7 +87,7 @@ func GetArticlesDetail(request GetArticlesDetailRequest) component.Response {
 	article := Articles.Get(request.Id)
 	comments := Comment.GetByMaxIdPage(request.Id, request.MaxCommentId, request.PageSize)
 
-	commentList := array.ArrayMap(func(item Comment.Comment) CommentDto {
+	commentList := array.ArrayMap(func(item Comment.Entity) CommentDto {
 		return CommentDto{
 			ArticleId:  item.ArticleId,
 			UserId:     item.UserId,
@@ -112,7 +112,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	if Articles.CantWriteNew(req.UserId, 66) {
 		return component.FailResponse("您当天已发布较多，为保证质量，请明天再发布新帖")
 	}
-	var article Articles.Articles
+	var article Articles.Entity
 	if req.Params.Id != 0 {
 		article = Articles.Get(req.Params.Id)
 		if article.UserId != req.UserId {
@@ -135,7 +135,7 @@ func ArticleComment(req ArticleCommentReq) component.Response {
 	if Articles.Get(req.ArticleId).Id == 0 {
 		return component.FailResponse("文章不存在")
 	}
-	Comment.Save(&Comment.Comment{Content: req.Comment})
+	Comment.Save(&Comment.Entity{Content: req.Comment})
 	return component.SuccessResponse(true)
 }
 
