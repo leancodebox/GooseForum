@@ -30,7 +30,7 @@ func CacheMiddleware(c *gin.Context) {
 		// 检查缓存
 		if val, ok := cache.Load(key); ok {
 			cachedResp := val.(cachedResponse)
-			c.Header("Content-Encoding", "gzip")
+			c.Header("content-Encoding", "gzip")
 			c.Data(http.StatusOK, cachedResp.contentType, cachedResp.body)
 			c.Abort()
 			return

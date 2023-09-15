@@ -15,11 +15,12 @@ type GetArticlesRequest struct {
 
 type ArticlesDto struct {
 	Id             uint64 `json:"id"`
-	Content        string `json:"content"`
+	content        string `json:"content"`
 	Title          string `json:"title"`
 	LastUpdateTime string `json:"lastUpdateTime"`
 }
 
+// GetArticles 获取文章列表
 func GetArticles(request GetArticlesRequest) component.Response {
 	if request.PageSize == 0 {
 		request.PageSize = 10
@@ -33,7 +34,7 @@ func GetArticles(request GetArticlesRequest) component.Response {
 		return ArticlesDto{
 			Id:             t.Id,
 			Title:          t.Title,
-			Content:        t.Content,
+			content:        t.Content,
 			LastUpdateTime: t.UpdateTime.Format("2006-01-02 15:04:05"),
 		}
 	}, articles)
@@ -57,7 +58,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 		"list": array.ArrayMap(func(t Articles.Entity) ArticlesDto {
 			return ArticlesDto{Id: t.Id,
 				Title:          t.Title,
-				Content:        t.Content,
+				content:        t.Content,
 				LastUpdateTime: t.UpdateTime.Format("2006-01-02 15:04:05"),
 			}
 		}, pageData.Data),
@@ -80,6 +81,7 @@ type CommentDto struct {
 	CreateTime string `json:"createTime"`
 }
 
+// GetArticlesDetail 文章详情
 func GetArticlesDetail(request GetArticlesDetailRequest) component.Response {
 	if request.PageSize == 0 {
 		request.PageSize = 10
