@@ -3,69 +3,43 @@ import {h, ref} from 'vue'
 import {RouterLink} from 'vue-router'
 import {Flash} from '@vicons/ionicons5'
 import {NDrawer, NDrawerContent, NButton, NDropdown, NIcon, NLayout, NLayoutHeader, NLayoutSider, NMenu} from 'naive-ui'
-import routes from "@/route/routes";
+import {managerRouter} from "@/route/routes";
 import {useIsMobile} from "@/utils/composables";
 
 function renderIcon(icon) {
-    return () => h(NIcon, null, {default: () => h(icon)})
+  return () => h(NIcon, null, {default: () => h(icon)})
 }
 
-function buildMenuOption(parentPath, route, deep = 0) {
-    if (route.belongMenu === undefined || route.belongMenu !== true) {
-        return []
-    }
-    let menuList = [];
-    if (deep === 0) {
-        for (let key in route.children) {
-            menuList.push(...buildMenuOption(route.path, route.children[key], deep + 1))
-        }
-    } else {
-        let path
-        if (parentPath.charAt(parentPath.length - 1) !== '/' && route.path.charAt(0) !== '/') {
-            path = parentPath + '/' + route.path
-        } else {
-            path = parentPath + route.path
-        }
-        let children = [];
-        if (route.children !== undefined && route.children.length > 0) {
-            for (let key in route.children) {
-                children.push(...buildMenuOption(path, route.children[key], deep + 1))
-            }
-        }
-
-        let label = function (path) {
-            return () => h(RouterLink, {to: {path: path,}},
-                {
-                    default: () => {
-                        return route.showName === undefined ? route.name : route.showName;
-                    }
-                }
-            )
-        }(path)
-
-        if (children.length === 0) {
-            children = undefined
-        } else {
-            label = route.showName === undefined ? route.name : route.showName;
-        }
-        let icon = renderIcon(Flash)
-        if (route.icon !== undefined) {
-            icon = renderIcon(route.icon)
-        }
-        menuList.push({
-            label: label,
-            key: path,
-            icon: icon,
-            children: children
-        })
-    }
-    return menuList
+function buildCompletePath(parentPath, currentPath) {
+  parentPath = parentPath === undefined ? "" : parentPath
+  return parentPath.endsWith('/') ? parentPath + currentPath : `${parentPath}/${currentPath}`;
 }
 
-let menuOptions = []
-for (const element of routes) {
-    menuOptions.push(...buildMenuOption('', element))
+function buildMenuItem(route, parentPath) {
+  const {path, showName, name, icon} = route;
+  let currentPath = buildCompletePath(parentPath, path)
+  let label = () => h(RouterLink, {to: {path: currentPath}}, () => showName === undefined ? name : showName);
+  let iconComponent = icon !== undefined ? renderIcon(icon) : renderIcon(Flash);
+  return {
+    label: label,
+    key: currentPath,
+    icon: iconComponent,
+  }
 }
+
+function buildMenuOptionV2(routeList, parentPath) {
+  if (!routeList) {
+    return [];
+  }
+  return routeList.filter(item => item.belongMenu).map(childrenRoute => {
+    let menuItem = buildMenuItem(childrenRoute, parentPath)
+    let childrenList = buildMenuOptionV2(childrenRoute.children, buildCompletePath(parentPath, childrenRoute.path))
+    menuItem.children = (childrenList && childrenList.length > 0) ? childrenList : undefined
+    return menuItem;
+  })
+}
+
+let menuOptions = buildMenuOptionV2(managerRouter.children, managerRouter.path)
 const options = menuOptions
 const collapsed = ref(false)
 const isMobile = useIsMobile()
