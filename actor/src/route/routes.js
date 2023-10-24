@@ -16,8 +16,16 @@ let bbsPage = () => import("@/pages/home/bbs/BBSPage.vue")
 let articlesPage = () => import("@/pages/home/bbs/ArticlesPage.vue")
 let articlesEdit = () => import("@/pages/home/bbs/ArticlesEdit.vue")
 
+export let managerRouter = {
+    belongMenu: true,
+    path: '/manager', component: moon, children: [
+        {showName: '', path: '', component: allTool, belongMenu: false},
+        {showName: 'all tool', path: 'allTool', component: allTool, belongMenu: true},
+        {showName: 'sysInfo', path: 'sysInfo', component: sysInfo, belongMenu: true},
+    ]
+}
 
-export default [
+export let routes= [
     {
         path: '/:catchAll(.*)*', name: '', redirect: '/home/'
     },
@@ -40,12 +48,5 @@ export default [
 
         ]
     },
-    {
-        belongMenu: true,
-        path: '/manager', component: moon, children: [
-            {showName: '', path: '', component: allTool, belongMenu: false},
-            {showName: 'all tool', path: 'allTool', component: allTool, belongMenu: true},
-            {showName: 'sysInfo', path: 'sysInfo', component: sysInfo, belongMenu: true},
-        ]
-    },
+    managerRouter
 ]
