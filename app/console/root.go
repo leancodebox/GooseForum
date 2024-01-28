@@ -21,7 +21,6 @@ var rootCmd = &cobra.Command{
 				panic(err)
 			}
 		}
-		fileopt.SetBasePath("storage/")
 		migration.M()
 	},
 	// Run: runWeb,

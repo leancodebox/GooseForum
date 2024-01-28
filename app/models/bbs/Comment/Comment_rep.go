@@ -2,7 +2,7 @@ package Comment
 
 import (
 	"context"
-	"github.com/leancodebox/goose/querymaker"
+	"github.com/leancodebox/goose/queryopt"
 )
 
 type Rep struct {
@@ -62,6 +62,6 @@ func IsExist(field, value string) bool {
 }
 
 func GetByMaxIdPage(articleId uint64, id uint64, pageSize int) (entities []Entity) {
-	builder().Where(querymaker.Eq(fieldArticleId, articleId)).Where(querymaker.Gt(pid, id)).Limit(pageSize).Find(&entities)
+	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Where(queryopt.Gt(pid, id)).Limit(pageSize).Find(&entities)
 	return
 }

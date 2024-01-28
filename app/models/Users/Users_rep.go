@@ -2,7 +2,7 @@ package Users
 
 import (
 	"github.com/leancodebox/GooseForum/bundles/algorithm"
-	"github.com/leancodebox/goose/querymaker"
+	"github.com/leancodebox/goose/queryopt"
 )
 
 func Get(id any) (entity Entity, err error) {
@@ -12,7 +12,7 @@ func Get(id any) (entity Entity, err error) {
 
 func Verify(username string, password string) (*Entity, error) {
 	var user Entity
-	err := builder().Where(querymaker.Eq(fieldUsername, username)).First(&user).Error
+	err := builder().Where(queryopt.Eq(fieldUsername, username)).First(&user).Error
 	if err != nil {
 		return &user, err
 	}
@@ -39,6 +39,6 @@ func All() (entities []*Entity) {
 }
 
 func GetByUsername(username string) (entities *Entity) {
-	builder().Where(querymaker.Eq(fieldUsername, username)).First(entities)
+	builder().Where(queryopt.Eq(fieldUsername, username)).First(entities)
 	return
 }
