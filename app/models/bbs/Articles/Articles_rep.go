@@ -2,7 +2,7 @@ package Articles
 
 import (
 	"context"
-	"github.com/leancodebox/goose/querymaker"
+	"github.com/leancodebox/goose/queryopt"
 	"time"
 )
 
@@ -42,7 +42,7 @@ func Delete(entity *Entity) int64 {
 }
 
 func Get(id any) (entity Entity) {
-	builder().Where(querymaker.Eq(pid, id)).First(&entity)
+	builder().Where(queryopt.Eq(pid, id)).First(&entity)
 	return
 }
 
@@ -63,13 +63,13 @@ func IsExist(field, value string) bool {
 }
 
 func GetByMaxIdPage(id uint64, pageSize int) (entities []*Entity) {
-	builder().Where(querymaker.Gt(pid, id)).Order(querymaker.Desc(fieldUpdateTime)).Limit(pageSize).Find(&entities)
+	builder().Where(queryopt.Gt(pid, id)).Order(queryopt.Desc(fieldUpdateTime)).Limit(pageSize).Find(&entities)
 	return
 }
 
 func CantWriteNew(userId uint64, maxCount int64) bool {
 	var count int64
-	builder().Where(querymaker.Eq(fieldUserId, userId)).Where(querymaker.Gt(fieldCreateTime, time.Now().Format("2006-01-02"))).Count(&count)
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Gt(fieldCreateTime, time.Now().Format("2006-01-02"))).Count(&count)
 	return count > maxCount
 }
 
@@ -95,13 +95,13 @@ func Page(q PageQuery) struct {
 	}
 	b := builder()
 	if q.Search != "" {
-		b.Where(querymaker.Like(fieldContent, q.Search))
+		b.Where(queryopt.Like(fieldContent, q.Search))
 	}
 	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order("id desc").Find(&list)
 
 	var total int64
 	if q.Search != "" {
-		builder().Where(querymaker.Like(fieldContent, q.Search)).Count(&total)
+		builder().Where(queryopt.Like(fieldContent, q.Search)).Count(&total)
 	} else {
 		builder().Count(&total)
 	}
