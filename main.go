@@ -4,6 +4,7 @@ import (
 	"embed"
 	"github.com/leancodebox/GooseForum/app/console"
 	"github.com/leancodebox/GooseForum/bundles/app"
+	_ "github.com/leancodebox/GooseForum/bundles/logging"
 	_ "net/http/pprof"
 )
 

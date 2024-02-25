@@ -7,8 +7,8 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	zhTranslations "github.com/go-playground/validator/v10/translations/zh"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/bundles/logging"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"path"
 
@@ -31,7 +31,7 @@ func init() {
 	trans, _ = uni.GetTranslator("zh")
 	err := zhTranslations.RegisterDefaultTranslations(validate, trans)
 	if err != nil {
-		logging.Error(cast.ToString(err))
+		slog.Error(cast.ToString(err))
 	}
 }
 

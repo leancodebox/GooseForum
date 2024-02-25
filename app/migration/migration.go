@@ -6,30 +6,30 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/bbs/Comment"
 	"github.com/leancodebox/GooseForum/bundles/app"
 	"github.com/leancodebox/GooseForum/bundles/dbconnect"
-	"github.com/leancodebox/GooseForum/bundles/logging"
 	"github.com/spf13/cast"
-	"gorm.io/gorm"
+	"log/slog"
 )
 
 func M() {
 	// 数据库迁移
-	migration(app.UseMigration(), dbconnect.Std())
+	migration(app.UseMigration())
 }
 
-func migration(migration bool, db *gorm.DB) {
+func migration(migration bool) {
 	if migration == false {
 		return
 	}
 	// 自动迁移
 	var err error
+	db := dbconnect.Connect()
 
 	if err = db.AutoMigrate(
 		&Users.Entity{},
 		&Comment.Entity{},
 		&Articles.Entity{},
 	); err != nil {
-		logging.Error(cast.ToString(err))
+		slog.Error(cast.ToString(err))
 	} else {
-		logging.Info("migration end")
+		slog.Info("migration end")
 	}
 }

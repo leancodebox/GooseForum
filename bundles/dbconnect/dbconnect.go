@@ -3,6 +3,7 @@ package dbconnect
 import (
 	"github.com/leancodebox/GooseForum/bundles/logging"
 	"log/slog"
+	"sync"
 
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/goose/preferences"
@@ -34,6 +35,7 @@ var (
 	maxIdleConnections = dbConfig.GetInt(`maxIdleConnections`, 2)
 	maxOpenConnections = dbConfig.GetInt(`maxOpenConnections`, 2)
 	maxLifeSeconds     = dbConfig.GetInt(`maxLifeSeconds`, 60)
+	once               = new(sync.Once)
 )
 
 func init() {
@@ -43,25 +45,27 @@ func init() {
 // DB gorm.DB 对象
 var dbIns *gorm.DB
 
-func Std() *gorm.DB {
+func Connect() *gorm.DB {
+	once.Do(func() {
+		connectDB()
+	})
 	return dbIns
 }
-
 // ConnectDB 初始化模型
 func connectDB() {
 
 	var err error
 	switch connection {
 	case "sqlite":
-		logging.Info("use sqlite")
+		slog.Info("use sqlite")
 		dbIns, err = connectSqlLiteDB(logging.NewGormLogger())
 		break
 	case "mysql":
-		logging.Info("use mysql")
+		slog.Info("use mysql")
 		dbIns, err = connectMysqlDB(logging.NewGormLogger())
 		break
 	default:
-		logging.Info("use sqlite because unselect db")
+		slog.Info("use sqlite because unselect db")
 		dbIns, err = connectSqlLiteDB(logging.NewGormLogger())
 		break
 	}
