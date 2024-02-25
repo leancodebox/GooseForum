@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/bundles/logging"
+	"log/slog"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +24,6 @@ func GinLogger(c *gin.Context) {
 		clientIP,
 		reqMethod,
 		reqUri)
-	logging.Info(info)
+	slog.Info(info)
 
 }

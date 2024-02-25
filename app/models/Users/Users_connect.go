@@ -10,7 +10,7 @@ import (
 // 禁止手动更改本文件
 
 func builder() *gorm.DB {
-	return db.Std().Table(tableName)
+	return db.Connect().Table(tableName)
 }
 
 func first(db *gorm.DB) (el Entity) {

@@ -17,7 +17,11 @@ maxLifeSeconds = 300
 
 [log]
 type = "stdout"# LOG_TYPE stdout,file
-path = "./storage/logs/thh.log"
+path = "./storage/logs/run.log"
+rolling = false # 是否开启滚动 true ,false
+maxage = 10 # 最大日期
+maxsize = 256 # 最大文件大小 MB
+maxBackUps = 30 # 最大保留文件数量
 
 [PATH]
 hexo = ""
