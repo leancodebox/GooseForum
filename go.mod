@@ -9,7 +9,7 @@ require (
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.12.0
-	github.com/leancodebox/goose v0.0.22
+	github.com/leancodebox/goose v0.0.23
 	github.com/shirou/gopsutil/v3 v3.23.12
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.7.0
