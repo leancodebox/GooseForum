@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/leancodebox/goose/jwt"
+	jwt "github.com/leancodebox/goose/jwtopt"
 	"net/http"
 	"strings"
 

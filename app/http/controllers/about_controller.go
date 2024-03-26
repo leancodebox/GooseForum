@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/bundles/logging"
-	"github.com/leancodebox/goose/serverinfo"
+	"github.com/leancodebox/GooseForum/bundles/serverinfo"
 	"net/http"
 	"runtime"
 	"strings"
