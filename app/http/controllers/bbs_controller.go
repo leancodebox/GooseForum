@@ -4,7 +4,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/bbs/Articles"
 	"github.com/leancodebox/GooseForum/app/models/bbs/Comment"
-	"github.com/leancodebox/goose/array"
+	array "github.com/leancodebox/goose/collectionopt"
 	"time"
 )
 

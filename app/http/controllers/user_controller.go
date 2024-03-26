@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/Users"
-	"github.com/leancodebox/goose/jwt"
+	jwt "github.com/leancodebox/goose/jwtopt"
 	"log/slog"
 	"strconv"
 	"time"
