@@ -21,9 +21,6 @@ func JWTAuth4Gin(c *gin.Context) {
 	userId, newToken, err := jwt.VerifyTokenWithFresh(token)
 	if err != nil {
 		errorMsg := err.Error()
-		if err == jwt.TokenExpired {
-			errorMsg = "授权已过期"
-		}
 		c.JSON(http.StatusUnauthorized, errorMsg)
 		c.Abort()
 		return
