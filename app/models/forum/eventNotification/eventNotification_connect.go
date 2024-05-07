@@ -1,4 +1,4 @@
-package articles
+package eventNotification
 
 import (
 	"gorm.io/gorm"

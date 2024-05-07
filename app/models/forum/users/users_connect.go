@@ -1,9 +1,9 @@
 package users
 
 import (
-	db "github.com/leancodebox/GooseForum/bundles/dbconnect"
-
 	"gorm.io/gorm"
+
+	db "github.com/leancodebox/GooseForum/bundles/dbconnect"
 )
 
 // Prohibit manual changes
@@ -13,12 +13,12 @@ func builder() *gorm.DB {
 	return db.Connect().Table(tableName)
 }
 
-func first(db *gorm.DB) (el Entity) {
+func first(db *gorm.DB) (el *Entity) {
 	db.First(&el)
 	return
 }
 
-func List(db *gorm.DB) (el []*Entity) {
+func getList(db *gorm.DB) (el []*Entity) {
 	db.Find(&el)
 	return
 }

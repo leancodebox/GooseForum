@@ -1,4 +1,4 @@
-package articles
+package pointsRecord
 
 import (
 	"gorm.io/gorm"

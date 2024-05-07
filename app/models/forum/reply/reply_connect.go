@@ -1,4 +1,4 @@
-package articles
+package reply
 
 import (
 	"gorm.io/gorm"

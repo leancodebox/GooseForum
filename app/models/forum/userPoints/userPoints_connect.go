@@ -1,4 +1,4 @@
-package articles
+package userPoints
 
 import (
 	"gorm.io/gorm"
