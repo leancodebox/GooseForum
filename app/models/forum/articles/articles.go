@@ -28,13 +28,13 @@ const fieldUpdateTime = "update_time"
 const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
-	Id         uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`           //
-	Title      string     `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"` //
-	Content    string     `gorm:"column:content;type:text;" json:"content"`                         //
-	UserId     uint64     `gorm:"column:user_id;type:bigint;not null;default:0;" json:"userId"`     //
-	CreateTime time.Time  `gorm:"column:create_time;type:datetime;not null;" json:"createTime"`     //
-	UpdateTime time.Time  `gorm:"column:update_time;type:datetime;not null;" json:"updateTime"`     //
-	DeletedAt  *time.Time `gorm:"column:deleted_at;type:datetime(3);" json:"deletedAt"`             //
+	Id        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`           //
+	Title     string     `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"` //
+	Content   string     `gorm:"column:content;type:text;" json:"content"`                         //
+	UserId    uint64     `gorm:"column:user_id;type:bigint;not null;default:0;" json:"userId"`     //
+	CreatedAt time.Time  `gorm:"column:created_at;type:datetime;" json:"createdAt"`                //
+	UpdatedAt time.Time  `gorm:"column:updated_at;type:datetime;" json:"updatedAt"`                //
+	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

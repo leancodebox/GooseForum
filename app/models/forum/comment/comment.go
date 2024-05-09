@@ -25,12 +25,12 @@ const fieldCreateTime = "create_time"
 const fieldUpdateTime = "update_time"
 
 type Entity struct {
-	Id         uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                 //
-	ArticleId  uint64    `gorm:"column:article_id;type:bigint;not null;default:0;" json:"articleId"`                     //
-	Content    string    `gorm:"column:content;type:text;" json:"content"`                                               //
-	UserId     uint64    `gorm:"column:user_id;type:bigint;not null;default:0;" json:"userId"`                           //
-	CreateTime time.Time `gorm:"column:create_time;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"createTime"` //
-	UpdateTime time.Time `gorm:"column:update_time;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"updateTime"` //
+	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`             //
+	ArticleId uint64    `gorm:"column:article_id;type:bigint;not null;default:0;" json:"articleId"` //
+	Content   string    `gorm:"column:content;type:text;" json:"content"`                           //
+	UserId    uint64    `gorm:"column:user_id;type:bigint;not null;default:0;" json:"userId"`       //
+	CreatedAt time.Time `gorm:"column:created_at;type:datetime;" json:"createdAt"`                  //
+	UpdatedAt time.Time `gorm:"column:updated_at;type:datetime;" json:"updatedAt"`                  //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

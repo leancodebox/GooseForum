@@ -35,7 +35,7 @@ func GetArticles(request GetArticlesRequest) component.Response {
 			Id:             t.Id,
 			Title:          t.Title,
 			Content:        t.Content,
-			LastUpdateTime: t.UpdateTime.Format("2006-01-02 15:04:05"),
+			LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 		}
 	}, pageData)
 
@@ -59,7 +59,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 			return ArticlesDto{Id: t.Id,
 				Title:          t.Title,
 				Content:        t.Content,
-				LastUpdateTime: t.UpdateTime.Format("2006-01-02 15:04:05"),
+				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 			}
 		}, pageData.Data),
 		"size":    pageData.PageSize,
@@ -94,7 +94,7 @@ func GetArticlesDetail(request GetArticlesDetailRequest) component.Response {
 			ArticleId:  item.ArticleId,
 			UserId:     item.UserId,
 			Content:    item.Content,
-			CreateTime: item.CreateTime.Format(time.RFC3339),
+			CreateTime: item.CreatedAt.Format(time.RFC3339),
 		}
 	}, comments)
 	return component.SuccessResponse(map[string]any{
