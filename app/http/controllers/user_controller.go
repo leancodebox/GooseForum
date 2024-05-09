@@ -58,7 +58,7 @@ type LoginReq struct {
 }
 
 func Login(r LoginReq) component.Response {
-	if VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
+	if !VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
 		return component.SuccessResponse("ok")
 	}
 	userEntity, err := users.Verify(r.Username, r.Password)
