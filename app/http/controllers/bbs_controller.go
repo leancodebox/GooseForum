@@ -15,7 +15,7 @@ type GetArticlesRequest struct {
 
 type ArticlesDto struct {
 	Id             uint64 `json:"id"`
-	content        string `json:"content"`
+	Content        string `json:"Content"`
 	Title          string `json:"title"`
 	LastUpdateTime string `json:"lastUpdateTime"`
 }
@@ -34,7 +34,7 @@ func GetArticles(request GetArticlesRequest) component.Response {
 		return ArticlesDto{
 			Id:             t.Id,
 			Title:          t.Title,
-			content:        t.Content,
+			Content:        t.Content,
 			LastUpdateTime: t.UpdateTime.Format("2006-01-02 15:04:05"),
 		}
 	}, pageData)
@@ -58,7 +58,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 		"list": array.ArrayMap(func(t articles.Entity) ArticlesDto {
 			return ArticlesDto{Id: t.Id,
 				Title:          t.Title,
-				content:        t.Content,
+				Content:        t.Content,
 				LastUpdateTime: t.UpdateTime.Format("2006-01-02 15:04:05"),
 			}
 		}, pageData.Data),
@@ -77,7 +77,7 @@ type GetArticlesDetailRequest struct {
 type CommentDto struct {
 	ArticleId  uint64 `json:"articleId"`
 	UserId     uint64 `json:"userId"`
-	Content    string `json:"content"`
+	Content    string `json:"Content"`
 	CreateTime string `json:"createTime"`
 }
 
@@ -107,7 +107,7 @@ func GetArticlesDetail(request GetArticlesDetailRequest) component.Response {
 
 type WriteArticleReq struct {
 	Id      int64  `json:"id"`
-	Content string `json:"content" validate:"required"`
+	Content string `json:"Content" validate:"required"`
 }
 
 func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Response {
