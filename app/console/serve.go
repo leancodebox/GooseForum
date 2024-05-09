@@ -87,6 +87,7 @@ func ginServe() {
 		}
 	}()
 
+	fmt.Println("GooseForum:listen " + port)
 	slog.Info("GooseForum:listen " + port)
 	slog.Info(fmt.Sprintf("use port:%s", port))
 	slog.Info(fmt.Sprintf("if in local you can http://localhost:%s", port))

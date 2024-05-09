@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/bbs/Articles"
-	"github.com/leancodebox/GooseForum/app/models/bbs/Comment"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/comment"
 	array "github.com/leancodebox/goose/collectionopt"
 	"time"
 )
@@ -25,19 +25,19 @@ func GetArticles(request GetArticlesRequest) component.Response {
 	if request.PageSize == 0 {
 		request.PageSize = 10
 	}
-	articles := Articles.GetByMaxIdPage(request.MaxId, request.PageSize)
+	pageData := articles.GetByMaxIdPage(request.MaxId, request.PageSize)
 	var maxId uint64
-	if len(articles) > 0 {
-		maxId = articles[0].Id
+	if len(pageData) > 0 {
+		maxId = pageData[0].Id
 	}
-	list := array.ArrayMap(func(t *Articles.Entity) ArticlesDto {
+	list := array.ArrayMap(func(t *articles.Entity) ArticlesDto {
 		return ArticlesDto{
 			Id:             t.Id,
 			Title:          t.Title,
 			content:        t.Content,
 			LastUpdateTime: t.UpdateTime.Format("2006-01-02 15:04:05"),
 		}
-	}, articles)
+	}, pageData)
 
 	return component.SuccessResponse(map[string]any{
 		"maxId": maxId,
@@ -52,10 +52,10 @@ type GetArticlesPageRequest struct {
 }
 
 func GetArticlesPage(param GetArticlesPageRequest) component.Response {
-	pageData := Articles.Page(Articles.PageQuery{Page: param.Page, PageSize: param.PageSize})
+	pageData := articles.Page(articles.PageQuery{Page: param.Page, PageSize: param.PageSize})
 
 	return component.SuccessResponse(component.DataMap{
-		"list": array.ArrayMap(func(t Articles.Entity) ArticlesDto {
+		"list": array.ArrayMap(func(t articles.Entity) ArticlesDto {
 			return ArticlesDto{Id: t.Id,
 				Title:          t.Title,
 				content:        t.Content,
@@ -86,10 +86,10 @@ func GetArticlesDetail(request GetArticlesDetailRequest) component.Response {
 	if request.PageSize == 0 {
 		request.PageSize = 10
 	}
-	article := Articles.Get(request.Id)
-	comments := Comment.GetByMaxIdPage(request.Id, request.MaxCommentId, request.PageSize)
+	entity := articles.Get(request.Id)
+	comments := comment.GetByMaxIdPage(request.Id, request.MaxCommentId, request.PageSize)
 
-	commentList := array.ArrayMap(func(item Comment.Entity) CommentDto {
+	commentList := array.ArrayMap(func(item comment.Entity) CommentDto {
 		return CommentDto{
 			ArticleId:  item.ArticleId,
 			UserId:     item.UserId,
@@ -98,8 +98,8 @@ func GetArticlesDetail(request GetArticlesDetailRequest) component.Response {
 		}
 	}, comments)
 	return component.SuccessResponse(map[string]any{
-		"articleTitle":   &article.Title,
-		"articleContent": &article.Content,
+		"articleTitle":   &entity.Title,
+		"articleContent": &entity.Content,
 		"commentList":    commentList,
 	})
 
@@ -111,12 +111,12 @@ type WriteArticleReq struct {
 }
 
 func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Response {
-	if Articles.CantWriteNew(req.UserId, 66) {
+	if articles.CantWriteNew(req.UserId, 66) {
 		return component.FailResponse("您当天已发布较多，为保证质量，请明天再发布新帖")
 	}
-	var article Articles.Entity
+	var article articles.Entity
 	if req.Params.Id != 0 {
-		article = Articles.Get(req.Params.Id)
+		article = articles.Get(req.Params.Id)
 		if article.UserId != req.UserId {
 			return component.FailResponse("不要更改别人发出的帖子哦")
 		}
@@ -124,7 +124,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		article.UserId = req.UserId
 	}
 	article.Content = req.Params.Content
-	Articles.Save(&article)
+	articles.Save(&article)
 	return component.SuccessResponse(map[string]any{})
 }
 
@@ -134,10 +134,10 @@ type ArticleCommentReq struct {
 }
 
 func ArticleComment(req ArticleCommentReq) component.Response {
-	if Articles.Get(req.ArticleId).Id == 0 {
+	if articles.Get(req.ArticleId).Id == 0 {
 		return component.FailResponse("文章不存在")
 	}
-	Comment.Save(&Comment.Entity{Content: req.Comment})
+	comment.Save(&comment.Entity{Content: req.Comment})
 	return component.SuccessResponse(true)
 }
 

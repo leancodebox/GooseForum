@@ -1,1 +1,3 @@
 # GooseForum
+
+# 功能

@@ -3,7 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	Articles2 "github.com/leancodebox/GooseForum/app/models/bbs/Articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/goose/preferences"
 	"os"
 	"path/filepath"
@@ -39,8 +39,8 @@ func runHexoTool(_ *cobra.Command, _ []string) {
 		return
 	}
 	for _, data := range blogs {
-		art := Articles2.Entity{UserId: 1, Content: data.Content, Title: data.Title}
-		Articles2.Save(&art)
+		art := articles.Entity{UserId: 1, Content: data.Content, Title: data.Title}
+		articles.Save(&art)
 	}
 	fmt.Println(len(blogs))
 }

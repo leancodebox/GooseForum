@@ -2,8 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/models/Users"
-
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/spf13/cobra"
 )
 
@@ -25,10 +24,10 @@ func runBbsinit(_ *cobra.Command, _ []string) {
 
 	adminUsername := "t_admin"
 
-	adminUser := Users.GetByUsername(adminUsername)
+	adminUser := users.GetByUsername(adminUsername)
 	if adminUser == nil {
-		userEntity := Users.MakeUser(adminUsername, "123456", "admin@admin.com")
-		err := Users.Create(userEntity)
+		userEntity := users.MakeUser(adminUsername, "123456", "admin@admin.com")
+		err := users.Create(userEntity)
 		if err != nil {
 			fmt.Println("账号创建失败，失败原因：", err)
 		}

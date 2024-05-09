@@ -10,8 +10,8 @@ func ginApi(ginApp *gin.Engine) {
 
 	apiGroup := ginApp.Group("api")
 	// lowerControllers\
-	apiGroup.GET("memUse", ginUpNP(controllers.GetUseMem))
+	//apiGroup.GET("memUse", ginUpNP(controllers.GetUseMem))
 	apiGroup.GET("about", ginUpNP(controllers.About))
-	apiGroup.GET("sys-info", ginUpNP(controllers.SysInfo))
+	//apiGroup.GET("sys-info", ginUpNP(controllers.SysInfo))
 
 }

@@ -1,4 +1,4 @@
-package Users
+package users
 
 import (
 	"github.com/leancodebox/GooseForum/bundles/algorithm"

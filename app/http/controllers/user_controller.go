@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/Users"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	jwt "github.com/leancodebox/goose/jwtopt"
 	"log/slog"
 	"strconv"
@@ -30,8 +30,8 @@ type RegReq struct {
 // 验证后更新验证字段
 // 清除验证码
 func Register(r RegReq) component.Response {
-	userEntity := Users.MakeUser(r.Username, r.Password, r.Email)
-	err := Users.Create(userEntity)
+	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
+	err := users.Create(userEntity)
 
 	if err != nil {
 		return component.FailResponse(cast.ToString(err))
@@ -58,7 +58,7 @@ func Login(r LoginReq) component.Response {
 	if VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
 		return component.SuccessResponse("ok")
 	}
-	userEntity, err := Users.Verify(r.Username, r.Password)
+	userEntity, err := users.Verify(r.Username, r.Password)
 	if err != nil {
 		slog.Info(cast.ToString(err))
 		return component.FailResponse("验证失败")

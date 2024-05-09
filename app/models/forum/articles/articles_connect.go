@@ -1,9 +1,9 @@
-package Users
+package articles
 
 import (
-	db "github.com/leancodebox/GooseForum/bundles/dbconnect"
-
 	"gorm.io/gorm"
+
+	db "github.com/leancodebox/GooseForum/bundles/dbconnect"
 )
 
 // Prohibit manual changes

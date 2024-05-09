@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/models/Users"
-	Articles2 "github.com/leancodebox/GooseForum/app/models/bbs/Articles"
-	Comment2 "github.com/leancodebox/GooseForum/app/models/bbs/Comment"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/comment"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"time"
 
 	"github.com/spf13/cast"
@@ -35,58 +35,58 @@ func init() {
 }
 
 func createAndUpdate(_ *cobra.Command, _ []string) {
-	art := Articles2.Entity{UserId: 1, Content: `
+	art := articles.Entity{UserId: 1, Content: `
 你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好
 `}
-	Articles2.Save(&art)
+	articles.Save(&art)
 
 	art.Content = "haohaohaohaohao"
 
 	time.Sleep(time.Second * 3)
 
-	Articles2.Save(&art)
+	articles.Save(&art)
 
 	fmt.Println(art)
 }
 
 func createAndDeleted(_ *cobra.Command, _ []string) {
-	art := Articles2.Entity{UserId: 1, Content: `
+	art := articles.Entity{UserId: 1, Content: `
 你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好
 `}
-	Articles2.Save(&art)
+	articles.Save(&art)
 
-	Articles2.Delete(&art)
+	articles.Delete(&art)
 
 	fmt.Println(art)
 }
 
 func runArticlesMake(_ *cobra.Command, _ []string) {
-	userEntity := Users.MakeUser(cast.ToString(time.Now().UnixMilli()), "123456", cast.ToString(time.Now())+"@qq.com")
-	err := Users.Create(userEntity)
+	userEntity := users.MakeUser(cast.ToString(time.Now().UnixMilli()), "123456", cast.ToString(time.Now())+"@qq.com")
+	err := users.Create(userEntity)
 	if err != nil {
 		fmt.Println("用户创建失败", err)
 	}
 
-	userList := Users.All()
+	userList := users.All()
 	fmt.Print(userList)
 	ctx := context.Background()
 
-	ArticlesRep := Articles2.NewRep(&ctx)
-	CommentRep := Comment2.NewRep(&ctx)
+	ArticlesRep := articles.NewRep(&ctx)
+	CommentRep := comment.NewRep(&ctx)
 	for _, user := range userList {
 		for i := 0; i < 10; i++ {
 
-			art := Articles2.Entity{UserId: user.Id, Content: `
+			art := articles.Entity{UserId: user.Id, Content: `
 你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好你好
 `}
 			ArticlesRep.Save(&art)
 			for _, cUser := range userList {
-				comment := Comment2.Entity{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
-				CommentRep.Save(&comment)
-				comment = Comment2.Entity{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
-				CommentRep.Save(&comment)
-				comment = Comment2.Entity{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
-				CommentRep.Save(&comment)
+				commentEntity := comment.Entity{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
+				CommentRep.Save(&commentEntity)
+				commentEntity = comment.Entity{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
+				CommentRep.Save(&commentEntity)
+				commentEntity = comment.Entity{UserId: cUser.Id, ArticleId: art.Id, Content: cUser.Username + "觉得不错"}
+				CommentRep.Save(&commentEntity)
 			}
 		}
 	}

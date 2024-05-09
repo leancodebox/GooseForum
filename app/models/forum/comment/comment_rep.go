@@ -1,4 +1,4 @@
-package Comment
+package comment
 
 import (
 	"context"

@@ -1,9 +1,9 @@
 package migration
 
 import (
-	"github.com/leancodebox/GooseForum/app/models/Users"
-	"github.com/leancodebox/GooseForum/app/models/bbs/Articles"
-	"github.com/leancodebox/GooseForum/app/models/bbs/Comment"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/comment"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/bundles/app"
 	"github.com/leancodebox/GooseForum/bundles/dbconnect"
 	"github.com/spf13/cast"
@@ -24,9 +24,9 @@ func migration(migration bool) {
 	db := dbconnect.Connect()
 
 	if err = db.AutoMigrate(
-		&Users.Entity{},
-		&Comment.Entity{},
-		&Articles.Entity{},
+		&users.Entity{},
+		&comment.Entity{},
+		&articles.Entity{},
 	); err != nil {
 		slog.Error(cast.ToString(err))
 	} else {
