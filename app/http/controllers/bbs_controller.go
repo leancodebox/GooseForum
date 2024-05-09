@@ -51,6 +51,7 @@ type GetArticlesPageRequest struct {
 	Search   string `form:"search"`
 }
 
+// GetArticlesPage 文章列表
 func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 	pageData := articles.Page(articles.PageQuery{Page: param.Page, PageSize: param.PageSize})
 
@@ -107,11 +108,13 @@ func GetArticlesDetail(request GetArticlesDetailRequest) component.Response {
 
 type WriteArticleReq struct {
 	Id      int64  `json:"id"`
-	Content string `json:"Content" validate:"required"`
+	Content string `json:"content" validate:"required"`
+	Title   string `json:"title" validate:"required"`
 }
 
+// WriteArticles 写文章
 func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Response {
-	if articles.CantWriteNew(req.UserId, 66) {
+	if articles.CantWriteNew(req.UserId, 10) {
 		return component.FailResponse("您当天已发布较多，为保证质量，请明天再发布新帖")
 	}
 	var article articles.Entity
@@ -124,6 +127,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		article.UserId = req.UserId
 	}
 	article.Content = req.Params.Content
+	article.Title = req.Params.Title
 	articles.Save(&article)
 	return component.SuccessResponse(map[string]any{})
 }
@@ -133,11 +137,12 @@ type ArticleCommentReq struct {
 	Comment   string `json:"comment"`
 }
 
-func ArticleComment(req ArticleCommentReq) component.Response {
-	if articles.Get(req.ArticleId).Id == 0 {
+// ArticleComment 文章添加评论
+func ArticleComment(req component.BetterRequest[ArticleCommentReq]) component.Response {
+	if articles.Get(req.Params.ArticleId).Id == 0 {
 		return component.FailResponse("文章不存在")
 	}
-	comment.Save(&comment.Entity{Content: req.Comment})
+	comment.Save(&comment.Entity{Content: req.Params.Comment, UserId: req.UserId})
 	return component.SuccessResponse(true)
 }
 

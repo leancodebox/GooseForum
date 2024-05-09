@@ -1,7 +1,7 @@
 package component
 
 import (
-	users2 "github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"net/http"
 )
 
@@ -16,7 +16,7 @@ type BetterRequest[T any] struct {
 	Params   T
 	UserId   uint64
 	userSet  bool
-	userInfo users2.Entity
+	userInfo users.Entity
 }
 type Null struct {
 }
@@ -26,11 +26,11 @@ func (r *BetterRequest[T]) GetParams() T {
 	return r.Params
 }
 
-func (r *BetterRequest[T]) GetUser() (users2.Entity, error) {
+func (r *BetterRequest[T]) GetUser() (users.Entity, error) {
 	if r.userSet != false {
 		return r.userInfo, nil
 	}
-	user, _ := users2.Get(r.UserId)
+	user, _ := users.Get(r.UserId)
 	r.userSet = true
 	r.userInfo = user
 	return r.userInfo, nil
