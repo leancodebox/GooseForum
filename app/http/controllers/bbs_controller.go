@@ -152,6 +152,8 @@ type ApplyShowReq struct {
 	ImageList []string `json:"imageList"`
 }
 
+// ApplyShow 申请展示
+// todo 低优先级 是可以考虑两个地方，一个地方是侧边栏，一个地方是置顶
 func ApplyShow(req component.BetterRequest[ApplyShowReq]) component.Response {
 	return component.SuccessResponse("success")
 }

@@ -51,7 +51,7 @@ func GetBy(field, value string) (entity Entity) {
 	return
 }
 
-func All() (entities []Entity) {
+func All() (entities []*Entity) {
 	builder().Find(&entities)
 	return
 }

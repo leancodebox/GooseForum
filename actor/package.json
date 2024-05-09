@@ -24,7 +24,7 @@
     "@vicons/antd": "^0.12.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/compiler-sfc": "^3.0.5",
-    "naive-ui": "^2.34.4",
+    "naive-ui": "^2.38.2",
     "vfonts": "^0.1.0",
     "vite": "^4.4.9",
     "vooks": "^0.2.10"

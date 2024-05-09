@@ -12,7 +12,7 @@ import {NAvatar, NIcon, NPopover, NButton, NSpace} from "naive-ui";
         <template #trigger>
             <n-avatar
                     round
-                    :size="48"
+                    :size="36"
             >
                 旺财
             </n-avatar>

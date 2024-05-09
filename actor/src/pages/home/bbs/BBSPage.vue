@@ -18,7 +18,7 @@ import {useIsMobile} from "@/utils/composables";
 
 const listData = ref([])
 
-let maxId = 0
+let maxId = 1
 
 function getArticlesAction() {
     getArticlesPageApi(maxId).then(r => {
@@ -38,7 +38,7 @@ function getArticlesAction() {
 }
 
 onMounted(() => {
-    maxId = 0
+    maxId = 1
     getArticlesAction()
 })
 
