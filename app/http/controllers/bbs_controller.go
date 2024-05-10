@@ -4,6 +4,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/comment"
+	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	array "github.com/leancodebox/goose/collectionopt"
 	"time"
 )
@@ -107,15 +109,18 @@ func GetArticlesDetail(request GetArticlesDetailRequest) component.Response {
 }
 
 type WriteArticleReq struct {
-	Id      int64  `json:"id"`
-	Content string `json:"content" validate:"required"`
-	Title   string `json:"title" validate:"required"`
+	Id          int64    `json:"id"`
+	Content     string   `json:"content" validate:"required"`
+	HtmlContent string   `json:"htmlContent" validate:"required"`
+	Title       string   `json:"title" validate:"required"`
+	Tags        []uint64 `json:"tags"`
+	CategoryId  uint64   `json:"categoryId"`
 }
 
 // WriteArticles 写文章
 func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Response {
 	if articles.CantWriteNew(req.UserId, 10) {
-		return component.FailResponse("您当天已发布较多，为保证质量，请明天再发布新帖")
+		return component.FailResponse("您当天已发布较多，为保证质量，请明天再发布新文章")
 	}
 	var article articles.Entity
 	if req.Params.Id != 0 {
@@ -128,7 +133,12 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	}
 	article.Content = req.Params.Content
 	article.Title = req.Params.Title
-	articles.Save(&article)
+	if article.Id > 0 {
+		articles.Save(&article)
+	} else {
+		articles.Create(&article)
+		pointservice.RewardPoints(req.UserId, 10, pointservice.RewardPoints4WriteArticles)
+	}
 	return component.SuccessResponse(map[string]any{})
 }
 
@@ -143,6 +153,40 @@ func ArticleComment(req component.BetterRequest[ArticleCommentReq]) component.Re
 		return component.FailResponse("文章不存在")
 	}
 	comment.Save(&comment.Entity{Content: req.Params.Comment, UserId: req.UserId})
+	return component.SuccessResponse(true)
+}
+
+type ArticleReplyId struct {
+	ArticleId uint64 `json:"articleId"`
+	Comment   string `json:"comment"`
+	ReplyId   uint64 `json:"repoId"`
+}
+
+func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Response {
+	if articles.Get(req.Params.ArticleId).Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+	if req.Params.ReplyId > 0 && reply.Get(req.Params.ReplyId).Id == 0 {
+		return component.FailResponse("要回复的评论不存在")
+	}
+	reply.Create(&reply.Entity{Content: req.Params.Comment, UserId: req.UserId})
+	pointservice.RewardPoints(req.UserId, 10, pointservice.RewardPoints4Reply)
+	return component.SuccessResponse(true)
+}
+
+type DeleteReplyId struct {
+	ReplyId uint64 `json:"repoId"`
+}
+
+func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response {
+	replyEntity := reply.Get(req.Params.ReplyId)
+	if replyEntity.Id == 0 {
+		return component.FailResponse("回复不存在")
+	}
+	if replyEntity.UserId != req.UserId {
+		return component.FailResponse("不可操作")
+	}
+	reply.DeleteEntity(&replyEntity)
 	return component.SuccessResponse(true)
 }
 

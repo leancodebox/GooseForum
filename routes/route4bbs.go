@@ -22,8 +22,12 @@ func ginBBS(ginApp *gin.Engine) {
 	bbsAuth := bbs.Use(middleware.JWTAuth4Gin)
 	// 发布文章
 	bbsAuth.POST("write-articles", UpButterReq(controllers.WriteArticles))
-	// 发布评论
-	bbsAuth.POST("articles-comment", ginUpP(controllers.ArticleComment))
+	//发布评论 todo clean code
+	//bbsAuth.POST("articles-comment", ginUpP(controllers.ArticleComment))
+	// 回复文章
+	bbsAuth.POST("articles-reply", UpButterReq(controllers.ArticleReply))
+	// 回复评论
+	bbsAuth.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
 	// 申请展示 todo
 	bbsAuth.POST("apply-show", UpButterReq(controllers.ApplyShow))
 

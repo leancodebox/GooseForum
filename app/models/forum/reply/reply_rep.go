@@ -1,9 +1,14 @@
 package reply
 
-//func create(entity *Entity) int64 {
-//	result := builder().Create(entity)
-//	return result.RowsAffected
-//}
+func Create(entity *Entity) int64 {
+	result := builder().Create(entity)
+	return result.RowsAffected
+}
+
+func Get(id any) (entity Entity) {
+	builder().Where(pid, id).First(entity)
+	return
+}
 
 //func save(entity *Entity) int64 {
 //	result := builder().Save(entity)
@@ -15,10 +20,10 @@ package reply
 //	return result.RowsAffected
 //}
 
-//func deleteEntity(entity *Entity) int64 {
-//	result := builder().Delete(entity)
-//	return result.RowsAffected
-//}
+func DeleteEntity(entity *Entity) int64 {
+	result := builder().Delete(entity)
+	return result.RowsAffected
+}
 
 //func all() (entities []*Entity) {
 //	builder().Find(&entities)

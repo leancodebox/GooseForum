@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	jwt "github.com/leancodebox/goose/jwtopt"
 	"log/slog"
 	"strconv"
@@ -33,13 +33,10 @@ type RegReq struct {
 func Register(r RegReq) component.Response {
 	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
 	err := users.Create(userEntity)
-	userPoint := userPoints.Entity{UserId: userEntity.Id, CurrentPoints: 10}
-	userPoints.Create(&userPoint)
-
 	if err != nil {
 		return component.FailResponse(cast.ToString(err))
 	}
-
+	pointservice.InitUserPoints(userEntity.Id, 100)
 	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
 	if err != nil {
 		return component.FailResponse(cast.ToString(err))

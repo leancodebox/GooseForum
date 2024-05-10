@@ -1,14 +1,14 @@
 package pointsRecord
 
-//func create(entity *Entity) int64 {
-//	result := builder().Create(entity)
-//	return result.RowsAffected
-//}
+func Create(entity *Entity) int64 {
+	result := builder().Create(entity)
+	return result.RowsAffected
+}
 
-//func save(entity *Entity) int64 {
-//	result := builder().Save(entity)
-//	return result.RowsAffected
-//}
+func Save(entity *Entity) int64 {
+	result := builder().Save(entity)
+	return result.RowsAffected
+}
 
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)

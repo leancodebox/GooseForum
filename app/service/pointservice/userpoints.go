@@ -1,4 +1,4 @@
-package points
+package pointservice
 
 import (
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
@@ -6,12 +6,32 @@ import (
 	"time"
 )
 
-func RewardPoints(userId uint64, points int64, reason string) {
+type RewardPointsType int
+
+var (
+	RewardPointsInit     RewardPointsType = 0
+	RewardPoints4WriteArticles RewardPointsType = 1
+	RewardPoints4Reply   RewardPointsType = 2
+)
+
+func (r RewardPointsType) String() string {
+	switch r {
+	case 0:
+		return "初始化"
+	case 1:
+		return "";
+	case 2:
+		return "";
+	}
+	return ""
+}
+
+func RewardPoints(userId uint64, points int64, reason RewardPointsType) {
 	userPoint := userPoints.Get(userId)
 	userPoint.CurrentPoints += points
 	userPoints.Save(&userPoint)
 
-	pointsRecordEntity := pointsRecord.Entity{UserId: userId, ChangeReason: reason, CreatedAt: time.Now()}
+	pointsRecordEntity := pointsRecord.Entity{UserId: userId, ChangeReason: reason.String(), CreatedAt: time.Now()}
 	pointsRecord.Save(&pointsRecordEntity)
 
 }
@@ -25,6 +45,6 @@ func InitUserPoints(userId uint64, points int64) {
 	userPoint.CurrentPoints += points
 	userPoints.Create(&userPoint)
 
-	pointsRecordEntity := pointsRecord.Entity{UserId: userId, ChangeReason: "用户创建奖励", CreatedAt: time.Now()}
+	pointsRecordEntity := pointsRecord.Entity{UserId: userId, ChangeReason: RewardPointsInit.String(), CreatedAt: time.Now()}
 	pointsRecord.Save(&pointsRecordEntity)
 }
