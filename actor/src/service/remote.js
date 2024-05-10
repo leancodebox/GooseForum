@@ -60,13 +60,6 @@ export function reg(email, username, password) {
     })
 }
 
-export function getArticlesApi(maxId) {
-    return instanceAxios.post('bbs/get-articles', {
-        maxId: maxId,
-        pageSize: 10,
-    })
-}
-
 export function getArticlesPageApi(page=1,pageSize=10,search="") {
     return instanceAxios.post('bbs/get-articles-page', {
         page: page,
