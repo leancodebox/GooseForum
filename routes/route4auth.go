@@ -11,7 +11,8 @@ func ginAuth(ginApp *gin.Engine) {
 	ginApp.Group("api").
 		POST("reg", ginUpP(controllers.Register)).
 		POST("login", ginUpP(controllers.Login)).
-		POST("get-captcha", ginUpNP(controllers.GetCaptcha))
+		POST("get-captcha", ginUpNP(controllers.GetCaptcha)).
+		POST("get-user-info", ginUpP(controllers.GetUserInfo))
 
 	ginApp.Group("api").Use(middleware.JWTAuth4Gin).
 		GET("get-user-info-v4", UpButterReq(controllers.UserInfo)).

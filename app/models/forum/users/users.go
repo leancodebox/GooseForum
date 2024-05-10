@@ -30,12 +30,12 @@ const fieldPassword = "password"
 
 type Entity struct {
 	Id        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                 //
-	CreatedAt *time.Time `gorm:"column:created_at;type:datetime;" json:"createdAt"`                      //
-	UpdatedAt *time.Time `gorm:"column:updated_at;type:datetime;" json:"updatedAt"`                      //
-	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                      //
 	Username  string     `gorm:"column:username;type:varchar(255);not null;default:'';" json:"username"` //
 	Email     string     `gorm:"column:email;type:varchar(255);not null;default:'';" json:"email"`       //
 	Password  string     `gorm:"column:password;type:varchar(255);not null;default:'';" json:"password"` //
+	CreatedAt *time.Time `gorm:"column:created_at;type:datetime;" json:"createdAt"`                      //
+	UpdatedAt *time.Time `gorm:"column:updated_at;type:datetime;" json:"updatedAt"`                      //
+	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                      //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

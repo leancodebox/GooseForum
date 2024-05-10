@@ -51,11 +51,12 @@ type GetArticlesPageRequest struct {
 	Page     int    `form:"page"`
 	PageSize int    `form:"pageSize"`
 	Search   string `form:"search"`
+	UserId   uint64 `form:"userId"`
 }
 
 // GetArticlesPage 文章列表
 func GetArticlesPage(param GetArticlesPageRequest) component.Response {
-	pageData := articles.Page(articles.PageQuery{Page: param.Page, PageSize: param.PageSize})
+	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
 
 	return component.SuccessResponse(component.DataMap{
 		"list": array.ArrayMap(func(t articles.Entity) ArticlesDto {

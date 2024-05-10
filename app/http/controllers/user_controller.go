@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	jwt "github.com/leancodebox/goose/jwtopt"
@@ -105,6 +106,7 @@ type EditUserInfoReq struct {
 	Nickname string `json:"nickname"`
 }
 
+// EditUserInfo 编辑用户
 func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Response {
 	return component.SuccessResponse("success")
 }
@@ -114,4 +116,28 @@ func Invitation(req component.BetterRequest[null]) component.Response {
 	return component.SuccessResponse(map[string]any{
 		"invitation": base36,
 	})
+}
+
+type GetUserInfoReq struct {
+	UserId uint64 `json:"userId"`
+}
+
+// GetUserInfo 游客访问某些用户时
+func GetUserInfo(req GetUserInfoReq) component.Response {
+	user, _ := users.Get(req.UserId)
+	if user.Id == 0 {
+		return component.FailResponse("用户不存在")
+	}
+	userPoint := userPoints.Get(user.Id)
+	return component.SuccessResponse(UserInfoShow{
+		Username:  user.Username,
+		AvatarUrl: "",
+		UserPoint: userPoint.CurrentPoints,
+	})
+}
+
+type UserInfoShow struct {
+	Username  string `json:"username"`
+	AvatarUrl string `json:"avatarUrl"`
+	UserPoint int64  `json:"userPoint"`
 }

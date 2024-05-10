@@ -46,20 +46,9 @@ func Get(id any) (entity Entity) {
 	return
 }
 
-func GetBy(field, value string) (entity Entity) {
-	builder().Where(field+" = ?", value).First(&entity)
-	return
-}
-
 func All() (entities []*Entity) {
 	builder().Find(&entities)
 	return
-}
-
-func IsExist(field, value string) bool {
-	var count int64
-	builder().Where(field+" = ?", value).Count(&count)
-	return count > 0
 }
 
 func GetByMaxIdPage(id uint64, pageSize int) (entities []*Entity) {
@@ -76,6 +65,7 @@ func CantWriteNew(userId uint64, maxCount int64) bool {
 type PageQuery struct {
 	Page, PageSize int
 	Search         string
+	UserId         uint64
 }
 
 func Page(q PageQuery) struct {
@@ -96,6 +86,9 @@ func Page(q PageQuery) struct {
 	b := builder()
 	if q.Search != "" {
 		b.Where(queryopt.Like(fieldContent, q.Search))
+	}
+	if q.UserId != 0 {
+		b.Where(queryopt.Eq(fieldUserId, q.UserId))
 	}
 	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order("id desc").Find(&list)
 
