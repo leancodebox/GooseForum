@@ -1,17 +1,5 @@
 <script setup>
-import {
-  NButton,
-  NCard,
-  NH2,
-  NLayout,
-  NLayoutContent,
-  NLayoutSider,
-  NList,
-  NListItem,
-  NSpace,
-  NTag,
-  NThing
-} from 'naive-ui'
+import {NButton, NCard, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing} from 'naive-ui'
 import {onMounted, onUnmounted, ref} from "vue";
 import {getArticlesPageApi} from "@/service/request";
 import {useIsMobile} from "@/utils/composables";
@@ -26,7 +14,7 @@ function getArticlesAction() {
       return {
         id: item.id,
         title: item.title,
-        tag: ["tag1", "tag2"],
+        tag: ["文章", "技术"],
         desc: item.content,
         lastUpdateTime: item.lastUpdateTime,
         body: item.content
@@ -78,36 +66,42 @@ const isMobile = useIsMobile()
               :style="{flex: 1, maxWidth: '1400px', margin: '0 auto', padding: '24px'}">
       <n-layout-content content-style="padding: 24px;">
         <!--          layout      -->
-        <n-card style="margin:0 auto">
-          <n-list>
-            <n-list-item v-for="item in listData">
-              <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
-                <n-thing>
-                  <template #description>
-                    <n-space size="small" style="padding-top: 4px">
+
+        <n-space>
+          <n-tag type="info">技术</n-tag>
+          <n-tag type="info">文章</n-tag>
+          <n-tag type="info">bn</n-tag>
+        </n-space>
+
+        <n-list>
+          <n-list-item v-for="item in listData">
+            <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
+              <n-thing>
+                <template #description>
+                  <n-space size="small" style="padding-top: 4px">
                                 <span v-if="item.type === 'xxx'" class="highlight-animation"
                                       :style="{ color: textColor }">
                                     {{ text }}
                                 </span>
-                      {{ item.title }}
-                      <n-tag v-for="itemTag in item.tag" :bordered="false" type="info"
-                             size="small"
-                             v-text="itemTag">
-                      </n-tag>
-                      {{ item.lastUpdateTime }}
-                    </n-space>
-                  </template>
-                </n-thing>
-              </router-link>
-            </n-list-item>
-            <n-list-item>
-              <n-button @click="more">
-                more
-              </n-button>
-            </n-list-item>
+                    {{ item.title }}
+                    <n-tag v-for="itemTag in item.tag" :bordered="false" type="info"
+                           size="small"
+                           v-text="itemTag">
+                    </n-tag>
+                    {{ item.lastUpdateTime }}
+                  </n-space>
+                </template>
+              </n-thing>
+            </router-link>
+          </n-list-item>
+          <n-list-item>
+            <n-button @click="more">
+              more
+            </n-button>
+          </n-list-item>
 
-          </n-list>
-        </n-card>
+        </n-list>
+
         <!--          layout      -->
 
       </n-layout-content>
@@ -117,17 +111,19 @@ const isMobile = useIsMobile()
           bordered
           v-show="!isMobile"
       >
-        <n-card>
-          <n-h2>userInfo</n-h2>
-        </n-card>
+        <n-space vertical>
+          <n-card title="祖国的花朵">
+            <p>祖国的花朵</p>
+          </n-card>
 
-        <n-card>
-          <n-h2>今日推薦</n-h2>
-        </n-card>
+          <n-card title="今日推荐">
+            <p>祖国的花朵</p>
+          </n-card>
 
-        <n-card>
-          <n-h2>友情连接</n-h2>
-        </n-card>
+          <n-card title="友情连接">
+            <p>祖国的花朵</p>
+          </n-card>
+        </n-space>
       </n-layout-sider>
     </n-layout>
   </n-layout>

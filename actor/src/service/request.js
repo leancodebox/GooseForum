@@ -72,7 +72,7 @@ export function reg(email, username, password) {
     })
 }
 
-export function getArticlesPageApi(page = 1, pageSize = 10, search = "") {
+export function getArticlesPageApi(page = 1, pageSize = 20, search = "") {
     return instanceAxios.post('bbs/get-articles-page', {
         page: page,
         pageSize: pageSize,

@@ -7,12 +7,10 @@ import ArticlesMdPage from "@/pages/home/bbs/ArticlesMdPage.vue";
 import '@/assets/github-markdown.css'
 import {useIsMobile} from "@/utils/composables";
 
-
 const commentList = ref([])
-
 const articleInfo = ref({
-    title: "title1",
-    tag: ["tag1", "tag2"],
+    title: "",
+    tag: ["文章", "技术"],
     createDate: "2022-12-28 01:01:01",
     lastUpdateDate: "2022-12-28 01:01:01",
     body: ""
@@ -26,7 +24,7 @@ function getArticlesDetail() {
         if (r.result.articleContent !== undefined && r.result.articleContent !== "") {
             articleInfo.value = {
                 title: r.result.articleTitle,
-                tag: ["tag1", "tag2"],
+                tag: ["文章", "技术"],
                 createDate: "2022-12-28 01:01:01",
                 lastUpdateDate: "2022-12-28 01:01:01",
                 body: r.result.articleContent
@@ -63,7 +61,7 @@ const isMobile = useIsMobile()
                   :style="{flex: 1, maxWidth: '1400px', margin: '0 auto', padding: '24px'}">
             <n-layout-content content-style="padding: 24px;">
 
-
+              <n-space vertical>
                 <n-card style="margin:0 auto">
 
                     <h2> {{ articleInfo.title }}</h2>
@@ -77,7 +75,8 @@ const isMobile = useIsMobile()
                     <articles-md-page :markdown="articleInfo.body"></articles-md-page>
 
                 </n-card>
-                <n-card style="margin:0 auto">
+
+                <n-card style="margin:0 auto" title="激情评论">
                     <n-list>
                         <n-list-item v-for="item in commentList">
                             <n-thing :title="item.userId" content-style="margin-top: 10px;">
@@ -86,6 +85,7 @@ const isMobile = useIsMobile()
                         </n-list-item>
                     </n-list>
                 </n-card>
+              </n-space>
 
 
             </n-layout-content>
