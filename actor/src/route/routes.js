@@ -4,13 +4,15 @@ import {LogoTwitter, LogoWebComponent} from '@vicons/ionicons5'
 import sun from "@/pages/HomePage.vue";
 import moon from "@/pages/AllManager.vue";
 
-let about = () => import("@/pages/home/AboutPage.vue")
+
 let allTool = () => import("@/pages/manager/AllTool.vue")
+let articlesManager = () => import("@/pages/manager/ArticlesManager.vue")
+let pageManager = () => import("@/pages/manager/PageManager.vue")
+let userManager = () => import("@/pages/manager/UserManager.vue")
+
+let about = () => import("@/pages/home/AboutPage.vue")
 let index = () => import("@/pages/home/IndexPage.vue")
-let sysInfo = () => import("@/pages/manager/SysInfo.vue")
 let login = () => import("@/pages/Login.vue")
-
-
 let bbs = () => import("@/pages/home/bbs/BBSIndex.vue")
 let bbsPage = () => import("@/pages/home/bbs/BBSPage.vue")
 let articlesPage = () => import("@/pages/home/bbs/ArticlesPage.vue")
@@ -20,8 +22,10 @@ export let managerRouter = {
     belongMenu: true,
     path: '/manager', component: moon, children: [
         {showName: '', path: '', component: allTool, belongMenu: false},
-        {showName: 'all tool', path: 'allTool', component: allTool, belongMenu: true},
-        {showName: 'sysInfo', path: 'sysInfo', component: sysInfo, belongMenu: true},
+        {showName: '工具', path: 'allTool', component: allTool, belongMenu: true},
+        {showName: '用户管理', path: 'articlesManager', component: articlesManager, belongMenu: true},
+        {showName: '文章管理', path: 'pageManager', component: pageManager, belongMenu: true},
+        {showName: '页面管理', path: 'userManager', component: userManager, belongMenu: true},
     ]
 }
 
