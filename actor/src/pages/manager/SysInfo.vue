@@ -1,11 +1,11 @@
 <script setup>
-import {getSysInfo} from "@/service/remote";
+import {getSysInfo} from "@/service/request";
 import {NGrid, NGridItem, NCard, NProgress} from "naive-ui"
 import {ref, onUnmounted} from "vue"
 
 function reload() {
   getSysInfo().then(r => {
-    sysInfo.value = r.data.result
+    sysInfo.value = r.result
   })
 }
 

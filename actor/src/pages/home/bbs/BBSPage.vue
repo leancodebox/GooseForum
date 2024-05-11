@@ -13,7 +13,7 @@ import {
     NThing
 } from 'naive-ui'
 import {onMounted, onUnmounted, ref} from "vue";
-import {getArticlesPageApi} from "@/service/remote";
+import {getArticlesPageApi} from "@/service/request";
 import {useIsMobile} from "@/utils/composables";
 
 const listData = ref([])
@@ -22,7 +22,7 @@ let maxId = 1
 
 function getArticlesAction() {
     getArticlesPageApi(maxId).then(r => {
-        let newList = r.data.result.list.map(function (item) {
+        let newList = r.result.list.map(function (item) {
             return {
                 id: item.id,
                 title: item.title,

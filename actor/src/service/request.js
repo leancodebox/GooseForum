@@ -27,6 +27,14 @@ instanceAxios.interceptors.request.use(config => {
 const success = 0
 const fail = 1
 
+/**
+ * response
+ * {
+ *  "code": 1,
+ *  "result":{},
+ *  "msg":""
+ * }
+ */
 instanceAxios.interceptors.response.use(response => {
     if (response.headers['new-token'] !== undefined) {
         userStore.updateToken(response.headers['new-token'])
@@ -35,17 +43,18 @@ instanceAxios.interceptors.response.use(response => {
     if (res === undefined) {
         return response
     }
-    if (res.code === success) {
-
-    }
-    if (res.code === fail) {
-        message.error(res.msg ? res.msg : "响应异常")
+    switch (res.code) {
+        case success:
+            return res;
+        case fail:
+            message.error(res.msg ? res.msg : "响应异常")
+            return res;
     }
     return response
 })
 
 export function getUserInfo() {
-    return instanceAxios.get("get-user-info-v4")
+    return instanceAxios.get("get-user-info")
 }
 
 export function login(username, password) {

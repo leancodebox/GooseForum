@@ -11,7 +11,7 @@ import {
 } from 'naive-ui'
 import {ref} from 'vue'
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
-import {getUserInfo} from "@/service/remote"
+import {getUserInfo} from "@/service/request"
 import CpTool from "@/pages/manager/tool/CpTool.vue";
 
 const message = useMessage()
@@ -50,7 +50,7 @@ function showNew() {
 
 function getUserInfoAction() {
     getUserInfo().then(r => {
-        message.success(JSON.stringify(r.data.result))
+        message.success(JSON.stringify(r.result))
     })
 }
 

@@ -2,7 +2,7 @@
 import {NCard, NH2, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing} from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
-import {getArticlesDetailApi} from "@/service/remote";
+import {getArticlesDetailApi} from "@/service/request";
 import ArticlesMdPage from "@/pages/home/bbs/ArticlesMdPage.vue";
 import '@/assets/github-markdown.css'
 import {useIsMobile} from "@/utils/composables";
@@ -23,17 +23,17 @@ let maxCommentId = 0
 
 function getArticlesDetail() {
     getArticlesDetailApi(id, maxCommentId).then(r => {
-        console.log(r.data.result.articleTitle)
-        if (r.data.result.articleContent !== undefined && r.data.result.articleContent !== "") {
+        console.log(r.result.articleTitle)
+        if (r.result.articleContent !== undefined && r.result.articleContent !== "") {
             articleInfo.value = {
-                title: r.data.result.articleTitle,
+                title: r.result.articleTitle,
                 tag: ["tag1", "tag2"],
                 createDate: "2022-12-28 01:01:01",
                 lastUpdateDate: "2022-12-28 01:01:01",
-                body: r.data.result.articleContent
+                body: r.result.articleContent
             }
         }
-        let commentData = r.data.result.commentList.map(function (item) {
+        let commentData = r.result.commentList.map(function (item) {
             return {
                 username: "" + item.userId,
                 content: item.content,

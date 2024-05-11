@@ -12,10 +12,10 @@ func ginAuth(ginApp *gin.Engine) {
 		POST("reg", ginUpP(controllers.Register)).
 		POST("login", ginUpP(controllers.Login)).
 		POST("get-captcha", ginUpNP(controllers.GetCaptcha)).
-		POST("get-user-info", ginUpP(controllers.GetUserInfo))
+		POST("get-user-info-show", ginUpP(controllers.GetUserInfo))
 
 	ginApp.Group("api").Use(middleware.JWTAuth4Gin).
-		GET("get-user-info-v4", UpButterReq(controllers.UserInfo)).
+		GET("get-user-info", UpButterReq(controllers.UserInfo)).
 		POST("set-user-info", UpButterReq(controllers.EditUserInfo)).
 		POST("invitation", UpButterReq(controllers.Invitation))
 }
