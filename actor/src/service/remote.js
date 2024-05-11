@@ -14,7 +14,7 @@ const instanceAxios = axios.create({
 })
 
 const userStore = useUserStore()
-const remoteService = {}
+
 instanceAxios.interceptors.request.use(config => {
     config.headers = {
         'Content-Type': 'application/json',
@@ -34,6 +34,9 @@ instanceAxios.interceptors.response.use(response => {
     const res = response.data
     if (res === undefined) {
         return response
+    }
+    if (res.code === success) {
+
     }
     if (res.code === fail) {
         message.error(res.msg ? res.msg : "响应异常")
@@ -60,7 +63,7 @@ export function reg(email, username, password) {
     })
 }
 
-export function getArticlesPageApi(page=1,pageSize=10,search="") {
+export function getArticlesPageApi(page = 1, pageSize = 10, search = "") {
     return instanceAxios.post('bbs/get-articles-page', {
         page: page,
         pageSize: pageSize,
@@ -80,5 +83,3 @@ export function getArticlesDetailApi(id, maxCommentId) {
 export function getSysInfo() {
     return instanceAxios.get("/sys-info")
 }
-
-export {remoteService}
