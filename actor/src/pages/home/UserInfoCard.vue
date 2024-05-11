@@ -1,7 +1,10 @@
 <script setup>
 
 import {NAvatar, NButton, NDropdown, useMessage} from "naive-ui";
+import {useUserStore} from "@/modules/user";
+import router from "@/route/router"
 
+const userStore = useUserStore()
 const message = useMessage()
 let options = [
   {label: "我的发布", key: "我的发布"},
@@ -12,19 +15,23 @@ let options = [
 let handleSelect = function (key) {
   message.info(String(key))
 }
+let loginOrReg = function (){
+  router.push({ path: '/login' })
+}
 </script>
 
 <template>
-  <n-dropdown trigger="hover" :options="options" @select="handleSelect">
+  <n-button v-if="userStore.userInfo.username===''" @click="loginOrReg"> 登录/注册</n-button>
+  <n-dropdown trigger="hover" :options="options" @select="handleSelect" v-else>
     <n-button text>
       <n-avatar
           round
           :size="36"
       >
-        旺财
+        {{ userStore.userInfo.username }}
       </n-avatar>
       <div style="width: 5px"></div>
-      旺财
+      {{ userStore.userInfo.username }}
     </n-button>
   </n-dropdown>
 </template>

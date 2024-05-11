@@ -39,7 +39,7 @@ dayInfoList.push({title: "start"})
 dayInfoList.unshift({title: "end", type: "success"});
 </script>
 <template>
-  <n-card style="margin:0 auto">
+  <n-card style="margin:0 auto" :bordered="false">
     <n-space>
       <n-grid>
         <n-gi span="24">

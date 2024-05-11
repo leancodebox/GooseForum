@@ -25,12 +25,7 @@ type RegReq struct {
 	InvitationCode string `json:"invitationCode"`
 }
 
-// Register
-// @todo user表增加验证字段
-// 创建后验证码存入redis，发认证送邮件。
-// 邮件 附有 url?code=xxx
-// 验证后更新验证字段
-// 清除验证码
+// Register 注册
 func Register(r RegReq) component.Response {
 	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
 	err := users.Create(userEntity)
@@ -43,8 +38,8 @@ func Register(r RegReq) component.Response {
 		return component.FailResponse(cast.ToString(err))
 	}
 	return component.SuccessResponse(component.DataMap{
-		"message": "ok",
-		"token":   token,
+		"username": userEntity.Username,
+		"token":    token,
 	})
 }
 
@@ -70,8 +65,8 @@ func Login(r LoginReq) component.Response {
 		return component.FailResponse("验证失败")
 	}
 	return component.SuccessResponse(component.DataMap{
-		"message": "ok",
-		"token":   token,
+		"username": userEntity.Username,
+		"token":    token,
 	})
 }
 

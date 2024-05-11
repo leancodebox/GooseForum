@@ -1,5 +1,5 @@
 <script setup>
-import {NAutoComplete, NButton, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu} from 'naive-ui';
+import {NAutoComplete, NButton, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu,NText} from 'naive-ui';
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from '@/utils/composables';
 
 import {FastFoodOutline as CashIcon, FishOutline, InfiniteOutline} from '@vicons/ionicons5'
@@ -20,7 +20,7 @@ const menuOptions = [
   {
     label: () => h(RouterLink, {to: {path: "/home/index",}},
         {
-          default: () => "index"
+          default: () => "首页"
         }
     ),
     key: "index",
@@ -29,7 +29,7 @@ const menuOptions = [
   }, {
     label: () => h(RouterLink, {to: {path: "/home/bbs",}},
         {
-          default: () => "bbs"
+          default: () => "论坛"
         }
     ),
     key: "bbs",
@@ -38,7 +38,7 @@ const menuOptions = [
   }, {
     label: () => h(RouterLink, {to: {path: "/home/about",}},
         {
-          default: () => "about"
+          default: () => "关于"
         }
     ),
     key: "about",

@@ -1,17 +1,40 @@
 <script setup>
-import {NButton, NCard, NForm, NFormItemRow, NGrid, NGridItem, NInput, NTabPane, NTabs} from "naive-ui"
+import {NButton, NCard, NForm, NFormItemRow, NGrid, NGridItem, NInput, NTabPane, NTabs, useMessage} from "naive-ui"
 import {ref} from "vue"
 import {useUserStore} from "@/modules/user";
+import {login, reg} from "@/service/request";
+import router from "@/route/router"
 
-let loginUsername = ref("")
-let loginPassword = ref("")
+const message = useMessage()
+
+let loginInfo = ref({
+  email: "",
+  password: "",
+})
+
+let regInfo = ref({
+  email: "",
+  username: "",
+  password: "",
+  repeatPassword: "",
+})
+
 const userStore = useUserStore()
 
-function login() {
-  userStore.login(loginUsername.value, loginPassword.value)
+async function loginAction() {
+  let res = await login(loginInfo.value.email, loginInfo.value.password)
+  userStore.login(res.result)
+  router.push({path: "/home/bbs"})
 }
-function regAction(){
-    userStore.login(loginUsername.value, loginPassword.value)
+
+async function regAction() {
+  if (regInfo.value.password !== regInfo.value.repeatPassword) {
+    message.error("两次密码不相等")
+    return
+  }
+  let res = await reg(regInfo.value.email, regInfo.value.username, regInfo.value.password)
+  userStore.login(res.result)
+  router.push({path: "/home/bbs"})
 }
 </script>
 
@@ -31,29 +54,32 @@ function regAction(){
           <n-tab-pane name="signin" tab="登录">
             <n-form>
               <n-form-item-row label="用户名">
-                <n-input v-model:value="loginUsername"/>
+                <n-input v-model:value="loginInfo.email"/>
               </n-form-item-row>
               <n-form-item-row label="密码">
-                <n-input v-model:value="loginPassword"/>
+                <n-input v-model:value="loginInfo.password" type="password"/>
               </n-form-item-row>
             </n-form>
-            <n-button type="primary" @click="login" block secondary strong>
+            <n-button type="primary" @click="loginAction" block secondary strong>
               登录
             </n-button>
           </n-tab-pane>
           <n-tab-pane name="signup" tab="注册">
             <n-form>
+              <n-form-item-row label="邮箱">
+                <n-input v-model:value="regInfo.email"/>
+              </n-form-item-row>
               <n-form-item-row label="用户名">
-                <n-input/>
+                <n-input v-model:value="regInfo.username"/>
               </n-form-item-row>
               <n-form-item-row label="密码">
-                <n-input/>
+                <n-input v-model:value="regInfo.password" type="password"/>
               </n-form-item-row>
               <n-form-item-row label="重复密码">
-                <n-input/>
+                <n-input v-model:value="regInfo.repeatPassword" type="password"/>
               </n-form-item-row>
             </n-form>
-            <n-button type="primary" block secondary strong>
+            <n-button type="primary" @click="regAction" block secondary strong>
               注册
             </n-button>
           </n-tab-pane>

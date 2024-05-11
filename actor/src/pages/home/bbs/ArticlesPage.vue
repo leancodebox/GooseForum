@@ -23,7 +23,6 @@ let maxCommentId = 0
 
 function getArticlesDetail() {
     getArticlesDetailApi(id, maxCommentId).then(r => {
-        console.log(r.result.articleTitle)
         if (r.result.articleContent !== undefined && r.result.articleContent !== "") {
             articleInfo.value = {
                 title: r.result.articleTitle,

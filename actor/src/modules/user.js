@@ -1,30 +1,24 @@
-import {login as loginApi,reg as regApi} from "@/service/request";
 import {ref, watch} from "vue"
 import {defineStore} from "pinia";
-import router from "@/route/router"
 
 export const useUserStore = defineStore('user', () => {
-    const userInfo = ref({
-        uuid: '',
-        nickName: '',
-    })
-    const token = ref(window.localStorage.getItem('token') || '')
-
-    function login(username, password) {
-        loginApi(username, password).then(r => {
-            token.value = r.result.token
-            router.push({name: 'bbs', replace: true})
-        })
+    let userInfoData = window.localStorage.getItem('userInfo')
+    const userInfo = ref({username: ''})
+    if (userInfoData !== undefined) {
+        let pData = JSON.parse(userInfoData)
+        if (pData) {
+            userInfo.username = pData.username || ""
+        }
     }
+    const token = ref(window.localStorage.getItem('token') || "")
 
-    function reg(username, password, email) {
-        regApi(email, username, password).then(r => {
-            token.value = r.result.token
-            router.push({name: 'bbs', replace: true})
-        })
+    function login(userData) {
+        userInfo.value.username = userData.username
+        token.value = userData.token
     }
 
     function layout() {
+        userInfo.value = null
         token.value = ''
         sessionStorage.clear()
         localStorage.clear()
@@ -33,14 +27,14 @@ export const useUserStore = defineStore('user', () => {
     watch(() => token.value, () => {
         window.localStorage.setItem('token', token.value)
     })
-    function updateToken(newToken){
-        token.value = newToken
-    }
+
+    watch(() => userInfo.value, () => {
+        userInfo.value = JSON.stringify(userInfo.value)
+    })
 
     return {
         userInfo,
         token,
-        login,
-        updateToken
+        login
     }
 })

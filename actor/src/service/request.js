@@ -48,7 +48,7 @@ instanceAxios.interceptors.response.use(response => {
             return res;
         case fail:
             message.error(res.msg ? res.msg : "响应异常")
-            return res;
+            throw new Error(res.msg ? res.msg : "响应异常")
     }
     return response
 })
