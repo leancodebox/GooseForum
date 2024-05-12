@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import {
     NButton,
     NCard,
@@ -7,80 +7,76 @@ import {
     NIcon,
     NSpace,
     NStatistic,
-    useMessage
+    useMessage,
+    NDataTable
 } from 'naive-ui'
-import {ref} from 'vue'
-import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
-import {getUserInfo} from "@/service/request"
-import CpTool from "@/pages/manager/tool/CpTool.vue";
+import type { DataTableColumns } from 'naive-ui'
+import {h, ref} from 'vue'
 
 const message = useMessage()
-const listData = ref([
+type Song = {
+  no: number
+  title: string
+  length: string
+}
+const data: Song[] = [
+  { no: 3, title: 'Wonderwall', length: '4:18' },
+  { no: 4, title: "Don't Look Back in Anger", length: '4:48' },
+  { no: 12, title: 'Champagne Supernova', length: '7:27' }
+]
+
+
+const createColumns = ({
+                         play
+                       }: {
+  play: (row: Song) => void
+}): DataTableColumns<Song> => {
+  return [
     {
-        title: "title1",
-        tag: ["tag1", "tag2"],
-        body: "bodybodybodybodybodybodybody"
+      title: 'No',
+      key: 'no'
+    },
+    {
+      title: 'Title',
+      key: 'title'
+    },
+    {
+      title: 'Length',
+      key: 'length'
+    },
+    {
+      title: 'Action',
+      key: 'actions',
+      render (row) {
+        return h(
+            NButton,
+            {
+              strong: true,
+              tertiary: true,
+              size: 'small',
+              onClick: () => play(row)
+            },
+            { default: () => 'Play' }
+        )
+      }
     }
-])
-
-const isMobileRef = useIsMobile()
-const isTabletRef = useIsTablet()
-const isSmallDesktop = useIsSmallDesktop()
-
-const isMobile = useIsMobile()
-
-
-let sessionStorageData = ref("")
-let localStorageData = ref("")
-
-
-function set() {
-    let localTmp = localStorage.getItem("tmp")
-    localStorage.setItem("tmp", (Number(localTmp) + 1).toString())
-    let sessionTmp = sessionStorage.getItem("tmp")
-    sessionStorage.setItem("tmp", (Number(sessionTmp) + 1).toString())
-    sessionStorageData.value = JSON.stringify(sessionStorage)
-    localStorageData.value = JSON.stringify(localStorage)
+  ]
 }
-
-function showNew() {
-    sessionStorageData.value = JSON.stringify(sessionStorage)
-    localStorageData.value = JSON.stringify(localStorage)
-}
-
-function getUserInfoAction() {
-    getUserInfo().then(r => {
-        message.success(JSON.stringify(r.result))
-    })
-}
-
-const mdData = ref("# h1")
+let columns =  createColumns({
+  play (row: Song) {
+    message.info(`Play ${row.title}`)
+  }
+})
+let pagination =  true
 </script>
 <template>
     <n-space vertical>
-        <n-card>
-            <cp-tool></cp-tool>
-        </n-card>
-        <n-card>
-            <n-button @click="getUserInfoAction"> 获取用户信息</n-button>
-        </n-card>
-        <n-card title="统计数据">
-            <n-grid>
-                <n-grid-item :span="12">
-                    <n-statistic label="统计数据" :value="99">
-                        <template #prefix>
-                            <n-icon>
-
-                            </n-icon>
-                        </template>
-                        <template #suffix>/ 100</template>
-                    </n-statistic>
-                </n-grid-item>
-                <n-grid-item :span="12">
-                    <n-statistic label="活跃用户">1,234,123</n-statistic>
-                </n-grid-item>
-            </n-grid>
-        </n-card>
+      <n-data-table
+          :columns="columns"
+          :data="data"
+          :pagination="pagination"
+          :bordered="false"
+      />
     </n-space>
 </template>
 <style>

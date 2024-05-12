@@ -89,6 +89,7 @@ export function getArticlesDetailApi(id, maxCommentId) {
     })
 }
 
-export function getSysInfo() {
-    return instanceAxios.get("/sys-info")
+export function getUserList() {
+    return instanceAxios.post("admin/user-list")
 }
+

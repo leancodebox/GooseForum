@@ -31,4 +31,7 @@ func ginBBS(ginApp *gin.Engine) {
 	// 申请展示 todo
 	bbsAuth.POST("apply-show", UpButterReq(controllers.ApplyShow))
 
+	admin := ginApp.Group("api/admin").Use(middleware.JWTAuth4Gin)
+	admin.POST("user-list", UpButterReq(controllers.UserList))
+
 }

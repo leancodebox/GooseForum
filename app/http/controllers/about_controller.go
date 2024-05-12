@@ -2,15 +2,10 @@ package controllers
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/bundles/logging"
-	"github.com/leancodebox/GooseForum/bundles/serverinfo"
 	"net/http"
-	"runtime"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/spf13/cast"
 )
 
 func Api(c *gin.Context) {
@@ -37,34 +32,8 @@ func NotFound(c *gin.Context) {
 	})
 }
 
-func GetUseMem() component.Response {
-	var m runtime.MemStats
-	runtime.ReadMemStats(&m)
-	return component.SuccessResponse(cast.ToString(m.Alloc/1024) + "KB")
-}
-
 func About() component.Response {
 	return component.SuccessResponse(component.DataMap{
 		"message": "Hello~ Now you see a json from gin",
 	})
-}
-
-func SysInfo() component.Response {
-	var s serverinfo.Server
-	var err error
-	s.Os = serverinfo.InitOS()
-	if s.Cpu, err = serverinfo.InitCPU(); err != nil {
-		logging.ErrIf(err)
-
-	}
-
-	if s.Ram, err = serverinfo.InitRAM(); err != nil {
-		logging.ErrIf(err)
-	}
-
-	if s.Disk, err = serverinfo.InitDisk(); err != nil {
-		logging.ErrIf(err)
-	}
-
-	return component.SuccessResponse(s)
 }

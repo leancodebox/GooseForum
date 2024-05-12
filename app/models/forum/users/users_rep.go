@@ -42,3 +42,52 @@ func GetByUsername(username string) (entities *Entity) {
 	builder().Where(queryopt.Eq(fieldUsername, username)).First(entities)
 	return
 }
+
+type PageQuery struct {
+	Page, PageSize int
+	Username       string
+	UserId         uint64
+	Email          string
+}
+
+func Page(q PageQuery) struct {
+	Page     int
+	PageSize int
+	Total    int64
+	Data     []Entity
+} {
+	var list []Entity
+	if q.Page > 0 {
+		q.Page -= 1
+	} else {
+		q.Page = 0
+	}
+	if q.PageSize < 1 {
+		q.PageSize = 10
+	}
+	b := builder()
+	cB := builder()
+	if q.Username != "" {
+		b.Where(queryopt.Like(fieldUsername, q.Username))
+		cB.Where(queryopt.Like(fieldUsername, q.Username))
+	}
+	if q.Email != "" {
+		b.Where(queryopt.Like(fieldEmail, q.Email))
+		cB.Where(queryopt.Like(fieldEmail, q.Email))
+	}
+	if q.UserId != 0 {
+		b.Where(queryopt.Eq(pid, q.UserId))
+		cB.Where(queryopt.Eq(pid, q.UserId))
+	}
+	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order(queryopt.Desc(pid)).Find(&list)
+
+	var total int64
+	cB.Count(&total)
+
+	return struct {
+		Page     int
+		PageSize int
+		Total    int64
+		Data     []Entity
+	}{Page: q.Page, PageSize: q.PageSize, Data: list, Total: total}
+}
