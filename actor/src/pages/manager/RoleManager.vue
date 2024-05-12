@@ -23,24 +23,20 @@ let columns = [
     key: 'userId'
   },
   {
-    title: 'username',
-    key: 'username'
+    title: '角色',
+    key: 'role',
   },
   {
-    title: 'email',
-    key: 'email'
-  },
-  {
-    title: '创建时间',
-    key: 'createTime'
+    title: '权限点',
+    key: 'permission'
   },
   {
     title: '状态',
     key: 'status'
   },
   {
-    title: '积分',
-    key: 'ponits'
+    title: '创建时间',
+    key: 'createTime'
   },
   {
     title: 'Action',
@@ -79,7 +75,7 @@ let columns = [
                 message.info(`Play ${row.username}`)
               }
             },
-            {default: () => '重置密码'}
+            {default: () => '删除'}
         )
       ]
     }

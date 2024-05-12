@@ -13,16 +13,11 @@ function getUserInfoAction() {
 </script>
 <template>
   <n-space vertical>
-    <n-card>
-      <cp-tool></cp-tool>
-    </n-card>
-    <n-card>
-      <n-button @click="getUserInfoAction"> 获取用户信息</n-button>
-    </n-card>
+
     <n-card title="统计数据">
       <n-grid>
         <n-grid-item :span="12">
-          <n-statistic label="统计数据" :value="99">
+          <n-statistic label="文章/总数(包含草稿)" :value="99">
             <template #prefix>
               <n-icon>
 
@@ -32,9 +27,15 @@ function getUserInfoAction() {
           </n-statistic>
         </n-grid-item>
         <n-grid-item :span="12">
-          <n-statistic label="活跃用户">1,234,123</n-statistic>
+          <n-statistic label="用户数量">1,234,123</n-statistic>
         </n-grid-item>
       </n-grid>
+    </n-card>
+    <n-card title="复制">
+      <cp-tool></cp-tool>
+    </n-card>
+    <n-card title="查看当前用户信息">
+      <n-button @click="getUserInfoAction"> 获取用户信息</n-button>
     </n-card>
   </n-space>
 </template>

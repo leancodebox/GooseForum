@@ -1,17 +1,7 @@
 <script setup lang="ts">
-import {
-    NButton,
-    NCard,
-    NGrid,
-    NGridItem,
-    NIcon,
-    NSpace,
-    NStatistic,
-    useMessage,
-    NDataTable
-} from 'naive-ui'
-import type { DataTableColumns } from 'naive-ui'
-import {h, ref} from 'vue'
+import type {DataTableColumns} from 'naive-ui'
+import {NButton, NDataTable, NSpace, useMessage} from 'naive-ui'
+import {h} from 'vue'
 
 const message = useMessage()
 type Song = {
@@ -20,9 +10,9 @@ type Song = {
   length: string
 }
 const data: Song[] = [
-  { no: 3, title: 'Wonderwall', length: '4:18' },
-  { no: 4, title: "Don't Look Back in Anger", length: '4:48' },
-  { no: 12, title: 'Champagne Supernova', length: '7:27' }
+  {no: 3, title: 'Wonderwall', length: '4:18'},
+  {no: 4, title: "Don't Look Back in Anger", length: '4:48'},
+  {no: 12, title: 'Champagne Supernova', length: '7:27'}
 ]
 
 
@@ -41,14 +31,22 @@ const createColumns = ({
       key: 'title'
     },
     {
-      title: 'Length',
+      title: '文章状态',
+      key: 'status'
+    },
+    {
+      title: '创建时间',
+      key: 'length'
+    },
+    {
+      title: '修改时间',
       key: 'length'
     },
     {
       title: 'Action',
       key: 'actions',
-      render (row) {
-        return h(
+      render(row) {
+        return [h(
             NButton,
             {
               strong: true,
@@ -56,33 +54,43 @@ const createColumns = ({
               size: 'small',
               onClick: () => play(row)
             },
-            { default: () => 'Play' }
-        )
+            {default: () => '冻结'}
+        ),
+          h(
+              NButton,
+              {
+                strong: true,
+                tertiary: true,
+                size: 'small',
+                onClick: () => play(row)
+              },
+              {default: () => '查看'}
+          )]
       }
     }
   ]
 }
-let columns =  createColumns({
-  play (row: Song) {
+let columns = createColumns({
+  play(row: Song) {
     message.info(`Play ${row.title}`)
   }
 })
-let pagination =  true
+let pagination = true
 </script>
 <template>
-    <n-space vertical>
-      <n-data-table
-          :columns="columns"
-          :data="data"
-          :pagination="pagination"
-          :bordered="false"
-      />
-    </n-space>
+  <n-space vertical>
+    <n-data-table
+        :columns="columns"
+        :data="data"
+        :pagination="pagination"
+        :bordered="false"
+    />
+  </n-space>
 </template>
 <style>
 .carousel-img {
-    width: 100%;
-    height: 240px;
-    object-fit: cover;
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
 }
 </style>
