@@ -27,6 +27,7 @@ const fieldCreatedAt = "created_at"
 type Entity struct {
 	Id         uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                               //
 	OptUserId  uint64    `gorm:"column:opt_user_id;type:bigint unsigned;not null;default:0;" json:"optUserId"`         //
+	OptType    int       `gorm:"column:opt_type;type:int;not null;default:0;" json:"optType"`                          //
 	TargetType int       `gorm:"column:target_type;type:int;not null;default:0;" json:"targetType"`                    //
 	TargetId   string    `gorm:"column:target_id;type:varchar(255);not null;default:'';" json:"targetId"`              //
 	OptInfo    string    `gorm:"column:opt_info;type:text;" json:"optInfo"`                                            //

@@ -1,6 +1,6 @@
 package optRecord
 
-func create(entity *Entity) int64 {
+func Create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
 }
@@ -12,7 +12,7 @@ func save(entity *Entity) int64 {
 
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
-		return create(entity)
+		return Create(entity)
 	} else {
 		return save(entity)
 	}
