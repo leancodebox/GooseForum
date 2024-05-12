@@ -31,8 +31,8 @@ let columns = [
     key: 'email'
   },
   {
-    title: '角色',
-    key: 'role'
+    title: '创建时间',
+    key: 'createTime'
   },
   {
     title: '状态',
@@ -41,10 +41,6 @@ let columns = [
   {
     title: '积分',
     key: 'ponits'
-  },
-  {
-    title: '创建时间',
-    key: 'createTime'
   },
   {
     title: 'Action',

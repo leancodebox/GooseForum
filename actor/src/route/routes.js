@@ -1,12 +1,13 @@
 import sun from "@/pages/HomePage.vue";
 import moon from "@/pages/AllManager.vue";
-import {CogOutline, DocumentsOutline, HammerOutline, PeopleOutline, ReceiptOutline} from '@vicons/ionicons5'
+import {CogOutline, DocumentsOutline, HammerOutline, PeopleOutline, ReceiptOutline,HappyOutline} from '@vicons/ionicons5'
 
 
 let allTool = () => import("@/pages/manager/AllTool.vue")
 let articlesManager = () => import("@/pages/manager/ArticlesManager.vue")
 let pageManager = () => import("@/pages/manager/PageManager.vue")
 let userManager = () => import("@/pages/manager/UserManager.vue")
+let roleManager = () => import("@/pages/manager/RoleManager.vue")
 let optLog = () => import("@/pages/manager/OptLog.vue")
 
 let about = () => import("@/pages/home/AboutPage.vue")
@@ -23,6 +24,7 @@ export let managerRouter = {
         {showName: '', path: '', component: allTool, belongMenu: false},
         {showName: '工具', path: 'allTool', component: allTool, belongMenu: true, icon: HammerOutline},
         {showName: '用户管理', path: 'userManager', component: userManager, belongMenu: true, icon: PeopleOutline},
+        {showName: '角色管理', path: 'roleManager', component: roleManager, belongMenu: true, icon: HappyOutline},
         {
             showName: '文章管理',
             path: 'articlesManager',
