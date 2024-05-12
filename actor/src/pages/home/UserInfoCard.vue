@@ -18,6 +18,7 @@ let handleSelect = function (key) {
 let loginOrReg = function (){
   router.push({ path: '/login' })
 }
+console.log(userStore.userInfo.username)
 </script>
 
 <template>

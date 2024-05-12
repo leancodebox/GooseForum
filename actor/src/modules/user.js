@@ -2,19 +2,26 @@ import {ref, watch} from "vue"
 import {defineStore} from "pinia";
 
 export const useUserStore = defineStore('user', () => {
-    let userInfoData = window.localStorage.getItem('userInfo')
+
     const userInfo = ref({username: ''})
-    if (userInfoData !== undefined) {
+    let userInfoData = window.localStorage.getItem('userInfo') || ""
+
+    if (userInfoData !== "") {
         let pData = JSON.parse(userInfoData)
         if (pData) {
-            userInfo.username = pData.username || ""
+            userInfo.value.username = pData.username || ""
         }
     }
     const token = ref(window.localStorage.getItem('token') || "")
 
+    function saveUserInfo() {
+        window.localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
+    }
+
     function login(userData) {
         userInfo.value.username = userData.username
         token.value = userData.token
+        saveUserInfo()
     }
 
     function layout() {
@@ -26,10 +33,6 @@ export const useUserStore = defineStore('user', () => {
 
     watch(() => token.value, () => {
         window.localStorage.setItem('token', token.value)
-    })
-
-    watch(() => userInfo.value, () => {
-        userInfo.value = JSON.stringify(userInfo.value)
     })
 
     return {
