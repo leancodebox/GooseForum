@@ -9,8 +9,8 @@ const tableName = "role_permission_rs"
 // pid
 const pid = "id"
 
-// fieldUserId
-const fieldUserId = "user_id"
+// fieldRoleId
+const fieldRoleId = "role_id"
 
 // fieldPermissionId
 const fieldPermissionId = "permission_id"
@@ -29,7 +29,7 @@ const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
 	Id           uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                               //
-	UserId       uint64     `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`                //
+	RoleId       uint64     `gorm:"column:role_id;type:bigint unsigned;not null;default:0;" json:"roleId"`                //
 	PermissionId uint64     `gorm:"column:permission_id;type:bigint unsigned;not null;default:0;" json:"permissionId"`    //
 	Effective    int        `gorm:"column:effective;type:int;not null;default:0;" json:"effective"`                       //
 	CreatedAt    time.Time  `gorm:"column:created_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"createdAt"` //

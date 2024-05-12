@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/role"
+	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	array "github.com/leancodebox/goose/collectionopt"
@@ -21,13 +23,6 @@ type UserItem struct {
 }
 
 func UserList(req component.BetterRequest[UserListReq]) component.Response {
-	user, err := req.GetUser()
-	if err != nil {
-		return component.FailResponse(err.Error())
-	}
-	if permission.CheckUser(user.Id, permission.UserManager) == false {
-		return component.FailResponse("权限不足")
-	}
 	var pageData = users.Page(users.PageQuery{
 		Username: req.Params.Username,
 		UserId:   req.Params.UserId,
@@ -41,6 +36,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			CreateTime: t.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
 	}, pageData.Data)
+	// todo
 	return component.SuccessResponse(map[string]any{
 		"list":  list,
 		"size":  pageData.PageSize,
@@ -53,43 +49,74 @@ type EditUserReq struct {
 }
 
 func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
-	user, err := req.GetUser()
-	if err != nil {
-		return component.FailResponse(err.Error())
-	}
-	if permission.CheckUser(user.Id, permission.UserManager) == false {
-		return component.FailResponse("权限不足")
-	}
 	return component.SuccessResponse("")
-
 }
 
 type ArticlesListReq struct {
 }
 
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
-	user, err := req.GetUser()
-	if err != nil {
-		return component.FailResponse(err.Error())
-	}
-	if permission.CheckUser(user.Id, permission.ArticlesManager) == false {
-		return component.FailResponse("权限不足")
-	}
 	return component.SuccessResponse("")
-
 }
 
 type EditArticleReq struct {
 }
 
 func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response {
-	user, err := req.GetUser()
-	if err != nil {
-		return component.FailResponse(err.Error())
-	}
-	if permission.CheckUser(user.Id, permission.ArticlesManager) == false {
-		return component.FailResponse("权限不足")
-	}
 	return component.SuccessResponse("")
+}
 
+type RoleListReq struct {
+}
+
+type RoleItem struct {
+	RoleId      uint64           `json:"roleId"`
+	RoleName    string           `json:"roleName"`
+	Permissions []PermissionItem `json:"permissions"`
+	CreateTime  string           `json:"createTime"`
+}
+
+type PermissionItem struct {
+	Id   uint64 `json:"id"`
+	Name string `json:"name"`
+}
+
+func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
+	pageData := role.Page(role.PageQuery{})
+	roleIds := array.ArrayMap(func(t role.Entity) uint64 {
+		return t.Id
+	}, pageData.Data)
+	rpGroup := make(map[uint64][]uint64)
+	if len(roleIds) > 0 {
+		rpGroup = rolePermissionRs.GetRsGroupByRoleIds(roleIds)
+	}
+	list := array.ArrayMap(func(t role.Entity) RoleItem {
+		pList, ok := rpGroup[t.Id]
+		permissionItemList := make([]PermissionItem, 0)
+		if ok {
+			permissionItemList = array.ArrayMap(func(t uint64) PermissionItem {
+				p := permission.Enum(t)
+				return PermissionItem{Id: p.Id(), Name: p.Name()}
+			}, pList)
+		}
+		return RoleItem{
+			RoleId:      t.Id,
+			RoleName:    t.RoleName,
+			Permissions: permissionItemList,
+			CreateTime:  t.CreatedAt.Format("2006-01-02 15:04:05"),
+		}
+	}, pageData.Data)
+
+	return component.SuccessResponse(component.DataMap{
+		"list":  list,
+		"size":  pageData.PageSize,
+		"total": pageData.Total,
+	})
+}
+
+type RoleSaveReq struct {
+}
+
+func RoleSave(req component.BetterRequest[RoleSaveReq]) component.Response {
+	return component.SuccessResponse("")
 }

@@ -10,11 +10,10 @@ type UserItem = {
   username: string | null
   email: string | null
   createTime: string | null
+  roleList: any
   status: string | null
 }
-const data: Ref<UnwrapRef<UserItem[]>> = ref([
-  {userId: 3, username: '张三', email: '4:18', createTime: "", status: ""},
-])
+const data: Ref<UnwrapRef<UserItem[]>> = ref([])
 
 
 let columns = [
@@ -91,9 +90,8 @@ let columns = [
 ]
 getUserList().then(r => {
   data.value = r.result.list.map(item => {
-    return {userId: item.userId, username: item.username, email: item.email,createTime:item.createTime, status: ""}
+    return {userId: item.userId, username: item.username, email: item.email, createTime: item.createTime, status: ""}
   })
-  // console.log(r)
 })
 let pagination = true
 </script>

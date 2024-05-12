@@ -143,20 +143,6 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	return component.SuccessResponse(map[string]any{})
 }
 
-type ArticleCommentReq struct {
-	ArticleId uint64 `json:"articleId"`
-	Comment   string `json:"comment"`
-}
-
-// ArticleComment 文章添加评论
-func ArticleComment(req component.BetterRequest[ArticleCommentReq]) component.Response {
-	if articles.Get(req.Params.ArticleId).Id == 0 {
-		return component.FailResponse("文章不存在")
-	}
-	comment.Save(&comment.Entity{Content: req.Params.Comment, UserId: req.UserId})
-	return component.SuccessResponse(true)
-}
-
 type ArticleReplyId struct {
 	ArticleId uint64 `json:"articleId"`
 	Comment   string `json:"comment"`

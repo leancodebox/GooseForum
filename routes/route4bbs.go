@@ -1,10 +1,10 @@
 package routes
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
-
-	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/service/permission"
 )
 
 func ginBBS(ginApp *gin.Engine) {
@@ -22,8 +22,6 @@ func ginBBS(ginApp *gin.Engine) {
 	bbsAuth := bbs.Use(middleware.JWTAuth4Gin)
 	// 发布文章
 	bbsAuth.POST("write-articles", UpButterReq(controllers.WriteArticles))
-	//发布评论 todo clean code
-	//bbsAuth.POST("articles-comment", ginUpP(controllers.ArticleComment))
 	// 回复文章
 	bbsAuth.POST("articles-reply", UpButterReq(controllers.ArticleReply))
 	// 回复评论
@@ -32,6 +30,11 @@ func ginBBS(ginApp *gin.Engine) {
 	bbsAuth.POST("apply-show", UpButterReq(controllers.ApplyShow))
 
 	admin := ginApp.Group("api/admin").Use(middleware.JWTAuth4Gin)
-	admin.POST("user-list", UpButterReq(controllers.UserList))
+	admin.POST("user-list", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.UserList))
+	admin.POST("user-edit", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.EditUser))
+	admin.POST("articles-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.ArticlesList))
+	admin.POST("article-edit", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.EditArticle))
+	admin.POST("role-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.RoleList))
+	admin.POST("role-save", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.RoleSave))
 
 }

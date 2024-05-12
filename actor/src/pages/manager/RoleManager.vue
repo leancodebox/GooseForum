@@ -1,34 +1,52 @@
 <script setup lang="ts">
-import {NButton, NDataTable, NSpace, useMessage} from 'naive-ui'
+import {NButton, NDataTable, NSpace, NTag, useMessage} from 'naive-ui'
 import {h, ref} from 'vue'
-import {getUserList} from '@/service/request'
+import {getRoleList} from '@/service/request'
 import {Ref, UnwrapRef} from "@vue/reactivity";
 
 const message = useMessage()
-type UserItem = {
-  userId: number | null
-  username: string | null
-  email: string | null
-  createTime: string | null
+type RoleItem = {
+  roleId: number | null
+  roleName: string | null
+  permissions: any
   status: string | null
+  createTime: string | null
 }
-const data: Ref<UnwrapRef<UserItem[]>> = ref([
-  {userId: 3, username: '张三', email: '4:18', createTime: "", status: ""},
-])
+const data: Ref<UnwrapRef<RoleItem[]>> = ref([])
 
 
 let columns = [
   {
     title: 'id',
-    key: 'userId'
+    key: 'roleId'
   },
   {
     title: '角色',
-    key: 'role',
+    key: 'roleName',
   },
   {
     title: '权限点',
-    key: 'permission'
+    key: 'permissions',
+    render(row: RoleItem) {
+      if (!row.permissions) {
+        return []
+      }
+      let res = []
+      for (const rowKey in row.permissions) {
+        console.log(rowKey, row.permissions[rowKey])
+        res.push(h(
+            NTag,
+            {
+              strong: true,
+              tertiary: true,
+              size: 'small',
+            },
+            {default: () => row.permissions[rowKey].name}
+        ))
+      }
+      return res
+
+    }
   },
   {
     title: '状态',
@@ -39,9 +57,9 @@ let columns = [
     key: 'createTime'
   },
   {
-    title: 'Action',
+    title: '操作',
     key: 'actions',
-    render(row: UserItem) {
+    render(row: RoleItem) {
       return [h(
           NButton,
           {
@@ -49,21 +67,10 @@ let columns = [
             tertiary: true,
             size: 'small',
             onClick: () => {
-              message.info(`Play ${row.username}`)
+              message.info(`Play ${row.roleName}`)
             }
           },
           {default: () => '编辑'}
-      ), h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => {
-              message.info(`Play ${row.username}`)
-            }
-          },
-          {default: () => '冻结'}
       ),
         h(
             NButton,
@@ -72,7 +79,7 @@ let columns = [
               tertiary: true,
               size: 'small',
               onClick: () => {
-                message.info(`Play ${row.username}`)
+                message.info(`Play ${row.roleName}`)
               }
             },
             {default: () => '删除'}
@@ -81,10 +88,8 @@ let columns = [
     }
   }
 ]
-getUserList().then(r => {
-  data.value = r.result.list.map(item => {
-    return {userId: item.userId, username: item.username, email: item.email,createTime:item.createTime, status: ""}
-  })
+getRoleList().then(r => {
+  data.value = r.result.list
   // console.log(r)
 })
 let pagination = true

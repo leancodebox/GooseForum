@@ -51,6 +51,17 @@ instanceAxios.interceptors.response.use(response => {
             throw new Error(res.msg ? res.msg : "响应异常")
     }
     return response
+}, error => {
+    const res = error.response.data
+    if (res === undefined || res.code === undefined) {
+        console.error(error)
+        return
+    }
+    if (res.code === fail) {
+        message.error(res.msg ? res.msg : "响应异常")
+        return
+    }
+    console.error(error)
 })
 
 export function getUserInfo() {
@@ -91,5 +102,9 @@ export function getArticlesDetailApi(id, maxCommentId) {
 
 export function getUserList() {
     return instanceAxios.post("admin/user-list")
+}
+
+export function getRoleList() {
+    return instanceAxios.post("admin/role-list")
 }
 
