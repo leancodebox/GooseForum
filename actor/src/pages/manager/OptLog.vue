@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import {NButton, NDataTable, NSpace, useMessage} from 'naive-ui'
-import {h, ref} from 'vue'
+import {NButton, NCard, NDataTable, NForm, NFormItem, NInput, NSelect, NSpace, useMessage} from 'naive-ui'
+import {ref} from 'vue'
 import {getUserList} from '@/service/request'
 import {Ref, UnwrapRef} from "@vue/reactivity";
+
+let searchInfo = ref({
+  optUserId: "",
+  optType: "0",
+  targetType: "0",
+  targetId: "",
+})
 
 const message = useMessage()
 type UserItem = {
@@ -23,78 +30,81 @@ let columns = [
     key: 'userId'
   },
   {
-    title: 'username',
+    title: '操作人',
     key: 'username'
   },
   {
-    title: 'email',
+    title: '操作类型',
     key: 'email'
   },
   {
-    title: '创建时间',
+    title: '目标类型',
+    key: 'targetType'
+  },
+  {
+    title: '目标id',
+    key: 'targetId'
+  },
+  {
+    title: '操作信息',
+    key: 'optInfo'
+  },
+  {
+    title: '操作时间',
     key: 'createTime'
   },
-  {
-    title: '状态',
-    key: 'status'
-  },
-  {
-    title: '积分',
-    key: 'ponits'
-  },
-  {
-    title: 'Action',
-    key: 'actions',
-    render(row: UserItem) {
-      return [h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => {
-              message.info(`Play ${row.username}`)
-            }
-          },
-          {default: () => '编辑'}
-      ), h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => {
-              message.info(`Play ${row.username}`)
-            }
-          },
-          {default: () => '冻结'}
-      ),
-        h(
-            NButton,
-            {
-              strong: true,
-              tertiary: true,
-              size: 'small',
-              onClick: () => {
-                message.info(`Play ${row.username}`)
-              }
-            },
-            {default: () => '重置密码'}
-        )
-      ]
-    }
-  }
 ]
 getUserList().then(r => {
   data.value = r.result.list.map(item => {
-    return {userId: item.userId, username: item.username, email: item.email,createTime:item.createTime, status: ""}
+    return {userId: item.userId, username: item.username, email: item.email, createTime: item.createTime, status: ""}
   })
   // console.log(r)
 })
+
+let options = [
+  {
+    label: '无',
+    value: '0'
+  },
+  {
+    label: '用户',
+    value: '1'
+  },
+];
 let pagination = true
 </script>
 <template>
   <n-space vertical>
+    <n-card :bordered="false">
+      <n-form
+          ref="formRef"
+          inline
+          :label-width="80"
+          :size="'small'"
+      >
+        <n-form-item label="操作人id" path="user.age" style="min-width:160px">
+          <n-input :value="searchInfo.optUserId" placeholder="操作人id"/>
+        </n-form-item>
+
+        <n-form-item label="操作类型" path="user.age" style="min-width:160px">
+          <n-select v-model:value="searchInfo.optType" :options="options"/>
+        </n-form-item>
+
+        <n-form-item label="目标类型" path="user.age" style="min-width: 120px">
+          <n-select  v-model:value="searchInfo.targetType" :options="options"/>
+        </n-form-item>
+
+        <n-form-item label="目标id" path="user.age">
+          <n-input v-model:value="searchInfo.targetId"  placeholder="输入编号"/>
+        </n-form-item>
+
+        <n-form-item>
+          <n-button attr-type="button" type="primary">
+            搜索
+          </n-button>
+        </n-form-item>
+      </n-form>
+    </n-card>
     <n-data-table
         :columns="columns"
         :data="data"

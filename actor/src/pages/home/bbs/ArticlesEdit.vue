@@ -32,35 +32,6 @@ let options = [
   {
     label: 'Think For Yourself',
     value: 'song5'
-  },
-  {
-    label: 'The Word',
-    value: 'song6'
-  },
-  {
-    label: 'Michelle',
-    value: 'song7',
-    disabled: true
-  },
-  {
-    label: 'What goes on',
-    value: 'song8'
-  },
-  {
-    label: 'Girl',
-    value: 'song9'
-  },
-  {
-    label: "I'm looking through you",
-    value: 'song10'
-  },
-  {
-    label: 'In My Life',
-    value: 'song11'
-  },
-  {
-    label: 'Wait',
-    value: 'song12'
   }
 ];
 
