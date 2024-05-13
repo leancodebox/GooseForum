@@ -68,7 +68,21 @@ func GetRoleGroupByUserIds(userIds []uint64) map[uint64][]role.Entity {
 	roleIds := array.ArrayMap(func(t *Entity) uint64 {
 		return t.RoleId
 	}, rs)
-	// todo
-	role.Get(roleIds)
-	return map[uint64][]role.Entity{}
+	roleEntityList := role.GetByRoleIds(roleIds)
+	roleMap := array.Slice2Map(roleEntityList, func(v *role.Entity) uint64 {
+		return v.Id
+	})
+	res := make(map[uint64][]role.Entity, len(userIds))
+	for _, item := range rs {
+		if roleItem, ok := roleMap[item.RoleId]; ok {
+			userRoleList, urOk := res[item.UserId]
+			if urOk {
+				userRoleList = append(userRoleList, *roleItem)
+			} else {
+				userRoleList = []role.Entity{*roleItem}
+			}
+			res[item.UserId] = userRoleList
+		}
+	}
+	return res
 }

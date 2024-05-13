@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {NButton, NDataTable, NSpace, useMessage} from 'naive-ui'
+import {NButton, NDataTable, NSpace, NTag, useMessage} from 'naive-ui'
 import {h, ref} from 'vue'
 import {getUserList} from '@/service/request'
 import {Ref, UnwrapRef} from "@vue/reactivity";
@@ -31,7 +31,28 @@ let columns = [
   },
   {
     title: '角色',
-    key: 'role'
+    key: 'role',
+    render(row: UserItem) {
+      console.log()
+      if (!row.roleList) {
+        return []
+      }
+      let res = []
+      for (const rowKey in row.roleList) {
+        console.log(rowKey, row.roleList[rowKey])
+        res.push(h(
+            NTag,
+            {
+              strong: true,
+              tertiary: true,
+              size: 'small',
+            },
+            {default: () => row.roleList[rowKey].name}
+        ))
+      }
+      return res
+
+    }
   },
   {
     title: '状态',
@@ -89,9 +110,7 @@ let columns = [
   }
 ]
 getUserList().then(r => {
-  data.value = r.result.list.map(item => {
-    return {userId: item.userId, username: item.username, email: item.email, createTime: item.createTime, status: ""}
-  })
+  data.value = r.result.list
 })
 let pagination = true
 </script>
