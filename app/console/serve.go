@@ -3,9 +3,9 @@ package console
 import (
 	"context"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/http/routes"
 	"github.com/leancodebox/GooseForum/bundles/app"
 	"github.com/leancodebox/GooseForum/bundles/logging"
-	"github.com/leancodebox/GooseForum/routes"
 	"github.com/leancodebox/goose/preferences"
 	"log"
 	"log/slog"

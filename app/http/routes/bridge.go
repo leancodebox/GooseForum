@@ -22,6 +22,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	ginApi(ginApp)
 	ginAuth(ginApp)
 	ginBBS(ginApp)
+	ginFileServer(ginApp)
 
 	ginApp.NoRoute(controllers.NotFound)
 }
