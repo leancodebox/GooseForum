@@ -38,10 +38,6 @@ var (
 	once               = new(sync.Once)
 )
 
-func init() {
-	connectDB()
-}
-
 // DB gorm.DB 对象
 var dbIns *gorm.DB
 
@@ -51,6 +47,7 @@ func Connect() *gorm.DB {
 	})
 	return dbIns
 }
+
 // ConnectDB 初始化模型
 func connectDB() {
 
