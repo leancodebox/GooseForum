@@ -10,43 +10,6 @@ import (
 	"time"
 )
 
-type GetArticlesRequest struct {
-	MaxId    uint64 `json:"maxId"`
-	PageSize int    `json:"pageSize"`
-}
-
-type ArticlesDto struct {
-	Id             uint64 `json:"id"`
-	Content        string `json:"Content"`
-	Title          string `json:"title"`
-	LastUpdateTime string `json:"lastUpdateTime"`
-}
-
-// GetArticles 获取文章列表
-func GetArticles(request GetArticlesRequest) component.Response {
-	if request.PageSize == 0 {
-		request.PageSize = 10
-	}
-	pageData := articles.GetByMaxIdPage(request.MaxId, request.PageSize)
-	var maxId uint64
-	if len(pageData) > 0 {
-		maxId = pageData[0].Id
-	}
-	list := array.ArrayMap(func(t *articles.Entity) ArticlesDto {
-		return ArticlesDto{
-			Id:             t.Id,
-			Title:          t.Title,
-			Content:        t.Content,
-			LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
-		}
-	}, pageData)
-
-	return component.SuccessResponse(map[string]any{
-		"maxId": maxId,
-		"list":  list,
-	})
-}
-
 type GetArticlesPageRequest struct {
 	Page     int    `form:"page"`
 	PageSize int    `form:"pageSize"`
@@ -54,22 +17,26 @@ type GetArticlesPageRequest struct {
 	UserId   uint64 `form:"userId"`
 }
 
+type ArticlesSimpleDto struct {
+	Id             uint64 `json:"id"`
+	Title          string `json:"title"`
+	LastUpdateTime string `json:"lastUpdateTime"`
+}
+
 // GetArticlesPage 文章列表
 func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
-
-	return component.SuccessResponse(component.DataMap{
-		"list": array.ArrayMap(func(t articles.Entity) ArticlesDto {
-			return ArticlesDto{Id: t.Id,
+	return component.SuccessPage(
+		array.ArrayMap(func(t articles.Entity) ArticlesSimpleDto {
+			return ArticlesSimpleDto{
+				Id:             t.Id,
 				Title:          t.Title,
-				Content:        t.Content,
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 			}
 		}, pageData.Data),
-		"size":    pageData.PageSize,
-		"total":   pageData.Total,
-		"current": param.Page,
-	})
+		pageData.PageSize,
+		pageData.Total,
+	)
 }
 
 type GetArticlesDetailRequest struct {

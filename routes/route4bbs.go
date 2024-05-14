@@ -9,8 +9,6 @@ import (
 
 func ginBBS(ginApp *gin.Engine) {
 	bbs := ginApp.Group("api/bbs")
-	// 文章列表
-	bbs.POST("get-articles", ginUpP(controllers.GetArticles))
 	// 文章分页
 	bbs.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
 	// 文章详情

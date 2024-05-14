@@ -53,6 +53,10 @@ func SuccessResponse(data any) Response {
 	)
 }
 
+func SuccessPage[T any](list []T, size int, total int64) Response {
+	return SuccessResponse(Page[T]{List: list, Total: total, Size: size})
+}
+
 func SuccessData(data any) map[string]any {
 	return map[string]any{
 		"msg":    nil,

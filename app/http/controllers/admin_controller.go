@@ -54,18 +54,28 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			CreateTime: t.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
 	}, pageData.Data)
-	return component.SuccessResponse(map[string]any{
-		"list":  list,
-		"size":  pageData.PageSize,
-		"total": pageData.Total,
-	})
+	return component.SuccessPage(
+		list,
+		pageData.PageSize,
+		pageData.Total,
+	)
 }
 
 type EditUserReq struct {
+	UserId uint64 `json:"userId"`
+	Status string `json:"status"`
 }
 
 func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
-	return component.SuccessResponse("")
+	params := req.Params
+	user, err := users.Get(params.UserId)
+	if err != nil || user.Id == 0 {
+		return component.SuccessResponse("目标用户查询失败")
+	}
+	// todo
+	// user.status = params.Status
+	users.Save(&user)
+	return component.SuccessResponse("success")
 }
 
 type ArticlesListReq struct {
@@ -123,11 +133,11 @@ func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 		}
 	}, pageData.Data)
 
-	return component.SuccessResponse(component.DataMap{
-		"list":  list,
-		"size":  pageData.PageSize,
-		"total": pageData.Total,
-	})
+	return component.SuccessPage(
+		list,
+		pageData.PageSize,
+		pageData.Total,
+	)
 }
 
 type RoleSaveReq struct {
