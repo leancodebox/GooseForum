@@ -2,7 +2,6 @@ package migration
 
 import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/GooseForum/app/models/forum/comment"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/bundles/app"
 	"github.com/leancodebox/GooseForum/bundles/dbconnect"
@@ -16,6 +15,7 @@ func M() {
 }
 
 func migration(migration bool) {
+	return
 	if migration == false {
 		return
 	}
@@ -25,7 +25,6 @@ func migration(migration bool) {
 
 	if err = db.AutoMigrate(
 		&users.Entity{},
-		&comment.Entity{},
 		&articles.Entity{},
 	); err != nil {
 		slog.Error(cast.ToString(err))

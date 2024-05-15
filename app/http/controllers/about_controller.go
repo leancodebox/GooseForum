@@ -34,6 +34,6 @@ func NotFound(c *gin.Context) {
 
 func About() component.Response {
 	return component.SuccessResponse(component.DataMap{
-		"message": "Hello~ Now you see a json from gin",
+		"message": "Hello~ Now you see a json from php9.0",
 	})
 }

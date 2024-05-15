@@ -18,23 +18,31 @@ const fieldContent = "content"
 // fieldUserId
 const fieldUserId = "user_id"
 
-// fieldCreateTime
-const fieldCreateTime = "create_time"
+// fieldArticleStatus 文章状态：0 草稿 1 发布
+const fieldArticleStatus = "article_status"
 
-// fieldUpdateTime
-const fieldUpdateTime = "update_time"
+// fieldProcessStatus 管理状态：0 正常 1 封禁
+const fieldProcessStatus = "process_status"
+
+// fieldCreatedAt
+const fieldCreatedAt = "created_at"
+
+// fieldUpdatedAt
+const fieldUpdatedAt = "updated_at"
 
 // fieldDeletedAt
 const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
-	Id        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`           //
-	Title     string     `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"` //
-	Content   string     `gorm:"column:content;type:text;" json:"content"`                         //
-	UserId    uint64     `gorm:"column:user_id;type:bigint;not null;default:0;" json:"userId"`     //
-	CreatedAt time.Time  `gorm:"column:created_at;type:datetime;" json:"createdAt"`                //
-	UpdatedAt time.Time  `gorm:"column:updated_at;type:datetime;" json:"updatedAt"`                //
-	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                //
+	Id            uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      //
+	Title         string     `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`            //
+	Content       string     `gorm:"column:content;type:text;" json:"content"`                                    //
+	UserId        uint64     `gorm:"column:user_id;type:bigint;not null;default:0;" json:"userId"`                //
+	ArticleStatus int8       `gorm:"column:article_status;type:tinyint;not null;default:0;" json:"articleStatus"` // 文章状态：0 草稿 1 发布
+	ProcessStatus int8       `gorm:"column:process_status;type:tinyint;not null;default:0;" json:"processStatus"` // 管理状态：0 正常 1 封禁
+	CreatedAt     *time.Time `gorm:"column:created_at;type:datetime;" json:"createdAt"`                           //
+	UpdatedAt     *time.Time `gorm:"column:updated_at;type:datetime;" json:"updatedAt"`                           //
+	DeletedAt     *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                           //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

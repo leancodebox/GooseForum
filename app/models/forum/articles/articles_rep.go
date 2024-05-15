@@ -51,14 +51,9 @@ func All() (entities []*Entity) {
 	return
 }
 
-func GetByMaxIdPage(id uint64, pageSize int) (entities []*Entity) {
-	builder().Where(queryopt.Gt(pid, id)).Order(queryopt.Desc(fieldUpdateTime)).Limit(pageSize).Find(&entities)
-	return
-}
-
 func CantWriteNew(userId uint64, maxCount int64) bool {
 	var count int64
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Gt(fieldCreateTime, time.Now().Format("2006-01-02"))).Count(&count)
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Gt(fieldCreatedAt, time.Now().Format("2006-01-02"))).Count(&count)
 	return count > maxCount
 }
 

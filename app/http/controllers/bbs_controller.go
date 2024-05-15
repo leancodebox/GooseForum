@@ -3,7 +3,6 @@ package controllers
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/GooseForum/app/models/forum/comment"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	array "github.com/leancodebox/goose/collectionopt"
@@ -45,7 +44,7 @@ type GetArticlesDetailRequest struct {
 	PageSize     int    `json:"pageSize"`
 }
 
-type CommentDto struct {
+type ReplyDto struct {
 	ArticleId  uint64 `json:"articleId"`
 	UserId     uint64 `json:"userId"`
 	Content    string `json:"Content"`
@@ -53,21 +52,17 @@ type CommentDto struct {
 }
 
 // GetArticlesDetail 文章详情
-func GetArticlesDetail(request GetArticlesDetailRequest) component.Response {
-	if request.PageSize == 0 {
-		request.PageSize = 10
-	}
-	entity := articles.Get(request.Id)
-	comments := comment.GetByMaxIdPage(request.Id, request.MaxCommentId, request.PageSize)
-
-	commentList := array.ArrayMap(func(item comment.Entity) CommentDto {
-		return CommentDto{
+func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
+	entity := articles.Get(req.Id)
+	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSize(req.PageSize))
+	commentList := array.ArrayMap(func(item reply.Entity) ReplyDto {
+		return ReplyDto{
 			ArticleId:  item.ArticleId,
 			UserId:     item.UserId,
 			Content:    item.Content,
 			CreateTime: item.CreatedAt.Format(time.RFC3339),
 		}
-	}, comments)
+	}, replyEntities)
 	return component.SuccessResponse(map[string]any{
 		"articleTitle":   &entity.Title,
 		"articleContent": &entity.Content,

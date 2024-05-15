@@ -1,5 +1,7 @@
 package reply
 
+import "github.com/leancodebox/goose/queryopt"
+
 func Create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
@@ -29,3 +31,8 @@ func DeleteEntity(entity *Entity) int64 {
 //	builder().Find(&entities)
 //	return
 //}
+
+func GetByMaxIdPage(articleId uint64, id uint64, pageSize int) (entities []Entity) {
+	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Where(queryopt.Gt(pid, id)).Limit(pageSize).Find(&entities)
+	return
+}

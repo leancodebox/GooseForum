@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
@@ -79,15 +80,22 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 }
 
 type ArticlesListReq struct {
+	Page     int    `form:"page"`
+	PageSize int    `form:"pageSize"`
+	Search   string `form:"search"`
+	UserId   uint64 `form:"userId"`
 }
 
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
+	param := req.Params
+	_ = articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
 	return component.SuccessResponse("")
 }
 
 type EditArticleReq struct {
 }
 
+// EditArticle 冻结操作
 func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response {
 	return component.SuccessResponse("")
 }
