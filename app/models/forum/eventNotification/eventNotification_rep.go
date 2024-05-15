@@ -1,9 +1,9 @@
 package eventNotification
 
-//func create(entity *Entity) int64 {
-//	result := builder().Create(entity)
-//	return result.RowsAffected
-//}
+func Create(entity *Entity) int64 {
+	result := builder().Create(entity)
+	return result.RowsAffected
+}
 
 //func save(entity *Entity) int64 {
 //	result := builder().Save(entity)

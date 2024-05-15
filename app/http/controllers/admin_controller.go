@@ -64,7 +64,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 
 type EditUserReq struct {
 	UserId uint64 `json:"userId"`
-	Status string `json:"status"`
+	Status int8   `json:"status"`
 }
 
 func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
@@ -73,8 +73,7 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 	if err != nil || user.Id == 0 {
 		return component.SuccessResponse("目标用户查询失败")
 	}
-	// todo
-	// user.status = params.Status
+	user.Status = params.Status
 	users.Save(&user)
 	return component.SuccessResponse("success")
 }
