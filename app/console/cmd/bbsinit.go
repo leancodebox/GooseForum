@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/bbsinit"
 	"github.com/spf13/cobra"
 )
 
@@ -22,16 +22,5 @@ func runBbsinit(_ *cobra.Command, _ []string) {
 		}
 	}()
 
-	adminUsername := "t_admin"
-
-	adminUser := users.GetByUsername(adminUsername)
-	if adminUser == nil {
-		userEntity := users.MakeUser(adminUsername, "123456", "admin@admin.com")
-		err := users.Create(userEntity)
-		if err != nil {
-			fmt.Println("账号创建失败，失败原因：", err)
-		}
-		fmt.Println(userEntity)
-	}
-
+	bbsinit.DataInit()
 }

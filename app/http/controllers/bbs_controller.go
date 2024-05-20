@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -9,6 +11,17 @@ import (
 	array "github.com/leancodebox/goose/collectionopt"
 	"time"
 )
+
+
+func GetArticlesCategory() component.Response {
+	res := array.ArrayMap(func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
+		return datastruct.Option[string, uint64]{
+			Name:  t.Category,
+			Value: t.Id,
+		}
+	}, articleCategory.All())
+	return component.SuccessResponse(res)
+}
 
 type GetArticlesPageRequest struct {
 	Page     int    `form:"page"`
