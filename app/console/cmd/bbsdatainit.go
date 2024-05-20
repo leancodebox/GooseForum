@@ -16,7 +16,7 @@ var dataAllSql string
 func init() {
 	appendCommand(&cobra.Command{
 		Use:   "bbs:init:db",
-		Short: "bbs初始化",
+		Short: "bbs数据库初始化",
 		Run:   runBbsinitDB,
 		// Args:  cobra.ExactArgs(1), // 只允许且必须传 1 个参数
 	})

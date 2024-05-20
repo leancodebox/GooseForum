@@ -88,6 +88,7 @@ func traverse(path string) ([]Blog, error) {
 					}
 					if strings.HasPrefix(line, "title:") {
 						title = strings.TrimSpace(strings.TrimPrefix(line, "title:"))
+						title = strings.Trim(title, `'`)
 					}
 				}
 				for scanner.Scan() {
