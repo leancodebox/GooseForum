@@ -37,7 +37,7 @@ type Entity struct {
 	Id            uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      //
 	Title         string     `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`            //
 	Content       string     `gorm:"column:content;type:text;" json:"content"`                                    //
-	UserId        uint64     `gorm:"column:user_id;type:bigint;not null;default:0;" json:"userId"`                //
+	UserId        uint64     `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`       //
 	ArticleStatus int8       `gorm:"column:article_status;type:tinyint;not null;default:0;" json:"articleStatus"` // 文章状态：0 草稿 1 发布
 	ProcessStatus int8       `gorm:"column:process_status;type:tinyint;not null;default:0;" json:"processStatus"` // 管理状态：0 正常 1 封禁
 	CreatedAt     *time.Time `gorm:"column:created_at;type:datetime;" json:"createdAt"`                           //

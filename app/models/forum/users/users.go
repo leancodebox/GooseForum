@@ -1,7 +1,6 @@
 package users
 
 import (
-	"github.com/leancodebox/GooseForum/bundles/algorithm"
 	"time"
 )
 
@@ -70,9 +69,4 @@ type Entity struct {
 
 func (itself *Entity) TableName() string {
 	return tableName
-}
-
-func (itself *Entity) SetPassword(password string) *Entity {
-	itself.Password, _ = algorithm.MakePassword(password)
-	return itself
 }

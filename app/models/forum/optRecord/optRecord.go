@@ -12,6 +12,9 @@ const pid = "id"
 // fieldOptUserId
 const fieldOptUserId = "opt_user_id"
 
+// fieldOptType
+const fieldOptType = "opt_type"
+
 // fieldTargetType
 const fieldTargetType = "target_type"
 

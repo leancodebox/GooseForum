@@ -1,25 +1,16 @@
-package reply
+package articleCategory
 
 import (
 	"time"
 )
 
-const tableName = "reply"
+const tableName = "article_category"
 
 // pid
 const pid = "id"
 
-// fieldArticleId
-const fieldArticleId = "article_id"
-
-// fieldUserId
-const fieldUserId = "user_id"
-
-// fieldTargetId 目标id
-const fieldTargetId = "target_id"
-
-// fieldContent
-const fieldContent = "content"
+// fieldCategory
+const fieldCategory = "category"
 
 // fieldCreatedAt
 const fieldCreatedAt = "created_at"
@@ -29,10 +20,7 @@ const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
 	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                               //
-	ArticleId uint64    `gorm:"column:article_id;type:bigint unsigned;not null;default:0;" json:"articleId"`          //
-	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`                //
-	TargetId  uint64    `gorm:"column:target_id;type:bigint unsigned;not null;default:0;" json:"targetId"`            // 目标id
-	Content   string    `gorm:"column:content;type:text;" json:"content"`                                             //
+	Category  string    `gorm:"column:category;type:varchar(255);not null;default:'';" json:"category"`               //
 	CreatedAt time.Time `gorm:"column:created_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"createdAt"` //
 	UpdatedAt time.Time `gorm:"column:updated_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"updatedAt"` //
 }
