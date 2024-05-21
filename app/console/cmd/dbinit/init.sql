@@ -85,6 +85,20 @@ CREATE TABLE article_category
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT '分类';
 
+CREATE TABLE article_category_rs
+(
+    id                  bigint unsigned NOT NULL AUTO_INCREMENT,
+    article_id          bigint unsigned NOT NULL,
+    article_category_id bigint unsigned NOT NULL,
+    `effective`         int             not null default 0,
+    `created_at`        datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`        datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    unique key uiq_category_article (article_category_id, article_id)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT '文章分类关系表，目的是为了让某些交叉文章可以更好的广播出去';
+
 CREATE TABLE `articles`
 (
     `id`             bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -107,6 +121,8 @@ alter table articles
 alter table articles
     add `article_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '文章状态：0 草稿 1 发布' after user_id,
     add `process_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '管理状态：0 正常 1 封禁' after article_status;
+alter table articles
+    add `type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '文章类型：0 博文，1教程，2问答，3分享' after `content`;
 
 CREATE TABLE `comment`
 (

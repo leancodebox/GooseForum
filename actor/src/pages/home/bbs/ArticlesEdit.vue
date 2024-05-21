@@ -6,21 +6,21 @@ import {ref} from "vue";
 
 let tags = ref([])
 let options = [
+  // {
+  //   label: "Everybody's Got Something to Hide Except Me and My Monkey",
+  //   value: 'song0',
+  //   disabled: true
+  // },
   {
-    label: "Everybody's Got Something to Hide Except Me and My Monkey",
-    value: 'song0',
-    disabled: true
-  },
-  {
-    label: 'Drive My Car',
+    label: '日常',
     value: 'song1'
   },
   {
-    label: 'Norwegian Wood',
+    label: '分享',
     value: 'song2'
   },
   {
-    label: "You Won't See",
+    label: "技术",
     value: 'song3',
     disabled: true
   },
@@ -36,7 +36,7 @@ let options = [
 
 let articlesData = ref({
   tags:[],
-  lm: "",
+  category: "",
   oData: "",
 })
 
@@ -54,8 +54,8 @@ function publish() {
         :label-width="80"
         :size="'small'"
     >
-      <n-form-item label="栏目" path="user.age" style="min-width:160px">
-        <n-select v-model:value="articlesData.lm" :options="options"/>
+      <n-form-item label="分类" path="user.age" style="min-width:160px">
+        <n-select v-model:value="articlesData.category" :options="options"/>
       </n-form-item>
 
       <n-form-item label="标签" path="user.age" style="min-width:160px">

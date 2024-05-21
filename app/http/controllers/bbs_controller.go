@@ -88,7 +88,7 @@ type WriteArticleReq struct {
 	HtmlContent string   `json:"htmlContent" validate:"required"`
 	Title       string   `json:"title" validate:"required"`
 	Tags        []uint64 `json:"tags"`
-	CategoryId  uint64   `json:"categoryId"`
+	CategoryId  []uint64 `json:"categoryId" validate:"min=1,max=3"`
 }
 
 // WriteArticles 写文章
