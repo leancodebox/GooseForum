@@ -1,5 +1,5 @@
 <script setup>
-import {NAutoComplete, NButton, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu,NText} from 'naive-ui';
+import {NAutoComplete, NButton, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NText} from 'naive-ui';
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from '@/utils/composables';
 
 import {FastFoodOutline as CashIcon, FishOutline, InfiniteOutline} from '@vicons/ionicons5'
@@ -60,16 +60,16 @@ let style = {
                      bordered
                      :style="style"
     >
-      <n-text tag="div" :depth="1" >
-        <span >学</span>
+      <n-text tag="div" :depth="1">
+        <span style="font-size: 18px">GooseForum</span>
       </n-text>
       <div style="display: flex; align-items: center; overflow: hidden;">
-      <div class="nav-menu">
-        <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions"/>
-      </div>
-      <n-auto-complete style="width: 280px; margin-left: 24px; margin-right: 12px; flex-shrink: 0;"         clear-after-select
-                       blur-after-select>
-      </n-auto-complete>
+        <div class="nav-menu">
+          <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions"/>
+        </div>
+        <n-auto-complete style="width: 280px; margin-left: 24px; margin-right: 12px; flex-shrink: 0;" clear-after-select
+                         blur-after-select>
+        </n-auto-complete>
       </div>
       <div class="nav-end">
         <router-link :to="'/home/bbs/articlesEdit'">
@@ -108,7 +108,7 @@ let style = {
 }
 
 .nav-menu {
-  padding-left: 36px;
+  padding-left: 0px;
   overflow: hidden;
   flex-grow: 0;
   flex-shrink: 1;
