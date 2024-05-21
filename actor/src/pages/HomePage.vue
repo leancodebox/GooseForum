@@ -11,10 +11,6 @@ function renderIcon(icon) {
   return () => h(NIcon, null, {default: () => h(icon)});
 }
 
-const isMobileRef = useIsMobile()
-const isTabletRef = useIsTablet()
-const isSmallDesktop = useIsSmallDesktop()
-const isMobile = isMobileRef
 const activeKey = ref('home')
 const menuOptions = [
   {
