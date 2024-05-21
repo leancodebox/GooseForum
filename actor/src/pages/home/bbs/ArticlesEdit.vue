@@ -4,7 +4,6 @@ import 'mavon-editor/dist/css/index.css'
 import {NButton, NCard, NForm, NFormItem, NInput, NSelect} from "naive-ui"
 import {ref} from "vue";
 
-let lu = ref(null)
 let tags = ref([])
 let options = [
   {
@@ -35,6 +34,15 @@ let options = [
   }
 ];
 
+let articlesData = ref({
+  lm: "",
+  oData: ""
+})
+
+function publish() {
+  console.log(articlesData.value)
+}
+
 </script>
 <template>
 
@@ -46,7 +54,7 @@ let options = [
         :size="'small'"
     >
       <n-form-item label="栏目" path="user.age" style="min-width:160px">
-        <n-select v-model:value="lu" :options="options" />
+        <n-select v-model:value="articlesData.lm" :options="options"/>
       </n-form-item>
 
       <n-form-item label="标签" path="user.age" style="min-width:160px">
@@ -72,11 +80,11 @@ let options = [
         </n-button>
       </n-form-item>
       <n-form-item>
-        <n-button attr-type="button" type="primary">
+        <n-button attr-type="button" type="primary" @click="publish">
           发布
         </n-button>
       </n-form-item>
     </n-form>
-    <mavon-editor style="height: 100%;min-height: 600px"></mavon-editor>
+    <mavon-editor style="height: 100%;min-height: 600px" v-model="articlesData.oData"></mavon-editor>
   </n-card>
 </template>

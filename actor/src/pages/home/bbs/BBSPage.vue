@@ -13,11 +13,15 @@ function getArticlesAction() {
     let newList = r.result.list.map(function (item) {
       return {
         id: item.id,
+        topic:"",
+        category:"博文",
         title: item.title,
         tag: ["文章", "技术"],
         desc: item.content,
         lastUpdateTime: item.lastUpdateTime,
-        body: item.content
+        body: item.content,
+        username: item.username,
+        // type: "xxx",
       }
     })
     listData.value.push(...newList)
@@ -78,12 +82,20 @@ const isMobile = useIsMobile()
             <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
               <n-thing>
                 <template #description>
-                  <n-space size="small" style="padding-top: 4px">
-                                <span v-if="item.type === 'xxx'" class="highlight-animation"
-                                      :style="{ color: textColor }">
-                                    {{ text }}
-                                </span>
+                  <n-space size="small" style="padding-top: 4px" >
+
+                    [{{ item.username }}]
+                    <n-tag :bordered="false" type="success"   size="small">
+                      {{ item.category}}
+                    </n-tag>
+                    <span v-if="item.type === 'xxx'" class="highlight-animation"
+                          :style="{ color: textColor }">
+
                     {{ item.title }}
+                    </span>
+                    <span v-else>
+                    {{ item.title }}
+                    </span>
                     <n-tag v-for="itemTag in item.tag" :bordered="false" type="info"
                            size="small"
                            v-text="itemTag">

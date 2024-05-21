@@ -4,6 +4,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	array "github.com/leancodebox/goose/collectionopt"
 	"time"
@@ -20,17 +21,27 @@ type ArticlesSimpleDto struct {
 	Id             uint64 `json:"id"`
 	Title          string `json:"title"`
 	LastUpdateTime string `json:"lastUpdateTime"`
+	Username       string `json:"username"`
 }
 
 // GetArticlesPage 文章列表
 func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
+	userIds := array.ArrayMap(func(t articles.Entity) uint64 {
+		return t.UserId
+	}, pageData.Data)
+	userMap := users.GetMapByIds(userIds)
 	return component.SuccessPage(
 		array.ArrayMap(func(t articles.Entity) ArticlesSimpleDto {
+			username := ""
+			if user, _ := userMap[t.UserId]; user != nil {
+				username = user.Username
+			}
 			return ArticlesSimpleDto{
 				Id:             t.Id,
 				Title:          t.Title,
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
+				Username:       username,
 			}
 		}, pageData.Data),
 		pageData.PageSize,

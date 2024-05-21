@@ -2,6 +2,7 @@ package users
 
 import (
 	"github.com/leancodebox/GooseForum/bundles/algorithm"
+	"github.com/leancodebox/goose/collectionopt"
 	"github.com/leancodebox/goose/queryopt"
 )
 
@@ -95,4 +96,18 @@ func Page(q PageQuery) struct {
 		Total    int64
 		Data     []Entity
 	}{Page: q.Page, PageSize: q.PageSize, Data: list, Total: total}
+}
+
+func GetByIds(userIds []uint64) (entities []*Entity) {
+	if len(userIds) == 0 {
+		return
+	}
+	builder().Where(queryopt.In(pid, userIds)).Find(&entities)
+	return
+}
+
+func GetMapByIds(userIds []uint64) map[uint64]*Entity {
+	return collectionopt.Slice2Map(GetByIds(userIds), func(v *Entity) uint64 {
+		return v.Id
+	})
 }

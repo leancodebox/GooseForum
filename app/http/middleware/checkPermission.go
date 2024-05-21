@@ -15,16 +15,16 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 		userIdData, _ := c.Get("userId")
 		userId := cast.ToUint64(userIdData)
 		if userId == 0 {
-			c.JSON(http.StatusUnauthorized, "未登陆")
+			c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
 			c.Abort()
 		}
 		if userId == 0 {
-			c.JSON(http.StatusUnauthorized, "未登陆")
+			c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
 			c.Abort()
 		}
 		user, err := users.Get(userId)
 		if err != nil {
-			c.JSON(http.StatusForbidden, "操作异常")
+			c.JSON(http.StatusForbidden, component.FailData("操作异常"))
 			c.Abort()
 		}
 		if permission.CheckUser(user.Id, permissionType) == false {
