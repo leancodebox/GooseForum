@@ -35,8 +35,9 @@ let options = [
 ];
 
 let articlesData = ref({
+  tags:[],
   lm: "",
-  oData: ""
+  oData: "",
 })
 
 function publish() {
