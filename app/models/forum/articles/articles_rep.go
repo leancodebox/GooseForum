@@ -85,14 +85,10 @@ func Page(q PageQuery) struct {
 	if q.UserId != 0 {
 		b.Where(queryopt.Eq(fieldUserId, q.UserId))
 	}
+	b.Where(queryopt.Eq(fieldArticleStatus, 1))
 	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order("id desc").Find(&list)
-
 	var total int64
-	if q.Search != "" {
-		builder().Where(queryopt.Like(fieldContent, q.Search)).Count(&total)
-	} else {
-		builder().Count(&total)
-	}
+	b.Count(&total)
 	return struct {
 		Page     int
 		PageSize int

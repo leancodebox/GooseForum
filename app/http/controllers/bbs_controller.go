@@ -118,6 +118,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		article.UserId = req.UserId
 		article.Type = req.Params.Type
 	}
+	article.ArticleStatus = 1
 	article.Content = req.Params.Content
 	article.Title = req.Params.Title
 	if article.Id > 0 {
