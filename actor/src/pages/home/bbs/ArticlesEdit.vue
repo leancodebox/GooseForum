@@ -54,7 +54,7 @@ async function publish() {
   } catch (e) {
     console.log(e)
   }
-  publishLoading.value = true
+  publishLoading.value = false
 }
 
 function categorySelect(value, option) {
