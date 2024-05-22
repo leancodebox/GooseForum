@@ -4,6 +4,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -11,7 +12,6 @@ import (
 	array "github.com/leancodebox/goose/collectionopt"
 	"time"
 )
-
 
 func GetArticlesCategory() component.Response {
 	res := array.ArrayMap(func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
@@ -96,12 +96,11 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 }
 
 type WriteArticleReq struct {
-	Id          int64    `json:"id"`
-	Content     string   `json:"content" validate:"required"`
-	HtmlContent string   `json:"htmlContent" validate:"required"`
-	Title       string   `json:"title" validate:"required"`
-	Tags        []uint64 `json:"tags"`
-	CategoryId  []uint64 `json:"categoryId" validate:"min=1,max=3"`
+	Id         int64    `json:"id"`
+	Content    string   `json:"content" validate:"required"`
+	Title      string   `json:"title" validate:"required"`
+	Type       int8     `json:"type"`
+	CategoryId []uint64 `json:"categoryId" validate:"min=1,max=3"`
 }
 
 // WriteArticles 写文章
@@ -117,6 +116,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		}
 	} else {
 		article.UserId = req.UserId
+		article.Type = req.Params.Type
 	}
 	article.Content = req.Params.Content
 	article.Title = req.Params.Title
@@ -124,9 +124,13 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		articles.Save(&article)
 	} else {
 		articles.Create(&article)
+		for _, item := range req.Params.CategoryId {
+			rs := articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: item}
+			articleCategoryRs.SaveOrCreateById(&rs)
+		}
 		pointservice.RewardPoints(req.UserId, 10, pointservice.RewardPoints4WriteArticles)
 	}
-	return component.SuccessResponse(map[string]any{})
+	return component.SuccessResponse(article.Id)
 }
 
 type ArticleReplyId struct {

@@ -83,6 +83,10 @@ export function reg(email, username, password) {
     })
 }
 
+export function getArticleCategory() {
+    return instanceAxios.get('bbs/get-articles-category')
+}
+
 export function getArticlesPageApi(page = 1, pageSize = 20, search = "") {
     return instanceAxios.post('bbs/get-articles-page', {
         page: page,
@@ -97,6 +101,15 @@ export function getArticlesDetailApi(id, maxCommentId) {
         maxCommentId: maxCommentId,
         id: parseInt(id),
         pageSize: 10,
+    })
+}
+
+export function writeArticles(data) {
+    return instanceAxios.post('bbs/write-articles', {
+        content: data.content,
+        title: data.title,
+        type: data.type,
+        categoryId: data.categoryId,
     })
 }
 

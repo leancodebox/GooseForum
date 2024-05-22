@@ -92,6 +92,7 @@ func UpButterReq[T any](action func(ctx component.BetterRequest[T]) component.Re
 		err := validate.Struct(params)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, component.FailData(formatError(err)))
+			return
 		}
 		response := action(component.BetterRequest[T]{
 			Params: params,

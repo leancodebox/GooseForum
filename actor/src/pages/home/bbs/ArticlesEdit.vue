@@ -1,91 +1,121 @@
 <script setup>
 import {mavonEditor} from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
-import {NButton, NCard, NForm, NFormItem, NInput, NSelect} from "naive-ui"
-import {ref} from "vue";
+import {NButton, NCard, NFlex, NForm, NFormItemGi, NGrid, NInput, NSelect} from "naive-ui"
+import {onMounted, ref} from "vue";
+import {getArticleCategory, writeArticles} from "@/service/request";
+import router from "@/route/router"
 
+let publishLoading = ref(false)
 let tags = ref([])
-let options = [
-  // {
-  //   label: "Everybody's Got Something to Hide Except Me and My Monkey",
-  //   value: 'song0',
-  //   disabled: true
-  // },
+let options = ref([])
+let typeOptions = ref([
   {
-    label: '日常',
-    value: 'song1'
+    label: "博文",
+    value: 0,
+  }, {
+    label: "教程",
+    value: 1,
+  }, {
+    label: "问答",
+    value: 2,
+  }, {
+    label: "分享",
+    value: 3,
   },
-  {
-    label: '分享',
-    value: 'song2'
-  },
-  {
-    label: "技术",
-    value: 'song3',
-    disabled: true
-  },
-  {
-    label: 'Nowhere Man',
-    value: 'song4'
-  },
-  {
-    label: 'Think For Yourself',
-    value: 'song5'
-  }
-];
+])
 
 let articlesData = ref({
-  tags:[],
-  category: "",
-  oData: "",
+  tags: [],
+  categoryId: [],
+  title: "",
+  content: "",
+})
+onMounted(async () => {
+  let data = await getArticleCategory()
+  options.value = data.result.map(item => {
+    return {
+      label: item.name,
+      value: item.value
+    }
+  })
+  if (options.value.length > 0) {
+    articlesData.value.categoryId.push(options.value[0].value)
+  }
 })
 
-function publish() {
-  console.log(articlesData.value)
+async function publish() {
+  publishLoading.value = true
+  try {
+    let res = await writeArticles(articlesData.value)
+    if (res.result > 0) {
+      await router.push({name: "articlesPage", query: {id: res.result}})
+    }
+  } catch (e) {
+    console.log(e)
+  }
+  publishLoading.value = true
 }
 
+function categorySelect(value, option) {
+  console.log(value, option)
+}
 </script>
 <template>
 
-  <n-card :bordered="false" title="撰写文章">
+  <n-card :bordered="false">
     <n-form
         ref="formRef"
         inline
         :label-width="80"
-        :size="'small'"
+        :size="'medium'"
     >
-      <n-form-item label="分类" path="user.age" style="min-width:160px">
-        <n-select v-model:value="articlesData.category" :options="options"/>
-      </n-form-item>
+      <n-grid cols="24" x-gap="24" item-responsive>
 
-      <n-form-item label="标签" path="user.age" style="min-width:160px">
-        <n-select
-            v-model:value="tags"
-            filterable
-            multiple
-            tag
-            placeholder="输入，按回车确认"
-            :show-arrow="false"
-            :show="false"
-        />
-      </n-form-item>
+        <n-form-item-gi :span="24" label="标题">
+          <n-input v-model:value="articlesData.title"></n-input>
+        </n-form-item-gi>
 
-      <n-form-item label="系列" path="user.age">
-        <n-input value="系列1" placeholder="选择系列"/>
-        <n-input value="编号  " placeholder="输入编号"/>
-      </n-form-item>
+        <n-form-item-gi span="0:24 860:6" label="类型" path="user.age" style="min-width:160px">
+          <n-select v-model:value="articlesData.type" :options="typeOptions"/>
+        </n-form-item-gi>
+        <n-form-item-gi span="0:24 860:6" label="分类(不超过3个)" path="user.age" style="min-width:160px">
+          <n-select multiple v-model:value="articlesData.categoryId" :options="options" @update:value="categorySelect"
+                    max-tag-count="responsive"/>
+        </n-form-item-gi>
+        <!--        <n-form-item-gi   :span="3"  label="标签" path="user.age" style="min-width:160px">-->
+        <!--          <n-select-->
+        <!--              v-model:value="tags"-->
+        <!--              filterable-->
+        <!--              multiple-->
+        <!--              tag-->
+        <!--              placeholder="输入，按回车确认"-->
+        <!--              :show-arrow="false"-->
+        <!--              :show="false"-->
+        <!--          />-->
+        <!--        </n-form-item-gi>-->
+        <!--        <n-form-item-gi label="系列" :span="3"  path="user.age">-->
+        <!--          <n-input value="系列1" placeholder="选择系列"/>-->
+        <!--          <n-input value="编号  " placeholder="输入编号"/>-->
+        <!--        </n-form-item-gi>-->
 
-      <n-form-item>
-        <n-button attr-type="button" type="info">
-          存草稿
-        </n-button>
-      </n-form-item>
-      <n-form-item>
-        <n-button attr-type="button" type="primary" @click="publish">
-          发布
-        </n-button>
-      </n-form-item>
+        <n-form-item-gi span="0:24 860:6">
+          <n-flex>
+            <n-button attr-type="button" type="info" @click="publish(0)" :disabled="publishLoading">
+              存草稿
+            </n-button>
+
+            <n-button attr-type="button" type="primary" @click="publish(1)" :disabled="publishLoading">
+              发文章
+            </n-button>
+          </n-flex>
+        </n-form-item-gi>
+        <n-form-item-gi :span="24">
+          <mavon-editor style="width:100%;height: 100%;min-height: 600px" v-model="articlesData.content"></mavon-editor>
+        </n-form-item-gi>
+      </n-grid>
     </n-form>
-    <mavon-editor style="height: 100%;min-height: 600px" v-model="articlesData.oData"></mavon-editor>
+
+
   </n-card>
 </template>
