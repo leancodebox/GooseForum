@@ -61,6 +61,7 @@ type PageQuery struct {
 	Page, PageSize int
 	Search         string
 	UserId         uint64
+	FilterStatus   bool
 }
 
 func Page(q PageQuery) struct {
@@ -85,7 +86,9 @@ func Page(q PageQuery) struct {
 	if q.UserId != 0 {
 		b.Where(queryopt.Eq(fieldUserId, q.UserId))
 	}
-	b.Where(queryopt.Eq(fieldArticleStatus, 1))
+	if q.FilterStatus {
+		b.Where(queryopt.Eq(fieldArticleStatus, 1))
+	}
 	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order("id desc").Find(&list)
 	var total int64
 	b.Count(&total)

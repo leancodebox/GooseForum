@@ -27,7 +27,6 @@ type GetArticlesPageRequest struct {
 	Page     int    `form:"page"`
 	PageSize int    `form:"pageSize"`
 	Search   string `form:"search"`
-	UserId   uint64 `form:"userId"`
 }
 
 type ArticlesSimpleDto struct {
@@ -39,7 +38,7 @@ type ArticlesSimpleDto struct {
 
 // GetArticlesPage 文章列表
 func GetArticlesPage(param GetArticlesPageRequest) component.Response {
-	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
+	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, FilterStatus: true})
 	userIds := array.ArrayMap(func(t articles.Entity) uint64 {
 		return t.UserId
 	}, pageData.Data)
@@ -166,16 +165,4 @@ func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response 
 	}
 	reply.DeleteEntity(&replyEntity)
 	return component.SuccessResponse(true)
-}
-
-type ApplyShowReq struct {
-	Title     string   `json:"comment"`
-	Desc      string   `json:"desc"`
-	ImageList []string `json:"imageList"`
-}
-
-// ApplyShow 申请展示
-// todo 低优先级 是可以考虑两个地方，一个地方是侧边栏，一个地方是置顶
-func ApplyShow(req component.BetterRequest[ApplyShowReq]) component.Response {
-	return component.SuccessResponse("success")
 }
