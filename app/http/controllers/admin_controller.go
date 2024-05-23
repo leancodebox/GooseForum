@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	array "github.com/leancodebox/goose/collectionopt"
+	"golang.org/x/exp/slices"
 )
 
 type UserListReq struct {
@@ -117,12 +118,21 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 	return component.SuccessResponse("")
 }
 
+type PermissionListReq struct {
+}
+
+func GetPermissionList(req component.BetterRequest[PermissionListReq]) component.Response {
+	res := permission.BuildOptions()
+	return component.SuccessResponse(res)
+}
+
 type RoleListReq struct {
 }
 
 type RoleItem struct {
 	RoleId      uint64           `json:"roleId"`
 	RoleName    string           `json:"roleName"`
+	Effective   int              `json:"effective"`
 	Permissions []PermissionItem `json:"permissions"`
 	CreateTime  string           `json:"createTime"`
 }
@@ -153,6 +163,7 @@ func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 		return RoleItem{
 			RoleId:      t.Id,
 			RoleName:    t.RoleName,
+			Effective:   t.Effective,
 			Permissions: permissionItemList,
 			CreateTime:  t.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
@@ -167,8 +178,63 @@ func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 }
 
 type RoleSaveReq struct {
+	Id          uint     `json:"id"`
+	RoleName    string   `json:"roleName" validate:"required"`
+	Permissions []uint64 `json:"permissions" validate:"required,min=1,max=100"`
 }
 
 func RoleSave(req component.BetterRequest[RoleSaveReq]) component.Response {
-	return component.SuccessResponse("")
+	var roleEntity role.Entity
+	if req.Params.Id > 0 {
+		roleEntity = role.Get(req.Params.Id)
+	} else {
+		roleEntity = role.Entity{
+			Effective: 1,
+		}
+	}
+	roleEntity.RoleName = req.Params.RoleName
+	role.SaveOrCreateById(&roleEntity)
+
+	rsList := rolePermissionRs.GetRsByRoleId(roleEntity.Id)
+	var canUpdate []uint64
+	// 更新数据
+	for _, item := range rsList {
+		item.Effective = 0
+		if slices.Contains(req.Params.Permissions, item.PermissionId) {
+			item.Effective = 0
+			canUpdate = append(canUpdate, item.PermissionId)
+		}
+		rolePermissionRs.SaveOrCreateById(item)
+	}
+	// 删除数据
+	for _, item := range req.Params.Permissions {
+		if !slices.Contains(canUpdate, item) {
+			rsItem := rolePermissionRs.Entity{
+				RoleId:       roleEntity.Id,
+				PermissionId: item,
+				Effective:    1,
+			}
+			rolePermissionRs.SaveOrCreateById(&rsItem)
+		}
+	}
+
+	return component.SuccessResponse(true)
+}
+
+type RoleSaveDel struct {
+	Id uint `json:"id"`
+}
+
+func RoleDel(req component.BetterRequest[RoleSaveDel]) component.Response {
+	roleEntity := role.Get(req.Params.Id)
+	if roleEntity.Id == 0 {
+		return component.FailResponse("角色不存在")
+	}
+	rsList := rolePermissionRs.GetRsByRoleId(roleEntity.Id)
+	// 删除
+	for _, item := range rsList {
+		rolePermissionRs.DeleteEntity(item)
+	}
+	role.DeleteEntity(&roleEntity)
+	return component.SuccessResponse(true)
 }

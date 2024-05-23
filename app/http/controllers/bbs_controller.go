@@ -148,7 +148,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		return component.FailResponse("要回复的评论不存在")
 	}
 	reply.Create(&reply.Entity{Content: req.Params.Comment, UserId: req.UserId})
-	pointservice.RewardPoints(req.UserId, 10, pointservice.RewardPoints4Reply)
+	pointservice.RewardPoints(req.UserId, 2, pointservice.RewardPoints4Reply)
 	return component.SuccessResponse(true)
 }
 

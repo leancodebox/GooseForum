@@ -33,16 +33,21 @@ func Get(id any) (entity Entity) {
 //	return result.RowsAffected
 //}
 
-//func deleteEntity(entity *Entity) int64 {
-//	result := builder().Delete(entity)
-//	return result.RowsAffected
-//}
+func DeleteEntity(entity *Entity) int64 {
+	result := builder().Delete(entity)
+	return result.RowsAffected
+}
 
 func GetRsByRoleIdAndPermission(roleId, permissionId uint64) (entities Entity) {
 	builder().
 		Where(queryopt.Eq(fieldRoleId, roleId)).
 		Where(queryopt.Eq(fieldPermissionId, permissionId)).
 		First(&entities)
+	return
+}
+
+func GetRsByRoleId(roleIds uint64) (entities []*Entity) {
+	builder().Where(queryopt.Eq(fieldRoleId, roleIds)).Find(&entities)
 	return
 }
 

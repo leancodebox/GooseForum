@@ -40,7 +40,7 @@ const (
 func BuildOptions() []datastruct.Option[string, Enum] {
 	var l []datastruct.Option[string, Enum]
 	for i := Admin; i <= PageManager; i++ {
-		l = append(l, datastruct.Option[string, Enum]{Name: i.Name(), Value: i})
+		l = append(l, datastruct.Option[string, Enum]{Name: i.Name(), Label: i.Name(), Value: i})
 	}
 	return l
 }

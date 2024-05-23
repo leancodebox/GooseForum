@@ -117,7 +117,25 @@ export function getUserList() {
     return instanceAxios.post("admin/user-list")
 }
 
+export function getPermissionList() {
+    return instanceAxios.post("admin/get-permission-list")
+}
+
 export function getRoleList() {
     return instanceAxios.post("admin/role-list")
+}
+
+export function getRoleSave(id, roleName, permission) {
+    return instanceAxios.post("admin/role-save", {
+        id: id,
+        roleName: roleName,
+        permissions: permission
+    })
+}
+
+export function getRoleDel(id) {
+    return instanceAxios.post("admin/role-delete", {
+        id: id,
+    })
 }
 

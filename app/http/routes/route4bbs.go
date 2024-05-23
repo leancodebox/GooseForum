@@ -35,7 +35,9 @@ func ginBBS(ginApp *gin.Engine) {
 	admin.POST("user-edit", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.EditUser))
 	admin.POST("articles-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.ArticlesList))
 	admin.POST("article-edit", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.EditArticle))
-	admin.POST("role-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.RoleList))
-	admin.POST("role-save", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.RoleSave))
+	admin.POST("get-permission-list", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.GetPermissionList))
+	admin.POST("role-list", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleList))
+	admin.POST("role-save", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleSave))
+	admin.POST("role-delete", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleDel))
 
 }

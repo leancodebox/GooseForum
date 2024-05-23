@@ -35,10 +35,10 @@ func GetByRoleIds(roleIds []uint64) (entities []*Entity) {
 //	return result.RowsAffected
 //}
 
-//func deleteEntity(entity *Entity) int64 {
-//	result := builder().Delete(entity)
-//	return result.RowsAffected
-//}
+func DeleteEntity(entity *Entity) int64 {
+	result := builder().Delete(entity)
+	return result.RowsAffected
+}
 
 type PageQuery struct {
 	Page, PageSize int
