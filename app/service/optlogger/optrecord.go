@@ -6,7 +6,9 @@ import (
 	"time"
 )
 
-func UserOpt(userId uint64, optType int, targetType int, targetId any, msg string) {
-	entity := optRecord.Entity{OptUserId: userId, OptType: optType, TargetType: targetType, TargetId: cast.ToString(targetId), OptInfo: msg, CreatedAt: time.Now()}
+func UserOpt(userId uint64, optType OptEnum, targetId any, msg string) {
+	entity := optRecord.Entity{
+		OptUserId: userId, OptType: optType.toInt(), TargetType: optType.TargetTypeEnum().toInt(),
+		TargetId: cast.ToString(targetId), OptInfo: msg, CreatedAt: time.Now()}
 	optRecord.Create(&entity)
 }

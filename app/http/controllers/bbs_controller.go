@@ -56,6 +56,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 				Username:       username,
 			}
 		}, pageData.Data),
+		pageData.Page,
 		pageData.PageSize,
 		pageData.Total,
 	)

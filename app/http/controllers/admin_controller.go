@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -8,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	array "github.com/leancodebox/goose/collectionopt"
 )
@@ -22,6 +24,9 @@ type UserItem struct {
 	UserId     uint64                              `json:"userId"`
 	Username   string                              `json:"username"`
 	Email      string                              `json:"email"`
+	Status     int8                                `json:"status"`
+	Validate   int8                                `json:"validate"`
+	Prestige   int64                               `json:"prestige"`
 	RoleList   []datastruct.Option[string, uint64] `json:"roleList"`
 	CreateTime string                              `json:"createTime"`
 }
@@ -51,12 +56,16 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			UserId:     t.Id,
 			Username:   t.Username,
 			Email:      t.Email,
+			Status:     t.Status,
+			Validate:   t.Validate,
+			Prestige:   t.Prestige,
 			RoleList:   roleList,
 			CreateTime: t.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
 	}, pageData.Data)
 	return component.SuccessPage(
 		list,
+		pageData.Page,
 		pageData.PageSize,
 		pageData.Total,
 	)
@@ -73,8 +82,17 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 	if err != nil || user.Id == 0 {
 		return component.SuccessResponse("目标用户查询失败")
 	}
-	user.Status = params.Status
-	users.Save(&user)
+	opt := false
+	msg := "用户编辑"
+	if user.Status != params.Status {
+		msg = msg + fmt.Sprintf("[用户状态调整:%v->%v]", user.Status, params.Status)
+		user.Status = params.Status
+		opt = true
+	}
+	if opt {
+		users.Save(&user)
+		optlogger.UserOpt(req.UserId, optlogger.EditUser, user.Id, msg)
+	}
 	return component.SuccessResponse("success")
 }
 
@@ -142,6 +160,7 @@ func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 
 	return component.SuccessPage(
 		list,
+		pageData.Page,
 		pageData.PageSize,
 		pageData.Total,
 	)
