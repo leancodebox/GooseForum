@@ -143,6 +143,7 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 				UpdatedAt:     t.UpdatedAt,
 			}
 		}, pageData.Data),
+		pageData.Page,
 		pageData.PageSize,
 		pageData.Total,
 	)
