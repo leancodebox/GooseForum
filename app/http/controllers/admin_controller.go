@@ -75,15 +75,17 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 }
 
 type EditUserReq struct {
-	UserId uint64 `json:"userId"`
-	Status int8   `json:"status"`
+	UserId   uint64   `json:"userId"`
+	Status   int8     `json:"status"`
+	Validate int8     `json:"validate"`
+	RoleId   []uint64 `json:"roleId"`
 }
 
 func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 	params := req.Params
 	user, err := users.Get(params.UserId)
 	if err != nil || user.Id == 0 {
-		return component.SuccessResponse("目标用户查询失败")
+		return component.FailResponse("目标用户查询失败")
 	}
 	opt := false
 	msg := "用户编辑"
@@ -91,6 +93,33 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 		msg = msg + fmt.Sprintf("[用户状态调整:%v->%v]", user.Status, params.Status)
 		user.Status = params.Status
 		opt = true
+	}
+	if user.Validate != params.Validate {
+		msg = msg + fmt.Sprintf("[用户验证状态:%v->%v]", user.Status, params.Status)
+		user.Validate = params.Validate
+		opt = true
+	}
+	ur := userRoleRs.GetByUserId(req.Params.UserId)
+	var canUpdate []uint64
+	// 更新数据
+	for _, item := range ur {
+		item.Effective = 0
+		if slices.Contains(req.Params.RoleId, item.RoleId) {
+			item.Effective = 1
+			canUpdate = append(canUpdate, item.RoleId)
+		}
+		userRoleRs.SaveOrCreateById(item)
+	}
+	// 删除数据
+	for _, item := range req.Params.RoleId {
+		if !slices.Contains(canUpdate, item) {
+			rsItem := userRoleRs.Entity{
+				RoleId:    item,
+				UserId:    req.Params.UserId,
+				Effective: 1,
+			}
+			userRoleRs.SaveOrCreateById(&rsItem)
+		}
 	}
 	if opt {
 		users.Save(&user)
@@ -162,6 +191,16 @@ type PermissionListReq struct {
 
 func GetPermissionList(req component.BetterRequest[PermissionListReq]) component.Response {
 	res := permission.BuildOptions()
+	return component.SuccessResponse(res)
+}
+
+type GetAllRoleItemReq struct {
+}
+
+func GetAllRoleItem(req component.BetterRequest[GetAllRoleItemReq]) component.Response {
+	res := array.ArrayMap(func(t *role.Entity) datastruct.Option[string, uint64] {
+		return datastruct.Option[string, uint64]{Name: t.RoleName, Label: t.RoleName, Value: t.Id}
+	}, role.AllEffective())
 	return component.SuccessResponse(res)
 }
 
@@ -240,7 +279,7 @@ func RoleSave(req component.BetterRequest[RoleSaveReq]) component.Response {
 	for _, item := range rsList {
 		item.Effective = 0
 		if slices.Contains(req.Params.Permissions, item.PermissionId) {
-			item.Effective = 0
+			item.Effective = 1
 			canUpdate = append(canUpdate, item.PermissionId)
 		}
 		rolePermissionRs.SaveOrCreateById(item)

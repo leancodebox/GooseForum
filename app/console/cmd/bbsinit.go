@@ -10,12 +10,12 @@ func init() {
 	appendCommand(&cobra.Command{
 		Use:   "bbs:init",
 		Short: "bbs初始化",
-		Run:   runBbsinit,
+		Run:   runBBsinit,
 		// Args:  cobra.ExactArgs(1), // 只允许且必须传 1 个参数
 	})
 }
 
-func runBbsinit(_ *cobra.Command, _ []string) {
+func runBBsinit(_ *cobra.Command, _ []string) {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println(err)

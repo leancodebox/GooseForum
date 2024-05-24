@@ -113,7 +113,7 @@ export function writeArticles(data) {
     })
 }
 
-export function articlesReply(articleId, content,replyId) {
+export function articlesReply(articleId, content, replyId) {
     return instanceAxios.post("bbs/articles-reply", {
         articleId: articleId,
         content: content,
@@ -123,6 +123,18 @@ export function articlesReply(articleId, content,replyId) {
 
 export function getUserList() {
     return instanceAxios.post("admin/user-list")
+}
+export function editUser(userId,status,validate,roleId) {
+    return instanceAxios.post("admin/user-edit",{
+        userId:userId,
+        status:status,
+        validate:validate,
+        roleId:roleId,
+    })
+}
+
+export function getAllRoleItem() {
+    return instanceAxios.post('/admin/get-all-role-item')
 }
 
 export function getPermissionList() {

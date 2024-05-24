@@ -158,7 +158,7 @@ async function reply() {
               <n-flex justify="space-around">
                 <n-statistic label="声望" :value="99">
                 </n-statistic>
-                <n-statistic label="文章" :value="1,234,123">
+                <n-statistic label="文章" :value="1111">
                 </n-statistic>
               </n-flex>
               <n-divider style="margin: 0 auto"/>

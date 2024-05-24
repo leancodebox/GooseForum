@@ -30,6 +30,11 @@ func GetByRoleIds(roleIds []uint64) (entities []*Entity) {
 	return
 }
 
+func AllEffective() (entities []*Entity) {
+	builder().Find(&entities)
+	return
+}
+
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
 //	return result.RowsAffected

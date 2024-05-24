@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type {DataTableColumns} from 'naive-ui'
-import {NButton, NDataTable, NSpace, useMessage} from 'naive-ui'
+import {DataTableColumns, NButton, NDataTable, NSpace, NTag, useMessage} from 'naive-ui'
 import {h, onMounted, reactive, ref} from 'vue'
 import {getAdminArticlesList} from '@/service/request'
 
@@ -11,8 +10,8 @@ type ArticleItem = {
   type: string
   userId: string
   username: string
-  articleStatus: string
-  processStatus: string
+  articleStatus: number
+  processStatus: number
   createdAt: string
   updatedAt: string
 }
@@ -36,18 +35,38 @@ const createColumns = ({
       width: "160px", ellipsis: true
     }, {
       title: "type",
-      key: "type"
+      key: "type",
+      width: "80px",
     },
     {
-      title: "用户名",
+      title: "作者(用户名)",
       key: "username"
     },
     {
       title: '文章状态',
-      key: 'articleStatus'
+      key: 'articleStatus',
+      width: "80px",
+      render(row: ArticleItem) {
+        if (row.articleStatus === 1) {
+          return h(NTag, {type: 'success'}, () => "已发布")
+        } else {
+          return h(NTag, {type: 'warning'}, () => "草稿")
+        }
+      }
     }, {
       title: "锁定状态",
-      key: "processStatus"
+      key: "processStatus",
+      width: "80px",
+      render(row: ArticleItem) {
+        switch (row.processStatus) {
+          case 0:
+            return h(NTag, {type: 'success'}, () => "未锁定")
+          case 1:
+            return h(NTag, {type: 'warning'}, () => "锁定")
+          case 2:
+            return h(NTag, {type: 'warning'}, () => "机器锁定")
+        }
+      }
     },
     {
       title: '创建时间',
@@ -69,6 +88,7 @@ const createColumns = ({
               size: 'small',
               onClick: () => play(row)
             },
+            // 冻结 ，弹窗， 冻结理由
             {default: () => '冻结'}
         ),
           h(

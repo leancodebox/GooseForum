@@ -113,7 +113,6 @@ let addRole = ref(initData)
 let showModal = ref(false);
 
 function onPositiveClick() {
-  console.log(addRole.value)
   getRoleSave(addRole.value.id === "" ? 0 : parseInt(addRole.value.id), addRole.value.roleName, addRole.value.permissions)
       .then(r => {
         getRoleListData()

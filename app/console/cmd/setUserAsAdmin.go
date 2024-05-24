@@ -31,6 +31,7 @@ func runAdminSet(cmd *cobra.Command, _ []string) {
 	roleEntity := role.Get(1)
 	if roleEntity.Id == 0 {
 		roleEntity.RoleName = "管理员"
+		roleEntity.Effective = 1
 		role.SaveOrCreateById(&roleEntity)
 		fmt.Println("角色不存在，创建角色")
 	}
@@ -39,6 +40,7 @@ func runAdminSet(cmd *cobra.Command, _ []string) {
 	if rp.Id == 0 {
 		rp.RoleId = roleEntity.Id
 		rp.PermissionId = permission.Admin.Id()
+		rp.Effective = 1
 		rolePermissionRs.SaveOrCreateById(&rp)
 		fmt.Println("角色权限关系不存在，创建角色权限关系")
 	}
@@ -47,6 +49,7 @@ func runAdminSet(cmd *cobra.Command, _ []string) {
 	if ur.Id == 0 {
 		ur.RoleId = roleEntity.Id
 		ur.UserId = userId
+		ur.Effective = 1
 		userRoleRs.SaveOrCreateById(&ur)
 		fmt.Println("用户角色关系不存在，创建用户角色关系")
 	}
