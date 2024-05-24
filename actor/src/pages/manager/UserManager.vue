@@ -33,7 +33,6 @@ let columns = [
     title: '角色',
     key: 'role',
     render(row: UserItem) {
-      console.log()
       if (!row.roleList) {
         return []
       }
@@ -57,6 +56,10 @@ let columns = [
   {
     title: '状态',
     key: 'status'
+  },
+  {
+    title: '声望',
+    key: 'ponits'
   },
   {
     title: '积分',

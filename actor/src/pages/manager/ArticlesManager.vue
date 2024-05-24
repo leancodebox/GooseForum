@@ -1,51 +1,66 @@
 <script setup lang="ts">
 import type {DataTableColumns} from 'naive-ui'
 import {NButton, NDataTable, NSpace, useMessage} from 'naive-ui'
-import {h} from 'vue'
+import {h, onMounted, reactive, ref} from 'vue'
+import {getAdminArticlesList} from '@/service/request'
 
 const message = useMessage()
-type Song = {
-  no: number
+type ArticleItem = {
+  id: string
   title: string
-  length: string
+  type: string
+  userId: string
+  username: string
+  articleStatus: string
+  processStatus: string
+  createdAt: string
+  updatedAt: string
 }
-const data: Song[] = [
-  {no: 3, title: 'Wonderwall', length: '4:18'},
-  {no: 4, title: "Don't Look Back in Anger", length: '4:48'},
-  {no: 12, title: 'Champagne Supernova', length: '7:27'}
-]
+const data = ref<ArticleItem[]>([])
 
 
 const createColumns = ({
                          play
                        }: {
-  play: (row: Song) => void
-}): DataTableColumns<Song> => {
+  play: (row: ArticleItem) => void
+}): DataTableColumns<ArticleItem> => {
   return [
     {
-      title: 'No',
-      key: 'no'
+      title: 'id',
+      key: 'id',
+      width: "60px",
     },
     {
       title: 'Title',
-      key: 'title'
+      key: 'title',
+      width: "160px", ellipsis: true
+    }, {
+      title: "type",
+      key: "type"
+    },
+    {
+      title: "用户名",
+      key: "username"
     },
     {
       title: '文章状态',
-      key: 'status'
+      key: 'articleStatus'
+    }, {
+      title: "锁定状态",
+      key: "processStatus"
     },
     {
       title: '创建时间',
-      key: 'length'
+      key: 'createdAt'
     },
     {
       title: '修改时间',
-      key: 'length'
+      key: 'updatedAt'
     },
     {
       title: 'Action',
       key: 'actions',
-      render(row) {
+      render(row: ArticleItem) {
         return [h(
             NButton,
             {
@@ -71,19 +86,47 @@ const createColumns = ({
   ]
 }
 let columns = createColumns({
-  play(row: Song) {
+  play(row: ArticleItem) {
     message.info(`Play ${row.title}`)
   }
 })
 let pagination = true
+const paginationReactive = reactive({
+  page: 1,
+  pageCount: 1,
+  pageSize: 20,
+  itemCount: 0,
+  search: "",
+  prefix({itemCount}) {
+    return `Total is ${itemCount}.`
+  }
+})
+onMounted(async () => {
+  await searchPage(paginationReactive.page)
+})
+
+async function searchPage(page: number) {
+  try {
+    let res = await getAdminArticlesList(page)
+    data.value = res.result.list
+    paginationReactive.page = page
+    paginationReactive.pageCount = parseInt(String(res.result.total / res.result.size))
+    paginationReactive.itemCount = res.result.total
+  } catch (e) {
+    console.error(e)
+  }
+}
 </script>
 <template>
   <n-space vertical>
     <n-data-table
+        remote
         :columns="columns"
         :data="data"
-        :pagination="pagination"
+        :pagination="paginationReactive"
         :bordered="false"
+        @update:page="searchPage"
+        flex-height :style="{ height: `600px` }" striped
     />
   </n-space>
 </template>

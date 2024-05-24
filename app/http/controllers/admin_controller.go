@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -104,10 +106,46 @@ type ArticlesListReq struct {
 	UserId   uint64 `form:"userId"`
 }
 
+type ArticlesInfoDto struct {
+	Id            uint64    `json:"id"`
+	Title         string    `json:"title"`
+	Type          int8      ` json:"type"`  // 文章类型：0 博文，1教程，2问答，3分享
+	UserId        uint64    `json:"userId"` //
+	Username      string    `json:"username"`
+	ArticleStatus int8      `json:"articleStatus"` // 文章状态：0 草稿 1 发布
+	ProcessStatus int8      `json:"processStatus"` // 管理状态：0 正常 1 封禁
+	CreatedAt     time.Time ` json:"createdAt"`    //
+	UpdatedAt     time.Time ` json:"updatedAt"`    //
+}
+
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
 	param := req.Params
-	_ = articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
-	return component.SuccessResponse("")
+	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
+	userIds := array.ArrayMap(func(t articles.Entity) uint64 {
+		return t.UserId
+	}, pageData.Data)
+	userMap := users.GetMapByIds(userIds)
+	return component.SuccessPage(
+		array.ArrayMap(func(t articles.Entity) ArticlesInfoDto {
+			username := ""
+			if user, _ := userMap[t.UserId]; user != nil {
+				username = user.Username
+			}
+			return ArticlesInfoDto{
+				Id:            t.Id,
+				Title:         t.Title,
+				Type:          t.Type,
+				UserId:        t.UserId,
+				Username:      username,
+				ArticleStatus: t.ArticleStatus,
+				ProcessStatus: t.ProcessStatus,
+				CreatedAt:     t.CreatedAt,
+				UpdatedAt:     t.UpdatedAt,
+			}
+		}, pageData.Data),
+		pageData.PageSize,
+		pageData.Total,
+	)
 }
 
 type EditArticleReq struct {

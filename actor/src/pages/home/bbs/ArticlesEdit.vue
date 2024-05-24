@@ -52,7 +52,7 @@ async function publish() {
       await router.push({name: "articlesPage", query: {id: res.result}})
     }
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
   publishLoading.value = false
 }
