@@ -1,8 +1,24 @@
 <script setup>
-import {NCard, NH2, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing} from 'naive-ui'
+import {
+  NAlert,
+  NAvatar,
+  NButton,
+  NCard,
+  NDivider,
+  NFlex,
+  NInput,
+  NLayout,
+  NLayoutContent,
+  NLayoutSider,
+  NList,
+  NListItem,
+  NStatistic,
+  NTag,
+  NThing
+} from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
-import {getArticlesDetailApi} from "@/service/request";
+import {articlesReply, getArticlesDetailApi} from "@/service/request";
 import ArticlesMdPage from "@/pages/home/bbs/ArticlesMdPage.vue";
 import '@/assets/github-markdown.css'
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
@@ -10,6 +26,8 @@ import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
 const commentList = ref([])
 const articleInfo = ref({
   title: "",
+  userId: 0,
+  username: "",
   tag: ["文章", "技术"],
   createDate: "2022-12-28 01:01:01",
   lastUpdateDate: "2022-12-28 01:01:01",
@@ -23,6 +41,8 @@ function getArticlesDetail() {
   getArticlesDetailApi(id, maxCommentId).then(r => {
     if (r.result.articleContent !== undefined && r.result.articleContent !== "") {
       articleInfo.value = {
+        userId: r.result.userId,
+        username: r.result.username,
         title: r.result.articleTitle,
         tag: ["文章", "技术"],
         createDate: "2022-12-28 01:01:01",
@@ -30,15 +50,13 @@ function getArticlesDetail() {
         body: r.result.articleContent
       }
     }
-    let commentData = r.result.commentList.map(function (item) {
+    commentList.value = r.result.commentList.map(function (item) {
       return {
-        username: "" + item.userId,
+        userId: item.userId,
+        username: item.username,
         content: item.content,
       }
     })
-    commentList.value.push(
-        ...commentData
-    )
   }).catch(e => {
     console.error(e)
   })
@@ -53,7 +71,26 @@ onMounted(() => {
 const isMobile = useIsMobile()
 const isTabletRef = useIsTablet()
 const isSmallDesktop = useIsSmallDesktop()
+const replyData = ref({
+  content: "",
+  replyId: 0,
+})
+const lockReply = ref(false)
 
+async function reply() {
+  lockReply.value = true
+  try {
+    console.log(id, replyData.value.content, replyData.value.content)
+    let res = await articlesReply(parseInt(id), replyData.value.content, replyData.value.replyId)
+    if (res.code === 0) {
+      getArticlesDetail()
+    }
+  } catch (err) {
+    console.log(err)
+  } finally {
+    lockReply.value = true
+  }
+}
 </script>
 <template>
 
@@ -63,31 +100,39 @@ const isSmallDesktop = useIsSmallDesktop()
               :style="{flex: 1, maxWidth: '1400px', margin: '0 auto', padding: '24px'}">
       <n-layout-content content-style="padding: 24px;">
 
-        <n-space vertical>
+        <n-flex vertical>
           <n-card style="margin:0 auto">
-
             <h2> {{ articleInfo.title }}</h2>
-
-            <n-space size="small" style="margin-bottom: 16px">
+            <n-flex size="small" style="margin-bottom: 16px">
               <n-tag v-for="itemTag in articleInfo.tag" :bordered="false" type="info" size="small"
                      v-text="itemTag">
               </n-tag>
-            </n-space>
-
+            </n-flex>
             <articles-md-page :markdown="articleInfo.body"></articles-md-page>
-
           </n-card>
 
           <n-card style="margin:0 auto" title="激情评论">
             <n-list>
               <n-list-item v-for="item in commentList">
-                <n-thing :title="item.userId" content-style="margin-top: 10px;">
+                <n-thing :title="item.username" content-style="margin-top: 10px;">
                   <articles-md-page :markdown="item.content"></articles-md-page>
                 </n-thing>
               </n-list-item>
             </n-list>
           </n-card>
-        </n-space>
+          <n-card>
+            <n-flex vertical>
+              <n-alert type="info" :bordered="false">
+                讨论应以学习和精进为目的。请勿发布不友善或者负能量的内容，与人为善，比聪明更重要！
+              </n-alert>
+              <n-input v-model:value="replyData.content"></n-input>
+              <n-flex justify="end" size="large">
+                <n-button @click="reply">评论</n-button>
+              </n-flex>
+            </n-flex>
+
+          </n-card>
+        </n-flex>
 
 
       </n-layout-content>
@@ -97,9 +142,36 @@ const isSmallDesktop = useIsSmallDesktop()
           bordered
           v-show="!(isMobile||isTabletRef)"
       >
-        <n-card>
-          <n-h2>海淀桥biubiubiu</n-h2>
-        </n-card>
+        <n-flex vertical>
+          <n-card>
+            <n-flex vertical>
+              <n-flex>
+                <n-avatar round :size="60">
+                  {{ articleInfo.username }}
+                </n-avatar>
+                <n-flex vertical>
+                  <span>{{ articleInfo.username }}({{ articleInfo.userId }})</span>
+                  <span>未填写</span>
+                </n-flex>
+              </n-flex>
+              <n-divider style="margin: 0 auto"/>
+              <n-flex justify="space-around">
+                <n-statistic label="声望" :value="99">
+                </n-statistic>
+                <n-statistic label="文章" :value="1,234,123">
+                </n-statistic>
+              </n-flex>
+              <n-divider style="margin: 0 auto"/>
+              <n-flex justify="space-around">
+                <n-button>关注</n-button>
+                <n-button>私信</n-button>
+              </n-flex>
+            </n-flex>
+          </n-card>
+          <n-card title="小卡片" size="small">
+            卡片内容
+          </n-card>
+        </n-flex>
 
       </n-layout-sider>
     </n-layout>

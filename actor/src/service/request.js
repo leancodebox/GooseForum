@@ -113,6 +113,14 @@ export function writeArticles(data) {
     })
 }
 
+export function articlesReply(articleId, content,replyId) {
+    return instanceAxios.post("bbs/articles-reply", {
+        articleId: articleId,
+        content: content,
+        replyId: replyId,
+    })
+}
+
 export function getUserList() {
     return instanceAxios.post("admin/user-list")
 }

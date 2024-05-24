@@ -71,26 +71,44 @@ type GetArticlesDetailRequest struct {
 type ReplyDto struct {
 	ArticleId  uint64 `json:"articleId"`
 	UserId     uint64 `json:"userId"`
-	Content    string `json:"Content"`
+	Username   string `json:"username"`
+	Content    string `json:"content"`
 	CreateTime string `json:"createTime"`
 }
 
 // GetArticlesDetail 文章详情
 func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 	entity := articles.Get(req.Id)
-	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSize(req.PageSize))
-	commentList := array.ArrayMap(func(item reply.Entity) ReplyDto {
+	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSizeWithRange(req.PageSize, 10, 100))
+	userIds := array.ArrayMap(func(item reply.Entity) uint64 {
+		return item.UserId
+	}, replyEntities)
+	userIds = append(userIds, entity.UserId)
+	userMap := users.GetMapByIds(userIds)
+	author := "陶渊明"
+	if user, ok := userMap[entity.UserId]; ok {
+		author = user.Username
+	}
+	replyList := array.ArrayMap(func(item reply.Entity) ReplyDto {
+		username := "陶渊明"
+		if user, ok := userMap[item.UserId]; ok {
+			username = user.Username
+		}
 		return ReplyDto{
 			ArticleId:  item.ArticleId,
 			UserId:     item.UserId,
+			Username:   username,
 			Content:    item.Content,
 			CreateTime: item.CreatedAt.Format(time.RFC3339),
 		}
 	}, replyEntities)
 	return component.SuccessResponse(map[string]any{
-		"articleTitle":   &entity.Title,
-		"articleContent": &entity.Content,
-		"commentList":    commentList,
+		"userId":         entity.UserId,
+		"username":       author,
+		"articleTitle":   entity.Title,
+		"articleContent": entity.Content,
+		"commentList":    replyList,
+		"replyList":      replyList,
 	})
 
 }
@@ -136,8 +154,8 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 
 type ArticleReplyId struct {
 	ArticleId uint64 `json:"articleId"`
-	Comment   string `json:"comment"`
-	ReplyId   uint64 `json:"repoId"`
+	Content   string `json:"content"`
+	ReplyId   uint64 `json:"replyId"`
 }
 
 func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Response {
@@ -147,7 +165,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	if req.Params.ReplyId > 0 && reply.Get(req.Params.ReplyId).Id == 0 {
 		return component.FailResponse("要回复的评论不存在")
 	}
-	reply.Create(&reply.Entity{Content: req.Params.Comment, UserId: req.UserId})
+	reply.Create(&reply.Entity{ArticleId: req.Params.ArticleId, Content: req.Params.Content, UserId: req.UserId})
 	pointservice.RewardPoints(req.UserId, 2, pointservice.RewardPoints4Reply)
 	return component.SuccessResponse(true)
 }
