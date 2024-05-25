@@ -1,5 +1,5 @@
-import sun from "@/pages/HomePage.vue";
-import moon from "@/pages/AllManager.vue";
+import sun from "@/pages/Main.vue";
+import moon from "@/pages/Admin.vue";
 import {
     CogOutline,
     DocumentsOutline,
