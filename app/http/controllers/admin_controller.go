@@ -316,3 +316,10 @@ func RoleDel(req component.BetterRequest[RoleSaveDel]) component.Response {
 	role.DeleteEntity(&roleEntity)
 	return component.SuccessResponse(true)
 }
+
+type GetOptRecordLogReq struct {
+}
+
+func GetOptRecordLog() {
+
+}
