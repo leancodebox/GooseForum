@@ -1,7 +1,6 @@
 <script setup>
-import {NAutoComplete, NButton, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NText} from 'naive-ui';
-import {useIsMobile, useIsSmallDesktop, useIsTablet} from '@/utils/composables';
-
+import {NButton, NFlex, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NSpace} from 'naive-ui';
+import {useIsMobile, useIsTablet} from "@/utils/composables";
 import {FastFoodOutline as CashIcon, FishOutline, InfiniteOutline} from '@vicons/ionicons5'
 import {h, ref} from "vue";
 import {RouterLink} from "vue-router";
@@ -47,35 +46,30 @@ let style = {
   'grid-template-columns':
       'calc(272px - var(--side-padding)) 1fr auto'
 }
+let isTablet = useIsTablet()
+let isMobile = useIsMobile()
 </script>
 <template>
   <n-layout position="absolute">
-
-    <n-layout-header class="l-header" position="absolute"
+    <n-layout-header position="absolute"
                      style="height: 64px;align-items: center;"
                      bordered
                      :style="style"
     >
-      <n-text tag="div" :depth="1">
-        <span style="font-size: 18px">GooseForum</span>
-      </n-text>
-      <div style="display: flex; align-items: center; overflow: hidden;">
-        <div class="nav-menu">
+      <n-flex justify="space-between" style="padding: 0 var(--side-padding);height: 100%">
+        <n-space justify="space-around" style="align-items: center;" v-show="!isTablet&&!isMobile">
+          <span style="font-size: 18px;">GooseForum</span>
           <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions"/>
-        </div>
-        <n-auto-complete style="width: 280px; margin-left: 24px; margin-right: 12px; flex-shrink: 0;" clear-after-select
-                         blur-after-select>
-        </n-auto-complete>
-      </div>
-      <div class="nav-end">
-        <router-link :to="'/home/bbs/articlesEdit'">
-          <n-button quaternary>我也写一篇</n-button>
-        </router-link>
-        <n-button quaternary>消息</n-button>
-        <n-button quaternary>审核中心</n-button>
-        <div style="width:15px"></div>
-        <user-info-card></user-info-card>
-      </div>
+        </n-space>
+        <n-flex justify="end" style="align-items: center;">
+          <router-link :to="'/home/bbs/articlesEdit'">
+            <n-button quaternary>我也写一篇</n-button>
+          </router-link>
+          <n-button quaternary>消息</n-button>
+          <n-button quaternary>审核中心</n-button>
+          <user-info-card></user-info-card>
+        </n-flex>
+      </n-flex>
     </n-layout-header>
 
     <n-layout style="top: 64px;"
@@ -96,22 +90,5 @@ let style = {
 </template>
 
 <style>
-.l-header {
-  display: grid;
-  grid-template-rows: calc(var(--header-height) - 1px);
-  align-items: center;
-  padding: 0 var(--side-padding);
-}
 
-.nav-menu {
-  padding-left: 0px;
-  overflow: hidden;
-  flex-grow: 0;
-  flex-shrink: 1;
-}
-
-.nav-end {
-  display: flex;
-  align-items: center;
-}
 </style>
