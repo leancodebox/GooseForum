@@ -4,7 +4,7 @@ import {useIsMobile, useIsTablet} from "@/utils/composables";
 import {FastFoodOutline as CashIcon, FishOutline, InfiniteOutline} from '@vicons/ionicons5'
 import {h, ref} from "vue";
 import {RouterLink} from "vue-router";
-import UserInfoCard from "@/pages/home/UserInfoCard.vue";
+import UserInfoCard from "@/components/UserInfoCard.vue";
 
 function renderIcon(icon) {
   return () => h(NIcon, null, {default: () => h(icon)});
@@ -48,6 +48,8 @@ let style = {
 }
 let isTablet = useIsTablet()
 let isMobile = useIsMobile()
+
+
 </script>
 <template>
   <n-layout position="absolute">
@@ -65,8 +67,10 @@ let isMobile = useIsMobile()
           <router-link :to="'/home/bbs/articlesEdit'">
             <n-button quaternary>我也写一篇</n-button>
           </router-link>
-          <n-button quaternary>消息</n-button>
-          <n-button quaternary>审核中心</n-button>
+          <router-link :to="'/home/notificationCenter'">
+            <n-button quaternary>消息中心</n-button>
+          </router-link>
+<!--          <n-button quaternary>审核中心</n-button>-->
           <user-info-card></user-info-card>
         </n-flex>
       </n-flex>

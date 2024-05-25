@@ -1,6 +1,6 @@
 <script setup>
 import {NButton, NCard, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing} from 'naive-ui'
-import {onMounted, onUnmounted, ref} from "vue";
+import {onMounted, ref} from "vue";
 import {getArticlesPageApi} from "@/service/request";
 import {useIsMobile} from "@/utils/composables";
 
@@ -13,8 +13,8 @@ function getArticlesAction() {
     let newList = r.result.list.map(function (item) {
       return {
         id: item.id,
-        topic:"",
-        category:"博文",
+        topic: "",
+        category: "博文",
         title: item.title,
         tag: ["文章", "技术"],
         desc: item.content,
@@ -40,26 +40,7 @@ function more() {
 
 
 const text = ref('金色传说') // 需要进行高亮的文本
-const textColor = ref('#000') // 文本颜色
 
-let interval // 定时器变量
-
-// 定义高亮动画函数，每 200ms 切换一次文本颜色
-function highlightAnimation() {
-  interval = setInterval(() => {
-    textColor.value = textColor.value === '#fff' ? '#E21C1CFF' : '#fff'
-  }, 200)
-}
-
-// 在组件挂载时启动高亮动画
-onMounted(() => {
-  highlightAnimation()
-})
-
-// 在组件卸载时停止高亮动画
-onUnmounted(() => {
-  clearInterval(interval)
-})
 
 const isMobile = useIsMobile()
 </script>
@@ -82,15 +63,14 @@ const isMobile = useIsMobile()
             <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
               <n-thing>
                 <template #description>
-                  <n-space size="small" style="padding-top: 4px" >
+                  <n-space size="small" style="padding-top: 4px">
 
                     [{{ item.username }}]
-                    <n-tag :bordered="false" type="success"   size="small">
-                      {{ item.category}}
+                    <n-tag :bordered="false" type="success" size="small">
+                      {{ item.category }}
                     </n-tag>
-                    <span v-if="item.type === 'xxx'" class="highlight-animation"
-                          :style="{ color: textColor }">
 
+                    <span v-if="item.type === 'xxx'" class="blinking-div">
                     {{ item.title }}
                     </span>
                     <span v-else>
@@ -141,9 +121,7 @@ const isMobile = useIsMobile()
   </n-layout>
 </template>
 <style scoped>
-.highlight-animation {
-  animation: highlight 0.5s ease-in-out alternate infinite;
-}
+
 
 @keyframes highlight {
   from {
@@ -162,5 +140,25 @@ a {
   .content {
     max-width: 100%;
   }
+}
+
+
+@keyframes yellowToRed {
+  0% {
+    background-color: yellow;
+    color: black;
+  }
+  50% {
+    background-color: white;
+    color: red;
+  }
+  100% {
+    background-color: yellow;
+    color: black;
+  }
+}
+
+.blinking-div {
+  animation: yellowToRed 0.5s infinite;
 }
 </style>

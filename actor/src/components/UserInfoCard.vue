@@ -8,15 +8,19 @@ const userStore = useUserStore()
 const message = useMessage()
 let options = [
   {label: "我的发布", key: "我的发布"},
-  {label: "个人中心", key: "个人中心"},
+  {label: "个人中心", key: "userInfo"},
   {label: "编辑资料", key: "编辑资料"},
   {label: "账号退出", key: "账号退出"},
 ]
 let handleSelect = function (key) {
   message.info(String(key))
+  if (key === "userInfo") {
+    router.push({name: 'userInfo'})
+  }
+  //
 }
-let loginOrReg = function (){
-  router.push({ path: '/login' })
+let loginOrReg = function () {
+  router.push({path: '/login'})
 }
 </script>
 

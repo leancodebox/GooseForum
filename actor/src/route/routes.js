@@ -1,6 +1,13 @@
 import sun from "@/pages/HomePage.vue";
 import moon from "@/pages/AllManager.vue";
-import {CogOutline, DocumentsOutline, HammerOutline, PeopleOutline, ReceiptOutline,HappyOutline} from '@vicons/ionicons5'
+import {
+    CogOutline,
+    DocumentsOutline,
+    HammerOutline,
+    HappyOutline,
+    PeopleOutline,
+    ReceiptOutline
+} from '@vicons/ionicons5'
 
 
 let allTool = () => import("@/pages/manager/AllTool.vue")
@@ -13,10 +20,13 @@ let optLog = () => import("@/pages/manager/OptLog.vue")
 let about = () => import("@/pages/home/AboutPage.vue")
 let index = () => import("@/pages/home/IndexPage.vue")
 let login = () => import("@/pages/Login.vue")
-let bbs = () => import("@/pages/home/bbs/BBSIndex.vue")
-let bbsPage = () => import("@/pages/home/bbs/BBSPage.vue")
-let articlesPage = () => import("@/pages/home/bbs/ArticlesPage.vue")
+let bbs = () => import("@/pages/home/BBSIndex.vue")
+let bbsPage = () => import("@/pages/home/bbs/ArticlesList.vue")
+let articlesPage = () => import("@/pages/home/bbs/ArticlesDetail.vue")
 let articlesEdit = () => import("@/pages/home/bbs/ArticlesEdit.vue")
+let userCenter = () => import("@/pages/home/UserCenter.vue")
+let userInfo = () => import("@/pages/home/user/UserInfo.vue")
+let notificationCenter = () => import("@/pages/home/NotificationCenter.vue")
 
 export let managerRouter = {
     belongMenu: true,
@@ -57,6 +67,15 @@ export let routes = [
                 ]
             },
             {name: 'about', path: 'about', component: about},
+            {
+                name: 'userCenter', path: 'userCenter', component: userCenter, children: [
+                    {name: '', path: '', redirect: '/home/userCenter/userInfo'},
+                    {name: 'userInfo', path: 'userInfo', component: userInfo},
+                ]
+            },
+            {
+                name: 'notificationCenter', path: 'notificationCenter', component: notificationCenter
+            }
 
         ]
     },

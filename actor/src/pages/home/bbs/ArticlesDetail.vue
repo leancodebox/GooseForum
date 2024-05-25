@@ -19,7 +19,7 @@ import {
 import {onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
 import {articlesReply, getArticlesDetailApi} from "@/service/request";
-import ArticlesMdPage from "@/pages/home/bbs/ArticlesMdPage.vue";
+import ArticlesMdPage from "@/pages/home/bbs/MarkdownShow.vue";
 import '@/assets/github-markdown.css'
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
 
@@ -112,7 +112,8 @@ async function reply() {
           </n-card>
 
           <n-card style="margin:0 auto" title="激情评论">
-            <n-list>
+            <span v-if="commentList">暂无</span>
+            <n-list v-else>
               <n-list-item v-for="item in commentList">
                 <n-thing :title="item.username" content-style="margin-top: 10px;">
                   <articles-md-page :markdown="item.content"></articles-md-page>
