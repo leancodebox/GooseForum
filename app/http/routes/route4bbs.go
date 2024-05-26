@@ -20,7 +20,10 @@ func ginBBS(ginApp *gin.Engine) {
 	// 用户主页
 	// tag/分类
 
-	bbsAuth := bbs.Use(middleware.JWTAuth4Gin)
+	bbsAuth := bbs.Use(middleware.JWTAuth4Gin).
+		Use(middleware.JWTAuth4Gin)
+	//
+	bbsAuth.POST("get-articles-origin", UpButterReq(controllers.WriteArticlesOrigin))
 	// 发布文章
 	bbsAuth.POST("write-articles", UpButterReq(controllers.WriteArticles))
 	// 回复文章
@@ -40,5 +43,6 @@ func ginBBS(ginApp *gin.Engine) {
 	admin.POST("role-list", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleList))
 	admin.POST("role-save", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleSave))
 	admin.POST("role-delete", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleDel))
+	admin.POST("opt-record-page", middleware.CheckPermission(permission.Admin), UpButterReq(controllers.OptRecordPage))
 
 }

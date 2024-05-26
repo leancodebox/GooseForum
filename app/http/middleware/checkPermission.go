@@ -18,10 +18,6 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 			c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
 			c.Abort()
 		}
-		if userId == 0 {
-			c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
-			c.Abort()
-		}
 		user, err := users.Get(userId)
 		if err != nil {
 			c.JSON(http.StatusForbidden, component.FailData("操作异常"))
@@ -32,5 +28,6 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 			c.JSON(http.StatusForbidden, component.FailData(msg))
 			c.Abort()
 		}
+		c.Next()
 	}
 }

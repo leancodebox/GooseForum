@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/datastruct"
@@ -317,9 +318,18 @@ func RoleDel(req component.BetterRequest[RoleSaveDel]) component.Response {
 	return component.SuccessResponse(true)
 }
 
-type GetOptRecordLogReq struct {
+type OptRecordPageReq struct {
 }
 
-func GetOptRecordLog() {
-
+func OptRecordPage(req component.BetterRequest[OptRecordPageReq]) component.Response {
+	pageData := optRecord.Page(optRecord.PageQuery{})
+	return component.SuccessPage(
+		array.Map(pageData.Data, func(item optRecord.Entity) optRecord.Entity {
+			return item
+		}),
+		pageData.Page,
+		pageData.PageSize,
+		pageData.Total,
+	)
 }
+

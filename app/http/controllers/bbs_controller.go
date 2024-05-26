@@ -113,6 +113,26 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 
 }
 
+type WriteArticlesOriginReq struct {
+	Id int64 `json:"id"`
+}
+
+// WriteArticlesOrigin 写文章
+func WriteArticlesOrigin(req component.BetterRequest[WriteArticleReq]) component.Response {
+	entity := articles.Get(req.Params.Id)
+	if entity.Id == 0 {
+		return component.FailResponse("不存在")
+	}
+	if entity.UserId != req.UserId {
+		return component.FailResponse("不存在")
+	}
+	return component.SuccessResponse(map[string]any{
+		"userId":         entity.UserId,
+		"articleTitle":   entity.Title,
+		"articleContent": entity.Content,
+	})
+}
+
 type WriteArticleReq struct {
 	Id         int64    `json:"id"`
 	Content    string   `json:"content" validate:"required"`
