@@ -60,7 +60,7 @@ func CheckUser(userId uint64, permission Enum) bool {
 
 // GetPermission 获取权限
 func GetPermission(roleIds []uint64) []Enum {
-	return array.ArrayMap(func(t uint64) Enum {
+	return array.Map(rolePermissionRs.GetPermissionIdsByRoleIds(roleIds), func(t uint64) Enum {
 		return Enum(t)
-	}, rolePermissionRs.GetPermissionIdsByRoleIds(roleIds))
+	})
 }

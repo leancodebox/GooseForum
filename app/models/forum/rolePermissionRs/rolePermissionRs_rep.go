@@ -57,9 +57,9 @@ func GetRsByRoleIds(roleIds []uint64) (entities []*Entity) {
 }
 
 func GetPermissionIdsByRoleIds(roleIds []uint64) (permissionIds []uint64) {
-	return array.ArrayMap(func(t *Entity) uint64 {
+	return array.Map(GetRsByRoleIds(roleIds), func(t *Entity) uint64 {
 		return t.PermissionId
-	}, GetRsByRoleIds(roleIds))
+	})
 }
 
 func GetRsGroupByRoleIds(roleIds []uint64) (result map[uint64][]uint64) {

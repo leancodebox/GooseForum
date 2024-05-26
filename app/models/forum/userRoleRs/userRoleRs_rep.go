@@ -50,9 +50,9 @@ func GetByUserIdAndRoleId(userId, roleId uint64) (entities Entity) {
 }
 
 func GetRoleIdsByUserId(userId uint64) []uint64 {
-	return array.ArrayMap(func(t *Entity) uint64 {
+	return array.Map(GetByUserId(userId), func(t *Entity) uint64 {
 		return t.RoleId
-	}, GetByUserId(userId))
+	})
 }
 
 func GetByUserIds(userIds []uint64) (entities []*Entity) {
@@ -65,9 +65,9 @@ func GetRoleGroupByUserIds(userIds []uint64) map[uint64][]role.Entity {
 	if len(rs) == 0 {
 		return map[uint64][]role.Entity{}
 	}
-	roleIds := array.ArrayMap(func(t *Entity) uint64 {
+	roleIds := array.Map(rs, func(t *Entity) uint64 {
 		return t.RoleId
-	}, rs)
+	})
 	roleEntityList := role.GetByRoleIds(roleIds)
 	roleMap := array.Slice2Map(roleEntityList, func(v *role.Entity) uint64 {
 		return v.Id

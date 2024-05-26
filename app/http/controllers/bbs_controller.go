@@ -14,12 +14,12 @@ import (
 )
 
 func GetArticlesCategory() component.Response {
-	res := array.ArrayMap(func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
+	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
 		return datastruct.Option[string, uint64]{
 			Name:  t.Category,
 			Value: t.Id,
 		}
-	}, articleCategory.All())
+	})
 	return component.SuccessResponse(res)
 }
 
@@ -39,12 +39,12 @@ type ArticlesSimpleDto struct {
 // GetArticlesPage 文章列表
 func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, FilterStatus: true})
-	userIds := array.ArrayMap(func(t articles.Entity) uint64 {
+	userIds := array.Map(pageData.Data, func(t articles.Entity) uint64 {
 		return t.UserId
-	}, pageData.Data)
+	})
 	userMap := users.GetMapByIds(userIds)
 	return component.SuccessPage(
-		array.ArrayMap(func(t articles.Entity) ArticlesSimpleDto {
+		array.Map(pageData.Data, func(t articles.Entity) ArticlesSimpleDto {
 			username := ""
 			if user, _ := userMap[t.UserId]; user != nil {
 				username = user.Username
@@ -55,7 +55,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 				Username:       username,
 			}
-		}, pageData.Data),
+		}),
 		pageData.Page,
 		pageData.PageSize,
 		pageData.Total,
@@ -80,16 +80,16 @@ type ReplyDto struct {
 func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 	entity := articles.Get(req.Id)
 	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSizeWithRange(req.PageSize, 10, 100))
-	userIds := array.ArrayMap(func(item reply.Entity) uint64 {
+	userIds := array.Map(replyEntities, func(item reply.Entity) uint64 {
 		return item.UserId
-	}, replyEntities)
+	})
 	userIds = append(userIds, entity.UserId)
 	userMap := users.GetMapByIds(userIds)
 	author := "陶渊明"
 	if user, ok := userMap[entity.UserId]; ok {
 		author = user.Username
 	}
-	replyList := array.ArrayMap(func(item reply.Entity) ReplyDto {
+	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
 		username := "陶渊明"
 		if user, ok := userMap[item.UserId]; ok {
 			username = user.Username
@@ -101,7 +101,7 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 			Content:    item.Content,
 			CreateTime: item.CreatedAt.Format(time.RFC3339),
 		}
-	}, replyEntities)
+	})
 	return component.SuccessResponse(map[string]any{
 		"userId":         entity.UserId,
 		"username":       author,

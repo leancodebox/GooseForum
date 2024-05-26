@@ -41,19 +41,19 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 		Email:    req.Params.Email,
 	})
 
-	userIdList := array.ArrayMap(func(t users.Entity) uint64 {
+	userIdList := array.Map(pageData.Data, func(t users.Entity) uint64 {
 		return t.Id
-	}, pageData.Data)
+	})
 	userRoleMap := userRoleRs.GetRoleGroupByUserIds(userIdList)
-	list := array.ArrayMap(func(t users.Entity) UserItem {
+	list := array.Map(pageData.Data, func(t users.Entity) UserItem {
 		var roleList []datastruct.Option[string, uint64]
 		if data, ok := userRoleMap[t.Id]; ok {
-			roleList = array.ArrayMap(func(rItem role.Entity) datastruct.Option[string, uint64] {
+			roleList = array.Map(data, func(rItem role.Entity) datastruct.Option[string, uint64] {
 				return datastruct.Option[string, uint64]{
 					Name:  rItem.RoleName,
 					Value: rItem.Id,
 				}
-			}, data)
+			})
 		}
 		return UserItem{
 			UserId:     t.Id,
@@ -65,7 +65,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			RoleList:   roleList,
 			CreateTime: t.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
-	}, pageData.Data)
+	})
 	return component.SuccessPage(
 		list,
 		pageData.Page,
@@ -150,12 +150,12 @@ type ArticlesInfoDto struct {
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
 	param := req.Params
 	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
-	userIds := array.ArrayMap(func(t articles.Entity) uint64 {
+	userIds := array.Map(pageData.Data, func(t articles.Entity) uint64 {
 		return t.UserId
-	}, pageData.Data)
+	})
 	userMap := users.GetMapByIds(userIds)
 	return component.SuccessPage(
-		array.ArrayMap(func(t articles.Entity) ArticlesInfoDto {
+		array.Map(pageData.Data, func(t articles.Entity) ArticlesInfoDto {
 			username := ""
 			if user, _ := userMap[t.UserId]; user != nil {
 				username = user.Username
@@ -171,7 +171,7 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 				CreatedAt:     t.CreatedAt,
 				UpdatedAt:     t.UpdatedAt,
 			}
-		}, pageData.Data),
+		}),
 		pageData.Page,
 		pageData.PageSize,
 		pageData.Total,
@@ -198,9 +198,9 @@ type GetAllRoleItemReq struct {
 }
 
 func GetAllRoleItem(req component.BetterRequest[GetAllRoleItemReq]) component.Response {
-	res := array.ArrayMap(func(t *role.Entity) datastruct.Option[string, uint64] {
+	res := array.Map(role.AllEffective(), func(t *role.Entity) datastruct.Option[string, uint64] {
 		return datastruct.Option[string, uint64]{Name: t.RoleName, Label: t.RoleName, Value: t.Id}
-	}, role.AllEffective())
+	})
 	return component.SuccessResponse(res)
 }
 
@@ -222,21 +222,21 @@ type PermissionItem struct {
 
 func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 	pageData := role.Page(role.PageQuery{})
-	roleIds := array.ArrayMap(func(t role.Entity) uint64 {
+	roleIds := array.Map(pageData.Data, func(t role.Entity) uint64 {
 		return t.Id
-	}, pageData.Data)
+	})
 	rpGroup := make(map[uint64][]uint64)
 	if len(roleIds) > 0 {
 		rpGroup = rolePermissionRs.GetRsGroupByRoleIds(roleIds)
 	}
-	list := array.ArrayMap(func(t role.Entity) RoleItem {
+	list := array.Map(pageData.Data, func(t role.Entity) RoleItem {
 		pList, ok := rpGroup[t.Id]
 		permissionItemList := make([]PermissionItem, 0)
 		if ok {
-			permissionItemList = array.ArrayMap(func(t uint64) PermissionItem {
+			permissionItemList = array.Map(pList, func(t uint64) PermissionItem {
 				p := permission.Enum(t)
 				return PermissionItem{Id: p.Id(), Name: p.Name()}
-			}, pList)
+			})
 		}
 		return RoleItem{
 			RoleId:      t.Id,
@@ -245,7 +245,7 @@ func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 			Permissions: permissionItemList,
 			CreateTime:  t.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
-	}, pageData.Data)
+	})
 
 	return component.SuccessPage(
 		list,

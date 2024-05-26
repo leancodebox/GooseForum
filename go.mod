@@ -1,6 +1,8 @@
 module github.com/leancodebox/GooseForum
 
-go 1.21
+go 1.22
+
+toolchain go1.22.0
 
 require (
 	github.com/gin-contrib/gzip v1.0.1
@@ -9,11 +11,12 @@ require (
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.20.0
-	github.com/leancodebox/goose v0.0.26
+	github.com/leancodebox/goose v0.0.27
 	github.com/shirou/gopsutil/v3 v3.24.4
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/crypto v0.23.0
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	golang.org/x/image v0.16.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.6
@@ -67,7 +70,6 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/arch v0.8.0 // indirect
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
