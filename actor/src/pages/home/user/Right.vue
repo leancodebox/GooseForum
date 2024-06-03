@@ -5,12 +5,12 @@ import {h} from 'vue'
 let options = [
   {
     label: () =>
-        h(NEllipsis, null, {default: () => '电灯熄灭 物换星移 泥牛入海'}),
+        h(NEllipsis, null, {default: () => '快捷入口1'}),
     key: '1'
   },
   {
     label: () =>
-        h(NEllipsis, null, {default: () => '黑暗好像 一颗巨石 按在胸口'}),
+        h(NEllipsis, null, {default: () => '快捷入口2'}),
     key: '2'
   }
 ]

@@ -5,12 +5,12 @@ import {h} from 'vue'
 let options = [
   {
     label: () =>
-        h(NEllipsis, null, {default: () => '电灯熄灭 物换星移 泥牛入海'}),
+        h(NEllipsis, null, {default: () => '我的发布'}),
     key: '1'
   },
   {
     label: () =>
-        h(NEllipsis, null, {default: () => '黑暗好像 一颗巨石 按在胸口'}),
+        h(NEllipsis, null, {default: () => '我的回复'}),
     key: '2'
   }
 ]
@@ -18,12 +18,7 @@ let options = [
 <template>
   <n-space vertical>
     <n-menu :options="options" style="width: 180px" default-value="1"/>
-    <n-menu :options="options" style="width: 180px" default-value="1"/>
-    <n-menu :options="options" style="width: 180px" default-value="1"/>
+
   </n-space>
-  <n-space vertical>
-    <n-menu :options="options" style="width: 180px" default-value="1"/>
-    <n-menu :options="options" style="width: 180px" default-value="1"/>
-    <n-menu :options="options" style="width: 180px" default-value="1"/>
-  </n-space>
+
 </template>
