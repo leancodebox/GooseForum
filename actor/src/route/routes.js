@@ -27,6 +27,7 @@ let articlesEdit = () => import("@/pages/home/bbs/ArticlesEdit.vue")
 let userCenter = () => import("@/pages/home/UserCenter.vue")
 let userInfo = () => import("@/pages/home/user/UserInfo.vue")
 let notificationCenter = () => import("@/pages/home/NotificationCenter.vue")
+let userEdit = () => import("@/pages/home/UserEdit.vue")
 
 export let managerRouter = {
     belongMenu: true,
@@ -75,8 +76,10 @@ export let routes = [
             },
             {
                 name: 'notificationCenter', path: 'notificationCenter', component: notificationCenter
+            },
+            {
+                name: 'userEdit', path: 'userEdit', component: userEdit
             }
-
         ]
     },
     managerRouter
