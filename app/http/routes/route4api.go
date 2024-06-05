@@ -6,8 +6,6 @@ import (
 )
 
 func ginApi(ginApp *gin.Engine) {
-	ginApp.GET("/api", controllers.Api)
-
 	apiGroup := ginApp.Group("api")
 	apiGroup.GET("about", ginUpNP(controllers.About))
 

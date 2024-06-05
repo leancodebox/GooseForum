@@ -8,12 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Api(c *gin.Context) {
-	c.JSON(http.StatusOK, map[string]any{
-		"msg": "OK",
-	})
-}
-
 const (
 	contentTypeHTML      = "text/html"
 	errorCodeNotFound    = 404
@@ -27,8 +21,8 @@ func NotFound(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusNotFound, component.DataMap{
-		"error_code":    errorCodeNotFound,
-		"error_message": errorMessageNotFound,
+		"code": errorCodeNotFound,
+		"msg":  errorMessageNotFound,
 	})
 }
 
