@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ginAuth(ginApp *gin.Engine) {
+func auth(ginApp *gin.Engine) {
 	ginApp.Group("api").
 		POST("reg", ginUpP(controllers.Register)).
 		POST("login", ginUpP(controllers.Login)).

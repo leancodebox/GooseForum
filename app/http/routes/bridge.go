@@ -13,16 +13,16 @@ func RegisterByGin(ginApp *gin.Engine) {
 	ginApp.Use(middleware.GinCors)
 
 	// 前端资源
-	ginWeb(ginApp)
+	frontend(ginApp)
 
 	// 访问日志中间件
 	ginApp.Use(middleware.GinLogger)
 
 	// 接口
-	ginApi(ginApp)
-	ginAuth(ginApp)
-	ginBBS(ginApp)
-	ginFileServer(ginApp)
+	api(ginApp)
+	auth(ginApp)
+	bbs(ginApp)
+	fileServer(ginApp)
 
 	ginApp.NoRoute(controllers.NotFound)
 }

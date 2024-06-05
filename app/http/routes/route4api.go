@@ -5,7 +5,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 )
 
-func ginApi(ginApp *gin.Engine) {
+func api(ginApp *gin.Engine) {
 	apiGroup := ginApp.Group("api")
 	apiGroup.GET("about", ginUpNP(controllers.About))
 

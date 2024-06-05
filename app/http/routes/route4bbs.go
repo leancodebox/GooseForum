@@ -7,7 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/permission"
 )
 
-func ginBBS(ginApp *gin.Engine) {
+func bbs(ginApp *gin.Engine) {
 	bbs := ginApp.Group("api/bbs")
 
 	// 分类列表

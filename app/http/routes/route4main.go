@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ginWeb(ginApp *gin.Engine) {
+func frontend(ginApp *gin.Engine) {
 	actGroup := ginApp.Group("/actor")
 	if app.IsProduction() {
 		actGroup.Use(middleware.CacheMiddleware).

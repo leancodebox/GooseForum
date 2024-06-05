@@ -19,7 +19,7 @@ import (
 
 const maxImageLength = 1200
 
-func ginFileServer(ginApp *gin.Engine) {
+func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
 	r.POST("/img-upload", func(c *gin.Context) {
 		// 判断上传令牌是否合法
