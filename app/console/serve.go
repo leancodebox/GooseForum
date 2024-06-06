@@ -87,11 +87,10 @@ func ginServe() {
 		}
 	}()
 
-	fmt.Println("GooseForum:listen " + port)
 	slog.Info("GooseForum:listen " + port)
-	slog.Info(fmt.Sprintf("use port:%s", port))
-	slog.Info(fmt.Sprintf("if in local you can http://localhost:%s", port))
+	slog.Info("use port:" + port)
 	slog.Info("start use:" + cast.ToString(app.GetUnitTime()))
+	fmt.Println("if in local you can http://localhost:" + port)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
