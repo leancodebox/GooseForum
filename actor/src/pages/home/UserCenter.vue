@@ -4,7 +4,7 @@ import Left from "@/pages/home/user/Left.vue";
 import Right from "@/pages/home/user/Right.vue";
 </script>
 <template>
-  <n-grid cols="5" style="padding: 0 10px;height: 100%">
+  <n-grid cols="5" >
     <n-gi span="1">
       <left></left>
     </n-gi>
@@ -15,6 +15,5 @@ import Right from "@/pages/home/user/Right.vue";
       <right></right>
     </n-gi>
   </n-grid>
-
 
 </template>

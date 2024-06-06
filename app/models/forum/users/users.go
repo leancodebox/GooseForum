@@ -12,6 +12,9 @@ const pid = "id"
 // fieldUsername
 const fieldUsername = "username"
 
+// fieldNickname
+const fieldNickname = "nickname"
+
 // fieldEmail
 const fieldEmail = "email"
 
@@ -45,6 +48,7 @@ const fieldDeletedAt = "deleted_at"
 type Entity struct {
 	Id                uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                 //
 	Username          string     `gorm:"column:username;type:varchar(255);not null;default:'';" json:"username"` //
+	Nickname          string     `gorm:"column:nickname;type:varchar(255);not null;default:'';" json:"nickname"` //
 	Email             string     `gorm:"column:email;type:varchar(255);not null;default:'';" json:"email"`       //
 	Password          string     `gorm:"column:password;type:varchar(255);not null;default:'';" json:"password"` //
 	MobileAreaCode    string     `gorm:"column:mobile_area_code;type:varchar(16);" json:"mobileAreaCode"`        //

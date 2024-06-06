@@ -26,16 +26,16 @@ let options = [
     <n-gi span="4">
       <n-list>
         <n-list-item>
-          消息1
+          <p><span>故人重来</span> 回答了问题 <span>webman中如何让php文件加载一次后就常驻内存了？</span></p>
+          <p>6小时前</p>
         </n-list-item>
-
         <n-list-item>
-          消息2
+          <p><span>故人重来</span> 回答了问题 <span>webman中如何让php文件加载一次后就常驻内存了？</span></p>
+          <p>6小时前</p>
         </n-list-item>
-
-
         <n-list-item>
-          消息3
+          <p><span>故人重来</span> 回答了问题 <span>webman中如何让php文件加载一次后就常驻内存了？</span></p>
+          <p>6小时前</p>
         </n-list-item>
       </n-list>
     </n-gi>

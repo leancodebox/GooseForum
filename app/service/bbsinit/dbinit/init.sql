@@ -2,6 +2,7 @@ CREATE TABLE `users`
 (
     `id`                  bigint unsigned NOT NULL AUTO_INCREMENT,
     `username`            varchar(255)    NOT NULL DEFAULT '',
+    `nickname`            varchar(255)    NOT NULL DEFAULT '',
     `email`               varchar(255)    NOT NULL DEFAULT '',
     `password`            varchar(255)    NOT NULL DEFAULT '',
     `mobile_area_code`    varchar(16),
@@ -25,6 +26,9 @@ alter table users
     add `status`              tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态：0正常 1冻结 ' after mobile_phone_number,
     add `validate`            tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否验证通过: 0未通过/未验证 1 验证通过' after status,
     add `prestige`            bigint     NOT NULL default 0 COMMENT '声望' after validate;
+
+alter table users
+    add `nickname` varchar(255) NOT NULL DEFAULT '' after username;
 
 
 CREATE TABLE `user_follow`

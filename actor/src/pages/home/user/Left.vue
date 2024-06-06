@@ -18,7 +18,6 @@ let options = [
 <template>
   <n-space vertical>
     <n-menu :options="options" style="width: 180px" default-value="1"/>
-
   </n-space>
 
 </template>

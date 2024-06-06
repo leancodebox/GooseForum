@@ -5,13 +5,19 @@ import {NList, NListItem} from "naive-ui";
 <template>
   <n-list>
     <n-list-item>
-      文章1
+      <p>title</p>
+      <p> content content content content</p>
+      <span>who 发表于 {xxx-xxx-xxx-xx} {xxx浏览} {xxx评论}</span>
     </n-list-item>
     <n-list-item>
-      文章2
+      <p>title</p>
+      <p> content content content content</p>
+      <span>who 发表于 {xxx-xxx-xxx-xx} {xxx浏览} {xxx评论}</span>
     </n-list-item>
     <n-list-item>
-      文章3
+      <p>title</p>
+      <p> content content content content</p>
+      <span>who 发表于 {xxx-xxx-xxx-xx} {xxx浏览} {xxx评论}</span>
     </n-list-item>
   </n-list>
 </template>
