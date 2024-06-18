@@ -126,6 +126,7 @@ func GetUserInfo(req GetUserInfoReq) component.Response {
 	userPoint := userPoints.Get(user.Id)
 	return component.SuccessResponse(UserInfoShow{
 		Username:  user.Username,
+		Prestige:  user.Prestige,
 		AvatarUrl: "",
 		UserPoint: userPoint.CurrentPoints,
 	})
@@ -133,6 +134,7 @@ func GetUserInfo(req GetUserInfoReq) component.Response {
 
 type UserInfoShow struct {
 	Username  string `json:"username"`
+	Prestige  int64  `json:"prestige"`
 	AvatarUrl string `json:"avatarUrl"`
 	UserPoint int64  `json:"userPoint"`
 }

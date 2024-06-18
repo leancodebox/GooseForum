@@ -22,6 +22,7 @@ func bbs(ginApp *gin.Engine) {
 
 	bbsAuth := bbs.Use(middleware.JWTAuth4Gin).
 		Use(middleware.JWTAuth4Gin)
+	bbsAuth.POST("get-notification", UpButterReq(controllers.GetNotification))
 	//
 	bbsAuth.POST("get-articles-origin", UpButterReq(controllers.WriteArticlesOrigin))
 	// 发布文章

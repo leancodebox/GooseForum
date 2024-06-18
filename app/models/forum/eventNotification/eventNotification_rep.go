@@ -1,5 +1,7 @@
 package eventNotification
 
+import "github.com/leancodebox/goose/queryopt"
+
 func Create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
@@ -24,3 +26,9 @@ func Create(entity *Entity) int64 {
 //	builder().Find(&entities)
 //	return
 //}
+
+func GetByUserId(userId any) (entities []*Entity) {
+	b := builder().Where(queryopt.Eq(fieldUserId, userId))
+	b.Find(&entities)
+	return
+}
