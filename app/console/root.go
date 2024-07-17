@@ -16,7 +16,7 @@ var rootCmd = &cobra.Command{
 	Long:  `GooseForum`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if !fileopt.IsExist("config.toml") {
-			err := fileopt.Put([]byte(app.GetDefaulConfig()), "./config.toml")
+			err := fileopt.FilePutContents("./config.toml", app.GetDefaulConfig())
 			if err != nil {
 				panic(err)
 			}
