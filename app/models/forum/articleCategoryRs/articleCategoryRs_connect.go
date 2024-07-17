@@ -1,9 +1,8 @@
 package articleCategoryRs
 
 import (
+	db "github.com/leancodebox/GooseForum/app/bundles/dbconnect"
 	"gorm.io/gorm"
-
-	db "github.com/leancodebox/GooseForum/bundles/dbconnect"
 )
 
 // Prohibit manual changes

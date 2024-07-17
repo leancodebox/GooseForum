@@ -1,9 +1,9 @@
 package console
 
 import (
+	"github.com/leancodebox/GooseForum/app/assert"
 	"github.com/leancodebox/GooseForum/app/console/cmd"
 	"github.com/leancodebox/GooseForum/app/migration"
-	"github.com/leancodebox/GooseForum/bundles/app"
 	"github.com/leancodebox/goose/fileopt"
 
 	"github.com/spf13/cobra"
@@ -16,7 +16,7 @@ var rootCmd = &cobra.Command{
 	Long:  `GooseForum`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if !fileopt.IsExist("config.toml") {
-			err := fileopt.FilePutContents("./config.toml", app.GetDefaulConfig())
+			err := fileopt.FilePutContents("./config.toml", assert.GetDefaultConfig())
 			if err != nil {
 				panic(err)
 			}

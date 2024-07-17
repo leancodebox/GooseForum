@@ -11,7 +11,7 @@ require (
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.20.0
-	github.com/leancodebox/goose v0.0.27
+	github.com/leancodebox/goose v0.0.29
 	github.com/shirou/gopsutil/v3 v3.24.4
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0

@@ -1,7 +1,7 @@
 package logging
 
 import (
-	"github.com/leancodebox/GooseForum/bundles/asyncwrite"
+	"github.com/leancodebox/GooseForum/app/bundles/asyncwrite"
 	"github.com/leancodebox/goose/fileopt"
 	"github.com/leancodebox/goose/preferences"
 	"gopkg.in/natefinch/lumberjack.v2"

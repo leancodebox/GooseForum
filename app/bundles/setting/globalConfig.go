@@ -1,5 +1,5 @@
 // Package app 应用信息
-package app
+package setting
 
 import (
 	"github.com/leancodebox/goose/preferences"
@@ -15,4 +15,9 @@ func UseMigration() bool {
 
 func IsProduction() bool {
 	return preferences.Get("app.env", "local") == "production"
+}
+
+// URL 传参 path 拼接站点的 URL
+func URL(path string) string {
+	return preferences.Get("app.url") + path
 }

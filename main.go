@@ -1,23 +1,12 @@
 package main
 
 import (
-	"embed"
+	_ "github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/console"
-	"github.com/leancodebox/GooseForum/bundles/app"
-	_ "github.com/leancodebox/GooseForum/bundles/logging"
 	_ "net/http/pprof"
 )
 
-//go:embed  all:actor/dist/**
-var actorFS embed.FS
-
-//go:embed config.example.toml
-var configData string
-
 func main() {
 	// 注册静态资源
-	app.InitStart()
-	app.ActorSave(actorFS)
-	app.ConfigData(configData)
 	console.Execute()
 }

@@ -1,7 +1,7 @@
 package users
 
 import (
-	"github.com/leancodebox/GooseForum/bundles/algorithm"
+	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/goose/collectionopt"
 	"github.com/leancodebox/goose/queryopt"
 )

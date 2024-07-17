@@ -1,7 +1,7 @@
 package dbconnect
 
 import (
-	"github.com/leancodebox/GooseForum/bundles/logging"
+	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"log/slog"
 	"sync"
 

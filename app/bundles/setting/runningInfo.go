@@ -1,4 +1,4 @@
-package app
+package setting
 
 import (
 	"time"
@@ -7,7 +7,7 @@ import (
 var start time.Time
 var unitTime time.Time
 
-func InitStart() {
+func init() {
 	start = time.Now()
 	unitTime = time.Now()
 }

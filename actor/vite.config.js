@@ -23,6 +23,7 @@ export default defineConfig({
         }
     },
     build: {
-        chunkSizeWarningLimit: 750
+        chunkSizeWarningLimit: 750,
+        outDir: "../app/assert/frontend/dist"
     }
 })

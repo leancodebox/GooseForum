@@ -3,9 +3,9 @@ package console
 import (
 	"context"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/logging"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/routes"
-	"github.com/leancodebox/GooseForum/bundles/app"
-	"github.com/leancodebox/GooseForum/bundles/logging"
 	"github.com/leancodebox/goose/preferences"
 	"log"
 	"log/slog"
@@ -89,7 +89,7 @@ func ginServe() {
 
 	slog.Info("GooseForum:listen " + port)
 	slog.Info("use port:" + port)
-	slog.Info("start use:" + cast.ToString(app.GetUnitTime()))
+	slog.Info("start use:" + cast.ToString(setting.GetUnitTime()))
 	fmt.Println("if in local you can http://localhost:" + port)
 
 	quit := make(chan os.Signal, 1)
