@@ -2,6 +2,7 @@ package logging
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/asyncwrite"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/goose/fileopt"
 	"github.com/leancodebox/goose/preferences"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -26,7 +27,7 @@ func ErrIf(err error) bool {
 }
 
 var (
-	debug      = preferences.GetBool("app.debug", true)
+	debug      = setting.IsDebug()
 	logType    = preferences.Get("log.type")
 	logPath    = preferences.Get("log.path", "./storage/logs/run.log")
 	rolling    = preferences.GetBool("log.rolling", false)

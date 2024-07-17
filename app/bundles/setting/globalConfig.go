@@ -17,7 +17,11 @@ func IsProduction() bool {
 	return preferences.Get("app.env", "local") == "production"
 }
 
+func IsDebug() bool {
+	return preferences.GetBool("app.debug", true)
+}
+
 // URL 传参 path 拼接站点的 URL
 func URL(path string) string {
-	return preferences.Get("app.url") + path
+	return preferences.Get("server.url") + path
 }

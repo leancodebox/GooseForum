@@ -2,6 +2,7 @@ package dbconnect
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"log/slog"
 	"sync"
 
@@ -24,7 +25,7 @@ import (
 //}
 
 var (
-	debug    = dbConfig.GetBool(`app.debug`, true)
+	debug    = setting.IsDebug()
 	dbConfig = preferences.GetExclusivePreferences("db.default")
 )
 

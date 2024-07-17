@@ -4,13 +4,13 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
-	setting2 "github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 )
 
 func frontend(ginApp *gin.Engine) {
 	actGroup := ginApp.Group("/actor")
-	if setting2.IsProduction() {
+	if setting.IsProduction() {
 		actGroup.Use(middleware.CacheMiddleware).
 			Use(gzip.Gzip(gzip.DefaultCompression)).
 			StaticFS("", PFilSystem("./frontend/dist", assert.GetActorFs()))

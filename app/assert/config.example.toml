@@ -1,9 +1,12 @@
 [app]
 name = "app"
 env = "production" # APP_ENV in local,production
+debug = true
+
+[server]
 url = "http://localhost"
 port = 99
-debug = true
+
 [db]
 migration = "on" # OPEN_MIGRATION in on,off
 [db.default]

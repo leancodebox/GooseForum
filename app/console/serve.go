@@ -31,7 +31,7 @@ var CmdServe = &cobra.Command{
 
 func runWeb(_ *cobra.Command, _ []string) {
 	var (
-		debug = preferences.GetBool("app.debug", true)
+		debug = setting.IsDebug()
 	)
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
@@ -56,8 +56,8 @@ const (
 )
 
 var (
-	port   = preferences.GetString("app.port", 8080)
-	isProd = preferences.Get("app.env") == EnvProd
+	port   = preferences.GetString("server.port", 8080)
+	isProd = setting.IsProduction()
 )
 
 func ginServe() {
