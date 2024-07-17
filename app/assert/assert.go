@@ -12,7 +12,7 @@ func GetDefaultConfig() []byte {
 	return configExample
 }
 
-//go:embed  all:frontend/dist/**
+//go:embed  all:frontend/**
 var actorFS embed.FS
 
 func GetActorFs() embed.FS {
