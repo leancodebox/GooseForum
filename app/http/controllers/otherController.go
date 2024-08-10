@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -27,6 +28,9 @@ func NotFound(c *gin.Context) {
 }
 
 func About() component.Response {
+	for i := 1; i <= 9; i++ {
+		slog.Info("infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo")
+	}
 	return component.SuccessResponse(component.DataMap{
 		"message": "Hello~ Now you see a json from php9.0",
 	})

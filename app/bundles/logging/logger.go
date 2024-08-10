@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"context"
 	"github.com/leancodebox/GooseForum/app/bundles/asyncwrite"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/goose/fileopt"
@@ -11,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 const (
@@ -112,7 +114,9 @@ func Shutdown() {
 	if aw == nil {
 		return
 	}
-	aw.Stop()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	aw.Stop(ctx)
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource:   true,
 		ReplaceAttr: replace,

@@ -1,61 +1,84 @@
 package asyncwrite
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"time"
 )
 
 type AsyncW struct {
-	io       *lumberjack.Logger
-	dataChan chan *[]byte
-	done     chan bool
+	io          *lumberjack.Logger
+	dataChan    chan []byte
+	closeFinish chan bool
 }
 
 func AsyncLumberjack(io *lumberjack.Logger) *AsyncW {
-	r := AsyncW{
-		io:       io,
-		dataChan: make(chan *[]byte, 1024),
-		done:     make(chan bool),
+	r := &AsyncW{
+		io:          io,
+		dataChan:    make(chan []byte, 256),
+		closeFinish: make(chan bool),
 	}
 	go func() {
-		ticker := time.NewTicker(time.Millisecond * 333) // 每0.333秒执行一次批量写入
+		defer func() {
+			r.io.Close()
+			r.closeFinish <- true
+			return
+		}()
+		ticker := time.NewTicker(time.Millisecond * 100) // 每0.333秒执行一次批量写入
 		defer ticker.Stop()
-		var data []byte
+		var buf bytes.Buffer
+		maxLen := 1024 * 8
 		for {
 			select {
-			case val := <-r.dataChan:
-				data = append(data, *val...)
-				if len(data) >= 100 {
-					r.io.Write(data)
-					data = []byte{}
+			case val, ok := <-r.dataChan:
+				if !ok {
+					if buf.Len() > 0 {
+						_, err := r.io.Write(buf.Bytes())
+						if err != nil {
+							fmt.Println(err)
+						}
+						buf.Reset()
+					}
+					return
+				}
+
+				buf.Write(val)
+				if buf.Len() >= maxLen {
+					_, err := r.io.Write(buf.Bytes())
+					if err != nil {
+						fmt.Println(err)
+					}
+					buf.Reset()
 				}
 			case <-ticker.C:
-				if len(data) > 0 {
-					r.io.Write(data)
-					data = []byte{}
+				if buf.Len() > 0 {
+					_, err := r.io.Write(buf.Bytes())
+					if err != nil {
+						fmt.Println(err)
+					}
+					buf.Reset()
 				}
-			case <-r.done:
-				if len(data) > 0 {
-					r.io.Write(data)
-					data = []byte{}
-				}
-				return
 			}
 		}
 	}()
-	return &r
+	return r
 }
 
 func (itself *AsyncW) Write(p []byte) (n int, err error) {
 	data := make([]byte, len(p))
 	copy(data, p)
-	itself.dataChan <- &data
-	return 0, nil
+	itself.dataChan <- data
+	return len(p), nil
 }
 
-func (itself *AsyncW) Stop() {
-	itself.done <- true
-	itself.io.Close()
+func (itself *AsyncW) Stop(ctx context.Context) {
 	close(itself.dataChan)
-	close(itself.done)
+	select {
+	case <-ctx.Done():
+		return
+	case <-itself.closeFinish:
+		return
+	}
 }
