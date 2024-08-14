@@ -86,7 +86,7 @@ func getFileIo() *os.File {
 }
 
 func getAsyncFileIoRolling() *asyncwrite.AsyncW {
-	aw = asyncwrite.AsyncLumberjack(&lumberjack.Logger{
+	aw = asyncwrite.AsyncLumberjackBufIo(&lumberjack.Logger{
 		Filename:   logPath,
 		MaxSize:    maxSize,    // megabytes
 		MaxBackups: maxBackUps, // maxBackUps

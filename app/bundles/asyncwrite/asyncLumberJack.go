@@ -1,6 +1,7 @@
 package asyncwrite
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"fmt"
@@ -9,34 +10,33 @@ import (
 )
 
 type AsyncW struct {
-	io          *lumberjack.Logger
 	dataChan    chan []byte
 	closeFinish chan bool
 }
 
 func AsyncLumberjack(io *lumberjack.Logger) *AsyncW {
 	r := &AsyncW{
-		io:          io,
 		dataChan:    make(chan []byte, 256),
 		closeFinish: make(chan bool),
 	}
+	maxLen := 1024 * 8
+	w := io
 	go func() {
 		defer func() {
-			r.io.Close()
+			err := w.Close()
+			fmt.Println(err)
 			r.closeFinish <- true
 			return
 		}()
-		ticker := time.NewTicker(time.Millisecond * 100) // 每0.333秒执行一次批量写入
+		ticker := time.NewTicker(time.Millisecond * 100)
 		defer ticker.Stop()
 		var buf bytes.Buffer
-		maxLen := 1024 * 8
 		for {
 			select {
 			case val, ok := <-r.dataChan:
 				if !ok {
 					if buf.Len() > 0 {
-						_, err := r.io.Write(buf.Bytes())
-						if err != nil {
+						if _, err := w.Write(buf.Bytes()); err != nil {
 							fmt.Println(err)
 						}
 						buf.Reset()
@@ -46,19 +46,52 @@ func AsyncLumberjack(io *lumberjack.Logger) *AsyncW {
 
 				buf.Write(val)
 				if buf.Len() >= maxLen {
-					_, err := r.io.Write(buf.Bytes())
-					if err != nil {
+					if _, err := w.Write(buf.Bytes()); err != nil {
 						fmt.Println(err)
 					}
 					buf.Reset()
 				}
 			case <-ticker.C:
 				if buf.Len() > 0 {
-					_, err := r.io.Write(buf.Bytes())
-					if err != nil {
+					if _, err := w.Write(buf.Bytes()); err != nil {
 						fmt.Println(err)
 					}
 					buf.Reset()
+				}
+			}
+		}
+	}()
+	return r
+}
+
+func AsyncLumberjackBufIo(io *lumberjack.Logger) *AsyncW {
+	r := &AsyncW{
+		dataChan:    make(chan []byte, 256),
+		closeFinish: make(chan bool),
+	}
+	w := bufio.NewWriterSize(io, 1024*16)
+	go func() {
+		defer func() {
+			err := w.Flush()
+			fmt.Println(err)
+			r.closeFinish <- true
+		}()
+		ticker := time.NewTicker(time.Millisecond * 100)
+		defer ticker.Stop()
+		for {
+			select {
+			case val, ok := <-r.dataChan:
+				if !ok {
+					return
+				}
+				_, err := w.Write(val)
+				if err != nil {
+					fmt.Println(err)
+				}
+			case <-ticker.C:
+				err := w.Flush()
+				if err != nil {
+					fmt.Println(err)
 				}
 			}
 		}
