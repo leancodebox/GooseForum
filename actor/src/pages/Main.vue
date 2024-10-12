@@ -1,5 +1,5 @@
 <script setup>
-import {NButton, NFlex, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NSpace} from 'naive-ui';
+import {NButton, NFlex, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NSpace, NText} from 'naive-ui';
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 import {FastFoodOutline as CashIcon, FishOutline, InfiniteOutline} from '@vicons/ionicons5'
 import {h, ref} from "vue";
@@ -41,11 +41,6 @@ const menuOptions = [
     children: null,
   }
 ]
-let style = {
-  '--side-padding': '32px',
-  'grid-template-columns':
-      'calc(272px - var(--side-padding)) 1fr auto'
-}
 let isTablet = useIsTablet()
 let isMobile = useIsMobile()
 
@@ -53,26 +48,28 @@ let isMobile = useIsMobile()
 </script>
 <template>
   <n-layout position="absolute">
-    <n-layout-header position="absolute"
-                     style="height: 64px;align-items: center;"
-                     bordered
-                     :style="style"
+    <n-layout-header
+        position="absolute"
+        style="height: 64px; padding: 12px;align-items: center;"
+        bordered
     >
-      <n-flex justify="space-between" style="padding: 0 var(--side-padding);height: 100%">
-        <n-space justify="space-around" style="align-items: center;" v-show="!isTablet&&!isMobile">
-          <span style="font-size: 18px;">GooseForum</span>
+      <n-flex justify="space-between">
+        <n-text tag="div" class="ui-logo" :depth="1" @click="console.log(1)" style="align-items: center;"
+                v-show="!isTablet&&!isMobile">
+          <img alt="" src="/quote-left.png"/>
+          <span>GooseForum</span>
           <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions"/>
-        </n-space>
-        <n-flex justify="end" style="align-items: center;">
+        </n-text>
+        <n-space style="align-items: center;">
           <router-link :to="'/home/bbs/articlesEdit'">
             <n-button quaternary>我也写一篇</n-button>
           </router-link>
           <router-link :to="'/home/notificationCenter'">
             <n-button quaternary>消息中心</n-button>
           </router-link>
-<!--          <n-button quaternary>审核中心</n-button>-->
+          <!--          <n-button quaternary>审核中心</n-button>-->
           <user-info-card></user-info-card>
-        </n-flex>
+        </n-space>
       </n-flex>
     </n-layout-header>
 
@@ -95,4 +92,16 @@ let isMobile = useIsMobile()
 
 <style>
 
+.ui-logo {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+}
+
+.ui-logo > img {
+  margin-right: 12px;
+  height: 32px;
+  width: 32px;
+}
 </style>
