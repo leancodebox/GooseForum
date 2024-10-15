@@ -1,7 +1,6 @@
 <script setup>
 import {NButton, NFlex, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NSpace, NText} from 'naive-ui';
 import {useIsMobile, useIsTablet} from "@/utils/composables";
-import {FastFoodOutline as CashIcon, FishOutline, InfiniteOutline} from '@vicons/ionicons5'
 import {h, ref} from "vue";
 import {RouterLink} from "vue-router";
 import UserInfoCard from "@/components/UserInfoCard.vue";
@@ -19,7 +18,7 @@ const menuOptions = [
         }
     ),
     key: "index",
-    icon: renderIcon(FishOutline),
+    // icon: renderIcon(FishOutline),
     children: null,
   }, {
     label: () => h(RouterLink, {to: {path: "/home/bbs",}},
@@ -28,7 +27,7 @@ const menuOptions = [
         }
     ),
     key: "bbs",
-    icon: renderIcon(InfiniteOutline),
+    // icon: renderIcon(InfiniteOutline),
     children: null,
   }, {
     label: () => h(RouterLink, {to: {path: "/home/about",}},
@@ -37,7 +36,7 @@ const menuOptions = [
         }
     ),
     key: "about",
-    icon: renderIcon(CashIcon),
+    // icon: renderIcon(CashIcon),
     children: null,
   }
 ]
@@ -50,7 +49,7 @@ let isMobile = useIsMobile()
   <n-layout position="absolute">
     <n-layout-header
         position="absolute"
-        style="height: 64px; padding: 12px;align-items: center;"
+        style="height: 56px; padding: 8px;align-items: center;"
         bordered
     >
       <n-flex justify="space-between">
@@ -72,8 +71,7 @@ let isMobile = useIsMobile()
         </n-space>
       </n-flex>
     </n-layout-header>
-
-    <n-layout style="top: 64px;"
+    <n-layout style="top: 56px;"
               :native-scrollbar="false"
               :position=" 'absolute'"
               content-style="min-height: calc(100vh - var(--header-height)); display: flex; flex-direction: column;"
