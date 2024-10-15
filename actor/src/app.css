@@ -6,5 +6,5 @@ body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    --header-height: 64px;
+    --header-height: 56px;
 }

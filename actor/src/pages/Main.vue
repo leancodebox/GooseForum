@@ -73,11 +73,10 @@ let isMobile = useIsMobile()
     </n-layout-header>
     <n-layout style="top: 56px;"
               :native-scrollbar="false"
-              :position=" 'absolute'"
+              :position="'absolute'"
               content-style="min-height: calc(100vh - var(--header-height)); display: flex; flex-direction: column;"
     >
       <router-view></router-view>
-
       <n-layout-footer
           style="--x-padding: 56px;margin-top: auto;height: 100px;display: flex;justify-content: center;align-items: center;width: 100%;background-color: #f0f3f5;"
           bordered>
