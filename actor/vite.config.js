@@ -12,18 +12,14 @@ export default defineConfig({
         alias,
     },
     plugins: [vue()],
-    devServer: {
-        proxy: {
-            '/api': {
-                target: 'http://localhost:80',
-                pathRewrite: {},
-                ws: true,
-                changeOrigin: true
-            }
-        }
-    },
     build: {
         chunkSizeWarningLimit: 750,
         outDir: "../app/assert/frontend/dist"
-    }
+    },
+    server: {
+        // 如果使用docker-compose开发模式，设置为false
+        proxy: {
+            '^/api/.*':'http://localhost:99',
+        }
+    },
 })
