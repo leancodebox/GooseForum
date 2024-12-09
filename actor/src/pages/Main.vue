@@ -23,7 +23,7 @@ const menuOptions = [
   }, {
     label: () => h(RouterLink, {to: {path: "/home/bbs",}},
         {
-          default: () => "论坛"
+          default: () => "七嘴八舌"
         }
     ),
     key: "bbs",
@@ -52,14 +52,14 @@ let isMobile = useIsMobile()
         style="height: 56px; padding: 8px;align-items: center;"
         bordered
     >
-      <n-flex justify="space-between">
+      <n-flex justify="space-between" align="center" >
         <n-text tag="div" class="ui-logo" :depth="1" @click="console.log(1)" style="align-items: center;"
                 v-show="!isTablet&&!isMobile">
           <img alt="" src="/quote-left.png"/>
           <span>GooseForum</span>
           <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions"/>
         </n-text>
-        <n-space style="align-items: center;">
+        <n-flex align="center" justify="end">
           <router-link :to="'/home/bbs/articlesEdit'">
             <n-button quaternary>我也写一篇</n-button>
           </router-link>
@@ -68,7 +68,7 @@ let isMobile = useIsMobile()
           </router-link>
           <!--          <n-button quaternary>审核中心</n-button>-->
           <user-info-card></user-info-card>
-        </n-space>
+        </n-flex>
       </n-flex>
     </n-layout-header>
     <n-layout style="top: 56px;"

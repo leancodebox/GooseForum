@@ -1,8 +1,8 @@
 <script setup>
-import {NButton, NCard, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing} from 'naive-ui'
+import {NButton, NCard, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing,NFlex,NAvatar} from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {getArticlesPageApi} from "@/service/request";
-import {useIsMobile} from "@/utils/composables";
+import {useIsMobile, useIsTablet} from "@/utils/composables";
 
 const listData = ref([])
 
@@ -43,57 +43,71 @@ const text = ref('金色传说') // 需要进行高亮的文本
 
 
 const isMobile = useIsMobile()
+const isTablet = useIsTablet()
 </script>
 <template>
   <n-layout>
     <n-layout has-sider sider-placement="right"
               class="content"
-              :style="{flex: 1, maxWidth: '1400px', margin: '0 auto', padding: '24px'}">
+              :style="{flex: 1, maxWidth: '1400px', margin: '0 auto'}">
       <n-layout-content content-style="padding: 24px;">
         <!--          layout      -->
-
-        <n-space>
-          <n-tag type="info">技术</n-tag>
-          <n-tag type="info">文章</n-tag>
-          <n-tag type="info">bn</n-tag>
-        </n-space>
+        <n-flex vertical>
+        <n-flex>
+          <n-tag    round>技术</n-tag>
+          <n-tag    round>文章</n-tag>
+          <n-tag    round>bn</n-tag>
+        </n-flex>
 
         <n-list>
           <n-list-item v-for="item in listData">
             <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
               <n-thing>
                 <template #description>
-                  <n-space size="small" style="padding-top: 4px">
+<!--                  <n-space size="small" style="padding-top: 4px">-->
+                    <n-flex justify="space-between">
+                      <n-flex align="center" >
+                        <n-avatar
+                            round
+                            size="small"
+                            src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
+                        />
+                        [{{ item.username }}]
+                        <n-tag :bordered="false" type="success" size="small">
+                          {{ item.category }}
+                        </n-tag>
 
-                    [{{ item.username }}]
-                    <n-tag :bordered="false" type="success" size="small">
-                      {{ item.category }}
-                    </n-tag>
+                        <span v-if="item.type === 'xxx'" class="blinking-div">
+                        {{ item.title }}
+                        </span>
+                        <span v-else>
+                        {{ item.title }}
+                        </span>
+                        <n-tag v-for="itemTag in item.tag" :bordered="false"
+                               size="small"
+                               v-text="itemTag" round >
+                        </n-tag>
+                      </n-flex>
 
-                    <span v-if="item.type === 'xxx'" class="blinking-div">
-                    {{ item.title }}
-                    </span>
-                    <span v-else>
-                    {{ item.title }}
-                    </span>
-                    <n-tag v-for="itemTag in item.tag" :bordered="false" type="info"
-                           size="small"
-                           v-text="itemTag">
-                    </n-tag>
-                    {{ item.lastUpdateTime }}
-                  </n-space>
+                      <span>
+                        {{ item.lastUpdateTime }}
+                      </span>
+                    </n-flex>
+<!--                  </n-space>-->
                 </template>
               </n-thing>
             </router-link>
           </n-list-item>
           <n-list-item>
+            <n-flex vertical>
             <n-button @click="more">
-              more
+              点击一下获取更多
             </n-button>
+            </n-flex>
           </n-list-item>
 
         </n-list>
-
+        </n-flex>
         <!--          layout      -->
 
       </n-layout-content>
@@ -101,21 +115,19 @@ const isMobile = useIsMobile()
           :width="360"
           content-style="padding: 24px;"
           bordered
-          v-show="!isMobile"
+          v-show="!isTablet && !isMobile"
       >
-        <n-space vertical>
+        <n-flex vertical>
           <n-card title="祖国的花朵">
             <p>祖国的花朵</p>
           </n-card>
-
           <n-card title="今日推荐">
             <p>祖国的花朵</p>
           </n-card>
-
           <n-card title="友情连接">
             <p>祖国的花朵</p>
           </n-card>
-        </n-space>
+        </n-flex>
       </n-layout-sider>
     </n-layout>
   </n-layout>
