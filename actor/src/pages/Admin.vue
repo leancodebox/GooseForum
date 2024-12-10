@@ -94,23 +94,23 @@ const menuOptions2 = [
   <n-layout position="absolute">
     <n-layout-header
         position="absolute"
-        style="height: 56px; padding: 8px;align-items: center;"
+        style="height: 56px; padding: 8px;"
         bordered
     >
-      <n-flex justify="space-between">
-        <n-text tag="div" class="ui-logo" :depth="1" @click="console.log(1)" style="align-items: center;">
+      <n-flex justify="space-between" align="center">
+        <n-text tag="div" class="ui-logo" :depth="1" >
           <img alt="" src="/quote-left.png"/>
           <span>GooseForum</span>
           <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions2"/>
         </n-text>
-        <n-space style="align-items: center">
+        <n-flex align="center"  style="padding-right: 24px;">>
           <n-button-group>
             <n-dropdown trigger="hover" :options="options">
               <n-button>旺财</n-button>
             </n-dropdown>
             <n-button @click="activate('left')">阿福</n-button>
           </n-button-group>
-        </n-space>
+        </n-flex>
       </n-flex>
     </n-layout-header>
     <n-layout position="absolute" style="top: 56px; bottom: 0;" has-sider>
@@ -136,7 +136,7 @@ const menuOptions2 = [
         />
 
       </n-layout-sider>
-      <n-layout content-style="padding: 24px;" :native-scrollbar="false">
+      <n-layout content-style="padding: 24px;width: 100%;height: 100%;" :native-scrollbar="false">
         <router-view></router-view>
       </n-layout>
     </n-layout>

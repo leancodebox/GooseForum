@@ -31,7 +31,7 @@ let loginOrReg = function () {
     <n-button text>
       <n-avatar
           round
-          :size="36"
+          :size="32"
       >
         {{ userStore.userInfo.username }}
       </n-avatar>

@@ -49,7 +49,7 @@ let isMobile = useIsMobile()
   <n-layout position="absolute">
     <n-layout-header
         position="absolute"
-        style="height: 56px; padding: 8px;align-items: center;"
+        style="height: 56px; padding: 8px;"
         bordered
     >
       <n-flex justify="space-between" align="center" >
@@ -59,7 +59,7 @@ let isMobile = useIsMobile()
           <span>GooseForum</span>
           <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions"/>
         </n-text>
-        <n-flex align="center" justify="end">
+        <n-flex align="center" justify="end"  style="padding-right: 24px;">
           <router-link :to="'/home/bbs/articlesEdit'">
             <n-button quaternary>我也写一篇</n-button>
           </router-link>

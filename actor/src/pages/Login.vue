@@ -1,5 +1,5 @@
 <script setup>
-import {NButton, NCard, NForm, NFormItemRow, NGrid, NGridItem, NInput, NTabPane, NTabs, useMessage} from "naive-ui"
+import {NButton, NCard, NForm, NFormItemRow, NGrid, NGridItem,NFlex, NInput, NTabPane, NTabs, useMessage} from "naive-ui"
 import {ref} from "vue"
 import {useUserStore} from "@/modules/user";
 import {login, reg} from "@/service/request";
@@ -39,10 +39,9 @@ async function regAction() {
 </script>
 
 <template>
-  <n-grid :cols="3" item-responsive style="height: 100%">
-    <n-grid-item span="0 660:1"/>
-    <n-grid-item span="3 660:1" style="padding-top:64px ">
-      <n-card style="">
+  <n-flex vertical style="margin-top: 120px">
+  <n-flex justify="space-around">
+      <n-card style="max-width: 400px;">
         <n-tabs
             class="card-tabs"
             default-value="signin"
@@ -85,8 +84,8 @@ async function regAction() {
           </n-tab-pane>
         </n-tabs>
       </n-card>
-    </n-grid-item>
-  </n-grid>
+  </n-flex>
+  </n-flex>
 </template>
 <style>
 

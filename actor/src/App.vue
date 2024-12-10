@@ -8,6 +8,7 @@ import {
   NLayout,
   NLoadingBarProvider,
   NMessageProvider,
+  NNotificationProvider,
   zhCN
 } from 'naive-ui'
 import {h} from 'vue'
@@ -67,6 +68,7 @@ function handleSelect(key) {
 </script>
 
 <template>
+  <n-notification-provider :max="3">
   <n-message-provider>
     <n-loading-bar-provider>
       <n-config-provider :locale="zhCN" :date-locale="dateZhCN">
@@ -91,6 +93,7 @@ function handleSelect(key) {
       </n-config-provider>
     </n-loading-bar-provider>
   </n-message-provider>
+  </n-notification-provider>
 </template>
 
 <style>
