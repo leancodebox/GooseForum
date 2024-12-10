@@ -43,13 +43,12 @@ const menuOptions = [
 let isTablet = useIsTablet()
 let isMobile = useIsMobile()
 
-
+let topHeight = ref('56px')
 </script>
 <template>
-  <n-layout position="absolute">
     <n-layout-header
         position="absolute"
-        style="height: 56px; padding: 8px;"
+        :style="{height: topHeight,  padding: '8px'}"
         bordered
     >
       <n-flex justify="space-between" align="center" >
@@ -71,7 +70,7 @@ let isMobile = useIsMobile()
         </n-flex>
       </n-flex>
     </n-layout-header>
-    <n-layout style="top: 56px;"
+    <n-layout :style="{top: topHeight}"
               :native-scrollbar="false"
               :position="'absolute'"
               content-style="min-height: calc(100vh - var(--header-height)); display: flex; flex-direction: column;"
@@ -84,7 +83,6 @@ let isMobile = useIsMobile()
         <p>&copy; My Homepage 2023</p>
       </n-layout-footer>
     </n-layout>
-  </n-layout>
 </template>
 
 <style>

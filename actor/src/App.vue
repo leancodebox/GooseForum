@@ -76,28 +76,13 @@ function handleSelect(key) {
         <n-layout position="absolute">
           <router-view></router-view>
         </n-layout>
-
         <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">
-          <n-float-button  circle :right="45" :bottom="30" >
+          <n-float-button  circle :right="56" :bottom="30" >
                 <n-icon>
                   <sparkles-outline/>
                 </n-icon>
           </n-float-button>
         </n-dropdown>
-<!--        <div-->
-<!--            style="right: 15px;bottom: 100px;position:absolute;z-index:1501"-->
-<!--        >-->
-<!--          <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">-->
-<!--            <n-button circle size="large" type="success">-->
-<!--              <template #icon>-->
-<!--                <n-icon>-->
-<!--                  <sparkles-outline/>-->
-<!--                </n-icon>-->
-<!--              </template>-->
-<!--            </n-button>-->
-<!--          </n-dropdown>-->
-
-<!--        </div>-->
       </n-config-provider>
     </n-loading-bar-provider>
   </n-message-provider>

@@ -93,13 +93,8 @@ async function reply() {
 }
 </script>
 <template>
-
-  <n-layout>
-    <n-layout has-sider sider-placement="right"
-              class="content"
-              :style="{flex: 1, maxWidth: '1400px', margin: '0 auto', padding: '24px'}">
+    <n-layout has-sider sider-placement="right">
       <n-layout-content content-style="padding: 24px;">
-
         <n-flex vertical>
           <n-card style="margin:0 auto">
             <h2> {{ articleInfo.title }}</h2>
@@ -126,16 +121,16 @@ async function reply() {
               <n-alert type="info" :bordered="false">
                 讨论应以学习和精进为目的。请勿发布不友善或者负能量的内容，与人为善，比聪明更重要！
               </n-alert>
-              <n-input v-model:value="replyData.content"></n-input>
+              <n-input v-model:value="replyData.content"
+                       type="textarea"
+                       :autosize="{minRows: 3,maxRows: 5 }"
+              ></n-input>
               <n-flex justify="end" size="large">
                 <n-button @click="reply">评论</n-button>
               </n-flex>
             </n-flex>
-
           </n-card>
         </n-flex>
-
-
       </n-layout-content>
       <n-layout-sider
           :width="360"
@@ -176,14 +171,7 @@ async function reply() {
 
       </n-layout-sider>
     </n-layout>
-  </n-layout>
 </template>
-
-
 <style>
-@media (max-width: 1200px) {
-  .content {
-    max-width: 100%;
-  }
-}
+
 </style>

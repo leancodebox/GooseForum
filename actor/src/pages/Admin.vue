@@ -114,7 +114,6 @@ const menuOptions2 = [
       </n-flex>
     </n-layout-header>
     <n-layout position="absolute" style="top: 56px; bottom: 0;" has-sider>
-
       <n-layout-sider
           collapse-mode="width"
           :collapsed-width="64"
@@ -136,7 +135,7 @@ const menuOptions2 = [
         />
 
       </n-layout-sider>
-      <n-layout content-style="padding: 24px;width: 100%;height: 100%;" :native-scrollbar="false">
+      <n-layout content-style="padding: 24px;width: 100%;height: 100%;"   :native-scrollbar="false">
         <router-view></router-view>
       </n-layout>
     </n-layout>

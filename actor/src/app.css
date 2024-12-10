@@ -8,3 +8,8 @@ body {
     min-height: 100vh;
     --header-height: 56px;
 }
+
+
+a {
+    text-decoration: none
+}

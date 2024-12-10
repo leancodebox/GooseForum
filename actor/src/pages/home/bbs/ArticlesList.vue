@@ -1,11 +1,11 @@
 <script setup>
-import {NButton, NCard, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing,NFlex,NAvatar} from 'naive-ui'
+import {NAffix,NButton, NCard, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing,NFlex,NAvatar} from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {getArticlesPageApi} from "@/service/request";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 
 const listData = ref([])
-
+const containerRef = ref(null)
 let maxId = 1
 
 function getArticlesAction() {
@@ -46,10 +46,7 @@ const isMobile = useIsMobile()
 const isTablet = useIsTablet()
 </script>
 <template>
-  <n-layout>
-    <n-layout has-sider sider-placement="right"
-              class="content"
-              :style="{flex: 1, maxWidth: '1400px', margin: '0 auto'}">
+    <n-layout has-sider sider-placement="right">
       <n-layout-content content-style="padding: 24px;">
         <!--          layout      -->
         <n-flex vertical>
@@ -64,7 +61,6 @@ const isTablet = useIsTablet()
             <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
               <n-thing>
                 <template #description>
-<!--                  <n-space size="small" style="padding-top: 4px">-->
                     <n-flex justify="space-between">
                       <n-flex align="center" >
                         <n-avatar
@@ -93,7 +89,6 @@ const isTablet = useIsTablet()
                         {{ item.lastUpdateTime }}
                       </span>
                     </n-flex>
-<!--                  </n-space>-->
                 </template>
               </n-thing>
             </router-link>
@@ -108,7 +103,6 @@ const isTablet = useIsTablet()
 
         </n-list>
         </n-flex>
-        <!--          layout      -->
 
       </n-layout-content>
       <n-layout-sider
@@ -117,20 +111,20 @@ const isTablet = useIsTablet()
           bordered
           v-show="!isTablet && !isMobile"
       >
-        <n-flex vertical>
-          <n-card title="祖国的花朵">
-            <p>祖国的花朵</p>
-          </n-card>
-          <n-card title="今日推荐">
-            <p>祖国的花朵</p>
-          </n-card>
-          <n-card title="友情连接">
-            <p>祖国的花朵</p>
-          </n-card>
-        </n-flex>
+
+          <n-flex vertical>
+            <n-card title="祖国的花朵">
+              <p>祖国的花朵</p>
+            </n-card>
+            <n-card title="今日推荐">
+              <p>祖国的花朵</p>
+            </n-card>
+            <n-card title="友情连接">
+              <p>祖国的花朵</p>
+            </n-card>
+          </n-flex>
       </n-layout-sider>
     </n-layout>
-  </n-layout>
 </template>
 <style scoped>
 
@@ -143,17 +137,6 @@ const isTablet = useIsTablet()
     background-color: #ffff00;
   }
 }
-
-a {
-  text-decoration: none
-}
-
-@media (max-width: 1200px) {
-  .content {
-    max-width: 100%;
-  }
-}
-
 
 @keyframes yellowToRed {
   0% {
