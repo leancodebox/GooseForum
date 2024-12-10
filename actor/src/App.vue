@@ -9,6 +9,7 @@ import {
   NLoadingBarProvider,
   NMessageProvider,
   NNotificationProvider,
+  NFloatButton,
   zhCN
 } from 'naive-ui'
 import {h} from 'vue'
@@ -53,7 +54,7 @@ const options = [
         RouterLink,
         {
           to: {
-            path: '/login/'
+            path: '/home/regOrLogin'
           }
         },
         {default: () => 'login'},
@@ -76,20 +77,27 @@ function handleSelect(key) {
           <router-view></router-view>
         </n-layout>
 
-        <div
-            style="right: 15px;bottom: 100px;position:absolute;z-index:1501"
-        >
-          <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">
-            <n-button circle size="large" type="success">
-              <template #icon>
+        <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">
+          <n-float-button  circle :right="45" :bottom="30" >
                 <n-icon>
                   <sparkles-outline/>
                 </n-icon>
-              </template>
-            </n-button>
-          </n-dropdown>
+          </n-float-button>
+        </n-dropdown>
+<!--        <div-->
+<!--            style="right: 15px;bottom: 100px;position:absolute;z-index:1501"-->
+<!--        >-->
+<!--          <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">-->
+<!--            <n-button circle size="large" type="success">-->
+<!--              <template #icon>-->
+<!--                <n-icon>-->
+<!--                  <sparkles-outline/>-->
+<!--                </n-icon>-->
+<!--              </template>-->
+<!--            </n-button>-->
+<!--          </n-dropdown>-->
 
-        </div>
+<!--        </div>-->
       </n-config-provider>
     </n-loading-bar-provider>
   </n-message-provider>

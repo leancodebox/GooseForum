@@ -19,7 +19,6 @@ let optLog = () => import("@/pages/manager/OptLog.vue")
 
 let about = () => import("@/pages/home/AboutPage.vue")
 let index = () => import("@/pages/home/IndexPage.vue")
-let login = () => import("@/pages/Login.vue")
 let bbs = () => import("@/pages/home/BBSIndex.vue")
 let bbsPage = () => import("@/pages/home/bbs/ArticlesList.vue")
 let articlesPage = () => import("@/pages/home/bbs/ArticlesDetail.vue")
@@ -28,6 +27,7 @@ let userCenter = () => import("@/pages/home/UserCenter.vue")
 let userInfo = () => import("@/pages/home/user/UserInfo.vue")
 let notificationCenter = () => import("@/pages/home/NotificationCenter.vue")
 let userEdit = () => import("@/pages/home/UserEdit.vue")
+let regOrLogin = () => import("@/pages/home/RegOrLogin.vue")
 
 export let managerRouter = {
     belongMenu: true,
@@ -53,9 +53,6 @@ export let routes = [
         path: '/:catchAll(.*)*', name: '', redirect: '/home/'
     },
     {
-        path: '/login', component: login
-    },
-    {
         path: '/home', component: sun, children: [
             {name: '', path: '', redirect: '/home/index'},
             {name: 'index', path: 'index', component: index},
@@ -68,6 +65,7 @@ export let routes = [
                 ]
             },
             {name: 'about', path: 'about', component: about},
+            {name: 'regOrLogin', path: 'regOrLogin', component: regOrLogin},
             {
                 name: 'userCenter', path: 'userCenter', component: userCenter, children: [
                     {name: '', path: '', redirect: '/home/userCenter/userInfo'},
