@@ -1,5 +1,6 @@
 <script setup>
 import {
+  NAffix,
   NAlert,
   NAvatar,
   NButton,
@@ -91,8 +92,10 @@ async function reply() {
     lockReply.value = true
   }
 }
+let containerRef =ref(null)
 </script>
 <template>
+  <div class="container" ref="containerRef">
     <n-layout has-sider sider-placement="right">
       <n-layout-content content-style="padding: 24px;">
         <n-flex vertical>
@@ -131,6 +134,7 @@ async function reply() {
             </n-flex>
           </n-card>
         </n-flex>
+
       </n-layout-content>
       <n-layout-sider
           :width="360"
@@ -138,6 +142,11 @@ async function reply() {
           bordered
           v-show="!(isMobile||isTabletRef)"
       >
+<!--        <n-affix-->
+<!--            :listen-to="()=>containerRef"-->
+<!--            :style="{height:'100%',width:'318px'}"-->
+<!--            :top="80" :trigger-top="80"-->
+<!--        >-->
         <n-flex vertical>
           <n-card>
             <n-flex vertical>
@@ -168,10 +177,16 @@ async function reply() {
             卡片内容
           </n-card>
         </n-flex>
-
+<!--        </n-affix>-->
       </n-layout-sider>
     </n-layout>
+  </div>
 </template>
 <style>
 
+.container {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
 </style>

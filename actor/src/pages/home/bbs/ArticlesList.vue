@@ -1,5 +1,5 @@
 <script setup>
-import {NAffix,NButton, NCard, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing,NFlex,NAvatar} from 'naive-ui'
+import {NAnchor,NAffix,NButton, NCard, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing,NFlex,NAvatar} from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {getArticlesPageApi} from "@/service/request";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
@@ -46,15 +46,16 @@ const isMobile = useIsMobile()
 const isTablet = useIsTablet()
 </script>
 <template>
-    <n-layout has-sider sider-placement="right">
+  <div class="container" ref="containerRef">
+    <n-layout has-sider sider-placement="right" >
       <n-layout-content content-style="padding: 24px;">
-        <!--          layout      -->
         <n-flex vertical>
         <n-flex>
-          <n-tag    round>技术</n-tag>
-          <n-tag    round>文章</n-tag>
-          <n-tag    round>bn</n-tag>
+          <n-tag  round>技术</n-tag>
+          <n-tag  round>文章</n-tag>
+          <n-tag  round>bn</n-tag>
         </n-flex>
+
 
         <n-list>
           <n-list-item v-for="item in listData">
@@ -100,7 +101,6 @@ const isTablet = useIsTablet()
             </n-button>
             </n-flex>
           </n-list-item>
-
         </n-list>
         </n-flex>
 
@@ -111,7 +111,11 @@ const isTablet = useIsTablet()
           bordered
           v-show="!isTablet && !isMobile"
       >
-
+<!--        <n-affix-->
+<!--            :listen-to="()=>containerRef"-->
+<!--            :style="{height:'100%',width:'318px'}"-->
+<!--            :top="80" :trigger-top="80"-->
+<!--        >-->
           <n-flex vertical>
             <n-card title="祖国的花朵">
               <p>祖国的花朵</p>
@@ -123,8 +127,10 @@ const isTablet = useIsTablet()
               <p>祖国的花朵</p>
             </n-card>
           </n-flex>
+<!--        </n-affix>-->
       </n-layout-sider>
     </n-layout>
+  </div>
 </template>
 <style scoped>
 
@@ -155,5 +161,11 @@ const isTablet = useIsTablet()
 
 .blinking-div {
   animation: yellowToRed 0.5s infinite;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
 }
 </style>

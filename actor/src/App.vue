@@ -77,7 +77,7 @@ function handleSelect(key) {
           <router-view></router-view>
         </n-layout>
         <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">
-          <n-float-button  circle :right="56" :bottom="30" >
+          <n-float-button  circle :right="56" :bottom="30" style="z-index:1501">
                 <n-icon>
                   <sparkles-outline/>
                 </n-icon>
