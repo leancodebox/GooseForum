@@ -1,55 +1,76 @@
 package middleware
 
 import (
+	"bytes"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 	"sync"
 )
 
-var cache sync.Map
+var gzipCache sync.Map
 
 type cachedResponse struct {
-	contentType string
-	body        []byte
+	statusCode int
+	headers    http.Header
+	body       *bytes.Buffer
 }
 type cachingResponseWriter struct {
 	gin.ResponseWriter
-	body *[]byte
+	statusCode int
+	headers    http.Header
+	body       *bytes.Buffer
 }
 
-func (w cachingResponseWriter) Write(b []byte) (int, error) {
-	*w.body = append(*w.body, b...)
-	return w.ResponseWriter.Write(b)
+func (w *cachingResponseWriter) WriteHeader(code int) {
+	w.statusCode = code
+	w.headers = w.Header().Clone() // Clone headers to avoid concurrent map writes
+	w.ResponseWriter.WriteHeader(code)
 }
 
+func (w *cachingResponseWriter) Write(data []byte) (int, error) {
+	w.body.Write(data)
+	return w.ResponseWriter.Write(data)
+}
 func CacheMiddleware(c *gin.Context) {
 	// 如果浏览器支持 Gzip 那么就开启缓存，否则就直接执行下个中间件
 	if acceptEncoding := c.Request.Header.Get("Accept-Encoding"); strings.Contains(acceptEncoding, "gzip") {
 		key := c.Request.URL.Path
 		// 检查缓存
-		if val, ok := cache.Load(key); ok {
-			cachedResp := val.(cachedResponse)
-			c.Header("content-Encoding", "gzip")
-			c.Data(http.StatusOK, cachedResp.contentType, cachedResp.body)
-			c.Abort()
-			return
+		if val, ok := gzipCache.Load(key); ok {
+			if cachedResp, ok := val.(cachedResponse); ok {
+				// 恢复响应头和状态码
+				for k, vv := range cachedResp.headers {
+					for _, v := range vv {
+						c.Header(k, v)
+					}
+				}
+
+				c.Data(cachedResp.statusCode, cachedResp.headers.Get("Content-Type"), cachedResp.body.Bytes())
+				c.Abort()
+				return
+			}
 		}
 
-		// 使用自定义的ResponseWriter
-		var respBody []byte
-		writer := cachingResponseWriter{c.Writer, &respBody}
+		// 使用自定义ResponseWriter
+		writer := &cachingResponseWriter{
+			ResponseWriter: c.Writer,
+			statusCode:     http.StatusOK, // 初始状态码，可能会被WriteHeader修改
+			headers:        make(http.Header),
+			body:           bytes.NewBuffer([]byte{}),
+		}
 		c.Writer = writer
-		// 执行下一个handler
 		c.Next()
 
 		// 缓存响应
-		if c.Writer.Status() == http.StatusOK {
-			contentType := c.Writer.Header().Get("Content-Type")
-			cache.Store(key, cachedResponse{contentType, respBody})
+		if writer.statusCode == http.StatusOK {
+			gzipCache.Store(key, cachedResponse{
+				statusCode: writer.statusCode,
+				headers:    writer.headers.Clone(), // Clone headers to avoid modification after storing
+				body:       writer.body,
+			})
 		}
 	} else {
 		c.Next()
 	}
-
 }
