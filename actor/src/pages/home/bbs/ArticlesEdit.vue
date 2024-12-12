@@ -72,46 +72,30 @@ function categorySelect(value, option) {
     >
       <n-grid cols="24" x-gap="24" item-responsive>
 
-        <n-form-item-gi :span="24" label="标题">
-          <n-input v-model:value="articlesData.title"></n-input>
-        </n-form-item-gi>
 
-        <n-form-item-gi span="0:24 860:6" label="类型" path="user.age" style="min-width:160px">
+
+        <n-form-item-gi span="0:24 860:2" label="类型" path="user.age" style="min-width:80px">
           <n-select v-model:value="articlesData.type" :options="typeOptions"/>
         </n-form-item-gi>
-        <n-form-item-gi span="0:24 860:6" label="分类(不超过3个)" path="user.age" style="min-width:160px">
+        <n-form-item-gi span="0:24 860:4" label="分类(不超过3个)" path="user.age" style="min-width:160px">
           <n-select multiple v-model:value="articlesData.categoryId" :options="options" @update:value="categorySelect"
                     max-tag-count="responsive"/>
         </n-form-item-gi>
-        <!--        <n-form-item-gi   :span="3"  label="标签" path="user.age" style="min-width:160px">-->
-        <!--          <n-select-->
-        <!--              v-model:value="tags"-->
-        <!--              filterable-->
-        <!--              multiple-->
-        <!--              tag-->
-        <!--              placeholder="输入，按回车确认"-->
-        <!--              :show-arrow="false"-->
-        <!--              :show="false"-->
-        <!--          />-->
-        <!--        </n-form-item-gi>-->
-        <!--        <n-form-item-gi label="系列" :span="3"  path="user.age">-->
-        <!--          <n-input value="系列1" placeholder="选择系列"/>-->
-        <!--          <n-input value="编号  " placeholder="输入编号"/>-->
-        <!--        </n-form-item-gi>-->
-
-        <n-form-item-gi span="0:24 860:6">
-          <n-flex>
+        <n-form-item-gi span="0:24 860:12" label="标题">
+          <n-input v-model:value="articlesData.title"></n-input>
+        </n-form-item-gi>
+        <n-form-item-gi span="0:24 860:4">
+          <n-flex justify="space-around">
             <n-button attr-type="button" type="info" @click="publish(0)" :disabled="publishLoading">
               存草稿
             </n-button>
-
             <n-button attr-type="button" type="primary" @click="publish(1)" :disabled="publishLoading">
               发文章
             </n-button>
           </n-flex>
         </n-form-item-gi>
         <n-form-item-gi :span="24">
-          <mavon-editor style="width:100%;height: 100%;min-height: 600px" v-model="articlesData.content"></mavon-editor>
+          <mavon-editor style="width:100%;height: 100%;min-height: 400px;max-height: 600px" v-model="articlesData.content"></mavon-editor>
         </n-form-item-gi>
       </n-grid>
     </n-form>

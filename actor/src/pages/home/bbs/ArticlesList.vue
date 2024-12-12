@@ -113,8 +113,8 @@ const isTablet = useIsTablet()
       >
 <!--        <n-affix-->
 <!--            :listen-to="()=>containerRef"-->
-<!--            :style="{height:'100%',width:'318px'}"-->
-<!--            :top="80" :trigger-top="80"-->
+<!--            :style="{height:'100%',width:'318px',pointerEvents:'none'}"-->
+<!--            :top="150" :trigger-top="20"-->
 <!--        >-->
           <n-flex vertical>
             <n-card title="祖国的花朵">
