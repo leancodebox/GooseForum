@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {NButton, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, NSpace, NTag, useMessage} from 'naive-ui'
+import {NFlex,NButton, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, NSpace, NTag, useMessage} from 'naive-ui'
 import {h, onMounted, ref} from 'vue'
 import {getPermissionList, getRoleDel, getRoleList, getRoleSave} from '@/service/request'
 import {Ref, UnwrapRef} from "@vue/reactivity";
@@ -177,15 +177,17 @@ function startAddRole() {
       </n-form-item>
     </n-form>
   </n-modal>
-  <n-space vertical>
-    <n-button @click="startAddRole"> 新增角色</n-button>
+  <n-flex vertical>
+    <n-flex>
+      <n-button @click="startAddRole"> 新增角色</n-button>
+    </n-flex>
     <n-data-table
         :columns="columns"
         :data="data"
         :pagination="pagination"
         :bordered="false"
     />
-  </n-space>
+  </n-flex>
 </template>
 <style>
 .carousel-img {

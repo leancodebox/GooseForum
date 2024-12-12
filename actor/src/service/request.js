@@ -159,7 +159,7 @@ export function getRoleDel(id) {
     })
 }
 
-export function getAdminArticlesList(page = 1, pageSize = 20) {
+export function getAdminArticlesList(page = 1, pageSize = 10) {
     return instanceAxios.post("admin/articles-list", {
         page: page,
         pageSize: pageSize,

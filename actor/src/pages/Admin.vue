@@ -91,7 +91,7 @@ const menuOptions2 = [
 ]
 </script>
 <template>
-  <n-layout position="absolute">
+  <n-layout position="absolute" content-style="width: 100%;height: 100%;">
     <n-layout-header
         position="absolute"
         style="height: 56px; padding: 8px;"
@@ -120,9 +120,9 @@ const menuOptions2 = [
           @collapse="collapsed = true"
           @expand="collapsed = false"
           :collapsed="collapsed"
-          content-style="padding-top: 24px;"
+          content-style="padding-top: 6px;"
           :native-scrollbar="false" bordered
-          width="180"
+          width="140"
           show-trigger
           v-show="!isMobile"
       >
@@ -135,7 +135,7 @@ const menuOptions2 = [
         />
 
       </n-layout-sider>
-      <n-layout content-style="padding: 24px;width: 100%;height: 100%;"   :native-scrollbar="false">
+      <n-layout content-style="padding: 16px;width: 100%;height: 100%;"   :native-scrollbar="false">
         <router-view></router-view>
       </n-layout>
     </n-layout>

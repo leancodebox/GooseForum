@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {DataTableColumns, NButton, NDataTable, NSpace, NTag, useMessage} from 'naive-ui'
+import {DataTableColumns, NButton, NDataTable, NTag, useMessage} from 'naive-ui'
 import {h, onMounted, reactive, ref} from 'vue'
 import {getAdminArticlesList} from '@/service/request'
 
@@ -114,7 +114,7 @@ let pagination = true
 const paginationReactive = reactive({
   page: 1,
   pageCount: 1,
-  pageSize: 20,
+  pageSize: 10,
   itemCount: 0,
   search: "",
   prefix({itemCount}) {
@@ -138,17 +138,18 @@ async function searchPage(page: number) {
 }
 </script>
 <template>
-  <n-space vertical>
-    <n-data-table
-        remote
-        :columns="columns"
-        :data="data"
-        :pagination="paginationReactive"
-        :bordered="false"
-        @update:page="searchPage"
-        flex-height :style="{ height: `600px` }" striped
-    />
-  </n-space>
+  <n-data-table
+      remote
+      :columns="columns"
+      :data="data"
+      :pagination="paginationReactive"
+      :bordered="false"
+      @update:page="searchPage"
+      striped
+      flex-height
+      style="height: calc(100vh - var(--header-height) - 28px);"
+  />
+
 </template>
 <style>
 .carousel-img {

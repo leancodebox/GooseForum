@@ -73,7 +73,7 @@ function handleSelect(key) {
   <n-message-provider>
     <n-loading-bar-provider>
       <n-config-provider :locale="zhCN" :date-locale="dateZhCN">
-        <n-layout position="absolute">
+        <n-layout position="absolute" content-style="width: 100%;height: 100%;">
           <router-view></router-view>
         </n-layout>
         <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">
