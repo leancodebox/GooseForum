@@ -1,5 +1,6 @@
 import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
+import vueDevTools from 'vite-plugin-vue-devtools'
 import * as path from 'path'
 
 const alias = {
@@ -7,15 +8,20 @@ const alias = {
 }
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: "/actor/",
+    plugins: [
+        vue(),
+        vueDevTools(),
+    ],
+    base: "/dt/actor/",
     resolve: {
         alias,
     },
-    plugins: [vue()],
+
     build: {
         chunkSizeWarningLimit: 750,
         outDir: "../app/assert/frontend/dist"
     },
+
     server: {
         // 如果使用docker-compose开发模式，设置为false
         proxy: {
