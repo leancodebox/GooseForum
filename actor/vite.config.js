@@ -12,7 +12,7 @@ export default defineConfig({
         vue(),
         vueDevTools(),
     ],
-    base: "/dt/actor/",
+    base: "/actor/",
     resolve: {
         alias,
     },
