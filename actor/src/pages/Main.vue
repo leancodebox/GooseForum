@@ -1,5 +1,5 @@
 <script setup>
-import {NButton, NFlex, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NSpace, NText} from 'naive-ui';
+import {NButton, NFlex, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NText} from 'naive-ui';
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 import {h, ref} from "vue";
 import {RouterLink} from "vue-router";
@@ -46,43 +46,44 @@ let isMobile = useIsMobile()
 let topHeight = ref('56px')
 </script>
 <template>
-    <n-layout-header
-        position="absolute"
-        :style="{height: topHeight,  padding: '8px'}"
-        bordered
-    >
-      <n-flex justify="space-between" align="center" >
-        <n-text tag="div" class="ui-logo" :depth="1" @click="console.log(1)" style="align-items: center;"
-                v-show="!isTablet&&!isMobile">
-          <img alt="" src="/quote-left.png"/>
-          <span>GooseForum</span>
-          <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions"/>
-        </n-text>
-        <n-flex align="center" justify="end"  style="padding-right: 24px;">
-          <router-link :to="'/home/bbs/articlesEdit'">
-            <n-button quaternary>我也写一篇</n-button>
-          </router-link>
-          <router-link :to="'/home/notificationCenter'">
-            <n-button quaternary>消息中心</n-button>
-          </router-link>
-          <!--          <n-button quaternary>审核中心</n-button>-->
-          <user-info-card></user-info-card>
-        </n-flex>
+  <n-layout-header
+      position="absolute"
+      :style="{height: topHeight,  padding: '8px',align:'center'}"
+      bordered
+  >
+    <n-flex align="center" style="text-align: center;height: 100%;"
+            :justify="(!isTablet&&!isMobile)? 'space-between':'end'">
+      <n-text tag="div" class="ui-logo" :depth="1" @click="console.log(1)" style="align-items: center;"
+              v-if="!isTablet&&!isMobile">
+        <img alt="" src="/quote-left.png" style="height: 20px"/>
+        <span>GooseForum</span>
+        <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions"/>
+      </n-text>
+      <n-flex style="padding-right: 24px;">
+        <router-link :to="'/home/bbs/articlesEdit'">
+          <n-button quaternary>我也写一篇</n-button>
+        </router-link>
+        <router-link :to="'/home/notificationCenter'">
+          <n-button quaternary>消息中心</n-button>
+        </router-link>
+        <!--          <n-button quaternary>审核中心</n-button>-->
+        <user-info-card></user-info-card>
       </n-flex>
-    </n-layout-header>
-    <n-layout :style="{top: topHeight}"
-              :native-scrollbar="false"
-              :position="'absolute'"
-              content-style="min-height: calc(100vh - var(--header-height)); display: flex; flex-direction: column;"
-    >
-      <router-view></router-view>
-      <n-layout-footer
-          style="--x-padding: 56px;margin-top: auto;height: 100px;display: flex;justify-content: center;align-items: center;width: 100%;background-color: #f0f3f5;"
-          bordered>
+    </n-flex>
+  </n-layout-header>
+  <n-layout :style="{top: topHeight}"
+            :native-scrollbar="false"
+            :position="'absolute'"
+            content-style="min-height: calc(100vh - var(--header-height)); display: flex; flex-direction: column;"
+  >
+    <router-view></router-view>
+    <n-layout-footer
+        style="--x-padding: 56px;margin-top: auto;height: 100px;display: flex;justify-content: center;align-items: center;width: 100%;background-color: #f0f3f5;"
+        bordered>
 
-        <p>&copy; My Homepage 2023</p>
-      </n-layout-footer>
-    </n-layout>
+      <p>&copy; My Homepage 2023</p>
+    </n-layout-footer>
+  </n-layout>
 </template>
 
 <style>

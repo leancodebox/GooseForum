@@ -3,6 +3,7 @@
 import {NAvatar, NButton, NDropdown, useMessage} from "naive-ui";
 import {useUserStore} from "@/modules/user";
 import router from "@/route/router"
+import {computed} from "vue";
 
 const userStore = useUserStore()
 const message = useMessage()
@@ -23,6 +24,13 @@ let handleSelect = function (key) {
 let loginOrReg = function () {
   router.push({path: '/login'})
 }
+const truncateUsername = computed(() => {
+  const maxLength = 3; // 设定一个最大长度
+  const username = userStore.userInfo.username;
+  return username.length > maxLength
+      ? `${username.slice(0, maxLength)}...`
+      : username;
+});
 </script>
 
 <template>
@@ -33,7 +41,7 @@ let loginOrReg = function () {
           round
           :size="32"
       >
-        {{ userStore.userInfo.username }}
+        {{ truncateUsername }}
       </n-avatar>
       <div style="width: 5px"></div>
       {{ userStore.userInfo.username }}

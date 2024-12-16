@@ -5,13 +5,18 @@ import {h} from 'vue'
 let options = [
   {
     label: () =>
-        h(NEllipsis, null, {default: () => '我的发布'}),
+        h(NEllipsis, null, {default: () => '基本自料'}),
     key: '1'
   },
   {
     label: () =>
-        h(NEllipsis, null, {default: () => '我的回复'}),
+        h(NEllipsis, null, {default: () => '我的博文'}),
     key: '2'
+  },
+  {
+    label: () =>
+        h(NEllipsis, null, {default: () => '我的回复'}),
+    key: '3'
   }
 ]
 </script>
