@@ -16,8 +16,5 @@ let options = [
 ]
 </script>
 <template>
-  <n-space vertical>
-    <n-menu :options="options" style="width: 180px" default-value="1"/>
-  </n-space>
-
+    <n-menu :options="options" style="min-width: 180px" default-value="1"/>
 </template>

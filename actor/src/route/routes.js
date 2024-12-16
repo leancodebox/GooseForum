@@ -68,7 +68,6 @@ export let routes = [
             {name: 'regOrLogin', path: 'regOrLogin', component: regOrLogin},
             {
                 name: 'userCenter', path: 'userCenter', component: userCenter, children: [
-                    {name: '', path: '', redirect: '/home/userCenter/userInfo'},
                     {name: 'userInfo', path: 'userInfo', component: userInfo},
                 ]
             },

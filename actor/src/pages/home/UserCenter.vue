@@ -1,19 +1,32 @@
 <script setup>
-import {NFlex, NGi, NGrid} from "naive-ui"
+import {NCard, NFlex, NGi, NGrid} from "naive-ui"
 import Left from "@/pages/home/user/Left.vue";
 import Right from "@/pages/home/user/Right.vue";
+import {onMounted, onUnmounted, ref} from "vue";
+
+let isSmallScreen = ref(false)
+
+function checkScreenSize() {
+  isSmallScreen.value = window.innerWidth < 800;
+}
+
+onMounted(() => {
+  checkScreenSize();
+  window.addEventListener('resize', checkScreenSize);
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreenSize);
+})
 </script>
 <template>
-  <n-grid cols="5" >
-    <n-gi span="1">
+  <n-card :bordered="false">
+    <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align-mid="true" :vertical="isSmallScreen">
       <left></left>
-    </n-gi>
-    <n-gi span="3">
-      <router-view></router-view>
-    </n-gi>
-    <n-gi span="1">
-      <right></right>
-    </n-gi>
-  </n-grid>
+      <n-card style="max-width: 800px;min-width: 600px">
 
+        <router-view></router-view>
+      </n-card>
+      <right></right>
+    </n-flex>
+  </n-card>
 </template>
