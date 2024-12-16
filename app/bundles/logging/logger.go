@@ -2,6 +2,7 @@ package logging
 
 import (
 	"context"
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/asyncwrite"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/goose/fileopt"
@@ -11,6 +12,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -97,15 +100,31 @@ func getAsyncFileIoRolling() *asyncwrite.AsyncW {
 	return aw
 }
 
-func replace(groups []string, a slog.Attr) slog.Attr {
-	// Remove time.
-	if a.Key == slog.TimeKey && len(groups) == 0 {
-		return slog.Attr{}
+var rootDir = getRootDir()
+
+func getRootDir() string {
+	_, file, _, ok := runtime.Caller(1)
+	if !ok {
+		return "???"
 	}
-	// Remove the directory from the source's filename.
-	if a.Key == slog.SourceKey {
-		source := a.Value.Any().(*slog.Source)
-		source.File = filepath.Base(source.File)
+
+	for i := 0; i < 3; i++ {
+		file = filepath.Dir(file)
+	}
+	return strings.ReplaceAll(file, "\\", "/")
+}
+
+func replace(groups []string, a slog.Attr) slog.Attr {
+	switch {
+	case a.Key == slog.SourceKey:
+		if source, ok := a.Value.Any().(*slog.Source); ok {
+			source.File = strings.TrimPrefix(source.File, rootDir+"/")
+			a.Value = slog.StringValue(fmt.Sprintf("%v:%v %v", source.File, source.Line, source.Function))
+		}
+	case a.Key == slog.TimeKey:
+		if item, ok := a.Value.Any().(time.Time); ok {
+			a.Value = slog.StringValue(item.Format("2006-01-02 15:04:05.999999999"))
+		}
 	}
 	return a
 }
