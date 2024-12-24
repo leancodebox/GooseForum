@@ -12,7 +12,7 @@ migration = "on" # OPEN_MIGRATION in on,off
 [db.default]
 connection = "sqlite"# in mysql sqlite
 url = "db_user:db_pass@tcp(db_host:3306)/db_name?charset=utf8mb4&parseTime=True&loc=Local"
-path = "./storage/data/sqlite.db"# :memory:|./storage/data/sqlite.db
+path = "./storage/database/sqlite.db"# :memory:|./storage/database/sqlite.db
 
 maxIdleConnections = 50
 maxOpenConnections = 50
