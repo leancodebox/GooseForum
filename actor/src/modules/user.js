@@ -24,8 +24,8 @@ export const useUserStore = defineStore('user', () => {
         saveUserInfo()
     }
 
-    function layout() {
-        userInfo.value = null
+    function clearUserInfo() {
+        userInfo.value = {username: ''}
         token.value = ''
         sessionStorage.clear()
         localStorage.clear()
@@ -38,6 +38,7 @@ export const useUserStore = defineStore('user', () => {
     return {
         userInfo,
         token,
-        login
+        login,
+        clearUserInfo
     }
 })

@@ -1,6 +1,7 @@
 import axios from "axios"
 import {useUserStore} from "@/modules/user";
 import {createDiscreteApi,} from "naive-ui";
+import router from '@/route/router'
 
 const {message} = createDiscreteApi(
     ["message"],
@@ -52,16 +53,36 @@ instanceAxios.interceptors.response.use(response => {
     }
     return response
 }, error => {
-    const res = error.response.data
+    const res = error.response?.data
+    
+    // 处理未授权的情况（token失效或未登录）
+    if (error.response?.status === 401) {
+        message.error('登录已过期，请重新登录')
+        userStore.clearUserInfo()
+        
+        // 保存当前路由，以便登录后返回
+        const currentPath = router.currentRoute.value.fullPath
+        if (currentPath !== '/home/regOrLogin') {
+            router.push({
+                path: '/home/regOrLogin',
+                query: { redirect: currentPath }  // 保存重定向信息
+            })
+        }
+        return Promise.reject(error)
+    }
+
     if (res === undefined || res.code === undefined) {
         console.error(error)
-        return
+        return Promise.reject(error)
     }
+    
     if (res.code === fail) {
         message.error(res.msg ? res.msg : "响应异常")
-        return
+        return Promise.reject(error)
     }
+    
     console.error(error)
+    return Promise.reject(error)
 })
 
 export function getUserInfo() {

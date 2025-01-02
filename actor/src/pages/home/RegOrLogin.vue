@@ -4,8 +4,10 @@ import {ref} from "vue"
 import {useUserStore} from "@/modules/user";
 import {login, reg} from "@/service/request";
 import router from "@/route/router"
+import {useRoute} from 'vue-router'
 
 const message = useMessage()
+const route = useRoute()
 
 let loginInfo = ref({
   email: "",
@@ -22,19 +24,33 @@ let regInfo = ref({
 const userStore = useUserStore()
 
 async function loginAction() {
-  let res = await login(loginInfo.value.email, loginInfo.value.password)
-  userStore.login(res.result)
-  router.push({path: "/home/bbs"})
+  try {
+    let res = await login(loginInfo.value.email, loginInfo.value.password)
+    userStore.login(res.result)
+    message.success('登录成功')
+    
+    const redirect = route.query.redirect || '/home/bbs'
+    router.push(redirect)
+  } catch (error) {
+    console.error('Login failed:', error)
+  }
 }
 
 async function regAction() {
-  if (regInfo.value.password !== regInfo.value.repeatPassword) {
-    message.error("两次密码不相等")
-    return
+  try {
+    if (regInfo.value.password !== regInfo.value.repeatPassword) {
+      message.error("两次密码不相等")
+      return
+    }
+    let res = await reg(regInfo.value.email, regInfo.value.username, regInfo.value.password)
+    userStore.login(res.result)
+    message.success('注册成功')
+    
+    const redirect = route.query.redirect || '/home/bbs'
+    router.push(redirect)
+  } catch (error) {
+    console.error('Registration failed:', error)
   }
-  let res = await reg(regInfo.value.email, regInfo.value.username, regInfo.value.password)
-  userStore.login(res.result)
-  router.push({path: "/home/bbs"})
 }
 </script>
 
