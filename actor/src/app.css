@@ -1,11 +1,18 @@
+/* 重置根元素和body的默认样式 */
 #app, html, body {
     background-color: #E9EEF3;
     margin: 0;
 }
+
+/* 
+ * 设置body为固定定位，占满整个视口
+ * 这样可以防止页面滚动，所有滚动都在内部容器中进行
+ */
 body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    /* 定义全局CSS变量，用于头部高度 */
     --header-height: 56px;
     position: fixed;
     top: 0;
@@ -14,12 +21,15 @@ body {
     height: 100%;
 }
 
-
+/* 移除所有链接的下划线 */
 a {
     text-decoration: none
 }
 
-
-html{
+/* 
+ * 禁用html的滚动条
+ * 因为我们使用固定定位的body，所以不需要html层的滚动
+ */
+html {
     overflow: hidden;
 }
