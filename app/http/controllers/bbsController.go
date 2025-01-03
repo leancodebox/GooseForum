@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
@@ -10,7 +12,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	array "github.com/leancodebox/goose/collectionopt"
-	"time"
 )
 
 func GetArticlesCategory() component.Response {
@@ -30,10 +31,16 @@ type GetArticlesPageRequest struct {
 }
 
 type ArticlesSimpleDto struct {
-	Id             uint64 `json:"id"`
-	Title          string `json:"title"`
-	LastUpdateTime string `json:"lastUpdateTime"`
-	Username       string `json:"username"`
+	Id             uint64   `json:"id"`
+	Title          string   `json:"title"`
+	Content        string   `json:"content"`
+	CreateTime     string   `json:"createTime"`
+	LastUpdateTime string   `json:"lastUpdateTime"`
+	Username       string   `json:"username"`
+	ViewCount      int64    `json:"viewCount"`
+	CommentCount   int64    `json:"commentCount"`
+	Category       string   `json:"category"`
+	Tags           []string `json:"tags"`
 }
 
 // GetArticlesPage 文章列表
@@ -204,4 +211,67 @@ func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response 
 	}
 	reply.DeleteEntity(&replyEntity)
 	return component.SuccessResponse(true)
+}
+
+// 添加新的请求结构体
+type GetUserArticlesRequest struct {
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+}
+
+// GetUserArticles 获取用户文章列表
+func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) component.Response {
+	pageData := articles.Page(articles.PageQuery{
+		Page:         max(req.Params.Page, 1),
+		PageSize:     req.Params.PageSize,
+		UserId:       req.UserId,
+		FilterStatus: true,
+	})
+
+	//获取文章的分类信息
+	articleIds := array.Map(pageData.Data, func(t articles.Entity) uint64 {
+		return t.Id
+	})
+	categoryRs := articleCategoryRs.GetByArticleIds(articleIds)
+	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
+		return t.ArticleCategoryId
+	})
+	categoryMap := articleCategory.GetMapByIds(categoryIds)
+
+	return component.SuccessPage(
+		array.Map(pageData.Data, func(t articles.Entity) ArticlesSimpleDto {
+			// 获取文章的分类和标签
+			categories := array.Filter(categoryRs, func(rs *articleCategoryRs.Entity) bool {
+				return rs.ArticleId == t.Id
+			})
+			categoryNames := array.Map(categories, func(rs *articleCategoryRs.Entity) string {
+				if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+					return category.Category
+				}
+				return ""
+			})
+
+			return ArticlesSimpleDto{
+				Id:             t.Id,
+				Title:          t.Title,
+				Content:        t.Content,
+				CreateTime:     t.CreatedAt.Format("2006-01-02 15:04:05"),
+				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
+				Username:       "", // 这里不需要用户名，因为是自己的文章
+				ViewCount:      0,  //t.ViewCount,
+				CommentCount:   0,  //t.CommentCount,
+				Category:       FirstOr(categoryNames, "未分类"),
+				Tags:           []string{"文章", "技术"}, // 暂时使用固定标签，后续可以添加标签系统
+			}
+		}),
+		pageData.Page,
+		pageData.PageSize,
+		pageData.Total,
+	)
+}
+func FirstOr[T any](d []T, defaultValue T) T {
+	if len(d) > 1 {
+		return d[0]
+	}
+	return defaultValue
 }

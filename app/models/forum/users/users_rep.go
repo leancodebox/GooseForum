@@ -111,3 +111,17 @@ func GetMapByIds(userIds []uint64) map[uint64]*Entity {
 		return v.Id
 	})
 }
+
+// ExistUsername 检查用户名是否已存在
+func ExistUsername(username string) bool {
+	var count int64
+	builder().Where("username = ?", username).Count(&count)
+	return count > 0
+}
+
+// ExistEmail 检查邮箱是否已存在
+func ExistEmail(email string) bool {
+	var count int64
+	builder().Where("email = ?", email).Count(&count)
+	return count > 0
+}

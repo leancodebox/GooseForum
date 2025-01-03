@@ -89,18 +89,22 @@ export function getUserInfo() {
     return instanceAxios.get("get-user-info")
 }
 
-export function login(username, password) {
+export function login(username, password, captchaId, captchaCode) {
     return instanceAxios.post("/login", {
         username: username,
-        password: password
+        password: password,
+        captchaId: captchaId,
+        captchaCode: captchaCode
     })
 }
 
-export function reg(email, username, password) {
+export function reg(email, username, password, captchaId, captchaCode) {
     return instanceAxios.post("/reg", {
         email: email,
         username: username,
-        password: password
+        password: password,
+        captchaId: captchaId,
+        captchaCode: captchaCode
     })
 }
 
@@ -184,6 +188,17 @@ export function getAdminArticlesList(page = 1, pageSize = 10) {
     return instanceAxios.post("admin/articles-list", {
         page: page,
         pageSize: pageSize,
+    })
+}
+
+export function getCaptcha() {
+    return instanceAxios.get("/get-captcha")
+}
+
+export function getUserArticles(page = 1, pageSize = 10) {
+    return instanceAxios.post('bbs/get-user-articles', {
+        page,
+        pageSize
     })
 }
 

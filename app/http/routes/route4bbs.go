@@ -8,19 +8,20 @@ import (
 )
 
 func bbs(ginApp *gin.Engine) {
-	bbs := ginApp.Group("api/bbs")
+	bbsShow := ginApp.Group("api/bbs")
 
 	// 分类列表
-	bbs.GET("get-articles-category", ginUpNP(controllers.GetArticlesCategory))
+	bbsShow.GET("get-articles-category", ginUpNP(controllers.GetArticlesCategory))
 	// 文章分页
-	bbs.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
+	bbsShow.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
 	// 文章详情
-	bbs.POST("get-articles-detail", ginUpP(controllers.GetArticlesDetail))
+	bbsShow.POST("get-articles-detail", ginUpP(controllers.GetArticlesDetail))
+
 	// 热门链接
 	// 用户主页
 	// tag/分类
 
-	bbsAuth := bbs.Use(middleware.JWTAuth4Gin).
+	bbsAuth := bbsShow.Use(middleware.JWTAuth4Gin).
 		Use(middleware.JWTAuth4Gin)
 	bbsAuth.POST("get-notification", UpButterReq(controllers.GetNotification))
 	//
@@ -33,6 +34,8 @@ func bbs(ginApp *gin.Engine) {
 	bbsAuth.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
 	// 申请展示 todo
 	bbsAuth.POST("apply-show", UpButterReq(controllers.ApplyShow))
+	//
+	bbsAuth.POST("/get-user-articles", UpButterReq(controllers.GetUserArticles))
 
 	admin := ginApp.Group("api/admin").Use(middleware.JWTAuth4Gin)
 	admin.POST("user-list", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.UserList))

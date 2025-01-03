@@ -1,8 +1,8 @@
 <script setup>
-import {NButton, NCard, NForm, NFormItemRow, NGrid, NGridItem,NFlex, NInput, NTabPane, NTabs, useMessage} from "naive-ui"
-import {ref} from "vue"
-import {useUserStore} from "@/modules/user";
-import {login, reg} from "@/service/request";
+import {NButton, NCard, NForm, NFormItemRow, NFlex, NInput, NTabPane, NTabs, useMessage, NImage} from "naive-ui"
+import {ref, onMounted} from "vue"
+import {useUserStore} from "@/modules/user"
+import {login, reg, getCaptcha} from "@/service/request"
 import router from "@/route/router"
 import {useRoute} from 'vue-router'
 
@@ -12,6 +12,8 @@ const route = useRoute()
 let loginInfo = ref({
   email: "",
   password: "",
+  captchaId: "",
+  captchaCode: ""
 })
 
 let regInfo = ref({
@@ -19,20 +21,54 @@ let regInfo = ref({
   username: "",
   password: "",
   repeatPassword: "",
+  captchaId: "",
+  captchaCode: ""
+})
+
+// 验证码相关
+const captchaImg = ref("")
+const captchaId = ref("")
+
+// 获取验证码
+async function refreshCaptcha() {
+  try {
+    const res = await getCaptcha()
+    captchaImg.value = res.result.captchaImg
+    // 同时更新登录和注册表单的 captchaId
+    loginInfo.value.captchaId = res.result.captchaId
+    regInfo.value.captchaId = res.result.captchaId
+  } catch (error) {
+    console.error('Failed to get captcha:', error)
+  }
+}
+
+// 组件挂载时获取验证码
+onMounted(() => {
+  refreshCaptcha()
 })
 
 const userStore = useUserStore()
 
 async function loginAction() {
   try {
-    let res = await login(loginInfo.value.email, loginInfo.value.password)
+    if (!loginInfo.value.captchaId || !loginInfo.value.captchaCode) {
+      message.error('请输入验证码')
+      return
+    }
+    let res = await login(
+      loginInfo.value.email, 
+      loginInfo.value.password, 
+      loginInfo.value.captchaId, 
+      loginInfo.value.captchaCode
+    )
     userStore.login(res.result)
     message.success('登录成功')
     
-    const redirect = route.query.redirect || '/home/bbs'
+    const redirect = route.query.redirect || '/home/bbs/bbs'
     router.push(redirect)
   } catch (error) {
     console.error('Login failed:', error)
+    refreshCaptcha()
   }
 }
 
@@ -42,14 +78,25 @@ async function regAction() {
       message.error("两次密码不相等")
       return
     }
-    let res = await reg(regInfo.value.email, regInfo.value.username, regInfo.value.password)
+    if (!regInfo.value.captchaId || !regInfo.value.captchaCode) {
+      message.error('请输入验证码')
+      return
+    }
+    let res = await reg(
+      regInfo.value.email, 
+      regInfo.value.username, 
+      regInfo.value.password,
+      regInfo.value.captchaId,
+      regInfo.value.captchaCode
+    )
     userStore.login(res.result)
     message.success('注册成功')
     
-    const redirect = route.query.redirect || '/home/bbs'
+    const redirect = route.query.redirect || '/home/bbs/bbs'
     router.push(redirect)
   } catch (error) {
     console.error('Registration failed:', error)
+    refreshCaptcha()
   }
 }
 </script>
@@ -74,6 +121,17 @@ async function regAction() {
               <n-form-item-row label="密码">
                 <n-input v-model:value="loginInfo.password" type="password"/>
               </n-form-item-row>
+              <n-form-item-row label="验证码">
+                <n-flex align="center" :size="[8, 0]">
+                  <n-input v-model:value="loginInfo.captchaCode"/>
+                  <n-image
+                    :src="captchaImg"
+                    @click="refreshCaptcha"
+                    style="cursor: pointer;"
+                    :preview-disabled="true"
+                  />
+                </n-flex>
+              </n-form-item-row>
             </n-form>
             <n-button type="primary" @click="loginAction" block secondary strong>
               登录
@@ -93,6 +151,17 @@ async function regAction() {
               <n-form-item-row label="重复密码">
                 <n-input v-model:value="regInfo.repeatPassword" type="password"/>
               </n-form-item-row>
+              <n-form-item-row label="验证码">
+                <n-flex align="center" :size="[8, 0]">
+                  <n-input v-model:value="regInfo.captchaCode"/>
+                  <n-image
+                    :src="captchaImg"
+                    @click="refreshCaptcha"
+                    style="cursor: pointer;"
+                    :preview-disabled="true"
+                  />
+                </n-flex>
+              </n-form-item-row>
             </n-form>
             <n-button type="primary" @click="regAction" block secondary strong>
               注册
@@ -103,6 +172,11 @@ async function regAction() {
     </n-flex>
   </n-flex>
 </template>
-<style>
 
+<style scoped>
+.n-image {
+  width: 120px;
+  height: 40px;
+  margin-left: 8px;
+}
 </style>

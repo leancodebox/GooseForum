@@ -1,14 +1,15 @@
 package controllers
 
 import (
+	"log/slog"
+	"strconv"
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	jwt "github.com/leancodebox/goose/jwtopt"
-	"log/slog"
-	"strconv"
-	"time"
 
 	"github.com/spf13/cast"
 )
@@ -23,20 +24,42 @@ type RegReq struct {
 	Password       string `json:"passWord"  validate:"required"`
 	NickName       string `json:"nickName" gorm:"default:'QMPlusUser'"`
 	InvitationCode string `json:"invitationCode"`
+	CaptchaId      string `json:"captchaId" validate:"required"`
+	CaptchaCode    string `json:"captchaCode" validate:"required"`
 }
 
 // Register 注册
 func Register(r RegReq) component.Response {
+	// 首先验证验证码
+	if !VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
+		return component.FailResponse("验证码错误或已过期")
+	}
+
+	// 检查用户名是否已存在
+	if users.ExistUsername(r.Username) {
+		return component.FailResponse("用户名已存在")
+	}
+
+	// 检查邮箱是否已存在
+	if users.ExistEmail(r.Email) {
+		return component.FailResponse("邮箱已被使用")
+	}
+
 	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
 	err := users.Create(userEntity)
 	if err != nil {
 		return component.FailResponse(cast.ToString(err))
 	}
+
+	// 初始化用户积分
 	pointservice.InitUserPoints(userEntity.Id, 100)
+
+	// 生成 token
 	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
 	if err != nil {
 		return component.FailResponse(cast.ToString(err))
 	}
+
 	return component.SuccessResponse(component.DataMap{
 		"username": userEntity.Username,
 		"token":    token,
@@ -76,14 +99,6 @@ func GetCaptcha() component.Response {
 		"captchaId":  captchaId,
 		"captchaImg": captchaImg,
 	})
-}
-
-func GenerateCaptcha() (string, string) {
-	return "", ""
-}
-
-func VerifyCaptcha(captchaId, captchaCode string) bool {
-	return true
 }
 
 type null struct {

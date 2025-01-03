@@ -1,5 +1,7 @@
 package articleCategory
 
+import "github.com/leancodebox/goose/collectionopt"
+
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
@@ -36,4 +38,20 @@ func SaveAll(entities *[]Entity) int64 {
 func All() (entities []*Entity) {
 	builder().Find(&entities)
 	return
+}
+
+// GetByIds 根据ID列表获取分类列表
+func GetByIds(ids []uint64) (entities []*Entity) {
+	if len(ids) == 0 {
+		return
+	}
+	builder().Where("id IN ?", ids).Find(&entities)
+	return
+}
+
+// GetMapByIds 根据ID列表获取分类Map
+func GetMapByIds(ids []uint64) map[uint64]*Entity {
+	return collectionopt.Slice2Map(GetByIds(ids), func(v *Entity) uint64 {
+		return v.Id
+	})
 }
