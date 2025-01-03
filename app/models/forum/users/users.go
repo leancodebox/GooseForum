@@ -56,9 +56,9 @@ type Entity struct {
 	Status            int8       `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`           // 状态：0正常 1冻结
 	Validate          int8       `gorm:"column:validate;type:tinyint;not null;default:0;" json:"validate"`       // 是否验证通过: 0未通过/未验证 1 验证通过
 	Prestige          int64      `gorm:"column:prestige;type:bigint;not null;default:0;" json:"prestige"`        // 声望
-	CreatedAt         *time.Time `gorm:"column:created_at;type:datetime;" json:"createdAt"`                      //
-	UpdatedAt         *time.Time `gorm:"column:updated_at;type:datetime;" json:"updatedAt"`                      //
-	DeletedAt         *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                      //
+	CreatedAt         time.Time  `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`               //
+	UpdatedAt         time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
+	DeletedAt         *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

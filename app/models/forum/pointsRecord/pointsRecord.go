@@ -19,10 +19,10 @@ const fieldChangeReason = "change_reason"
 const fieldCreatedAt = "created_at"
 
 type Entity struct {
-	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                               //
-	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`                //
-	ChangeReason string    `gorm:"column:change_reason;type:varchar(255);" json:"changeReason"`                          //
-	CreatedAt    time.Time `gorm:"column:created_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"createdAt"` //
+	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                //
+	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"` //
+	ChangeReason string    `gorm:"column:change_reason;type:varchar(255);" json:"changeReason"`           //
+	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`              //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

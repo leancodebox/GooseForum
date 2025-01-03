@@ -25,12 +25,12 @@ const fieldUpdatedAt = "updated_at"
 const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
-	Id        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                               //
-	RoleName  string     `gorm:"column:role_name;type:varchar(255);" json:"roleName"`                                  //
-	Effective int        `gorm:"column:effective;type:int;not null;default:0;" json:"effective"`                       //
-	CreatedAt time.Time  `gorm:"column:created_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"createdAt"` //
-	UpdatedAt time.Time  `gorm:"column:updated_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"updatedAt"` //
-	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                                    //
+	Id        uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`         //
+	RoleName  string     `gorm:"column:role_name;type:varchar(255);" json:"roleName"`            //
+	Effective int        `gorm:"column:effective;type:int;not null;default:0;" json:"effective"` //
+	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`       //
+	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
+	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

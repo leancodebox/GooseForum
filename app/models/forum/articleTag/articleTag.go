@@ -19,10 +19,10 @@ const fieldCreatedAt = "created_at"
 const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
-	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                               //
-	Tag       string    `gorm:"column:tag;type:varchar(255);not null;default:'';" json:"tag"`                         //
-	CreatedAt time.Time `gorm:"column:created_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"createdAt"` //
-	UpdatedAt time.Time `gorm:"column:updated_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"updatedAt"` //
+	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`       //
+	Tag       string    `gorm:"column:tag;type:varchar(255);not null;default:'';" json:"tag"` //
+	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;" json:"createdAt"`           //
+	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

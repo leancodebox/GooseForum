@@ -44,9 +44,9 @@ type Entity struct {
 	UserId        uint64     `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`       //
 	ArticleStatus int8       `gorm:"column:article_status;type:tinyint;not null;default:0;" json:"articleStatus"` // 文章状态：0 草稿 1 发布
 	ProcessStatus int8       `gorm:"column:process_status;type:tinyint;not null;default:0;" json:"processStatus"` // 管理状态：0 正常 1 封禁
-	CreatedAt     time.Time  `gorm:"column:created_at;type:datetime;" json:"createdAt"`                           //
-	UpdatedAt     time.Time  `gorm:"column:updated_at;type:datetime;" json:"updatedAt"`                           //
-	DeletedAt     *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                           //
+	CreatedAt     time.Time  `gorm:"column:created_at;autoCreateTime;" json:"createdAt"`                          //
+	UpdatedAt     time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
+	DeletedAt     *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

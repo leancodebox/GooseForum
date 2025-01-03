@@ -28,13 +28,13 @@ const fieldCreatedAt = "created_at"
 const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
-	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                               //
-	ArticleId uint64    `gorm:"column:article_id;type:bigint unsigned;not null;default:0;" json:"articleId"`          //
-	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`                //
-	TargetId  uint64    `gorm:"column:target_id;type:bigint unsigned;not null;default:0;" json:"targetId"`            // 目标id
-	Content   string    `gorm:"column:content;type:text;" json:"content"`                                             //
-	CreatedAt time.Time `gorm:"column:created_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"createdAt"` //
-	UpdatedAt time.Time `gorm:"column:updated_at;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"updatedAt"` //
+	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      //
+	ArticleId uint64    `gorm:"column:article_id;type:bigint unsigned;not null;default:0;" json:"articleId"` //
+	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`       //
+	TargetId  uint64    `gorm:"column:target_id;type:bigint unsigned;not null;default:0;" json:"targetId"`   // 目标id
+	Content   string    `gorm:"column:content;type:text;" json:"content"`                                    //
+	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`                    //
+	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

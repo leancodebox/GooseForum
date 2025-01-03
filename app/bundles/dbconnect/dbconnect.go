@@ -25,8 +25,9 @@ import (
 //}
 
 var (
-	debug    = setting.IsDebug()
-	dbConfig = preferences.GetExclusivePreferences("db.default")
+	debug         = setting.IsDebug()
+	dbConfig      = preferences.GetExclusivePreferences("db.default")
+	isSqlite bool = false
 )
 
 var (
@@ -47,6 +48,10 @@ func Connect() *gorm.DB {
 		connectDB()
 	})
 	return dbIns
+}
+func IsSqlite() bool {
+	connectDB()
+	return isSqlite
 }
 
 // ConnectDB 初始化模型
@@ -102,6 +107,7 @@ func connectMysqlDB(_logger gormlogger.Interface) (*gorm.DB, error) {
 }
 
 func connectSqlLiteDB(_logger gormlogger.Interface) (*gorm.DB, error) {
+	isSqlite = true
 	if dbPath == ":memory:" {
 		// ":memory:"
 	} else if err := createFileIfNotExists(dbPath); err != nil {
