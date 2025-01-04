@@ -17,13 +17,13 @@ import {
   NThing,
   useMessage
 } from 'naive-ui'
-import {onMounted, ref, computed} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
 import {articlesReply, getArticlesDetailApi, getUserInfoShow} from "@/service/request";
 import ArticlesMdPage from "@/pages/home/bbs/MarkdownShow.vue";
 import '@/assets/github-markdown.css'
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
-import { useUserStore } from "@/modules/user";
+import {useUserStore} from "@/modules/user";
 
 const commentList = ref([])
 const articleInfo = ref({
@@ -45,7 +45,7 @@ const userInfo = ref({
   avatar: '',
   signature: '未填写',
   articleCount: 0,
-  reputation: 0,
+  prestige: 0,
 })
 
 async function getUserInfo(userId) {
@@ -58,7 +58,7 @@ async function getUserInfo(userId) {
         avatar: res.result.avatar || '',
         signature: res.result.signature || '未填写',
         articleCount: res.result.articleCount || 0,
-        reputation: res.result.reputation || 0,
+        prestige: res.result.prestige || 0,
       }
     }
   } catch (err) {
@@ -114,7 +114,7 @@ const message = useMessage()
 
 async function reply() {
   if (!replyData.value.content.trim()) {
-    window.$message.warning('评论内容不能为空')
+    message.warning('评论内容不能为空')
     return
   }
 
@@ -154,7 +154,7 @@ const router = useRouter()
 function handleEdit() {
   router.push({
     path: '/home/bbs/articlesEdit',
-    query: { id: id }
+    query: {id: id}
   })
 }
 
@@ -172,9 +172,9 @@ const isAuthor = computed(() => {
             <n-flex justify="space-between" align="center" style="margin-bottom: 16px">
               <h2 style="margin: 0">{{ articleInfo.title }}</h2>
               <n-button v-if="isAuthor"
-                       secondary
-                       size="small"
-                       @click="handleEdit">
+                        secondary
+                        size="small"
+                        @click="handleEdit">
                 编辑文章
               </n-button>
             </n-flex>
@@ -258,7 +258,7 @@ const isAuthor = computed(() => {
               </n-flex>
               <n-divider style="margin: 16px 0"/>
               <n-flex justify="space-around">
-                <n-statistic :value="userInfo.reputation">
+                <n-statistic :value="userInfo.prestige">
                   <template #label>
                     <div class="stat-label">声望</div>
                   </template>
