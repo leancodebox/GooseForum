@@ -141,6 +141,8 @@ CREATE TABLE `comment`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT '评论';
 
+alter table comment add reply_id   bigint          NOT NULL DEFAULT '0' after content;
+
 CREATE TABLE `reply`
 (
     `id`         bigint unsigned NOT NULL AUTO_INCREMENT,
