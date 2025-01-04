@@ -46,7 +46,7 @@ export let managerRouter = {
         {showName: '页面管理', path: 'pageManager', component: pageManager, belongMenu: true, icon: CogOutline},
         {showName: '操作记录', path: 'optLog', component: optLog, belongMenu: true, icon: ReceiptOutline},
         {
-            showName: "分配管理",
+            showName: "分类管理",
             path: 'category',
             name: 'categoryManager',
             component: () => import('@/pages/admin/CategoryManager.vue'),
