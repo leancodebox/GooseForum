@@ -2,9 +2,9 @@ package reply
 
 import "github.com/leancodebox/goose/queryopt"
 
-func Create(entity *Entity) int64 {
+func Create(entity *Entity) error {
 	result := builder().Create(entity)
-	return result.RowsAffected
+	return result.Error
 }
 
 func Get(id any) (entity Entity) {

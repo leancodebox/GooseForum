@@ -56,6 +56,7 @@ function getArticlesDetail() {
         userId: item.userId,
         username: item.username,
         content: item.content,
+        createTime: new Date(item.createTime).toLocaleString(),
       }
     })
   }).catch(e => {
@@ -79,17 +80,24 @@ const replyData = ref({
 const lockReply = ref(false)
 
 async function reply() {
+  if (!replyData.value.content.trim()) {
+    window.$message.warning('评论内容不能为空')
+    return
+  }
+  
   lockReply.value = true
   try {
-    console.log(id, replyData.value.content, replyData.value.content)
     let res = await articlesReply(parseInt(id), replyData.value.content, replyData.value.replyId)
     if (res.code === 0) {
+      window.$message.success('评论成功')
+      replyData.value.content = ''
       getArticlesDetail()
     }
   } catch (err) {
-    console.log(err)
+    console.error(err)
+    window.$message.error('评论失败')
   } finally {
-    lockReply.value = true
+    lockReply.value = false
   }
 }
 let containerRef =ref(null)
@@ -110,14 +118,14 @@ let containerRef =ref(null)
           </n-card>
 
           <n-card style="margin:0 auto" title="激情评论">
-            <span v-if="commentList">暂无</span>
-            <n-list v-else>
-              <n-list-item v-for="item in commentList">
-                <n-thing :title="item.username" content-style="margin-top: 10px;">
+            <n-list v-if="commentList && commentList.length > 0">
+              <n-list-item v-for="item in commentList" :key="item.userId">
+                <n-thing :title="item.username" :description="item.createTime" content-style="margin-top: 10px;">
                   <articles-md-page :markdown="item.content"></articles-md-page>
                 </n-thing>
               </n-list-item>
             </n-list>
+            <span v-else>暂无评论</span>
           </n-card>
           <n-card>
             <n-flex vertical>

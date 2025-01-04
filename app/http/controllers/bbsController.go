@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"strings"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/datastruct"
@@ -76,6 +77,7 @@ type GetArticlesDetailRequest struct {
 }
 
 type ReplyDto struct {
+	Id         uint64 `json:"id"`
 	ArticleId  uint64 `json:"articleId"`
 	UserId     uint64 `json:"userId"`
 	Username   string `json:"username"`
@@ -102,6 +104,7 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 			username = user.Username
 		}
 		return ReplyDto{
+			Id:         item.Id,
 			ArticleId:  item.ArticleId,
 			UserId:     item.UserId,
 			Username:   username,
@@ -186,13 +189,29 @@ type ArticleReplyId struct {
 }
 
 func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Response {
+	if len(strings.TrimSpace(req.Params.Content)) == 0 {
+		return component.FailResponse("评论内容不能为空")
+	}
+
 	if articles.Get(req.Params.ArticleId).Id == 0 {
 		return component.FailResponse("文章不存在")
 	}
+
 	if req.Params.ReplyId > 0 && reply.Get(req.Params.ReplyId).Id == 0 {
 		return component.FailResponse("要回复的评论不存在")
 	}
-	reply.Create(&reply.Entity{ArticleId: req.Params.ArticleId, Content: req.Params.Content, UserId: req.UserId})
+
+	replyEntity := &reply.Entity{
+		ArticleId: req.Params.ArticleId,
+		Content:   req.Params.Content,
+		UserId:    req.UserId,
+	}
+
+	err := reply.Create(replyEntity)
+	if err != nil {
+		return component.FailResponse("评论失败:" + err.Error())
+	}
+
 	pointservice.RewardPoints(req.UserId, 2, pointservice.RewardPoints4Reply)
 	return component.SuccessResponse(true)
 }
