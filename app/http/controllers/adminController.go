@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 

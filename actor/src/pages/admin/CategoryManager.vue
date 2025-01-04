@@ -190,22 +190,30 @@ const dialog = useDialog()
 
 async function handleDelete(row) {
   try {
-    await dialog.warning({
+    const d = await dialog.warning({
       title: '确认删除',
       content: '确定要删除这个分类吗？',
       positiveText: '确定',
-      negativeText: '取消'
+      negativeText: '取消',
+      onPositiveClick: async () => {
+        try {
+          const res = await deleteCategory(row.id)
+          if (res.code === 0) {
+            message.success('删除成功')
+            await loadData()
+          }
+        } catch (err) {
+          console.error('删除失败:', err)
+          message.error('删除失败')
+        }
+        return true
+      },
+      onNegativeClick: () => {
+        return true
+      }
     })
-    const res = await deleteCategory(row.id)
-    if (res.code === 0) {
-      message.success('删除成功')
-      await loadData()
-    }
   } catch (err) {
-    if (err instanceof Error) {
-      console.error('删除失败:', err)
-      message.error('删除失败')
-    }
+    console.error('操作异常:', err)
   }
 }
 
