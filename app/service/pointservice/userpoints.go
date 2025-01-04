@@ -3,15 +3,16 @@ package pointservice
 import (
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"time"
 )
 
 type RewardPointsType int
 
 var (
-	RewardPointsInit     RewardPointsType = 0
+	RewardPointsInit           RewardPointsType = 0
 	RewardPoints4WriteArticles RewardPointsType = 1
-	RewardPoints4Reply   RewardPointsType = 2
+	RewardPoints4Reply         RewardPointsType = 2
 )
 
 func (r RewardPointsType) String() string {
@@ -19,9 +20,9 @@ func (r RewardPointsType) String() string {
 	case 0:
 		return "初始化"
 	case 1:
-		return "";
+		return ""
 	case 2:
-		return "";
+		return ""
 	}
 	return ""
 }
@@ -30,6 +31,8 @@ func RewardPoints(userId uint64, points int64, reason RewardPointsType) {
 	userPoint := userPoints.Get(userId)
 	userPoint.CurrentPoints += points
 	userPoints.Save(&userPoint)
+
+	users.IncrementPrestige(points, userId)
 
 	pointsRecordEntity := pointsRecord.Entity{UserId: userId, ChangeReason: reason.String(), CreatedAt: time.Now()}
 	pointsRecord.Save(&pointsRecordEntity)

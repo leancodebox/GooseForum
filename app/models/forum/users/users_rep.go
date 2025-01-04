@@ -125,3 +125,8 @@ func ExistEmail(email string) bool {
 	builder().Where("email = ?", email).Count(&count)
 	return count > 0
 }
+
+func IncrementPrestige(addNumber int64, userId uint64) int64 {
+	result := builder().Exec("UPDATE users SET prestige = prestige+? where id = ?", addNumber, userId)
+	return result.RowsAffected
+}
