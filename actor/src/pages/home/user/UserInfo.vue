@@ -19,7 +19,6 @@ async function loadArticles(page = 1) {
     const res = await getUserArticles(page, pagination.value.pageSize)
     articles.value = res.result.list
     pagination.value = {
-      page: res.result.page,
       pageSize: res.result.size,
       total: res.result.total,
       pageCount: Math.ceil(res.result.total / res.result.size)
