@@ -19,7 +19,7 @@ import {
 } from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
-import {articlesReply, getArticlesDetailApi} from "@/service/request";
+import {articlesReply, getArticlesDetailApi, getUserInfoShow} from "@/service/request";
 import ArticlesMdPage from "@/pages/home/bbs/MarkdownShow.vue";
 import '@/assets/github-markdown.css'
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
@@ -38,6 +38,33 @@ const articleInfo = ref({
 let id = 1
 let maxCommentId = 0
 
+const userInfo = ref({
+  username: '',
+  userId: 0,
+  avatar: '',
+  signature: '未填写',
+  articleCount: 0,
+  reputation: 0,
+})
+
+async function getUserInfo(userId) {
+  try {
+    const res = await getUserInfoShow(userId)
+    if (res.code === 0 && res.result) {
+      userInfo.value = {
+        username: res.result.username || '',
+        userId: res.result.userId || 0,
+        avatar: res.result.avatar || '',
+        signature: res.result.signature || '未填写',
+        articleCount: res.result.articleCount || 0,
+        reputation: res.result.reputation || 0,
+      }
+    }
+  } catch (err) {
+    console.error('获取用户信息失败:', err)
+  }
+}
+
 function getArticlesDetail() {
   getArticlesDetailApi(id, maxCommentId).then(r => {
     if (r.result.articleContent !== undefined && r.result.articleContent !== "") {
@@ -50,6 +77,7 @@ function getArticlesDetail() {
         lastUpdateDate: "2022-12-28 01:01:01",
         body: r.result.articleContent
       }
+      getUserInfo(r.result.userId)
     }
     commentList.value = r.result.commentList.map(function (item) {
       return {
@@ -190,31 +218,39 @@ function cancelReply() {
         <n-flex vertical>
           <n-card>
             <n-flex vertical>
-              <n-flex>
-                <n-avatar round :size="60">
-                  {{ articleInfo.username }}
+              <n-flex align="center" :wrap="false">
+                <n-avatar
+                    round
+                    :size="60"
+                    :src="userInfo.avatar"
+                    :fallback-src="'/avatar-default.png'"
+                >
+                  {{ userInfo.username?.charAt(0) }}
                 </n-avatar>
-                <n-flex vertical>
-                  <span>{{ articleInfo.username }}({{ articleInfo.userId }})</span>
-                  <span>未填写</span>
+                <n-flex vertical style="margin-left: 12px; flex: 1;">
+                  <span class="username">{{ userInfo.username }}</span>
+                  <span class="signature">{{ userInfo.signature }}</span>
                 </n-flex>
               </n-flex>
-              <n-divider style="margin: 0 auto"/>
+              <n-divider style="margin: 16px 0"/>
               <n-flex justify="space-around">
-                <n-statistic label="声望" :value="99">
+                <n-statistic :value="userInfo.reputation">
+                  <template #label>
+                    <div class="stat-label">声望</div>
+                  </template>
                 </n-statistic>
-                <n-statistic label="文章" :value="1111">
+                <n-statistic :value="userInfo.articleCount">
+                  <template #label>
+                    <div class="stat-label">文章</div>
+                  </template>
                 </n-statistic>
               </n-flex>
-              <n-divider style="margin: 0 auto"/>
+              <n-divider style="margin: 16px 0"/>
               <n-flex justify="space-around">
-                <n-button>关注</n-button>
-                <n-button>私信</n-button>
+                <n-button secondary size="small">关注</n-button>
+                <n-button secondary size="small">私信</n-button>
               </n-flex>
             </n-flex>
-          </n-card>
-          <n-card title="小卡片" size="small">
-            卡片内容
           </n-card>
         </n-flex>
       </n-layout-sider>
@@ -299,5 +335,28 @@ function cancelReply() {
 
 .reply-to {
   color: #2080f0;
+}
+
+.username {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--n-text-color);
+}
+
+.signature {
+  font-size: 13px;
+  color: var(--n-text-color-3);
+  line-height: 1.5;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--n-text-color-3);
+}
+
+:deep(.n-statistic-value) {
+  font-size: 20px;
+  font-weight: 500;
 }
 </style>

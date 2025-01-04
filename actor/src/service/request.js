@@ -54,12 +54,12 @@ instanceAxios.interceptors.response.use(response => {
     return response
 }, error => {
     const res = error.response?.data
-    
+
     // 处理未授权的情况（token失效或未登录）
     if (error.response?.status === 401) {
         message.error('登录已过期，请重新登录')
         userStore.clearUserInfo()
-        
+
         // 保存当前路由，以便登录后返回
         const currentPath = router.currentRoute.value.fullPath
         if (currentPath !== '/home/regOrLogin') {
@@ -75,12 +75,12 @@ instanceAxios.interceptors.response.use(response => {
         console.error(error)
         return Promise.reject(error)
     }
-    
+
     if (res.code === fail) {
         message.error(res.msg ? res.msg : "响应异常")
         return Promise.reject(error)
     }
-    
+
     console.error(error)
     return Promise.reject(error)
 })
@@ -200,5 +200,12 @@ export function getUserArticles(page = 1, pageSize = 10) {
         page,
         pageSize
     })
+}
+
+export const getUserInfoShow = (userId) => {
+    return instanceAxios.post('/get-user-info-show',
+         {
+            userId
+        })
 }
 
