@@ -1,15 +1,15 @@
 <script setup>
 import {
   dateZhCN,
-  NButton,
   NConfigProvider,
+  NDialogProvider,
   NDropdown,
+  NFloatButton,
   NIcon,
   NLayout,
   NLoadingBarProvider,
   NMessageProvider,
   NNotificationProvider,
-  NFloatButton,
   zhCN
 } from 'naive-ui'
 import {h} from 'vue'
@@ -72,27 +72,29 @@ function handleSelect(key) {
 <template>
   <!-- 全局通知提供者，限制最大显示数量为3 -->
   <n-notification-provider :max="3">
-    <!-- 全局消息提供者 -->
-    <n-message-provider>
-      <!-- 全局加载条提供者 -->
-      <n-loading-bar-provider>
-        <!-- 全局配置提供者，设置中文语言 -->
-        <n-config-provider :locale="zhCN" :date-locale="dateZhCN">
-          <!-- 主布局容器 -->
-          <n-layout position="absolute" content-style="width: 100%;height: 100%;">
-            <router-view></router-view>
-          </n-layout>
-          <!-- 全局浮动按钮 -->
-          <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">
-            <n-float-button circle :right="56" :bottom="30" style="z-index:1501">
-              <n-icon>
-                <sparkles-outline/>
-              </n-icon>
-            </n-float-button>
-          </n-dropdown>
-        </n-config-provider>
-      </n-loading-bar-provider>
-    </n-message-provider>
+    <n-dialog-provider>
+      <!-- 全局消息提供者 -->
+      <n-message-provider>
+        <!-- 全局加载条提供者 -->
+        <n-loading-bar-provider>
+          <!-- 全局配置提供者，设置中文语言 -->
+          <n-config-provider :locale="zhCN" :date-locale="dateZhCN">
+            <!-- 主布局容器 -->
+            <n-layout position="absolute" content-style="width: 100%;height: 100%;">
+              <router-view></router-view>
+            </n-layout>
+            <!-- 全局浮动按钮 -->
+            <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">
+              <n-float-button circle :right="56" :bottom="30" style="z-index:1501">
+                <n-icon>
+                  <sparkles-outline/>
+                </n-icon>
+              </n-float-button>
+            </n-dropdown>
+          </n-config-provider>
+        </n-loading-bar-provider>
+      </n-message-provider>
+    </n-dialog-provider>
   </n-notification-provider>
 </template>
 

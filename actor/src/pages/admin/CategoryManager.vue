@@ -74,7 +74,7 @@ import {
   NInput,
   NInputNumber,
   NModal,
-  NSwitch,
+  NSwitch, useDialog,
   useMessage,
 } from 'naive-ui'
 import {h, onMounted, ref} from 'vue'
@@ -185,8 +185,10 @@ function handleEdit(row) {
   showModal.value = true
 }
 
+const dialog = useDialog()
+
 async function handleDelete(row) {
-  if (await window.$dialog.warning({
+  if (await dialog.warning({
     title: '确认删除',
     content: '确定要删除这个分类吗？',
     positiveText: '确定',
@@ -207,7 +209,7 @@ async function handleDelete(row) {
 
 async function handleSubmit() {
   await formRef.value?.validate()
-  
+
   submitting.value = true
   try {
     const res = await saveCategory(formData.value)
@@ -237,4 +239,4 @@ function closeModal() {
 onMounted(() => {
   loadData()
 })
-</script> 
+</script>
