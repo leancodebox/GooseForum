@@ -153,7 +153,7 @@ const router = useRouter()
 
 function handleEdit() {
   router.push({
-    path: '/home/write',
+    path: '/home/bbs/articlesEdit',
     query: { id: id }
   })
 }

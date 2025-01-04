@@ -1,10 +1,14 @@
 <script setup>
 import {mavonEditor} from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
-import {NButton, NCard, NFlex, NForm, NFormItemGi, NGrid, NInput, NSelect} from "naive-ui"
+import {NButton, NCard, NFlex, NForm, NFormItemGi, NGrid, NInput, NSelect, useMessage} from "naive-ui"
 import {onMounted, ref} from "vue";
-import {getArticleCategory, writeArticles} from "@/service/request";
-import router from "@/route/router"
+import {getArticleCategory, writeArticles, getArticlesOrigin} from "@/service/request";
+import {useRouter, useRoute} from "vue-router"
+
+const router = useRouter()
+const route = useRoute()
+const message = useMessage()
 
 let publishLoading = ref(false)
 let tags = ref([])
@@ -26,44 +30,110 @@ let typeOptions = ref([
 ])
 
 let articlesData = ref({
+  id: 0,
   tags: [],
   categoryId: [],
   title: "",
   content: "",
+  type: 0,
 })
-onMounted(async () => {
-  let data = await getArticleCategory()
-  options.value = data.result.map(item => {
-    return {
-      label: item.name,
-      value: item.value
+
+// 获取文章原始数据
+async function getOriginData() {
+  const id = route.query.id
+  if (!id) return
+
+  try {
+    const res = await getArticlesOrigin(id)
+    if (res.code === 0 && res.result) {
+      articlesData.value = {
+        ...articlesData.value,
+        id: parseInt(id),
+        title: res.result.articleTitle,
+        content: res.result.articleContent,
+        // 如果后端返回了分类和类型，也需要设置
+        // categoryId: res.result.categoryId,
+        // type: res.result.type,
+      }
     }
-  })
-  if (options.value.length > 0) {
-    articlesData.value.categoryId.push(options.value[0].value)
+  } catch (err) {
+    console.error('获取文章数据失败:', err)
+    message.error('获取文章数据失败')
+  }
+}
+
+onMounted(async () => {
+  // 获取分类选项
+  try {
+    let data = await getArticleCategory()
+    options.value = data.result.map(item => {
+      return {
+        label: item.name,
+        value: item.value
+      }
+    })
+    if (options.value.length > 0) {
+      articlesData.value.categoryId.push(options.value[0].value)
+    }
+  } catch (err) {
+    console.error('获取分类失败:', err)
+    message.error('获取分类失败')
+  }
+
+  // 如果有 id 参数，说明是编辑模式
+  if (route.query.id) {
+    await getOriginData()
   }
 })
 
-async function publish() {
+async function publish(status = 1) {
+  if (!articlesData.value.title.trim()) {
+    message.warning('请输入标题')
+    return
+  }
+  if (!articlesData.value.content.trim()) {
+    message.warning('请输入内容')
+    return
+  }
+
   publishLoading.value = true
   try {
-    let res = await writeArticles(articlesData.value)
-    if (res.result > 0) {
-      await router.push({name: "articlesPage", query: {id: res.result}})
+    let res = await writeArticles({
+      ...articlesData.value,
+      type: articlesData.value.type || 0,
+    })
+    if (res.code === 0 && res.result > 0) {
+      message.success('保存成功')
+      await router.push({
+        path:'/home/bbs/articlesPage',
+        query: {
+          id: res.result
+        }
+      })
     }
   } catch (e) {
     console.error(e)
+    message.error('保存失败')
+  } finally {
+    publishLoading.value = false
   }
-  publishLoading.value = false
 }
 
 function categorySelect(value, option) {
-  console.log(value, option)
+  if (value.length > 3) {
+    articlesData.value.categoryId = value.slice(0, 3)
+    message.warning('最多选择3个分类')
+  }
 }
 </script>
-<template>
 
+<!-- 模板部分基本不变，可以添加一个标题来区分是新建还是编辑 -->
+<template>
   <n-card :bordered="false">
+    <template #header>
+      <h3 style="margin: 0">{{ route.query.id ? '编辑文章' : '发布文章' }}</h3>
+    </template>
+    <!-- 其他内容保持不变 -->
     <n-form
         ref="formRef"
         inline

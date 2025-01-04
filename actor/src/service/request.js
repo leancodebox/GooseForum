@@ -131,6 +131,7 @@ export function getArticlesDetailApi(id, maxCommentId) {
 
 export function writeArticles(data) {
     return instanceAxios.post('bbs/write-articles', {
+        id:data.id,
         content: data.content,
         title: data.title,
         type: data.type,
@@ -207,5 +208,11 @@ export const getUserInfoShow = (userId) => {
          {
             userId
         })
+}
+
+export const getArticlesOrigin = (id) => {
+    return instanceAxios.post('/bbs/get-articles-origin', {
+        id: parseInt(id)
+    })
 }
 
