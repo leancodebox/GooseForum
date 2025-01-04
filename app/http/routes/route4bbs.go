@@ -11,6 +11,7 @@ func bbs(ginApp *gin.Engine) {
 	bbsShow := ginApp.Group("api/bbs")
 
 	// 分类列表
+	bbsShow.GET("get-articles-enum", ginUpNP(controllers.GetArticlesCategory))
 	bbsShow.GET("get-articles-category", ginUpNP(controllers.GetArticlesCategory))
 	// 文章分页
 	bbsShow.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
