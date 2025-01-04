@@ -1,25 +1,9 @@
 package articles
 
 import (
-	"context"
 	"github.com/leancodebox/goose/queryopt"
 	"time"
 )
-
-type Rep struct {
-	ctx *context.Context
-}
-
-func NewRep(ctx *context.Context) Rep {
-	return Rep{
-		ctx: ctx,
-	}
-}
-
-func (itself Rep) Save(entity *Entity) int64 {
-	result := builder().WithContext(*itself.ctx).Save(entity)
-	return result.RowsAffected
-}
 
 func Create(entity *Entity) int64 {
 	result := builder().Create(entity)
@@ -98,4 +82,14 @@ func Page(q PageQuery) struct {
 		Total    int64
 		Data     []Entity
 	}{Page: q.Page, PageSize: q.PageSize, Data: list, Total: total}
+}
+
+func IncrementView(entity Entity) int64 {
+	result := builder().Exec("UPDATE articles SET view_count = view_count+1 where id = ?", entity.Id)
+	return result.RowsAffected
+}
+
+func IncrementReply(entity Entity) int64 {
+	result := builder().Exec("UPDATE articles SET reply_count = reply_count+1 where id = ?", entity.Id)
+	return result.RowsAffected
 }

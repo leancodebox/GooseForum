@@ -119,6 +119,11 @@ CREATE TABLE `articles`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT '文章';
 
+
+alter table articles add view_count  bigint unsigned NOT NULL DEFAULT '0';
+alter table articles add reply_count  bigint unsigned NOT NULL DEFAULT '0';
+
+
 alter table articles
     modify `user_id` bigint unsigned NOT NULL DEFAULT '0';
 

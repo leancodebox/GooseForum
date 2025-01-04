@@ -38,8 +38,8 @@ type ArticlesSimpleDto struct {
 	CreateTime     string   `json:"createTime"`
 	LastUpdateTime string   `json:"lastUpdateTime"`
 	Username       string   `json:"username"`
-	ViewCount      int64    `json:"viewCount"`
-	CommentCount   int64    `json:"commentCount"`
+	ViewCount      uint64   `json:"viewCount"`
+	CommentCount   uint64   `json:"commentCount"`
 	Category       string   `json:"category"`
 	Tags           []string `json:"tags"`
 }
@@ -126,6 +126,7 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 			ReplyToUsername: replyToUsername,
 		}
 	})
+	articles.IncrementView(entity)
 	return component.SuccessResponse(map[string]any{
 		"userId":         entity.UserId,
 		"username":       author,
@@ -207,7 +208,8 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		return component.FailResponse("评论内容不能为空")
 	}
 
-	if articles.Get(req.Params.ArticleId).Id == 0 {
+	articleEntity := articles.Get(req.Params.ArticleId)
+	if articleEntity.Id == 0 {
 		return component.FailResponse("文章不存在")
 	}
 
@@ -226,6 +228,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	if err != nil {
 		return component.FailResponse("评论失败:" + err.Error())
 	}
+	articles.IncrementReply(articleEntity)
 
 	pointservice.RewardPoints(req.UserId, 2, pointservice.RewardPoints4Reply)
 	return component.SuccessResponse(true)
@@ -292,8 +295,8 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				CreateTime:     t.CreatedAt.Format("2006-01-02 15:04:05"),
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 				Username:       "", // 这里不需要用户名，因为是自己的文章
-				ViewCount:      0,  //t.ViewCount,
-				CommentCount:   0,  //t.CommentCount,
+				ViewCount:      t.ViewCount,
+				CommentCount:   t.ReplyCount,
 				Category:       FirstOr(categoryNames, "未分类"),
 				Tags:           []string{"文章", "技术"}, // 暂时使用固定标签，后续可以添加标签系统
 			}
