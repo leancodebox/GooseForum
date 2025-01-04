@@ -1,6 +1,5 @@
 <script setup>
 import {
-  NAffix,
   NAlert,
   NAvatar,
   NButton,
@@ -15,7 +14,8 @@ import {
   NListItem,
   NStatistic,
   NTag,
-  NThing
+  NThing,
+  useMessage
 } from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
@@ -78,29 +78,31 @@ const replyData = ref({
   replyId: 0,
 })
 const lockReply = ref(false)
+const message = useMessage()
 
 async function reply() {
   if (!replyData.value.content.trim()) {
     window.$message.warning('评论内容不能为空')
     return
   }
-  
+
   lockReply.value = true
   try {
     let res = await articlesReply(parseInt(id), replyData.value.content, replyData.value.replyId)
     if (res.code === 0) {
-      window.$message.success('评论成功')
+      message.success('评论成功')
       replyData.value.content = ''
       getArticlesDetail()
     }
   } catch (err) {
     console.error(err)
-    window.$message.error('评论失败')
+    message.error('评论失败')
   } finally {
     lockReply.value = false
   }
 }
-let containerRef =ref(null)
+
+let containerRef = ref(null)
 </script>
 <template>
   <div class="container" ref="containerRef">
@@ -150,11 +152,11 @@ let containerRef =ref(null)
           bordered
           v-show="!(isMobile||isTabletRef)"
       >
-<!--        <n-affix-->
-<!--            :listen-to="()=>containerRef"-->
-<!--            :style="{height:'100%',width:'318px'}"-->
-<!--            :top="80" :trigger-top="80"-->
-<!--        >-->
+        <!--        <n-affix-->
+        <!--            :listen-to="()=>containerRef"-->
+        <!--            :style="{height:'100%',width:'318px'}"-->
+        <!--            :top="80" :trigger-top="80"-->
+        <!--        >-->
         <n-flex vertical>
           <n-card>
             <n-flex vertical>
@@ -185,7 +187,7 @@ let containerRef =ref(null)
             卡片内容
           </n-card>
         </n-flex>
-<!--        </n-affix>-->
+        <!--        </n-affix>-->
       </n-layout-sider>
     </n-layout>
   </div>
