@@ -1,6 +1,9 @@
 package articleCategory
 
-import "github.com/leancodebox/goose/collectionopt"
+import (
+	"fmt"
+	"github.com/leancodebox/goose/collectionopt"
+)
 
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
@@ -9,6 +12,7 @@ func create(entity *Entity) int64 {
 
 func save(entity *Entity) int64 {
 	result := builder().Save(entity)
+	fmt.Println(result.Error)
 	return result.RowsAffected
 }
 
@@ -21,6 +25,9 @@ func SaveOrCreateById(entity *Entity) int64 {
 }
 
 func Get(id any) (entity Entity) {
+	if id == 0{
+		return entity
+	}
 	builder().First(&entity, id)
 	return
 }
@@ -30,10 +37,10 @@ func SaveAll(entities *[]Entity) int64 {
 	return result.RowsAffected
 }
 
-//func deleteEntity(entity *Entity) int64 {
-//	result := builder().Delete(entity)
-//	return result.RowsAffected
-//}
+func DeleteEntity(entity *Entity) int64 {
+	result := builder().Delete(entity)
+	return result.RowsAffected
+}
 
 func All() (entities []*Entity) {
 	builder().Find(&entities)

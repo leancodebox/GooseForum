@@ -2,8 +2,12 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
+
+	"strings"
 
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -333,3 +337,63 @@ func OptRecordPage(req component.BetterRequest[OptRecordPageReq]) component.Resp
 	)
 }
 
+type CategoryListReq struct {
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+}
+
+type CategoryItem struct {
+	Id       uint64 `json:"id"`
+	Category string `json:"category"`
+	Sort     int    `json:"sort"`
+	Status   int8   `json:"status"`
+}
+
+// GetCategoryList 获取分类列表
+func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Response {
+	categories := articleCategory.All()
+	return component.SuccessResponse(array.Map(categories, func(t *articleCategory.Entity) CategoryItem {
+		return CategoryItem{
+			Id:       t.Id,
+			Category: t.Category,
+			//Sort:     t.Sort,
+			//Status:   t.Status,
+		}
+	}))
+}
+
+type CategorySaveReq struct {
+	Id       uint64 `json:"id"`
+	Category string `json:"category" validate:"required"`
+	Sort     int    `json:"sort"`
+	Status   int8   `json:"status"`
+}
+
+// SaveCategory 保存分类
+func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Response {
+	if len(strings.TrimSpace(req.Params.Category)) == 0 {
+		return component.FailResponse("分类名称不能为空")
+	}
+
+	entity := articleCategory.Get(req.Params.Id)
+	if req.Params.Id != 0 && entity.Id == 0 {
+		return component.FailResponse("数据不存在")
+	}
+	entity.Category = req.Params.Category
+
+	articleCategory.SaveOrCreateById(&entity)
+	return component.SuccessResponse(true)
+}
+
+// DeleteCategory 删除分类
+func DeleteCategory(req component.BetterRequest[struct {
+	Id uint64 `json:"id"`
+}]) component.Response {
+	entity := articleCategory.Get(req.Params.Id)
+	if entity.Id == 0 {
+		return component.FailResponse("分类不存在")
+	}
+
+	articleCategory.DeleteEntity(&entity)
+	return component.SuccessResponse(true)
+}

@@ -216,3 +216,15 @@ export const getArticlesOrigin = (id) => {
     })
 }
 
+export const getCategoryList = () => {
+    return instanceAxios.post('/admin/category-list')
+}
+
+export const saveCategory = (data) => {
+    return instanceAxios.post('/admin/category-save', data)
+}
+
+export const deleteCategory = (id) => {
+    return instanceAxios.post('/admin/category-delete', { id })
+}
+
