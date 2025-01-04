@@ -128,22 +128,6 @@ alter table articles
 alter table articles
     add `type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '文章类型：0 博文，1教程，2问答，3分享' after `content`;
 
-CREATE TABLE `comment`
-(
-    `id`         bigint unsigned NOT NULL AUTO_INCREMENT,
-    `article_id` bigint          NOT NULL DEFAULT '0',
-    `content`    text,
-    `user_id`    bigint          NOT NULL DEFAULT '0',
-    `created_at` datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_0900_ai_ci COMMENT '评论';
-
-alter table comment
-    add reply_id bigint NOT NULL DEFAULT '0' after content;
-
 CREATE TABLE `reply`
 (
     `id`         bigint unsigned NOT NULL AUTO_INCREMENT,

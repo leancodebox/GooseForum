@@ -7,7 +7,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleTag"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/GooseForum/app/models/forum/comment"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
@@ -39,7 +38,6 @@ func migration(migration bool) {
 		&articleCategoryRs.Entity{},
 		&articles.Entity{},
 		&articleTag.Entity{},
-		&comment.Entity{},
 		&eventNotification.Entity{},
 		&optRecord.Entity{},
 		&pointsRecord.Entity{},
