@@ -143,8 +143,8 @@ type WriteArticlesOriginReq struct {
 }
 
 // WriteArticlesOrigin 写文章
-func WriteArticlesOrigin(req component.BetterRequest[WriteArticleReq]) component.Response {
-	entity := articles.Get(req.Params.Id)
+func WriteArticlesOrigin(req component.BetterRequest[WriteArticlesOriginReq]) component.Response {
+	entity := articles.Get(uint64(req.Params.Id))
 	if entity.Id == 0 {
 		return component.FailResponse("不存在")
 	}

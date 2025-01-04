@@ -62,6 +62,7 @@ func Register(r RegReq) component.Response {
 
 	return component.SuccessResponse(component.DataMap{
 		"username": userEntity.Username,
+		"userId":   userEntity.Id,
 		"token":    token,
 	})
 }
@@ -75,7 +76,7 @@ type LoginReq struct {
 
 func Login(r LoginReq) component.Response {
 	if !VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
-		return component.SuccessResponse("ok")
+		return component.FailResponse("验证失败")
 	}
 	userEntity, err := users.Verify(r.Username, r.Password)
 	if err != nil {
@@ -89,6 +90,7 @@ func Login(r LoginReq) component.Response {
 	}
 	return component.SuccessResponse(component.DataMap{
 		"username": userEntity.Username,
+		"userId":   userEntity.Id,
 		"token":    token,
 	})
 }

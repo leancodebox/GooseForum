@@ -17,12 +17,13 @@ import {
   NThing,
   useMessage
 } from 'naive-ui'
-import {onMounted, ref} from "vue";
+import {onMounted, ref, computed} from "vue";
 import {useRouter} from "vue-router";
 import {articlesReply, getArticlesDetailApi, getUserInfoShow} from "@/service/request";
 import ArticlesMdPage from "@/pages/home/bbs/MarkdownShow.vue";
 import '@/assets/github-markdown.css'
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
+import { useUserStore } from "@/modules/user";
 
 const commentList = ref([])
 const articleInfo = ref({
@@ -146,6 +147,21 @@ function cancelReply() {
   replyData.value.replyId = 0
   replyData.value.replyTo = ""
 }
+
+const userStore = useUserStore()
+const router = useRouter()
+
+function handleEdit() {
+  router.push({
+    path: '/home/write',
+    query: { id: id }
+  })
+}
+
+const isAuthor = computed(() => {
+  console.log(userStore.userInfo, articleInfo.value.userId)
+  return userStore.userInfo.userId === articleInfo.value.userId
+})
 </script>
 <template>
   <div class="container" ref="containerRef">
@@ -153,7 +169,15 @@ function cancelReply() {
       <n-layout-content content-style="padding: 24px;">
         <n-flex vertical>
           <n-card style="margin:0 auto">
-            <h2> {{ articleInfo.title }}</h2>
+            <n-flex justify="space-between" align="center" style="margin-bottom: 16px">
+              <h2 style="margin: 0">{{ articleInfo.title }}</h2>
+              <n-button v-if="isAuthor"
+                       secondary
+                       size="small"
+                       @click="handleEdit">
+                编辑文章
+              </n-button>
+            </n-flex>
             <n-flex size="small" style="margin-bottom: 16px">
               <n-tag v-for="itemTag in articleInfo.tag" :bordered="false" type="info" size="small"
                      v-text="itemTag">
@@ -358,5 +382,9 @@ function cancelReply() {
 :deep(.n-statistic-value) {
   font-size: 20px;
   font-weight: 500;
+}
+
+.edit-button {
+  margin-left: 16px;
 }
 </style>
