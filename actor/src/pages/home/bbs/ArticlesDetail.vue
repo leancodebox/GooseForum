@@ -120,9 +120,15 @@ let containerRef = ref(null)
           </n-card>
 
           <n-card style="margin:0 auto" title="激情评论">
-            <n-list v-if="commentList && commentList.length > 0">
-              <n-list-item v-for="item in commentList" :key="item.userId">
-                <n-thing :title="item.username" :description="item.createTime" content-style="margin-top: 10px;">
+            <n-list v-if="commentList && commentList.length > 0" :bordered="false" class="comment-list">
+              <n-list-item v-for="item in commentList" 
+                           :key="item.userId" 
+                           class="comment-item">
+                <n-thing :title="item.username" 
+                         class="comment-content">
+                  <template #header-extra>
+                    <span class="comment-time">{{ item.createTime }}</span>
+                  </template>
                   <articles-md-page :markdown="item.content"></articles-md-page>
                 </n-thing>
               </n-list-item>
@@ -198,5 +204,52 @@ let containerRef = ref(null)
   width: 100%;
   height: 100%;
   overflow: auto;
+}
+</style>
+<style scoped>
+.comment-list :deep(.n-list-item) {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.comment-list :deep(.n-list-item:last-child) {
+  border-bottom: none;
+}
+
+.comment-content :deep(.n-thing-main) {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comment-content :deep(.n-thing-header) {
+  margin-bottom: 4px;
+}
+
+.comment-content :deep(.n-thing-header__title) {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.comment-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.comment-content :deep(.n-thing-description) {
+  display: none;
+}
+
+/* 调整 markdown 内容的样式 */
+.comment-content :deep(.markdown-body) {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* 移除列表项的默认padding */
+.comment-list :deep(.n-list) {
+  --n-padding: 0;
 }
 </style>
