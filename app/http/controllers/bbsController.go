@@ -219,6 +219,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		ArticleId: req.Params.ArticleId,
 		Content:   req.Params.Content,
 		UserId:    req.UserId,
+		ReplyId:   req.Params.ReplyId,
 	}
 
 	err := reply.Create(replyEntity)

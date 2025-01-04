@@ -101,6 +101,7 @@ async function reply() {
     console.error(err)
     message.error('评论失败')
   } finally {
+    cancelReply()
     lockReply.value = false
   }
 }
@@ -110,7 +111,7 @@ let containerRef = ref(null)
 function handleReply(item) {
   replyData.value.replyId = item.id
   replyData.value.replyTo = item.username
-  document.querySelector('textarea').scrollIntoView({ behavior: 'smooth' })
+  document.querySelector('textarea').scrollIntoView({behavior: 'smooth'})
 }
 
 function cancelReply() {
@@ -148,12 +149,12 @@ function cancelReply() {
                       <span class="comment-time">{{ item.createTime }}</span>
                     </n-flex>
                   </template>
-                  <articles-md-page :markdown="item.content"></articles-md-page>
                   <template v-if="item.replyTo">
                     <div class="reply-reference">
                       <span class="reply-to">回复 @{{ item.replyTo }}</span>
                     </div>
                   </template>
+                  <articles-md-page :markdown="item.content"></articles-md-page>
                 </n-thing>
               </n-list-item>
             </n-list>
@@ -186,11 +187,6 @@ function cancelReply() {
           bordered
           v-show="!(isMobile||isTabletRef)"
       >
-        <!--        <n-affix-->
-        <!--            :listen-to="()=>containerRef"-->
-        <!--            :style="{height:'100%',width:'318px'}"-->
-        <!--            :top="80" :trigger-top="80"-->
-        <!--        >-->
         <n-flex vertical>
           <n-card>
             <n-flex vertical>
@@ -221,7 +217,6 @@ function cancelReply() {
             卡片内容
           </n-card>
         </n-flex>
-        <!--        </n-affix>-->
       </n-layout-sider>
     </n-layout>
   </div>
