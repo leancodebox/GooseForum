@@ -1,6 +1,8 @@
 package reply
 
-import "github.com/leancodebox/goose/queryopt"
+import (
+	"github.com/leancodebox/goose/queryopt"
+)
 
 func Create(entity *Entity) error {
 	result := builder().Create(entity)
@@ -8,7 +10,7 @@ func Create(entity *Entity) error {
 }
 
 func Get(id any) (entity Entity) {
-	builder().Where(pid, id).First(entity)
+	builder().Where(pid, id).First(&entity)
 	return
 }
 

@@ -77,12 +77,14 @@ type GetArticlesDetailRequest struct {
 }
 
 type ReplyDto struct {
-	Id         uint64 `json:"id"`
-	ArticleId  uint64 `json:"articleId"`
-	UserId     uint64 `json:"userId"`
-	Username   string `json:"username"`
-	Content    string `json:"content"`
-	CreateTime string `json:"createTime"`
+	Id              uint64 `json:"id"`
+	ArticleId       uint64 `json:"articleId"`
+	UserId          uint64 `json:"userId"`
+	Username        string `json:"username"`
+	Content         string `json:"content"`
+	CreateTime      string `json:"createTime"`
+	ReplyToId       uint64 `json:"replyToId,omitempty"`
+	ReplyToUsername string `json:"replyToUsername,omitempty"`
 }
 
 // GetArticlesDetail 文章详情
@@ -103,13 +105,25 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 		if user, ok := userMap[item.UserId]; ok {
 			username = user.Username
 		}
+
+		// 获取被回复评论的用户名
+		replyToUsername := ""
+		if item.ReplyId > 0 {
+			if replyTo := reply.Get(item.ReplyId); replyTo.Id > 0 {
+				if replyUser, ok := userMap[replyTo.UserId]; ok {
+					replyToUsername = replyUser.Username
+				}
+			}
+		}
+
 		return ReplyDto{
-			Id:         item.Id,
-			ArticleId:  item.ArticleId,
-			UserId:     item.UserId,
-			Username:   username,
-			Content:    item.Content,
-			CreateTime: item.CreatedAt.Format(time.RFC3339),
+			Id:              item.Id,
+			ArticleId:       item.ArticleId,
+			UserId:          item.UserId,
+			Username:        username,
+			Content:         item.Content,
+			CreateTime:      item.CreatedAt.Format(time.RFC3339),
+			ReplyToUsername: replyToUsername,
 		}
 	})
 	return component.SuccessResponse(map[string]any{

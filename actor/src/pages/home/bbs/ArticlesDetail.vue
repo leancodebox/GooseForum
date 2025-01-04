@@ -53,10 +53,12 @@ function getArticlesDetail() {
     }
     commentList.value = r.result.commentList.map(function (item) {
       return {
+        id: item.id,
         userId: item.userId,
         username: item.username,
         content: item.content,
         createTime: new Date(item.createTime).toLocaleString(),
+        replyTo: item.replyToUsername,
       }
     })
   }).catch(e => {
@@ -76,6 +78,7 @@ const isSmallDesktop = useIsSmallDesktop()
 const replyData = ref({
   content: "",
   replyId: 0,
+  replyTo: "",
 })
 const lockReply = ref(false)
 const message = useMessage()
@@ -103,6 +106,17 @@ async function reply() {
 }
 
 let containerRef = ref(null)
+
+function handleReply(item) {
+  replyData.value.replyId = item.id
+  replyData.value.replyTo = item.username
+  document.querySelector('textarea').scrollIntoView({ behavior: 'smooth' })
+}
+
+function cancelReply() {
+  replyData.value.replyId = 0
+  replyData.value.replyTo = ""
+}
 </script>
 <template>
   <div class="container" ref="containerRef">
@@ -121,15 +135,25 @@ let containerRef = ref(null)
 
           <n-card style="margin:0 auto" title="激情评论">
             <n-list v-if="commentList && commentList.length > 0" :bordered="false" class="comment-list">
-              <n-list-item v-for="item in commentList" 
-                           :key="item.userId" 
+              <n-list-item v-for="item in commentList"
+                           :key="item.id"
                            class="comment-item">
-                <n-thing :title="item.username" 
+                <n-thing :title="item.username"
                          class="comment-content">
                   <template #header-extra>
-                    <span class="comment-time">{{ item.createTime }}</span>
+                    <n-flex>
+                      <n-button text size="tiny" @click="handleReply(item)">
+                        回复
+                      </n-button>
+                      <span class="comment-time">{{ item.createTime }}</span>
+                    </n-flex>
                   </template>
                   <articles-md-page :markdown="item.content"></articles-md-page>
+                  <template v-if="item.replyTo">
+                    <div class="reply-reference">
+                      <span class="reply-to">回复 @{{ item.replyTo }}</span>
+                    </div>
+                  </template>
                 </n-thing>
               </n-list-item>
             </n-list>
@@ -140,12 +164,16 @@ let containerRef = ref(null)
               <n-alert type="info" :bordered="false">
                 讨论应以学习和精进为目的。请勿发布不友善或者负能量的内容，与人为善，比聪明更重要！
               </n-alert>
+              <div v-if="replyData.replyTo" class="reply-info">
+                <span>回复 @{{ replyData.replyTo }}</span>
+                <n-button text size="tiny" @click="cancelReply">取消回复</n-button>
+              </div>
               <n-input v-model:value="replyData.content"
                        type="textarea"
                        :autosize="{minRows: 3,maxRows: 5 }"
               ></n-input>
               <n-flex justify="end" size="large">
-                <n-button @click="reply">评论</n-button>
+                <n-button @click="reply" :loading="lockReply">评论</n-button>
               </n-flex>
             </n-flex>
           </n-card>
@@ -251,5 +279,30 @@ let containerRef = ref(null)
 /* 移除列表项的默认padding */
 .comment-list :deep(.n-list) {
   --n-padding: 0;
+}
+
+.reply-info {
+  margin: 8px 0;
+  padding: 4px 8px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reply-reference {
+  margin-top: 8px;
+  padding: 4px 8px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.reply-to {
+  color: #2080f0;
 }
 </style>

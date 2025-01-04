@@ -141,7 +141,8 @@ CREATE TABLE `comment`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT '评论';
 
-alter table comment add reply_id   bigint          NOT NULL DEFAULT '0' after content;
+alter table comment
+    add reply_id bigint NOT NULL DEFAULT '0' after content;
 
 CREATE TABLE `reply`
 (
@@ -156,6 +157,8 @@ CREATE TABLE `reply`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT '回复表';
+alter table reply
+    add reply_id bigint NOT NULL DEFAULT '0' after content;
 
 alter table reply
     modify `article_id` bigint unsigned NOT NULL DEFAULT '0',
