@@ -74,11 +74,12 @@ import {
   NInput,
   NInputNumber,
   NModal,
-  NSwitch, useDialog,
+  NSwitch,
+  useDialog,
   useMessage,
 } from 'naive-ui'
 import {h, onMounted, ref} from 'vue'
-import {getCategoryList, saveCategory, deleteCategory} from '@/service/request'
+import {deleteCategory, getCategoryList, saveCategory} from '@/service/request'
 
 const message = useMessage()
 const loading = ref(false)
@@ -188,19 +189,20 @@ function handleEdit(row) {
 const dialog = useDialog()
 
 async function handleDelete(row) {
-  if (await dialog.warning({
-    title: '确认删除',
-    content: '确定要删除这个分类吗？',
-    positiveText: '确定',
-    negativeText: '取消'
-  })) {
-    try {
-      const res = await deleteCategory(row.id)
-      if (res.code === 0) {
-        message.success('删除成功')
-        loadData()
-      }
-    } catch (err) {
+  try {
+    await dialog.warning({
+      title: '确认删除',
+      content: '确定要删除这个分类吗？',
+      positiveText: '确定',
+      negativeText: '取消'
+    })
+    const res = await deleteCategory(row.id)
+    if (res.code === 0) {
+      message.success('删除成功')
+      await loadData()
+    }
+  } catch (err) {
+    if (err instanceof Error) {
       console.error('删除失败:', err)
       message.error('删除失败')
     }
@@ -216,7 +218,7 @@ async function handleSubmit() {
     if (res.code === 0) {
       message.success('保存成功')
       closeModal()
-      loadData()
+      await loadData()
     }
   } catch (err) {
     console.error('保存失败:', err)
