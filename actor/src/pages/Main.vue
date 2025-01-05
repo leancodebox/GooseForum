@@ -3,7 +3,7 @@ import {NButton, NFlex, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NTe
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 import {h, ref} from "vue";
 import {RouterLink} from "vue-router";
-import UserInfoCard from "@/components/UserInfoCard.vue";
+import UserInfoCard from "@/components/UserInfoMenu.vue";
 
 function renderIcon(icon) {
   return () => h(NIcon, null, {default: () => h(icon)});
