@@ -32,14 +32,7 @@ const handleLogout = () => {
   userStore.clearUserInfo()
   message.success('已退出登录')
   
-  const currentPath = router.currentRoute.value.fullPath
-  const authRoutes = ['/home/userCenter', '/home/notificationCenter', '/home/userEdit', '/home/bbs/articlesEdit', '/manager']
-  if (authRoutes.some(path => currentPath.startsWith(path))) {
-    router.push({
-      path: '/home/regOrLogin',
-      query: { redirect: currentPath }
-    })
-  }
+  router.push('/home/bbs/bbs')
 }
 
 const handleLoginOrRegister = () => {
