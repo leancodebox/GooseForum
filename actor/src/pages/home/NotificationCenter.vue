@@ -156,8 +156,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <n-card :bordered="false">
-    <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align="isSmallScreen ? 'start' : 'center'" :vertical="isSmallScreen">
+  <div class="notification-container">
+    <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align="isSmallScreen ? 'start' : 'start'" :vertical="isSmallScreen">
       <div class="menu-section">
         <n-menu
           :options="options"
@@ -176,68 +176,83 @@ onUnmounted(() => {
         </n-button>
       </div>
 
-      <n-list class="list-component" :loading="loading">
-        <template v-if="notifications.length > 0">
-          <n-list-item v-for="notification in notifications" :key="notification.id">
-            <n-space vertical>
-              <n-space justify="space-between" align="center">
-                <n-space align="center">
-                  <n-tag :type="notificationTypes[notification.eventType]?.type || 'default'">
-                    {{ notificationTypes[notification.eventType]?.name || '通知' }}
-                  </n-tag>
-                  <span class="notification-title">{{ notification.payload.title }}</span>
+      <div class="content-section">
+        <n-list class="list-component" :loading="loading">
+          <template v-if="notifications.length > 0">
+            <n-list-item v-for="notification in notifications" :key="notification.id">
+              <n-space vertical>
+                <n-space justify="space-between" align="center">
+                  <n-space align="center">
+                    <n-tag :type="notificationTypes[notification.eventType]?.type || 'default'">
+                      {{ notificationTypes[notification.eventType]?.name || '通知' }}
+                    </n-tag>
+                    <span class="notification-title">{{ notification.payload.title }}</span>
+                  </n-space>
+                  <n-space>
+                    <n-time :time="new Date(notification.createdAt)" />
+                    <n-button
+                      v-if="!notification.isRead"
+                      text
+                      size="tiny"
+                      @click="handleMarkAsRead(notification.id)"
+                    >
+                      标记已读
+                    </n-button>
+                    <n-button
+                      text
+                      size="tiny"
+                      @click="handleDelete(notification.id)"
+                    >
+                      删除
+                    </n-button>
+                  </n-space>
                 </n-space>
-                <n-space>
-                  <n-time :time="new Date(notification.createdAt)" />
-                  <n-button
-                    v-if="!notification.isRead"
-                    text
-                    size="tiny"
-                    @click="handleMarkAsRead(notification.id)"
-                  >
-                    标记已读
-                  </n-button>
-                  <n-button
-                    text
-                    size="tiny"
-                    @click="handleDelete(notification.id)"
-                  >
-                    删除
-                  </n-button>
-                </n-space>
+                <div class="notification-content">{{ notification.payload.content }}</div>
               </n-space>
-              <div class="notification-content">{{ notification.payload.content }}</div>
-            </n-space>
-          </n-list-item>
-        </template>
-        <template v-else>
-          <n-empty description="暂无通知" />
-        </template>
-      </n-list>
+            </n-list-item>
+          </template>
+          <template v-else>
+            <n-empty description="暂无通知" />
+          </template>
+        </n-list>
+      </div>
     </n-flex>
-  </n-card>
+  </div>
 </template>
 
 <style scoped>
+.notification-container {
+  padding: 24px;
+  height: 100%;
+  background-color: var(--n-color);
+}
+
 .menu-section {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: sticky;
+  top: 24px;
 }
 
 .menu-component {
   min-width: 180px;
   max-width: 240px;
+  background-color: var(--n-color);
 }
 
 .mark-all-button {
   width: 100%;
 }
 
-.list-component {
-  min-width: 460px;
-  max-width: 900px;
+.content-section {
+  flex: 1;
   margin-left: 24px;
+  max-width: 1200px;
+}
+
+.list-component {
+  width: 100%;
 }
 
 .notification-title {
@@ -248,22 +263,27 @@ onUnmounted(() => {
   color: var(--n-text-color-2);
   font-size: 14px;
   line-height: 1.6;
+  padding: 8px 0;
 }
 
 @media (max-width: 600px) {
   .menu-component,
-  .list-component {
+  .content-section {
     min-width: 100%;
     max-width: none;
     margin-left: 0;
   }
 
-  .list-component {
+  .content-section {
     margin-top: 16px;
   }
 
   .n-flex.vertical {
     gap: 16px;
+  }
+
+  .notification-container {
+    padding: 16px;
   }
 }
 </style>
