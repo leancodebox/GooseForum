@@ -1,7 +1,7 @@
 <script setup>
-import {NButton, NCard, NEllipsis, NFlex, NList, NListItem, NMenu, NInput, NSpace, NImage} from "naive-ui"
+import {NButton, NCard, NEllipsis, NFlex, NList, NListItem, NMenu, NInput, NSpace, NImage, NUpload, useMessage} from "naive-ui"
 import {h, onMounted, onUnmounted, ref} from "vue";
-import {getUserProfile, updateUserProfile} from "@/service/request";
+import {getUserProfile, updateUserProfile, uploadAvatar} from "@/service/request";
 
 let options = [
   {
@@ -49,11 +49,47 @@ const editValues = ref({
   email: '',
 });
 
+const message = useMessage()
+const avatarUrl = ref('')
+const uploading = ref(false)
+
+async function handleAvatarUpload({file}) {
+  if (!file) return;
+  
+  // 验证文件类型
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  if (!allowedTypes.includes(file.type)) {
+    message.error('只支持 jpg、png、gif 格式的图片');
+    return;
+  }
+  
+  // 验证文件大小（2MB）
+  if (file.size > 2 * 1024 * 1024) {
+    message.error('图片大小不能超过 2MB');
+    return;
+  }
+  
+  uploading.value = true;
+  try {
+    const response = await uploadAvatar(file.file);
+    if (response.code === 0) {
+      avatarUrl.value = response.result.avatarUrl;
+      message.success('头像上传成功');
+    }
+  } catch (error) {
+    message.error('头像上传失败');
+    console.error('上传失败:', error);
+  } finally {
+    uploading.value = false;
+  }
+}
+
 async function fetchUserInfo() {
   try {
     const response = await getUserProfile();
     if (response.code === 0) {
       userInfo.value = response.result;
+      avatarUrl.value = response.result.avatarUrl || '';
     }
   } catch (error) {
     console.error('获取用户信息失败:', error);
@@ -126,12 +162,22 @@ onMounted(() => {
             <n-space vertical>
               <n-image
                   width="100"
-                  src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
+                  :src="avatarUrl || 'https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg'"
+                  :preview-disabled="!avatarUrl"
               />
-
-              <n-button>上传图片</n-button>
-
-              支持png,jpg,jpeg,gif格式 上传文件不能超过2M
+              
+              <n-upload
+                  accept="image/gif,image/jpeg,image/jpg,image/png"
+                  :max-size="2 * 1024 * 1024"
+                  @change="handleAvatarUpload"
+                  :show-file-list="false"
+              >
+                <n-button :loading="uploading">
+                  {{ uploading ? '上传中...' : '上传图片' }}
+                </n-button>
+              </n-upload>
+              
+              <span class="upload-tip">支持 png、jpg、jpeg、gif 格式，文件大小不超过 2MB</span>
             </n-space>
           </n-list>
         </n-card>
@@ -178,6 +224,11 @@ onMounted(() => {
   .n-flex.vertical {
     flex-direction: column; /* 确保在垂直模式下，元素是垂直排列的 */
   }
+}
+
+.upload-tip {
+  color: #999;
+  font-size: 12px;
 }
 </style>
 

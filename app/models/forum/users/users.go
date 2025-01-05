@@ -59,6 +59,7 @@ type Entity struct {
 	CreatedAt         time.Time  `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`               //
 	UpdatedAt         time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 	DeletedAt         *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
+	AvatarUrl         string     `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"` // 头像URL
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

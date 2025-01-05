@@ -17,5 +17,6 @@ func auth(ginApp *gin.Engine) {
 	ginApp.Group("api").Use(middleware.JWTAuth4Gin).
 		GET("get-user-info", UpButterReq(controllers.UserInfo)).
 		POST("set-user-info", UpButterReq(controllers.EditUserInfo)).
-		POST("invitation", UpButterReq(controllers.Invitation))
+		POST("invitation", UpButterReq(controllers.Invitation)).
+		POST("upload-avatar", controllers.UploadAvatar)
 }

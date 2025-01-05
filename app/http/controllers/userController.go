@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"log/slog"
+	"os"
+	"path"
 	"strconv"
 	"time"
 
@@ -11,6 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	jwt "github.com/leancodebox/goose/jwtopt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 )
 
@@ -178,4 +183,82 @@ type UserInfoShow struct {
 	Prestige  int64  `json:"prestige"`
 	AvatarUrl string `json:"avatarUrl"`
 	UserPoint int64  `json:"userPoint"`
+}
+
+// UploadAvatar 头像上传处理函数
+func UploadAvatar(c *gin.Context) {
+	// 从 context 中获取用户 ID
+	userIdData, exists := c.Get("userId")
+	if !exists {
+		c.JSON(200, component.FailData("未登录"))
+		return
+	}
+	userId := cast.ToUint64(userIdData)
+
+	// 获取用户信息
+	userEntity, err := users.Get(userId)
+	if err != nil {
+		c.JSON(200, component.FailData("获取用户信息失败"))
+		return
+	}
+
+	// 获取上传的文件
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		c.JSON(200, component.FailData("获取上传文件失败"))
+		return
+	}
+
+	// 验证文件类型
+	if !isValidImageType(file.Header.Get("Content-Type")) {
+		c.JSON(200, component.FailData("不支持的文件类型"))
+		return
+	}
+
+	// 验证文件大小（2MB）
+	if file.Size > 2*1024*1024 {
+		c.JSON(200, component.FailData("文件大小不能超过2MB"))
+		return
+	}
+
+	// 生成文件名
+	filename := fmt.Sprintf("avatar_%d_%d%s",
+		userId,
+		time.Now().Unix(),
+		path.Ext(file.Filename))
+
+	// 保存路径
+	avatarPath := path.Join(setting.GetStorage(), "avatars", filename)
+
+	// 确保目录存在
+	if err := os.MkdirAll(path.Dir(avatarPath), 0755); err != nil {
+		c.JSON(200, component.FailData("创建目录失败"))
+		return
+	}
+
+	// 保存文件
+	if err := c.SaveUploadedFile(file, avatarPath); err != nil {
+		c.JSON(200, component.FailData("保存文件失败"))
+		return
+	}
+
+	// 更新用户头像信息
+	userEntity.AvatarUrl = "/avatars/" + filename
+	if err := users.Save(&userEntity); err != nil {
+		c.JSON(200, component.FailData("更新用户信息失败"))
+		return
+	}
+
+	c.JSON(200, component.SuccessData(map[string]string{
+		"avatarUrl": userEntity.AvatarUrl,
+	}))
+}
+
+func isValidImageType(contentType string) bool {
+	validTypes := map[string]bool{
+		"image/jpeg": true,
+		"image/png":  true,
+		"image/gif":  true,
+	}
+	return validTypes[contentType]
 }

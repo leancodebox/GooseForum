@@ -236,3 +236,13 @@ export function updateUserProfile(data) {
     return instanceAxios.post("/set-user-info", data)
 }
 
+export function uploadAvatar(file) {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return instanceAxios.post("/upload-avatar", formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+}
+
