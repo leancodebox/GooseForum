@@ -42,7 +42,7 @@ let maxCommentId = 0
 const userInfo = ref({
   username: '',
   userId: 0,
-  avatar: '',
+  avatarUrl: '',
   signature: '未填写',
   articleCount: 0,
   prestige: 0,
@@ -55,7 +55,7 @@ async function getUserInfo(userId) {
       userInfo.value = {
         username: res.result.username || '',
         userId: res.result.userId || 0,
-        avatar: res.result.avatar || '',
+        avatarUrl: res.result.avatarUrl || '',
         signature: res.result.signature || '未填写',
         articleCount: res.result.articleCount || 0,
         prestige: res.result.prestige || 0,
@@ -246,11 +246,16 @@ const isAuthor = computed(() => {
                 <n-avatar
                     round
                     :size="60"
-                    :src="userInfo.avatar"
-                    :fallback-src="'/avatar-default.png'"
+                    v-if="!userInfo.avatarUrl"
                 >
                   {{ userInfo.username?.charAt(0) }}
                 </n-avatar>
+                <n-avatar
+                    round
+                    :size="60"
+                    v-else
+                    :src="userInfo.avatarUrl || '/api/assets/default-avatar.png'"
+                />
                 <n-flex vertical style="margin-left: 12px; flex: 1;">
                   <span class="username">{{ userInfo.username }}</span>
                   <span class="signature">{{ userInfo.signature }}</span>
