@@ -24,6 +24,7 @@ import ArticlesMdPage from "@/pages/home/bbs/MarkdownShow.vue";
 import '@/assets/github-markdown.css'
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
 import {useUserStore} from "@/modules/user";
+import UserInfoCard from '@/components/UserInfoCard.vue'
 
 const commentList = ref([])
 const articleInfo = ref({
@@ -240,47 +241,7 @@ const isAuthor = computed(() => {
           v-show="!(isMobile||isTabletRef)"
       >
         <n-flex vertical>
-          <n-card>
-            <n-flex vertical>
-              <n-flex align="center" :wrap="false">
-                <n-avatar
-                    round
-                    :size="60"
-                    v-if="!userInfo.avatarUrl"
-                >
-                  {{ userInfo.username?.charAt(0) }}
-                </n-avatar>
-                <n-avatar
-                    round
-                    :size="60"
-                    v-else
-                    :src="userInfo.avatarUrl || '/api/assets/default-avatar.png'"
-                />
-                <n-flex vertical style="margin-left: 12px; flex: 1;">
-                  <span class="username">{{ userInfo.username }}</span>
-                  <span class="signature">{{ userInfo.signature }}</span>
-                </n-flex>
-              </n-flex>
-              <n-divider style="margin: 16px 0"/>
-              <n-flex justify="space-around">
-                <n-statistic :value="userInfo.prestige">
-                  <template #label>
-                    <div class="stat-label">声望</div>
-                  </template>
-                </n-statistic>
-                <n-statistic :value="userInfo.articleCount">
-                  <template #label>
-                    <div class="stat-label">文章</div>
-                  </template>
-                </n-statistic>
-              </n-flex>
-              <n-divider style="margin: 16px 0"/>
-              <n-flex justify="space-around">
-                <n-button secondary size="small">关注</n-button>
-                <n-button secondary size="small">私信</n-button>
-              </n-flex>
-            </n-flex>
-          </n-card>
+            <user-info-card :user-info="userInfo"/>
         </n-flex>
       </n-layout-sider>
     </n-layout>
