@@ -1,74 +1,269 @@
 <script setup>
-import {NButton, NCard, NEllipsis, NFlex, NList, NListItem, NMenu} from "naive-ui"
+import {
+  NButton,
+  NCard,
+  NFlex,
+  NList,
+  NListItem,
+  NMenu,
+  NSpace,
+  NTag,
+  NTime,
+  NEmpty,
+  useMessage
+} from "naive-ui"
 import {onMounted, ref, h, onUnmounted} from "vue";
+import {
+  getNotificationList,
+  getNotificationTypes,
+  markAllAsRead,
+  markAsRead,
+  deleteNotification
+} from "@/service/request";
 
-let options = [
+const message = useMessage()
+const notifications = ref([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = 20
+const loading = ref(false)
+const showUnreadOnly = ref(true)
+
+// 通知类型配置
+const notificationTypes = ref({
+  comment: { name: '评论通知', type: 'info' },
+  reply: { name: '回复通知', type: 'success' },
+  system: { name: '系统通知', type: 'warning' },
+  follow: { name: '关注通知', type: 'error' }
+})
+
+const options = [
   {
-    label: () =>
-        h(NEllipsis, null, {default: () => '只看未读'}),
-    key: '1'
+    label: '只看未读',
+    key: 'unread'
   },
   {
-    label: () =>
-        h(NEllipsis, null, {default: () => '全部消息'}),
-    key: '2'
+    label: '全部消息',
+    key: 'all'
   }
 ]
-let isSmallScreen = ref(false)
-function checkScreenSize() {
-  isSmallScreen.value = window.innerWidth < 600;
+
+// 加载通知列表
+async function loadNotifications() {
+  loading.value = true
+  try {
+    const res = await getNotificationList({
+      page: currentPage.value,
+      pageSize: pageSize
+    })
+    if (res.code === 0) {
+      notifications.value = res.result.list.map(notification => ({
+        ...notification,
+        payload: typeof notification.payload === 'string' 
+          ? JSON.parse(notification.payload) 
+          : notification.payload
+      }))
+      total.value = res.result.total
+    }
+  } catch (err) {
+    console.error('Failed to load notifications:', err)
+    message.error('加载通知失败')
+  } finally {
+    loading.value = false
+  }
 }
-onMounted(()=> {
-  checkScreenSize();
-  window.addEventListener('resize', checkScreenSize);
+
+// 处理菜单选择
+function handleMenuSelect(key) {
+  showUnreadOnly.value = key === 'unread'
+  currentPage.value = 1
+  loadNotifications()
+}
+
+// 标记单条通知为已读
+async function handleMarkAsRead(notificationId) {
+  try {
+    const res = await markAsRead({ notificationId })
+    if (res.code === 0) {
+      message.success('已标记为已读')
+      loadNotifications()
+    }
+  } catch (err) {
+    message.error('操作失败')
+  }
+}
+
+// 标记所有通知为已读
+async function handleMarkAllAsRead() {
+  try {
+    const res = await markAllAsRead()
+    if (res.code === 0) {
+      message.success('已全部标记为已读')
+      loadNotifications()
+    }
+  } catch (err) {
+    message.error('操作失败')
+  }
+}
+
+// 删除通知
+async function handleDelete(notificationId) {
+  try {
+    const res = await deleteNotification({ notificationId })
+    if (res.code === 0) {
+      message.success('删除成功')
+      loadNotifications()
+    }
+  } catch (err) {
+    message.error('删除失败')
+  }
+}
+
+// 获取通知类型配置
+async function loadNotificationTypes() {
+  try {
+    const res = await getNotificationTypes()
+    if (res.code === 0) {
+      notificationTypes.value = res.result.reduce((acc, type) => {
+        acc[type.type] = type
+        return acc
+      }, {})
+    }
+  } catch (err) {
+    console.error('Failed to load notification types:', err)
+  }
+}
+
+onMounted(() => {
+  loadNotifications()
+  loadNotificationTypes()
 })
-onUnmounted(()=>{
-  window.removeEventListener('resize', checkScreenSize);
+
+// 响应式布局
+const isSmallScreen = ref(false)
+function checkScreenSize() {
+  isSmallScreen.value = window.innerWidth < 600
+}
+
+onMounted(() => {
+  checkScreenSize()
+  window.addEventListener('resize', checkScreenSize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreenSize)
 })
 </script>
+
 <template>
   <n-card :bordered="false">
-    <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align-mid="true" :vertical="isSmallScreen">
-      <n-menu :options="options" class="menu-component" default-value="1" />
-      <n-list class="list-component">
-        <n-list-item>
-          <p><span>故人重来</span> 回答了问题 <span>webman中如何让php文件加载一次后就常驻内存了？</span></p>
-          <p>6小时前</p>
-        </n-list-item>
-        <n-list-item>
-          <p><span>故人重来</span> 回答了问题 <span>webman中如何让php文件加载一次后就常驻内存了？</span></p>
-          <p>6小时前</p>
-        </n-list-item>
-        <n-list-item>
-          <p><span>故人重来</span> 回答了问题 <span>webman中如何让php文件加载一次后就常驻内存了？</span></p>
-          <p>6小时前</p>
-        </n-list-item>
+    <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align="isSmallScreen ? 'start' : 'center'" :vertical="isSmallScreen">
+      <div class="menu-section">
+        <n-menu
+          :options="options"
+          :value="showUnreadOnly ? 'unread' : 'all'"
+          @update:value="handleMenuSelect"
+          class="menu-component"
+        />
+        <n-button
+          type="primary"
+          ghost
+          size="small"
+          @click="handleMarkAllAsRead"
+          class="mark-all-button"
+        >
+          全部标记已读
+        </n-button>
+      </div>
+
+      <n-list class="list-component" :loading="loading">
+        <template v-if="notifications.length > 0">
+          <n-list-item v-for="notification in notifications" :key="notification.id">
+            <n-space vertical>
+              <n-space justify="space-between" align="center">
+                <n-space align="center">
+                  <n-tag :type="notificationTypes[notification.eventType]?.type || 'default'">
+                    {{ notificationTypes[notification.eventType]?.name || '通知' }}
+                  </n-tag>
+                  <span class="notification-title">{{ notification.payload.title }}</span>
+                </n-space>
+                <n-space>
+                  <n-time :time="new Date(notification.createdAt)" />
+                  <n-button
+                    v-if="!notification.isRead"
+                    text
+                    size="tiny"
+                    @click="handleMarkAsRead(notification.id)"
+                  >
+                    标记已读
+                  </n-button>
+                  <n-button
+                    text
+                    size="tiny"
+                    @click="handleDelete(notification.id)"
+                  >
+                    删除
+                  </n-button>
+                </n-space>
+              </n-space>
+              <div class="notification-content">{{ notification.payload.content }}</div>
+            </n-space>
+          </n-list-item>
+        </template>
+        <template v-else>
+          <n-empty description="暂无通知" />
+        </template>
       </n-list>
     </n-flex>
   </n-card>
 </template>
 
 <style scoped>
+.menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .menu-component {
   min-width: 180px;
   max-width: 240px;
-  flex: 1; /* 让菜单在垂直布局时占据可用空间 */
+}
+
+.mark-all-button {
+  width: 100%;
 }
 
 .list-component {
   min-width: 460px;
   max-width: 900px;
-  flex: 2; /* 让列表在垂直布局时占据更多空间 */
+  margin-left: 24px;
+}
+
+.notification-title {
+  font-weight: 500;
+}
+
+.notification-content {
+  color: var(--n-text-color-2);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 @media (max-width: 600px) {
-  .menu-component, .list-component {
-    min-width: 100%; /* 在小屏幕上，让菜单和列表都占据全部宽度 */
+  .menu-component,
+  .list-component {
+    min-width: 100%;
     max-width: none;
+    margin-left: 0;
+  }
+
+  .list-component {
+    margin-top: 16px;
   }
 
   .n-flex.vertical {
-    flex-direction: column; /* 确保在垂直模式下，元素是垂直排列的 */
+    gap: 16px;
   }
 }
 </style>

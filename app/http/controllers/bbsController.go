@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"strings"
 	"time"
 
@@ -67,7 +68,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 				Title:          t.Title,
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 				Username:       username,
-				AvatarUrl:     avatarUrl,
+				AvatarUrl:      avatarUrl,
 			}
 		}),
 		pageData.Page,
@@ -235,9 +236,25 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		return component.FailResponse("评论失败:" + err.Error())
 	}
 	articles.IncrementReply(articleEntity)
-
 	pointservice.RewardPoints(req.UserId, 2, pointservice.RewardPoints4Reply)
+	if articleEntity.UserId != req.UserId {
+		if loginUser, err := req.GetUser(); err == nil {
+			eventnotice.SendCommentNotification(articleEntity.UserId, articleEntity.Id, TakeUpTo64Chars(req.Params.Content), loginUser.Nickname)
+		}
+	}
 	return component.SuccessResponse(true)
+}
+
+// TakeUpTo64Chars 按字符数截取字符串，最多取 64 个字符
+func TakeUpTo64Chars(s string) string {
+	// 将字符串转换为 rune 切片
+	runes := []rune(s)
+	// 如果 rune 切片的长度超过 64 个字符，截取前 64 个字符
+	if len(runes) > 64 {
+		return string(runes[:64])
+	}
+	// 否则返回整个字符串
+	return s
 }
 
 type DeleteReplyId struct {

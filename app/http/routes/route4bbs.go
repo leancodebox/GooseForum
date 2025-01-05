@@ -24,8 +24,15 @@ func bbs(ginApp *gin.Engine) {
 
 	bbsAuth := bbsShow.Use(middleware.JWTAuth4Gin).
 		Use(middleware.JWTAuth4Gin)
-	bbsAuth.POST("get-notification", UpButterReq(controllers.GetNotification))
-	//
+	// 通知相关接口
+	bbsAuth.POST("notification/list", UpButterReq(controllers.GetNotificationList))
+	bbsAuth.GET("notification/unread-count", UpButterReq(controllers.GetUnreadCount))
+	bbsAuth.POST("notification/mark-read", UpButterReq(controllers.MarkAsRead))
+	bbsAuth.POST("notification/mark-all-read", UpButterReq(controllers.MarkAllAsRead))
+	bbsAuth.POST("notification/delete", UpButterReq(controllers.DeleteNotification))
+	bbsAuth.GET("notification/types", UpButterReq(controllers.GetNotificationTypes))
+
+	// 其他接口...
 	bbsAuth.POST("get-articles-origin", UpButterReq(controllers.WriteArticlesOrigin))
 	// 发布文章
 	bbsAuth.POST("write-articles", UpButterReq(controllers.WriteArticles))

@@ -246,3 +246,33 @@ export function uploadAvatar(file) {
     });
 }
 
+// 获取通知列表
+export function getNotificationList(params) {
+  return instanceAxios.post('/bbs/notification/list', params)
+}
+
+// 获取未读通知数量
+export function getUnreadCount() {
+  return instanceAxios.get('/bbs/notification/unread-count')
+}
+
+// 标记通知为已读
+export function markAsRead(params) {
+  return instanceAxios.post('/bbs/notification/mark-read', params)
+}
+
+// 标记所有通知为已读
+export function markAllAsRead() {
+  return instanceAxios.post('/bbs/notification/mark-all-read')
+}
+
+// 删除通知
+export function deleteNotification(params) {
+  return instanceAxios.post('/bbs/notification/delete', params)
+}
+
+// 获取通知类型
+export function getNotificationTypes() {
+  return instanceAxios.get('/bbs/notification/types')
+}
+
