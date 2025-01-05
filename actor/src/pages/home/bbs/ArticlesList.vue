@@ -21,7 +21,7 @@ function getArticlesAction() {
         lastUpdateTime: item.lastUpdateTime,
         body: item.content,
         username: item.username,
-        // type: "xxx",
+        avatarUrl: item.avatarUrl,
       }
     })
     listData.value.push(...newList)
@@ -67,7 +67,7 @@ const isTablet = useIsTablet()
                         <n-avatar
                             round
                             size="small"
-                            src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
+                            :src="item.avatarUrl || '/api/assets/default-avatar.png'"
                         />
                         [{{ item.username }}]
                         <n-tag :bordered="false" type="success" size="small">

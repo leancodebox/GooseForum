@@ -42,6 +42,7 @@ type ArticlesSimpleDto struct {
 	CommentCount   uint64   `json:"commentCount"`
 	Category       string   `json:"category"`
 	Tags           []string `json:"tags"`
+	AvatarUrl      string   `json:"avatarUrl"`
 }
 
 // GetArticlesPage 文章列表
@@ -54,14 +55,19 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 	return component.SuccessPage(
 		array.Map(pageData.Data, func(t articles.Entity) ArticlesSimpleDto {
 			username := ""
-			if user, _ := userMap[t.UserId]; user != nil {
+			avatarUrl := ""
+			if user, ok := userMap[t.UserId]; ok {
 				username = user.Username
+				if user.AvatarUrl != "" {
+					avatarUrl = "/api" + user.AvatarUrl
+				}
 			}
 			return ArticlesSimpleDto{
 				Id:             t.Id,
 				Title:          t.Title,
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 				Username:       username,
+				AvatarUrl:     avatarUrl,
 			}
 		}),
 		pageData.Page,
