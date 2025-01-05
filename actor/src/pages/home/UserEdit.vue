@@ -1,6 +1,7 @@
 <script setup>
-import {NButton, NCard, NEllipsis, NFlex, NList, NListItem, NMenu} from "naive-ui"
+import {NButton, NCard, NEllipsis, NFlex, NList, NListItem, NMenu, NInput, NSpace, NImage} from "naive-ui"
 import {h, onMounted, onUnmounted, ref} from "vue";
+import {getUserProfile, updateUserProfile} from "@/service/request";
 
 let options = [
   {
@@ -32,25 +33,91 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkScreenSize);
 })
+
+const userInfo = ref({
+  email: '',
+  nickname: '',
+});
+
+const editing = ref({
+  nickname: false,
+  email: false,
+});
+
+const editValues = ref({
+  nickname: '',
+  email: '',
+});
+
+async function fetchUserInfo() {
+  try {
+    const response = await getUserProfile();
+    if (response.code === 0) {
+      userInfo.value = response.result;
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error);
+  }
+}
+
+async function saveEdit(field) {
+  try {
+    const updates = {
+      [field]: editValues.value[field]
+    };
+
+    const response = await updateUserProfile(updates);
+    if (response.code === 0) {
+      userInfo.value[field] = editValues.value[field];
+      editing.value[field] = false;
+    }
+  } catch (error) {
+    console.error('保存失败:', error);
+  }
+}
+
+function startEdit(field) {
+  editValues.value[field] = userInfo.value[field];
+  editing.value[field] = true;
+}
+
+onMounted(() => {
+  fetchUserInfo();
+  checkScreenSize();
+  window.addEventListener('resize', checkScreenSize);
+})
+
 </script>
 <template>
   <n-card :bordered="false">
     <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align-mid="true" :vertical="isSmallScreen">
       <n-menu :options="options" class="menu-component" default-value="1"/>
       <n-flex vertical class="list-component">
-        <n-card title="个人自料" :bordered="false">
+        <n-card title="个人资料" :bordered="false">
           <n-list>
             <n-list-item>
-              邮箱 test@outlook.com
+              邮箱:
+              <template v-if="!editing.email">
+                {{ userInfo.email }}
+                <n-button text type="primary" @click="startEdit('email')">编辑</n-button>
+              </template>
+              <template v-else>
+                <n-input v-model:value="editValues.email" />
+                <n-button type="primary" @click="saveEdit('email')">保存</n-button>
+                <n-button @click="editing.email = false">取消</n-button>
+              </template>
             </n-list-item>
             <n-list-item>
-              昵称 缝合 编辑
-            </n-list-item>
-            <n-list-item>
-              手机号 190912121 编辑
-            </n-list-item>
-            <n-list-item>
-              个性签名 未填写 编辑
+              昵称:
+              <template v-if="!editing.nickname">
+                {{ userInfo.nickname }}
+                <n-button text type="primary" @click="startEdit('nickname')">编辑</n-button>
+              </template>
+              <template v-else>
+                <n-input v-model:value="editValues.nickname" />
+                <n-button type="primary" @click="saveEdit('nickname')">保存</n-button>
+                <n-button @click="editing.nickname = false">取消</n-button>
+              </template>
             </n-list-item>
           </n-list>
         </n-card>

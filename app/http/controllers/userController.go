@@ -116,11 +116,35 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 
 type EditUserInfoReq struct {
 	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
 }
 
 // EditUserInfo 编辑用户
 func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Response {
-	return component.SuccessResponse("success")
+	userEntity, err := req.GetUser()
+	if err != nil {
+		return component.FailResponse("获取用户信息失败")
+	}
+
+	// 如果要修改邮箱,需要检查邮箱是否已被使用
+	if req.Params.Email != "" && req.Params.Email != userEntity.Email {
+		if users.ExistEmail(req.Params.Email) {
+			return component.FailResponse("邮箱已被使用")
+		}
+		userEntity.Email = req.Params.Email
+	}
+
+	// 更新昵称
+	if req.Params.Nickname != "" {
+		userEntity.Nickname = req.Params.Nickname
+	}
+
+	err = users.Save(&userEntity)
+	if err != nil {
+		return component.FailResponse("更新用户信息失败")
+	}
+
+	return component.SuccessResponse("更新成功")
 }
 
 func Invitation(req component.BetterRequest[null]) component.Response {

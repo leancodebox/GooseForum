@@ -228,3 +228,11 @@ export const deleteCategory = (id) => {
     return instanceAxios.post('/admin/category-delete', { id })
 }
 
+export function getUserProfile() {
+    return instanceAxios.get("/get-user-info")
+}
+
+export function updateUserProfile(data) {
+    return instanceAxios.post("/set-user-info", data)
+}
+
