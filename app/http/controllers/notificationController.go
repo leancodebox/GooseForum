@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
 // GetNotificationListReq 获取通知列表请求
@@ -17,6 +20,24 @@ func GetNotificationList(req component.BetterRequest[GetNotificationListReq]) co
 	notifications, total, err := eventNotification.GetByUserId(req.UserId, req.Params.PageSize, offset)
 	if err != nil {
 		return component.FailResponse("获取通知列表失败")
+	}
+
+	// 转换数据
+	for _, notification := range notifications {
+		fmt.Println(notification.Payload.ActorId)
+		if notification.Payload.ActorId != 0 {
+			userInfo, err := users.Get(notification.Payload.ActorId)
+			if err == nil {
+				notification.Payload.ActorName = userInfo.Username
+			}
+		}
+		fmt.Println(notification.Payload.ArticleId)
+		if notification.Payload.ArticleId != 0 {
+			articleInfo := articles.Get(notification.Payload.ArticleId)
+			if articleInfo.Id != 0 {
+				notification.Payload.ArticleTitle = articleInfo.Title
+			}
+		}
 	}
 
 	return component.SuccessResponse(component.DataMap{

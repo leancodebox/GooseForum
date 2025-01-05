@@ -238,10 +238,8 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	articles.IncrementReply(articleEntity)
 	pointservice.RewardPoints(req.UserId, 2, pointservice.RewardPoints4Reply)
 	if articleEntity.UserId != req.UserId {
-		if loginUser, err := req.GetUser(); err == nil {
-			eventnotice.SendCommentNotification(articleEntity.UserId, articleEntity.Id,
-				TakeUpTo64Chars(req.Params.Content), loginUser.Nickname, req.UserId, articleEntity.Title)
-		}
+		eventnotice.SendCommentNotification(articleEntity.UserId, articleEntity.Id,
+			TakeUpTo64Chars(req.Params.Content), req.UserId)
 	}
 	return component.SuccessResponse(true)
 }

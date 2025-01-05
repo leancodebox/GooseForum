@@ -1,26 +1,28 @@
 <script setup>
 import {
+  NAvatar,
   NButton,
   NCard,
+  NEmpty,
   NFlex,
   NList,
   NListItem,
   NMenu,
   NSpace,
   NTag,
+  NText,
   NTime,
-  NEmpty,
   useMessage
 } from "naive-ui"
-import {onMounted, ref, h, onUnmounted} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 import {
+  deleteNotification,
   getNotificationList,
   getNotificationTypes,
   markAllAsRead,
-  markAsRead,
-  deleteNotification
+  markAsRead
 } from "@/service/request";
-import { useRouter } from 'vue-router'
+import {useRouter} from 'vue-router'
 
 const message = useMessage()
 const notifications = ref([])
@@ -32,10 +34,10 @@ const showUnreadOnly = ref(true)
 
 // 通知类型配置
 const notificationTypes = ref({
-  comment: { name: '评论通知', type: 'info' },
-  reply: { name: '回复通知', type: 'success' },
-  system: { name: '系统通知', type: 'warning' },
-  follow: { name: '关注通知', type: 'error' }
+  comment: {name: '评论通知', type: 'info'},
+  reply: {name: '回复通知', type: 'success'},
+  system: {name: '系统通知', type: 'warning'},
+  follow: {name: '关注通知', type: 'error'}
 })
 
 const options = [
@@ -60,9 +62,9 @@ async function loadNotifications() {
     if (res.code === 0) {
       notifications.value = res.result.list.map(notification => ({
         ...notification,
-        payload: typeof notification.payload === 'string' 
-          ? JSON.parse(notification.payload) 
-          : notification.payload
+        payload: typeof notification.payload === 'string'
+            ? JSON.parse(notification.payload)
+            : notification.payload
       }))
       total.value = res.result.total
     }
@@ -84,7 +86,7 @@ function handleMenuSelect(key) {
 // 标记单条通知为已读
 async function handleMarkAsRead(notificationId) {
   try {
-    const res = await markAsRead({ notificationId })
+    const res = await markAsRead({notificationId})
     if (res.code === 0) {
       message.success('已标记为已读')
       loadNotifications()
@@ -110,7 +112,7 @@ async function handleMarkAllAsRead() {
 // 删除通知
 async function handleDelete(notificationId) {
   try {
-    const res = await deleteNotification({ notificationId })
+    const res = await deleteNotification({notificationId})
     if (res.code === 0) {
       message.success('删除成功')
       loadNotifications()
@@ -155,7 +157,7 @@ function getActionText(eventType) {
 function goToArticle(articleId) {
   router.push({
     name: 'articlesPage',
-    query: { id: articleId }
+    query: {id: articleId}
   })
 }
 
@@ -166,6 +168,7 @@ onMounted(() => {
 
 // 响应式布局
 const isSmallScreen = ref(false)
+
 function checkScreenSize() {
   isSmallScreen.value = window.innerWidth < 600
 }
@@ -182,20 +185,21 @@ onUnmounted(() => {
 
 <template>
   <div class="notification-container">
-    <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align="isSmallScreen ? 'start' : 'start'" :vertical="isSmallScreen">
+    <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align="isSmallScreen ? 'start' : 'start'"
+            :vertical="isSmallScreen">
       <div class="menu-section">
         <n-menu
-          :options="options"
-          :value="showUnreadOnly ? 'unread' : 'all'"
-          @update:value="handleMenuSelect"
-          class="menu-component"
+            :options="options"
+            :value="showUnreadOnly ? 'unread' : 'all'"
+            @update:value="handleMenuSelect"
+            class="menu-component"
         />
         <n-button
-          type="primary"
-          ghost
-          size="small"
-          @click="handleMarkAllAsRead"
-          class="mark-all-button"
+            type="primary"
+            ghost
+            size="small"
+            @click="handleMarkAllAsRead"
+            class="mark-all-button"
         >
           全部标记已读
         </n-button>
@@ -210,27 +214,27 @@ onUnmounted(() => {
                 <n-space justify="space-between" align="center">
                   <n-space align="center">
                     <n-tag
-                      :type="notificationTypes[notification.eventType]?.type || 'default'"
-                      size="large"
-                      round
+                        :type="notificationTypes[notification.eventType]?.type || 'default'"
+                        size="large"
+                        round
                     >
                       {{ notificationTypes[notification.eventType]?.name || '通知' }}
                     </n-tag>
                   </n-space>
                   <n-space>
-                    <n-time :time="new Date(notification.createdAt)" />
+                    <n-time :time="new Date(notification.createdAt)"/>
                     <n-button
-                      v-if="!notification.isRead"
-                      text
-                      size="tiny"
-                      @click="handleMarkAsRead(notification.id)"
+                        v-if="!notification.isRead"
+                        text
+                        size="tiny"
+                        @click="handleMarkAsRead(notification.id)"
                     >
                       标记已读
                     </n-button>
                     <n-button
-                      text
-                      size="tiny"
-                      @click="handleDelete(notification.id)"
+                        text
+                        size="tiny"
+                        @click="handleDelete(notification.id)"
                     >
                       删除
                     </n-button>
@@ -242,19 +246,19 @@ onUnmounted(() => {
                   <template #header>
                     <n-space align="center">
                       <n-avatar
-                        round
-                        size="small"
-                        :src="notification.payload.actorAvatarUrl || '/api/assets/default-avatar.png'"
+                          round
+                          size="small"
+                          :src="notification.payload.actorAvatarUrl || '/api/assets/default-avatar.png'"
                       />
                       <n-text strong>{{ notification.payload.actorName }}</n-text>
                       <n-text depth="3">
                         {{ getActionText(notification.eventType) }}
                       </n-text>
                       <n-button
-                        v-if="notification.payload.articleId"
-                        text
-                        type="primary"
-                        @click="goToArticle(notification.payload.articleId)"
+                          v-if="notification.payload.articleId"
+                          text
+                          type="primary"
+                          @click="goToArticle(notification.payload.articleId)"
                       >
                         《{{ notification.payload.articleTitle }}》
                       </n-button>
@@ -269,7 +273,7 @@ onUnmounted(() => {
             </n-list-item>
           </template>
           <template v-else>
-            <n-empty description="暂无通知" />
+            <n-empty description="暂无通知"/>
           </template>
         </n-list>
       </div>

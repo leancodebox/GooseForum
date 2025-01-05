@@ -21,8 +21,8 @@ type NotificationPayload struct {
 	Title   string `json:"title"`   // 通知标题
 	Content string `json:"content"` // 通知内容
 	// 通用字段
-	ActorName string `json:"actorName"` // 触发者名称
-	ActorId   uint64 `json:"actorId"`   // 触发者ID
+	ActorId   uint64 `json:"actorId"`             // 触发者ID
+	ActorName string `json:"actorName,omitempty"` // 触发者名称
 	// 文章相关
 	ArticleId    uint64 `json:"articleId,omitempty"`    // 相关文章ID
 	ArticleTitle string `json:"articleTitle,omitempty"` // 文章标题
