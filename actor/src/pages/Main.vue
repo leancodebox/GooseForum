@@ -1,9 +1,26 @@
 <script setup>
-import {NButton, NFlex, NIcon, NLayout, NLayoutFooter, NLayoutHeader, NMenu, NText} from 'naive-ui';
+import {
+  NButton, 
+  NFlex, 
+  NIcon, 
+  NLayout, 
+  NLayoutFooter, 
+  NLayoutHeader, 
+  NMenu, 
+  NText,
+  NDrawer,
+  NDrawerContent,
+  NSpace,
+  NDivider
+} from 'naive-ui';
+import { MenuOutline } from '@vicons/ionicons5'
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 import {h, ref} from "vue";
-import {RouterLink} from "vue-router";
+import {RouterLink, useRouter} from "vue-router";
 import UserInfoCard from "@/components/UserInfoMenu.vue";
+
+const router = useRouter()
+const showDrawer = ref(false)
 
 function renderIcon(icon) {
   return () => h(NIcon, null, {default: () => h(icon)});
@@ -12,65 +29,130 @@ function renderIcon(icon) {
 const activeKey = ref('home')
 const menuOptions = [
   {
-    label: () => h(RouterLink, {to: {path: "/home/index",}},
-        {
-          default: () => "首页"
-        }
-    ),
+    label: "首页",
     key: "index",
-    // icon: renderIcon(FishOutline),
-    children: null,
-  }, {
-    label: () => h(RouterLink, {to: {path: "/home/bbs",}},
-        {
-          default: () => "BBS"
-        }
-    ),
+    path: "/home/index"
+  }, 
+  {
+    label: "BBS",
     key: "bbs",
-    // icon: renderIcon(InfiniteOutline),
-    children: null,
-  }, {
-    label: () => h(RouterLink, {to: {path: "/home/about",}},
-        {
-          default: () => "关于"
-        }
-    ),
+    path: "/home/bbs"
+  }, 
+  {
+    label: "关于",
     key: "about",
-    // icon: renderIcon(CashIcon),
-    children: null,
+    path: "/home/about"
   }
 ]
+
+const actionOptions = [
+  {
+    label: "写文章",
+    key: "write",
+    path: "/home/bbs/articlesEdit"
+  },
+  {
+    label: "消息中心",
+    key: "notification",
+    path: "/home/notificationCenter"
+  }
+]
+
 let isTablet = useIsTablet()
 let isMobile = useIsMobile()
-
 let topHeight = ref('56px')
+
+function handleMenuClick(path) {
+  router.push(path)
+  showDrawer.value = false
+}
 </script>
+
 <template>
   <n-layout-header
       position="absolute"
-      :style="{height: topHeight,  padding: '8px',align:'center'}"
+      :style="{height: topHeight}"
       bordered
   >
-    <n-flex align="center" style="text-align: center;height: 100%;"
-            :justify="(!isTablet&&!isMobile)? 'space-between':'end'">
-      <n-text tag="div" class="ui-logo" :depth="1" @click="()=>console.log(1)" style="align-items: center;"
-              v-if="!isTablet&&!isMobile">
-        <img alt="" src="/quote-left.png" style="height: 20px"/>
-        <span>GooseForum</span>
-        <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions"/>
-      </n-text>
-      <n-flex style="padding-right: 24px;">
-        <router-link :to="'/home/bbs/articlesEdit'">
-          <n-button quaternary>我也写一篇</n-button>
+    <n-flex align="center" style="height: 100%; padding: 0 16px" justify="space-between">
+      <!-- Logo和导航区域 -->
+      <n-flex align="center" style="height: 100%">
+        <n-text tag="div" class="ui-logo" :depth="1">
+          <img alt="" src="/quote-left.png"/>
+          <span>GooseForum</span>
+        </n-text>
+
+        <!-- 桌面端导航菜单 -->
+        <div v-if="!isTablet && !isMobile" class="menu-container">
+          <n-menu
+              v-model:value="activeKey"
+              mode="horizontal"
+              :options="menuOptions.map(item => ({
+                label: () => h(RouterLink, {to: {path: item.path}}, {default: () => item.label}),
+                key: item.key
+              }))"
+          />
+        </div>
+      </n-flex>
+
+      <!-- 桌面端操作按钮 -->
+      <n-flex v-if="!isTablet && !isMobile" align="center" class="action-buttons">
+        <router-link v-for="item in actionOptions" :key="item.key" :to="item.path">
+          <n-button quaternary>{{ item.label }}</n-button>
         </router-link>
-        <router-link :to="'/home/notificationCenter'">
-          <n-button quaternary>消息中心</n-button>
-        </router-link>
-        <!--          <n-button quaternary>审核中心</n-button>-->
-        <user-info-card></user-info-card>
+        <user-info-card />
+      </n-flex>
+
+      <!-- 移动端菜单按钮和用户信息 -->
+      <n-flex v-else align="center" class="action-buttons">
+        <user-info-card />
+        <n-button quaternary @click="showDrawer = true">
+          <n-icon size="20">
+            <menu-outline />
+          </n-icon>
+        </n-button>
       </n-flex>
     </n-flex>
   </n-layout-header>
+
+  <!-- 移动端抽屉菜单 -->
+  <n-drawer v-model:show="showDrawer" :width="280">
+    <n-drawer-content title="菜单" closable>
+      <n-space vertical size="large">
+        <!-- 导航菜单 -->
+        <n-space vertical>
+          <div class="drawer-section-title">导航</div>
+          <n-button
+              v-for="item in menuOptions"
+              :key="item.key"
+              quaternary
+              block
+              @click="handleMenuClick(item.path)"
+          >
+            {{ item.label }}
+          </n-button>
+        </n-space>
+
+        <n-divider />
+
+        <!-- 操作按钮 -->
+        <n-space vertical>
+          <div class="drawer-section-title">操作</div>
+          <n-button
+              v-for="item in actionOptions"
+              :key="item.key"
+              quaternary
+              block
+              @click="handleMenuClick(item.path)"
+          >
+            {{ item.label }}
+          </n-button>
+        </n-space>
+      </n-space>
+    </n-drawer-content>
+  </n-drawer>
+
+  <!-- 其他内容保持不变 -->
   <n-layout :style="{top: topHeight}"
             :native-scrollbar="false"
             :position="'absolute'"
@@ -80,24 +162,73 @@ let topHeight = ref('56px')
     <n-layout-footer
         style="--x-padding: 56px;margin-top: auto;height: 100px;display: flex;justify-content: center;align-items: center;width: 100%;background-color: #f0f3f5;"
         bordered>
-
       <p>&copy; My Homepage 2023</p>
     </n-layout-footer>
   </n-layout>
 </template>
 
-<style>
-
+<style scoped>
 .ui-logo {
   cursor: pointer;
   display: flex;
   align-items: center;
   font-size: 18px;
+  margin-right: 24px;
+  height: 100%;
+  white-space: nowrap;
 }
 
 .ui-logo > img {
   margin-right: 12px;
   height: 32px;
   width: 32px;
+}
+
+.menu-container {
+  height: 100%;
+}
+
+.action-buttons {
+  height: 100%;
+  gap: 12px;
+}
+
+/* 调整菜单样式 */
+:deep(.n-menu.n-menu--horizontal) {
+  height: 100%;
+  border: none;
+  display: flex;
+  align-items: center;
+}
+
+:deep(.n-menu-item) {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+:deep(.n-button.n-button--quaternary) {
+  height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+.drawer-section-title {
+  font-size: 14px;
+  color: var(--n-text-color-3);
+  padding: 8px 0;
+}
+
+/* 移动端样式调整 */
+@media (max-width: 800px) {
+  .ui-logo {
+    font-size: 16px;
+    margin-right: 0;
+  }
+  
+  .ui-logo > img {
+    height: 24px;
+    width: 24px;
+  }
 }
 </style>

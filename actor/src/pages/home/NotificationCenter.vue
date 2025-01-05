@@ -7,7 +7,6 @@ import {
   NFlex,
   NList,
   NListItem,
-  NMenu,
   NSpace,
   NTag,
   NText,
@@ -30,7 +29,7 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = 20
 const loading = ref(false)
-const showUnreadOnly = ref(true)
+const showUnreadOnly = ref(false)
 
 // 通知类型配置
 const notificationTypes = ref({
@@ -171,7 +170,7 @@ onMounted(() => {
 const isSmallScreen = ref(false)
 
 function checkScreenSize() {
-  isSmallScreen.value = window.innerWidth < 600
+  isSmallScreen.value = window.innerWidth < 1200
 }
 
 onMounted(() => {
@@ -186,143 +185,212 @@ onUnmounted(() => {
 
 <template>
   <div class="notification-container">
-    <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align="isSmallScreen ? 'start' : 'start'" :vertical="isSmallScreen">
+    <n-flex :vertical="isSmallScreen" justify="center">
+      <!-- 左侧菜单 -->
       <div class="menu-section">
-        <n-menu
-          :options="options"
-          :value="showUnreadOnly ? 'unread' : 'all'"
-          @update:value="handleMenuSelect"
-          class="menu-component"
-        />
-        <n-button
-          type="primary"
-          ghost
-          size="small"
-          @click="handleMarkAllAsRead"
-          class="mark-all-button"
-        >
-          全部标记已读
-        </n-button>
+        <n-card :bordered="false" style="position: sticky; top: 24px;">
+          <n-flex vertical class="nav-buttons">
+            <n-button class="nav-button" ghost :type="!showUnreadOnly?'info':'tertiary'"
+                      @click="handleMenuSelect('all')">
+              全部消息
+            </n-button>
+            <n-button class="nav-button" ghost :type="showUnreadOnly?'info':'tertiary'"
+                      @click="handleMenuSelect('unread')">
+              只看未读
+            </n-button>
+            <n-button
+                type="warning"
+                ghost
+                @click="handleMarkAllAsRead"
+                class="nav-button"
+            >
+              全部标记已读
+            </n-button>
+          </n-flex>
+        </n-card>
       </div>
 
+      <!-- 右侧内容 -->
       <div class="content-section">
-        <n-list class="list-component" :loading="loading">
-          <template v-if="notifications.length > 0">
-            <n-list-item v-for="notification in notifications" :key="notification.id">
-              <n-space vertical :size="12">
-                <!-- 通知头部 -->
-                <n-space justify="space-between" align="center">
-                  <n-space align="center">
-                    <n-tag
-                      :type="notificationTypes[notification.eventType]?.type || 'default'"
-                      size="large"
-                      round
-                    >
-                      {{ notificationTypes[notification.eventType]?.name || '通知' }}
-                    </n-tag>
-                  </n-space>
-                  <n-space>
-                    <n-time :time="new Date(notification.createdAt)" />
-                    <n-button
-                      v-if="!notification.isRead"
-                      text
-                      size="tiny"
-                      @click="handleMarkAsRead(notification.id)"
-                    >
-                      标记已读
-                    </n-button>
-                    <n-button
-                      text
-                      size="tiny"
-                      @click="handleDelete(notification.id)"
-                    >
-                      删除
-                    </n-button>
-                  </n-space>
-                </n-space>
-
-                <!-- 通知内容 -->
-                <n-card size="small" class="notification-card">
-                  <template #header>
-                    <n-flex align="center" class="notification-header" style="align-items: center;">
-                      <n-avatar
-                        round
-                        size="small"
-                        :src="notification.payload.actorAvatarUrl || '/api/assets/default-avatar.png'"
-                      />
-                      <n-flex align="center">
-                        <n-text strong>{{ notification.payload.actorName }}</n-text>
-                        <n-text depth="3">
-                          {{ getActionText(notification.eventType) }}
-                        </n-text>
-                        <n-button
-                          v-if="notification.payload.articleId"
+        <n-card :bordered="false">
+          <n-list :loading="loading">
+            <template v-if="notifications.length > 0">
+              <n-list-item v-for="notification in notifications" :key="notification.id">
+                <n-space vertical :size="12">
+                  <!-- 通知头部 -->
+                  <n-space justify="space-between" align="center">
+                    <n-space align="center">
+                      <n-tag
+                          :type="notificationTypes[notification.eventType]?.type || 'default'"
+                          size="large"
+                          round
+                      >
+                        {{ notificationTypes[notification.eventType]?.name || '通知' }}
+                      </n-tag>
+                    </n-space>
+                    <n-space>
+                      <n-time :time="new Date(notification.createdAt)"/>
+                      <n-button
+                          v-if="!notification.isRead"
                           text
-                          type="primary"
-                          @click="goToArticle(notification.payload.articleId)"
-                        >
-                          《{{ notification.payload.articleTitle }}》
-                        </n-button>
-                      </n-flex>
-                    </n-flex>
-                  </template>
+                          size="tiny"
+                          @click="handleMarkAsRead(notification.id)"
+                      >
+                        标记已读
+                      </n-button>
+                      <n-button
+                          text
+                          size="tiny"
+                          @click="handleDelete(notification.id)"
+                      >
+                        删除
+                      </n-button>
+                    </n-space>
+                  </n-space>
 
-                  <div class="notification-content">
-                    {{ notification.payload.content }}
-                  </div>
-                </n-card>
-              </n-space>
-            </n-list-item>
-          </template>
-          <template v-else>
-            <div class="empty-container">
-              <n-empty description="暂无通知"/>
-            </div>
-          </template>
-        </n-list>
+                  <!-- 通知内容 -->
+                  <n-card size="small" class="notification-card">
+                    <template #header>
+                      <n-flex align="center" class="notification-header" style="align-items: center;">
+                        <n-avatar
+                            round
+                            size="small"
+                            :src="notification.payload.actorAvatarUrl || '/api/assets/default-avatar.png'"
+                        />
+                        <n-flex align="center">
+                          <n-text strong>{{ notification.payload.actorName }}</n-text>
+                          <n-text depth="3">
+                            {{ getActionText(notification.eventType) }}
+                          </n-text>
+                          <n-button
+                              v-if="notification.payload.articleId"
+                              text
+                              type="primary"
+                              @click="goToArticle(notification.payload.articleId)"
+                          >
+                            《{{ notification.payload.articleTitle }}》
+                          </n-button>
+                        </n-flex>
+                      </n-flex>
+                    </template>
+
+                    <div class="notification-content">
+                      {{ notification.payload.content }}
+                    </div>
+                  </n-card>
+                </n-space>
+              </n-list-item>
+            </template>
+            <template v-else>
+              <div class="empty-container">
+                <n-empty description="暂无通知"/>
+              </div>
+            </template>
+          </n-list>
+        </n-card>
       </div>
     </n-flex>
   </div>
 </template>
 
 <style scoped>
+
+.nav-buttons {
+  min-width: 240px;
+  gap: 8px;
+}
+
+.nav-button {
+  width: 100%;
+}
+
 .notification-header {
   align-items: center; /* 确保头像和文字垂直居中 */
 }
 
 .notification-container {
   padding: 24px;
-  height: 100%;
-  background-color: var(--n-color);
+  min-height: 100%;
 }
 
 .menu-section {
+  width: 240px;
+  margin-right: 24px;
+  flex-shrink: 0;
+}
+
+.menu-container {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  position: sticky;
-  top: 24px;
 }
 
-.menu-component {
-  min-width: 180px;
-  max-width: 240px;
-  background-color: var(--n-color);
+:deep(.notification-menu) {
+  width: 100% !important;
+}
+
+:deep(.notification-menu .n-menu-item-content) {
+  padding: 0 16px !important;
+  width: 100% !important;
+}
+
+:deep(.notification-menu .n-menu-item) {
+  width: 100% !important;
+}
+
+:deep(.n-menu) {
+  --n-item-height: 40px !important;
+}
+
+.content-section {
+  width: 800px;
+  flex-shrink: 0;
 }
 
 .mark-all-button {
   width: 100%;
+  margin-top: 16px;
 }
 
-.content-section {
-  flex: 1;
-  margin-left: 24px;
-  max-width: 1200px;
+/* 响应式布局 */
+@media (max-width: 1200px) {
+  .notification-container {
+    padding: 16px;
+  }
+
+  .menu-section {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
+
+  .content-section {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  :deep(.n-menu.n-menu--horizontal) {
+    width: 100% !important;
+  }
+
+  :deep(.n-menu.n-menu--horizontal .n-menu-item) {
+    width: auto !important;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  :deep(.n-menu.n-menu--horizontal .n-menu-item-content) {
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .mark-all-button {
+    margin-top: 12px;
+  }
 }
 
-.list-component {
-  width: 100%;
-}
 
 .notification-title {
   font-weight: 500;
@@ -333,27 +401,6 @@ onUnmounted(() => {
   font-size: 14px;
   line-height: 1.6;
   padding: 8px 0;
-}
-
-@media (max-width: 600px) {
-  .menu-component,
-  .content-section {
-    min-width: 100%;
-    max-width: none;
-    margin-left: 0;
-  }
-
-  .content-section {
-    margin-top: 16px;
-  }
-
-  .n-flex.vertical {
-    gap: 16px;
-  }
-
-  .notification-container {
-    padding: 16px;
-  }
 }
 
 .notification-card {

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
@@ -25,14 +24,12 @@ func GetNotificationList(req component.BetterRequest[GetNotificationListReq]) co
 
 	// 转换数据
 	for _, notification := range notifications {
-		fmt.Println(notification.Payload.ActorId)
 		if notification.Payload.ActorId != 0 {
 			userInfo, err := users.Get(notification.Payload.ActorId)
 			if err == nil {
 				notification.Payload.ActorName = userInfo.Username
 			}
 		}
-		fmt.Println(notification.Payload.ArticleId)
 		if notification.Payload.ArticleId != 0 {
 			articleInfo := articles.Get(notification.Payload.ArticleId)
 			if articleInfo.Id != 0 {

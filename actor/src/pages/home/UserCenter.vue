@@ -1,32 +1,123 @@
 <script setup>
-import {NCard, NFlex, NGi, NGrid} from "naive-ui"
-import Left from "@/pages/home/user/Left.vue";
-import Right from "@/pages/home/user/Right.vue";
-import {onMounted, onUnmounted, ref} from "vue";
+import {NButton, NCard, NEllipsis, NFlex} from "naive-ui"
+import {h, ref} from 'vue'
+import UserInfoCard from "@/components/UserInfoCard.vue";
+import {useUserStore} from "@/modules/user.js";
 
-let isSmallScreen = ref(false)
-
-function checkScreenSize() {
-  isSmallScreen.value = window.innerWidth < 800;
-}
-
-onMounted(() => {
-  checkScreenSize();
-  window.addEventListener('resize', checkScreenSize);
-})
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreenSize);
-})
+let options = [
+  {
+    label: () =>
+        h(NEllipsis, null, {default: () => '我的博文'}),
+    key: '2'
+  },
+  {
+    label: () =>
+        h(NEllipsis, null, {default: () => '我的回复'}),
+    key: '3'
+  }
+]
+const userStore = useUserStore()
 </script>
-<template>
-  <n-card :bordered="false">
-    <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align-mid="true" :vertical="isSmallScreen">
-      <left></left>
-      <n-card style="max-width: 800px;min-width: 600px">
 
+<template>
+  <n-card :bordered="false" class="page-container">
+    <n-flex :justify="'center'" class="responsive-container">
+      <!-- 左侧导航按钮 -->
+      <n-flex vertical class="nav-buttons">
+        <n-button class="nav-button">我的博文</n-button>
+        <n-button class="nav-button">我的回复</n-button>
+      </n-flex>
+
+      <!-- 中间内容区 -->
+      <n-card class="content-area">
         <router-view></router-view>
       </n-card>
-      <right></right>
+
+      <!-- 右侧用户信息卡片 -->
+      <n-flex vertical class="user-info-section">
+        <user-info-card :user-id="userStore.userInfo.userId"/>
+      </n-flex>
     </n-flex>
   </n-card>
 </template>
+
+<style scoped>
+.page-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.responsive-container {
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nav-buttons {
+  min-width: 240px;
+  gap: 8px;
+}
+
+.nav-button {
+  width: 100%;
+}
+
+.content-area {
+  flex: 1;
+  min-width: 300px;
+  max-width: 800px;
+}
+
+.user-info-section {
+  min-width: 240px;
+}
+
+/* 平板设备 */
+@media screen and (max-width: 1024px) {
+  .responsive-container {
+    flex-direction: column;
+  }
+
+  .nav-buttons {
+    flex-direction: row;
+    min-width: 100%;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .nav-button {
+    width: auto;
+  }
+
+  .content-area {
+    min-width: 100%;
+  }
+
+  .user-info-section {
+    min-width: 100%;
+  }
+}
+
+/* 移动设备 */
+@media screen and (max-width: 640px) {
+  .nav-buttons {
+    flex-direction: column;
+  }
+
+  .nav-button {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .page-container {
+    padding: 0 12px;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .page-container {
+    padding: 0 8px;
+  }
+}
+</style>
