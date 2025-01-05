@@ -1,7 +1,7 @@
 package userFollow
 
 import (
-	db "github.com/leancodebox/GooseForum/app/bundles/dbconnect"
+	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"gorm.io/gorm"
 )
 

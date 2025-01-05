@@ -1,7 +1,7 @@
 package migration
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/dbconnect"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
