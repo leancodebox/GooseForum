@@ -23,7 +23,7 @@ const menuOptions = [
   }, {
     label: () => h(RouterLink, {to: {path: "/home/bbs",}},
         {
-          default: () => "七嘴八舌"
+          default: () => "BBS"
         }
     ),
     key: "bbs",

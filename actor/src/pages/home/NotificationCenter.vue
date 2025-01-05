@@ -275,7 +275,9 @@ onUnmounted(() => {
             </n-list-item>
           </template>
           <template v-else>
-            <n-empty description="暂无通知"  style="min-height: 360px"/>
+            <div class="empty-container">
+              <n-empty description="暂无通知"/>
+            </div>
           </template>
         </n-list>
       </div>
@@ -374,5 +376,15 @@ onUnmounted(() => {
 
 .n-tag {
   padding: 0 12px;
+}
+
+.empty-container {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--n-card-color);
+  border-radius: 8px;
+  margin: 16px 0;
 }
 </style>
