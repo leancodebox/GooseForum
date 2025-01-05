@@ -57,7 +57,8 @@ async function loadNotifications() {
   try {
     const res = await getNotificationList({
       page: currentPage.value,
-      pageSize: pageSize
+      pageSize: pageSize,
+      unreadOnly: showUnreadOnly.value
     })
     if (res.code === 0) {
       notifications.value = res.result.list.map(notification => ({
@@ -274,7 +275,7 @@ onUnmounted(() => {
             </n-list-item>
           </template>
           <template v-else>
-            <n-empty description="暂无通知" />
+            <n-empty description="暂无通知"  style="min-height: 360px"/>
           </template>
         </n-list>
       </div>

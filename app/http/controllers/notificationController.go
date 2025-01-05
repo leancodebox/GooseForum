@@ -10,14 +10,15 @@ import (
 
 // GetNotificationListReq 获取通知列表请求
 type GetNotificationListReq struct {
-	Page     int `json:"page" validate:"required,min=1"`
-	PageSize int `json:"pageSize" validate:"required,min=1,max=100"`
+	Page       int  `json:"page" validate:"required,min=1"`
+	PageSize   int  `json:"pageSize" validate:"required,min=1,max=100"`
+	UnreadOnly bool `json:"unreadOnly"`
 }
 
 // GetNotificationList 获取通知列表
 func GetNotificationList(req component.BetterRequest[GetNotificationListReq]) component.Response {
 	offset := (req.Params.Page - 1) * req.Params.PageSize
-	notifications, total, err := eventNotification.GetByUserId(req.UserId, req.Params.PageSize, offset)
+	notifications, total, err := eventNotification.GetByUserId(req.UserId, req.Params.PageSize, offset, req.Params.UnreadOnly)
 	if err != nil {
 		return component.FailResponse("获取通知列表失败")
 	}
