@@ -61,7 +61,7 @@ export let routes = [
     },
     {
         path: '/home', component: sun, children: [
-            {name: '', path: '', redirect: '/home/index'},
+            {name: '', path: '', redirect: '/home/bbs'},
             {name: 'index', path: 'index', component: index},
             {
                 path: 'bbs', component: bbs, children: [
