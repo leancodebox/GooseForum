@@ -18,3 +18,10 @@ var actorFS embed.FS
 func GetActorFs() embed.FS {
 	return actorFS
 }
+
+//go:embed 07akioni.jpeg
+var defaultAvatar []byte
+
+func GetDefaultAvatar() []byte {
+	return defaultAvatar
+}

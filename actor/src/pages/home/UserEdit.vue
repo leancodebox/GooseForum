@@ -93,6 +93,7 @@ async function fetchUserInfo() {
     }
   } catch (error) {
     console.error('获取用户信息失败:', error);
+    message.error('获取用户信息失败');
   }
 }
 
@@ -162,8 +163,10 @@ onMounted(() => {
             <n-space vertical>
               <n-image
                   width="100"
-                  :src="avatarUrl || 'https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg'"
+                  :src="avatarUrl || '/api/assets/default-avatar.png'"
                   :preview-disabled="!avatarUrl"
+                  object-fit="cover"
+                  :round="true"
               />
               
               <n-upload
@@ -229,6 +232,11 @@ onMounted(() => {
 .upload-tip {
   color: #999;
   font-size: 12px;
+}
+
+.n-image {
+  border-radius: 50%;
+  overflow: hidden;
 }
 </style>
 

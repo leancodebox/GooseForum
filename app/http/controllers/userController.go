@@ -116,6 +116,12 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 	if err != nil {
 		return component.FailResponse("账号异常" + err.Error())
 	}
+
+	// 如果有头像，添加域名前缀
+	if userEntity.AvatarUrl != "" {
+		userEntity.AvatarUrl = "/api" + userEntity.AvatarUrl
+	}
+
 	return component.SuccessResponse(userEntity)
 }
 
@@ -170,10 +176,17 @@ func GetUserInfo(req GetUserInfoReq) component.Response {
 		return component.FailResponse("用户不存在")
 	}
 	userPoint := userPoints.Get(user.Id)
+
+	// 如果有头像，添加域名前缀
+	avatarUrl := ""
+	if user.AvatarUrl != "" {
+		avatarUrl = "/api" + user.AvatarUrl
+	}
+
 	return component.SuccessResponse(UserInfoShow{
 		Username:  user.Username,
 		Prestige:  user.Prestige,
-		AvatarUrl: "",
+		AvatarUrl: avatarUrl,
 		UserPoint: userPoint.CurrentPoints,
 	})
 }
@@ -243,14 +256,15 @@ func UploadAvatar(c *gin.Context) {
 	}
 
 	// 更新用户头像信息
-	userEntity.AvatarUrl = "/avatars/" + filename
+	avatarUrl := "/avatars/" + filename
+	userEntity.AvatarUrl = avatarUrl
 	if err := users.Save(&userEntity); err != nil {
 		c.JSON(200, component.FailData("更新用户信息失败"))
 		return
 	}
 
 	c.JSON(200, component.SuccessData(map[string]string{
-		"avatarUrl": userEntity.AvatarUrl,
+		"avatarUrl": "/api" + avatarUrl,
 	}))
 }
 
