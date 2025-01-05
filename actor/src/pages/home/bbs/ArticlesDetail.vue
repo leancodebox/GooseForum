@@ -40,33 +40,6 @@ const articleInfo = ref({
 let id = 1
 let maxCommentId = 0
 
-const userInfo = ref({
-  username: '',
-  userId: 0,
-  avatarUrl: '',
-  signature: '未填写',
-  articleCount: 0,
-  prestige: 0,
-})
-
-async function getUserInfo(userId) {
-  try {
-    const res = await getUserInfoShow(userId)
-    if (res.code === 0 && res.result) {
-      userInfo.value = {
-        username: res.result.username || '',
-        userId: res.result.userId || 0,
-        avatarUrl: res.result.avatarUrl || '',
-        signature: res.result.signature || '未填写',
-        articleCount: res.result.articleCount || 0,
-        prestige: res.result.prestige || 0,
-      }
-    }
-  } catch (err) {
-    console.error('获取用户信息失败:', err)
-  }
-}
-
 function getArticlesDetail() {
   getArticlesDetailApi(id, maxCommentId).then(r => {
     if (r.result.articleContent !== undefined && r.result.articleContent !== "") {
@@ -79,7 +52,6 @@ function getArticlesDetail() {
         lastUpdateDate: "2022-12-28 01:01:01",
         body: r.result.articleContent
       }
-      getUserInfo(r.result.userId)
     }
     commentList.value = r.result.commentList.map(function (item) {
       return {
@@ -160,7 +132,6 @@ function handleEdit() {
 }
 
 const isAuthor = computed(() => {
-  console.log(userStore.userInfo, articleInfo.value.userId)
   return userStore.userInfo.userId === articleInfo.value.userId
 })
 </script>
@@ -241,7 +212,7 @@ const isAuthor = computed(() => {
           v-show="!(isMobile||isTabletRef)"
       >
         <n-flex vertical>
-            <user-info-card :user-info="userInfo"/>
+          <user-info-card v-if="articleInfo.userId" :user-id="articleInfo.userId"/>
         </n-flex>
       </n-layout-sider>
     </n-layout>

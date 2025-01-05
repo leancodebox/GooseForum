@@ -32,7 +32,6 @@ const truncateUsername = computed(() => {
       : username;
 });
 onMounted(()=>{
-  console.log(userStore.userInfo)
 })
 </script>
 

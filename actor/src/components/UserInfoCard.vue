@@ -1,21 +1,52 @@
 <script setup>
 import {NAvatar, NButton, NCard, NDivider, NFlex, NStatistic,} from 'naive-ui'
+import { ref, onMounted, watch } from 'vue'
+import { getUserInfoShow } from '@/service/request'
 
-// 定义props
 const props = defineProps({
-  userInfo: {
-    type: Object,
-    required: true,
-    default: () => ({
-      username: '',
-      userId: 0,
-      avatarUrl: '',
-      signature: '未填写',
-      articleCount: 0,
-      prestige: 0,
-    })
+  userId: {
+    type: Number,
+    required: true
   }
 })
+
+const userInfo = ref({
+  username: '',
+  userId: 0,
+  avatarUrl: '',
+  signature: '未填写',
+  articleCount: 0,
+  prestige: 0,
+})
+
+async function getUserInfo() {
+  try {
+    const res = await getUserInfoShow(props.userId)
+    if (res.code === 0 && res.result) {
+      userInfo.value = {
+        username: res.result.username || '',
+        userId: res.result.userId || 0,
+        avatarUrl: res.result.avatarUrl || '',
+        signature: res.result.signature || '未填写',
+        articleCount: res.result.articleCount || 0,
+        prestige: res.result.prestige || 0,
+      }
+    }
+  } catch (err) {
+    console.error('获取用户信息失败:', err)
+  }
+}
+
+onMounted(() => {
+  getUserInfo()
+})
+
+// 监听 userId 的变化
+watch(() => props.userId, (newId) => {
+  if (newId) {
+    getUserInfo()
+  }
+}, { immediate: true })
 </script>
 
 <template>

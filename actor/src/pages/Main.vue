@@ -53,7 +53,7 @@ let topHeight = ref('56px')
   >
     <n-flex align="center" style="text-align: center;height: 100%;"
             :justify="(!isTablet&&!isMobile)? 'space-between':'end'">
-      <n-text tag="div" class="ui-logo" :depth="1" @click="console.log(1)" style="align-items: center;"
+      <n-text tag="div" class="ui-logo" :depth="1" @click="()=>console.log(1)" style="align-items: center;"
               v-if="!isTablet&&!isMobile">
         <img alt="" src="/quote-left.png" style="height: 20px"/>
         <span>GooseForum</span>
