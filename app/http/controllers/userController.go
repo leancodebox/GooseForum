@@ -66,9 +66,10 @@ func Register(r RegReq) component.Response {
 	}
 
 	return component.SuccessResponse(component.DataMap{
-		"username": userEntity.Username,
-		"userId":   userEntity.Id,
-		"token":    token,
+		"username":  userEntity.Username,
+		"userId":    userEntity.Id,
+		"token":     token,
+		"avatarUrl": "",
 	})
 }
 
@@ -93,10 +94,18 @@ func Login(r LoginReq) component.Response {
 		slog.Info(cast.ToString(err))
 		return component.FailResponse("验证失败")
 	}
+
+	// 处理头像URL
+	avatarUrl := ""
+	if userEntity.AvatarUrl != "" {
+		avatarUrl = "/api" + userEntity.AvatarUrl
+	}
+
 	return component.SuccessResponse(component.DataMap{
-		"username": userEntity.Username,
-		"userId":   userEntity.Id,
-		"token":    token,
+		"username":  userEntity.Username,
+		"userId":    userEntity.Id,
+		"token":     token,
+		"avatarUrl": avatarUrl,
 	})
 }
 

@@ -3,7 +3,11 @@ import {defineStore} from "pinia";
 
 export const useUserStore = defineStore('user', () => {
 
-    const userInfo = ref({username: '', userId: 0})
+    const userInfo = ref({
+        username: '', 
+        userId: 0,
+        avatarUrl: ''
+    })
     let userInfoData = window.localStorage.getItem('userInfo') || ""
 
     if (userInfoData !== "") {
@@ -11,6 +15,7 @@ export const useUserStore = defineStore('user', () => {
         if (pData) {
             userInfo.value.username = pData.username || ""
             userInfo.value.userId = pData.userId || ""
+            userInfo.value.avatarUrl = pData.avatarUrl || ""
         }
     }
     const token = ref(window.localStorage.getItem('token') || "")
@@ -23,12 +28,17 @@ export const useUserStore = defineStore('user', () => {
         console.log(userData)
         userInfo.value.username = userData.username
         userInfo.value.userId = userData.userId
+        userInfo.value.avatarUrl = userData.avatarUrl || ""
         token.value = userData.token
         saveUserInfo()
     }
 
     function clearUserInfo() {
-        userInfo.value = {username: '', userId: 0}
+        userInfo.value = {
+            username: '', 
+            userId: 0,
+            avatarUrl: ''
+        }
         token.value = ''
         sessionStorage.clear()
         localStorage.clear()

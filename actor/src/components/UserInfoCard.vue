@@ -3,7 +3,7 @@
 import {NAvatar, NButton, NDropdown, useMessage} from "naive-ui";
 import {useUserStore} from "@/modules/user";
 import router from "@/route/router"
-import {computed} from "vue";
+import {computed, onMounted} from "vue";
 
 const userStore = useUserStore()
 const message = useMessage()
@@ -31,6 +31,9 @@ const truncateUsername = computed(() => {
       ? `${username.slice(0, maxLength)}...`
       : username;
 });
+onMounted(()=>{
+  console.log(userStore.userInfo)
+})
 </script>
 
 <template>
@@ -40,9 +43,15 @@ const truncateUsername = computed(() => {
       <n-avatar
           round
           :size="32"
+          v-if="!userStore.userInfo.avatarUrl"
       >
         {{ truncateUsername }}
       </n-avatar>
+      <n-avatar
+          round
+          :size="32"
+          :src="userStore.userInfo.avatarUrl || '/api/assets/default-avatar.png'"
+      />
       <div style="width: 5px"></div>
       {{ userStore.userInfo.username }}
     </n-button>
