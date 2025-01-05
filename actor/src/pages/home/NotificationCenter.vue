@@ -20,6 +20,7 @@ import {
   markAsRead,
   deleteNotification
 } from "@/service/request";
+import { useRouter } from 'vue-router'
 
 const message = useMessage()
 const notifications = ref([])
@@ -134,6 +135,30 @@ async function loadNotificationTypes() {
   }
 }
 
+const router = useRouter()
+
+// 获取动作文本
+function getActionText(eventType) {
+  switch (eventType) {
+    case 'comment':
+      return '评论了文章'
+    case 'reply':
+      return '回复了你的评论'
+    case 'follow':
+      return '关注了你'
+    default:
+      return '发送了一条通知'
+  }
+}
+
+// 跳转到文章
+function goToArticle(articleId) {
+  router.push({
+    name: 'articlesPage',
+    query: { id: articleId }
+  })
+}
+
 onMounted(() => {
   loadNotifications()
   loadNotificationTypes()
@@ -180,13 +205,17 @@ onUnmounted(() => {
         <n-list class="list-component" :loading="loading">
           <template v-if="notifications.length > 0">
             <n-list-item v-for="notification in notifications" :key="notification.id">
-              <n-space vertical>
+              <n-space vertical :size="12">
+                <!-- 通知头部 -->
                 <n-space justify="space-between" align="center">
                   <n-space align="center">
-                    <n-tag :type="notificationTypes[notification.eventType]?.type || 'default'">
+                    <n-tag
+                      :type="notificationTypes[notification.eventType]?.type || 'default'"
+                      size="large"
+                      round
+                    >
                       {{ notificationTypes[notification.eventType]?.name || '通知' }}
                     </n-tag>
-                    <span class="notification-title">{{ notification.payload.title }}</span>
                   </n-space>
                   <n-space>
                     <n-time :time="new Date(notification.createdAt)" />
@@ -207,7 +236,35 @@ onUnmounted(() => {
                     </n-button>
                   </n-space>
                 </n-space>
-                <div class="notification-content">{{ notification.payload.content }}</div>
+
+                <!-- 通知内容 -->
+                <n-card size="small" class="notification-card">
+                  <template #header>
+                    <n-space align="center">
+                      <n-avatar
+                        round
+                        size="small"
+                        :src="notification.payload.actorAvatarUrl || '/api/assets/default-avatar.png'"
+                      />
+                      <n-text strong>{{ notification.payload.actorName }}</n-text>
+                      <n-text depth="3">
+                        {{ getActionText(notification.eventType) }}
+                      </n-text>
+                      <n-button
+                        v-if="notification.payload.articleId"
+                        text
+                        type="primary"
+                        @click="goToArticle(notification.payload.articleId)"
+                      >
+                        《{{ notification.payload.articleTitle }}》
+                      </n-button>
+                    </n-space>
+                  </template>
+
+                  <div class="notification-content">
+                    {{ notification.payload.content }}
+                  </div>
+                </n-card>
               </n-space>
             </n-list-item>
           </template>
@@ -285,5 +342,27 @@ onUnmounted(() => {
   .notification-container {
     padding: 16px;
   }
+}
+
+.notification-card {
+  background-color: var(--n-card-color);
+  transition: box-shadow .3s ease;
+}
+
+.notification-card:hover {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.notification-content {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: var(--n-color-hover);
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.n-tag {
+  padding: 0 12px;
 }
 </style>

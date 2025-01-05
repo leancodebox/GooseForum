@@ -5,14 +5,14 @@ import (
 )
 
 // SendCommentNotification 发送评论通知
-func SendCommentNotification(userId uint64, articleId uint64, commentContent string, commenterName string) error {
+func SendCommentNotification(userId uint64, articleId uint64, commentContent string, commenterName string, commenterId uint64, articleTitle string) error {
 	payload := eventNotification.NotificationPayload{
-		Title:   "收到新评论",
-		Content: commentContent,
-		Extra: map[string]interface{}{
-			"articleId":     articleId,
-			"commenterName": commenterName,
-		},
+		Title:        "收到新评论",
+		Content:      commentContent,
+		ActorName:    commenterName,
+		ActorId:      commenterId,
+		ArticleId:    articleId,
+		ArticleTitle: articleTitle,
 	}
 
 	notification := &eventNotification.Entity{
@@ -25,14 +25,15 @@ func SendCommentNotification(userId uint64, articleId uint64, commentContent str
 }
 
 // SendReplyNotification 发送回复通知
-func SendReplyNotification(userId uint64, commentId uint64, replyContent string, replierName string) error {
+func SendReplyNotification(userId uint64, commentId uint64, articleId uint64, replyContent string, replierName string, replierId uint64, articleTitle string) error {
 	payload := eventNotification.NotificationPayload{
-		Title:   "收到新回复",
-		Content: replyContent,
-		Extra: map[string]interface{}{
-			"commentId":   commentId,
-			"replierName": replierName,
-		},
+		Title:        "收到新回复",
+		Content:      replyContent,
+		ActorName:    replierName,
+		ActorId:      replierId,
+		ArticleId:    articleId,
+		ArticleTitle: articleTitle,
+		CommentId:    commentId,
 	}
 
 	notification := &eventNotification.Entity{
