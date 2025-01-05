@@ -122,12 +122,12 @@ async function regAction() {
                 <n-input v-model:value="loginInfo.password" type="password"/>
               </n-form-item-row>
               <n-form-item-row label="验证码">
-                <n-flex align="center" :size="[8, 0]">
-                  <n-input v-model:value="loginInfo.captchaCode"/>
+                <n-flex align="center" :wrap="false" style="width: 100%">
+                  <n-input v-model:value="loginInfo.captchaCode" style="flex: 1"/>
                   <n-image
                     :src="captchaImg"
                     @click="refreshCaptcha"
-                    style="cursor: pointer;"
+                    style="cursor: pointer; flex-shrink: 0;"
                     :preview-disabled="true"
                   />
                 </n-flex>
@@ -152,12 +152,12 @@ async function regAction() {
                 <n-input v-model:value="regInfo.repeatPassword" type="password"/>
               </n-form-item-row>
               <n-form-item-row label="验证码">
-                <n-flex align="center" :size="[8, 0]">
-                  <n-input v-model:value="regInfo.captchaCode"/>
+                <n-flex align="center" :wrap="false" style="width: 100%">
+                  <n-input v-model:value="regInfo.captchaCode" style="flex: 1"/>
                   <n-image
                     :src="captchaImg"
                     @click="refreshCaptcha"
-                    style="cursor: pointer;"
+                    style="cursor: pointer; flex-shrink: 0;"
                     :preview-disabled="true"
                   />
                 </n-flex>
@@ -177,6 +177,7 @@ async function regAction() {
 .n-image {
   width: 120px;
   height: 40px;
-  margin-left: 8px;
+  margin-left: 12px;
+  min-width: 120px;
 }
 </style>
