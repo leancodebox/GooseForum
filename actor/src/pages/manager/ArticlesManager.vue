@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {DataTableColumns, NButton, NDataTable, NTag, useMessage} from 'naive-ui'
+import {DataTableColumns, NButton, NDataTable, NTag, useMessage, NCard, NSpace, NGrid, NGridItem} from 'naive-ui'
 import {h, onMounted, reactive, ref} from 'vue'
 import {getAdminArticlesList} from '@/service/request'
 
@@ -15,102 +15,107 @@ type ArticleItem = {
   createdAt: string
   updatedAt: string
 }
+
 const data = ref<ArticleItem[]>([])
+let isSmallScreen = ref(window.innerWidth < 800)
 
+// 检查屏幕尺寸
+function checkScreenSize() {
+  isSmallScreen.value = window.innerWidth < 800
+}
 
+onMounted(() => {
+  checkScreenSize()
+  window.addEventListener('resize', checkScreenSize)
+})
+
+// 状态标签渲染函数
+const renderArticleStatus = (status: number) => {
+  if (status === 1) {
+    return h(NTag, {type: 'success', style: 'margin: 4px 0'}, () => "已发布")
+  }
+  return h(NTag, {type: 'warning', style: 'margin: 4px 0'}, () => "草稿")
+}
+
+const renderProcessStatus = (status: number) => {
+  switch (status) {
+    case 0:
+      return h(NTag, {type: 'success', style: 'margin: 4px 0'}, () => "未锁定")
+    case 1:
+      return h(NTag, {type: 'warning', style: 'margin: 4px 0'}, () => "锁定")
+    case 2:
+      return h(NTag, {type: 'warning', style: 'margin: 4px 0'}, () => "机器锁定")
+  }
+}
+
+// PC端表格列配置
 const createColumns = ({
-                         play
-                       }: {
+  play
+}: {
   play: (row: ArticleItem) => void
 }): DataTableColumns<ArticleItem> => {
   return [
     {
-      title: 'id',
-      key: 'id',
-      width: "60px",
-    },
-    {
       title: 'Title',
       key: 'title',
-      width: "160px", ellipsis: true
-    }, {
-      title: "type",
-      key: "type",
-      width: "80px",
+      width: "160px",
+      ellipsis: true
     },
     {
-      title: "作者(用户名)",
+      title: "作者",
       key: "username"
     },
     {
-      title: '文章状态',
+      title: '状态',
       key: 'articleStatus',
-      width: "80px",
-      render(row: ArticleItem) {
-        if (row.articleStatus === 1) {
-          return h(NTag, {type: 'success'}, () => "已发布")
-        } else {
-          return h(NTag, {type: 'warning'}, () => "草稿")
-        }
-      }
-    }, {
+      render: (row) => renderArticleStatus(row.articleStatus)
+    },
+    {
       title: "锁定状态",
       key: "processStatus",
-      width: "80px",
-      render(row: ArticleItem) {
-        switch (row.processStatus) {
-          case 0:
-            return h(NTag, {type: 'success'}, () => "未锁定")
-          case 1:
-            return h(NTag, {type: 'warning'}, () => "锁定")
-          case 2:
-            return h(NTag, {type: 'warning'}, () => "机器锁定")
-        }
-      }
+      render: (row) => renderProcessStatus(row.processStatus)
     },
     {
       title: '创建时间',
       key: 'createdAt'
     },
     {
-      title: '修改时间',
-      key: 'updatedAt'
-    },
-    {
       title: 'Action',
       key: 'actions',
       render(row: ArticleItem) {
-        return [h(
-            NButton,
-            {
-              strong: true,
-              tertiary: true,
-              size: 'small',
-              onClick: () => play(row)
-            },
-            // 冻结 ，弹窗， 冻结理由
-            {default: () => '冻结'}
-        ),
-          h(
-              NButton,
-              {
-                strong: true,
-                tertiary: true,
-                size: 'small',
-                onClick: () => play(row)
-              },
-              {default: () => '查看'}
-          )]
+        return h(NSpace, {}, {
+          default: () => [
+            h(
+                NButton,
+                {
+                  type: 'warning',
+                  size: 'small',
+                  onClick: () => play(row)
+                },
+                {default: () => '冻结'}
+            ),
+            h(
+                NButton,
+                {
+                  type: 'primary',
+                  size: 'small',
+                  onClick: () => play(row)
+                },
+                {default: () => '查看'}
+            )
+          ]
+        })
       }
     }
   ]
 }
-let columns = createColumns({
+
+const columns = createColumns({
   play(row: ArticleItem) {
-    message.info(`Play ${row.title}`)
+    message.info(`操作文章: ${row.title}`)
   }
 })
-let pagination = true
+
 const paginationReactive = reactive({
   page: 1,
   pageCount: 1,
@@ -118,9 +123,10 @@ const paginationReactive = reactive({
   itemCount: 0,
   search: "",
   prefix({itemCount}) {
-    return `Total is ${itemCount}.`
+    return `共 ${itemCount} 条`
   }
 })
+
 onMounted(async () => {
   await searchPage(paginationReactive.page)
 })
@@ -136,25 +142,131 @@ async function searchPage(page: number) {
     console.error(e)
   }
 }
-</script>
-<template>
-  <n-data-table
-      remote
-      :columns="columns"
-      :data="data"
-      :pagination="paginationReactive"
-      :bordered="false"
-      @update:page="searchPage"
-      striped
-      flex-height
-      style="height: calc(100vh - var(--header-height) - 28px);"
-  />
 
+// 操作按钮
+const handleFreeze = (row: ArticleItem) => {
+  message.info(`冻结文章: ${row.title}`)
+}
+
+const handleView = (row: ArticleItem) => {
+  message.info(`查看文章: ${row.title}`)
+}
+</script>
+
+<template>
+  <!-- PC端显示表格 -->
+  <div v-if="!isSmallScreen" class="pc-view">
+    <n-data-table
+        remote
+        :columns="columns"
+        :data="data"
+        :pagination="paginationReactive"
+        :bordered="false"
+        @update:page="searchPage"
+        striped
+        flex-height
+        style="height: calc(100vh - var(--header-height) - 28px);"
+    />
+  </div>
+
+  <!-- 移动端显示卡片 -->
+  <div v-else class="mobile-view">
+    <n-space vertical>
+      <n-card
+          v-for="item in data"
+          :key="item.id"
+          class="article-card"
+          :bordered="false"
+          size="small"
+      >
+        <n-space vertical>
+          <div class="article-title">{{ item.title }}</div>
+          <n-space justify="space-between" align="center">
+            <span class="article-author">{{ item.username }}</span>
+            <div>
+              <n-tag :type="item.articleStatus === 1 ? 'success' : 'warning'" style="margin: 4px 0">
+                {{ item.articleStatus === 1 ? '已发布' : '草稿' }}
+              </n-tag>
+              <n-tag :type="item.processStatus === 0 ? 'success' : 'warning'" style="margin: 4px 0">
+                {{ item.processStatus === 0 ? '未锁定' : item.processStatus === 1 ? '锁定' : '机器锁定' }}
+              </n-tag>
+            </div>
+          </n-space>
+          <div class="article-time">创建于: {{ item.createdAt }}</div>
+          <n-space justify="end">
+            <n-button size="small" type="warning" @click="handleFreeze(item)">
+              冻结
+            </n-button>
+            <n-button size="small" type="primary" @click="handleView(item)">
+              查看
+            </n-button>
+          </n-space>
+        </n-space>
+      </n-card>
+    </n-space>
+
+    <!-- 移动端分页 -->
+    <div class="mobile-pagination">
+      <n-space justify="center" align="center">
+        <n-button
+          size="small"
+          :disabled="paginationReactive.page === 1"
+          @click="searchPage(paginationReactive.page - 1)"
+        >
+          上一页
+        </n-button>
+        <span>{{ paginationReactive.page }} / {{ paginationReactive.pageCount }}</span>
+        <n-button
+          size="small"
+          :disabled="paginationReactive.page === paginationReactive.pageCount"
+          @click="searchPage(paginationReactive.page + 1)"
+        >
+          下一页
+        </n-button>
+      </n-space>
+    </div>
+  </div>
 </template>
-<style>
-.carousel-img {
-  width: 100%;
-  height: 240px;
-  object-fit: cover;
+
+<style scoped>
+.mobile-view {
+  padding: 8px;
+}
+
+.article-card {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.article-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.article-author {
+  font-size: 14px;
+  color: #666;
+}
+
+.article-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.mobile-pagination {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: white;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 为底部分页器留出空间 */
+.mobile-view {
+  padding-bottom: 60px;
 }
 </style>
