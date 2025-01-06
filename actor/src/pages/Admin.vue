@@ -1,12 +1,11 @@
 <script setup>
 import {h, ref} from 'vue'
 import {RouterLink} from 'vue-router'
-import {Flash} from '@vicons/ionicons5'
+import {Flash, GridOutline, MenuOutline} from '@vicons/ionicons5'
 import {
   NButton,
   NDrawer,
   NDrawerContent,
-  NDropdown,
   NFlex,
   NIcon,
   NLayout,
@@ -14,11 +13,10 @@ import {
   NLayoutSider,
   NMenu,
   NSpace,
-  NText,
-  NButtonGroup
+  NText
 } from 'naive-ui'
 import {managerRouter} from "@/route/routes";
-import {useIsMobile} from "@/utils/composables";
+import {useIsMobile, useIsTablet} from "@/utils/composables";
 
 function renderIcon(icon) {
   return () => h(NIcon, null, {default: () => h(icon)})
@@ -89,27 +87,45 @@ const menuOptions2 = [
     children: null,
   }
 ]
+
+let isTablet = useIsTablet()
+const showDrawer = ref(false)
+const showAdminDrawer = ref(false)
 </script>
 <template>
   <n-layout position="absolute" content-style="width: 100%;height: 100%;">
     <n-layout-header
         position="absolute"
-        style="height: 56px; padding: 8px;"
+        style="height: 56px;"
         bordered
     >
-      <n-flex justify="space-between" align="center">
-        <n-text tag="div" class="ui-logo" :depth="1" >
-          <img alt="" src="/quote-left.png"/>
-          <span>GooseForum</span>
-          <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions2"/>
-        </n-text>
-        <n-flex align="center"  style="padding-right: 24px;">>
-          <n-button-group>
-            <n-dropdown trigger="hover" :options="options">
-              <n-button>旺财</n-button>
-            </n-dropdown>
-            <n-button @click="activate('left')">阿福</n-button>
-          </n-button-group>
+      <n-flex align="center" style="height: 100%; padding: 0 16px" justify="space-between">
+        <!-- Logo and Navigation Area -->
+        <n-flex align="center" style="height: 100%">
+          <n-text tag="div" class="ui-logo" :depth="1">
+            <img alt="" src="/quote-left.png"/>
+            <span>GooseForum</span>
+          </n-text>
+
+          <!-- Desktop Navigation Menu -->
+          <div v-if="!isTablet && !isMobile" class="menu-container">
+            <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions2"/>
+          </div>
+        </n-flex>
+        
+        <n-flex v-if="isTablet || isMobile" align="center" class="action-buttons">
+          <!-- Admin Menu Button -->
+          <n-button quaternary @click="showAdminDrawer = true">
+            <n-icon size="20">
+              <grid-outline/>
+            </n-icon>
+          </n-button>
+          <!-- Navigation Menu Button -->
+          <n-button quaternary @click="showDrawer = true">
+            <n-icon size="20">
+              <menu-outline/>
+            </n-icon>
+          </n-button>
         </n-flex>
       </n-flex>
     </n-layout-header>
@@ -126,41 +142,54 @@ const menuOptions2 = [
           show-trigger
           v-show="!isMobile"
       >
-        <n-menu :options="menuOptions"
-                :collapsed="collapsed"
-                :collapsed-width="64"
-                :collapsed-icon-size="22"
-                :icon-size="22"
-                :indent="22"
+        <n-menu
+            :options="menuOptions"
+            :collapsed="collapsed"
+            :collapsed-width="64"
+            :collapsed-icon-size="22"
+            :icon-size="22"
+            :indent="24"
         />
-
       </n-layout-sider>
-      <n-layout content-style="padding: 16px;width: 100%;height: 100%;"   :native-scrollbar="false">
+
+      <n-layout content-style="padding: 16px;width: 100%;height: 100%;" :native-scrollbar="false">
         <router-view></router-view>
       </n-layout>
     </n-layout>
   </n-layout>
-  <n-drawer v-model:show="active" :width="320" :placement="placement">
-    <n-drawer-content title="斯通纳" :body-content-style="{padding:'12px 0 0 0 '}">
-      <n-menu :options="menuOptions"
-              :collapsed="collapsed"
-              :collapsed-width="64"
-              :collapsed-icon-size="22"
-              :indent="16"
-              @select="handleSelect"
-      />
 
+  <!-- Mobile Navigation Drawer -->
+  <n-drawer v-model:show="showDrawer" :width="280">
+    <n-drawer-content title="导航菜单" closable>
+      <n-space vertical size="large">
+        <n-menu
+            :options="menuOptions2"
+            @select="() => showDrawer = false"
+        />
+      </n-space>
+    </n-drawer-content>
+  </n-drawer>
+
+  <!-- Mobile Admin Menu Drawer -->
+  <n-drawer v-model:show="showAdminDrawer" :width="280">
+    <n-drawer-content title="管理菜单" closable>
+      <n-menu
+          :options="menuOptions"
+          @select="() => showAdminDrawer = false"
+      />
     </n-drawer-content>
   </n-drawer>
 </template>
 
-<style>
-
+<style scoped>
 .ui-logo {
   cursor: pointer;
   display: flex;
   align-items: center;
   font-size: 18px;
+  margin-right: 24px;
+  height: 100%;
+  white-space: nowrap;
 }
 
 .ui-logo > img {
@@ -168,4 +197,29 @@ const menuOptions2 = [
   height: 32px;
   width: 32px;
 }
+
+.menu-container {
+  height: 100%;
+}
+
+.action-buttons {
+  height: 100%;
+  gap: 8px;
+}
+
+/* Menu Styles - only for horizontal menu in header */
+:deep(.n-menu.n-menu--horizontal) {
+  height: 100%;
+  border: none;
+  display: flex;
+  align-items: center;
+}
+
+:deep(.n-menu-item) {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+
 </style>
