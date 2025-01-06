@@ -21,20 +21,26 @@ func GetNotificationList(req component.BetterRequest[GetNotificationListReq]) co
 	if err != nil {
 		return component.FailResponse("获取通知列表失败")
 	}
+	var userIds []uint64
+	var actorIds []uint64
+	for _, notification := range notifications {
+		if notification.Payload.ActorId != 0 {
+			userIds = append(userIds, notification.Payload.ActorId)
+		}
+		if notification.Payload.ArticleId != 0 {
+			actorIds = append(actorIds, notification.Payload.ArticleId)
+		}
+	}
+	userMap := users.GetMapByIds(userIds)
+	articleMap := articles.GetMapByIds(actorIds)
 
 	// 转换数据
 	for _, notification := range notifications {
-		if notification.Payload.ActorId != 0 {
-			userInfo, err := users.Get(notification.Payload.ActorId)
-			if err == nil {
-				notification.Payload.ActorName = userInfo.Username
-			}
+		if userInfo, ok := userMap[notification.Payload.ActorId]; ok {
+			notification.Payload.ActorName = userInfo.Username
 		}
-		if notification.Payload.ArticleId != 0 {
-			articleInfo := articles.Get(notification.Payload.ArticleId)
-			if articleInfo.Id != 0 {
-				notification.Payload.ArticleTitle = articleInfo.Title
-			}
+		if articleInfo, ok := articleMap[notification.Payload.ArticleId]; ok {
+			notification.Payload.ArticleTitle = articleInfo.Title
 		}
 	}
 

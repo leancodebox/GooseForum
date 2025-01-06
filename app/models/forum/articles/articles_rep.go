@@ -1,6 +1,7 @@
 package articles
 
 import (
+	"github.com/leancodebox/goose/collectionopt"
 	"github.com/leancodebox/goose/queryopt"
 	"time"
 )
@@ -28,6 +29,20 @@ func Delete(entity *Entity) int64 {
 func Get(id any) (entity Entity) {
 	builder().Where(queryopt.Eq(pid, id)).First(&entity)
 	return
+}
+
+func GetByIds(ids []uint64) (entities []*Entity) {
+	if len(ids) == 0 {
+		return
+	}
+	builder().Where(queryopt.In(pid, ids)).Find(&entities)
+	return
+}
+
+func GetMapByIds(ids []uint64) map[uint64]*Entity {
+	return collectionopt.Slice2Map(GetByIds(ids), func(v *Entity) uint64 {
+		return v.Id
+	})
 }
 
 func All() (entities []*Entity) {
