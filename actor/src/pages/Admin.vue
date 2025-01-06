@@ -112,7 +112,7 @@ const showAdminDrawer = ref(false)
             <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions2"/>
           </div>
         </n-flex>
-        
+
         <n-flex v-if="isTablet || isMobile" align="center" class="action-buttons">
           <!-- Admin Menu Button -->
           <n-button quaternary @click="showAdminDrawer = true">
@@ -205,20 +205,6 @@ const showAdminDrawer = ref(false)
 .action-buttons {
   height: 100%;
   gap: 8px;
-}
-
-/* Menu Styles - only for horizontal menu in header */
-:deep(.n-menu.n-menu--horizontal) {
-  height: 100%;
-  border: none;
-  display: flex;
-  align-items: center;
-}
-
-:deep(.n-menu-item) {
-  height: 100%;
-  display: flex;
-  align-items: center;
 }
 
 
