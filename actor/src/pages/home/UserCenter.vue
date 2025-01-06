@@ -20,19 +20,19 @@ const userStore = useUserStore()
 </script>
 
 <template>
-  <n-card :bordered="false" class="page-container">
+  <n-card :bordered="false">
     <n-flex :justify="'center'" class="responsive-container">
       <!-- 左侧导航按钮 -->
       <n-flex vertical class="nav-buttons">
         <n-button class="nav-button">我的博文</n-button>
         <n-button class="nav-button">我的回复</n-button>
       </n-flex>
-
+      
       <!-- 中间内容区 -->
       <n-card class="content-area">
         <router-view></router-view>
       </n-card>
-
+      
       <!-- 右侧用户信息卡片 -->
       <n-flex vertical class="user-info-section">
         <user-info-card :user-id="userStore.userInfo.userId"/>
@@ -42,19 +42,13 @@ const userStore = useUserStore()
 </template>
 
 <style scoped>
-.page-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
 .responsive-container {
   gap: 16px;
   flex-wrap: wrap;
 }
 
 .nav-buttons {
-  min-width: 240px;
+  min-width: 140px;
   gap: 8px;
 }
 
@@ -77,22 +71,22 @@ const userStore = useUserStore()
   .responsive-container {
     flex-direction: column;
   }
-
+  
   .nav-buttons {
     flex-direction: row;
     min-width: 100%;
     justify-content: center;
     gap: 16px;
   }
-
+  
   .nav-button {
     width: auto;
   }
-
+  
   .content-area {
     min-width: 100%;
   }
-
+  
   .user-info-section {
     min-width: 100%;
   }
@@ -103,21 +97,9 @@ const userStore = useUserStore()
   .nav-buttons {
     flex-direction: column;
   }
-
+  
   .nav-button {
     width: 100%;
-  }
-}
-
-@media screen and (max-width: 1024px) {
-  .page-container {
-    padding: 0 12px;
-  }
-}
-
-@media screen and (max-width: 640px) {
-  .page-container {
-    padding: 0 8px;
   }
 }
 </style>
