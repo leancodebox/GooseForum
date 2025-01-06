@@ -22,6 +22,7 @@ import {
   markAsRead
 } from "@/service/request";
 import {useRouter} from 'vue-router'
+import { useNotificationStore } from '@/modules/notification'
 
 const message = useMessage()
 const notifications = ref([])
@@ -50,6 +51,8 @@ const options = [
   }
 ]
 
+const notificationStore = useNotificationStore()
+
 // 加载通知列表
 async function loadNotifications() {
   loading.value = true
@@ -67,6 +70,7 @@ async function loadNotifications() {
             : notification.payload
       }))
       total.value = res.result.total
+      notificationStore.refreshUnreadCount()
     }
   } catch (err) {
     console.error('Failed to load notifications:', err)
@@ -89,7 +93,8 @@ async function handleMarkAsRead(notificationId) {
     const res = await markAsRead({notificationId})
     if (res.code === 0) {
       message.success('已标记为已读')
-      loadNotifications()
+      await loadNotifications()
+      notificationStore.refreshUnreadCount()
     }
   } catch (err) {
     message.error('操作失败')
@@ -102,7 +107,8 @@ async function handleMarkAllAsRead() {
     const res = await markAllAsRead()
     if (res.code === 0) {
       message.success('已全部标记为已读')
-      loadNotifications()
+      await loadNotifications()
+      notificationStore.refreshUnreadCount()
     }
   } catch (err) {
     message.error('操作失败')

@@ -21,6 +21,7 @@ import {RouterLink, useRouter} from "vue-router";
 import UserInfoCard from "@/components/UserInfoMenu.vue";
 import { getUnreadCount } from '@/service/request'
 import { useUserStore } from '@/modules/user'
+import { useNotificationStore } from '@/modules/notification'
 
 const router = useRouter()
 const showDrawer = ref(false)
@@ -48,44 +49,9 @@ const menuOptions = [
   }
 ]
 
-const unreadCount = ref(0)
+const notificationStore = useNotificationStore()
 
-// 获取未读消息数量
-const fetchUnreadCount = async () => {
-  const userStore = useUserStore()
-  if (userStore.isLogin) {
-    try {
-      const res = await getUnreadCount()
-      unreadCount.value = res.result.count || 0
-    } catch (error) {
-      console.error('获取未读消息数量失败:', error)
-    }
-  } else {
-    unreadCount.value = 0
-  }
-}
-
-// 定期检查未读消息
-onMounted(() => {
-  fetchUnreadCount()
-  // 每分钟检查一次未读消息
-  const timer = setInterval(fetchUnreadCount, 60000)
-
-  // 清理定时器
-  onUnmounted(() => {
-    clearInterval(timer)
-  })
-})
-
-// 监听登录状态变化
 const userStore = useUserStore()
-watch(() => userStore.isLogin, (newVal) => {
-  if (newVal) {
-    fetchUnreadCount()
-  } else {
-    unreadCount.value = 0
-  }
-})
 
 const actionOptions = [
   {
@@ -108,6 +74,28 @@ function handleMenuClick(path) {
   router.push(path)
   showDrawer.value = false
 }
+
+// 监听登录状态变化
+watch(() => userStore.isLogin, (newVal) => {
+  if (newVal) {
+    notificationStore.startPolling()
+  } else {
+    notificationStore.stopPolling()
+    notificationStore.resetUnreadCount()
+  }
+})
+
+// 在组件挂载时启动轮询
+onMounted(() => {
+  if (userStore.isLogin) {
+    notificationStore.startPolling()
+  }
+})
+
+// 在组件卸载时停止轮询
+onUnmounted(() => {
+  notificationStore.stopPolling()
+})
 </script>
 
 <template>
@@ -141,7 +129,7 @@ function handleMenuClick(path) {
       <n-flex v-if="!isTablet && !isMobile" align="center" class="action-buttons">
         <router-link v-for="item in actionOptions" :key="item.key" :to="item.path">
           <n-badge v-if="item.key === 'notification'"
-                   :value="unreadCount"
+                   :value="notificationStore.unreadCount"
                    :max="99"
                    processing
                    :offset="[-5,3]"
