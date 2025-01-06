@@ -96,6 +96,11 @@ onMounted(() => {
 onUnmounted(() => {
   notificationStore.stopPolling()
 })
+
+// 在组件卸载时清理
+onUnmounted(() => {
+  notificationStore.cleanup()
+})
 </script>
 
 <template>
