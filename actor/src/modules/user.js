@@ -1,4 +1,4 @@
-import {ref, watch} from "vue"
+import {ref, watch, computed} from "vue"
 import {defineStore} from "pinia";
 
 export const useUserStore = defineStore('user', () => {
@@ -48,10 +48,15 @@ export const useUserStore = defineStore('user', () => {
         window.localStorage.setItem('token', token.value)
     })
 
+    const isLogin = computed(() => {
+        return token.value !== '' && userInfo.value.userId !== 0
+    })
+
     return {
         userInfo,
         token,
         login,
-        clearUserInfo
+        clearUserInfo,
+        isLogin
     }
 })

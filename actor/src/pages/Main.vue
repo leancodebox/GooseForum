@@ -1,23 +1,26 @@
 <script setup>
 import {
-  NButton, 
-  NFlex, 
-  NIcon, 
-  NLayout, 
-  NLayoutFooter, 
-  NLayoutHeader, 
-  NMenu, 
+  NButton,
+  NFlex,
+  NIcon,
+  NLayout,
+  NLayoutFooter,
+  NLayoutHeader,
+  NMenu,
   NText,
   NDrawer,
   NDrawerContent,
   NSpace,
-  NDivider
+  NDivider,
+  NBadge
 } from 'naive-ui';
 import { MenuOutline } from '@vicons/ionicons5'
 import {useIsMobile, useIsTablet} from "@/utils/composables";
-import {h, ref} from "vue";
+import {h, ref, onMounted, onUnmounted, watch} from "vue";
 import {RouterLink, useRouter} from "vue-router";
 import UserInfoCard from "@/components/UserInfoMenu.vue";
+import { getUnreadCount } from '@/service/request'
+import { useUserStore } from '@/modules/user'
 
 const router = useRouter()
 const showDrawer = ref(false)
@@ -32,18 +35,57 @@ const menuOptions = [
     label: "首页",
     key: "index",
     path: "/home/index"
-  }, 
+  },
   {
     label: "BBS",
     key: "bbs",
     path: "/home/bbs"
-  }, 
+  },
   {
     label: "关于",
     key: "about",
     path: "/home/about"
   }
 ]
+
+const unreadCount = ref(0)
+
+// 获取未读消息数量
+const fetchUnreadCount = async () => {
+  const userStore = useUserStore()
+  if (userStore.isLogin) {
+    try {
+      const res = await getUnreadCount()
+      unreadCount.value = res.result.count || 0
+    } catch (error) {
+      console.error('获取未读消息数量失败:', error)
+    }
+  } else {
+    unreadCount.value = 0
+  }
+}
+
+// 定期检查未读消息
+onMounted(() => {
+  fetchUnreadCount()
+  // 每分钟检查一次未读消息
+  const timer = setInterval(fetchUnreadCount, 60000)
+
+  // 清理定时器
+  onUnmounted(() => {
+    clearInterval(timer)
+  })
+})
+
+// 监听登录状态变化
+const userStore = useUserStore()
+watch(() => userStore.isLogin, (newVal) => {
+  if (newVal) {
+    fetchUnreadCount()
+  } else {
+    unreadCount.value = 0
+  }
+})
 
 const actionOptions = [
   {
@@ -54,7 +96,7 @@ const actionOptions = [
   {
     label: "消息中心",
     key: "notification",
-    path: "/home/notificationCenter"
+    path: "/home/notificationCenter",
   }
 ]
 
@@ -98,7 +140,21 @@ function handleMenuClick(path) {
       <!-- 桌面端操作按钮 -->
       <n-flex v-if="!isTablet && !isMobile" align="center" class="action-buttons">
         <router-link v-for="item in actionOptions" :key="item.key" :to="item.path">
-          <n-button quaternary>{{ item.label }}</n-button>
+          <n-badge v-if="item.key === 'notification'"
+                   :value="unreadCount"
+                   :max="99"
+                   processing
+                   :offset="[-5,3]"
+                   type="error"
+          >
+          <n-button >
+            {{ item.label }}
+          </n-button>
+          </n-badge>
+          <n-button v-else >
+            {{ item.label }}
+          </n-button>
+
         </router-link>
         <user-info-card />
       </n-flex>
@@ -146,6 +202,12 @@ function handleMenuClick(path) {
               @click="handleMenuClick(item.path)"
           >
             {{ item.label }}
+            <n-badge v-if="item.key === 'notification' && item.badge > 0"
+                    :value="item.badge"
+                    :max="99"
+                    processing
+                    type="error"
+            />
           </n-button>
         </n-space>
       </n-space>
@@ -225,10 +287,15 @@ function handleMenuClick(path) {
     font-size: 16px;
     margin-right: 0;
   }
-  
+
   .ui-logo > img {
     height: 24px;
     width: 24px;
   }
+}
+
+/* 添加 badge 样式调整 */
+:deep(.n-badge) {
+  margin-left: 4px;
 }
 </style>

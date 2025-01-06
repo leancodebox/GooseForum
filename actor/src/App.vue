@@ -15,10 +15,6 @@ import {
 import {h} from 'vue'
 import {SparklesOutline} from '@vicons/ionicons5'
 import {RouterLink} from "vue-router";
-// import HelloWorld from './components/HelloWorld.vue'
-// This starter template is using Vue 3 experimental <script setup> SFCs
-// Check out https://github.com/vuejs/rfcs/blob/master/active-rfcs/0040-script-setup.md
-
 
 // 全局浮动按钮的下拉菜单选项
 const options = [

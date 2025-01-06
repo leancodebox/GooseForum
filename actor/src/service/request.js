@@ -1,12 +1,11 @@
 import axios from "axios"
-import {useUserStore} from "@/modules/user";
 import {createDiscreteApi,} from "naive-ui";
 import router from '@/route/router'
+import { useUserStore } from '@/modules/user'
 
 const {message} = createDiscreteApi(
     ["message"],
 );
-
 
 const instanceAxios = axios.create({
     baseURL: import.meta.env.VITE_DEV_API_HOST,
@@ -14,9 +13,9 @@ const instanceAxios = axios.create({
     headers: {}
 })
 
-const userStore = useUserStore()
-
+// 创建请求拦截器
 instanceAxios.interceptors.request.use(config => {
+    const userStore = useUserStore()
     config.headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + userStore.token,
@@ -28,15 +27,8 @@ instanceAxios.interceptors.request.use(config => {
 const success = 0
 const fail = 1
 
-/**
- * response
- * {
- *  "code": 1,
- *  "result":{},
- *  "msg":""
- * }
- */
 instanceAxios.interceptors.response.use(response => {
+    const userStore = useUserStore()
     if (response.headers['new-token'] !== undefined) {
         userStore.updateToken(response.headers['new-token'])
     }
@@ -53,6 +45,7 @@ instanceAxios.interceptors.response.use(response => {
     }
     return response
 }, error => {
+    const userStore = useUserStore()
     const res = error.response?.data
 
     // 处理未授权的情况（token失效或未登录）
@@ -65,7 +58,7 @@ instanceAxios.interceptors.response.use(response => {
         if (currentPath !== '/home/regOrLogin') {
             router.push({
                 path: '/home/regOrLogin',
-                query: { redirect: currentPath }  // 保存重定向信息
+                query: { redirect: currentPath }
             })
         }
         return Promise.reject(error)
@@ -280,5 +273,10 @@ export function deleteNotification(params) {
 // 获取通知类型
 export function getNotificationTypes() {
   return instanceAxios.get('/bbs/notification/types')
+}
+
+export {
+    instanceAxios,
+    // ... 其他导出保持不变 ...
 }
 
