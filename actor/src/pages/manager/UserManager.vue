@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   NButton,
+  NCard,
   NDataTable,
   NForm,
   NFormItem,
@@ -10,7 +11,6 @@ import {
   NSpace,
   NSwitch,
   NTag,
-  NCard,
   useMessage
 } from 'naive-ui'
 import {h, onMounted, ref} from 'vue'
@@ -111,7 +111,7 @@ let columns = [
     key: 'createTime'
   },
   {
-    title: 'Action',
+    title: '操作',
     key: 'actions',
     render(row: UserItem) {
       return h(NSpace, {}, {
@@ -125,17 +125,6 @@ let columns = [
               },
               {default: () => '编辑'}
           ),
-          h(
-              NButton,
-              {
-                type: 'warning',
-                size: 'small',
-                onClick: () => {
-                  message.info(`冻结用户 ${row.username}`)
-                }
-              },
-              {default: () => '冻结'}
-          )
         ]
       })
     }
@@ -253,7 +242,7 @@ function userEdit4Role() {
         <n-space vertical>
           <div class="user-title">{{ item.username }}</div>
           <div class="user-email">{{ item.email }}</div>
-          
+
           <n-space wrap>
             <template v-if="item.roleList">
               <n-tag
