@@ -1,5 +1,17 @@
 <script setup>
-import {NAnchor,NAffix,NButton, NCard, NLayout, NLayoutContent, NLayoutSider, NList, NListItem, NSpace, NTag, NThing,NFlex,NAvatar} from 'naive-ui'
+import {
+  NAvatar,
+  NButton,
+  NCard,
+  NFlex,
+  NLayout,
+  NLayoutContent,
+  NLayoutSider,
+  NList,
+  NListItem,
+  NTag,
+  NThing
+} from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {getArticlesPageApi} from "@/service/request";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
@@ -47,29 +59,28 @@ const isTablet = useIsTablet()
 </script>
 <template>
   <div class="container" ref="containerRef">
-    <n-layout has-sider sider-placement="right" >
+    <n-layout has-sider sider-placement="right">
       <n-layout-content content-style="padding: 24px;">
         <n-flex vertical>
-        <n-flex>
-          <n-tag  round>技术</n-tag>
-          <n-tag  round>文章</n-tag>
-          <n-tag  round>bn</n-tag>
-        </n-flex>
+          <n-flex>
+            <n-tag round>技术</n-tag>
+            <n-tag round>文章</n-tag>
+            <n-tag round>bn</n-tag>
+          </n-flex>
 
-
-        <n-list>
-          <n-list-item v-for="item in listData">
-            <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
-              <n-thing>
-                <template #description>
+          <n-list>
+            <n-list-item v-for="item in listData">
+              <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
+                <n-thing>
+                  <template #description>
                     <n-flex justify="space-between">
-                      <n-flex align="center" >
+                      <n-flex align="center">
                         <n-avatar
                             round
                             size="small"
                             :src="item.avatarUrl || '/api/assets/default-avatar.png'"
                         />
-                        [{{ item.username }}]
+                        <!--                        [{{ item.username }}]-->
                         <n-tag :bordered="false" type="success" size="small">
                           {{ item.category }}
                         </n-tag>
@@ -82,7 +93,7 @@ const isTablet = useIsTablet()
                         </span>
                         <n-tag v-for="itemTag in item.tag" :bordered="false"
                                size="small"
-                               v-text="itemTag" round >
+                               v-text="itemTag" round>
                         </n-tag>
                       </n-flex>
 
@@ -90,18 +101,18 @@ const isTablet = useIsTablet()
                         {{ item.lastUpdateTime }}
                       </span>
                     </n-flex>
-                </template>
-              </n-thing>
-            </router-link>
-          </n-list-item>
-          <n-list-item>
-            <n-flex vertical>
-            <n-button @click="more">
-              点击一下获取更多
-            </n-button>
-            </n-flex>
-          </n-list-item>
-        </n-list>
+                  </template>
+                </n-thing>
+              </router-link>
+            </n-list-item>
+            <n-list-item>
+              <n-flex vertical>
+                <n-button @click="more">
+                  点击一下获取更多
+                </n-button>
+              </n-flex>
+            </n-list-item>
+          </n-list>
         </n-flex>
 
       </n-layout-content>
@@ -111,23 +122,18 @@ const isTablet = useIsTablet()
           bordered
           v-show="!isTablet && !isMobile"
       >
-<!--        <n-affix-->
-<!--            :listen-to="()=>containerRef"-->
-<!--            :style="{height:'100%',width:'318px',pointerEvents:'none'}"-->
-<!--            :top="150" :trigger-top="20"-->
-<!--        >-->
-          <n-flex vertical>
-            <n-card title="祖国的花朵">
-              <p>祖国的花朵</p>
-            </n-card>
-            <n-card title="今日推荐">
-              <p>祖国的花朵</p>
-            </n-card>
-            <n-card title="友情连接">
-              <p>祖国的花朵</p>
-            </n-card>
-          </n-flex>
-<!--        </n-affix>-->
+        <n-flex vertical>
+          <n-card title="祖国的花朵">
+            <p>祖国的花朵</p>
+          </n-card>
+          <n-card title="社区推荐">
+            <n-flex vertical>
+              <a href="https://learnku.com/" style="text-decoration: none;">LearnKu</a>
+              <a href="https://ruby-china.org" style="text-decoration: none;"><b
+                  style="color: #EB5424 !important;">Ruby</b> China</a>
+            </n-flex>
+          </n-card>
+        </n-flex>
       </n-layout-sider>
     </n-layout>
   </div>
