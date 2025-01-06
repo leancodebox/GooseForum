@@ -123,11 +123,13 @@ const isTablet = useIsTablet()
           v-show="!isTablet && !isMobile"
       >
         <n-flex vertical>
-          <n-card title="祖国的花朵">
-            <p>祖国的花朵</p>
+          <n-card title="统计信息">
+            <p>帖子数量:0</p>
+            <p>内容数量:0</p>
+            <p>回复数量:0</p>
           </n-card>
           <n-card title="社区推荐">
-            <n-flex vertical>
+            <n-flex vertical align="center">
               <a href="https://learnku.com/" style="text-decoration: none;">LearnKu</a>
               <a href="https://ruby-china.org" style="text-decoration: none;"><b
                   style="color: #EB5424 !important;">Ruby</b> China</a>
