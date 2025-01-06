@@ -114,16 +114,16 @@ const showAdminDrawer = ref(false)
         </n-flex>
 
         <n-flex v-if="isTablet || isMobile" align="center" class="action-buttons">
-          <!-- Admin Menu Button -->
-          <n-button quaternary @click="showAdminDrawer = true">
-            <n-icon size="20">
-              <grid-outline/>
-            </n-icon>
-          </n-button>
           <!-- Navigation Menu Button -->
           <n-button quaternary @click="showDrawer = true">
             <n-icon size="20">
               <menu-outline/>
+            </n-icon>
+          </n-button>
+          <!-- Admin Menu Button -->
+          <n-button quaternary @click="showAdminDrawer = true">
+            <n-icon size="20">
+              <grid-outline/>
             </n-icon>
           </n-button>
         </n-flex>
@@ -207,5 +207,21 @@ const showAdminDrawer = ref(false)
   gap: 8px;
 }
 
+.menu-container :deep(.n-menu.n-menu--horizontal) {
+  height: 100%;
+  border: none;
+}
+
+.menu-container :deep(.n-menu-item) {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.menu-container :deep(.n-menu-item a) {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
 
 </style>
