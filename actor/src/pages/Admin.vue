@@ -164,7 +164,7 @@ const showAdminDrawer = ref(false)
       <n-space vertical size="large">
         <n-menu
             :options="menuOptions2"
-            @select="() => showDrawer = false"
+
         />
       </n-space>
     </n-drawer-content>
@@ -175,7 +175,7 @@ const showAdminDrawer = ref(false)
     <n-drawer-content title="管理菜单" closable>
       <n-menu
           :options="menuOptions"
-          @select="() => showAdminDrawer = false"
+
       />
     </n-drawer-content>
   </n-drawer>

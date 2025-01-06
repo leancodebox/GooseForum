@@ -7,7 +7,7 @@ const STORAGE_KEY = {
   LAST_FETCH: 'notification_last_fetch_time'
 }
 
-const CACHE_DURATION = 60000 // 缓存时间：1分钟
+const CACHE_DURATION = 20000 // 缓存时间：1分钟
 
 export const useNotificationStore = defineStore('notification', () => {
   // 从 localStorage 初始化状态
@@ -17,7 +17,7 @@ export const useNotificationStore = defineStore('notification', () => {
   // 检查是否需要更新
   const shouldUpdate = (force = false) => {
     if (force) return true
-    
+
     const now = Date.now()
     const lastFetch = parseInt(localStorage.getItem(STORAGE_KEY.LAST_FETCH) || '0')
     return now - lastFetch >= CACHE_DURATION
@@ -111,4 +111,4 @@ export const useNotificationStore = defineStore('notification', () => {
     refreshUnreadCount,
     cleanup
   }
-}) 
+})
