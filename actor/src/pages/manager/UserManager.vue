@@ -10,6 +10,7 @@ import {
   NSpace,
   NSwitch,
   NTag,
+  NCard,
   useMessage
 } from 'naive-ui'
 import {h, onMounted, ref} from 'vue'
@@ -28,7 +29,21 @@ type UserItem = {
   prestige: number | null
 }
 const data: Ref<UnwrapRef<UserItem[]>> = ref([])
+let isSmallScreen = ref(window.innerWidth < 800)
 
+// 检查屏幕尺寸
+function checkScreenSize() {
+  isSmallScreen.value = window.innerWidth < 800
+}
+
+onMounted(() => {
+  checkScreenSize()
+  window.addEventListener('resize', checkScreenSize)
+  getAllRoleItem().then(r => {
+    roleOption.value = r.result
+  })
+  showUserList()
+})
 
 let columns = [
   {
@@ -63,7 +78,6 @@ let columns = [
         ))
       }
       return res
-
     }
   },
   {
@@ -100,58 +114,44 @@ let columns = [
     title: 'Action',
     key: 'actions',
     render(row: UserItem) {
-      return [h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => {
-              showModal.value = true
-              userEntity.value = {
-                userId: row.userId,
-                username: row.username,
-                roleId: !!row.roleList ? row.roleList.map(item => {
-                  return item.value
-                }) : [],
-                status: row.status,
-                validate: row.validate
-              }
-            }
-          },
-          {default: () => '编辑'}
-      ), h(
-          NButton,
-          {
-            strong: true,
-            tertiary: true,
-            size: 'small',
-            onClick: () => {
-              message.info(`Play ${row.username}`)
-            }
-          },
-          {default: () => '冻结'}
-      )
-      ]
+      return h(NSpace, {}, {
+        default: () => [
+          h(
+              NButton,
+              {
+                type: 'primary',
+                size: 'small',
+                onClick: () => handleEdit(row)
+              },
+              {default: () => '编辑'}
+          ),
+          h(
+              NButton,
+              {
+                type: 'warning',
+                size: 'small',
+                onClick: () => {
+                  message.info(`冻结用户 ${row.username}`)
+                }
+              },
+              {default: () => '冻结'}
+          )
+        ]
+      })
     }
   }
 ]
-let roleOption = ref([])
-onMounted(() => {
-  getAllRoleItem().then(r => {
-    console.log(r.result)
-    roleOption.value = r.result
-  })
-  showUserList()
-})
 
-function showUserList() {
-  getUserList().then(r => {
-    data.value = r.result.list
-  })
+let roleOption = ref([])
+let pagination = {
+  page: 1,
+  pageSize: 10,
+  itemCount: 0,
+  prefix({itemCount}) {
+    return `共 ${itemCount} 条`
+  }
 }
 
-let pagination = true
 let showModal = ref(false)
 let userEntity = ref({
   userId: 0,
@@ -161,48 +161,58 @@ let userEntity = ref({
   validate: 0
 })
 
-function onPositiveClick() {
-  userEdit4Role()
+function handleEdit(row: UserItem) {
+  showModal.value = true
+  userEntity.value = {
+    userId: row.userId,
+    username: row.username,
+    roleId: !!row.roleList ? row.roleList.map(item => {
+      return item.value
+    }) : [],
+    status: row.status,
+    validate: row.validate
+  }
 }
 
-function onNegativeClick() {
-
+function showUserList() {
+  getUserList().then(r => {
+    data.value = r.result.list
+  })
 }
 
 function userEdit4Role() {
   let req = userEntity.value
   editUser(req.userId, req.status, req.validate, req.roleId)
       .then(() => {
+        showModal.value = false
         showUserList()
+        message.success('更新成功')
       })
 }
 </script>
+
 <template>
+  <!-- 编辑用户弹窗 -->
   <n-modal
       v-model:show="showModal"
-      style="width: 600px"
+      style="width: 90%; max-width: 600px"
       preset="dialog"
-      title="添加角色"
-      content="你确认?"
+      title="编辑用户"
       positive-text="确认"
-      negative-text="算了"
-      @positive-click="onPositiveClick"
-      @negative-click="onNegativeClick"
+      negative-text="取消"
+      @positive-click="userEdit4Role"
+      @negative-click="() => showModal = false"
   >
-
     <n-form
         ref="formRef"
         :model="userEntity"
-        :rules="{}"
         label-placement="left"
         label-width="auto"
-        require-mark-placement="right-hanging"
         :style="{
-          padding: '30px 0 0',
-      maxWidth: '640px'
-    }"
+          maxWidth: '640px'
+        }"
     >
-      <n-form-item label="角色名" path="username">
+      <n-form-item label="用户名" path="username">
         <n-input v-model:value="userEntity.username" disabled></n-input>
       </n-form-item>
       <n-form-item label="是否冻结">
@@ -216,19 +226,137 @@ function userEdit4Role() {
       </n-form-item>
     </n-form>
   </n-modal>
-  <n-space vertical>
+
+  <!-- PC端显示表格 -->
+  <div v-if="!isSmallScreen" class="pc-view">
     <n-data-table
         :columns="columns"
         :data="data"
         :pagination="pagination"
         :bordered="false"
+        striped
+        flex-height
+        style="height: calc(100vh - var(--header-height) - 28px);"
     />
-  </n-space>
+  </div>
+
+  <!-- 移动端显示卡片 -->
+  <div v-else class="mobile-view">
+    <n-space vertical>
+      <n-card
+          v-for="item in data"
+          :key="item.userId"
+          class="user-card"
+          :bordered="false"
+          size="small"
+      >
+        <n-space vertical>
+          <div class="user-title">{{ item.username }}</div>
+          <div class="user-email">{{ item.email }}</div>
+          
+          <n-space wrap>
+            <template v-if="item.roleList">
+              <n-tag
+                  v-for="role in item.roleList"
+                  :key="role.value"
+                  size="small"
+                  :bordered="false"
+              >
+                {{ role.name }}
+              </n-tag>
+            </template>
+          </n-space>
+
+          <n-space>
+            <n-tag :type="item.status === 0 ? 'success' : 'error'">
+              {{ item.status === 0 ? '正常' : '冻结' }}
+            </n-tag>
+            <n-tag :type="item.validate === 1 ? 'success' : 'warning'">
+              {{ item.validate === 1 ? '已验证' : '未验证' }}
+            </n-tag>
+          </n-space>
+
+          <div class="user-info">
+            <span>声望: {{ item.prestige }}</span>
+            <span class="user-time">创建: {{ item.createTime }}</span>
+          </div>
+
+          <n-space justify="end">
+            <n-button size="small" type="primary" @click="handleEdit(item)">
+              编辑
+            </n-button>
+            <n-button size="small" type="warning" @click="message.info(`冻结用户 ${item.username}`)">
+              冻结
+            </n-button>
+          </n-space>
+        </n-space>
+      </n-card>
+    </n-space>
+
+    <!-- 移动端分页 -->
+    <div class="mobile-pagination">
+      <n-space justify="center" align="center">
+        <n-button
+            size="small"
+            :disabled="pagination.page === 1"
+            @click="pagination.page--"
+        >
+          上一页
+        </n-button>
+        <span>{{ pagination.page }}</span>
+        <n-button
+            size="small"
+            @click="pagination.page++"
+        >
+          下一页
+        </n-button>
+      </n-space>
+    </div>
+  </div>
 </template>
-<style>
-.carousel-img {
-  width: 100%;
-  height: 240px;
-  object-fit: cover;
+
+<style scoped>
+.mobile-view {
+  padding: 8px;
+  padding-bottom: 60px;
+}
+
+.user-card {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.user-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.user-email {
+  font-size: 14px;
+  color: #666;
+}
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #999;
+}
+
+.user-time {
+  color: #999;
+}
+
+.mobile-pagination {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: white;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1;
 }
 </style>
