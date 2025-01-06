@@ -27,3 +27,4 @@ GooseForum
 storage
 tmp
 config.toml
+.DS_Store
