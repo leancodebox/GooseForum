@@ -40,8 +40,8 @@ function getArticlesAction(page = 1) {
       }
     })
     total.value = r.result.total || 0
-    
-    listContainerRef.value?.scrollIntoView({ 
+
+    listContainerRef.value?.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
     })
@@ -65,10 +65,10 @@ const isTablet = useIsTablet()
 </script>
 
 <template>
-  <div class="articles-container">
+  <div class="articles-container"ref="listContainerRef">
     <div class="main-content">
       <!-- 标签区域 -->
-      <div class="tags-section" ref="listContainerRef">
+      <div class="tags-section" >
         <n-tag round>技术</n-tag>
         <n-tag round>文章</n-tag>
         <n-tag round>bn</n-tag>
@@ -97,10 +97,10 @@ const isTablet = useIsTablet()
                     <span v-else>
                       {{ item.title }}
                     </span>
-                    <n-tag v-for="itemTag in item.tag" 
+                    <n-tag v-for="itemTag in item.tag"
                            :bordered="false"
                            size="small"
-                           v-text="itemTag" 
+                           v-text="itemTag"
                            round
                            :style="{ marginLeft: '4px' }">
                     </n-tag>
@@ -132,7 +132,7 @@ const isTablet = useIsTablet()
             </n-thing>
           </router-link>
         </n-list-item>
-        
+
         <!-- 分页 -->
         <n-list-item>
           <div class="pagination-wrapper">
