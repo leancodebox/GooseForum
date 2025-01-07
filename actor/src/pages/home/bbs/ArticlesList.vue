@@ -11,7 +11,8 @@ import {
   NList,
   NListItem,
   NTag,
-  NThing
+  NThing,
+  NPagination
 } from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {getArticlesPageApi} from "@/service/request";
@@ -19,11 +20,13 @@ import {useIsMobile, useIsTablet} from "@/utils/composables";
 
 const listData = ref([])
 const containerRef = ref(null)
-let maxId = 1
+const currentPage = ref(1)
+const pageSize = ref(20)
+const total = ref(0)
 
-function getArticlesAction() {
-  getArticlesPageApi(maxId).then(r => {
-    let newList = r.result.list.map(function (item) {
+function getArticlesAction(page = 1) {
+  getArticlesPageApi(page, pageSize.value).then(r => {
+    listData.value = r.result.list.map(function (item) {
       return {
         id: item.id,
         topic: "",
@@ -39,20 +42,18 @@ function getArticlesAction() {
         commentCount: item.commentCount
       }
     })
-    listData.value.push(...newList)
-    maxId += 1
+    total.value = r.result.total || 0
   })
 }
 
-onMounted(() => {
-  maxId = 1
-  getArticlesAction()
-})
-
-function more() {
-  getArticlesAction()
+function handlePageChange(page) {
+  currentPage.value = page
+  getArticlesAction(page)
 }
 
+onMounted(() => {
+  getArticlesAction(1)
+})
 
 const text = ref('金色传说') // 需要进行高亮的文本
 
@@ -129,10 +130,14 @@ const isTablet = useIsTablet()
               </router-link>
             </n-list-item>
             <n-list-item>
-              <n-flex vertical>
-                <n-button @click="more">
-                  点击一下获取更多
-                </n-button>
+              <n-flex justify="center" style="width: 100%">
+                <n-pagination
+                    v-model:page="currentPage"
+                    v-model:page-size="pageSize"
+                    :page-count="Math.ceil(total / pageSize)"
+                    :on-update:page="handlePageChange"
+                    show-quick-jumper
+                />
               </n-flex>
             </n-list-item>
           </n-list>
