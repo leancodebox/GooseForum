@@ -32,8 +32,8 @@ let regOrLogin = () => import("@/pages/home/RegOrLogin.vue")
 export let managerRouter = {
     belongMenu: true,
     path: '/manager', component: moon, children: [
-        {showName: '', path: '', component: allTool, belongMenu: false},
-        {showName: '工具', path: 'allTool', component: allTool, belongMenu: true, icon: HammerOutline},
+        {name: '', path: '', redirect: '/manager/allTool'},
+        {showName: '工具', name: 'allTool', path: 'allTool', component: allTool, belongMenu: true, icon: HammerOutline},
         {showName: '用户管理', path: 'userManager', component: userManager, belongMenu: true, icon: PeopleOutline},
         {showName: '角色管理', path: 'roleManager', component: roleManager, belongMenu: true, icon: HappyOutline},
         {

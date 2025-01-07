@@ -3,24 +3,27 @@
 import {NAvatar, NButton, NDropdown, useMessage} from "naive-ui";
 import {useUserStore} from "@/modules/user";
 import router from "@/route/router"
-import {computed} from "vue";
+import {computed, onMounted, ref} from "vue";
 
 const userStore = useUserStore()
 const message = useMessage()
 
-const options = [
+const options = ref([
   {label: "个人中心", key: "userInfo"},
   {label: "编辑资料", key: "userEdit"},
   {label: "退出登录", key: "logout"},
-]
+])
 
 const handleSelect = function (key) {
-  switch(key) {
+  switch (key) {
     case "userInfo":
       router.push({name: 'userInfo'})
       break
     case "userEdit":
       router.push({name: "userEdit"})
+      break
+    case "manager":
+      router.push({name: "allTool"})
       break
     case "logout":
       handleLogout()
@@ -38,7 +41,7 @@ const handleLogout = () => {
 const handleLoginOrRegister = () => {
   router.push({
     path: '/home/regOrLogin',
-    query: { redirect: router.currentRoute.value.fullPath }
+    query: {redirect: router.currentRoute.value.fullPath}
   })
 }
 
@@ -48,6 +51,13 @@ const truncateUsername = computed(() => {
   return username.length > maxLength
       ? `${username.slice(0, maxLength)}...`
       : username;
+})
+
+onMounted(() => {
+  if (userStore?.userInfo?.isAdmin) {
+    options.value.push({label: "管理后台", key: "manager"},)
+  }
+  // options.value.push({label: "管理后台", key: "manager"},)
 })
 </script>
 

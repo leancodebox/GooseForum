@@ -4,9 +4,10 @@ import {defineStore} from "pinia";
 export const useUserStore = defineStore('user', () => {
 
     const userInfo = ref({
-        username: '', 
+        username: '',
         userId: 0,
-        avatarUrl: ''
+        avatarUrl: '',
+        isAdmin: false,
     })
     let userInfoData = window.localStorage.getItem('userInfo') || ""
 
@@ -35,7 +36,7 @@ export const useUserStore = defineStore('user', () => {
 
     function clearUserInfo() {
         userInfo.value = {
-            username: '', 
+            username: '',
             userId: 0,
             avatarUrl: ''
         }

@@ -208,16 +208,16 @@ onUnmounted(() => {
   </n-drawer>
 
   <!-- 其他内容保持不变 -->
-  <n-layout 
+  <n-layout
     class="n-layout-container"
     :style="{top: topHeight}"
     :native-scrollbar="true"
     :position="'absolute'"
     content-style="display: flex; flex-direction: column; min-height: calc(100vh - var(--header-height));"
   >
-    <n-layout-content style="flex: 1;">
+    <div style="flex: 1;">
       <router-view></router-view>
-    </n-layout-content>
+    </div>
     <n-layout-footer
         class="main-footer"
         bordered>
