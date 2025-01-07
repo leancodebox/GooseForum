@@ -80,54 +80,60 @@ const isTablet = useIsTablet()
           <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
             <n-thing>
               <template #description>
-                <n-flex justify="space-between" align="center" :style="{ gap: '8px' }">
-                  <n-flex align="center" :style="{ gap: '8px' }">
+                <div class="article-item">
+                  <div class="article-avatar">
                     <n-avatar
                         round
-                        size="small"
+                        :size="48"
                         :src="item.avatarUrl || '/api/assets/default-avatar.png'"
                     />
-                    <n-tag :bordered="false" type="success" size="small">
-                      {{ item.category }}
-                    </n-tag>
+                  </div>
 
-                    <span v-if="item.type === 'xxx'" class="blinking-div">
-                      {{ item.title }}
-                    </span>
-                    <span v-else>
-                      {{ item.title }}
-                    </span>
-                    <n-tag v-for="itemTag in item.tag"
-                           :bordered="false"
-                           size="small"
-                           v-text="itemTag"
-                           round
-                           :style="{ marginLeft: '4px' }">
-                    </n-tag>
-                  </n-flex>
+                  <div class="article-content">
+                    <n-flex align="center" class="article-header" :style="{ gap: '8px' }">
+                      <n-tag :bordered="false" type="success" size="small">
+                        {{ item.category }}
+                      </n-tag>
+                      <span v-if="item.type === 'xxx'" class="blinking-div">
+                        {{ item.title }}
+                      </span>
+                      <span v-else>
+                        {{ item.title }}
+                      </span>
+                      <n-tag v-for="itemTag in item.tag"
+                             :bordered="false"
+                             size="small"
+                             v-text="itemTag"
+                             round
+                             :style="{ marginLeft: '4px' }">
+                      </n-tag>
+                    </n-flex>
 
-                  <n-flex :style="{ gap: '12px', color: '#666' }">
-                    <n-flex align="center" :style="{ gap: '4px' }">
-                      <n-icon size="14">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                          <path fill="currentColor"
-                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3z"/>
-                        </svg>
-                      </n-icon>
-                      <span style="font-size: 0.9em;">{{ item.viewCount || 0 }}</span>
-                    </n-flex>
-                    <n-flex align="center" :style="{ gap: '4px' }">
-                      <n-icon size="14">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                          <path fill="currentColor"
-                                d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
-                        </svg>
-                      </n-icon>
-                      <span style="font-size: 0.9em;">{{ item.commentCount || 0 }}</span>
-                    </n-flex>
-                    <span style="font-size: 0.9em;">{{ item.lastUpdateTime }}</span>
-                  </n-flex>
-                </n-flex>
+                    <div class="article-stats">
+                      <n-flex :style="{ gap: '12px', color: '#666' }">
+                        <n-flex align="center" :style="{ gap: '4px' }">
+                          <n-icon size="14">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                              <path fill="currentColor"
+                                    d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3z"/>
+                            </svg>
+                          </n-icon>
+                          <span style="font-size: 0.9em;">{{ item.viewCount || 0 }}</span>
+                        </n-flex>
+                        <n-flex align="center" :style="{ gap: '4px' }">
+                          <n-icon size="14">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                              <path fill="currentColor"
+                                    d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                            </svg>
+                          </n-icon>
+                          <span style="font-size: 0.9em;">{{ item.commentCount || 0 }}</span>
+                        </n-flex>
+                        <span style="font-size: 0.9em;">{{ item.lastUpdateTime }}</span>
+                      </n-flex>
+                    </div>
+                  </div>
+                </div>
               </template>
             </n-thing>
           </router-link>
@@ -255,5 +261,47 @@ const isTablet = useIsTablet()
 
 .blinking-div {
   animation: yellowToRed 0.5s infinite;
+}
+
+.article-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.article-avatar {
+  flex-shrink: 0;
+}
+
+.article-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.article-header {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.article-stats {
+  padding-left: 0;
+}
+
+/* 响应式布局 */
+@media (max-width: 800px) {
+  .article-stats {
+    padding-left: 0;
+  }
+
+  .article-item {
+    gap: 12px;
+  }
+
+  .article-avatar {
+    margin-left: 12px;
+  }
 }
 </style>
