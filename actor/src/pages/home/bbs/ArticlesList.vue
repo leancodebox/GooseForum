@@ -141,7 +141,6 @@ const isTablet = useIsTablet()
                 v-model:page-size="pageSize"
                 :page-count="Math.ceil(total / pageSize)"
                 :on-update:page="handlePageChange"
-                show-quick-jumper
             />
           </div>
         </n-list-item>
@@ -172,14 +171,28 @@ const isTablet = useIsTablet()
   display: flex;
   gap: 24px;
   padding: 24px;
-  min-height: 100%;
   width: 100%;
+  min-height: 100%;
   box-sizing: border-box;
 }
 
 .main-content {
   flex: 1;
   min-width: 0; /* 防止flex子项溢出 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 让列表部分占据剩余空间 */
+.main-content :deep(.n-list) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 让最后一个列表项（分页）保持在底部 */
+.main-content :deep(.n-list-item:last-child) {
+  margin-top: auto;
 }
 
 .sidebar {
@@ -244,6 +257,7 @@ const isTablet = useIsTablet()
 @media (max-width: 800px) {
   .articles-container {
     flex-direction: column;
+    min-height: 100%;
   }
 
   .sidebar {

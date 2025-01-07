@@ -213,11 +213,13 @@ onUnmounted(() => {
     :style="{top: topHeight}"
     :native-scrollbar="true"
     :position="'absolute'"
-    content-style="min-height: calc(100vh - var(--header-height));"
+    content-style="display: flex; flex-direction: column; min-height: calc(100vh - var(--header-height));"
   >
-    <router-view></router-view>
+    <n-layout-content style="flex: 1;">
+      <router-view></router-view>
+    </n-layout-content>
     <n-layout-footer
-        style="--x-padding: 56px;margin-top: auto;height: 100px;display: flex;justify-content: center;align-items: center;width: 100%;background-color: #f0f3f5;"
+        class="main-footer"
         bordered>
       <p>&copy; My Homepage 2023</p>
     </n-layout-footer>
@@ -302,5 +304,14 @@ onUnmounted(() => {
 
 .n-layout-container {
   overflow: auto;
+}
+
+.main-footer {
+  flex-shrink: 0;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f3f5;
 }
 </style>
