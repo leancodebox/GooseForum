@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 
@@ -142,15 +141,15 @@ type ArticlesListReq struct {
 }
 
 type ArticlesInfoDto struct {
-	Id            uint64    `json:"id"`
-	Title         string    `json:"title"`
-	Type          int8      ` json:"type"`  // 文章类型：0 博文，1教程，2问答，3分享
-	UserId        uint64    `json:"userId"` //
-	Username      string    `json:"username"`
-	ArticleStatus int8      `json:"articleStatus"` // 文章状态：0 草稿 1 发布
-	ProcessStatus int8      `json:"processStatus"` // 管理状态：0 正常 1 封禁
-	CreatedAt     time.Time ` json:"createdAt"`    //
-	UpdatedAt     time.Time ` json:"updatedAt"`    //
+	Id            uint64 `json:"id"`
+	Title         string `json:"title"`
+	Type          int8   `json:"type"`   // 文章类型：0 博文，1教程，2问答，3分享
+	UserId        uint64 `json:"userId"` //
+	Username      string `json:"username"`
+	ArticleStatus int8   `json:"articleStatus"` // 文章状态：0 草稿 1 发布
+	ProcessStatus int8   `json:"processStatus"` // 管理状态：0 正常 1 封禁
+	CreatedAt     string `json:"createdAt"`     // 改为 string 类型
+	UpdatedAt     string `json:"updatedAt"`     // 改为 string 类型
 }
 
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
@@ -174,8 +173,8 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 				Username:      username,
 				ArticleStatus: t.ArticleStatus,
 				ProcessStatus: t.ProcessStatus,
-				CreatedAt:     t.CreatedAt,
-				UpdatedAt:     t.UpdatedAt,
+				CreatedAt:     t.CreatedAt.Format("2006-01-02 15:04:05"),
+				UpdatedAt:     t.UpdatedAt.Format("2006-01-02 15:04:05"),
 			}
 		}),
 		pageData.Page,

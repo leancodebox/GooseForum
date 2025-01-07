@@ -87,6 +87,7 @@ func Page(q PageQuery) struct {
 	}
 	if q.FilterStatus {
 		b.Where(queryopt.Eq(fieldArticleStatus, 1))
+		b.Where(queryopt.Eq(fieldProcessStatus, 0))
 	}
 	var total int64
 	b.Count(&total)
