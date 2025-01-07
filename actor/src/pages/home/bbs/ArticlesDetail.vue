@@ -15,7 +15,7 @@ import {
   useMessage
 } from 'naive-ui'
 import {computed, onMounted, ref} from "vue";
-import {useRouter} from "vue-router";
+import {useRouter, useRoute} from "vue-router";
 import {articlesReply, getArticlesDetailApi, getUserInfoShow} from "@/service/request";
 import ArticlesMdPage from "@/pages/home/bbs/MarkdownShow.vue";
 import '@/assets/github-markdown.css'
@@ -120,6 +120,7 @@ function cancelReply() {
 
 const userStore = useUserStore()
 const router = useRouter()
+const route = useRoute()
 
 function handleEdit() {
   router.push({
@@ -140,6 +141,17 @@ const isAuthor = computed(() => {
         <!-- 文章卡片 -->
         <n-card style="margin-bottom: 24px">
           <n-flex justify="space-between" align="center" style="margin-bottom: 16px">
+            <router-link 
+              :to="{ 
+                path: '/home/bbs/articlesList', 
+                query: { page: route.query.page || '1' } 
+              }"
+              style="margin-right: 16px"
+            >
+              <n-button secondary size="small">
+                返回列表
+              </n-button>
+            </router-link>
             <h2 style="margin: 0">{{ articleInfo.title }}</h2>
             <n-button v-if="isAuthor"
                       secondary

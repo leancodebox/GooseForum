@@ -14,7 +14,10 @@ import {
 import {onMounted, ref} from "vue";
 import {getArticlesPageApi} from "@/service/request";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
+import {useRoute, useRouter} from 'vue-router';
 
+const router = useRouter();
+const route = useRoute();
 const listData = ref([])
 const listContainerRef = ref(null)
 const currentPage = ref(1)
@@ -50,11 +53,16 @@ function getArticlesAction(page = 1) {
 
 function handlePageChange(page) {
   currentPage.value = page
+  router.push({
+    query: { ...route.query, page: page }
+  })
   getArticlesAction(page)
 }
 
 onMounted(() => {
-  getArticlesAction(1)
+  const pageFromUrl = parseInt(route.query.page) || 1;
+  currentPage.value = pageFromUrl;
+  getArticlesAction(pageFromUrl)
 })
 
 const text = ref('金色传说') // 需要进行高亮的文本
@@ -77,7 +85,16 @@ const isTablet = useIsTablet()
       <!-- 文章列表 -->
       <n-list>
         <n-list-item v-for="item in listData">
-          <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
+          <router-link 
+            :to="{
+              path:'articlesPage',
+              query: {
+                title: item.title,
+                id: item.id,
+                page: currentPage
+              }
+            }"
+          >
             <n-thing>
               <template #description>
                 <div class="article-item">
