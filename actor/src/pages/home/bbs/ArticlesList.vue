@@ -4,6 +4,7 @@ import {
   NButton,
   NCard,
   NFlex,
+  NIcon,
   NLayout,
   NLayoutContent,
   NLayoutSider,
@@ -34,6 +35,8 @@ function getArticlesAction() {
         body: item.content,
         username: item.username,
         avatarUrl: item.avatarUrl,
+        viewCount: item.viewCount,
+        commentCount: item.commentCount
       }
     })
     listData.value.push(...newList)
@@ -73,33 +76,57 @@ const isTablet = useIsTablet()
               <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
                 <n-thing>
                   <template #description>
-                    <n-flex justify="space-between">
-                      <n-flex align="center">
-                        <n-avatar
-                            round
-                            size="small"
-                            :src="item.avatarUrl || '/api/assets/default-avatar.png'"
-                        />
-                        <!--                        [{{ item.username }}]-->
-                        <n-tag :bordered="false" type="success" size="small">
-                          {{ item.category }}
-                        </n-tag>
+                    <n-flex vertical>
+                      <n-flex justify="space-between">
+                        <n-flex align="center">
+                          <n-avatar
+                              round
+                              size="small"
+                              :src="item.avatarUrl || '/api/assets/default-avatar.png'"
+                          />
+                          <n-tag :bordered="false" type="success" size="small">
+                            {{ item.category }}
+                          </n-tag>
 
-                        <span v-if="item.type === 'xxx'" class="blinking-div">
-                        {{ item.title }}
+                          <span v-if="item.type === 'xxx'" class="blinking-div">
+                            {{ item.title }}
+                          </span>
+                          <span v-else>
+                            {{ item.title }}
+                          </span>
+                          <n-tag v-for="itemTag in item.tag" :bordered="false"
+                                 size="small"
+                                 v-text="itemTag" round>
+                          </n-tag>
+                        </n-flex>
+
+                        <span>
+                          {{ item.lastUpdateTime }}
                         </span>
-                        <span v-else>
-                        {{ item.title }}
-                        </span>
-                        <n-tag v-for="itemTag in item.tag" :bordered="false"
-                               size="small"
-                               v-text="itemTag" round>
-                        </n-tag>
                       </n-flex>
 
-                      <span>
-                        {{ item.lastUpdateTime }}
-                      </span>
+                      <n-flex justify="flex-end" style="margin-top: 8px;">
+                        <n-flex>
+                          <n-flex align="center">
+                            <n-icon size="16">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                      d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3z"/>
+                              </svg>
+                            </n-icon>
+                            <span style="margin-left: 4px;">{{ item.viewCount || 0 }}</span>
+                          </n-flex>
+                          <n-flex align="center">
+                            <n-icon size="16">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                      d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                              </svg>
+                            </n-icon>
+                            <span style="margin-left: 4px;">{{ item.commentCount || 0 }}</span>
+                          </n-flex>
+                        </n-flex>
+                      </n-flex>
                     </n-flex>
                   </template>
                 </n-thing>
@@ -114,7 +141,6 @@ const isTablet = useIsTablet()
             </n-list-item>
           </n-list>
         </n-flex>
-
       </n-layout-content>
       <n-layout-sider
           :width="360"
