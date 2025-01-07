@@ -42,7 +42,7 @@ function getArticlesAction(page = 1) {
     total.value = r.result.total || 0
 
     listContainerRef.value?.scrollIntoView({
-      behavior: 'smooth',
+      behavior: 'instant',
       block: 'start'
     })
   })
