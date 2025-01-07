@@ -159,7 +159,7 @@ const handleFreeze = async (row: ArticleItem) => {
 
 const handleView = (row: ArticleItem) => {
   router.push({
-    path: '/home/bbs/articlesPage',
+    path: '/home/bbs/articlesDetail',
     query: {
       id: row.id,
       title: row.title

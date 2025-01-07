@@ -44,7 +44,7 @@ onMounted(() => {
         <n-space vertical>
           <router-link
               :to="{
-              path:'/home/bbs/articlesPage',
+              path:'/home/bbs/articlesDetail',
               query: {
                 title: article.title,
                 id: article.id

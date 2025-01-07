@@ -20,8 +20,8 @@ let optLog = () => import("@/pages/manager/OptLog.vue")
 let about = () => import("@/pages/home/AboutPage.vue")
 let index = () => import("@/pages/home/IndexPage.vue")
 let bbs = () => import("@/pages/home/BBSIndex.vue")
-let bbsPage = () => import("@/pages/home/bbs/ArticlesList.vue")
-let articlesPage = () => import("@/pages/home/bbs/ArticlesDetail.vue")
+let articlesList = () => import("@/pages/home/bbs/ArticlesList.vue")
+let articlesDetail = () => import("@/pages/home/bbs/ArticlesDetail.vue")
 let articlesEdit = () => import("@/pages/home/bbs/ArticlesEdit.vue")
 let userCenter = () => import("@/pages/home/UserCenter.vue")
 let userInfo = () => import("@/pages/home/user/UserInfo.vue")
@@ -65,9 +65,9 @@ export let routes = [
             {name: 'index', path: 'index', component: index},
             {
                 path: 'bbs', component: bbs, children: [
-                    {name: '', path: '', redirect: '/home/bbs/bbs'},
-                    {name: 'bbs', path: 'bbs', component: bbsPage},
-                    {name: 'articlesPage', path: 'articlesPage', component: articlesPage},
+                    {name: '', path: '', redirect: '/home/bbs/articlesList'},
+                    {name: 'articlesList', path: 'articlesList', component: articlesList},
+                    {name: 'articlesDetail', path: 'articlesDetail', component: articlesDetail},
                     {name: 'articlesEdit', path: 'articlesEdit', component: articlesEdit},
                 ]
             },

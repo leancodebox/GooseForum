@@ -85,9 +85,9 @@ const isTablet = useIsTablet()
       <!-- 文章列表 -->
       <n-list>
         <n-list-item v-for="item in listData">
-          <router-link 
+          <router-link
             :to="{
-              path:'articlesPage',
+              path:'articlesDetail',
               query: {
                 title: item.title,
                 id: item.id,

@@ -56,15 +56,15 @@ async function loginAction() {
       return
     }
     let res = await login(
-      loginInfo.value.email, 
-      loginInfo.value.password, 
-      loginInfo.value.captchaId, 
+      loginInfo.value.email,
+      loginInfo.value.password,
+      loginInfo.value.captchaId,
       loginInfo.value.captchaCode
     )
     userStore.login(res.result)
     message.success('登录成功')
-    
-    const redirect = route.query.redirect || '/home/bbs/bbs'
+
+    const redirect = route.query.redirect || '/home/bbs/articlesList'
     router.push(redirect)
   } catch (error) {
     console.error('Login failed:', error)
@@ -83,16 +83,16 @@ async function regAction() {
       return
     }
     let res = await reg(
-      regInfo.value.email, 
-      regInfo.value.username, 
+      regInfo.value.email,
+      regInfo.value.username,
       regInfo.value.password,
       regInfo.value.captchaId,
       regInfo.value.captchaCode
     )
     userStore.login(res.result)
     message.success('注册成功')
-    
-    const redirect = route.query.redirect || '/home/bbs/bbs'
+
+    const redirect = route.query.redirect || '/home/bbs/articlesList'
     router.push(redirect)
   } catch (error) {
     console.error('Registration failed:', error)

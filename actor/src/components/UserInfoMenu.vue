@@ -31,8 +31,8 @@ const handleSelect = function (key) {
 const handleLogout = () => {
   userStore.clearUserInfo()
   message.success('已退出登录')
-  
-  router.push('/home/bbs/bbs')
+
+  router.push('/home/bbs/articlesList')
 }
 
 const handleLoginOrRegister = () => {

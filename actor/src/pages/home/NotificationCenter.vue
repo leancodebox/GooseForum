@@ -162,7 +162,7 @@ function getActionText(eventType) {
 // 跳转到文章
 function goToArticle(articleId) {
   router.push({
-    name: 'articlesPage',
+    name: 'articlesDetail',
     query: {id: articleId}
   })
 }

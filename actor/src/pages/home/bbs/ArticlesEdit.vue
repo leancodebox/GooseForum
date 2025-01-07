@@ -105,7 +105,7 @@ async function publish(status = 1) {
     if (res.code === 0 && res.result > 0) {
       message.success('保存成功')
       await router.push({
-        path:'/home/bbs/articlesPage',
+        path:'/home/bbs/articlesDetail',
         query: {
           id: res.result
         }
