@@ -237,7 +237,7 @@ export function uploadAvatar(file) {
     } else {
         formData.append('avatar', file);
     }
-    
+
     return instanceAxios.post("/upload-avatar", formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
@@ -273,6 +273,14 @@ export function deleteNotification(params) {
 // 获取通知类型
 export function getNotificationTypes() {
   return instanceAxios.get('/bbs/notification/types')
+}
+
+// 文章管理相关接口
+export const editArticle = (id, processStatus) => {
+  return instanceAxios.post('/admin/article-edit', {
+    id,
+    processStatus
+  })
 }
 
 export {

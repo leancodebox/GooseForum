@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import {DataTableColumns, NButton, NDataTable, NTag, useMessage, NCard, NSpace, NGrid, NGridItem} from 'naive-ui'
 import {h, onMounted, reactive, ref} from 'vue'
-import {getAdminArticlesList} from '@/service/request'
+import {getAdminArticlesList, editArticle} from '@/service/request'
+import { useRouter } from 'vue-router'
 
 const message = useMessage()
+const router = useRouter()
 type ArticleItem = {
   id: string
   title: string
@@ -49,11 +51,7 @@ const renderProcessStatus = (status: number) => {
 }
 
 // PC端表格列配置
-const createColumns = ({
-  play
-}: {
-  play: (row: ArticleItem) => void
-}): DataTableColumns<ArticleItem> => {
+const createColumns = (): DataTableColumns<ArticleItem> => {
   return [
     {
       title: 'Title',
@@ -88,18 +86,18 @@ const createColumns = ({
             h(
                 NButton,
                 {
-                  type: 'warning',
+                  type: row.processStatus === 0 ? 'warning' : 'success',
                   size: 'small',
-                  onClick: () => play(row)
+                  onClick: () => handleFreeze(row)
                 },
-                {default: () => '冻结'}
+                { default: () => row.processStatus === 0 ? '冻结' : '解冻' }
             ),
             h(
                 NButton,
                 {
                   type: 'primary',
                   size: 'small',
-                  onClick: () => play(row)
+                  onClick: () => handleView(row)
                 },
                 {default: () => '查看'}
             )
@@ -110,11 +108,7 @@ const createColumns = ({
   ]
 }
 
-const columns = createColumns({
-  play(row: ArticleItem) {
-    message.info(`操作文章: ${row.title}`)
-  }
-})
+const columns = createColumns()
 
 const paginationReactive = reactive({
   page: 1,
@@ -144,12 +138,32 @@ async function searchPage(page: number) {
 }
 
 // 操作按钮
-const handleFreeze = (row: ArticleItem) => {
-  message.info(`冻结文章: ${row.title}`)
+const handleFreeze = async (row: ArticleItem) => {
+  try {
+    // 切换状态：0->1 或 1->0
+    const newStatus = row.processStatus === 0 ? 1 : 0
+    await editArticle(row.id, newStatus)
+    
+    // 更新本地数据状态
+    row.processStatus = newStatus
+    message.success(`${newStatus === 1 ? '冻结' : '解冻'}成功`)
+    
+    // 刷新列表
+    await searchPage(paginationReactive.page)
+  } catch (err) {
+    message.error('操作失败')
+    console.error(err)
+  }
 }
 
 const handleView = (row: ArticleItem) => {
-  message.info(`查看文章: ${row.title}`)
+  router.push({
+    path: '/home/bbs/articlesPage',
+    query: {
+      id: row.id,
+      title: row.title
+    }
+  })
 }
 </script>
 
@@ -194,8 +208,12 @@ const handleView = (row: ArticleItem) => {
           </n-space>
           <div class="article-time">创建于: {{ item.createdAt }}</div>
           <n-space justify="end">
-            <n-button size="small" type="warning" @click="handleFreeze(item)">
-              冻结
+            <n-button 
+                size="small" 
+                :type="item.processStatus === 0 ? 'warning' : 'success'"
+                @click="handleFreeze(item)"
+            >
+              {{ item.processStatus === 0 ? '冻结' : '解冻' }}
             </n-button>
             <n-button size="small" type="primary" @click="handleView(item)">
               查看

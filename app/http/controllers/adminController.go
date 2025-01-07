@@ -185,11 +185,33 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 }
 
 type EditArticleReq struct {
+	Id            uint64 `json:"id" validate:"required"`
+	ProcessStatus int8   `json:"processStatus" validate:"oneof=0 1"` // 0正常 1封禁
 }
 
-// EditArticle 冻结操作
+// EditArticle 文章状态管理
 func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response {
-	return component.SuccessResponse("")
+	article := articles.Get(req.Params.Id)
+	if article.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+
+	// 更新文章状态
+	article.ProcessStatus = req.Params.ProcessStatus
+	err := articles.Save(&article)
+	if err != nil {
+		return component.FailResponse("操作失败")
+	}
+
+	// 记录操作日志
+	status := "解除封禁"
+	if req.Params.ProcessStatus == 1 {
+		status = "封禁"
+	}
+	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
+		fmt.Sprintf("文章%s操作:[%s]", status, article.Title))
+
+	return component.SuccessResponse("操作成功")
 }
 
 type PermissionListReq struct {

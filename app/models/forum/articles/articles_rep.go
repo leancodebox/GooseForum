@@ -11,9 +11,9 @@ func Create(entity *Entity) int64 {
 	return result.RowsAffected
 }
 
-func Save(entity *Entity) int64 {
+func Save(entity *Entity) error {
 	result := builder().Save(entity)
-	return result.RowsAffected
+	return result.Error
 }
 
 func SaveAll(entities *[]Entity) int64 {

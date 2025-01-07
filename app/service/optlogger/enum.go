@@ -8,6 +8,8 @@ func (receiver OptEnum) TargetTypeEnum() TargetTypeEnum {
 	switch receiver {
 	case EditUser:
 		return User
+	case EditArticle:
+		return User
 	}
 	return System
 }
@@ -16,6 +18,8 @@ func (receiver OptEnum) Name() string {
 	switch receiver {
 	case EditUser:
 		return "操作用户"
+	case EditArticle:
+		return "编辑文章"
 	}
 	return ""
 }
@@ -26,6 +30,7 @@ func (receiver OptEnum) toInt() int {
 
 const (
 	EditUser OptEnum = iota
+	EditArticle
 )
 
 type TargetTypeEnum int
@@ -45,6 +50,7 @@ func (receiver TargetTypeEnum) toInt() int {
 }
 
 const (
-	System TargetTypeEnum = iota
-	User                  = iota
+	System  TargetTypeEnum = iota
+	User                   = iota
+	Article                = iota
 )
