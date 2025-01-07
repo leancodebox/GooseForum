@@ -65,7 +65,7 @@ const isTablet = useIsTablet()
 </script>
 
 <template>
-  <div class="articles-container"ref="listContainerRef">
+  <div class="articles-container" ref="listContainerRef">
     <div class="main-content">
       <!-- 标签区域 -->
       <div class="tags-section" >
@@ -149,19 +149,22 @@ const isTablet = useIsTablet()
 
     <!-- 侧边栏 -->
     <div class="sidebar" v-show="!isTablet && !isMobile">
-      <n-card title="统计信息" class="sidebar-card">
-        <p>帖子数量:0</p>
-        <p>内容数量:0</p>
-        <p>回复数量:0</p>
-      </n-card>
-      <n-card title="社区推荐" class="sidebar-card">
-        <div class="community-links">
-          <a href="https://learnku.com/" style="text-decoration: none;">LearnKu</a>
-          <a href="https://ruby-china.org" style="text-decoration: none;">
-            <b style="color: #EB5424 !important;">Ruby</b> China
-          </a>
-        </div>
-      </n-card>
+      <div class="sidebar-content">
+        <n-card title="统计信息">
+          <p>帖子数量:0</p>
+          <p>内容数量:0</p>
+          <p>回复数量:0</p>
+        </n-card>
+        <n-card title="社区推荐" style="margin-top: 24px;">
+          <div class="community-links">
+            <a href="https://learnku.com/" style="text-decoration: none;">LearnKu</a>
+            <a href="https://learnku.com/" style="text-decoration: none;">LearnKu</a>
+            <a href="https://ruby-china.org" style="text-decoration: none;">
+              <b style="color: #EB5424 !important;">Ruby</b> China
+            </a>
+          </div>
+        </n-card>
+      </div>
     </div>
   </div>
 </template>
@@ -178,41 +181,42 @@ const isTablet = useIsTablet()
 
 .main-content {
   flex: 1;
-  min-width: 0; /* 防止flex子项溢出 */
-  display: flex;
-  flex-direction: column;
-}
-
-/* 让列表部分占据剩余空间 */
-.main-content :deep(.n-list) {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 让最后一个列表项（分页）保持在底部 */
-.main-content :deep(.n-list-item:last-child) {
-  margin-top: auto;
+  min-width: 0;
 }
 
 .sidebar {
   width: 360px;
   flex-shrink: 0;
+  margin-bottom: 100px;
+}
+
+/* 修改固定效果 */
+.sidebar-content {
+  position: sticky;
+  top: 80px; /* header 高度 + padding */
+}
+
+.community-links {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  align-items: center;
+  gap: 8px;
 }
 
-/* 第一个卡片的固定效果 */
-.sidebar-card:first-child {
-  position: sticky;
-  top: 80px;
-}
+/* 响应式布局 */
+@media (max-width: 800px) {
+  .articles-container {
+    flex-direction: column;
+  }
 
-/* 第二个卡片的固定效果 */
-.sidebar-card:last-child {
-  position: sticky;
-  top: 300px;
+  .sidebar {
+    width: 100%;
+  }
+
+  .sidebar-content {
+    position: static;
+    max-height: none;
+  }
 }
 
 .tags-section {
@@ -226,13 +230,6 @@ const isTablet = useIsTablet()
   justify-content: center;
   width: 100%;
   padding: 16px 0;
-}
-
-.community-links {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
 }
 
 /* 动画相关样式保持不变 */
@@ -258,17 +255,5 @@ const isTablet = useIsTablet()
 
 .blinking-div {
   animation: yellowToRed 0.5s infinite;
-}
-
-/* 响应式布局 */
-@media (max-width: 800px) {
-  .articles-container {
-    flex-direction: column;
-    min-height: 100%;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
 }
 </style>
