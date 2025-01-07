@@ -7,9 +7,6 @@ import {
   NDivider,
   NFlex,
   NInput,
-  NLayout,
-  NLayoutContent,
-  NLayoutSider,
   NList,
   NListItem,
   NStatistic,
@@ -136,97 +133,127 @@ const isAuthor = computed(() => {
 })
 </script>
 <template>
-  <div class="container" ref="containerRef">
-    <n-layout has-sider sider-placement="right">
-      <n-layout-content content-style="padding: 24px;">
-        <n-flex vertical>
-          <n-card style="margin:0 auto">
-            <n-flex justify="space-between" align="center" style="margin-bottom: 16px">
-              <h2 style="margin: 0">{{ articleInfo.title }}</h2>
-              <n-button v-if="isAuthor"
-                        secondary
-                        size="small"
-                        @click="handleEdit">
-                编辑文章
-              </n-button>
-            </n-flex>
-            <n-flex size="small" style="margin-bottom: 16px">
-              <n-tag v-for="itemTag in articleInfo.tag" :bordered="false" type="info" size="small"
-                     v-text="itemTag">
-              </n-tag>
-            </n-flex>
-            <articles-md-page :markdown="articleInfo.body"></articles-md-page>
-          </n-card>
+  <div class="articles-detail-container">
+    <!-- 主内容区域 -->
+    <div class="main-content">
+      <n-flex vertical>
+        <!-- 文章卡片 -->
+        <n-card style="margin-bottom: 24px">
+          <n-flex justify="space-between" align="center" style="margin-bottom: 16px">
+            <h2 style="margin: 0">{{ articleInfo.title }}</h2>
+            <n-button v-if="isAuthor"
+                      secondary
+                      size="small"
+                      @click="handleEdit">
+              编辑文章
+            </n-button>
+          </n-flex>
+          <n-flex size="small" style="margin-bottom: 16px">
+            <n-tag v-for="itemTag in articleInfo.tag" 
+                   :bordered="false" 
+                   type="info" 
+                   size="small"
+                   v-text="itemTag">
+            </n-tag>
+          </n-flex>
+          <articles-md-page :markdown="articleInfo.body"></articles-md-page>
+        </n-card>
 
-          <n-card style="margin:0 auto" title="激情评论">
-            <n-list v-if="commentList && commentList.length > 0" :bordered="false" class="comment-list">
-              <n-list-item v-for="item in commentList"
-                           :key="item.id"
-                           class="comment-item">
-                <n-thing :title="item.username"
-                         class="comment-content">
-                  <template #header-extra>
-                    <n-flex>
-                      <n-button text size="tiny" @click="handleReply(item)">
-                        回复
-                      </n-button>
-                      <span class="comment-time">{{ item.createTime }}</span>
-                    </n-flex>
-                  </template>
-                  <template v-if="item.replyTo">
-                    <div class="reply-reference">
-                      <span class="reply-to">回复 @{{ item.replyTo }}</span>
-                    </div>
-                  </template>
-                  <articles-md-page :markdown="item.content"></articles-md-page>
-                </n-thing>
-              </n-list-item>
-            </n-list>
-            <span v-else>暂无评论</span>
-          </n-card>
-          <n-card>
-            <n-flex vertical>
-              <n-alert type="info" :bordered="false">
-                讨论应以学习和精进为目的。请勿发布不友善或者负能量的内容，与人为善，比聪明更重要！
-              </n-alert>
-              <div v-if="replyData.replyTo" class="reply-info">
-                <span>回复 @{{ replyData.replyTo }}</span>
-                <n-button text size="tiny" @click="cancelReply">取消回复</n-button>
-              </div>
-              <n-input v-model:value="replyData.content"
-                       type="textarea"
-                       :autosize="{minRows: 3,maxRows: 5 }"
-              ></n-input>
-              <n-flex justify="end" size="large">
-                <n-button @click="reply" :loading="lockReply">评论</n-button>
-              </n-flex>
-            </n-flex>
-          </n-card>
-        </n-flex>
+        <!-- 评论卡片 -->
+        <n-card style="margin-bottom: 24px" title="激情评论">
+          <n-list v-if="commentList && commentList.length > 0" :bordered="false" class="comment-list">
+            <n-list-item v-for="item in commentList"
+                         :key="item.id"
+                         class="comment-item">
+              <n-thing :title="item.username"
+                       class="comment-content">
+                <template #header-extra>
+                  <n-flex>
+                    <n-button text size="tiny" @click="handleReply(item)">
+                      回复
+                    </n-button>
+                    <span class="comment-time">{{ item.createTime }}</span>
+                  </n-flex>
+                </template>
+                <template v-if="item.replyTo">
+                  <div class="reply-reference">
+                    <span class="reply-to">回复 @{{ item.replyTo }}</span>
+                  </div>
+                </template>
+                <articles-md-page :markdown="item.content"></articles-md-page>
+              </n-thing>
+            </n-list-item>
+          </n-list>
+          <span v-else>暂无评论</span>
+        </n-card>
 
-      </n-layout-content>
-      <n-layout-sider
-          :width="360"
-          content-style="padding: 24px;"
-          bordered
-          v-show="!(isMobile||isTabletRef)"
-      >
-        <n-flex vertical>
-          <user-info-card v-if="articleInfo.userId" :user-id="articleInfo.userId"/>
-        </n-flex>
-      </n-layout-sider>
-    </n-layout>
+        <!-- 评论输入卡片 -->
+        <n-card>
+          <n-flex vertical>
+            <n-alert type="info" :bordered="false">
+              讨论应以学习和精进为目的。请勿发布不友善或者负能量的内容，与人为善，比聪明更重要！
+            </n-alert>
+            <div v-if="replyData.replyTo" class="reply-info">
+              <span>回复 @{{ replyData.replyTo }}</span>
+              <n-button text size="tiny" @click="cancelReply">取消回复</n-button>
+            </div>
+            <n-input v-model:value="replyData.content"
+                     type="textarea"
+                     :autosize="{minRows: 3,maxRows: 5 }"
+            ></n-input>
+            <n-flex justify="end" size="large">
+              <n-button @click="reply" :loading="lockReply">评论</n-button>
+            </n-flex>
+          </n-flex>
+        </n-card>
+      </n-flex>
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="sidebar" v-show="!(isMobile||isTabletRef)">
+      <user-info-card v-if="articleInfo.userId" 
+                      :user-id="articleInfo.userId"
+                      class="sidebar-card"/>
+    </div>
   </div>
 </template>
-<style>
 
-.container {
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-}
-</style>
 <style scoped>
+.articles-detail-container {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0; /* 防止flex子项溢出 */
+}
+
+.sidebar {
+  width: 360px;
+  flex-shrink: 0;
+}
+
+.sidebar-card {
+  position: sticky;
+  top: 80px; /* header height + some padding */
+}
+
+/* 响应式布局 */
+@media (max-width: 800px) {
+  .articles-detail-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+}
+
 .comment-list :deep(.n-list-item) {
   padding: 8px 0;
   border-bottom: 1px solid #eee;
