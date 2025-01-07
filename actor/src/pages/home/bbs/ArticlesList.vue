@@ -154,7 +154,7 @@ const isTablet = useIsTablet()
     </div>
 
     <!-- 侧边栏 -->
-    <div class="sidebar" v-show="!isTablet && !isMobile">
+    <div class="sidebar">
       <div class="sidebar-content">
         <n-card title="统计信息">
           <p>帖子数量:0</p>
@@ -196,17 +196,9 @@ const isTablet = useIsTablet()
   margin-bottom: 100px;
 }
 
-/* 修改固定效果 */
 .sidebar-content {
   position: sticky;
-  top: 80px; /* header 高度 + padding */
-}
-
-.community-links {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  top: 80px;
 }
 
 /* 响应式布局 */
@@ -217,12 +209,32 @@ const isTablet = useIsTablet()
 
   .sidebar {
     width: 100%;
+    margin-bottom: 0;
   }
 
   .sidebar-content {
     position: static;
-    max-height: none;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
   }
+
+  .sidebar-content :deep(.n-card) {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  /* 移除第二个卡片的顶部边距 */
+  .sidebar-content :deep(.n-card + .n-card) {
+    margin-top: 0 !important;
+  }
+}
+
+.community-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .tags-section {
