@@ -69,6 +69,8 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 				Username:       username,
 				AvatarUrl:      avatarUrl,
+				ViewCount:      t.ViewCount,
+				CommentCount:   t.ReplyCount,
 			}
 		}),
 		pageData.Page,
