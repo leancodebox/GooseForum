@@ -80,6 +80,7 @@ const createColumns = (): DataTableColumns<ArticleItem> => {
     {
       title: 'Action',
       key: 'actions',
+      fixed: 'right',
       render(row: ArticleItem) {
         return h(NSpace, {}, {
           default: () => [
@@ -143,11 +144,11 @@ const handleFreeze = async (row: ArticleItem) => {
     // 切换状态：0->1 或 1->0
     const newStatus = row.processStatus === 0 ? 1 : 0
     await editArticle(row.id, newStatus)
-    
+
     // 更新本地数据状态
     row.processStatus = newStatus
     message.success(`${newStatus === 1 ? '冻结' : '解冻'}成功`)
-    
+
     // 刷新列表
     await searchPage(paginationReactive.page)
   } catch (err) {
@@ -171,6 +172,7 @@ const handleView = (row: ArticleItem) => {
   <!-- PC端显示表格 -->
   <div v-if="!isSmallScreen" class="pc-view">
     <n-data-table
+        :size="'small'"
         remote
         :columns="columns"
         :data="data"
@@ -208,8 +210,8 @@ const handleView = (row: ArticleItem) => {
           </n-space>
           <div class="article-time">创建于: {{ item.createdAt }}</div>
           <n-space justify="end">
-            <n-button 
-                size="small" 
+            <n-button
+                size="small"
                 :type="item.processStatus === 0 ? 'warning' : 'success'"
                 @click="handleFreeze(item)"
             >
