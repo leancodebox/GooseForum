@@ -6,6 +6,7 @@ import (
 	_ "net/http/pprof"
 )
 
+//go:generate npm run --prefix actor build --emptyOutDir
 func main() {
 	// 注册静态资源
 	console.Execute()
