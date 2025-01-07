@@ -198,14 +198,21 @@ const isTablet = useIsTablet()
 .sidebar {
   width: 360px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.sidebar-card {
-  margin-bottom: 16px;
+/* 第一个卡片的固定效果 */
+.sidebar-card:first-child {
+  position: sticky;
+  top: 80px;
 }
 
+/* 第二个卡片的固定效果 */
 .sidebar-card:last-child {
-  margin-bottom: 0;
+  position: sticky;
+  top: 300px;
 }
 
 .tags-section {
