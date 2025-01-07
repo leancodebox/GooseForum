@@ -208,10 +208,12 @@ onUnmounted(() => {
   </n-drawer>
 
   <!-- 其他内容保持不变 -->
-  <n-layout :style="{top: topHeight}"
-            :native-scrollbar="false"
-            :position="'absolute'"
-            content-style="min-height: calc(100vh - var(--header-height)); display: flex; flex-direction: column;"
+  <n-layout 
+    class="n-layout-container"
+    :style="{top: topHeight}"
+    :native-scrollbar="true"
+    :position="'absolute'"
+    content-style="min-height: calc(100vh - var(--header-height));"
   >
     <router-view></router-view>
     <n-layout-footer
@@ -290,5 +292,15 @@ onUnmounted(() => {
 /* 添加 badge 样式调整 */
 :deep(.n-badge) {
   margin-left: 4px;
+}
+
+.main-content {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+}
+
+.n-layout-container {
+  overflow: auto;
 }
 </style>

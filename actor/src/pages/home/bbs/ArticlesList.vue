@@ -5,9 +5,6 @@ import {
   NCard,
   NFlex,
   NIcon,
-  NLayout,
-  NLayoutContent,
-  NLayoutSider,
   NList,
   NListItem,
   NTag,
@@ -43,6 +40,11 @@ function getArticlesAction(page = 1) {
       }
     })
     total.value = r.result.total || 0
+    
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
   })
 }
 
@@ -61,122 +63,162 @@ const text = ref('金色传说') // 需要进行高亮的文本
 const isMobile = useIsMobile()
 const isTablet = useIsTablet()
 </script>
+
 <template>
-  <div class="container" ref="containerRef">
-    <n-layout has-sider sider-placement="right">
-      <n-layout-content content-style="padding: 24px;">
-        <n-flex vertical>
-          <n-flex>
-            <n-tag round>技术</n-tag>
-            <n-tag round>文章</n-tag>
-            <n-tag round>bn</n-tag>
-          </n-flex>
+  <div class="articles-container">
+    <div class="main-content">
+      <!-- 标签区域 -->
+      <div class="tags-section">
+        <n-tag round>技术</n-tag>
+        <n-tag round>文章</n-tag>
+        <n-tag round>bn</n-tag>
+      </div>
 
-          <n-list>
-            <n-list-item v-for="item in listData">
-              <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
-                <n-thing>
-                  <template #description>
-                    <n-flex justify="space-between" align="center" :style="{ gap: '8px' }">
-                      <n-flex align="center" :style="{ gap: '8px' }">
-                        <n-avatar
-                            round
-                            size="small"
-                            :src="item.avatarUrl || '/api/assets/default-avatar.png'"
-                        />
-                        <n-tag :bordered="false" type="success" size="small">
-                          {{ item.category }}
-                        </n-tag>
+      <!-- 文章列表 -->
+      <n-list>
+        <n-list-item v-for="item in listData">
+          <router-link :to="{path:'articlesPage',query:{title:item.title,id:item.id}}">
+            <n-thing>
+              <template #description>
+                <n-flex justify="space-between" align="center" :style="{ gap: '8px' }">
+                  <n-flex align="center" :style="{ gap: '8px' }">
+                    <n-avatar
+                        round
+                        size="small"
+                        :src="item.avatarUrl || '/api/assets/default-avatar.png'"
+                    />
+                    <n-tag :bordered="false" type="success" size="small">
+                      {{ item.category }}
+                    </n-tag>
 
-                        <span v-if="item.type === 'xxx'" class="blinking-div">
-                          {{ item.title }}
-                        </span>
-                        <span v-else>
-                          {{ item.title }}
-                        </span>
-                        <n-tag v-for="itemTag in item.tag" 
-                               :bordered="false"
-                               size="small"
-                               v-text="itemTag" 
-                               round
-                               :style="{ marginLeft: '4px' }">
-                        </n-tag>
-                      </n-flex>
+                    <span v-if="item.type === 'xxx'" class="blinking-div">
+                      {{ item.title }}
+                    </span>
+                    <span v-else>
+                      {{ item.title }}
+                    </span>
+                    <n-tag v-for="itemTag in item.tag" 
+                           :bordered="false"
+                           size="small"
+                           v-text="itemTag" 
+                           round
+                           :style="{ marginLeft: '4px' }">
+                    </n-tag>
+                  </n-flex>
 
-                      <n-flex :style="{ gap: '12px', color: '#666' }">
-                        <n-flex align="center" :style="{ gap: '4px' }">
-                          <n-icon size="14">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                              <path fill="currentColor"
-                                    d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3z"/>
-                            </svg>
-                          </n-icon>
-                          <span style="font-size: 0.9em;">{{ item.viewCount || 0 }}</span>
-                        </n-flex>
-                        <n-flex align="center" :style="{ gap: '4px' }">
-                          <n-icon size="14">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
-                              <path fill="currentColor"
-                                    d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
-                            </svg>
-                          </n-icon>
-                          <span style="font-size: 0.9em;">{{ item.commentCount || 0 }}</span>
-                        </n-flex>
-                        <span style="font-size: 0.9em;">{{ item.lastUpdateTime }}</span>
-                      </n-flex>
+                  <n-flex :style="{ gap: '12px', color: '#666' }">
+                    <n-flex align="center" :style="{ gap: '4px' }">
+                      <n-icon size="14">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                          <path fill="currentColor"
+                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3z"/>
+                        </svg>
+                      </n-icon>
+                      <span style="font-size: 0.9em;">{{ item.viewCount || 0 }}</span>
                     </n-flex>
-                  </template>
-                </n-thing>
-              </router-link>
-            </n-list-item>
-            <n-list-item>
-              <n-flex justify="center" style="width: 100%">
-                <n-pagination
-                    v-model:page="currentPage"
-                    v-model:page-size="pageSize"
-                    :page-count="Math.ceil(total / pageSize)"
-                    :on-update:page="handlePageChange"
-                    show-quick-jumper
-                />
-              </n-flex>
-            </n-list-item>
-          </n-list>
-        </n-flex>
-      </n-layout-content>
-      <n-layout-sider
-          :width="360"
-          content-style="padding: 24px;"
-          bordered
-          v-show="!isTablet && !isMobile"
-      >
-        <n-flex vertical>
-          <n-card title="统计信息">
-            <p>帖子数量:0</p>
-            <p>内容数量:0</p>
-            <p>回复数量:0</p>
-          </n-card>
-          <n-card title="社区推荐">
-            <n-flex vertical align="center">
-              <a href="https://learnku.com/" style="text-decoration: none;">LearnKu</a>
-              <a href="https://ruby-china.org" style="text-decoration: none;"><b
-                  style="color: #EB5424 !important;">Ruby</b> China</a>
-            </n-flex>
-          </n-card>
-        </n-flex>
-      </n-layout-sider>
-    </n-layout>
+                    <n-flex align="center" :style="{ gap: '4px' }">
+                      <n-icon size="14">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                          <path fill="currentColor"
+                                d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                        </svg>
+                      </n-icon>
+                      <span style="font-size: 0.9em;">{{ item.commentCount || 0 }}</span>
+                    </n-flex>
+                    <span style="font-size: 0.9em;">{{ item.lastUpdateTime }}</span>
+                  </n-flex>
+                </n-flex>
+              </template>
+            </n-thing>
+          </router-link>
+        </n-list-item>
+        
+        <!-- 分页 -->
+        <n-list-item>
+          <div class="pagination-wrapper">
+            <n-pagination
+                v-model:page="currentPage"
+                v-model:page-size="pageSize"
+                :page-count="Math.ceil(total / pageSize)"
+                :on-update:page="handlePageChange"
+                show-quick-jumper
+            />
+          </div>
+        </n-list-item>
+      </n-list>
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="sidebar" v-show="!isTablet && !isMobile">
+      <n-card title="统计信息" class="sidebar-card">
+        <p>帖子数量:0</p>
+        <p>内容数量:0</p>
+        <p>回复数量:0</p>
+      </n-card>
+      <n-card title="社区推荐" class="sidebar-card">
+        <div class="community-links">
+          <a href="https://learnku.com/" style="text-decoration: none;">LearnKu</a>
+          <a href="https://ruby-china.org" style="text-decoration: none;">
+            <b style="color: #EB5424 !important;">Ruby</b> China
+          </a>
+        </div>
+      </n-card>
+    </div>
   </div>
 </template>
+
 <style scoped>
+.articles-container {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  min-height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
 
+.main-content {
+  flex: 1;
+  min-width: 0; /* 防止flex子项溢出 */
+}
 
+.sidebar {
+  width: 360px;
+  flex-shrink: 0;
+}
+
+.sidebar-card {
+  margin-bottom: 16px;
+}
+
+.sidebar-card:last-child {
+  margin-bottom: 0;
+}
+
+.tags-section {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 0;
+}
+
+.community-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 动画相关样式保持不变 */
 @keyframes highlight {
-  from {
-    background-color: #fff;
-  }
-  to {
-    background-color: #ffff00;
-  }
+  from { background-color: #fff; }
+  to { background-color: #ffff00; }
 }
 
 @keyframes yellowToRed {
@@ -198,9 +240,14 @@ const isTablet = useIsTablet()
   animation: yellowToRed 0.5s infinite;
 }
 
-.container {
-  width: 100%;
-  height: 100%;
-  overflow: auto;
+/* 响应式布局 */
+@media (max-width: 800px) {
+  .articles-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
 }
 </style>
