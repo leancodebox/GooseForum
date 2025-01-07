@@ -16,7 +16,7 @@ import {getArticlesPageApi} from "@/service/request";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 
 const listData = ref([])
-const containerRef = ref(null)
+const listContainerRef = ref(null)
 const currentPage = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
@@ -41,9 +41,9 @@ function getArticlesAction(page = 1) {
     })
     total.value = r.result.total || 0
     
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
+    listContainerRef.value?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
     })
   })
 }
@@ -68,7 +68,7 @@ const isTablet = useIsTablet()
   <div class="articles-container">
     <div class="main-content">
       <!-- 标签区域 -->
-      <div class="tags-section">
+      <div class="tags-section" ref="listContainerRef">
         <n-tag round>技术</n-tag>
         <n-tag round>文章</n-tag>
         <n-tag round>bn</n-tag>
