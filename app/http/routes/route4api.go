@@ -11,6 +11,12 @@ import (
 	"path"
 )
 
+func setup(ginApp *gin.Engine) {
+	setupGroup := ginApp.Group("api/setup")
+	setupGroup.GET("status", UpButterReq(controllers.GetSetupStatus))
+	setupGroup.POST("init", UpButterReq(controllers.InitialSetup))
+}
+
 func api(ginApp *gin.Engine) {
 	apiGroup := ginApp.Group("api")
 	apiGroup.GET("about", ginUpNP(controllers.About))

@@ -19,7 +19,13 @@ export default defineConfig({
 
     build: {
         chunkSizeWarningLimit: 750,
-        outDir: "../app/assert/frontend/dist"
+        outDir: "../app/assert/frontend/dist",
+        rollupOptions: {
+            input: {
+                main: path.resolve(__dirname, 'index.html'),
+                setup: path.resolve(__dirname, 'setup.html')
+            }
+        }
     },
 
     server: {

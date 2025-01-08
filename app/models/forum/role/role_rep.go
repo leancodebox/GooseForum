@@ -2,17 +2,17 @@ package role
 
 import "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 
-func create(entity *Entity) int64 {
+func create(entity *Entity) error {
 	result := builder().Create(entity)
-	return result.RowsAffected
+	return result.Error
 }
 
-func save(entity *Entity) int64 {
+func save(entity *Entity) error {
 	result := builder().Save(entity)
-	return result.RowsAffected
+	return result.Error
 }
 
-func SaveOrCreateById(entity *Entity) int64 {
+func SaveOrCreateById(entity *Entity) error {
 	if entity.Id == 0 {
 		return create(entity)
 	} else {

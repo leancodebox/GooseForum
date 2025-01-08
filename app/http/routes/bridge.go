@@ -19,6 +19,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	ginApp.Use(middleware.GinLogger)
 
 	// 接口
+	setup(ginApp)
 	api(ginApp)
 	auth(ginApp)
 	bbs(ginApp)
