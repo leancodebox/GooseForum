@@ -16,11 +16,12 @@ const (
 )
 
 type DatabaseConfig struct {
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	DBName   string `json:"dbName"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Type     string `json:"type"`     // mysql 或 sqlite
+	Host     string `json:"host"`     // mysql 专用
+	Port     string `json:"port"`     // mysql 专用
+	DBName   string `json:"dbName"`   // 数据库名/sqlite文件路径
+	Username string `json:"username"` // mysql 专用
+	Password string `json:"password"` // mysql 专用
 }
 
 type SiteConfig struct {

@@ -282,17 +282,6 @@ export const editArticle = (id, processStatus) => {
     processStatus
   })
 }
-
-// 获取初始化状态
-export function getSetupStatus() {
-  return instanceAxios.get('/api/setup/status')
-}
-
-// 提交初始化设置
-export function submitSetup(data) {
-  return instanceAxios.post('/api/setup/init', data)
-}
-
 export {
     instanceAxios,
     // ... 其他导出保持不变 ...
