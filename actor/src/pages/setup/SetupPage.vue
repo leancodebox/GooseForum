@@ -1,19 +1,8 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import {
-  NCard,
-  NButton,
-  NSpace,
-  NSteps,
-  NStep,
-  NForm,
-  NFormItem,
-  NInput,
-  NResult,
-  NSelect
-} from 'naive-ui'
-import { getSetupStatus, submitSetup } from '@/service/request4setup.js'
-import { enqueueMessage } from '@/service/messageManager'
+import {onMounted, ref} from 'vue'
+import {NButton, NCard, NForm, NFormItem, NInput, NResult, NSelect, NSpace, NStep, NSteps} from 'naive-ui'
+import {getSetupStatus, submitSetup} from '@/service/request4setup.js'
+import {enqueueMessage} from '@/service/messageManager'
 
 const isLoading = ref(false)
 const currentStep = ref(0)
@@ -21,49 +10,40 @@ const isInitialized = ref(false)
 
 const formData = ref({
   // 站点信息
-  siteName: '',
+  siteName: 'GooseForum',
   siteDesc: '',
   // 数据库配置
   dbType: 'mysql', // 默认数据库类型
   dbHost: 'localhost',
   dbPort: '3306',
-  dbName: '',
-  dbUser: '',
-  dbPassword: '',
-  sqlitePath: '', // SQLite 文件路径
+  dbName: 'goose_forum',
+  dbUser: 'root',
+  dbPassword: 'password',
+  sqlitePath: './storage/database/sqlite.db', // SQLite 文件路径
   // 管理员账号
-  adminUsername: '',
+  adminUsername: 'root',
   adminPassword: '',
   adminEmail: ''
 })
 
 const dbOptions = [
-  { label: 'MySQL', value: 'mysql' },
-  { label: 'SQLite', value: 'sqlite' }
+  {label: 'MySQL', value: 'mysql'},
+  {label: 'SQLite', value: 'sqlite'}
 ]
 
 const onDbTypeChange = (value) => {
   // 根据选择的数据库类型，重置相关字段
-  if (value === 'sqlite') {
-    formData.value.dbHost = ''
-    formData.value.dbPort = ''
-    formData.value.dbName = ''
-    formData.value.dbUser = ''
-    formData.value.dbPassword = ''
-  } else {
-    formData.value.sqlitePath = ''
-  }
 }
 
 const steps = [
-  { title: '欢迎', description: '开始设置您的网站' },
-  { title: '站点信息', description: '设置基本信息' },
-  { title: '数据库配置', description: '配置数据库连接' },
-  { title: '管理员账号', description: '创建管理员账号' }
+  {title: '欢迎', description: '开始设置您的网站'},
+  {title: '站点信息', description: '设置基本信息'},
+  {title: '数据库配置', description: '配置数据库连接'},
+  {title: '管理员账号', description: '创建管理员账号'}
 ]
 
 onMounted(async () => {
-  let resp  = await getSetupStatus()
+  let resp = await getSetupStatus()
 
   isInitialized.value = resp.result.isInit
   if (isInitialized.value) {
@@ -117,11 +97,11 @@ const getStepStatus = (index) => {
       <div class="steps-wrapper">
         <n-steps :current="currentStep">
           <n-step
-            v-for="(step, index) in steps"
-            :key="index"
-            :title="step.title"
-            :description="step.description"
-            :status="getStepStatus(index)"
+              v-for="(step, index) in steps"
+              :key="index"
+              :title="step.title"
+              :description="step.description"
+              :status="getStepStatus(index)"
           />
         </n-steps>
       </div>
@@ -130,9 +110,9 @@ const getStepStatus = (index) => {
         <!-- 欢迎页面 -->
         <div v-if="currentStep === 0" class="step-content">
           <n-result
-            status="success"
-            title="欢迎使用"
-            description="让我们开始配置您的网站"
+              status="success"
+              title="欢迎使用"
+              description="让我们开始配置您的网站"
           >
             <template #footer>
               <n-button type="primary" @click="nextStep">
@@ -150,9 +130,9 @@ const getStepStatus = (index) => {
             </n-form-item>
             <n-form-item label="站点描述">
               <n-input
-                v-model:value="formData.siteDesc"
-                type="textarea"
-                placeholder="请输入站点描述"
+                  v-model:value="formData.siteDesc"
+                  type="textarea"
+                  placeholder="请输入站点描述"
               />
             </n-form-item>
           </n-form>
@@ -163,10 +143,10 @@ const getStepStatus = (index) => {
           <n-form>
             <n-form-item label="数据库类型" required>
               <n-select
-                v-model:value="formData.dbType"
-                :options="dbOptions"
-                placeholder="选择数据库类型"
-                @change="onDbTypeChange"
+                  v-model:value="formData.dbType"
+                  :options="dbOptions"
+                  placeholder="选择数据库类型"
+                  @change="onDbTypeChange"
               />
             </n-form-item>
 
@@ -184,10 +164,10 @@ const getStepStatus = (index) => {
             </n-form-item>
             <n-form-item v-if="formData.dbType === 'mysql'" label="数据库密码" required>
               <n-input
-                v-model:value="formData.dbPassword"
-                type="password"
-                show-password-on="click"
-                placeholder="请输入数据库密码"
+                  v-model:value="formData.dbPassword"
+                  type="password"
+                  show-password-on="click"
+                  placeholder="请输入数据库密码"
               />
             </n-form-item>
 
@@ -205,9 +185,9 @@ const getStepStatus = (index) => {
             </n-form-item>
             <n-form-item label="管理员密码" required>
               <n-input
-                v-model:value="formData.adminPassword"
-                type="password"
-                show-password-on="click"
+                  v-model:value="formData.adminPassword"
+                  type="password"
+                  show-password-on="click"
               />
             </n-form-item>
             <n-form-item label="管理员邮箱" required>
@@ -220,25 +200,25 @@ const getStepStatus = (index) => {
         <div class="step-actions">
           <n-space justify="center">
             <n-button
-              v-if="currentStep > 0"
-              @click="prevStep"
-              :disabled="isLoading"
+                v-if="currentStep > 0"
+                @click="prevStep"
+                :disabled="isLoading"
             >
               上一步
             </n-button>
             <n-button
-              v-if="currentStep < steps.length - 1"
-              type="primary"
-              @click="nextStep"
-              :disabled="isLoading"
+                v-if="currentStep < steps.length - 1"
+                type="primary"
+                @click="nextStep"
+                :disabled="isLoading"
             >
               下一步
             </n-button>
             <n-button
-              v-if="currentStep === steps.length - 1"
-              type="primary"
-              @click="handleSubmit"
-              :loading="isLoading"
+                v-if="currentStep === steps.length - 1"
+                type="primary"
+                @click="handleSubmit"
+                :loading="isLoading"
             >
               完成设置
             </n-button>
@@ -249,9 +229,9 @@ const getStepStatus = (index) => {
       <!-- 已初始化提示 -->
       <div v-else class="initialized-notice">
         <n-result
-          status="info"
-          title="网站已初始化"
-          description="网站已经完成初始化设置，如需重新设置请联系管理员"
+            status="info"
+            title="网站已初始化"
+            description="网站已经完成初始化设置，如需重新设置请联系管理员"
         >
           <template #footer>
             <n-button type="primary" @click="() => window.location.href = '/'">

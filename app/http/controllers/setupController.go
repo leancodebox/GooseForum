@@ -19,6 +19,8 @@ type InitialSetupReq struct {
 	SiteName string `json:"siteName" validate:"required"`
 	SiteDesc string `json:"siteDesc"`
 	// 数据库配置
+	DBType     string `json:"dbType" validate:"required"`
+	SqlitePath string `json:"sqlitePath" validate:"required"`
 	DBHost     string `json:"dbHost" validate:"required"`
 	DBPort     string `json:"dbPort" validate:"required"`
 	DBName     string `json:"dbName" validate:"required"`
