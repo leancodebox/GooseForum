@@ -1,11 +1,7 @@
 import axios from "axios"
-import {createDiscreteApi,} from "naive-ui";
+import { enqueueMessage } from './messageManager'
 import router from '@/route/router'
 import { useUserStore } from '@/modules/user'
-
-const {message} = createDiscreteApi(
-    ["message"],
-);
 
 const instanceAxios = axios.create({
     baseURL: import.meta.env.VITE_DEV_API_HOST,
@@ -30,8 +26,8 @@ instanceAxios.interceptors.response.use(response => {
         case success:
             return res;
         case fail:
-            message.error(res.msg ? res.msg : "响应异常")
-            throw new Error(res.msg ? res.msg : "响应异常")
+            enqueueMessage(res.msg ? res.msg : "响应异常", 'error');
+            throw new Error(res.msg ? res.msg : "响应异常");
     }
     return response
 }, error => {
@@ -42,7 +38,7 @@ instanceAxios.interceptors.response.use(response => {
     }
 
     if (res.code === fail) {
-        message.error(res.msg ? res.msg : "响应异常")
+        enqueueMessage(res.msg ? res.msg : "响应异常", 'error');
         return Promise.reject(error)
     }
 

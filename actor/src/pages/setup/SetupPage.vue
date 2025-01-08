@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import {
-  useMessage,
   NCard,
   NButton,
   NSpace,
@@ -14,8 +13,8 @@ import {
   NSelect
 } from 'naive-ui'
 import { getSetupStatus, submitSetup } from '@/service/request4setup.js'
+import { enqueueMessage } from '@/service/messageManager'
 
-const message = useMessage()
 const isLoading = ref(false)
 const currentStep = ref(0)
 const isInitialized = ref(false)
@@ -68,7 +67,7 @@ onMounted(async () => {
 
   isInitialized.value = resp.result.isInit
   if (isInitialized.value) {
-    message.warning('网站已经完成初始化')
+    enqueueMessage('网站已经完成初始化', 'warning')
   }
 })
 
@@ -77,13 +76,13 @@ const handleSubmit = async () => {
     isLoading.value = true
     const response = await submitSetup(formData.value)
     if (response.code === 0) {
-      message.success('初始化成功')
+      enqueueMessage('初始化成功', 'success')
       window.location.href = '/'
     } else {
-      message.error(response.msg || '初始化失败')
+      enqueueMessage(response.msg || '初始化失败', 'error')
     }
   } catch (error) {
-    message.error('系统错误：' + error.message)
+    enqueueMessage('系统错误：' + error.message, 'error')
   } finally {
     isLoading.value = false
   }
