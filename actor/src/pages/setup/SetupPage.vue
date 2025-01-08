@@ -115,9 +115,7 @@ const getStepStatus = (index) => {
   <div class="setup-container">
     <n-card class="setup-card">
       <div class="steps-wrapper">
-        <n-steps
-          :current="currentStep"
-        >
+        <n-steps :current="currentStep">
           <n-step
             v-for="(step, index) in steps"
             :key="index"
