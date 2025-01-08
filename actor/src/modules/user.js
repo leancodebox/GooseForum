@@ -12,7 +12,8 @@ export const useUserStore = defineStore('user', () => {
     username: '',
     avatarUrl: '',
     email: '',
-    nickname: ''
+    nickname: '',
+    isAdmin: false
   })
 
   // 监听 token 变化并保存到 localStorage
@@ -30,7 +31,10 @@ export const useUserStore = defineStore('user', () => {
   }
 
   function setUserInfo(info) {
-    userInfo.value = info
+    userInfo.value = {
+      ...info,
+      isAdmin: !!info.isAdmin
+    }
     hasLoadedUserInfo.value = true
   }
 
@@ -41,7 +45,8 @@ export const useUserStore = defineStore('user', () => {
       username: '',
       avatarUrl: '',
       email: '',
-      nickname: ''
+      nickname: '',
+      isAdmin: false
     }
     hasLoadedUserInfo.value = false
   }

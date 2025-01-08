@@ -57,7 +57,6 @@ onMounted(() => {
   if (userStore?.userInfo?.isAdmin) {
     options.value.push({label: "管理后台", key: "manager"},)
   }
-  // options.value.push({label: "管理后台", key: "manager"},)
 })
 </script>
 
