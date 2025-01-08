@@ -2,7 +2,7 @@
 import {NButton, NCard, NForm, NFormItemRow, NFlex, NInput, NTabPane, NTabs, useMessage, NImage} from "naive-ui"
 import {ref, onMounted} from "vue"
 import {useUserStore} from "@/modules/user"
-import {login, reg, getCaptcha} from "@/service/request"
+import {login, reg, getCaptcha, getUserInfo} from "@/service/request"
 import router from "@/route/router"
 import {useRoute} from 'vue-router'
 
@@ -61,7 +61,14 @@ async function loginAction() {
       loginInfo.value.captchaId,
       loginInfo.value.captchaCode
     )
-    userStore.login(res.result)
+    
+    // 只保存 token
+    userStore.setToken(res.result.token)
+    
+    // 获取用户信息
+    const userInfoRes = await getUserInfo()
+    userStore.setUserInfo(userInfoRes.result)
+    
     message.success('登录成功')
 
     const redirect = route.query.redirect || '/home/bbs/articlesList'

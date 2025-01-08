@@ -1,63 +1,54 @@
-import {ref, watch, computed} from "vue"
-import {defineStore} from "pinia";
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { getUserInfo } from '@/service/request'
 
 export const useUserStore = defineStore('user', () => {
+  const token = ref('')
+  const userInfo = ref({
+    userId: '',
+    username: '',
+    avatarUrl: '',
+    email: '',
+    nickname: ''
+  })
 
-    const userInfo = ref({
-        username: '',
-        userId: 0,
-        avatarUrl: '',
-        isAdmin: false,
-    })
-    let userInfoData = window.localStorage.getItem('userInfo') || ""
+  function setToken(newToken) {
+    token.value = newToken
+  }
 
-    if (userInfoData !== "") {
-        let pData = JSON.parse(userInfoData)
-        if (pData) {
-            userInfo.value.username = pData.username || ""
-            userInfo.value.userId = pData.userId || ""
-            userInfo.value.avatarUrl = pData.avatarUrl || ""
-        }
+  function setUserInfo(info) {
+    userInfo.value = info
+  }
+
+  function clearUserInfo() {
+    token.value = ''
+    userInfo.value = {
+      userId: '',
+      username: '',
+      avatarUrl: '',
+      email: '',
+      nickname: ''
     }
-    const token = ref(window.localStorage.getItem('token') || "")
+  }
 
-    function saveUserInfo() {
-        window.localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
+  // 刷新用户信息
+  async function refreshUserInfo() {
+    if (token.value) {
+      try {
+        const res = await getUserInfo()
+        setUserInfo(res.result)
+      } catch (error) {
+        console.error('Failed to refresh user info:', error)
+      }
     }
+  }
 
-    function login(userData) {
-        console.log(userData)
-        userInfo.value.username = userData.username
-        userInfo.value.userId = userData.userId
-        userInfo.value.avatarUrl = userData.avatarUrl || ""
-        token.value = userData.token
-        saveUserInfo()
-    }
-
-    function clearUserInfo() {
-        userInfo.value = {
-            username: '',
-            userId: 0,
-            avatarUrl: ''
-        }
-        token.value = ''
-        sessionStorage.clear()
-        localStorage.clear()
-    }
-
-    watch(() => token.value, () => {
-        window.localStorage.setItem('token', token.value)
-    })
-
-    const isLogin = computed(() => {
-        return token.value !== '' && userInfo.value.userId !== 0
-    })
-
-    return {
-        userInfo,
-        token,
-        login,
-        clearUserInfo,
-        isLogin
-    }
+  return {
+    token,
+    userInfo,
+    setToken,
+    setUserInfo,
+    clearUserInfo,
+    refreshUserInfo
+  }
 })

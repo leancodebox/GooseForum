@@ -17,8 +17,24 @@ const authRoutes = [
     '/manager'
 ]
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
+    
+    // 如果有 token 但没有用户信息，获取用户信息
+    if (userStore.token && !userStore.userInfo.userId) {
+        try {
+            await userStore.refreshUserInfo()
+        } catch (error) {
+            console.error('Failed to fetch user info:', error)
+            // 如果获取用户信息失败，清除 token 并跳转到登录页
+            userStore.clearUserInfo()
+            next({
+                path: '/home/regOrLogin',
+                query: { redirect: to.fullPath }
+            })
+            return
+        }
+    }
     
     // 检查是否需要登录
     if (authRoutes.some(path => to.path.startsWith(path)) && !userStore.token) {

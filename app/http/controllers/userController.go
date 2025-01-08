@@ -2,12 +2,13 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"log/slog"
 	"os"
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 
 	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -80,6 +81,7 @@ type LoginReq struct {
 	CaptchaCode string `json:"captchaCode"`
 }
 
+// Login 登录只返回 token
 func Login(r LoginReq) component.Response {
 	if !VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
 		return component.FailResponse("验证失败")
@@ -95,17 +97,8 @@ func Login(r LoginReq) component.Response {
 		return component.FailResponse("验证失败")
 	}
 
-	// 处理头像URL
-	avatarUrl := ""
-	if userEntity.AvatarUrl != "" {
-		avatarUrl = "/api" + userEntity.AvatarUrl
-	}
-
 	return component.SuccessResponse(component.DataMap{
-		"username":  userEntity.Username,
-		"userId":    userEntity.Id,
-		"token":     token,
-		"avatarUrl": avatarUrl,
+		"token": token,
 	})
 }
 
@@ -120,18 +113,26 @@ func GetCaptcha() component.Response {
 type null struct {
 }
 
+// UserInfo 获取登录用户信息
 func UserInfo(req component.BetterRequest[null]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
 		return component.FailResponse("账号异常" + err.Error())
 	}
 
-	// 如果有头像，添加域名前缀
+	// 处理头像URL
+	avatarUrl := ""
 	if userEntity.AvatarUrl != "" {
-		userEntity.AvatarUrl = "/api" + userEntity.AvatarUrl
+		avatarUrl = "/api" + userEntity.AvatarUrl
 	}
 
-	return component.SuccessResponse(userEntity)
+	return component.SuccessResponse(component.DataMap{
+		"username":  userEntity.Username,
+		"userId":    userEntity.Id,
+		"avatarUrl": avatarUrl,
+		"email":     userEntity.Email,
+		"nickname":  userEntity.Nickname,
+	})
 }
 
 type EditUserInfoReq struct {
