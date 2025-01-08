@@ -32,5 +32,4 @@ import SetupPage from './pages/setup/SetupPage.vue'
 </template>
 
 <style>
-@import "app.css";
 </style>
