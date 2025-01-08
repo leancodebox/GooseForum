@@ -20,13 +20,13 @@ const authRoutes = [
 router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
     
-    // 如果有 token 但没有用户信息，获取用户信息
-    if (userStore.token && !userStore.userInfo.userId) {
+    // 如果有 token 且未加载过用户信息，获取用户信息
+    if (userStore.token && !userStore.hasLoadedUserInfo) {
         try {
             await userStore.refreshUserInfo()
         } catch (error) {
             console.error('Failed to fetch user info:', error)
-            // 如果获取用户信息失败，清除 token 并跳转到登录页
+            // 如果获取用户信息失败，清除用户信息并跳转到登录页
             userStore.clearUserInfo()
             next({
                 path: '/home/regOrLogin',
