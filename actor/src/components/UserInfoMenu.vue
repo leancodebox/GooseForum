@@ -3,16 +3,26 @@
 import {NAvatar, NButton, NDropdown, useMessage} from "naive-ui";
 import {useUserStore} from "@/modules/user";
 import router from "@/route/router"
-import {computed, onMounted, ref} from "vue";
+import {computed, ref} from "vue";
 
 const userStore = useUserStore()
 const message = useMessage()
 
-const options = ref([
+const baseOptions = [
   {label: "个人中心", key: "userInfo"},
   {label: "编辑资料", key: "userEdit"},
   {label: "退出登录", key: "logout"},
-])
+]
+
+const options = computed(() => {
+  if (userStore?.userInfo?.isAdmin) {
+    return [
+      {label: "管理后台", key: "manager"},
+      ...baseOptions
+    ]
+  }
+  return baseOptions
+})
 
 const handleSelect = function (key) {
   switch (key) {
@@ -51,12 +61,6 @@ const truncateUsername = computed(() => {
   return username.length > maxLength
       ? `${username.slice(0, maxLength)}...`
       : username;
-})
-
-onMounted(() => {
-  if (userStore?.userInfo?.isAdmin) {
-    options.value.push({label: "管理后台", key: "manager"},)
-  }
 })
 </script>
 
