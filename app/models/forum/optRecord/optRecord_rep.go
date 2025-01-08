@@ -1,6 +1,6 @@
 package optRecord
 
-import "github.com/leancodebox/goose/queryopt"
+import "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 
 func Create(entity *Entity) int64 {
 	result := builder().Create(entity)

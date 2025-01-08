@@ -3,8 +3,8 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/goose/preferences"
 	"os"
 	"path/filepath"
 	"strings"

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	_ "embed"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
-	"github.com/leancodebox/goose/preferences"
 	"log"
 	"strings"
 )

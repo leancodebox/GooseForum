@@ -1,7 +1,7 @@
 package reply
 
 import (
-	"github.com/leancodebox/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 )
 
 func Create(entity *Entity) error {

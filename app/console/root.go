@@ -2,9 +2,9 @@ package console
 
 import (
 	"github.com/leancodebox/GooseForum/app/assert"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/fileopt"
 	"github.com/leancodebox/GooseForum/app/console/cmd"
 	"github.com/leancodebox/GooseForum/app/migration"
-	"github.com/leancodebox/goose/fileopt"
 
 	"github.com/spf13/cobra"
 )

@@ -1,7 +1,7 @@
 package eventNotification
 
 import (
-	"github.com/leancodebox/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 	"time"
 )
 
@@ -13,16 +13,16 @@ func Create(entity *Entity) error {
 // GetByUserId 获取用户的通知列表
 func GetByUserId(userId uint64, limit, offset int, unreadOnly bool) (notifications []*Entity, total int64, err error) {
 	db := builder().Where(queryopt.Eq("user_id", userId))
-	
+
 	if unreadOnly {
 		db = db.Where(queryopt.Eq("is_read", false))
 	}
-	
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
-	
+
 	err = db.Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).

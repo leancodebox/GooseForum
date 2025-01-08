@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
@@ -13,7 +14,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
-	array "github.com/leancodebox/goose/collectionopt"
 )
 
 func GetArticlesCategory() component.Response {

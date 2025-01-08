@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	jwt "github.com/leancodebox/goose/jwtopt"
 	"net/http"
 	"strings"
 

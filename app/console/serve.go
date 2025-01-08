@@ -3,10 +3,10 @@ package console
 import (
 	"context"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/routes"
-	"github.com/leancodebox/goose/preferences"
 	"log"
 	"log/slog"
 	"net/http"

@@ -2,9 +2,9 @@ package sqlconnect
 
 import (
 	"github.com/glebarez/sqlite"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"github.com/leancodebox/goose/preferences"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log/slog"

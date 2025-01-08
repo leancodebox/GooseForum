@@ -2,7 +2,7 @@ package articleCategory
 
 import (
 	"fmt"
-	"github.com/leancodebox/goose/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 )
 
 func create(entity *Entity) int64 {
@@ -25,7 +25,7 @@ func SaveOrCreateById(entity *Entity) int64 {
 }
 
 func Get(id any) (entity Entity) {
-	if id == 0{
+	if id == 0 {
 		return entity
 	}
 	builder().First(&entity, id)

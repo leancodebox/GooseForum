@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"time"
 
+	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
-	jwt "github.com/leancodebox/goose/jwtopt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"

@@ -1,9 +1,9 @@
 package userRoleRs
 
 import (
+	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
-	array "github.com/leancodebox/goose/collectionopt"
-	"github.com/leancodebox/goose/queryopt"
 )
 
 func create(entity *Entity) int64 {

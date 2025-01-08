@@ -4,7 +4,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/sqlconnect"
 	"sync"
 
-	"github.com/leancodebox/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 
 	"gorm.io/gorm"
 )

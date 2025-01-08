@@ -1,8 +1,8 @@
 package articles
 
 import (
-	"github.com/leancodebox/goose/collectionopt"
-	"github.com/leancodebox/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 	"time"
 )
 
