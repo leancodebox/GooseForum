@@ -1,9 +1,11 @@
 package controllers
 
 import (
-	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
@@ -16,12 +18,30 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 )
 
+var (
+	siteStatsCache      component.Response
+	siteStatsCacheTime  time.Time
+	siteStatsCacheMutex sync.Mutex
+)
+
 func GetSiteStatistics() component.Response {
-	return component.SuccessResponse(map[string]any{
+	siteStatsCacheMutex.Lock()
+	defer siteStatsCacheMutex.Unlock()
+
+	if time.Since(siteStatsCacheTime) < 5*time.Second && siteStatsCache.Data != nil {
+		return siteStatsCache
+	}
+
+	result := component.SuccessResponse(map[string]any{
 		"userCount":    users.GetCount(),
 		"articleCount": articles.GetCount(),
 		"reply":        reply.GetCount(),
 	})
+
+	siteStatsCache = result
+	siteStatsCacheTime = time.Now()
+
+	return result
 }
 
 func GetArticlesCategory() component.Response {

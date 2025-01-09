@@ -1,11 +1,17 @@
 import axios from "axios"
-import {createDiscreteApi,} from "naive-ui";
 import router from '@/route/router'
-import { useUserStore } from '@/modules/user'
+import {useUserStore} from '@/modules/user'
+import {createDiscreteApi} from "naive-ui";
 
-const {message} = createDiscreteApi(
-    ["message"],
-);
+function getMessage() {
+    if (window.$message !== undefined) {
+        return window.$message
+    }
+    let {message} = createDiscreteApi(
+        ["message"],
+    );
+    return message
+}
 
 const instanceAxios = axios.create({
     baseURL: import.meta.env.VITE_DEV_API_HOST,
@@ -40,7 +46,7 @@ instanceAxios.interceptors.response.use(response => {
         case success:
             return res;
         case fail:
-            message.error(res.msg ? res.msg : "响应异常")
+            getMessage().error(res.msg ? res.msg : "响应异常")
             throw new Error(res.msg ? res.msg : "响应异常")
     }
     return response
@@ -50,7 +56,7 @@ instanceAxios.interceptors.response.use(response => {
 
     // 处理未授权的情况（token失效或未登录）
     if (error.response?.status === 401) {
-        message.error('登录已过期，请重新登录')
+        getMessage().error('登录已过期，请重新登录')
         userStore.clearUserInfo()
 
         // 保存当前路由，以便登录后返回
@@ -58,7 +64,7 @@ instanceAxios.interceptors.response.use(response => {
         if (currentPath !== '/home/regOrLogin') {
             router.push({
                 path: '/home/regOrLogin',
-                query: { redirect: currentPath }
+                query: {redirect: currentPath}
             })
         }
         return Promise.reject(error)
@@ -70,7 +76,7 @@ instanceAxios.interceptors.response.use(response => {
     }
 
     if (res.code === fail) {
-        message.error(res.msg ? res.msg : "响应异常")
+        getMessage().error(res.msg ? res.msg : "响应异常")
         return Promise.reject(error)
     }
 
@@ -128,7 +134,7 @@ export function getArticlesDetailApi(id, maxCommentId) {
 
 export function writeArticles(data) {
     return instanceAxios.post('bbs/write-articles', {
-        id:data.id,
+        id: data.id,
         content: data.content,
         title: data.title,
         type: data.type,
@@ -147,12 +153,13 @@ export function articlesReply(articleId, content, replyId) {
 export function getUserList() {
     return instanceAxios.post("admin/user-list")
 }
-export function editUser(userId,status,validate,roleId) {
-    return instanceAxios.post("admin/user-edit",{
-        userId:userId,
-        status:status,
-        validate:validate,
-        roleId:roleId,
+
+export function editUser(userId, status, validate, roleId) {
+    return instanceAxios.post("admin/user-edit", {
+        userId: userId,
+        status: status,
+        validate: validate,
+        roleId: roleId,
     })
 }
 
@@ -202,7 +209,7 @@ export function getUserArticles(page = 1, pageSize = 10) {
 
 export const getUserInfoShow = (userId) => {
     return instanceAxios.post('/get-user-info-show',
-         {
+        {
             userId
         })
 }
@@ -222,7 +229,7 @@ export const saveCategory = (data) => {
 }
 
 export const deleteCategory = (id) => {
-    return instanceAxios.post('/admin/category-delete', { id })
+    return instanceAxios.post('/admin/category-delete', {id})
 }
 
 export function getUserProfile() {
@@ -237,7 +244,7 @@ export function uploadAvatar(file) {
     const formData = new FormData();
     // 如果是 Blob 对象，需要创建 File 对象
     if (file instanceof Blob) {
-        formData.append('avatar', new File([file], 'avatar.png', { type: file.type }));
+        formData.append('avatar', new File([file], 'avatar.png', {type: file.type}));
     } else {
         formData.append('avatar', file);
     }
@@ -251,40 +258,40 @@ export function uploadAvatar(file) {
 
 // 获取通知列表
 export function getNotificationList(params) {
-  return instanceAxios.post('/bbs/notification/list', params)
+    return instanceAxios.post('/bbs/notification/list', params)
 }
 
 // 获取未读通知数量
 export function getUnreadCount() {
-  return instanceAxios.get('/bbs/notification/unread-count')
+    return instanceAxios.get('/bbs/notification/unread-count')
 }
 
 // 标记通知为已读
 export function markAsRead(params) {
-  return instanceAxios.post('/bbs/notification/mark-read', params)
+    return instanceAxios.post('/bbs/notification/mark-read', params)
 }
 
 // 标记所有通知为已读
 export function markAllAsRead() {
-  return instanceAxios.post('/bbs/notification/mark-all-read')
+    return instanceAxios.post('/bbs/notification/mark-all-read')
 }
 
 // 删除通知
 export function deleteNotification(params) {
-  return instanceAxios.post('/bbs/notification/delete', params)
+    return instanceAxios.post('/bbs/notification/delete', params)
 }
 
 // 获取通知类型
 export function getNotificationTypes() {
-  return instanceAxios.get('/bbs/notification/types')
+    return instanceAxios.get('/bbs/notification/types')
 }
 
 // 文章管理相关接口
 export const editArticle = (id, processStatus) => {
-  return instanceAxios.post('/admin/article-edit', {
-    id,
-    processStatus
-  })
+    return instanceAxios.post('/admin/article-edit', {
+        id,
+        processStatus
+    })
 }
 export {
     instanceAxios,

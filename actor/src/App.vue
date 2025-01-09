@@ -12,8 +12,11 @@ import {
 } from 'naive-ui'
 import {useThemeStore} from '@/modules/theme.js';
 import SuperMenu from "@/components/SuperMenu.vue";
+import MessageSetting from "@/pages/home/bbs/MessageSetting.vue";
 
 const themeStore = useThemeStore();
+
+
 </script>
 
 <template>
@@ -26,6 +29,7 @@ const themeStore = useThemeStore();
         <n-loading-bar-provider>
           <!-- 全局配置提供者，设置中文语言 -->
           <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme="themeStore.isDarkTheme ? darkTheme : null">
+            <MessageSetting/>
             <!-- 主布局容器 -->
             <n-layout position="absolute" content-style="width: 100%;height: 100%;">
               <router-view></router-view>

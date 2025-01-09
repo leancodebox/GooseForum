@@ -97,7 +97,6 @@ async function reply() {
       getArticlesDetail()
     }
   } catch (err) {
-    console.error(err)
     message.error('评论失败')
   } finally {
     cancelReply()
@@ -141,10 +140,10 @@ const isAuthor = computed(() => {
         <!-- 文章卡片 -->
         <n-card style="margin-bottom: 24px">
           <n-flex justify="space-between" align="center" style="margin-bottom: 16px">
-            <router-link 
-              :to="{ 
-                path: '/home/bbs/articlesList', 
-                query: { page: route.query.page || '1' } 
+            <router-link
+              :to="{
+                path: '/home/bbs/articlesList',
+                query: { page: route.query.page || '1' }
               }"
               style="margin-right: 16px"
             >
@@ -161,9 +160,9 @@ const isAuthor = computed(() => {
             </n-button>
           </n-flex>
           <n-flex size="small" style="margin-bottom: 16px">
-            <n-tag v-for="itemTag in articleInfo.tag" 
-                   :bordered="false" 
-                   type="info" 
+            <n-tag v-for="itemTag in articleInfo.tag"
+                   :bordered="false"
+                   type="info"
                    size="small"
                    v-text="itemTag">
             </n-tag>
@@ -223,7 +222,7 @@ const isAuthor = computed(() => {
 
     <!-- 侧边栏 -->
     <div class="sidebar" v-show="!(isMobile||isTabletRef)">
-      <user-info-card v-if="articleInfo.userId" 
+      <user-info-card v-if="articleInfo.userId"
                       :user-id="articleInfo.userId"
                       class="sidebar-card"/>
     </div>
