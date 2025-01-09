@@ -11,17 +11,17 @@ import {
   NLayoutFooter,
   NLayoutHeader,
   NMenu,
-  NSpace,
-  NText
+  NSpace
 } from 'naive-ui';
-import {MenuOutline, MoonOutline, SunnyOutline} from '@vicons/ionicons5'
+import {MenuOutline} from '@vicons/ionicons5'
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 import {h, onMounted, onUnmounted, ref, watch} from "vue";
 import {RouterLink, useRouter} from "vue-router";
 import UserInfoCard from "@/components/UserInfoMenu.vue";
 import {useUserStore} from '@/modules/user'
 import {useNotificationStore} from '@/modules/notification'
-import UpdateTheme from "@/components/UpdateTheme.vue"; // Import the theme store
+import UpdateTheme from "@/components/UpdateTheme.vue";
+import HeaderLogo from "@/components/HeaderLogo.vue"; // Import the theme store
 
 const router = useRouter()
 const showDrawer = ref(false)
@@ -113,12 +113,7 @@ onUnmounted(() => {
     <n-flex align="center" style="height: 100%; padding: 0 16px" justify="space-between">
       <!-- Logo和导航区域 -->
       <n-flex align="center" style="height: 100%">
-        <n-text tag="div" class="ui-logo" :depth="1">
-          <img alt="" src="/quote-left.png"/>
-          <span>GooseForum</span>
-        </n-text>
-
-
+        <header-logo></header-logo>
         <!-- 桌面端导航菜单 -->
         <div v-if="!isTablet && !isMobile" class="menu-container">
           <n-menu
@@ -234,21 +229,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.ui-logo {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  font-size: 18px;
-  margin-right: 24px;
-  height: 100%;
-  white-space: nowrap;
-}
-
-.ui-logo > img {
-  margin-right: 12px;
-  height: 32px;
-  width: 32px;
-}
 
 .menu-container {
   height: 100%;

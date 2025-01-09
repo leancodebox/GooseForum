@@ -12,13 +12,13 @@ import {
   NLayoutHeader,
   NLayoutSider,
   NMenu,
-  NSpace,
-  NText
+  NSpace
 } from 'naive-ui'
 import {managerRouter} from "@/route/routes";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 import UpdateTheme from "@/components/UpdateTheme.vue";
-import UserInfoMenu from "@/components/UserInfoMenu.vue"; // Import the theme store
+import UserInfoMenu from "@/components/UserInfoMenu.vue";
+import HeaderLogo from "@/components/HeaderLogo.vue"; // Import the theme store
 
 
 function renderIcon(icon) {
@@ -107,12 +107,7 @@ const showAdminDrawer = ref(false)
       <n-flex align="center" style="height: 100%; padding: 0 16px" justify="space-between">
         <!-- Logo and Navigation Area -->
         <n-flex align="center" style="height: 100%">
-          <n-text tag="div" class="ui-logo" :depth="1">
-            <img alt="" src="/quote-left.png"/>
-            <span>GooseForum</span>
-          </n-text>
-
-
+          <header-logo/>
           <!-- Desktop Navigation Menu -->
           <div v-if="!isTablet && !isMobile" class="menu-container">
             <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions2"/>
@@ -193,21 +188,6 @@ const showAdminDrawer = ref(false)
 </template>
 
 <style scoped>
-.ui-logo {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  font-size: 18px;
-  margin-right: 24px;
-  height: 100%;
-  white-space: nowrap;
-}
-
-.ui-logo > img {
-  margin-right: 12px;
-  height: 32px;
-  width: 32px;
-}
 
 .menu-container {
   height: 100%;
