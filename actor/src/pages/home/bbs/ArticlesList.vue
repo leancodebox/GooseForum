@@ -101,7 +101,7 @@ const isTablet = useIsTablet()
                   <div class="article-avatar">
                     <n-avatar
                         round
-                        :size="48"
+                        :size="42"
                         :src="item.avatarUrl || '/api/assets/default-avatar.png'"
                     />
                   </div>
