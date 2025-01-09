@@ -101,6 +101,10 @@ export function reg(email, username, password, captchaId, captchaCode) {
     })
 }
 
+export function gtSiteStatistics() {
+    return instanceAxios.get('bbs/get-site-statistics')
+}
+
 export function getArticleCategory() {
     return instanceAxios.get('bbs/get-articles-category')
 }

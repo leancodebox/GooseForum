@@ -1,18 +1,7 @@
 <script setup>
-import {
-  NAvatar,
-  NButton,
-  NCard,
-  NFlex,
-  NIcon,
-  NList,
-  NListItem,
-  NTag,
-  NThing,
-  NPagination
-} from 'naive-ui'
+import {NStatistic,NAvatar, NCard, NFlex, NIcon, NList, NListItem, NPagination, NTag, NThing} from 'naive-ui'
 import {onMounted, ref} from "vue";
-import {getArticlesPageApi} from "@/service/request";
+import {getArticlesPageApi, gtSiteStatistics} from "@/service/request";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 import {useRoute, useRouter} from 'vue-router';
 
@@ -23,6 +12,11 @@ const listContainerRef = ref(null)
 const currentPage = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
+const siteStatistic = ref({
+  articleCount: 0,
+  reply: 0,
+  userCount: 0,
+})
 
 function getArticlesAction(page = 1) {
   getArticlesPageApi(page, pageSize.value).then(r => {
@@ -54,15 +48,17 @@ function getArticlesAction(page = 1) {
 function handlePageChange(page) {
   currentPage.value = page
   router.push({
-    query: { ...route.query, page: page }
+    query: {...route.query, page: page}
   })
   getArticlesAction(page)
 }
 
-onMounted(() => {
+onMounted(async () => {
   const pageFromUrl = parseInt(route.query.page) || 1;
   currentPage.value = pageFromUrl;
   getArticlesAction(pageFromUrl)
+  let resp = await gtSiteStatistics()
+  siteStatistic.value = resp.result
 })
 
 const text = ref('金色传说') // 需要进行高亮的文本
@@ -76,7 +72,7 @@ const isTablet = useIsTablet()
   <div class="articles-container" ref="listContainerRef">
     <div class="main-content">
       <!-- 标签区域 -->
-      <div class="tags-section" >
+      <div class="tags-section">
         <n-tag round>技术</n-tag>
         <n-tag round>文章</n-tag>
         <n-tag round>bn</n-tag>
@@ -86,7 +82,7 @@ const isTablet = useIsTablet()
       <n-list>
         <n-list-item v-for="item in listData">
           <router-link
-            :to="{
+              :to="{
               path:'articlesDetail',
               query: {
                 title: item.title,
@@ -174,9 +170,9 @@ const isTablet = useIsTablet()
     <div class="sidebar">
       <div class="sidebar-content">
         <n-card title="统计信息">
-          <p>帖子数量:0</p>
-          <p>内容数量:0</p>
-          <p>回复数量:0</p>
+          <n-statistic label="帖子数量" :value="siteStatistic.articleCount"/>
+          <n-statistic label="回复数量" :value="siteStatistic.reply"/>
+          <n-statistic label="用户数量" :value="siteStatistic.userCount"/>
         </n-card>
         <n-card title="社区推荐" style="margin-top: 24px;">
           <div class="community-links">
@@ -269,8 +265,12 @@ const isTablet = useIsTablet()
 
 /* 动画相关样式保持不变 */
 @keyframes highlight {
-  from { background-color: #fff; }
-  to { background-color: #ffff00; }
+  from {
+    background-color: #fff;
+  }
+  to {
+    background-color: #ffff00;
+  }
 }
 
 @keyframes yellowToRed {

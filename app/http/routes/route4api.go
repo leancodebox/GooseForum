@@ -57,6 +57,7 @@ func auth(ginApp *gin.Engine) {
 func bbs(ginApp *gin.Engine) {
 	bbsShow := ginApp.Group("api/bbs")
 
+	bbsShow.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	// 分类列表
 	bbsShow.GET("get-articles-enum", ginUpNP(controllers.GetArticlesCategory))
 	bbsShow.GET("get-articles-category", ginUpNP(controllers.GetArticlesCategory))

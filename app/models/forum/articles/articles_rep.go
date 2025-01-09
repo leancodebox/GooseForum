@@ -31,6 +31,18 @@ func Get(id any) (entity Entity) {
 	return
 }
 
+func GetCount() int64 {
+	var count int64
+	builder().Count(&count)
+	return count
+}
+
+func GetMaxId() uint64 {
+	var entity Entity
+	builder().Order(queryopt.Desc(pid)).Limit(1).First(&entity)
+	return entity.Id
+}
+
 func GetByUserAndTitle(userId, title any) (entity Entity) {
 	builder().Where(queryopt.Eq(fieldTitle, title)).Where(queryopt.Eq(fieldUserId, userId)).First(&entity)
 	return

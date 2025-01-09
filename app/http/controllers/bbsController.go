@@ -16,6 +16,14 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 )
 
+func GetSiteStatistics() component.Response {
+	return component.SuccessResponse(map[string]any{
+		"userCount":    users.GetCount(),
+		"articleCount": articles.GetCount(),
+		"reply":        reply.GetCount(),
+	})
+}
+
 func GetArticlesCategory() component.Response {
 	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
 		return datastruct.Option[string, uint64]{
