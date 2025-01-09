@@ -6,6 +6,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	timeopt "github.com/leancodebox/GooseForum/app/bundles/timopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
@@ -69,6 +70,7 @@ func runHexoTool(_ *cobra.Command, _ []string) {
 			CreatedAt:     writeDate,
 		}
 		articles.Save(&art)
+		pointservice.RewardPoints(uint64(userId), 10, pointservice.RewardPoints4WriteArticles)
 	}
 	fmt.Println(len(blogs))
 }
