@@ -7,6 +7,9 @@
 <script setup>
 import MarkdownIt from 'markdown-it'
 import {computed} from "vue";
+import hljs from 'highlight.js';
+// import 'highlight.js/styles/github.css';
+import 'highlight.js/styles/intellij-light.min.css';
 
 const props = defineProps({
     markdown: {
@@ -17,15 +20,24 @@ const props = defineProps({
 
 const compiledMarkdown = computed(() => {
     const md = new MarkdownIt({
-        html:         true,        // Enable HTML tags in source
+        html:         true,
         xhtmlOut:     false,
-        breaks:       true,        // Convert '\n' in paragraphs into <br>
-        linkify:      false,       // 禁用自动转换URL为链接，避免punycode警告
+        breaks:       true,
+        linkify:      false,
         typographer:  false,
         quotes: '""\'\'',
-    })
+        highlight: function (str, lang) {
+            if (lang && hljs.getLanguage(lang)) {
+                try {
+                    return '<pre class="hljs"><code>' + hljs.highlight(str, { language: lang }).value + '</code></pre>';
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+            return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
+        }
+    });
 
-    // 如果需要URL转换，可以使用自定义规则
     md.normalizeLink = function(url) {
         try {
             return url.toString();
