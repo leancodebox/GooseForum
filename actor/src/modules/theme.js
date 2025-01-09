@@ -6,6 +6,7 @@ export const useThemeStore = defineStore('theme', () => {
 
   function toggleTheme() {
     isDarkTheme.value = !isDarkTheme.value; // Toggle the theme
+    document.body.classList.toggle('dark-theme', isDarkTheme.value); // Apply the class to the body
   }
 
   return {

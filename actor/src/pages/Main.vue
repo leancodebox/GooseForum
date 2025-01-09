@@ -324,6 +324,19 @@ function toggleTheme() {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: var(--footer-bg-color);
+  color: var(--footer-text-color);
+}
+
+/* Dark theme styles */
+.dark-theme .main-footer {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+/* Light theme styles */
+.light-theme .main-footer {
   background-color: #f0f3f5;
+  color: #000000;
 }
 </style>

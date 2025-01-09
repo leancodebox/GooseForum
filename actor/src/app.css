@@ -33,3 +33,13 @@ a {
 html {
     overflow: hidden;
 }
+
+:root {
+  --footer-bg-color: #f0f3f5; /* Default light theme footer background */
+  --footer-text-color: #000000; /* Default light theme footer text */
+}
+
+.dark-theme {
+  --footer-bg-color: #1a1a1a; /* Dark theme footer background */
+  --footer-text-color: #ffffff; /* Dark theme footer text */
+}
