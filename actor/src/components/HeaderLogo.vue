@@ -4,11 +4,11 @@ import {NText} from "naive-ui";
 <template>
   <n-text tag="div" class="ui-logo">
     <img v-if="false" alt="" src="/quote-left.png"/>
-    <span class="ui-logo-span" style="color: #ff7e5f;">G</span>
-    <span class="ui-logo-span" style="color: #feb47b;">o</span>
+    <span class="ui-logo-span" style="color: #ff6f61;">G</span>
+    <span class="ui-logo-span" style="color: #6ab04c;">o</span>
     <span class="ui-logo-span" style="color: #333333;">ose</span>
-    <span class="ui-logo-span" style="color: #ff7e5f;">F</span>
-    <span class="ui-logo-span" style="color: #feb47b;">o</span>
+    <span class="ui-logo-span" style="color: #ff6f61;">F</span>
+    <span class="ui-logo-span" style="color: #6ab04c;">o</span>
     <span class="ui-logo-span" style="color: #333333;">rum</span>
   </n-text>
 </template>
