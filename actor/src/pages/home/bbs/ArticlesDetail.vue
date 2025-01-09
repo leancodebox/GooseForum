@@ -152,7 +152,7 @@ const isAuthor = computed(() => {
                 返回列表
               </n-button>
             </router-link>
-            <h2 style="margin: 0">{{ articleInfo.title }}</h2>
+            <h2 style="margin: 0; flex: 1; text-align: center;">{{ articleInfo.title }}</h2>
             <n-button v-if="isAuthor"
                       secondary
                       size="small"
