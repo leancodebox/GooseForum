@@ -36,7 +36,7 @@ const fail = 1
 instanceAxios.interceptors.response.use(response => {
     const userStore = useUserStore()
     if (response.headers['new-token'] !== undefined) {
-        userStore.updateToken(response.headers['new-token'])
+        userStore.setToken(response.headers['new-token'])
     }
     const res = response.data
     if (res === undefined) {
