@@ -31,6 +31,11 @@ func Get(id any) (entity Entity) {
 	return
 }
 
+func GetByUserAndTitle(userId, title any) (entity Entity) {
+	builder().Where(queryopt.Eq(fieldTitle, title)).Where(queryopt.Eq(fieldUserId, userId)).First(&entity)
+	return
+}
+
 func GetByIds(ids []uint64) (entities []*Entity) {
 	if len(ids) == 0 {
 		return

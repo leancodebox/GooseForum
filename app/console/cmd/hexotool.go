@@ -4,9 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	timeopt "github.com/leancodebox/GooseForum/app/bundles/timopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -21,14 +24,16 @@ func init() {
 }
 
 type Blog struct {
-	Title   string
-	Content string
+	TitleConfig TitleConfig
+	Title       string
+	Content     string
 }
 
 func runHexoTool(_ *cobra.Command, _ []string) {
 
 	var basePath = preferences.Get("path.hexo", "")
 
+	userId := 1
 	if len(basePath) == 0 {
 		fmt.Println("请填写有效目标路径")
 		return
@@ -38,9 +43,31 @@ func runHexoTool(_ *cobra.Command, _ []string) {
 		fmt.Println("Error traversing directory:", err)
 		return
 	}
+	slices.SortFunc(blogs, func(a, b Blog) int {
+		aDate := timeopt.Str2Time(a.TitleConfig.Date)
+		bDate := timeopt.Str2Time(b.TitleConfig.Date)
+		if aDate.After(bDate) {
+			return 1
+		}
+		return -1
+	})
 	for _, data := range blogs {
-		art := articles.Entity{UserId: 1, Content: data.Content, Title: data.Title}
 		fmt.Println(data.Title)
+		fmt.Println(data.TitleConfig)
+		old := articles.GetByUserAndTitle(userId, data.Title)
+		if old.Id > 0 {
+			fmt.Println(userId, data.Title, "已经存在")
+			continue
+		}
+		writeDate := timeopt.Str2Time(data.TitleConfig.Date)
+		art := articles.Entity{
+			UserId:        1,
+			Content:       data.Content,
+			ArticleStatus: 1,
+			Title:         data.Title,
+			UpdatedAt:     writeDate,
+			CreatedAt:     writeDate,
+		}
 		articles.Save(&art)
 	}
 	fmt.Println(len(blogs))
@@ -77,31 +104,45 @@ func traverse(path string) ([]Blog, error) {
 				// Parse front-matter and content
 				scanner := bufio.NewScanner(strings.NewReader(string(data)))
 				isFrontMatter := true
+				headerB := strings.Builder{}
+				var tc TitleConfig
 				for scanner.Scan() {
 					line := scanner.Text()
+					fmt.Println(line)
 					if line == "---" {
 						if isFrontMatter {
 							isFrontMatter = false
 						} else {
 							break
 						}
+						continue
 					}
+					headerB.WriteString(line + "\n")
 					if strings.HasPrefix(line, "title:") {
 						title = strings.TrimSpace(strings.TrimPrefix(line, "title:"))
 						title = strings.Trim(title, `'`)
 					}
 				}
+				yaml.Unmarshal([]byte(headerB.String()), &tc)
 				for scanner.Scan() {
 					content += scanner.Text() + "\n"
 				}
-
 				blogs = append(blogs, Blog{
-					Title:   title,
-					Content: content,
+					TitleConfig: tc,
+					Title:       title,
+					Content:     content,
 				})
 			}
 		}
 	}
 
 	return blogs, nil
+}
+
+type TitleConfig struct {
+	Title      string   `json:"title"`
+	Toc        bool     `json:"toc"`
+	Date       string   `json:"date"`
+	Tags       []string `json:"tags"`
+	Categories []string `json:"categories"`
 }

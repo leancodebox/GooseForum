@@ -120,8 +120,10 @@ CREATE TABLE `articles`
   COLLATE = utf8mb4_0900_ai_ci COMMENT '文章';
 
 
-alter table articles add view_count  bigint unsigned NOT NULL DEFAULT '0';
-alter table articles add reply_count  bigint unsigned NOT NULL DEFAULT '0';
+alter table articles
+    add view_count bigint unsigned NOT NULL DEFAULT '0';
+alter table articles
+    add reply_count bigint unsigned NOT NULL DEFAULT '0';
 
 
 alter table articles
@@ -157,12 +159,14 @@ alter table reply
 
 CREATE TABLE event_notification
 (
-    `id`                  bigint unsigned NOT NULL AUTO_INCREMENT,
-    `user_id`             VARCHAR(255),
-    received_notification TEXT,
-    event_type            VARCHAR(50),
-    `created_at`          datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at`          datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `id`         bigint unsigned NOT NULL AUTO_INCREMENT,
+    `user_id`    VARCHAR(255),
+    `payload`    TEXT,
+    `event_type` VARCHAR(50),
+    `is_read`    bool                     DEFAULT false,
+    `read_at`    datetime                 DEFAULT NULL,
+    `created_at` datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
