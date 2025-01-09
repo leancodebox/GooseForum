@@ -1,28 +1,27 @@
 <script setup>
 import {
+  NBadge,
   NButton,
+  NDivider,
+  NDrawer,
+  NDrawerContent,
   NFlex,
   NIcon,
   NLayout,
   NLayoutFooter,
   NLayoutHeader,
   NMenu,
-  NText,
-  NDrawer,
-  NDrawerContent,
   NSpace,
-  NDivider,
-  NBadge
+  NText
 } from 'naive-ui';
-import { MenuOutline } from '@vicons/ionicons5'
+import {MenuOutline, MoonOutline, SunnyOutline} from '@vicons/ionicons5'
 import {useIsMobile, useIsTablet} from "@/utils/composables";
-import {h, ref, onMounted, onUnmounted, watch,defineEmits} from "vue";
+import {h, onMounted, onUnmounted, ref, watch} from "vue";
 import {RouterLink, useRouter} from "vue-router";
 import UserInfoCard from "@/components/UserInfoMenu.vue";
-import { getUnreadCount } from '@/service/request'
-import { useUserStore } from '@/modules/user'
-import { useNotificationStore } from '@/modules/notification'
-import { useThemeStore } from '@/modules/theme'; // Import the theme store
+import {useUserStore} from '@/modules/user'
+import {useNotificationStore} from '@/modules/notification'
+import UpdateTheme from "@/components/UpdateTheme.vue"; // Import the theme store
 
 const router = useRouter()
 const showDrawer = ref(false)
@@ -103,11 +102,6 @@ onUnmounted(() => {
   notificationStore.cleanup()
 })
 
-const themeStore = useThemeStore(); // Use the theme store
-
-function toggleTheme() {
-  themeStore.toggleTheme(); // Call the toggleTheme action from the store
-}
 </script>
 
 <template>
@@ -124,10 +118,6 @@ function toggleTheme() {
           <span>GooseForum</span>
         </n-text>
 
-        <!-- Theme Toggle Button -->
-        <n-button @click="toggleTheme">
-          {{ themeStore.isDarkTheme ? 'Light Mode' : 'Dark Mode' }}
-        </n-button>
 
         <!-- 桌面端导航菜单 -->
         <div v-if="!isTablet && !isMobile" class="menu-container">
@@ -152,24 +142,29 @@ function toggleTheme() {
                    :offset="[-5,3]"
                    type="error"
           >
-          <n-button >
-            {{ item.label }}
-          </n-button>
+            <n-button>
+              {{ item.label }}
+            </n-button>
           </n-badge>
-          <n-button v-else >
+          <n-button v-else>
             {{ item.label }}
           </n-button>
 
         </router-link>
-        <user-info-card />
+
+        <!-- Theme Toggle Button -->
+        <update-theme/>
+        <user-info-card/>
       </n-flex>
 
       <!-- 移动端菜单按钮和用户信息 -->
       <n-flex v-else align="center" class="action-buttons">
-        <user-info-card />
+
+        <update-theme/>
+        <user-info-card/>
         <n-button quaternary @click="showDrawer = true">
           <n-icon size="20">
-            <menu-outline />
+            <menu-outline/>
           </n-icon>
         </n-button>
       </n-flex>
@@ -194,7 +189,7 @@ function toggleTheme() {
           </n-button>
         </n-space>
 
-        <n-divider />
+        <n-divider/>
 
         <!-- 操作按钮 -->
         <n-space vertical>
@@ -208,10 +203,10 @@ function toggleTheme() {
           >
             {{ item.label }}
             <n-badge v-if="item.key === 'notification' && item.badge > 0"
-                    :value="item.badge"
-                    :max="99"
-                    processing
-                    type="error"
+                     :value="item.badge"
+                     :max="99"
+                     processing
+                     type="error"
             />
           </n-button>
         </n-space>
@@ -221,11 +216,11 @@ function toggleTheme() {
 
   <!-- 其他内容保持不变 -->
   <n-layout
-    class="n-layout-container"
-    :style="{top: topHeight}"
-    :native-scrollbar="true"
-    :position="'absolute'"
-    content-style="display: flex; flex-direction: column; min-height: calc(100vh - var(--header-height));"
+      class="n-layout-container"
+      :style="{top: topHeight}"
+      :native-scrollbar="true"
+      :position="'absolute'"
+      content-style="display: flex; flex-direction: column; min-height: calc(100vh - var(--header-height));"
   >
     <div style="flex: 1;">
       <router-view></router-view>

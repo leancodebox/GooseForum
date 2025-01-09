@@ -17,9 +17,9 @@ import {
 } from 'naive-ui'
 import {managerRouter} from "@/route/routes";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
-import { useThemeStore } from '@/modules/theme'; // Import the theme store
+import UpdateTheme from "@/components/UpdateTheme.vue";
+import UserInfoMenu from "@/components/UserInfoMenu.vue"; // Import the theme store
 
-const themeStore = useThemeStore(); // Use the theme store
 
 function renderIcon(icon) {
   return () => h(NIcon, null, {default: () => h(icon)})
@@ -95,11 +95,7 @@ let isTablet = useIsTablet()
 const showDrawer = ref(false)
 const showAdminDrawer = ref(false)
 
-const emit = defineEmits(['click'])
 
-function toggleTheme() {
-  themeStore.toggleTheme(); // Call the toggleTheme action from the store
-}
 </script>
 <template>
   <n-layout position="absolute" content-style="width: 100%;height: 100%;">
@@ -116,18 +112,19 @@ function toggleTheme() {
             <span>GooseForum</span>
           </n-text>
 
-          <!-- Theme Toggle Button -->
-          <n-button @click="toggleTheme">
-            {{ themeStore.isDarkTheme ? 'Light Mode' : 'Dark Mode' }}
-          </n-button>
 
           <!-- Desktop Navigation Menu -->
           <div v-if="!isTablet && !isMobile" class="menu-container">
             <n-menu v-model:value="activeKey" mode="horizontal" :options="menuOptions2"/>
           </div>
         </n-flex>
+        <n-flex v-if="!isTablet && !isMobile" align="center" class="action-buttons">
+          <update-theme/>
+          <user-info-menu/>
+        </n-flex>
 
         <n-flex v-if="isTablet || isMobile" align="center" class="action-buttons">
+          <update-theme/>
           <!-- Navigation Menu Button -->
           <n-button quaternary @click="showDrawer = true">
             <n-icon size="20">

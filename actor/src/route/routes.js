@@ -6,7 +6,7 @@ import {
     HammerOutline,
     HappyOutline,
     PeopleOutline,
-    ReceiptOutline
+    ReceiptOutline,
 } from '@vicons/ionicons5'
 
 
