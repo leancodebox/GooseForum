@@ -16,12 +16,13 @@ import {
 } from 'naive-ui';
 import { MenuOutline } from '@vicons/ionicons5'
 import {useIsMobile, useIsTablet} from "@/utils/composables";
-import {h, ref, onMounted, onUnmounted, watch} from "vue";
+import {h, ref, onMounted, onUnmounted, watch,defineEmits} from "vue";
 import {RouterLink, useRouter} from "vue-router";
 import UserInfoCard from "@/components/UserInfoMenu.vue";
 import { getUnreadCount } from '@/service/request'
 import { useUserStore } from '@/modules/user'
 import { useNotificationStore } from '@/modules/notification'
+import { useThemeStore } from '@/modules/theme'; // Import the theme store
 
 const router = useRouter()
 const showDrawer = ref(false)
@@ -101,6 +102,12 @@ onUnmounted(() => {
 onUnmounted(() => {
   notificationStore.cleanup()
 })
+
+const themeStore = useThemeStore(); // Use the theme store
+
+function toggleTheme() {
+  themeStore.toggleTheme(); // Call the toggleTheme action from the store
+}
 </script>
 
 <template>
@@ -116,6 +123,11 @@ onUnmounted(() => {
           <img alt="" src="/quote-left.png"/>
           <span>GooseForum</span>
         </n-text>
+
+        <!-- Theme Toggle Button -->
+        <n-button @click="toggleTheme">
+          {{ themeStore.isDarkTheme ? 'Light Mode' : 'Dark Mode' }}
+        </n-button>
 
         <!-- 桌面端导航菜单 -->
         <div v-if="!isTablet && !isMobile" class="menu-container">

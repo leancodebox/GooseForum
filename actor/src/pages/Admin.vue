@@ -17,6 +17,9 @@ import {
 } from 'naive-ui'
 import {managerRouter} from "@/route/routes";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
+import { useThemeStore } from '@/modules/theme'; // Import the theme store
+
+const themeStore = useThemeStore(); // Use the theme store
 
 function renderIcon(icon) {
   return () => h(NIcon, null, {default: () => h(icon)})
@@ -91,6 +94,12 @@ const menuOptions2 = [
 let isTablet = useIsTablet()
 const showDrawer = ref(false)
 const showAdminDrawer = ref(false)
+
+const emit = defineEmits(['click'])
+
+function toggleTheme() {
+  themeStore.toggleTheme(); // Call the toggleTheme action from the store
+}
 </script>
 <template>
   <n-layout position="absolute" content-style="width: 100%;height: 100%;">
@@ -106,6 +115,11 @@ const showAdminDrawer = ref(false)
             <img alt="" src="/quote-left.png"/>
             <span>GooseForum</span>
           </n-text>
+
+          <!-- Theme Toggle Button -->
+          <n-button @click="toggleTheme">
+            {{ themeStore.isDarkTheme ? 'Light Mode' : 'Dark Mode' }}
+          </n-button>
 
           <!-- Desktop Navigation Menu -->
           <div v-if="!isTablet && !isMobile" class="menu-container">

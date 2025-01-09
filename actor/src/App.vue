@@ -10,11 +10,15 @@ import {
   NLoadingBarProvider,
   NMessageProvider,
   NNotificationProvider,
-  zhCN
+  zhCN,
+  darkTheme
 } from 'naive-ui'
 import {h} from 'vue'
 import {SparklesOutline} from '@vicons/ionicons5'
 import {RouterLink} from "vue-router";
+import { useThemeStore } from '@/modules/theme';
+
+const themeStore = useThemeStore();
 
 // 全局浮动按钮的下拉菜单选项
 const options = [
@@ -61,7 +65,7 @@ const options = [
 ]
 
 function handleSelect(key) {
-  console.log(key)
+  console.log(key);
 }
 </script>
 
@@ -74,10 +78,10 @@ function handleSelect(key) {
         <!-- 全局加载条提供者 -->
         <n-loading-bar-provider>
           <!-- 全局配置提供者，设置中文语言 -->
-          <n-config-provider :locale="zhCN" :date-locale="dateZhCN">
+          <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme="themeStore.isDarkTheme ? darkTheme : null">
             <!-- 主布局容器 -->
             <n-layout position="absolute" content-style="width: 100%;height: 100%;">
-              <router-view></router-view>
+              <router-view ></router-view>
             </n-layout>
             <!-- 全局浮动按钮 -->
             <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">
