@@ -1,19 +1,18 @@
 <script setup>
-import {NText} from "naive-ui";
+import {NText,NButton} from "naive-ui";
 import {useThemeStore} from "@/modules/theme";
 
 const themeStore = useThemeStore();
-const isDarkTheme = themeStore.isDarkTheme;
 </script>
 <template>
-  <n-text tag="div" class="ui-logo">
+  <n-text tag="div" class="ui-logo" >
     <img v-if="false" alt="" src="/quote-left.png"/>
     <span class="ui-logo-span" :style="{ color: '#ff6f61' }">G</span>
     <span class="ui-logo-span" :style="{ color:  '#6ab04c' }">o</span>
-    <span class="ui-logo-span" :style="{ color: isDarkTheme ? '#e07d2d' : '#333333' }">ose</span>
+    <span class="ui-logo-span" :style="{ color: themeStore.isDarkTheme ? '#e07d2d' : '#333333' }">ose</span>
     <span class="ui-logo-span" :style="{ color:  '#ff6f61' }">F</span>
     <span class="ui-logo-span" :style="{ color:  '#6ab04c' }">o</span>
-    <span class="ui-logo-span" :style="{ color: isDarkTheme ? '#333333' : '#333333' }">rum</span>
+    <span class="ui-logo-span" :style="{ color: themeStore.isDarkTheme ? '#e07d2d' : '#333333' }">rum</span>
   </n-text>
 </template>
 <style scoped>
@@ -22,7 +21,7 @@ const isDarkTheme = themeStore.isDarkTheme;
   display: flex;
   align-items: center;
   font-size: 22px;
-  margin-right: 24px;
+  margin-right: 0px;
   height: 100%;
   white-space: nowrap;
 }
