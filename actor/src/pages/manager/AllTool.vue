@@ -1,5 +1,5 @@
 <script setup>
-import {NButton, NCard, NGrid, NGridItem, NStatistic, useMessage} from 'naive-ui'
+import {NText,NButton, NCard, NGrid, NGridItem, NStatistic, useMessage} from 'naive-ui'
 import {getUserInfo} from "@/service/request"
 import {onMounted, ref} from 'vue'
 
@@ -48,13 +48,13 @@ function getUserInfoAction() {
       <n-card title="语言包" class="dashboard-card">
         <n-grid :cols="3" :x-gap="12">
           <n-grid-item>
-            <div class="lang-item">简体中文</div>
+            <n-text class="lang-item">简体中文</n-text>
           </n-grid-item>
           <n-grid-item>
-            <div class="lang-item">English</div>
+            <n-text class="lang-item">English</n-text>
           </n-grid-item>
           <n-grid-item>
-            <div class="lang-item">日本語</div>
+            <n-text class="lang-item">日本語</n-text>
           </n-grid-item>
         </n-grid>
       </n-card>
@@ -124,13 +124,13 @@ function getUserInfoAction() {
 
 .lang-item {
   padding: 12px;
-  background-color: #f5f5f5;
   border-radius: 4px;
   text-align: center;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: #0a3069 1px solid;
 }
 
 .full-width-btn {

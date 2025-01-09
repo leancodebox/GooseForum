@@ -1,72 +1,19 @@
 <script setup>
 import {
+  darkTheme,
   dateZhCN,
   NConfigProvider,
   NDialogProvider,
-  NDropdown,
-  NFloatButton,
-  NIcon,
   NLayout,
   NLoadingBarProvider,
   NMessageProvider,
   NNotificationProvider,
-  zhCN,
-  darkTheme
+  zhCN
 } from 'naive-ui'
-import {h} from 'vue'
-import {SparklesOutline} from '@vicons/ionicons5'
-import {RouterLink} from "vue-router";
-import { useThemeStore } from '@/modules/theme';
+import {useThemeStore} from '@/modules/theme.js';
+import SuperMenu from "@/components/SuperMenu.vue";
 
 const themeStore = useThemeStore();
-
-// 全局浮动按钮的下拉菜单选项
-const options = [
-  {
-    label: 'super menu',
-    key: 'marina bay sands',
-    disabled: false
-  },
-  {
-    label: () => h(
-        RouterLink,
-        {
-          to: {
-            path: '/manager/',
-          }
-        },
-        {default: () => 'manager'}),
-    key: "manager"
-  },
-
-  {
-    label: () => h(
-        RouterLink,
-        {
-          to: {
-            path: '/home/',
-          }
-        },
-        {default: () => 'home'}),
-    key: "home"
-  },
-  {
-    label: () => h(
-        RouterLink,
-        {
-          to: {
-            path: '/home/regOrLogin'
-          }
-        },
-        {default: () => 'login'},
-    ),
-    key: "login"
-  }
-]
-
-function handleSelect(key) {
-  console.log(key);
-}
 </script>
 
 <template>
@@ -81,16 +28,10 @@ function handleSelect(key) {
           <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme="themeStore.isDarkTheme ? darkTheme : null">
             <!-- 主布局容器 -->
             <n-layout position="absolute" content-style="width: 100%;height: 100%;">
-              <router-view ></router-view>
+              <router-view></router-view>
             </n-layout>
             <!-- 全局浮动按钮 -->
-            <n-dropdown trigger="hover" :options="options" @select="handleSelect" :size="'huge'">
-              <n-float-button circle :right="56" :bottom="30" style="z-index:1501">
-                <n-icon>
-                  <sparkles-outline/>
-                </n-icon>
-              </n-float-button>
-            </n-dropdown>
+            <super-menu v-if="false"></super-menu>
           </n-config-provider>
         </n-loading-bar-provider>
       </n-message-provider>
