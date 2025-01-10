@@ -18,6 +18,32 @@ const siteStatistic = ref({
   userCount: 0,
 })
 
+// 新增：分类状态
+const categories = ref(['全部', '技术', '文章', 'bn']) // 示例分类
+const selectedCategories = ref(['全部'])
+
+// 新增：选择分类的处理函数
+function selectCategory(category) {
+    if (category === '全部') {
+        if (!selectedCategories.value.includes('全部')) {
+            selectedCategories.value = ['全部']
+        }
+    } else {
+        const index = selectedCategories.value.indexOf(category)
+        if (index > -1) {
+            selectedCategories.value.splice(index, 1)
+        } else {
+            selectedCategories.value.push(category)
+            // 移除 '全部' 以确保互斥
+            const allIndex = selectedCategories.value.indexOf('全部')
+            if (allIndex > -1) {
+                selectedCategories.value.splice(allIndex, 1)
+            }
+        }
+    }
+    // 此处可添加根据选择的分类过滤文章的逻辑
+}
+
 function getArticlesAction(page = 1) {
   getArticlesPageApi(page, pageSize.value).then(r => {
     listData.value = r.result.list.map(function (item) {
@@ -71,11 +97,18 @@ const isTablet = useIsTablet()
 <template>
   <div class="articles-container" ref="listContainerRef">
     <div class="main-content">
-      <!-- 标签区域 -->
-      <div class="tags-section">
-        <n-tag round>技术</n-tag>
-        <n-tag round>文章</n-tag>
-        <n-tag round>bn</n-tag>
+      <!-- 新增：分类选择区域 -->
+      <div class="categories-section">
+        <n-tag
+          v-for="category in categories"
+          :key="category"
+          round
+          :type="selectedCategories.includes(category) ? 'success' : 'default'"
+          @click="selectCategory(category)"
+          style="cursor: pointer;"
+        >
+          {{ category }}
+        </n-tag>
       </div>
 
       <!-- 文章列表 -->
@@ -214,6 +247,21 @@ const isTablet = useIsTablet()
   top: 80px;
 }
 
+/* 新增：分类选择区域样式 */
+.categories-section {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.categories-section .n-tag {
+  transition: background-color 0.3s;
+}
+
+.categories-section .n-tag:hover {
+  background-color: #f0f0f0;
+}
+
 /* 响应式布局 */
 @media (max-width: 800px) {
   .articles-container {
@@ -250,11 +298,6 @@ const isTablet = useIsTablet()
   gap: 8px;
 }
 
-.tags-section {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
 
 .pagination-wrapper {
   display: flex;
@@ -332,5 +375,11 @@ const isTablet = useIsTablet()
   .article-avatar {
     margin-left: 12px;
   }
+}
+
+/* 可选：根据需要调整标签的选中样式 */
+.categories-section .n-tag.success {
+  background-color: #52c41a; /* 绿色表示选中 */
+  color: white;
 }
 </style>
