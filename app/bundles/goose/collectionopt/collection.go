@@ -85,3 +85,17 @@ func Map2Map[mK comparable, mV any, newK comparable, newV any](oldMap map[mK]mV,
 	}
 	return newMap
 }
+
+func RemoveDuplicates[T comparable](slice []T) []T {
+	encountered := map[T]bool{}
+	result := []T{}
+
+	for _, v := range slice {
+		if !encountered[v] {
+			encountered[v] = true
+			result = append(result, v)
+		}
+	}
+
+	return result
+}

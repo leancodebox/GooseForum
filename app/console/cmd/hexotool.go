@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	timeopt "github.com/leancodebox/GooseForum/app/bundles/timopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -52,7 +53,11 @@ func runHexoTool(_ *cobra.Command, _ []string) {
 		}
 		return -1
 	})
+	var tags []string
+	var categories []string
 	for _, data := range blogs {
+		tags = append(tags, data.TitleConfig.Tags...)
+		categories = append(categories, data.TitleConfig.Categories...)
 		fmt.Println(data.Title)
 		fmt.Println(data.TitleConfig)
 		old := articles.GetByUserAndTitle(userId, data.Title)
@@ -69,10 +74,14 @@ func runHexoTool(_ *cobra.Command, _ []string) {
 			UpdatedAt:     writeDate,
 			CreatedAt:     writeDate,
 		}
-		articles.Save(&art)
-		pointservice.RewardPoints(uint64(userId), 10, pointservice.RewardPoints4WriteArticles)
+		if false {
+			articles.Save(&art)
+			pointservice.RewardPoints(uint64(userId), 10, pointservice.RewardPoints4WriteArticles)
+		}
 	}
 	fmt.Println(len(blogs))
+	fmt.Println(array.RemoveDuplicates(tags))
+	fmt.Println(array.RemoveDuplicates(categories))
 }
 
 func traverse(path string) ([]Blog, error) {
