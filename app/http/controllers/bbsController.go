@@ -94,13 +94,13 @@ type ArticlesSimpleDto struct {
 
 // GetArticlesPage 文章列表
 func GetArticlesPage(param GetArticlesPageRequest) component.Response {
-	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, FilterStatus: true})
-	userIds := array.Map(pageData.Data, func(t articles.Entity) uint64 {
+	pageData := articles.Page[articles.SmallEntity](articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, FilterStatus: true})
+	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
 	return component.SuccessPage(
-		array.Map(pageData.Data, func(t articles.Entity) ArticlesSimpleDto {
+		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
 			username := ""
 			avatarUrl := ""
 			if user, ok := userMap[t.UserId]; ok {
@@ -328,7 +328,7 @@ type GetUserArticlesRequest struct {
 
 // GetUserArticles 获取用户文章列表
 func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) component.Response {
-	pageData := articles.Page(articles.PageQuery{
+	pageData := articles.Page[articles.Entity](articles.PageQuery{
 		Page:         max(req.Params.Page, 1),
 		PageSize:     req.Params.PageSize,
 		UserId:       req.UserId,

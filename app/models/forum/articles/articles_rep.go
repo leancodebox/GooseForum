@@ -80,13 +80,13 @@ type PageQuery struct {
 	FilterStatus   bool
 }
 
-func Page(q PageQuery) struct {
+func Page[ResType SmallEntity | Entity](q PageQuery) struct {
 	Page     int
 	PageSize int
 	Total    int64
-	Data     []Entity
+	Data     []ResType
 } {
-	var list []Entity
+	var list []ResType
 	if q.Page > 0 {
 		q.Page -= 1
 	} else {
@@ -113,7 +113,7 @@ func Page(q PageQuery) struct {
 		Page     int
 		PageSize int
 		Total    int64
-		Data     []Entity
+		Data     []ResType
 	}{Page: q.Page, PageSize: q.PageSize, Data: list, Total: total}
 }
 

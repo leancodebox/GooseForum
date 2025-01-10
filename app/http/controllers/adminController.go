@@ -154,13 +154,13 @@ type ArticlesInfoDto struct {
 
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
 	param := req.Params
-	pageData := articles.Page(articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
-	userIds := array.Map(pageData.Data, func(t articles.Entity) uint64 {
+	pageData := articles.Page[articles.SmallEntity](articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
+	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
 	return component.SuccessPage(
-		array.Map(pageData.Data, func(t articles.Entity) ArticlesInfoDto {
+		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesInfoDto {
 			username := ""
 			if user, _ := userMap[t.UserId]; user != nil {
 				username = user.Username
