@@ -24,9 +24,9 @@ function getArticlesAction(page = 1) {
       return {
         id: item.id,
         topic: "",
-        category: "博文",
+        category: "分享",
         title: item.title,
-        tag: ["文章", "技术"],
+        tag: ["文章", "coding"],
         desc: item.content,
         lastUpdateTime: item.lastUpdateTime,
         body: item.content,

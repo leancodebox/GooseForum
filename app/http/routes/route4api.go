@@ -59,7 +59,7 @@ func bbs(ginApp *gin.Engine) {
 
 	bbsShow.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	// 分类列表
-	bbsShow.GET("get-articles-enum", ginUpNP(controllers.GetArticlesCategory))
+	bbsShow.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
 	bbsShow.GET("get-articles-category", ginUpNP(controllers.GetArticlesCategory))
 	// 文章分页
 	bbsShow.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))

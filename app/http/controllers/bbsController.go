@@ -44,6 +44,24 @@ func GetSiteStatistics() component.Response {
 	return result
 }
 
+var articlesType = []datastruct.Option[string, int]{
+	{Name: "分享", Value: 1},
+	{Name: "求助", Value: 2},
+}
+
+func GetArticlesEnum() component.Response {
+	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
+		return datastruct.Option[string, uint64]{
+			Name:  t.Category,
+			Value: t.Id,
+		}
+	})
+	return component.SuccessResponse(map[string]any{
+		"category": res,
+		"type":     articlesType,
+	})
+}
+
 func GetArticlesCategory() component.Response {
 	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
 		return datastruct.Option[string, uint64]{

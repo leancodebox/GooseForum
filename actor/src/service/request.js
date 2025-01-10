@@ -111,6 +111,10 @@ export function gtSiteStatistics() {
     return instanceAxios.get('bbs/get-site-statistics')
 }
 
+export function getArticleEnum() {
+    return instanceAxios.get('bbs/get-articles-enum')
+}
+
 export function getArticleCategory() {
     return instanceAxios.get('bbs/get-articles-category')
 }

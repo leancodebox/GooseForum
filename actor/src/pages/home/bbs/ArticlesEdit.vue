@@ -3,8 +3,8 @@ import {mavonEditor} from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 import {NButton, NCard, NFlex, NForm, NFormItemGi, NGrid, NInput, NSelect, useMessage} from "naive-ui"
 import {onMounted, ref} from "vue";
-import {getArticleCategory, writeArticles, getArticlesOrigin} from "@/service/request";
-import {useRouter, useRoute} from "vue-router"
+import {getArticleEnum, getArticlesOrigin, writeArticles} from "@/service/request";
+import {useRoute, useRouter} from "vue-router"
 
 const router = useRouter()
 const route = useRoute()
@@ -15,17 +15,11 @@ let tags = ref([])
 let options = ref([])
 let typeOptions = ref([
   {
-    label: "博文",
-    value: 0,
-  }, {
-    label: "教程",
+    label: "分享",
     value: 1,
   }, {
-    label: "问答",
+    label: "求助",
     value: 2,
-  }, {
-    label: "分享",
-    value: 3,
   },
 ])
 
@@ -35,7 +29,7 @@ let articlesData = ref({
   categoryId: [],
   title: "",
   content: "",
-  type: 0,
+  type: 1,
 })
 
 // 获取文章原始数据
@@ -65,8 +59,14 @@ async function getOriginData() {
 onMounted(async () => {
   // 获取分类选项
   try {
-    let data = await getArticleCategory()
-    options.value = data.result.map(item => {
+    let data = await getArticleEnum()
+    options.value = data.result.category.map(item => {
+      return {
+        label: item.name,
+        value: item.value
+      }
+    })
+    typeOptions.value = data.result.type.map(item => {
       return {
         label: item.name,
         value: item.value
@@ -105,7 +105,7 @@ async function publish(status = 1) {
     if (res.code === 0 && res.result > 0) {
       message.success('保存成功')
       await router.push({
-        path:'/home/bbs/articlesDetail',
+        path: '/home/bbs/articlesDetail',
         query: {
           id: res.result
         }
@@ -129,8 +129,7 @@ function categorySelect(value, option) {
 
 <!-- 模板部分基本不变，可以添加一个标题来区分是新建还是编辑 -->
 <template>
-  <n-card :bordered="false" style="padding: 16px;">
-
+  <n-card :bordered="false" >
     <n-form
         ref="formRef"
         inline
@@ -139,17 +138,18 @@ function categorySelect(value, option) {
         style="margin-top: 4px;"
     >
       <n-grid cols="24" x-gap="16" item-responsive>
-        <n-form-item-gi span="0:24 860:2" label="类型" path="user.age" style="min-width:80px; margin-bottom: 8px;">
-          <n-select v-model:value="articlesData.type" :options="typeOptions"/>
-        </n-form-item-gi>
-        <n-form-item-gi span="0:24 860:4" label="分类(不超过3个)" path="user.age" style="min-width:160px; margin-bottom: 8px;">
+        <n-form-item-gi span="0:24 860:4" label="分类(不超过3个)" path="user.age"
+                        style="min-width:160px; margin-bottom: 8px;"  :show-feedback="false">
           <n-select multiple v-model:value="articlesData.categoryId" :options="options" @update:value="categorySelect"
                     max-tag-count="responsive"/>
         </n-form-item-gi>
-        <n-form-item-gi span="0:24 860:12" label="标题" style="margin-bottom: 8px;">
+        <n-form-item-gi span="0:24 860:2" label="类型" path="user.age" style="min-width:80px; margin-bottom: 8px;"  :show-feedback="false">
+          <n-select v-model:value="articlesData.type" :options="typeOptions"/>
+        </n-form-item-gi>
+        <n-form-item-gi span="0:24 860:14" label="标题" style="margin-bottom: 8px;"  :show-feedback="false">
           <n-input v-model:value="articlesData.title"></n-input>
         </n-form-item-gi>
-        <n-form-item-gi span="0:24 860:4">
+        <n-form-item-gi span="0:24 860:4"  :show-feedback="false">
           <n-flex justify="space-around">
             <n-button attr-type="button" type="info" @click="publish(0)" :disabled="publishLoading">
               存草稿
@@ -160,7 +160,8 @@ function categorySelect(value, option) {
           </n-flex>
         </n-form-item-gi>
         <n-form-item-gi :span="24">
-          <mavon-editor style="width:100%;height: 100%;min-height: 500px;max-height: 600px" v-model="articlesData.content"></mavon-editor>
+          <mavon-editor style="width:100%;height: 100%;min-height: 600px;max-height: 600px"
+                        v-model="articlesData.content"></mavon-editor>
         </n-form-item-gi>
       </n-grid>
     </n-form>
