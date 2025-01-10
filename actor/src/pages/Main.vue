@@ -129,6 +129,7 @@ onUnmounted(() => {
 
       <!-- 桌面端操作按钮 -->
       <n-flex v-if="!isTablet && !isMobile" align="center" class="action-buttons">
+        <update-theme style="padding-right:10px "/>
         <router-link v-for="item in actionOptions" :key="item.key" :to="item.path">
           <n-badge v-if="item.key === 'notification'"
                    :value="notificationStore.unreadCount"
@@ -144,11 +145,7 @@ onUnmounted(() => {
           <n-button v-else>
             {{ item.label }}
           </n-button>
-
         </router-link>
-
-        <!-- Theme Toggle Button -->
-        <update-theme/>
         <user-info-card/>
       </n-flex>
 

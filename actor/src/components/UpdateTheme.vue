@@ -11,8 +11,8 @@ function toggleTheme() {
 }
 </script>
 <template>
-  <n-button @click="toggleTheme" tertiary circle>
-    <n-icon>
+  <n-button @click="toggleTheme" text>
+    <n-icon size="24px">
       <SunnyOutline v-if="themeStore.isDarkTheme"/>
       <MoonOutline v-else/>
     </n-icon>
