@@ -21,16 +21,29 @@ var maintenanceHTML []byte = []byte(`
 			align-items: center;
 			height: 100vh;
 			margin: 0;
-			background-color: #f2f2f2;
+			background: linear-gradient(135deg, #71b7e6, #9b59b6);
 		}
 		h1 {
-			color: #333;
-			font-family: Arial, sans-serif;
+			color: #fff;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+		}
+		p {
+			color: #f0f0f0;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+			margin-top: 20px;
+		}
+		.container {
+			text-align: center;
 		}
 	</style>
 </head>
 <body>
-	<h1>当前网站正在维护中，请稍后再试。</h1>
+	<div class="container">
+		<h1>抱歉，我们正在进行维护</h1>
+		<p>请稍后再试。感谢您的理解与支持！</p>
+	</div>
 </body>
 </html>
 `)
@@ -42,8 +55,6 @@ func SiteMaintenance(c *gin.Context) {
 	if maintenance {
 		// 设置HTTP状态码为503 Service Unavailable
 		c.Writer.WriteHeader(http.StatusServiceUnavailable)
-
-		// 定义维护页面的 HTML 内容
 
 		// 返回优化后的维护页面
 		c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
