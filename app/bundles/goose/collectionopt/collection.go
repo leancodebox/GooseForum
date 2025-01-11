@@ -49,6 +49,18 @@ func Filter[T any](list []T, f func(T) bool) (result []T) {
 	return
 }
 
+// GroupBy 函数根据指定的键函数对数组进行分组
+func GroupBy[T any, K comparable](arr []T, keyFunc func(T) K) map[K][]T {
+	grouped := make(map[K][]T)
+
+	for _, item := range arr {
+		key := keyFunc(item)
+		grouped[key] = append(grouped[key], item)
+	}
+
+	return grouped
+}
+
 func ArrayFill[T any](startIndex int, num uint, value T) map[int]T {
 	result := make(map[int]T, num)
 	var i uint

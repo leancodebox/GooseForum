@@ -1,5 +1,5 @@
 <script setup>
-import {NStatistic,NAvatar, NCard, NFlex, NIcon, NList, NListItem, NPagination, NTag, NThing} from 'naive-ui'
+import {NAvatar, NCard, NFlex, NIcon, NList, NListItem, NPagination, NStatistic, NTag, NThing} from 'naive-ui'
 import {onMounted, ref} from "vue";
 import {getArticlesPageApi, gtSiteStatistics} from "@/service/request";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
@@ -24,24 +24,24 @@ const selectedCategories = ref(['全部'])
 
 // 新增：选择分类的处理函数
 function selectCategory(category) {
-    if (category === '全部') {
-        if (!selectedCategories.value.includes('全部')) {
-            selectedCategories.value = ['全部']
-        }
-    } else {
-        const index = selectedCategories.value.indexOf(category)
-        if (index > -1) {
-            selectedCategories.value.splice(index, 1)
-        } else {
-            selectedCategories.value.push(category)
-            // 移除 '全部' 以确保互斥
-            const allIndex = selectedCategories.value.indexOf('全部')
-            if (allIndex > -1) {
-                selectedCategories.value.splice(allIndex, 1)
-            }
-        }
+  if (category === '全部') {
+    if (!selectedCategories.value.includes('全部')) {
+      selectedCategories.value = ['全部']
     }
-    // 此处可添加根据选择的分类过滤文章的逻辑
+  } else {
+    const index = selectedCategories.value.indexOf(category)
+    if (index > -1) {
+      selectedCategories.value.splice(index, 1)
+    } else {
+      selectedCategories.value.push(category)
+      // 移除 '全部' 以确保互斥
+      const allIndex = selectedCategories.value.indexOf('全部')
+      if (allIndex > -1) {
+        selectedCategories.value.splice(allIndex, 1)
+      }
+    }
+  }
+  // 此处可添加根据选择的分类过滤文章的逻辑
 }
 
 function getArticlesAction(page = 1) {
@@ -49,17 +49,16 @@ function getArticlesAction(page = 1) {
     listData.value = r.result.list.map(function (item) {
       return {
         id: item.id,
-        topic: "",
-        category: "分享",
         title: item.title,
-        tag: ["文章", "coding"],
         desc: item.content,
         lastUpdateTime: item.lastUpdateTime,
-        body: item.content,
         username: item.username,
         avatarUrl: item.avatarUrl,
         viewCount: item.viewCount,
-        commentCount: item.commentCount
+        commentCount: item.commentCount,
+        categories: item.categories,
+        type: item.type,
+        typeStr: item.typeStr,
       }
     })
     total.value = r.result.total || 0
@@ -100,12 +99,12 @@ const isTablet = useIsTablet()
       <!-- 新增：分类选择区域 -->
       <div class="categories-section">
         <n-tag
-          v-for="category in categories"
-          :key="category"
-          round
-          :type="selectedCategories.includes(category) ? 'success' : 'default'"
-          @click="selectCategory(category)"
-          style="cursor: pointer;"
+            v-for="category in categories"
+            :key="category"
+            round
+            :type="selectedCategories.includes(category) ? 'success' : 'default'"
+            @click="selectCategory(category)"
+            style="cursor: pointer;"
         >
           {{ category }}
         </n-tag>
@@ -138,7 +137,7 @@ const isTablet = useIsTablet()
                   <div class="article-content">
                     <n-flex align="center" class="article-header" :style="{ gap: '8px' }">
                       <n-tag :bordered="false" type="success" size="small">
-                        {{ item.category }}
+                        {{ item.typeStr }}
                       </n-tag>
                       <span v-if="item.type === 'xxx'" class="blinking-div">
                         {{ item.title }}
@@ -146,7 +145,7 @@ const isTablet = useIsTablet()
                       <span v-else>
                         {{ item.title }}
                       </span>
-                      <n-tag v-for="itemTag in item.tag"
+                      <n-tag v-for="itemTag in item.categories"
                              :bordered="false"
                              size="small"
                              v-text="itemTag"

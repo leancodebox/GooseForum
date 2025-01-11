@@ -49,6 +49,10 @@ var articlesType = []datastruct.Option[string, int]{
 	{Name: "求助", Value: 2},
 }
 
+var articlesTypeMap = array.Slice2Map(articlesType, func(v datastruct.Option[string, int]) int {
+	return v.Value
+})
+
 func GetArticlesEnum() component.Response {
 	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
 		return datastruct.Option[string, uint64]{
@@ -80,16 +84,19 @@ type GetArticlesPageRequest struct {
 
 type ArticlesSimpleDto struct {
 	Id             uint64   `json:"id"`
-	Title          string   `json:"title"`
-	Content        string   `json:"content"`
-	CreateTime     string   `json:"createTime"`
-	LastUpdateTime string   `json:"lastUpdateTime"`
-	Username       string   `json:"username"`
-	ViewCount      uint64   `json:"viewCount"`
-	CommentCount   uint64   `json:"commentCount"`
-	Category       string   `json:"category"`
-	Tags           []string `json:"tags"`
-	AvatarUrl      string   `json:"avatarUrl"`
+	Title          string   `json:"title,omitempty"`
+	Content        string   `json:"content,omitempty"`
+	CreateTime     string   `json:"createTime,omitempty"`
+	LastUpdateTime string   `json:"lastUpdateTime,omitempty"`
+	Username       string   `json:"username,omitempty"`
+	ViewCount      uint64   `json:"viewCount,omitempty"`
+	CommentCount   uint64   `json:"commentCount,omitempty"`
+	Type           int8     `json:"type,omitempty"`
+	TypeStr        string   `json:"typeStr,omitempty"`
+	Category       string   `json:"category,omitempty"`
+	Categories     []string `json:"categories,omitempty"`
+	Tags           []string `json:"tags,omitempty"`
+	AvatarUrl      string   `json:"avatarUrl,omitempty"`
 }
 
 // GetArticlesPage 文章列表
@@ -99,8 +106,29 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
+
+	//获取文章的分类信息
+	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
+		return t.Id
+	})
+	categoryRs := articleCategoryRs.GetByArticleIds(articleIds)
+	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
+		return t.ArticleCategoryId
+	})
+	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	// 获取文章的分类和标签
+	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
+		return rs.ArticleId
+	})
+
 	return component.SuccessPage(
 		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
+			categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
+				if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+					return category.Category
+				}
+				return ""
+			})
 			username := ""
 			avatarUrl := ""
 			if user, ok := userMap[t.UserId]; ok {
@@ -117,6 +145,10 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 				AvatarUrl:      avatarUrl,
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,
+				Category:       FirstOr(categoryNames, "未分类"),
+				Categories:     categoryNames,
+				Type:           t.Type,
+				TypeStr:        articlesTypeMap[int(t.Type)].Name,
 			}
 		}),
 		pageData.Page,
@@ -206,10 +238,16 @@ func WriteArticlesOrigin(req component.BetterRequest[WriteArticlesOriginReq]) co
 	if entity.UserId != req.UserId {
 		return component.FailResponse("不存在")
 	}
+	categoryRs := articleCategoryRs.GetByArticleIds([]uint64{entity.Id})
+
 	return component.SuccessResponse(map[string]any{
 		"userId":         entity.UserId,
+		"type":           entity.Type,
 		"articleTitle":   entity.Title,
 		"articleContent": entity.Content,
+		"categoryId": array.Map(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
+			return rs.ArticleCategoryId
+		}),
 	})
 }
 
@@ -357,7 +395,6 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				}
 				return ""
 			})
-
 			return ArticlesSimpleDto{
 				Id:             t.Id,
 				Title:          t.Title,
@@ -368,6 +405,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,
 				Category:       FirstOr(categoryNames, "未分类"),
+				Categories:     categoryNames,
 				Tags:           []string{"文章", "技术"}, // 暂时使用固定标签，后续可以添加标签系统
 			}
 		}),
