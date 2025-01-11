@@ -1,5 +1,7 @@
 package articleCategoryRs
 
+import "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
@@ -35,6 +37,15 @@ func GetByArticleIds(articleIds []uint64) (entities []*Entity) {
 		return
 	}
 	builder().Where("article_id IN ?", articleIds).Find(&entities)
+	return
+}
+
+// GetByArticleIdsEffective 批量获取文章的分类关系
+func GetByArticleIdsEffective(articleIds []uint64) (entities []*Entity) {
+	if len(articleIds) == 0 {
+		return
+	}
+	builder().Where("article_id IN ?", articleIds).Where(queryopt.Eq(fieldEffective, 1)).Find(&entities)
 	return
 }
 

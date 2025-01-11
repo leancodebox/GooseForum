@@ -111,7 +111,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
 		return t.Id
 	})
-	categoryRs := articleCategoryRs.GetByArticleIds(articleIds)
+	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
 	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
 		return t.ArticleCategoryId
 	})
@@ -238,7 +238,7 @@ func WriteArticlesOrigin(req component.BetterRequest[WriteArticlesOriginReq]) co
 	if entity.UserId != req.UserId {
 		return component.FailResponse("不存在")
 	}
-	categoryRs := articleCategoryRs.GetByArticleIds([]uint64{entity.Id})
+	categoryRs := articleCategoryRs.GetByArticleIdsEffective([]uint64{entity.Id})
 
 	return component.SuccessResponse(map[string]any{
 		"userId":         entity.UserId,
@@ -279,10 +279,30 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	article.Title = req.Params.Title
 	if article.Id > 0 {
 		articles.Save(&article)
+		categoryIDMap := make(map[uint64]bool)
+		for _, id := range req.Params.CategoryId {
+			categoryIDMap[id] = true
+		}
+
+		// 遍历 rsList，更新或删除无效的条目
+		for _, item := range articleCategoryRs.GetByArticleId(article.Id) {
+			if !categoryIDMap[item.ArticleCategoryId] {
+				item.Effective = 0
+				articleCategoryRs.SaveOrCreateById(item)
+			} else {
+				// 如果已经存在，从 map 中删除，避免重复插入
+				delete(categoryIDMap, item.ArticleCategoryId)
+			}
+		}
+		// 插入新的条目
+		for id := range categoryIDMap {
+			rs := &articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: id, Effective: 1}
+			articleCategoryRs.SaveOrCreateById(rs)
+		}
 	} else {
 		articles.Create(&article)
 		for _, item := range req.Params.CategoryId {
-			rs := articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: item}
+			rs := articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: item, Effective: 1}
 			articleCategoryRs.SaveOrCreateById(&rs)
 		}
 		pointservice.RewardPoints(req.UserId, 10, pointservice.RewardPoints4WriteArticles)
@@ -377,7 +397,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 	articleIds := array.Map(pageData.Data, func(t articles.Entity) uint64 {
 		return t.Id
 	})
-	categoryRs := articleCategoryRs.GetByArticleIds(articleIds)
+	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
 	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
 		return t.ArticleCategoryId
 	})

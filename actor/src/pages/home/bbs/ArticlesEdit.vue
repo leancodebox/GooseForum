@@ -45,6 +45,8 @@ async function getOriginData() {
         id: parseInt(id),
         title: res.result.articleTitle,
         content: res.result.articleContent,
+        type: res.result.type,
+        categoryId: res.result.categoryId,
         // 如果后端返回了分类和类型，也需要设置
         // categoryId: res.result.categoryId,
         // type: res.result.type,
@@ -129,7 +131,7 @@ function categorySelect(value, option) {
 
 <!-- 模板部分基本不变，可以添加一个标题来区分是新建还是编辑 -->
 <template>
-  <n-card :bordered="false" >
+  <n-card :bordered="false">
     <n-form
         ref="formRef"
         inline
@@ -139,17 +141,18 @@ function categorySelect(value, option) {
     >
       <n-grid cols="24" x-gap="16" item-responsive>
         <n-form-item-gi span="0:24 860:4" label="分类(不超过3个)" path="user.age"
-                        style="min-width:160px; margin-bottom: 8px;"  :show-feedback="false">
+                        style="min-width:160px; margin-bottom: 8px;" :show-feedback="false">
           <n-select multiple v-model:value="articlesData.categoryId" :options="options" @update:value="categorySelect"
                     max-tag-count="responsive"/>
         </n-form-item-gi>
-        <n-form-item-gi span="0:24 860:2" label="类型" path="user.age" style="min-width:80px; margin-bottom: 8px;"  :show-feedback="false">
+        <n-form-item-gi span="0:24 860:2" label="类型" path="user.age" style="min-width:80px; margin-bottom: 8px;"
+                        :show-feedback="false">
           <n-select v-model:value="articlesData.type" :options="typeOptions"/>
         </n-form-item-gi>
-        <n-form-item-gi span="0:24 860:14" label="标题" style="margin-bottom: 8px;"  :show-feedback="false">
+        <n-form-item-gi span="0:24 860:14" label="标题" style="margin-bottom: 8px;" :show-feedback="false">
           <n-input v-model:value="articlesData.title"></n-input>
         </n-form-item-gi>
-        <n-form-item-gi span="0:24 860:4"  :show-feedback="false">
+        <n-form-item-gi span="0:24 860:4" :show-feedback="false">
           <n-flex justify="space-around">
             <n-button attr-type="button" type="info" @click="publish(0)" :disabled="publishLoading">
               存草稿
