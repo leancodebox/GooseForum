@@ -2,7 +2,7 @@
 name = "app"
 env = "production" # APP_ENV in local,production
 debug = true
-
+enabled = false
 [server]
 url = "http://localhost"
 port = 99
