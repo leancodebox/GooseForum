@@ -18,6 +18,7 @@ import {computed, onMounted, ref} from "vue";
 import {useRouter, useRoute} from "vue-router";
 import {articlesReply, getArticlesDetailApi, getUserInfoShow} from "@/service/request";
 import ArticlesMdPage from "@/pages/home/bbs/MarkdownShow.vue";
+import '@/assets/github-markdown.css'
 import {useIsMobile, useIsSmallDesktop, useIsTablet} from "@/utils/composables";
 import {useUserStore} from "@/modules/user";
 import UserInfoCard from '@/components/UserInfoCard.vue'
