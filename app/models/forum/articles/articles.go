@@ -47,7 +47,7 @@ type Entity struct {
 	ViewCount     uint64     `gorm:"column:view_count;type:bigint unsigned;not null;default:0;" json:"viewCount"`   // 访问数量
 	ReplyCount    uint64     `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"` // 访问数量
 	CreatedAt     time.Time  `gorm:"column:created_at;autoCreateTime;" json:"createdAt"`                            //
-	UpdatedAt     time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
+	UpdatedAt     time.Time  `gorm:"column:updated_at;autoUpdateTime;index;" json:"updatedAt"`
 	DeletedAt     *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
 }
 
