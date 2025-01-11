@@ -21,28 +21,32 @@ var maintenanceHTML []byte = []byte(`
 			align-items: center;
 			height: 100vh;
 			margin: 0;
-			background: linear-gradient(135deg, #71b7e6, #9b59b6);
+			background: linear-gradient(135deg, #ff6f61, #6ab04c);
 		}
 		h1 {
-			color: #fff;
+			color: #333333;
 			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+			text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 		}
 		p {
-			color: #f0f0f0;
+			color: #333333;
 			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-			text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-			margin-top: 20px;
+			text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+			margin-top: 10px;
 		}
 		.container {
 			text-align: center;
+			background-color: rgba(255, 255, 255, 0.8);
+			padding: 40px;
+			border-radius: 10px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 		}
 	</style>
 </head>
 <body>
 	<div class="container">
-		<h1>抱歉，我们正在进行维护</h1>
-		<p>请稍后再试。感谢您的理解与支持！</p>
+		<h1>网站维护中</h1>
+		<p>我们正在进行系统升级，请稍后再试。感谢您的耐心等待与支持！</p>
 	</div>
 </body>
 </html>
