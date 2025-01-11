@@ -1,5 +1,5 @@
 <template>
-    <div class="markdown-body">
+    <div >
         <div v-html="compiledMarkdown"></div>
     </div>
 </template>
@@ -8,8 +8,9 @@
 import MarkdownIt from 'markdown-it'
 import {computed} from "vue";
 import hljs from 'highlight.js';
-// import 'highlight.js/styles/github.css';
-import 'highlight.js/styles/intellij-light.min.css';
+// import 'highlight.js/styles/intellij-light.min.css';
+import 'highlight.js/styles/atom-one-dark.min.css';
+import { useThemeStore } from '@/modules/theme';
 
 const props = defineProps({
     markdown: {
@@ -17,6 +18,8 @@ const props = defineProps({
         required: true
     }
 })
+
+const themeStore = useThemeStore();
 
 const compiledMarkdown = computed(() => {
     const md = new MarkdownIt({
@@ -27,6 +30,8 @@ const compiledMarkdown = computed(() => {
         typographer:  false,
         quotes: '""\'\'',
         highlight: function (str, lang) {
+            const theme = themeStore.isDarkTheme ? 'dark' : 'light';
+            console.log(`Current theme: ${theme}`);
             if (lang && hljs.getLanguage(lang)) {
                 try {
                     return '<pre class="hljs"><code>' + hljs.highlight(str, { language: lang }).value + '</code></pre>';
