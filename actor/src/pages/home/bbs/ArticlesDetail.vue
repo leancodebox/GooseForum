@@ -166,7 +166,7 @@ const isAuthor = computed(() => {
                    v-text="itemTag">
             </n-tag>
           </n-flex>
-          <articles-md-page :markdown="articleInfo.body"></articles-md-page>
+          <articles-md-page :content="articleInfo.body"></articles-md-page>
         </n-card>
 
         <!-- 评论卡片 -->
@@ -190,7 +190,7 @@ const isAuthor = computed(() => {
                     <span class="reply-to">回复 @{{ item.replyTo }}</span>
                   </div>
                 </template>
-                <articles-md-page :markdown="item.content"></articles-md-page>
+                <articles-md-page :content="item.content"></articles-md-page>
               </n-thing>
             </n-list-item>
           </n-list>

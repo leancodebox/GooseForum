@@ -59,12 +59,23 @@ instanceAxios.interceptors.response.use(response => {
         getMessage().error('登录已过期，请重新登录')
         userStore.clearUserInfo()
 
-        // 保存当前路由，以便登录后返回
+        // 获取当前路由路径
         const currentPath = router.currentRoute.value.fullPath
-        if (currentPath !== '/home/regOrLogin') {
+        
+        // 从 router.js 导入的需要登录的路由列表
+        const authRoutes = [
+            '/home/userCenter',
+            '/home/notificationCenter',
+            '/home/userEdit',
+            '/home/bbs/articlesEdit',
+            '/manager'
+        ]
+
+        // 只有当前路径需要登录时才跳转到登录页面
+        if (authRoutes.some(path => currentPath.startsWith(path))) {
             router.push({
                 path: '/home/regOrLogin',
-                query: {redirect: currentPath}
+                query: { redirect: currentPath }
             })
         }
         return Promise.reject(error)
