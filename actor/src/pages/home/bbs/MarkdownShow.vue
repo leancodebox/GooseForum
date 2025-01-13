@@ -9,7 +9,7 @@ import MarkdownIt from 'markdown-it'
 import {computed, onMounted, watch,nextTick} from "vue";
 import hljs from 'highlight.js';
 import {useThemeStore} from '@/modules/theme';
-import 'highlight.js/styles/atom-one-dark.css';
+import 'highlight.js/styles/atom-one-dark.min.css';
 
 const themeStore = useThemeStore();
 const props = defineProps({
@@ -46,8 +46,8 @@ const compiledMarkdown = computed(() => {
         highlight: function (str, lang) {
             if (lang && hljs.getLanguage(lang)) {
                 try {
-                    return '<pre class="hljs"><code class="language-' + lang + '">' 
-                           + hljs.highlight(str, { language: lang }).value 
+                    return '<pre class="hljs"><code class="language-' + lang + '">'
+                           + hljs.highlight(str, { language: lang }).value
                            + '</code></pre>';
                 } catch (err) {}
             }
@@ -84,7 +84,6 @@ const compiledMarkdown = computed(() => {
     position: relative;
     overflow-x: auto;
     overflow-y: hidden;
-    background-color: #282c34;
 }
 
 /* 行内代码样式 */
@@ -114,12 +113,12 @@ const compiledMarkdown = computed(() => {
 
 /* 浅色主题 */
 .markdown-content {
-    color: #24292e;
+
 }
 
 .markdown-content :not(pre) > code {
     background-color: rgba(175,184,193,0.2);
-    color: #24292e;
+
 }
 
 /* 深色主题 */
@@ -167,7 +166,7 @@ const compiledMarkdown = computed(() => {
     .markdown-content {
         padding: 16px;
     }
-    
+
     .markdown-content pre {
         padding: 12px;
         margin: 12px 0;
