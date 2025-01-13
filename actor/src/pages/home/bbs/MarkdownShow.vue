@@ -9,7 +9,7 @@ import MarkdownIt from 'markdown-it'
 import {computed, onMounted, watch,nextTick} from "vue";
 import hljs from 'highlight.js';
 import {useThemeStore} from '@/modules/theme';
-import 'highlight.js/styles/atom-one-dark.min.css';
+import 'highlight.js/styles/github-dark.css';
 
 const themeStore = useThemeStore();
 const props = defineProps({
