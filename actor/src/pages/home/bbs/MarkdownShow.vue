@@ -63,7 +63,7 @@ const compiledMarkdown = computed(() => {
 })
 </script>
 
-<style>
+<style scoped>
 /* 根据主题切换 markdown 样式 */
 .markdown-body {
     box-sizing: border-box;
