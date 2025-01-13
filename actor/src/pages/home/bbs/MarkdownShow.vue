@@ -82,7 +82,8 @@ const compiledMarkdown = computed(() => {
     padding: 16px;
     border-radius: 8px;
     position: relative;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     background-color: #282c34;
 }
 
@@ -101,7 +102,7 @@ const compiledMarkdown = computed(() => {
 .markdown-content pre > code {
     display: block;
     padding: 0;
-    overflow-x: auto;
+    overflow: visible;
     font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
     font-size: 14px;
     line-height: 1.6;
@@ -131,25 +132,35 @@ const compiledMarkdown = computed(() => {
     color: #c9d1d9;
 }
 
-/* 滚动条美化 */
+/* 滚动条样式 */
 .markdown-content pre::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
-}
-
-.markdown-content pre::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.2);
-    border-radius: 3px;
-    transition: all 0.3s ease;
-}
-
-.markdown-content pre::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.3);
+    width: 0;
+    height: 12px;
 }
 
 .markdown-content pre::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 3px;
+    background-color: transparent;
+}
+
+.markdown-content pre::-webkit-scrollbar-thumb {
+    background-color: rgba(69, 79, 89, 0.3);
+    border-radius: 6px;
+    border: 4px solid transparent;
+    background-clip: content-box;
+    transition: background-color .2s;
+}
+
+.markdown-content pre::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(69, 79, 89, 0.5);
+}
+
+/* 深色主题滚动条 */
+.markdown-content.dark-theme pre::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.markdown-content.dark-theme pre::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 @media (max-width: 767px) {
