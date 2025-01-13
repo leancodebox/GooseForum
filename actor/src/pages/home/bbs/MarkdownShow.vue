@@ -6,15 +6,12 @@
 
 <script setup>
 import MarkdownIt from 'markdown-it'
-import {computed, watch} from "vue";
+import {computed, onMounted, watch,nextTick} from "vue";
 import hljs from 'highlight.js';
 import {useThemeStore} from '@/modules/theme';
-// import 'highlight.js/styles/github.css'; // 浅色主题
-// import 'highlight.js/styles/github-dark.css'; // 深色主题
-import 'highlight.js/styles/atom-one-dark.css';   // 深色主题
+import 'highlight.js/styles/atom-one-dark.css';
 
 const themeStore = useThemeStore();
-
 const props = defineProps({
     markdown: {
         type: String,
@@ -22,31 +19,37 @@ const props = defineProps({
     }
 })
 
-// 监听主题变化，动态切换代码高亮样式
-watch(() => themeStore.isDarkTheme, (isDark) => {
-    const codeBlocks = document.querySelectorAll('pre code');
-    codeBlocks.forEach((block) => {
-        if (block.className) {
+// 重新高亮所有代码块
+const rehighlightCode = () => {
+    nextTick(() => {
+        document.querySelectorAll('.markdown-content pre code').forEach((block) => {
             hljs.highlightElement(block);
-        }
+        });
     });
-}, { immediate: true });
+}
+
+// 监听主题变化和markdown内容变化，重新应用高亮
+watch([() => themeStore.isDarkTheme, () => props.markdown], () => {
+    rehighlightCode();
+});
+
+// 组件挂载时初始化高亮
+onMounted(() => {
+    rehighlightCode();
+});
 
 const compiledMarkdown = computed(() => {
     const md = new MarkdownIt({
-        html:         true,
-        xhtmlOut:     false,
-        breaks:       true,
-        linkify:      false,
-        typographer:  false,
-        quotes: '""\'\'',
+        html: true,
+        breaks: true,
+        linkify: true,
         highlight: function (str, lang) {
             if (lang && hljs.getLanguage(lang)) {
                 try {
-                    return '<pre class="hljs"><code>' + hljs.highlight(str, { language: lang }).value + '</code></pre>';
-                } catch (err) {
-                    console.error(err);
-                }
+                    return '<pre class="hljs"><code class="language-' + lang + '">' 
+                           + hljs.highlight(str, { language: lang }).value 
+                           + '</code></pre>';
+                } catch (err) {}
             }
             return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>';
         }
@@ -69,115 +72,94 @@ const compiledMarkdown = computed(() => {
 .markdown-content {
     box-sizing: border-box;
     width: 100%;
-    padding: 45px;
+    padding: 24px;
     transition: all 0.3s ease;
 }
 
-@media (max-width: 767px) {
-    .markdown-content {
-        padding: 15px;
-    }
-}
-
-/* 代码块样式优化 */
-.markdown-content code,
-.markdown-content tt {
-    padding: .2em .4em;
-    margin: 0;
-    font-size: 85%;
-    white-space: pre-wrap;
-    border-radius: 6px;
-    word-break: break-word;
-}
-
-.markdown-content code br,
-.markdown-content tt br {
-    display: none;
-}
-
+/* 代码块容器样式 */
 .markdown-content pre {
-    margin-top: 0;
-    margin-bottom: 16px;
-    padding: 8px;
-    overflow: auto;
-    font-size: 85%;
-    line-height: 1.45;
+    margin: 16px 0;
+    padding: 16px;
     border-radius: 8px;
-    width: 100%;
     position: relative;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: auto;
+    background-color: #282c34;
 }
 
-.markdown-content pre code {
-    display: block;
-    max-width: 100%;
-    padding: 0;
-    margin: 0;
-    overflow-x: auto;
-    line-height: inherit;
-    word-wrap: normal;
-    border: 0;
-    border-radius: 6px;
+/* 行内代码样式 */
+.markdown-content :not(pre) > code {
+    padding: 0.2em 0.4em;
+    margin: 0 0.2em;
+    font-size: 85%;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    white-space: break-spaces;
+    word-wrap: break-word;
 }
 
+/* 代码块内容样式 */
 .markdown-content pre > code {
+    display: block;
     padding: 0;
-    margin: 0;
-    word-break: normal;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    tab-size: 4;
     white-space: pre;
-    background: transparent;
-    border: 0;
+    word-break: normal;
+    word-wrap: normal;
 }
 
-/* 代码字体设置 */
-.markdown-content code,
-.markdown-content pre {
-    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
-    font-size: 12px;
+/* 浅色主题 */
+.markdown-content {
+    color: #24292e;
 }
 
-/* 主题相关样式 */
-.markdown-content.dark-theme {
-    color: #c9d1d9;
-}
-
-.markdown-content.dark-theme pre {
-    background: #0d1117;
-    border: 1px solid #30363d;
-}
-
-.markdown-content.dark-theme code {
-    background-color: rgba(110,118,129,0.4);
-    color: #c9d1d9;
-}
-
-/* 浅色主题样式 */
-.markdown-content pre {
-    background: #ffffff;
-    border: 1px solid #e1e4e8;
-}
-
-.markdown-content code {
+.markdown-content :not(pre) > code {
     background-color: rgba(175,184,193,0.2);
     color: #24292e;
 }
 
-/* 代码块滚动条美化 */
+/* 深色主题 */
+.markdown-content.dark-theme {
+    color: #c9d1d9;
+}
+
+.markdown-content.dark-theme :not(pre) > code {
+    background-color: rgba(110,118,129,0.4);
+    color: #c9d1d9;
+}
+
+/* 滚动条美化 */
 .markdown-content pre::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
+    height: 6px;
+    width: 6px;
 }
 
 .markdown-content pre::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    transition: all 0.3s ease;
 }
 
-.markdown-content.dark-theme pre::-webkit-scrollbar-thumb {
-    background: #484848;
+.markdown-content pre::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.3);
 }
 
 .markdown-content pre::-webkit-scrollbar-track {
     background: transparent;
+    border-radius: 3px;
+}
+
+@media (max-width: 767px) {
+    .markdown-content {
+        padding: 16px;
+    }
+    
+    .markdown-content pre {
+        padding: 12px;
+        margin: 12px 0;
+    }
 }
 </style>

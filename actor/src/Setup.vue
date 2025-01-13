@@ -31,5 +31,5 @@ import SetupPage from './pages/setup/SetupPage.vue'
   </n-notification-provider>
 </template>
 
-<style>
+<style scoped>
 </style>

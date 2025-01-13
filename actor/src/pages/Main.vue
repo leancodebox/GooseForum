@@ -210,7 +210,7 @@ onUnmounted(() => {
   <n-layout
       class="n-layout-container"
       :style="{top: topHeight}"
-      :native-scrollbar="true"
+      :native-scrollbar="false"
       :position="'absolute'"
       content-style="display: flex; flex-direction: column; min-height: calc(100vh - var(--header-height));"
   >

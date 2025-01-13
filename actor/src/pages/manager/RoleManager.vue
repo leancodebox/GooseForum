@@ -189,7 +189,7 @@ function startAddRole() {
     />
   </n-flex>
 </template>
-<style>
+<style scoped>
 .carousel-img {
   width: 100%;
   height: 240px;
