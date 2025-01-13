@@ -298,7 +298,7 @@ const isAuthor = computed(() => {
 }
 
 /* 调整 markdown 内容的样式 */
-.comment-content :deep(.markdown-body) {
+.comment-content :deep(.markdown-content) {
   font-size: 14px;
   line-height: 1.6;
   margin: 0;
