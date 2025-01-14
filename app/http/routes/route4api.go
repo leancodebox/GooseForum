@@ -1,14 +1,15 @@
 package routes
 
 import (
+	"net/http"
+	"path"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
-	"net/http"
-	"path"
 )
 
 func setup(ginApp *gin.Engine) {

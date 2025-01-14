@@ -2,11 +2,8 @@ package console
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
-	"github.com/leancodebox/GooseForum/app/bundles/logging"
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"github.com/leancodebox/GooseForum/app/http/routes"
 	"log"
 	"log/slog"
 	"net/http"
@@ -14,6 +11,12 @@ import (
 	"os/signal"
 	"runtime"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/logging"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/app/http/routes"
+	"github.com/leancodebox/GooseForum/app/service/setupservice"
 
 	"github.com/spf13/cast"
 
@@ -46,21 +49,19 @@ func runWeb(_ *cobra.Command, _ []string) {
 			}
 		}()
 	}
+
+	//// 检查是否需要setup
+	//if !setupservice.IsInitialized() {
+	//	setupServe()
+	//}
+
+	// 启动主服务
 	ginServe()
 }
 
-const (
-	ENV      = "env"
-	EnvProd  = "production"
-	EnvLocal = "local"
-)
-
-var (
-	port   = preferences.GetString("server.port", 8080)
-	isProd = setting.IsProduction()
-)
-
 func ginServe() {
+	port := preferences.GetString("server.port", 8080)
+	isProd := setting.IsProduction()
 	var engine *gin.Engine
 	if isProd {
 		gin.DisableConsoleColor()
@@ -82,7 +83,7 @@ func ginServe() {
 	}
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
@@ -104,4 +105,45 @@ func ginServe() {
 	}
 	slog.Info("Server exiting")
 	logging.Shutdown()
+}
+
+func setupServe() error {
+	if setupservice.IsInitialized() {
+		return nil
+	}
+	port := "8080"
+	engine := gin.Default()
+
+	// 使用专门的setup路由注册函数
+	routes.SetupRegisterByGin(engine)
+
+	srv := &http.Server{
+		Addr:           ":" + port,
+		Handler:        engine,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	// 启动setup服务器
+	go func() {
+		slog.Info("Starting setup server on port " + port)
+		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("setup server listen: %s\n", err)
+		}
+	}()
+
+	// 等待setup完成
+	for !setupservice.IsInitialized() {
+		time.Sleep(1 * time.Second)
+	}
+
+	// setup完成后关闭服务器
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		slog.Error("Setup server shutdown:", err)
+	}
+	slog.Info("Setup completed, shutting down setup server")
+	return nil
 }
