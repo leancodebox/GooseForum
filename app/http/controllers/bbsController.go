@@ -96,6 +96,7 @@ type ArticlesSimpleDto struct {
 	TypeStr        string   `json:"typeStr,omitempty"`
 	Category       string   `json:"category,omitempty"`
 	Categories     []string `json:"categories,omitempty"`
+	CategoriesId   []uint64 `json:"categoriesId,omitempty"`
 	Tags           []string `json:"tags,omitempty"`
 	AvatarUrl      string   `json:"avatarUrl,omitempty"`
 }
@@ -107,6 +108,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 			Page:         max(param.Page, 1),
 			PageSize:     param.PageSize,
 			FilterStatus: true,
+			Categories:   param.Categories,
 		})
 	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
 		return t.UserId
@@ -153,8 +155,11 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 				CommentCount:   t.ReplyCount,
 				Category:       FirstOr(categoryNames, "未分类"),
 				Categories:     categoryNames,
-				Type:           t.Type,
-				TypeStr:        articlesTypeMap[int(t.Type)].Name,
+				CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
+					return rs.ArticleCategoryId
+				}),
+				Type:    t.Type,
+				TypeStr: articlesTypeMap[int(t.Type)].Name,
 			}
 		}),
 		pageData.Page,

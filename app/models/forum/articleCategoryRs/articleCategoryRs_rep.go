@@ -45,7 +45,7 @@ func GetByArticleIdsEffective(articleIds []uint64) (entities []*Entity) {
 	if len(articleIds) == 0 {
 		return
 	}
-	builder().Where("article_id IN ?", articleIds).Where(queryopt.Eq(fieldEffective, 1)).Find(&entities)
+	builder().Where("article_id IN (?)", articleIds).Where(queryopt.Eq(fieldEffective, 1)).Find(&entities)
 	return
 }
 

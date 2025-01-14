@@ -22,11 +22,16 @@ const siteStatistic = ref({
 const categories = ref(['全部']) // 初始只有"全部"选项
 const selectedCategories = ref(['全部'])
 
+// 添加一个新的 ref 来存储分类 ID 映射
+const categoryMap = ref(new Map()) // 用于存储分类名称到 ID 的映射
+
 // 获取分类数据的函数
 async function fetchCategories() {
   try {
     const response = await getArticleCategory()
     if (response.result) {
+      // 保存分类 ID 映射
+      categoryMap.value = new Map(response.result.map(item => [item.name, item.value]))
       // 添加分类数据，保持"全部"作为第一个选项
       categories.value = ['全部', ...response.result.map(item => item.name)]
     }
@@ -59,7 +64,12 @@ function selectCategory(category) {
 }
 
 function getArticlesAction(page = 1) {
-  getArticlesPageApi(page, pageSize.value).then(r => {
+  // 获取选中分类的 ID
+  const categoryIds = selectedCategories.value.includes('全部') 
+    ? [] 
+    : selectedCategories.value.map(name => categoryMap.value.get(name)).filter(id => id)
+
+  getArticlesPageApi(page, pageSize.value, '', categoryIds).then(r => {
     listData.value = r.result.list.map(function (item) {
       return {
         id: item.id,

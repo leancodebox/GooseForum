@@ -109,6 +109,8 @@ func Page[ResType SmallEntity | Entity](q PageQuery) struct {
 	}
 	if q.Categories != nil && len(q.Categories) > 0 {
 		b.Joins("left join article_category_rs on articles.id = article_category_rs.article_id")
+		b.Where("article_category_rs.article_category_id IN (?)", q.Categories)
+		b.Where("article_category_rs.effective = ? ", 1)
 		b.Group("articles.id")
 	}
 	var total int64

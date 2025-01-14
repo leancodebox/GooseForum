@@ -130,11 +130,12 @@ export function getArticleCategory() {
     return instanceAxios.get('bbs/get-articles-category')
 }
 
-export function getArticlesPageApi(page = 1, pageSize = 20, search = "") {
+export function getArticlesPageApi(page = 1, pageSize = 20, search = "", categories = []) {
     return instanceAxios.post('bbs/get-articles-page', {
         page: page,
         pageSize: pageSize,
-        search: search
+        search: search,
+        categories: categories
     })
 }
 
