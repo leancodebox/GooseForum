@@ -169,4 +169,24 @@ const compiledMarkdown = computed(() => {
     margin: 12px 0;
   }
 }
+
+/* 添加链接样式 */
+.markdown-content a {
+  color: #0969da;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+/* 深色主题下的链接样式 */
+.markdown-content.dark-theme a {
+  color: #58a6ff;
+}
+
+.markdown-content.dark-theme a:hover {
+  color: #79b8ff;
+}
 </style>

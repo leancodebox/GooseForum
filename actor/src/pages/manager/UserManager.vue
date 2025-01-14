@@ -16,6 +16,7 @@ import {
 import {h, onMounted, ref} from 'vue'
 import {editUser, getAllRoleItem, getUserList} from '@/service/request'
 import {Ref, UnwrapRef} from "@vue/reactivity";
+import {useThemeStore} from '@/modules/theme';
 
 const message = useMessage()
 type UserItem = {
@@ -178,6 +179,8 @@ function userEdit4Role() {
         message.success('更新成功')
       })
 }
+
+const themeStore = useThemeStore();
 </script>
 
 <template>
@@ -283,7 +286,7 @@ function userEdit4Role() {
     </n-space>
 
     <!-- 移动端分页 -->
-    <div class="mobile-pagination">
+    <div class="mobile-pagination" :class="{ 'dark-theme': themeStore.isDarkTheme }">
       <n-space justify="center" align="center">
         <n-button
             size="small"
@@ -347,5 +350,10 @@ function userEdit4Role() {
   background: white;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
   z-index: 1;
+}
+
+.mobile-pagination.dark-theme {
+  background: #18181c;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
 }
 </style>

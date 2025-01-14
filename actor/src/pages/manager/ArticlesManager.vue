@@ -3,9 +3,11 @@ import {DataTableColumns, NButton, NDataTable, NTag, useMessage, NCard, NSpace, 
 import {h, onMounted, reactive, ref} from 'vue'
 import {getAdminArticlesList, editArticle} from '@/service/request'
 import { useRouter } from 'vue-router'
+import {useThemeStore} from '@/modules/theme';
 
 const message = useMessage()
 const router = useRouter()
+const themeStore = useThemeStore();
 type ArticleItem = {
   id: string
   title: string
@@ -226,7 +228,7 @@ const handleView = (row: ArticleItem) => {
     </n-space>
 
     <!-- 移动端分页 -->
-    <div class="mobile-pagination">
+    <div class="mobile-pagination" :class="{ 'dark-theme': themeStore.isDarkTheme }">
       <n-space justify="center" align="center">
         <n-button
           size="small"
@@ -283,6 +285,11 @@ const handleView = (row: ArticleItem) => {
   padding: 12px;
   background: white;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-pagination.dark-theme {
+  background: #18181c;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* 为底部分页器留出空间 */
