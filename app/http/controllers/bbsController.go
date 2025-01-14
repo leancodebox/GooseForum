@@ -77,9 +77,10 @@ func GetArticlesCategory() component.Response {
 }
 
 type GetArticlesPageRequest struct {
-	Page     int    `form:"page"`
-	PageSize int    `form:"pageSize"`
-	Search   string `form:"search"`
+	Page       int    `form:"page"`
+	PageSize   int    `form:"pageSize"`
+	Search     string `form:"search"`
+	Categories []int  `form:"categories"`
 }
 
 type ArticlesSimpleDto struct {
@@ -101,7 +102,12 @@ type ArticlesSimpleDto struct {
 
 // GetArticlesPage 文章列表
 func GetArticlesPage(param GetArticlesPageRequest) component.Response {
-	pageData := articles.Page[articles.SmallEntity](articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, FilterStatus: true})
+	pageData := articles.Page[articles.SmallEntity](
+		articles.PageQuery{
+			Page:         max(param.Page, 1),
+			PageSize:     param.PageSize,
+			FilterStatus: true,
+		})
 	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
 		return t.UserId
 	})

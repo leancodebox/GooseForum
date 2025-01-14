@@ -78,6 +78,7 @@ type PageQuery struct {
 	Search         string
 	UserId         uint64
 	FilterStatus   bool
+	Categories     []int
 }
 
 func Page[ResType SmallEntity | Entity](q PageQuery) struct {
@@ -106,8 +107,14 @@ func Page[ResType SmallEntity | Entity](q PageQuery) struct {
 		b.Where(queryopt.Eq(fieldArticleStatus, 1))
 		b.Where(queryopt.Eq(fieldProcessStatus, 0))
 	}
+	if q.Categories != nil && len(q.Categories) > 0 {
+		b.Joins("left join article_category_rs on articles.id = article_category_rs.article_id")
+		b.Group("articles.id")
+	}
 	var total int64
-	b.Count(&total)
+	total = 1200
+	//b.Count(&total)
+	b.Select("articles.*")
 	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order("id desc").Find(&list)
 	return struct {
 		Page     int
