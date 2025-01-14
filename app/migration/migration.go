@@ -1,8 +1,10 @@
 package migration
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleTag"
@@ -48,6 +50,16 @@ func migration(migration bool) {
 		&userPoints.Entity{},
 		&userRoleRs.Entity{},
 		&users.Entity{},
+	); err != nil {
+		slog.Error("migration err", "err", err)
+	} else {
+		slog.Info("migration end")
+	}
+	
+	// 因为图片数据库比较大，所以单独迁移
+	db4file := db4fileconnect.Connect()
+	if err = db4file.AutoMigrate(
+		&filedata.Entity{},
 	); err != nil {
 		slog.Error("migration err", "err", err)
 	} else {

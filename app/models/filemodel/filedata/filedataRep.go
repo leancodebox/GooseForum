@@ -2,6 +2,7 @@ package filedata
 
 import (
 	"fmt"
+
 	queryopt "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 )
 
@@ -36,4 +37,33 @@ func GetByName(name string) (entity Entity) {
 func all() (entities []*Entity) {
 	builder().Find(&entities)
 	return
+}
+
+func SaveFile(name string, fileType string, data []byte) (*Entity, error) {
+	entity := &Entity{
+		Name: name,
+		Type: fileType,
+		Data: data,
+	}
+	affected := CreateOrSave(entity)
+	if affected == 0 {
+		return nil, fmt.Errorf("failed to save file")
+	}
+	return entity, nil
+}
+
+func GetFile(id uint64) (*Entity, error) {
+	entity := Get(id)
+	if entity.Id == 0 {
+		return nil, fmt.Errorf("file not found")
+	}
+	return &entity, nil
+}
+
+func GetFileByName(name string) (*Entity, error) {
+	entity := GetByName(name)
+	if entity.Id == 0 {
+		return nil, fmt.Errorf("file not found")
+	}
+	return &entity, nil
 }

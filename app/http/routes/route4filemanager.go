@@ -1,26 +1,22 @@
 package routes
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/cast"
-	"golang.org/x/image/draw"
-	"image"
-	"image/jpeg"
-	_ "image/png"
 	"io"
-	"math"
 	"net/http"
-	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
-)
 
-const maxImageLength = 1200
+	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
+	"github.com/spf13/cast"
+)
 
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
+
+	// 文件上传接口
 	r.POST("/img-upload", func(c *gin.Context) {
 		// 判断上传令牌是否合法
 		token := c.PostForm("token")
@@ -29,13 +25,13 @@ func fileServer(ginApp *gin.Engine) {
 			return
 		}
 
-		// 判断文件大小是否合法
+		// 获取上传的文件
 		file, err := c.FormFile("file")
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "File upload failed"})
 			return
 		}
-		if file.Size > 5*1024*1024 { // 限制文件大小为5MB
+		if file.Size > 2*1024*1024 { // 限制文件大小为2MB
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "File size too large"})
 			return
 		}
@@ -48,68 +44,81 @@ func fileServer(ginApp *gin.Engine) {
 		}
 		defer src.Close()
 
+		// 直接读取文件内容
+		fileData, err := io.ReadAll(src)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file"})
+			return
+		}
+
+		// 生成文件名
 		fileExt := path.Ext(file.Filename)
 		fileNameInt := time.Now().Unix()
 		fileNameStr := cast.ToString(fileNameInt)
 		fileName := fileNameStr + fileExt
 		folderName := time.Now().Format("2006/01/02")
-		folderPath := filepath.Join("./storage/uploads", folderName)
-		if err := os.MkdirAll(folderPath, os.ModePerm); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "File create failed"})
-			return
-		}
+		filePath := filepath.Join(folderName, fileName)
 
-		// 创建目标文件
-		filePath := filepath.Join(folderPath, fileName)
-		dst, err := os.Create(filePath)
+		// 保存到数据库
+		entity, err := filedata.SaveFile(filePath, "image", fileData)
 		if err != nil {
-			fmt.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "File create failed"})
-			return
-		}
-		defer dst.Close()
-
-		// 缩放图片
-		err = scaleImage(src, dst)
-		if err != nil {
-			fmt.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Image scaling failed"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
 			return
 		}
 
-		c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully", fileName))
+		c.JSON(http.StatusOK, gin.H{
+			"message": "File uploaded successfully",
+			//"id":      entity.Id,
+			"name": entity.Name,
+		})
 	})
-}
 
-func scaleImage(src io.Reader, dst io.Writer) error {
-	img, _, err := image.Decode(src)
-	if err != nil {
-		return err
-	}
-
-	bounds := img.Bounds()
-	width := bounds.Dx()
-	height := bounds.Dy()
-
-	if width > maxImageLength || height > maxImageLength {
-		ratio := float64(maxImageLength) / math.Max(float64(width), float64(height))
-
-		newWidth := int(float64(width) * ratio)
-		newHeight := int(float64(height) * ratio)
-
-		resizedImg := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
-		draw.CatmullRom.Scale(resizedImg, resizedImg.Bounds(), img, img.Bounds(), draw.Over, nil)
-
-		err := jpeg.Encode(dst, resizedImg, nil)
-		if err != nil {
-			return err
+	// 文件获取接口
+	r.GET("/img/:id", func(c *gin.Context) {
+		id := cast.ToUint64(c.Param("id"))
+		if id == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file ID"})
+			return
 		}
-	} else {
-		_, err := io.Copy(dst, src)
-		if err != nil {
-			return err
-		}
-	}
 
-	return nil
+		entity, err := filedata.GetFile(id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+			return
+		}
+
+		// 设置内容类型
+		contentType := "image/jpeg"
+		if strings.HasSuffix(entity.Name, ".png") {
+			contentType = "image/png"
+		}
+		c.Header("Content-Type", contentType)
+		c.Header("Content-Disposition", "inline")
+
+		c.Data(http.StatusOK, contentType, entity.Data)
+	})
+
+	r.GET("/image/*filepath", func(c *gin.Context) {
+		id := c.Param("filepath")
+		if id == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid filepath"})
+			return
+		}
+		id = strings.TrimPrefix(id, "/")
+		entity, err := filedata.GetFileByName(id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+			return
+		}
+
+		// 设置内容类型
+		contentType := "image/jpeg"
+		if strings.HasSuffix(entity.Name, ".png") {
+			contentType = "image/png"
+		}
+		c.Header("Content-Type", contentType)
+		c.Header("Content-Disposition", "inline")
+
+		c.Data(http.StatusOK, contentType, entity.Data)
+	})
 }
