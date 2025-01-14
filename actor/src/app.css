@@ -4,7 +4,7 @@
     margin: 0;
 }
 
-/* 
+/*
  * 设置body为固定定位，占满整个视口
  * 这样可以防止页面滚动，所有滚动都在内部容器中进行
  */
@@ -26,7 +26,7 @@ a {
     text-decoration: none
 }
 
-/* 
+/*
  * 禁用html的滚动条
  * 因为我们使用固定定位的body，所以不需要html层的滚动
  */
@@ -35,11 +35,26 @@ html {
 }
 
 :root {
-  --footer-bg-color: #f0f3f5; /* Default light theme footer background */
-  --footer-text-color: #000000; /* Default light theme footer text */
+    --footer-bg-color: #f0f3f5; /* Default light theme footer background */
+    --footer-text-color: #000000; /* Default light theme footer text */
 }
 
 .dark-theme {
-  --footer-bg-color: #1a1a1a; /* Dark theme footer background */
-  --footer-text-color: #ffffff; /* Dark theme footer text */
+    --footer-bg-color: #1a1a1a; /* Dark theme footer background */
+    --footer-text-color: #ffffff; /* Dark theme footer text */
+}
+
+a {
+    color: #0969da;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+/* 深色主题下的链接样式 */
+.dark-theme a {
+    color: #58a6ff;
+}
+
+.dark-theme a:hover {
+    color: #79b8ff;
 }
