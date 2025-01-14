@@ -117,7 +117,7 @@ func Page[ResType SmallEntity | Entity](q PageQuery) struct {
 	total = 1200
 	//b.Count(&total)
 	b.Select("articles.*")
-	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order("id desc").Find(&list)
+	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order("articles.updated_at desc").Find(&list)
 	return struct {
 		Page     int
 		PageSize int
