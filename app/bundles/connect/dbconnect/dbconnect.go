@@ -14,7 +14,6 @@ import (
 //}
 
 var (
-	dbConfig      = preferences.GetExclusivePreferences("db.default")
 	isSqlite bool = false
 	once          = new(sync.Once)
 )
@@ -24,6 +23,7 @@ var dbIns *gorm.DB
 
 func Connect() *gorm.DB {
 	once.Do(func() {
+		dbConfig := preferences.GetExclusivePreferences("db.default")
 		res := sqlconnect.GetConnectByPreferences(dbConfig)
 		dbIns = res.Connect
 		isSqlite = res.IsSqlite()

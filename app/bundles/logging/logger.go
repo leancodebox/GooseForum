@@ -33,7 +33,7 @@ func ErrIf(err error) bool {
 
 var (
 	debug      = setting.IsDebug()
-	logType    = preferences.Get("log.type")
+	logType    = preferences.Get("log.type", LogTypeStdout)
 	logPath    = preferences.Get("log.path", "./storage/logs/run.log")
 	rolling    = preferences.GetBool("log.rolling", false)
 	maxAge     = preferences.GetInt("log.maxAge", 30)
