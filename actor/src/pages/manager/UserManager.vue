@@ -13,7 +13,7 @@ import {
   NTag,
   useMessage
 } from 'naive-ui'
-import {h, onMounted, ref} from 'vue'
+import {h, onMounted, ref, reactive} from 'vue'
 import {editUser, getAllRoleItem, getUserList} from '@/service/request'
 import {Ref, UnwrapRef} from "@vue/reactivity";
 import {useThemeStore} from '@/modules/theme';
@@ -37,13 +37,37 @@ function checkScreenSize() {
   isSmallScreen.value = window.innerWidth < 800
 }
 
+// 修改分页配置为响应式
+const paginationReactive = reactive({
+  page: 1,
+  pageCount: 1,
+  pageSize: 10,
+  itemCount: 0,
+  prefix({itemCount}) {
+    return `共 ${itemCount} 条`
+  }
+})
+
+// 修改获取用户列表的函数
+async function searchPage(page: number) {
+  try {
+    let res = await getUserList(page)
+    data.value = res.result.list
+    paginationReactive.page = page
+    paginationReactive.pageCount = parseInt(String(res.result.total / res.result.size))
+    paginationReactive.itemCount = res.result.total
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 onMounted(() => {
   checkScreenSize()
   window.addEventListener('resize', checkScreenSize)
   getAllRoleItem().then(r => {
     roleOption.value = r.result
   })
-  showUserList()
+  searchPage(1)
 })
 
 let columns = [
@@ -133,14 +157,6 @@ let columns = [
 ]
 
 let roleOption = ref([])
-let pagination = {
-  page: 1,
-  pageSize: 10,
-  itemCount: 0,
-  prefix({itemCount}) {
-    return `共 ${itemCount} 条`
-  }
-}
 
 let showModal = ref(false)
 let userEntity = ref({
@@ -164,18 +180,12 @@ function handleEdit(row: UserItem) {
   }
 }
 
-function showUserList() {
-  getUserList().then(r => {
-    data.value = r.result.list
-  })
-}
-
 function userEdit4Role() {
   let req = userEntity.value
   editUser(req.userId, req.status, req.validate, req.roleId)
       .then(() => {
         showModal.value = false
-        showUserList()
+        searchPage(1)
         message.success('更新成功')
       })
 }
@@ -224,7 +234,7 @@ const themeStore = useThemeStore();
     <n-data-table
         :columns="columns"
         :data="data"
-        :pagination="pagination"
+        :pagination="paginationReactive"
         :bordered="false"
         striped
         flex-height
@@ -290,15 +300,16 @@ const themeStore = useThemeStore();
       <n-space justify="center" align="center">
         <n-button
             size="small"
-            :disabled="pagination.page === 1"
-            @click="pagination.page--"
+            :disabled="paginationReactive.page === 1"
+            @click="searchPage(paginationReactive.page - 1)"
         >
           上一页
         </n-button>
-        <span>{{ pagination.page }}</span>
+        <span>{{ paginationReactive.page }} / {{ paginationReactive.pageCount }}</span>
         <n-button
             size="small"
-            @click="pagination.page++"
+            :disabled="paginationReactive.page === paginationReactive.pageCount"
+            @click="searchPage(paginationReactive.page + 1)"
         >
           下一页
         </n-button>
@@ -310,7 +321,6 @@ const themeStore = useThemeStore();
 <style scoped>
 .mobile-view {
   padding: 8px;
-  padding-bottom: 60px;
 }
 
 .user-card {
@@ -349,11 +359,15 @@ const themeStore = useThemeStore();
   padding: 12px;
   background: white;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
-  z-index: 1;
 }
 
 .mobile-pagination.dark-theme {
   background: #18181c;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 为底部分页器留出空间 */
+.mobile-view {
+  padding-bottom: 60px;
 }
 </style>
