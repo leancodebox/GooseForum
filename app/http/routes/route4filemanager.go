@@ -31,6 +31,14 @@ func fileServer(ginApp *gin.Engine) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "File upload failed"})
 			return
 		}
+
+		// 检查文件类型
+		contentType, err := filedata.CheckImageType(file.Filename)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
 		if file.Size > 2*1024*1024 { // 限制文件大小为2MB
 			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "File size too large"})
 			return
@@ -51,7 +59,7 @@ func fileServer(ginApp *gin.Engine) {
 			return
 		}
 
-		// 生成文件名
+		// 生成文件名和路径
 		fileExt := path.Ext(file.Filename)
 		fileNameInt := time.Now().Unix()
 		fileNameStr := cast.ToString(fileNameInt)
@@ -60,7 +68,7 @@ func fileServer(ginApp *gin.Engine) {
 		filePath := filepath.Join(folderName, fileName)
 
 		// 保存到数据库
-		entity, err := filedata.SaveFile(filePath, "image", fileData)
+		entity, err := filedata.SaveFile(filePath, contentType, fileData)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
 			return
@@ -68,57 +76,28 @@ func fileServer(ginApp *gin.Engine) {
 
 		c.JSON(http.StatusOK, gin.H{
 			"message": "File uploaded successfully",
-			//"id":      entity.Id,
-			"name": entity.Name,
+			"name":    entity.Name,
 		})
 	})
 
-	// 文件获取接口
-	r.GET("/img/:id", func(c *gin.Context) {
-		id := cast.ToUint64(c.Param("id"))
-		if id == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file ID"})
+	// 文件获取接口 - 通过路径
+	r.GET("/img/*filename", func(c *gin.Context) {
+		filename := c.Param("filename")
+		if filename == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid filename"})
 			return
 		}
+		filename = strings.TrimPrefix(filename, "/")
 
-		entity, err := filedata.GetFile(id)
+		entity, err := filedata.GetFileByName(filename)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
 			return
 		}
 
-		// 设置内容类型
-		contentType := "image/jpeg"
-		if strings.HasSuffix(entity.Name, ".png") {
-			contentType = "image/png"
-		}
-		c.Header("Content-Type", contentType)
+		c.Header("Content-Type", entity.Type)
 		c.Header("Content-Disposition", "inline")
-
-		c.Data(http.StatusOK, contentType, entity.Data)
+		c.Data(http.StatusOK, entity.Type, entity.Data)
 	})
 
-	r.GET("/image/*filepath", func(c *gin.Context) {
-		id := c.Param("filepath")
-		if id == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid filepath"})
-			return
-		}
-		id = strings.TrimPrefix(id, "/")
-		entity, err := filedata.GetFileByName(id)
-		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
-			return
-		}
-
-		// 设置内容类型
-		contentType := "image/jpeg"
-		if strings.HasSuffix(entity.Name, ".png") {
-			contentType = "image/png"
-		}
-		c.Header("Content-Type", contentType)
-		c.Header("Content-Disposition", "inline")
-
-		c.Data(http.StatusOK, contentType, entity.Data)
-	})
 }

@@ -2,9 +2,30 @@ package filedata
 
 import (
 	"fmt"
+	"path"
+	"strings"
 
 	queryopt "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 )
+
+// 添加支持的图片类型映射
+var supportedImageTypes = map[string]string{
+	".jpg":  "image/jpeg",
+	".jpeg": "image/jpeg",
+	".png":  "image/png",
+	".gif":  "image/gif",
+	".webp": "image/webp",
+	".bmp":  "image/bmp",
+}
+
+// CheckImageType 检查文件类型是否支持，返回对应的 Content-Type
+func CheckImageType(filename string) (string, error) {
+	ext := strings.ToLower(path.Ext(filename))
+	if contentType, ok := supportedImageTypes[ext]; ok {
+		return contentType, nil
+	}
+	return "", fmt.Errorf("unsupported image type: %s", ext)
+}
 
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
