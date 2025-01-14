@@ -415,7 +415,9 @@ func DeleteCategory(req component.BetterRequest[struct {
 	if entity.Id == 0 {
 		return component.FailResponse("分类不存在")
 	}
-
+	if articleCategory.Count() == 1 {
+		return component.FailResponse("至少保留1个分类")
+	}
 	articleCategory.DeleteEntity(&entity)
 	return component.SuccessResponse(true)
 }

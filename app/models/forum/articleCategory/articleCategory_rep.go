@@ -47,6 +47,12 @@ func All() (entities []*Entity) {
 	return
 }
 
+func Count() int64 {
+	var total int64
+	builder().Count(&total)
+	return total
+}
+
 // GetByIds 根据ID列表获取分类列表
 func GetByIds(ids []uint64) (entities []*Entity) {
 	if len(ids) == 0 {
