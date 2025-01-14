@@ -1,7 +1,7 @@
 <script setup>
 import {NAvatar, NCard, NFlex, NIcon, NList, NListItem, NPagination, NStatistic, NTag, NThing} from 'naive-ui'
 import {onMounted, ref} from "vue";
-import {getArticlesPageApi, gtSiteStatistics} from "@/service/request";
+import {getArticleCategory, getArticlesPageApi, gtSiteStatistics} from "@/service/request";
 import {useIsMobile, useIsTablet} from "@/utils/composables";
 import {useRoute, useRouter} from 'vue-router';
 
@@ -19,8 +19,21 @@ const siteStatistic = ref({
 })
 
 // 新增：分类状态
-const categories = ref(['全部', '技术', '文章', 'bn']) // 示例分类
+const categories = ref(['全部']) // 初始只有"全部"选项
 const selectedCategories = ref(['全部'])
+
+// 获取分类数据的函数
+async function fetchCategories() {
+  try {
+    const response = await getArticleCategory()
+    if (response.result) {
+      // 添加分类数据，保持"全部"作为第一个选项
+      categories.value = ['全部', ...response.result.map(item => item.name)]
+    }
+  } catch (error) {
+    console.error('获取分类失败:', error)
+  }
+}
 
 // 新增：选择分类的处理函数
 function selectCategory(category) {
@@ -42,6 +55,7 @@ function selectCategory(category) {
     }
   }
   // 此处可添加根据选择的分类过滤文章的逻辑
+  getArticlesAction(1) // 选择分类后重新获取第一页数据
 }
 
 function getArticlesAction(page = 1) {
@@ -81,9 +95,15 @@ function handlePageChange(page) {
 onMounted(async () => {
   const pageFromUrl = parseInt(route.query.page) || 1;
   currentPage.value = pageFromUrl;
-  getArticlesAction(pageFromUrl)
-  let resp = await gtSiteStatistics()
-  siteStatistic.value = resp.result
+  
+  // 并行获取数据
+  await Promise.all([
+    getArticlesAction(pageFromUrl),
+    gtSiteStatistics().then(resp => {
+      siteStatistic.value = resp.result
+    }),
+    fetchCategories() // 添加这行来获取分类数据
+  ])
 })
 
 const text = ref('金色传说') // 需要进行高亮的文本
