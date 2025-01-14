@@ -28,7 +28,6 @@ func HandleFileUpload(c *gin.Context, fieldName string) ([]byte, string, error) 
 	return fileData, file.Filename, nil
 }
 
-
 func FilePath(filename string) string {
-	return filepath.Join("file/img",filename)
+	return filepath.Join("/file/img", filename)
 }
