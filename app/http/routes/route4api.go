@@ -1,37 +1,20 @@
 package routes
 
 import (
-	"net/http"
-	"path"
-
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
+	"net/http"
+	"path"
 )
 
 func setup(ginApp *gin.Engine) {
 	setupGroup := ginApp.Group("api/setup")
 	setupGroup.GET("status", UpButterReq(controllers.GetSetupStatus))
 	setupGroup.POST("init", UpButterReq(controllers.InitialSetup))
-}
-
-func api(ginApp *gin.Engine) {
-	apiGroup := ginApp.Group("api")
-	apiGroup.GET("about", ginUpNP(controllers.About))
-
-	// 权限组合判断/上面的代码为 fullpath的获取，下面的代码为所有routes的获取，
-	// 两者配合就可以实现基于接口权限设置的底层资源配置，和拦截
-	//ginApp.GET("fullpath/:name/:id", func(c *gin.Context) {
-	//	c.JSON(200, map[string]any{
-	//		"f": c.FullPath(),
-	//	})
-	//})
-	//for _, item := range ginApp.Routes() {
-	//	fmt.Println(item.Path)
-	//}
 }
 
 func auth(ginApp *gin.Engine) {
@@ -108,5 +91,16 @@ func bbs(ginApp *gin.Engine) {
 	admin.POST("category-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.GetCategoryList))
 	admin.POST("category-save", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.SaveCategory))
 	admin.POST("category-delete", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.DeleteCategory))
+
+}
+
+func fileServer(ginApp *gin.Engine) {
+	r := ginApp.Group("file")
+
+	// 文件上传接口
+	r.POST("/img-upload", middleware.JWTAuth4Gin, controllers.SaveFileByGinContext)
+
+	// 文件获取接口 - 通过路径
+	r.GET("/img/*filename", controllers.GetFileByFileName)
 
 }

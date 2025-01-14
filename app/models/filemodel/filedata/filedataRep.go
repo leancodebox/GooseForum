@@ -68,7 +68,7 @@ func SaveFile(name string, fileType string, data []byte) (*Entity, error) {
 	}
 	affected := CreateOrSave(entity)
 	if affected == 0 {
-		return nil, fmt.Errorf("failed to save file")
+		return nil, fmt.Errorf("failed to save file, possibly duplicate name")
 	}
 	return entity, nil
 }
