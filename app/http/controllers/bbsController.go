@@ -142,7 +142,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 			if user, ok := userMap[t.UserId]; ok {
 				username = user.Username
 				if user.AvatarUrl != "" {
-					avatarUrl = "/api" + user.AvatarUrl
+					avatarUrl = component.FilePath(user.AvatarUrl)
 				}
 			}
 			return ArticlesSimpleDto{

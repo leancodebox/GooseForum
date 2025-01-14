@@ -1,14 +1,10 @@
 package controllers
 
 import (
-	"fmt"
+	"io"
 	"log/slog"
-	"os"
-	"path"
 	"strconv"
 	"time"
-
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
 
 	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -18,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/spf13/cast"
 )
 
@@ -124,7 +121,7 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 	// 处理头像URL
 	avatarUrl := ""
 	if userEntity.AvatarUrl != "" {
-		avatarUrl = "/api" + userEntity.AvatarUrl
+		avatarUrl = component.FilePath(userEntity.AvatarUrl)
 	}
 
 	// 检查用户是否有任意角色（是否是管理员）
@@ -195,7 +192,7 @@ func GetUserInfo(req GetUserInfoReq) component.Response {
 	// 如果有头像，添加域名前缀
 	avatarUrl := ""
 	if user.AvatarUrl != "" {
-		avatarUrl = "/api" + user.AvatarUrl
+		avatarUrl = component.FilePath(user.AvatarUrl)
 	}
 
 	return component.SuccessResponse(UserInfoShow{
@@ -237,57 +234,36 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	// 验证文件类型
-	if !isValidImageType(file.Header.Get("Content-Type")) {
-		c.JSON(200, component.FailData("不支持的文件类型"))
+	// 打开上传的文件
+	src, err := file.Open()
+	if err != nil {
+		c.JSON(200, component.FailData("打开文件失败"))
+		return
+	}
+	defer src.Close()
+
+	// 读取文件内容
+	fileData, err := io.ReadAll(src)
+	if err != nil {
+		c.JSON(200, component.FailData("读取文件失败"))
 		return
 	}
 
-	// 验证文件大小（2MB）
-	if file.Size > 2*1024*1024 {
-		c.JSON(200, component.FailData("文件大小不能超过2MB"))
-		return
-	}
-
-	// 生成文件名
-	filename := fmt.Sprintf("avatar_%d_%d%s",
-		userId,
-		time.Now().Unix(),
-		path.Ext(file.Filename))
-
-	// 保存路径
-	avatarPath := path.Join(setting.GetStorage(), "avatars", filename)
-
-	// 确保目录存在
-	if err := os.MkdirAll(path.Dir(avatarPath), 0755); err != nil {
-		c.JSON(200, component.FailData("创建目录失败"))
-		return
-	}
-
-	// 保存文件
-	if err := c.SaveUploadedFile(file, avatarPath); err != nil {
-		c.JSON(200, component.FailData("保存文件失败"))
+	// 保存头像
+	fileEntity, err := filedata.SaveAvatar(userId, fileData, file.Filename)
+	if err != nil {
+		c.JSON(200, component.FailData("保存文件失败: "+err.Error()))
 		return
 	}
 
 	// 更新用户头像信息
-	avatarUrl := "/avatars/" + filename
-	userEntity.AvatarUrl = avatarUrl
+	userEntity.AvatarUrl = fileEntity.Name
 	if err := users.Save(&userEntity); err != nil {
 		c.JSON(200, component.FailData("更新用户信息失败"))
 		return
 	}
 
 	c.JSON(200, component.SuccessData(map[string]string{
-		"avatarUrl": "/api" + avatarUrl,
+		"avatarUrl": component.FilePath(fileEntity.Name),
 	}))
-}
-
-func isValidImageType(contentType string) bool {
-	validTypes := map[string]bool{
-		"image/jpeg": true,
-		"image/png":  true,
-		"image/gif":  true,
-	}
-	return validTypes[contentType]
 }

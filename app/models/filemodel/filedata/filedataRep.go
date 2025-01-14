@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"time"
 
+	"github.com/google/uuid"
 	queryopt "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 )
 
@@ -87,4 +89,44 @@ func GetFileByName(name string) (*Entity, error) {
 		return nil, fmt.Errorf("file not found")
 	}
 	return &entity, nil
+}
+
+// SaveFileFromUpload 处理文件上传的通用方法
+func SaveFileFromUpload(fileData []byte, filename string, customPath string) (*Entity, error) {
+	// 验证文件大小
+	if len(fileData) > MaxFileSize {
+		return nil, fmt.Errorf("file size exceeds maximum limit of 2MB")
+	}
+
+	// 检查文件类型
+	contentType, err := CheckImageType(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	// 生成文件路径
+	fileExt := path.Ext(filename)
+	newFilename := fmt.Sprintf("%s/%s%s",
+		customPath,
+		uuid.New().String(),
+		fileExt)
+
+	// 保存文件
+	return SaveFile(newFilename, contentType, fileData)
+}
+
+// 在 supportedImageTypes 映射后添加新的常量
+const (
+	MaxFileSize = 2 * 1024 * 1024 // 2MB
+	AvatarPath  = "avatars"
+)
+
+// SaveAvatar 现在可以基于通用方法实现
+func SaveAvatar(userId uint64, fileData []byte, filename string) (*Entity, error) {
+	avatarPath := fmt.Sprintf("%s/avatar_%d_%d",
+		AvatarPath,
+		userId,
+		time.Now().Unix())
+
+	return SaveFileFromUpload(fileData, filename, avatarPath)
 }
