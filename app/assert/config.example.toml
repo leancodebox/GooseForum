@@ -18,6 +18,15 @@ maxIdleConnections = 50
 maxOpenConnections = 50
 maxLifeSeconds = 300
 
+[db.file]
+connection = "sqlite"# in mysql sqlite
+url = "root:root_password@tcp(127.0.0.1:3306)/goose_forum?charset=utf8mb4&parseTime=True&loc=Local"
+path = "./storage/database/file.db"# :memory:|./storage/database/sqlite.db
+
+maxIdleConnections = 50
+maxOpenConnections = 50
+maxLifeSeconds = 300
+
 [log]
 type = "stdout"# LOG_TYPE stdout,file
 path = "./storage/logs/run.log"
