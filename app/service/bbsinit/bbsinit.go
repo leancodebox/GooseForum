@@ -42,20 +42,7 @@ func DBInit() {
 
 func DataInit() {
 	dataList := []articleCategory.Entity{
-		{Category: "Code"},
-		{Category: "Go"},
-		{Category: "PHP"},
-		{Category: "Python"},
-		{Category: "Web"},
-		{Category: "Server"},
-		{Category: "App"},
-		{Category: "Vue.js"},
-		{Category: "Java"},
-		{Category: "MySQL"},
-		{Category: "Rust"},
-		{Category: "Server"},
-		{Category: "Database"},
-		{Category: "Math"},
+		{Category: "passion"},
 	}
 	has := articleCategory.Get(1)
 	if has.Id == 0 {
