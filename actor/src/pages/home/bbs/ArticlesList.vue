@@ -65,8 +65,8 @@ function selectCategory(category) {
 
 function getArticlesAction(page = 1) {
   // 获取选中分类的 ID
-  const categoryIds = selectedCategories.value.includes('全部') 
-    ? [] 
+  const categoryIds = selectedCategories.value.includes('全部')
+    ? []
     : selectedCategories.value.map(name => categoryMap.value.get(name)).filter(id => id)
 
   getArticlesPageApi(page, pageSize.value, '', categoryIds).then(r => {
@@ -105,7 +105,7 @@ function handlePageChange(page) {
 onMounted(async () => {
   const pageFromUrl = parseInt(route.query.page) || 1;
   currentPage.value = pageFromUrl;
-  
+
   // 并行获取数据
   await Promise.all([
     getArticlesAction(pageFromUrl),
@@ -218,6 +218,7 @@ const isTablet = useIsTablet()
         <n-list-item>
           <div class="pagination-wrapper">
             <n-pagination
+                :page-slot="7"
                 v-model:page="currentPage"
                 v-model:page-size="pageSize"
                 :page-count="Math.ceil(total / pageSize)"
