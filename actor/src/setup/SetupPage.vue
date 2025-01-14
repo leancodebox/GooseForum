@@ -1,8 +1,8 @@
 <script setup>
 import {onMounted, ref} from 'vue'
 import {NButton, NCard, NForm, NFormItem, NInput, NResult, NSelect, NSpace, NStep, NSteps} from 'naive-ui'
-import {getSetupStatus, submitSetup} from '@/service/request4setup.js'
-import {enqueueMessage} from '@/service/messageManager'
+import {getSetupStatus, submitSetup} from '@/setup/request4setup.js'
+import {enqueueMessage} from '@/setup/messageManager.js'
 
 const isLoading = ref(false)
 const currentStep = ref(0)

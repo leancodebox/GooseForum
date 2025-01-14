@@ -9,7 +9,7 @@ import {
   zhCN
 } from 'naive-ui'
 
-import SetupPage from './pages/setup/SetupPage.vue'
+import SetupPage from '@/setup/SetupPage.vue'
 </script>
 
 <template>

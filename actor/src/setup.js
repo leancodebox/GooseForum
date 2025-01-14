@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import Setup from './Setup.vue'
+import Setup from './setup/Setup.vue'
 
 
 

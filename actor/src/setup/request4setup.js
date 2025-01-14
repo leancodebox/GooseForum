@@ -1,7 +1,7 @@
 import axios from "axios"
-import { enqueueMessage } from './messageManager'
-import router from '@/route/router'
-import { useUserStore } from '@/modules/user'
+import { enqueueMessage } from './messageManager.js'
+import router from '@/route/router.js'
+import { useUserStore } from '@/modules/user.js'
 
 const instanceAxios = axios.create({
     baseURL: import.meta.env.VITE_DEV_API_HOST,
