@@ -80,6 +80,7 @@ onMounted(() => {
 
     <div class="pagination" v-if="pagination.total > 0">
       <n-pagination
+          :page-slot="7"
           :page="pagination.page"
           :page-size="pagination.pageSize"
           :page-count="pagination.pageCount"
