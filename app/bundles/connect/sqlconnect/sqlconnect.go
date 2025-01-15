@@ -1,16 +1,19 @@
 package sqlconnect
 
 import (
+	"fmt"
+	"log/slog"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log/slog"
-	"os"
-	"path/filepath"
-	"time"
 )
 
 var debug = setting.IsDebug()
@@ -38,7 +41,7 @@ func GetConnectByPreferences(preferences preferences.ExclusivePreferences) Conne
 	c := Config{
 		Connection:         preferences.Get(`connection`, `sqlite`),
 		DbUrl:              preferences.Get(`url`),
-		DbPath:             preferences.Get(`path`, `storage/database/sqlite4file.db`),
+		DbPath:             preferences.Get(`path`, `:memory:`),
 		MaxIdleConnections: preferences.GetInt(`maxIdleConnections`, 2),
 		MaxOpenConnections: preferences.GetInt(`maxOpenConnections`, 2),
 		MaxLifeSeconds:     preferences.GetInt(`maxLifeSeconds`, 60),
@@ -111,9 +114,22 @@ func connectSqlLiteDB(dbPath string) (*gorm.DB, error) {
 	} else if err := createFileIfNotExists(dbPath); err != nil {
 		return nil, err
 	}
-	db, err := gorm.Open(sqlite.Open(dbPath+"?_pragma=busy_timeout(5000)"), &gorm.Config{
+
+	// 构建 SQLite DSN，启用 WAL 模式和其他优化配置
+	dsn := buildSQLiteDSN(dbPath, map[string]string{
+		"journal_mode":       "WAL",
+		"cache_size":         "-20000",
+		"synchronous":        "NORMAL",
+		"journal_size_limit": "1048576",
+		"wal_autocheckpoint": "1000",
+		"page_size":          "8192",
+		"busy_timeout":       "5000",
+	})
+
+	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{
 		Logger: logging.NewGormLogger(),
 	})
+
 	return db, err
 }
 
@@ -128,4 +144,52 @@ func createFileIfNotExists(filePath string) error {
 		}
 	}
 	return nil
+}
+
+func buildSQLiteDSN(filepath string, config map[string]string) string {
+	// 如果 filepath 已经包含参数，则拆分路径和参数
+	basePath := filepath
+	existingParams := make(map[string]string)
+	if idx := strings.Index(filepath, "?"); idx != -1 {
+		basePath = filepath[:idx]
+		paramStr := filepath[idx+1:]
+
+		// 解析已有的参数
+		for _, param := range strings.Split(paramStr, "&") {
+			if strings.HasPrefix(param, "_pragma=") {
+				// 提取 _pragma 的值
+				pragmaValue := strings.TrimPrefix(param, "_pragma=")
+				// 拆分 key 和 value
+				if pidx := strings.Index(pragmaValue, "("); pidx != -1 {
+					key := pragmaValue[:pidx]
+					value := pragmaValue[pidx+1 : len(pragmaValue)-1] // 去掉括号
+					existingParams[key] = value
+				}
+			}
+		}
+	}
+
+	// 构建新的参数
+	var params []string
+	for key, value := range config {
+		// 如果参数已经存在，跳过
+		if _, exists := existingParams[key]; exists {
+			continue
+		}
+		// 添加新的参数
+		params = append(params, fmt.Sprintf("_pragma=%s(%s)", key, value))
+	}
+
+	// 如果有已有的参数，添加到 params 中
+	if len(existingParams) > 0 {
+		for key, value := range existingParams {
+			params = append(params, fmt.Sprintf("_pragma=%s(%s)", key, value))
+		}
+	}
+
+	// 拼接路径和参数
+	if len(params) > 0 {
+		return basePath + "?" + strings.Join(params, "&")
+	}
+	return basePath
 }

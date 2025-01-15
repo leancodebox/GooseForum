@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"log"
 	"log/slog"
 	"net/http"
@@ -95,15 +97,16 @@ func ginServe() {
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
-	<-quit
-
-	slog.Info("Shutdown Server ...")
+	data := <-quit
+	slog.Info("Shutdown Server ...", "signal", data)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		slog.Info("Server Shutdown:", err)
 	}
 	slog.Info("Server exiting")
+	dbconnect.Close()
+	db4fileconnect.Close()
 	logging.Shutdown()
 }
 

@@ -23,8 +23,9 @@ func AsyncLumberjack(io *lumberjack.Logger) *AsyncW {
 	w := io
 	go func() {
 		defer func() {
-			err := w.Close()
-			fmt.Println(err)
+			if err := w.Close(); err != nil {
+				fmt.Println(err)
+			}
 			r.closeFinish <- true
 			return
 		}()
@@ -72,8 +73,9 @@ func AsyncLumberjackBufIo(io *lumberjack.Logger) *AsyncW {
 	w := bufio.NewWriterSize(io, 1024*16)
 	go func() {
 		defer func() {
-			err := w.Flush()
-			fmt.Println(err)
+			if err := w.Flush(); err != nil {
+				fmt.Println(err)
+			}
 			r.closeFinish <- true
 		}()
 		ticker := time.NewTicker(time.Millisecond * 100)

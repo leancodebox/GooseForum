@@ -2,6 +2,7 @@ package dbconnect
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/sqlconnect"
+	"log/slog"
 	"sync"
 
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
@@ -33,4 +34,23 @@ func Connect() *gorm.DB {
 func IsSqlite() bool {
 	Connect()
 	return isSqlite
+}
+
+// Close 关闭数据库连接
+func Close() {
+	if dbIns == nil {
+		return
+	}
+	db, err := dbIns.DB()
+	if err != nil {
+		return
+	}
+	if db == nil {
+		return
+	}
+	if err = db.Close(); err != nil {
+		slog.Error("dbClose", "err", err)
+	} else {
+		slog.Error("dbCloseSuccess")
+	}
 }
