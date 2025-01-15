@@ -1,7 +1,6 @@
 package jwtopt
 
 import (
-	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"sync"
 	"time"
@@ -17,7 +16,6 @@ var (
 func Std() *JWT {
 	once.Do(func() {
 		std = NewJWT([]byte(signingKey))
-		fmt.Println(signingKey)
 	})
 	return std
 }
