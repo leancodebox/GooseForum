@@ -3,7 +3,7 @@ import {VueCropper} from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
 import {NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage} from "naive-ui"
 import {onMounted, onUnmounted, ref} from "vue";
-import {getUserProfile, updateUserProfile, uploadAvatar} from "@/service/request";
+import {getUserProfile, updateUserProfile, uploadAvatar, changePassword} from "@/service/request";
 
 let isSmallScreen = ref(false)
 
@@ -42,6 +42,12 @@ const cropperRef = ref(null)
 const previewUrl = ref('')
 const cropImg = ref('')
 const fileInputRef = ref(null)
+const activeTab = ref('profile') // 'profile' 或 'password'
+const passwordForm = ref({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+})
 
 async function fetchUserInfo() {
   try {
@@ -200,86 +206,149 @@ onMounted(() => {
   window.addEventListener('resize', checkScreenSize);
 })
 
+async function handleChangePassword() {
+    if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+        message.error('两次输入的新密码不一致')
+        return
+    }
+
+    try {
+        const response = await changePassword(
+            passwordForm.value.oldPassword,
+            passwordForm.value.newPassword
+        )
+        if (response.code === 0) {
+            message.success('密码修改成功')
+            // 清空表单
+            passwordForm.value = {
+                oldPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            }
+        }
+    } catch (error) {
+        console.error('修改密码失败:', error)
+    }
+}
+
 </script>
 <template>
   <n-card :bordered="false">
     <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align-mid="true" :vertical="isSmallScreen">
       <n-flex vertical class="nav-buttons">
-        <n-button class="nav-button">个人自料</n-button>
-        <n-button class="nav-button">修改密码</n-button>
+        <n-button 
+          class="nav-button" 
+          :type="activeTab === 'profile' ? 'primary' : 'default'"
+          @click="activeTab = 'profile'"
+        >
+          个人资料
+        </n-button>
+        <n-button 
+          class="nav-button"
+          :type="activeTab === 'password' ? 'primary' : 'default'"
+          @click="activeTab = 'password'"
+        >
+          修改密码
+        </n-button>
       </n-flex>
 
       <n-flex vertical class="list-component">
-        <n-card title="个人资料" :bordered="false">
-          <n-list>
-            <n-list-item>
-              邮箱:
-              <template v-if="!editing.email">
-                {{ userInfo.email }}
-                <n-button text type="primary" @click="startEdit('email')">编辑</n-button>
-              </template>
-              <template v-else>
-                <n-input v-model:value="editValues.email"/>
-                <n-button type="primary" @click="saveEdit('email')">保存</n-button>
-                <n-button @click="editing.email = false">取消</n-button>
-              </template>
-            </n-list-item>
-            <n-list-item>
-              昵称:
-              <template v-if="!editing.nickname">
-                {{ userInfo.nickname }}
-                <n-button text type="primary" @click="startEdit('nickname')">编辑</n-button>
-              </template>
-              <template v-else>
-                <n-input v-model:value="editValues.nickname"/>
-                <n-button type="primary" @click="saveEdit('nickname')">保存</n-button>
-                <n-button @click="editing.nickname = false">取消</n-button>
-              </template>
-            </n-list-item>
-          </n-list>
-        </n-card>
-        <n-card title="头像设置" :bordered="false">
-          <n-list>
-            <n-space vertical>
-              <n-image
-                  width="100"
-                  :src="avatarUrl || '/api/assets/default-avatar.png'"
-                  :preview-disabled="!avatarUrl"
-                  object-fit="cover"
-                  :round="true"
-              />
+        <template v-if="activeTab === 'profile'">
+          <n-card title="个人资料" :bordered="false">
+            <n-list>
+              <n-list-item>
+                邮箱:
+                <template v-if="!editing.email">
+                  {{ userInfo.email }}
+                  <n-button text type="primary" @click="startEdit('email')">编辑</n-button>
+                </template>
+                <template v-else>
+                  <n-input v-model:value="editValues.email"/>
+                  <n-button type="primary" @click="saveEdit('email')">保存</n-button>
+                  <n-button @click="editing.email = false">取消</n-button>
+                </template>
+              </n-list-item>
+              <n-list-item>
+                昵称:
+                <template v-if="!editing.nickname">
+                  {{ userInfo.nickname }}
+                  <n-button text type="primary" @click="startEdit('nickname')">编辑</n-button>
+                </template>
+                <template v-else>
+                  <n-input v-model:value="editValues.nickname"/>
+                  <n-button type="primary" @click="saveEdit('nickname')">保存</n-button>
+                  <n-button @click="editing.nickname = false">取消</n-button>
+                </template>
+              </n-list-item>
+            </n-list>
+          </n-card>
+          <n-card title="头像设置" :bordered="false">
+            <n-list>
+              <n-space vertical>
+                <n-image
+                    width="100"
+                    :src="avatarUrl || '/api/assets/default-avatar.png'"
+                    :preview-disabled="!avatarUrl"
+                    object-fit="cover"
+                    :round="true"
+                />
 
-              <input
-                  type="file"
-                  accept="image/gif,image/jpeg,image/jpg,image/png"
-                  style="display: none"
-                  ref="fileInputRef"
-                  @change="handleFileSelect"
-              />
+                <input
+                    type="file"
+                    accept="image/gif,image/jpeg,image/jpg,image/png"
+                    style="display: none"
+                    ref="fileInputRef"
+                    @change="handleFileSelect"
+                />
 
-              <n-button :loading="uploading" @click="fileInputRef?.click()">
-                {{ uploading ? '上传中...' : '选择图片' }}
-              </n-button>
+                <n-button :loading="uploading" @click="fileInputRef?.click()">
+                  {{ uploading ? '上传中...' : '选择图片' }}
+                </n-button>
 
-              <span class="upload-tip">支持 jpg、png、gif 格式，建议选择小于 2MB 的图片，最终头像大小不超过 500KB</span>
-            </n-space>
-          </n-list>
-        </n-card>
+                <span class="upload-tip">支持 jpg、png、gif 格式，建议选择小于 2MB 的图片，最终头像大小不超过 500KB</span>
+              </n-space>
+            </n-list>
+          </n-card>
+        </template>
 
-        <n-card title="密码设置" :bordered="false">
-          <n-list>
-            <n-list-item>
-              原始密码
-              <n-input></n-input>
-            </n-list-item>
-            <n-list-item>
-              新密码
-            </n-list-item>
-            <n-list-item>
-              确认新密码
-            </n-list-item>
-          </n-list>
-        </n-card>
+        <template v-if="activeTab === 'password'">
+          <n-card title="修改密码" :bordered="false">
+            <n-list>
+              <n-list-item>
+                <n-form-item label="原始密码">
+                  <n-input 
+                    type="password"
+                    v-model:value="passwordForm.oldPassword"
+                    placeholder="请输入原始密码"
+                  />
+                </n-form-item>
+              </n-list-item>
+              <n-list-item>
+                <n-form-item label="新密码">
+                  <n-input 
+                    type="password"
+                    v-model:value="passwordForm.newPassword"
+                    placeholder="请输入新密码"
+                  />
+                </n-form-item>
+              </n-list-item>
+              <n-list-item>
+                <n-form-item label="确认新密码">
+                  <n-input 
+                    type="password"
+                    v-model:value="passwordForm.confirmPassword"
+                    placeholder="请再次输入新密码"
+                  />
+                </n-form-item>
+              </n-list-item>
+              <n-list-item>
+                <n-button type="primary" @click="handleChangePassword">
+                  确认修改
+                </n-button>
+              </n-list-item>
+            </n-list>
+          </n-card>
+        </template>
       </n-flex>
     </n-flex>
   </n-card>
@@ -351,6 +420,11 @@ onMounted(() => {
 
 .nav-button {
   width: 100%;
+  margin-bottom: 8px;
+}
+
+.nav-button:last-child {
+  margin-bottom: 0;
 }
 
 .menu-component {

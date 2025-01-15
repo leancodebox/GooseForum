@@ -1,6 +1,7 @@
 package users
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"time"
 )
 
@@ -58,7 +59,7 @@ type Entity struct {
 	Prestige          int64      `gorm:"column:prestige;type:bigint;not null;default:0;" json:"prestige"`        // 声望
 	CreatedAt         time.Time  `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`               //
 	UpdatedAt         time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
-	DeletedAt         *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
+	DeletedAt         *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`     //
 	AvatarUrl         string     `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"` // 头像URL
 }
 
@@ -74,4 +75,9 @@ type Entity struct {
 
 func (itself *Entity) TableName() string {
 	return tableName
+}
+
+func (itself *Entity) SetPassword(password string) *Entity {
+	itself.Password, _ = algorithm.MakePassword(password)
+	return itself
 }

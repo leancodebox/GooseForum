@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
@@ -266,4 +267,33 @@ func UploadAvatar(c *gin.Context) {
 	c.JSON(200, component.SuccessData(map[string]string{
 		"avatarUrl": component.FilePath(fileEntity.Name),
 	}))
+}
+
+// 添加新的请求结构体
+type ChangePasswordReq struct {
+	OldPassword string `json:"oldPassword" validate:"required"`
+	NewPassword string `json:"newPassword" validate:"required"`
+}
+
+// 添加修改密码的处理函数
+func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Response {
+	userEntity, err := req.GetUser()
+	if err != nil {
+		return component.FailResponse("获取用户信息失败")
+	}
+
+	// 验证旧密码
+	err = algorithm.VerifyEncryptPassword(userEntity.Password, req.Params.OldPassword)
+	if err != nil {
+		return component.FailResponse("原密码错误")
+	}
+
+	// 更新密码
+	userEntity.SetPassword(req.Params.NewPassword)
+	err = users.Save(&userEntity)
+	if err != nil {
+		return component.FailResponse("更新密码失败")
+	}
+
+	return component.SuccessResponse("密码修改成功")
 }

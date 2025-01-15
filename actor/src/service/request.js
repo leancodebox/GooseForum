@@ -309,6 +309,15 @@ export const editArticle = (id, processStatus) => {
         processStatus
     })
 }
+
+// 添加修改密码的请求方法
+export function changePassword(oldPassword, newPassword) {
+    return instanceAxios.post("/change-password", {
+        oldPassword,
+        newPassword
+    })
+}
+
 export {
     instanceAxios,
     // ... 其他导出保持不变 ...
