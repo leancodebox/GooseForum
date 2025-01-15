@@ -64,10 +64,15 @@ func Register(r RegReq) component.Response {
 		return component.FailResponse("生成激活令牌失败")
 	}
 
-	// 发送激活邮件
-	err = mailservice.SendActivationEmail(userEntity.Email, userEntity.Username, token)
+	// 将邮件任务加入队列
+	err = mailservice.AddToQueue(mailservice.EmailTask{
+		To:       userEntity.Email,
+		Username: userEntity.Username,
+		Token:    token,
+		Type:     "activation",
+	})
 	if err != nil {
-		slog.Error("发送激活邮件失败", "error", err)
+		slog.Error("添加邮件任务到队列失败", "error", err)
 		// 不要因为发送邮件失败而阻止注册
 	}
 

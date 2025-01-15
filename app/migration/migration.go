@@ -15,6 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
@@ -50,12 +51,13 @@ func migration(migration bool) {
 		&userPoints.Entity{},
 		&userRoleRs.Entity{},
 		&users.Entity{},
+		&taskQueue.Entity{},
 	); err != nil {
 		slog.Error("migration err", "err", err)
 	} else {
 		slog.Info("migration end")
 	}
-	
+
 	// 因为图片数据库比较大，所以单独迁移
 	db4file := db4fileconnect.Connect()
 	if err = db4file.AutoMigrate(
