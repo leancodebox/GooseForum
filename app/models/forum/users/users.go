@@ -63,6 +63,9 @@ type Entity struct {
 	UpdatedAt         time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 	DeletedAt         *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`     //
 	AvatarUrl         string     `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"` // 头像URL
+	Bio               string     `gorm:"column:bio;type:varchar(500);" json:"bio"`              // 个人简介
+	Signature         string     `gorm:"column:signature;type:varchar(255);" json:"signature"`  // 署名
+	Website           string     `gorm:"column:website;type:varchar(255);" json:"website"`      // 个人网站
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

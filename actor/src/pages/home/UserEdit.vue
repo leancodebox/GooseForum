@@ -1,7 +1,7 @@
 <script setup>
 import {VueCropper} from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
-import {NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage} from "naive-ui"
+import {NFormItem,NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage} from "naive-ui"
 import {onMounted, onUnmounted, ref} from "vue";
 import {getUserProfile, updateUserProfile, uploadAvatar, changePassword} from "@/service/request";
 
@@ -22,16 +22,25 @@ onUnmounted(() => {
 const userInfo = ref({
   email: '',
   nickname: '',
+  bio: '',
+  signature: '',
+  website: '',
 });
 
 const editing = ref({
   nickname: false,
   email: false,
+  bio: false,
+  signature: false,
+  website: false,
 });
 
 const editValues = ref({
   nickname: '',
   email: '',
+  bio: '',
+  signature: '',
+  website: '',
 });
 
 const message = useMessage()
@@ -236,14 +245,14 @@ async function handleChangePassword() {
   <n-card :bordered="false">
     <n-flex :justify="isSmallScreen ? 'start' : 'center'" :align-mid="true" :vertical="isSmallScreen">
       <n-flex vertical class="nav-buttons">
-        <n-button 
-          class="nav-button" 
+        <n-button
+          class="nav-button"
           :type="activeTab === 'profile' ? 'primary' : 'default'"
           @click="activeTab = 'profile'"
         >
           个人资料
         </n-button>
-        <n-button 
+        <n-button
           class="nav-button"
           :type="activeTab === 'password' ? 'primary' : 'default'"
           @click="activeTab = 'password'"
@@ -278,6 +287,44 @@ async function handleChangePassword() {
                   <n-input v-model:value="editValues.nickname"/>
                   <n-button type="primary" @click="saveEdit('nickname')">保存</n-button>
                   <n-button @click="editing.nickname = false">取消</n-button>
+                </template>
+              </n-list-item>
+              <n-list-item>
+                个人简介:
+                <template v-if="!editing.bio">
+                  {{ userInfo.bio }}
+                  <n-button text type="primary" @click="startEdit('bio')">编辑</n-button>
+                </template>
+                <template v-else>
+                  <n-input v-model:value="editValues.bio" type="textarea" :autosize="{ minRows: 3, maxRows: 5 }"/>
+                  <n-button type="primary" @click="saveEdit('bio')">保存</n-button>
+                  <n-button @click="editing.bio = false">取消</n-button>
+                </template>
+              </n-list-item>
+
+              <n-list-item>
+                署名:
+                <template v-if="!editing.signature">
+                  {{ userInfo.signature }}
+                  <n-button text type="primary" @click="startEdit('signature')">编辑</n-button>
+                </template>
+                <template v-else>
+                  <n-input v-model:value="editValues.signature"/>
+                  <n-button type="primary" @click="saveEdit('signature')">保存</n-button>
+                  <n-button @click="editing.signature = false">取消</n-button>
+                </template>
+              </n-list-item>
+
+              <n-list-item>
+                个人网站:
+                <template v-if="!editing.website">
+                  {{ userInfo.website }}
+                  <n-button text type="primary" @click="startEdit('website')">编辑</n-button>
+                </template>
+                <template v-else>
+                  <n-input v-model:value="editValues.website"/>
+                  <n-button type="primary" @click="saveEdit('website')">保存</n-button>
+                  <n-button @click="editing.website = false">取消</n-button>
                 </template>
               </n-list-item>
             </n-list>
@@ -316,7 +363,7 @@ async function handleChangePassword() {
             <n-list>
               <n-list-item>
                 <n-form-item label="原始密码">
-                  <n-input 
+                  <n-input
                     type="password"
                     v-model:value="passwordForm.oldPassword"
                     placeholder="请输入原始密码"
@@ -325,7 +372,7 @@ async function handleChangePassword() {
               </n-list-item>
               <n-list-item>
                 <n-form-item label="新密码">
-                  <n-input 
+                  <n-input
                     type="password"
                     v-model:value="passwordForm.newPassword"
                     placeholder="请输入新密码"
@@ -334,7 +381,7 @@ async function handleChangePassword() {
               </n-list-item>
               <n-list-item>
                 <n-form-item label="确认新密码">
-                  <n-input 
+                  <n-input
                     type="password"
                     v-model:value="passwordForm.confirmPassword"
                     placeholder="请再次输入新密码"

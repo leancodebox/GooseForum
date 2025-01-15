@@ -160,12 +160,18 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 		"email":     userEntity.Email,
 		"nickname":  userEntity.Nickname,
 		"isAdmin":   isAdmin,
+		"bio":       userEntity.Bio,
+		"signature": userEntity.Signature,
+		"website":   userEntity.Website,
 	})
 }
 
 type EditUserInfoReq struct {
-	Nickname string `json:"nickname"`
-	Email    string `json:"email"`
+	Nickname  string `json:"nickname"`
+	Email     string `json:"email"`
+	Bio       string `json:"bio"`
+	Signature string `json:"signature"`
+	Website   string `json:"website"`
 }
 
 // EditUserInfo 编辑用户
@@ -185,9 +191,18 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 		needSendEmail = true
 	}
 
-	// 更新昵称
+	// 更新其他字段
 	if req.Params.Nickname != "" {
 		userEntity.Nickname = req.Params.Nickname
+	}
+	if req.Params.Bio != "" {
+		userEntity.Bio = req.Params.Bio
+	}
+	if req.Params.Signature != "" {
+		userEntity.Signature = req.Params.Signature
+	}
+	if req.Params.Website != "" {
+		userEntity.Website = req.Params.Website
 	}
 
 	err = users.Save(&userEntity)
