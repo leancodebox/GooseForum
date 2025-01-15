@@ -1,13 +1,17 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
-	"net/http"
 )
 
 func RegisterByGin(ginApp *gin.Engine) {
+	// 加载HTML模板
+	ginApp.LoadHTMLGlob("app/views/*")
+
 	// 基础中间件
 	ginApp.Use(middleware.SiteMaintenance)
 	ginApp.Use(middleware.SiteInfo)

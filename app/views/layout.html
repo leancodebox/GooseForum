@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}} - GooseForum</title>
+    <meta name="description" content="{{.description}}">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+    <style>
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <a href="/">首页</a>
+        <a href="/articles">文章</a>
+    </nav>
+</header>
+
+<main>
+    {{ block "detail" . }}Default Content{{ end }}
+    {{ block "list" . }}Default List{{ end }}
+    {{ block "error" . }}Default Error{{ end }}
+</main>
+
+<footer>
+    <p>&copy; {{.year}} GooseForum</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}} - GooseForum</title>
+    <meta name="description" content="{{.description}}">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+    <style>
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 45px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">首页</a>
+            <a href="/articles">文章</a>
+        </nav>
+    </header>
+
+    <main>
+        <article class="article-detail">
+            <h1>{{.articleTitle}}</h1>
+
+            <div class="article-meta">
+                <span>作者: {{.username}}</span>
+            </div>
+
+            <div class="article-content markdown-body">
+                {{.articleContent}}
+            </div>
+
+            <section class="comments">
+                <h2>评论列表</h2>
+                {{range .commentList}}
+                <div class="comment">
+                    <div class="comment-meta">
+                        <span>{{.Username}}</span>
+                        <time>{{.CreateTime}}</time>
+                    </div>
+                    <div class="comment-content">
+                        {{if .ReplyToUsername}}
+                        <p class="reply-to">回复 @{{.ReplyToUsername}}:</p>
+                        {{end}}
+                        {{.Content}}
+                    </div>
+                </div>
+                {{end}}
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>&copy; {{.year}} GooseForum</p>
+    </footer>
+</body>
+</html>

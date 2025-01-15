@@ -97,6 +97,10 @@ func bbs(ginApp *gin.Engine) {
 	admin.POST("category-save", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.SaveCategory))
 	admin.POST("category-delete", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.DeleteCategory))
 
+	// 添加服务端渲染路由
+	bbsSSR := ginApp.Group("")
+	bbsSSR.GET("/articles", controllers.RenderArticlesPage)
+	bbsSSR.GET("/articles/:id", controllers.RenderArticleDetail)
 }
 
 func fileServer(ginApp *gin.Engine) {

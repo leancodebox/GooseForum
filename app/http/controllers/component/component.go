@@ -38,12 +38,18 @@ func (r *BetterRequest[T]) GetUser() (users.Entity, error) {
 
 type Response struct {
 	Code int
-	Data any
+	Data ResultStruct
+}
+
+type ResultStruct struct {
+	Msg    any    `json:"msg"`
+	Result any    `json:"result"`
+	Code   Status `json:"code"`
 }
 
 type DataMap map[string]interface{}
 
-func BuildResponse(code int, data any) Response {
+func BuildResponse(code int, data ResultStruct) Response {
 	return Response{code, data}
 }
 
@@ -57,11 +63,11 @@ func SuccessPage[T any](list []T, page, size int, total int64) Response {
 	return SuccessResponse(Page[T]{List: list, Page: page, Total: total, Size: size})
 }
 
-func SuccessData(data any) map[string]any {
-	return map[string]any{
-		"msg":    nil,
-		"result": data,
-		"code":   SUCCESS,
+func SuccessData(data any) ResultStruct {
+	return ResultStruct{
+		Msg:    nil,
+		Result: data,
+		Code:   SUCCESS,
 	}
 }
 
@@ -71,10 +77,10 @@ func FailResponse(msg any) Response {
 	)
 }
 
-func FailData(msg any) map[string]any {
-	return map[string]any{
-		"msg":    msg,
-		"result": nil,
-		"code":   FAIL,
+func FailData(msg any) ResultStruct {
+	return ResultStruct{
+		Msg:    msg,
+		Result: nil,
+		Code:   SUCCESS,
 	}
 }

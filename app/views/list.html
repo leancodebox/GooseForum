@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}} - GooseForum</title>
+    <meta name="description" content="{{.description}}">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">首页</a>
+            <a href="/articles">文章</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="articles-list">
+            <h1>文章列表</h1>
+            {{range .Data}}
+            <article class="article-item">
+                <h2><a href="/articles/{{.Id}}">{{.Title}}</a></h2>
+                <div class="article-meta">
+                    <span>作者: {{.Username}}</span>
+                    <span>发布时间: {{.LastUpdateTime}}</span>
+                    <span>分类: {{.Category}}</span>
+                </div>
+                <div class="article-stats">
+                    <span>浏览: {{.ViewCount}}</span>
+                    <span>评论: {{.CommentCount}}</span>
+                </div>
+            </article>
+            {{end}}
+
+            <div class="pagination">
+                {{if gt .Page 1}}
+                <a href="?page={{.PrevPage}}">上一页</a>
+                {{end}}
+                <span>第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
+                {{if lt .Page .TotalPages}}
+                <a href="?page={{.NextPage}}">下一页</a>
+                {{end}}
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; {{.year}} GooseForum</p>
+    </footer>
+</body>
+</html>

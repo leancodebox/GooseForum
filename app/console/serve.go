@@ -64,9 +64,9 @@ func runWeb(_ *cobra.Command, _ []string) {
 
 func ginServe() {
 	port := preferences.GetString("server.port", 8080)
-	isProd := setting.IsProduction()
+	isDebug := setting.IsDebug()
 	var engine *gin.Engine
-	if isProd {
+	if !isDebug {
 		gin.DisableConsoleColor()
 		gin.SetMode(gin.ReleaseMode)
 		engine = gin.New()
