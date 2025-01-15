@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"syscall"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
@@ -96,7 +97,9 @@ func ginServe() {
 	fmt.Println("if in local you can http://localhost:" + port)
 
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit,
+		syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM,
+		syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
 	data := <-quit
 	slog.Info("Shutdown Server ...", "signal", data)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
