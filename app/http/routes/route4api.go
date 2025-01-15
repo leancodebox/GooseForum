@@ -34,7 +34,7 @@ func auth(ginApp *gin.Engine) {
 	avatarPath := path.Join(setting.GetStorage(), "avatars")
 	ginApp.Static("api/avatars", avatarPath)
 	ginApp.GET("/api/assets/default-avatar.png", func(context *gin.Context) {
-		context.Data(http.StatusOK, "image/jpeg", assert.GetDefaultAvatar())
+		context.Data(http.StatusOK, "image/png", assert.GetDefaultAvatar())
 	})
 }
 

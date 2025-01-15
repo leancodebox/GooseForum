@@ -19,7 +19,7 @@ func GetActorFs() embed.FS {
 	return actorFS
 }
 
-//go:embed 07akioni.jpeg
+//go:embed smile-o.png
 var defaultAvatar []byte
 
 func GetDefaultAvatar() []byte {

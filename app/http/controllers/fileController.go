@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/leancodebox/GooseForum/app/assert"
 	"io"
 	"net/http"
 	"strings"
@@ -20,7 +21,8 @@ func GetFileByFileName(c *gin.Context) {
 
 	entity, err := filedata.GetFileByName(filename)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		c.Data(http.StatusOK, "image/png", assert.GetDefaultAvatar())
+		//c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
 		return
 	}
 
