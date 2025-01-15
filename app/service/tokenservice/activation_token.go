@@ -2,6 +2,7 @@ package tokenservice
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,6 +12,10 @@ type ActivationClaims struct {
 	UserId uint64 `json:"userId"`
 	Email  string `json:"email"`
 	jwt.RegisteredClaims
+}
+
+func GenerateActivationTokenByUser(entity users.Entity) (string, error) {
+	return GenerateActivationToken(entity.Id, entity.Email)
 }
 
 func GenerateActivationToken(userId uint64, email string) (string, error) {
