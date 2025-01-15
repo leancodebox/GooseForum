@@ -20,7 +20,7 @@ import (
 func init() {
 	appendCommand(&cobra.Command{
 		Use:   "hexo:tool",
-		Short: "hexo tool",
+		Short: "hexo迁移工具",
 		Run:   runHexoTool,
 	})
 }

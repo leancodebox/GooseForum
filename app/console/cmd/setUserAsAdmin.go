@@ -11,8 +11,8 @@ import (
 
 func init() {
 	cmd := &cobra.Command{
-		Use:   "admin:set",
-		Short: "hexo tool",
+		Use:   "user:setAdmin",
+		Short: "设置管理员",
 		Run:   runAdminSet,
 		//Args:  cobra.ExactArgs(1), // 只允许且必须传 1 个参数
 	}

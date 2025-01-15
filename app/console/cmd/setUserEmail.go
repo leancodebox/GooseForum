@@ -12,7 +12,7 @@ import (
 func init() {
 	cmd := &cobra.Command{
 		Use:   "user:email",
-		Short: "user:email",
+		Short: "发送邮件测试",
 		Run:   runUserEmail,
 		//Args:  cobra.ExactArgs(1), // 只允许且必须传 1 个参数
 	}
