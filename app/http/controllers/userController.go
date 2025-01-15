@@ -12,7 +12,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
+	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
@@ -56,11 +58,24 @@ func Register(r RegReq) component.Response {
 		return component.FailResponse(cast.ToString(err))
 	}
 
+	// 生成激活令牌
+	token, err := tokenservice.GenerateActivationToken(userEntity.Id, userEntity.Email)
+	if err != nil {
+		return component.FailResponse("生成激活令牌失败")
+	}
+
+	// 发送激活邮件
+	err = mailservice.SendActivationEmail(userEntity.Email, userEntity.Username, token)
+	if err != nil {
+		slog.Error("发送激活邮件失败", "error", err)
+		// 不要因为发送邮件失败而阻止注册
+	}
+
 	// 初始化用户积分
 	pointservice.InitUserPoints(userEntity.Id, 100)
 
 	// 生成 token
-	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
+	token, err = jwt.CreateNewToken(userEntity.Id, expireTime)
 	if err != nil {
 		return component.FailResponse(cast.ToString(err))
 	}
@@ -296,4 +311,42 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 	}
 
 	return component.SuccessResponse("密码修改成功")
+}
+
+// 添加激活处理函数
+func ActivateAccount(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		c.JSON(200, component.FailData("无效的激活链接"))
+		return
+	}
+
+	// 解析激活令牌
+	claims, err := tokenservice.ParseActivationToken(token)
+	if err != nil {
+		c.JSON(200, component.FailData("激活链接已过期或无效"))
+		return
+	}
+
+	// 获取用户信息
+	user, err := users.Get(claims.UserId)
+	if err != nil {
+		c.JSON(200, component.FailData("用户不存在"))
+		return
+	}
+
+	// 检查邮箱是否匹配
+	if user.Email != claims.Email {
+		c.JSON(200, component.FailData("激活链接无效"))
+		return
+	}
+
+	// 激活账号
+	err = user.Activate()
+	if err != nil {
+		c.JSON(200, component.FailData("激活失败"))
+		return
+	}
+
+	c.JSON(200, component.SuccessData("账号激活成功"))
 }

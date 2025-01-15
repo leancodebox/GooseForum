@@ -61,14 +61,14 @@ async function loginAction() {
       loginInfo.value.captchaId,
       loginInfo.value.captchaCode
     )
-    
+
     // 只保存 token
     userStore.setToken(res.result.token)
-    
+
     // 获取用户信息
     const userInfoRes = await getUserInfo()
     userStore.setUserInfo(userInfoRes.result)
-    
+
     message.success('登录成功')
 
     const redirect = route.query.redirect || '/home/bbs/articlesList'
@@ -96,8 +96,14 @@ async function regAction() {
       regInfo.value.captchaId,
       regInfo.value.captchaCode
     )
-    userStore.login(res.result)
     message.success('注册成功')
+
+    // 只保存 token
+    userStore.setToken(res.result.token)
+
+    // 获取用户信息
+    const userInfoRes = await getUserInfo()
+    userStore.setUserInfo(userInfoRes.result)
 
     const redirect = route.query.redirect || '/home/bbs/articlesList'
     router.push(redirect)

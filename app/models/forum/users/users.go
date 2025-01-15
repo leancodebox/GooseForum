@@ -1,8 +1,9 @@
 package users
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 )
 
 const tableName = "users"
@@ -56,6 +57,7 @@ type Entity struct {
 	MobilePhoneNumber string     `gorm:"column:mobile_phone_number;type:varchar(64);" json:"mobilePhoneNumber"`  //
 	Status            int8       `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`           // 状态：0正常 1冻结
 	Validate          int8       `gorm:"column:validate;type:tinyint;not null;default:0;" json:"validate"`       // 是否验证通过: 0未通过/未验证 1 验证通过
+	ActivatedAt       time.Time  `gorm:"column:activated_at;type:datetime;" json:"activatedAt"`                  // 激活时间
 	Prestige          int64      `gorm:"column:prestige;type:bigint;not null;default:0;" json:"prestige"`        // 声望
 	CreatedAt         time.Time  `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`               //
 	UpdatedAt         time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
@@ -80,4 +82,10 @@ func (itself *Entity) TableName() string {
 func (itself *Entity) SetPassword(password string) *Entity {
 	itself.Password, _ = algorithm.MakePassword(password)
 	return itself
+}
+
+func (itself *Entity) Activate() error {
+	itself.Validate = 1
+	itself.ActivatedAt = time.Now()
+	return Save(itself)
 }

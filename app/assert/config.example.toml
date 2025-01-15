@@ -6,6 +6,15 @@ enabled = false
 [server]
 url = "http://localhost"
 port = 99
+[jwtopt]
+signingKey="mq+ZeGafL+b1xdC0u9vSVg=="
+validTime = 604800
+[mail]
+host = "smtp.example.com"
+port = 587
+username = "noreply@example.com"
+password = "your-password"
+from_name = "GooseForum"
 
 [db]
 migration = "on" # OPEN_MIGRATION in on,off
@@ -22,7 +31,6 @@ maxLifeSeconds = 300
 connection = "sqlite"# in mysql sqlite
 url = "root:root_password@tcp(127.0.0.1:3306)/goose_forum?charset=utf8mb4&parseTime=True&loc=Local"
 path = "./storage/database/file.db"# :memory:|./storage/database/sqlite.db
-
 maxIdleConnections = 50
 maxOpenConnections = 50
 maxLifeSeconds = 300

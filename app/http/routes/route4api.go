@@ -38,6 +38,9 @@ func auth(ginApp *gin.Engine) {
 	ginApp.GET("/api/assets/default-avatar.png", func(context *gin.Context) {
 		context.Data(http.StatusOK, "image/png", assert.GetDefaultAvatar())
 	})
+
+	// 添加激活路由
+	ginApp.GET("api/activate", controllers.ActivateAccount)
 }
 
 func bbs(ginApp *gin.Engine) {
