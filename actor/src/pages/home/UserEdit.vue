@@ -1,7 +1,7 @@
 <script setup>
 import {VueCropper} from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
-import {NFormItem,NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage} from "naive-ui"
+import {NFormItem,NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage, NGrid, NGridItem} from "naive-ui"
 import {onMounted, onUnmounted, ref} from "vue";
 import {getUserProfile, updateUserProfile, uploadAvatar, changePassword} from "@/service/request";
 
@@ -266,66 +266,148 @@ async function handleChangePassword() {
           <n-card title="个人资料" :bordered="false">
             <n-list>
               <n-list-item>
-                邮箱:
-                <template v-if="!editing.email">
-                  {{ userInfo.email }}
-                  <n-button text type="primary" @click="startEdit('email')">编辑</n-button>
-                </template>
-                <template v-else>
-                  <n-input v-model:value="editValues.email"/>
-                  <n-button type="primary" @click="saveEdit('email')">保存</n-button>
-                  <n-button @click="editing.email = false">取消</n-button>
-                </template>
-              </n-list-item>
-              <n-list-item>
-                昵称:
-                <template v-if="!editing.nickname">
-                  {{ userInfo.nickname }}
-                  <n-button text type="primary" @click="startEdit('nickname')">编辑</n-button>
-                </template>
-                <template v-else>
-                  <n-input v-model:value="editValues.nickname"/>
-                  <n-button type="primary" @click="saveEdit('nickname')">保存</n-button>
-                  <n-button @click="editing.nickname = false">取消</n-button>
-                </template>
-              </n-list-item>
-              <n-list-item>
-                个人简介:
-                <template v-if="!editing.bio">
-                  {{ userInfo.bio }}
-                  <n-button text type="primary" @click="startEdit('bio')">编辑</n-button>
-                </template>
-                <template v-else>
-                  <n-input v-model:value="editValues.bio" type="textarea" :autosize="{ minRows: 3, maxRows: 5 }"/>
-                  <n-button type="primary" @click="saveEdit('bio')">保存</n-button>
-                  <n-button @click="editing.bio = false">取消</n-button>
-                </template>
+                <n-grid :cols="24" :x-gap="12">
+                  <n-grid-item :span="4">
+                    <n-text class="label">邮箱:</n-text>
+                  </n-grid-item>
+                  <n-grid-item :span="16">
+                    <template v-if="!editing.email">
+                      <n-text>{{ userInfo.email || '未设置' }}</n-text>
+                    </template>
+                    <template v-else>
+                      <n-input v-model:value="editValues.email"/>
+                    </template>
+                  </n-grid-item>
+                  <n-grid-item :span="4">
+                    <div class="action-buttons">
+                      <template v-if="!editing.email">
+                        <n-button text type="primary" @click="startEdit('email')">编辑</n-button>
+                      </template>
+                      <template v-else>
+                        <n-space>
+                          <n-button size="small" type="primary" @click="saveEdit('email')">保存</n-button>
+                          <n-button size="small" @click="editing.email = false">取消</n-button>
+                        </n-space>
+                      </template>
+                    </div>
+                  </n-grid-item>
+                </n-grid>
               </n-list-item>
 
               <n-list-item>
-                署名:
-                <template v-if="!editing.signature">
-                  {{ userInfo.signature }}
-                  <n-button text type="primary" @click="startEdit('signature')">编辑</n-button>
-                </template>
-                <template v-else>
-                  <n-input v-model:value="editValues.signature"/>
-                  <n-button type="primary" @click="saveEdit('signature')">保存</n-button>
-                  <n-button @click="editing.signature = false">取消</n-button>
-                </template>
+                <n-grid :cols="24" :x-gap="12">
+                  <n-grid-item :span="4">
+                    <n-text class="label">昵称:</n-text>
+                  </n-grid-item>
+                  <n-grid-item :span="16">
+                    <template v-if="!editing.nickname">
+                      <n-text>{{ userInfo.nickname || '未设置' }}</n-text>
+                    </template>
+                    <template v-else>
+                      <n-input v-model:value="editValues.nickname"/>
+                    </template>
+                  </n-grid-item>
+                  <n-grid-item :span="4">
+                    <div class="action-buttons">
+                      <template v-if="!editing.nickname">
+                        <n-button text type="primary" @click="startEdit('nickname')">编辑</n-button>
+                      </template>
+                      <template v-else>
+                        <n-space>
+                          <n-button size="small" type="primary" @click="saveEdit('nickname')">保存</n-button>
+                          <n-button size="small" @click="editing.nickname = false">取消</n-button>
+                        </n-space>
+                      </template>
+                    </div>
+                  </n-grid-item>
+                </n-grid>
               </n-list-item>
 
               <n-list-item>
-                个人网站:
-                <template v-if="!editing.website">
-                  {{ userInfo.website }}
-                  <n-button text type="primary" @click="startEdit('website')">编辑</n-button>
-                </template>
-                <template v-else>
-                  <n-input v-model:value="editValues.website"/>
-                  <n-button type="primary" @click="saveEdit('website')">保存</n-button>
-                  <n-button @click="editing.website = false">取消</n-button>
-                </template>
+                <n-grid :cols="24" :x-gap="12">
+                  <n-grid-item :span="4">
+                    <n-text class="label">个人简介:</n-text>
+                  </n-grid-item>
+                  <n-grid-item :span="16">
+                    <template v-if="!editing.bio">
+                      <n-text>{{ userInfo.bio || '未设置' }}</n-text>
+                    </template>
+                    <template v-else>
+                      <n-input v-model:value="editValues.bio" type="textarea" :autosize="{ minRows: 3, maxRows: 5 }"/>
+                    </template>
+                  </n-grid-item>
+                  <n-grid-item :span="4">
+                    <div class="action-buttons">
+                      <template v-if="!editing.bio">
+                        <n-button text type="primary" @click="startEdit('bio')">编辑</n-button>
+                      </template>
+                      <template v-else>
+                        <n-space>
+                          <n-button size="small" type="primary" @click="saveEdit('bio')">保存</n-button>
+                          <n-button size="small" @click="editing.bio = false">取消</n-button>
+                        </n-space>
+                      </template>
+                    </div>
+                  </n-grid-item>
+                </n-grid>
+              </n-list-item>
+
+              <n-list-item>
+                <n-grid :cols="24" :x-gap="12">
+                  <n-grid-item :span="4">
+                    <n-text class="label">署名:</n-text>
+                  </n-grid-item>
+                  <n-grid-item :span="16">
+                    <template v-if="!editing.signature">
+                      <n-text>{{ userInfo.signature || '未设置' }}</n-text>
+                    </template>
+                    <template v-else>
+                      <n-input v-model:value="editValues.signature"/>
+                    </template>
+                  </n-grid-item>
+                  <n-grid-item :span="4">
+                    <div class="action-buttons">
+                      <template v-if="!editing.signature">
+                        <n-button text type="primary" @click="startEdit('signature')">编辑</n-button>
+                      </template>
+                      <template v-else>
+                        <n-space>
+                          <n-button size="small" type="primary" @click="saveEdit('signature')">保存</n-button>
+                          <n-button size="small" @click="editing.signature = false">取消</n-button>
+                        </n-space>
+                      </template>
+                    </div>
+                  </n-grid-item>
+                </n-grid>
+              </n-list-item>
+
+              <n-list-item>
+                <n-grid :cols="24" :x-gap="12">
+                  <n-grid-item :span="4">
+                    <n-text class="label">个人网站:</n-text>
+                  </n-grid-item>
+                  <n-grid-item :span="16">
+                    <template v-if="!editing.website">
+                      <n-text>{{ userInfo.website || '未设置' }}</n-text>
+                    </template>
+                    <template v-else>
+                      <n-input v-model:value="editValues.website"/>
+                    </template>
+                  </n-grid-item>
+                  <n-grid-item :span="4">
+                    <div class="action-buttons">
+                      <template v-if="!editing.website">
+                        <n-button text type="primary" @click="startEdit('website')">编辑</n-button>
+                      </template>
+                      <template v-else>
+                        <n-space>
+                          <n-button size="small" type="primary" @click="saveEdit('website')">保存</n-button>
+                          <n-button size="small" @click="editing.website = false">取消</n-button>
+                        </n-space>
+                      </template>
+                    </div>
+                  </n-grid-item>
+                </n-grid>
               </n-list-item>
             </n-list>
           </n-card>
@@ -565,6 +647,30 @@ async function handleChangePassword() {
 :deep(.cropper-point.point-se) {
   width: 8px;
   height: 8px;
+}
+
+.label {
+  font-weight: 500;
+  color: #666;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+:deep(.n-input) {
+  width: 100%;
+}
+
+:deep(.n-list-item) {
+  padding: 16px 0;
+}
+
+:deep(.n-grid) {
+  width: 100%;
+  align-items: center;
 }
 </style>
 
