@@ -51,6 +51,6 @@ func Close() {
 	if err = db.Close(); err != nil {
 		slog.Error("dbClose", "err", err)
 	} else {
-		slog.Error("dbCloseSuccess")
+		slog.Info("dbCloseSuccess")
 	}
 }
