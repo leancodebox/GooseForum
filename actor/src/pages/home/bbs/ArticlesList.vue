@@ -128,6 +128,7 @@ const isTablet = useIsTablet()
     <div class="main-content">
       <!-- 新增：分类选择区域 -->
       <div class="categories-section">
+        <n-flex>
         <n-tag
             v-for="category in categories"
             :key="category"
@@ -138,6 +139,7 @@ const isTablet = useIsTablet()
         >
           {{ category }}
         </n-tag>
+        </n-flex>
       </div>
 
       <!-- 文章列表 -->
