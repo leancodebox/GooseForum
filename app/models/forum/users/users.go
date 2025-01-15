@@ -59,13 +59,13 @@ type Entity struct {
 	Validate          int8       `gorm:"column:validate;type:tinyint;not null;default:0;" json:"validate"`       // 是否验证通过: 0未通过/未验证 1 验证通过
 	ActivatedAt       time.Time  `gorm:"column:activated_at;type:datetime;" json:"activatedAt"`                  // 激活时间
 	Prestige          int64      `gorm:"column:prestige;type:bigint;not null;default:0;" json:"prestige"`        // 声望
+	AvatarUrl         string     `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"`                  // 头像URL
+	Bio               string     `gorm:"column:bio;type:varchar(500);" json:"bio"`                               // 个人简介
+	Signature         string     `gorm:"column:signature;type:varchar(255);" json:"signature"`                   // 署名
+	Website           string     `gorm:"column:website;type:varchar(255);" json:"website"`                       // 个人网站
 	CreatedAt         time.Time  `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`               //
 	UpdatedAt         time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
-	DeletedAt         *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`     //
-	AvatarUrl         string     `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"` // 头像URL
-	Bio               string     `gorm:"column:bio;type:varchar(500);" json:"bio"`              // 个人简介
-	Signature         string     `gorm:"column:signature;type:varchar(255);" json:"signature"`  // 署名
-	Website           string     `gorm:"column:website;type:varchar(255);" json:"website"`      // 个人网站
+	DeletedAt         *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
