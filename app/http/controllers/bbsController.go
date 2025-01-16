@@ -529,6 +529,7 @@ func RenderArticleDetail(c *gin.Context) {
 
 	// 构建模板数据
 	templateData := gin.H{
+		"articleId":      id,
 		"title":          cast.ToString(result["articleTitle"]),
 		"description":    TakeUpTo64Chars(cast.ToString(result["articleContent"])),
 		"year":           time.Now().Year(),

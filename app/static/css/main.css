@@ -166,3 +166,29 @@ footer {
     background: var(--light-gray);
     margin-top: 4rem;
 }
+
+.comment-action {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.comment-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.comment-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.comment-btn .arrow {
+    margin-left: 0.5rem;
+    font-size: 1.2em;
+}
