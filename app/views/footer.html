@@ -4,8 +4,11 @@
 <footer>
     <div class="footer-content">
         <p>&copy; {{.year}} GooseForum - 分享知识，连接世界</p>
-<!--        <div class="footer-links">-->
-<!--        </div>-->
+        <div class="footer-links">
+            {{with getFooterLink}}
+            <p><a href="{{.url}}" target="_blank" style="text-decoration: none;color: #005cc5">{{.text}}</a></p>
+            {{end}}
+        </div>
     </div>
 </footer>
 </body>

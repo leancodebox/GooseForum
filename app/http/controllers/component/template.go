@@ -1,9 +1,10 @@
 package component
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"html/template"
 	"sync"
+
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 
 	"github.com/leancodebox/GooseForum/app/views"
 )
@@ -20,7 +21,11 @@ func GetTemplates() *template.Template {
 		if setting.IsProduction() {
 			templates, err = views.GetTemplates()
 		} else {
-			templates, err = template.ParseGlob("app/views/*.html")
+			// 创建带有函数的模板
+			templates = template.New("").Funcs(template.FuncMap{
+				"getFooterLink": views.GetFooterLink,
+			})
+			templates, err = templates.ParseGlob("app/views/*.html")
 		}
 		if err != nil {
 			panic(err)

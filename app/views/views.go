@@ -2,6 +2,7 @@ package views
 
 import (
 	"embed"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"html/template"
 	"io/fs"
 )
@@ -9,10 +10,25 @@ import (
 //go:embed *.html
 var templateFiles embed.FS
 
+// 添加模板函数映射
+var templateFuncs = template.FuncMap{
+	"getFooterLink": GetFooterLink,
+}
+
+// getFooterLink 获取页脚链接
+func GetFooterLink() map[string]string {
+	return map[string]string{
+		"url":  preferences.Get("footer.url", "/"),
+		"text": preferences.Get("footer.text", "Goos"),
+	}
+}
+
 // GetTemplates 获取所有模板
 func GetTemplates() (*template.Template, error) {
-	// 读取所有模板文件
-	tmpl := template.New("")
+	// 创建带有函数的模板
+	tmpl := template.New("").Funcs(template.FuncMap{
+		"getFooterLink": GetFooterLink,
+	})
 
 	err := fs.WalkDir(templateFiles, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {

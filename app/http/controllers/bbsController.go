@@ -557,14 +557,3 @@ func markdownToHTML(md string) template.HTML {
 	output := markdown.ToHTML([]byte(md), nil, nil)
 	return template.HTML(output)
 }
-
-//
-//func renderMarkdown(md string) template.HTML {
-//	extensions := blackfriday.WithExtensions(
-//		blackfriday.CommonExtensions |
-//			blackfriday.AutoHeadingIDs |
-//			blackfriday.HardLineBreak,
-//	)
-//	html := blackfriday.Run([]byte(md), extensions)
-//	return template.HTML(html)
-//}
