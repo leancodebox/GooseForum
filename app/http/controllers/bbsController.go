@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"github.com/gomarkdown/markdown"
 	"html/template"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gomarkdown/markdown"
 
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/spf13/cast"
@@ -494,7 +495,12 @@ func RenderArticlesPage(c *gin.Context) {
 		"NextPage":    min(max(result.Page, 1)+1, totalPages),
 	}
 
-	c.HTML(http.StatusOK, "list.html", templateData)
+	tmpl := component.GetTemplates()
+	err := tmpl.ExecuteTemplate(c.Writer, "list.html", templateData)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Template error")
+		return
+	}
 }
 
 // RenderArticleDetail 渲染文章详情页面
@@ -539,7 +545,12 @@ func RenderArticleDetail(c *gin.Context) {
 		"commentList":    result["commentList"],
 	}
 
-	c.HTML(http.StatusOK, "detail.html", templateData)
+	tmpl := component.GetTemplates()
+	err := tmpl.ExecuteTemplate(c.Writer, "detail.html", templateData)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Template error")
+		return
+	}
 }
 
 func markdownToHTML(md string) template.HTML {

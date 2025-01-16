@@ -10,7 +10,6 @@ import (
 
 func RegisterByGin(ginApp *gin.Engine) {
 	// 加载HTML模板
-	ginApp.LoadHTMLGlob("app/views/*")
 
 	// 基础中间件
 	ginApp.Use(middleware.SiteMaintenance)

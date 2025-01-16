@@ -14,7 +14,7 @@ func UseMigration() bool {
 }
 
 func IsProduction() bool {
-	return preferences.Get("app.env", "local") == "production"
+	return preferences.Get("app.env", "production") == "production"
 }
 
 func IsDebug() bool {
