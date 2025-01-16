@@ -135,3 +135,16 @@ func IncrementReply(entity Entity) int64 {
 	result := builder().Exec("UPDATE articles SET reply_count = reply_count+1 where id = ?", entity.Id)
 	return result.RowsAffected
 }
+
+// GetLatestArticles 获取最新的n篇文章
+func GetLatestArticles(limit int) ([]SmallEntity, error) {
+	var articles []SmallEntity
+	b := builder()
+	b.Where(queryopt.Eq(fieldArticleStatus, 1))
+	b.Where(queryopt.Eq(fieldProcessStatus, 0))
+	err := b.
+		Order("id desc").
+		Limit(limit).
+		Find(&articles).Error
+	return articles, err
+}

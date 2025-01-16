@@ -38,6 +38,7 @@ func frontend(ginApp *gin.Engine) {
 	// SEO 相关路由
 	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
 	ginApp.GET("/sitemap.xml", controllers.RenderSitemapXml)
+	ginApp.GET("/rss.xml", controllers.RenderRssFeed)
 }
 
 func auth(ginApp *gin.Engine) {
