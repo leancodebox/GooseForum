@@ -1,3 +1,4 @@
+{{define "header"}}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -27,13 +28,4 @@
 </header>
 
 <main>
-    {{ block "detail" . }}Default Content{{ end }}
-    {{ block "list" . }}Default List{{ end }}
-    {{ block "error" . }}Default Error{{ end }}
-</main>
-
-<footer>
-    <p>&copy; {{.year}} GooseForum</p>
-</footer>
-</body>
-</html>
+{{end}}
