@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"github.com/gin-contrib/gzip"
+	"github.com/leancodebox/GooseForum/app/static"
 	"net/http"
 	"path"
 
@@ -16,6 +18,21 @@ func setup(ginApp *gin.Engine) {
 	setupGroup := ginApp.Group("api/setup")
 	setupGroup.GET("status", UpButterReq(controllers.GetSetupStatus))
 	setupGroup.POST("init", UpButterReq(controllers.InitialSetup))
+
+}
+
+func frontend(ginApp *gin.Engine) {
+	// 添加静态文件服务
+	ginApp.StaticFS("/css", PFilSystem("./css", static.GetStaticFile()))
+
+	actGroup := ginApp.Group("/actor")
+	if setting.IsProduction() {
+		actGroup.Use(middleware.CacheMiddleware).
+			Use(gzip.Gzip(gzip.DefaultCompression)).
+			StaticFS("", PFilSystem("./frontend/dist", assert.GetActorFs()))
+	} else {
+		actGroup.Use(gzip.Gzip(gzip.DefaultCompression)).Static("", "./actor/dist")
+	}
 }
 
 func auth(ginApp *gin.Engine) {

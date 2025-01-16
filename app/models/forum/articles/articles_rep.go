@@ -123,7 +123,7 @@ func Page[ResType SmallEntity | Entity](q PageQuery) struct {
 		PageSize int
 		Total    int64
 		Data     []ResType
-	}{Page: q.Page, PageSize: q.PageSize, Data: list, Total: total}
+	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, Total: total}
 }
 
 func IncrementView(entity Entity) int64 {

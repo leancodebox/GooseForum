@@ -1,13 +1,11 @@
 package controllers
 
 import (
-	"fmt"
+	"github.com/gomarkdown/markdown"
 	"html/template"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/russross/blackfriday/v2"
 
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/spf13/cast"
@@ -493,7 +491,7 @@ func RenderArticlesPage(c *gin.Context) {
 		"Total":       result.Total,
 		"TotalPages":  totalPages,
 		"PrevPage":    max(result.Page-1, 1),
-		"NextPage":    min(result.Page+1, totalPages),
+		"NextPage":    min(max(result.Page, 1)+1, totalPages),
 	}
 
 	c.HTML(http.StatusOK, "list.html", templateData)
@@ -529,16 +527,13 @@ func RenderArticleDetail(c *gin.Context) {
 	}
 	result := response.Data.Result.(map[string]any)
 
-	// 添加调试信息
-	fmt.Printf("Response data: %+v\n", result)
-
 	// 构建模板数据
 	templateData := gin.H{
 		"title":          cast.ToString(result["articleTitle"]),
 		"description":    TakeUpTo64Chars(cast.ToString(result["articleContent"])),
 		"year":           time.Now().Year(),
 		"articleTitle":   cast.ToString(result["articleTitle"]),
-		"articleContent": renderMarkdown(cast.ToString(result["articleContent"])),
+		"articleContent": markdownToHTML(cast.ToString(result["articleContent"])),
 		"username":       cast.ToString(result["username"]),
 		"commentList":    result["commentList"],
 	}
@@ -546,12 +541,18 @@ func RenderArticleDetail(c *gin.Context) {
 	c.HTML(http.StatusOK, "detail.html", templateData)
 }
 
-func renderMarkdown(md string) template.HTML {
-	extensions := blackfriday.WithExtensions(
-		blackfriday.CommonExtensions |
-			blackfriday.AutoHeadingIDs |
-			blackfriday.HardLineBreak,
-	)
-	html := blackfriday.Run([]byte(md), extensions)
-	return template.HTML(html)
+func markdownToHTML(md string) template.HTML {
+	output := markdown.ToHTML([]byte(md), nil, nil)
+	return template.HTML(output)
 }
+
+//
+//func renderMarkdown(md string) template.HTML {
+//	extensions := blackfriday.WithExtensions(
+//		blackfriday.CommonExtensions |
+//			blackfriday.AutoHeadingIDs |
+//			blackfriday.HardLineBreak,
+//	)
+//	html := blackfriday.Run([]byte(md), extensions)
+//	return template.HTML(html)
+//}
