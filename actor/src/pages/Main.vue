@@ -38,8 +38,8 @@ const menuOptions = [
     path: "/home/index"
   },
   {
-    label: "BBS",
-    key: "bbs",
+    label: "Forum",
+    key: "Forum",
     path: "/home/bbs"
   },
   {

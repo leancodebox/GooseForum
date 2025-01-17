@@ -83,7 +83,7 @@ const menuOptions2 = [
   }, {
     label: () => h(RouterLink, {to: {path: "/home/bbs",}},
         {
-          default: () => "BBS"
+          default: () => "Forum"
         }
     ),
     key: "bbs",
