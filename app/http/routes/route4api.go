@@ -1,10 +1,11 @@
 package routes
 
 import (
-	"github.com/gin-contrib/gzip"
-	"github.com/leancodebox/GooseForum/app/static"
 	"net/http"
 	"path"
+
+	"github.com/gin-contrib/gzip"
+	"github.com/leancodebox/GooseForum/app/static"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
@@ -33,6 +34,10 @@ func frontend(ginApp *gin.Engine) {
 	} else {
 		actGroup.Use(gzip.Gzip(gzip.DefaultCompression)).Static("", "./actor/dist")
 	}
+
+	// SEO 相关路由
+	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
+	ginApp.GET("/sitemap.xml", controllers.RenderSitemapXml)
 }
 
 func auth(ginApp *gin.Engine) {
