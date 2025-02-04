@@ -81,6 +81,6 @@ func FailData(msg any) ResultStruct {
 	return ResultStruct{
 		Msg:    msg,
 		Result: nil,
-		Code:   SUCCESS,
+		Code:   FAIL,
 	}
 }
