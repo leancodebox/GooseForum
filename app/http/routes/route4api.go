@@ -4,7 +4,6 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
@@ -25,16 +24,10 @@ func frontend(ginApp *gin.Engine) {
 	ginApp.StaticFS("/css", http.FS(staticFS))
 
 	actGroup := ginApp.Group("/actor")
-	if setting.IsProduction() {
-		actorFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
-		actGroup.Use(middleware.CacheMiddleware).
-			Use(gzip.Gzip(gzip.DefaultCompression)).
-			StaticFS("", http.FS(actorFs))
-	} else {
-		actGroup.
-			Use(gzip.Gzip(gzip.DefaultCompression)).
-			Static("", "./actor/dist")
-	}
+	actorFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
+	actGroup.Use(middleware.CacheMiddleware).
+		Use(gzip.Gzip(gzip.DefaultCompression)).
+		StaticFS("", http.FS(actorFs))
 
 	// SEO 相关路由
 	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
