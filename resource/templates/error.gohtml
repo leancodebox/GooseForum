@@ -1,9 +1,17 @@
-{{template "layout.html" .}}
-{{define "content"}}
-<div class="error-page">
-    <h1>出错了</h1>
-    <p>{{.message}}</p>
-    <a href="/">返回首页</a>
-</div>
-{{end}}
+<!DOCTYPE html>
+<html lang="zh-CN">
+{{template "head.gohtml" .}}
+<body>
+{{template "nav.gohtml" .}}
+<main>
+    <div class="error-page">
+        <h1>出错了</h1>
+        <p>{{.message}}</p>
+        <a href="/">返回首页</a>
+    </div>
+</main>
+{{template "footer.gohtml" .}}
+</body>
+</html>
+
 

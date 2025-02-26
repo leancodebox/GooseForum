@@ -72,12 +72,15 @@ func RenderArticleDetail(c *gin.Context) {
 
 	// 复用现有的数据获取逻辑
 	response := GetArticlesDetail(req)
-	if response.Code != 200 {
-		c.HTML(http.StatusNotFound, "error.gohtml", gin.H{
-			"title":   "页面不存在",
-			"message": "文章不存在",
-			"year":    time.Now().Year(),
-		})
+	data, _ := response.Data.Result.(GetArticlesDetailRequest)
+	if response.Code != 200 || data.Id == 0 {
+		c.HTML(http.StatusNotFound,
+			"error.gohtml",
+			gin.H{
+				"title":   "页面不存在",
+				"message": "文章不存在",
+				"year":    time.Now().Year(),
+			})
 		return
 	}
 	result := response.Data.Result.(map[string]any)
