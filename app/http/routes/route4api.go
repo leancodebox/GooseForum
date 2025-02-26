@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/leancodebox/GooseForum/resource"
 	"net/http"
 	"path"
 
@@ -124,6 +125,23 @@ func bbs(ginApp *gin.Engine) {
 	bbsSSR := ginApp.Group("")
 	bbsSSR.GET("/articles", controllers.RenderArticlesPage)
 	bbsSSR.GET("/articles/:id", controllers.RenderArticleDetail)
+
+	// 生产模式：使用嵌入的资源
+	//tmpl, err := resource.GetTemplates()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//ginApp.SetHTMLTemplate(tmpl)
+
+	staticFS, err := resource.GetStaticFS()
+	if err != nil {
+		panic(err)
+	}
+	ginApp.StaticFS("/static", http.FS(staticFS))
+	bbsGinTemp := ginApp.Group("")
+	bbsGinTemp.GET("/post", controllers.RenderArticlesPageV2)
+	bbsGinTemp.GET("/post/:id", controllers.RenderArticleDetailV2)
+
 }
 
 func fileServer(ginApp *gin.Engine) {
