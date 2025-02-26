@@ -5,9 +5,10 @@
 {{template "nav.gohtml" .}}
 <main>
     <!-- 网站介绍横幅 -->
-    <section class="hero">
+    <section class="hero" id="welcomeBanner">
         <h1>欢迎来到 GooseForum</h1>
         <p>分享知识，连接世界</p>
+        <button class="hero-close" onclick="closeWelcomeBanner()">×</button>
     </section>
 
     <!-- 热门文章区域 -->

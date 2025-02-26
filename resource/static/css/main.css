@@ -209,6 +209,33 @@ footer {
     color: white;
     margin: -2rem -1rem 2rem -1rem;
     border-radius: 0 0 20px 20px;
+    position: relative;
+    display: none; /* 默认隐藏，通过JS控制显示 */
+}
+
+.hero.show {
+    display: block;
+}
+
+.hero-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    line-height: 1;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.hero-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .hero h1 {

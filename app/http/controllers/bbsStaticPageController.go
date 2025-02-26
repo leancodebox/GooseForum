@@ -29,7 +29,7 @@ func RenderIndex(c *gin.Context) {
 	pageData := articles.Page[articles.SmallEntity](
 		articles.PageQuery{
 			Page:         1,
-			PageSize:     10,
+			PageSize:     6,
 			FilterStatus: true,
 		})
 	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
