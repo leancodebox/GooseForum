@@ -7,7 +7,7 @@ toolchain go1.22.0
 require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gertd/go-pluralize v0.2.1
-	github.com/gin-contrib/gzip v1.0.1
+	github.com/gin-contrib/gzip v1.2.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-playground/locales v0.14.1
@@ -34,10 +34,8 @@ require (
 	github.com/bytedance/sonic v1.12.8 // indirect
 	github.com/bytedance/sonic/loader v0.2.3 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
-	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
-	github.com/gin-contrib/multitemplate v1.1.0 // indirect
 	github.com/gin-contrib/sse v1.0.0 // indirect
 	github.com/glebarez/go-sqlite v1.21.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
