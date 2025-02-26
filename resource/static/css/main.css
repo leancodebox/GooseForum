@@ -20,7 +20,7 @@ body {
 header {
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 1rem 0;
+    padding: 0 0;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -50,7 +50,7 @@ nav {
 nav a {
     color: var(--text-color);
     text-decoration: none;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.5rem;
     margin: 0 0.5rem;
     border-radius: 4px;
     transition: all 0.2s;
