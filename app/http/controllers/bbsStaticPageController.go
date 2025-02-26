@@ -3,7 +3,12 @@ package controllers
 import (
 	"bytes"
 	"github.com/gin-gonic/gin"
+	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/spf13/cast"
 	"github.com/yuin/goldmark"
 	"html/template"
@@ -19,6 +24,72 @@ func markdownToHTML(markdown string) template.HTML {
 		slog.Error("转化失败", "err", err)
 	}
 	return template.HTML(buf.String())
+}
+func RenderIndex(c *gin.Context) {
+	pageData := articles.Page[articles.SmallEntity](
+		articles.PageQuery{
+			Page:         1,
+			PageSize:     10,
+			FilterStatus: true,
+		})
+	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
+		return t.UserId
+	})
+	userMap := users.GetMapByIds(userIds)
+
+	//获取文章的分类信息
+	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
+		return t.Id
+	})
+	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
+	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
+		return t.ArticleCategoryId
+	})
+	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	// 获取文章的分类和标签
+	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
+		return rs.ArticleId
+	})
+
+	res := array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
+		categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
+			if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+				return category.Category
+			}
+			return ""
+		})
+		username := ""
+		avatarUrl := ""
+		if user, ok := userMap[t.UserId]; ok {
+			username = user.Username
+			if user.AvatarUrl != "" {
+				avatarUrl = component.FilePath(user.AvatarUrl)
+			}
+		}
+		return ArticlesSimpleDto{
+			Id:             t.Id,
+			Title:          t.Title,
+			LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
+			Username:       username,
+			AvatarUrl:      avatarUrl,
+			ViewCount:      t.ViewCount,
+			CommentCount:   t.ReplyCount,
+			Category:       FirstOr(categoryNames, "未分类"),
+			Categories:     categoryNames,
+			CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
+				return rs.ArticleCategoryId
+			}),
+			Type:    t.Type,
+			TypeStr: articlesTypeMap[int(t.Type)].Name,
+		}
+	})
+
+	templateData := gin.H{
+		"FeaturedArticles": res,
+		"LatestArticles":   res,
+		"Stats":            GetSiteStatisticsData(),
+	}
+	c.HTML(http.StatusOK, "home.gohtml", templateData)
 }
 
 // RenderArticlesPage 渲染文章列表页面

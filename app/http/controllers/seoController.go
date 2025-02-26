@@ -16,8 +16,8 @@ func RenderRobotsTxt(c *gin.Context) {
 	host := c.Request.Host
 	robotsTxt := fmt.Sprintf(`User-agent: *
 Allow: /
-Allow: /articles
-Allow: /articles/*
+Allow: /post
+Allow: /post/*
 
 # Sitemaps
 Sitemap: https://%s/sitemap.xml

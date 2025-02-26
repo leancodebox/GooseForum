@@ -69,6 +69,7 @@ func auth(ginApp *gin.Engine) {
 
 func bbs(ginApp *gin.Engine) {
 
+	ginApp.GET("", controllers.RenderIndex)
 	ginApp.GET("/post", controllers.RenderArticlesPage)
 	ginApp.GET("/post/:id", controllers.RenderArticleDetail)
 

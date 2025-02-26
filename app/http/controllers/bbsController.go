@@ -18,29 +18,40 @@ import (
 )
 
 var (
-	siteStatsCache      component.Response
-	siteStatsCacheTime  time.Time
-	siteStatsCacheMutex sync.Mutex
+	siteStatsCacheHasCache bool
+	siteStatsCache         SiteStats
+	siteStatsCacheTime     time.Time
+	siteStatsCacheMutex    sync.Mutex
 )
 
-func GetSiteStatistics() component.Response {
+type SiteStats struct {
+	UserCount    int64 `json:"userCount"`
+	ArticleCount int64 `json:"articleCount"`
+	Reply        int64 `json:"reply"`
+}
+
+func GetSiteStatisticsData() SiteStats {
 	siteStatsCacheMutex.Lock()
 	defer siteStatsCacheMutex.Unlock()
 
-	if time.Since(siteStatsCacheTime) < 5*time.Second && siteStatsCache.Data.Result != nil {
+	if time.Since(siteStatsCacheTime) < 5*time.Second && siteStatsCacheHasCache  {
 		return siteStatsCache
 	}
 
-	result := component.SuccessResponse(map[string]any{
-		"userCount":    users.GetCount(),
-		"articleCount": articles.GetCount(),
-		"reply":        reply.GetCount(),
-	})
+	result := SiteStats{
+		UserCount:    users.GetCount(),
+		ArticleCount: articles.GetCount(),
+		Reply:        reply.GetCount(),
+	}
 
 	siteStatsCache = result
 	siteStatsCacheTime = time.Now()
+	siteStatsCacheHasCache = true
+	return siteStatsCache
+}
 
-	return result
+func GetSiteStatistics() component.Response {
+	return component.SuccessResponse(GetSiteStatisticsData())
 }
 
 var articlesType = []datastruct.Option[string, int]{

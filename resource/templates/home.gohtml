@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{{template "head.gohtml" .}}
+<body>
+{{template "nav.gohtml" .}}
+<main>
+    <!-- 网站介绍横幅 -->
+    <section class="hero">
+        <h1>欢迎来到 GooseForum</h1>
+        <p>分享知识，连接世界</p>
+    </section>
+
+    <!-- 热门文章区域 -->
+    <section class="featured-articles">
+        <h2>热门文章</h2>
+        <div class="articles-grid">
+            {{range .FeaturedArticles}}
+                <article class="featured-article-card">
+                    <div class="article-category">{{.Category}}</div>
+                    <h3><a href="/post/{{.Id}}">{{.Title}}</a></h3>
+                    <div class="article-meta">
+                        <span class="author">{{.Username}}</span>
+                        <span class="date">{{.LastUpdateTime}}</span>
+                        <br>
+                        <span class="stats">
+                            <span>👁️ {{.ViewCount}}</span>
+                            <span>💬 {{.CommentCount}}</span>
+                        </span>
+                    </div>
+                </article>
+            {{end}}
+        </div>
+    </section>
+
+    <!-- 最新文章区域 -->
+    <section class="latest-articles">
+        <h2>最新文章</h2>
+        <div class="articles-list">
+            {{range .LatestArticles}}
+                <article class="article-item">
+                    <h3><a href="/post/{{.Id}}">{{.Title}}</a></h3>
+                    <div class="article-meta">
+                        <span class="author">{{.Username}}</span>
+                        <span class="date">{{.LastUpdateTime}}</span>
+                        <span class="category">{{.Category}}</span>
+                    </div>
+                </article>
+            {{end}}
+        </div>
+    </section>
+
+    <!-- 社区数据统计 -->
+    <section class="community-stats">
+        <div class="stat-card">
+            <h3>文章总数</h3>
+            <span class="stat-number">{{.Stats.ArticleCount}}</span>
+        </div>
+        <div class="stat-card">
+            <h3>用户数量</h3>
+            <span class="stat-number">{{.Stats.UserCount}}</span>
+        </div>
+        <div class="stat-card">
+            <h3>回复数量</h3>
+            <span class="stat-number">{{.Stats.Reply}}</span>
+        </div>
+    </section>
+</main>
+{{template "footer.gohtml" .}}
+</body>
+</html>
