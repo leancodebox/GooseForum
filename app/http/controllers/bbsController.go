@@ -187,6 +187,9 @@ type ReplyDto struct {
 // GetArticlesDetail 文章详情
 func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 	entity := articles.Get(req.Id)
+	if entity.Id == 0 {
+		return component.FailResponse("不存在")
+	}
 	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSizeWithRange(req.PageSize, 10, 100))
 	userIds := array.Map(replyEntities, func(item reply.Entity) uint64 {
 		return item.UserId
@@ -225,6 +228,7 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 	})
 	articles.IncrementView(entity)
 	return component.SuccessResponse(map[string]any{
+		"id":             entity.Id,
 		"userId":         entity.UserId,
 		"username":       author,
 		"articleTitle":   entity.Title,

@@ -1,19 +1,24 @@
 package controllers
 
 import (
+	"bytes"
 	"github.com/gin-gonic/gin"
-	"github.com/gomarkdown/markdown"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/spf13/cast"
+	"github.com/yuin/goldmark"
 	"html/template"
+	"log/slog"
 	"net/http"
 	"time"
 )
 
 // 添加新的服务端渲染的控制器方法
-func markdownToHTML(md string) template.HTML {
-	output := markdown.ToHTML([]byte(md), nil, nil)
-	return template.HTML(output)
+func markdownToHTML(markdown string) template.HTML {
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(markdown), &buf); err != nil {
+		slog.Error("转化失败", "err", err)
+	}
+	return template.HTML(buf.String())
 }
 
 // RenderArticlesPage 渲染文章列表页面
@@ -72,19 +77,16 @@ func RenderArticleDetail(c *gin.Context) {
 
 	// 复用现有的数据获取逻辑
 	response := GetArticlesDetail(req)
-	data, _ := response.Data.Result.(GetArticlesDetailRequest)
-	if response.Code != 200 || data.Id == 0 {
-		c.HTML(http.StatusNotFound,
-			"error.gohtml",
-			gin.H{
-				"title":   "页面不存在",
-				"message": "文章不存在",
-				"year":    time.Now().Year(),
-			})
-		return
-	}
 	result := response.Data.Result.(map[string]any)
 
+	if _, ok := result["id"]; !ok {
+		c.HTML(http.StatusNotFound, "error.gohtml", gin.H{
+			"title":   "页面不存在",
+			"message": "文章不存在",
+			"year":    time.Now().Year(),
+		})
+		return
+	}
 	// 构建模板数据
 	templateData := gin.H{
 		"articleId":      id,
