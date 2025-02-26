@@ -12,6 +12,9 @@ body {
     color: var(--text-color);
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
@@ -62,6 +65,9 @@ main {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .articles-list {
@@ -164,7 +170,9 @@ footer {
     text-align: center;
     padding: 2rem;
     background: var(--light-gray);
-    margin-top: 4rem;
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .comment-action {
