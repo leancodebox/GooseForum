@@ -2,23 +2,17 @@ package routes
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/go-playground/locales/zh"
 	ut "github.com/go-playground/universal-translator"
 	zhTranslations "github.com/go-playground/validator/v10/translations/zh"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"io/fs"
+	"github.com/spf13/cast"
 	"log/slog"
 	"net/http"
-	"path"
-
-	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
-
-type resultMap map[string]any
 
 var validate = validator.New()
 
@@ -33,29 +27,6 @@ func init() {
 	if err != nil {
 		slog.Error(cast.ToString(err))
 	}
-}
-
-type fsFunc func(name string) (fs.File, error)
-
-func (f fsFunc) Open(name string) (fs.File, error) {
-	return f(name)
-}
-
-func upFsHandle(pPath string, fSys fs.FS) fsFunc {
-	return func(name string) (fs.File, error) {
-		assetPath := path.Join(pPath, name)
-		// If we can't find the asset, fs can handle the error
-		file, err := fSys.Open(assetPath)
-		if err != nil {
-			fmt.Println(err, "出错了")
-			return nil, err
-		}
-		return file, err
-	}
-}
-
-func PFilSystem(pPath string, fSys fs.FS) http.FileSystem {
-	return http.FS(upFsHandle(pPath, fSys))
 }
 
 // ginUpP  支持params 参数

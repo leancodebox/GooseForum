@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{{template "head.gohtml" .}}
+<body>
+{{template "header.gohtml" .}}
+<main>
+    <div class="articles-list">
+        <h1>文章列表</h1>
+        {{range .Data}}
+            <article class="article-item">
+                <h2><a href="/post/{{.Id}}">{{.Title}}</a></h2>
+                <div class="article-meta">
+                    <span>作者: {{.Username}}</span>
+                    <span>发布时间: {{.LastUpdateTime}}</span>
+                    <span>分类: {{.Category}}</span>
+                </div>
+                <div class="article-stats">
+                    <span>浏览: {{.ViewCount}}</span>
+                    <span>评论: {{.CommentCount}}</span>
+                </div>
+            </article>
+        {{end}}
+
+        <div class="pagination">
+            {{if gt .Page 1}}
+                <a href="?page={{.PrevPage}}">上一页</a>
+            {{end}}
+            <span>第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
+            {{if lt .Page .TotalPages}}
+                <a href="?page={{.NextPage}}">下一页</a>
+            {{end}}
+        </div>
+    </div>
+</main>
+{{template "footer.gohtml" .}}
+</body>
+</html>

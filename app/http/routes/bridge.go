@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"fmt"
+	"github.com/leancodebox/GooseForum/resource"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +12,15 @@ import (
 
 func RegisterByGin(ginApp *gin.Engine) {
 	// 加载HTML模板
+
+	tmpl, err := resource.GetTemplates()
+	if err != nil {
+		panic(err)
+	}
+	ginApp.SetHTMLTemplate(tmpl)
+	for _, item := range tmpl.Templates() {
+		fmt.Println(item.Name())
+	}
 
 	// 基础中间件
 	ginApp.Use(middleware.SiteMaintenance)

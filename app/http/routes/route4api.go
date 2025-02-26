@@ -1,19 +1,16 @@
 package routes
 
 import (
-	"github.com/leancodebox/GooseForum/resource"
-	"net/http"
-	"path"
-
 	"github.com/gin-contrib/gzip"
-	"github.com/leancodebox/GooseForum/app/static"
-
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
+	"github.com/leancodebox/GooseForum/resource"
+	"io/fs"
+	"net/http"
 )
 
 func setup(ginApp *gin.Engine) {
@@ -24,16 +21,19 @@ func setup(ginApp *gin.Engine) {
 }
 
 func frontend(ginApp *gin.Engine) {
-	// 添加静态文件服务
-	ginApp.StaticFS("/css", PFilSystem("./css", static.GetStaticFile()))
+	staticFS, _ := resource.GetStaticFS()
+	ginApp.StaticFS("/css", http.FS(staticFS))
 
 	actGroup := ginApp.Group("/actor")
 	if setting.IsProduction() {
+		actorFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
 		actGroup.Use(middleware.CacheMiddleware).
 			Use(gzip.Gzip(gzip.DefaultCompression)).
-			StaticFS("", PFilSystem("./frontend/dist", assert.GetActorFs()))
+			StaticFS("", http.FS(actorFs))
 	} else {
-		actGroup.Use(gzip.Gzip(gzip.DefaultCompression)).Static("", "./actor/dist")
+		actGroup.
+			Use(gzip.Gzip(gzip.DefaultCompression)).
+			Static("", "./actor/dist")
 	}
 
 	// SEO 相关路由
@@ -42,13 +42,16 @@ func frontend(ginApp *gin.Engine) {
 	ginApp.GET("/rss.xml", controllers.RenderRssFeed)
 }
 
+// 认证相关服务
 func auth(ginApp *gin.Engine) {
+	// 非登陆下的用户操作
 	ginApp.Group("api").
 		POST("reg", ginUpP(controllers.Register)).
 		POST("login", ginUpP(controllers.Login)).
 		GET("get-captcha", ginUpNP(controllers.GetCaptcha)).
 		POST("get-user-info-show", ginUpP(controllers.GetUserInfo))
 
+	// 登陆状态下的用户操作
 	ginApp.Group("api").Use(middleware.JWTAuth4Gin).
 		GET("get-user-info", UpButterReq(controllers.UserInfo)).
 		POST("set-user-info", UpButterReq(controllers.EditUserInfo)).
@@ -56,20 +59,22 @@ func auth(ginApp *gin.Engine) {
 		POST("upload-avatar", controllers.UploadAvatar).
 		POST("change-password", UpButterReq(controllers.ChangePassword))
 
-	// 添加静态文件服务，用于访问头像
-	avatarPath := path.Join(setting.GetStorage(), "avatars")
-	ginApp.Static("api/avatars", avatarPath)
+	// 静态头像地址
 	ginApp.GET("/api/assets/default-avatar.png", func(context *gin.Context) {
 		context.Data(http.StatusOK, "image/png", assert.GetDefaultAvatar())
 	})
-
 	// 添加激活路由
 	ginApp.GET("api/activate", controllers.ActivateAccount)
 }
 
 func bbs(ginApp *gin.Engine) {
+
+	ginApp.GET("/post", controllers.RenderArticlesPage)
+	ginApp.GET("/post/:id", controllers.RenderArticleDetail)
+
 	bbsShow := ginApp.Group("api/bbs")
 
+	// 站点统计
 	bbsShow.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	// 分类列表
 	bbsShow.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
@@ -93,7 +98,7 @@ func bbs(ginApp *gin.Engine) {
 	bbsAuth.POST("notification/delete", UpButterReq(controllers.DeleteNotification))
 	bbsAuth.GET("notification/types", UpButterReq(controllers.GetNotificationTypes))
 
-	// 其他接口...
+	// 编辑文章时原始文章内容
 	bbsAuth.POST("get-articles-origin", UpButterReq(controllers.WriteArticlesOrigin))
 	// 发布文章
 	bbsAuth.POST("write-articles", UpButterReq(controllers.WriteArticles))
@@ -103,7 +108,7 @@ func bbs(ginApp *gin.Engine) {
 	bbsAuth.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
 	// 申请展示 todo
 	bbsAuth.POST("apply-show", UpButterReq(controllers.ApplyShow))
-	//
+	// 用户文章列表
 	bbsAuth.POST("/get-user-articles", UpButterReq(controllers.GetUserArticles))
 
 	admin := ginApp.Group("api/admin").Use(middleware.JWTAuth4Gin)
@@ -120,27 +125,6 @@ func bbs(ginApp *gin.Engine) {
 	admin.POST("category-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.GetCategoryList))
 	admin.POST("category-save", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.SaveCategory))
 	admin.POST("category-delete", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.DeleteCategory))
-
-	// 添加服务端渲染路由
-	bbsSSR := ginApp.Group("")
-	bbsSSR.GET("/articles", controllers.RenderArticlesPage)
-	bbsSSR.GET("/articles/:id", controllers.RenderArticleDetail)
-
-	// 生产模式：使用嵌入的资源
-	//tmpl, err := resource.GetTemplates()
-	//if err != nil {
-	//	panic(err)
-	//}
-	//ginApp.SetHTMLTemplate(tmpl)
-
-	staticFS, err := resource.GetStaticFS()
-	if err != nil {
-		panic(err)
-	}
-	ginApp.StaticFS("/static", http.FS(staticFS))
-	bbsGinTemp := ginApp.Group("")
-	bbsGinTemp.GET("/post", controllers.RenderArticlesPageV2)
-	bbsGinTemp.GET("/post/:id", controllers.RenderArticleDetailV2)
 
 }
 

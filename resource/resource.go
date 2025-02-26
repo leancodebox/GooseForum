@@ -27,14 +27,17 @@ func GetFooterLink() map[string]string {
 
 // GetTemplates 返回所有模板
 func GetTemplates() (*template.Template, error) {
-	return template.New("").Funcs(template.FuncMap{
+	return template.New("root").Funcs(template.FuncMap{
 		"getFooterLink": GetFooterLink,
-	}).ParseFS(templatesFS, "templates/*.html")
+	}).ParseFS(templatesFS,
+		"templates/*.gohtml",
+		"templates/*/**.gohtml",
+	)
 }
 
 // GetStaticFS 返回静态文件的文件系统
 func GetStaticFS() (fs.FS, error) {
-	static, err := fs.Sub(staticFS, "static")
+	static, err := fs.Sub(staticFS, "static/css")
 	if err != nil {
 		return nil, err
 	}
