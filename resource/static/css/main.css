@@ -480,9 +480,18 @@ footer {
 .author-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.3rem;
+    gap: 0.5rem;
     margin: 0.75rem 0;
     text-align: center;
+    padding: 0.5rem 0;
+}
+
+.author-stats .stat-item {
+    padding: 0.5rem;
+}
+
+.author-stats .number {
+    font-size: 1.2rem;
 }
 
 .recommended-posts {
@@ -539,7 +548,7 @@ footer {
     .container {
         grid-template-columns: 1fr;
     }
-    
+
     .sidebar {
         position: static;
         margin-top: 2rem;
@@ -596,8 +605,6 @@ footer {
 
 .sponsor-tag {
     font-size: 0.65rem;
-    color: var(--primary-color);
-    background: rgba(255, 111, 97, 0.1);
     padding: 0.15rem 0.4rem;
     border-radius: 12px;
     margin-top: 0.4rem;
@@ -605,18 +612,21 @@ footer {
 }
 
 .sponsor-tag.platinum {
-    color: #6574cd;
-    background: rgba(101, 116, 205, 0.1);
+    color: #1a365d;
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
 }
 
 .sponsor-tag.gold {
-    color: #f2d024;
-    background: rgba(242, 208, 36, 0.1);
+    color: #975a16;
+    background: #fffff0;
+    border: 1px solid #fbd38d;
 }
 
 .sponsor-tag.silver {
-    color: #9561e2;
-    background: rgba(149, 97, 226, 0.1);
+    color: #2d3748;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
 }
 
 .all-sponsors-link {
@@ -657,4 +667,32 @@ a {
 
 a:hover {
     color: var(--link-hover-color);
+}
+
+/* 统一的统计数字样式 */
+.stat-number, .number {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    line-height: 1.2;
+}
+
+.label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.2rem;
+}
+
+/* 统一社区统计卡片样式 */
+.sidebar .author-stats {
+    background: var(--light-gray);
+    border-radius: 8px;
+    margin: 0;
+    padding: 0.75rem;
+}
+
+.sidebar .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
