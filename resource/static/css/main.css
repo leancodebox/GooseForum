@@ -63,7 +63,7 @@ nav a:hover {
 
 main {
     max-width: 1200px;
-    margin: 2rem auto;
+    margin: 1rem auto;
     padding: 0 1rem;
     flex: 1;
     width: 100%;
@@ -77,8 +77,8 @@ main {
 .article-item {
     background: white;
     border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s;
 }
@@ -88,7 +88,8 @@ main {
 }
 
 .article-item h2 {
-    margin: 0 0 1rem 0;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
 }
 
 .article-item h2 a {
@@ -101,9 +102,9 @@ main {
 }
 
 .article-meta, .article-stats {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #666;
-    margin: 0.5rem 0;
+    margin: 0.3rem 0;
 }
 
 .article-meta span, .article-stats span {
@@ -114,17 +115,18 @@ main {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 2rem;
-    gap: 1rem;
+    margin-top: 1.5rem;
+    gap: 0.75rem;
 }
 
 .pagination a {
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;
     background: var(--primary-color);
     color: white;
     text-decoration: none;
     border-radius: 4px;
     transition: opacity 0.2s;
+    font-size: 0.9rem;
 }
 
 .pagination a:hover {
@@ -141,17 +143,22 @@ main {
     padding: 5px;
 }
 
+.article-detail h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.75rem;
+}
+
 .comments {
-    margin-top: 3rem;
+    margin-top: 2rem;
     padding-top: 2rem;
     border-top: 1px solid var(--border-color);
 }
 
 .comment {
     background: var(--light-gray);
-    padding: 1rem;
+    padding: 0.75rem;
     border-radius: 4px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .comment-meta {
@@ -326,7 +333,7 @@ footer {
 .container {
     display: grid;
     grid-template-columns: 1fr 300px;
-    gap: 2rem;
+    gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1rem;
@@ -345,48 +352,50 @@ footer {
 .sidebar-card {
     background: white;
     border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-card h3 {
     margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
     color: var(--text-color);
 }
 
 .author-card {
     text-align: center;
+    padding: 0.75rem;
 }
 
 .author-avatar {
-    width: 80px;
-    height: 80px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    margin: 0 auto 1rem;
+    margin: 0 auto 0.75rem;
 }
 
 .author-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
-    margin: 1rem 0;
+    gap: 0.3rem;
+    margin: 0.75rem 0;
     text-align: center;
 }
 
 .stat-item {
-    padding: 0.5rem;
+    padding: 0.3rem;
 }
 
 .stat-item .number {
     font-weight: bold;
     color: var(--primary-color);
+    font-size: 0.9rem;
 }
 
 .stat-item .label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #666;
 }
 
@@ -397,8 +406,8 @@ footer {
 }
 
 .recommended-posts li {
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -411,9 +420,9 @@ footer {
 .recommended-posts a {
     color: var(--text-color);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     display: block;
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .recommended-posts a:hover {
@@ -428,9 +437,9 @@ footer {
 
 .tag {
     background: var(--light-gray);
-    padding: 0.3rem 0.8rem;
+    padding: 0.2rem 0.6rem;
     border-radius: 15px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #666;
     text-decoration: none;
 }
@@ -455,14 +464,14 @@ footer {
 .sponsors-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .sponsor-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 1rem;
+    padding: 0.75rem;
     background: white;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -477,14 +486,14 @@ footer {
 }
 
 .sponsor-logo {
-    width: 64px;
-    height: 64px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
 }
 
 .sponsor-name {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--text-color);
     font-weight: 500;
     text-align: center;
@@ -492,20 +501,20 @@ footer {
 }
 
 .sponsor-description {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #666;
     text-align: center;
-    margin: 0.25rem 0 0 0;
-    line-height: 1.4;
+    margin: 0.2rem 0 0 0;
+    line-height: 1.3;
 }
 
 .sponsor-tag {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--primary-color);
     background: rgba(255, 111, 97, 0.1);
-    padding: 0.2rem 0.5rem;
+    padding: 0.15rem 0.4rem;
     border-radius: 12px;
-    margin-top: 0.5rem;
+    margin-top: 0.4rem;
 }
 
 .all-sponsors-link {
