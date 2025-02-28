@@ -683,10 +683,22 @@ a:hover {
     margin-top: 0.2rem;
 }
 
-/* 统一社区统计卡片样式 */
+/* 统计布局样式 */
+.author-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    text-align: center;
+    padding: 0.5rem 0;
+}
+
+.author-stats .stat-item {
+    padding: 0.5rem;
+}
+
+/* 移除之前的背景相关样式 */
 .sidebar .author-stats {
-    background: var(--light-gray);
-    border-radius: 8px;
     margin: 0;
     padding: 0.75rem;
 }
