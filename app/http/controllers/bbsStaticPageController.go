@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -108,7 +107,6 @@ func RenderArticlesPage(c *gin.Context) {
 		return
 	}
 	result := response.Data.Result.(component.Page[ArticlesSimpleDto])
-	fmt.Println(result)
 	// 计算总页数
 	totalPages := (cast.ToInt(result.Total) + param.PageSize - 1) / param.PageSize
 
