@@ -22,7 +22,6 @@
                         </div>
                     </article>
                 {{end}}
-
                 <div class="pagination">
                     {{if gt .Page 1}}
                         <a href="?page={{.PrevPage}}">上一页</a>
@@ -62,8 +61,6 @@
                     <li><a href="#">Go语言实战：构建高性能Web应用</a></li>
                     <li><a href="#">深入理解Docker容器化技术</a></li>
                     <li><a href="#">微服务架构设计实践</a></li>
-                    <li><a href="#">云原生应用开发指南</a></li>
-                    <li><a href="#">DevOps最佳实践</a></li>
                 </ul>
             </div>
 
@@ -75,26 +72,42 @@
                     <a href="#" class="tag">Docker</a>
                     <a href="#" class="tag">Kubernetes</a>
                     <a href="#" class="tag">微服务</a>
-                    <a href="#" class="tag">DevOps</a>
-                    <a href="#" class="tag">云原生</a>
-                    <a href="#" class="tag">后端开发</a>
                     <a href="#" class="tag">数据库</a>
                 </div>
             </div>
 
             <!-- 标签云 -->
             <div class="sidebar-card">
-                <h3>社区赞助</h3>
-                <div class="tag-cloud">
-                    <a href="#" class="tag">Golang</a>
-                    <a href="#" class="tag">Docker</a>
-                    <a href="#" class="tag">Kubernetes</a>
-                    <a href="#" class="tag">微服务</a>
-                    <a href="#" class="tag">DevOps</a>
-                    <a href="#" class="tag">云原生</a>
-                    <a href="#" class="tag">后端开发</a>
-                    <a href="#" class="tag">数据库</a>
+                <h3>赞助商</h3>
+                <div class="sponsors-grid">
+                    <a href="#" class="sponsor-card">
+                        <img src="/api/assets/default-avatar.png" alt="Docker" class="sponsor-logo">
+                        <h4 class="sponsor-name">Docker</h4>
+                        <p class="sponsor-description">容器化解决方案</p>
+                        <span class="sponsor-tag">白金赞助</span>
+                    </a>
+                    <a href="#" class="sponsor-card">
+                        <img src="/api/assets/default-avatar.png" alt="Kubernetes" class="sponsor-logo">
+                        <h4 class="sponsor-name">Kubernetes</h4>
+                        <p class="sponsor-description">容器编排平台</p>
+                        <span class="sponsor-tag">金牌赞助</span>
+                    </a>
+                    <a href="#" class="sponsor-card">
+                        <img src="/api/assets/default-avatar.png" alt="AWS" class="sponsor-logo">
+                        <h4 class="sponsor-name">AWS</h4>
+                        <p class="sponsor-description">云服务提供商</p>
+                        <span class="sponsor-tag">银牌赞助</span>
+                    </a>
+                    <a href="#" class="sponsor-card">
+                        <img src="/api/assets/default-avatar.png" alt="JetBrains" class="sponsor-logo">
+                        <h4 class="sponsor-name">JetBrains</h4>
+                        <p class="sponsor-description">开发工具</p>
+                        <span class="sponsor-tag">银牌赞助</span>
+                    </a>
                 </div>
+                <a href="/sponsors" class="all-sponsors-link">
+                    查看所有赞助商 →
+                </a>
             </div>
         </aside>
     </div>

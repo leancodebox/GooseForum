@@ -450,3 +450,89 @@ footer {
         margin-top: 2rem;
     }
 }
+
+/* 赞助商卡片样式 */
+.sponsors-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.sponsor-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.sponsor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.sponsor-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+.sponsor-name {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    font-weight: 500;
+    text-align: center;
+    margin: 0;
+}
+
+.sponsor-description {
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+    margin: 0.25rem 0 0 0;
+    line-height: 1.4;
+}
+
+.sponsor-tag {
+    font-size: 0.7rem;
+    color: var(--primary-color);
+    background: rgba(255, 111, 97, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    margin-top: 0.5rem;
+}
+
+.all-sponsors-link {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.all-sponsors-link:hover {
+    background: var(--light-gray);
+    border-radius: 0 0 8px 8px;
+}
+
+/* 响应式调整 */
+@media (max-width: 1100px) {
+    .sponsors-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 400px) {
+    .sponsors-grid {
+        grid-template-columns: 1fr;
+    }
+}
