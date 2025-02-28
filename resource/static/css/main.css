@@ -4,6 +4,8 @@
     --text-color: #333;
     --light-gray: #f5f5f5;
     --border-color: #eaeaea;
+    --link-color: var(--text-color);
+    --link-hover-color: var(--primary-color);
 }
 
 body {
@@ -104,7 +106,10 @@ main {
 }
 
 .article-item {
-    padding: 1.2rem 1rem;
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 1rem;
+    padding: 1rem;
     border-bottom: 1px solid var(--border-color);
     transition: background-color 0.2s;
 }
@@ -118,9 +123,6 @@ main {
 }
 
 .article-author {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     width: 48px;
 }
 
@@ -134,19 +136,19 @@ main {
 .article-content {
     display: flex;
     flex-direction: column;
-    min-width: 0;
+    gap: 0.5rem;
 }
 
 .article-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 0.4rem;
+    flex-wrap: wrap;
 }
 
 .article-category-tag {
     font-size: 0.75rem;
-    padding: 0.2rem 0.5rem;
+    padding: 0.15rem 0.5rem;
     border-radius: 4px;
     background: var(--primary-color);
     color: white;
@@ -154,15 +156,8 @@ main {
 }
 
 .article-title a {
-    color: var(--text-color);
-    text-decoration: none;
     font-size: 1.1rem;
     font-weight: 500;
-    transition: color 0.2s;
-}
-
-.article-title a:hover {
-    color: var(--primary-color);
 }
 
 .article-meta-info {
@@ -171,6 +166,7 @@ main {
     gap: 1rem;
     font-size: 0.85rem;
     color: #666;
+    flex-wrap: wrap;
 }
 
 .article-tags {
@@ -181,7 +177,7 @@ main {
 
 .article-tag {
     font-size: 0.75rem;
-    padding: 0.15rem 0.4rem;
+    padding: 0.1rem 0.4rem;
     border-radius: 12px;
     background: var(--light-gray);
     color: #666;
@@ -196,9 +192,10 @@ main {
 }
 
 .stat-item {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    font-size: 0.85rem;
 }
 
 .stat-icon {
@@ -640,4 +637,15 @@ footer {
     .sponsors-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* 添加全局链接样式 */
+a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--link-hover-color);
 }
