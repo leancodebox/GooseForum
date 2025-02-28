@@ -34,7 +34,7 @@ func GetSiteStatisticsData() SiteStats {
 	siteStatsCacheMutex.Lock()
 	defer siteStatsCacheMutex.Unlock()
 
-	if time.Since(siteStatsCacheTime) < 5*time.Second && siteStatsCacheHasCache  {
+	if time.Since(siteStatsCacheTime) < 5*time.Second && siteStatsCacheHasCache {
 		return siteStatsCache
 	}
 
@@ -160,7 +160,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 				Title:          t.Title,
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 				Username:       username,
-				AvatarUrl:      avatarUrl,
+				AvatarUrl:      strings.ReplaceAll(avatarUrl, "\\", "/"),
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,
 				Category:       FirstOr(categoryNames, "未分类"),
