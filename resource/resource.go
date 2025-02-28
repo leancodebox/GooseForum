@@ -26,13 +26,13 @@ func GetFooterLink() map[string]string {
 }
 
 // GetTemplates 返回所有模板
-func GetTemplates() (*template.Template, error) {
-	return template.New("root").Funcs(template.FuncMap{
+func GetTemplates() *template.Template {
+	return template.Must(template.New("root").Funcs(template.FuncMap{
 		"getFooterLink": GetFooterLink,
 	}).ParseFS(templatesFS,
 		"templates/*.gohtml",
 		"templates/*/**.gohtml",
-	)
+	))
 }
 
 // GetStaticFS 返回静态文件的文件系统
