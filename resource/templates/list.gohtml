@@ -17,19 +17,20 @@
                 {{range .Data}}
                     <article class="article-item">
                         <div class="article-author">
-                            <img src="/api/assets/default-avatar.png" alt="{{.Username}}" class="author-avatar-small">
+                            <img src="{{.AvatarUrl}}" alt="{{.Username}}" class="author-avatar-small">
                         </div>
                         <div class="article-content">
                             <div class="article-header">
-                                <span class="article-category-tag">{{.Category}}</span>
+                                <span class="article-category-tag">{{.TypeStr}}</span>
                                 <h2 class="article-title"><a href="/post/{{.Id}}">{{.Title}}</a></h2>
                             </div>
                             <div class="article-meta-info">
                                 <span>{{.Username}}</span>
                                 <span>{{.LastUpdateTime}}</span>
                                 <div class="article-tags">
-                                    <span class="article-tag">Go</span>
-                                    <span class="article-tag">Web</span>
+                                    {{range .Categories}}
+                                        <span class="article-tag">{{.}}</span>
+                                    {{end}}
                                 </div>
                                 <div class="article-stats">
                                     <span class="stat-item">

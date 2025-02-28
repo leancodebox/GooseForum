@@ -103,9 +103,7 @@ func RenderArticlesPage(c *gin.Context) {
 	// 复用现有的数据获取逻辑
 	response := GetArticlesPage(param)
 	if response.Code != 200 {
-		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
-			"message": "获取文章列表失败",
-		})
+		errorPage(c, "获取文章列表失败", "获取文章列表失败")
 		return
 	}
 	result := response.Data.Result.(component.Page[ArticlesSimpleDto])
@@ -132,11 +130,7 @@ func RenderArticlesPage(c *gin.Context) {
 func RenderArticleDetail(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
 	if id == 0 {
-		c.HTML(http.StatusNotFound, "error.gohtml", gin.H{
-			"title":   "页面不存在",
-			"message": "文章不存在",
-			"year":    time.Now().Year(),
-		})
+		errorPage(c, "页面不存在", "页面不存在")
 		return
 	}
 
@@ -151,11 +145,7 @@ func RenderArticleDetail(c *gin.Context) {
 	result := response.Data.Result.(map[string]any)
 
 	if _, ok := result["id"]; !ok {
-		c.HTML(http.StatusNotFound, "error.gohtml", gin.H{
-			"title":   "页面不存在",
-			"message": "文章不存在",
-			"year":    time.Now().Year(),
-		})
+		errorPage(c, "页面不存在", "文章不存在")
 		return
 	}
 	// 构建模板数据
@@ -171,4 +161,12 @@ func RenderArticleDetail(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "detail.gohtml", templateData)
+}
+
+func errorPage(c *gin.Context, title, message string) {
+	c.HTML(http.StatusNotFound, "error.gohtml", gin.H{
+		"title":   title,
+		"message": message,
+		"year":    time.Now().Year(),
+	})
 }
