@@ -107,9 +107,9 @@ main {
 
 .article-item {
     display: grid;
-    grid-template-columns: 48px 1fr;
-    gap: 1rem;
-    padding: 1rem;
+    grid-template-columns: 40px 1fr;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border-color);
     transition: background-color 0.2s;
 }
@@ -123,12 +123,12 @@ main {
 }
 
 .article-author {
-    width: 48px;
+    width: 40px;
 }
 
 .author-avatar-small {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -136,34 +136,43 @@ main {
 .article-content {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.35rem;
 }
 
 .article-header {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    align-items: baseline;
+    gap: 0.5rem;
     flex-wrap: wrap;
+    margin-bottom: -0.15rem;
 }
 
 .article-category-tag {
     font-size: 0.75rem;
-    padding: 0.15rem 0.5rem;
+    padding: 0.1rem 0.4rem;
     border-radius: 4px;
     background: var(--primary-color);
     color: white;
     white-space: nowrap;
+    line-height: 1.2;
+    display: inline-block;
+}
+
+.article-title {
+    margin: 0;
+    line-height: 1.2;
 }
 
 .article-title a {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 500;
+    line-height: inherit;
 }
 
 .article-meta-info {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
     font-size: 0.85rem;
     color: #666;
     flex-wrap: wrap;
@@ -177,7 +186,7 @@ main {
 
 .article-tag {
     font-size: 0.75rem;
-    padding: 0.1rem 0.4rem;
+    padding: 0.1rem 0.35rem;
     border-radius: 12px;
     background: var(--light-gray);
     color: #666;
