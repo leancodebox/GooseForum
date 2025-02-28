@@ -39,11 +39,28 @@
         <div class="articles-list">
             {{range .LatestArticles}}
                 <article class="article-item">
-                    <h3><a href="/post/{{.Id}}">{{.Title}}</a></h3>
-                    <div class="article-meta">
-                        <span class="author">{{.Username}}</span>
-                        <span class="date">{{.LastUpdateTime}}</span>
-                        <span class="category">{{.Category}}</span>
+                    <div class="article-author">
+                        <img src="/api/assets/default-avatar.png" alt="{{.Username}}" class="author-avatar-small">
+                    </div>
+                    <div class="article-content">
+                        <div class="article-header">
+                            <span class="article-category-tag">{{.Category}}</span>
+                            <h2 class="article-title"><a href="/post/{{.Id}}">{{.Title}}</a></h2>
+                        </div>
+                        <div class="article-meta-info">
+                            <span>{{.Username}}</span>
+                            <span>{{.LastUpdateTime}}</span>
+                            <div class="article-stats">
+                                <span class="stat-item">
+                                    <span class="stat-icon">👁️</span>
+                                    {{.ViewCount}}
+                                </span>
+                                <span class="stat-item">
+                                    <span class="stat-icon">💬</span>
+                                    {{.CommentCount}}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </article>
             {{end}}
