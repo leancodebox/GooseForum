@@ -4,43 +4,91 @@
 <body>
 {{template "nav.gohtml" .}}
 <main>
+    <div class="container">
+        <div class="main-content">
+            <article class="article-detail">
+                <h1>{{.articleTitle}}</h1>
 
-    <article class="article-detail">
-        <h1>{{.articleTitle}}</h1>
+                <div class="article-meta">
+                    <span>作者: {{.username}}</span>
+                </div>
 
-        <div class="article-meta">
-            <span>作者: {{.username}}</span>
-        </div>
+                <div class="article-content markdown-body">
+                    {{.articleContent}}
+                </div>
 
-        <div class="article-content markdown-body">
-            {{.articleContent}}
-        </div>
+                <section class="comments">
+                    <h2>评论列表</h2>
+                    {{range .commentList}}
+                        <div class="comment">
+                            <div class="comment-meta">
+                                <span>{{.Username}}</span>
+                                <time>{{.CreateTime}}</time>
+                            </div>
+                            <div class="comment-content">
+                                {{if .ReplyToUsername}}
+                                    <p class="reply-to">回复 @{{.ReplyToUsername}}:</p>
+                                {{end}}
+                                {{.Content}}
+                            </div>
+                        </div>
+                    {{end}}
 
-        <section class="comments">
-            <h2>评论列表</h2>
-            {{range .commentList}}
-                <div class="comment">
-                    <div class="comment-meta">
-                        <span>{{.Username}}</span>
-                        <time>{{.CreateTime}}</time>
+                    <div class="comment-action">
+                        <a href="/actor/#/home/bbs/articlesDetail?id={{.articleId}}" class="comment-btn">
+                            前往评论
+                            <span class="arrow">→</span>
+                        </a>
                     </div>
-                    <div class="comment-content">
-                        {{if .ReplyToUsername}}
-                            <p class="reply-to">回复 @{{.ReplyToUsername}}:</p>
-                        {{end}}
-                        {{.Content}}
+                </section>
+            </article>
+        </div>
+
+        <aside class="sidebar">
+            <!-- 作者信息卡片 -->
+            <div class="sidebar-card author-card">
+                <img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="作者头像" class="author-avatar">
+                <h3>{{.username}}</h3>
+                <p>资深开发者 / 技术博主</p>
+                <div class="author-stats">
+                    <div class="stat-item">
+                        <div class="number">52</div>
+                        <div class="label">文章</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">128</div>
+                        <div class="label">粉丝</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">1.2k</div>
+                        <div class="label">获赞</div>
                     </div>
                 </div>
-            {{end}}
-
-            <div class="comment-action">
-                <a href="/actor/#/home/bbs/articlesDetail?id={{.articleId}}" class="comment-btn">
-                    前往评论
-                    <span class="arrow">→</span>
-                </a>
             </div>
-        </section>
-    </article>
+
+            <!-- 作者其他文章 -->
+            <div class="sidebar-card">
+                <h3>作者其他文章</h3>
+                <ul class="recommended-posts">
+                    <li><a href="#">微服务架构实践经验分享</a></li>
+                    <li><a href="#">Go语言性能优化技巧</a></li>
+                    <li><a href="#">分布式系统设计原则</a></li>
+                    <li><a href="#">容器化部署最佳实践</a></li>
+                </ul>
+            </div>
+
+            <!-- 相关文章推荐 -->
+            <div class="sidebar-card">
+                <h3>相关文章</h3>
+                <ul class="recommended-posts">
+                    <li><a href="#">深入理解Go并发编程</a></li>
+                    <li><a href="#">Go语言错误处理最佳实践</a></li>
+                    <li><a href="#">Go Web框架对比分析</a></li>
+                    <li><a href="#">Go语言项目结构设计</a></li>
+                </ul>
+            </div>
+        </aside>
+    </div>
 </main>
 {{template "footer.gohtml" .}}
 </body>

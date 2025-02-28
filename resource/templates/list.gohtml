@@ -4,32 +4,99 @@
 <body>
 {{template "nav.gohtml" .}}
 <main>
-    <div class="articles-list">
-        <h1>文章列表</h1>
-        {{range .Data}}
-            <article class="article-item">
-                <h2><a href="/post/{{.Id}}">{{.Title}}</a></h2>
-                <div class="article-meta">
-                    <span>作者: {{.Username}}</span>
-                    <span>发布时间: {{.LastUpdateTime}}</span>
-                    <span>分类: {{.Category}}</span>
-                </div>
-                <div class="article-stats">
-                    <span>浏览: {{.ViewCount}}</span>
-                    <span>评论: {{.CommentCount}}</span>
-                </div>
-            </article>
-        {{end}}
+    <div class="container">
+        <div class="main-content">
+            <div class="articles-list">
+                <h1>文章列表</h1>
+                {{range .Data}}
+                    <article class="article-item">
+                        <h2><a href="/post/{{.Id}}">{{.Title}}</a></h2>
+                        <div class="article-meta">
+                            <span>作者: {{.Username}}</span>
+                            <span>发布时间: {{.LastUpdateTime}}</span>
+                            <span>分类: {{.Category}}</span>
+                        </div>
+                        <div class="article-stats">
+                            <span>浏览: {{.ViewCount}}</span>
+                            <span>评论: {{.CommentCount}}</span>
+                        </div>
+                    </article>
+                {{end}}
 
-        <div class="pagination">
-            {{if gt .Page 1}}
-                <a href="?page={{.PrevPage}}">上一页</a>
-            {{end}}
-            <span>第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
-            {{if lt .Page .TotalPages}}
-                <a href="?page={{.NextPage}}">下一页</a>
-            {{end}}
+                <div class="pagination">
+                    {{if gt .Page 1}}
+                        <a href="?page={{.PrevPage}}">上一页</a>
+                    {{end}}
+                    <span>第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
+                    {{if lt .Page .TotalPages}}
+                        <a href="?page={{.NextPage}}">下一页</a>
+                    {{end}}
+                </div>
+            </div>
         </div>
+
+        <aside class="sidebar">
+            <!-- 社区统计 -->
+            <div class="sidebar-card">
+                <h3>社区统计</h3>
+                <div class="author-stats">
+                    <div class="stat-item">
+                        <div class="number">1.2k</div>
+                        <div class="label">文章</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">3.5k</div>
+                        <div class="label">用户</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">8.7k</div>
+                        <div class="label">评论</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 推荐文章 -->
+            <div class="sidebar-card">
+                <h3>推荐文章</h3>
+                <ul class="recommended-posts">
+                    <li><a href="#">Go语言实战：构建高性能Web应用</a></li>
+                    <li><a href="#">深入理解Docker容器化技术</a></li>
+                    <li><a href="#">微服务架构设计实践</a></li>
+                    <li><a href="#">云原生应用开发指南</a></li>
+                    <li><a href="#">DevOps最佳实践</a></li>
+                </ul>
+            </div>
+
+            <!-- 标签云 -->
+            <div class="sidebar-card">
+                <h3>热门标签</h3>
+                <div class="tag-cloud">
+                    <a href="#" class="tag">Golang</a>
+                    <a href="#" class="tag">Docker</a>
+                    <a href="#" class="tag">Kubernetes</a>
+                    <a href="#" class="tag">微服务</a>
+                    <a href="#" class="tag">DevOps</a>
+                    <a href="#" class="tag">云原生</a>
+                    <a href="#" class="tag">后端开发</a>
+                    <a href="#" class="tag">数据库</a>
+                </div>
+            </div>
+
+            <!-- 标签云 -->
+            <div class="sidebar-card">
+                <h3>社区赞助</h3>
+                <div class="tag-cloud">
+                    <a href="#" class="tag">Golang</a>
+                    <a href="#" class="tag">Docker</a>
+                    <a href="#" class="tag">Kubernetes</a>
+                    <a href="#" class="tag">微服务</a>
+                    <a href="#" class="tag">DevOps</a>
+                    <a href="#" class="tag">云原生</a>
+                    <a href="#" class="tag">后端开发</a>
+                    <a href="#" class="tag">数据库</a>
+                </div>
+            </div>
+        </aside>
     </div>
 </main>
 {{template "footer.gohtml" .}}
