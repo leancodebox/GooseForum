@@ -10,15 +10,32 @@
                 <h1>文章列表</h1>
                 {{range .Data}}
                     <article class="article-item">
-                        <h2><a href="/post/{{.Id}}">{{.Title}}</a></h2>
-                        <div class="article-meta">
-                            <span>作者: {{.Username}}</span>
-                            <span>发布时间: {{.LastUpdateTime}}</span>
-                            <span>分类: {{.Category}}</span>
+                        <div class="article-author">
+                            <img src="/api/assets/default-avatar.png" alt="{{.Username}}" class="author-avatar-small">
                         </div>
-                        <div class="article-stats">
-                            <span>浏览: {{.ViewCount}}</span>
-                            <span>评论: {{.CommentCount}}</span>
+                        <div class="article-content">
+                            <div class="article-header">
+                                <span class="article-category-tag">{{.Category}}</span>
+                                <h2 class="article-title"><a href="/post/{{.Id}}">{{.Title}}</a></h2>
+                            </div>
+                            <div class="article-meta-info">
+                                <span>{{.Username}}</span>
+                                <span>{{.LastUpdateTime}}</span>
+                                <div class="article-tags">
+                                    <span class="article-tag">Go</span>
+                                    <span class="article-tag">Web</span>
+                                </div>
+                                <div class="article-stats">
+                                    <span class="stat-item">
+                                        <span class="stat-icon">👁️</span>
+                                        {{.ViewCount}}
+                                    </span>
+                                    <span class="stat-item">
+                                        <span class="stat-icon">💬</span>
+                                        {{.CommentCount}}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </article>
                 {{end}}
@@ -84,19 +101,19 @@
                         <img src="/api/assets/default-avatar.png" alt="Docker" class="sponsor-logo">
                         <h4 class="sponsor-name">Docker</h4>
                         <p class="sponsor-description">容器化解决方案</p>
-                        <span class="sponsor-tag">白金赞助</span>
+                        <span class="sponsor-tag platinum">白金赞助</span>
                     </a>
                     <a href="#" class="sponsor-card">
                         <img src="/api/assets/default-avatar.png" alt="Kubernetes" class="sponsor-logo">
                         <h4 class="sponsor-name">Kubernetes</h4>
                         <p class="sponsor-description">容器编排平台</p>
-                        <span class="sponsor-tag">金牌赞助</span>
+                        <span class="sponsor-tag gold">金牌赞助</span>
                     </a>
                     <a href="#" class="sponsor-card">
                         <img src="/api/assets/default-avatar.png" alt="AWS" class="sponsor-logo">
                         <h4 class="sponsor-name">AWS</h4>
                         <p class="sponsor-description">云服务提供商</p>
-                        <span class="sponsor-tag">银牌赞助</span>
+                        <span class="sponsor-tag silver">银牌赞助</span>
                     </a>
                     <a href="#" class="sponsor-card">
                         <img src="/api/assets/default-avatar.png" alt="JetBrains" class="sponsor-logo">
