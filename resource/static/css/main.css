@@ -652,10 +652,23 @@ footer {
     font-weight: 500;
 }
 
+
+@keyframes platinumGlow {
+    0%, 100% {
+        background: #331e70;
+        border-color: #1a0d47;
+    }
+    50% {
+        background: #007bff; /* 更改为蓝色 */
+        border-color: #0056b3; /* 更深的蓝色 */
+    }
+}
+
 .sponsor-tag.platinum {
-    color: #1a365d;
-    background: #ebf8ff;
-    border: 1px solid #bee3f8;
+    color: #ffffff; /* 白色文字 */
+    background: #331e70; /* 较深的紫色背景 */
+    border: 1px solid #1a0d47; /* 更深的紫色边框 */
+    animation: platinumGlow 2s infinite;
 }
 
 .sponsor-tag.gold {
