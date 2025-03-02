@@ -1,4 +1,4 @@
-//go:build darwin || (openbsd && !mips64)
+//go:build darwin || (openbsd && !mips64) || linux
 
 package console
 
