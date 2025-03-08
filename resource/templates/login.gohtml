@@ -1,10 +1,72 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录 - GooseForum</title>
-    <link rel="stylesheet" href="/static/css/main.css">
+{{template "head.gohtml" .}}
+<body>
+    {{template "nav_new.gohtml" .}}
+    <main>
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>欢迎来到 GooseForum</h1>
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchTab('login')">登录</div>
+                <div class="auth-tab" onclick="switchTab('register')">注册</div>
+            </div>
+            <form class="auth-form login-form" id="loginForm" action="/api/login" method="POST">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="submit-btn">登录</button>
+            </form>
+            <form class="auth-form register-form" id="registerForm" action="/api/register" method="POST">
+                <div class="form-group">
+                    <label for="reg-username">用户名</label>
+                    <input type="text" id="reg-username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">邮箱</label>
+                    <input type="email" id="reg-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">密码</label>
+                    <input type="password" id="reg-password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-confirm-password">确认密码</label>
+                    <input type="password" id="reg-confirm-password" name="confirm_password" required>
+                </div>
+                <button type="submit" class="submit-btn">注册</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+    function switchTab(tab) {
+        const loginTab = document.querySelector('.auth-tab:nth-child(1)');
+        const registerTab = document.querySelector('.auth-tab:nth-child(2)');
+        const loginForm = document.querySelector('.login-form');
+        const registerForm = document.querySelector('.register-form');
+
+        if (tab === 'login') {
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            loginForm.style.display = 'flex';
+            registerForm.style.display = 'none';
+        } else {
+            loginTab.classList.remove('active');
+            registerTab.classList.add('active');
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'flex';
+        }
+    }
+    </script>
+</body>
+
     <style>
         .auth-container {
             max-width: 400px;
@@ -92,70 +154,4 @@
             display: flex;
         }
     </style>
-</head>
-<body>
-    {{template "nav_new.gohtml" .}}
-    <main>
-        <div class="auth-container">
-            <div class="auth-header">
-                <h1>欢迎来到 GooseForum</h1>
-            </div>
-            <div class="auth-tabs">
-                <div class="auth-tab active" onclick="switchTab('login')">登录</div>
-                <div class="auth-tab" onclick="switchTab('register')">注册</div>
-            </div>
-            <form class="auth-form login-form" id="loginForm" action="/api/login" method="POST">
-                <div class="form-group">
-                    <label for="username">用户名</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">密码</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit" class="submit-btn">登录</button>
-            </form>
-            <form class="auth-form register-form" id="registerForm" action="/api/register" method="POST">
-                <div class="form-group">
-                    <label for="reg-username">用户名</label>
-                    <input type="text" id="reg-username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="reg-email">邮箱</label>
-                    <input type="email" id="reg-email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="reg-password">密码</label>
-                    <input type="password" id="reg-password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="reg-confirm-password">确认密码</label>
-                    <input type="password" id="reg-confirm-password" name="confirm_password" required>
-                </div>
-                <button type="submit" class="submit-btn">注册</button>
-            </form>
-        </div>
-    </main>
-
-    <script>
-    function switchTab(tab) {
-        const loginTab = document.querySelector('.auth-tab:nth-child(1)');
-        const registerTab = document.querySelector('.auth-tab:nth-child(2)');
-        const loginForm = document.querySelector('.login-form');
-        const registerForm = document.querySelector('.register-form');
-
-        if (tab === 'login') {
-            loginTab.classList.add('active');
-            registerTab.classList.remove('active');
-            loginForm.style.display = 'flex';
-            registerForm.style.display = 'none';
-        } else {
-            loginTab.classList.remove('active');
-            registerTab.classList.add('active');
-            loginForm.style.display = 'none';
-            registerForm.style.display = 'flex';
-        }
-    }
-    </script>
-</body>
 </html>

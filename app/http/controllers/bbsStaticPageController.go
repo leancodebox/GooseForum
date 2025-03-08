@@ -172,14 +172,14 @@ func errorPage(c *gin.Context, title, message string) {
 }
 
 func LoginPage(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "login.gohtml", gin.H{"title": "login.gohtml"})
+	c.HTML(http.StatusNotFound, "login.gohtml", gin.H{"title": "登录 - GooseForum"})
 }
 func Notifications(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "notifications.gohtml", gin.H{"title": "notifications.gohtml"})
+	c.HTML(http.StatusNotFound, "notifications.gohtml", gin.H{"title": "消息通知 - GooseForum"})
 }
 func PostEdit(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "post_edit.gohtml", gin.H{"title": "post_edit.gohtml"})
+	c.HTML(http.StatusNotFound, "post_edit.gohtml", gin.H{"title": "发布文章 - GooseForum"})
 }
 func UserProfile(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "user_profile.gohtml", gin.H{"title": "user_profile.gohtml"})
+	c.HTML(http.StatusNotFound, "user_profile.gohtml", gin.H{"title": "用户主页 - GooseForum"})
 }
