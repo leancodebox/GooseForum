@@ -186,7 +186,7 @@ main {
 
 .article-title {
     margin: 0;
-    line-height: 1.2;
+    line-height: 0;
 }
 
 .article-title a {
