@@ -205,17 +205,26 @@
 
     .sponsors-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 280px));
+        gap: 2rem;
+        justify-content: center;
     }
 
     .sponsor-card {
         background: var(--card-bg-color);
         border-radius: 8px;
-        padding: 0.75rem;
+        padding: 1.5rem;
         text-align: center;
-        transition: transform 0.3s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
         box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        display: block;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .sponsor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
     .sponsor-logo {
