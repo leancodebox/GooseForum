@@ -148,15 +148,31 @@
         text-align: center;
         margin-bottom: 2rem;
         position: relative;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        display: inline-block;
+        background: var(--card-bg-color);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .sponsor-tier h2::after {
-        content: '';
-        display: block;
-        width: 60px;
-        height: 3px;
-        background: var(--primary-color);
-        margin: 1rem auto;
+    .diamond-tier h2 {
+        background: linear-gradient(135deg, rgba(185, 242, 255, 0.2), rgba(230, 250, 255, 0.1));
+        border: 1px solid rgba(185, 242, 255, 0.3);
+    }
+
+    .gold-tier h2 {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 248, 231, 0.1));
+        border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .silver-tier h2 {
+        background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(245, 245, 245, 0.1));
+        border: 1px solid rgba(192, 192, 192, 0.3);
+    }
+
+    .bronze-tier h2 {
+        background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(255, 241, 230, 0.1));
+        border: 1px solid rgba(205, 127, 50, 0.3);
     }
 
     .sponsors-grid {
@@ -184,7 +200,7 @@
         justify-content: center;
         align-items: center;
         height: 120px;
-        background: rgba(255, 255, 255, 0.05);
+        background: transparent;
         border-radius: 8px;
         padding: 1rem;
     }
@@ -263,23 +279,27 @@
 
     /* 赞助商等级样式 */
     .diamond-tier .sponsor-card {
-        background: linear-gradient(135deg, rgba(185, 242, 255, 0.1), rgba(230, 250, 255, 0.05));
-        border: 1px solid rgba(185, 242, 255, 0.2);
+        background: linear-gradient(135deg, rgba(185, 242, 255, 0.08), rgba(230, 250, 255, 0.02));
+        border: 1px solid rgba(185, 242, 255, 0.15);
+        backdrop-filter: blur(10px);
     }
 
     .gold-tier .sponsor-card {
-        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 248, 231, 0.05));
-        border: 1px solid rgba(255, 215, 0, 0.2);
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 248, 231, 0.02));
+        border: 1px solid rgba(255, 215, 0, 0.15);
+        backdrop-filter: blur(10px);
     }
 
     .silver-tier .sponsor-card {
-        background: linear-gradient(135deg, rgba(192, 192, 192, 0.1), rgba(245, 245, 245, 0.05));
-        border: 1px solid rgba(192, 192, 192, 0.2);
+        background: linear-gradient(135deg, rgba(192, 192, 192, 0.08), rgba(245, 245, 245, 0.02));
+        border: 1px solid rgba(192, 192, 192, 0.15);
+        backdrop-filter: blur(10px);
     }
 
     .bronze-tier .sponsor-card {
-        background: linear-gradient(135deg, rgba(205, 127, 50, 0.1), rgba(255, 241, 230, 0.05));
-        border: 1px solid rgba(205, 127, 50, 0.2);
+        background: linear-gradient(135deg, rgba(205, 127, 50, 0.08), rgba(255, 241, 230, 0.02));
+        border: 1px solid rgba(205, 127, 50, 0.15);
+        backdrop-filter: blur(10px);
     }
 
     @media (max-width: 768px) {
