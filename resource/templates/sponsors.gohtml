@@ -13,16 +13,15 @@
     <section class="sponsor-tier diamond-tier">
         <h2>钻石赞助商</h2>
         <div class="sponsors-grid">
-            <div class="sponsor-card diamond">
+            <a href="https://www.microsoft.com" target="_blank" class="sponsor-card diamond">
                 <div class="sponsor-logo">
                     <img src="/api/assets/default-avatar.png" alt="Microsoft的logo">
                 </div>
                 <div class="sponsor-info">
                     <h3>Microsoft</h3>
                     <p class="sponsor-description">全球领先的科技公司，提供创新的软件解决方案</p>
-                    <a href="https://www.microsoft.com" target="_blank" class="sponsor-link">访问网站</a>
                 </div>
-            </div>
+            </a>
         </div>
     </section>
 
@@ -30,26 +29,24 @@
     <section class="sponsor-tier gold-tier">
         <h2>金牌赞助商</h2>
         <div class="sponsors-grid">
-            <div class="sponsor-card gold">
+            <a href="https://www.aliyun.com" target="_blank" class="sponsor-card gold">
                 <div class="sponsor-logo">
                     <img src="/api/assets/default-avatar.png" alt="阿里云的logo">
                 </div>
                 <div class="sponsor-info">
                     <h3>阿里云</h3>
                     <p class="sponsor-description">领先的云计算服务提供商，为企业提供全方位的云解决方案</p>
-                    <a href="https://www.aliyun.com" target="_blank" class="sponsor-link">访问网站</a>
                 </div>
-            </div>
-            <div class="sponsor-card gold">
+            </a>
+            <a href="https://cloud.tencent.com" target="_blank" class="sponsor-card gold">
                 <div class="sponsor-logo">
                     <img src="/api/assets/default-avatar.png" alt="腾讯云的logo">
                 </div>
                 <div class="sponsor-info">
                     <h3>腾讯云</h3>
                     <p class="sponsor-description">专业的云服务平台，提供安全稳定的云计算服务</p>
-                    <a href="https://cloud.tencent.com" target="_blank" class="sponsor-link">访问网站</a>
                 </div>
-            </div>
+            </a>
         </div>
     </section>
 
@@ -57,74 +54,49 @@
     <section class="sponsor-tier silver-tier">
         <h2>银牌赞助商</h2>
         <div class="sponsors-grid">
-            <div class="sponsor-card silver">
+            <a href="https://www.jetbrains.com" target="_blank" class="sponsor-card silver">
                 <div class="sponsor-logo">
                     <img src="/api/assets/default-avatar.png" alt="JetBrains的logo">
                 </div>
                 <div class="sponsor-info">
                     <h3>JetBrains</h3>
                     <p class="sponsor-description">专业的开发工具提供商，打造高效的开发环境</p>
-                    <a href="https://www.jetbrains.com" target="_blank" class="sponsor-link">访问网站</a>
                 </div>
-            </div>
-            <div class="sponsor-card silver">
+            </a>
+            <a href="https://gitlab.com" target="_blank" class="sponsor-card silver">
                 <div class="sponsor-logo">
                     <img src="/api/assets/default-avatar.png" alt="GitLab的logo">
                 </div>
                 <div class="sponsor-info">
                     <h3>GitLab</h3>
                     <p class="sponsor-description">完整的DevOps平台，助力团队协作开发</p>
-                    <a href="https://gitlab.com" target="_blank" class="sponsor-link">访问网站</a>
                 </div>
-            </div>
+            </a>
         </div>
     </section>
-
 
     <!-- 铜牌赞助商 -->
     <section class="sponsor-tier bronze-tier">
         <h2>铜牌赞助商</h2>
         <div class="sponsors-grid">
-            <div class="sponsor-card bronze">
+            <a href="https://www.digitalocean.com" target="_blank" class="sponsor-card bronze">
                 <div class="sponsor-logo">
                     <img src="/api/assets/default-avatar.png" alt="DigitalOcean的logo">
                 </div>
                 <div class="sponsor-info">
                     <h3>DigitalOcean</h3>
                     <p class="sponsor-description">简单易用的云计算平台，适合开发者使用</p>
-                    <a href="https://www.digitalocean.com" target="_blank" class="sponsor-link">访问网站</a>
                 </div>
-            </div>
-            <div class="sponsor-card bronze">
+            </a>
+            <a href="https://www.vultr.com" target="_blank" class="sponsor-card bronze">
                 <div class="sponsor-logo">
                     <img src="/api/assets/default-avatar.png" alt="Vultr的logo">
                 </div>
                 <div class="sponsor-info">
                     <h3>Vultr</h3>
                     <p class="sponsor-description">高性能的云服务器提供商，全球数据中心覆盖</p>
-                    <a href="https://www.vultr.com" target="_blank" class="sponsor-link">访问网站</a>
                 </div>
-            </div>
-            <div class="sponsor-card bronze">
-                <div class="sponsor-logo">
-                    <img src="/api/assets/default-avatar.png" alt="Vultr的logo">
-                </div>
-                <div class="sponsor-info">
-                    <h3>Vultr</h3>
-                    <p class="sponsor-description">高性能的云服务器提供商，全球数据中心覆盖</p>
-                    <a href="https://www.vultr.com" target="_blank" class="sponsor-link">访问网站</a>
-                </div>
-            </div>
-            <div class="sponsor-card bronze">
-                <div class="sponsor-logo">
-                    <img src="/api/assets/default-avatar.png" alt="Vultr的logo">
-                </div>
-                <div class="sponsor-info">
-                    <h3>Vultr</h3>
-                    <p class="sponsor-description">高性能的云服务器提供商，全球数据中心覆盖</p>
-                    <a href="https://www.vultr.com" target="_blank" class="sponsor-link">访问网站</a>
-                </div>
-            </div>
+            </a>
         </div>
     </section>
     
@@ -225,6 +197,11 @@
         text-decoration: none;
         cursor: pointer;
         width: 280px;
+    }
+
+    .sponsor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
     .sponsor-logo {
