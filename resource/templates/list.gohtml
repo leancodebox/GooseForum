@@ -48,11 +48,11 @@
                 {{end}}
                 <div class="pagination">
                     {{if gt .Page 1}}
-                        <a href="?page={{.PrevPage}}">上一页</a>
+                        <a href="?page={{.PrevPage}}" class="page-btn prev-page">上一页</a>
                     {{end}}
-                    <span>第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
+                    <span class="page-info">第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
                     {{if lt .Page .TotalPages}}
-                        <a href="?page={{.NextPage}}">下一页</a>
+                        <a href="?page={{.NextPage}}" class="page-btn next-page">下一页</a>
                     {{end}}
                 </div>
             </div>
@@ -137,5 +137,33 @@
     </div>
 </main>
 {{template "footer.gohtml" .}}
+<style>
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+
+    .page-btn {
+        padding: 0.5rem 1rem;
+        background-color: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .page-btn:hover {
+        background-color: var(--primary-color-dark);
+        transform: translateY(-2px);
+    }
+
+    .page-info {
+        color: var(--text-color);
+        font-size: 0.9rem;
+    }
+</style>
 </body>
 </html>
