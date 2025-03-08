@@ -142,22 +142,32 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 1rem;
-        margin: 2rem 0;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border-top: none;
     }
 
     .page-btn {
         padding: 0.5rem 1rem;
-        background-color: var(--primary-color);
-        color: white;
+        background-color: var(--card-bg-color);
+        color: var(--text-color);
         text-decoration: none;
         border-radius: 4px;
         transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
     }
 
     .page-btn:hover {
-        background-color: var(--primary-color-dark);
+        background-color: var(--primary-color);
+        color: white;
         transform: translateY(-2px);
+    }
+
+    .page-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
     }
 
     .page-info {
