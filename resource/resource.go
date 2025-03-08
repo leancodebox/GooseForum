@@ -5,6 +5,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"html/template"
 	"io/fs"
+	"os"
+	"path/filepath"
 )
 
 //go:embed templates/*
@@ -12,6 +14,11 @@ var templatesFS embed.FS
 
 func GetTemplatesFS() embed.FS {
 	return templatesFS
+}
+
+// isDevelopment 判断是否为开发模式
+func isDevelopment() bool {
+	return preferences.Get("app.env", "production") == "local"
 }
 
 //go:embed static/*
@@ -37,7 +44,10 @@ func GetTemplates() *template.Template {
 
 // GetStaticFS 返回静态文件的文件系统
 func GetStaticFS() (fs.FS, error) {
-	static, err := fs.Sub(staticFS, "static/css")
+	if isDevelopment() {
+		return os.DirFS(filepath.Join("resource", "static")), nil
+	}
+	static, err := fs.Sub(staticFS, "static")
 	if err != nil {
 		return nil, err
 	}

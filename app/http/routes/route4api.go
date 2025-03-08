@@ -20,14 +20,14 @@ func setup(ginApp *gin.Engine) {
 }
 
 func frontend(ginApp *gin.Engine) {
-	staticFS, _ := resource.GetStaticFS()
-	ginApp.StaticFS("/css", http.FS(staticFS))
 
-	actGroup := ginApp.Group("/actor")
+	actGroup := ginApp.Group("/")
 	actorFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
+	staticFS, _ := resource.GetStaticFS()
 	actGroup.Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).
-		StaticFS("", http.FS(actorFs))
+		StaticFS("actor", http.FS(actorFs)).
+		StaticFS("static", http.FS(staticFS))
 
 	// SEO 相关路由
 	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
@@ -65,7 +65,7 @@ func bbs(ginApp *gin.Engine) {
 	ginApp.GET("", controllers.RenderIndex)
 	ginApp.GET("/post", controllers.RenderArticlesPage)
 	ginApp.GET("/post/:id", controllers.RenderArticleDetail)
-	
+
 	ginApp.GET("/login", controllers.LoginPage)
 	ginApp.GET("/notifications", controllers.Notifications)
 	ginApp.GET("/post-edit", controllers.PostEdit)

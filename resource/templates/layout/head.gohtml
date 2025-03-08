@@ -4,7 +4,7 @@
     <title>{{.title}} - GooseForum</title>
     <meta name="description" content="{{.description}}">
     <meta name="keywords" content="论坛,社区,GooseForum,讨论">
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
     <!-- Open Graph tags for better social sharing -->
@@ -19,7 +19,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const banner = document.getElementById('welcomeBanner');
             const isBannerClosed = localStorage.getItem('welcomeBannerClosed');
-            
+
             if (!isBannerClosed) {
                 banner.classList.add('show');
             }
@@ -36,10 +36,10 @@
         function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
+
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
-            
+
             // 更新图标
             const themeIcon = document.querySelector('.theme-icon');
             themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
@@ -49,7 +49,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
-            
+
             // 设置初始图标
             const themeIcon = document.querySelector('.theme-icon');
             themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
