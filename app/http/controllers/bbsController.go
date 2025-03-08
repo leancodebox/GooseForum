@@ -208,8 +208,10 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 	userIds = append(userIds, entity.UserId)
 	userMap := users.GetMapByIds(userIds)
 	author := "陶渊明"
+	avatarUrl := ""
 	if user, ok := userMap[entity.UserId]; ok {
 		author = user.Username
+		avatarUrl = strings.ReplaceAll(component.FilePath(user.AvatarUrl), "\\", "/")
 	}
 	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
 		username := "陶渊明"
@@ -242,6 +244,7 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 		"id":             entity.Id,
 		"userId":         entity.UserId,
 		"username":       author,
+		"avatarUrl":      avatarUrl,
 		"articleTitle":   entity.Title,
 		"articleContent": entity.Content,
 		"commentList":    replyList,

@@ -158,6 +158,7 @@ func RenderArticleDetail(c *gin.Context) {
 		"articleContent": markdownToHTML(cast.ToString(result["articleContent"])),
 		"username":       cast.ToString(result["username"]),
 		"commentList":    result["commentList"],
+		"avatarUrl":      result["avatarUrl"],
 	}
 
 	c.HTML(http.StatusOK, "detail.gohtml", templateData)
