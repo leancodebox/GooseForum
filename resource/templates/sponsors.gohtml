@@ -80,6 +80,7 @@
         </div>
     </section>
 
+
     <!-- 铜牌赞助商 -->
     <section class="sponsor-tier bronze-tier">
         <h2>铜牌赞助商</h2>
@@ -103,6 +104,94 @@
                     <p class="sponsor-description">高性能的云服务器提供商，全球数据中心覆盖</p>
                     <a href="https://www.vultr.com" target="_blank" class="sponsor-link">访问网站</a>
                 </div>
+            </div>
+            <div class="sponsor-card bronze">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="Vultr的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>Vultr</h3>
+                    <p class="sponsor-description">高性能的云服务器提供商，全球数据中心覆盖</p>
+                    <a href="https://www.vultr.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+            <div class="sponsor-card bronze">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="Vultr的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>Vultr</h3>
+                    <p class="sponsor-description">高性能的云服务器提供商，全球数据中心覆盖</p>
+                    <a href="https://www.vultr.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 个人赞助者展示区域 -->
+    <section class="sponsors-section">
+        <h2 class="sponsors-title">个人赞助者</h2>
+        <div class="sponsors-list">
+            <!-- 示例赞助者 -->
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">W</div>
+                <div class="sponsor-amount">¥100</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">L</div>
+                <div class="sponsor-amount">¥50</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
+            </div>
+            <div class="sponsor-item">
+                <div class="sponsor-avatar">Z</div>
+                <div class="sponsor-amount">¥200</div>
             </div>
         </div>
     </section>
@@ -250,6 +339,76 @@
         .sponsor-logo img {
             max-width: 150px;
         }
+    }
+
+    /* 个人赞助者样式 */
+    .sponsors-section {
+        margin-top: 2rem;
+        padding: 2rem;
+        background: var(--card-bg-color);
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .sponsors-title {
+        color: var(--text-color);
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        font-size: 1.6rem;
+    }
+
+    .sponsors-title::after {
+        content: '';
+        position: absolute;
+        bottom: -0.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 2px;
+        background: var(--primary-color);
+    }
+
+    .sponsors-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        justify-content: center;
+    }
+
+    .sponsor-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .sponsor-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .sponsor-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .sponsor-amount {
+        color: var(--text-color);
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.25rem 0.75rem;
+        background: var(--card-bg-color);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
     }
 </style>
 </body>
