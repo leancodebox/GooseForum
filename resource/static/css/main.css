@@ -316,21 +316,60 @@ footer {
 }
 
 .comment-btn {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.5rem 1.0rem;
-    background-image:linear-gradient(135deg, #ff8075 0%, #7cc75d 100%);
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+  position: relative; /* 伪元素定位参考 */
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  overflow: hidden;  /* 隐藏伪元素溢出 */
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  z-index: 1;        /* 确保内容在伪元素上方 */
+}
+
+/* 初始背景层 */
+.comment-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(135deg, #ff8075 0%, #7cc75d 100%);
+  transition: opacity 0.3s ease; /* 控制渐变的过渡 */
+  z-index: -1; /* 置于内容下方 */
+}
+
+/* 悬停时的渐变层 */
+.comment-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(135deg, #7cc75d 0%, #ff8075 100%);
+  opacity: 0; /* 初始隐藏 */
+  transition: opacity 2s ease;
+  z-index: -1;
+}
+
+/* 悬停时切换渐变 */
+.comment-btn:hover::before {
+    transition: opacity 2s ease 1s; /* 延迟0.1秒淡出 */
+  opacity: 0; /* 原背景淡出 */
+}
+
+.comment-btn:hover::after {
+    transition: opacity 2s ease 0s; /* 立即淡入 */
+  opacity: 1; /* 新背景淡入 */
 }
 
 .comment-btn:hover {
-    opacity: 0.9;
-    color: white;
-    background-image:linear-gradient(135deg, #7cc75d 0%,  #ff8075 100%);
-    transform: translateY(-1px);
+  color: white;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .comment-btn .arrow {
