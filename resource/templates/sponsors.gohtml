@@ -204,12 +204,12 @@
     }
 
     .sponsors-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 280px));
+        display: flex;
+        flex-wrap: wrap;
         gap: 2rem;
-        justify-content: center;
         margin: 0 auto;
         max-width: 1200px;
+        justify-content: center;
     }
 
     .sponsor-card {
@@ -224,7 +224,7 @@
         align-items: center;
         text-decoration: none;
         cursor: pointer;
-        width: 100%;
+        width: 280px;
     }
 
     .sponsor-logo {
