@@ -1,0 +1,251 @@
+<header>
+    <nav class="nav-container">
+        <!-- Logo -->
+        <div class="nav-left">
+            <a href="/" class="logo" style="letter-spacing: 0;">
+                <span style="color:var(--primary-color)">G</span><span style="color:var(--secondary-color)">o</span><span style="color:var(--text-color)">ose</span><span style="color:var(--primary-color)">F</span><span style="color:var(--secondary-color)">o</span><span style="color:var(--text-color)">rum</span>
+            </a>
+            <!-- 导航链接 -->
+            <div class="nav-links">
+                <a href="/" class="nav-link">首页</a>
+                <a href="/post" class="nav-link">文章</a>
+            </div>
+        </div>
+
+        <!-- 右侧功能区 -->
+        <div class="nav-right">
+            <!-- 主题切换按钮 -->
+            <button class="theme-switch" onclick="toggleTheme()" aria-label="切换主题">
+                <span class="theme-icon">🌓</span>
+            </button>
+
+            <!-- 未登录状态 -->
+            <div class="auth-buttons" id="guestButtons">
+                <a href="/login" class="btn btn-login">登录</a>
+                <a href="/register" class="btn btn-register">注册</a>
+            </div>
+
+            <!-- 已登录状态 -->
+            <div class="user-actions" id="userActions" style="display: none;">
+                <a href="/post/new" class="btn btn-publish">发布</a>
+                <div class="notifications">
+                    <a href="/notifications" class="notification-icon">
+                        <span class="notification-count">3</span>
+                        📬
+                    </a>
+                </div>
+                <div class="user-menu">
+                    <img src="/static/default-avatar.png" alt="用户头像" class="user-avatar">
+                    <div class="dropdown-menu">
+                        <a href="/user/profile">个人主页</a>
+                        <a href="/user/settings">设置</a>
+                        <a href="#" onclick="handleLogout()">退出</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 移动端菜单按钮 -->
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="/" class="mobile-link">首页</a>
+            <a href="/post" class="mobile-link">文章</a>
+            <a href="/login" class="mobile-link" id="mobileLoginBtn">登录</a>
+            <a href="/register" class="mobile-link" id="mobileRegisterBtn">注册</a>
+        </div>
+    </nav>
+</header>
+
+<style>
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    height: 60px;
+    background: var(--bg-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-login {
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.btn-register {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-publish {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.notifications {
+    position: relative;
+}
+
+.notification-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.user-menu {
+    position: relative;
+    cursor: pointer;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem 0;
+    min-width: 150px;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.dropdown-menu a:hover {
+    background: var(--hover-color);
+}
+
+.user-menu:hover .dropdown-menu {
+    display: block;
+}
+
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.mobile-menu-btn span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: var(--bg-color);
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mobile-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-color);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+
+    .auth-buttons {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    .mobile-menu.active {
+        display: block;
+    }
+}
+</style>
+
+<script>
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenu.classList.toggle('active');
+}
+
+function handleLogout() {
+    // 处理退出登录逻辑
+    console.log('Logout clicked');
+}
+
+// 模拟登录状态切换
+const isLoggedIn = false; // 根据实际登录状态修改
+const guestButtons = document.getElementById('guestButtons');
+const userActions = document.getElementById('userActions');
+const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
+
+if (isLoggedIn) {
+    guestButtons.style.display = 'none';
+    userActions.style.display = 'flex';
+    mobileLoginBtn.style.display = 'none';
+    mobileRegisterBtn.style.display = 'none';
+} else {
+    guestButtons.style.display = 'flex';
+    userActions.style.display = 'none';
+}
+</script>

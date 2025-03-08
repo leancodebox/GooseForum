@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布文章 - GooseForum</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+</head>
+<body>
+    {{template "nav_new.gohtml" .}}
+    <main class="editor-container">
+        <div class="editor-header">
+            <h1>发布文章</h1>
+        </div>
+
+        <form id="postForm" class="editor-form">
+            <div class="form-group">
+                <label for="title">文章标题</label>
+                <input type="text" id="title" name="title" required placeholder="请输入文章标题">
+            </div>
+
+            <div class="form-group">
+                <label for="category">文章分类</label>
+                <select id="category" name="category" required>
+                    <option value="">请选择分类</option>
+                    <option value="tech">技术</option>
+                    <option value="share">分享</option>
+                    <option value="question">问答</option>
+                    <option value="discussion">讨论</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tags">标签</label>
+                <input type="text" id="tags" name="tags" placeholder="输入标签，用逗号分隔">
+            </div>
+
+            <div class="form-group">
+                <label for="content">文章内容</label>
+                <textarea id="content" name="content" required></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-preview">预览</button>
+                <button type="submit" class="btn-publish">发布文章</button>
+            </div>
+        </form>
+
+        <!-- 预览模态框 -->
+        <div id="previewModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>预览文章</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <h1 id="previewTitle"></h1>
+                    <div id="previewContent" class="markdown-body"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <style>
+    .editor-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .editor-header {
+        margin-bottom: 2rem;
+    }
+
+    .editor-header h1 {
+        color: var(--text-color);
+        margin: 0;
+    }
+
+    .editor-form {
+        background: var(--card-bg-color);
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--input-bg-color);
+        color: var(--text-color);
+    }
+
+    .form-group textarea {
+        width: 100%;
+        min-height: 400px;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--input-bg-color);
+        color: var(--text-color);
+        resize: vertical;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+
+    .btn-preview,
+    .btn-publish {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s ease;
+    }
+
+    .btn-preview {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .btn-publish {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        position: relative;
+        background: var(--card-bg-color);
+        margin: 2rem auto;
+        padding: 2rem;
+        width: 90%;
+        max-width: 1000px;
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: 8px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-color);
+    }
+
+    .markdown-body {
+        color: var(--text-color);
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .editor-form {
+            padding: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-preview,
+        .btn-publish {
+            width: 100%;
+        }
+    }
+    </style>
+
+    <script>
+    // 初始化Markdown编辑器
+    const easyMDE = new EasyMDE({
+        element: document.getElementById('content'),
+        spellChecker: false,
+        autosave: {
+            enabled: true,
+            delay: 1000,
+            uniqueId: 'post-editor'
+        },
+        placeholder: '使用Markdown编写文章内容...'
+    });
+
+    // 预览功能
+    const modal = document.getElementById('previewModal');
+    const previewBtn = document.querySelector('.btn-preview');
+    const closeBtn = document.querySelector('.close-modal');
+
+    previewBtn.addEventListener('click', () => {
+        const title = document.getElementById('title').value;
+        const content = easyMDE.value();
+
+        document.getElementById('previewTitle').textContent = title;
+        document.getElementById('previewContent').innerHTML = easyMDE.markdown(content);
+        modal.style.display = 'block';
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // 表单提交
+    document.getElementById('postForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = {
+            title: document.getElementById('title').value,
+            category: document.getElementById('category').value,
+            tags: document.getElementById('tags').value.split(',').map(tag => tag.trim()),
+            content: easyMDE.value()
+        };
+        console.log('提交的文章数据:', formData);
+        // 实际项目中这里会发送请求到服务器
+    });
+    </script>
+</body>
+</html>

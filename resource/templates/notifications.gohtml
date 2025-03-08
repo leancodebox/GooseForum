@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息通知 - GooseForum</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+    {{template "nav_new.gohtml" .}}
+    <main class="notifications-container">
+        <div class="notifications-header">
+            <h1>消息通知</h1>
+            <button class="mark-all-read">全部标记为已读</button>
+        </div>
+
+        <div class="notifications-tabs">
+            <button class="tab-btn active" data-tab="unread">未读消息</button>
+            <button class="tab-btn" data-tab="read">已读消息</button>
+        </div>
+
+        <div class="tab-content" id="unread">
+            <div class="notification-list">
+                <!-- 示例未读消息 -->
+                <div class="notification-item unread">
+                    <div class="notification-content">
+                        <div class="notification-icon">💬</div>
+                        <div class="notification-text">
+                            <p><strong>用户A</strong> 回复了你的文章 <a href="#">《示例文章标题》</a></p>
+                            <p class="notification-excerpt">这是回复的内容摘要...</p>
+                            <span class="notification-time">10分钟前</span>
+                        </div>
+                    </div>
+                    <button class="mark-read-btn">标记已读</button>
+                </div>
+
+                <div class="notification-item unread">
+                    <div class="notification-content">
+                        <div class="notification-icon">👍</div>
+                        <div class="notification-text">
+                            <p><strong>用户B</strong> 赞了你的评论</p>
+                            <p class="notification-excerpt">你的评论：这是一个很好的观点...</p>
+                            <span class="notification-time">30分钟前</span>
+                        </div>
+                    </div>
+                    <button class="mark-read-btn">标记已读</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="read" style="display: none;">
+            <div class="notification-list">
+                <!-- 示例已读消息 -->
+                <div class="notification-item">
+                    <div class="notification-content">
+                        <div class="notification-icon">📢</div>
+                        <div class="notification-text">
+                            <p>系统通知：你的文章被设为精华帖</p>
+                            <p class="notification-excerpt">恭喜你的文章《示例文章》被管理员设为精华帖！</p>
+                            <span class="notification-time">2天前</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <style>
+    .notifications-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .notifications-header h1 {
+        color: var(--text-color);
+        margin: 0;
+    }
+
+    .mark-all-read {
+        padding: 0.5rem 1rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .notifications-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+        padding: 0.5rem 1rem;
+        background: none;
+        border: none;
+        color: var(--text-color);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    .notification-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .notification-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--card-bg-color);
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .notification-item.unread {
+        background: var(--card-bg-color);
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .notification-content {
+        display: flex;
+        gap: 1rem;
+        flex: 1;
+    }
+
+    .notification-icon {
+        font-size: 1.5rem;
+        width: 2rem;
+        text-align: center;
+    }
+
+    .notification-text {
+        flex: 1;
+    }
+
+    .notification-text p {
+        margin: 0;
+        color: var(--text-color);
+    }
+
+    .notification-text a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+
+    .notification-excerpt {
+        font-size: 0.9rem;
+        color: var(--text-color-light);
+        margin-top: 0.5rem;
+    }
+
+    .notification-time {
+        font-size: 0.8rem;
+        color: var(--text-color-light);
+    }
+
+    .mark-read-btn {
+        padding: 0.5rem 1rem;
+        background: none;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        color: var(--text-color);
+        cursor: pointer;
+    }
+
+    .mark-read-btn:hover {
+        background: var(--hover-color);
+    }
+
+    @media (max-width: 640px) {
+        .notifications-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .notification-item {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .mark-read-btn {
+            align-self: flex-end;
+        }
+    }
+    </style>
+
+    <script>
+    // 标签切换功能
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            // 更新按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            // 更新内容显示
+            const tabId = button.dataset.tab;
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(tabId).style.display = 'block';
+        });
+    });
+
+    // 标记已读功能
+    document.querySelectorAll('.mark-read-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationItem = this.closest('.notification-item');
+            notificationItem.classList.remove('unread');
+            this.style.display = 'none';
+        });
+    });
+
+    // 全部标记为已读
+    document.querySelector('.mark-all-read').addEventListener('click', () => {
+        document.querySelectorAll('.notification-item.unread').forEach(item => {
+            item.classList.remove('unread');
+            item.querySelector('.mark-read-btn').style.display = 'none';
+        });
+    });
+    </script>
+</body>
+</html>

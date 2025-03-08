@@ -170,3 +170,16 @@ func errorPage(c *gin.Context, title, message string) {
 		"year":    time.Now().Year(),
 	})
 }
+
+func LoginPage(c *gin.Context) {
+	c.HTML(http.StatusNotFound, "login.gohtml", gin.H{"title": "login.gohtml"})
+}
+func Notifications(c *gin.Context) {
+	c.HTML(http.StatusNotFound, "notifications.gohtml", gin.H{"title": "notifications.gohtml"})
+}
+func PostEdit(c *gin.Context) {
+	c.HTML(http.StatusNotFound, "post_edit.gohtml", gin.H{"title": "post_edit.gohtml"})
+}
+func UserProfile(c *gin.Context) {
+	c.HTML(http.StatusNotFound, "user_profile.gohtml", gin.H{"title": "user_profile.gohtml"})
+}
