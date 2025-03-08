@@ -180,12 +180,60 @@
 
     .sponsor-logo {
         margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 120px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 1rem;
     }
 
     .sponsor-logo img {
         max-width: 180px;
         max-height: 80px;
         object-fit: contain;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    .sponsor-card {
+        background: var(--card-bg-color);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .sponsor-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sponsor-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .sponsor-card:hover::before {
+        opacity: 1;
+    }
+
+    .sponsor-card:hover .sponsor-logo img {
+        transform: scale(1.05);
+        filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15));
     }
 
     .sponsor-info h3 {
@@ -215,23 +263,23 @@
 
     /* 赞助商等级样式 */
     .diamond-tier .sponsor-card {
-        border: 2px solid #B9F2FF;
-        background: linear-gradient(to bottom right, var(--card-bg-color), #E6FAFF);
+        background: linear-gradient(135deg, rgba(185, 242, 255, 0.1), rgba(230, 250, 255, 0.05));
+        border: 1px solid rgba(185, 242, 255, 0.2);
     }
 
     .gold-tier .sponsor-card {
-        border: 2px solid #FFD700;
-        background: linear-gradient(to bottom right, var(--card-bg-color), #FFF8E7);
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 248, 231, 0.05));
+        border: 1px solid rgba(255, 215, 0, 0.2);
     }
 
     .silver-tier .sponsor-card {
-        border: 2px solid #C0C0C0;
-        background: linear-gradient(to bottom right, var(--card-bg-color), #F5F5F5);
+        background: linear-gradient(135deg, rgba(192, 192, 192, 0.1), rgba(245, 245, 245, 0.05));
+        border: 1px solid rgba(192, 192, 192, 0.2);
     }
 
     .bronze-tier .sponsor-card {
-        border: 2px solid #CD7F32;
-        background: linear-gradient(to bottom right, var(--card-bg-color), #FFF1E6);
+        background: linear-gradient(135deg, rgba(205, 127, 50, 0.1), rgba(255, 241, 230, 0.05));
+        border: 1px solid rgba(205, 127, 50, 0.2);
     }
 
     @media (max-width: 768px) {
