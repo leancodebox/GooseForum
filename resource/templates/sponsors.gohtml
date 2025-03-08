@@ -23,16 +23,6 @@
                     <a href="https://www.microsoft.com" target="_blank" class="sponsor-link">访问网站</a>
                 </div>
             </div>
-            <div class="sponsor-card diamond">
-                <div class="sponsor-logo">
-                    <img src="/api/assets/default-avatar.png" alt="Google的logo">
-                </div>
-                <div class="sponsor-info">
-                    <h3>Google</h3>
-                    <p class="sponsor-description">全球最大的搜索引擎公司，提供多样化的互联网服务</p>
-                    <a href="https://www.google.com" target="_blank" class="sponsor-link">访问网站</a>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -118,6 +108,8 @@
     </section>
 </main>
 
+{{template "footer.gohtml" .}}
+
 <style>
     .sponsors-container {
         max-width: 1200px;
@@ -146,121 +138,65 @@
     .sponsor-tier h2 {
         color: var(--text-color);
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         position: relative;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        display: inline-block;
-        background: var(--card-bg-color);
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        font-size: 1.6rem;
     }
 
-    .diamond-tier h2 {
-        background: linear-gradient(135deg, rgba(185, 242, 255, 0.2), rgba(230, 250, 255, 0.1));
-        border: 1px solid rgba(185, 242, 255, 0.3);
-    }
-
-    .gold-tier h2 {
-        background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 248, 231, 0.1));
-        border: 1px solid rgba(255, 215, 0, 0.3);
-    }
-
-    .silver-tier h2 {
-        background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(245, 245, 245, 0.1));
-        border: 1px solid rgba(192, 192, 192, 0.3);
-    }
-
-    .bronze-tier h2 {
-        background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(255, 241, 230, 0.1));
-        border: 1px solid rgba(205, 127, 50, 0.3);
+    .sponsor-tier h2::after {
+        content: '';
+        position: absolute;
+        bottom: -0.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 2px;
+        background: var(--primary-color);
     }
 
     .sponsors-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
     }
 
     .sponsor-card {
         background: var(--card-bg-color);
-        border-radius: 12px;
-        padding: 2rem;
+        border-radius: 8px;
+        padding: 0.75rem;
         text-align: center;
         transition: transform 0.3s ease;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .sponsor-card:hover {
-        transform: translateY(-5px);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
 
     .sponsor-logo {
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.75rem;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 120px;
+        height: 70px;
         background: transparent;
-        border-radius: 8px;
-        padding: 1rem;
+        border-radius: 6px;
+        padding: 0.25rem;
     }
 
     .sponsor-logo img {
-        max-width: 180px;
-        max-height: 80px;
+        max-width: 140px;
+        max-height: 60px;
         object-fit: contain;
-        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-        transition: transform 0.3s ease, filter 0.3s ease;
-    }
-
-    .sponsor-card {
-        background: var(--card-bg-color);
-        border-radius: 16px;
-        padding: 2rem;
-        text-align: center;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        overflow: hidden;
-        position: relative;
-    }
-
-    .sponsor-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 100%;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .sponsor-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    }
-
-    .sponsor-card:hover::before {
-        opacity: 1;
-    }
-
-    .sponsor-card:hover .sponsor-logo img {
-        transform: scale(1.05);
-        filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15));
     }
 
     .sponsor-info h3 {
         color: var(--text-color);
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
     }
 
     .sponsor-description {
         color: var(--text-color-light);
-        margin-bottom: 1.5rem;
-        line-height: 1.5;
+        margin-bottom: 0.75rem;
+        line-height: 1.25;
+        font-size: 0.85rem;
     }
 
     .sponsor-link {
