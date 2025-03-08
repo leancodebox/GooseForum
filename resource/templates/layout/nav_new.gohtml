@@ -21,8 +21,7 @@
 
             <!-- 未登录状态 -->
             <div class="auth-buttons" id="guestButtons">
-                <a href="/login" class="btn btn-login">登录</a>
-                <a href="/register" class="btn btn-register">注册</a>
+                <a href="/login" class="btn btn-auth">登录 / 注册</a>
             </div>
 
             <!-- 已登录状态 -->
@@ -137,12 +136,14 @@
     transition: all 0.3s ease;
 }
 
-.btn-login {
+.btn-auth {
     color: var(--primary-color);
     border: 1px solid var(--primary-color);
+    background: transparent;
+    transition: all 0.3s ease;
 }
 
-.btn-register {
+.btn-auth:hover {
     background: var(--primary-color);
     color: white;
 }
