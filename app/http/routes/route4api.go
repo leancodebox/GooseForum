@@ -70,6 +70,7 @@ func bbs(ginApp *gin.Engine) {
 	ginApp.GET("/notifications", controllers.Notifications)
 	ginApp.GET("/post-edit", controllers.PostEdit)
 	ginApp.GET("/user-profile", controllers.UserProfile)
+	ginApp.GET("/sponsors", controllers.Sponsors)
 
 	bbsShow := ginApp.Group("api/bbs")
 

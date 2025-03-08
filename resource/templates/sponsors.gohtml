@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{{template "head.gohtml" .}}
+<body>
+{{template "nav_new.gohtml" .}}
+<main class="sponsors-container">
+    <div class="sponsors-header">
+        <h1>我们的赞助商</h1>
+        <p>感谢以下赞助商对我们的支持</p>
+    </div>
+
+    <!-- 钻石赞助商 -->
+    <section class="sponsor-tier diamond-tier">
+        <h2>钻石赞助商</h2>
+        <div class="sponsors-grid">
+            <div class="sponsor-card diamond">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="Microsoft的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>Microsoft</h3>
+                    <p class="sponsor-description">全球领先的科技公司，提供创新的软件解决方案</p>
+                    <a href="https://www.microsoft.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+            <div class="sponsor-card diamond">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="Google的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>Google</h3>
+                    <p class="sponsor-description">全球最大的搜索引擎公司，提供多样化的互联网服务</p>
+                    <a href="https://www.google.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 金牌赞助商 -->
+    <section class="sponsor-tier gold-tier">
+        <h2>金牌赞助商</h2>
+        <div class="sponsors-grid">
+            <div class="sponsor-card gold">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="阿里云的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>阿里云</h3>
+                    <p class="sponsor-description">领先的云计算服务提供商，为企业提供全方位的云解决方案</p>
+                    <a href="https://www.aliyun.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+            <div class="sponsor-card gold">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="腾讯云的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>腾讯云</h3>
+                    <p class="sponsor-description">专业的云服务平台，提供安全稳定的云计算服务</p>
+                    <a href="https://cloud.tencent.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 银牌赞助商 -->
+    <section class="sponsor-tier silver-tier">
+        <h2>银牌赞助商</h2>
+        <div class="sponsors-grid">
+            <div class="sponsor-card silver">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="JetBrains的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>JetBrains</h3>
+                    <p class="sponsor-description">专业的开发工具提供商，打造高效的开发环境</p>
+                    <a href="https://www.jetbrains.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+            <div class="sponsor-card silver">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="GitLab的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>GitLab</h3>
+                    <p class="sponsor-description">完整的DevOps平台，助力团队协作开发</p>
+                    <a href="https://gitlab.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 铜牌赞助商 -->
+    <section class="sponsor-tier bronze-tier">
+        <h2>铜牌赞助商</h2>
+        <div class="sponsors-grid">
+            <div class="sponsor-card bronze">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="DigitalOcean的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>DigitalOcean</h3>
+                    <p class="sponsor-description">简单易用的云计算平台，适合开发者使用</p>
+                    <a href="https://www.digitalocean.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+            <div class="sponsor-card bronze">
+                <div class="sponsor-logo">
+                    <img src="/api/assets/default-avatar.png" alt="Vultr的logo">
+                </div>
+                <div class="sponsor-info">
+                    <h3>Vultr</h3>
+                    <p class="sponsor-description">高性能的云服务器提供商，全球数据中心覆盖</p>
+                    <a href="https://www.vultr.com" target="_blank" class="sponsor-link">访问网站</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<style>
+    .sponsors-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .sponsors-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .sponsors-header h1 {
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .sponsors-header p {
+        color: var(--text-color-light);
+    }
+
+    .sponsor-tier {
+        margin-bottom: 4rem;
+    }
+
+    .sponsor-tier h2 {
+        color: var(--text-color);
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .sponsor-tier h2::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 3px;
+        background: var(--primary-color);
+        margin: 1rem auto;
+    }
+
+    .sponsors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .sponsor-card {
+        background: var(--card-bg-color);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: transform 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .sponsor-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .sponsor-logo {
+        margin-bottom: 1.5rem;
+    }
+
+    .sponsor-logo img {
+        max-width: 180px;
+        max-height: 80px;
+        object-fit: contain;
+    }
+
+    .sponsor-info h3 {
+        color: var(--text-color);
+        margin-bottom: 1rem;
+    }
+
+    .sponsor-description {
+        color: var(--text-color-light);
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .sponsor-link {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background 0.3s ease;
+    }
+
+    .sponsor-link:hover {
+        background: var(--primary-color-dark);
+    }
+
+    /* 赞助商等级样式 */
+    .diamond-tier .sponsor-card {
+        border: 2px solid #B9F2FF;
+        background: linear-gradient(to bottom right, var(--card-bg-color), #E6FAFF);
+    }
+
+    .gold-tier .sponsor-card {
+        border: 2px solid #FFD700;
+        background: linear-gradient(to bottom right, var(--card-bg-color), #FFF8E7);
+    }
+
+    .silver-tier .sponsor-card {
+        border: 2px solid #C0C0C0;
+        background: linear-gradient(to bottom right, var(--card-bg-color), #F5F5F5);
+    }
+
+    .bronze-tier .sponsor-card {
+        border: 2px solid #CD7F32;
+        background: linear-gradient(to bottom right, var(--card-bg-color), #FFF1E6);
+    }
+
+    @media (max-width: 768px) {
+        .sponsors-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sponsor-card {
+            padding: 1.5rem;
+        }
+
+        .sponsor-logo img {
+            max-width: 150px;
+        }
+    }
+</style>
+</body>
+</html>

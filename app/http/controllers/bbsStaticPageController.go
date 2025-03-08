@@ -183,3 +183,7 @@ func PostEdit(c *gin.Context) {
 func UserProfile(c *gin.Context) {
 	c.HTML(http.StatusNotFound, "user_profile.gohtml", gin.H{"title": "用户主页 - GooseForum"})
 }
+
+func Sponsors(c *gin.Context) {
+	c.HTML(http.StatusNotFound, "sponsors.gohtml", gin.H{"title": "赞助商 - GooseForum"})
+}
