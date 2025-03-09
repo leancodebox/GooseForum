@@ -41,9 +41,9 @@
 
                     <div class="comment-action">
                         {{if and .User (gt .User.UserId 0)}}
-                            <div class="comment-form">
-                                <textarea class="comment-input" placeholder="写下你的评论..."></textarea>
-                                <button class="comment-submit">发表评论</button>
+                            <div class="comment-form" id="main-comment-form">
+                                <textarea class="comment-input" id="main-comment-input" placeholder="写下你的评论..."></textarea>
+                                <button class="comment-submit" id="main-comment-submit">发表评论</button>
                             </div>
                         {{else}}
                             <div class="comment-login-prompt">
@@ -167,62 +167,6 @@
 {{template "footer.gohtml" .}}
 </body>
 </html>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const commentForm = document.querySelector('.comment-form');
-    const commentInput = document.querySelector('.comment-input');
-    const commentSubmit = document.querySelector('.comment-submit');
-
-    if (commentForm) {
-        commentSubmit.addEventListener('click', async function() {
-            const content = commentInput.value.trim();
-            if (!content) {
-                alert('请输入评论内容');
-                return;
-            }
-
-            // 禁用提交按钮，显示加载状态
-            commentSubmit.disabled = true;
-            commentSubmit.textContent = '提交中...';
-
-            try {
-                const response = await fetch('/api/bbs/articles-reply', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        articleId: {{.articleId}},
-                        content: content,
-                        replyId:0
-                    })
-                });
-
-                const result = await response.json();
-
-                console.log(result)
-                if (response.ok) {
-                    // 评论成功，刷新页面显示新评论
-                    location.reload();
-                } else {
-                    alert(result.message || '评论发表失败，请稍后重试');
-                }
-            } catch (error) {
-                console.error('评论发表失败:', error);
-                alert('评论发表失败，请稍后重试');
-            } finally {
-                // 恢复提交按钮状态
-                commentSubmit.disabled = false;
-                commentSubmit.textContent = '发表评论';
-            }
-        });
-    }
-});
-</script>
-
-
 <style>
     .reply-btn {
         padding: 4px 8px;
@@ -251,6 +195,25 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const commentForm = document.getElementById('main-comment-form');
+    const commentInput = document.getElementById('main-comment-input');
+    const commentSubmit = document.getElementById('main-comment-submit');
+
+    if (commentForm) {
+        commentSubmit.addEventListener('click', async function() {
+            const content = commentInput.value.trim();
+            if (!content) {
+                alert('请输入评论内容');
+                return;
+            }
+            // 禁用提交按钮，显示加载状态
+            commentSubmit.disabled = true;
+            commentSubmit.textContent = '提交中...';
+            await submitComment(content, 0)
+        });
+    }
+});
 function showReplyForm(commentId) {
     // 隐藏所有回复表单
     document.querySelectorAll('.reply-form').forEach(form => {
@@ -279,7 +242,10 @@ async function submitReply(replyId) {
     const submitBtn = replyForm.querySelector('.comment-submit');
     submitBtn.disabled = true;
     submitBtn.textContent = '提交中...';
+    await submitComment(content, replyId)
+}
 
+async function submitComment(content,replyId){
     try {
         const response = await fetch('/api/bbs/articles-reply', {
             method: 'POST',
