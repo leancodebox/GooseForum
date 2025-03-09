@@ -13,6 +13,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/spf13/cast"
 	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer/html"
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -94,10 +97,27 @@ func GetLoginUser(c *gin.Context) UserInfoShow {
 	}
 }
 
+var md = goldmark.New(
+	goldmark.WithExtensions(
+		extension.GFM,
+		extension.Table,
+		extension.Strikethrough,
+		extension.Linkify,
+		extension.TaskList,
+	),
+	goldmark.WithParserOptions(
+		parser.WithAutoHeadingID(),
+	),
+	goldmark.WithRendererOptions(
+		html.WithHardWraps(),
+		html.WithXHTML(),
+	),
+)
+
 // 添加新的服务端渲染的控制器方法
 func markdownToHTML(markdown string) template.HTML {
 	var buf bytes.Buffer
-	if err := goldmark.Convert([]byte(markdown), &buf); err != nil {
+	if err := md.Convert([]byte(markdown), &buf); err != nil {
 		slog.Error("转化失败", "err", err)
 	}
 	return template.HTML(buf.String())
