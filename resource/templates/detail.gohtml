@@ -35,12 +35,69 @@
                     {{end}}
 
                     <div class="comment-action">
-                        <a href="/actor/#/home/bbs/articlesDetail?id={{.articleId}}" class="comment-btn">
-                            前往评论
-                            <span class="arrow">→</span>
-                        </a>
+                        {{if and .User (gt .User.UserId 0)}}
+                            <div class="comment-form">
+                                <textarea class="comment-input" placeholder="写下你的评论..."></textarea>
+                                <button class="comment-submit">发表评论</button>
+                            </div>
+                        {{else}}
+                            <div class="comment-login-prompt">
+                                <a href="/login" class="btn btn-primary">登录后发表评论</a>
+                            </div>
+                        {{end}}
                     </div>
                 </section>
+
+                <style>
+                    .comment-form {
+                        margin-top: 20px;
+                    }
+
+                    .comment-input {
+                        width: 100%;
+                        min-height: 100px;
+                        padding: 12px;
+                        border: 1px solid var(--border-color);
+                        border-radius: 4px;
+                        resize: vertical;
+                        margin-bottom: 10px;
+                        background: var(--bg-color);
+                        color: var(--text-color);
+                    }
+
+                    .comment-submit {
+                        padding: 8px 16px;
+                        background: var(--primary-color);
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        transition: background 0.3s ease;
+                    }
+
+                    .comment-submit:hover {
+                        background: var(--primary-color-dark);
+                    }
+
+                    .comment-login-prompt {
+                        text-align: center;
+                        margin: 20px 0;
+                    }
+
+                    .comment-login-prompt .btn {
+                        display: inline-block;
+                        padding: 8px 16px;
+                        background: var(--primary-color);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 4px;
+                        transition: background 0.3s ease;
+                    }
+
+                    .comment-login-prompt .btn:hover {
+                        background: var(--primary-color-dark);
+                    }
+                </style>
             </article>
         </div>
 

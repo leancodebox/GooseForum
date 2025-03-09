@@ -34,3 +34,9 @@ markdown颜色问题。
 
 8 积分消费功能
 
+```GO
+{{/*                        <a href="/actor/#/home/bbs/articlesDetail?id={{.articleId}}" class="comment-btn">*/}}
+{{/*                            前往评论*/}}
+{{/*                            <span class="arrow">→</span>*/}}
+{{/*                        </a>*/}}
+```
