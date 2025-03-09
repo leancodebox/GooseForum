@@ -11,9 +11,11 @@ import (
 
 func JWTAuth4Gin(c *gin.Context) {
 	var token string
-	//token = c.GetHeader("x-token")
 	token = c.GetHeader("Authorization")
 	token = strings.ReplaceAll(token, "Bearer ", "")
+	if token == "" {
+		token, _ = c.Cookie("access_token")
+	}
 	if token == "" {
 		c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
 		c.Abort()
@@ -28,6 +30,15 @@ func JWTAuth4Gin(c *gin.Context) {
 	}
 	if token != newToken {
 		c.Header("New-Token", newToken)
+		c.SetCookie(
+			"access_token",
+			newToken,
+			86400, // 24小时
+			"/",
+			"",    // 域名，为空表示当前域名
+			false, // 仅HTTPS
+			true,  // HttpOnly
+		)
 	}
 	c.Set("userId", userId)
 	c.Next()

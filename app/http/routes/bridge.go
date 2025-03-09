@@ -25,6 +25,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 
 	// 接口
 	auth(ginApp)
+	viewRoute(ginApp)
 	bbs(ginApp)
 	fileServer(ginApp)
 

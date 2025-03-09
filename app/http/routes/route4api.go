@@ -20,7 +20,6 @@ func setup(ginApp *gin.Engine) {
 }
 
 func frontend(ginApp *gin.Engine) {
-
 	actGroup := ginApp.Group("/")
 	actorFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
 	staticFS, _ := resource.GetStaticFS()
@@ -60,22 +59,24 @@ func auth(ginApp *gin.Engine) {
 	ginApp.GET("api/activate", controllers.ActivateAccount)
 }
 
+func viewRoute(ginApp *gin.Engine) {
+
+	view := ginApp.Group("")
+	view.Use(middleware.JWTAuth)
+
+	view.GET("", controllers.RenderIndex)
+	view.GET("/post", controllers.RenderArticlesPage)
+	view.GET("/post/:id", controllers.RenderArticleDetail)
+
+	view.GET("/login", controllers.LoginPage)
+	view.POST("/login", controllers.LoginHandler)
+	view.GET("/notifications", controllers.Notifications)
+	view.GET("/post-edit", controllers.PostEdit)
+	view.GET("/user-profile", controllers.UserProfile)
+	view.GET("/sponsors", controllers.Sponsors)
+}
+
 func bbs(ginApp *gin.Engine) {
-
-	gotempGroup := ginApp.Group("")
-	gotempGroup.Use(middleware.JWTAuth)
-
-	gotempGroup.GET("", controllers.RenderIndex)
-	gotempGroup.GET("/post", controllers.RenderArticlesPage)
-	gotempGroup.GET("/post/:id", controllers.RenderArticleDetail)
-
-	gotempGroup.GET("/login", controllers.LoginPage)
-	gotempGroup.POST("/login", controllers.LoginHandler)
-	gotempGroup.GET("/notifications", controllers.Notifications)
-	gotempGroup.GET("/post-edit", controllers.PostEdit)
-	gotempGroup.GET("/user-profile", controllers.UserProfile)
-	gotempGroup.GET("/sponsors", controllers.Sponsors)
-
 	bbsShow := ginApp.Group("api/bbs")
 
 	// 站点统计
@@ -92,8 +93,7 @@ func bbs(ginApp *gin.Engine) {
 	// 用户主页
 	// tag/分类
 
-	bbsAuth := bbsShow.Use(middleware.JWTAuth4Gin).
-		Use(middleware.JWTAuth4Gin)
+	bbsAuth := bbsShow.Use(middleware.JWTAuth4Gin)
 	// 通知相关接口
 	bbsAuth.POST("notification/list", UpButterReq(controllers.GetNotificationList))
 	bbsAuth.GET("notification/unread-count", UpButterReq(controllers.GetUnreadCount))
