@@ -77,7 +77,6 @@
         height: 60px;
         background: var(--bg-color);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
     }
 
     .nav-left {
@@ -179,6 +178,7 @@
     .user-menu {
         position: relative;
         cursor: pointer;
+        z-index: 1000;
     }
 
     .user-avatar {
@@ -197,6 +197,8 @@
         border-radius: 4px;
         padding: 0.5rem 0;
         min-width: 150px;
+        z-index: 200;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .dropdown-menu a {
@@ -212,6 +214,16 @@
 
     .user-menu:hover .dropdown-menu {
         display: block;
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+
+    .dropdown-menu {
+        opacity: 0;
+        transform: translateY(-10px);
+        visibility: hidden;
+        transition: all 0.2s ease-in-out;
     }
 
     .mobile-menu-btn {
