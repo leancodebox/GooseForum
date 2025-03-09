@@ -2,63 +2,63 @@
 <html lang="zh-CN">
 {{template "head.gohtml" .}}
 <body>
-    {{template "nav_new.gohtml" .}}
-    <main class="editor-container">
-        <div class="editor-header">
-            <h1>发布文章</h1>
+{{template "nav_new.gohtml" .}}
+<main class="editor-container">
+    <div class="editor-header">
+        <h1>发布文章</h1>
+    </div>
+
+    <form id="postForm" class="editor-form">
+        <div class="form-group">
+            <label for="title">文章标题</label>
+            <input type="text" id="title" name="title" required placeholder="请输入文章标题">
         </div>
 
-        <form id="postForm" class="editor-form">
-            <div class="form-group">
-                <label for="title">文章标题</label>
-                <input type="text" id="title" name="title" required placeholder="请输入文章标题">
-            </div>
+        <div class="form-group">
+            <label for="category">文章分类</label>
+            <select id="category" name="category" required>
+                <option value="">请选择分类</option>
+                <option value="tech">技术</option>
+                <option value="share">分享</option>
+                <option value="question">问答</option>
+                <option value="discussion">讨论</option>
+            </select>
+        </div>
 
-            <div class="form-group">
-                <label for="category">文章分类</label>
-                <select id="category" name="category" required>
-                    <option value="">请选择分类</option>
-                    <option value="tech">技术</option>
-                    <option value="share">分享</option>
-                    <option value="question">问答</option>
-                    <option value="discussion">讨论</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label for="tags">标签</label>
+            <input type="text" id="tags" name="tags" placeholder="输入标签，用逗号分隔">
+        </div>
 
-            <div class="form-group">
-                <label for="tags">标签</label>
-                <input type="text" id="tags" name="tags" placeholder="输入标签，用逗号分隔">
-            </div>
+        <div class="form-group">
+            <label for="content">文章内容</label>
+            <textarea id="content" name="content" required></textarea>
+        </div>
 
-            <div class="form-group">
-                <label for="content">文章内容</label>
-                <textarea id="content" name="content" required></textarea>
-            </div>
+        <div class="form-actions">
+            <button type="button" class="btn-preview">预览</button>
+            <button type="submit" class="btn-publish">发布文章</button>
+        </div>
+    </form>
 
-            <div class="form-actions">
-                <button type="button" class="btn-preview">预览</button>
-                <button type="submit" class="btn-publish">发布文章</button>
+    <!-- 预览模态框 -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>预览文章</h2>
+                <button class="close-modal">&times;</button>
             </div>
-        </form>
-
-        <!-- 预览模态框 -->
-        <div id="previewModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>预览文章</h2>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <h1 id="previewTitle"></h1>
-                    <div id="previewContent" class="markdown-body"></div>
-                </div>
+            <div class="modal-body">
+                <h1 id="previewTitle"></h1>
+                <div id="previewContent" class="markdown-body"></div>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 {{template "footer.gohtml" .}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
-    <style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<style>
     .editor-container {
         max-width: 1000px;
         margin: 2rem auto;
@@ -78,7 +78,7 @@
         background: var(--card-bg-color);
         padding: 2rem;
         border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .form-group {
@@ -147,7 +147,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0, 0, 0, 0.5);
         z-index: 1000;
     }
 
@@ -197,9 +197,9 @@
             width: 100%;
         }
     }
-    </style>
+</style>
 
-    <script>
+<script>
     // 初始化Markdown编辑器
     const easyMDE = new EasyMDE({
         element: document.getElementById('content'),
@@ -237,17 +237,70 @@
     });
 
     // 表单提交
-    document.getElementById('postForm').addEventListener('submit', (e) => {
+    document.getElementById('postForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData = {
-            title: document.getElementById('title').value,
-            category: document.getElementById('category').value,
-            tags: document.getElementById('tags').value.split(',').map(tag => tag.trim()),
-            content: easyMDE.value()
-        };
-        console.log('提交的文章数据:', formData);
-        // 实际项目中这里会发送请求到服务器
+
+        // 表单验证
+        const title = document.getElementById('title').value.trim();
+        const category = document.getElementById('category').value;
+        const content = easyMDE.value().trim();
+        const tags = document.getElementById('tags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+
+        if (!title) {
+            alert('请输入文章标题');
+            return;
+        }
+        if (!category) {
+            alert('请选择文章分类');
+            return;
+        }
+        if (!content) {
+            alert('请输入文章内容');
+            return;
+        }
+
+        // 禁用提交按钮
+        const submitBtn = document.querySelector('.btn-publish');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '发布中...';
+
+        try {
+            const articleId = new URLSearchParams(window.location.search).get('id');
+            const url = '/api/bbs/write-articles'
+
+            let data = {
+                id: articleId,
+                title: title,
+                type: category,
+                categoryId: tags,
+                content: content
+            }
+            console.log(data)
+            return
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // 发布成功，跳转到文章详情页
+                const newArticleId = articleId || result.data.id;
+                window.location.href = `/post/${newArticleId}`;
+            } else {
+                throw new Error(result.message || '发布失败');
+            }
+        } catch (error) {
+            alert(error.message || '发布失败，请稍后重试');
+            // 恢复提交按钮状态
+            submitBtn.disabled = false;
+            submitBtn.textContent = '发布文章';
+        }
     });
-    </script>
+</script>
 </body>
 </html>
