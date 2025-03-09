@@ -51,18 +51,23 @@
                 <style>
                     .comment-form {
                         margin-top: 20px;
+                        width: 100%;
+                        box-sizing: border-box;
                     }
 
                     .comment-input {
                         width: 100%;
                         min-height: 100px;
+                        max-height: 300px;
                         padding: 12px;
                         border: 1px solid var(--border-color);
                         border-radius: 4px;
-                        resize: vertical;
+                        resize: none;
                         margin-bottom: 10px;
                         background: var(--bg-color);
                         color: var(--text-color);
+                        overflow-y: auto;
+                        box-sizing: border-box;
                     }
 
                     .comment-submit {
