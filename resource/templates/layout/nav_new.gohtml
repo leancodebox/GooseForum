@@ -49,6 +49,12 @@
             {{end}}
 
 
+            <!-- 移动端用户头像 -->
+            {{if and .User (gt .User.UserId 0)}}
+            <div class="mobile-header-avatar">
+                <img src="{{.User.AvatarUrl}}" alt="{{.User.Username}}" class="mobile-nav-avatar">
+            </div>
+            {{end}}
             <!-- 移动端菜单按钮 -->
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
                 <span></span>
@@ -59,6 +65,13 @@
 
         <!-- 移动端菜单 -->
         <div class="mobile-menu" id="mobileMenu">
+            {{if and .User (gt .User.UserId 0)}}
+                <!-- 移动端用户信息 -->
+                <div class="mobile-user-info">
+                    <img src="{{.User.AvatarUrl}}" alt="{{.User.Username}}" class="mobile-user-avatar">
+                    <span class="mobile-username">{{.User.Username}}</span>
+                </div>
+            {{end}}
             <a href="/" class="mobile-link">首页</a>
             <a href="/post" class="mobile-link">文章</a>
             {{if and .User (gt .User.UserId 0)}}
@@ -261,6 +274,27 @@
         background: var(--bg-color);
         padding: 1rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+
+    .mobile-user-info {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .mobile-user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 1rem;
+    }
+
+    .mobile-username {
+        color: var(--text-color);
+        font-weight: 500;
     }
 
     .mobile-link {
@@ -271,7 +305,33 @@
         border-bottom: 1px solid var(--border-color);
     }
 
+    .mobile-header-avatar {
+        display: none;
+    }
+
+    .mobile-nav-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+    }
+
     @media (max-width: 768px) {
+
+        .mobile-header-avatar {
+            display: block;
+        }
+
+        .mobile-nav-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-actions {
+            display: none;
+        }
+
         .nav-links {
             display: none;
         }
@@ -287,6 +347,7 @@
         .mobile-menu.active {
             display: block;
         }
+
     }
 </style>
 
@@ -294,7 +355,39 @@
     function toggleMobileMenu() {
         const mobileMenu = document.getElementById('mobileMenu');
         mobileMenu.classList.toggle('active');
+
+        // 切换汉堡按钮样式
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        const spans = menuBtn.querySelectorAll('span');
+
+        if (mobileMenu.classList.contains('active')) {
+            spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+            spans[1].style.opacity = '0';
+            spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+        } else {
+            spans[0].style.transform = 'none';
+            spans[1].style.opacity = '1';
+            spans[2].style.transform = 'none';
+        }
     }
+
+    // 点击菜单外区域关闭菜单
+    document.addEventListener('click', function(event) {
+        const mobileMenu = document.getElementById('mobileMenu');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+
+        if (!mobileMenu.contains(event.target) && !menuBtn.contains(event.target) && mobileMenu.classList.contains('active')) {
+            toggleMobileMenu();
+        }
+    });
+
+    // 窗口大小改变时处理菜单状态
+    window.addEventListener('resize', function() {
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (window.innerWidth > 768 && mobileMenu.classList.contains('active')) {
+            toggleMobileMenu();
+        }
+    });
 
     function handleLogout() {
         // 处理退出登录逻辑
