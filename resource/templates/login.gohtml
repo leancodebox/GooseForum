@@ -154,3 +154,87 @@
         }
     </style>
 </html>
+    <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // 表单验证
+        if (!username || !password) {
+            alert('请填写用户名和密码');
+            return;
+        }
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+            console.log(response.ok,data)
+            if (data.ok) {
+                // 登录成功，跳转到首页
+                // window.location.href = '/';
+            } else {
+                // 登录失败，显示错误信息
+                alert(data.message || '登录失败，请检查用户名和密码');
+            }
+        } catch (error) {
+            console.error('登录请求失败:', error);
+            alert('登录失败，请稍后重试');
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+        const confirmPassword = document.getElementById('reg-confirm-password').value;
+
+        // 表单验证
+        if (!username || !email || !password || !confirmPassword) {
+            alert('请填写所有必填字段');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            alert('两次输入的密码不一致');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    email: email,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('注册成功，请登录');
+                switchTab('login');
+            } else {
+                alert(data.message || '注册失败，请稍后重试');
+            }
+        } catch (error) {
+            console.error('注册请求失败:', error);
+            alert('注册失败，请稍后重试');
+        }
+    });
+    </script>

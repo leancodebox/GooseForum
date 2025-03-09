@@ -26,19 +26,19 @@ func LoginHandler(c *gin.Context) {
 	captchaCode := c.PostForm("captchaCode")
 
 	if !VerifyCaptcha(captchaId, captchaCode) {
-		c.JSON(http.StatusOK, gin.H{"message": "验证失败"})
+		c.JSON(200, component.FailData("验证失败"))
 		return
 	}
 	userEntity, err := users.Verify(username, password)
 	if err != nil {
 		slog.Info(cast.ToString(err))
-		c.JSON(http.StatusOK, gin.H{"message": err})
+		c.JSON(200, component.FailData(err))
 		return
 	}
 	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
 	if err != nil {
 		slog.Info(cast.ToString(err))
-		c.JSON(http.StatusOK, gin.H{"message": err})
+		c.JSON(200, component.FailData(err))
 		return
 	}
 	// 设置Cookie
@@ -51,7 +51,9 @@ func LoginHandler(c *gin.Context) {
 		false, // 仅HTTPS
 		true,  // HttpOnly
 	)
-	c.Redirect(http.StatusFound, "/")
+	c.JSON(http.StatusOK, component.SuccessData(
+		"登录成功",
+	))
 }
 
 // 添加新的服务端渲染的控制器方法

@@ -20,7 +20,7 @@
             const banner = document.getElementById('welcomeBanner');
             const isBannerClosed = localStorage.getItem('welcomeBannerClosed');
 
-            if (!isBannerClosed) {
+            if (!isBannerClosed && banner) {
                 banner.classList.add('show');
             }
         });
