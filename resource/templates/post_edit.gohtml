@@ -18,10 +18,9 @@
             <label for="category">文章分类</label>
             <select id="category" name="category" required>
                 <option value="">请选择分类</option>
-                <option value="tech">技术</option>
-                <option value="share">分享</option>
-                <option value="question">问答</option>
-                <option value="discussion">讨论</option>
+                {{range .TypeList}}
+                    <option value="{{.Value}}">{{.Name}}</option>
+                {{end}}
             </select>
         </div>
 
