@@ -51,7 +51,7 @@ func RenderSitemapXml(c *gin.Context) {
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>%s/articles</loc>
+        <loc>%s/post</loc>
         <changefreq>hourly</changefreq>
         <priority>0.9</priority>
     </url>

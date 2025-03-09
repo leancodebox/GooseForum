@@ -60,17 +60,14 @@ func auth(ginApp *gin.Engine) {
 }
 
 func viewRoute(ginApp *gin.Engine) {
-
 	view := ginApp.Group("")
 	view.Use(middleware.JWTAuth)
-
 	view.GET("", controllers.RenderIndex)
 	view.GET("/post", controllers.RenderArticlesPage)
 	view.GET("/post/:id", controllers.RenderArticleDetail)
-
 	view.GET("/login", controllers.LoginPage)
 	view.POST("/login", controllers.LoginHandler)
-	view.GET("/notifications", controllers.Notifications)
+	view.GET("/notifications", middleware.CheckLogin, controllers.Notifications)
 	view.GET("/post-edit", middleware.CheckLogin, controllers.PostEdit)
 	view.GET("/user-profile", controllers.UserProfile)
 	view.GET("/sponsors", controllers.Sponsors)
@@ -134,11 +131,8 @@ func bbs(ginApp *gin.Engine) {
 
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
-
 	// 文件上传接口
 	r.POST("/img-upload", middleware.JWTAuth4Gin, controllers.SaveFileByGinContext)
-
 	// 文件获取接口 - 通过路径
 	r.GET("/img/*filename", controllers.GetFileByFileName)
-
 }
