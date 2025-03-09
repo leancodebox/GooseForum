@@ -61,8 +61,16 @@
         <div class="mobile-menu" id="mobileMenu">
             <a href="/" class="mobile-link">首页</a>
             <a href="/post" class="mobile-link">文章</a>
-            <a href="/login" class="mobile-link" id="mobileLoginBtn">登录</a>
-            <a href="/register" class="mobile-link" id="mobileRegisterBtn">注册</a>
+            {{if and .User (gt .User.UserId 0)}}
+                <a href="/post/new" class="mobile-link">发布</a>
+                <a href="/notifications" class="mobile-link">消息</a>
+                <a href="/user/profile" class="mobile-link">个人主页</a>
+                <a href="/user/settings" class="mobile-link">设置</a>
+                <a href="#" onclick="handleLogout()" class="mobile-link">退出</a>
+            {{else}}
+                <a href="/login" class="mobile-link" id="mobileLoginBtn">登录</a>
+                <a href="/register" class="mobile-link" id="mobileRegisterBtn">注册</a>
+            {{end}}
         </div>
     </nav>
 </header>
@@ -268,8 +276,8 @@
             display: none;
         }
 
-        .auth-buttons {
-            display: none;
+        .auth-buttons, .user-actions {
+            display: none !important;
         }
 
         .mobile-menu-btn {
