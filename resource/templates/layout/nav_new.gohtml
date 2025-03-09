@@ -22,36 +22,33 @@
                 <span class="theme-icon">🌓</span>
             </button>
 
-            <!-- 未登录状态 -->
-            <div class="auth-buttons" id="guestButtons">
-                {{if and .User (gt .User.UserId 0)}}
-                    <div class="user-info">
-                        <img src="{{.User.AvatarUrl}}" alt="用户头像" class="user-avatar-small">
-                        <span class="username">{{.User.Username}}</span>
-                    </div>
-                {{else}}
-                    <a href="/login" class="btn btn-auth">登录 / 注册</a>
-                {{end}}
-            </div>
-
             <!-- 已登录状态 -->
-            <div class="user-actions" id="userActions" style="display: none;">
-                <a href="/post/new" class="btn btn-publish">发布</a>
-                <div class="notifications">
-                    <a href="/notifications" class="notification-icon">
-                        <span class="notification-count">3</span>
-                        📬
-                    </a>
-                </div>
-                <div class="user-menu">
-                    <img src="/static/default-avatar.png" alt="用户头像" class="user-avatar">
-                    <div class="dropdown-menu">
-                        <a href="/user/profile">个人主页</a>
-                        <a href="/user/settings">设置</a>
-                        <a href="#" onclick="handleLogout()">退出</a>
+            {{if and .User (gt .User.UserId 0)}}
+                <div class="user-actions" id="userActions" {{/*style="display: none;"*/}}>
+                    <a href="/post/new" class="btn btn-publish">发布</a>
+                    <div class="notifications">
+                        <a href="/notifications" class="notification-icon">
+                            <span class="notification-count">3</span>
+                            📬
+                        </a>
+                    </div>
+                    <div class="user-menu">
+                        <img src="{{.User.AvatarUrl}}" alt="用户头像" class="user-avatar">
+                        <span class="username">{{.User.Username}}</span>
+                        <div class="dropdown-menu">
+                            <a href="/user/profile">个人主页</a>
+                            <a href="/user/settings">设置</a>
+                            <a href="#" onclick="handleLogout()">退出</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            {{else}}
+                <!-- 未登录状态 -->
+                <div class="auth-buttons" id="guestButtons">
+                    <a href="/login" class="btn btn-auth">登录 / 注册</a>
+                </div>
+            {{end}}
+
 
             <!-- 移动端菜单按钮 -->
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
