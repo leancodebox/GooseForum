@@ -25,8 +25,10 @@
             <!-- 未登录状态 -->
             <div class="auth-buttons" id="guestButtons">
                 {{if and .User (gt .User.UserId 0)}}
-                    <span>{{.User.Username}}</span>
-                    <img>{{.User.AvatarUrl}}</img>
+                    <div class="user-info">
+                        <img src="{{.User.AvatarUrl}}" alt="用户头像" class="user-avatar-small">
+                        <span class="username">{{.User.Username}}</span>
+                    </div>
                 {{else}}
                     <a href="/login" class="btn btn-auth">登录 / 注册</a>
                 {{end}}

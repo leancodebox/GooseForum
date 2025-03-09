@@ -15,6 +15,7 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -80,7 +81,7 @@ func GetLoginUser(c *gin.Context) UserInfoShow {
 	// 如果有头像，添加域名前缀
 	avatarUrl := ""
 	if user.AvatarUrl != "" {
-		avatarUrl = component.FilePath(user.AvatarUrl)
+		avatarUrl = strings.ReplaceAll(component.FilePath(user.AvatarUrl), "\\", "/")
 	}
 
 	return UserInfoShow{
@@ -198,6 +199,7 @@ func RenderArticlesPage(c *gin.Context) {
 		"TotalPages":  totalPages,
 		"PrevPage":    max(result.Page-1, 1),
 		"NextPage":    min(max(result.Page, 1)+1, totalPages),
+		"User":        GetLoginUser(c),
 	}
 	c.HTML(http.StatusOK, "list.gohtml", templateData)
 }
@@ -235,6 +237,7 @@ func RenderArticleDetail(c *gin.Context) {
 		"username":       cast.ToString(result["username"]),
 		"commentList":    result["commentList"],
 		"avatarUrl":      result["avatarUrl"],
+		"User":           GetLoginUser(c),
 	}
 
 	c.HTML(http.StatusOK, "detail.gohtml", templateData)
@@ -245,22 +248,23 @@ func errorPage(c *gin.Context, title, message string) {
 		"title":   title,
 		"message": message,
 		"year":    time.Now().Year(),
+		"User":    GetLoginUser(c),
 	})
 }
 
 func LoginPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.gohtml", gin.H{"title": "登录 - GooseForum"})
+	c.HTML(http.StatusOK, "login.gohtml", gin.H{"title": "登录 - GooseForum", "User": GetLoginUser(c)})
 }
 func Notifications(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "notifications.gohtml", gin.H{"title": "消息通知 - GooseForum"})
+	c.HTML(http.StatusNotFound, "notifications.gohtml", gin.H{"title": "消息通知 - GooseForum", "User": GetLoginUser(c)})
 }
 func PostEdit(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "post_edit.gohtml", gin.H{"title": "发布文章 - GooseForum"})
+	c.HTML(http.StatusNotFound, "post_edit.gohtml", gin.H{"title": "发布文章 - GooseForum", "User": GetLoginUser(c)})
 }
 func UserProfile(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "user_profile.gohtml", gin.H{"title": "用户主页 - GooseForum"})
+	c.HTML(http.StatusNotFound, "user_profile.gohtml", gin.H{"title": "用户主页 - GooseForum", "User": GetLoginUser(c)})
 }
 
 func Sponsors(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "sponsors.gohtml", gin.H{"title": "赞助商 - GooseForum"})
+	c.HTML(http.StatusNotFound, "sponsors.gohtml", gin.H{"title": "赞助商 - GooseForum", "User": GetLoginUser(c)})
 }
