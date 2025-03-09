@@ -399,20 +399,4 @@
         console.log('Logout clicked');
     }
 
-    // 模拟登录状态切换
-    const isLoggedIn = false; // 根据实际登录状态修改
-    const guestButtons = document.getElementById('guestButtons');
-    const userActions = document.getElementById('userActions');
-    const mobileLoginBtn = document.getElementById('mobileLoginBtn');
-    const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
-
-    if (isLoggedIn) {
-        guestButtons.style.display = 'none';
-        userActions.style.display = 'flex';
-        mobileLoginBtn.style.display = 'none';
-        mobileRegisterBtn.style.display = 'none';
-    } else {
-        guestButtons.style.display = 'flex';
-        userActions.style.display = 'none';
-    }
 </script>
