@@ -24,7 +24,7 @@
                             <div class="comment-meta">
                                 <span>{{.Username}}</span>
                                 <time>{{.CreateTime}}</time>
-                                <button class="reply-btn" onclick="showReplyForm({{.Id}}, '{{.Username}}')">回复</button>
+                                <button class="reply-btn" onclick="showReplyForm({{.Id}})">回复</button>
                             </div>
                             <div class="comment-content">
                                 {{if .ReplyToUsername}}
@@ -34,7 +34,7 @@
                             </div>
                             <div class="reply-form" id="reply-form-{{.Id}}" style="display: none;">
                                 <textarea class="comment-input" placeholder="回复 @{{.Username}}..."></textarea>
-                                <button class="comment-submit" onclick="submitReply({{.Id}}, '{{.Username}}')">发表回复</button>
+                                <button class="comment-submit" onclick="submitReply({{.Id}})">发表回复</button>
                             </div>
                         </div>
                     {{end}}
@@ -224,21 +224,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <style>
-    .comment {
-        margin-bottom: 20px;
-        padding: 15px;
-        background: var(--bg-color);
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-    }
-
-    .comment-meta {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        gap: 10px;
-    }
-
     .reply-btn {
         padding: 4px 8px;
         background: var(--bg-color);
@@ -266,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 
 <script>
-function showReplyForm(commentId, username) {
+function showReplyForm(commentId) {
     // 隐藏所有回复表单
     document.querySelectorAll('.reply-form').forEach(form => {
         form.style.display = 'none';
