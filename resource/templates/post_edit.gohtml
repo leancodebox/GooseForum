@@ -26,7 +26,12 @@
 
         <div class="form-group">
             <label for="tags">标签</label>
-            <input type="text" id="tags" name="tags" placeholder="输入标签，用逗号分隔">
+            <select id="tags" name="tags" required>
+                <option value="">请选择分类</option>
+                {{range .Category}}
+                    <option value="{{.Value}}">{{.Name}}</option>
+                {{end}}
+            </select>
         </div>
 
         <div class="form-group">
