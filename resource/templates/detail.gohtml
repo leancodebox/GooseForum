@@ -24,8 +24,9 @@
                             <div class="comment-meta">
                                 <span>{{.Username}}</span>
                                 <time>{{.CreateTime}}</time>
-                                <button class="reply-btn" onclick="showReplyForm({{.Id}})">回复</button>
-
+                                {{if and $.User (gt $.User.UserId 0)}}
+                                    <button class="reply-btn" onclick="showReplyForm({{.Id}})">回复</button>
+                                {{end}}
                             </div>
                             <div class="comment-content">
                                 {{if .ReplyToUsername}}
@@ -33,10 +34,12 @@
                                 {{end}}
                                 {{.Content}}
                             </div>
-                            <div class="reply-form" id="reply-form-{{.Id}}" style="display: none;">
-                                <textarea class="comment-input" placeholder="回复 @{{.Username}}..."></textarea>
-                                <button class="comment-submit" onclick="submitReply({{.Id}})">发表回复</button>
-                            </div>
+                            {{if and $.User (gt $.User.UserId 0)}}
+                                <div class="reply-form" id="reply-form-{{.Id}}" style="display: none;">
+                                    <textarea class="comment-input" placeholder="回复 @{{.Username}}..."></textarea>
+                                    <button class="comment-submit" onclick="submitReply({{.Id}})">发表回复</button>
+                                </div>
+                            {{end}}
                         </div>
                     {{end}}
 
