@@ -24,12 +24,17 @@
                             <div class="comment-meta">
                                 <span>{{.Username}}</span>
                                 <time>{{.CreateTime}}</time>
+                                <button class="reply-btn" onclick="showReplyForm({{.Id}}, '{{.Username}}')">回复</button>
                             </div>
                             <div class="comment-content">
                                 {{if .ReplyToUsername}}
                                     <p class="reply-to">回复 @{{.ReplyToUsername}}:</p>
                                 {{end}}
                                 {{.Content}}
+                            </div>
+                            <div class="reply-form" id="reply-form-{{.Id}}" style="display: none;">
+                                <textarea class="comment-input" placeholder="回复 @{{.Username}}..."></textarea>
+                                <button class="comment-submit" onclick="submitReply({{.Id}}, '{{.Username}}')">发表回复</button>
                             </div>
                         </div>
                     {{end}}
@@ -215,6 +220,109 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+</script>
+
+
+<style>
+    .comment {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: var(--bg-color);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .comment-meta {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 10px;
+    }
+
+    .reply-btn {
+        padding: 4px 8px;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        color: var(--text-color);
+    }
+
+    .reply-btn:hover {
+        background: var(--border-color);
+    }
+
+    .reply-to {
+        color: var(--primary-color);
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .reply-form {
+        margin-top: 10px;
+        padding-left: 20px;
+    }
+</style>
+
+<script>
+function showReplyForm(commentId, username) {
+    // 隐藏所有回复表单
+    document.querySelectorAll('.reply-form').forEach(form => {
+        form.style.display = 'none';
+    });
+
+    // 显示当前评论的回复表单
+    const replyForm = document.getElementById(`reply-form-${commentId}`);
+    if (replyForm) {
+        replyForm.style.display = 'block';
+        const textarea = replyForm.querySelector('.comment-input');
+        textarea.focus();
+    }
+}
+
+async function submitReply(replyId) {
+    const replyForm = document.getElementById(`reply-form-${replyId}`);
+    const textarea = replyForm.querySelector('.comment-input');
+    const content = textarea.value.trim();
+
+    if (!content) {
+        alert('请输入回复内容');
+        return;
+    }
+
+    const submitBtn = replyForm.querySelector('.comment-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提交中...';
+
+    try {
+        const response = await fetch('/api/bbs/articles-reply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                articleId: {{.articleId}},
+                content: content,
+                replyId: replyId
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert(result.message || '回复发表失败，请稍后重试');
+        }
+    } catch (error) {
+        console.error('回复发表失败:', error);
+        alert('回复发表失败，请稍后重试');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '发表回复';
+    }
+}
 </script>
 
 
