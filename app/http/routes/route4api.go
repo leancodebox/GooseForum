@@ -67,6 +67,7 @@ func bbs(ginApp *gin.Engine) {
 	ginApp.GET("/post/:id", controllers.RenderArticleDetail)
 
 	ginApp.GET("/login", controllers.LoginPage)
+	ginApp.POST("/login", controllers.LoginHandler)
 	ginApp.GET("/notifications", controllers.Notifications)
 	ginApp.GET("/post-edit", controllers.PostEdit)
 	ginApp.GET("/user-profile", controllers.UserProfile)

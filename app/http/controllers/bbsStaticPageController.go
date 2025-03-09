@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
@@ -16,6 +17,42 @@ import (
 	"net/http"
 	"time"
 )
+
+// LoginHandler 处理登录请求
+func LoginHandler(c *gin.Context) {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	captchaId := c.PostForm("captchaId")
+	captchaCode := c.PostForm("captchaCode")
+
+	if !VerifyCaptcha(captchaId, captchaCode) {
+		c.JSON(http.StatusOK, gin.H{"message": "验证失败"})
+		return
+	}
+	userEntity, err := users.Verify(username, password)
+	if err != nil {
+		slog.Info(cast.ToString(err))
+		c.JSON(http.StatusOK, gin.H{"message": err})
+		return
+	}
+	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
+	if err != nil {
+		slog.Info(cast.ToString(err))
+		c.JSON(http.StatusOK, gin.H{"message": err})
+		return
+	}
+	// 设置Cookie
+	c.SetCookie(
+		"access_token",
+		token,
+		86400, // 24小时
+		"/",
+		"",    // 域名，为空表示当前域名
+		false, // 仅HTTPS
+		true,  // HttpOnly
+	)
+	c.Redirect(http.StatusFound, "/")
+}
 
 // 添加新的服务端渲染的控制器方法
 func markdownToHTML(markdown string) template.HTML {
@@ -173,7 +210,7 @@ func errorPage(c *gin.Context, title, message string) {
 }
 
 func LoginPage(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "login.gohtml", gin.H{"title": "登录 - GooseForum"})
+	c.HTML(http.StatusOK, "login.gohtml", gin.H{"title": "登录 - GooseForum"})
 }
 func Notifications(c *gin.Context) {
 	c.HTML(http.StatusNotFound, "notifications.gohtml", gin.H{"title": "消息通知 - GooseForum"})
