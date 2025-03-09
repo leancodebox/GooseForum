@@ -32,3 +32,30 @@ func JWTAuth4Gin(c *gin.Context) {
 	c.Set("userId", userId)
 	c.Next()
 }
+
+func JWTAuth(c *gin.Context) {
+	var token string
+	token, _ = c.Cookie("access_token")
+	if token == "" {
+		c.Next()
+		return
+	}
+	userId, newToken, err := jwt.VerifyTokenWithFresh(token)
+	if err != nil {
+		c.Next()
+		return
+	}
+	if token != newToken {
+		c.SetCookie(
+			"access_token",
+			newToken,
+			86400, // 24小时
+			"/",
+			"",    // 域名，为空表示当前域名
+			false, // 仅HTTPS
+			true,  // HttpOnly
+		)
+	}
+	c.Set("userId", userId)
+	c.Next()
+}

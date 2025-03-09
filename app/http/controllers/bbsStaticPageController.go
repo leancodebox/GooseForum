@@ -67,6 +67,30 @@ func LoginHandler(c *gin.Context) {
 		"登录成功",
 	))
 }
+func GetLoginUser(c *gin.Context) UserInfoShow {
+	userId := c.GetUint64("userId")
+	if userId == 0 {
+		return UserInfoShow{}
+	}
+	user, _ := users.Get(userId)
+	if user.Id == 0 {
+		return UserInfoShow{}
+	}
+	//userPoint := userPoints.Get(user.Id)
+	// 如果有头像，添加域名前缀
+	avatarUrl := ""
+	if user.AvatarUrl != "" {
+		avatarUrl = component.FilePath(user.AvatarUrl)
+	}
+
+	return UserInfoShow{
+		UserId:    userId,
+		Username:  user.Username,
+		Prestige:  user.Prestige,
+		AvatarUrl: avatarUrl,
+		//UserPoint: userPoint.CurrentPoints,
+	}
+}
 
 // 添加新的服务端渲染的控制器方法
 func markdownToHTML(markdown string) template.HTML {
@@ -139,6 +163,7 @@ func RenderIndex(c *gin.Context) {
 		"FeaturedArticles": res,
 		"LatestArticles":   res,
 		"Stats":            GetSiteStatisticsData(),
+		"User":             GetLoginUser(c),
 	}
 	c.HTML(http.StatusOK, "home.gohtml", templateData)
 }

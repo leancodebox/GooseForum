@@ -62,16 +62,19 @@ func auth(ginApp *gin.Engine) {
 
 func bbs(ginApp *gin.Engine) {
 
-	ginApp.GET("", controllers.RenderIndex)
-	ginApp.GET("/post", controllers.RenderArticlesPage)
-	ginApp.GET("/post/:id", controllers.RenderArticleDetail)
+	gotempGroup := ginApp.Group("")
+	gotempGroup.Use(middleware.JWTAuth)
 
-	ginApp.GET("/login", controllers.LoginPage)
-	ginApp.POST("/login", controllers.LoginHandler)
-	ginApp.GET("/notifications", controllers.Notifications)
-	ginApp.GET("/post-edit", controllers.PostEdit)
-	ginApp.GET("/user-profile", controllers.UserProfile)
-	ginApp.GET("/sponsors", controllers.Sponsors)
+	gotempGroup.GET("", controllers.RenderIndex)
+	gotempGroup.GET("/post", controllers.RenderArticlesPage)
+	gotempGroup.GET("/post/:id", controllers.RenderArticleDetail)
+
+	gotempGroup.GET("/login", controllers.LoginPage)
+	gotempGroup.POST("/login", controllers.LoginHandler)
+	gotempGroup.GET("/notifications", controllers.Notifications)
+	gotempGroup.GET("/post-edit", controllers.PostEdit)
+	gotempGroup.GET("/user-profile", controllers.UserProfile)
+	gotempGroup.GET("/sponsors", controllers.Sponsors)
 
 	bbsShow := ginApp.Group("api/bbs")
 

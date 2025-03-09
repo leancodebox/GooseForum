@@ -3,7 +3,10 @@
         <!-- Logo -->
         <div class="nav-left">
             <a href="/" class="logo" style="letter-spacing: 0;">
-                <span style="color:var(--primary-color)">G</span><span style="color:var(--secondary-color)">o</span><span style="color:var(--text-color)">ose</span><span style="color:var(--primary-color)">F</span><span style="color:var(--secondary-color)">o</span><span style="color:var(--text-color)">rum</span>
+                <span style="color:var(--primary-color)">G</span><span
+                        style="color:var(--secondary-color)">o</span><span
+                        style="color:var(--text-color)">ose</span><span style="color:var(--primary-color)">F</span><span
+                        style="color:var(--secondary-color)">o</span><span style="color:var(--text-color)">rum</span>
             </a>
             <!-- 导航链接 -->
             <div class="nav-links">
@@ -21,7 +24,12 @@
 
             <!-- 未登录状态 -->
             <div class="auth-buttons" id="guestButtons">
-                <a href="/login" class="btn btn-auth">登录 / 注册</a>
+                {{if and .User (gt .User.UserId 0)}}
+                    <span>{{.User.Username}}</span>
+                    <img>{{.User.AvatarUrl}}</img>
+                {{else}}
+                    <a href="/login" class="btn btn-auth">登录 / 注册</a>
+                {{end}}
             </div>
 
             <!-- 已登录状态 -->
@@ -62,233 +70,233 @@
 </header>
 
 <style>
-.nav-container {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 1.5rem;
-    height: 60px;
-    background: var(--bg-color);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-.nav-left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.logo {
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    height: 100%;
-    padding: 0;
-    font-size: 1.5rem;
-    transition: transform 0.2s ease;
-}
-
-.logo:hover {
-    transform: scale(1.05);
-}
-
-.nav-links {
-    display: flex;
-    gap: 1.2rem;
-    margin-left: 1rem;
-}
-
-.nav-link {
-    color: var(--text-color);
-    text-decoration: none;
-    padding: 0.5rem 0;
-    position: relative;
-}
-
-.nav-link:after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    bottom: 0;
-    left: 0;
-    background-color: var(--primary-color);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-}
-
-.nav-link:hover:after {
-    transform: scaleX(1);
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-}
-
-.btn {
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.btn-auth {
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-    background: transparent;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-}
-
-.btn-auth:hover {
-    background: var(--primary-color);
-    color: white;
-}
-
-.btn-publish {
-    background: var(--secondary-color);
-    color: white;
-}
-
-.notifications {
-    position: relative;
-}
-
-.notification-count {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: red;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
-}
-
-.user-menu {
-    position: relative;
-    cursor: pointer;
-}
-
-.user-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 0.5rem 0;
-    min-width: 150px;
-}
-
-.dropdown-menu a {
-    display: block;
-    padding: 0.5rem 1rem;
-    color: var(--text-color);
-    text-decoration: none;
-}
-
-.dropdown-menu a:hover {
-    background: var(--hover-color);
-}
-
-.user-menu:hover .dropdown-menu {
-    display: block;
-}
-
-.mobile-menu-btn {
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-}
-
-.mobile-menu-btn span {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: var(--text-color);
-    transition: all 0.3s ease;
-}
-
-.mobile-menu {
-    display: none;
-    position: fixed;
-    top: 60px;
-    left: 0;
-    right: 0;
-    background: var(--bg-color);
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.mobile-link {
-    display: block;
-    padding: 0.75rem 1rem;
-    color: var(--text-color);
-    text-decoration: none;
-    border-bottom: 1px solid var(--border-color);
-}
-
-@media (max-width: 768px) {
-    .nav-links {
-        display: none;
+    .nav-container {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 1.5rem;
+        height: 60px;
+        background: var(--bg-color);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
     }
 
-    .auth-buttons {
+    .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .logo {
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        height: 100%;
+        padding: 0;
+        font-size: 1.5rem;
+        transition: transform 0.2s ease;
+    }
+
+    .logo:hover {
+        transform: scale(1.05);
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 1.2rem;
+        margin-left: 1rem;
+    }
+
+    .nav-link {
+        color: var(--text-color);
+        text-decoration: none;
+        padding: 0.5rem 0;
+        position: relative;
+    }
+
+    .nav-link:after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: var(--primary-color);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .nav-link:hover:after {
+        transform: scaleX(1);
+    }
+
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .btn {
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .btn-auth {
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+        background: transparent;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .btn-auth:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-publish {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .notifications {
+        position: relative;
+    }
+
+    .notification-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: red;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 12px;
+    }
+
+    .user-menu {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+    }
+
+    .dropdown-menu {
         display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 0.5rem 0;
+        min-width: 150px;
+    }
+
+    .dropdown-menu a {
+        display: block;
+        padding: 0.5rem 1rem;
+        color: var(--text-color);
+        text-decoration: none;
+    }
+
+    .dropdown-menu a:hover {
+        background: var(--hover-color);
+    }
+
+    .user-menu:hover .dropdown-menu {
+        display: block;
     }
 
     .mobile-menu-btn {
-        display: flex;
+        display: none;
+        flex-direction: column;
+        gap: 4px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
     }
 
-    .mobile-menu.active {
+    .mobile-menu-btn span {
         display: block;
+        width: 24px;
+        height: 2px;
+        background: var(--text-color);
+        transition: all 0.3s ease;
     }
-}
+
+    .mobile-menu {
+        display: none;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: var(--bg-color);
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-link {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: var(--text-color);
+        text-decoration: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 768px) {
+        .nav-links {
+            display: none;
+        }
+
+        .auth-buttons {
+            display: none;
+        }
+
+        .mobile-menu-btn {
+            display: flex;
+        }
+
+        .mobile-menu.active {
+            display: block;
+        }
+    }
 </style>
 
 <script>
-function toggleMobileMenu() {
-    const mobileMenu = document.getElementById('mobileMenu');
-    mobileMenu.classList.toggle('active');
-}
+    function toggleMobileMenu() {
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenu.classList.toggle('active');
+    }
 
-function handleLogout() {
-    // 处理退出登录逻辑
-    console.log('Logout clicked');
-}
+    function handleLogout() {
+        // 处理退出登录逻辑
+        console.log('Logout clicked');
+    }
 
-// 模拟登录状态切换
-const isLoggedIn = false; // 根据实际登录状态修改
-const guestButtons = document.getElementById('guestButtons');
-const userActions = document.getElementById('userActions');
-const mobileLoginBtn = document.getElementById('mobileLoginBtn');
-const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
+    // 模拟登录状态切换
+    const isLoggedIn = false; // 根据实际登录状态修改
+    const guestButtons = document.getElementById('guestButtons');
+    const userActions = document.getElementById('userActions');
+    const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+    const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
 
-if (isLoggedIn) {
-    guestButtons.style.display = 'none';
-    userActions.style.display = 'flex';
-    mobileLoginBtn.style.display = 'none';
-    mobileRegisterBtn.style.display = 'none';
-} else {
-    guestButtons.style.display = 'flex';
-    userActions.style.display = 'none';
-}
+    if (isLoggedIn) {
+        guestButtons.style.display = 'none';
+        userActions.style.display = 'flex';
+        mobileLoginBtn.style.display = 'none';
+        mobileRegisterBtn.style.display = 'none';
+    } else {
+        guestButtons.style.display = 'flex';
+        userActions.style.display = 'none';
+    }
 </script>
