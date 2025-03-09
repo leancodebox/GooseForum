@@ -70,3 +70,11 @@ func JWTAuth(c *gin.Context) {
 	c.Set("userId", userId)
 	c.Next()
 }
+
+func CheckLogin(c *gin.Context) {
+	userId := c.GetUint64("userId")
+	if userId == 0 {
+		c.Redirect(http.StatusFound, "/login")
+	}
+	c.Next()
+}
