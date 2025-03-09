@@ -21,6 +21,14 @@
                     <label for="password">密码</label>
                     <input type="password" id="password" name="password" required>
                 </div>
+                <div class="form-group captcha-group">
+                    <label for="captcha">验证码</label>
+                    <div class="captcha-container">
+                        <input type="text" id="captcha" name="captcha" required>
+                        <img id="captchaImage" src="" alt="验证码" onclick="refreshCaptcha()">
+                        <input type="hidden" id="captchaId" name="captchaId">
+                    </div>
+                </div>
                 <button type="submit" class="submit-btn">登录</button>
             </form>
             <form class="auth-form register-form" id="registerForm" action="/api/register" method="POST">
@@ -64,8 +72,27 @@
             registerForm.style.display = 'flex';
         }
     }
+
+    async function getCaptcha() {
+        try {
+            const response = await fetch('/api/get-captcha');
+            const data = await response.json();
+            if (data.code === 0) {
+                document.getElementById('captchaImage').src = data.result.captchaImg;
+                document.getElementById('captchaId').value = data.result.captchaId;
+            }
+        } catch (error) {
+            console.error('获取验证码失败:', error);
+        }
+    }
+
+    function refreshCaptcha() {
+        getCaptcha();
+    }
+
+    // 页面加载时获取验证码
+    document.addEventListener('DOMContentLoaded', getCaptcha);
     </script>
-</body>
 
     <style>
         .auth-container {
@@ -132,6 +159,22 @@
             border-color: var(--primary-color);
         }
 
+        .captcha-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .captcha-container input {
+            flex: 1;
+        }
+
+        .captcha-container img {
+            height: 38px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
         .submit-btn {
             padding: 0.8rem;
             background: var(--primary-color);
@@ -143,6 +186,7 @@
         }
 
         .submit-btn:hover {
+            background: var(--primary-color-dark);
         }
 
         .register-form {
@@ -153,16 +197,18 @@
             display: flex;
         }
     </style>
-</html>
+
     <script>
     document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
+        const captcha = document.getElementById('captcha').value;
+        const captchaId = document.getElementById('captchaId').value;
 
         // 表单验证
-        if (!username || !password) {
-            alert('请填写用户名和密码');
+        if (!username || !password || !captcha) {
+            alert('请填写所有必填字段');
             return;
         }
 
@@ -174,22 +220,24 @@
                 },
                 body: JSON.stringify({
                     username: username,
-                    password: password
+                    password: password,
+                    captchaId: captchaId,
+                    captchaCode: captcha
                 })
             });
 
             const data = await response.json();
-            console.log(response.ok,data)
-            if (data.ok) {
-                // 登录成功，跳转到首页
-                // window.location.href = '/';
+            console.log(data)
+            if (data.code === 0 ) {
+                window.location.href = '/';
             } else {
-                // 登录失败，显示错误信息
                 alert(data.message || '登录失败，请检查用户名和密码');
+                refreshCaptcha();
             }
         } catch (error) {
             console.error('登录请求失败:', error);
             alert('登录失败，请稍后重试');
+            refreshCaptcha(); // 刷新验证码
         }
     });
 
@@ -238,3 +286,5 @@
         }
     });
     </script>
+</body>
+</html>

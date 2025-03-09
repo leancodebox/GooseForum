@@ -18,12 +18,24 @@ import (
 	"time"
 )
 
+type LoginHandlerReq struct {
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	CaptchaId   string `json:"captchaId"`
+	CaptchaCode string `json:"captchaCode"`
+}
+
 // LoginHandler 处理登录请求
 func LoginHandler(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-	captchaId := c.PostForm("captchaId")
-	captchaCode := c.PostForm("captchaCode")
+	var req LoginHandlerReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(200, component.FailData("验证失败"))
+		return
+	}
+	username := req.Username
+	password := req.Password
+	captchaId := req.CaptchaId
+	captchaCode := req.CaptchaCode
 
 	if !VerifyCaptcha(captchaId, captchaCode) {
 		c.JSON(200, component.FailData("验证失败"))
