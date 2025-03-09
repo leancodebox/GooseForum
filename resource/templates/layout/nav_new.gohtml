@@ -24,17 +24,16 @@
 
             <!-- 已登录状态 -->
             {{if and .User (gt .User.UserId 0)}}
-                <div class="user-actions" id="userActions" {{/*style="display: none;"*/}}>
-                    <a href="/post/new" class="btn btn-publish">发布</a>
-                    <div class="notifications">
-                        <a href="/notifications" class="notification-icon">
-                            <span class="notification-count">3</span>
-                            📬
-                        </a>
-                    </div>
+                <div class="user-actions" id="userActions">
+                    <a href="/post/new" class="btn btn-primary">发布</a>
+                    <a href="/notifications" class="notification-link">
+                        <span class="notification-dot"></span>📬
+                    </a>
                     <div class="user-menu">
-                        <img src="{{.User.AvatarUrl}}" alt="用户头像" class="user-avatar">
-                        <span class="username">{{.User.Username}}</span>
+                        <button class="user-menu-btn">
+                            <img src="{{.User.AvatarUrl}}" alt="{{.User.Username}}" class="user-avatar">
+                            <span class="username">{{.User.Username}}</span>
+                        </button>
                         <div class="dropdown-menu">
                             <a href="/user/profile">个人主页</a>
                             <a href="/user/settings">设置</a>

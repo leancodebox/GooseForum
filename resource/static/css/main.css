@@ -539,11 +539,71 @@ footer {
     padding: 0.75rem;
 }
 
-.author-avatar {
-    width: 64px;
-    height: 64px;
+.user-menu {
+    position: relative;
+    cursor: pointer;
+}
+
+.user-avatar {
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    margin: 0 auto 0.75rem;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem 0;
+    min-width: 150px;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.notification-link {
+    position: relative;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    transition: color 0.2s;
+}
+
+.notification-link:hover {
+    color: var(--primary-color);
+}
+
+.notification-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+}
+
+.user-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.user-menu-btn:hover {
+    background: var(--light-gray);
 }
 
 .author-stats {
