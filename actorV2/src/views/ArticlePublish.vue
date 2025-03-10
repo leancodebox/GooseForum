@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import { ref } from 'vue';
+import { NInput, NSelect, NButton } from 'naive-ui'; // 引入 Naive UI 组件
 import {mavonEditor} from 'mavon-editor'
-import 'mavon-editor/dist/css/index.css'
-
+import 'mavon-editor/dist/css/index.css';
 
 const title = ref<string>('');
 const type = ref<string>('');
@@ -25,7 +25,6 @@ const submitArticle = () => {
   content.value = '';
 };
 
-
 </script>
 <template>
   <div>
@@ -33,34 +32,41 @@ const submitArticle = () => {
     <form @submit.prevent="submitArticle">
       <div>
         <label for="title">标题:</label>
-        <input type="text" v-model="title" required/>
+        <n-input v-model:value="title" required placeholder="请输入标题" />
       </div>
       <div>
         <label for="type">类型:</label>
-        <select v-model="type" required>
-          <option value="blog">博客</option>
-          <option value="news">新闻</option>
-          <option value="tutorial">教程</option>
-        </select>
+        <n-select
+          v-model:value="type"
+          :options="[
+            { label: '博客', value: 'blog' },
+            { label: '新闻', value: 'news' },
+            { label: '教程', value: 'tutorial' }
+          ]"
+          required
+        />
       </div>
       <div>
         <label for="categories">分类:</label>
-        <v-select
-            v-model="selectedCategories"
-            :options="categories"
-            multiple
-            required
+        <n-select
+          v-model="selectedCategories"
+          :options="[
+            { label: '博客', value: 'blog' },
+            { label: '新闻', value: 'news' },
+            { label: '教程', value: 'tutorial' }
+          ]"
+          multiple
+          required
         />
       </div>
       <div>
         <label for="content">内容:</label>
-        <mavon-editor style="width:100%;height: 100%;min-height: 600px;max-height: 600px;z-index: 0"  required></mavon-editor>
+        <mavon-editor style="width:100%;height: 100%;min-height: 600px;max-height: 600px;z-index: 0" required></mavon-editor>
       </div>
-      <button type="submit">发布</button>
+      <n-button :type="'default'">发布</n-button>
     </form>
   </div>
 </template>
-
 
 <style scoped>
 /* 添加一些样式 */
