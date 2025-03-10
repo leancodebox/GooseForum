@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
 import {NButton, NInput, NSelect} from 'naive-ui'; // 引入 Naive UI 组件
-import {mavonEditor} from 'mavon-editor';
-import 'mavon-editor/dist/css/index.css';
+
 import {getArticleEnum, getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
-import type {ArticleInfo, ArticleResponse, EnumInfoResponse} from '@/types/articleInterfaces'; // 使用 type 导入接口
+import type {ArticleInfo, ArticleResponse, EnumInfoResponse} from '@/types/articleInterfaces';
+import MarkdownEdit from "@/components/MarkdownEdit.vue"; // 使用 type 导入接口
 
 const router = useRouter()
 const route = useRoute()
@@ -125,10 +125,10 @@ async function getOriginData() {
       <div class="form-group">
         <label for="content">内容:</label>
 
-        <mavon-editor style="min-height: 600px; max-height: 600px;  z-index: 0;"
+        <markdown-edit style="min-height: 600px; max-height: 600px;  z-index: 0;"
                       v-model="articleData.articleContent"
                       :ishljs="true"
-                      required></mavon-editor>
+                      required></markdown-edit>
       </div>
       <n-button :type="'default'" class="submit-button" @click="submitArticleHandler">发布</n-button>
     </form>
