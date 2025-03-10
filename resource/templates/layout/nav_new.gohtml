@@ -26,7 +26,7 @@
             {{if and .User (gt .User.UserId 0)}}
                 <div class="user-actions" id="userActions">
                     <a href="/app/post-edit" class="btn btn-primary">发布</a>
-                    <a href="/notifications" class="notification-link">
+                    <a href="/app/notifications" class="notification-link">
                         <span class="notification-dot"></span>📬
                     </a>
                     <div class="user-menu">
@@ -51,9 +51,9 @@
 
             <!-- 移动端用户头像 -->
             {{if and .User (gt .User.UserId 0)}}
-            <div class="mobile-header-avatar">
-                <img src="{{.User.AvatarUrl}}" alt="{{.User.Username}}" class="mobile-nav-avatar">
-            </div>
+                <div class="mobile-header-avatar">
+                    <img src="{{.User.AvatarUrl}}" alt="{{.User.Username}}" class="mobile-nav-avatar">
+                </div>
             {{end}}
             <!-- 移动端菜单按钮 -->
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
@@ -76,7 +76,7 @@
             <a href="/post" class="mobile-link">文章</a>
             {{if and .User (gt .User.UserId 0)}}
                 <a href="/app/post-edit" class="mobile-link">发布</a>
-                <a href="/notifications" class="mobile-link">消息</a>
+                <a href="/app/notifications" class="mobile-link">消息</a>
                 <a href="/user/profile" class="mobile-link">个人主页</a>
                 <a href="/user/settings" class="mobile-link">设置</a>
                 <a href="#" onclick="handleLogout()" class="mobile-link">退出</a>
@@ -89,6 +89,50 @@
 </header>
 
 <style>
+    header {
+        background-color: var(--header-bg);
+        box-shadow: 0 2px 4px var(--shadow-color);
+        padding: 0 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    nav {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        text-decoration: none;
+        margin: 0 0.5rem;
+        letter-spacing: -1px;
+    }
+
+    .logo span {
+        font-weight: bold;
+    }
+
+    nav a {
+        color: var(--text-color);
+        text-decoration: none;
+        padding: 0.5rem 0.5rem;
+        margin: 0 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    nav a:hover {
+        background-color: var(--light-gray);
+        color: var(--primary-color);
+    }
+
     .nav-container {
         position: relative;
         display: flex;
@@ -174,26 +218,6 @@
     .btn-auth:hover {
         background: var(--primary-color);
         color: white;
-    }
-
-    .btn-publish {
-        background: var(--secondary-color);
-        color: white;
-    }
-
-    .notifications {
-        position: relative;
-    }
-
-    .notification-count {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: red;
-        color: white;
-        border-radius: 50%;
-        padding: 2px 6px;
-        font-size: 12px;
     }
 
     .user-menu {
@@ -377,7 +401,7 @@
     }
 
     // 点击菜单外区域关闭菜单
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         const mobileMenu = document.getElementById('mobileMenu');
         const menuBtn = document.querySelector('.mobile-menu-btn');
 
@@ -387,7 +411,7 @@
     });
 
     // 窗口大小改变时处理菜单状态
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
         const mobileMenu = document.getElementById('mobileMenu');
         if (window.innerWidth > 768 && mobileMenu.classList.contains('active')) {
             toggleMobileMenu();

@@ -47,22 +47,22 @@ export const submitArticle = async <T>(article: any): Promise<T> => {
 
 // Mock 获取用户信息
 export const getUserInfo = async () => {
-    // 模拟用户数据
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({
-                avatarUrl: '/file/img/avatars/avatar_1_1736935027/a93ee576-ff66-442a-8def-ac52e56872a3.png',
-                bio: '',
-                email: 'abandon1a2b@outlook.com',
-                isAdmin: true,
-                nickname: '昵称昵称妮妮称',
-                signature: '',
-                userId: 1,
-                username: 'abandon',
-                website: ''
-            });
-        }, 1); // 模拟网络延迟
-    });
+    // // 模拟用户数据
+    // return new Promise((resolve) => {
+    //     setTimeout(() => {
+    //         resolve({
+    //             avatarUrl: '/file/img/avatars/avatar_1_1736935027/a93ee576-ff66-442a-8def-ac52e56872a3.png',
+    //             bio: '',
+    //             email: 'abandon1a2b@outlook.com',
+    //             isAdmin: true,
+    //             nickname: '昵称昵称妮妮称',
+    //             signature: '',
+    //             userId: 1,
+    //             username: 'abandon',
+    //             website: ''
+    //         });
+    //     }, 1); // 模拟网络延迟
+    // });
 
     try {
         return axiosInstance.get("/get-user-info")

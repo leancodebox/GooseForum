@@ -24,3 +24,8 @@ export interface NameLabel {
   name: string;
   value: number;
 }
+
+export interface Result<T> {
+  code: number;
+  result: T;
+}

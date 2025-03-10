@@ -63,6 +63,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
+  font-size: 16px;
   color: var(--text-color);
   margin: 0;
   padding: 0;
@@ -70,50 +71,6 @@ body {
   display: flex;
   flex-direction: column;
   background-color: var(--bg-color);
-}
-
-header {
-  background-color: var(--header-bg);
-  box-shadow: 0 2px 4px var(--shadow-color);
-  padding: 0 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-nav {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  display: flex;
-  align-items: center;
-}
-
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--primary-color);
-  text-decoration: none;
-  margin: 0 0.5rem;
-  letter-spacing: -1px;
-}
-
-.logo span {
-  font-weight: bold;
-}
-
-nav a {
-  color: var(--text-color);
-  text-decoration: none;
-  padding: 0.5rem 0.5rem;
-  margin: 0 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-nav a:hover {
-  background-color: var(--light-gray);
-  color: var(--primary-color);
 }
 
 main {
@@ -340,69 +297,6 @@ footer {
   margin-top: 2rem;
   text-align: center;
 }
-
-.comment-btn {
-  position: relative; /* 伪元素定位参考 */
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-  overflow: hidden;  /* 隐藏伪元素溢出 */
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  z-index: 1;        /* 确保内容在伪元素上方 */
-}
-
-/* 初始背景层 */
-.comment-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: linear-gradient(135deg, #ff8075 0%, #7cc75d 100%);
-  transition: opacity 0.3s ease; /* 控制渐变的过渡 */
-  z-index: -1; /* 置于内容下方 */
-}
-
-/* 悬停时的渐变层 */
-.comment-btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: linear-gradient(135deg, #7cc75d 0%, #ff8075 100%);
-  opacity: 0; /* 初始隐藏 */
-  transition: opacity 2s ease;
-  z-index: -1;
-}
-
-/* 悬停时切换渐变 */
-.comment-btn:hover::before {
-  transition: opacity 2s ease 1s; /* 延迟0.1秒淡出 */
-  opacity: 0; /* 原背景淡出 */
-}
-
-.comment-btn:hover::after {
-  transition: opacity 2s ease 0s; /* 立即淡入 */
-  opacity: 1; /* 新背景淡入 */
-}
-
-.comment-btn:hover {
-  color: white;
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.comment-btn .arrow {
-  margin-left: 0.5rem;
-  font-size: 1.2em;
-}
-
 /* 主页特定样式 */
 .hero {
   text-align: center;
@@ -906,34 +800,6 @@ a:hover {
   color: var(--primary-color);
 }
 
-
-/* 用户信息样式 */
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.user-info:hover {
-  background-color: var(--light-gray);
-}
-
-.user-avatar-small {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.username {
-  color: var(--text-color);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
 /* Markdown 内容的主题适配 */
 .markdown-body {
   box-sizing: border-box;
@@ -1023,4 +889,31 @@ a:hover {
 [data-theme="dark"] .markdown-body table th,
 [data-theme="dark"] .markdown-body table td {
   border-color: var(--border-color);
+}
+
+/* 用户信息样式 */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.user-info:hover {
+  background-color: var(--light-gray);
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.username {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 500;
 }

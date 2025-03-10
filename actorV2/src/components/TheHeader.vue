@@ -113,10 +113,10 @@ window.addEventListener('resize', function () {
 
         <!-- 已登录状态 -->
         <div class="user-actions" v-if="userStore.userInfo">
-          <a href="/app/post-edit" class="btn btn-primary">发布</a>
-          <a href="/notifications" class="notification-link">
+          <router-link to="/post-edit"  class="btn btn-primary">发布</router-link>
+          <router-link to="/notifications" class="notification-link">
             <span class="notification-dot"></span>📬
-          </a>
+          </router-link>
           <div class="user-menu" v-if="userStore.userInfo">
             <button class="user-menu-btn">
               <img :src="userStore.userInfo.avatarUrl" alt="" class="user-avatar">
@@ -155,8 +155,8 @@ window.addEventListener('resize', function () {
         </div>
         <a href="/" class="mobile-link">首页</a>
         <a href="/post" class="mobile-link">文章</a>
-        <a href="/app/post-edit" class="mobile-link">发布</a>
-        <a href="/notifications" class="mobile-link">消息</a>
+        <router-link to="/post-edit" class="mobile-link">发布</router-link>
+        <router-link to="/notifications"  class="mobile-link">消息</router-link>
         <a href="/user/profile" class="mobile-link">个人主页</a>
         <a href="/user/settings" class="mobile-link">设置</a>
         <a href="#" onclick="handleLogout()" class="mobile-link">退出</a>
@@ -168,6 +168,49 @@ window.addEventListener('resize', function () {
 </template>
 
 <style scoped>
+header {
+  background-color: var(--header-bg);
+  box-shadow: 0 2px 4px var(--shadow-color);
+  padding: 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+nav {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  text-decoration: none;
+  margin: 0 0.5rem;
+  letter-spacing: -1px;
+}
+
+.logo span {
+  font-weight: bold;
+}
+
+nav a {
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 0.5rem 0.5rem;
+  margin: 0 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+nav a:hover {
+  background-color: var(--light-gray);
+  color: var(--primary-color);
+}
 .nav-container {
   position: relative;
   display: flex;

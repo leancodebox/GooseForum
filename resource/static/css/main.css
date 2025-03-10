@@ -19,6 +19,14 @@
     --input-bg-color: white;
     --hover-color: #f0f0f0;
     --primary-color-dark: #e85d50;
+    /* 添加缺失的 CSS 变量 */
+    --color-background: var(--bg-color); /* 背景颜色 */
+    --color-background-soft: #f9f9f9; /* 柔和背景颜色 */
+    --color-heading: #333333; /* 标题颜色 */
+    --color-text: #666666; /* 主要文本颜色 */
+    --color-text-light: #999999; /* 次要文本颜色 */
+    --color-primary: #ff6f61; /* 主要颜色 */
+    --color-border: #eaeaea; /* 边框颜色 */
 }
 
 /* 深色主题变量 */
@@ -42,11 +50,20 @@
     --input-bg-color: #333;
     --hover-color: #363636;
     --primary-color-dark: #cc6b60;
+    /* 添加深色主题下的缺失 CSS 变量 */
+    --color-background: var(--bg-color); /* 背景颜色 */
+    --color-background-soft: #2b2b2b; /* 柔和背景颜色 */
+    --color-heading: #e1e1e1; /* 标题颜色 */
+    --color-text: #e1e1e1; /* 主要文本颜色 */
+    --color-text-light: #aaaaaa; /* 次要文本颜色 */
+    --color-primary: #ff8075; /* 主要颜色 */
+    --color-border: #404040; /* 边框颜色 */
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.6;
+    font-size: 16px;
     color: var(--text-color);
     margin: 0;
     padding: 0;
@@ -54,50 +71,6 @@ body {
     display: flex;
     flex-direction: column;
     background-color: var(--bg-color);
-}
-
-header {
-    background-color: var(--header-bg);
-    box-shadow: 0 2px 4px var(--shadow-color);
-    padding: 0 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-nav {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary-color);
-    text-decoration: none;
-    margin: 0 0.5rem;
-    letter-spacing: -1px;
-}
-
-.logo span {
-    font-weight: bold;
-}
-
-nav a {
-    color: var(--text-color);
-    text-decoration: none;
-    padding: 0.5rem 0.5rem;
-    margin: 0 0.5rem;
-    border-radius: 4px;
-    transition: all 0.2s;
-}
-
-nav a:hover {
-    background-color: var(--light-gray);
-    color: var(--primary-color);
 }
 
 main {
@@ -276,6 +249,7 @@ main {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--border-color);
 }
+
 .article-detail .article-content {
     padding: 5px;
 }
@@ -323,68 +297,6 @@ footer {
 .comment-action {
     margin-top: 2rem;
     text-align: center;
-}
-
-.comment-btn {
-  position: relative; /* 伪元素定位参考 */
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-  overflow: hidden;  /* 隐藏伪元素溢出 */
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  z-index: 1;        /* 确保内容在伪元素上方 */
-}
-
-/* 初始背景层 */
-.comment-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: linear-gradient(135deg, #ff8075 0%, #7cc75d 100%);
-  transition: opacity 0.3s ease; /* 控制渐变的过渡 */
-  z-index: -1; /* 置于内容下方 */
-}
-
-/* 悬停时的渐变层 */
-.comment-btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: linear-gradient(135deg, #7cc75d 0%, #ff8075 100%);
-  opacity: 0; /* 初始隐藏 */
-  transition: opacity 2s ease;
-  z-index: -1;
-}
-
-/* 悬停时切换渐变 */
-.comment-btn:hover::before {
-    transition: opacity 2s ease 1s; /* 延迟0.1秒淡出 */
-  opacity: 0; /* 原背景淡出 */
-}
-
-.comment-btn:hover::after {
-    transition: opacity 2s ease 0s; /* 立即淡入 */
-  opacity: 1; /* 新背景淡入 */
-}
-
-.comment-btn:hover {
-  color: white;
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.comment-btn .arrow {
-    margin-left: 0.5rem;
-    font-size: 1.2em;
 }
 
 /* 主页特定样式 */
@@ -941,10 +853,10 @@ a:hover {
     --color-canvas-subtle: var(--light-gray);
     --color-border-default: var(--border-color);
     --color-border-muted: var(--border-color);
-    --color-neutral-muted: rgba(110,118,129,0.4);
+    --color-neutral-muted: rgba(110, 118, 129, 0.4);
     --color-accent-fg: #2f81f7;
     --color-accent-emphasis: #1f6feb;
-    --color-attention-subtle: rgba(187,128,9,0.15);
+    --color-attention-subtle: rgba(187, 128, 9, 0.15);
     --color-danger-fg: #f85149;
 }
 

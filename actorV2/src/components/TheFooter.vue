@@ -6,7 +6,7 @@ const footerLink = [{
 }, {
   type: 'a',
   url: '/',
-  text: '备案号备案号备案号'
+  text: 'Goos'
 }]
 </script>
 
