@@ -72,9 +72,6 @@ func viewRoute(ginApp *gin.Engine) {
 	view.GET("/notifications", middleware.CheckLogin, controllers.Notifications)
 	view.GET("/user-profile", controllers.UserProfile)
 	view.GET("/sponsors", controllers.Sponsors)
-
-	// 这个页面要移动到前后分离，
-	view.GET("/post-edit", middleware.CheckLogin, controllers.PostEdit)
 }
 
 func bbs(ginApp *gin.Engine) {

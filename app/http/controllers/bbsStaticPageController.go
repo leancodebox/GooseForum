@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
-	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
@@ -279,21 +278,7 @@ func LoginPage(c *gin.Context) {
 func Notifications(c *gin.Context) {
 	c.HTML(http.StatusNotFound, "notifications.gohtml", gin.H{"title": "消息通知 - GooseForum", "User": GetLoginUser(c)})
 }
-func PostEdit(c *gin.Context) {
-	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
-		return datastruct.Option[string, uint64]{
-			Name:  t.Category,
-			Value: t.Id,
-		}
-	})
-	c.HTML(http.StatusNotFound, "post_edit.gohtml",
-		gin.H{
-			"title":    "发布文章 - GooseForum",
-			"User":     GetLoginUser(c),
-			"Category": res,
-			"TypeList": articlesType,
-		})
-}
+
 func UserProfile(c *gin.Context) {
 	c.HTML(http.StatusNotFound, "user_profile.gohtml", gin.H{"title": "用户主页 - GooseForum", "User": GetLoginUser(c)})
 }
