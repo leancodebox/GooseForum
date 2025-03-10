@@ -147,7 +147,8 @@ async function getOriginData() {
       </div>
       <div class="form-group">
         <label for="content">内容:</label>
-        <mavon-editor style="min-height: 600px; max-height: 600px;min-width: 300px;z-index: 0;"
+
+        <mavon-editor style="min-height: 600px; max-height: 600px;  z-index: 0;"
                       v-model="articleData.articleContent"
                       :ishljs="true"
                       required></mavon-editor>

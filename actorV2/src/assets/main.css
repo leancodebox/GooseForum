@@ -906,13 +906,38 @@ a:hover {
   color: var(--primary-color);
 }
 
+
+/* 用户信息样式 */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.user-info:hover {
+  background-color: var(--light-gray);
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.username {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 /* Markdown 内容的主题适配 */
 .markdown-body {
   box-sizing: border-box;
-  min-width: 200px;
-  max-width: 980px;
   margin: 0 auto;
-  padding: 45px;
   color: var(--text-color);
   background-color: var(--card-bg);
 }
@@ -998,31 +1023,4 @@ a:hover {
 [data-theme="dark"] .markdown-body table th,
 [data-theme="dark"] .markdown-body table td {
   border-color: var(--border-color);
-}
-
-/* 用户信息样式 */
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.user-info:hover {
-  background-color: var(--light-gray);
-}
-
-.user-avatar-small {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.username {
-  color: var(--text-color);
-  font-size: 0.9rem;
-  font-weight: 500;
 }
