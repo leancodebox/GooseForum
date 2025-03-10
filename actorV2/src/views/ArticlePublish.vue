@@ -74,6 +74,13 @@ onMounted(async () => {
 // 更新 getOriginData 函数的类型
 async function getOriginData() {
   const id = route.query.id;
+
+  // 确保 id 是字符串类型
+  if (Array.isArray(id)) {
+    console.error('ID should be a string, but received an array:', id);
+    return;
+  }
+
   if (!id) return;
 
   try {
@@ -81,11 +88,11 @@ async function getOriginData() {
     if (res.code === 0 && res.result) {
       articleData.value.articleTitle = res.result.articleTitle;
       articleData.value.articleContent = res.result.articleContent;
-      articleData.value.categoryId = res.result.categoryId
-      articleData.value.type = res.result.type
-      articleData.value.id = parseInt(id)
+      articleData.value.categoryId = res.result.categoryId;
+      articleData.value.type = res.result.type;
+      articleData.value.id = parseInt(id); // 这里 id 确保是字符串
     }
-    console.log(articleData.value)
+    console.log(articleData.value);
   } catch (err) {
     console.error('获取文章数据失败:', err);
   }
