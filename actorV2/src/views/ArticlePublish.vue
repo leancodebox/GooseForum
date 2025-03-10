@@ -54,7 +54,7 @@ const submitArticle = () => {
       </div>
       <div>
         <label for="content">内容:</label>
-        <mavon-editor style="width:100%;height: 100%;min-height: 600px;max-height: 600px"  required></mavon-editor>
+        <mavon-editor style="width:100%;height: 100%;min-height: 600px;max-height: 600px;z-index: 0"  required></mavon-editor>
       </div>
       <button type="submit">发布</button>
     </form>
