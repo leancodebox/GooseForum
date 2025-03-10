@@ -5,38 +5,10 @@ import {mavonEditor} from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
 import {getArticleEnum, getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
-
-
-interface ArticleInfo {
-  id: number,
-  articleContent: string;
-  articleTitle: string;
-  categoryId: number[];
-  type: number;
-}
-
-// 在文件顶部添加接口定义
-interface ArticleResponse {
-  code: number;
-  result: ArticleInfo;
-}
-
-interface EnumInfoResponse {
-  code: number;
-  result: {
-    category: NameLabel[];
-    type: NameLabel[];
-  };
-}
-
-interface NameLabel {
-  name: string;
-  value: number;
-}
+import { ArticleInfo, ArticleResponse, EnumInfoResponse } from '@/types/articleInterfaces'; // 导入接口
 
 const router = useRouter()
 const route = useRoute()
-
 
 const articleData = ref<ArticleInfo>({
   id: 0,
@@ -56,7 +28,6 @@ const typeList = ref([
   {label: '新闻', value: 2},
   {label: '教程', value: 3}
 ]);
-
 
 const submitArticleHandler = async () => {
   console.log(articleData.value)
