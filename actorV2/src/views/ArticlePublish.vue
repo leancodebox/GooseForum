@@ -6,7 +6,6 @@ import 'mavon-editor/dist/css/index.css';
 import {getArticleEnum, getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
 import type {ArticleInfo, ArticleResponse, EnumInfoResponse} from '@/types/articleInterfaces'; // 使用 type 导入接口
-import axios from 'axios';
 
 const router = useRouter()
 const route = useRoute()
@@ -92,7 +91,6 @@ async function getOriginData() {
       articleData.value.type = res.result.type;
       articleData.value.id = parseInt(id); // 这里 id 确保是字符串
     }
-    console.log(articleData.value);
   } catch (err) {
     console.error('获取文章数据失败:', err);
   }
