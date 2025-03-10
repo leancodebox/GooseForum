@@ -17,6 +17,9 @@ const articleData = ref<ArticleInfo>({
   categoryId: [],
   type: 0
 })
+
+const isSubmitting = ref(false); // 用于跟踪提交状态
+
 const categories = ref([
   {label: '博客', value: 1},
   {label: '新闻', value: 2},
@@ -30,6 +33,9 @@ const typeList = ref([
 ]);
 
 const submitArticleHandler = async () => {
+  if (isSubmitting.value) return; // 如果正在提交，直接返回
+  isSubmitting.value = true; // 设置为正在提交状态
+
   try {
     const response = await submitArticle<ArticleResponse>(articleData.value);
     if (response.code !== 0) {
@@ -39,11 +45,13 @@ const submitArticleHandler = async () => {
 
     // 跳转到新发布的文章地址
      // 替换为实际的服务器地址
-    window.location.href = `/post/${response.result.id}`; // 使用 window.location.href 进行跳转
+    window.location.href = `/post/${response.result}`; // 使用 window.location.href 进行跳转
 
   } catch (error) {
     console.error(error);
 
+  } finally {
+    isSubmitting.value = false; // 提交完成后重置状态
   }
 };
 
@@ -133,7 +141,7 @@ async function getOriginData() {
 <!--                              :ishljs="true"-->
 <!--                              required></markdown-edit-toast>-->
       </div>
-      <n-button :type="'default'" class="submit-button" @click="submitArticleHandler">发布</n-button>
+      <n-button :type="'default'" class="submit-button" @click="submitArticleHandler" :disabled="isSubmitting">发布</n-button>
     </form>
   </div>
 </template>
