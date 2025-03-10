@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {ref} from 'vue';
-import VSelect from 'vue-select';
-import {MavonEditor} from 'mavon-editor';
+import {mavonEditor} from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 
 
@@ -55,7 +54,7 @@ const submitArticle = () => {
       </div>
       <div>
         <label for="content">内容:</label>
-        <mavon-editor v-model="content" required></mavon-editor>
+        <mavon-editor style="width:100%;height: 100%;min-height: 600px;max-height: 600px"  required></mavon-editor>
       </div>
       <button type="submit">发布</button>
     </form>
