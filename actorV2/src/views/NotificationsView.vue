@@ -161,66 +161,43 @@ onMounted(() => {
 
 .notification-item {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: flex-start;
 }
 
 .notification-icon {
-  font-size: 1.5rem;
-  min-width: 32px;
-}
-
-.notification-content {
-  flex: 1;
+  font-size: 1.2rem;
+  min-width: 24px;
+  padding-top: 2px;
 }
 
 .notification-content h3 {
-  margin: 0 0 8px 0;
-  font-size: 1rem;
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-color);
 }
 
 .notification-content p {
   margin: 0;
+  font-size: 0.9rem;
   color: var(--text-color-light);
 }
 
 .notification-time {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-color-light);
   display: block;
-  margin-top: 8px;
+  margin-top: 4px;
+}
+
+.n-card {
+  margin-bottom: 8px;
+  padding: 12px;
 }
 
 .notification-actions {
   margin-left: auto;
-}
-
-.unread {
-  border-left: 3px solid var(--primary-color);
-}
-
-.pagination-wrapper {
-  margin-top: 24px;
-  padding: 16px;
-  background-color: var(--card-bg);
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: center;
-}
-
-/* 移除旧的分页样式 */
-.pagination {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-}
-
-.n-card {
-  margin-bottom: 12px;
-}
-
-.n-tabs {
-  margin-bottom: 20px;
+  padding-left: 12px;
 }
 </style>
