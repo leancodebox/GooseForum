@@ -22,7 +22,6 @@ onMounted(() => {
   // 设置初始图标
   const themeIcon = document.querySelector('.theme-icon');
   themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
-  userStore.fetchUserInfo();
 })
 
 const toggleMenu = () => {
@@ -88,15 +87,14 @@ function toggleMobileMenu() {
 
         <!-- 已登录状态 -->
         <div class="user-actions" v-if="userStore.userInfo">
-          <span class="username">{{ userStore.userInfo.username }}</span>
           <a href="/post-edit" class="btn btn-primary">发布</a>
           <a href="/notifications" class="notification-link">
             <span class="notification-dot"></span>📬
           </a>
-          <div class="user-menu" v-if="false">
+          <div class="user-menu" v-if="userStore.userInfo">
             <button class="user-menu-btn">
-              <img src="" alt="" class="user-avatar" >
-              <span class="username">false</span>
+              <img :src="userStore.userInfo.avatarUrl" alt="" class="user-avatar" >
+              <span class="username">{{ userStore.userInfo.username }}</span>
             </button>
             <div class="dropdown-menu">
               <a href="/user/profile">个人主页</a>

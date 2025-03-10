@@ -28,11 +28,11 @@ export default defineConfig({
       }
     }
   },
-
   server: {
     // 如果使用docker-compose开发模式，设置为false
     proxy: {
       '^/api/.*':'http://localhost:99',
+      '^/file/img/.*':'http://localhost:99',
     }
   },
 })
