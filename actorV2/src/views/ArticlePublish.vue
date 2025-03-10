@@ -6,15 +6,18 @@ import 'mavon-editor/dist/css/index.css';
 import {getArticleEnum, getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
 
+
+interface ArticleInfo {
+  articleContent: string;
+  articleTitle: string;
+  categoryId: number[];
+  type: number;
+}
+
 // 在文件顶部添加接口定义
 interface ArticleResponse {
   code: number;
-  result: {
-    articleContent: string;
-    articleTitle: string;
-    categoryId: number[];
-    type: string;
-  };
+  result: ArticleInfo;
 }
 
 interface EnumInfoResponse {
@@ -24,6 +27,7 @@ interface EnumInfoResponse {
     type: NameLabel[];
   };
 }
+
 interface NameLabel {
   name: string;
   value: number;
@@ -31,10 +35,14 @@ interface NameLabel {
 
 const router = useRouter()
 const route = useRoute()
-const title = ref<string>('');
-const type = ref<string>('');
-const selectedCategories = ref<number[]>([]);
-const content = ref<string>('');
+
+
+const articleData = ref<ArticleInfo>({
+  articleContent: "",
+  articleTitle: "",
+  categoryId: [],
+  type: 0
+})
 const categories = ref([
   {label: '博客', value: 1},
   {label: '新闻', value: 2},
@@ -48,22 +56,17 @@ const typeList = ref([
 ]);
 
 const submitArticleHandler = async () => {
-  const article = {
-    id: 0, // 示例 ID，您可以根据需要生成或获取
-    title: title.value,
-    type: type.value,
-    categories: selectedCategories.value,
-    content: content.value,
-  };
+  console.log(articleData.value)
+  return
 
   try {
-    const response = await submitArticle(article);
+    const response = await submitArticle(articleData.value);
     console.log('文章提交成功:', response);
     // 清空表单
-    title.value = '';
-    type.value = '';
-    selectedCategories.value = [];
-    content.value = '';
+    articleData.value.articleTitle = '';
+    articleData.value.articleContent = '';
+    articleData.value.categoryId = [];
+    articleData.value.type = 0;
   } catch (error) {
     console.error(error);
   }
@@ -99,11 +102,12 @@ async function getOriginData() {
   try {
     const res = await getArticlesOrigin(id) as unknown as ArticleResponse; // 使用 unknown 进行类型转换
     if (res.code === 0 && res.result) {
-      title.value = res.result.articleTitle;
-      content.value = res.result.articleContent;
-      selectedCategories.value = res.result.categoryId
-      type.value = res.result.type
+      articleData.value.articleTitle = res.result.articleTitle;
+      articleData.value.articleContent = res.result.articleContent;
+      articleData.value.categoryId = res.result.categoryId
+      articleData.value.type = res.result.type
     }
+    console.log(articleData.value)
   } catch (err) {
     console.error('获取文章数据失败:', err);
   }
@@ -116,12 +120,12 @@ async function getOriginData() {
     <form @submit.prevent="submitArticleHandler" class="form">
       <div class="form-group">
         <label for="title">标题:</label>
-        <n-input v-model:value="title" required placeholder="请输入标题"/>
+        <n-input v-model:value="articleData.articleTitle" required placeholder="请输入标题"/>
       </div>
       <div class="form-group">
         <label for="type">类型:</label>
         <n-select
-            v-model:value="type"
+            v-model:value="articleData.type"
             :options="typeList"
             required
         />
@@ -129,7 +133,7 @@ async function getOriginData() {
       <div class="form-group">
         <label for="categories">分类:</label>
         <n-select
-            v-model="selectedCategories"
+            v-model:value="articleData.categoryId"
             :options="categories"
             multiple
             required
@@ -138,10 +142,10 @@ async function getOriginData() {
       <div class="form-group">
         <label for="content">内容:</label>
         <mavon-editor style="width: 100%; height: 100%; min-height: 600px; max-height: 600px;z-index: 0;"
-                      v-model="content"
+                      v-model="articleData.articleContent"
                       required></mavon-editor>
       </div>
-      <n-button :type="'default'" class="submit-button">发布</n-button>
+      <n-button :type="'default'" class="submit-button" @click="submitArticleHandler">发布</n-button>
     </form>
   </div>
 </template>
