@@ -17,3 +17,10 @@ export const submitArticle = async (article: Article) => {
         throw new Error(`提交文章失败: ${error}`);
     }
 };
+
+export const getUserInfo = async () => {
+    try {
+        return axiosInstance.get("/api/get-user-info")
+    } catch (error) {
+    }
+}
