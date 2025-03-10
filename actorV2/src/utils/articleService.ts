@@ -1,14 +1,5 @@
 import axiosInstance from './axiosInstance';
 
-// 定义文章类型
-interface Article {
-    id: number,
-    title: string;
-    type: string;
-    categories: number[];
-    content: string;
-}
-
 export const getArticleEnum = async () => {
     try {
         return await axiosInstance.get('bbs/get-articles-enum')
@@ -28,9 +19,15 @@ export const getArticlesOrigin = async (id: any) => {
 }
 
 // 提交文章的函数
-export const submitArticle = async (article: Article) => {
+export const submitArticle = async (article: any) => {
     try {
-        return await axiosInstance.post('/bbs/write-articles', article); // 返回响应数据
+        return await axiosInstance.post('/bbs/write-articles', {
+            id: article.id,
+            content: article.articleContent,
+            title: article.articleTitle,
+            type: article.type,
+            categoryId: article.categoryId,
+        }); // 返回响应数据
     } catch (error) {
         throw new Error(`提交文章失败: ${error}`);
     }

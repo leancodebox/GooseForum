@@ -8,6 +8,7 @@ import {useRoute, useRouter} from "vue-router"
 
 
 interface ArticleInfo {
+  id: number,
   articleContent: string;
   articleTitle: string;
   categoryId: number[];
@@ -38,6 +39,7 @@ const route = useRoute()
 
 
 const articleData = ref<ArticleInfo>({
+  id: 0,
   articleContent: "",
   articleTitle: "",
   categoryId: [],
@@ -55,18 +57,21 @@ const typeList = ref([
   {label: '教程', value: 3}
 ]);
 
+
 const submitArticleHandler = async () => {
   console.log(articleData.value)
-  return
-
   try {
-    const response = await submitArticle(articleData.value);
-    console.log('文章提交成功:', response);
-    // 清空表单
-    articleData.value.articleTitle = '';
-    articleData.value.articleContent = '';
-    articleData.value.categoryId = [];
-    articleData.value.type = 0;
+    const response = await submitArticle(articleData.value) ;
+    if (response.code !== 0) {
+      alert("提交失败")
+      return
+    }
+
+    // articleData.value.articleTitle = '';
+    // articleData.value.articleContent = '';
+    // articleData.value.categoryId = [];
+    // articleData.value.type = 0;
+
   } catch (error) {
     console.error(error);
   }
@@ -106,6 +111,7 @@ async function getOriginData() {
       articleData.value.articleContent = res.result.articleContent;
       articleData.value.categoryId = res.result.categoryId
       articleData.value.type = res.result.type
+      articleData.value.id = parseInt(id)
     }
     console.log(articleData.value)
   } catch (err) {
@@ -141,8 +147,9 @@ async function getOriginData() {
       </div>
       <div class="form-group">
         <label for="content">内容:</label>
-        <mavon-editor style="width: 100%; height: 100%; min-height: 600px; max-height: 600px;z-index: 0;"
+        <mavon-editor style="min-height: 600px; max-height: 600px;min-width: 300px;z-index: 0;"
                       v-model="articleData.articleContent"
+                      :ishljs="true"
                       required></mavon-editor>
       </div>
       <n-button :type="'default'" class="submit-button" @click="submitArticleHandler">发布</n-button>
