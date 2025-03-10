@@ -113,7 +113,7 @@ window.addEventListener('resize', function () {
 
         <!-- 已登录状态 -->
         <div class="user-actions" v-if="userStore.userInfo">
-          <a href="/post-edit" class="btn btn-primary">发布</a>
+          <a href="/app/post-edit" class="btn btn-primary">发布</a>
           <a href="/notifications" class="notification-link">
             <span class="notification-dot"></span>📬
           </a>
@@ -155,7 +155,7 @@ window.addEventListener('resize', function () {
         </div>
         <a href="/" class="mobile-link">首页</a>
         <a href="/post" class="mobile-link">文章</a>
-        <a href="/post-edit" class="mobile-link">发布</a>
+        <a href="/app/post-edit" class="mobile-link">发布</a>
         <a href="/notifications" class="mobile-link">消息</a>
         <a href="/user/profile" class="mobile-link">个人主页</a>
         <a href="/user/settings" class="mobile-link">设置</a>
