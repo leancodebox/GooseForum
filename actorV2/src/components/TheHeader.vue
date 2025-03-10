@@ -18,6 +18,9 @@ onMounted(() => {
   const savedTheme = localStorage.getItem('theme') || 'light'
   theme.value = savedTheme
   document.documentElement.setAttribute('data-theme', savedTheme)
+  // 设置初始图标
+  const themeIcon = document.querySelector('.theme-icon');
+  themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
 })
 
 const toggleMenu = () => {
@@ -35,6 +38,24 @@ watch(
 const handleLogout = () => {
   // 处理退出登录逻辑
   console.log('Logout clicked');
+}
+function toggleMobileMenu() {
+  const mobileMenu = document.getElementById('mobileMenu');
+  mobileMenu.classList.toggle('active');
+
+  // 切换汉堡按钮样式
+  const menuBtn = document.querySelector('.mobile-menu-btn');
+  const spans = menuBtn.querySelectorAll('span');
+
+  if (mobileMenu.classList.contains('active')) {
+    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+  } else {
+    spans[0].style.transform = 'none';
+    spans[1].style.opacity = '1';
+    spans[2].style.transform = 'none';
+  }
 }
 </script>
 
@@ -59,7 +80,7 @@ const handleLogout = () => {
       <!-- 右侧功能区 -->
       <div class="nav-right">
         <!-- 主题切换按钮 -->
-        <button class="theme-switch" onclick="toggleTheme()" aria-label="切换主题">
+        <button class="theme-switch" @click="toggleTheme()" aria-label="切换主题">
           <span class="theme-icon">🌓</span>
         </button>
 
@@ -70,9 +91,9 @@ const handleLogout = () => {
           <a href="/notifications" class="notification-link">
             <span class="notification-dot"></span>📬
           </a>
-          <div class="user-menu">
+          <div class="user-menu" v-if="false">
             <button class="user-menu-btn">
-              <img src="" alt="" class="user-avatar">
+              <img src="" alt="" class="user-avatar" >
               <span class="username">false</span>
             </button>
             <div class="dropdown-menu">
