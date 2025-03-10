@@ -1,4 +1,5 @@
 import axiosInstance from './axiosInstance';
+import {enqueueMessage} from "@/utils/messageManager.ts";
 
 // 获取文章枚举
 export const getArticleEnum = async (): Promise<any> => {
@@ -31,6 +32,7 @@ export const submitArticle = async <T>(article: any): Promise<T> => {
             categoryId: article.categoryId,
         });
     } catch (error) {
+        enqueueMessage(`提交文章失败: ${error}`)
         throw new Error(`提交文章失败: ${error}`);
     }
 };

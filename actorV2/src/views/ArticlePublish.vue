@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
-import {NButton, NInput, NSelect} from 'naive-ui'; // 引入 Naive UI 组件
+import {NButton, NInput, NSelect,useMessage} from 'naive-ui'; // 引入 Naive UI 组件
 
 import {getArticleEnum, getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
@@ -10,6 +10,7 @@ import MarkdownEditToast from "@/components/MarkdownEditToast.vue"; // 使用 ty
 
 const router = useRouter()
 const route = useRoute()
+const message = useMessage()
 
 const articleData = ref<ArticleInfo>({
   id: 0,
@@ -31,11 +32,10 @@ const typeList = ref([
 ]);
 
 const submitArticleHandler = async () => {
-  console.log(articleData.value)
   try {
     const response = await submitArticle<ArticleResponse>(articleData.value);
     if (response.code !== 0) {
-      alert("提交失败")
+      message.error(response.message)
       return
     }
 
@@ -46,6 +46,7 @@ const submitArticleHandler = async () => {
 
   } catch (error) {
     console.error(error);
+
   }
 };
 

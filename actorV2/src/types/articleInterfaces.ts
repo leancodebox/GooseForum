@@ -9,6 +9,7 @@ export interface ArticleInfo {
 export interface ArticleResponse {
   code: number;
   result: ArticleInfo;
+  message: string;
 }
 
 export interface EnumInfoResponse {
@@ -22,4 +23,4 @@ export interface EnumInfoResponse {
 export interface NameLabel {
   name: string;
   value: number;
-} 
+}
