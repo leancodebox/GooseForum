@@ -12,6 +12,7 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@toast-ui/editor": "^3.2.2",
     "axios": "^1.8.2",
     "markdown-it": "^14.1.0",
     "mavon-editor": "^3.0.2",
