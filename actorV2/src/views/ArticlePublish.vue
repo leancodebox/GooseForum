@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { NInput, NSelect, NButton } from 'naive-ui'; // 引入 Naive UI 组件
-import { mavonEditor } from 'mavon-editor';
+import {ref,onMounted} from 'vue';
+import {NButton, NInput, NSelect} from 'naive-ui'; // 引入 Naive UI 组件
+import {mavonEditor} from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
-import { submitArticle } from '@/utils/articleService'; // 引入封装的文章发布接口
-
+import {getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
+import {useRoute, useRouter} from "vue-router"
+const router = useRouter()
+const route = useRoute()
 const title = ref<string>('');
 const type = ref<string>('');
 const selectedCategories = ref<string[]>([]);
 const content = ref<string>('');
 const categories = [
-  { label: '博客', value: 'blog' },
-  { label: '新闻', value: 'news' },
-  { label: '教程', value: 'tutorial' }
+  {label: '博客', value: 'blog'},
+  {label: '新闻', value: 'news'},
+  {label: '教程', value: 'tutorial'}
 ];
 
 const submitArticleHandler = async () => {
@@ -37,6 +39,44 @@ const submitArticleHandler = async () => {
   }
 };
 
+// 364
+onMounted(async () => {
+  // 获取分类选项
+  // 如果有 id 参数，说明是编辑模式
+  if (route.query.id) {
+    await getOriginData()
+  }
+})
+
+async function getOriginData() {
+  const id = route.query.id
+  if (!id) return
+
+  try {
+    const res = await getArticlesOrigin(id)
+    // if (res.code === 0 && res.result) {
+      console.log(res.result.articleContent)
+      console.log(res.result.articleTitle)
+      console.log(res.result.categoryId)
+      console.log(res.result.type)
+      // articlesData.value = {
+      //   ...articlesData.value,
+      //   id: parseInt(id),
+      //   title: res.result.articleTitle,
+      //   content: res.result.articleContent,
+      //   type: res.result.type,
+      //   categoryId: res.result.categoryId,
+      //   // 如果后端返回了分类和类型，也需要设置
+      //   // categoryId: res.result.categoryId,
+      //   // type: res.result.type,
+      // }
+    // }
+  } catch (err) {
+    console.error('获取文章数据失败:', err)
+
+  }
+}
+
 </script>
 <template>
   <div class="article-publish">
@@ -44,28 +84,29 @@ const submitArticleHandler = async () => {
     <form @submit.prevent="submitArticleHandler" class="form">
       <div class="form-group">
         <label for="title">标题:</label>
-        <n-input v-model:value="title" required placeholder="请输入标题" />
+        <n-input v-model:value="title" required placeholder="请输入标题"/>
       </div>
       <div class="form-group">
         <label for="type">类型:</label>
         <n-select
-          v-model:value="type"
-          :options="categories"
-          required
+            v-model:value="type"
+            :options="categories"
+            required
         />
       </div>
       <div class="form-group">
         <label for="categories">分类:</label>
         <n-select
-          v-model="selectedCategories"
-          :options="categories"
-          multiple
-          required
+            v-model="selectedCategories"
+            :options="categories"
+            multiple
+            required
         />
       </div>
       <div class="form-group">
         <label for="content">内容:</label>
-        <mavon-editor style="width:100%;height: 100%;min-height: 600px;max-height: 600px;z-index: 0" required></mavon-editor>
+        <mavon-editor style="width: 100%; height: 100%; min-height: 600px; max-height: 600px; z-index: 0;"
+                      required></mavon-editor>
       </div>
       <n-button :type="'default'" class="submit-button">发布</n-button>
     </form>

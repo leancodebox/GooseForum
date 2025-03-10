@@ -9,6 +9,16 @@ interface Article {
     content: string;
 }
 
+export const getArticlesOrigin = async (id: any) => {
+    try {
+        return await axiosInstance.post('/bbs/get-articles-origin', {
+            id: parseInt(id)
+        })
+    } catch (error) {
+        throw new Error(`提交文章失败: ${error}`);
+    }
+}
+
 // 提交文章的函数
 export const submitArticle = async (article: Article) => {
     try {
