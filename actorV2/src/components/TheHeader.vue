@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {ref, watch, onMounted} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
-import { useUserStore } from '@/stores/userStore'
+import {useUserStore} from '@/stores/userStore'
 
 const router = useRouter()
 const theme = ref('light')
@@ -21,7 +21,9 @@ onMounted(() => {
   document.documentElement.setAttribute('data-theme', savedTheme)
   // 设置初始图标
   const themeIcon = document.querySelector('.theme-icon');
-  themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+  if (themeIcon !== null) {
+    themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+  }
 })
 
 const toggleMenu = () => {
@@ -30,22 +32,29 @@ const toggleMenu = () => {
 
 // 监听路由变化，关闭菜单
 watch(
-  () => router.currentRoute.value.path,
-  () => {
-    isMenuOpen.value = false
-  }
+    () => router.currentRoute.value.path,
+    () => {
+      isMenuOpen.value = false
+    }
 )
 
 const handleLogout = () => {
   // 处理退出登录逻辑
   console.log('Logout clicked');
 }
+
 function toggleMobileMenu() {
   const mobileMenu = document.getElementById('mobileMenu');
+  if (mobileMenu === null) {
+    return
+  }
   mobileMenu.classList.toggle('active');
 
   // 切换汉堡按钮样式
   const menuBtn = document.querySelector('.mobile-menu-btn');
+  if (menuBtn === null) {
+    return
+  }
   const spans = menuBtn.querySelectorAll('span');
 
   if (mobileMenu.classList.contains('active')) {
@@ -58,6 +67,23 @@ function toggleMobileMenu() {
     spans[2].style.transform = 'none';
   }
 }
+
+document.addEventListener('click', function (event) {
+  const mobileMenu = document.getElementById('mobileMenu');
+  const menuBtn = document.querySelector('.mobile-menu-btn');
+
+  if (mobileMenu !== null && menuBtn !== null && !mobileMenu.contains(event.target) && !menuBtn.contains(event.target) && mobileMenu.classList.contains('active')) {
+    toggleMobileMenu();
+  }
+});
+
+// 窗口大小改变时处理菜单状态
+window.addEventListener('resize', function () {
+  const mobileMenu = document.getElementById('mobileMenu');
+  if (window.innerWidth > 768 && mobileMenu !== null && mobileMenu.classList.contains('active')) {
+    toggleMobileMenu();
+  }
+});
 </script>
 
 <template>
@@ -93,7 +119,7 @@ function toggleMobileMenu() {
           </a>
           <div class="user-menu" v-if="userStore.userInfo">
             <button class="user-menu-btn">
-              <img :src="userStore.userInfo.avatarUrl" alt="" class="user-avatar" >
+              <img :src="userStore.userInfo.avatarUrl" alt="" class="user-avatar">
               <span class="username">{{ userStore.userInfo.username }}</span>
             </button>
             <div class="dropdown-menu">
@@ -109,11 +135,11 @@ function toggleMobileMenu() {
         </div>
 
         <!-- 移动端用户头像 -->
-        <div class="mobile-header-avatar" v-if="false">
-          <img src="" alt="" class="mobile-nav-avatar">
+        <div class="mobile-header-avatar" v-if="userStore.userInfo">
+          <img :src="userStore.userInfo.avatarUrl" alt="" class="mobile-nav-avatar">
         </div>
         <!-- 移动端菜单按钮 -->
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <button class="mobile-menu-btn" @click="toggleMobileMenu">
           <span></span>
           <span></span>
           <span></span>
@@ -123,9 +149,9 @@ function toggleMobileMenu() {
       <!-- 移动端菜单 -->
       <div class="mobile-menu" id="mobileMenu">
         <!-- 移动端用户信息 -->
-        <div class="mobile-user-info">
-          <img src="" alt="" class="mobile-user-avatar">
-          <span class="mobile-username">12312</span>
+        <div class="mobile-user-info" v-if="userStore.userInfo">
+          <img :src="userStore.userInfo.avatarUrl" alt="" class="mobile-user-avatar">
+          <span class="mobile-username">{{ userStore.userInfo.username }}</span>
         </div>
         <a href="/" class="mobile-link">首页</a>
         <a href="/post" class="mobile-link">文章</a>
