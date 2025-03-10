@@ -33,6 +33,8 @@ export default defineConfig({
     proxy: {
       '^/api/.*':'http://localhost:99',
       '^/file/img/.*':'http://localhost:99',
+      '^/login':'http://localhost:99',
+      '^/static':'http://localhost:99',
     }
   },
 })
