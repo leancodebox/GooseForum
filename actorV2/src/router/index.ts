@@ -10,6 +10,11 @@ const router = createRouter({
       name: 'home',
       component: Empty,
     },
+    {
+      path: '/post-edit',
+      name: 'postEdit',
+      component: ()=>import('../views/ArticlePublish.vue'),
+    },
   ],
 })
 
