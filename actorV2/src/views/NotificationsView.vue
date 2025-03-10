@@ -123,18 +123,20 @@ onMounted(() => {
           </div>
         </div>
       </NCard>
+
+      <div class="pagination-wrapper" v-if="total > pageSize">
+        <NPagination
+          v-model:page="currentPage"
+          :page-size="pageSize"
+          :item-count="total"
+          :page-slot="5"
+          size="medium"
+          @update:page="handlePageChange"
+        />
+      </div>
     </div>
 
     <NEmpty v-else description="暂无通知消息" />
-
-    <div class="pagination" v-if="total > pageSize">
-      <NPagination
-        v-model:page="currentPage"
-        :page-size="pageSize"
-        :item-count="total"
-        @update:page="handlePageChange"
-      />
-    </div>
   </div>
 </template>
 
@@ -197,6 +199,17 @@ onMounted(() => {
   border-left: 3px solid var(--primary-color);
 }
 
+.pagination-wrapper {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: center;
+}
+
+/* 移除旧的分页样式 */
 .pagination {
   margin-top: 20px;
   display: flex;
