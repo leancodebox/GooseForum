@@ -97,7 +97,7 @@ onMounted(() => {
     <div class="notifications-list" v-if="notifications.length > 0">
       <NCard v-for="notification in notifications" 
              :key="notification.id" 
-             :class="{ 'unread': !notification.isRead }">
+             :class="{ 'unread': !notification.isRead, 'read': notification.isRead }">
         <div class="notification-item">
           <div class="notification-icon">
             {{ getNotificationIcon(notification.type) }}
@@ -141,63 +141,70 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.notifications-page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+.n-tabs {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.notifications-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.notifications-list {
+  margin-top: 12px;
 }
 
-.notifications-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
+.n-card {
+  margin-bottom: 4px;
+  transition: background-color 0.2s;
 }
 
 .notification-item {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: flex-start;
+}
+
+.read {
+  opacity: 0.8;
+  background-color: var(--card-bg);
+}
+
+.unread {
+  background-color: var(--color-background-soft);
+  border-left: 2px solid var(--primary-color);
 }
 
 .notification-icon {
   font-size: 1.2rem;
   min-width: 24px;
-  padding-top: 2px;
+}
+
+.notification-content {
+  flex: 1;
+  padding: 0;
 }
 
 .notification-content h3 {
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
   font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text-color);
+  line-height: 1.4;
 }
 
 .notification-content p {
   margin: 0;
-  font-size: 0.9rem;
-  color: var(--text-color-light);
+  line-height: 1.4;
 }
 
 .notification-time {
+  margin-top: 2px;
   font-size: 0.8rem;
-  color: var(--text-color-light);
-  display: block;
-  margin-top: 4px;
-}
-
-.n-card {
-  margin-bottom: 8px;
-  padding: 12px;
 }
 
 .notification-actions {
-  margin-left: auto;
-  padding-left: 12px;
+  margin-left: 8px;
+  padding-left: 8px;
+}
+
+.pagination-wrapper {
+  margin-top: 16px;
+  padding: 8px;
 }
 </style>
