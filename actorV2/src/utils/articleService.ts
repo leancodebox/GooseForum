@@ -9,6 +9,14 @@ interface Article {
     content: string;
 }
 
+export const getArticleEnum = async () => {
+    try {
+        return await axiosInstance.get('bbs/get-articles-enum')
+    } catch (error) {
+        throw new Error(`提交文章失败: ${error}`);
+    }
+}
+
 export const getArticlesOrigin = async (id: any) => {
     try {
         return await axiosInstance.post('/bbs/get-articles-origin', {

@@ -1,13 +1,23 @@
 <script setup lang="ts">
-import {ref,onMounted} from 'vue';
+import {onMounted, ref} from 'vue';
 import {NButton, NInput, NSelect} from 'naive-ui'; // 引入 Naive UI 组件
 import {mavonEditor} from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
-import {getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
+import {getArticleEnum, getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
 
 // 在文件顶部添加接口定义
 interface ArticleResponse {
+  code: number;
+  result: {
+    articleContent: string;
+    articleTitle: string;
+    categoryId: number[];
+    type: string;
+  };
+}
+
+interface EnumInfoResponse {
   code: number;
   result: {
     articleContent: string;
@@ -23,11 +33,17 @@ const title = ref<string>('');
 const type = ref<string>('');
 const selectedCategories = ref<number[]>([]);
 const content = ref<string>('');
-const categories = [
+const categories = ref([
   {label: '博客', value: 'blog'},
   {label: '新闻', value: 'news'},
   {label: '教程', value: 'tutorial'}
-];
+]);
+
+const typeList = ref([
+  {label: '博客', value: 'blog'},
+  {label: '新闻', value: 'news'},
+  {label: '教程', value: 'tutorial'}
+]);
 
 const submitArticleHandler = async () => {
   const article = {
@@ -55,6 +71,20 @@ const submitArticleHandler = async () => {
 onMounted(async () => {
   // 获取分类选项
   // 如果有 id 参数，说明是编辑模式
+  let enumInfo = await getArticleEnum() as unknown as EnumInfoResponse; // 使用 unknown 进行类型转换
+  console.log(enumInfo.result)
+  categories.value = enumInfo.result.category.map(item => {
+    return {
+      label: item.name,
+      value: item.value
+    }
+  })
+  typeList.value = enumInfo.result.type.map(item => {
+    return {
+      label: item.name,
+      value: item.value
+    }
+  })
   if (route.query.id) {
     await getOriginData()
   }
@@ -67,11 +97,7 @@ async function getOriginData() {
 
   try {
     const res = await getArticlesOrigin(id) as unknown as ArticleResponse; // 使用 unknown 进行类型转换
-    console.log(res)
     if (res.code === 0 && res.result) {
-      console.log(res.result.articleContent);
-      console.log(res.result.articleTitle);
-      console.log(res.result.categoryId);
       title.value = res.result.articleTitle;
       content.value = res.result.articleContent;
       selectedCategories.value = res.result.categoryId
@@ -95,7 +121,7 @@ async function getOriginData() {
         <label for="type">类型:</label>
         <n-select
             v-model:value="type"
-            :options="categories"
+            :options="typeList"
             required
         />
       </div>
