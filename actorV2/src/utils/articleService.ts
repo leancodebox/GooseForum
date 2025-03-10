@@ -1,25 +1,27 @@
 import axiosInstance from './axiosInstance';
 
-export const getArticleEnum = async () => {
+// 获取文章枚举
+export const getArticleEnum = async (): Promise<any> => {
     try {
-        return await axiosInstance.get('bbs/get-articles-enum')
+        return await axiosInstance.get('bbs/get-articles-enum');
     } catch (error) {
-        throw new Error(`提交文章失败: ${error}`);
+        throw new Error(`获取文章枚举失败: ${error}`);
     }
 }
 
-export const getArticlesOrigin = async (id: any) => {
+// 获取文章原始数据
+export const getArticlesOrigin = async (id: any): Promise<any> => {
     try {
         return await axiosInstance.post('/bbs/get-articles-origin', {
             id: parseInt(id)
-        })
+        });
     } catch (error) {
-        throw new Error(`提交文章失败: ${error}`);
+        throw new Error(`获取文章原始数据失败: ${error}`);
     }
 }
 
 // 提交文章的函数
-export const submitArticle = async (article: any) => {
+export const submitArticle = async <T>(article: any): Promise<T> => {
     try {
         return await axiosInstance.post('/bbs/write-articles', {
             id: article.id,
@@ -27,7 +29,7 @@ export const submitArticle = async (article: any) => {
             title: article.articleTitle,
             type: article.type,
             categoryId: article.categoryId,
-        }); // 返回响应数据
+        });
     } catch (error) {
         throw new Error(`提交文章失败: ${error}`);
     }
