@@ -84,15 +84,19 @@ onMounted(() => {
   <div class="notifications-page">
     <div class="notifications-header">
       <h1>消息通知</h1>
-      <NButton type="primary" @click="handleMarkAllAsRead">
-        全部标记为已读
-      </NButton>
     </div>
 
-    <NTabs v-model:value="activeTab" @update:value="handleTabChange">
-      <NTab name="all" tab="全部消息" />
-      <NTab name="unread" tab="未读消息" />
-    </NTabs>
+    <div class="notifications-actions">
+      <NTabs v-model:value="activeTab" @update:value="handleTabChange">
+        <NTab name="unread" tab="未读消息" />
+        <NTab name="all" tab="全部消息" />
+        <template #suffix>
+          <NButton type="primary" size="small" @click="handleMarkAllAsRead">
+            全部标记为已读
+          </NButton>
+        </template>
+      </NTabs>
+    </div>
 
     <div class="notifications-list" v-if="notifications.length > 0">
       <NCard v-for="notification in notifications" 
@@ -141,6 +145,35 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.notifications-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.notifications-header {
+  margin-bottom: 16px;
+}
+
+.notifications-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.notifications-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 移除重复的 tabs 样式 */
+.n-tabs {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
 .n-tabs {
   margin-bottom: 16px;
   padding-bottom: 8px;
