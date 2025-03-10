@@ -18,15 +18,20 @@ let mockNotifications = generateMockNotifications(50);
 
 export const mockNotificationService = {
   // 获取通知列表
-  getNotifications: async (page: number = 1, size: number = 10) => {
+  getNotifications: async (page: number = 1, size: number = 10, unreadOnly: boolean = false) => {
+    let filteredNotifications = mockNotifications;
+    if (unreadOnly) {
+      filteredNotifications = mockNotifications.filter(n => !n.isRead);
+    }
+    
     const start = (page - 1) * size;
     const end = start + size;
-    const list = mockNotifications.slice(start, end);
+    const list = filteredNotifications.slice(start, end);
     
     return {
       code: 0,
       result: {
-        total: mockNotifications.length,
+        total: filteredNotifications.length,
         list
       },
       message: 'success'

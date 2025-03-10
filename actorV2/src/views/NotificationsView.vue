@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { NButton, NEmpty, NPagination, NSpace, NCard, NBadge } from 'naive-ui';
 import type { NotificationItem } from '@/types/notificationInterfaces';
 import { getNotifications, markAsRead, markAllAsRead } from '@/utils/notificationService';
+import { NTabs, NTab } from 'naive-ui';
 
 const router = useRouter();
 const notifications = ref<NotificationItem[]>([]);
@@ -11,11 +12,16 @@ const loading = ref(false);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
+const activeTab = ref('all'); // 'all' 或 'unread'
 
 const loadNotifications = async () => {
   loading.value = true;
   try {
-    const response = await getNotifications(currentPage.value, pageSize.value);
+    const response = await getNotifications(
+      currentPage.value, 
+      pageSize.value, 
+      activeTab.value === 'unread'
+    );
     notifications.value = response.result.list;
     total.value = response.result.total;
   } catch (error) {
@@ -23,6 +29,12 @@ const loadNotifications = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const handleTabChange = (tabName: string) => {
+  activeTab.value = tabName;
+  currentPage.value = 1; // 切换 tab 时重置页码
+  loadNotifications();
 };
 
 const handleMarkAsRead = async (id: number) => {
@@ -76,6 +88,11 @@ onMounted(() => {
         全部标记为已读
       </NButton>
     </div>
+
+    <NTabs v-model:value="activeTab" @update:value="handleTabChange">
+      <NTab name="all" tab="全部消息" />
+      <NTab name="unread" tab="未读消息" />
+    </NTabs>
 
     <div class="notifications-list" v-if="notifications.length > 0">
       <NCard v-for="notification in notifications" 
@@ -188,5 +205,9 @@ onMounted(() => {
 
 .n-card {
   margin-bottom: 12px;
+}
+
+.n-tabs {
+  margin-bottom: 20px;
 }
 </style>

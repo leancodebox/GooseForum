@@ -3,10 +3,13 @@ import type { NotificationResponse } from '@/types/notificationInterfaces';
 import { showErrorMessage } from './messageManager';
 import { mockNotificationService } from './mockData';
 
-export const getNotifications = async (page: number = 1, size: number = 10): Promise<NotificationResponse> => {
+export const getNotifications = async (
+  page: number = 1, 
+  size: number = 10, 
+  unreadOnly: boolean = false
+): Promise<NotificationResponse> => {
   try {
-    // 使用 mock 服务
-    return await mockNotificationService.getNotifications(page, size);
+    return await mockNotificationService.getNotifications(page, size, unreadOnly);
   } catch (error) {
     showErrorMessage('获取通知失败');
     throw error;
