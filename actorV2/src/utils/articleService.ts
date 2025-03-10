@@ -1,5 +1,6 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "@/utils/messageManager.ts";
+import axios from 'axios';
 
 // 获取文章枚举
 export const getArticleEnum = async (): Promise<any> => {
@@ -32,7 +33,14 @@ export const submitArticle = async <T>(article: any): Promise<T> => {
             categoryId: article.categoryId,
         });
     } catch (error) {
-        enqueueMessage(`提交文章失败: ${error}`)
+        // 检查是否有响应数据
+        if (axios.isAxiosError(error) && error.response) {
+            // 从响应中提取错误信息
+            const errorMessage = error.response.data?.msg || '提交文章失败';
+            enqueueMessage(`提交文章失败: ${errorMessage}`);
+        } else {
+            enqueueMessage(`提交文章失败`);
+        }
         throw new Error(`提交文章失败: ${error}`);
     }
 };
