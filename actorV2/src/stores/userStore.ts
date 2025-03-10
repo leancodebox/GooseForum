@@ -20,7 +20,8 @@ export const useUserStore = defineStore('user', () => {
 
     const fetchUserInfo = async () => {
         try {
-            userInfo.value = await getUserInfo(); // 这里会调用 Mock 数据
+            // 使用类型断言，确保返回值符合 UserInfo 接口
+            userInfo.value = await getUserInfo() as UserInfo; // 这里会调用 Mock 数据
         } catch (error) {
             console.error('获取用户信息失败:', error);
         }

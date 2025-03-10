@@ -72,7 +72,7 @@ document.addEventListener('click', function (event) {
   const mobileMenu = document.getElementById('mobileMenu');
   const menuBtn = document.querySelector('.mobile-menu-btn');
 
-  if (mobileMenu !== null && menuBtn !== null && !mobileMenu.contains(event.target) && !menuBtn.contains(event.target) && mobileMenu.classList.contains('active')) {
+  if (mobileMenu !== null && menuBtn !== null && !mobileMenu.contains(event.target as Node) && !menuBtn.contains(event.target as Node) && mobileMenu.classList.contains('active')) {
     toggleMobileMenu();
   }
 });
