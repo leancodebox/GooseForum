@@ -19,6 +19,14 @@
   --input-bg-color: white;
   --hover-color: #f0f0f0;
   --primary-color-dark: #e85d50;
+  /* 添加缺失的 CSS 变量 */
+  --color-background: var(--bg-color); /* 背景颜色 */
+  --color-background-soft: #f9f9f9; /* 柔和背景颜色 */
+  --color-heading: #333333; /* 标题颜色 */
+  --color-text: #666666; /* 主要文本颜色 */
+  --color-text-light: #999999; /* 次要文本颜色 */
+  --color-primary: #ff6f61; /* 主要颜色 */
+  --color-border: #eaeaea; /* 边框颜色 */
 }
 
 /* 深色主题变量 */
@@ -42,6 +50,14 @@
   --input-bg-color: #333;
   --hover-color: #363636;
   --primary-color-dark: #cc6b60;
+  /* 添加深色主题下的缺失 CSS 变量 */
+  --color-background: var(--bg-color); /* 背景颜色 */
+  --color-background-soft: #2b2b2b; /* 柔和背景颜色 */
+  --color-heading: #e1e1e1; /* 标题颜色 */
+  --color-text: #e1e1e1; /* 主要文本颜色 */
+  --color-text-light: #aaaaaa; /* 次要文本颜色 */
+  --color-primary: #ff8075; /* 主要颜色 */
+  --color-border: #404040; /* 边框颜色 */
 }
 
 body {
