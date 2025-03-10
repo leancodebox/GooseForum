@@ -5,7 +5,7 @@ interface Article {
     id: number,
     title: string;
     type: string;
-    categories: string[];
+    categories: number[];
     content: string;
 }
 

@@ -5,11 +5,23 @@ import {mavonEditor} from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
 import {getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
+
+// 在文件顶部添加接口定义
+interface ArticleResponse {
+  code: number;
+  result: {
+    articleContent: string;
+    articleTitle: string;
+    categoryId: number[];
+    type: string;
+  };
+}
+
 const router = useRouter()
 const route = useRoute()
 const title = ref<string>('');
 const type = ref<string>('');
-const selectedCategories = ref<string[]>([]);
+const selectedCategories = ref<number[]>([]);
 const content = ref<string>('');
 const categories = [
   {label: '博客', value: 'blog'},
@@ -48,32 +60,25 @@ onMounted(async () => {
   }
 })
 
+// 更新 getOriginData 函数的类型
 async function getOriginData() {
-  const id = route.query.id
-  if (!id) return
+  const id = route.query.id;
+  if (!id) return;
 
   try {
-    const res = await getArticlesOrigin(id)
-    // if (res.code === 0 && res.result) {
-      console.log(res.result.articleContent)
-      console.log(res.result.articleTitle)
-      console.log(res.result.categoryId)
-      console.log(res.result.type)
-      // articlesData.value = {
-      //   ...articlesData.value,
-      //   id: parseInt(id),
-      //   title: res.result.articleTitle,
-      //   content: res.result.articleContent,
-      //   type: res.result.type,
-      //   categoryId: res.result.categoryId,
-      //   // 如果后端返回了分类和类型，也需要设置
-      //   // categoryId: res.result.categoryId,
-      //   // type: res.result.type,
-      // }
-    // }
+    const res = await getArticlesOrigin(id) as unknown as ArticleResponse; // 使用 unknown 进行类型转换
+    console.log(res)
+    if (res.code === 0 && res.result) {
+      console.log(res.result.articleContent);
+      console.log(res.result.articleTitle);
+      console.log(res.result.categoryId);
+      title.value = res.result.articleTitle;
+      content.value = res.result.articleContent;
+      selectedCategories.value = res.result.categoryId
+      type.value = res.result.type
+    }
   } catch (err) {
-    console.error('获取文章数据失败:', err)
-
+    console.error('获取文章数据失败:', err);
   }
 }
 
@@ -105,7 +110,8 @@ async function getOriginData() {
       </div>
       <div class="form-group">
         <label for="content">内容:</label>
-        <mavon-editor style="width: 100%; height: 100%; min-height: 600px; max-height: 600px; z-index: 0;"
+        <mavon-editor style="width: 100%; height: 100%; min-height: 600px; max-height: 600px;z-index: 0;"
+                      v-model="content"
                       required></mavon-editor>
       </div>
       <n-button :type="'default'" class="submit-button">发布</n-button>
