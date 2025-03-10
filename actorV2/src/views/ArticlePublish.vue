@@ -20,11 +20,13 @@ interface ArticleResponse {
 interface EnumInfoResponse {
   code: number;
   result: {
-    articleContent: string;
-    articleTitle: string;
-    categoryId: number[];
-    type: string;
+    category: NameLabel[];
+    type: NameLabel[];
   };
+}
+interface NameLabel {
+  name: string;
+  value: number;
 }
 
 const router = useRouter()
@@ -34,15 +36,15 @@ const type = ref<string>('');
 const selectedCategories = ref<number[]>([]);
 const content = ref<string>('');
 const categories = ref([
-  {label: '博客', value: 'blog'},
-  {label: '新闻', value: 'news'},
-  {label: '教程', value: 'tutorial'}
+  {label: '博客', value: 1},
+  {label: '新闻', value: 2},
+  {label: '教程', value: 3}
 ]);
 
 const typeList = ref([
-  {label: '博客', value: 'blog'},
-  {label: '新闻', value: 'news'},
-  {label: '教程', value: 'tutorial'}
+  {label: '博客', value: 1},
+  {label: '新闻', value: 2},
+  {label: '教程', value: 3}
 ]);
 
 const submitArticleHandler = async () => {
@@ -72,14 +74,13 @@ onMounted(async () => {
   // 获取分类选项
   // 如果有 id 参数，说明是编辑模式
   let enumInfo = await getArticleEnum() as unknown as EnumInfoResponse; // 使用 unknown 进行类型转换
-  console.log(enumInfo.result)
-  categories.value = enumInfo.result.category.map(item => {
+  categories.value = enumInfo.result.category.map((item) => {
     return {
       label: item.name,
       value: item.value
     }
   })
-  typeList.value = enumInfo.result.type.map(item => {
+  typeList.value = enumInfo.result.type.map((item) => {
     return {
       label: item.name,
       value: item.value
