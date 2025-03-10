@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { NInput, NSelect, NButton } from 'naive-ui'; // 引入 Naive UI 组件
-import {mavonEditor} from 'mavon-editor'
+import { mavonEditor } from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
+import { submitArticle } from '@/utils/articleService'; // 引入封装的文章发布接口
 
 const title = ref<string>('');
 const type = ref<string>('');
@@ -14,26 +15,33 @@ const categories = [
   { label: '教程', value: 'tutorial' }
 ];
 
-const submitArticle = () => {
-  // 处理文章发布逻辑
-  console.log({
+const submitArticleHandler = async () => {
+  const article = {
+    id: 0, // 示例 ID，您可以根据需要生成或获取
     title: title.value,
     type: type.value,
     categories: selectedCategories.value,
     content: content.value,
-  });
-  // 清空表单
-  title.value = '';
-  type.value = '';
-  selectedCategories.value = [];
-  content.value = '';
+  };
+
+  try {
+    const response = await submitArticle(article);
+    console.log('文章提交成功:', response);
+    // 清空表单
+    title.value = '';
+    type.value = '';
+    selectedCategories.value = [];
+    content.value = '';
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 </script>
 <template>
   <div class="article-publish">
     <h1>发布文章</h1>
-    <form @submit.prevent="submitArticle" class="form">
+    <form @submit.prevent="submitArticleHandler" class="form">
       <div class="form-group">
         <label for="title">标题:</label>
         <n-input v-model:value="title" required placeholder="请输入标题" />
@@ -42,11 +50,7 @@ const submitArticle = () => {
         <label for="type">类型:</label>
         <n-select
           v-model:value="type"
-          :options="[
-            { label: '博客', value: 'blog' },
-            { label: '新闻', value: 'news' },
-            { label: '教程', value: 'tutorial' }
-          ]"
+          :options="categories"
           required
         />
       </div>
