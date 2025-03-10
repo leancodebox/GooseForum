@@ -20,7 +20,6 @@ export const submitArticle = async (article: Article) => {
 
 // Mock 获取用户信息
 export const getUserInfo = async () => {
-    console.log("runrunrun")
     // 模拟用户数据
     return new Promise((resolve) => {
         setTimeout(() => {
