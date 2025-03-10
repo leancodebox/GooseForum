@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
-import {NButton, NInput, NSelect,useMessage} from 'naive-ui'; // 引入 Naive UI 组件
-
+import {NButton, NInput, NSelect, useMessage} from 'naive-ui'; // 引入 Naive UI 组件
 import {getArticleEnum, getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
 import type {ArticleInfo, ArticleResponse, EnumInfoResponse} from '@/types/articleInterfaces';
 import MarkdownEdit from "@/components/MarkdownEdit.vue";
-import MarkdownEditToast from "@/components/MarkdownEditToast.vue"; // 使用 type 导入接口
 
 const router = useRouter()
 const route = useRoute()
@@ -39,10 +37,9 @@ const submitArticleHandler = async () => {
       return
     }
 
-    // articleData.value.articleTitle = '';
-    // articleData.value.articleContent = '';
-    // articleData.value.categoryId = [];
-    // articleData.value.type = 0;
+    // 跳转到新发布的文章地址
+     // 替换为实际的服务器地址
+    window.location.href = `/post/${response.result.id}`; // 使用 window.location.href 进行跳转
 
   } catch (error) {
     console.error(error);
