@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import {ref, watch, onMounted} from 'vue'
 import {useRouter} from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
 
 const router = useRouter()
 const theme = ref('light')
 const isMenuOpen = ref(false)
-const user = ref(null) // 假设你会从某处获取用户信息
+const userStore = useUserStore()
 
 const toggleTheme = () => {
   theme.value = theme.value === 'light' ? 'dark' : 'light'
@@ -21,6 +22,7 @@ onMounted(() => {
   // 设置初始图标
   const themeIcon = document.querySelector('.theme-icon');
   themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+  userStore.fetchUserInfo();
 })
 
 const toggleMenu = () => {
@@ -85,8 +87,8 @@ function toggleMobileMenu() {
         </button>
 
         <!-- 已登录状态 -->
-
-        <div class="user-actions" id="userActions">
+        <div class="user-actions" v-if="userStore.userInfo">
+          <span class="username">{{ userStore.userInfo.username }}</span>
           <a href="/post-edit" class="btn btn-primary">发布</a>
           <a href="/notifications" class="notification-link">
             <span class="notification-dot"></span>📬
@@ -104,13 +106,11 @@ function toggleMobileMenu() {
           </div>
         </div>
         <!-- 未登录状态 -->
-        <div class="auth-buttons" id="guestButtons">
+        <div class="auth-buttons" v-else>
           <a href="/login" class="btn btn-auth">登录 / 注册</a>
         </div>
 
-
         <!-- 移动端用户头像 -->
-
         <div class="mobile-header-avatar" v-if="false">
           <img src="" alt="" class="mobile-nav-avatar">
         </div>

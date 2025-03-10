@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // 创建一个 Axios 实例
 const axiosInstance = axios.create({
-  baseURL: 'https://your-api-url.com/api', // 替换为您的 API 基础 URL
+  baseURL: '/api', // 替换为您的 API 基础 URL
   timeout: 10000, // 请求超时设置
   headers: {
     'Content-Type': 'application/json',
@@ -37,4 +37,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance; 
+export default axiosInstance;

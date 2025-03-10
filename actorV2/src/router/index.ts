@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
 
 import Empty from '../views/Empty.vue'
 
@@ -21,6 +22,12 @@ const router = createRouter({
       component: ()=>import('../views/AboutView.vue'),
     },
   ],
+})
+
+// 路由守卫
+router.beforeEach(async (to, from) => {
+  const userStore = useUserStore()
+  await userStore.fetchUserInfo()
 })
 
 export default router

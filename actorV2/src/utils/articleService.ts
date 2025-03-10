@@ -12,7 +12,7 @@ interface Article {
 // 提交文章的函数
 export const submitArticle = async (article: Article) => {
     try {
-        return await axiosInstance.post('/api/bbs/write-articles', article); // 返回响应数据
+        return await axiosInstance.post('/bbs/write-articles', article); // 返回响应数据
     } catch (error) {
         throw new Error(`提交文章失败: ${error}`);
     }
@@ -20,7 +20,7 @@ export const submitArticle = async (article: Article) => {
 
 export const getUserInfo = async () => {
     try {
-        return axiosInstance.get("/api/get-user-info")
+        return axiosInstance.get("/get-user-info")
     } catch (error) {
     }
 }
