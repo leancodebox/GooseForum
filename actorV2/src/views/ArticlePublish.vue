@@ -5,7 +5,7 @@ import {mavonEditor} from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
 import {getArticleEnum, getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
-import { ArticleInfo, ArticleResponse, EnumInfoResponse } from '@/types/articleInterfaces'; // 导入接口
+import type {ArticleInfo, ArticleResponse, EnumInfoResponse} from '@/types/articleInterfaces'; // 使用 type 导入接口
 
 const router = useRouter()
 const route = useRoute()
