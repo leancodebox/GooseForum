@@ -26,6 +26,7 @@ func frontend(ginApp *gin.Engine) {
 	staticFS, _ := resource.GetStaticFS()
 	actGroup.Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).
+		Use(middleware.BrowserCache).
 		StaticFS("actor", http.FS(actorFs)).
 		StaticFS("static", http.FS(staticFS)).
 		StaticFS("app", http.FS(appFs))
@@ -54,9 +55,11 @@ func auth(ginApp *gin.Engine) {
 		POST("change-password", UpButterReq(controllers.ChangePassword))
 
 	// 静态头像地址
-	ginApp.GET("/api/assets/default-avatar.png", func(context *gin.Context) {
-		context.Data(http.StatusOK, "image/png", assert.GetDefaultAvatar())
-	})
+	ginApp.GET("/api/assets/default-avatar.png",
+		middleware.BrowserCache,
+		func(context *gin.Context) {
+			context.Data(http.StatusOK, "image/png", assert.GetDefaultAvatar())
+		})
 	// 添加激活路由
 	ginApp.GET("api/activate", controllers.ActivateAccount)
 }
@@ -136,5 +139,5 @@ func fileServer(ginApp *gin.Engine) {
 	// 文件上传接口
 	r.POST("/img-upload", middleware.JWTAuth4Gin, controllers.SaveFileByGinContext)
 	// 文件获取接口 - 通过路径
-	r.GET("/img/*filename", controllers.GetFileByFileName)
+	r.GET("/img/*filename", middleware.BrowserCache, controllers.GetFileByFileName)
 }
