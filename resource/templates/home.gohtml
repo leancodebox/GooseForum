@@ -79,21 +79,21 @@
             <h3>社区统计</h3>
             <div class="stats-container">
                 <div class="stat-item">
-                    <div class="stat-icon">📝</div>
+                    <div class="stat-icon-community">📝</div>
                     <div class="stat-info">
                         <span class="stat-number">{{.Stats.ArticleCount}}</span>
                         <span class="stat-label">文章</span>
                     </div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-icon">👥</div>
+                    <div class="stat-icon-community">👥</div>
                     <div class="stat-info">
                         <span class="stat-number">{{.Stats.UserCount}}</span>
                         <span class="stat-label">用户</span>
                     </div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-icon">💬</div>
+                    <div class="stat-icon-community">💬</div>
                     <div class="stat-info">
                         <span class="stat-number">{{.Stats.Reply}}</span>
                         <span class="stat-label">回复</span>
@@ -104,14 +104,14 @@
 
         <!-- 小贴士卡片 -->
         <div class="stat-card tips-card">
-            <div class="stat-icon">💡</div>
+            <div class="stat-icon-community">💡</div>
             <h3>小贴士</h3>
             <p class="tip-content">使用Markdown语法可以让你的文章更加美观，支持代码高亮、表格和图片插入等功能。</p>
         </div>
 
         <!-- 今日时间密码卡片 -->
         <div class="stat-card time-code-card">
-            <div class="stat-icon">🔐</div>
+            <div class="stat-icon-community">🔐</div>
             <h3>今日密码</h3>
             <div class="time-code">
                 <span class="code-value">每天都是最棒的</span>
@@ -149,7 +149,7 @@
             text-align: center;
         }
 
-        .stat-icon {
+        .stat-icon-community {
             font-size: 24px;
             margin-bottom: 10px;
             text-align: center;
