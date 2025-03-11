@@ -17,7 +17,7 @@
         <div class="articles-grid">
             {{range .FeaturedArticles}}
                 <article class="featured-article-card">
-                    <div class="article-category">{{.Category}}</div>
+                    <div class="article-category">{{.TypeStr}}</div>
                     <h3><a href="/post/{{.Id}}">{{.Title}}</a></h3>
                     <div class="article-meta">
                         <span class="author">{{.Username}}</span>
@@ -44,12 +44,17 @@
                     </div>
                     <div class="article-content">
                         <div class="article-header">
-                            <span class="article-category-tag">{{.Category}}</span>
+                            <span class="article-category-tag">{{.TypeStr}}</span>
                             <h2 class="article-title"><a href="/post/{{.Id}}">{{.Title}}</a></h2>
                         </div>
                         <div class="article-meta-info">
                             <span>{{.Username}}</span>
                             <span>{{.LastUpdateTime}}</span>
+                            <div class="article-tags">
+                                {{range .Categories}}
+                                    <span class="article-tag">{{.}}</span>
+                                {{end}}
+                            </div>
                             <div class="article-stats">
                                 <span class="stat-item">
                                     <span class="stat-icon">👁️</span>

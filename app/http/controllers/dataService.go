@@ -1,43 +1,80 @@
 package controllers
 
 import (
+	"fmt"
+	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"sync"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"time"
 )
 
-var (
-	cacheMutex   sync.RWMutex
-	articleCache = struct {
-		data       []articles.SmallEntity
-		expiration time.Time
-	}{
-		expiration: time.Now().Add(-1 * time.Second), // 初始设为过期状态
-	}
-	cacheTTL = 5 * time.Minute // 缓存有效时间
-)
+// 初始化缓存
+var articleCache = &Cache[string, []articles.SmallEntity]{}
 
 func getRecommendedArticles() []articles.SmallEntity {
-	// 先尝试读取缓存
-	cacheMutex.RLock()
-	if time.Now().Before(articleCache.expiration) {
-		defer cacheMutex.RUnlock()
-		return articleCache.data
-	}
-	cacheMutex.RUnlock()
+	data, _ := articleCache.GetOrLoad(
+		"hot_articles",
+		func() ([]articles.SmallEntity, error) {
+			fmt.Println("重新查询")
+			return articles.GetRecommendedArticles(4)
+		},
+		5*time.Minute, // 缓存5分钟
+	)
+	return data
+}
 
-	// 缓存过期，重新获取数据
-	cacheMutex.Lock()
-	defer cacheMutex.Unlock()
+func articlesSmallEntity2Dto(data []articles.SmallEntity) []ArticlesSimpleDto {
+	userIds := array.Map(data, func(t articles.SmallEntity) uint64 {
+		return t.UserId
+	})
+	userMap := users.GetMapByIds(userIds)
 
-	// 双检锁避免并发重复更新
-	if time.Now().Before(articleCache.expiration) {
-		return articleCache.data
-	}
-
-	newData, _ := articles.GetRecommendedArticles(3)
-	articleCache.data = newData
-	articleCache.expiration = time.Now().Add(cacheTTL)
-
-	return newData
+	//获取文章的分类信息
+	articleIds := array.Map(data, func(t articles.SmallEntity) uint64 {
+		return t.Id
+	})
+	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
+	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
+		return t.ArticleCategoryId
+	})
+	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	// 获取文章的分类和标签
+	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
+		return rs.ArticleId
+	})
+	return array.Map(data, func(t articles.SmallEntity) ArticlesSimpleDto {
+		categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
+			if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+				return category.Category
+			}
+			return ""
+		})
+		username := ""
+		avatarUrl := ""
+		if user, ok := userMap[t.UserId]; ok {
+			username = user.Username
+			if user.AvatarUrl != "" {
+				avatarUrl = component.FilePath(user.AvatarUrl)
+			}
+		}
+		return ArticlesSimpleDto{
+			Id:             t.Id,
+			Title:          t.Title,
+			LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
+			Username:       username,
+			AvatarUrl:      avatarUrl,
+			ViewCount:      t.ViewCount,
+			CommentCount:   t.ReplyCount,
+			Category:       FirstOr(categoryNames, "未分类"),
+			Categories:     categoryNames,
+			CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
+				return rs.ArticleCategoryId
+			}),
+			Type:    t.Type,
+			TypeStr: articlesTypeMap[int(t.Type)].Name,
+		}
+	})
 }
