@@ -148,3 +148,15 @@ func GetLatestArticles(limit int) ([]SmallEntity, error) {
 		Find(&articles).Error
 	return articles, err
 }
+
+func GetRecommendedArticles(limit int) ([]SmallEntity, error) {
+	var articles []SmallEntity
+	b := builder()
+	b.Where(queryopt.Eq(fieldArticleStatus, 1))
+	b.Where(queryopt.Eq(fieldProcessStatus, 0))
+	err := b.
+		Order(queryopt.Desc(fieldReplyCount)).
+		Limit(limit).
+		Find(&articles).Error
+	return articles, err
+}

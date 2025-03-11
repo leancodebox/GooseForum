@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
+	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
@@ -267,20 +268,27 @@ func RenderArticlesPage(c *gin.Context) {
 	result := response.Data.Result.(component.Page[ArticlesSimpleDto])
 	// 计算总页数
 	totalPages := (cast.ToInt(result.Total) + param.PageSize - 1) / param.PageSize
-
+	articleCategoryList := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
+		return datastruct.Option[string, uint64]{
+			Name:  t.Category,
+			Value: t.Id,
+		}
+	})
 	// 构建模板数据
 	templateData := gin.H{
-		"title":       "文章列表",
-		"description": "GooseForum的文章列表页面",
-		"year":        time.Now().Year(),
-		"Data":        result.List,
-		"Page":        result.Page,
-		"PageSize":    param.PageSize,
-		"Total":       result.Total,
-		"TotalPages":  totalPages,
-		"PrevPage":    max(result.Page-1, 1),
-		"NextPage":    min(max(result.Page, 1)+1, totalPages),
-		"User":        GetLoginUser(c),
+		"title":               "文章列表",
+		"description":         "GooseForum的文章列表页面",
+		"year":                time.Now().Year(),
+		"Data":                result.List,
+		"Page":                result.Page,
+		"PageSize":            param.PageSize,
+		"Total":               result.Total,
+		"TotalPages":          totalPages,
+		"PrevPage":            max(result.Page-1, 1),
+		"NextPage":            min(max(result.Page, 1)+1, totalPages),
+		"User":                GetLoginUser(c),
+		"articleCategoryList": articleCategoryList,
+		"recommendedArticles": getRecommendedArticles(),
 	}
 	c.HTML(http.StatusOK, "list.gohtml", templateData)
 }

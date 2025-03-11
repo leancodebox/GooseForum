@@ -102,7 +102,7 @@ func bbs(ginApp *gin.Engine) {
 	bbsAuth.GET("notification/types", UpButterReq(controllers.GetNotificationTypes))
 
 	// 编辑文章时原始文章内容
-	bbsAuth.POST("get-articles-origin", UpButterReq(controllers.WriteArticlesOrigin))
+	bbsAuth.POST("get-articles-origin", middleware.CheckLogin, UpButterReq(controllers.WriteArticlesOrigin))
 	// 发布文章
 	bbsAuth.POST("write-articles", UpButterReq(controllers.WriteArticles))
 	// 回复文章

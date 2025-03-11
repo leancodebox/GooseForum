@@ -21,7 +21,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	frontend(ginApp)
 
 	// 访问日志中间件
-	ginApp.Use(middleware.GinLogger)
+	ginApp.Use(middleware.AccessLog)
 
 	// 接口
 	auth(ginApp)
@@ -53,7 +53,7 @@ func SetupRegisterByGin(ginApp *gin.Engine) {
 	frontend(ginApp)
 
 	// 访问日志中间件
-	ginApp.Use(middleware.GinLogger)
+	ginApp.Use(middleware.AccessLog)
 
 	// 接口
 	setup(ginApp)
