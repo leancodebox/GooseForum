@@ -4,7 +4,8 @@ import {NButton, NInput, NSelect, useMessage} from 'naive-ui'; // 引入 Naive U
 import {getArticleEnum, getArticlesOrigin, submitArticle} from '@/utils/articleService'; // 引入封装的文章发布接口
 import {useRoute, useRouter} from "vue-router"
 import type {ArticleInfo, ArticleResponse, EnumInfoResponse} from '@/types/articleInterfaces';
-import MarkdownEdit from "@/components/MarkdownEdit.vue";
+import { MdEditor } from 'md-editor-v3';
+import 'md-editor-v3/lib/style.css';
 
 const router = useRouter()
 const route = useRoute()
@@ -103,6 +104,8 @@ async function getOriginData() {
   }
 }
 
+
+const text = ref('# Hello Editor');
 </script>
 <template>
   <div class="article-publish">
@@ -131,15 +134,7 @@ async function getOriginData() {
       </div>
       <div class="form-group">
         <label for="content">内容:</label>
-
-        <markdown-edit style="min-height: 600px; max-height: 600px;  z-index: 0;"
-                      v-model="articleData.articleContent"
-                      :ishljs="true"
-                      required></markdown-edit>
-<!--        <markdown-edit-toast  style="min-height: 600px; max-height: 600px;  z-index: 0;"-->
-<!--                              v-model="articleData.articleContent"-->
-<!--                              :ishljs="true"-->
-<!--                              required></markdown-edit-toast>-->
+        <MdEditor v-model="articleData.articleContent" />
       </div>
       <n-button :type="'default'" class="submit-button" @click="submitArticleHandler" :disabled="isSubmitting">发布</n-button>
     </form>
