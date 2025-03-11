@@ -288,13 +288,13 @@ func LoginPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.gohtml", gin.H{"title": "登录 - GooseForum", "User": GetLoginUser(c)})
 }
 func Notifications(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "notifications.gohtml", gin.H{"title": "消息通知 - GooseForum", "User": GetLoginUser(c)})
+	c.HTML(http.StatusOK, "notifications.gohtml", gin.H{"title": "消息通知 - GooseForum", "User": GetLoginUser(c)})
 }
 
 func UserProfile(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "user_profile.gohtml", gin.H{"title": "用户主页 - GooseForum", "User": GetLoginUser(c)})
+	c.HTML(http.StatusOK, "user_profile.gohtml", gin.H{"title": "用户主页 - GooseForum", "User": GetLoginUser(c)})
 }
 
 func Sponsors(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "sponsors.gohtml", gin.H{"title": "赞助商 - GooseForum", "User": GetLoginUser(c)})
+	c.HTML(http.StatusOK, "sponsors.gohtml", gin.H{"title": "赞助商 - GooseForum", "User": GetLoginUser(c)})
 }
