@@ -12,14 +12,14 @@ const loading = ref(false);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
-const activeTab = ref('all'); // 'all' 或 'unread'
+const activeTab = ref('unread'); // 'all' 或 'unread'
 
 const loadNotifications = async () => {
   loading.value = true;
   try {
     const response = await getNotifications(
-      currentPage.value, 
-      pageSize.value, 
+      currentPage.value,
+      pageSize.value,
       activeTab.value === 'unread'
     );
     notifications.value = response.result.list;
@@ -99,8 +99,8 @@ onMounted(() => {
     </div>
 
     <div class="notifications-list" v-if="notifications.length > 0">
-      <NCard v-for="notification in notifications" 
-             :key="notification.id" 
+      <NCard v-for="notification in notifications"
+             :key="notification.id"
              :class="{ 'unread': !notification.isRead, 'read': notification.isRead }">
         <div class="notification-item">
           <div class="notification-icon">
@@ -113,13 +113,13 @@ onMounted(() => {
           </div>
           <div class="notification-actions">
             <NSpace>
-              <NButton v-if="!notification.isRead" 
-                       size="small" 
+              <NButton v-if="!notification.isRead"
+                       size="small"
                        @click="handleMarkAsRead(notification.id)">
                 标记已读
               </NButton>
-              <NButton v-if="notification.link" 
-                       size="small" 
+              <NButton v-if="notification.link"
+                       size="small"
                        @click="router.push(notification.link)">
                 查看详情
               </NButton>
