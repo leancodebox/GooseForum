@@ -289,11 +289,11 @@
 
             const data = await response.json();
 
-            if (response.ok) {
-                alert('注册成功，请登录');
-                switchTab('login');
+            if (data.code === 0 ) {
+                window.location.href = '/';
             } else {
                 alert(data.message || '注册失败，请稍后重试');
+                refreshCaptcha();
             }
         } catch (error) {
             console.error('注册请求失败:', error);
