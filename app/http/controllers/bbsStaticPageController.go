@@ -183,7 +183,7 @@ func markdownToHTML(markdown string) template.HTML {
 	return template.HTML(buf.String())
 }
 func RenderIndex(c *gin.Context) {
-	last, _ := articles.GetLatestArticles(10)
+	last, _ := articles.GetLatestArticles(5)
 	templateData := gin.H{
 		"FeaturedArticles": articlesSmallEntity2Dto(getRecommendedArticles()),
 		"LatestArticles":   articlesSmallEntity2Dto(last),
