@@ -88,6 +88,9 @@
             if (data.code === 0) {
                 document.getElementById('captchaImage').src = data.result.captchaImg;
                 document.getElementById('captchaId').value = data.result.captchaId;
+
+                document.getElementById('reg-captchaImage').src = data.result.captchaImg;
+                document.getElementById('reg-captchaId').value = data.result.captchaId;
             }
         } catch (error) {
             console.error('获取验证码失败:', error);
