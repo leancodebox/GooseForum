@@ -59,25 +59,26 @@
         </div>
 
         <aside class="sidebar">
-            <!-- 社区统计 -->
-            <div class="sidebar-card">
-                <h3>社区统计</h3>
-                <div class="author-stats">
-                    <div class="stat-item">
-                        <div class="number">1.2k</div>
-                        <div class="label">文章</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="number">3.5k</div>
-                        <div class="label">用户</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="number">8.7k</div>
-                        <div class="label">评论</div>
+            {{ if false }}
+                <!-- 社区统计 -->
+                <div class="sidebar-card">
+                    <h3>社区统计</h3>
+                    <div class="author-stats">
+                        <div class="stat-item">
+                            <div class="number">1.2k</div>
+                            <div class="label">文章</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="number">3.5k</div>
+                            <div class="label">用户</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="number">8.7k</div>
+                            <div class="label">评论</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
+            {{end}}
             <!-- 新增的小帖士卡片 -->
             <div class="sidebar-card">
                 <h3>小帖士</h3>
@@ -189,6 +190,7 @@
         background-color: var(--card-bg-color);
         border-radius: 4px;
     }
+
     .tips-content p {
         margin: 0 auto;
     }
