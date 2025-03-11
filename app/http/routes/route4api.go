@@ -69,6 +69,7 @@ func viewRoute(ginApp *gin.Engine) {
 	view.GET("/post/:id", controllers.RenderArticleDetail)
 	view.GET("/login", controllers.LoginPage)
 	view.POST("/login", controllers.LoginHandler)
+	view.POST("/register", controllers.RegisterHandle)
 	view.GET("/notifications", middleware.CheckLogin, controllers.Notifications)
 	view.GET("/user-profile", controllers.UserProfile)
 	view.GET("/sponsors", controllers.Sponsors)

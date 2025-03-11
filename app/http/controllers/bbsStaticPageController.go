@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"github.com/spf13/cast"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -21,6 +22,66 @@ import (
 	"strings"
 	"time"
 )
+
+// RegisterHandle 注册
+func RegisterHandle(c *gin.Context) {
+	var r RegReq
+	if err := c.ShouldBindJSON(&r); err != nil {
+		c.JSON(200, component.FailData("验证失败"))
+		return
+	}
+	// 首先验证验证码
+	if !VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
+		c.JSON(200, component.FailData("验证码错误或已过期"))
+		return
+	}
+
+	// 检查用户名是否已存在
+	if users.ExistUsername(r.Username) {
+		c.JSON(200, component.FailData("用户名已存在"))
+		return
+	}
+
+	// 检查邮箱是否已存在
+	if users.ExistEmail(r.Email) {
+		c.JSON(200, component.FailData("邮箱已被使用"))
+		return
+	}
+
+	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
+	err := users.Create(userEntity)
+	if err != nil {
+		c.JSON(200, component.FailData("注册失败"))
+	}
+
+	if err = SendAEmail4User(userEntity); err != nil {
+		slog.Error("添加邮件任务到队列失败", "error", err)
+	}
+
+	// 初始化用户积分
+	pointservice.InitUserPoints(userEntity.Id, 100)
+
+	// 生成 token
+	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
+	if err != nil {
+
+		c.JSON(200, component.FailData("注册异常，尝试登陆"))
+	}
+
+	// 设置Cookie
+	c.SetCookie(
+		"access_token",
+		token,
+		86400, // 24小时
+		"/",
+		"",    // 域名，为空表示当前域名
+		false, // 仅HTTPS
+		true,  // HttpOnly
+	)
+	c.JSON(http.StatusOK, component.SuccessData(
+		"登录成功",
+	))
+}
 
 type LoginHandlerReq struct {
 	Username    string `json:"username"`

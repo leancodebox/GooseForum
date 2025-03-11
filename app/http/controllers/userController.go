@@ -29,8 +29,7 @@ type RegReq struct {
 	Email          string `json:"email" validate:"required"`
 	Username       string `json:"userName"  validate:"required"`
 	Password       string `json:"passWord"  validate:"required"`
-	NickName       string `json:"nickName" gorm:"default:'QMPlusUser'"`
-	InvitationCode string `json:"invitationCode"`
+	InvitationCode string `json:"invitationCode,omitempty"`
 	CaptchaId      string `json:"captchaId" validate:"required"`
 	CaptchaCode    string `json:"captchaCode" validate:"required"`
 }
