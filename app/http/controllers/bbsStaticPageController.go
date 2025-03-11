@@ -143,7 +143,7 @@ func GetLoginUser(c *gin.Context) UserInfoShow {
 	}
 	//userPoint := userPoints.Get(user.Id)
 	// 如果有头像，添加域名前缀
-	avatarUrl := ""
+	avatarUrl := "/file/img/default.png"
 	if user.AvatarUrl != "" {
 		avatarUrl = strings.ReplaceAll(component.FilePath(user.AvatarUrl), "\\", "/")
 	}
