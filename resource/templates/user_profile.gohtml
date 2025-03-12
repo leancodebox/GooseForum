@@ -6,10 +6,10 @@
     <main class="profile-container">
         <div class="profile-header">
             <div class="profile-avatar">
-                <img src="/api/assets/default-avatar.png" alt="用户头像">
+                <img src="{{ .Author.AvatarUrl}}" alt="用户头像">
             </div>
             <div class="profile-info">
-                <h1 class="username">示例用户</h1>
+                <h1 class="username">{{ .Author.Username}}</h1>
                 <div class="user-stats">
                     <div class="stat-item">
                         <span class="stat-value">42</span>
@@ -38,16 +38,17 @@
 
             <div class="tab-content" id="posts">
                 <div class="article-list">
-                    <!-- 示例文章 -->
+                    {{range .Articles}}
                     <div class="article-item">
-                        <h3 class="article-title"><a href="#">示例文章标题</a></h3>
+                        <h3 class="article-title"><a href="/articles/{{.Id}}">{{.Title}}</a></h3>
                         <div class="article-meta">
-                            <span class="post-time">2024-01-01</span>
-                            <span class="view-count">👁️ 123</span>
-                            <span class="comment-count">💬 45</span>
+                            <span class="post-time">{{.CreateTime}}</span>
+                            <span class="view-count">👁️ {{.ViewCount}}</span>
+                            <span class="comment-count">💬 {{.CommentCount}}</span>
                         </div>
-                        <p class="article-excerpt">这是文章的摘要内容，简要介绍文章的主要内容...</p>
+                        <p class="article-excerpt">121212121</p>
                     </div>
+                    {{end}}
                 </div>
             </div>
 

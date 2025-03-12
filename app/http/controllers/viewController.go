@@ -134,6 +134,10 @@ func LoginHandler(c *gin.Context) {
 }
 func GetLoginUser(c *gin.Context) UserInfoShow {
 	userId := c.GetUint64("userId")
+	return GetUserShowByUserId(userId)
+}
+
+func GetUserShowByUserId(userId uint64) UserInfoShow {
 	if userId == 0 {
 		return UserInfoShow{}
 	}
@@ -291,7 +295,22 @@ func LoginPage(c *gin.Context) {
 }
 
 func UserProfile(c *gin.Context) {
-	c.HTML(http.StatusOK, "user_profile.gohtml", gin.H{"title": "用户主页 - GooseForum", "User": GetLoginUser(c)})
+	id := cast.ToUint64(c.Param("id"))
+	showUser := GetUserShowByUserId(id)
+	if showUser.UserId == 0 {
+		errorPage(c, "用户不存在", "用户不存在")
+		return
+	}
+	articlesSmallEntity2Dto(getRecommendedArticles())
+	last, _ := articles.GetLatestArticlesByUserId(id, 5)
+	templateData := gin.H{
+		"Articles":    articlesSmallEntity2Dto(last),
+		"Author":      showUser,
+		"User":        GetLoginUser(c),
+		"title":       "GooseForum",
+		"description": "GooseForum的首页",
+	}
+	c.HTML(http.StatusOK, "user_profile.gohtml", templateData)
 }
 
 func Sponsors(c *gin.Context) {
