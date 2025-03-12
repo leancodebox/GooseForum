@@ -1,6 +1,8 @@
 package users
 
 import (
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
+	"strings"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
@@ -66,6 +68,13 @@ type Entity struct {
 	CreatedAt         time.Time  `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`               //
 	UpdatedAt         time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 	DeletedAt         *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
+}
+
+func (itself *Entity) GetWebAvatarUrl() string {
+	if itself.AvatarUrl == "" {
+		return urlconfig.GetDefaultAvatar()
+	}
+	return strings.ReplaceAll(urlconfig.FilePath(itself.AvatarUrl), "\\", "/")
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

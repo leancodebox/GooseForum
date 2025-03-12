@@ -3,11 +3,11 @@ package controllers
 import (
 	"fmt"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"time"
 )
 
@@ -53,12 +53,10 @@ func articlesSmallEntity2Dto(data []articles.SmallEntity) []ArticlesSimpleDto {
 			return ""
 		})
 		username := ""
-		avatarUrl := ""
+		avatarUrl := urlconfig.GetDefaultAvatar()
 		if user, ok := userMap[t.UserId]; ok {
 			username = user.Username
-			if user.AvatarUrl != "" {
-				avatarUrl = component.FilePath(user.AvatarUrl)
-			}
+			avatarUrl = user.GetWebAvatarUrl()
 		}
 		return ArticlesSimpleDto{
 			Id:             t.Id,

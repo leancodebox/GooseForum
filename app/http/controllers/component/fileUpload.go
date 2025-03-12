@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
-	"path/filepath"
 )
 
 // HandleFileUpload 处理文件上传的通用逻辑
@@ -26,8 +25,4 @@ func HandleFileUpload(c *gin.Context, fieldName string) ([]byte, string, error) 
 	}
 
 	return fileData, file.Filename, nil
-}
-
-func FilePath(filename string) string {
-	return filepath.Join("/file/img", filename)
 }

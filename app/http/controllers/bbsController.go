@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"strings"
 	"sync"
 	"time"
@@ -148,19 +149,17 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 				return ""
 			})
 			username := ""
-			avatarUrl := `/api/assets/default-avatar.png`
+			avatarUrl := urlconfig.GetDefaultAvatar()
 			if user, ok := userMap[t.UserId]; ok {
 				username = user.Username
-				if user.AvatarUrl != "" {
-					avatarUrl = component.FilePath(user.AvatarUrl)
-				}
+				avatarUrl = user.GetWebAvatarUrl()
 			}
 			return ArticlesSimpleDto{
 				Id:             t.Id,
 				Title:          t.Title,
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 				Username:       username,
-				AvatarUrl:      strings.ReplaceAll(avatarUrl, "\\", "/"),
+				AvatarUrl:      avatarUrl,
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,
 				Category:       FirstOr(categoryNames, "未分类"),
@@ -208,10 +207,10 @@ func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
 	userIds = append(userIds, entity.UserId)
 	userMap := users.GetMapByIds(userIds)
 	author := "陶渊明"
-	avatarUrl := ""
+	avatarUrl := urlconfig.GetDefaultAvatar()
 	if user, ok := userMap[entity.UserId]; ok {
 		author = user.Username
-		avatarUrl = strings.ReplaceAll(component.FilePath(user.AvatarUrl), "\\", "/")
+		avatarUrl = user.GetWebAvatarUrl()
 	}
 	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
 		username := "陶渊明"

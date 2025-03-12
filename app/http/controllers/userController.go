@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"io"
 	"log/slog"
 	"strconv"
@@ -74,7 +75,7 @@ func Register(r RegReq) component.Response {
 		"username":  userEntity.Username,
 		"userId":    userEntity.Id,
 		"token":     token,
-		"avatarUrl": "",
+		"avatarUrl": urlconfig.GetDefaultAvatar(),
 	})
 }
 
@@ -144,10 +145,7 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 	}
 
 	// 处理头像URL
-	avatarUrl := ""
-	if userEntity.AvatarUrl != "" {
-		avatarUrl = component.FilePath(userEntity.AvatarUrl)
-	}
+	avatarUrl := userEntity.GetWebAvatarUrl()
 
 	// 检查用户是否有任意角色（是否是管理员）
 	isAdmin := len(userRoleRs.GetRoleIdsByUserId(userEntity.Id)) > 0
@@ -237,10 +235,7 @@ func GetUserInfo(req GetUserInfoReq) component.Response {
 	userPoint := userPoints.Get(user.Id)
 
 	// 如果有头像，添加域名前缀
-	avatarUrl := ""
-	if user.AvatarUrl != "" {
-		avatarUrl = component.FilePath(user.AvatarUrl)
-	}
+	avatarUrl := user.GetWebAvatarUrl()
 
 	return component.SuccessResponse(UserInfoShow{
 		Username:  user.Username,
@@ -313,7 +308,7 @@ func UploadAvatar(c *gin.Context) {
 	}
 
 	c.JSON(200, component.SuccessData(map[string]string{
-		"avatarUrl": component.FilePath(fileEntity.Name),
+		"avatarUrl": urlconfig.FilePath(fileEntity.Name),
 	}))
 }
 

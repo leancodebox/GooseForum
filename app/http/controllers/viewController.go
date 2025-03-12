@@ -19,7 +19,6 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -147,10 +146,7 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 	}
 	//userPoint := userPoints.Get(user.Id)
 	// 如果有头像，添加域名前缀
-	avatarUrl := "/file/img/default.png"
-	if user.AvatarUrl != "" {
-		avatarUrl = strings.ReplaceAll(component.FilePath(user.AvatarUrl), "\\", "/")
-	}
+	avatarUrl := user.GetWebAvatarUrl()
 
 	return UserInfoShow{
 		UserId:     userId,
