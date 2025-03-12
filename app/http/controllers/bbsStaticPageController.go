@@ -289,9 +289,6 @@ func errorPage(c *gin.Context, title, message string) {
 func LoginPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.gohtml", gin.H{"title": "登录 - GooseForum", "User": GetLoginUser(c)})
 }
-func Notifications(c *gin.Context) {
-	c.HTML(http.StatusOK, "notifications.gohtml", gin.H{"title": "消息通知 - GooseForum", "User": GetLoginUser(c)})
-}
 
 func UserProfile(c *gin.Context) {
 	c.HTML(http.StatusOK, "user_profile.gohtml", gin.H{"title": "用户主页 - GooseForum", "User": GetLoginUser(c)})
