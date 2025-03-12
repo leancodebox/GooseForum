@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/userStore'
-import type { UserInfo } from '@/stores/userStore'
 import axiosInstance from '@/utils/axiosInstance'
 import { enqueueMessage } from '@/utils/messageManager'
 
@@ -20,6 +19,7 @@ const userForm = ref({
 })
 
 // 初始化用户数据
+// 移除 onMounted 中的 fetchUserArticles 调用
 onMounted(async () => {
   if (userStore.userInfo) {
     userForm.value = {
@@ -29,6 +29,14 @@ onMounted(async () => {
       website: userStore.userInfo.website,
       signature: userStore.userInfo.signature,
     }
+  }
+})
+
+// 添加 watch 监听标签切换
+import { watch } from 'vue'
+
+watch(activeTab, async (newTab) => {
+  if (newTab === 'articles' && articles.value.length === 0) {
     await fetchUserArticles()
   }
 })
