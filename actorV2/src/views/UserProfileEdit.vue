@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import axiosInstance from '@/utils/axiosInstance'
 import { enqueueMessage } from '@/utils/messageManager'
 
+// 定义文章接口
+interface Article {
+  id: number
+  title: string
+  content: string
+  createTime: string
+  viewCount: number
+  commentCount: number
+}
+
 const userStore = useUserStore()
-const activeTab = ref('profile') // 'profile' 或 'articles'
-const articles = ref([])
+const activeTab = ref('profile')
+const articles = ref<Article[]>([])
 const isUploading = ref(false)
 
 // 用户信息表单
@@ -32,8 +42,6 @@ onMounted(async () => {
   }
 })
 
-// 添加 watch 监听标签切换
-import { watch } from 'vue'
 
 watch(activeTab, async (newTab) => {
   if (newTab === 'articles' && articles.value.length === 0) {
