@@ -128,6 +128,19 @@
             margin: 40px 0;
         }
 
+        /* 添加媒体查询以处理小屏幕 */
+        @media (max-width: 768px) {
+            .community-stats {
+                grid-template-columns: repeat(2, 1fr); /* 在小屏幕上显示两列 */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .community-stats {
+                grid-template-columns: 1fr; /* 在超小屏幕上显示一列 */
+            }
+        }
+
         .stat-card {
             background: var(--card-bg-color);
             border-radius: 10px;
