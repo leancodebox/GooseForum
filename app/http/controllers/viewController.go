@@ -153,10 +153,11 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 	}
 
 	return UserInfoShow{
-		UserId:    userId,
-		Username:  user.Username,
-		Prestige:  user.Prestige,
-		AvatarUrl: avatarUrl,
+		UserId:     userId,
+		Username:   user.Username,
+		Prestige:   user.Prestige,
+		AvatarUrl:  avatarUrl,
+		CreateTime: user.CreatedAt,
 		//UserPoint: userPoint.CurrentPoints,
 	}
 }
@@ -308,7 +309,7 @@ func UserProfile(c *gin.Context) {
 		"Author":      showUser,
 		"User":        GetLoginUser(c),
 		"title":       "GooseForum",
-		"description": "GooseForum的首页",
+		"description": "GooseForum",
 	}
 	c.HTML(http.StatusOK, "user_profile.gohtml", templateData)
 }

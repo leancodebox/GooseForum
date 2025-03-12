@@ -251,11 +251,12 @@ func GetUserInfo(req GetUserInfoReq) component.Response {
 }
 
 type UserInfoShow struct {
-	UserId    uint64 `json:"userId,omitempty"`
-	Username  string `json:"username"`
-	Prestige  int64  `json:"prestige"`
-	AvatarUrl string `json:"avatarUrl"`
-	UserPoint int64  `json:"userPoint"`
+	UserId     uint64    `json:"userId,omitempty"`
+	Username   string    `json:"username"`
+	Prestige   int64     `json:"prestige"`
+	AvatarUrl  string    `json:"avatarUrl"`
+	UserPoint  int64     `json:"userPoint"`
+	CreateTime time.Time `json:"createTime"`
 }
 
 // UploadAvatar 头像上传处理函数
