@@ -123,7 +123,8 @@ window.addEventListener('resize', function () {
               <span class="username">{{ userStore.userInfo.username }}</span>
             </button>
             <div class="dropdown-menu">
-              <a href="/user/profile">个人主页</a>
+              <!-- 将个人主页的链接改为 -->
+              <a href="/user/profile/edit">个人主页</a>
               <a href="/user/settings">设置</a>
               <a href="#" onclick="handleLogout()">退出</a>
             </div>
