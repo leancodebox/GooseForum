@@ -3,7 +3,7 @@ package urlconfig
 import "path/filepath"
 
 func GetDefaultAvatar() string {
-	return `/api/assets/default-avatar.png`
+	return `/static/pic/default-avatar.png`
 }
 
 func FilePath(filename string) string {

@@ -81,7 +81,7 @@ const truncateUsername = computed(() => {
           round
           v-else
           :size="32"
-          :src="userStore.userInfo.avatarUrl || '/api/assets/default-avatar.png'"
+          :src="userStore.userInfo.avatarUrl || '/static/pic/default-avatar.png'"
       />
       <div style="width: 5px"></div>
       {{ userStore.userInfo.username }}

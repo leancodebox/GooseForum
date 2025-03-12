@@ -64,7 +64,7 @@ watch(() => props.userId, (newId) => {
             round
             :size="60"
             v-else
-            :src="userInfo.avatarUrl || '/api/assets/default-avatar.png'"
+            :src="userInfo.avatarUrl || '/static/pic/default-avatar.png'"
         />
         <n-flex vertical style="margin-left: 12px; flex: 1;">
           <span class="username">{{ userInfo.username }}</span>

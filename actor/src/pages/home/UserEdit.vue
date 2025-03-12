@@ -416,7 +416,7 @@ async function handleChangePassword() {
               <n-space vertical>
                 <n-image
                     width="100"
-                    :src="avatarUrl || '/api/assets/default-avatar.png'"
+                    :src="avatarUrl || '/static/pic/default-avatar.png'"
                     :preview-disabled="!avatarUrl"
                     object-fit="cover"
                     :round="true"

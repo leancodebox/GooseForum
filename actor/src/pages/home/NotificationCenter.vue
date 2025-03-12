@@ -261,7 +261,7 @@ onUnmounted(() => {
                         <n-avatar
                             round
                             size="small"
-                            :src="notification.payload.actorAvatarUrl || '/api/assets/default-avatar.png'"
+                            :src="notification.payload.actorAvatarUrl || '/static/pic/default-avatar.png'"
                         />
                         <n-flex align="center">
                           <n-text strong>{{ notification.payload.actorName }}</n-text>

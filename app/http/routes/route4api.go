@@ -45,7 +45,6 @@ func auth(ginApp *gin.Engine) {
 		POST("login", ginUpP(controllers.Login)).
 		GET("get-captcha", ginUpNP(controllers.GetCaptcha)).
 		POST("get-user-info-show", ginUpP(controllers.GetUserInfo))
-
 	// 登陆状态下的用户操作
 	ginApp.Group("api").Use(middleware.JWTAuth4Gin).
 		GET("get-user-info", UpButterReq(controllers.UserInfo)).
@@ -53,13 +52,6 @@ func auth(ginApp *gin.Engine) {
 		POST("invitation", UpButterReq(controllers.Invitation)).
 		POST("upload-avatar", controllers.UploadAvatar).
 		POST("change-password", UpButterReq(controllers.ChangePassword))
-
-	// 静态头像地址
-	ginApp.GET("/api/assets/default-avatar.png",
-		middleware.BrowserCache,
-		func(context *gin.Context) {
-			context.Data(http.StatusOK, "image/png", assert.GetDefaultAvatar())
-		})
 	// 添加激活路由
 	ginApp.GET("api/activate", controllers.ActivateAccount)
 }
