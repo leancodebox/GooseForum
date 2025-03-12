@@ -47,25 +47,29 @@ export const submitArticle = async <T>(article: any): Promise<T> => {
 
 // Mock 获取用户信息
 export const getUserInfo = async () => {
-    // // 模拟用户数据
-    // return new Promise((resolve) => {
-    //     setTimeout(() => {
-    //         resolve({
-    //             avatarUrl: '/file/img/avatars/avatar_1_1736935027/a93ee576-ff66-442a-8def-ac52e56872a3.png',
-    //             bio: '',
-    //             email: 'abandon1a2b@outlook.com',
-    //             isAdmin: true,
-    //             nickname: '昵称昵称妮妮称',
-    //             signature: '',
-    //             userId: 1,
-    //             username: 'abandon',
-    //             website: ''
-    //         });
-    //     }, 1); // 模拟网络延迟
-    // });
-
     try {
         return axiosInstance.get("/get-user-info")
     } catch (error) {
     }
 };
+
+
+// 获取通知列表
+export function getNotificationList(params: any) {
+    return axiosInstance.post('/bbs/notification/list', params)
+}
+
+// 获取未读通知数量
+export function getUnreadCount() {
+    return axiosInstance.get('/bbs/notification/unread-count')
+}
+
+// 标记通知为已读
+export function markAsRead(params: any) {
+    return axiosInstance.post('/bbs/notification/mark-read', params)
+}
+
+// 标记所有通知为已读
+export function markAllAsRead() {
+    return axiosInstance.post('/bbs/notification/mark-all-read')
+}

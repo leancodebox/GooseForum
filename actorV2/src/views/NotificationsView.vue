@@ -5,6 +5,7 @@ import { NButton, NEmpty, NPagination, NSpace, NCard, NBadge } from 'naive-ui';
 import type { NotificationItem } from '@/types/notificationInterfaces';
 import { getNotifications, markAsRead, markAllAsRead } from '@/utils/notificationService';
 import { NTabs, NTab } from 'naive-ui';
+import {getNotificationList} from "@/utils/articleService.ts";
 
 const router = useRouter();
 const notifications = ref<NotificationItem[]>([]);
@@ -17,6 +18,12 @@ const activeTab = ref('unread'); // 'all' 或 'unread'
 const loadNotifications = async () => {
   loading.value = true;
   try {
+    let resp   = await getNotificationList({
+      page: currentPage.value,
+      pageSize: pageSize.value,
+      unreadOnly: activeTab.value === 'unread'
+    })
+    console.log(resp)
     const response = await getNotifications(
       currentPage.value,
       pageSize.value,

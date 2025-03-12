@@ -179,7 +179,6 @@ header {
 }
 
 nav {
-  max-width: 1440px;
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;

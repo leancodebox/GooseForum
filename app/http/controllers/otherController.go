@@ -4,7 +4,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/assert"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"io/fs"
-	"log/slog"
 	"net/http"
 	"path"
 	"strings"
@@ -45,14 +44,5 @@ func NotFound(c *gin.Context) {
 	c.JSON(http.StatusNotFound, component.DataMap{
 		"code": errorCodeNotFound,
 		"msg":  errorMessageNotFound,
-	})
-}
-
-func About() component.Response {
-	for i := 1; i <= 9; i++ {
-		slog.Info("infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo")
-	}
-	return component.SuccessResponse(component.DataMap{
-		"message": "Hello~ Now you see a json from php9.0",
 	})
 }

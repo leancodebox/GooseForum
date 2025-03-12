@@ -148,7 +148,7 @@ func GetArticlesPage(param GetArticlesPageRequest) component.Response {
 				return ""
 			})
 			username := ""
-			avatarUrl := ""
+			avatarUrl := `/api/assets/default-avatar.png`
 			if user, ok := userMap[t.UserId]; ok {
 				username = user.Username
 				if user.AvatarUrl != "" {
