@@ -189,6 +189,8 @@ func RenderIndex(c *gin.Context) {
 		"LatestArticles":   articlesSmallEntity2Dto(last),
 		"Stats":            GetSiteStatisticsData(),
 		"User":             GetLoginUser(c),
+		"title":            "GooseForum",
+		"description":      "GooseForum的首页",
 	}
 	c.HTML(http.StatusOK, "home.gohtml", templateData)
 }
@@ -218,7 +220,7 @@ func RenderArticlesPage(c *gin.Context) {
 	})
 	// 构建模板数据
 	templateData := gin.H{
-		"title":               "文章列表",
+		"title":               "GooseForum",
 		"description":         "GooseForum的文章列表页面",
 		"year":                time.Now().Year(),
 		"Data":                result.List,
