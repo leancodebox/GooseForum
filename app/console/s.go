@@ -1,6 +1,7 @@
 package console
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/robfig/cron/v3"
@@ -16,6 +17,7 @@ func RunJob() {
 	slog.Info("start cron")
 	spec, err := c.AddFunc("* * * * *", upCmd(func() {
 		dbconnect.BackupSQLiteHandle()
+		db4fileconnect.BackupSQLiteHandle()
 	}))
 	slog.Info("reg cron", "spec", spec, "err", err)
 	runCron = true

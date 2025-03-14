@@ -31,6 +31,7 @@ type Connect struct {
 	Config  Config
 	Connect *gorm.DB
 	Error   error
+	Init    bool
 }
 
 func (itself *Connect) IsSqlite() bool {
@@ -70,7 +71,7 @@ func GetConnect(config Config) Connect {
 
 	if err != nil {
 		slog.Error(err.Error())
-		return Connect{config, dbIns, err}
+		return Connect{Config: config, Connect: dbIns, Error: err}
 	}
 
 	if debug {
@@ -82,7 +83,7 @@ func GetConnect(config Config) Connect {
 	sqlDB, err := dbIns.DB()
 	if err != nil {
 		slog.Error(err.Error())
-		return Connect{config, dbIns, nil}
+		return Connect{Config: config, Connect: dbIns, Error: err}
 	}
 	// 设置最大连接数
 	sqlDB.SetMaxOpenConns(config.MaxOpenConnections)
@@ -90,7 +91,7 @@ func GetConnect(config Config) Connect {
 	sqlDB.SetMaxIdleConns(config.MaxIdleConnections)
 	// 设置每个链接的过期时间
 	sqlDB.SetConnMaxLifetime(time.Duration(config.MaxLifeSeconds) * time.Second)
-	return Connect{config, dbIns, nil}
+	return Connect{Config: config, Connect: dbIns, Error: err}
 }
 
 func connectMysqlDB(dbUrl string) (*gorm.DB, error) {

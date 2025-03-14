@@ -35,7 +35,7 @@ func migration(migration bool) {
 	// 自动迁移
 	var err error
 	if !dbconnect.IsSqlite() {
-		slog.Info("非sqlite不执行迁移")
+		slog.Info("dbconnect 非sqlite不执行迁移")
 		return
 	} else {
 		db := dbconnect.Connect()
@@ -56,14 +56,14 @@ func migration(migration bool) {
 			&users.Entity{},
 			&taskQueue.Entity{},
 		); err != nil {
-			slog.Error("migration err", "err", err)
+			slog.Error("dbconnect migration err", "err", err)
 		} else {
-			slog.Info("migration end")
+			slog.Info("dbconnect migration end")
 		}
 	}
 
 	if !db4fileconnect.IsSqlite() {
-		slog.Info("非sqlite不执行迁移")
+		slog.Info("db4fileconnect 非sqlite不执行迁移")
 		return
 	} else {
 		// 因为图片数据库比较大，所以单独迁移
@@ -71,9 +71,9 @@ func migration(migration bool) {
 		if err = db4file.AutoMigrate(
 			&filedata.Entity{},
 		); err != nil {
-			slog.Error("migration err", "err", err)
+			slog.Error("db4fileconnect migration err", "err", err)
 		} else {
-			slog.Info("migration end")
+			slog.Info("db4fileconnect migration end")
 		}
 	}
 }

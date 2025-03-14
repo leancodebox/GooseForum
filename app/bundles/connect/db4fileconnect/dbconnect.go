@@ -2,7 +2,6 @@ package db4fileconnect
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/sqlconnect"
-	"log/slog"
 	"sync"
 
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
@@ -15,41 +14,29 @@ import (
 //}
 
 var (
-	isSqlite bool = false
-	once          = new(sync.Once)
+	once = new(sync.Once)
 )
 
-// DB gorm.DB 对象
-var dbIns *gorm.DB
+var dbConnect sqlconnect.Connect
 
 func Connect() *gorm.DB {
 	once.Do(func() {
 		dbConfig := preferences.GetExclusivePreferences("db.file")
-		res := sqlconnect.GetConnectByPreferences(dbConfig)
-		dbIns = res.Connect
-		isSqlite = res.IsSqlite()
+		dbConnect = sqlconnect.GetConnectByPreferences(dbConfig)
 	})
-	return dbIns
-}
-func IsSqlite() bool {
-	Connect()
-	return isSqlite
+	return dbConnect.Connect
 }
 
+func IsSqlite() bool {
+	Connect()
+	return dbConnect.IsSqlite()
+}
+
+// Close 关闭数据库连接
 func Close() {
-	if dbIns == nil {
-		return
-	}
-	db, err := dbIns.DB()
-	if err != nil {
-		return
-	}
-	if db == nil {
-		return
-	}
-	if err = db.Close(); err != nil {
-		slog.Error("dbClose", "err", err)
-	} else {
-		slog.Info("dbCloseSuccess")
-	}
+	dbConnect.Close()
+}
+
+func BackupSQLiteHandle() {
+	dbConnect.BackupSQLiteHandle()
 }
