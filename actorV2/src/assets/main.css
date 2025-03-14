@@ -644,17 +644,6 @@ footer {
 }
 
 
-@keyframes platinumGlow {
-  0%, 100% {
-    background: #331e70;
-    border-color: #1a0d47;
-  }
-  50% {
-    background: #007bff; /* 更改为蓝色 */
-    border-color: #0056b3; /* 更深的蓝色 */
-  }
-}
-
 .sponsor-tag.platinum {
   color: #ffffff; /* 白色文字 */
   background: #331e70; /* 较深的紫色背景 */
