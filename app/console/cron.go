@@ -3,6 +3,7 @@ package console
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/robfig/cron/v3"
 	"log/slog"
@@ -15,7 +16,8 @@ var runCron = false
 
 func RunJob() {
 	slog.Info("start cron")
-	spec, err := c.AddFunc("* * * * *", upCmd(func() {
+	backupSpec := preferences.Get("spec", "0 3 * * *")
+	spec, err := c.AddFunc(backupSpec, upCmd(func() {
 		dbconnect.BackupSQLiteHandle()
 		db4fileconnect.BackupSQLiteHandle()
 	}))
@@ -33,6 +35,11 @@ func StopJob() {
 
 func upCmd(cmd func()) func() {
 	return func() {
+		defer func() {
+			if p := recover(); p != nil {
+				slog.Error("cron panic ", "p", p)
+			}
+		}()
 		cmd()
 	}
 }

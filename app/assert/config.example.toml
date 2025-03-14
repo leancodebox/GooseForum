@@ -4,13 +4,13 @@ env = "production" # APP_ENV in local,production
 debug = true
 enabled = false
 
-[footer]
-url = "https://github.com/leanCodeBox/GooseForum"
-text = "Powered by GooseForum"
-
 [server]
 url = "http://localhost"
 port = 99
+
+[footer]
+url = "https://github.com/leanCodeBox/GooseForum"
+text = "Powered by GooseForum"
 
 [jwtopt]
 signingKey="mq+ZeGafL+b1xdC0u9vSVg=="
@@ -24,11 +24,17 @@ password = "your-password"
 from_name = "GooseForum"
 
 [db]
-migration = "on" # OPEN_MIGRATION in on,off
+migration = "on" # on,off
+backupSqlite = true
+backupDir = "./storage/databasebackup/"
+keep = 7
+spec = "0 3 * * *"
+
 [db.default]
 connection = "sqlite"# in mysql sqlite
 url = "db_user:db_pass@tcp(db_host:3306)/db_name?charset=utf8mb4&parseTime=True&loc=Local"
 path = "./storage/database/sqlite.db"# :memory:|./storage/database/sqlite.db
+
 maxIdleConnections = 50
 maxOpenConnections = 50
 maxLifeSeconds = 300
@@ -37,9 +43,11 @@ maxLifeSeconds = 300
 connection = "sqlite"# in mysql sqlite
 url = "root:root_password@tcp(127.0.0.1:3306)/goose_forum?charset=utf8mb4&parseTime=True&loc=Local"
 path = "./storage/database/file.db"# :memory:|./storage/database/sqlite.db
+
 maxIdleConnections = 50
 maxOpenConnections = 50
 maxLifeSeconds = 300
+
 
 [log]
 type = "stdout"# LOG_TYPE stdout,file
