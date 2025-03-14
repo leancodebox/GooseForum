@@ -61,7 +61,7 @@ func runWeb(_ *cobra.Command, _ []string) {
 }
 
 func ginServe() {
-	RunJob()
+	go RunJob()
 	defer StopJob()
 	defer logging.Shutdown()
 	defer db4fileconnect.Close()

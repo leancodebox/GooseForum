@@ -3,6 +3,7 @@ package dbconnect
 import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/sqlconnect"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/fileopt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -68,7 +69,8 @@ func BackupSQLiteHandle() {
 	if !preferences.GetBool("db.backupSqlite", false) {
 		return
 	}
-	backupDir := preferences.Get("db.backupPath")
+	backupDir := preferences.Get("db.backupDir")
+	slog.Info("backupDir DirExistOrCreate", "err", fileopt.DirExistOrCreate(backupDir))
 	err := backupSQLite(dbIns, backupDir)
 	slog.Info("backupSQLite", "err", err)
 	cleanOldBackups(backupDir, 7)
