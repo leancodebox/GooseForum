@@ -34,7 +34,7 @@ func (itself *Connect) GenerateBackupPath(backupDir string) string {
 
 	// 生成带时间戳的备份文件名
 	timestamp := time.Now().Format("20060102_150405")
-	return filepath.Join(backupDir, fmt.Sprintf("%s_%s.db", nameWithoutExt, timestamp))
+	return filepath.Join(backupDir, fmt.Sprintf("%s_%s.db", timestamp, nameWithoutExt))
 }
 
 func (itself *Connect) BackupSQLiteHandle() {
@@ -49,7 +49,8 @@ func (itself *Connect) BackupSQLiteHandle() {
 	slog.Info("backupDir DirExistOrCreate", "err", fileopt.DirExistOrCreate(backupDir))
 	err := backupSQLite(itself.Connect, backupPath)
 	slog.Info("backupSQLite", "err", err)
-	cleanOldBackups(backupPath, 7)
+	keep := max(preferences.GetInt("db.keep", 7), 1)
+	cleanOldBackups(itself.Config.DbPath, keep)
 }
 
 func backupSQLite(db *gorm.DB, backupPath string) error {
@@ -64,7 +65,12 @@ func backupSQLite(db *gorm.DB, backupPath string) error {
 
 func cleanOldBackups(sourcePath string, keep int) {
 	// 获取同源的所有备份文件
-	files, err := filepath.Glob(fmt.Sprintf("%s/*%s*.db", getBackUpDir(), filepath.Base(sourcePath)))
+	// 提取源文件名（不含扩展名）
+	baseName := filepath.Base(sourcePath)
+	ext := filepath.Ext(baseName)
+	nameWithoutExt := strings.TrimSuffix(baseName, ext)
+	searchFileName := filepath.Join(getBackUpDir(), fmt.Sprintf("*%s*.db", nameWithoutExt))
+	files, err := filepath.Glob(searchFileName)
 	if err != nil {
 		slog.Error("cleanOldBackups err", "err", err)
 		return

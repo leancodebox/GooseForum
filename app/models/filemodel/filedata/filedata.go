@@ -12,11 +12,12 @@ const fieldCreateTime = "create_time"
 const fieldUpdateTime = "update_time"
 
 type Entity struct {
-	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`          // 主键
-	Name      string    `gorm:"column:name;uniqueIndex;type:varchar(256);not null;" json:"name"` // 添加唯一索引
-	Type      string    `gorm:"column:assert_type;index;type:varchar(64);not null;" json:"type"` //
-	Data      []byte    `gorm:"column:content;type:BLOB;" json:"data"`                           // 内容
-	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`        //
+	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      // 主键
+	Name      string    `gorm:"column:name;uniqueIndex;type:varchar(256);not null;" json:"name"`             // 添加唯一索引
+	Type      string    `gorm:"column:assert_type;index;type:varchar(64);not null;" json:"type"`             //
+	Data      []byte    `gorm:"column:content;type:BLOB;" json:"data"`                                       // 内容
+	UserId    uint64    `gorm:"column:user_id;index;type:bigint unsigned;not null;default:0;" json:"userId"` //
+	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`                    //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 
