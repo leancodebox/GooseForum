@@ -72,9 +72,6 @@ CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build
 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build
 ```
 
-# todo
+# Todo
 
-1 文章管理页面细化
-2 文章类型细化
- 文章列表，搜索，展示 
-
+[TodoList](./TodoList.md)
