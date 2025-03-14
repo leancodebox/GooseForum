@@ -9,7 +9,7 @@ const on = "on"
 const off = "off"
 
 func UseMigration() bool {
-	openMigration := preferences.GetString("db.migration")
+	openMigration := preferences.GetString("db.migration", on)
 	return openMigration == on
 }
 

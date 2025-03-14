@@ -29,42 +29,51 @@ func M() {
 }
 
 func migration(migration bool) {
+	if !migration {
+		return
+	}
 	// 自动迁移
 	var err error
 	if !dbconnect.IsSqlite() {
 		slog.Info("非sqlite不执行迁移")
 		return
-	}
-	db := dbconnect.Connect()
-	if err = db.AutoMigrate(
-		&articleCategory.Entity{},
-		&articleCategoryRs.Entity{},
-		&articles.Entity{},
-		&articleTag.Entity{},
-		&eventNotification.Entity{},
-		&optRecord.Entity{},
-		&pointsRecord.Entity{},
-		&reply.Entity{},
-		&role.Entity{},
-		&rolePermissionRs.Entity{},
-		&userFollow.Entity{},
-		&userPoints.Entity{},
-		&userRoleRs.Entity{},
-		&users.Entity{},
-		&taskQueue.Entity{},
-	); err != nil {
-		slog.Error("migration err", "err", err)
 	} else {
-		slog.Info("migration end")
+		db := dbconnect.Connect()
+		if err = db.AutoMigrate(
+			&articleCategory.Entity{},
+			&articleCategoryRs.Entity{},
+			&articles.Entity{},
+			&articleTag.Entity{},
+			&eventNotification.Entity{},
+			&optRecord.Entity{},
+			&pointsRecord.Entity{},
+			&reply.Entity{},
+			&role.Entity{},
+			&rolePermissionRs.Entity{},
+			&userFollow.Entity{},
+			&userPoints.Entity{},
+			&userRoleRs.Entity{},
+			&users.Entity{},
+			&taskQueue.Entity{},
+		); err != nil {
+			slog.Error("migration err", "err", err)
+		} else {
+			slog.Info("migration end")
+		}
 	}
 
-	// 因为图片数据库比较大，所以单独迁移
-	db4file := db4fileconnect.Connect()
-	if err = db4file.AutoMigrate(
-		&filedata.Entity{},
-	); err != nil {
-		slog.Error("migration err", "err", err)
+	if !db4fileconnect.IsSqlite() {
+		slog.Info("非sqlite不执行迁移")
+		return
 	} else {
-		slog.Info("migration end")
+		// 因为图片数据库比较大，所以单独迁移
+		db4file := db4fileconnect.Connect()
+		if err = db4file.AutoMigrate(
+			&filedata.Entity{},
+		); err != nil {
+			slog.Error("migration err", "err", err)
+		} else {
+			slog.Info("migration end")
+		}
 	}
 }

@@ -1,9 +1,15 @@
 package dbconnect
 
 import (
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/sqlconnect"
 	"log/slog"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 
@@ -52,5 +58,57 @@ func Close() {
 		slog.Error("dbClose", "err", err)
 	} else {
 		slog.Info("dbCloseSuccess")
+	}
+}
+
+func BackupSQLiteHandle() {
+	if !IsSqlite() {
+		return
+	}
+	if !preferences.GetBool("db.backupSqlite", false) {
+		return
+	}
+	backupDir := preferences.Get("db.backupPath")
+	err := backupSQLite(dbIns, backupDir)
+	slog.Info("backupSQLite", "err", err)
+	cleanOldBackups(backupDir, 7)
+}
+
+func backupSQLite(db *gorm.DB, backupDir string) error {
+	// 生成带时间戳的备份文件名
+	timestamp := time.Now().Format("20060102_150405")
+	backupPath := filepath.Join(backupDir, fmt.Sprintf("backup_%s.db", timestamp))
+
+	// 使用 SQLite 备份 API
+	result := db.Exec("VACUUM main INTO ?", backupPath)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func cleanOldBackups(backupDir string, maxBackups int) {
+	files, _ := os.ReadDir(backupDir)
+	var backupFiles []os.DirEntry
+
+	// 筛选备份文件（按命名规则）
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), "backup_") && strings.HasSuffix(file.Name(), ".db") {
+			backupFiles = append(backupFiles, file)
+		}
+	}
+
+	// 按修改时间排序（旧文件在前）
+	sort.Slice(backupFiles, func(i, j int) bool {
+		infoI, _ := backupFiles[i].Info()
+		infoJ, _ := backupFiles[j].Info()
+		return infoI.ModTime().Before(infoJ.ModTime())
+	})
+
+	// 删除超量的旧备份
+	if len(backupFiles) > maxBackups {
+		for i := 0; i < len(backupFiles)-maxBackups; i++ {
+			os.Remove(filepath.Join(backupDir, backupFiles[i].Name()))
+		}
 	}
 }

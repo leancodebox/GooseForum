@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"log"
 	"log/slog"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
-	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/routes"
 	"github.com/leancodebox/GooseForum/app/service/setupservice"
@@ -61,6 +61,12 @@ func runWeb(_ *cobra.Command, _ []string) {
 }
 
 func ginServe() {
+	RunJob()
+	defer StopJob()
+	defer logging.Shutdown()
+	defer db4fileconnect.Close()
+	defer dbconnect.Close()
+
 	port := preferences.GetString("server.port", 8080)
 	isDebug := setting.IsDebug()
 	var engine *gin.Engine
@@ -104,9 +110,6 @@ func ginServe() {
 		slog.Info("Server Shutdown:", err)
 	}
 	slog.Info("Server exiting")
-	dbconnect.Close()
-	db4fileconnect.Close()
-	logging.Shutdown()
 }
 
 func setupServe() error {
