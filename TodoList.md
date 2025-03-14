@@ -25,6 +25,7 @@ git push --set-upstream origin master
 - 6 赞助商编辑
 - 7 私信功能
 - 8 积分消费功能
+- [x] db备份
 
 ```GO
 {{/*                        <a href="/actor/#/home/bbs/articlesDetail?id={{.articleId}}" class="comment-btn">*/}}
