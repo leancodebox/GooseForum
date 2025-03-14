@@ -59,4 +59,3 @@ maxBackUps = 30 # 最大保留文件数量
 
 [PATH]
 hexo = ""
-workspace = ""
