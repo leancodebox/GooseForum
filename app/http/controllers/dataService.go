@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
@@ -18,7 +17,6 @@ func getRecommendedArticles() []articles.SmallEntity {
 	data, _ := articleCache.GetOrLoad(
 		"hot_articles",
 		func() ([]articles.SmallEntity, error) {
-			fmt.Println("重新查询")
 			return articles.GetRecommendedArticles(4)
 		},
 		5*time.Minute, // 缓存5分钟
