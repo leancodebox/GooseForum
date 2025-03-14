@@ -56,9 +56,9 @@ func SaveFileByGinContext(c *gin.Context) {
 
 	// 生成存储路径
 	folderName := time.Now().Format("2006/01/02")
-
+	userId := c.GetUint64(`userId`)
 	// 保存文件
-	entity, err := filedata.SaveFileFromUpload(fileData, file.Filename, folderName)
+	entity, err := filedata.SaveFileFromUpload(userId, fileData, file.Filename, folderName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

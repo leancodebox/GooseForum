@@ -16,7 +16,7 @@ var runCron = false
 
 func RunJob() {
 	slog.Info("start cron")
-	backupSpec := preferences.Get("spec", "0 3 * * *")
+	backupSpec := preferences.Get("db.spec", "0 3 * * *")
 	spec, err := c.AddFunc(backupSpec, upCmd(func() {
 		dbconnect.BackupSQLiteHandle()
 		db4fileconnect.BackupSQLiteHandle()

@@ -62,11 +62,12 @@ func all() (entities []*Entity) {
 	return
 }
 
-func SaveFile(name string, fileType string, data []byte) (*Entity, error) {
+func SaveFile(userId uint64, name string, fileType string, data []byte) (*Entity, error) {
 	entity := &Entity{
-		Name: name,
-		Type: fileType,
-		Data: data,
+		Name:   name,
+		Type:   fileType,
+		Data:   data,
+		UserId: userId,
 	}
 	affected := CreateOrSave(entity)
 	if affected == 0 {
@@ -92,7 +93,7 @@ func GetFileByName(name string) (*Entity, error) {
 }
 
 // SaveFileFromUpload 处理文件上传的通用方法
-func SaveFileFromUpload(fileData []byte, filename string, customPath string) (*Entity, error) {
+func SaveFileFromUpload(userId uint64, fileData []byte, filename string, customPath string) (*Entity, error) {
 	// 验证文件大小
 	if len(fileData) > MaxFileSize {
 		return nil, fmt.Errorf("file size exceeds maximum limit of 2MB")
@@ -112,7 +113,7 @@ func SaveFileFromUpload(fileData []byte, filename string, customPath string) (*E
 		fileExt)
 
 	// 保存文件
-	return SaveFile(newFilename, contentType, fileData)
+	return SaveFile(userId, newFilename, contentType, fileData)
 }
 
 // 在 supportedImageTypes 映射后添加新的常量
@@ -128,5 +129,5 @@ func SaveAvatar(userId uint64, fileData []byte, filename string) (*Entity, error
 		userId,
 		time.Now().Unix())
 
-	return SaveFileFromUpload(fileData, filename, avatarPath)
+	return SaveFileFromUpload(userId, fileData, filename, avatarPath)
 }
