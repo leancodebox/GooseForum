@@ -6,6 +6,97 @@
 
 <link rel="stylesheet"
       href="/static/css/github-markdown.min.css">
+<style>
+    .markdown-body {
+        box-sizing: border-box;
+        margin: 0 auto;
+        color: var(--text-color);
+        background-color: var(--card-bg);
+    }
+
+    /* 深色主题下的 markdown 样式覆盖 */
+    [data-theme="dark"] .markdown-body {
+        color-scheme: dark;
+        --color-prettylights-syntax-comment: #8b949e;
+        --color-prettylights-syntax-constant: #79c0ff;
+        --color-prettylights-syntax-entity: #d2a8ff;
+        --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+        --color-prettylights-syntax-entity-tag: #7ee787;
+        --color-prettylights-syntax-keyword: #ff7b72;
+        --color-prettylights-syntax-string: #a5d6ff;
+        --color-prettylights-syntax-variable: #ffa657;
+        --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
+        --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+        --color-prettylights-syntax-invalid-illegal-bg: #8e1519;
+        --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+        --color-prettylights-syntax-carriage-return-bg: #b62324;
+        --color-prettylights-syntax-string-regexp: #7ee787;
+        --color-prettylights-syntax-markup-list: #f2cc60;
+        --color-prettylights-syntax-markup-heading: #1f6feb;
+        --color-prettylights-syntax-markup-italic: #c9d1d9;
+        --color-prettylights-syntax-markup-bold: #c9d1d9;
+        --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
+        --color-prettylights-syntax-markup-deleted-bg: #67060c;
+        --color-prettylights-syntax-markup-inserted-text: #aff5b4;
+        --color-prettylights-syntax-markup-inserted-bg: #033a16;
+        --color-prettylights-syntax-markup-changed-text: #ffdfb6;
+        --color-prettylights-syntax-markup-changed-bg: #5a1e02;
+        --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+        --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+        --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+        --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+        --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+        --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+        --color-fg-default: #e6edf3;
+        --color-fg-muted: #848d97;
+        --color-fg-subtle: #6e7681;
+        --color-canvas-default: var(--card-bg);
+        --color-canvas-subtle: var(--light-gray);
+        --color-border-default: var(--border-color);
+        --color-border-muted: var(--border-color);
+        --color-neutral-muted: rgba(110, 118, 129, 0.4);
+        --color-accent-fg: #2f81f7;
+        --color-accent-emphasis: #1f6feb;
+        --color-attention-subtle: rgba(187, 128, 9, 0.15);
+        --color-danger-fg: #f85149;
+    }
+
+    [data-theme="dark"] .markdown-body img {
+        background-color: var(--card-bg);
+    }
+
+    [data-theme="dark"] .markdown-body kbd,
+    [data-theme="dark"] .markdown-body code,
+    [data-theme="dark"] .markdown-body pre {
+        background-color: var(--light-gray);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .markdown-body h1,
+    [data-theme="dark"] .markdown-body h2 {
+        border-bottom-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .markdown-body blockquote {
+        color: var(--text-color);
+        opacity: 0.8;
+        border-left-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .markdown-body table tr {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .markdown-body table tr:nth-child(2n) {
+        background-color: var(--light-gray);
+    }
+
+    [data-theme="dark"] .markdown-body table th,
+    [data-theme="dark"] .markdown-body table td {
+        border-color: var(--border-color);
+    }
+</style>
 <main>
     <div class="container">
         <div class="main-content">
@@ -164,16 +255,16 @@
                 </ul>
             </div>
 
-{{/*            <!-- 相关文章推荐 -->*/}}
-{{/*            <div class="sidebar-card">*/}}
-{{/*                <h3>相关文章</h3>*/}}
-{{/*                <ul class="recommended-posts">*/}}
-{{/*                    <li><a href="#">深入理解Go并发编程</a></li>*/}}
-{{/*                    <li><a href="#">Go语言错误处理最佳实践</a></li>*/}}
-{{/*                    <li><a href="#">Go Web框架对比分析</a></li>*/}}
-{{/*                    <li><a href="#">Go语言项目结构设计</a></li>*/}}
-{{/*                </ul>*/}}
-{{/*            </div>*/}}
+            {{/*            <!-- 相关文章推荐 -->*/}}
+            {{/*            <div class="sidebar-card">*/}}
+            {{/*                <h3>相关文章</h3>*/}}
+            {{/*                <ul class="recommended-posts">*/}}
+            {{/*                    <li><a href="#">深入理解Go并发编程</a></li>*/}}
+            {{/*                    <li><a href="#">Go语言错误处理最佳实践</a></li>*/}}
+            {{/*                    <li><a href="#">Go Web框架对比分析</a></li>*/}}
+            {{/*                    <li><a href="#">Go语言项目结构设计</a></li>*/}}
+            {{/*                </ul>*/}}
+            {{/*            </div>*/}}
         </aside>
     </div>
 </main>
@@ -233,6 +324,7 @@
         border-color: var(--primary-color);
         color: white;
     }
+
     .reply-to {
         color: var(--primary-color);
         margin-bottom: 8px;
@@ -310,6 +402,7 @@
         background: var(--primary-color-dark);
         transform: translateY(-1px);
     }
+
     .edit-btn {
         padding: 8px 16px;
         background: var(--primary-color);

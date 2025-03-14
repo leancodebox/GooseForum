@@ -13,9 +13,11 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"github.com/spf13/cast"
 	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
+
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -158,6 +160,7 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 	}
 }
 
+var a = highlighting.Highlighting
 var md = goldmark.New(
 	goldmark.WithExtensions(
 		extension.GFM,
