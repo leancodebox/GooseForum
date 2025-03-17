@@ -8,11 +8,11 @@
         <div class="main-content">
             <div class="articles-list">
                 <div class="category-filter">
-                    <a href="#" class="filter-tag active" data-filter="all">全部</a>
-                    <a href="#" class="filter-tag" data-filter="tech">技术</a>
-                    <a href="#" class="filter-tag" data-filter="share">分享</a>
-                    <a href="#" class="filter-tag" data-filter="qa">问答</a>
-                    <a href="#" class="filter-tag" data-filter="discussion">讨论</a>
+                    <a href="#" class="filter-tag active" data-filter="all" role="button">全部</a>
+                    <a href="#" class="filter-tag" data-filter="tech" role="button">技术</a>
+                    <a href="#" class="filter-tag" data-filter="share" role="button">分享</a>
+                    <a href="#" class="filter-tag" data-filter="qa" role="button">问答</a>
+                    <a href="#" class="filter-tag" data-filter="discussion" role="button">讨论</a>
                 </div>
                 {{range .Data}}
                     <article class="article-item">
@@ -212,6 +212,7 @@
                     }
                 });
                 this.classList.toggle('active');
+                updateUrl();
             } else {
                 // 处理其他标签的选中状态
                 this.classList.toggle('active');
@@ -219,9 +220,20 @@
                 if (allTag.classList.contains('active')) {
                     allTag.classList.remove('active');
                 }
+                updateUrl();
             }
         });
     });
+
+    function updateUrl() {
+        const selectedFilters = Array.from(filterTags)
+            .filter(tag => tag.classList.contains('active') && tag.dataset.filter !== 'all')
+            .map(tag => tag.dataset.filter);
+
+        const queryString = selectedFilters.length > 0 ? `?filters=${selectedFilters.join(',')}` : '';
+        const baseUrl = window.location.pathname; // 获取当前页面的基本 URL
+        window.history.replaceState(null, '', baseUrl + queryString); // 更新 URL
+    }
 </script>
 </body>
 </html>
