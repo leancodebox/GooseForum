@@ -8,11 +8,11 @@
         <div class="main-content">
             <div class="articles-list">
                 <div class="category-filter">
-                    <a href="#" class="filter-tag active">全部</a>
-                    <a href="#" class="filter-tag">技术</a>
-                    <a href="#" class="filter-tag">分享</a>
-                    <a href="#" class="filter-tag">问答</a>
-                    <a href="#" class="filter-tag">讨论</a>
+                    <a href="#" class="filter-tag active" data-filter="all">全部</a>
+                    <a href="#" class="filter-tag" data-filter="tech">技术</a>
+                    <a href="#" class="filter-tag" data-filter="share">分享</a>
+                    <a href="#" class="filter-tag" data-filter="qa">问答</a>
+                    <a href="#" class="filter-tag" data-filter="discussion">讨论</a>
                 </div>
                 {{range .Data}}
                     <article class="article-item">
@@ -197,5 +197,31 @@
         margin: 0 auto;
     }
 </style>
+<script>
+    const filterTags = document.querySelectorAll('.filter-tag');
+    const allTag = document.querySelector('.filter-tag[data-filter="all"]');
+
+    filterTags.forEach(tag => {
+        tag.addEventListener('click', function(event) {
+            event.preventDefault();
+            if (this.dataset.filter === 'all') {
+                // 如果点击的是"全部"，则取消其他标签的选中状态
+                filterTags.forEach(t => {
+                    if (t !== this) {
+                        t.classList.remove('active');
+                    }
+                });
+                this.classList.toggle('active');
+            } else {
+                // 处理其他标签的选中状态
+                this.classList.toggle('active');
+                // 如果"全部"被选中，取消选中状态
+                if (allTag.classList.contains('active')) {
+                    allTag.classList.remove('active');
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>
