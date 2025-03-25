@@ -59,3 +59,8 @@ maxBackUps = 30 # 最大保留文件数量
 
 [PATH]
 hexo = ""
+
+[site]
+metaList="""
+[{"name":"name","content":"content"}]
+"""

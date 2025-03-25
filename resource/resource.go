@@ -2,6 +2,7 @@ package resource
 
 import (
 	"embed"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"html/template"
 	"io/fs"
@@ -32,10 +33,20 @@ func GetFooterLink() map[string]string {
 	}
 }
 
+type MetaItem struct {
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
+
+func GetMetaList() []MetaItem {
+	return jsonopt.Decode[[]MetaItem](preferences.Get("site.metaList", "[]"))
+}
+
 // GetTemplates 返回所有模板
 func GetTemplates() *template.Template {
 	return template.Must(template.New("root").Funcs(template.FuncMap{
 		"getFooterLink": GetFooterLink,
+		"metaList":      GetMetaList,
 	}).ParseFS(templatesFS,
 		"templates/*.gohtml",
 		"templates/*/**.gohtml",
