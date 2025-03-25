@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
@@ -17,6 +19,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
+	"strings"
 
 	"html/template"
 	"log/slog"
@@ -195,6 +198,7 @@ func RenderIndex(c *gin.Context) {
 		"User":             GetLoginUser(c),
 		"title":            "GooseForum",
 		"description":      "GooseForum的首页",
+		"canonicalHref":    buildCanonicalHref(c),
 	}
 	c.HTML(http.StatusOK, "home.gohtml", templateData)
 }
@@ -237,6 +241,7 @@ func RenderArticlesPage(c *gin.Context) {
 		"User":                GetLoginUser(c),
 		"articleCategoryList": articleCategoryList,
 		"recommendedArticles": getRecommendedArticles(),
+		"canonicalHref":       buildCanonicalHref(c),
 	}
 	c.HTML(http.StatusOK, "list.gohtml", templateData)
 }
@@ -276,6 +281,7 @@ func RenderArticleDetail(c *gin.Context) {
 		"commentList":    result["commentList"],
 		"avatarUrl":      result["avatarUrl"],
 		"User":           GetLoginUser(c),
+		"canonicalHref":  buildCanonicalHref(c),
 	}
 
 	c.HTML(http.StatusOK, "detail.gohtml", templateData)
@@ -315,4 +321,14 @@ func UserProfile(c *gin.Context) {
 
 func Sponsors(c *gin.Context) {
 	c.HTML(http.StatusOK, "sponsors.gohtml", gin.H{"title": "赞助商 - GooseForum", "User": GetLoginUser(c)})
+}
+
+func buildCanonicalHref(c *gin.Context) string {
+	scheme := "https"
+	if strings.HasPrefix(c.Request.Host, "localhost") {
+		scheme = "http"
+	}
+	host := fmt.Sprintf("%s://%s", scheme, c.Request.Host)
+	baseUri := preferences.Get("server.url", host)
+	return baseUri + c.Request.URL.String()
 }

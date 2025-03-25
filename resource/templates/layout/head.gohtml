@@ -12,6 +12,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/static/pic/default-avatar.png">
     <link rel="alternate" type="application/rss+xml" title="GooseForum RSS Feed" href="/rss.xml"/>
+{{if .canonicalHref}}<link rel="canonical" href="{{.canonicalHref}}">{{end}}
     <script>
         // 在页面加载完成后检查横幅状态
         document.addEventListener('DOMContentLoaded', function() {
