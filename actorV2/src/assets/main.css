@@ -494,8 +494,8 @@ footer {
 
 .notification-dot {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: 2px;
+  right: 2px;
   width: 8px;
   height: 8px;
   background: var(--primary-color);

@@ -156,7 +156,7 @@ const text = ref('# Hello Editor');
 }
 
 .form-group {
-  
+
 }
 
 .inline-group {
