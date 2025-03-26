@@ -17,14 +17,14 @@ import (
 
 // RenderRobotsTxt 渲染 robots.txt
 func RenderRobotsTxt(c *gin.Context) {
-	host := c.Request.Host
+	host := getHost(c)
 	robotsTxt := fmt.Sprintf(`User-agent: *
 Allow: /
 Allow: /post
 Allow: /post/*
 
 # Sitemaps
-Sitemap: https://%s/sitemap.xml
+Sitemap: %s/sitemap.xml
 
 # Disallow
 Disallow: /api/
