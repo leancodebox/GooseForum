@@ -59,7 +59,7 @@ func auth(ginApp *gin.Engine) {
 func viewRoute(ginApp *gin.Engine) {
 	view := ginApp.Group("")
 	view.Use(middleware.JWTAuth)
-	view.GET("", controllers.RenderIndex)
+	view.GET("", controllers.RenderArticlesPage)
 	view.GET("/post", controllers.RenderArticlesPage)
 	view.GET("/post/:id", controllers.RenderArticleDetail)
 	view.GET("/login", controllers.LoginPage)
