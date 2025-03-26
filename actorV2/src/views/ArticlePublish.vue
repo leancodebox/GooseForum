@@ -16,21 +16,18 @@ const articleData = ref<ArticleInfo>({
   articleContent: "",
   articleTitle: "",
   categoryId: [],
-  type: 0
+  type: 1
 })
 
 const isSubmitting = ref(false); // 用于跟踪提交状态
 
 const categories = ref([
-  {label: '博客', value: 1},
-  {label: '新闻', value: 2},
-  {label: '教程', value: 3}
+  {label: '分享', value: 1},
+  {label: '求助', value: 2},
 ]);
 
 const typeList = ref([
-  {label: '博客', value: 1},
-  {label: '新闻', value: 2},
-  {label: '教程', value: 3}
+  {label: 'GooseForum', value: 1},
 ]);
 
 const submitArticleHandler = async () => {
@@ -159,7 +156,7 @@ const text = ref('# Hello Editor');
 }
 
 .form-group {
-  margin-bottom: 10px; /* 减少底部边距 */
+  
 }
 
 .inline-group {
