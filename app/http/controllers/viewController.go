@@ -332,3 +332,12 @@ func buildCanonicalHref(c *gin.Context) string {
 	baseUri := preferences.Get("server.url", host)
 	return baseUri + c.Request.URL.String()
 }
+
+func getHost(c *gin.Context) string {
+	scheme := "https"
+	if strings.HasPrefix(c.Request.Host, "localhost") {
+		scheme = "http"
+	}
+	host := fmt.Sprintf("%s://%s", scheme, c.Request.Host)
+	return preferences.Get("server.url", host)
+}

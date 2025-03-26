@@ -38,13 +38,9 @@ Disallow: /app/
 
 // RenderSitemapXml 渲染 sitemap.xml
 func RenderSitemapXml(c *gin.Context) {
-	scheme := "https"
-	if strings.HasPrefix(c.Request.Host, "localhost") {
-		scheme = "http"
-	}
-	host := fmt.Sprintf("%s://%s", scheme, c.Request.Host)
+	host := getHost(c)
 	sb := strings.Builder{}
-	list, _ := articles.GetLatestArticles(40)
+	list, _ := articles.GetLatestArticles(160)
 	for _, item := range list {
 		sb.WriteString(fmt.Sprintf(`    <url>
         <loc>%v/post/%v</loc>
@@ -75,11 +71,7 @@ func RenderSitemapXml(c *gin.Context) {
 
 // RenderRssFeed 渲染 RSS feed
 func RenderRssFeed(c *gin.Context) {
-	scheme := "https"
-	if strings.HasPrefix(c.Request.Host, "localhost") {
-		scheme = "http"
-	}
-	host := fmt.Sprintf("%s://%s", scheme, c.Request.Host)
+	host := getHost(c)
 
 	// 获取最新的文章列表
 	articleList, err := articles.GetLatestArticles(20)
