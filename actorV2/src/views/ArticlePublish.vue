@@ -109,30 +109,33 @@ const text = ref('# Hello Editor');
 </script>
 <template>
   <div class="article-publish">
-    <h1>发布文章</h1>
     <form @submit.prevent="submitArticleHandler" class="form">
       <div class="form-group">
         <label for="title">标题:</label>
-        <n-input v-model:value="articleData.articleTitle" required placeholder="请输入标题"/>
+        <n-input v-model:value="articleData.articleTitle" required placeholder="请输入标题" class="input-field"/>
       </div>
-      <div class="form-group">
-        <label for="type">类型:</label>
-        <n-select
-            v-model:value="articleData.type"
-            :options="typeList"
-            required
-        />
+      <div class="form-group inline-group">
+        <div class="inline-item">
+          <label for="type">类型:</label>
+          <n-select
+              v-model:value="articleData.type"
+              :options="typeList"
+              required
+              class="select-field"
+          />
+        </div>
+        <div class="inline-item">
+          <label for="categories">分类:</label>
+          <n-select
+              v-model:value="articleData.categoryId"
+              :options="categories"
+              multiple
+              required
+              class="select-field"
+          />
+        </div>
       </div>
-      <div class="form-group">
-        <label for="categories">分类:</label>
-        <n-select
-            v-model:value="articleData.categoryId"
-            :options="categories"
-            multiple
-            required
-        />
-      </div>
-      <div class="form-group">
+      <div class="form-group" >
         <label for="content">内容:</label>
         <MdEditor v-model="articleData.articleContent" />
       </div>
@@ -143,29 +146,42 @@ const text = ref('# Hello Editor');
 
 <style scoped>
 .article-publish {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 使容器高度填满视口 */
 }
 
 .form {
+  flex: 1; /* 使表单区域填充剩余空间 */
   display: flex;
   flex-direction: column;
+  padding: 20px; /* 添加内边距 */
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 10px; /* 减少底部边距 */
+}
+
+.inline-group {
+  display: flex; /* 使用 Flexbox 布局 */
+  gap: 10px; /* 设置子项之间的间距 */
+}
+
+.inline-item {
+  flex: 1; /* 使每个子项均匀分配空间 */
 }
 
 label {
-  margin-bottom: 5px;
+  margin-bottom: 3px; /* 减少标签底部边距 */
   font-weight: bold;
 }
 
+.input-field, .select-field {
+  height: 36px; /* 设置输入框和选择框的高度 */
+}
+
 .submit-button {
-  margin-top: 20px;
+  margin-top: 10px; /* 减少按钮顶部边距 */
+  align-self: flex-end; /* 将按钮对齐到右侧 */
 }
 </style>
