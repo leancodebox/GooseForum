@@ -48,11 +48,11 @@
                 {{end}}
                 <div class="pagination">
                     {{if gt .Page 1}}
-                        <a href="?page={{.PrevPage}}" class="page-btn prev-page">上一页</a>
+                        <a href="/post?page={{.PrevPage}}" class="page-btn prev-page">上一页</a>
                     {{end}}
                     <span class="page-info">第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
                     {{if lt .Page .TotalPages}}
-                        <a href="?page={{.NextPage}}" class="page-btn next-page">下一页</a>
+                        <a href="/post?page={{.NextPage}}" class="page-btn next-page">下一页</a>
                     {{end}}
                 </div>
             </div>
