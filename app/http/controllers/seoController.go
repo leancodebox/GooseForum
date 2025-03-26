@@ -137,9 +137,6 @@ func (c CDATA) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 
 // GenerateRSS 生成符合RSS 2.0规范的XML字符串
 func GenerateRSS(title, link, description string, items []Item) (string, error) {
-	// 构建时间处理器（RFC 822格式带时区）
-	formatRFC822WithZone := "02 Jan 06 15:04 -0700"
-
 	// 构建Channel结构
 	channel := Channel{
 		Title:       title,
