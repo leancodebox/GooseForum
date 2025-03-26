@@ -27,6 +27,21 @@ import (
 	"time"
 )
 
+func Logout(c *gin.Context) {
+	c.SetCookie(
+		"access_token",
+		"",
+		-1, // 24小时
+		"/",
+		"",    // 域名，为空表示当前域名
+		false, // 仅HTTPS
+		true,  // HttpOnly
+	)
+	c.JSON(http.StatusOK, component.SuccessData(
+		"再见",
+	))
+}
+
 // RegisterHandle 注册
 func RegisterHandle(c *gin.Context) {
 	var r RegReq

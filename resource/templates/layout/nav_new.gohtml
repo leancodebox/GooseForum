@@ -417,9 +417,19 @@
         }
     });
 
-    function handleLogout() {
-        // 处理退出登录逻辑
-        console.log('Logout clicked');
+    async function handleLogout() {
+        try {
+            const response = await fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const data = await response.json();
+            window.location.href = '/';
+        } catch (error) {
+            console.error('退出失败:', error);
+        }
     }
 
 </script>

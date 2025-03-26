@@ -11,6 +11,22 @@ export default defineConfig({
     vue(),
     vueJsx(),
     vueDevTools(),
+    (() => {
+      return {
+        name: "multi-entry",
+        configureServer(server) {
+          return () => {
+            server.middlewares.use((req, res, next) => {
+              const url = req.originalUrl;
+              if (url !== undefined && url.startsWith('/app/admin')) {
+                req.url = '/admin.html'; // 重写请求路径
+              }
+              next();
+            });
+          };
+        }
+      };
+    })()
   ],
   base: "/app/",
   resolve: {
