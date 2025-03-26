@@ -25,12 +25,11 @@ func NewJWT(signingKey []byte) *JWT {
 	}
 }
 
-
 func GetBaseRegisteredClaims(expireTime time.Duration) jwt.RegisteredClaims {
 	return jwt.RegisteredClaims{
 		NotBefore: jwt.NewNumericDate(time.Now().Add(-10)),        // 签名生效时间
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(expireTime)), // 过期时间 7天  配置文件
-		Issuer:    "thh",                                          // 签名的发行者
+		Issuer:    "GooseForum",                                   // 签名的发行者
 	}
 }
 

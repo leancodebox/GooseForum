@@ -60,7 +60,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.6;
+    /*line-height: 1.6;*/
     font-size: 16px;
     color: var(--text-color);
     margin: 0;
@@ -126,8 +126,8 @@ a:hover {
 .article-item {
     display: grid;
     grid-template-columns: 40px 1fr;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
     border-bottom: 1px solid var(--border-color);
     transition: background-color 0.2s;
 }
@@ -145,8 +145,8 @@ a:hover {
 }
 
 .author-avatar-small {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -159,10 +159,10 @@ a:hover {
 
 .article-header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    grid-auto-flow: column;
     gap: 0.5rem;
     flex-wrap: wrap;
-    margin-bottom: -0.15rem;
 }
 
 .article-category-tag {
@@ -172,17 +172,17 @@ a:hover {
     background: var(--primary-color);
     color: white;
     white-space: nowrap;
-    line-height: 1.2;
     display: inline-block;
+    line-height: 16px;
 }
 
 .article-title {
     margin: 0;
-    line-height: 0;
+    line-height: 20px;
 }
 
 .article-title a {
-    font-size: 1rem;
+    font-size: 20px;
     font-weight: 500;
     line-height: inherit;
 }
