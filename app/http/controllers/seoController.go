@@ -22,9 +22,6 @@ Allow: /post/*
 # Sitemaps
 Sitemap: https://%s/sitemap.xml
 
-# Crawl-delay
-Crawl-delay: 10
-
 # Disallow
 Disallow: /api/
 Disallow: /admin/
