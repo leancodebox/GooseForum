@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"bytes"
+	"encoding/xml"
 	"fmt"
+	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	"github.com/spf13/cast"
 	"html"
 	"net/http"
 	"strings"
@@ -66,57 +70,102 @@ func RenderSitemapXml(c *gin.Context) {
 	c.String(http.StatusOK, sitemap)
 }
 
-// RenderRssFeed 渲染 RSS feed
-func RenderRssFeed(c *gin.Context) {
-	host := getHost(c)
+var formatRFC822WithZone = "02 Jan 06 15:04 -0700"
 
-	// 获取最新的文章列表
-	articleList, err := articles.GetLatestArticles(20)
+func RenderRssV2(c *gin.Context) {
+	host := getHost(c)
+	articleList, err := articles.GetLatestArticles(90)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error generating RSS feed")
 		return
 	}
 
-	// 生成RSS内容
-	now := time.Now().Format(time.RFC1123Z)
-	rss := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-<channel>
-    <title><![CDATA[GooseForum - 最新文章]]></title>
-    <link>%s</link>
-    <description><![CDATA[GooseForum的最新文章和讨论]]></description>
-    <language>zh-CN</language>
-    <lastBuildDate>%s</lastBuildDate>
-    <atom:link href="%s/rss.xml" rel="self" type="application/rss+xml" />
-`, html.EscapeString(host), now, html.EscapeString(host))
+	articlesList := array.Map(articleList, func(item articles.SmallEntity) Item {
+		return Item{
+			Title:       item.Title,
+			Link:        html.EscapeString(fmt.Sprintf("%s/post/%d", host, item.Id)),
+			Description: CDATA(item.Title),
+			PubDate:     item.CreatedAt.Format(formatRFC822WithZone),
+			GUID:        cast.ToString(item.Id),
+		}
+	})
 
-	// 添加文章条目
-	for _, article := range articleList {
-		pubDate := article.CreatedAt.Format(time.RFC1123Z)
-		rss += fmt.Sprintf(`
-    <item>
-        <title><![CDATA[%s]]></title>
-        <link>%s</link>
-        <guid>%s</guid>
-        <pubDate>%s</pubDate>
-        <description><![CDATA[%s]]></description>
-        <author><![CDATA[%s]]></author>
-        <category><![CDATA[%s]]></category>
-    </item>`,
-			article.Title,
-			html.EscapeString(fmt.Sprintf("%s/articles/%d", host, article.Id)),
-			html.EscapeString(fmt.Sprintf("%s/articles/%d", host, article.Id)),
-			pubDate,
-			"",
-			"author",   // 这里可以添加实际作者信息
-			"category", // 这里可以添加实际分类信息
-		)
+	rss, err := GenerateRSS(
+		"GooseForum - 最新文章",
+		host+"/rss.xml",
+		"GooseForum",
+		articlesList,
+	)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error generating RSS feed")
+		return
 	}
-
-	rss += `
-</channel>
-</rss>`
-
 	c.Header("Content-Type", "application/xml; charset=utf-8")
 	c.String(http.StatusOK, rss)
+}
+
+// RSS 2.0规范核心结构体
+type RSS struct {
+	XMLName xml.Name `xml:"rss"`
+	Version string   `xml:"version,attr"`
+	Channel Channel  `xml:"channel"`
+}
+
+type Channel struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	Description string `xml:"description"`
+	PubDate     string `xml:"pubDate"`
+	Items       []Item `xml:"item"`
+}
+
+type Item struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	Description CDATA  `xml:"description"`
+	PubDate     string `xml:"pubDate"`
+	GUID        string `xml:"guid"` // 可选唯一标识符
+}
+
+type CDATA string
+
+func (c CDATA) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	return e.EncodeElement(struct {
+		string `xml:",cdata"`
+	}{string(c)}, start)
+}
+
+// GenerateRSS 生成符合RSS 2.0规范的XML字符串
+func GenerateRSS(title, link, description string, items []Item) (string, error) {
+	// 构建时间处理器（RFC 822格式带时区）
+	formatRFC822WithZone := "02 Jan 06 15:04 -0700"
+
+	// 构建Channel结构
+	channel := Channel{
+		Title:       title,
+		Link:        link,
+		Description: description,
+		PubDate:     time.Now().Format(formatRFC822WithZone),
+	}
+
+	// 转换Items
+	for _, item := range items {
+		channel.Items = append(channel.Items, item)
+	}
+
+	// 组装完整RSS结构
+	rss := RSS{
+		Version: "2.0",
+		Channel: channel,
+	}
+
+	// 生成XML
+	var buf bytes.Buffer
+	buf.WriteString(xml.Header)
+	encoder := xml.NewEncoder(&buf)
+	encoder.Indent("", "  ")
+	if err := encoder.Encode(rss); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
