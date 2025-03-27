@@ -28,4 +28,5 @@ export interface NameLabel {
 export interface Result<T> {
   code: number;
   result: T;
+  message: string;
 }

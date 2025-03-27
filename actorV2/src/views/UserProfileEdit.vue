@@ -378,41 +378,41 @@ function checkScreenSize(): void {
 
 <style scoped>
 .profile-container {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 .profile-header {
   background: var(--card-bg);
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 8px var(--shadow-color);
+  border-radius: 8px;  /* 减小圆角 */
+  padding: 1.5rem;  /* 减小内边距 */
+  margin-bottom: 1.5rem;  /* 减小底部间距 */
+  box-shadow: 0 2px 6px var(--shadow-color);  /* 调整阴影 */
 }
 
 .user-basic-info {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  gap: 1.5rem;  /* 减小间距 */
+  margin-bottom: 1.5rem;  /* 减小底部间距 */
 }
 
 .avatar-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.3rem;  /* 减小间距 */
 }
 
 .avatar-wrapper {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 100px;  /* 减小头像尺寸 */
+  height: 100px;  /* 减小头像尺寸 */
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);  /* 调整阴影 */
   transition: transform 0.3s ease;
 }
 
@@ -468,7 +468,7 @@ function checkScreenSize(): void {
 }
 
 .avatar-tip {
-  font-size: 0.8rem;
+  font-size: 0.75rem;  /* 减小字体大小 */
   color: var(--text-color-light);
   text-align: center;
 }
@@ -492,26 +492,20 @@ function checkScreenSize(): void {
 }
 
 .user-info h2 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.3rem 0;  /* 减小底部间距 */
   color: var(--text-color);
-  font-size: 1.8rem;
-}
-
-.user-bio {
-  color: var(--text-color-light);
-  margin: 0;
-  line-height: 1.5;
+  font-size: 1.5rem;  /* 减小字体大小 */
 }
 
 .tab-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 0.8rem;  /* 减小间距 */
   border-top: 1px solid var(--border-color);
-  padding-top: 1.5rem;
+  padding-top: 1rem;  /* 减小顶部内边距 */
 }
 
 .tab-btn {
-  padding: 0.5rem 2rem;
+  padding: 0.4rem 1.5rem;  /* 减小内边距 */
   border: none;
   background: none;
   color: var(--text-color);
@@ -537,151 +531,116 @@ function checkScreenSize(): void {
 
 .profile-content {
   background: var(--card-bg);
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px var(--shadow-color);
+  border-radius: 8px;  /* 减小圆角 */
+  padding: 1.5rem;  /* 减小内边距 */
+  box-shadow: 0 2px 6px var(--shadow-color);  /* 调整阴影 */
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));  /* 减小最小宽度 */
+  gap: 1.5rem;  /* 增加列间距，确保输入框之间有足够间隙 */
+  margin-bottom: 1rem;  /* 统一设置为1rem */
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;  /* 统一设置为1rem */
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;  /* 稍微增加标签与输入框的间距 */
   color: var(--text-color);
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .form-group input,
 .form-group textarea {
-  width: 100%;
-  padding: 0.75rem;
+  width: calc(100% - 20px);
+  padding: 0.6rem 0.8rem;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--input-bg-color);
   color: var(--text-color);
   transition: all 0.2s;
+  font-size: 0.9rem;
+  line-height: 1.4;  /* 添加行高控制 */
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: var(--primary-color);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+.form-group textarea {
+  min-height: 80px;  /* 为文本域设置最小高度 */
+  resize: vertical;  /* 允许垂直调整大小 */
 }
 
 .submit-btn {
   background: var(--primary-color);
   color: white;
   border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s;
-}
-
-.submit-btn:hover {
-  background: var(--primary-color-dark, #0056b3);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;  /* 添加顶部间距 */
 }
 
 .article-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));  /* 减小最小宽度 */
+  gap: 1.2rem;  /* 减小间距 */
 }
 
 .article-card {
   background: var(--bg-color);
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: 6px;  /* 减小圆角 */
+  padding: 1.2rem;  /* 减小内边距 */
   transition: all 0.3s ease;
   border: 1px solid var(--border-color);
 }
 
-.article-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px var(--shadow-color);
-  border-color: var(--primary-color-light, #4d90fe);
-}
-
 .article-title {
-  margin: 0 0 1rem 0;
-}
-
-.article-title a {
-  color: var(--text-color);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.article-title a:hover {
-  color: var(--primary-color);
+  margin: 0 0 0.8rem 0;  /* 减小底部间距 */
+  font-size: 1.1rem;  /* 减小字体大小 */
 }
 
 .article-excerpt {
   color: var(--text-color-light);
-  margin: 0 0 1rem 0;
-  line-height: 1.5;
-}
-
-.article-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: var(--text-color-light);
-  font-size: 0.9rem;
-}
-
-.stats {
-  display: flex;
-  gap: 1rem;
+  margin: 0 0 0.8rem 0;  /* 减小底部间距 */
+  line-height: 1.4;  /* 减小行高 */
+  font-size: 0.9rem;  /* 减小字体大小 */
 }
 
 .empty-state {
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 3rem 1.5rem;  /* 减小内边距 */
   color: var(--text-color-light);
 }
 
 .empty-state i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 2.5rem;  /* 减小字体大小 */
+  margin-bottom: 0.8rem;  /* 减小底部间距 */
   opacity: 0.5;
 }
 
 .create-post-btn {
   display: inline-block;
-  margin-top: 1.5rem;
-  padding: 0.75rem 2rem;
+  margin-top: 1.2rem;  /* 减小顶部间距 */
+  padding: 0.6rem 1.5rem;  /* 减小内边距 */
   background: var(--primary-color);
   color: white;
-  border-radius: 8px;
+  border-radius: 6px;  /* 减小圆角 */
   text-decoration: none;
   transition: all 0.3s ease;
   font-weight: 500;
-}
-
-.create-post-btn:hover {
-  background: var(--primary-color-dark, #0056b3);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;  /* 减小字体大小 */
 }
 
 /* 裁切相关样式 */
 .cropper-container {
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;  /* 减小圆角 */
   overflow: hidden;
 }
 
@@ -689,20 +648,20 @@ function checkScreenSize(): void {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;  /* 减小间距 */
 }
 
 .preview-container {
-  width: 100px;
-  height: 100px;
+  width: 80px;  /* 减小尺寸 */
+  height: 80px;  /* 减小尺寸 */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .preview-circle {
-  width: 80px;
-  height: 80px;
+  width: 70px;  /* 减小尺寸 */
+  height: 70px;  /* 减小尺寸 */
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid var(--primary-color);
@@ -710,17 +669,17 @@ function checkScreenSize(): void {
 
 @media (max-width: 768px) {
   .profile-container {
-    padding: 1rem;
+    padding: 0.8rem;  /* 减小内边距 */
   }
 
   .profile-header, .profile-content {
-    padding: 1.5rem;
+    padding: 1.2rem;  /* 减小内边距 */
   }
 
   .user-basic-info {
     flex-direction: column;
     text-align: center;
-    gap: 1rem;
+    gap: 0.8rem;  /* 减小间距 */
   }
 
   .form-row {
@@ -736,7 +695,8 @@ function checkScreenSize(): void {
   }
 
   .tab-btn {
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;  /* 减小内边距 */
+    font-size: 0.9rem;  /* 减小字体大小 */
   }
 }
 </style>

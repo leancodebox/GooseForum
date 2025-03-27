@@ -1,6 +1,7 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "@/utils/messageManager.ts";
 import axios from 'axios';
+import type {Result} from "@/types/articleInterfaces.ts";
 
 // 获取文章枚举
 export const getArticleEnum = async (): Promise<any> => {
@@ -74,7 +75,7 @@ export function markAllAsRead() {
     return axiosInstance.post('/bbs/notification/mark-all-read')
 }
 
-export function uploadAvatar(file:Blob) {
+export function uploadAvatar(file:Blob):Promise<Result<any>> {
     const formData = new FormData();
     // 如果是 Blob 对象，需要创建 File 对象
     if (file instanceof Blob) {
