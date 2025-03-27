@@ -83,10 +83,6 @@ func bbs(ginApp *gin.Engine) {
 	// 文章详情
 	bbsShow.POST("get-articles-detail", ginUpP(controllers.GetArticlesDetail))
 
-	// 热门链接
-	// 用户主页
-	// tag/分类
-
 	bbsAuth := bbsShow.Use(middleware.JWTAuth4Gin)
 	// 通知相关接口
 	bbsAuth.POST("notification/list", UpButterReq(controllers.GetNotificationList))
@@ -104,8 +100,6 @@ func bbs(ginApp *gin.Engine) {
 	bbsAuth.POST("articles-reply", UpButterReq(controllers.ArticleReply))
 	// 回复评论
 	bbsAuth.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
-	// 申请展示 todo
-	bbsAuth.POST("apply-show", UpButterReq(controllers.ApplyShow))
 	// 用户文章列表
 	bbsAuth.POST("/get-user-articles", UpButterReq(controllers.GetUserArticles))
 
