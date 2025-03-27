@@ -70,53 +70,52 @@ func viewRoute(ginApp *gin.Engine) {
 	view.GET("/sponsors", controllers.Sponsors)
 }
 
-func bbs(ginApp *gin.Engine) {
-	bbsShow := ginApp.Group("api/bbs")
-
+func forum(ginApp *gin.Engine) {
+	forumApi := ginApp.Group("api/bbs")
 	// 站点统计
-	bbsShow.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
+	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	// 分类列表
-	bbsShow.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
-	bbsShow.GET("get-articles-category", ginUpNP(controllers.GetArticlesCategory))
+	forumApi.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
+	forumApi.GET("get-articles-category", ginUpNP(controllers.GetArticlesCategory))
 	// 文章分页
-	bbsShow.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
+	forumApi.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
 	// 文章详情
-	bbsShow.POST("get-articles-detail", ginUpP(controllers.GetArticlesDetail))
+	forumApi.POST("get-articles-detail", ginUpP(controllers.GetArticlesDetail))
 
-	bbsAuth := bbsShow.Use(middleware.JWTAuth4Gin)
+	loginApi := forumApi.Use(middleware.JWTAuth4Gin)
 	// 通知相关接口
-	bbsAuth.POST("notification/list", UpButterReq(controllers.GetNotificationList))
-	bbsAuth.GET("notification/unread-count", UpButterReq(controllers.GetUnreadCount))
-	bbsAuth.POST("notification/mark-read", UpButterReq(controllers.MarkAsRead))
-	bbsAuth.POST("notification/mark-all-read", UpButterReq(controllers.MarkAllAsRead))
-	bbsAuth.POST("notification/delete", UpButterReq(controllers.DeleteNotification))
-	bbsAuth.GET("notification/types", UpButterReq(controllers.GetNotificationTypes))
+	loginApi.POST("notification/list", UpButterReq(controllers.GetNotificationList))
+	loginApi.GET("notification/unread-count", UpButterReq(controllers.GetUnreadCount))
+	loginApi.POST("notification/mark-read", UpButterReq(controllers.MarkAsRead))
+	loginApi.POST("notification/mark-all-read", UpButterReq(controllers.MarkAllAsRead))
+	loginApi.POST("notification/delete", UpButterReq(controllers.DeleteNotification))
+	loginApi.GET("notification/types", UpButterReq(controllers.GetNotificationTypes))
 
 	// 编辑文章时原始文章内容
-	bbsAuth.POST("get-articles-origin", middleware.CheckLogin, UpButterReq(controllers.WriteArticlesOrigin))
+	loginApi.POST("get-articles-origin", middleware.CheckLogin, UpButterReq(controllers.WriteArticlesOrigin))
 	// 发布文章
-	bbsAuth.POST("write-articles", UpButterReq(controllers.WriteArticles))
+	loginApi.POST("write-articles", UpButterReq(controllers.WriteArticles))
 	// 回复文章
-	bbsAuth.POST("articles-reply", UpButterReq(controllers.ArticleReply))
+	loginApi.POST("articles-reply", UpButterReq(controllers.ArticleReply))
 	// 回复评论
-	bbsAuth.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
+	loginApi.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
 	// 用户文章列表
-	bbsAuth.POST("/get-user-articles", UpButterReq(controllers.GetUserArticles))
+	loginApi.POST("/get-user-articles", UpButterReq(controllers.GetUserArticles))
 
-	admin := ginApp.Group("api/admin").Use(middleware.JWTAuth4Gin)
-	admin.POST("user-list", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.UserList))
-	admin.POST("user-edit", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.EditUser))
-	admin.POST("get-all-role-item", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.GetAllRoleItem))
-	admin.POST("articles-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.ArticlesList))
-	admin.POST("article-edit", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.EditArticle))
-	admin.POST("get-permission-list", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.GetPermissionList))
-	admin.POST("role-list", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleList))
-	admin.POST("role-save", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleSave))
-	admin.POST("role-delete", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleDel))
-	admin.POST("opt-record-page", middleware.CheckPermission(permission.Admin), UpButterReq(controllers.OptRecordPage))
-	admin.POST("category-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.GetCategoryList))
-	admin.POST("category-save", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.SaveCategory))
-	admin.POST("category-delete", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.DeleteCategory))
+	adminApi := ginApp.Group("api/admin").Use(middleware.JWTAuth4Gin)
+	adminApi.POST("user-list", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.UserList))
+	adminApi.POST("user-edit", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.EditUser))
+	adminApi.POST("get-all-role-item", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.GetAllRoleItem))
+	adminApi.POST("articles-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.ArticlesList))
+	adminApi.POST("article-edit", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.EditArticle))
+	adminApi.POST("get-permission-list", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.GetPermissionList))
+	adminApi.POST("role-list", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleList))
+	adminApi.POST("role-save", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleSave))
+	adminApi.POST("role-delete", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleDel))
+	adminApi.POST("opt-record-page", middleware.CheckPermission(permission.Admin), UpButterReq(controllers.OptRecordPage))
+	adminApi.POST("category-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.GetCategoryList))
+	adminApi.POST("category-save", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.SaveCategory))
+	adminApi.POST("category-delete", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.DeleteCategory))
 
 }
 
