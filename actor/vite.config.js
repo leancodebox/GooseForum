@@ -25,7 +25,8 @@ export default defineConfig({
                 main: path.resolve(__dirname, 'index.html'),
                 setup: path.resolve(__dirname, 'setup.html')
             }
-        }
+        },
+        emptyOutDir:true,
     },
 
     server: {

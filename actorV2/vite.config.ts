@@ -42,7 +42,8 @@ export default defineConfig({
         main: fileURLToPath(new URL('./index.html', import.meta.url)),
         admin: fileURLToPath(new URL('./admin.html', import.meta.url))
       }
-    }
+    },
+    emptyOutDir:true,
   },
   server: {
     // 如果使用docker-compose开发模式，设置为false
