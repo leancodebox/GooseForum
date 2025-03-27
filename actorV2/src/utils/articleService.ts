@@ -74,7 +74,7 @@ export function markAllAsRead() {
     return axiosInstance.post('/bbs/notification/mark-all-read')
 }
 
-export function uploadAvatar(file) {
+export function uploadAvatar(file:Blob) {
     const formData = new FormData();
     // 如果是 Blob 对象，需要创建 File 对象
     if (file instanceof Blob) {
@@ -83,7 +83,7 @@ export function uploadAvatar(file) {
         formData.append('avatar', file);
     }
 
-    return instanceAxios.post("/upload-avatar", formData, {
+    return axiosInstance.post("/upload-avatar", formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }

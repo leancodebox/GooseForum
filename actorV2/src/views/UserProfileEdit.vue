@@ -17,21 +17,32 @@ interface Article {
   viewCount: number
   commentCount: number
 }
+
+// 定义用户表单接口
+interface UserForm {
+  nickname: string
+  email: string
+  bio: string
+  website: string
+  signature: string
+}
+
 const message = useMessage()
-const avatarUrl = ref('')
-const uploading = ref(false)
-const showCropModal = ref(false)
-const cropperRef = ref(null)
-const previewUrl = ref('')
-const cropImg = ref('')
-const fileInputRef = ref(null)
+const avatarUrl = ref<string>('')
+const uploading = ref<boolean>(false)
+const showCropModal = ref<boolean>(false)
+const cropperRef = ref<any>(null)
+const previewUrl = ref<string>('')
+const cropImg = ref<string>('')
+const fileInputRef = ref<HTMLInputElement | null>(null)
 const userStore = useUserStore()
-const activeTab = ref('profile')
+const activeTab = ref<'profile' | 'articles'>('profile')
 const articles = ref<Article[]>([])
-const isUploading = ref(false)
+const isUploading = ref<boolean>(false)
+const isSmallScreen = ref<boolean>(false)
 
 // 用户信息表单
-const userForm = ref({
+const userForm = ref<UserForm>({
   nickname: '',
   email: '',
   bio: '',
@@ -43,13 +54,13 @@ const userForm = ref({
 onMounted(async () => {
   if (userStore.userInfo) {
     userForm.value = {
-      nickname: userStore.userInfo.nickname,
-      email: userStore.userInfo.email,
-      bio: userStore.userInfo.bio,
-      website: userStore.userInfo.website,
-      signature: userStore.userInfo.signature,
+      nickname: userStore.userInfo.nickname || '',
+      email: userStore.userInfo.email || '',
+      bio: userStore.userInfo.bio || '',
+      website: userStore.userInfo.website || '',
+      signature: userStore.userInfo.signature || '',
     }
-    avatarUrl.value = userStore.userInfo.avatarUrl
+    avatarUrl.value = userStore.userInfo.avatarUrl || ''
   }
   checkScreenSize();
   window.addEventListener('resize', checkScreenSize);
@@ -62,7 +73,7 @@ watch(activeTab, async (newTab) => {
 })
 
 // 获取用户文章列表
-const fetchUserArticles = async () => {
+const fetchUserArticles = async (): Promise<void> => {
   try {
     const response = await axiosInstance.get('/bbs/get-user-articles')
     articles.value = response.data.result
@@ -72,7 +83,7 @@ const fetchUserArticles = async () => {
 }
 
 // 更新用户信息
-const updateProfile = async () => {
+const updateProfile = async (): Promise<void> => {
   try {
     await axiosInstance.post('/user/update-profile', userForm.value)
     await userStore.fetchUserInfo()
@@ -83,8 +94,9 @@ const updateProfile = async () => {
 }
 
 // 处理文件选择
-function handleFileSelect(event) {
-  const file = event.target.files?.[0]
+function handleFileSelect(event: Event): void {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   if (!file) return
 
   // 验证文件类型
@@ -106,14 +118,15 @@ function handleFileSelect(event) {
 }
 
 // 添加图片压缩函数
-function compressImage(base64Data :any, maxWidth = 200) {
+function compressImage(base64Data: string, maxWidth = 200): Promise<Blob> {
   return new Promise((resolve) => {
     const img = new Image()
     img.src = base64Data
     img.onload = () => {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
-      if (ctx==null){
+      if (ctx == null) {
+        resolve(new Blob())
         return
       }
 
@@ -133,7 +146,7 @@ function compressImage(base64Data :any, maxWidth = 200) {
 
       // 转换为 blob，使用较低的质量值来减小文件大小
       canvas.toBlob(
-          (blob) => resolve(blob),
+          (blob) => resolve(blob || new Blob()),
           'image/jpeg',
           0.8  // 压缩质量，0.8通常是质量和大小的好平衡点
       )
@@ -142,11 +155,11 @@ function compressImage(base64Data :any, maxWidth = 200) {
 }
 
 // 修改裁切完成函数
-async function handleCropFinish() {
+async function handleCropFinish(): Promise<void> {
   if (!cropperRef.value) return
 
   try {
-    cropperRef.value.getCropData(async (base64Data:any) => {
+    cropperRef.value.getCropData(async (base64Data: string) => {
       uploading.value = true
       try {
         // 压缩裁切后的图片
@@ -188,10 +201,10 @@ async function handleCropFinish() {
 }
 
 // 修改实时预览函数
-function realTimePreview() {
+function realTimePreview(): void {
   if (!cropperRef.value) return
   // 使用 getCropData 获取裁切后的图片数据
-  cropperRef.value.getCropData((data) => {
+  cropperRef.value.getCropData((data: string) => {
     cropImg.value = data  // 使用单独的变量存储裁切后的预览图
   })
 }
@@ -204,9 +217,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkScreenSize);
 })
 
-let isSmallScreen = ref(false)
-
-function checkScreenSize() {
+function checkScreenSize(): void {
   isSmallScreen.value = window.innerWidth < 800;
 }
 </script>
