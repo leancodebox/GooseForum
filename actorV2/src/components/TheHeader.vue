@@ -298,26 +298,6 @@ nav a:hover {
   color: white;
 }
 
-.btn-publish {
-  background: var(--secondary-color);
-  color: white;
-}
-
-.notifications {
-  position: relative;
-}
-
-.notification-count {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: red;
-  color: white;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 12px;
-}
-
 .user-menu {
   position: relative;
   cursor: pointer;
