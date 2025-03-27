@@ -218,7 +218,7 @@ nav a:hover {
   align-items: center;
   padding: 0 1.5rem;
   height: 47px;
-  background: var(--bg-color);
+  background: var(--header-bg);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
