@@ -15,7 +15,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     (config) => {
         // 在发送请求之前做些什么，例如添加 token
-        const token = localStorage.getItem('token'); // 假设 token 存储在 localStorage
+        const token = localStorage.getItem('access_token'); // 假设 token 存储在 localStorage
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
