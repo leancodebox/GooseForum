@@ -40,7 +40,6 @@ const userForm = ref({
 })
 
 // 初始化用户数据
-// 移除 onMounted 中的 fetchUserArticles 调用
 onMounted(async () => {
   if (userStore.userInfo) {
     userForm.value = {
@@ -50,9 +49,11 @@ onMounted(async () => {
       website: userStore.userInfo.website,
       signature: userStore.userInfo.signature,
     }
+    avatarUrl.value = userStore.userInfo.avatarUrl
   }
+  checkScreenSize();
+  window.addEventListener('resize', checkScreenSize);
 })
-
 
 watch(activeTab, async (newTab) => {
   if (newTab === 'articles' && articles.value.length === 0) {
@@ -81,30 +82,9 @@ const updateProfile = async () => {
   }
 }
 
-// 处理头像上传
-const handleAvatarUpload = async (event: Event) => {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-
-  const formData = new FormData()
-  formData.append('avatar', file)
-  isUploading.value = true
-
-  try {
-    await axiosInstance.post('/user/update-avatar', formData)
-    await userStore.fetchUserInfo()
-    enqueueMessage('头像更新成功')
-  } catch (error) {
-    enqueueMessage('头像上传失败')
-  } finally {
-    isUploading.value = false
-  }
-}
-
-
 // 处理文件选择
 function handleFileSelect(event) {
-  const file = event.target.files[0]
+  const file = event.target.files?.[0]
   if (!file) return
 
   // 验证文件类型
@@ -182,6 +162,7 @@ async function handleCropFinish() {
         const response = await uploadAvatar(compressedBlob)
         if (response.code === 0) {
           avatarUrl.value = response.result.avatarUrl
+          await userStore.fetchUserInfo()
           message.success('头像上传成功')
           showCropModal.value = false
           // 重置文件输入框
@@ -220,6 +201,7 @@ onUnmounted(() => {
   if (previewUrl.value) {
     URL.revokeObjectURL(previewUrl.value)
   }
+  window.removeEventListener('resize', checkScreenSize);
 })
 
 let isSmallScreen = ref(false)
@@ -227,58 +209,25 @@ let isSmallScreen = ref(false)
 function checkScreenSize() {
   isSmallScreen.value = window.innerWidth < 800;
 }
-
-onMounted(() => {
-  checkScreenSize();
-  window.addEventListener('resize', checkScreenSize);
-})
-onUnmounted(() => {
-  window.removeEventListener('resize', checkScreenSize);
-})
 </script>
 
 <template>
   <div class="profile-container">
     <!-- 个人信息头部 -->
-    <n-card title="头像设置" :bordered="false">
-      <n-list>
-        <n-space vertical>
-          <n-image
-              width="100"
-              :src="avatarUrl || '/static/pic/default-avatar.png'"
-              :preview-disabled="!avatarUrl"
-              object-fit="cover"
-              :round="true"
-          />
-
-          <input
-              type="file"
-              accept="image/gif,image/jpeg,image/jpg,image/png"
-              style="display: none"
-              ref="fileInputRef"
-              @change="handleFileSelect"
-          />
-
-          <n-button :loading="uploading" @click="fileInputRef?.click()">
-            {{ uploading ? '上传中...' : '选择图片' }}
-          </n-button>
-
-          <span class="upload-tip">支持 jpg、png、gif 格式，建议选择小于 2MB 的图片，最终头像大小不超过 500KB</span>
-        </n-space>
-      </n-list>
-    </n-card>
     <div class="profile-header">
       <div class="user-basic-info">
         <div class="avatar-section">
           <div class="avatar-wrapper">
-            <img :src="userStore.userInfo?.avatarUrl" alt="用户头像" class="current-avatar">
+            <img :src="avatarUrl || '/static/pic/default-avatar.png'" alt="用户头像" class="current-avatar">
             <div class="avatar-upload">
-              <input type="file" accept="image/*" @change="handleAvatarUpload" id="avatar-input" :disabled="isUploading">
-              <label for="avatar-input" :class="{ 'uploading': isUploading }">
+              <input type="file" accept="image/*" @change="handleFileSelect" id="avatar-input" :disabled="uploading">
+              <label for="avatar-input" :class="{ 'uploading': uploading }">
                 <i class="fas fa-camera"></i>
+                <span v-if="uploading" class="upload-spinner"></span>
               </label>
             </div>
           </div>
+          <div class="avatar-tip">点击头像上传新图片</div>
         </div>
         <div class="user-info">
           <h2>{{ userStore.userInfo?.nickname || userStore.userInfo?.username }}</h2>
@@ -358,10 +307,11 @@ onUnmounted(() => {
     </div>
   </div>
 
+  <!-- 裁切头像的模态框 -->
   <n-modal
       v-model:show="showCropModal"
       preset="card"
-      style="width: 600px"
+      :style="isSmallScreen ? 'width: 95%' : 'width: 600px'"
       title="裁切头像"
       :mask-closable="false"
   >
@@ -387,7 +337,7 @@ onUnmounted(() => {
         />
       </div>
 
-      <n-flex justify="space-between" align="center">
+      <n-flex justify="space-between" align="center" :wrap="isSmallScreen">
         <div class="preview-box">
           <n-text depth="3">预览效果</n-text>
           <div class="preview-container">
@@ -400,7 +350,7 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <n-space>
+        <n-space :style="isSmallScreen ? 'margin-top: 20px; width: 100%; justify-content: flex-end;' : ''">
           <n-button @click="showCropModal = false">取消</n-button>
           <n-button
               type="primary"
@@ -437,23 +387,52 @@ onUnmounted(() => {
   margin-bottom: 2rem;
 }
 
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .avatar-wrapper {
   position: relative;
   width: 120px;
   height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.avatar-wrapper:hover {
+  transform: scale(1.05);
+}
+
+.avatar-wrapper:hover .avatar-upload label {
+  opacity: 1;
 }
 
 .current-avatar {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
   object-fit: cover;
+  transition: filter 0.3s ease;
+}
+
+.avatar-wrapper:hover .current-avatar {
+  filter: brightness(0.7);
 }
 
 .avatar-upload {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .avatar-upload input[type="file"] {
@@ -461,26 +440,56 @@ onUnmounted(() => {
 }
 
 .avatar-upload label {
-  width: 32px;
-  height: 32px;
-  background: var(--primary-color);
-  color: white;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s ease;
   cursor: pointer;
-  transition: all 0.2s;
+}
+
+.avatar-upload label i {
+  font-size: 1.5rem;
+}
+
+.avatar-tip {
+  font-size: 0.8rem;
+  color: var(--text-color-light);
+  text-align: center;
+}
+
+.upload-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+  position: absolute;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.user-info {
+  flex: 1;
 }
 
 .user-info h2 {
   margin: 0 0 0.5rem 0;
   color: var(--text-color);
+  font-size: 1.8rem;
 }
 
 .user-bio {
   color: var(--text-color-light);
   margin: 0;
+  line-height: 1.5;
 }
 
 .tab-buttons {
@@ -498,6 +507,7 @@ onUnmounted(() => {
   font-weight: 500;
   cursor: pointer;
   position: relative;
+  transition: color 0.3s ease;
 }
 
 .tab-btn.active {
@@ -554,6 +564,7 @@ onUnmounted(() => {
 .form-group textarea:focus {
   border-color: var(--primary-color);
   outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
 }
 
 .submit-btn {
@@ -567,6 +578,12 @@ onUnmounted(() => {
   transition: all 0.2s;
 }
 
+.submit-btn:hover {
+  background: var(--primary-color-dark, #0056b3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 .article-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -577,16 +594,28 @@ onUnmounted(() => {
   background: var(--bg-color);
   border-radius: 8px;
   padding: 1.5rem;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
 }
 
 .article-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px var(--shadow-color);
+  border-color: var(--primary-color-light, #4d90fe);
 }
 
 .article-title {
   margin: 0 0 1rem 0;
+}
+
+.article-title a {
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.article-title a:hover {
+  color: var(--primary-color);
 }
 
 .article-excerpt {
@@ -617,17 +646,55 @@ onUnmounted(() => {
 .empty-state i {
   font-size: 3rem;
   margin-bottom: 1rem;
+  opacity: 0.5;
 }
 
 .create-post-btn {
   display: inline-block;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   padding: 0.75rem 2rem;
   background: var(--primary-color);
   color: white;
   border-radius: 8px;
   text-decoration: none;
-  transition: opacity 0.2s;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.create-post-btn:hover {
+  background: var(--primary-color-dark, #0056b3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 裁切相关样式 */
+.cropper-container {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.preview-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.preview-container {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--primary-color);
 }
 
 @media (max-width: 768px) {
@@ -635,9 +702,14 @@ onUnmounted(() => {
     padding: 1rem;
   }
 
+  .profile-header, .profile-content {
+    padding: 1.5rem;
+  }
+
   .user-basic-info {
     flex-direction: column;
     text-align: center;
+    gap: 1rem;
   }
 
   .form-row {
@@ -646,6 +718,14 @@ onUnmounted(() => {
 
   .article-grid {
     grid-template-columns: 1fr;
+  }
+
+  .tab-buttons {
+    justify-content: center;
+  }
+
+  .tab-btn {
+    padding: 0.5rem 1rem;
   }
 }
 </style>
