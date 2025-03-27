@@ -244,8 +244,7 @@ nav a:hover {
 
 .nav-links {
   display: flex;
-  gap: 1.2rem;
-  margin-left: 1rem;
+  gap: 0;
 }
 
 .nav-link {
