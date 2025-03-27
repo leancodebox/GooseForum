@@ -73,3 +73,19 @@ export function markAsRead(params: any) {
 export function markAllAsRead() {
     return axiosInstance.post('/bbs/notification/mark-all-read')
 }
+
+export function uploadAvatar(file) {
+    const formData = new FormData();
+    // 如果是 Blob 对象，需要创建 File 对象
+    if (file instanceof Blob) {
+        formData.append('avatar', new File([file], 'avatar.png', {type: file.type}));
+    } else {
+        formData.append('avatar', file);
+    }
+
+    return instanceAxios.post("/upload-avatar", formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+}
