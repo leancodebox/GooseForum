@@ -124,7 +124,7 @@ window.addEventListener('resize', function () {
             </button>
             <div class="dropdown-menu">
               <!-- 将个人主页的链接改为 -->
-              <a href="/user/profile/edit">个人主页</a>
+              <router-link to="/user/profile/edit">个人主页</router-link>
               <a href="/user/settings">设置</a>
               <a href="#" onclick="handleLogout()">退出</a>
             </div>
@@ -158,7 +158,7 @@ window.addEventListener('resize', function () {
         <a href="/post" class="mobile-link">文章</a>
         <router-link to="/post-edit" class="mobile-link">发布</router-link>
         <router-link to="/notifications"  class="mobile-link">消息</router-link>
-        <a href="/user/profile" class="mobile-link">个人主页</a>
+        <router-link to="/user/profile/edit" class="mobile-link">个人主页</router-link>
         <a href="/user/settings" class="mobile-link">设置</a>
         <a href="#" onclick="handleLogout()" class="mobile-link">退出</a>
         <a href="/login" class="mobile-link" id="mobileLoginBtn">登录</a>
