@@ -1,3 +1,139 @@
+<script setup lang="ts">
+import { h, ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import {
+  MenuOutline,
+  HomeOutline,
+  PeopleOutline,
+  DocumentTextOutline,
+  GridOutline,
+  SettingsOutline,
+  LogOutOutline,
+  PersonOutline
+} from '@vicons/ionicons5'
+import {
+  NLayout,
+  NLayoutSider,
+  NLayoutHeader,
+  NLayoutContent,
+  NLayoutFooter,
+  NMenu,
+  NBreadcrumb,
+  NBreadcrumbItem,
+  NDropdown,
+  NButton,
+  NIcon,
+  NCard
+} from 'naive-ui'
+import type { MenuOption } from 'naive-ui'
+
+const router = useRouter()
+const route = useRoute()
+const collapsed = ref(false)
+
+// 计算主内容区样式
+const contentStyle = computed(() => {
+  return {
+    paddingLeft: collapsed.value ? '64px' : '240px',
+  }
+})
+
+// 菜单渲染函数
+function renderMenuLabel(option: MenuOption) {
+  return option.label as string
+}
+
+function renderMenuIcon(option: MenuOption) {
+  return h(NIcon, null, { default: () => h(option.icon as any) })
+}
+
+// 菜单选项
+const menuOptions: MenuOption[] = [
+  {
+    label: '仪表盘',
+    key: 'dashboard',
+    icon: () => h(HomeOutline),
+    path: '/admin/'
+  },
+  {
+    label: '用户管理',
+    key: 'users',
+    icon: () => h(PeopleOutline),
+    path: '/admin/users'
+  },
+  {
+    label: '角色管理',
+    key: 'roles',
+    icon: () => h(PeopleOutline),
+    path: '/admin/roles'
+  },
+  {
+    label: '帖子管理',
+    key: 'posts',
+    icon: () => h(DocumentTextOutline),
+    path: '/admin/posts'
+  },
+  {
+    label: '分类管理',
+    key: 'categories',
+    icon: () => h(GridOutline),
+    path: '/admin/categories'
+  },
+  {
+    label: '系统设置',
+    key: 'settings',
+    icon: () => h(SettingsOutline),
+    path: '/admin/settings'
+  }
+]
+
+// 用户下拉菜单选项
+const userOptions = [
+  {
+    label: '个人信息',
+    key: 'profile',
+    icon: () => h(NIcon, null, { default: () => h(PersonOutline) })
+  },
+  {
+    label: '退出登录',
+    key: 'logout',
+    icon: () => h(NIcon, null, { default: () => h(LogOutOutline) })
+  }
+]
+
+// 当前激活的菜单项
+const activeKey = computed(() => {
+  const path = route.path
+  const menuItem = menuOptions.find(item => path === item.path)
+  return menuItem ? menuItem.key : 'dashboard'
+})
+
+// 当前页面标题
+const currentPageTitle = computed(() => {
+  return route.meta.title || '仪表盘'
+})
+
+// 菜单点击处理
+const handleMenuUpdate = (key: string) => {
+  const menuItem = menuOptions.find(item => item.key === key)
+  if (menuItem && menuItem.path) {
+    router.push(menuItem.path)
+  }
+}
+
+// 用户菜单选择处理
+const handleUserSelect = (key: string) => {
+  if (key === 'logout') {
+    // 退出登录逻辑
+    // localStorage.removeItem('admin_token')
+    router.push('/login')
+  } else if (key === 'profile') {
+    // 跳转到个人信息页
+    // router.push('/profile')
+  }
+}
+</script>
+
 <template>
   <n-layout has-sider position="absolute">
     <!-- 侧边栏 -->
@@ -74,141 +210,7 @@
   </n-layout>
 </template>
 
-<script setup lang="ts">
-import { h, ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import {
-  MenuOutline,
-  HomeOutline,
-  PeopleOutline,
-  DocumentTextOutline,
-  GridOutline,
-  SettingsOutline,
-  LogOutOutline,
-  PersonOutline
-} from '@vicons/ionicons5'
-import {
-  NLayout,
-  NLayoutSider,
-  NLayoutHeader,
-  NLayoutContent,
-  NLayoutFooter,
-  NMenu,
-  NBreadcrumb,
-  NBreadcrumbItem,
-  NDropdown,
-  NButton,
-  NIcon,
-  NCard
-} from 'naive-ui'
-import type { MenuOption } from 'naive-ui'
 
-const router = useRouter()
-const route = useRoute()
-const collapsed = ref(false)
-
-// 计算主内容区样式
-const contentStyle = computed(() => {
-  return {
-    paddingLeft: collapsed.value ? '64px' : '240px',
-  }
-})
-
-// 菜单渲染函数
-function renderMenuLabel(option: MenuOption) {
-  return option.label as string
-}
-
-function renderMenuIcon(option: MenuOption) {
-  return h(NIcon, null, { default: () => h(option.icon as any) })
-}
-
-// 菜单选项
-const menuOptions: MenuOption[] = [
-  {
-    label: '仪表盘',
-    key: 'dashboard',
-    icon: HomeOutline,
-    path: '/admin/'
-  },
-  {
-    label: '用户管理',
-    key: 'users',
-    icon: PeopleOutline,
-    path: '/admin/users'
-  },
-  {
-    label: '角色管理',
-    key: 'roles',
-    icon: PeopleOutline,
-    path: '/admin/roles'
-  },
-  {
-    label: '帖子管理',
-    key: 'posts',
-    icon: DocumentTextOutline,
-    path: '/admin/posts'
-  },
-  {
-    label: '分类管理',
-    key: 'categories',
-    icon: GridOutline,
-    path: '/admin/categories'
-  },
-  {
-    label: '系统设置',
-    key: 'settings',
-    icon: SettingsOutline,
-    path: '/admin/settings'
-  }
-]
-
-// 用户下拉菜单选项
-const userOptions = [
-  {
-    label: '个人信息',
-    key: 'profile',
-    icon: () => h(NIcon, null, { default: () => h(PersonOutline) })
-  },
-  {
-    label: '退出登录',
-    key: 'logout',
-    icon: () => h(NIcon, null, { default: () => h(LogOutOutline) })
-  }
-]
-
-// 当前激活的菜单项
-const activeKey = computed(() => {
-  const path = route.path
-  const menuItem = menuOptions.find(item => path === item.path)
-  return menuItem ? menuItem.key : 'dashboard'
-})
-
-// 当前页面标题
-const currentPageTitle = computed(() => {
-  return route.meta.title || '仪表盘'
-})
-
-// 菜单点击处理
-const handleMenuUpdate = (key: string) => {
-  const menuItem = menuOptions.find(item => item.key === key)
-  if (menuItem && menuItem.path) {
-    router.push(menuItem.path)
-  }
-}
-
-// 用户菜单选择处理
-const handleUserSelect = (key: string) => {
-  if (key === 'logout') {
-    // 退出登录逻辑
-    // localStorage.removeItem('admin_token')
-    router.push('/login')
-  } else if (key === 'profile') {
-    // 跳转到个人信息页
-    // router.push('/profile')
-  }
-}
-</script>
 
 <style scoped>
 .logo-container {
