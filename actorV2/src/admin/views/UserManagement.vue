@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import {computed, h, onMounted, reactive, ref} from 'vue'
-import type {FormInst, FormRules} from 'naive-ui'
-import {NButton, NTag, useMessage} from 'naive-ui'
+import {type FormInst, type FormRules, NButton, NSpace, NTag, useMessage} from 'naive-ui'
 import {AddOutline, CreateOutline, SearchOutline, TrashOutline} from '@vicons/ionicons5'
-import {getUserList} from "@/admin/utils/authService.ts";
+import {editUser, getAllRoleItem, getUserList} from "@/admin/utils/authService.ts";
 import type {User} from "../types/adminInterfaces.ts";
 
 const message = useMessage()
@@ -53,18 +52,23 @@ const handleSearch = () => {
   fetchUsers()
 }
 
+let roleOption = ref([])
+
 // 初始化加载
-onMounted(() => {
-  fetchUsers()
+onMounted(async () => {
+  await fetchUsers()
+  let res = await getAllRoleItem()
+  roleOption.value = res.result
 })
 
 // 用户表单
 const userForm = reactive({
-  id: '',
+  id: 0,
   username: '',
   email: '',
-  role: 'user',
-  status: 'active',
+  role: [],
+  status: 0,
+  validate: 0,
   password: ''
 })
 
@@ -82,19 +86,6 @@ const userRules: FormRules = {
   ]
 }
 
-// 角色选项
-const roleOptions = [
-  {label: '管理员', value: 'admin'},
-  {label: '普通用户', value: 'user'},
-  {label: '访客', value: 'guest'}
-]
-
-// 状态选项
-const statusOptions = [
-  {label: '正常', value: 'active'},
-  {label: '禁用', value: 'disabled'},
-  {label: '待验证', value: 'pending'}
-]
 
 // 过滤后的用户列表 - 不再需要本地过滤，由后端处理
 const filteredUsers = computed(() => users.value)
@@ -117,7 +108,22 @@ const columns = [
     title: '角色',
     key: 'role',
     render(row: User) {
-      return row.roleList
+      let list = []
+      list = row?.roleList?.map(item => {
+        return h(
+            NTag,
+            {
+              // size: 'small',
+            },
+            () => item.name
+        )
+      })
+      return h(
+          NSpace,
+          {},
+          {
+            default: () => list
+          })
     }
   },
   {
@@ -154,14 +160,14 @@ const columns = [
   },
   {
     title: '注册时间',
-    key: 'createdAt'
+    key: 'createTime'
   },
   {
     title: '操作',
     key: 'actions',
-    render(row: any) {
+    render(row: User) {
       return h(
-          'n-space',
+          NSpace,
           {},
           {
             default: () => [
@@ -203,21 +209,25 @@ const handleAddUser = () => {
   userForm.id = ''
   userForm.username = ''
   userForm.email = ''
-  userForm.role = 'user'
-  userForm.status = 'active'
+  userForm.role = []
+  userForm.status = 0
   userForm.password = ''
+  userForm.validate = 0
   showUserModal.value = true
 }
 
 // 编辑用户
-const handleEditUser = (user) => {
+const handleEditUser = (user: User) => {
   isEditing.value = true
-  userForm.id = user.id
+  userForm.id = user.userId
   userForm.username = user.username
   userForm.email = user.email
-  userForm.role = user.role
+  userForm.role = !!user.roleList ? user.roleList.map(item => {
+    return item.value
+  }) : []
   userForm.status = user.status
   userForm.password = ''
+  userForm.validate = user.validate
   showUserModal.value = true
 }
 
@@ -232,6 +242,8 @@ const handleSaveUser = () => {
     if (!errors) {
       try {
         if (isEditing.value) {
+
+          await editUser(userForm.id, userForm.status, userForm.validate, userForm.role)
           // 这里应该调用更新用户的API
           message.success('用户更新成功')
         } else {
@@ -240,7 +252,7 @@ const handleSaveUser = () => {
         }
         showUserModal.value = false
         // 刷新用户列表
-        fetchUsers()
+        await fetchUsers()
       } catch (error) {
         message.error(isEditing.value ? '更新用户失败' : '添加用户失败')
         console.error(error)
@@ -288,8 +300,12 @@ const handleSaveUser = () => {
         striped
     />
 
-    <!-- 添加/编辑用户对话框 保持不变 -->
-    <n-modal v-model:show="showUserModal" :title="isEditing ? '编辑用户' : '添加用户'">
+    <!-- 添加/编辑用户对话框 -->
+    <n-modal
+        v-model:show="showUserModal"
+        :title="isEditing ? '编辑用户' : '添加用户'"
+        style="width: 500px; max-width: 90%;"
+    >
       <n-card>
         <n-form
             ref="userFormRef"
@@ -300,16 +316,20 @@ const handleSaveUser = () => {
             require-mark-placement="right-hanging"
         >
           <n-form-item path="username" label="用户名">
-            <n-input v-model:value="userForm.username" placeholder="请输入用户名" />
+            <n-input v-model:value="userForm.username" placeholder="请输入用户名"/>
           </n-form-item>
           <n-form-item path="email" label="邮箱">
-            <n-input v-model:value="userForm.email" placeholder="请输入邮箱" />
+            <n-input v-model:value="userForm.email" placeholder="请输入邮箱" disabled/>
           </n-form-item>
-          <n-form-item path="role" label="角色">
-            <n-select v-model:value="userForm.role" :options="roleOptions" />
+          <n-form-item label="角色" path="roleId">
+            <n-select v-model:value="userForm.role" multiple :options="roleOption"></n-select>
           </n-form-item>
-          <n-form-item path="status" label="状态">
-            <n-select v-model:value="userForm.status" :options="statusOptions" />
+
+          <n-form-item path="status" label="是否冻结">
+            <n-switch v-model:value="userForm.status" :checked-value="1" :unchecked-value="0"/>
+          </n-form-item>
+          <n-form-item path="validate" label="验证通过">
+            <n-switch v-model:value="userForm.validate" :checked-value="1" :unchecked-value="0"/>
           </n-form-item>
           <n-form-item v-if="!isEditing" path="password" label="密码">
             <n-input

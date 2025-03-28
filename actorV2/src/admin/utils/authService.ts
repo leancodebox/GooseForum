@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "./messageManager.ts";
 import axios from 'axios';
-import type {Result,User} from "../types/adminInterfaces.ts";
+import type {Label, Result, User} from "../types/adminInterfaces.ts";
 
 export interface PageData<T> {
     list: T[];
@@ -29,7 +29,7 @@ export function editUser(userId:any, status:any, validate:any, roleId:any) {
     })
 }
 
-export function getAllRoleItem() {
+export function getAllRoleItem():Promise<Result<Label[]>>  {
     return axiosInstance.post('/admin/get-all-role-item')
 }
 

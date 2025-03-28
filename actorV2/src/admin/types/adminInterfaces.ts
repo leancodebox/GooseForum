@@ -10,6 +10,11 @@ export interface Role {
   name: string;
   value: number;
 }
+export interface Label {
+  name: string|null
+  label: string|null
+  value: number|null
+}
 
 export interface User {
   userId: number;
