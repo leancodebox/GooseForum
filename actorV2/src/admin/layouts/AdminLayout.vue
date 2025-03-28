@@ -69,12 +69,6 @@
         </n-card>
       </n-layout-content>
 
-      <!-- 页脚 -->
-      <n-layout-footer bordered>
-        <div class="footer-container">
-          GooseForum 管理系统 &copy; {{ new Date().getFullYear() }}
-        </div>
-      </n-layout-footer>
     </n-layout>
   </n-layout>
 </template>
