@@ -4,13 +4,14 @@ import { h, ref, computed, reactive } from 'vue'
 import { useMessage,NButton } from 'naive-ui'
 import { SearchOutline, AddOutline, CreateOutline, TrashOutline } from '@vicons/ionicons5'
 import type { FormInst, FormRules } from 'naive-ui'
+import {getUserList} from "@/admin/utils/authService.ts";
 
 const message = useMessage()
 const searchText = ref('')
 const showUserModal = ref(false)
 const isEditing = ref(false)
 const userFormRef = ref<FormInst | null>(null)
-
+getUserList()
 // 用户表单
 const userForm = reactive({
   id: '',

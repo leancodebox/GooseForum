@@ -1,19 +1,41 @@
 import axiosInstance from './axiosInstance';
-import {enqueueMessage} from "@/utils/messageManager.ts";
+import {enqueueMessage} from "./messageManager.ts";
 import axios from 'axios';
-import type {Result} from "@/types/articleInterfaces.ts";
+import type {Result} from "../types/adminInterfaces.ts";
 
+export interface PageData<T> {
+    list: T[];
+    page: number
+    size: number
+    total: number
+}
 
 // Mock 获取用户信息
 export const getUserInfo = async () => {
     return axiosInstance.get("/get-user-info")
 }
 
-export function getUserList() {
+
+interface Role {
+    name: string;
+    value: number;
+}
+
+interface User {
+    userId: number;
+    username: string;
+    email: string;
+    status: number;
+    validate: number;
+    prestige: number;
+    roleList: Role[];
+    createTime: string;
+}
+export function getUserList():Promise<Result<PageData<User>>> {
     return axiosInstance.post("admin/user-list")
 }
 
-export function editUser(userId, status, validate, roleId) {
+export function editUser(userId:any, status:any, validate:any, roleId:any) {
     return axiosInstance.post("admin/user-edit", {
         userId: userId,
         status: status,
@@ -34,7 +56,7 @@ export function getRoleList() {
     return axiosInstance.post("admin/role-list")
 }
 
-export function getRoleSave(id, roleName, permission) {
+export function getRoleSave(id:any, roleName:any, permission:any) {
     return axiosInstance.post("admin/role-save", {
         id: id,
         roleName: roleName,
@@ -42,7 +64,7 @@ export function getRoleSave(id, roleName, permission) {
     })
 }
 
-export function getRoleDel(id) {
+export function getRoleDel(id:any) {
     return axiosInstance.post("admin/role-delete", {
         id: id,
     })
@@ -59,17 +81,17 @@ export const getCategoryList = () => {
     return axiosInstance.post('/admin/category-list')
 }
 
-export const saveCategory = (data) => {
+export const saveCategory = (data:any) => {
     return axiosInstance.post('/admin/category-save', data)
 }
 
-export const deleteCategory = (id) => {
+export const deleteCategory = (id:any) => {
     return axiosInstance.post('/admin/category-delete', {id})
 }
 
 
 // 文章管理相关接口
-export const editArticle = (id, processStatus) => {
+export const editArticle = (id:any, processStatus:any) => {
     return axiosInstance.post('/admin/article-edit', {
         id,
         processStatus
