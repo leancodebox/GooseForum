@@ -1,5 +1,5 @@
 <template>
-  <n-layout has-sider>
+  <n-layout has-sider position="absolute">
     <!-- 侧边栏 -->
     <n-layout-sider
       bordered
@@ -11,6 +11,7 @@
       @collapse="collapsed = true"
       @expand="collapsed = false"
       :native-scrollbar="false"
+      position="absolute"
     >
       <div class="logo-container">
         <img v-if="collapsed"  src="/favicon.ico" alt="Logo" class="logo-small" />
@@ -29,9 +30,9 @@
     </n-layout-sider>
 
     <!-- 主内容区 -->
-    <n-layout>
+    <n-layout :style="contentStyle">
       <!-- 顶部导航栏 -->
-      <n-layout-header bordered>
+      <n-layout-header bordered position="absolute" style="z-index: 999;">
         <div class="header-container">
           <div class="header-left">
             <n-button quaternary circle @click="collapsed = !collapsed">
@@ -63,7 +64,7 @@
       </n-layout-header>
 
       <!-- 内容区 -->
-      <n-layout-content content-style="padding: 24px;">
+      <n-layout-content content-style="padding: 24px;" :style="{ marginTop: '64px' }">
         <n-card>
           <router-view />
         </n-card>
@@ -105,6 +106,13 @@ import type { MenuOption } from 'naive-ui'
 const router = useRouter()
 const route = useRoute()
 const collapsed = ref(false)
+
+// 计算主内容区样式
+const contentStyle = computed(() => {
+  return {
+    paddingLeft: collapsed.value ? '64px' : '240px',
+  }
+})
 
 // 菜单渲染函数
 function renderMenuLabel(option: MenuOption) {
@@ -220,6 +228,8 @@ const handleUserSelect = (key: string) => {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
+  background-color: #fff;
+  width: 100%;
 }
 
 .header-left {
