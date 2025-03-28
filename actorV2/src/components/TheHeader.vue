@@ -176,6 +176,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
+  border-radius: 0 0 4px 4px;
 }
 
 nav {
@@ -183,6 +184,7 @@ nav {
   padding: 0 2rem;
   display: flex;
   align-items: center;
+  border-radius: 0 0 4px 4px;
 }
 
 .logo {
@@ -208,7 +210,6 @@ nav a {
 }
 
 nav a:hover {
-  background-color: var(--light-gray);
   color: var(--primary-color);
 }
 .nav-container {
