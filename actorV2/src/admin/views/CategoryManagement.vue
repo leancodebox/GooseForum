@@ -1,68 +1,3 @@
-<template>
-  <div>
-    <div class="action-bar">
-      <n-space>
-        <n-button type="primary" @click="handleAddCategory">
-          <template #icon>
-            <n-icon>
-              <AddOutline />
-            </n-icon>
-          </template>
-          添加分类
-        </n-button>
-      </n-space>
-    </div>
-
-    <n-data-table
-      :columns="columns"
-      :data="categories"
-      :pagination="pagination"
-      :bordered="false"
-      striped
-    />
-
-    <!-- 添加/编辑分类对话框 -->
-    <n-modal v-model:show="showCategoryModal" :title="isEditing ? '编辑分类' : '添加分类'">
-      <n-card>
-        <n-form
-          ref="categoryFormRef"
-          :model="categoryForm"
-          :rules="categoryRules"
-          label-placement="left"
-          label-width="auto"
-          require-mark-placement="right-hanging"
-        >
-          <n-form-item path="name" label="分类名称">
-            <n-input v-model:value="categoryForm.name" placeholder="请输入分类名称" />
-          </n-form-item>
-          <n-form-item path="slug" label="分类标识">
-            <n-input v-model:value="categoryForm.slug" placeholder="请输入分类标识" />
-          </n-form-item>
-          <n-form-item path="description" label="分类描述">
-            <n-input
-              v-model:value="categoryForm.description"
-              type="textarea"
-              placeholder="请输入分类描述"
-            />
-          </n-form-item>
-          <n-form-item path="order" label="排序">
-            <n-input-number v-model:value="categoryForm.order" :min="0" />
-          </n-form-item>
-          <n-form-item path="status" label="状态">
-            <n-switch v-model:value="categoryForm.status" />
-          </n-form-item>
-        </n-form>
-        <div class="action-buttons">
-          <n-space justify="end">
-            <n-button @click="showCategoryModal = false">取消</n-button>
-            <n-button type="primary" @click="handleSaveCategory">保存</n-button>
-          </n-space>
-        </div>
-      </n-card>
-    </n-modal>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { h, ref, reactive } from 'vue'
 import { useMessage } from 'naive-ui'
@@ -139,9 +74,9 @@ const columns = [
     key: 'status',
     render(row) {
       return h(
-        'n-tag',
-        { type: row.status ? 'success' : 'warning' },
-        { default: () => row.status ? '启用' : '禁用' }
+          'n-tag',
+          { type: row.status ? 'success' : 'warning' },
+          { default: () => row.status ? '启用' : '禁用' }
       )
     }
   },
@@ -158,37 +93,37 @@ const columns = [
     key: 'actions',
     render(row) {
       return h(
-        'n-space',
-        {},
-        {
-          default: () => [
-            h(
-              'n-button',
-              {
-                size: 'small',
-                quaternary: true,
-                onClick: () => handleEditCategory(row)
-              },
-              {
-                default: () => '编辑',
-                icon: () => h(CreateOutline)
-              }
-            ),
-            h(
-              'n-button',
-              {
-                size: 'small',
-                quaternary: true,
-                type: 'error',
-                onClick: () => handleDeleteCategory(row)
-              },
-              {
-                default: () => '删除',
-                icon: () => h(TrashOutline)
-              }
-            )
-          ]
-        }
+          'n-space',
+          {},
+          {
+            default: () => [
+              h(
+                  'n-button',
+                  {
+                    size: 'small',
+                    quaternary: true,
+                    onClick: () => handleEditCategory(row)
+                  },
+                  {
+                    default: () => '编辑',
+                    icon: () => h(CreateOutline)
+                  }
+              ),
+              h(
+                  'n-button',
+                  {
+                    size: 'small',
+                    quaternary: true,
+                    type: 'error',
+                    onClick: () => handleDeleteCategory(row)
+                  },
+                  {
+                    default: () => '删除',
+                    icon: () => h(TrashOutline)
+                  }
+              )
+            ]
+          }
       )
     }
   }
@@ -225,7 +160,7 @@ const handleDeleteCategory = (category) => {
     message.error(`无法删除分类 "${category.name}"，该分类下还有 ${category.postCount} 篇帖子`)
     return
   }
-  
+
   message.success(`分类 "${category.name}" 已删除`)
   categories.value = categories.value.filter(c => c.id !== category.id)
 }
@@ -238,8 +173,8 @@ const handleSaveCategory = () => {
         // 更新分类
         const index = categories.value.findIndex(c => c.id === categoryForm.id)
         if (index !== -1) {
-          categories.value[index] = { 
-            ...categories.value[index], 
+          categories.value[index] = {
+            ...categories.value[index],
             name: categoryForm.name,
             slug: categoryForm.slug,
             description: categoryForm.description,
@@ -268,6 +203,71 @@ const handleSaveCategory = () => {
   })
 }
 </script>
+<template>
+  <div>
+    <div class="action-bar">
+      <n-space>
+        <n-button type="primary" @click="handleAddCategory">
+          <template #icon>
+            <n-icon>
+              <AddOutline />
+            </n-icon>
+          </template>
+          添加分类
+        </n-button>
+      </n-space>
+    </div>
+
+    <n-data-table
+      :columns="columns"
+      :data="categories"
+      :pagination="pagination"
+      :bordered="false"
+      striped
+    />
+
+    <!-- 添加/编辑分类对话框 -->
+    <n-modal v-model:show="showCategoryModal" :title="isEditing ? '编辑分类' : '添加分类'">
+      <n-card>
+        <n-form
+          ref="categoryFormRef"
+          :model="categoryForm"
+          :rules="categoryRules"
+          label-placement="left"
+          label-width="auto"
+          require-mark-placement="right-hanging"
+        >
+          <n-form-item path="name" label="分类名称">
+            <n-input v-model:value="categoryForm.name" placeholder="请输入分类名称" />
+          </n-form-item>
+          <n-form-item path="slug" label="分类标识">
+            <n-input v-model:value="categoryForm.slug" placeholder="请输入分类标识" />
+          </n-form-item>
+          <n-form-item path="description" label="分类描述">
+            <n-input
+              v-model:value="categoryForm.description"
+              type="textarea"
+              placeholder="请输入分类描述"
+            />
+          </n-form-item>
+          <n-form-item path="order" label="排序">
+            <n-input-number v-model:value="categoryForm.order" :min="0" />
+          </n-form-item>
+          <n-form-item path="status" label="状态">
+            <n-switch v-model:value="categoryForm.status" />
+          </n-form-item>
+        </n-form>
+        <div class="action-buttons">
+          <n-space justify="end">
+            <n-button @click="showCategoryModal = false">取消</n-button>
+            <n-button type="primary" @click="handleSaveCategory">保存</n-button>
+          </n-space>
+        </div>
+      </n-card>
+    </n-modal>
+  </div>
+</template>
+
 
 <style scoped>
 .action-bar {
