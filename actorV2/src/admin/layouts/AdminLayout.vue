@@ -32,7 +32,7 @@
     <!-- 主内容区 -->
     <n-layout :style="contentStyle">
       <!-- 顶部导航栏 -->
-      <n-layout-header bordered position="absolute" style="z-index: 999;">
+      <n-layout-header bordered position="absolute" style="z-index: 999; width: 100%;">
         <div class="header-container">
           <div class="header-left">
             <n-button quaternary circle @click="collapsed = !collapsed">
@@ -229,13 +229,21 @@ const handleUserSelect = (key: string) => {
   justify-content: space-between;
   padding: 0 24px;
   background-color: #fff;
+  box-sizing: border-box;
   width: 100%;
+  right: 0;
 }
 
 .header-left {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  margin-right: 24px;
 }
 
 .footer-container {
