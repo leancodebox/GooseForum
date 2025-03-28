@@ -1,41 +1,3 @@
-<template>
-  <div>
-    <div class="action-bar">
-      <n-space>
-        <n-input v-model:value="searchText" placeholder="搜索帖子" clearable>
-          <template #prefix>
-            <n-icon>
-              <SearchOutline />
-            </n-icon>
-          </template>
-        </n-input>
-        <n-select
-          v-model:value="categoryFilter"
-          placeholder="分类筛选"
-          clearable
-          :options="categoryOptions"
-          style="width: 200px"
-        />
-        <n-select
-          v-model:value="statusFilter"
-          placeholder="状态筛选"
-          clearable
-          :options="statusOptions"
-          style="width: 200px"
-        />
-      </n-space>
-    </div>
-
-    <n-data-table
-      :columns="columns"
-      :data="filteredPosts"
-      :pagination="pagination"
-      :bordered="false"
-      striped
-    />
-  </div>
-</template>
-
 <script setup lang="ts">
 import { h, ref, computed } from 'vue'
 import { useMessage } from 'naive-ui'
@@ -81,9 +43,9 @@ const filteredPosts = computed(() => {
 
   // 搜索过滤
   if (searchText.value) {
-    result = result.filter(post => 
-      post.title.toLowerCase().includes(searchText.value.toLowerCase()) ||
-      post.author.toLowerCase().includes(searchText.value.toLowerCase())
+    result = result.filter(post =>
+        post.title.toLowerCase().includes(searchText.value.toLowerCase()) ||
+        post.author.toLowerCase().includes(searchText.value.toLowerCase())
     )
   }
 
@@ -141,9 +103,9 @@ const columns = [
       }
       const status = statusMap[row.status] || { text: row.status, type: 'default' }
       return h(
-        'n-tag',
-        { type: status.type },
-        { default: () => status.text }
+          'n-tag',
+          { type: status.type },
+          { default: () => status.text }
       )
     }
   },
@@ -164,63 +126,63 @@ const columns = [
     key: 'actions',
     render(row) {
       return h(
-        'n-space',
-        {},
-        {
-          default: () => [
-            h(
-              'n-button',
-              {
-                size: 'small',
-                quaternary: true,
-                onClick: () => handleViewPost(row)
-              },
-              {
-                default: () => '查看',
-                icon: () => h(EyeOutline)
-              }
-            ),
-            row.status === 'pending' ? h(
-              'n-button',
-              {
-                size: 'small',
-                quaternary: true,
-                type: 'success',
-                onClick: () => handleApprovePost(row)
-              },
-              {
-                default: () => '通过',
-                icon: () => h(CheckmarkCircleOutline)
-              }
-            ) : null,
-            row.status !== 'deleted' ? h(
-              'n-button',
-              {
-                size: 'small',
-                quaternary: true,
-                type: 'warning',
-                onClick: () => handleBlockPost(row)
-              },
-              {
-                default: () => '屏蔽',
-                icon: () => h(BanOutline)
-              }
-            ) : null,
-            h(
-              'n-button',
-              {
-                size: 'small',
-                quaternary: true,
-                type: 'error',
-                onClick: () => handleDeletePost(row)
-              },
-              {
-                default: () => '删除',
-                icon: () => h(TrashOutline)
-              }
-            )
-          ]
-        }
+          'n-space',
+          {},
+          {
+            default: () => [
+              h(
+                  'n-button',
+                  {
+                    size: 'small',
+                    quaternary: true,
+                    onClick: () => handleViewPost(row)
+                  },
+                  {
+                    default: () => '查看',
+                    icon: () => h(EyeOutline)
+                  }
+              ),
+              row.status === 'pending' ? h(
+                  'n-button',
+                  {
+                    size: 'small',
+                    quaternary: true,
+                    type: 'success',
+                    onClick: () => handleApprovePost(row)
+                  },
+                  {
+                    default: () => '通过',
+                    icon: () => h(CheckmarkCircleOutline)
+                  }
+              ) : null,
+              row.status !== 'deleted' ? h(
+                  'n-button',
+                  {
+                    size: 'small',
+                    quaternary: true,
+                    type: 'warning',
+                    onClick: () => handleBlockPost(row)
+                  },
+                  {
+                    default: () => '屏蔽',
+                    icon: () => h(BanOutline)
+                  }
+              ) : null,
+              h(
+                  'n-button',
+                  {
+                    size: 'small',
+                    quaternary: true,
+                    type: 'error',
+                    onClick: () => handleDeletePost(row)
+                  },
+                  {
+                    default: () => '删除',
+                    icon: () => h(TrashOutline)
+                  }
+              )
+            ]
+          }
       )
     }
   }
@@ -251,7 +213,43 @@ const handleDeletePost = (post) => {
   posts.value = posts.value.filter(p => p.id !== post.id)
 }
 </script>
+<template>
+  <div>
+    <div class="action-bar">
+      <n-space>
+        <n-input v-model:value="searchText" placeholder="搜索帖子" clearable>
+          <template #prefix>
+            <n-icon>
+              <SearchOutline />
+            </n-icon>
+          </template>
+        </n-input>
+        <n-select
+          v-model:value="categoryFilter"
+          placeholder="分类筛选"
+          clearable
+          :options="categoryOptions"
+          style="width: 200px"
+        />
+        <n-select
+          v-model:value="statusFilter"
+          placeholder="状态筛选"
+          clearable
+          :options="statusOptions"
+          style="width: 200px"
+        />
+      </n-space>
+    </div>
 
+    <n-data-table
+      :columns="columns"
+      :data="filteredPosts"
+      :pagination="pagination"
+      :bordered="false"
+      striped
+    />
+  </div>
+</template>
 <style scoped>
 .action-bar {
   margin-bottom: 16px;
