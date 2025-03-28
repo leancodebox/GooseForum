@@ -45,6 +45,7 @@ export default defineConfig({
     },
     emptyOutDir:true,
   },
+
   server: {
     // 如果使用docker-compose开发模式，设置为false
     proxy: {
