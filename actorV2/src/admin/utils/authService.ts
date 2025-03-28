@@ -11,7 +11,7 @@ export interface PageData<T> {
 }
 
 // Mock 获取用户信息
-export const getUserInfo = async () => {
+export const getUserInfo = async ():Promise<Result<any>> => {
     return axiosInstance.get("/get-user-info")
 }
 
@@ -20,7 +20,7 @@ export function getUserList():Promise<Result<PageData<User>>> {
     return axiosInstance.post("admin/user-list")
 }
 
-export function editUser(userId:any, status:any, validate:any, roleId:any) {
+export function editUser(userId:any, status:any, validate:any, roleId:any):Promise<Result<any>> {
     return axiosInstance.post("admin/user-edit", {
         userId: userId,
         status: status,
@@ -41,7 +41,7 @@ export function getRoleList():Promise<Result<PageData<UserRole>>> {
     return axiosInstance.post("admin/role-list")
 }
 
-export function getRoleSave(id:any, roleName:any, permission:any) {
+export function getRoleSave(id:any, roleName:any, permission:any):Promise<Result<any>>  {
     return axiosInstance.post("admin/role-save", {
         id: id,
         roleName: roleName,
@@ -49,7 +49,7 @@ export function getRoleSave(id:any, roleName:any, permission:any) {
     })
 }
 
-export function getRoleDel(id:any) {
+export function getRoleDel(id:any):Promise<Result<any>> {
     return axiosInstance.post("admin/role-delete", {
         id: id,
     })
@@ -66,17 +66,15 @@ export const getCategoryList = ():Promise<Result<Category[]>> => {
     return axiosInstance.post('/admin/category-list')
 }
 
-export const saveCategory = (data:any) => {
+export const saveCategory = (data:any):Promise<Result<any>> => {
     return axiosInstance.post('/admin/category-save', data)
 }
 
-export const deleteCategory = (id:any) => {
+export const deleteCategory = (id:any) :Promise<Result<any>> => {
     return axiosInstance.post('/admin/category-delete', {id})
 }
 
-
-// 文章管理相关接口
-export const editArticle = (id:any, processStatus:any) => {
+export const editArticle = (id:any, processStatus:any):Promise<Result<any>> => {
     return axiosInstance.post('/admin/article-edit', {
         id,
         processStatus

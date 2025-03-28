@@ -1,5 +1,5 @@
 export interface Result<T> {
-    code: number;
+    code: 0 | 1;
     result: T;
     message: string;
 }
@@ -9,6 +9,7 @@ export interface Role {
     name: string;
     value: number;
 }
+
 export interface Label {
     name: string | null
     label: string | null
