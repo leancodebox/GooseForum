@@ -52,6 +52,7 @@ export default defineConfig({
       '^/api/.*':'http://localhost:99',
       '^/file/img/.*':'http://localhost:99',
       '^/login':'http://localhost:99',
+      '^/logout':'http://localhost:99',
       '^/static/*':'http://localhost:99',
       '^/post/*':'http://localhost:99',
     }

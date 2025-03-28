@@ -48,11 +48,8 @@ export const submitArticle = async <T>(article: any): Promise<T> => {
 
 // Mock 获取用户信息
 export const getUserInfo = async () => {
-    try {
-        return axiosInstance.get("/get-user-info")
-    } catch (error) {
-    }
-};
+    return axiosInstance.get("/get-user-info")
+}
 
 
 // 获取通知列表

@@ -38,9 +38,19 @@ watch(
     }
 )
 
-const handleLogout = () => {
-  // 处理退出登录逻辑
-  console.log('Logout clicked');
+const handleLogout = async () => {
+  try {
+    const response = await fetch('/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    const data = await response.json();
+    window.location.href = '/';
+  } catch (error) {
+    console.error('退出失败:', error);
+  }
 }
 
 function toggleMobileMenu() {
@@ -126,7 +136,7 @@ window.addEventListener('resize', function () {
               <!-- 将个人主页的链接改为 -->
               <router-link to="/user/profile/edit">个人主页</router-link>
               <a href="/user/settings">设置</a>
-              <a href="#" onclick="handleLogout()">退出</a>
+              <a href="#" @click="handleLogout">退出</a>
             </div>
           </div>
         </div>
@@ -160,7 +170,7 @@ window.addEventListener('resize', function () {
         <router-link to="/notifications"  class="mobile-link">消息</router-link>
         <router-link to="/user/profile/edit" class="mobile-link">个人主页</router-link>
         <a href="/user/settings" class="mobile-link">设置</a>
-        <a href="#" onclick="handleLogout()" class="mobile-link">退出</a>
+        <a href="#" @click="handleLogout" class="mobile-link">退出</a>
         <a href="/login" class="mobile-link" id="mobileLoginBtn">登录</a>
         <a href="/register" class="mobile-link" id="mobileRegisterBtn">注册</a>
       </div>

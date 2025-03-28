@@ -1,7 +1,7 @@
-import {defineStore} from 'pinia';
-import {ref} from 'vue';
-import {getUserInfo} from '@/utils/articleService';
-import type {Result} from "@/types/articleInterfaces.ts"; // 引入获取用户信息的接口
+import {defineStore} from 'pinia'
+import {ref} from 'vue'
+import {getUserInfo} from "../utils/authService.ts";
+import type {Result} from "../types/adminInterfaces.ts";
 
 // 定义用户信息的接口
 interface UserInfo {
@@ -16,7 +16,8 @@ interface UserInfo {
     website: string;
 }
 
-export const useUserStore = defineStore('user', () => {
+
+export const useUserStore = defineStore('auth', () => {
     const userInfo = ref<UserInfo | null>(null); // 设置 userInfo 的类型
     const fetchUserInfo = async () => {
         try {
@@ -42,5 +43,5 @@ export const useUserStore = defineStore('user', () => {
             console.error('退出失败:', error);
         }
     }
-    return {userInfo, fetchUserInfo,handleLogout};
+    return {userInfo, fetchUserInfo, handleLogout};
 });

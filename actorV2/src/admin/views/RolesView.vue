@@ -12,15 +12,13 @@
         </template>
       </n-page-header>
 
-      <n-card>
         <n-data-table
           :columns="columns"
           :data="roles"
           :pagination="pagination"
-          :bordered="false"
+          :bordered="true"
           striped
         />
-      </n-card>
     </n-space>
 
     <!-- 添加角色对话框 -->

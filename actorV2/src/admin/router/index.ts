@@ -7,6 +7,7 @@ import CategoryManagement from '../views/CategoryManagement.vue'
 import SystemSettings from '../views/SystemSettings.vue'
 import Login from '../views/Login.vue'
 import RolesView from '../views/RolesView.vue'
+import {useUserStore} from "../stores/auth.ts";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -85,18 +86,11 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   // 设置页面标题
   document.title = `${to.meta.title} - GooseForum管理系统`
-
-  // 这里可以添加登录验证逻辑
-  // const isAuthenticated = localStorage.getItem('admin_token')
-  // if (to.meta.requiresAuth && !isAuthenticated) {
-  //   next('/login')
-  // } else {
-  //   next()
-  // }
-
+  const userStore = useUserStore()
+  await userStore.fetchUserInfo()
   // 暂时不做验证，直接放行
   next()
 })

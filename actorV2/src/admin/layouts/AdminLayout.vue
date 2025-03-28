@@ -26,6 +26,7 @@ import {
   NCard
 } from 'naive-ui'
 import type { MenuOption } from 'naive-ui'
+import {useUserStore} from "@/admin/stores/auth.ts";
 
 const router = useRouter()
 const route = useRoute()
@@ -126,7 +127,8 @@ const handleUserSelect = (key: string) => {
   if (key === 'logout') {
     // 退出登录逻辑
     // localStorage.removeItem('admin_token')
-    router.push('/login')
+    useUserStore().handleLogout()
+    // router.push('/login')
   } else if (key === 'profile') {
     // 跳转到个人信息页
     // router.push('/profile')
