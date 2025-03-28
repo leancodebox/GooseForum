@@ -206,7 +206,7 @@ const columns = [
 // 添加用户
 const handleAddUser = () => {
   isEditing.value = false
-  userForm.id = ''
+  userForm.id = 0
   userForm.username = ''
   userForm.email = ''
   userForm.role = []

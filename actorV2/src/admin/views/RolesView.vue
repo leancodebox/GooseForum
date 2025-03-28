@@ -198,10 +198,12 @@ const handleAddRole = () => {
 }
 
 // 处理编辑角色
-const handleEdit = (row) => {
-  editFormModel.id = row.id
+const handleEdit = (row:UserRole) => {
+  editFormModel.id = row.roleId
   editFormModel.roleName = row.roleName
-  editFormModel.permissions = [...row.permissions]
+  editFormModel.permissions =  !!row.permissions ? row.permissions.map(item => {
+    return item.id
+  }) : []
   showEditModal.value = true
 }
 
@@ -209,6 +211,7 @@ const handleEditRole = () => {
   editFormRef.value?.validate(async (errors) => {
     if (!errors) {
       try {
+        console.log(editFormModel.permissions)
         const res = await getRoleSave(
           editFormModel.id,
           editFormModel.roleName,
@@ -232,13 +235,13 @@ const handleEditRole = () => {
 
 // 处理删除角色
 const handleDelete = async (row) => {
-  if (row.id === 1) {
+  if (row.roleId === 1) {
     message.error('超级管理员角色不能删除')
     return
   }
 
   try {
-    const res = await getRoleDel(row.id)
+    const res = await getRoleDel(row.roleId)
     if (res.code === 0) {
       message.success('角色删除成功')
       // 重新获取角色列表
@@ -316,7 +319,7 @@ const handleDelete = async (row) => {
           <n-input v-model:value="editFormModel.roleName" placeholder="请输入角色名称" />
         </n-form-item>
         <n-form-item label="权限点" path="permissions">
-          <n-select v-model:value="formModel.permissions" multiple :options="permissions"></n-select>
+          <n-select v-model:value="editFormModel.permissions" multiple :options="permissions"></n-select>
         </n-form-item>
       </n-form>
       <template #action>
