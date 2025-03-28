@@ -1,32 +1,32 @@
 <script setup lang="ts">
-import { h, ref, reactive } from 'vue'
-import { useMessage } from 'naive-ui'
+import { h, ref, reactive, onMounted } from 'vue'
+import { useMessage, NTag, NSpace, NButton, NPopconfirm } from 'naive-ui'
 import { AddOutline, CreateOutline, TrashOutline } from '@vicons/ionicons5'
 import type { FormInst, FormRules } from 'naive-ui'
+import { getCategoryList, saveCategory, deleteCategory } from "@/admin/utils/authService.ts";
+import type { Category} from "../types/adminInterfaces.ts";
 
 const message = useMessage()
 const showCategoryModal = ref(false)
 const isEditing = ref(false)
 const categoryFormRef = ref<FormInst | null>(null)
+const loading = ref(false)
 
 // 分类表单
 const categoryForm = reactive({
-  id: '',
-  name: '',
-  slug: '',
-  description: '',
-  order: 0,
-  status: true
+  id: 0,
+  category: '',
+  sort: 0,
+  status: 1
 })
 
 // 表单验证规则
 const categoryRules: FormRules = {
-  name: [
+  category: [
     { required: true, message: '请输入分类名称', trigger: 'blur' }
   ],
-  slug: [
-    { required: true, message: '请输入分类标识', trigger: 'blur' },
-    { pattern: /^[a-z0-9-]+$/, message: '分类标识只能包含小写字母、数字和连字符', trigger: 'blur' }
+  sort: [
+    { required: true, message: '请输入排序值', trigger: 'blur' }
   ]
 }
 
@@ -35,14 +35,31 @@ const pagination = {
   pageSize: 10
 }
 
-// 模拟分类数据
-const categories = ref([
-  { id: '1', name: '技术讨论', slug: 'tech', description: '讨论各种技术问题', order: 0, status: true, postCount: 42, createdAt: '2023-01-01' },
-  { id: '2', name: '问答', slug: 'qa', description: '提问和回答', order: 1, status: true, postCount: 128, createdAt: '2023-01-02' },
-  { id: '3', name: '分享', slug: 'share', description: '分享各种资源和经验', order: 2, status: true, postCount: 64, createdAt: '2023-01-03' },
-  { id: '4', name: '公告', slug: 'announcement', description: '系统公告', order: 3, status: true, postCount: 10, createdAt: '2023-01-04' },
-  { id: '5', name: '闲聊', slug: 'chat', description: '随意聊天', order: 4, status: false, postCount: 0, createdAt: '2023-01-05' }
-])
+// 分类数据
+const categories = ref([])
+
+// 获取分类列表
+const fetchCategories = async () => {
+  loading.value = true
+  try {
+    const res = await getCategoryList()
+    if (res.code === 0) {
+      categories.value = res.result
+    } else {
+      message.error(res.message || '获取分类列表失败')
+    }
+  } catch (error) {
+    message.error('获取分类列表失败')
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 初始化时获取分类列表
+onMounted(() => {
+  fetchCategories()
+})
 
 // 表格列定义
 const columns = [
@@ -52,78 +69,67 @@ const columns = [
   },
   {
     title: '分类名称',
-    key: 'name'
-  },
-  {
-    title: '分类标识',
-    key: 'slug'
-  },
-  {
-    title: '描述',
-    key: 'description',
-    ellipsis: {
-      tooltip: true
-    }
+    key: 'category'
   },
   {
     title: '排序',
-    key: 'order'
+    key: 'sort'
   },
   {
     title: '状态',
     key: 'status',
-    render(row) {
+    render(row:Category) {
       return h(
-          'n-tag',
-          { type: row.status ? 'success' : 'warning' },
-          { default: () => row.status ? '启用' : '禁用' }
+        NTag,
+        { type: row.status === 1 ?  'warning':'success'  },
+        { default: () => row.status === 1 ?  '禁用':'启用' }
       )
     }
   },
   {
-    title: '帖子数',
-    key: 'postCount'
-  },
-  {
-    title: '创建时间',
-    key: 'createdAt'
-  },
-  {
     title: '操作',
     key: 'actions',
-    render(row) {
+    render(row:Category) {
       return h(
-          'n-space',
-          {},
-          {
-            default: () => [
-              h(
-                  'n-button',
+        NSpace,
+        {},
+        {
+          default: () => [
+            h(
+              NButton,
+              {
+                size: 'small',
+                quaternary: true,
+                onClick: () => handleEditCategory(row)
+              },
+              {
+                default: () => '编辑',
+                icon: () => h(CreateOutline)
+              }
+            ),
+            h(
+              NPopconfirm,
+              {
+                onPositiveClick: () => handleDeleteCategory(row)
+              },
+              {
+                default: () => '确定要删除该分类吗？',
+                trigger: () => h(
+                  NButton,
                   {
                     size: 'small',
                     quaternary: true,
-                    onClick: () => handleEditCategory(row)
-                  },
-                  {
-                    default: () => '编辑',
-                    icon: () => h(CreateOutline)
-                  }
-              ),
-              h(
-                  'n-button',
-                  {
-                    size: 'small',
-                    quaternary: true,
-                    type: 'error',
-                    onClick: () => handleDeleteCategory(row)
+                    type: 'error'
                   },
                   {
                     default: () => '删除',
                     icon: () => h(TrashOutline)
                   }
-              )
-            ]
-          }
+                )
+              }
+            )
+          ]
+        }
       )
     }
   }
@@ -132,12 +138,10 @@ const columns = [
 // 添加分类
 const handleAddCategory = () => {
   isEditing.value = false
-  categoryForm.id = ''
-  categoryForm.name = ''
-  categoryForm.slug = ''
-  categoryForm.description = ''
-  categoryForm.order = categories.value.length
-  categoryForm.status = true
+  categoryForm.id = 0
+  categoryForm.category = ''
+  categoryForm.sort = 0
+  categoryForm.status = 1
   showCategoryModal.value = true
 }
 
@@ -145,60 +149,51 @@ const handleAddCategory = () => {
 const handleEditCategory = (category) => {
   isEditing.value = true
   categoryForm.id = category.id
-  categoryForm.name = category.name
-  categoryForm.slug = category.slug
-  categoryForm.description = category.description
-  categoryForm.order = category.order
+  categoryForm.category = category.category
+  categoryForm.sort = category.sort
   categoryForm.status = category.status
   showCategoryModal.value = true
 }
 
 // 删除分类
-const handleDeleteCategory = (category) => {
-  // 实际应用中应该弹出确认对话框
-  if (category.postCount > 0) {
-    message.error(`无法删除分类 "${category.name}"，该分类下还有 ${category.postCount} 篇帖子`)
-    return
+const handleDeleteCategory = async (category) => {
+  try {
+    const res = await deleteCategory(category.id)
+    if (res.data.code === 0) {
+      message.success('分类删除成功')
+      fetchCategories() // 重新获取分类列表
+    } else {
+      message.error(res.data.message || '删除分类失败')
+    }
+  } catch (error) {
+    message.error('删除分类失败')
+    console.error(error)
   }
-
-  message.success(`分类 "${category.name}" 已删除`)
-  categories.value = categories.value.filter(c => c.id !== category.id)
 }
 
 // 保存分类
 const handleSaveCategory = () => {
-  categoryFormRef.value?.validate((errors) => {
+  categoryFormRef.value?.validate(async (errors) => {
     if (!errors) {
-      if (isEditing.value) {
-        // 更新分类
-        const index = categories.value.findIndex(c => c.id === categoryForm.id)
-        if (index !== -1) {
-          categories.value[index] = {
-            ...categories.value[index],
-            name: categoryForm.name,
-            slug: categoryForm.slug,
-            description: categoryForm.description,
-            order: categoryForm.order,
-            status: categoryForm.status
-          }
-          message.success('分类更新成功')
-        }
-      } else {
-        // 添加分类
-        const newId = (parseInt(categories.value[categories.value.length - 1].id) + 1).toString()
-        categories.value.push({
-          id: newId,
-          name: categoryForm.name,
-          slug: categoryForm.slug,
-          description: categoryForm.description,
-          order: categoryForm.order,
-          status: categoryForm.status,
-          postCount: 0,
-          createdAt: new Date().toISOString().split('T')[0]
+      try {
+        const res = await saveCategory({
+          id: isEditing.value ? categoryForm.id : undefined,
+          category: categoryForm.category,
+          sort: categoryForm.sort,
+          status: categoryForm.status
         })
-        message.success('分类添加成功')
+
+        if (res.data.code === 0) {
+          message.success(isEditing.value ? '分类更新成功' : '分类添加成功')
+          showCategoryModal.value = false
+          fetchCategories() // 重新获取分类列表
+        } else {
+          message.error(res.data.message || '保存分类失败')
+        }
+      } catch (error) {
+        message.error('保存分类失败')
+        console.error(error)
       }
-      showCategoryModal.value = false
     }
   })
 }
@@ -223,6 +218,7 @@ const handleSaveCategory = () => {
       :data="categories"
       :pagination="pagination"
       :bordered="false"
+      :loading="loading"
       striped
     />
 
@@ -237,24 +233,17 @@ const handleSaveCategory = () => {
           label-width="auto"
           require-mark-placement="right-hanging"
         >
-          <n-form-item path="name" label="分类名称">
-            <n-input v-model:value="categoryForm.name" placeholder="请输入分类名称" />
+          <n-form-item path="category" label="分类名称">
+            <n-input v-model:value="categoryForm.category" placeholder="请输入分类名称" />
           </n-form-item>
-          <n-form-item path="slug" label="分类标识">
-            <n-input v-model:value="categoryForm.slug" placeholder="请输入分类标识" />
-          </n-form-item>
-          <n-form-item path="description" label="分类描述">
-            <n-input
-              v-model:value="categoryForm.description"
-              type="textarea"
-              placeholder="请输入分类描述"
-            />
-          </n-form-item>
-          <n-form-item path="order" label="排序">
-            <n-input-number v-model:value="categoryForm.order" :min="0" />
+          <n-form-item path="sort" label="排序">
+            <n-input-number v-model:value="categoryForm.sort" :min="0" />
           </n-form-item>
           <n-form-item path="status" label="状态">
-            <n-switch v-model:value="categoryForm.status" />
+            <n-radio-group v-model:value="categoryForm.status">
+              <n-radio :value="1">启用</n-radio>
+              <n-radio :value="0">禁用</n-radio>
+            </n-radio-group>
           </n-form-item>
         </n-form>
         <div class="action-buttons">
@@ -267,7 +256,6 @@ const handleSaveCategory = () => {
     </n-modal>
   </div>
 </template>
-
 
 <style scoped>
 .action-bar {

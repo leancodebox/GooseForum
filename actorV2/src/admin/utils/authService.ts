@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "./messageManager.ts";
 import axios from 'axios';
-import type {Articles, Label, Result, User} from "../types/adminInterfaces.ts";
+import type {Articles, Category, Label, Result, User} from "../types/adminInterfaces.ts";
 
 export interface PageData<T> {
     list: T[];
@@ -62,7 +62,7 @@ export function getAdminArticlesList(page = 1, pageSize = 10):Promise<Result<Pag
     })
 }
 
-export const getCategoryList = () => {
+export const getCategoryList = ():Promise<Result<Category[]>> => {
     return axiosInstance.post('/admin/category-list')
 }
 
