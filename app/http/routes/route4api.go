@@ -77,10 +77,10 @@ func forum(ginApp *gin.Engine) {
 	// 分类列表
 	forumApi.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
 	forumApi.GET("get-articles-category", ginUpNP(controllers.GetArticlesCategory))
-	// 文章分页
-	forumApi.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
-	// 文章详情
-	forumApi.POST("get-articles-detail", ginUpP(controllers.GetArticlesDetail))
+	//// 文章分页
+	//forumApi.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
+	//// 文章详情
+	//forumApi.POST("get-articles-detail", ginUpP(controllers.GetArticlesDetail))
 
 	loginApi := forumApi.Use(middleware.JWTAuth4Gin)
 	// 通知相关接口
