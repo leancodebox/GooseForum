@@ -138,6 +138,12 @@ const menuOptions: MenuOption[] = [
     path: '/admin/users'
   },
   {
+    label: '角色管理',
+    key: 'roles',
+    icon: PeopleOutline,
+    path: '/admin/roles'
+  },
+  {
     label: '帖子管理',
     key: 'posts',
     icon: DocumentTextOutline,

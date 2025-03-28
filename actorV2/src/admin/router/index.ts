@@ -6,6 +6,7 @@ import PostManagement from '../views/PostManagement.vue'
 import CategoryManagement from '../views/CategoryManagement.vue'
 import SystemSettings from '../views/SystemSettings.vue'
 import Login from '../views/Login.vue'
+import RolesView from '../views/RolesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -66,6 +67,16 @@ const router = createRouter({
           meta: {
             title: '系统设置',
             requiresAuth: true
+          }
+        },
+        {
+          path: '/admin/roles',
+          name: 'AdminRoles',
+          component: RolesView,
+          meta: {
+            title: '角色管理',
+            requiresAuth: true,
+            isAdmin: true
           }
         }
       ]

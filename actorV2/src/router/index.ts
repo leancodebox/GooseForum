@@ -3,6 +3,7 @@ import { useUserStore } from '@/stores/userStore'
 
 import Empty from '../views/Empty.vue'
 import UserProfileEdit from '../views/UserProfileEdit.vue'
+import RolesView from '../admin/views/RolesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,7 +32,7 @@ const router = createRouter({
       path: '/user/profile/edit',
       name: 'userProfileEdit',
       component: UserProfileEdit
-    }
+    },
   ],
 })
 
