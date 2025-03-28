@@ -8,7 +8,8 @@ import (
 
 // --go:generate go run generatetool/generatetool.go
 //
-//go:generate npm run --prefix actor build --emptyOutDir
+// -- go:generate npm run --prefix actor build --emptyOutDir
+//
 //go:generate npm run --prefix actorV2 build --emptyOutDir
 func main() {
 	// 注册静态资源
