@@ -21,13 +21,11 @@ func setup(ginApp *gin.Engine) {
 
 func frontend(ginApp *gin.Engine) {
 	actGroup := ginApp.Group("/")
-	actorFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
 	appFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist2")
 	staticFS, _ := resource.GetStaticFS()
 	actGroup.Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).
 		Use(middleware.BrowserCache).
-		StaticFS("actor", http.FS(actorFs)).
 		StaticFS("static", http.FS(staticFS)).
 		StaticFS("app", http.FS(appFs))
 
