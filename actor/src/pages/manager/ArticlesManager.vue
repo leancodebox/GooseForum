@@ -115,8 +115,8 @@ const columns = createColumns()
 
 const paginationReactive = reactive({
   page: 1,
-  pageCount: 1,
   pageSize: 10,
+  pageCount: 1,
   itemCount: 0,
   search: "",
   prefix({itemCount}) {

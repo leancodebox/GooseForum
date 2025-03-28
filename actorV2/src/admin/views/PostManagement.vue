@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, h, onMounted, ref} from 'vue'
+import {computed, h, onMounted, reactive, ref} from 'vue'
 import {NButton, NSpace, NTag, useMessage} from 'naive-ui'
 import {BanOutline, CheckmarkCircleOutline, EyeOutline, SearchOutline, TrashOutline} from '@vicons/ionicons5'
 import {getAdminArticlesList,editArticle} from "@/admin/utils/authService.ts";
@@ -12,13 +12,20 @@ const statusFilter = ref(null)
 const loading = ref(false)
 
 // 分页设置
-const pagination = ref({
+const pagination = reactive({
   page: 1,
   pageSize: 10,
-  itemCount: 0,
-  pageCount: 1,
+  itemCount: 120,
+  pageCount: 120,
+  showSizePicker: true,
+  pageSizes: [10, 20, 30, 50],
   onChange: (page: number) => {
-    pagination.value.page = page
+    pagination.page = page
+    fetchArticles()
+  },
+  onUpdatePageSize: (pageSize: number) => {
+    pagination.pageSize = pageSize
+    pagination.page = 1
     fetchArticles()
   }
 })
@@ -45,12 +52,13 @@ const posts = ref<Articles[]>([])
 const fetchArticles = async () => {
   loading.value = true
   try {
-    const response = await getAdminArticlesList(pagination.value.page, pagination.value.pageSize)
+    const response = await getAdminArticlesList(pagination.page, pagination.pageSize)
     if (response.code === 0) {
       posts.value = response.result.list
-      pagination.value.itemCount = response.result.total
-      pagination.value.pageCount = parseInt(String(response.result.total / response.result.size))
-      console.log(pagination.value)
+      pagination.itemCount = response.result.total
+      // 正确计算总页数，使用Math.ceil向上取整
+      pagination.pageCount = Math.ceil(response.result.total / (response.result.size || pagination.pageSize))
+      console.log('分页信息:', pagination)
     } else {
       message.error(response.message || '获取文章列表失败')
     }
@@ -271,6 +279,7 @@ onMounted(() => {
     </div>
 
     <n-data-table
+        remote
         :columns="columns"
         :data="filteredPosts"
         :pagination="pagination"
