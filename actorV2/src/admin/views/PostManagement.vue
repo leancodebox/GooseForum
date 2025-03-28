@@ -16,6 +16,7 @@ const pagination = ref({
   page: 1,
   pageSize: 10,
   itemCount: 0,
+  pageCount: 1,
   onChange: (page: number) => {
     pagination.value.page = page
     fetchArticles()
@@ -48,6 +49,8 @@ const fetchArticles = async () => {
     if (response.code === 0) {
       posts.value = response.result.list
       pagination.value.itemCount = response.result.total
+      pagination.value.pageCount = parseInt(String(response.result.total / response.result.size))
+      console.log(pagination.value)
     } else {
       message.error(response.message || '获取文章列表失败')
     }
