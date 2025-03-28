@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	fmt.Println(os.RemoveAll("app/assert/frontend/dist2"))
+	fmt.Println(os.RemoveAll("app/assert/frontend/dist"))
 }

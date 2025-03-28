@@ -20,7 +20,7 @@ const (
 func NotFound(c *gin.Context) {
 	uri := c.Request.RequestURI
 	if !strings.HasPrefix(uri, "/app/assert") && strings.HasPrefix(uri, "/app") {
-		fsEntity, _ := fs.Sub(assert.GetActorFs(), "frontend/dist2")
+		fsEntity, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
 		if strings.HasPrefix(uri, "/app/admin") {
 			c.FileFromFS(
 				path.Join("admin.html"),

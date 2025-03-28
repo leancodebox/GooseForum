@@ -36,7 +36,7 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 750,
-    outDir:"../app/assert/frontend/dist2",
+    outDir:"../app/assert/frontend/dist",
     rollupOptions: {
       input: {
         main: fileURLToPath(new URL('./index.html', import.meta.url)),
