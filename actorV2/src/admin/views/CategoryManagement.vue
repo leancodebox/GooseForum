@@ -223,7 +223,12 @@ const handleSaveCategory = () => {
     />
 
     <!-- 添加/编辑分类对话框 -->
-    <n-modal v-model:show="showCategoryModal" :title="isEditing ? '编辑分类' : '添加分类'">
+    <n-modal 
+      v-model:show="showCategoryModal" 
+      :title="isEditing ? '编辑分类' : '添加分类'"
+      style="width: 500px;"
+      preset="card"
+    >
       <n-card>
         <n-form
           ref="categoryFormRef"
