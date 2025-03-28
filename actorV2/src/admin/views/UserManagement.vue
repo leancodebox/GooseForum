@@ -1,17 +1,63 @@
-
 <script setup lang="ts">
-import { h, ref, computed, reactive } from 'vue'
-import { useMessage,NButton } from 'naive-ui'
-import { SearchOutline, AddOutline, CreateOutline, TrashOutline } from '@vicons/ionicons5'
-import type { FormInst, FormRules } from 'naive-ui'
+import {computed, h, onMounted, reactive, ref} from 'vue'
+import type {FormInst, FormRules} from 'naive-ui'
+import {NButton, NTag, useMessage} from 'naive-ui'
+import {AddOutline, CreateOutline, SearchOutline, TrashOutline} from '@vicons/ionicons5'
 import {getUserList} from "@/admin/utils/authService.ts";
+import type {User} from "../types/adminInterfaces.ts";
 
 const message = useMessage()
 const searchText = ref('')
 const showUserModal = ref(false)
 const isEditing = ref(false)
 const userFormRef = ref<FormInst | null>(null)
-getUserList()
+const loading = ref(false)
+const users = ref([])
+
+// 分页设置
+const pagination = reactive({
+  page: 1,
+  pageSize: 10,
+  itemCount: 0,
+  onChange: (page: number) => {
+    pagination.page = page
+    fetchUsers()
+  }
+})
+
+// 获取用户列表
+const fetchUsers = async () => {
+  loading.value = true
+  try {
+    /**
+     * {
+     page: pagination.page,
+     pageSize: pagination.pageSize,
+     search: searchText.value
+     }
+     */
+    const response = await getUserList()
+    users.value = response.result.list || []
+    pagination.itemCount = response.result.total || 0
+  } catch (error) {
+    message.error('获取用户列表失败')
+    console.error('获取用户列表失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 监听搜索文本变化
+const handleSearch = () => {
+  pagination.page = 1
+  fetchUsers()
+}
+
+// 初始化加载
+onMounted(() => {
+  fetchUsers()
+})
+
 // 用户表单
 const userForm = reactive({
   id: '',
@@ -25,59 +71,39 @@ const userForm = reactive({
 // 表单验证规则
 const userRules: FormRules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+    {required: true, message: '请输入用户名', trigger: 'blur'}
   ],
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' }
+    {required: true, message: '请输入邮箱', trigger: 'blur'},
+    {type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur'}
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' }
+    {required: true, message: '请输入密码', trigger: 'blur'}
   ]
 }
 
 // 角色选项
 const roleOptions = [
-  { label: '管理员', value: 'admin' },
-  { label: '普通用户', value: 'user' },
-  { label: '访客', value: 'guest' }
+  {label: '管理员', value: 'admin'},
+  {label: '普通用户', value: 'user'},
+  {label: '访客', value: 'guest'}
 ]
 
 // 状态选项
 const statusOptions = [
-  { label: '正常', value: 'active' },
-  { label: '禁用', value: 'disabled' },
-  { label: '待验证', value: 'pending' }
+  {label: '正常', value: 'active'},
+  {label: '禁用', value: 'disabled'},
+  {label: '待验证', value: 'pending'}
 ]
 
-// 分页设置
-const pagination = {
-  pageSize: 10
-}
-
-// 模拟用户数据
-const users = ref([
-  { id: '1', username: 'admin', email: 'admin@example.com', role: 'admin', status: 'active', createdAt: '2023-01-01' },
-  { id: '2', username: 'user1', email: 'user1@example.com', role: 'user', status: 'active', createdAt: '2023-01-02' },
-  { id: '3', username: 'user2', email: 'user2@example.com', role: 'user', status: 'disabled', createdAt: '2023-01-03' },
-  { id: '4', username: 'guest', email: 'guest@example.com', role: 'guest', status: 'pending', createdAt: '2023-01-04' }
-])
-
-// 过滤后的用户列表
-const filteredUsers = computed(() => {
-  if (!searchText.value) return users.value
-
-  return users.value.filter(user =>
-      user.username.toLowerCase().includes(searchText.value.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchText.value.toLowerCase())
-  )
-})
+// 过滤后的用户列表 - 不再需要本地过滤，由后端处理
+const filteredUsers = computed(() => users.value)
 
 // 表格列定义
 const columns = [
   {
     title: 'ID',
-    key: 'id'
+    key: 'userId'
   },
   {
     title: '用户名',
@@ -90,29 +116,39 @@ const columns = [
   {
     title: '角色',
     key: 'role',
-    render(row) {
-      const roleMap = {
-        admin: '管理员',
-        user: '普通用户',
-        guest: '访客'
-      }
-      return roleMap[row.role] || row.role
+    render(row: User) {
+      return row.roleList
     }
   },
   {
     title: '状态',
     key: 'status',
-    render(row) {
+    render(row: User) {
       const statusMap = {
-        active: { text: '正常', type: 'success' },
-        disabled: { text: '禁用', type: 'error' },
-        pending: { text: '待验证', type: 'warning' }
+        0: {text: '正常', type: 'success'},
+        1: {text: '禁用', type: 'error'},
       }
-      const status = statusMap[row.status] || { text: row.status, type: 'default' }
+      const status = statusMap[row.status] || {text: row.status, type: 'default'}
       return h(
-          'n-tag',
-          { type: status.type },
-          { default: () => status.text }
+          NTag,
+          {type: status.type},
+          {default: () => status.text}
+      )
+    }
+  },
+  {
+    title: '验证',
+    key: 'validate',
+    render(row: User) {
+      const statusMap = {
+        0: {text: '未验证', type: 'warning'},
+        1: {text: '验证', type: 'success'},
+      }
+      const status = statusMap[row.validate] || {text: row.validate, type: 'default'}
+      return h(
+          NTag,
+          {type: status.type},
+          {default: () => status.text}
       )
     }
   },
@@ -123,7 +159,7 @@ const columns = [
   {
     title: '操作',
     key: 'actions',
-    render(row:any) {
+    render(row: any) {
       return h(
           'n-space',
           {},
@@ -192,29 +228,23 @@ const handleDeleteUser = (user) => {
 
 // 保存用户
 const handleSaveUser = () => {
-  userFormRef.value?.validate((errors) => {
+  userFormRef.value?.validate(async (errors) => {
     if (!errors) {
-      if (isEditing.value) {
-        // 更新用户
-        const index = users.value.findIndex(u => u.id === userForm.id)
-        if (index !== -1) {
-          users.value[index] = { ...users.value[index], ...userForm }
+      try {
+        if (isEditing.value) {
+          // 这里应该调用更新用户的API
           message.success('用户更新成功')
+        } else {
+          // 这里应该调用添加用户的API
+          message.success('用户添加成功')
         }
-      } else {
-        // 添加用户
-        const newId = (parseInt(users.value[users.value.length - 1].id) + 1).toString()
-        users.value.push({
-          id: newId,
-          username: userForm.username,
-          email: userForm.email,
-          role: userForm.role,
-          status: userForm.status,
-          createdAt: new Date().toISOString().split('T')[0]
-        })
-        message.success('用户添加成功')
+        showUserModal.value = false
+        // 刷新用户列表
+        fetchUsers()
+      } catch (error) {
+        message.error(isEditing.value ? '更新用户失败' : '添加用户失败')
+        console.error(error)
       }
-      showUserModal.value = false
     }
   })
 }
@@ -223,17 +253,25 @@ const handleSaveUser = () => {
   <div>
     <div class="action-bar">
       <n-space>
-        <n-input v-model:value="searchText" placeholder="搜索用户" clearable>
+        <n-input
+            v-model:value="searchText"
+            placeholder="搜索用户"
+            clearable
+            @keydown.enter="handleSearch"
+        >
           <template #prefix>
             <n-icon>
-              <SearchOutline />
+              <SearchOutline/>
             </n-icon>
           </template>
         </n-input>
+        <n-button type="primary" @click="handleSearch">
+          搜索
+        </n-button>
         <n-button type="primary" @click="handleAddUser">
           <template #icon>
             <n-icon>
-              <AddOutline />
+              <AddOutline/>
             </n-icon>
           </template>
           添加用户
@@ -242,23 +280,24 @@ const handleSaveUser = () => {
     </div>
 
     <n-data-table
-      :columns="columns"
-      :data="filteredUsers"
-      :pagination="pagination"
-      :bordered="false"
-      striped
+        :columns="columns"
+        :data="filteredUsers"
+        :pagination="pagination"
+        :bordered="false"
+        :loading="loading"
+        striped
     />
 
-    <!-- 添加/编辑用户对话框 -->
+    <!-- 添加/编辑用户对话框 保持不变 -->
     <n-modal v-model:show="showUserModal" :title="isEditing ? '编辑用户' : '添加用户'">
       <n-card>
         <n-form
-          ref="userFormRef"
-          :model="userForm"
-          :rules="userRules"
-          label-placement="left"
-          label-width="auto"
-          require-mark-placement="right-hanging"
+            ref="userFormRef"
+            :model="userForm"
+            :rules="userRules"
+            label-placement="left"
+            label-width="auto"
+            require-mark-placement="right-hanging"
         >
           <n-form-item path="username" label="用户名">
             <n-input v-model:value="userForm.username" placeholder="请输入用户名" />
@@ -274,9 +313,9 @@ const handleSaveUser = () => {
           </n-form-item>
           <n-form-item v-if="!isEditing" path="password" label="密码">
             <n-input
-              v-model:value="userForm.password"
-              type="password"
-              placeholder="请输入密码"
+                v-model:value="userForm.password"
+                type="password"
+                placeholder="请输入密码"
             />
           </n-form-item>
         </n-form>

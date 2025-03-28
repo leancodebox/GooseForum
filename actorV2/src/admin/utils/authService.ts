@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "./messageManager.ts";
 import axios from 'axios';
-import type {Result} from "../types/adminInterfaces.ts";
+import type {Result,User} from "../types/adminInterfaces.ts";
 
 export interface PageData<T> {
     list: T[];
@@ -16,21 +16,6 @@ export const getUserInfo = async () => {
 }
 
 
-interface Role {
-    name: string;
-    value: number;
-}
-
-interface User {
-    userId: number;
-    username: string;
-    email: string;
-    status: number;
-    validate: number;
-    prestige: number;
-    roleList: Role[];
-    createTime: string;
-}
 export function getUserList():Promise<Result<PageData<User>>> {
     return axiosInstance.post("admin/user-list")
 }
