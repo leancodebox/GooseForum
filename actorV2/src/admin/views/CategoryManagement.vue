@@ -26,7 +26,7 @@ const categoryRules: FormRules = {
     { required: true, message: '请输入分类名称', trigger: 'blur' }
   ],
   sort: [
-    { required: true, message: '请输入排序值', trigger: 'blur' }
+    { type: 'number', required: true, message: '请输入排序值', trigger: ['blur', 'change'] }
   ]
 }
 
@@ -159,11 +159,11 @@ const handleEditCategory = (category) => {
 const handleDeleteCategory = async (category) => {
   try {
     const res = await deleteCategory(category.id)
-    if (res.data.code === 0) {
+    if (res.code === 0) {
       message.success('分类删除成功')
       fetchCategories() // 重新获取分类列表
     } else {
-      message.error(res.data.message || '删除分类失败')
+      message.error(res.message || '删除分类失败')
     }
   } catch (error) {
     message.error('删除分类失败')
@@ -183,12 +183,12 @@ const handleSaveCategory = () => {
           status: categoryForm.status
         })
 
-        if (res.data.code === 0) {
+        if (res.code === 0) {
           message.success(isEditing.value ? '分类更新成功' : '分类添加成功')
           showCategoryModal.value = false
           fetchCategories() // 重新获取分类列表
         } else {
-          message.error(res.data.message || '保存分类失败')
+          message.error(res.message || '保存分类失败')
         }
       } catch (error) {
         message.error('保存分类失败')
