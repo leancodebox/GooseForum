@@ -38,7 +38,7 @@ func NotFound(c *gin.Context) {
 	}
 	acceptString := c.GetHeader("Accept")
 	if strings.Contains(acceptString, contentTypeHTML) {
-		c.Redirect(http.StatusTemporaryRedirect, "/actor")
+		c.Redirect(http.StatusTemporaryRedirect, "/")
 		return
 	}
 	c.JSON(http.StatusNotFound, component.DataMap{
