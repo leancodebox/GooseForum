@@ -26,3 +26,15 @@ export interface User {
   roleList: Role[];
   createTime: string;
 }
+
+export interface Articles {
+  id: number,
+  title: string
+  type: number
+  userId: number
+  username: string
+  articleStatus: number,
+  processStatus: number,
+  createdAt: string
+  updatedAt: string
+}

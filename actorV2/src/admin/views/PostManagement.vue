@@ -1,41 +1,63 @@
 <script setup lang="ts">
-import { h, ref, computed } from 'vue'
-import { useMessage } from 'naive-ui'
-import { SearchOutline, EyeOutline, TrashOutline, CheckmarkCircleOutline, BanOutline } from '@vicons/ionicons5'
+import {computed, h, onMounted, ref} from 'vue'
+import {NButton, NSpace, NTag, useMessage} from 'naive-ui'
+import {BanOutline, CheckmarkCircleOutline, EyeOutline, SearchOutline, TrashOutline} from '@vicons/ionicons5'
+import {getAdminArticlesList,editArticle} from "@/admin/utils/authService.ts";
+import type {Articles} from "@/admin/types/adminInterfaces.ts";
 
 const message = useMessage()
 const searchText = ref('')
 const categoryFilter = ref(null)
 const statusFilter = ref(null)
+const loading = ref(false)
 
 // 分页设置
-const pagination = {
-  pageSize: 10
-}
+const pagination = ref({
+  page: 1,
+  pageSize: 10,
+  itemCount: 0,
+  onChange: (page: number) => {
+    pagination.value.page = page
+    fetchArticles()
+  }
+})
 
 // 分类选项
 const categoryOptions = [
-  { label: '技术讨论', value: 'tech' },
-  { label: '问答', value: 'qa' },
-  { label: '分享', value: 'share' },
-  { label: '公告', value: 'announcement' }
+  {label: '技术讨论', value: 1},
+  {label: '问答', value: 2},
+  {label: '分享', value: 3},
+  {label: '公告', value: 4}
 ]
 
 // 状态选项
 const statusOptions = [
-  { label: '已发布', value: 'published' },
-  { label: '待审核', value: 'pending' },
-  { label: '已删除', value: 'deleted' }
+  {label: '已发布', value: 1},
+  {label: '待审核', value: 0},
+  {label: '已删除', value: 2}
 ]
 
-// 模拟帖子数据
-const posts = ref([
-  { id: '1', title: 'Vue3 最佳实践', author: 'admin', category: 'tech', status: 'published', views: 1024, comments: 42, createdAt: '2023-01-01' },
-  { id: '2', title: '如何使用 Naive UI', author: 'user1', category: 'qa', status: 'published', views: 768, comments: 23, createdAt: '2023-01-02' },
-  { id: '3', title: '分享一个好用的工具', author: 'user2', category: 'share', status: 'pending', views: 0, comments: 0, createdAt: '2023-01-03' },
-  { id: '4', title: '系统维护公告', author: 'admin', category: 'announcement', status: 'published', views: 2048, comments: 15, createdAt: '2023-01-04' },
-  { id: '5', title: '被举报的帖子', author: 'user3', category: 'share', status: 'deleted', views: 128, comments: 5, createdAt: '2023-01-05' }
-])
+// 文章数据
+const posts = ref<Articles[]>([])
+
+// 获取文章列表
+const fetchArticles = async () => {
+  loading.value = true
+  try {
+    const response = await getAdminArticlesList(pagination.value.page, pagination.value.pageSize)
+    if (response.code === 0) {
+      posts.value = response.result.list
+      pagination.value.itemCount = response.result.total
+    } else {
+      message.error(response.message || '获取文章列表失败')
+    }
+  } catch (error) {
+    message.error('获取文章列表失败')
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
 
 // 过滤后的帖子列表
 const filteredPosts = computed(() => {
@@ -45,18 +67,18 @@ const filteredPosts = computed(() => {
   if (searchText.value) {
     result = result.filter(post =>
         post.title.toLowerCase().includes(searchText.value.toLowerCase()) ||
-        post.author.toLowerCase().includes(searchText.value.toLowerCase())
+        post.username.toLowerCase().includes(searchText.value.toLowerCase())
     )
   }
 
   // 分类过滤
   if (categoryFilter.value) {
-    result = result.filter(post => post.category === categoryFilter.value)
+    result = result.filter(post => post.type === categoryFilter.value)
   }
 
   // 状态过滤
   if (statusFilter.value) {
-    result = result.filter(post => post.status === statusFilter.value)
+    result = result.filter(post => post.processStatus === statusFilter.value)
   }
 
   return result
@@ -77,61 +99,72 @@ const columns = [
   },
   {
     title: '作者',
-    key: 'author'
+    key: 'username'
   },
   {
     title: '分类',
-    key: 'category',
-    render(row) {
+    key: 'type',
+    render(row: Articles) {
       const categoryMap = {
-        tech: '技术讨论',
-        qa: '问答',
-        share: '分享',
-        announcement: '公告'
+        1: '技术讨论',
+        2: '问答',
+        3: '分享',
+        4: '公告'
       }
-      return categoryMap[row.category] || row.category
+      return categoryMap[row.type] || row.type
     }
   },
   {
     title: '状态',
-    key: 'status',
-    render(row) {
+    key: 'processStatus',
+    render(row: Articles) {
       const statusMap = {
-        published: { text: '已发布', type: 'success' },
-        pending: { text: '待审核', type: 'warning' },
-        deleted: { text: '已删除', type: 'error' }
+        1: {text: '已发布', type: 'success'},
+        0: {text: '待审核', type: 'warning'},
       }
-      const status = statusMap[row.status] || { text: row.status, type: 'default' }
+      const status = statusMap[row.articleStatus] || {text: row.articleStatus, type: 'default'}
       return h(
-          'n-tag',
-          { type: status.type },
-          { default: () => status.text }
+          NTag,
+          {type: status.type},
+          {default: () => status.text}
       )
     }
   },
   {
-    title: '浏览量',
-    key: 'views'
+    title: '锁定',
+    key: 'processStatus',
+    render(row: Articles) {
+      const statusMap = {
+        1: {text: '已锁定', type: 'warning'},
+        0: {text: '未锁定', type: 'success'},
+      }
+      const status = statusMap[row.processStatus] || {text: row.processStatus, type: 'default'}
+      return h(
+          NTag,
+          {type: status.type},
+          {default: () => status.text}
+      )
+    }
   },
   {
-    title: '评论数',
-    key: 'comments'
-  },
-  {
-    title: '发布时间',
+    title: '创建时间',
     key: 'createdAt'
+  },
+  {
+    title: '更新时间',
+    key: 'updatedAt'
   },
   {
     title: '操作',
     key: 'actions',
-    render(row) {
+    render(row: Articles) {
       return h(
-          'n-space',
+          NSpace,
           {},
           {
             default: () => [
               h(
-                  'n-button',
+                  NButton,
                   {
                     size: 'small',
                     quaternary: true,
@@ -142,21 +175,8 @@ const columns = [
                     icon: () => h(EyeOutline)
                   }
               ),
-              row.status === 'pending' ? h(
-                  'n-button',
-                  {
-                    size: 'small',
-                    quaternary: true,
-                    type: 'success',
-                    onClick: () => handleApprovePost(row)
-                  },
-                  {
-                    default: () => '通过',
-                    icon: () => h(CheckmarkCircleOutline)
-                  }
-              ) : null,
-              row.status !== 'deleted' ? h(
-                  'n-button',
+              row.processStatus === 0 ? h(
+                  NButton,
                   {
                     size: 'small',
                     quaternary: true,
@@ -164,23 +184,23 @@ const columns = [
                     onClick: () => handleBlockPost(row)
                   },
                   {
-                    default: () => '屏蔽',
+                    default: () => '冻结',
                     icon: () => h(BanOutline)
                   }
               ) : null,
-              h(
-                  'n-button',
+              row.processStatus === 1 ? h(
+                  NButton,
                   {
                     size: 'small',
                     quaternary: true,
-                    type: 'error',
-                    onClick: () => handleDeletePost(row)
+                    type: 'success',
+                    onClick: () => handleBlockPost(row)
                   },
                   {
-                    default: () => '删除',
-                    icon: () => h(TrashOutline)
+                    default: () => '解冻',
+                    icon: () => h(CheckmarkCircleOutline)
                   }
-              )
+              ):null
             ]
           }
       )
@@ -192,26 +212,32 @@ const columns = [
 const handleViewPost = (post) => {
   message.info(`查看帖子: ${post.title}`)
   // 实际应用中可以跳转到帖子详情页或打开预览对话框
+  window.open(`/post/${post.id}`, '_blank')
 }
 
-// 通过帖子
-const handleApprovePost = (post) => {
-  post.status = 'published'
-  message.success(`帖子已通过审核: ${post.title}`)
+// 屏蔽和解冻
+const handleBlockPost = async(row:Articles) => {
+  try {
+    // 切换状态：0->1 或 1->0
+    const newStatus = row.processStatus === 0 ? 1 : 0
+    await editArticle(row.id, newStatus)
+
+    // 更新本地数据状态
+    row.processStatus = newStatus
+    message.success(`${newStatus === 1 ? '冻结' : '解冻'}成功`)
+
+    // 刷新列表
+    await fetchArticles()
+  } catch (err) {
+    message.error('操作失败')
+    console.error(err)
+  }
 }
 
-// 屏蔽帖子
-const handleBlockPost = (post) => {
-  post.status = 'deleted'
-  message.warning(`帖子已屏蔽: ${post.title}`)
-}
-
-// 删除帖子
-const handleDeletePost = (post) => {
-  // 实际应用中应该弹出确认对话框
-  message.error(`帖子已删除: ${post.title}`)
-  posts.value = posts.value.filter(p => p.id !== post.id)
-}
+// 页面加载时获取文章列表
+onMounted(() => {
+  fetchArticles()
+})
 </script>
 <template>
   <div>
@@ -220,33 +246,34 @@ const handleDeletePost = (post) => {
         <n-input v-model:value="searchText" placeholder="搜索帖子" clearable>
           <template #prefix>
             <n-icon>
-              <SearchOutline />
+              <SearchOutline/>
             </n-icon>
           </template>
         </n-input>
         <n-select
-          v-model:value="categoryFilter"
-          placeholder="分类筛选"
-          clearable
-          :options="categoryOptions"
-          style="width: 200px"
+            v-model:value="categoryFilter"
+            placeholder="分类筛选"
+            clearable
+            :options="categoryOptions"
+            style="width: 200px"
         />
         <n-select
-          v-model:value="statusFilter"
-          placeholder="状态筛选"
-          clearable
-          :options="statusOptions"
-          style="width: 200px"
+            v-model:value="statusFilter"
+            placeholder="状态筛选"
+            clearable
+            :options="statusOptions"
+            style="width: 200px"
         />
       </n-space>
     </div>
 
     <n-data-table
-      :columns="columns"
-      :data="filteredPosts"
-      :pagination="pagination"
-      :bordered="false"
-      striped
+        :columns="columns"
+        :data="filteredPosts"
+        :pagination="pagination"
+        :bordered="true"
+        :loading="loading"
+        striped
     />
   </div>
 </template>

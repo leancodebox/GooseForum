@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "./messageManager.ts";
 import axios from 'axios';
-import type {Label, Result, User} from "../types/adminInterfaces.ts";
+import type {Articles, Label, Result, User} from "../types/adminInterfaces.ts";
 
 export interface PageData<T> {
     list: T[];
@@ -55,7 +55,7 @@ export function getRoleDel(id:any) {
     })
 }
 
-export function getAdminArticlesList(page = 1, pageSize = 10) {
+export function getAdminArticlesList(page = 1, pageSize = 10):Promise<Result<PageData<Articles>>>  {
     return axiosInstance.post("admin/articles-list", {
         page: page,
         pageSize: pageSize,
