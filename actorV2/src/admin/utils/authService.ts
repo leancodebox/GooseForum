@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "./messageManager.ts";
 import axios from 'axios';
-import type {Articles, Category, Label, Result, User} from "../types/adminInterfaces.ts";
+import type {Articles, Category, Label, Result, User, UserRole} from "../types/adminInterfaces.ts";
 
 export interface PageData<T> {
     list: T[];
@@ -33,11 +33,11 @@ export function getAllRoleItem():Promise<Result<Label[]>>  {
     return axiosInstance.post('/admin/get-all-role-item')
 }
 
-export function getPermissionList() {
+export function getPermissionList():Promise<Result<Label[]>> {
     return axiosInstance.post("admin/get-permission-list")
 }
 
-export function getRoleList() {
+export function getRoleList():Promise<Result<PageData<UserRole>>> {
     return axiosInstance.post("admin/role-list")
 }
 

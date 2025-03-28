@@ -9,7 +9,6 @@ export interface Role {
     name: string;
     value: number;
 }
-
 export interface Label {
     name: string | null
     label: string | null
@@ -44,4 +43,17 @@ export interface Category {
     category: string,
     sort: number
     status: number
+}
+
+export interface Permissions {
+    name: string;
+    id: number;
+}
+
+export interface UserRole {
+    roleId: number,
+    roleName: string,
+    effective: number,
+    permissions: Permissions[]
+    createTime: string
 }

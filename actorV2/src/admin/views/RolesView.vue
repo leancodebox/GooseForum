@@ -15,9 +15,11 @@ import {
   useMessage
 } from 'naive-ui'
 import type { DataTableColumns } from 'naive-ui'
+import {getPermissionList, getRoleList} from "@/admin/utils/authService.ts";
 
 const message = useMessage()
-
+getPermissionList()
+getRoleList()
 // 角色数据
 const roles = ref([
   {
