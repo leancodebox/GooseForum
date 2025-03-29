@@ -53,8 +53,12 @@ export const getUserInfo = async () => {
 
 
 // 获取通知列表
-export function getNotificationList(params: any):Promise<Result<PageData<Notifications>>> {
-    return axiosInstance.post('/bbs/notification/list', params)
+export function getNotificationList(page:any, pageSize:any, unreadOnly:any):Promise<Result<PageData<Notifications>>> {
+    return axiosInstance.post('/bbs/notification/list', {
+        page:page,
+        pageSize:pageSize,
+        unreadOnly:unreadOnly,
+    })
 }
 
 // 获取未读通知数量

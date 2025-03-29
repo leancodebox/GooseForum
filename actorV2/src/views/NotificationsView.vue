@@ -18,11 +18,11 @@ const activeTab = ref('unread'); // 'all' 或 'unread'
 const loadNotifications = async () => {
   loading.value = true;
   try {
-    let resp   = await getNotificationList({
-      page: currentPage.value,
-      pageSize: pageSize.value,
-      unreadOnly: activeTab.value === 'unread'
-    })
+    let resp   = await getNotificationList(
+       currentPage.value,
+       pageSize.value,
+       activeTab.value === 'unread'
+    )
     console.log(resp)
     const response = await getNotifications(
       currentPage.value,
