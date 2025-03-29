@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "@/utils/messageManager.ts";
 import axios from 'axios';
-import type {Result} from "@/types/articleInterfaces.ts";
+import type {Notifications, PageData, Result} from "@/types/articleInterfaces.ts";
 
 // 获取文章枚举
 export const getArticleEnum = async (): Promise<any> => {
@@ -53,22 +53,24 @@ export const getUserInfo = async () => {
 
 
 // 获取通知列表
-export function getNotificationList(params: any) {
+export function getNotificationList(params: any):Promise<Result<PageData<Notifications>>> {
     return axiosInstance.post('/bbs/notification/list', params)
 }
 
 // 获取未读通知数量
-export function getUnreadCount() {
+export function getUnreadCount():Promise<Result<any>> {
     return axiosInstance.get('/bbs/notification/unread-count')
 }
 
 // 标记通知为已读
-export function markAsRead(params: any) {
-    return axiosInstance.post('/bbs/notification/mark-read', params)
+export function markAsRead(notificationId: any):Promise<Result<any>> {
+    return axiosInstance.post('/bbs/notification/mark-read', {
+        notificationId:notificationId
+    })
 }
 
 // 标记所有通知为已读
-export function markAllAsRead() {
+export function markAllAsRead():Promise<Result<any>> {
     return axiosInstance.post('/bbs/notification/mark-all-read')
 }
 
