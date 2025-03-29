@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { NButton, NEmpty, NPagination, NSpace, NCard, NBadge } from 'naive-ui';
-import type { NotificationItem } from '@/types/notificationInterfaces';
-import { getNotifications, markAsRead, markAllAsRead } from '@/utils/notificationService';
-import { NTabs, NTab } from 'naive-ui';
-import {getNotificationList} from "@/utils/articleService.ts";
+import {onMounted, ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {NButton, NCard, NEmpty, NPagination, NSpace, NTab, NTabs} from 'naive-ui';
+import {getNotificationList, markAllAsRead, markAsRead} from "@/utils/articleService.ts";
+import type {Notifications} from '@/types/articleInterfaces';
 
 const router = useRouter();
-const notifications = ref<NotificationItem[]>([]);
+const notifications = ref<Notifications[]>([]);
 const loading = ref(false);
 const currentPage = ref(1);
 const pageSize = ref(10);
@@ -18,19 +16,18 @@ const activeTab = ref('unread'); // 'all' 或 'unread'
 const loadNotifications = async () => {
   loading.value = true;
   try {
-    let resp   = await getNotificationList(
-       currentPage.value,
-       pageSize.value,
-       activeTab.value === 'unread'
-    )
-    console.log(resp)
-    const response = await getNotifications(
-      currentPage.value,
-      pageSize.value,
-      activeTab.value === 'unread'
+    const response = await getNotificationList(
+        currentPage.value,
+        pageSize.value,
+        activeTab.value === 'unread'
     );
-    notifications.value = response.result.list;
-    total.value = response.result.total;
+
+    if (response.code === 0) {
+      notifications.value = response.result.list;
+      total.value = response.result.total;
+    } else {
+      console.error('加载通知失败:', response.message);
+    }
   } catch (error) {
     console.error('加载通知失败:', error);
   } finally {
@@ -46,8 +43,12 @@ const handleTabChange = (tabName: string) => {
 
 const handleMarkAsRead = async (id: number) => {
   try {
-    await markAsRead(id);
-    await loadNotifications();
+    const response = await markAsRead(id);
+    if (response.code === 0) {
+      await loadNotifications();
+    } else {
+      console.error('标记已读失败:', response.message);
+    }
   } catch (error) {
     console.error('标记已读失败:', error);
   }
@@ -55,8 +56,12 @@ const handleMarkAsRead = async (id: number) => {
 
 const handleMarkAllAsRead = async () => {
   try {
-    await markAllAsRead();
-    await loadNotifications();
+    const response = await markAllAsRead();
+    if (response.code === 0) {
+      await loadNotifications();
+    } else {
+      console.error('标记全部已读失败:', response.message);
+    }
   } catch (error) {
     console.error('标记全部已读失败:', error);
   }
@@ -69,12 +74,12 @@ const handlePageChange = (page: number) => {
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
-    case 'system':
-      return '🔔';
     case 'comment':
       return '💬';
-    case 'like':
+    case 'reply':
       return '❤️';
+    case 'system':
+      return '🔔';
     case 'follow':
       return '👥';
     default:
@@ -85,6 +90,10 @@ const getNotificationIcon = (type: string) => {
 onMounted(() => {
   loadNotifications();
 });
+
+function openPost(url: string) {
+  window.open(url, '_blank');
+}
 </script>
 
 <template>
@@ -95,8 +104,8 @@ onMounted(() => {
 
     <div class="notifications-actions">
       <NTabs v-model:value="activeTab" @update:value="handleTabChange">
-        <NTab name="unread" tab="未读消息" />
-        <NTab name="all" tab="全部消息" />
+        <NTab name="unread" tab="未读消息"/>
+        <NTab name="all" tab="全部消息"/>
         <template #suffix>
           <NButton type="primary" size="small" @click="handleMarkAllAsRead">
             全部标记为已读
@@ -111,12 +120,13 @@ onMounted(() => {
              :class="{ 'unread': !notification.isRead, 'read': notification.isRead }">
         <div class="notification-item">
           <div class="notification-icon">
-            {{ getNotificationIcon(notification.type) }}
+            {{ getNotificationIcon(notification.eventType) }}
           </div>
           <div class="notification-content">
-            <h3>{{ notification.title }}</h3>
-            <p>{{ notification.content }}</p>
-            <span class="notification-time">{{ notification.createTime }}</span>
+            <h3>{{ notification.payload.title }}</h3>
+            <p>{{notification.payload.actorName}} 对  <a :href="`/post/${notification.payload.articleId}`">{{ notification.payload.articleTitle }}</a> 评论： {{ notification.payload.content }}</p>
+
+            <span class="notification-time">{{ notification.createdAt }}</span>
           </div>
           <div class="notification-actions">
             <NSpace>
@@ -125,9 +135,9 @@ onMounted(() => {
                        @click="handleMarkAsRead(notification.id)">
                 标记已读
               </NButton>
-              <NButton v-if="notification.link"
+              <NButton v-if="notification.payload.articleId"
                        size="small"
-                       @click="router.push(notification.link)">
+                       @click="openPost(`/post/${notification.payload.articleId}`)">
                 查看详情
               </NButton>
             </NSpace>
@@ -137,17 +147,17 @@ onMounted(() => {
 
       <div class="pagination-wrapper" v-if="total > pageSize">
         <NPagination
-          v-model:page="currentPage"
-          :page-size="pageSize"
-          :item-count="total"
-          :page-slot="5"
-          size="medium"
-          @update:page="handlePageChange"
+            v-model:page="currentPage"
+            :page-size="pageSize"
+            :item-count="total"
+            :page-slot="5"
+            size="medium"
+            @update:page="handlePageChange"
         />
       </div>
     </div>
 
-    <NEmpty v-else description="暂无通知消息" />
+    <NEmpty v-else description="暂无通知消息"/>
   </div>
 </template>
 
