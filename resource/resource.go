@@ -4,6 +4,7 @@ import (
 	"embed"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"html/template"
 	"io/fs"
 	"os"
@@ -19,7 +20,7 @@ func GetTemplatesFS() embed.FS {
 
 // isDevelopment 判断是否为开发模式
 func isDevelopment() bool {
-	return preferences.Get("app.env", "production") == "local"
+	return !setting.IsProduction()
 }
 
 //go:embed static/*

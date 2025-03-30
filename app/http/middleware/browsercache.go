@@ -2,9 +2,14 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
 
 func BrowserCache(c *gin.Context) {
+	if !setting.IsProduction() {
+		c.Next()
+		return
+	}
 	// 如果请求的是 index.html，禁用浏览器缓存
 	if c.Request.URL.Path == "/actor/" {
 		c.Header("Cache-Control", "no-store")
