@@ -1,4 +1,12 @@
-# GooseForum
+<h1  style="text-align: center;">
+  <br>
+  <a href="https://cloudreve.org/" alt="logo" >
+    <img src="resource/static/pic/default-avatar.png" width="150"/></a>
+  <br>
+  GooseForum
+  <br>
+</h1>
+
 
 GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分离架构。
 
