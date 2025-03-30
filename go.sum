@@ -1,5 +1,6 @@
 github.com/alecthomas/chroma/v2 v2.2.0 h1:Aten8jfQwUqEdadVFFjNyjx7HTexhKP0XuqBG67mRDY=
 github.com/alecthomas/chroma/v2 v2.2.0/go.mod h1:vf4zrexSH54oEjJ7EdB65tGNHmH3pGZmVkgTP5RHvAs=
+github.com/alecthomas/repr v0.0.0-20220113201626-b1b626ac65ae h1:zzGwJfFlFGD94CyyYwCJeSuD32Gj9GTaSi5y9hoVzdY=
 github.com/alecthomas/repr v0.0.0-20220113201626-b1b626ac65ae/go.mod h1:2kn6fqh/zIyPLmm3ugklbEi5hg5wS435eygvNfaDQL8=
 github.com/bytedance/sonic v1.12.8 h1:4xYRVRlXIgvSZ4e8iVTlMF5szgpXd4AfvuWgA8I8lgs=
 github.com/bytedance/sonic v1.12.8/go.mod h1:uVvFidNmlt9+wa31S1urfwwthTWteBgG0hWuoKAXTx8=

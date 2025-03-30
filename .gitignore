@@ -28,3 +28,5 @@ storage
 tmp
 config.toml
 .DS_Store
+# Added by goreleaser init:
+dist/
