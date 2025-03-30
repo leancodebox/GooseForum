@@ -161,6 +161,19 @@ func GetRecommendedArticles(limit int) ([]SmallEntity, error) {
 	return articles, err
 }
 
+func GetRecommendedArticlesByAuthorId(authorId uint64, limit int) ([]SmallEntity, error) {
+	var articles []SmallEntity
+	b := builder()
+	b.Where(queryopt.Eq(fieldUserId, authorId))
+	b.Where(queryopt.Eq(fieldArticleStatus, 1))
+	b.Where(queryopt.Eq(fieldProcessStatus, 0))
+	err := b.
+		Order(queryopt.Desc(fieldReplyCount)).
+		Limit(limit).
+		Find(&articles).Error
+	return articles, err
+}
+
 func GetLatestArticlesByUserId(userId uint64, limit int) ([]SmallEntity, error) {
 	var articles []SmallEntity
 	b := builder()

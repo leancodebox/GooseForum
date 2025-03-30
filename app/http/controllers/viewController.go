@@ -283,6 +283,9 @@ func RenderArticleDetail(c *gin.Context) {
 		errorPage(c, "页面不存在", "文章不存在")
 		return
 	}
+	authorId := result["userId"]
+	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
+
 	// 构建模板数据
 	templateData := gin.H{
 		"articleId":      id,
@@ -297,6 +300,7 @@ func RenderArticleDetail(c *gin.Context) {
 		"avatarUrl":      result["avatarUrl"],
 		"User":           GetLoginUser(c),
 		"canonicalHref":  buildCanonicalHref(c),
+		"authorArticles": authorArticles,
 	}
 
 	c.HTML(http.StatusOK, "detail.gohtml", templateData)
