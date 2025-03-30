@@ -2,6 +2,7 @@ package resource
 
 import (
 	"embed"
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
@@ -45,10 +46,20 @@ func GetMetaList() []MetaItem {
 
 // GetTemplates 返回所有模板
 func GetTemplates() *template.Template {
-	return template.Must(template.New("root").Funcs(template.FuncMap{
+	tmpl := template.New("root").Funcs(template.FuncMap{
 		"getFooterLink": GetFooterLink,
 		"metaList":      GetMetaList,
-	}).ParseFS(templatesFS,
+	})
+
+	if isDevelopment() {
+		fmt.Println("开发模式")
+		// 开发模式下直接从目录读取模板
+		return template.Must(template.Must(tmpl.ParseGlob(filepath.Join("resource", "templates", "*.gohtml"))).
+			ParseGlob(filepath.Join("resource", "templates", "*", "*.gohtml")))
+	}
+
+	// 生产模式下从embed读取模板
+	return template.Must(tmpl.ParseFS(templatesFS,
 		"templates/*.gohtml",
 		"templates/*/**.gohtml",
 	))

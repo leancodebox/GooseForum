@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/resource"
 	"net/http"
 
@@ -16,6 +17,15 @@ func RegisterByGin(ginApp *gin.Engine) {
 	ginApp.Use(middleware.SiteMaintenance)
 	ginApp.Use(middleware.SiteInfo)
 	ginApp.Use(middleware.GinCors)
+
+	ginApp.GET("/reload", func(c *gin.Context) {
+		if !setting.IsProduction() {
+			ginApp.SetHTMLTemplate(resource.GetTemplates())
+			c.String(200, "模板已刷新")
+			return
+		}
+		c.String(http.StatusNotFound, "404")
+	})
 
 	// 前端资源
 	frontend(ginApp)
