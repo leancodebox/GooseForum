@@ -3,6 +3,7 @@
     --primary-color: #ff6f61;
     --secondary-color: #6ab04c;
     --text-color: #333;
+    --text-color-secondary: #666; /* 添加次要文本颜色 */
     --light-gray: #f5f5f5;
     --border-color: #eaeaea;
     --link-color: var(--text-color);
@@ -33,6 +34,7 @@
     --primary-color: #ff8075;
     --secondary-color: #7cc75d;
     --text-color: #e1e1e1;
+    --text-color-secondary: #a0a0a0;
     --light-gray: #2d2d2d;
     --border-color: #404040;
     --link-color: #e1e1e1;
