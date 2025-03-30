@@ -231,6 +231,7 @@
                         <p>{{.username}}</p>
                         <p class="author-bio">技术小白 / 学生</p>
                     </div>
+                    
                 </div>
 
                 <div class="author-expand">
@@ -248,15 +249,13 @@
                             <div class="label">获赞</div>
                         </div>
                     </div>
+                    </div>
+                <div class="author-expand">
 
                     <div class="author-links">
                         <a href="#" class="author-link"><i class="icon-github"></i> GitHub</a>
                         <a href="#" class="author-link"><i class="icon-twitter"></i> Twitter</a>
                         <a href="#" class="author-link"><i class="icon-website"></i> 个人网站</a>
-                    </div>
-
-                    <div class="author-description">
-                        <p>专注于Go语言和分布式系统开发，热爱开源，喜欢分享技术经验。</p>
                     </div>
                 </div>
             </div>
@@ -435,7 +434,17 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem; /* 减少底部间距 */
+}
+
+.author-info {
+    flex: 1;
+    text-align: left; /* 确保左对齐 */
+}
+
+.author-info p {
+    margin: 0.2rem 0; /* 紧凑的上下间距 */
+    line-height: 1.3;
 }
 
 .author-avatar {
@@ -465,7 +474,7 @@
 
 .author-expand {
     border-top: 1px solid var(--border-color);
-    padding-top: 1rem;
+    padding-top: 0.25rem;
 }
 
 .author-stats {
@@ -478,7 +487,6 @@
 .author-stats .stat-item {
     text-align: center;
     padding: 0.5rem;
-    background: var(--light-gray);
     border-radius: 6px;
 }
 
@@ -497,7 +505,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    margin-bottom: 1rem;
 }
 
 .author-link {
@@ -517,14 +524,6 @@
     color: var(--primary-color);
 }
 
-.author-description {
-    font-size: 0.85rem;
-    color: var(--text-color);
-    line-height: 1.5;
-    padding: 0.5rem;
-    background: var(--light-gray);
-    border-radius: 6px;
-}
 
 /* 图标样式 (可以使用Font Awesome或其他图标库) */
 .icon-github::before,
