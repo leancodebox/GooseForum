@@ -277,6 +277,10 @@ func RenderArticleDetail(c *gin.Context) {
 
 	// 复用现有的数据获取逻辑
 	response := GetArticlesDetail(req)
+	if response.Data.Code == component.FAIL {
+		errorPage(c, "文章不存在", "文章不存在")
+		return
+	}
 	result := response.Data.Result.(map[string]any)
 
 	if _, ok := result["id"]; !ok {
