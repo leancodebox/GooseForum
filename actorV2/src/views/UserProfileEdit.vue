@@ -7,7 +7,7 @@ import { NFormItem, NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NMo
 import { VueCropper } from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
 // 首先确保导入了 saveUserInfo 函数
-import { uploadAvatar, saveUserInfo } from "@/utils/articleService.ts";
+import {uploadAvatar, saveUserInfo, changePassword} from "@/utils/articleService.ts";
 
 // 定义文章接口
 interface Article {
@@ -41,6 +41,15 @@ const activeTab = ref<'profile' | 'articles'>('profile')
 const articles = ref<Article[]>([])
 const isUploading = ref<boolean>(false)
 const isSmallScreen = ref<boolean>(false)
+
+// 添加密码表单数据
+const passwordForm = ref({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+// 添加密码修改状态
+const changingPassword = ref(false)
 
 // 用户信息表单
 const userForm = ref<UserForm>({
@@ -233,6 +242,45 @@ onUnmounted(() => {
 function checkScreenSize(): void {
   isSmallScreen.value = window.innerWidth < 800;
 }
+
+// 添加修改密码的方法
+const updatePassword = async (): Promise<void> => {
+  // 验证新密码与确认密码是否一致
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    message.error('新密码与确认密码不一致');
+    return;
+  }
+
+  // 验证新密码长度
+  if (passwordForm.value.newPassword.length < 6) {
+    message.error('新密码长度不能少于6位');
+    return;
+  }
+
+  try {
+    changingPassword.value = true;
+    const response = await changePassword(
+      passwordForm.value.oldPassword,
+      passwordForm.value.newPassword
+    );
+
+    if (response.code === 0) {
+      enqueueMessage('密码修改成功', 'success');
+      // 清空表单
+      passwordForm.value = {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      };
+    } else {
+      enqueueMessage(`密码修改失败: ${response.message || '请重试'}`);
+    }
+  } catch (error) {
+    enqueueMessage('密码修改失败，请重试');
+  } finally {
+    changingPassword.value = false;
+  }
+}
 </script>
 
 <template>
@@ -328,7 +376,27 @@ function checkScreenSize(): void {
           </div>
         </n-tab-pane>
         <n-tab-pane name="修改密码" tab="修改密码">
-          
+          <form @submit.prevent="updatePassword" class="profile-form">
+            <div class="form-group">
+              <label for="oldPassword">当前密码</label>
+              <input type="password" id="oldPassword" v-model="passwordForm.oldPassword" required>
+            </div>
+
+            <div class="form-group">
+              <label for="newPassword">新密码</label>
+              <input type="password" id="newPassword" v-model="passwordForm.newPassword" required>
+              <small class="form-tip">密码长度不少于6位</small>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">确认新密码</label>
+              <input type="password" id="confirmPassword" v-model="passwordForm.confirmPassword" required>
+            </div>
+
+            <button type="submit" class="submit-btn" :disabled="changingPassword">
+              {{ changingPassword ? '修改中...' : '修改密码' }}
+            </button>
+          </form>
         </n-tab-pane>
       </n-tabs>
     </div>
@@ -706,6 +774,18 @@ function checkScreenSize(): void {
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid var(--primary-color);
+}
+
+.form-tip {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--text-color-light);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

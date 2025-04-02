@@ -112,7 +112,7 @@ export function saveUserInfo(
 }
 
 export function changePassword(oldPassword: string,
-                               newPassword: string) {
+                               newPassword: string): Promise<Result<any>> {
     return axiosInstance.post('change-password', {
         oldPassword: oldPassword,
         newPassword: newPassword,
