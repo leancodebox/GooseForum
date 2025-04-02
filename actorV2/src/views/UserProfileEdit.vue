@@ -37,9 +37,7 @@ const previewUrl = ref<string>('')
 const cropImg = ref<string>('')
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const userStore = useUserStore()
-const activeTab = ref<'profile' | 'articles'>('profile')
 const articles = ref<Article[]>([])
-const isUploading = ref<boolean>(false)
 const isSmallScreen = ref<boolean>(false)
 
 // 添加密码表单数据
@@ -76,21 +74,8 @@ onMounted(async () => {
   window.addEventListener('resize', checkScreenSize);
 })
 
-watch(activeTab, async (newTab) => {
-  if (newTab === 'articles' && articles.value.length === 0) {
-    await fetchUserArticles()
-  }
-})
 
-// 获取用户文章列表
-const fetchUserArticles = async (): Promise<void> => {
-  try {
-    const response = await axiosInstance.get('/bbs/get-user-articles')
-    articles.value = response.data.result
-  } catch (error) {
-    enqueueMessage('获取文章列表失败')
-  }
-}
+
 
 // 更新用户信息
 const updateProfile = async (): Promise<void> => {
@@ -306,15 +291,6 @@ const updatePassword = async (): Promise<void> => {
           <p class="user-bio">{{ userForm.bio || '这个人很懒，还没有写简介' }}</p>
         </div>
       </div>
-
-      <div class="tab-buttons">
-        <button :class="['tab-btn', { active: activeTab === 'profile' }]" @click="activeTab = 'profile'">
-          个人资料
-        </button>
-        <button :class="['tab-btn', { active: activeTab === 'articles' }]" @click="activeTab = 'articles'">
-          我的文章
-        </button>
-      </div>
     </div>
 
     <!-- 内容区域 -->
@@ -456,8 +432,6 @@ const updatePassword = async (): Promise<void> => {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  /* 减小间距 */
-  margin-bottom: 1.5rem;
   /* 减小底部间距 */
 }
 
