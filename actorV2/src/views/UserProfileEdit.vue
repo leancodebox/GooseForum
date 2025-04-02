@@ -297,7 +297,6 @@ const updatePassword = async (): Promise<void> => {
     <div class="profile-content">
       <n-tabs type="line" animated>
         <n-tab-pane name="个人资料" tab="个人资料">
-
           <form @submit.prevent="updateProfile" class="profile-form">
             <div class="form-row">
               <div class="form-group">
@@ -590,31 +589,19 @@ const updatePassword = async (): Promise<void> => {
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  /* 减小最小宽度 */
-  gap: 1.5rem;
-  /* 增加列间距，确保输入框之间有足够间隙 */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
   margin-bottom: 1rem;
-  /* 统一设置为1rem */
 }
 
 .form-group {
   margin-bottom: 1rem;
-  /* 统一设置为1rem */
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.4rem;
-  /* 稍微增加标签与输入框的间距 */
-  color: var(--text-color);
-  font-weight: 500;
-  font-size: 0.9rem;
+  min-width: 0; /* 添加这一行，防止内容溢出 */
 }
 
 .form-group input,
 .form-group textarea {
-  width: calc(100% - 20px);
+  width: 100%; /* 修改为100% */
   padding: 0.6rem 0.8rem;
   border: 1px solid var(--border-color);
   border-radius: 6px;
@@ -622,8 +609,7 @@ const updatePassword = async (): Promise<void> => {
   color: var(--text-color);
   transition: all 0.2s;
   font-size: 0.9rem;
-  line-height: 1.4;
-  /* 添加行高控制 */
+  box-sizing: border-box; /* 添加这一行 */
 }
 
 .form-group textarea {
