@@ -110,3 +110,11 @@ export function saveUserInfo(
         website: website,
     })
 }
+
+export function changePassword(oldPassword: string,
+                               newPassword: string) {
+    return axiosInstance.post('change-password', {
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+    })
+}
