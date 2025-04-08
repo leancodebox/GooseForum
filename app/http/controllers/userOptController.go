@@ -163,7 +163,7 @@ func renderActivationPage(c *gin.Context, success bool, message string) {
 		if success {
 			return `<a href="/login" class="login-link">立即登录</a>`
 		}
-		return `<a href="/register" class="login-link">重新注册</a>`
+		return `<a href="/login?model=register" class="login-link">重新注册</a>`
 	}() + `
         </div>
     </div>

@@ -172,7 +172,7 @@ window.addEventListener('resize', function () {
         <a href="/user/settings" class="mobile-link">设置</a>
         <a href="#" @click="handleLogout" class="mobile-link">退出</a>
         <a href="/login" class="mobile-link" id="mobileLoginBtn">登录</a>
-        <a href="/register" class="mobile-link" id="mobileRegisterBtn">注册</a>
+        <a href="/login?model=register" class="mobile-link" id="mobileRegisterBtn">注册</a>
       </div>
     </nav>
   </header>
