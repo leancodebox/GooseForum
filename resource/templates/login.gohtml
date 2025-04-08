@@ -81,6 +81,17 @@
         }
     }
 
+    // 检查 URL 参数并切换到相应的标签
+    function checkUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const model = urlParams.get('model');
+        if (model === 'register') {
+            switchTab('register');
+        } else {
+            switchTab('login');
+        }
+    }
+
     async function getCaptcha() {
         try {
             const response = await fetch('/api/get-captcha');
@@ -101,8 +112,11 @@
         getCaptcha();
     }
 
-    // 页面加载时获取验证码
-    document.addEventListener('DOMContentLoaded', getCaptcha);
+    // 页面加载时获取验证码和检查 URL 参数
+    document.addEventListener('DOMContentLoaded', function() {
+        getCaptcha();
+        checkUrlParams();
+    });
     </script>
 
     <style>
