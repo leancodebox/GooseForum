@@ -8,7 +8,7 @@
 </h1>
 
 
-GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分离架构。[站点体验](https://forum.leancodebox.online/)
+GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分离架构。[站点体验](https://gooseforum.online/)
 
 ## 技术栈
 
