@@ -243,7 +243,7 @@ func RenderArticlesPage(c *gin.Context) {
 	})
 	// 构建模板数据
 	templateData := gin.H{
-		"title":               "GooseForum",
+		"title":               "GooseForum 知识分享链接世界",
 		"description":         "GooseForum的文章列表页面",
 		"year":                time.Now().Year(),
 		"Data":                result.List,
