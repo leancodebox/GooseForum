@@ -9,10 +9,11 @@
             <div class="articles-list">
                 <div class="category-filter">
                     <a href="#" class="filter-tag active" data-filter="all" role="button">全部</a>
-                    <a href="#" class="filter-tag" data-filter="tech" role="button">技术</a>
-                    <a href="#" class="filter-tag" data-filter="share" role="button">分享</a>
-                    <a href="#" class="filter-tag" data-filter="qa" role="button">问答</a>
-                    <a href="#" class="filter-tag" data-filter="discussion" role="button">讨论</a>
+                    {{ if .articleCategoryList}}
+                        {{range .articleCategoryList}}
+                            <a href="#" class="filter-tag" data-filter="{{.Value}}" role="button">{{.Name}}</a>
+                        {{end}}
+                    {{end}}
                 </div>
                 {{range .Data}}
                     <article class="article-item">
@@ -48,11 +49,11 @@
                 {{end}}
                 <div class="pagination">
                     {{if gt .Page 1}}
-                        <a href="/post?page={{.PrevPage}}" class="page-btn prev-page">上一页</a>
+                        <a href="/post?page={{.PrevPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn prev-page">上一页</a>
                     {{end}}
                     <span class="page-info">第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
                     {{if lt .Page .TotalPages}}
-                        <a href="/post?page={{.NextPage}}" class="page-btn next-page">下一页</a>
+                        <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn next-page">下一页</a>
                     {{end}}
                 </div>
             </div>
@@ -201,6 +202,25 @@
     const filterTags = document.querySelectorAll('.filter-tag');
     const allTag = document.querySelector('.filter-tag[data-filter="all"]');
 
+    // 页面加载时根据URL参数设置初始状态
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const filters = urlParams.get('filters');
+
+        if (filters) {
+            const filterArray = filters.split(',');
+            filterTags.forEach(tag => {
+                if (filterArray.includes(tag.dataset.filter)) {
+                    tag.classList.add('active');
+                    // 如果有其他标签被选中，取消"全部"的选中状态
+                    if (tag.dataset.filter !== 'all') {
+                        allTag.classList.remove('active');
+                    }
+                }
+            });
+        }
+    });
+
     filterTags.forEach(tag => {
         tag.addEventListener('click', function(event) {
             event.preventDefault();
@@ -211,8 +231,8 @@
                         t.classList.remove('active');
                     }
                 });
-                this.classList.toggle('active');
-                updateUrl();
+                this.classList.add('active'); // 确保"全部"被选中
+                updateUrlAndRefresh();
             } else {
                 // 处理其他标签的选中状态
                 this.classList.toggle('active');
@@ -220,19 +240,61 @@
                 if (allTag.classList.contains('active')) {
                     allTag.classList.remove('active');
                 }
-                updateUrl();
+                // 如果没有任何标签被选中，则自动选中"全部"
+                const anyActive = Array.from(filterTags).some(t => t.classList.contains('active') && t !== allTag);
+                if (!anyActive) {
+                    allTag.classList.add('active');
+                }
+                updateUrlAndRefresh();
             }
         });
     });
 
-    function updateUrl() {
+    function updateUrlAndRefresh() {
         const selectedFilters = Array.from(filterTags)
             .filter(tag => tag.classList.contains('active') && tag.dataset.filter !== 'all')
             .map(tag => tag.dataset.filter);
 
-        const queryString = selectedFilters.length > 0 ? `?filters=${selectedFilters.join(',')}` : '';
-        const baseUrl = window.location.pathname; // 获取当前页面的基本 URL
-        window.history.replaceState(null, '', baseUrl + queryString); // 更新 URL
+        // 获取当前URL中的其他参数
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // 更新或添加filters参数
+        if (selectedFilters.length > 0) {
+            urlParams.set('filters', selectedFilters.join(','));
+        } else {
+            urlParams.delete('filters');
+        }
+
+        // 保留页码参数
+        const page = urlParams.get('page');
+
+        // 构建新的URL并刷新页面
+        const baseUrl = window.location.pathname;
+        const newUrl = baseUrl + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.location.href = newUrl; // 使用location.href进行页面刷新
+
+        // 同时更新分页链接
+        updatePaginationLinks(selectedFilters);
+    }
+
+    // 添加更新分页链接的函数
+    function updatePaginationLinks(selectedFilters) {
+        const prevPageLink = document.querySelector('.prev-page');
+        const nextPageLink = document.querySelector('.next-page');
+
+        if (!prevPageLink && !nextPageLink) return;
+
+        const filterParam = selectedFilters.length > 0 ? `&filters=${selectedFilters.join(',')}` : '';
+
+        if (prevPageLink) {
+            const prevUrl = new URL(prevPageLink.href);
+            prevPageLink.href = `${prevUrl.pathname}${prevUrl.search.split('&')[0]}${filterParam}`;
+        }
+
+        if (nextPageLink) {
+            const nextUrl = new URL(nextPageLink.href);
+            nextPageLink.href = `${nextUrl.pathname}${nextUrl.search.split('&')[0]}${filterParam}`;
+        }
     }
 </script>
 </body>

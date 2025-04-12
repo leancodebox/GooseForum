@@ -220,10 +220,17 @@ func RenderIndex(c *gin.Context) {
 
 // RenderArticlesPage 渲染文章列表页面
 func RenderArticlesPage(c *gin.Context) {
+	filters := c.DefaultQuery("filters", "")
+	categories := array.Filter(array.Map(strings.Split(filters, ","), func(t string) int {
+		return cast.ToInt(t)
+	}), func(i int) bool {
+		return i > 0
+	})
 	param := GetArticlesPageRequest{
-		Page:     cast.ToInt(c.DefaultQuery("page", "1")),
-		PageSize: cast.ToInt(c.DefaultQuery("pageSize", "20")),
-		Search:   c.Query("search"),
+		Page:       cast.ToInt(c.DefaultQuery("page", "1")),
+		PageSize:   cast.ToInt(c.DefaultQuery("pageSize", "20")),
+		Search:     c.Query("search"),
+		Categories: categories,
 	}
 
 	// 复用现有的数据获取逻辑
@@ -257,6 +264,7 @@ func RenderArticlesPage(c *gin.Context) {
 		"articleCategoryList": articleCategoryList,
 		"recommendedArticles": getRecommendedArticles(),
 		"canonicalHref":       buildCanonicalHref(c),
+		"Filters":             filters,
 	}
 	c.HTML(http.StatusOK, "list.gohtml", templateData)
 }
