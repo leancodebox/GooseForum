@@ -2,6 +2,8 @@ package preferences
 
 import (
 	"flag"
+	"github.com/leancodebox/GooseForum/app/assert"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/fileopt"
 	"log/slog"
 	"sync"
 
@@ -15,6 +17,12 @@ var v *viper.Viper
 
 // 初始化配置信息，完成对环境变量以及 conf 信息的加载
 func init() {
+	if !fileopt.IsExist("config.toml") {
+		err := fileopt.FilePutContents("./config.toml", assert.GetDefaultConfig())
+		if err != nil {
+			panic(err)
+		}
+	}
 	// 使用独立的实例。防止外部直接调用 viper 标准实例
 	v = viper.New()
 	v.SetConfigType("toml") // "json", "toml", "yaml", "yml", "properties", "props", "prop", "env", "dotenv"

@@ -4,9 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"log"
 	"log/slog"
 	"net/http"
@@ -63,9 +60,6 @@ func runWeb(_ *cobra.Command, _ []string) {
 func ginServe() {
 	go RunJob()
 	defer StopJob()
-	defer logging.Shutdown()
-	defer db4fileconnect.Close()
-	defer dbconnect.Close()
 
 	port := preferences.GetString("server.port", 8080)
 	isDebug := setting.IsDebug()
