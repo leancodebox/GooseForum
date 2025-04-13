@@ -1,7 +1,6 @@
 package console
 
 import (
-	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
@@ -17,7 +16,6 @@ var rootCmd = &cobra.Command{
 	Short: "A brief description of your application",
 	Long:  `GooseForum`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		fmt.Println("sadasdas")
 		migration.M()
 	},
 	// Run: runWeb,
