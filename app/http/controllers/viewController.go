@@ -250,8 +250,8 @@ func RenderArticlesPage(c *gin.Context) {
 	})
 	// 构建模板数据
 	templateData := gin.H{
-		"title":               "GooseForum 知识分享链接世界",
-		"description":         "GooseForum的文章列表页面",
+		"title":               "GooseForum",
+		"description":         "知无不言,言无不尽",
 		"year":                time.Now().Year(),
 		"Data":                result.List,
 		"Page":                result.Page,
@@ -302,7 +302,7 @@ func RenderArticleDetail(c *gin.Context) {
 	templateData := gin.H{
 		"articleId":      id,
 		"authorId":       result["userId"],
-		"title":          cast.ToString(result["articleTitle"]),
+		"title":          cast.ToString(result["articleTitle"]) + " - GooseForum",
 		"description":    TakeUpTo64Chars(cast.ToString(result["articleContent"])),
 		"year":           time.Now().Year(),
 		"articleTitle":   cast.ToString(result["articleTitle"]),

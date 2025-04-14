@@ -10,7 +10,7 @@
             </a>
             <!-- 导航链接 -->
             <div class="nav-links">
-{{/*                <a href="/" class="nav-link">首页</a>*/}}
+                {{/*                <a href="/" class="nav-link">首页</a>*/}}
                 <a href="/post" class="nav-link">社区</a>
             </div>
         </div>
@@ -380,6 +380,46 @@
 </style>
 
 <script>
+    // 在页面加载完成后检查横幅状态
+    document.addEventListener('DOMContentLoaded', function () {
+        const banner = document.getElementById('welcomeBanner');
+        const isBannerClosed = localStorage.getItem('welcomeBannerClosed');
+
+        if (!isBannerClosed && banner) {
+            banner.classList.add('show');
+        }
+    });
+
+    // 关闭横幅的函数
+    function closeWelcomeBanner() {
+        const banner = document.getElementById('welcomeBanner');
+        banner.classList.remove('show');
+        localStorage.setItem('welcomeBannerClosed', 'true');
+    }
+
+    // 主题切换功能
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+
+        // 更新图标
+        const themeIcon = document.querySelector('.theme-icon');
+        themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+    }
+
+    // 在页面加载时设置主题
+    document.addEventListener('DOMContentLoaded', function () {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        // 设置初始图标
+        const themeIcon = document.querySelector('.theme-icon');
+        themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+    });
+
     function toggleMobileMenu() {
         const mobileMenu = document.getElementById('mobileMenu');
         mobileMenu.classList.toggle('active');

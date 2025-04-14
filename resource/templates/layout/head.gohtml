@@ -3,62 +3,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.title}}</title>
     <meta name="description" content="{{.description}}">
-    <meta name="keywords" content="论坛,社区,GooseForum,讨论">
+    <meta name="keywords" content="GooseForum,论坛,社区,Go,Python,PHP,Vue.js,Java,MySQL,Rust">
     <link rel="stylesheet" href="/static/css/main.css">
     <!-- Open Graph tags for better social sharing -->
-    <meta property="og:title" content="{{.title}} - GooseForum">
-    <meta property="og:description" content="{{.description}}">
-    <meta property="og:type" content="website">
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="/static/pic/default-avatar.png">
     <link rel="alternate" type="application/rss+xml" title="GooseForum RSS Feed" href="/rss.xml"/>
 {{if .canonicalHref}}<link rel="canonical" href="{{.canonicalHref}}">{{end}}
-    {{with metaList }}
-        {{if .}}
-            {{range .}}
-                <meta name="{{.Name}}" content="{{.Content}}"/>
-            {{end}}
-        {{end}}
-    {{end}}
-    <script>
-        // 在页面加载完成后检查横幅状态
-        document.addEventListener('DOMContentLoaded', function() {
-            const banner = document.getElementById('welcomeBanner');
-            const isBannerClosed = localStorage.getItem('welcomeBannerClosed');
-
-            if (!isBannerClosed && banner) {
-                banner.classList.add('show');
-            }
-        });
-
-        // 关闭横幅的函数
-        function closeWelcomeBanner() {
-            const banner = document.getElementById('welcomeBanner');
-            banner.classList.remove('show');
-            localStorage.setItem('welcomeBannerClosed', 'true');
-        }
-
-        // 主题切换功能
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-
-            // 更新图标
-            const themeIcon = document.querySelector('.theme-icon');
-            themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
-        }
-
-        // 在页面加载时设置主题
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-
-            // 设置初始图标
-            const themeIcon = document.querySelector('.theme-icon');
-            themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
-        });
-    </script>
+{{with metaList }}{{if .}}{{range .}}
+    <meta name="{{.Name}}" content="{{.Content}}"/>
+{{end}}{{end}}{{end}}
 </head>
