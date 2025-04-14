@@ -11,8 +11,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
@@ -276,45 +278,72 @@ func RenderArticleDetail(c *gin.Context) {
 		errorPage(c, "页面不存在", "页面不存在")
 		return
 	}
-
 	req := GetArticlesDetailRequest{
 		Id:           id,
 		MaxCommentId: 0,
 		PageSize:     50,
 	}
-
-	// 复用现有的数据获取逻辑
-	response := GetArticlesDetail(req)
-	if response.Data.Code == component.FAIL {
+	entity := articles.Get(req.Id)
+	if entity.Id == 0 {
 		errorPage(c, "文章不存在", "文章不存在")
 		return
 	}
-	result := response.Data.Result.(map[string]any)
-
-	if _, ok := result["id"]; !ok {
-		errorPage(c, "页面不存在", "文章不存在")
-		return
+	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSizeWithRange(req.PageSize, 10, 100))
+	userIds := array.Map(replyEntities, func(item reply.Entity) uint64 {
+		return item.UserId
+	})
+	userIds = append(userIds, entity.UserId)
+	userMap := users.GetMapByIds(userIds)
+	author := "陶渊明"
+	avatarUrl := urlconfig.GetDefaultAvatar()
+	if user, ok := userMap[entity.UserId]; ok {
+		author = user.Username
+		avatarUrl = user.GetWebAvatarUrl()
 	}
-	authorId := result["userId"]
+	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
+		username := "陶渊明"
+		if user, ok := userMap[item.UserId]; ok {
+			username = user.Username
+		}
+		// 获取被回复评论的用户名
+		replyToUsername := ""
+		if item.ReplyId > 0 {
+			if replyTo := reply.Get(item.ReplyId); replyTo.Id > 0 {
+				if replyUser, ok := userMap[replyTo.UserId]; ok {
+					replyToUsername = replyUser.Username
+				}
+			}
+		}
+		return ReplyDto{
+			Id:              item.Id,
+			ArticleId:       item.ArticleId,
+			UserId:          item.UserId,
+			Username:        username,
+			Content:         item.Content,
+			CreateTime:      item.CreatedAt.Format(time.RFC3339),
+			ReplyToUsername: replyToUsername,
+		}
+	})
+	articles.IncrementView(entity)
+	// 复用现有的数据获取逻辑
+	authorId := entity.UserId
 	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
-
 	// 构建模板数据
 	templateData := gin.H{
 		"articleId":      id,
-		"authorId":       result["userId"],
-		"title":          cast.ToString(result["articleTitle"]) + " - GooseForum",
-		"description":    TakeUpTo64Chars(cast.ToString(result["articleContent"])),
+		"authorId":       authorId,
+		"title":          entity.Title + " - GooseForum",
+		"description":    TakeUpTo64Chars(entity.Content),
 		"year":           time.Now().Year(),
-		"articleTitle":   cast.ToString(result["articleTitle"]),
-		"articleContent": markdownToHTML(cast.ToString(result["articleContent"])),
-		"username":       cast.ToString(result["username"]),
-		"commentList":    result["commentList"],
-		"avatarUrl":      result["avatarUrl"],
+		"articleTitle":   entity.Title,
+		"articleContent": markdownToHTML(entity.Content),
+		"username":       author,
+		"commentList":    replyList,
+		"avatarUrl":      avatarUrl,
 		"User":           GetLoginUser(c),
 		"canonicalHref":  buildCanonicalHref(c),
 		"authorArticles": authorArticles,
 	}
-
 	c.HTML(http.StatusOK, "detail.gohtml", templateData)
 }
 
@@ -328,7 +357,7 @@ func errorPage(c *gin.Context, title, message string) {
 }
 
 func LoginPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.gohtml", gin.H{"title": "登录 - GooseForum", "User": GetLoginUser(c)})
+	c.HTML(http.StatusOK, "login.gohtml", gin.H{"title": "登录/注册 - GooseForum", "User": GetLoginUser(c)})
 }
 
 func UserProfile(c *gin.Context) {
@@ -344,8 +373,8 @@ func UserProfile(c *gin.Context) {
 		"Articles":    articlesSmallEntity2Dto(last),
 		"Author":      showUser,
 		"User":        GetLoginUser(c),
-		"title":       "GooseForum",
-		"description": "GooseForum",
+		"title":       showUser.Username + " - GooseForum",
+		"description": showUser.Username + " 的个人简介 ",
 	}
 	c.HTML(http.StatusOK, "user_profile.gohtml", templateData)
 }

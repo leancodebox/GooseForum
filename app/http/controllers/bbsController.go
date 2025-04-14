@@ -194,64 +194,6 @@ type ReplyDto struct {
 	ReplyToUsername string `json:"replyToUsername,omitempty"`
 }
 
-// GetArticlesDetail 文章详情
-func GetArticlesDetail(req GetArticlesDetailRequest) component.Response {
-	entity := articles.Get(req.Id)
-	if entity.Id == 0 {
-		return component.FailResponse("不存在")
-	}
-	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSizeWithRange(req.PageSize, 10, 100))
-	userIds := array.Map(replyEntities, func(item reply.Entity) uint64 {
-		return item.UserId
-	})
-	userIds = append(userIds, entity.UserId)
-	userMap := users.GetMapByIds(userIds)
-	author := "陶渊明"
-	avatarUrl := urlconfig.GetDefaultAvatar()
-	if user, ok := userMap[entity.UserId]; ok {
-		author = user.Username
-		avatarUrl = user.GetWebAvatarUrl()
-	}
-	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
-		username := "陶渊明"
-		if user, ok := userMap[item.UserId]; ok {
-			username = user.Username
-		}
-
-		// 获取被回复评论的用户名
-		replyToUsername := ""
-		if item.ReplyId > 0 {
-			if replyTo := reply.Get(item.ReplyId); replyTo.Id > 0 {
-				if replyUser, ok := userMap[replyTo.UserId]; ok {
-					replyToUsername = replyUser.Username
-				}
-			}
-		}
-
-		return ReplyDto{
-			Id:              item.Id,
-			ArticleId:       item.ArticleId,
-			UserId:          item.UserId,
-			Username:        username,
-			Content:         item.Content,
-			CreateTime:      item.CreatedAt.Format(time.RFC3339),
-			ReplyToUsername: replyToUsername,
-		}
-	})
-	articles.IncrementView(entity)
-	return component.SuccessResponse(map[string]any{
-		"id":             entity.Id,
-		"userId":         entity.UserId,
-		"username":       author,
-		"avatarUrl":      avatarUrl,
-		"articleTitle":   entity.Title,
-		"articleContent": entity.Content,
-		"commentList":    replyList,
-		"replyList":      replyList,
-	})
-
-}
-
 type WriteArticlesOriginReq struct {
 	Id int64 `json:"id"`
 }

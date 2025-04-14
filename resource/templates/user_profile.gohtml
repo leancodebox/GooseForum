@@ -7,7 +7,7 @@
     <div class="profile-card">
         <div class="profile-header">
             <div class="profile-avatar">
-                <img src="/api/assets/default-avatar.png" alt="用户头像">
+                <img src="{{.Author.AvatarUrl}}" alt="用户头像">
             </div>
             <div class="profile-info">
                 <h1>{{.Author.Username}}</h1>
@@ -44,7 +44,7 @@
             <div class="posts-list">
                 {{range .Articles}}
                 <article class="post-item">
-                    <h3><a href="/app/detail?id={{.Id}}">{{.Title}}</a></h3>
+                    <h3><a href="/post/{{.Id}}">{{.Title}}</a></h3>
                     <div class="post-meta">
                         <span class="post-date">{{.CreateTime}}</span>
                         <span class="post-comments">{{.CommentCount}} 评论</span>
