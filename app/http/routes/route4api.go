@@ -68,10 +68,6 @@ func forum(ginApp *gin.Engine) {
 	// 分类列表
 	forumApi.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
 	forumApi.GET("get-articles-category", ginUpNP(controllers.GetArticlesCategory))
-	//// 文章分页
-	//forumApi.POST("get-articles-page", ginUpP(controllers.GetArticlesPage))
-	//// 文章详情
-	//forumApi.POST("get-articles-detail", ginUpP(controllers.GetArticlesDetail))
 
 	loginApi := forumApi.Use(middleware.JWTAuth4Gin)
 	// 通知相关接口
@@ -91,7 +87,7 @@ func forum(ginApp *gin.Engine) {
 	// 回复评论
 	loginApi.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
 	// 用户文章列表
-	loginApi.POST("/get-user-articles", UpButterReq(controllers.GetUserArticles))
+	loginApi.POST("get-user-articles", UpButterReq(controllers.GetUserArticles))
 
 	adminApi := ginApp.Group("api/admin").Use(middleware.JWTAuth4Gin)
 	adminApi.POST("user-list", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.UserList))
