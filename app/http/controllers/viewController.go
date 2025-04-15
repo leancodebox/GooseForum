@@ -367,7 +367,6 @@ func UserProfile(c *gin.Context) {
 		errorPage(c, "用户不存在", "用户不存在")
 		return
 	}
-	articlesSmallEntity2Dto(getRecommendedArticles())
 	last, _ := articles.GetLatestArticlesByUserId(id, 5)
 	templateData := gin.H{
 		"Articles":    articlesSmallEntity2Dto(last),
