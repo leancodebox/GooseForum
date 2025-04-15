@@ -5,6 +5,6 @@ import (
 )
 
 func SiteInfo(context *gin.Context) {
-	context.Header("X-Powered-By", "PHP/6.0.6")
+	context.Header("X-Powered-By", "GooseForum/0.0.1")
 	context.Next()
 }
