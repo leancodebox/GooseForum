@@ -14,8 +14,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/routes"
-	"github.com/leancodebox/GooseForum/app/service/setupservice"
-
 	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
@@ -104,45 +102,4 @@ func ginServe() {
 		slog.Info("Server Shutdown:", err)
 	}
 	slog.Info("Server exiting")
-}
-
-func setupServe() error {
-	if setupservice.IsInitialized() {
-		return nil
-	}
-	port := "8080"
-	engine := gin.Default()
-
-	// 使用专门的setup路由注册函数
-	routes.SetupRegisterByGin(engine)
-
-	srv := &http.Server{
-		Addr:           ":" + port,
-		Handler:        engine,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-
-	// 启动setup服务器
-	go func() {
-		slog.Info("Starting setup server on port " + port)
-		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("setup server listen: %s\n", err)
-		}
-	}()
-
-	// 等待setup完成
-	for !setupservice.IsInitialized() {
-		time.Sleep(1 * time.Second)
-	}
-
-	// setup完成后关闭服务器
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		slog.Error("Setup server shutdown:", err)
-	}
-	slog.Info("Setup completed, shutting down setup server")
-	return nil
 }
