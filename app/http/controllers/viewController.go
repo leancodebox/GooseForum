@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -234,16 +235,64 @@ func RenderArticlesPage(c *gin.Context) {
 		Search:     c.Query("search"),
 		Categories: categories,
 	}
+	pageData := articles.Page[articles.SmallEntity](
+		articles.PageQuery{
+			Page:         max(param.Page, 1),
+			PageSize:     param.PageSize,
+			FilterStatus: true,
+			Categories:   param.Categories,
+		})
+	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
+		return t.UserId
+	})
+	userMap := users.GetMapByIds(userIds)
 
-	// 复用现有的数据获取逻辑
-	response := GetArticlesPage(param)
-	if response.Code != 200 {
-		errorPage(c, "获取文章列表失败", "获取文章列表失败")
-		return
-	}
-	result := response.Data.Result.(component.Page[ArticlesSimpleDto])
+	//获取文章的分类信息
+	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
+		return t.Id
+	})
+	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
+	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
+		return t.ArticleCategoryId
+	})
+	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	// 获取文章的分类和标签
+	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
+		return rs.ArticleId
+	})
+
+	articleList := array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
+		categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
+			if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+				return category.Category
+			}
+			return ""
+		})
+		username := ""
+		avatarUrl := urlconfig.GetDefaultAvatar()
+		if user, ok := userMap[t.UserId]; ok {
+			username = user.Username
+			avatarUrl = user.GetWebAvatarUrl()
+		}
+		return ArticlesSimpleDto{
+			Id:             t.Id,
+			Title:          t.Title,
+			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
+			Username:       username,
+			AvatarUrl:      avatarUrl,
+			ViewCount:      t.ViewCount,
+			CommentCount:   t.ReplyCount,
+			Category:       FirstOr(categoryNames, "未分类"),
+			Categories:     categoryNames,
+			CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
+				return rs.ArticleCategoryId
+			}),
+			Type:    t.Type,
+			TypeStr: articlesTypeMap[int(t.Type)].Name,
+		}
+	})
 	// 计算总页数
-	totalPages := (cast.ToInt(result.Total) + param.PageSize - 1) / param.PageSize
+	totalPages := (cast.ToInt(pageData.Total) + param.PageSize - 1) / param.PageSize
 	articleCategoryList := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
 		return datastruct.Option[string, uint64]{
 			Name:  t.Category,
@@ -255,13 +304,13 @@ func RenderArticlesPage(c *gin.Context) {
 		"title":               "GooseForum",
 		"description":         "知无不言,言无不尽",
 		"year":                time.Now().Year(),
-		"Data":                result.List,
-		"Page":                result.Page,
+		"Data":                articleList,
+		"Page":                pageData.Page,
 		"PageSize":            param.PageSize,
-		"Total":               result.Total,
+		"Total":               pageData.Total,
 		"TotalPages":          totalPages,
-		"PrevPage":            max(result.Page-1, 1),
-		"NextPage":            min(max(result.Page, 1)+1, totalPages),
+		"PrevPage":            max(pageData.Page-1, 1),
+		"NextPage":            min(max(pageData.Page, 1)+1, totalPages),
 		"User":                GetLoginUser(c),
 		"articleCategoryList": articleCategoryList,
 		"recommendedArticles": getRecommendedArticles(),

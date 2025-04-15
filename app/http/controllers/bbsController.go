@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"strings"
 	"sync"
 	"time"
@@ -110,71 +109,6 @@ type ArticlesSimpleDto struct {
 	CategoriesId   []uint64 `json:"categoriesId,omitempty"`
 	Tags           []string `json:"tags,omitempty"`
 	AvatarUrl      string   `json:"avatarUrl,omitempty"`
-}
-
-// GetArticlesPage 文章列表
-func GetArticlesPage(param GetArticlesPageRequest) component.Response {
-	pageData := articles.Page[articles.SmallEntity](
-		articles.PageQuery{
-			Page:         max(param.Page, 1),
-			PageSize:     param.PageSize,
-			FilterStatus: true,
-			Categories:   param.Categories,
-		})
-	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
-		return t.UserId
-	})
-	userMap := users.GetMapByIds(userIds)
-
-	//获取文章的分类信息
-	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
-		return t.Id
-	})
-	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
-	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
-		return t.ArticleCategoryId
-	})
-	categoryMap := articleCategory.GetMapByIds(categoryIds)
-	// 获取文章的分类和标签
-	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
-		return rs.ArticleId
-	})
-
-	return component.SuccessPage(
-		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
-			categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
-				if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
-					return category.Category
-				}
-				return ""
-			})
-			username := ""
-			avatarUrl := urlconfig.GetDefaultAvatar()
-			if user, ok := userMap[t.UserId]; ok {
-				username = user.Username
-				avatarUrl = user.GetWebAvatarUrl()
-			}
-			return ArticlesSimpleDto{
-				Id:             t.Id,
-				Title:          t.Title,
-				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
-				Username:       username,
-				AvatarUrl:      avatarUrl,
-				ViewCount:      t.ViewCount,
-				CommentCount:   t.ReplyCount,
-				Category:       FirstOr(categoryNames, "未分类"),
-				Categories:     categoryNames,
-				CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
-					return rs.ArticleCategoryId
-				}),
-				Type:    t.Type,
-				TypeStr: articlesTypeMap[int(t.Type)].Name,
-			}
-		}),
-		pageData.Page,
-		pageData.PageSize,
-		pageData.Total,
-	)
 }
 
 type GetArticlesDetailRequest struct {
