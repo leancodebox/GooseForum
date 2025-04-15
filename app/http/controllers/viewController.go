@@ -182,6 +182,7 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 }
 
 var a = highlighting.Highlighting
+
 var md = goldmark.New(
 	goldmark.WithExtensions(
 		extension.GFM,
@@ -189,6 +190,7 @@ var md = goldmark.New(
 		extension.Strikethrough,
 		extension.Linkify,
 		extension.TaskList,
+		a,
 	),
 	goldmark.WithParserOptions(
 		parser.WithAutoHeadingID(),
