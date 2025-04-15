@@ -23,6 +23,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
+	"go.abhg.dev/goldmark/mermaid"
 	"strings"
 
 	"html/template"
@@ -197,6 +198,7 @@ var md = goldmark.New(
 		extension.Strikethrough,
 		extension.Linkify,
 		extension.TaskList,
+		&mermaid.Extender{},
 		b,
 	),
 	goldmark.WithParserOptions(
