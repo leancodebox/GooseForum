@@ -52,24 +52,3 @@ func RegisterByGin(ginApp *gin.Engine) {
 	//	fmt.Println(item.Path)
 	//}
 }
-
-func SetupRegisterByGin(ginApp *gin.Engine) {
-	// 基础中间件
-	ginApp.Use(middleware.SiteMaintenance)
-	ginApp.Use(middleware.SiteInfo)
-	ginApp.Use(middleware.GinCors)
-
-	// 前端资源
-	frontend(ginApp)
-
-	// 访问日志中间件
-	ginApp.Use(middleware.AccessLog)
-
-	// 接口
-	setup(ginApp)
-
-	ginApp.NoRoute(func(c *gin.Context) {
-		c.Redirect(http.StatusTemporaryRedirect, "/actor/setup.html")
-		return
-	})
-}

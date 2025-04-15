@@ -12,13 +12,6 @@ import (
 	"net/http"
 )
 
-func setup(ginApp *gin.Engine) {
-	setupGroup := ginApp.Group("api/setup")
-	setupGroup.GET("status", UpButterReq(controllers.GetSetupStatus))
-	setupGroup.POST("init", UpButterReq(controllers.InitialSetup))
-
-}
-
 func frontend(ginApp *gin.Engine) {
 	actGroup := ginApp.Group("/")
 	appFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
