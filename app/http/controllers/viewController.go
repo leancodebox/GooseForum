@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"fmt"
+	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
@@ -182,6 +183,12 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 }
 
 var a = highlighting.Highlighting
+var b = highlighting.NewHighlighting(
+	highlighting.WithStyle("monokai"),
+	highlighting.WithFormatOptions(
+		chromahtml.WithLineNumbers(true),
+	),
+)
 
 var md = goldmark.New(
 	goldmark.WithExtensions(
@@ -190,7 +197,7 @@ var md = goldmark.New(
 		extension.Strikethrough,
 		extension.Linkify,
 		extension.TaskList,
-		a,
+		b,
 	),
 	goldmark.WithParserOptions(
 		parser.WithAutoHeadingID(),
