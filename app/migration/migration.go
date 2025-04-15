@@ -142,7 +142,7 @@ func dataInit() {
 			Type:       1,
 			CategoryId: []uint64{1},
 		},
-		UserId: 0,
+		UserId: adminUser.Id,
 	})
 
 	// 是否有用户
