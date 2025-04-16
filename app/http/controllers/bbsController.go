@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"strings"
 	"sync"
 	"time"
@@ -181,6 +182,8 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	article.ArticleStatus = 1
 	article.Content = req.Params.Content
 	article.Title = req.Params.Title
+	article.RenderedVersion = markdown2html.GetVersion()
+	article.RenderedHTML = "" // 用户提交后不用渲染，避免提交时间过长。
 	if article.Id > 0 {
 		articles.Save(&article)
 		categoryIDMap := make(map[uint64]bool)
