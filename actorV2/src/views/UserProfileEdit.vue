@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { useUserStore } from '@/stores/userStore'
-import axiosInstance from '@/utils/axiosInstance'
 import { enqueueMessage } from '@/utils/messageManager'
 import { NFormItem, NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage, NGrid, NGridItem, NTabs, NTabPane } from "naive-ui"
 import { VueCropper } from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
 // 首先确保导入了 saveUserInfo 函数
-import {uploadAvatar, saveUserInfo, changePassword} from "@/utils/articleService.ts";
+import {uploadAvatar, saveUserInfo, changePassword, getUserArticles} from "@/utils/articleService.ts";
 
 // 定义文章接口
 interface Article {
@@ -74,7 +73,7 @@ onMounted(async () => {
   window.addEventListener('resize', checkScreenSize);
 })
 
-
+getUserArticles(1,10)
 
 
 // 更新用户信息
@@ -563,19 +562,6 @@ const updatePassword = async (): Promise<void> => {
   transition: color 0.3s ease;
 }
 
-.tab-btn.active {
-  color: var(--primary-color);
-}
-
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: var(--primary-color);
-}
 
 .profile-content {
   background: var(--card-bg);
@@ -775,15 +761,5 @@ const updatePassword = async (): Promise<void> => {
     grid-template-columns: 1fr;
   }
 
-  .tab-buttons {
-    justify-content: center;
-  }
-
-  .tab-btn {
-    padding: 0.4rem 0.8rem;
-    /* 减小内边距 */
-    font-size: 0.9rem;
-    /* 减小字体大小 */
-  }
 }
 </style>

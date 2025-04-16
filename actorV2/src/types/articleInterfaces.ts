@@ -19,6 +19,16 @@ export interface ArticleInfo {
     type: number;
 }
 
+export interface ArticleListItem {
+    id: number,
+    title: string,
+    createTime: string,
+    lastUpdateTime: string,
+    viewCount: number,
+    category: string,
+    categories: string[]
+}
+
 export interface ArticleResponse {
     code: number;
     result: ArticleInfo;
@@ -37,7 +47,6 @@ export interface NameLabel {
     name: string;
     value: number;
 }
-
 
 
 export interface Payload {
