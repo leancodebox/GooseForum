@@ -111,7 +111,11 @@
                 <div class="article-meta">
                     <span>作者: {{.username}}</span>
                 </div>
-                <div> {{range .articleCategory}} {{.}} {{end}}</div>
+                <div class="article-category-list">
+                    {{range .articleCategory}}
+                        <span class="article-category-badge">{{.}}</span>
+                    {{end}}
+                </div>
                 <div class="article-content markdown-body">
                     {{.articleContent}}
                 </div>
@@ -214,6 +218,32 @@
 </body>
 </html>
 <style>
+    .article-category-list {
+        margin: 10px 0 18px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .article-category-badge {
+        display: inline-block;
+        padding: 2px 12px;
+        background: #1976d2; /* 更鲜明的蓝色 */
+        color: #fff;          /* 白色字体 */
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 1px 4px rgba(25, 118, 210, 0.08);
+        letter-spacing: 0.5px;
+        transition: background 0.2s;
+        line-height: 1.8;
+    }
+    [data-theme="dark"] .article-category-badge {
+        background: #90caf9;  /* 浅蓝色背景 */
+        color: #0d2236;       /* 深色字体 */
+        border: none;
+    }
+    
     .comments {
         margin-top: 30px;
     }
@@ -581,5 +611,3 @@
         }
     }
 </script>
-
-
