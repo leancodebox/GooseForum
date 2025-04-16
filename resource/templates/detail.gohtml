@@ -111,7 +111,7 @@
                 <div class="article-meta">
                     <span>作者: {{.username}}</span>
                 </div>
-
+                <div> {{range .articleCategory}} {{.}} {{end}}</div>
                 <div class="article-content markdown-body">
                     {{.articleContent}}
                 </div>
