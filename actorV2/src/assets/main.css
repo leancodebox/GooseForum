@@ -14,7 +14,6 @@
   --hero-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
   --shadow-color: rgba(0, 0, 0, 0.05);
   --comment-bg: var(--light-gray);
-  --card-bg-color: white;
   --text-color-light: #666;
   --input-bg-color: white;
   --hover-color: #f0f0f0;
@@ -35,7 +34,7 @@
   --text-color: #e1e1e1;
   --light-gray: #2d2d2d;
   --border-color: #404040;
-  --link-color: #e1e1e1;
+  --link-color: var(--text-color);
   --link-hover-color: var(--primary-color);
   --bg-color: #1a1a1a;
   --card-bg: #2b2b2b;
@@ -44,7 +43,6 @@
   --hero-gradient: linear-gradient(135deg, #ff8075 0%, #7cc75d 100%);
   --shadow-color: rgba(0, 0, 0, 0.2);
   --comment-bg: #2d2d2d;
-  --card-bg-color: #2b2b2b;
   --text-color-light: #888;
   --input-bg-color: #333;
   --hover-color: #363636;
