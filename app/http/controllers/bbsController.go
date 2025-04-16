@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -189,17 +190,20 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 
 		// 遍历 rsList，更新或删除无效的条目
 		for _, item := range articleCategoryRs.GetByArticleId(article.Id) {
-			if !categoryIDMap[item.ArticleCategoryId] {
-				item.Effective = 0
+			if _, ok := categoryIDMap[item.ArticleCategoryId]; ok {
+				item.Effective = 1
 				articleCategoryRs.SaveOrCreateById(item)
-			} else {
 				// 如果已经存在，从 map 中删除，避免重复插入
 				delete(categoryIDMap, item.ArticleCategoryId)
+			} else {
+				item.Effective = 0
+				articleCategoryRs.SaveOrCreateById(item)
 			}
 		}
 		// 插入新的条目
-		for id := range categoryIDMap {
+		for id, _ := range categoryIDMap {
 			rs := &articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: id, Effective: 1}
+			fmt.Println(*rs)
 			articleCategoryRs.SaveOrCreateById(rs)
 		}
 	} else {
