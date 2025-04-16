@@ -2,21 +2,13 @@
 import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { enqueueMessage } from '@/utils/messageManager'
-import { NFormItem, NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage, NGrid, NGridItem, NTabs, NTabPane } from "naive-ui"
+import { NPagination, NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage, NGrid, NGridItem, NTabs, NTabPane } from "naive-ui"
 import { VueCropper } from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
 // 首先确保导入了 saveUserInfo 函数
 import {uploadAvatar, saveUserInfo, changePassword, getUserArticles} from "@/utils/articleService.ts";
+import type { ArticleListItem } from "@/types/articleInterfaces.ts";
 
-// 定义文章接口
-interface Article {
-  id: number
-  title: string
-  content: string
-  createTime: string
-  viewCount: number
-  commentCount: number
-}
 
 // 定义用户表单接口
 interface UserForm {
@@ -36,7 +28,7 @@ const previewUrl = ref<string>('')
 const cropImg = ref<string>('')
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const userStore = useUserStore()
-const articles = ref<Article[]>([])
+const articles = ref<ArticleListItem[]>([])
 const isSmallScreen = ref<boolean>(false)
 
 // 添加密码表单数据
@@ -57,6 +49,34 @@ const userForm = ref<UserForm>({
   signature: '',
 })
 
+// 分页相关变量
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+
+// 分页获取文章
+const fetchUserArticles = async (page = 1, size = 10) => {
+  try {
+    const res = await getUserArticles(page, size)
+    if (res.code === 0 && res.result?.list) {
+      articles.value = res.result.list
+      total.value = res.result.total
+    } else {
+      articles.value = []
+      total.value = 0
+    }
+  } catch (e) {
+    articles.value = []
+    total.value = 0
+  }
+}
+
+// 监听分页变化
+function handlePageChange(page: number) {
+  currentPage.value = page
+  fetchUserArticles(page, pageSize.value)
+}
+
 // 初始化用户数据
 onMounted(async () => {
   if (userStore.userInfo) {
@@ -71,6 +91,9 @@ onMounted(async () => {
   }
   checkScreenSize();
   window.addEventListener('resize', checkScreenSize);
+
+  // 获取用户文章列表（分页）
+  await fetchUserArticles(currentPage.value, pageSize.value)
 })
 
 getUserArticles(1,10)
@@ -328,24 +351,34 @@ const updatePassword = async (): Promise<void> => {
           </form>
         </n-tab-pane>
         <n-tab-pane name="我的文章" tab="我的文章">
-          <div v-if="articles.length === 0" class="empty-state">
+          <div v-if="articles.length === 0 && currentPage<=1" class="empty-state">
             <i class="fas fa-file-alt"></i>
             <p>还没有发布过文章</p>
             <router-link to="/post-edit" class="create-post-btn">写第一篇文章</router-link>
           </div>
-          <div v-else class="article-grid">
-            <div v-for="article in articles" :key="article.id" class="article-card">
-              <h3 class="article-title">
-                <a :href="`/post/${article.id}`">{{ article.title }}</a>
-              </h3>
-              <p class="article-excerpt">{{ article.content.substring(0, 100) }}...</p>
-              <div class="article-meta">
-                <span class="publish-time">{{ article.createTime }}</span>
-                <div class="stats">
-                  <span><i class="fas fa-eye"></i> {{ article.viewCount }}</span>
-                  <span><i class="fas fa-comment"></i> {{ article.commentCount }}</span>
+          <div v-else>
+            <n-list bordered>
+              <n-list-item v-for="article in articles" :key="article.id">
+                <template #prefix>
+                  <span style="color:var(--primary-color);font-weight:bold;">#</span>
+                </template>
+                <div>
+                  <a :href="`/post/${article.id}`" class="article-title" target="_blank">{{ article.title }}</a>
+                  <div class="article-meta">
+                    <span class="publish-time">{{ article.createTime }}</span>
+                    <span style="margin-left: 1em;"><i class="fas fa-eye"></i> {{ article.viewCount }}</span>
+                    <span style="margin-left: 1em;">分类: {{ article.categories?.join(', ') || article.category }}</span>
+                  </div>
                 </div>
-              </div>
+              </n-list-item>
+            </n-list>
+            <div style="margin-top: 24px; text-align: right;">
+              <n-pagination
+                v-model:page="currentPage"
+                :page-size="pageSize"
+                :item-count="total"
+                @update:page="handlePageChange"
+              />
             </div>
           </div>
         </n-tab-pane>
