@@ -13,7 +13,7 @@ import (
 )
 
 func GetVersion() uint32 {
-	return 1
+	return 2
 }
 
 var a = highlighting.Highlighting
@@ -32,7 +32,7 @@ var md = goldmark.New(
 		extension.Linkify,
 		extension.TaskList,
 		&mermaid.Extender{},
-		b,
+		//b,
 	),
 	goldmark.WithParserOptions(
 		parser.WithAutoHeadingID(),
