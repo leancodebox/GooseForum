@@ -108,7 +108,6 @@ type ArticlesSimpleDto struct {
 	Category       string   `json:"category,omitempty"`
 	Categories     []string `json:"categories,omitempty"`
 	CategoriesId   []uint64 `json:"categoriesId,omitempty"`
-	Tags           []string `json:"tags,omitempty"`
 	AvatarUrl      string   `json:"avatarUrl,omitempty"`
 }
 
@@ -290,7 +289,7 @@ type GetUserArticlesRequest struct {
 
 // GetUserArticles 获取用户文章列表
 func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) component.Response {
-	pageData := articles.Page[articles.Entity](articles.PageQuery{
+	pageData := articles.Page[articles.SmallEntity](articles.PageQuery{
 		Page:         max(req.Params.Page, 1),
 		PageSize:     req.Params.PageSize,
 		UserId:       req.UserId,
@@ -298,7 +297,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 	})
 
 	//获取文章的分类信息
-	articleIds := array.Map(pageData.Data, func(t articles.Entity) uint64 {
+	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
 		return t.Id
 	})
 	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
@@ -308,7 +307,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 	categoryMap := articleCategory.GetMapByIds(categoryIds)
 
 	return component.SuccessPage(
-		array.Map(pageData.Data, func(t articles.Entity) ArticlesSimpleDto {
+		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
 			// 获取文章的分类和标签
 			categories := array.Filter(categoryRs, func(rs *articleCategoryRs.Entity) bool {
 				return rs.ArticleId == t.Id
@@ -322,7 +321,6 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 			return ArticlesSimpleDto{
 				Id:             t.Id,
 				Title:          t.Title,
-				Content:        t.Content,
 				CreateTime:     t.CreatedAt.Format("2006-01-02 15:04:05"),
 				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
 				Username:       "", // 这里不需要用户名，因为是自己的文章
@@ -330,7 +328,6 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				CommentCount:   t.ReplyCount,
 				Category:       FirstOr(categoryNames, "未分类"),
 				Categories:     categoryNames,
-				Tags:           []string{"文章", "技术"}, // 暂时使用固定标签，后续可以添加标签系统
 			}
 		}),
 		pageData.Page,

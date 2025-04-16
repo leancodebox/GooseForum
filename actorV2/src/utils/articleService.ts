@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "@/utils/messageManager.ts";
 import axios from 'axios';
-import type {Notifications, PageData, Result} from "@/types/articleInterfaces.ts";
+import type {ArticleListItem, Notifications, PageData, Result} from "@/types/articleInterfaces.ts";
 
 // 获取文章枚举
 export const getArticleEnum = async (): Promise<any> => {
@@ -108,6 +108,15 @@ export function saveUserInfo(
         bio: bio,
         signature: signature,
         website: website,
+    })
+}
+
+
+export function getUserArticles(page: number,
+                               pageSize: number): Promise<Result<PageData<ArticleListItem>>> {
+    return axiosInstance.post('bbs/get-user-articles', {
+        page: page,
+        pageSize: pageSize,
     })
 }
 
