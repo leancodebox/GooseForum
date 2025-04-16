@@ -389,23 +389,50 @@ func RenderArticleDetail(c *gin.Context) {
 	// 复用现有的数据获取逻辑
 	authorId := entity.UserId
 	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
+	acMap := articleCategoryMapList([]uint64{id})
 	// 构建模板数据
 	templateData := gin.H{
-		"articleId":      id,
-		"authorId":       authorId,
-		"title":          entity.Title + " - GooseForum",
-		"description":    TakeUpTo64Chars(entity.Content),
-		"year":           time.Now().Year(),
-		"articleTitle":   entity.Title,
-		"articleContent": markdownToHTML(entity.Content),
-		"username":       author,
-		"commentList":    replyList,
-		"avatarUrl":      avatarUrl,
-		"User":           GetLoginUser(c),
-		"canonicalHref":  buildCanonicalHref(c),
-		"authorArticles": authorArticles,
+		"articleId":       id,
+		"authorId":        authorId,
+		"title":           entity.Title + " - GooseForum",
+		"description":     TakeUpTo64Chars(entity.Content),
+		"year":            time.Now().Year(),
+		"articleTitle":    entity.Title,
+		"articleContent":  markdownToHTML(entity.Content),
+		"username":        author,
+		"commentList":     replyList,
+		"avatarUrl":       avatarUrl,
+		"User":            GetLoginUser(c),
+		"canonicalHref":   buildCanonicalHref(c),
+		"authorArticles":  authorArticles,
+		"articleCategory": acMap[id],
 	}
 	c.HTML(http.StatusOK, "detail.gohtml", templateData)
+}
+
+func articleCategoryMapList(articleIds []uint64) map[uint64][]string {
+	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
+	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
+		return t.ArticleCategoryId
+	})
+	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	// 获取文章的分类和标签
+	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
+		return rs.ArticleId
+	})
+	res := make(map[uint64][]string, len(categoriesGroup))
+	for aId, ids := range categoriesGroup {
+		res[aId] = array.Map(array.Map(ids, func(rs *articleCategoryRs.Entity) uint64 {
+			return rs.ArticleCategoryId
+		}), func(item uint64) string {
+			if cateItem, ok := categoryMap[item]; ok {
+				return cateItem.Category
+			} else {
+				return ""
+			}
+		})
+	}
+	return res
 }
 
 func errorPage(c *gin.Context, title, message string) {
