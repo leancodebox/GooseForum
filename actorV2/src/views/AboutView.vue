@@ -141,7 +141,7 @@ const achievements: Achievement[] = [
 <style scoped>
 .about {
   padding: 2rem;
-  background-color: var(--color-background);
+  background-color: var(--bg-color);
 }
 
 .about-container {
@@ -291,7 +291,7 @@ const achievements: Achievement[] = [
     rgba(65, 184, 131, 0.15) 20%,
     rgba(65, 184, 131, 0.05) 50%,
     rgba(65, 184, 131, 0) 80%
-  ), 
+  ),
   radial-gradient(ellipse at center,
     rgba(65, 184, 131, 0.1) 0%,
     rgba(65, 184, 131, 0) 70%
