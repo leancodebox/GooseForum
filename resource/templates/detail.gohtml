@@ -226,24 +226,37 @@
         flex-wrap: wrap;
         gap: 8px;
     }
-    .article-category-badge {
-        display: inline-block;
-        padding: 2px 12px;
-        background: #1976d2; /* 更鲜明的蓝色 */
-        color: #fff;          /* 白色字体 */
-        border-radius: 14px;
-        font-size: 14px;
-        border: none;
-        box-shadow: 0 1px 4px rgba(25, 118, 210, 0.08);
-        letter-spacing: 0.5px;
-        transition: background 0.2s;
-        line-height: 1.8;
-    }
-    [data-theme="dark"] .article-category-badge {
-        background: #90caf9;  /* 浅蓝色背景 */
-        color: #0d2236;       /* 深色字体 */
-        border: none;
-    }
+.article-category-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    background: transparent; /* 透明背景 */
+    color: #1976d2;          /* 主色字体 */
+    border-radius: 14px;
+    font-size: 14px;
+    border: 1.5px solid #1976d2; /* 主色边框 */
+    box-shadow: none;
+    letter-spacing: 0.5px;
+    transition: 
+        color 0.2s,
+        border-color 0.2s,
+        background 0.2s;
+    line-height: 1.6;
+}
+.article-category-badge:hover {
+    background: #e3f2fd;     /* 悬停时淡蓝背景 */
+    color: #0d2236;
+    border-color: #1565c0;
+}
+[data-theme="dark"] .article-category-badge {
+    background: transparent;
+    color: #90caf9;
+    border: 1.5px solid #90caf9;
+}
+[data-theme="dark"] .article-category-badge:hover {
+    background: #1a2733;
+    color: #fff;
+    border-color: #42a5f5;
+}
 
     .comments {
         margin-top: 30px;
