@@ -16,24 +16,6 @@
                     <span><i class="fas fa-clock"></i> 加入时间：{{.Author.CreateTime.Format "2006-01-02"}}</span>
                     <span><i class="fas fa-history"></i> 最后活跃：今天</span>
                 </div>
-                <div class="user-stats">
-                    <div class="stat-item">
-                        <span class="stat-value">{{.postCount}}</span>
-                        <span class="stat-label">发帖数</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">{{.commentCount}}</span>
-                        <span class="stat-label">评论数</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">{{.points}}</span>
-                        <span class="stat-label">积分</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">LV.1</span>
-                        <span class="stat-label">等级</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -43,13 +25,15 @@
             <h2>发布的文章</h2>
             <div class="posts-list">
                 {{range .Articles}}
-                <article class="post-item">
-                    <h3><a href="/post/{{.Id}}">{{.Title}}</a></h3>
-                    <div class="post-meta">
-                        <span class="post-date">{{.CreateTime}}</span>
-                        <span class="post-comments">{{.CommentCount}} 评论</span>
-                    </div>
-                </article>
+                    <article class="post-item">
+                        <h3 class="post-title">
+                            <a href="/post/{{.Id}}">{{.Title}}</a>
+                        </h3>
+                        <div class="post-meta">
+                            <span class="post-date">{{.CreateTime}}</span>
+                            <span class="post-comments">{{.CommentCount}} 评论</span>
+                        </div>
+                    </article>
                 {{end}}
             </div>
         </section>
@@ -114,29 +98,6 @@
         margin-right: 0.5rem;
     }
 
-    .user-stats {
-        display: flex;
-        gap: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid var(--border-color);
-    }
-
-    .stat-item {
-        text-align: center;
-    }
-
-    .stat-value {
-        display: block;
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--primary-color);
-    }
-
-    .stat-label {
-        color: var(--text-color-light);
-        font-size: 0.9rem;
-        margin-top: 0.25rem;
-    }
 
     @media (max-width: 768px) {
         .profile-header {
@@ -144,20 +105,93 @@
             text-align: center;
             gap: 1rem;
         }
-
         .user-meta {
             justify-content: center;
             flex-wrap: wrap;
         }
+    }
 
-        .user-stats {
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1.5rem;
+    .posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .post-item {
+        background: var(--card-bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        transition: box-shadow 0.2s, background 0.2s;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .post-item:hover {
+        background: var(--light-gray);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .post-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .post-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .post-title a:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+
+    .post-meta {
+        font-size: 0.92rem;
+        color: var(--text-color-light);
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.1rem;
+    }
+
+    .post-meta .post-date::before {
+        content: "🕒 ";
+        font-size: 0.95em;
+        margin-right: 0.1em;
+    }
+
+    .post-meta .post-comments::before {
+        content: "💬 ";
+        font-size: 0.95em;
+        margin-right: 0.1em;
+    }
+
+    @media (max-width: 768px) {
+        .posts-list {
+            gap: 0.5rem;
         }
 
-        .stat-value {
-            font-size: 1.3rem;
+        .post-item {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .post-title {
+            font-size: 1rem;
+        }
+
+        .post-meta {
+            font-size: 0.85rem;
+            gap: 1rem;
         }
     }
 </style>
