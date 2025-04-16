@@ -18,7 +18,9 @@
                 {{range .Data}}
                     <article class="article-item">
                         <div class="article-author">
+                            <a href="/user-profile/{{.AuthorId}}" >
                             <img src="{{.AvatarUrl}}" alt="{{.Username}}" class="author-avatar-small">
+                            </a>
                         </div>
                         <div class="article-content">
                             <div class="article-header">
@@ -26,7 +28,9 @@
                                 <a href="/post/{{.Id}}"><span class="article-title">{{.Title}}</span></a>
                             </div>
                             <div class="article-meta-info">
+                                <a href="/user-profile/{{.AuthorId}}" >
                                 <span>{{.Username}}</span>
+                                </a>
                                 <span>{{.LastUpdateTime}}</span>
                                 <div class="article-tags">
                                     {{range .Categories}}
@@ -116,7 +120,7 @@
             <div class="sidebar-card">
                 <h3>赞助商</h3>
                 <div class="sponsors-grid">
-                    <a rel="nofollow noopener noreferrer" target="_blank" href="https://golang.google.cn" class="sponsor-card">
+                    <a rel="nofollow noopener noreferrer" target="_blank" href="https://github.com/golang/go" class="sponsor-card">
                         <img src="https://golang.google.cn/images/go-logo-blue.svg" alt="Docker" class="sponsor-logo">
                         <h4 class="sponsor-name">golang</h4>
                         <p class="sponsor-description">An open-source programming language supported by Google</p>

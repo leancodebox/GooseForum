@@ -100,6 +100,7 @@ type ArticlesSimpleDto struct {
 	CreateTime     string   `json:"createTime,omitempty"`
 	LastUpdateTime string   `json:"lastUpdateTime,omitempty"`
 	Username       string   `json:"username,omitempty"`
+	AuthorId       uint64   `json:"authorId,omitempty"`
 	ViewCount      uint64   `json:"viewCount,omitempty"`
 	CommentCount   uint64   `json:"commentCount,omitempty"`
 	Type           int8     `json:"type,omitempty"`
