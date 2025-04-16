@@ -290,6 +290,7 @@ func RenderArticlesPage(c *gin.Context) {
 			Title:          t.Title,
 			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
 			Username:       username,
+			AuthorId:       t.UserId,
 			AvatarUrl:      avatarUrl,
 			ViewCount:      t.ViewCount,
 			CommentCount:   t.ReplyCount,
