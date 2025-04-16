@@ -1,15 +1,14 @@
 package controllers
 
 import (
-	"bytes"
 	"fmt"
-	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -18,15 +17,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
-	"github.com/yuin/goldmark"
-	highlighting "github.com/yuin/goldmark-highlighting/v2"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/renderer/html"
-	"go.abhg.dev/goldmark/mermaid"
+	"html/template"
 	"strings"
 
-	"html/template"
 	"log/slog"
 	"net/http"
 	"time"
@@ -183,41 +176,6 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 	}
 }
 
-var a = highlighting.Highlighting
-var b = highlighting.NewHighlighting(
-	highlighting.WithStyle("monokai"),
-	highlighting.WithFormatOptions(
-		chromahtml.WithLineNumbers(true),
-	),
-)
-
-var md = goldmark.New(
-	goldmark.WithExtensions(
-		extension.GFM,
-		extension.Table,
-		extension.Strikethrough,
-		extension.Linkify,
-		extension.TaskList,
-		&mermaid.Extender{},
-		b,
-	),
-	goldmark.WithParserOptions(
-		parser.WithAutoHeadingID(),
-	),
-	goldmark.WithRendererOptions(
-		html.WithHardWraps(),
-		html.WithXHTML(),
-	),
-)
-
-// 添加新的服务端渲染的控制器方法
-func markdownToHTML(markdown string) template.HTML {
-	var buf bytes.Buffer
-	if err := md.Convert([]byte(markdown), &buf); err != nil {
-		slog.Error("转化失败", "err", err)
-	}
-	return template.HTML(buf.String())
-}
 func RenderIndex(c *gin.Context) {
 	last, _ := articles.GetLatestArticles(5)
 	templateData := gin.H{
@@ -388,6 +346,14 @@ func RenderArticleDetail(c *gin.Context) {
 	articles.IncrementView(entity)
 	// 复用现有的数据获取逻辑
 	authorId := entity.UserId
+
+	if entity.RenderedVersion < markdown2html.GetVersion() || entity.RenderedHTML == "" {
+		mdInfo := markdown2html.MarkdownToHTML(entity.Content)
+		entity.RenderedHTML = mdInfo
+		entity.RenderedVersion = markdown2html.GetVersion()
+		articles.Save(&entity)
+	}
+
 	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
 	acMap := articleCategoryMapList([]uint64{id})
 	// 构建模板数据
@@ -398,7 +364,7 @@ func RenderArticleDetail(c *gin.Context) {
 		"description":     TakeUpTo64Chars(entity.Content),
 		"year":            time.Now().Year(),
 		"articleTitle":    entity.Title,
-		"articleContent":  markdownToHTML(entity.Content),
+		"articleContent":  template.HTML(entity.RenderedHTML),
 		"username":        author,
 		"commentList":     replyList,
 		"avatarUrl":       avatarUrl,

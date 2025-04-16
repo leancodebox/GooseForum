@@ -40,18 +40,20 @@ const fieldUpdatedAt = "updated_at"
 const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
-	Id            uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                            //
-	Title         string     `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`                  //
-	Content       string     `gorm:"column:content;type:text;" json:"content"`                                          //
-	Type          int8       `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`                          // 文章类型：0 博文，1教程，2问答，3分享
-	UserId        uint64     `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`             //
-	ArticleStatus int8       `gorm:"column:article_status;type:tinyint;not null;default:0;" json:"articleStatus"`       // 文章状态：0 草稿 1 发布
-	ProcessStatus int8       `gorm:"column:process_status;type:tinyint;not null;default:0;" json:"processStatus"`       // 管理状态：0 正常 1 封禁
-	ViewCount     uint64     `gorm:"column:view_count;index;type:bigint unsigned;not null;default:0;" json:"viewCount"` // 访问数量
-	ReplyCount    uint64     `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"`     // 访问数量
-	CreatedAt     time.Time  `gorm:"column:created_at;autoCreateTime;" json:"createdAt"`                                //
-	UpdatedAt     time.Time  `gorm:"column:updated_at;autoUpdateTime;index;" json:"updatedAt"`
-	DeletedAt     *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
+	Id              uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                  //
+	Title           string     `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`                        //
+	Content         string     `gorm:"column:content;type:text;" json:"content"`                                                //
+	RenderedHTML    string     `gorm:"column:rendered_html;type:text;" json:"renderedHTML"`                                     //md 渲染后数据
+	RenderedVersion uint32     `gorm:"column:rendered_version;type:bigint unsigned;not null;default:0;" json:"renderedVersion"` //md 的渲染器版本
+	Type            int8       `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`                                // 文章类型：0 博文，1教程，2问答，3分享
+	UserId          uint64     `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`                   //
+	ArticleStatus   int8       `gorm:"column:article_status;type:tinyint;not null;default:0;" json:"articleStatus"`             // 文章状态：0 草稿 1 发布
+	ProcessStatus   int8       `gorm:"column:process_status;type:tinyint;not null;default:0;" json:"processStatus"`             // 管理状态：0 正常 1 封禁
+	ViewCount       uint64     `gorm:"column:view_count;index;type:bigint unsigned;not null;default:0;" json:"viewCount"`       // 访问数量
+	ReplyCount      uint64     `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"`           // 访问数量
+	CreatedAt       time.Time  `gorm:"column:created_at;autoCreateTime;" json:"createdAt"`                                      //
+	UpdatedAt       time.Time  `gorm:"column:updated_at;autoUpdateTime;index;" json:"updatedAt"`
+	DeletedAt       *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
