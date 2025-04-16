@@ -39,6 +39,9 @@ func runWeb(_ *cobra.Command, _ []string) {
 
 	if debug {
 		go func() {
+			// go tool pprof http://localhost:7071/debug/pprof/profile
+			// go tool pprof -http=:9001 http://localhost:7071/debug/pprof/heap
+			// http://127.0.0.1:7071/debug/pprof/
 			err := http.ListenAndServe("0.0.0.0:7071", nil)
 			if err != nil {
 				slog.Error("debug listen ", "err", err)
