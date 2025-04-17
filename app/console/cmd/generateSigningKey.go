@@ -25,21 +25,20 @@ func runSigningKey(_ *cobra.Command, _ []string) {
 	fmt.Println("Generated signingKey:", signingKey)
 }
 
-// 生成指定长度的随机字节序列
 func generateRandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("随机数生成失败: %w", err)
 	}
 	return b, nil
 }
 
-// 生成 Base64 编码的 signingKey
+// 生成符合JWT规范的签名密钥
 func generateSigningKey(keyLength int) (string, error) {
 	bytes, err := generateRandomBytes(keyLength)
 	if err != nil {
 		return "", err
 	}
-	return base64.URLEncoding.EncodeToString(bytes), nil
+	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(bytes), nil
 }
