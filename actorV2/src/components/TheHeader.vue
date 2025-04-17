@@ -2,27 +2,26 @@
 import {onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useUserStore} from '@/stores/userStore'
+import {useThemeStore} from '@/stores/themeStore'
 
 const router = useRouter()
 const theme = ref('light')
 const isMenuOpen = ref(false)
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 
 const toggleTheme = () => {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
-  document.documentElement.setAttribute('data-theme', theme.value)
-  localStorage.setItem('theme', theme.value)
+  themeStore.toggleTheme()
 }
 
 // 在组件挂载时读取 localStorage 中的主题
 onMounted(() => {
-  const savedTheme = localStorage.getItem('theme') || 'light'
-  theme.value = savedTheme
-  document.documentElement.setAttribute('data-theme', savedTheme)
+  theme.value = themeStore.theme
+  document.documentElement.setAttribute('data-theme', themeStore.theme)
   // 设置初始图标
   const themeIcon = document.querySelector('.theme-icon');
   if (themeIcon !== null) {
-    themeIcon.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+    themeIcon.textContent = themeStore.theme === 'dark' ? '🌙' : '☀️';
   }
 })
 
@@ -467,3 +466,13 @@ nav a:hover {
 
 }
 </style>
+
+watch(
+    () => themeStore.theme,
+    (newTheme) => {
+      const themeIcon = document.querySelector('.theme-icon');
+      if (themeIcon !== null) {
+        themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+      }
+    }
+)

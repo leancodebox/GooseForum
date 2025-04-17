@@ -11,6 +11,11 @@ import {
   NNotificationProvider,
   zhCN
 } from 'naive-ui'
+import { darkTheme } from 'naive-ui'
+import {useThemeStore} from '@/stores/themeStore'
+const themeStore = useThemeStore()
+
+
 </script>
 
 <template>
@@ -22,9 +27,9 @@ import {
           <!-- 全局消息提供者 -->
           <n-message-provider>
             <!-- 全局加载条提供者 -->
-            <n-loading-bar-provider>
+            <n-loading-bar-provider >
               <!-- 全局配置提供者，设置中文语言 -->
-              <n-config-provider :locale="zhCN" :date-locale="dateZhCN">
+              <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme="themeStore.theme==='light'?null:darkTheme">
                 <RouterView/>
               </n-config-provider>
             </n-loading-bar-provider>
