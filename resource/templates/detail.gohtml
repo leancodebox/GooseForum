@@ -69,7 +69,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <h1 style="margin: 0;">{{.articleTitle}}</h1>
                     {{if and .User (eq .User.UserId .authorId)}}
-                        <a href="/app/post-edit?id={{.articleId}}" class="edit-btn">编辑文章</a>
+                        <a href="/app/post-edit?id={{.articleId}}" class="edit-btn">编辑</a>
                     {{end}}
                 </div>
 
