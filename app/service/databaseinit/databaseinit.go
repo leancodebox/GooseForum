@@ -1,11 +1,10 @@
-package bbsinit
+package databaseinit
 
 import (
 	"database/sql"
 	_ "embed"
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"log"
 	"strings"
 )
@@ -38,15 +37,4 @@ func DBInit() {
 			fmt.Println(err)
 		}
 	}
-}
-
-func DataInit() {
-	dataList := []articleCategory.Entity{
-		{Category: "passion"},
-	}
-	has := articleCategory.Get(1)
-	if has.Id == 0 {
-		articleCategory.SaveAll(&dataList)
-	}
-
 }
