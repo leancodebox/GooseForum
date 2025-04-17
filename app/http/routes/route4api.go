@@ -88,6 +88,8 @@ func forum(ginApp *gin.Engine) {
 	loginApi.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
 	// 用户文章列表
 	loginApi.POST("get-user-articles", UpButterReq(controllers.GetUserArticles))
+	// 文章点赞
+	loginApi.POST("like-articles", UpButterReq(controllers.LikeArticle))
 
 	adminApi := ginApp.Group("api/admin").Use(middleware.JWTAuth4Gin)
 	adminApi.POST("user-list", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.UserList))
