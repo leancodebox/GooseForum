@@ -274,7 +274,7 @@
         const filters = urlParams.get('filters');
 
         if (filters) {
-            const filterArray = filters.split(',');
+            const filterArray = filters.split('_');
             filterTags.forEach(tag => {
                 if (filterArray.includes(tag.dataset.filter)) {
                     tag.classList.add('active');
@@ -335,7 +335,7 @@
 
         // 更新或添加filters参数
         if (selectedFilters.length > 0) {
-            urlParams.set('filters', selectedFilters.join(','));
+            urlParams.set('filters', selectedFilters.join('_'));
         } else {
             urlParams.delete('filters');
         }

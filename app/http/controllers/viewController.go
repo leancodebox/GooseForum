@@ -193,7 +193,7 @@ func RenderIndex(c *gin.Context) {
 // RenderArticlesPage 渲染文章列表页面
 func RenderArticlesPage(c *gin.Context) {
 	filters := c.DefaultQuery("filters", "")
-	categories := array.Filter(array.Map(strings.Split(filters, ","), func(t string) int {
+	categories := array.Filter(array.Map(strings.Split(filters, "_"), func(t string) int {
 		return cast.ToInt(t)
 	}), func(i int) bool {
 		return i > 0
