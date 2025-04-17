@@ -269,6 +269,12 @@ func RenderArticlesPage(c *gin.Context) {
 			Value: t.Id,
 		}
 	})
+	pagination := []PageButton{}
+	start := max(pageData.Page-5, 1)
+	for i := 1; i <= 10; i++ {
+		pagination = append(pagination, PageButton{start})
+		start += 1
+	}
 	// 构建模板数据
 	templateData := gin.H{
 		"title":               "GooseForum",
@@ -286,8 +292,14 @@ func RenderArticlesPage(c *gin.Context) {
 		"recommendedArticles": getRecommendedArticles(),
 		"canonicalHref":       buildCanonicalHref(c),
 		"Filters":             filters,
+		"pagination":          pagination,
 	}
+
 	c.HTML(http.StatusOK, "list.gohtml", templateData)
+}
+
+type PageButton struct {
+	Page int
 }
 
 // RenderArticleDetail 渲染文章详情页面

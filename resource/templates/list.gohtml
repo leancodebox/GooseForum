@@ -55,6 +55,9 @@
                     {{if gt .Page 1}}
                         <a href="/post?page={{.PrevPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn prev-page">上一页</a>
                     {{end}}
+                    {{range .pagination}}
+                        <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}" class="page-btn">{{.Page}}</a>
+                    {{end}}
                     <span class="page-info">第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
                     {{if lt .Page .TotalPages}}
                         <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn next-page">下一页</a>
