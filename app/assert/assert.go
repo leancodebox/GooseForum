@@ -21,7 +21,7 @@ func GenerateConfig() []byte {
 	t := template.New("config.templ.toml")
 	t = template.Must(t.Parse(string(configTempl)))
 	err := t.Execute(&b, map[string]any{
-		"SigningKey": algorithm.GenerateSigningKey(32),
+		"SigningKey": algorithm.SafeGenerateSigningKey(32),
 	})
 
 	if err != nil {
