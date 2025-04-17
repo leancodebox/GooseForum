@@ -351,7 +351,7 @@ func RenderArticleDetail(c *gin.Context) {
 		mdInfo := markdown2html.MarkdownToHTML(entity.Content)
 		entity.RenderedHTML = mdInfo
 		entity.RenderedVersion = markdown2html.GetVersion()
-		articles.Save(&entity)
+		articles.SaveNoUpdate(&entity)
 	}
 
 	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)

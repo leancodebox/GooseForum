@@ -15,6 +15,10 @@ func Save(entity *Entity) error {
 	result := builder().Save(entity)
 	return result.Error
 }
+func SaveNoUpdate(entity *Entity) error {
+	result := builder().Omit(fieldUpdatedAt).Save(entity)
+	return result.Error
+}
 
 func SaveAll(entities *[]Entity) int64 {
 	result := builder().Save(entities)
@@ -117,7 +121,7 @@ func Page[ResType SmallEntity | Entity](q PageQuery) struct {
 	total = 1200
 	//b.Count(&total)
 	b.Select("articles.*")
-	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order("articles.updated_at desc").Find(&list)
+	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order(" articles.updated_at desc").Find(&list)
 	return struct {
 		Page     int
 		PageSize int
