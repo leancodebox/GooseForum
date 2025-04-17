@@ -52,42 +52,46 @@
                     </article>
                 {{end}}
                 <div class="pagination">
-                    <ul class="pagination-list">
+                    <ul class="pagination">
                         {{if gt .Page 1}}
                             <li class="page-item">
-                                <a href="/post?page={{.PrevPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-link prev-page" rel="prev">‹</a>
+                                <a class="page-link" href="/post?page={{.PrevPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
                             </li>
                         {{end}}
                         {{range .pagination}}
                             {{if eq .Index 1}}
                                 {{if ne .Page 1 }}
                                     <li class="page-item">
-                                        <a href="/post?page=1{{if $.Filters}}&filters={{$.Filters}}{{end}}"
-                                           class="page-link">1</a>
+                                        <a class="page-link" href="/post?page=1{{if $.Filters}}&filters={{$.Filters}}{{end}}">1</a>
                                     </li>
                                     {{if gt .Page 2 }}
                                         <li class="page-item">
-                                            <span class="page-ellipsis">...</span>
+                                            <span class="page-link">...</span>
                                         </li>
                                     {{end}}
                                 {{end}}
                             {{end}}
-                            <li class="page-item">
-                                <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
-                                   class="page-link">{{.Page}}</a>
+                            <li class="page-item{{if eq .Page $.Page}} active{{end}}">
+                                <a class="page-link" href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}">{{.Page}}</a>
                             </li>
                             {{if eq .Index 10}}
                                 {{if ne .Page $.TotalPages}}
                                     <li class="page-item">
-                                        <a href="/post?page={{$.TotalPages}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
-                                           class="page-link">{{$.TotalPages}}</a>
+                                        <span class="page-link">...</span>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="/post?page={{$.TotalPages}}{{if $.Filters}}&filters={{$.Filters}}{{end}}">{{$.TotalPages}}</a>
                                     </li>
                                 {{end}}
                             {{end}}
                         {{end}}
                         {{if lt .Page .TotalPages}}
                             <li class="page-item">
-                                <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-link next-page" rel="next">›</a>
+                                <a class="page-link" href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
                             </li>
                         {{end}}
                     </ul>
@@ -186,84 +190,74 @@
 </main>
 {{template "footer.gohtml" .}}
 <style>
-    /* 新增分页列表样式 */
-    .pagination-list {
+    /* 类似 Bootstrap 的分页样式 */
+    .pagination {
         display: flex;
+        padding-left: 20px;
         list-style: none;
-        padding: 0;
-        margin: 0;
+        justify-content: left;
     }
 
     .page-item {
         margin: 0;
     }
 
-    .page-link {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        background-color: #f0f0f0;
-        color: #333;
-        text-decoration: none;
-        border: 1px solid #ddd;
-        border-right: none;
-        transition: background-color 0.3s ease;
-    }
-
     .page-item:first-child .page-link {
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
+        margin-left: 0;
+        border-top-left-radius: 0.25rem;
+        border-bottom-left-radius: 0.25rem;
     }
 
     .page-item:last-child .page-link {
-        border-top-right-radius: 4px;
-        border-bottom-right-radius: 4px;
-        border-right: 1px solid #ddd;
+        border-top-right-radius: 0.25rem;
+        border-bottom-right-radius: 0.25rem;
+    }
+
+    .page-link {
+        position: relative;
+        display: block;
+        padding: 0.5rem 0.75rem;
+        margin-left: -1px;
+        line-height: 1.25;
+        color: #007bff;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
     }
 
     .page-link:hover {
-        background-color: #e0e0e0;
-        color: #222;
+        z-index: 2;
+        color: #0056b3;
+        text-decoration: none;
+        background-color: #e9ecef;
+        border-color: #dee2e6;
     }
 
-    .page-link.active {
+    .page-link:focus {
+        z-index: 3;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .page-item.active .page-link {
+        z-index: 3;
+        color: #fff;
         background-color: #007bff;
-        color: white;
-        cursor: default;
+        border-color: #007bff;
     }
 
-    .page-link.disabled {
-        opacity: 0.5;
+    .page-item.disabled .page-link {
+        color: #6c757d;
         pointer-events: none;
+        cursor: auto;
+        background-color: #fff;
+        border-color: #dee2e6;
     }
 
-    .page-ellipsis {
-        padding: 0.5rem 1rem;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-        border-right: none;
-    }
-
-    .page-info {
-        margin-left: 1rem;
-        color: #666;
-    }
-
+    /* 小屏幕适配 */
     @media (max-width: 768px) {
-        .pagination-list {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
         .page-link {
             padding: 0.3rem 0.6rem;
             font-size: 0.8rem;
-        }
-
-        .page-info {
-            width: 100%;
-            text-align: center;
-            margin-top: 0.5rem;
-            margin-left: 0;
         }
     }
 </style>
@@ -297,7 +291,7 @@
         pageLinks.forEach(link => {
             const pageNumber = parseInt(link.textContent);
             if (!isNaN(pageNumber) && pageNumber === currentPage) {
-                link.classList.add('active');
+                link.parentElement.classList.add('active');
             }
         });
     });
