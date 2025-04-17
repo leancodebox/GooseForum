@@ -228,26 +228,7 @@ a:hover {
     opacity: 0.7;
 }
 
-.pagination {
-    padding: 1rem;
-    border-top: 1px solid var(--border-color);
-    background: var(--card-bg);
-    margin-top: 0;
-}
 
-.pagination a {
-    padding: 0.4rem 0.8rem;
-    background: var(--primary-color);
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: opacity 0.2s;
-    font-size: 0.9rem;
-}
-
-.pagination a:hover {
-    opacity: 0.9;
-}
 
 .article-detail {
     background: var(--card-bg);
