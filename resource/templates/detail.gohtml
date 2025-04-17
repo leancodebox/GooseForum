@@ -647,6 +647,8 @@
         submitBtn.disabled = true;
         submitBtn.textContent = '提交中...';
         await submitComment(content, replyId)
+        submitBtn.disabled = false;
+        submitBtn.textContent = '发表回复';
     }
 
     async function submitComment(content, replyId) {
@@ -673,9 +675,6 @@
         } catch (error) {
             console.error('回复发表失败:', error);
             alert('回复发表失败，请稍后重试');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = '发表回复';
         }
     }
 
