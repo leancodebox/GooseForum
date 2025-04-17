@@ -13,7 +13,7 @@ url = "https://github.com/leanCodeBox/GooseForum"
 text = "Powered by GooseForum"
 
 [jwtopt]
-signingKey="mq+ZeGafL+b1xdC0u9vSVg=="
+signingKey="{{.SigningKey}}"
 validTime = 604800
 
 [mail]
@@ -35,8 +35,8 @@ connection = "sqlite"# in mysql sqlite
 url = "db_user:db_pass@tcp(db_host:3306)/db_name?charset=utf8mb4&parseTime=True&loc=Local"
 path = "./storage/database/sqlite.db"# :memory:|./storage/database/sqlite.db
 
-maxIdleConnections = 50
-maxOpenConnections = 50
+maxIdleConnections = 3
+maxOpenConnections = 5
 maxLifeSeconds = 300
 
 [db.file]
@@ -44,8 +44,8 @@ connection = "sqlite"# in mysql sqlite
 url = "root:root_password@tcp(127.0.0.1:3306)/goose_forum?charset=utf8mb4&parseTime=True&loc=Local"
 path = "./storage/database/file.db"# :memory:|./storage/database/sqlite.db
 
-maxIdleConnections = 50
-maxOpenConnections = 50
+maxIdleConnections = 3
+maxOpenConnections = 5
 maxLifeSeconds = 300
 
 
@@ -57,8 +57,6 @@ maxage = 10 # 最大日期
 maxsize = 256 # 最大文件大小 MB
 maxBackUps = 30 # 最大保留文件数量
 
-[PATH]
-hexo = ""
 
 [site]
 metaList="""
