@@ -6,7 +6,8 @@ import {useRoute, useRouter} from "vue-router"
 import type {ArticleInfo, ArticleResponse, EnumInfoResponse} from '@/types/articleInterfaces';
 import { MdEditor } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
-
+import {useThemeStore} from "@/stores/themeStore.ts";
+const themeStore = useThemeStore()
 const router = useRouter()
 const route = useRoute()
 const message = useMessage()
@@ -134,7 +135,7 @@ const text = ref('# Hello Editor');
       </div>
       <div class="form-group" >
         <label for="content">内容:</label>
-        <MdEditor v-model="articleData.articleContent" />
+        <MdEditor v-model="articleData.articleContent" :theme="themeStore.theme"/>
       </div>
       <n-button :type="'default'" class="submit-button" @click="submitArticleHandler" :disabled="isSubmitting">发布</n-button>
     </form>
@@ -153,10 +154,6 @@ const text = ref('# Hello Editor');
   display: flex;
   flex-direction: column;
   padding: 20px; /* 添加内边距 */
-}
-
-.form-group {
-
 }
 
 .inline-group {
