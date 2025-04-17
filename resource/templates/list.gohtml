@@ -56,9 +56,25 @@
                         <a href="/post?page={{.PrevPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn prev-page">上一页</a>
                     {{end}}
                     {{range .pagination}}
-                        <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}" class="page-btn">{{.Page}}</a>
+                        {{if eq .Index 1}}
+                            {{if ne .Page 1 }}
+                                <a href="/post?page=1{{if $.Filters}}&filters={{$.Filters}}{{end}}"
+                                   class="page-btn">1</a>
+                                {{if gt .Page 2 }}
+                                    ...
+                                {{end}}
+                            {{end}}
+                        {{end}}
+                        <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
+                           class="page-btn">{{.Page}}</a>
+                        {{if eq .Index 10}}
+                            {{if ne .Page $.TotalPages}}
+                                <a href="/post?page={{$.TotalPages}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
+                                   class="page-btn">{{$.TotalPages}}</a>
+                            {{end}}
+                        {{end}}
                     {{end}}
-                    <a href="/post?page={{.TotalPages}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn">{{.TotalPages}}</a>
+
                     <span class="page-info">第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
                     {{if lt .Page .TotalPages}}
                         <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn next-page">下一页</a>
