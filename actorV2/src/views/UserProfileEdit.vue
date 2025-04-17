@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted,onUnmounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { enqueueMessage } from '@/utils/messageManager'
 import { NPagination, NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage, NGrid, NGridItem, NTabs, NTabPane } from "naive-ui"
@@ -30,6 +31,34 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 const userStore = useUserStore()
 const articles = ref<ArticleListItem[]>([])
 const isSmallScreen = ref<boolean>(false)
+
+const route = useRoute()
+const router = useRouter()
+
+// 当前激活的tab
+const activeTab = ref('个人资料')
+
+// 监听路由变化来同步tab状态
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab && ['个人资料', '我的文章', '修改密码'].includes(newTab as string)) {
+      activeTab.value = newTab as string
+    }
+  },
+  { immediate: true }
+)
+
+// 当tab变化时更新URL
+watch(activeTab, (newTab) => {
+  router.replace({
+    query: {
+      ...route.query,
+      tab: newTab
+    }
+  })
+})
+
 
 // 添加密码表单数据
 const passwordForm = ref({
@@ -317,7 +346,7 @@ const updatePassword = async (): Promise<void> => {
 
     <!-- 内容区域 -->
     <div class="profile-content">
-      <n-tabs type="line" animated>
+      <n-tabs type="line" animated v-model:value="activeTab">
         <n-tab-pane name="个人资料" tab="个人资料">
           <form @submit.prevent="updateProfile" class="profile-form">
             <div class="form-row">
