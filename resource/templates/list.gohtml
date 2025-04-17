@@ -190,10 +190,10 @@
 </main>
 {{template "footer.gohtml" .}}
 <style>
-    /* 类似 Bootstrap 的分页样式 */
+    /* 类似 Bootstrap 的分页样式，使用 :root 变量 */
     .pagination {
         display: flex;
-        padding-left: 20px;
+        padding-left: 10px;
         list-style: none;
         justify-content: left;
     }
@@ -219,38 +219,38 @@
         padding: 0.5rem 0.75rem;
         margin-left: -1px;
         line-height: 1.25;
-        color: #007bff;
-        background-color: #fff;
-        border: 1px solid #dee2e6;
+        color: var(--color-primary); /* 使用主要颜色变量 */
+        background-color: var(--card-bg); /* 使用卡片背景颜色变量 */
+        border: 1px solid var(--color-border); /* 使用边框颜色变量 */
     }
 
     .page-link:hover {
         z-index: 2;
-        color: #0056b3;
+        color: var(--primary-color-dark); /* 使用主要颜色的深色版本变量 */
         text-decoration: none;
-        background-color: #e9ecef;
-        border-color: #dee2e6;
+        background-color: var(--hover-color); /* 使用悬停颜色变量 */
+        border-color: var(--color-border); /* 使用边框颜色变量 */
     }
 
     .page-link:focus {
         z-index: 3;
         outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        box-shadow: 0 0 0 0.2rem rgba(var(--color-primary), 0.25); /* 使用主要颜色变量 */
     }
 
     .page-item.active .page-link {
         z-index: 3;
-        color: #fff;
-        background-color: #007bff;
-        border-color: #007bff;
+        color: white;
+        background-color: var(--color-primary); /* 使用主要颜色变量 */
+        border-color: var(--color-primary); /* 使用主要颜色变量 */
     }
 
     .page-item.disabled .page-link {
-        color: #6c757d;
+        color: var(--text-color-light); /* 使用次要文本颜色变量 */
         pointer-events: none;
         cursor: auto;
-        background-color: #fff;
-        border-color: #dee2e6;
+        background-color: var(--card-bg); /* 使用卡片背景颜色变量 */
+        border-color: var(--color-border); /* 使用边框颜色变量 */
     }
 
     /* 小屏幕适配 */
