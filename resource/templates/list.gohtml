@@ -52,33 +52,45 @@
                     </article>
                 {{end}}
                 <div class="pagination">
-                    {{if gt .Page 1}}
-                        <a href="/post?page={{.PrevPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn prev-page">上一页</a>
-                    {{end}}
-                    {{range .pagination}}
-                        {{if eq .Index 1}}
-                            {{if ne .Page 1 }}
-                                <a href="/post?page=1{{if $.Filters}}&filters={{$.Filters}}{{end}}"
-                                   class="page-btn">1</a>
-                                {{if gt .Page 2 }}
-                                    ...
+                    <ul class="pagination-list">
+                        {{if gt .Page 1}}
+                            <li class="page-item">
+                                <a href="/post?page={{.PrevPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-link prev-page" rel="prev">‹</a>
+                            </li>
+                        {{end}}
+                        {{range .pagination}}
+                            {{if eq .Index 1}}
+                                {{if ne .Page 1 }}
+                                    <li class="page-item">
+                                        <a href="/post?page=1{{if $.Filters}}&filters={{$.Filters}}{{end}}"
+                                           class="page-link">1</a>
+                                    </li>
+                                    {{if gt .Page 2 }}
+                                        <li class="page-item">
+                                            <span class="page-ellipsis">...</span>
+                                        </li>
+                                    {{end}}
+                                {{end}}
+                            {{end}}
+                            <li class="page-item">
+                                <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
+                                   class="page-link">{{.Page}}</a>
+                            </li>
+                            {{if eq .Index 10}}
+                                {{if ne .Page $.TotalPages}}
+                                    <li class="page-item">
+                                        <a href="/post?page={{$.TotalPages}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
+                                           class="page-link">{{$.TotalPages}}</a>
+                                    </li>
                                 {{end}}
                             {{end}}
                         {{end}}
-                        <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
-                           class="page-btn">{{.Page}}</a>
-                        {{if eq .Index 10}}
-                            {{if ne .Page $.TotalPages}}
-                                <a href="/post?page={{$.TotalPages}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
-                                   class="page-btn">{{$.TotalPages}}</a>
-                            {{end}}
+                        {{if lt .Page .TotalPages}}
+                            <li class="page-item">
+                                <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-link next-page" rel="next">›</a>
+                            </li>
                         {{end}}
-                    {{end}}
-
-                    <span class="page-info">第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
-                    {{if lt .Page .TotalPages}}
-                        <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn next-page">下一页</a>
-                    {{end}}
+                    </ul>
                 </div>
             </div>
         </div>
@@ -174,67 +186,93 @@
 </main>
 {{template "footer.gohtml" .}}
 <style>
-    .pagination {
+    /* 新增分页列表样式 */
+    .pagination-list {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1rem 0;
-        border-top: none;
+        list-style: none;
+        padding: 0;
+        margin: 0;
     }
 
-    .page-btn {
+    .page-item {
+        margin: 0;
+    }
+
+    .page-link {
+        display: inline-block;
         padding: 0.5rem 1rem;
-        background-color: var(--card-bg);
-        color: var(--text-color);
+        background-color: #f0f0f0;
+        color: #333;
         text-decoration: none;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-        border: 1px solid var(--border-color);
+        border: 1px solid #ddd;
+        border-right: none;
+        transition: background-color 0.3s ease;
     }
 
-    .page-btn:hover {
-        background-color: var(--primary-color);
-        color: white;
-        transform: translateY(-2px);
+    .page-item:first-child .page-link {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
     }
 
-    .page-ellipsis {
-        padding: 0 0.5rem;
-        color: var(--text-color-secondary);
+    .page-item:last-child .page-link {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+        border-right: 1px solid #ddd;
     }
 
-    .page-btn.active {
-        background-color: var(--primary-color);
+    .page-link:hover {
+        background-color: #e0e0e0;
+        color: #222;
+    }
+
+    .page-link.active {
+        background-color: #007bff;
         color: white;
         cursor: default;
-        pointer-events: none;
     }
 
-    .page-btn.disabled {
+    .page-link.disabled {
         opacity: 0.5;
         pointer-events: none;
     }
 
+    .page-ellipsis {
+        padding: 0.5rem 1rem;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-right: none;
+    }
+
+    .page-info {
+        margin-left: 1rem;
+        color: #666;
+    }
+
     @media (max-width: 768px) {
-        .pagination {
+        .pagination-list {
             flex-wrap: wrap;
-            gap: 0.3rem;
+            justify-content: center;
         }
-        .page-btn {
+
+        .page-link {
             padding: 0.3rem 0.6rem;
             font-size: 0.8rem;
         }
+
         .page-info {
             width: 100%;
             text-align: center;
             margin-top: 0.5rem;
+            margin-left: 0;
         }
     }
 </style>
 <script>
     const filterTags = document.querySelectorAll('.filter-tag');
     const allTag = document.querySelector('.filter-tag[data-filter="all"]');
+
+    // 修改选择器以匹配新的 HTML 结构
+    const pageLinks = document.querySelectorAll('.page-link');
 
     // 页面加载时根据URL参数设置初始状态
     document.addEventListener('DOMContentLoaded', function() {
@@ -253,6 +291,15 @@
                 }
             });
         }
+
+        // 设置当前页码的激活状态
+        const currentPage = parseInt(urlParams.get('page')) || 1;
+        pageLinks.forEach(link => {
+            const pageNumber = parseInt(link.textContent);
+            if (!isNaN(pageNumber) && pageNumber === currentPage) {
+                link.classList.add('active');
+            }
+        });
     });
 
     filterTags.forEach(tag => {
@@ -306,29 +353,6 @@
         const baseUrl = window.location.pathname;
         const newUrl = baseUrl + (urlParams.toString() ? '?' + urlParams.toString() : '');
         window.location.href = newUrl; // 使用location.href进行页面刷新
-
-        // 同时更新分页链接
-        updatePaginationLinks(selectedFilters);
-    }
-
-    // 添加更新分页链接的函数
-    function updatePaginationLinks(selectedFilters) {
-        const prevPageLink = document.querySelector('.prev-page');
-        const nextPageLink = document.querySelector('.next-page');
-
-        if (!prevPageLink && !nextPageLink) return;
-
-        const filterParam = selectedFilters.length > 0 ? `&filters=${selectedFilters.join(',')}` : '';
-
-        if (prevPageLink) {
-            const prevUrl = new URL(prevPageLink.href);
-            prevPageLink.href = `${prevUrl.pathname}${prevUrl.search.split('&')[0]}${filterParam}`;
-        }
-
-        if (nextPageLink) {
-            const nextUrl = new URL(nextPageLink.href);
-            nextPageLink.href = `${nextUrl.pathname}${nextUrl.search.split('&')[0]}${filterParam}`;
-        }
     }
 </script>
 </body>
