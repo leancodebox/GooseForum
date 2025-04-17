@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/spf13/cobra"
 )
 
@@ -16,29 +15,6 @@ func init() {
 	})
 }
 func runSigningKey(_ *cobra.Command, _ []string) {
-	signingKey, err := generateSigningKey(32)
-	if err != nil {
-		fmt.Println("Failed to generate signingKey:", err)
-		return
-	}
 
-	fmt.Println("Generated signingKey:", signingKey)
-}
-
-func generateRandomBytes(n int) ([]byte, error) {
-	b := make([]byte, n)
-	_, err := rand.Read(b)
-	if err != nil {
-		return nil, fmt.Errorf("随机数生成失败: %w", err)
-	}
-	return b, nil
-}
-
-// 生成符合JWT规范的签名密钥
-func generateSigningKey(keyLength int) (string, error) {
-	bytes, err := generateRandomBytes(keyLength)
-	if err != nil {
-		return "", err
-	}
-	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(bytes), nil
+	fmt.Println("Generated signingKey:", algorithm.SafeGenerateSigningKey(32))
 }
