@@ -11,6 +11,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -369,6 +370,11 @@ func RenderArticleDetail(c *gin.Context) {
 
 	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
 	acMap := articleCategoryMapList([]uint64{id})
+	iLike := false
+	loginUser := GetLoginUser(c)
+	if loginUser.UserId != 0 {
+		iLike = articleLike.GetByArticleId(loginUser.UserId, entity.Id).Status == 1
+	}
 	// 构建模板数据
 	templateData := gin.H{
 		"articleId":       id,
@@ -378,6 +384,8 @@ func RenderArticleDetail(c *gin.Context) {
 		"year":            time.Now().Year(),
 		"articleTitle":    entity.Title,
 		"articleContent":  template.HTML(entity.RenderedHTML),
+		"LikeCount":       entity.LikeCount,
+		"ILike":           iLike,
 		"username":        author,
 		"commentList":     replyList,
 		"avatarUrl":       avatarUrl,
