@@ -11,9 +11,9 @@
 <script src="/static/js/languages/go.min.js"></script>
 <script>hljs.highlightAll();</script>
 <style>
-    pre {
-        /* 不再设置overflow-x和滚动条样式 */
-        padding:0 
+    /* ... 省略其他样式 ... */
+    .markdown-body pre {
+        padding: 0 !important;
     }
     pre code {
         display: block;
@@ -50,16 +50,10 @@
         border-radius: 4px;
         transition: background 0.2s;
     }
-    pre code::-webkit-scrollbar-thumb:hover {
-        background: #9e9e9e;
-    }
     [data-theme="dark"] pre code::-webkit-scrollbar-thumb {
         background: #444a55;
     }
-    [data-theme="dark"] pre code::-webkit-scrollbar-thumb:hover {
-        background: #666d7a;
-    }
-        .markdown-body li {
+    .markdown-body li {
         word-break: break-all;
         overflow-wrap: break-word;
         white-space: normal;
