@@ -135,7 +135,7 @@ const text = ref('# Hello Editor');
       </div>
       <div class="form-group" >
         <label for="content">内容:</label>
-        <MdEditor v-model="articleData.articleContent" :theme="themeStore.theme"/>
+        <MdEditor v-model="articleData.articleContent" :theme="themeStore.theme==='light'?'light':'dark'" :codeStyleReverse="true" :codeFoldable="false"/>
       </div>
       <n-button :type="'default'" class="submit-button" @click="submitArticleHandler" :disabled="isSubmitting">发布</n-button>
     </form>
