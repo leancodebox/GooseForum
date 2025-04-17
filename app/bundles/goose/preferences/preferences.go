@@ -18,7 +18,7 @@ var v *viper.Viper
 // 初始化配置信息，完成对环境变量以及 conf 信息的加载
 func init() {
 	if !fileopt.IsExist("config.toml") {
-		err := fileopt.FilePutContents("./config.toml", assert.GetDefaultConfig())
+		err := fileopt.FilePutContents("./config.toml", assert.GenerateConfig())
 		if err != nil {
 			panic(err)
 		}
