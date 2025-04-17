@@ -272,7 +272,7 @@ func RenderArticlesPage(c *gin.Context) {
 	pagination := []PageButton{}
 	start := max(pageData.Page-5, 1)
 	for i := 1; i <= 10; i++ {
-		pagination = append(pagination, PageButton{start})
+		pagination = append(pagination, PageButton{Index: i, Page: start})
 		start += 1
 	}
 	// 构建模板数据
@@ -299,7 +299,8 @@ func RenderArticlesPage(c *gin.Context) {
 }
 
 type PageButton struct {
-	Page int
+	Index int
+	Page  int
 }
 
 // RenderArticleDetail 渲染文章详情页面

@@ -58,6 +58,7 @@
                     {{range .pagination}}
                         <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}" class="page-btn">{{.Page}}</a>
                     {{end}}
+                    <a href="/post?page={{.TotalPages}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn">{{.TotalPages}}</a>
                     <span class="page-info">第 {{.Page}} 页 / 共 {{.TotalPages}} 页</span>
                     {{if lt .Page .TotalPages}}
                         <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" class="page-btn next-page">下一页</a>
@@ -182,27 +183,37 @@
         transform: translateY(-2px);
     }
 
+    .page-ellipsis {
+        padding: 0 0.5rem;
+        color: var(--text-color-secondary);
+    }
+
     .page-btn.active {
         background-color: var(--primary-color);
         color: white;
-        border-color: var(--primary-color);
+        cursor: default;
+        pointer-events: none;
     }
 
-    .page-info {
-        color: var(--text-color);
-        font-size: 0.9rem;
+    .page-btn.disabled {
+        opacity: 0.5;
+        pointer-events: none;
     }
 
-    .tips-content {
-        font-size: 0.9rem;
-        line-height: 1.5;
-        color: var(--text-color);
-        background-color: var(--card-bg);
-        border-radius: 4px;
-    }
-
-    .tips-content p {
-        margin: 0 auto;
+    @media (max-width: 768px) {
+        .pagination {
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        .page-btn {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+        }
+        .page-info {
+            width: 100%;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
     }
 </style>
 <script>
