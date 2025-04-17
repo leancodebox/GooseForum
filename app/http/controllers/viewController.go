@@ -270,8 +270,8 @@ func RenderArticlesPage(c *gin.Context) {
 		}
 	})
 	pagination := []PageButton{}
-	start := max(pageData.Page-5, 1)
-	for i := 1; i <= 10; i++ {
+	start := max(pageData.Page-3, 1)
+	for i := 1; i <= 7; i++ {
 		pagination = append(pagination, PageButton{Index: i, Page: start})
 		start += 1
 	}

@@ -76,7 +76,7 @@
                             <li class="page-item{{if eq .Page $.Page}} active{{end}}">
                                 <a class="page-link" href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}">{{.Page}}</a>
                             </li>
-                            {{if eq .Index 10}}
+                            {{if eq .Index 7}}
                                 {{if ne .Page $.TotalPages}}
                                     <li class="page-item">
                                         <span class="page-link">...</span>
