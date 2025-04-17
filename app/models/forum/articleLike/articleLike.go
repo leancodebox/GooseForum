@@ -26,8 +26,8 @@ const fieldUpdateTime = "update_time"
 
 type Entity struct {
 	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                              // 主键
-	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article,priority:2" json:"userId"`       //
-	ArticleId uint64    `gorm:"column:article_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article,priority:1" json:"articleId"` //
+	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article,priority:1" json:"userId"`       // 用户
+	ArticleId uint64    `gorm:"column:article_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article,priority:2" json:"articleId"` //
 	Status    int       `gorm:"column:status;type:int;not null;default:1;" json:"status"`                                                            // 点赞状态（1:有效点赞 0:取消点赞）
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;" json:"createdAt"`                                                                  //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;index;" json:"updatedAt"`

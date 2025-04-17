@@ -22,10 +22,11 @@ const fieldCreatedAt = "created_at"
 const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
-	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                   //
-	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;" json:"userId"`              //
-	FollowUserId uint64    `gorm:"column:follow_user_id;type:bigint unsigned;not null;" json:"followUserId"` //
-	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`                 //
+	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                                            //
+	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;uniqueIndex:uniq_user_follow,priority:1" json:"userId"`                                //
+	FollowUserId uint64    `gorm:"column:follow_user_id;type:bigint unsigned;not null;uniqueIndex:uniq_user_follow,priority:2;index:idx_follow;" json:"followUserId"` //
+	Status       int       `gorm:"column:status;type:int;not null;default:1;" json:"status"`                                                                          // 1 关注 0 取消关注
+	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`                                                                          //
 	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 
