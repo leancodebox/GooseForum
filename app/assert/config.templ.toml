@@ -60,5 +60,5 @@ maxBackUps = 30 # 最大保留文件数量
 
 [site]
 metaList="""
-[{"name":"name","content":"content"}]
+[{"name":"author","content":"GooseForum's Friend"}]
 """
