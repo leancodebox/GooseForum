@@ -28,6 +28,7 @@ func GenerateSigningKey(keyLength int) (string, error) {
 func SafeGenerateSigningKey(keyLength int) string {
 	signingKey, err := GenerateSigningKey(keyLength)
 	if err != nil {
+		fmt.Println("随机数生成失败，使用备用随机数生成器生成随机数")
 		bytes := make([]byte, keyLength)
 		fallbackSource := mRand.New(mRand.NewSource(time.Now().UnixNano()))
 		for i := 0; i < keyLength; i++ {
