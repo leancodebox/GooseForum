@@ -809,3 +809,13 @@ footer {
         grid-template-columns: 1fr;
     }
 }
+
+/* 保证 markdown-body 在不同主题下的背景和字体色由 github-markdown-css 控制 */
+.markdown-body {
+    background: unset !important;
+    color: unset !important;
+}
+[data-theme="dark"] .markdown-body {
+    background: unset !important;
+    color: unset !important;
+}
