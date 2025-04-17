@@ -18,12 +18,13 @@
         border-radius: 0 !important;
         /* 让 pre 完全透明无圆角，所有视觉交给 code 控制 */
     }
+
     .markdown-body pre code {
         display: block;
         overflow-x: auto;
         border: 1px solid #e0e0e0;
         border-radius: 6px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         padding: 1.1em 1.5em;
         background: var(--card-bg, #fafbfc);
         font-size: 1em;
@@ -31,8 +32,9 @@
         scrollbar-width: thin;
         scrollbar-color: #bdbdbd #f5f5f5;
     }
+
     pre code:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     }
 
     /* 深色模式下代码块边框和滚动条 */
@@ -47,14 +49,17 @@
         height: 7px;
         background: transparent;
     }
+
     pre code::-webkit-scrollbar-thumb {
         background: #bdbdbd;
         border-radius: 4px;
         transition: background 0.2s;
     }
+
     [data-theme="dark"] pre code::-webkit-scrollbar-thumb {
         background: #444a55;
     }
+
     .markdown-body li {
         word-break: break-all;
         overflow-wrap: break-word;
@@ -78,12 +83,19 @@
                         <span class="article-category-badge">{{.}}</span>
                     {{end}}
                 </div>
-                <div class="markdown-body" >
+                <div class="markdown-body">
                     {{.articleContent}}
                 </div>
                 <div>
-                    {{.LikeCount}}
-                    {{.ILike}}
+                    <!-- 替换原有的 todo like 注释和占位符 -->
+                    <button id="like-btn" class="like-btn" onclick="toggleLike()">
+                        {{if .ILike}}
+                            取消点赞
+                        {{else}}
+                            点赞
+                        {{end}}
+                    </button>
+                    <span id="like-count">{{.LikeCount}}</span>
                 </div>
 
                 <section class="comments">
@@ -136,39 +148,42 @@
             <div class="sidebar-card author-card">
                 <div class="author-header">
 
-                    <a href="/user-profile/{{.AuthorId}}" >
-                    <img src="{{.avatarUrl}}" alt="{{.username}}" class="author-avatar">
+                    <a href="/user-profile/{{.AuthorId}}">
+                        <img src="{{.avatarUrl}}" alt="{{.username}}" class="author-avatar">
                     </a>
                     <div class="author-info">
                         <p>
-                            <a href="/user-profile/{{.AuthorId}}" >{{.username}}</a>
+                            <a href="/user-profile/{{.AuthorId}}">{{.username}}</a>
                         </p>
                         <p class="author-bio">技术小白 / 学生</p>
                     </div>
                 </div>
                 {{if false}}
-                <div class="author-expand">
-                    <div class="author-stats">
-                        <div class="stat-item">
-                            <div class="number">91527</div>
-                            <div class="label">文章</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="number">1021</div>
-                            <div class="label">粉丝</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="number">10</div>
-                            <div class="label">获赞</div>
+                    <div class="author-expand">
+                        <div class="author-stats">
+                            <div class="stat-item">
+                                <div class="number">91527</div>
+                                <div class="label">文章</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">1021</div>
+                                <div class="label">粉丝</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="number">10</div>
+                                <div class="label">获赞</div>
+                            </div>
                         </div>
                     </div>
-                </div>
                 {{end}}
                 <div class="author-expand">
                     <div class="author-links">
-                        <a rel="nofollow noopener noreferrer" target="_blank" href="https://github.com/" class="author-link"><i class="icon-github"></i> GitHub</a>
-                        <a rel="nofollow noopener noreferrer" target="_blank" href="https://x.com" class="author-link"><i class="icon-twitter"></i> Twitter</a>
-                        <a rel="nofollow noopener noreferrer" target="_blank" href="#" class="author-link"><i class="icon-website"></i> 个人网站</a>
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="https://github.com/"
+                           class="author-link"><i class="icon-github"></i> GitHub</a>
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="https://x.com"
+                           class="author-link"><i class="icon-twitter"></i> Twitter</a>
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="#" class="author-link"><i
+                                    class="icon-website"></i> 个人网站</a>
                     </div>
                 </div>
             </div>
@@ -195,6 +210,7 @@
         flex-wrap: wrap;
         gap: 6px;
     }
+
     .article-category-badge {
         display: inline-block;
         padding: 2px 10px;
@@ -203,34 +219,36 @@
         border-radius: 16px;
         font-size: 13px;
         border: 1px solid #e3eaf3; /* 更细更浅的边框 */
-        box-shadow: 0 1px 2px rgba(25,118,210,0.04);
+        box-shadow: 0 1px 2px rgba(25, 118, 210, 0.04);
         letter-spacing: 0.2px;
-        transition:
-            color 0.2s,
-            border-color 0.2s,
-            background 0.2s,
-            box-shadow 0.2s;
+        transition: color 0.2s,
+        border-color 0.2s,
+        background 0.2s,
+        box-shadow 0.2s;
         line-height: 1.7;
         font-weight: 500;
         cursor: pointer;
         user-select: none;
     }
+
     .article-category-badge:hover {
         background: #e3f2fd;
         color: #0d2236;
         border-color: #90caf9;
-        box-shadow: 0 2px 8px rgba(25,118,210,0.08);
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
     }
+
     [data-theme="dark"] .article-category-badge {
-        background: rgba(144,202,249,0.08);
+        background: rgba(144, 202, 249, 0.08);
         color: #90caf9;
         border: 1px solid #23304a;
     }
+
     [data-theme="dark"] .article-category-badge:hover {
         background: #1a2733;
         color: #fff;
         border-color: #42a5f5;
-        box-shadow: 0 2px 8px rgba(66,165,245,0.12);
+        box-shadow: 0 2px 8px rgba(66, 165, 245, 0.12);
     }
 
     .comments {
@@ -388,6 +406,7 @@
         background: var(--primary-color-dark);
         transform: translateY(-1px);
     }
+
     /* 作者卡片样式 */
     .author-card {
         padding: 1rem;
@@ -516,6 +535,52 @@
     [data-theme="dark"] .icon-github::before {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e1e1e1'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E");
     }
+
+    .like-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .like-btn.liked {
+        background-color: #ff4444;
+        color: white;
+    }
+
+    .like-btn:not(.liked) {
+        background-color: #f0f0f0;
+        color: #333;
+    }
+
+    .like-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .like-btn:active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    .like-count-animate {
+        animation: pulse 0.5s;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.2);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
 </style>
 
 <script>
@@ -597,6 +662,44 @@
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = '发表回复';
+        }
+    }
+
+    async function toggleLike() {
+        const likeBtn = document.getElementById('like-btn');
+        const likeCountSpan = document.getElementById('like-count');
+        const currentCount = parseInt(likeCountSpan.textContent);
+        const isLiked = likeBtn.textContent === '取消点赞';
+        const action = isLiked ? 2 : 1;
+
+        try {
+            const response = await fetch('/api/bbs/like-articles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: {{.articleId}},
+                    action: action
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                if (action === 1) {
+                    likeBtn.textContent = '取消点赞';
+                    likeCountSpan.textContent = currentCount + 1;
+                } else {
+                    likeBtn.textContent = '点赞';
+                    likeCountSpan.textContent = currentCount - 1;
+                }
+            } else {
+                alert(result.message || '操作失败，请稍后重试');
+            }
+        } catch (error) {
+            console.error('操作失败:', error);
+            alert('操作失败，请稍后重试');
         }
     }
 </script>

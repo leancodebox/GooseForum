@@ -361,18 +361,23 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 		return component.FailResponse("文章不存在")
 	}
 	oldLike := articleLike.GetByArticleId(req.UserId, articleEntity.Id)
+	targetStatus := 0
 	if req.Params.Action == 1 {
 		if oldLike.Id == 0 {
 			oldLike.UserId = req.UserId
 			oldLike.ArticleId = articleEntity.Id
 		}
-		oldLike.Status = 1
+		targetStatus = 1
 	} else {
 		if oldLike.Id == 0 {
 			return component.SuccessResponse(true)
 		}
-		oldLike.Status = 0
+		targetStatus = 0
 	}
+	if oldLike.Status == targetStatus {
+		return component.SuccessResponse(true)
+	}
+	oldLike.Status = targetStatus
 	if articleLike.SaveOrCreateById(&oldLike) > 0 {
 		if req.Params.Action == 1 {
 			articles.IncrementLike(articleEntity)
