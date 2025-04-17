@@ -44,9 +44,18 @@ func GetMetaList() []MetaItem {
 	return jsonopt.Decode[[]MetaItem](preferences.Get("site.metaList", "[]"))
 }
 
+func Iterate(count int) []int {
+	var items []int
+	for i := 0; i < count; i++ {
+		items = append(items, i)
+	}
+	return items
+}
+
 // GetTemplates 返回所有模板
 func GetTemplates() *template.Template {
 	tmpl := template.New("root").Funcs(template.FuncMap{
+		"Iterate":       Iterate,
 		"getFooterLink": GetFooterLink,
 		"metaList":      GetMetaList,
 	})
