@@ -11,6 +11,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
@@ -59,6 +60,7 @@ func migration(migration bool) {
 			&userRoleRs.Entity{},
 			&users.Entity{},
 			&taskQueue.Entity{},
+			&articleLike.Entity{},
 		); err != nil {
 			slog.Error("dbconnect migration err", "err", err)
 		} else {
