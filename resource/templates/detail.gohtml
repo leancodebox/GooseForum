@@ -87,15 +87,9 @@
                     {{.articleContent}}
                 </div>
                 <div>
-                    <!-- 替换原有的 todo like 注释和占位符 -->
-                    <button id="like-btn" class="like-btn" onclick="toggleLike()">
-                        {{if .ILike}}
-                            取消点赞
-                        {{else}}
-                            点赞
-                        {{end}}
+                    <button id="like-btn" class="like-btn {{if .ILike}} liked {{end}}" onclick="toggleLike()">
+                        <span id="like-count">{{.LikeCount}}</span>
                     </button>
-                    <span id="like-count">{{.LikeCount}}</span>
                 </div>
 
                 <section class="comments">
@@ -539,15 +533,19 @@
     .like-btn {
         padding: 8px 16px;
         border: none;
-        border-radius: 4px;
+        border-radius: 20px; /* 更圆润的边框 */
         cursor: pointer;
         font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         transition: all 0.3s ease;
-        display: inline-block;
+        background-color: #f0f0f0;
+        color: #333;
     }
 
     .like-btn.liked {
-        background-color: #ff4444;
+        background-color: #ff6b6b; /* 点赞后的颜色 */
         color: white;
     }
 
@@ -557,17 +555,13 @@
     }
 
     .like-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .like-btn:active {
         transform: translateY(0);
         box-shadow: none;
-    }
-
-    .like-count-animate {
-        animation: pulse 0.5s;
     }
 
     @keyframes pulse {
@@ -669,7 +663,7 @@
         const likeBtn = document.getElementById('like-btn');
         const likeCountSpan = document.getElementById('like-count');
         const currentCount = parseInt(likeCountSpan.textContent);
-        const isLiked = likeBtn.textContent === '取消点赞';
+        const isLiked = likeBtn.classList.contains('liked');
         const action = isLiked ? 2 : 1;
 
         try {
@@ -688,10 +682,10 @@
 
             if (response.ok) {
                 if (action === 1) {
-                    likeBtn.textContent = '取消点赞';
+                    likeBtn.classList.add('liked');
                     likeCountSpan.textContent = currentCount + 1;
                 } else {
-                    likeBtn.textContent = '点赞';
+                    likeBtn.classList.remove('liked');
                     likeCountSpan.textContent = currentCount - 1;
                 }
             } else {
