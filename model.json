@@ -1,0 +1,14 @@
+[
+  {
+    "tool": "dbhelper",
+    "modelName": "article_like",
+    "keyList": [
+      {"field": "id","type": "bigint unsigned", "key": "PRI", "desc": "主键", "null": "NO", "default": null},
+      {"field": "user_id", "type": "bigint unsigned", "key": "", "desc": "", "null": "NO", "default": "0"},
+      {"field": "article_id", "type": "bigint unsigned", "key": "", "desc": "", "null": "NO", "default": "0"},
+      {"field": "status", "type": "int", "key": "", "desc": "点赞状态（1:有效点赞 0:取消点赞）", "null": "NO", "default": "1"},
+      {"field": "create_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "update_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+    ]
+  }
+]
