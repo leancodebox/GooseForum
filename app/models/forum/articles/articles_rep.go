@@ -140,6 +140,16 @@ func IncrementReply(entity Entity) int64 {
 	return result.RowsAffected
 }
 
+func IncrementLike(entity Entity) int64 {
+	result := builder().Exec("UPDATE articles SET like_count = like_count+1 where id = ?", entity.Id)
+	return result.RowsAffected
+}
+
+func DecrementLike(entity Entity) int64 {
+	result := builder().Exec("UPDATE articles SET like_count = like_count-1 where id = ?", entity.Id)
+	return result.RowsAffected
+}
+
 // GetLatestArticles 获取最新的n篇文章
 func GetLatestArticles(limit int) ([]SmallEntity, error) {
 	var articles []SmallEntity

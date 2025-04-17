@@ -1,5 +1,7 @@
 package articleLike
 
+import "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
@@ -10,8 +12,6 @@ func save(entity *Entity) int64 {
 	return result.RowsAffected
 }
 
-
-
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
@@ -20,15 +20,15 @@ func SaveOrCreateById(entity *Entity) int64 {
 	}
 }
 
-
-
-
 func Get(id any) (entity Entity) {
 	builder().First(&entity, id)
 	return
 }
 
-
+func GetByArticleId(userId, articleId any) (entity Entity) {
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldArticleId, articleId)).First(&entity)
+	return
+}
 
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
@@ -39,7 +39,6 @@ func Get(id any) (entity Entity) {
 //	result := builder().Delete(entity)
 //	return result.RowsAffected
 //}
-
 
 //func all() (entities []*Entity) {
 //	builder().Find(&entities)

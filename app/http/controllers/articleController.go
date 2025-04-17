@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"strings"
 	"sync"
 	"time"
@@ -347,4 +348,37 @@ func FirstOr[T any](d []T, defaultValue T) T {
 		return d[0]
 	}
 	return defaultValue
+}
+
+type LikeArticleReq struct {
+	Id     uint64 `json:"id"`
+	Action int    `json:"action" validate:"min=1,max=2"` // 1 like 2 cancel
+}
+
+func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response {
+	articleEntity := articles.Get(req.Params.Id)
+	if articleEntity.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+	oldLike := articleLike.GetByArticleId(req.UserId, articleEntity.Id)
+	if req.Params.Action == 1 {
+		if oldLike.Id == 0 {
+			oldLike.UserId = req.UserId
+			oldLike.ArticleId = articleEntity.Id
+		}
+		oldLike.Status = 1
+	} else {
+		if oldLike.Id == 0 {
+			return component.SuccessResponse(true)
+		}
+		oldLike.Status = 0
+	}
+	if articleLike.SaveOrCreateById(&oldLike) > 0 {
+		if req.Params.Action == 1 {
+			articles.IncrementLike(articleEntity)
+		} else {
+			articles.DecrementLike(articleEntity)
+		}
+	}
+	return component.SuccessResponse(true)
 }
