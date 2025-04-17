@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 {{template "head.gohtml" .}}
 <body>
 {{template "nav_new.gohtml" .}}
+<link rel="stylesheet"
+      href="/static/css/github-markdown.min.css">
 <link rel="stylesheet"
       href="/static/css/codehightlight.css">
 <script src="/static/js/highlight.min.js"></script>
@@ -11,6 +13,7 @@
 <style>
     pre {
         /* 不再设置overflow-x和滚动条样式 */
+        padding:0 
     }
     pre code {
         display: block;
@@ -79,7 +82,7 @@
                         <span class="article-category-badge">{{.}}</span>
                     {{end}}
                 </div>
-                <div class="article-content markdown-body">
+                <div class="markdown-body" >
                     {{.articleContent}}
                 </div>
 
