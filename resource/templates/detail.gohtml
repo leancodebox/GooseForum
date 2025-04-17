@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 {{template "head.gohtml" .}}
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "{{.articleTitle}}",
+  "author": {
+    "@type": "Person",
+    "name": "{{.username}}"
+  },
+  "datePublished": "{{.CreateTime}}"
+}
+</script>
 <body>
 {{template "nav_new.gohtml" .}}
 <link rel="stylesheet"
@@ -88,7 +100,7 @@
                 </div>
                 <div>
                     <div class="article-actions">
-                        <button id="like-btn" class="like-btn {{if .ILike}} liked {{end}}" onclick="toggleLike()">
+                        <button id="like-btn" class="like-btn {{if .ILike}} liked {{end}}" onclick="toggleLike()" aria-label="点赞文章">
                             <svg class="like-icon" viewBox="0 0 24 24" width="16" height="16">
                                 <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                             </svg>
@@ -103,7 +115,7 @@
                         <div class="comment">
                             <div class="comment-meta">
                                 <span>{{.Username}}</span>
-                                <time>{{.CreateTime}}</time>
+                                <time datetime="{{.CreateTime }}" >{{.CreateTime}}</time>
                                 {{if and $.User (gt $.User.UserId 0)}}
                                     <button class="reply-btn" onclick="showReplyForm({{.Id}})">回复</button>
                                 {{end}}
@@ -148,7 +160,7 @@
                 <div class="author-header">
 
                     <a href="/user-profile/{{.AuthorId}}">
-                        <img src="{{.avatarUrl}}" alt="{{.username}}" class="author-avatar">
+                        <img src="{{.avatarUrl}}" alt="{{.username}}的头像" class="author-avatar">
                     </a>
                     <div class="author-info">
                         <p>
@@ -670,7 +682,7 @@
             if (response.ok) {
                 location.reload();
             } else {
-                alert(result.message || '回复发表失败，请稍后重试');
+                alert(result.msg || '回复发表失败，请稍后重试');
             }
         } catch (error) {
             console.error('回复发表失败:', error);
@@ -708,7 +720,7 @@
                     likeCountSpan.textContent = currentCount - 1;
                 }
             } else {
-                alert(result.message || '操作失败，请稍后重试');
+                alert(result.msg || '操作失败，请稍后重试');
             }
         } catch (error) {
             console.error('操作失败:', error);
