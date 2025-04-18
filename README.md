@@ -9,19 +9,16 @@
 
 
 GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分离架构。
+- [GooseForum](https://gooseforum.online/)
 
-# GooseForum 在线访问
+# GooseForum 快速上手
 
-[GooseForum](https://gooseforum.online/)
-
-> GooseForum 快速上手
-
+## 获取 GooseForum
 - [详细文档](https://gooseforum.online/post/371)
 
-# 获取 GooseForum
 你可以在 [GitHub Release](https://github.com/leancodebox/GooseForum/releases) 页面获取已经构建打包完成的主程序。其中每个版本都提供了常见系统架构下可用的主程序，命名规则为`GooseForum_操作系统_CPU架构.tar.gz` 。比如，普通 64 位 Linux 系统上部署 v0.0.2 版本，则应该下载GooseForum_Linux_x86_64.tar.gz。
 
-# 启动 GooseForum
+## 启动 GooseForum
 
 ```shell
 #解压获取到的主程序
@@ -42,7 +39,7 @@ GooseForum 默认会监听99端口。你可以在浏览器中访问 http://服�
 
 以上步骤操作完后，最简单的部署就完成了。你可能需要一些更为具体的配置，才能让 GooseForum 更好的工作，具体流程请参考下面的配置流程。
 
-# 配置文件 
+## 配置文件 
 
 GooseForum 启动总会默认检查执行的同级目录是否存在`config.toml`，如果不存在则会进行创建，同时使用本文件进行项目启动。默认情况下，你不需要更改任何配置。如果有需要你可以参考下方相关配置文件解释
 
@@ -111,24 +108,24 @@ metaList="""
 """
 ```
 
-# 构建
+## 构建
 
-## 环境准备
+### 环境准备
 
 - 参照 [Getting Started - The Go Programming Language](https://go.dev/doc/install)  安装并配置 Go 语言开发环境 (>=1.18)；
 - 参考 [下载|Node.js](https://nodejs.org/zh-cn/download/) 安装 Node.js;
 
 
-## 开始构建
+### 开始构建
 
-### 克隆代码
+#### 克隆代码
 
 ```shell
 git clone git@github.com:leancodebox/GooseForum.git
 cd GooseForum
 ```
 
-### 构建项目前后端分离资源并编译完整项目为二进制可执行文件
+#### 构建项目前后端分离资源并编译完整项目为二进制可执行文件
 
 GooseForum 项目主要由两部分组成：二者均在同一仓库，分别为主目录下的服务端和`actorv2`目录下的前后端分离项目，需要先构建`actorv2` 目录下的前后端分离项目。完整命令如下
 
@@ -143,17 +140,17 @@ go build
 
 编译完成后，会在项目根目录下生成最终的可执行文件 `GooseForum` 。
 
-### 构建助手
+#### 构建助手
 
 你可以使用 goreleaser 快速完成构建、打包等操作，使用方法如下：
 
-#### 安装 goreleaser
+##### 安装 goreleaser
 
 ```shell
 go install github.com/goreleaser/goreleaser@latest
 ```
 
-#### 构建项目
+##### 构建项目
 
 ```shell
 goreleaser build --clean --single-target --snapshot
@@ -166,22 +163,22 @@ goreleaser build --clean --snapshot
 
 ------------------------------------------
 
-## 技术栈
+### 技术栈
 
-### 前端
+#### 前端
 - Vue 3 (Composition API)
 - Vue Router
 - Naive UI
 - Vite
 - JavaScript/ES6+
 
-### 后端
+#### 后端
 - Go
 - Gin Framework
 
-## 项目结构
+### 项目结构
 
-## 编译相关
+### 编译相关
 
 ```
  go generate ./...
