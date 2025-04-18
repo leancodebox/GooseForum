@@ -14,8 +14,9 @@ GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分
 
 # GooseForum 快速上手
 
+[在GooseForum上查看快手上手](https://gooseforum.online/post/371)
+
 ## 获取 GooseForum
-- [详细文档](https://gooseforum.online/post/371)
 
 你可以在 [GitHub Release](https://github.com/leancodebox/GooseForum/releases) 页面获取已经构建打包完成的主程序。其中每个版本都提供了常见系统架构下可用的主程序，命名规则为`GooseForum_操作系统_CPU架构.tar.gz` 。比如，普通 64 位 Linux 系统上部署 v0.0.2 版本，则应该下载GooseForum_Linux_x86_64.tar.gz。
 
