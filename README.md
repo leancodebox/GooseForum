@@ -10,18 +10,13 @@
 
 GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分离架构。
 
-## GooseForum 在线访问
+# GooseForum 在线访问
 
 [GooseForum](https://gooseforum.online/)
 
-## 快速安装
+> GooseForum 快速上手
 
-- [GooseForum 快速安装](https://gooseforum.online/post/371)
-
-[releases](https://github.com/leancodebox/GooseForum/releases) 下载合适系统版本的压缩包。解压后通过运行 `./GooseForum serve` 即可启动 `GooseForum` 管理员账号默认 username `admin` password `gooseforum`  
-默认管理地址 http://localhost:99/app/admin  
-
-[详细文档](https://gooseforum.online/post/371)
+- [详细文档](https://gooseforum.online/post/371)
 
 # 获取 GooseForum
 你可以在 [GitHub Release](https://github.com/leancodebox/GooseForum/releases) 页面获取已经构建打包完成的主程序。其中每个版本都提供了常见系统架构下可用的主程序，命名规则为`GooseForum_操作系统_CPU架构.tar.gz` 。比如，普通 64 位 Linux 系统上部署 v0.0.2 版本，则应该下载GooseForum_Linux_x86_64.tar.gz。
