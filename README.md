@@ -15,6 +15,8 @@ GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分
 [releases](https://github.com/leancodebox/GooseForum/releases) 下载合适系统版本的压缩包。解压后通过运行 `./GooseForum serve` 即可启动 `GooseForum` 管理员账号默认 username `admin` password `gooseforum`  
 默认管理地址 http://localhost:99/app/admin  
 
+[详细文档](https://gooseforum.online/post/371)
+
 ## 技术栈
 
 ### 前端
