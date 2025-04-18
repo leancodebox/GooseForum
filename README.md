@@ -8,8 +8,9 @@
 </h1>
 
 
-GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分离架构。
-- [GooseForum](https://gooseforum.online/)
+GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分离架构。提供了极低依赖的安装方式。
+
+如果你向知道GooseForum运行效果怎么样，请点击[GooseForum](https://gooseforum.online/)进行体验。
 
 # GooseForum 快速上手
 
