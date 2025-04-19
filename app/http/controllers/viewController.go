@@ -475,3 +475,7 @@ func getHost(c *gin.Context) string {
 	host := fmt.Sprintf("%s://%s", scheme, c.Request.Host)
 	return preferences.Get("server.url", host)
 }
+
+func Links(c *gin.Context) {
+	c.HTML(http.StatusOK, "links.gohtml", gin.H{"title": "友情链接 - GooseForum", "User": GetLoginUser(c)})
+}

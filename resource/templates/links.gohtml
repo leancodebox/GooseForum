@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{{template "head.gohtml" .}}
+<body>
+{{template "nav_new.gohtml" .}}
+<main>
+    <div class="container">
+        <div class="main-content">
+            <article class="article-detail">
+                <h1 style="margin-bottom: 18px;">友情链接</h1>
+                <div class="links-list">
+                    {{range .friendLinks}}
+                    <a class="friend-link-card" href="{{.Url}}" target="_blank" rel="noopener nofollow">
+                        <img class="friend-link-logo" src="{{.Logo}}" alt="{{.Name}} logo">
+                        <div class="friend-link-info">
+                            <div class="friend-link-title">{{.Name}}</div>
+                            <div class="friend-link-desc">{{.Description}}</div>
+                        </div>
+                    </a>
+                    {{end}}
+                </div>
+                <div class="links-tips">
+                    <p>欢迎优秀社区、博客、技术站点交换友链！请联系站长或在 <a href="/contact" target="_blank">联系我们</a> 页面留言。</p>
+                </div>
+            </article>
+        </div>
+        <aside class="sidebar">
+            <div class="sidebar-card">
+                <h3>友情链接须知</h3>
+                <ul class="links-rules">
+                    <li>内容健康、合法，技术/学习/社区类优先</li>
+                    <li>请保持贵站可访问且有本站友链</li>
+                    <li>本站保留审核与下架权利</li>
+                </ul>
+            </div>
+            <div class="sidebar-card">
+                <h3>推荐社区</h3>
+                <ul class="recommended-posts">
+                    <li><a href="https://segmentfault.com/" target="_blank">SegmentFault 思否</a></li>
+                    <li><a href="https://www.v2ex.com/" target="_blank">V2EX</a></li>
+                    <li><a href="https://www.oschina.net/" target="_blank">开源中国</a></li>
+                    <li><a href="https://juejin.cn/" target="_blank">稀土掘金</a></li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</main>
+{{template "footer.gohtml" .}}
+<style>
+.links-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 30px;
+}
+.friend-link-card {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px 22px;
+    min-width: 260px;
+    max-width: 420px;
+    flex: 1 1 320px;
+    text-decoration: none;
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+}
+.friend-link-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 16px rgba(25,118,210,0.08);
+    background: #f5faff;
+}
+.friend-link-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: contain;
+    margin-right: 18px;
+    background: #fff;
+    border: 1px solid #eee;
+}
+.friend-link-info {
+    flex: 1;
+}
+.friend-link-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.friend-link-desc {
+    font-size: 0.95rem;
+    color: var(--text-color-light);
+    line-height: 1.5;
+}
+.links-tips {
+    margin-top: 18px;
+    color: var(--text-color-secondary);
+    font-size: 0.98rem;
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 14px 18px;
+    border: 1px dashed var(--border-color);
+}
+.links-tips a {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+.links-rules {
+    padding-left: 18px;
+    font-size: 0.98rem;
+    color: var(--text-color-secondary);
+    margin: 0;
+}
+.links-rules li {
+    margin-bottom: 8px;
+}
+@media (max-width: 900px) {
+    .links-list {
+        flex-direction: column;
+        gap: 14px;
+    }
+    .friend-link-card {
+        max-width: 100%;
+    }
+}
+</style>
+</body>
+</html>
