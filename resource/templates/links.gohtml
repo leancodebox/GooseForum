@@ -8,17 +8,71 @@
         <div class="main-content">
             <article class="article-detail">
                 <h1 style="margin-bottom: 18px;">友情链接</h1>
+
+                <!-- 社区类 -->
+                <h2 class="links-group-title"><span class="group-icon group-icon-community"></span>社区类</h2>
                 <div class="links-list">
-                    {{range .friendLinks}}
-                    <a class="friend-link-card" href="{{.Url}}" target="_blank" rel="noopener nofollow">
-                        <img class="friend-link-logo" src="{{.Logo}}" alt="{{.Name}} logo">
+                    <a class="friend-link-card community" href="https://segmentfault.com/" target="_blank" rel="noopener nofollow">
+                        <img class="friend-link-logo" src="https://static.segmentfault.com/v-5f7e4b5c/global/img/touch-icon.png" alt="SegmentFault logo">
                         <div class="friend-link-info">
-                            <div class="friend-link-title">{{.Name}}</div>
-                            <div class="friend-link-desc">{{.Description}}</div>
+                            <div class="friend-link-title">SegmentFault 思否</div>
+                            <div class="friend-link-desc">中国领先的开发者技术社区</div>
                         </div>
                     </a>
-                    {{end}}
+                    <a class="friend-link-card community" href="https://www.v2ex.com/" target="_blank" rel="noopener nofollow">
+                        <img class="friend-link-logo" src="https://www.v2ex.com/static/icon-192.png" alt="V2EX logo">
+                        <div class="friend-link-info">
+                            <div class="friend-link-title">V2EX</div>
+                            <div class="friend-link-desc">创意工作者的社区</div>
+                        </div>
+                    </a>
+                    <a class="friend-link-card community" href="https://www.oschina.net/" target="_blank" rel="noopener nofollow">
+                        <img class="friend-link-logo" src="https://static.oschina.net/new-osc/img/logo_osc_new.svg" alt="开源中国 logo">
+                        <div class="friend-link-info">
+                            <div class="friend-link-title">开源中国</div>
+                            <div class="friend-link-desc">中文开源技术交流社区</div>
+                        </div>
+                    </a>
                 </div>
+
+                <!-- 博客类 -->
+                <h2 class="links-group-title"><span class="group-icon group-icon-blog"></span>博客类</h2>
+                <div class="links-list">
+                    <a class="friend-link-card blog" href="https://coolshell.cn/" target="_blank" rel="noopener nofollow">
+                        <img class="friend-link-logo" src="https://coolshell.cn/wp-content/themes/coolshell/images/logo.png" alt="酷壳 logo">
+                        <div class="friend-link-info">
+                            <div class="friend-link-title">酷壳 - CoolShell</div>
+                            <div class="friend-link-desc">陈皓的技术博客</div>
+                        </div>
+                    </a>
+                    <a class="friend-link-card blog" href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener nofollow">
+                        <img class="friend-link-logo" src="https://www.ruanyifeng.com/blog/images/person.jpg" alt="阮一峰 logo">
+                        <div class="friend-link-info">
+                            <div class="friend-link-title">阮一峰的网络日志</div>
+                            <div class="friend-link-desc">科技、编程、互联网</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- 工具/产品类 -->
+                <h2 class="links-group-title"><span class="group-icon group-icon-tool"></span>工具/产品类</h2>
+                <div class="links-list">
+                    <a class="friend-link-card tool" href="https://www.jetbrains.com/" target="_blank" rel="noopener nofollow">
+                        <img class="friend-link-logo" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains logo">
+                        <div class="friend-link-info">
+                            <div class="friend-link-title">JetBrains</div>
+                            <div class="friend-link-desc">开发者工具与 IDE</div>
+                        </div>
+                    </a>
+                    <a class="friend-link-card tool" href="https://github.com/" target="_blank" rel="noopener nofollow">
+                        <img class="friend-link-logo" src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub logo">
+                        <div class="friend-link-info">
+                            <div class="friend-link-title">GitHub</div>
+                            <div class="friend-link-desc">全球最大开源代码托管平台</div>
+                        </div>
+                    </a>
+                </div>
+
                 <div class="links-tips">
                     <p>欢迎优秀社区、博客、技术站点交换友链！请联系站长或在 <a href="/contact" target="_blank">联系我们</a> 页面留言。</p>
                 </div>
@@ -47,6 +101,32 @@
 </main>
 {{template "footer.gohtml" .}}
 <style>
+.links-group-title {
+    font-size: 1.18rem;
+    font-weight: 600;
+    margin: 32px 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.group-icon {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    vertical-align: middle;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+.group-icon-community {
+    background-image: url("data:image/svg+xml,%3Csvg fill='none' viewBox='0 0 24 24' stroke='blue' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='10' stroke-width='2'/%3E%3Cpath d='M8 15a4 4 0 1 1 8 0' stroke-width='2'/%3E%3C/svg%3E");
+}
+.group-icon-blog {
+    background-image: url("data:image/svg+xml,%3Csvg fill='none' viewBox='0 0 24 24' stroke='orange' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='4' y='4' width='16' height='16' rx='3' stroke-width='2'/%3E%3Cpath d='M8 8h8M8 12h8M8 16h4' stroke-width='2'/%3E%3C/svg%3E");
+}
+.group-icon-tool {
+    background-image: url("data:image/svg+xml,%3Csvg fill='none' viewBox='0 0 24 24' stroke='green' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='6' y='6' width='12' height='12' rx='2' stroke-width='2'/%3E%3Cpath d='M9 9h6v6H9z' stroke-width='2'/%3E%3C/svg%3E");
+}
+
 .links-list {
     display: flex;
     flex-wrap: wrap;
@@ -72,6 +152,17 @@
     border-color: var(--primary-color);
     box-shadow: 0 4px 16px rgba(25,118,210,0.08);
     background: #f5faff;
+}
+.friend-link-card.community {
+    border-left: 5px solid #1976d2;
+}
+.friend-link-card.blog {
+    border-left: 5px solid #ff9800;
+    background: linear-gradient(90deg, #fff7e6 0%, var(--card-bg) 80%);
+}
+.friend-link-card.tool {
+    border-left: 5px solid #43a047;
+    background: linear-gradient(90deg, #e8f5e9 0%, var(--card-bg) 80%);
 }
 .friend-link-logo {
     width: 48px;
