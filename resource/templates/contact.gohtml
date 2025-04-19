@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{{template "head.gohtml" .}}
+<body>
+{{template "nav_new.gohtml" .}}
+<main>
+    <div class="container">
+        <div class="main-content">
+            <article class="article-detail">
+                <h1 style="margin-bottom: 18px;">申请友情链接 / 联系我们</h1>
+                <div class="contact-form-card">
+                    <form id="friend-link-form" method="post" action="/api/friend-link/apply" autocomplete="off">
+                        <div class="form-group">
+                            <label for="siteName">网站名称 <span class="required">*</span></label>
+                            <input type="text" id="siteName" name="siteName" required maxlength="32" placeholder="如：GooseForum">
+                        </div>
+                        <div class="form-group">
+                            <label for="siteUrl">网站地址 <span class="required">*</span></label>
+                            <input type="url" id="siteUrl" name="siteUrl" required maxlength="128" placeholder="如：https://example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="siteLogo">Logo地址</label>
+                            <input type="url" id="siteLogo" name="siteLogo" maxlength="256" placeholder="如：https://example.com/logo.png">
+                        </div>
+                        <div class="form-group">
+                            <label for="siteDesc">网站简介 <span class="required">*</span></label>
+                            <textarea id="siteDesc" name="siteDesc" required maxlength="100" rows="3" placeholder="一句话介绍你的站点"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact">联系方式 <span class="required">*</span></label>
+                            <input type="text" id="contact" name="contact" required maxlength="64" placeholder="如邮箱/QQ/微信">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="contact-submit-btn">提交申请</button>
+                        </div>
+                    </form>
+                    <div class="contact-tips">
+                        <ul>
+                            <li>请确保贵站内容健康、合法，优先收录技术/学习/社区类网站。</li>
+                            <li>请在贵站添加本站友链后再提交申请。</li>
+                            <li>我们会在3个工作日内审核并回复，请保持联系方式畅通。</li>
+                        </ul>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <aside class="sidebar">
+            <div class="sidebar-card">
+                <h3>站点信息</h3>
+                <ul class="links-rules">
+                    <li>本站名称：GooseForum</li>
+                    <li>网址：https://gooseforum.com/</li>
+                    <li>Logo：<span style="word-break:break-all;">https://gooseforum.com/static/pic/default-avatar.png</span></li>
+                    <li>简介：一个专注于技术交流的社区</li>
+                </ul>
+            </div>
+            <div class="sidebar-card">
+                <h3>其他联系方式</h3>
+                <ul class="links-rules">
+                    <li>邮箱：admin@gooseforum.com</li>
+                    <li>QQ：123456789</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</main>
+{{template "footer.gohtml" .}}
+<style>
+.contact-form-card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 28px 32px 18px 32px;
+    max-width: 520px;
+    margin-bottom: 30px;
+}
+.form-group {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.form-group label {
+    font-weight: 500;
+    color: var(--text-color);
+}
+.form-group .required {
+    color: #e53935;
+    font-size: 1em;
+}
+.form-group input,
+.form-group textarea {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    background: var(--bg-color);
+    color: var(--text-color);
+    transition: border-color 0.2s;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+.contact-submit-btn {
+    padding: 10px 28px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.contact-submit-btn:hover {
+    background: var(--primary-color-dark);
+}
+.contact-tips {
+    margin-top: 18px;
+    color: var(--text-color-secondary);
+    font-size: 0.98rem;
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 14px 18px;
+    border: 1px dashed var(--border-color);
+}
+.contact-tips ul {
+    margin: 0;
+    padding-left: 18px;
+}
+@media (max-width: 900px) {
+    .contact-form-card {
+        padding: 16px 8px 12px 8px;
+        max-width: 100%;
+    }
+}
+</style>
+<script>
+document.getElementById('friend-link-form')?.addEventListener('submit', function(e){
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('.contact-submit-btn');
+    btn.disabled = true;
+    btn.textContent = '提交中...';
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form)
+    }).then(resp => resp.json())
+      .then(res => {
+        if(res && res.success){
+            btn.textContent = '提交成功';
+            alert('申请已提交，感谢您的支持！');
+            form.reset();
+        }else{
+            btn.disabled = false;
+            btn.textContent = '提交申请';
+            alert(res.msg || '提交失败，请稍后重试');
+        }
+      }).catch(()=>{
+        btn.disabled = false;
+        btn.textContent = '提交申请';
+        alert('提交失败，请稍后重试');
+      });
+});
+</script>
+</body>
+</html>
