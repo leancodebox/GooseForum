@@ -479,3 +479,7 @@ func getHost(c *gin.Context) string {
 func Links(c *gin.Context) {
 	c.HTML(http.StatusOK, "links.gohtml", gin.H{"title": "友情链接 - GooseForum", "User": GetLoginUser(c)})
 }
+
+func Contact(c *gin.Context) {
+	c.HTML(http.StatusOK, "contact.gohtml", gin.H{"title": "友情链接 - GooseForum", "User": GetLoginUser(c)})
+}
