@@ -128,8 +128,8 @@
 }
 
 .links-list {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 18px;
     margin-bottom: 30px;
 }
@@ -140,13 +140,14 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 16px 22px;
-    min-width: 260px;
-    max-width: 420px;
-    flex: 1 1 320px;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
     text-decoration: none;
     color: var(--text-color);
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+    height: 88px;
 }
 .friend-link-card:hover {
     border-color: var(--primary-color);
@@ -172,19 +173,27 @@
     margin-right: 18px;
     background: #fff;
     border: 1px solid #eee;
+    flex-shrink: 0;
 }
 .friend-link-info {
     flex: 1;
+    min-width: 0;
 }
 .friend-link-title {
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .friend-link-desc {
     font-size: 0.95rem;
     color: var(--text-color-light);
     line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .links-tips {
     margin-top: 18px;
@@ -210,11 +219,23 @@
 }
 @media (max-width: 900px) {
     .links-list {
-        flex-direction: column;
-        gap: 14px;
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
     .friend-link-card {
-        max-width: 100%;
+        padding: 10px 10px;
+        height: 64px;
+    }
+    .friend-link-logo {
+        width: 36px;
+        height: 36px;
+        margin-right: 10px;
+    }
+    .friend-link-title {
+        font-size: 1rem;
+    }
+    .friend-link-desc {
+        font-size: 0.88rem;
     }
 }
 </style>
