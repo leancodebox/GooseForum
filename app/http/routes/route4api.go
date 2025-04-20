@@ -60,7 +60,8 @@ func viewRoute(ginApp *gin.Engine) {
 	view.GET("/user-profile/:id", controllers.UserProfile)
 	view.GET("/sponsors", controllers.Sponsors)
 	view.GET("/links", controllers.Links)
-	view.GET("/contact", controllers.Contact)
+	view.GET("/link-contact", controllers.Contact)
+	view.POST("/apply-link-add", UpButterReq(controllers.ApplyAddLink))
 }
 
 func forum(ginApp *gin.Engine) {
