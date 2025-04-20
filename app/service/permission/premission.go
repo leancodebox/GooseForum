@@ -22,9 +22,12 @@ func (receiver Enum) Name() string {
 		return "页面管理"
 	case RoleManager:
 		return "角色管理"
+	case SiteManager:
+		return "站点管理"
 	}
 	return ""
 }
+
 func (receiver Enum) Id() uint64 {
 	return uint64(receiver)
 }
@@ -35,11 +38,12 @@ const (
 	ArticlesManager
 	PageManager
 	RoleManager
+	SiteManager
 )
 
 func BuildOptions() []datastruct.Option[string, Enum] {
 	var l []datastruct.Option[string, Enum]
-	for i := Admin; i <= PageManager; i++ {
+	for i := Admin; i <= SiteManager; i++ {
 		l = append(l, datastruct.Option[string, Enum]{Name: i.Name(), Label: i.Name(), Value: i})
 	}
 	return l

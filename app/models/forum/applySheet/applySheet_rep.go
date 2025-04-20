@@ -2,6 +2,8 @@ package applySheet
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	"github.com/spf13/cast"
+	"math"
 	"time"
 )
 
@@ -34,6 +36,43 @@ func CantWriteNew(applyType SheetType, maxCount int64) bool {
 		Where(queryopt.Lt(fieldType, applyType)).
 		Where(queryopt.Gt(fieldCreatedAt, time.Now().Format("2006-01-02"))).Count(&count)
 	return count > maxCount
+}
+
+type PageQuery struct {
+	Page, PageSize int
+}
+
+func Page[ResType Entity](q PageQuery) struct {
+	Page     int
+	PageSize int
+	Total    int64
+	Data     []ResType
+} {
+	var list []ResType
+	if q.Page > 0 {
+		q.Page -= 1
+	} else {
+		q.Page = 0
+	}
+	if q.PageSize < 1 {
+		q.PageSize = 1
+	}
+	var total int64
+	var bigEntity Entity
+	builder().Limit(1).Order(queryopt.Desc(pid)).Find(&bigEntity)
+	total = cast.ToInt64(bigEntity.Id)
+	lastId := math.MaxInt
+	if q.Page > 0 {
+		lastId = cast.ToInt(total) - cast.ToInt(q.PageSize*q.Page)
+	}
+	builder().Where(queryopt.Le(pid, lastId)).Limit(q.PageSize).Order("id desc").Find(&list)
+
+	return struct {
+		Page     int
+		PageSize int
+		Total    int64
+		Data     []ResType
+	}{Page: q.Page, PageSize: q.PageSize, Data: list, Total: total}
 }
 
 //func saveAll(entities []*Entity) int64 {

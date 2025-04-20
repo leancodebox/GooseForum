@@ -2,16 +2,18 @@
 import { ref, onMounted, h } from 'vue'
 import { NButton, NDataTable, NSpace, NTag, useMessage } from 'naive-ui'
 import { EyeOutline, CheckmarkOutline, CloseOutline } from '@vicons/ionicons5'
+import {applySheetList} from "@/admin/utils/authService.ts";
 
 const message = useMessage()
 const tickets = ref([])
 const loading = ref(false)
-
+applySheetList()
 // 获取工单列表
 const fetchTickets = async () => {
   loading.value = true
   try {
     // 这里调用API获取数据
+
     // const res = await getExternalTickets()
     // tickets.value = res.result
     message.success('获取工单列表成功')
@@ -44,7 +46,7 @@ const columns = [
     title: '状态',
     key: 'status',
     render(row: { status: string }) {
-      return h(NTag, { type: row.status === 'pending' ? 'warning' : 'success' }, 
+      return h(NTag, { type: row.status === 'pending' ? 'warning' : 'success' },
         { default: () => row.status === 'pending' ? '待处理' : '已处理' })
     }
   },

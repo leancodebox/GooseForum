@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 import {enqueueMessage} from "./messageManager.ts";
 import axios from 'axios';
-import type {Articles, Category, Label, Result, User, UserRole} from "../types/adminInterfaces.ts";
+import type {ApplySheet, Articles, Category, Label, Result, User, UserRole} from "../types/adminInterfaces.ts";
 
 export interface PageData<T> {
     list: T[];
@@ -78,5 +78,12 @@ export const editArticle = (id:any, processStatus:any):Promise<Result<any>> => {
     return axiosInstance.post('/admin/article-edit', {
         id,
         processStatus
+    })
+}
+
+export function applySheetList(page = 1, pageSize = 10): Promise<Result<PageData<ApplySheet>>> {
+    return axiosInstance.post("/admin/apply-sheet-list", {
+        page: page,
+        pageSize: pageSize,
     })
 }

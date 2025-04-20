@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 
@@ -420,4 +421,26 @@ func DeleteCategory(req component.BetterRequest[struct {
 	}
 	articleCategory.DeleteEntity(&entity)
 	return component.SuccessResponse(true)
+}
+
+type ApplySheetListReq struct {
+	Page     int    `form:"page"`
+	PageSize int    `form:"pageSize"`
+	Search   string `form:"search"`
+	UserId   uint64 `form:"userId"`
+}
+
+func ApplySheet(req component.BetterRequest[ApplySheetListReq]) component.Response {
+	pageData := applySheet.Page[applySheet.Entity](applySheet.PageQuery{
+		Page:     req.Params.Page,
+		PageSize: req.Params.PageSize,
+	})
+
+	return component.SuccessPage(array.Map(pageData.Data, func(item applySheet.Entity) applySheet.Entity {
+		return item
+	}),
+		pageData.Page,
+		pageData.PageSize,
+		pageData.Total,
+	)
 }
