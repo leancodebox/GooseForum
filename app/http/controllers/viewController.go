@@ -476,6 +476,13 @@ func getHost(c *gin.Context) string {
 	return preferences.Get("server.url", host)
 }
 
+type LinkItem struct {
+	Name    string
+	Desc    string
+	Url     string
+	LogoUrl string
+}
+
 func Links(c *gin.Context) {
 	c.HTML(http.StatusOK, "links.gohtml", gin.H{"title": "友情链接 - GooseForum", "User": GetLoginUser(c)})
 }
