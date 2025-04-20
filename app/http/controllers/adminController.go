@@ -2,7 +2,11 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"net/http"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 
@@ -443,4 +447,64 @@ func ApplySheet(req component.BetterRequest[ApplySheetListReq]) component.Respon
 		pageData.PageSize,
 		pageData.Total,
 	)
+}
+
+const (
+	FriendShipLinks = `friendShipLinks`
+)
+
+var pageTypeList = []string{
+	FriendShipLinks,
+}
+
+func GetPageConfig(c *gin.Context) {
+	pageType := c.Param(`pageType`)
+	if !slices.Contains(pageTypeList, pageType) {
+		c.JSON(http.StatusOK, component.FailData(`类型不存在`))
+		return
+	}
+	configEntity := pageConfig.GetByPageType(pageType)
+
+	c.JSON(http.StatusOK, component.SuccessData(map[string]any{
+		`pageType`: pageType,
+		`config`:   configEntity.Config,
+	}))
+}
+
+type FriendLinksGroup struct {
+	Name  string     `json:"name,omitempty"`
+	Links []LinkItem `json:"links,omitempty"`
+}
+
+func GetFriendLinks(req component.BetterRequest[null]) component.Response {
+	configEntity := pageConfig.GetByPageType(FriendShipLinks)
+	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
+	lItem := LinkItem{
+		Name:    "NAME",
+		Desc:    "DESC-GooseForum",
+		Url:     "https://gooseforum.online",
+		LogoUrl: "/static/pic/default-avatar.png",
+	}
+	item := FriendLinksGroup{
+		Name:  "community",
+		Links: []LinkItem{lItem, lItem, lItem},
+	}
+	res = []FriendLinksGroup{
+		item,
+		item,
+		item,
+	}
+	return component.SuccessResponse(res)
+}
+
+type SaveFriendLinksReq struct {
+	LinksInfo []FriendLinksGroup `json:"linksInfo"`
+}
+
+func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(FriendShipLinks)
+	configEntity.PageType = FriendShipLinks
+	configEntity.Config = jsonopt.Encode(req.Params.LinksInfo)
+	pageConfig.CreateOrSave(&configEntity)
+	return component.SuccessResponse("success")
 }

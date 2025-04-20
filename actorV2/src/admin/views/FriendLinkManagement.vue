@@ -1,20 +1,37 @@
 <script setup lang="ts">
-import { ref, onMounted,h } from 'vue'
-import { NButton, NDataTable, NSpace, useMessage } from 'naive-ui'
-import { AddOutline, TrashOutline, CreateOutline } from '@vicons/ionicons5'
+import {onMounted, ref} from 'vue'
+import {NButton, NCard, NInput, NList, NListItem, NModal, NSpace, NThing, useMessage} from 'naive-ui'
+import draggable from 'vuedraggable'
+import {getFriendLinks} from "@/admin/utils/authService.ts";
+import type {FriendLinksGroup} from "@/admin/types/adminInterfaces.ts";
 
 const message = useMessage()
-const friendLinks = ref([])
+const friendLinks = ref<FriendLinksGroup[]>([])
 const loading = ref(false)
+const startEdit = ref(false)
+const showLinkModal = ref(false)
+const modalMode = ref('add') // 'add' | 'edit'
+const editingLink = ref({
+  name: '',
+  desc: '',
+  url: '',
+  logoUrl: '',
+  status: 1,
+  groupIndex: 0,
+  linkIndex: 0
+})
 
 // 获取友情链接列表
 const fetchFriendLinks = async () => {
   loading.value = true
   try {
-    // 这里调用API获取数据
-    // const res = await getFriendLinks()
-    // friendLinks.value = res.result
-    message.success('获取友情链接成功')
+    const res = await getFriendLinks()
+    if (res.code === 0) {
+      friendLinks.value = res.result // 直接使用接口返回的数据结构
+      message.success('获取友情链接成功')
+    } else {
+      message.error(res.message || '获取友情链接失败')
+    }
   } catch (error) {
     message.error('获取友情链接失败')
     console.error(error)
@@ -23,56 +40,354 @@ const fetchFriendLinks = async () => {
   }
 }
 
+// 添加/编辑链接
+function showAddLink(groupIndex) {
+  modalMode.value = 'add'
+  editingLink.value = {
+    name: '',
+    desc: '',
+    url: '',
+    status: 1,
+    logoUrl: '',
+    groupIndex,
+    linkIndex: 0
+  }
+  showLinkModal.value = true
+}
+
+function showEditLink(groupIndex, linkIndex, link) {
+  modalMode.value = 'edit'
+  editingLink.value = {
+    name: link.name,
+    desc: link.desc,
+    url: link.url,
+    logoUrl: link.logoUrl,
+    status: link.status,
+    groupIndex,
+    linkIndex
+  }
+  showLinkModal.value = true
+}
+
+function handleSaveLink() {
+  if (!editingLink.value.name || !editingLink.value.url) {
+    message.warning('请填写完整的链接信息')
+    return
+  }
+
+  const {groupIndex, linkIndex} = editingLink.value
+  const newLink = {
+    name: editingLink.value.name,
+    desc: editingLink.value.desc,
+    url: editingLink.value.url,
+    logoUrl: editingLink.value.logoUrl,
+    status: editingLink.value.status,
+  }
+
+  if (modalMode.value === 'add') {
+    friendLinks.value[groupIndex].links.push(newLink)
+    message.success('添加成功')
+  } else {
+    friendLinks.value[groupIndex].links[linkIndex] = newLink
+    message.success('修改成功')
+  }
+
+  showLinkModal.value = false
+}
+
+// 拖拽排序处理
+const handleLinkDrag = (groupIndex, event) => {
+  const {removed, added} = event
+  if (!removed || !added) return
+
+  const links = [...friendLinks.value[groupIndex].links]
+  const [movedItem] = links.splice(removed.oldIndex, 1)
+  links.splice(added.newIndex, 0, movedItem)
+  friendLinks.value[groupIndex].links = links
+}
+
+const handleGroupDrag = (event) => {
+  const {removed, added} = event
+  if (!removed || !added) return
+
+  const groups = [...friendLinks.value]
+  const [movedItem] = groups.splice(removed.oldIndex, 1)
+  groups.splice(added.newIndex, 0, movedItem)
+  friendLinks.value = groups
+}
+
+// 删除操作
+function handleDeleteLink(groupIndex, linkIndex) {
+  friendLinks.value[groupIndex].links.splice(linkIndex, 1)
+  message.success('删除成功')
+}
+
+// 保存配置
+async function saveConfig() {
+  startEdit.value = !startEdit.value
+  if (startEdit.value) return
+
+  try {
+    // 调用API保存配置
+    // await saveFriendLinks(friendLinks.value)
+    message.success('保存成功')
+  } catch (error) {
+    message.error('保存失败')
+    console.error(error)
+  }
+}
+
+// 添加新分组
+function handleAddGroup() {
+  friendLinks.value.push({
+    name: '新分组',
+    links: []
+  })
+  message.success('分组添加成功')
+}
+
+// 删除分组
+function handleDeleteGroup(groupIndex) {
+  friendLinks.value.splice(groupIndex, 1)
+  message.success('分组删除成功')
+}
+
 onMounted(() => {
   fetchFriendLinks()
 })
-
-const columns = [
-  {
-    title: '名称',
-    key: 'name'
-  },
-  {
-    title: 'URL',
-    key: 'url'
-  },
-  {
-    title: '排序',
-    key: 'sort'
-  },
-  {
-    title: '状态',
-    key: 'status'
-  },
-  {
-    title: '操作',
-    key: 'actions',
-    render() {
-      return h(NSpace, {}, [
-        h(NButton, { size: 'small', icon: CreateOutline }, '编辑'),
-        h(NButton, { size: 'small', icon: TrashOutline, type: 'error' }, '删除')
-      ])
-    }
-  }
-]
 </script>
 
 <template>
-  <div>
-    <n-space justify="end" style="margin-bottom: 16px">
-      <n-button type="primary">
-        <template #icon>
-          <n-icon><AddOutline /></n-icon>
-        </template>
-        添加友情链接
-      </n-button>
-    </n-space>
-    
-    <n-data-table
-      :columns="columns"
-      :data="friendLinks"
-      :loading="loading"
-      striped
-    />
-  </div>
+  <n-modal v-model:show="showLinkModal">
+    <n-card
+        style="width: 500px"
+        :title="modalMode === 'add' ? '添加友情链接' : '编辑友情链接'"
+        :bordered="false"
+        size="huge"
+    >
+      <n-space vertical size="large">
+        <n-input
+            v-model:value="editingLink.name"
+            placeholder="链接名称"
+            clearable
+        />
+        <n-input
+            v-model:value="editingLink.desc"
+            placeholder="desc"
+            clearable
+        />
+        <n-input
+            v-model:value="editingLink.url"
+            placeholder="链接地址"
+            clearable
+        />
+        <n-input
+            v-model:value="editingLink.logoUrl"
+            placeholder="链接地址"
+            clearable
+        />
+        <n-switch v-model:value="editingLink.status" :checked-value="1" :unchecked-value="0"/>
+      </n-space>
+      <template #footer>
+        <n-space justify="end">
+          <n-button @click="showLinkModal = false">取消</n-button>
+          <n-button type="primary" @click="handleSaveLink">
+            {{ modalMode === 'add' ? '添加' : '保存' }}
+          </n-button>
+        </n-space>
+      </template>
+    </n-card>
+  </n-modal>
+
+  <n-list>
+    <n-list-item>
+      <n-space>
+        <n-button type="primary" @click="fetchFriendLinks" :size="'small'">
+          刷新
+        </n-button>
+        <n-button type="primary" :size="'small'" @click="saveConfig">
+          {{ !startEdit ? '启动编辑' : '保存' }}
+        </n-button>
+        <n-button type="success" :size="'small'" @click="handleAddGroup" disabled>
+          添加分组
+        </n-button>
+      </n-space>
+    </n-list-item>
+
+    <draggable
+        v-model="friendLinks"
+        v-if="startEdit"
+        @change="handleGroupDrag"
+        item-key="title"
+        handle=".group-drag-handle"
+    >
+      <template #item="{element: groupItem, index: groupIndex}">
+        <n-list-item>
+          <n-thing>
+            <template #header>
+              <n-space v-if="startEdit">
+                <n-button circle size="small" class="group-drag-handle">
+                  ≡
+                </n-button>
+                <n-input v-model:value="groupItem.name"></n-input>
+                <n-button
+                    type="error"
+                    size="small"
+                    @click="handleDeleteGroup(groupIndex)"
+                >
+                  删除
+                </n-button>
+              </n-space>
+              <span v-else>{{ groupItem.name }}</span>
+            </template>
+            <n-space wrap>
+              <draggable
+                  v-model="groupItem.links"
+                  @change="(e) => handleLinkDrag(groupIndex, e)"
+                  item-key="url"
+                  handle=".link-drag-handle"
+                  :animation="150"
+                  class="links-container"
+              >
+                <template #item="{element: item, index: linkIndex}">
+                  <div class="link-item">
+                    <n-button
+                        circle
+                        size="tiny"
+                        class="link-drag-handle"
+                        v-if="startEdit"
+                    >
+                      ≡
+                    </n-button>
+                    <n-button
+                        :style="{width:'180px',overflow:'hidden',textOverflow:'ellipsis'}"
+                        dashed
+                        type="default"
+                        :size="'small'"
+                        @click="startEdit ? showEditLink(groupIndex, linkIndex, item) : null"
+                        :tag="startEdit ? 'button' : 'a'"
+                        :href="startEdit ? null : item.url"
+                    >
+                      {{ item.name }}
+                    </n-button>
+                    <n-button
+                        v-if="startEdit"
+                        circle
+                        type="error"
+                        :size="'small'"
+                        @click="handleDeleteLink(groupIndex, linkIndex)"
+                    >
+                      删
+                    </n-button>
+                  </div>
+                </template>
+              </draggable>
+              <n-button
+                  dashed
+                  type="primary"
+                  :size="'small'"
+                  v-if="startEdit"
+                  @click="showAddLink(groupIndex)"
+              >
+                添加链接
+              </n-button>
+            </n-space>
+          </n-thing>
+        </n-list-item>
+      </template>
+    </draggable>
+
+    <template v-if="!startEdit">
+      <n-list-item v-for="groupItem in friendLinks">
+        <n-thing>
+          <template #header>
+            <span>{{ groupItem.name }}</span>
+          </template>
+          <n-space>
+            <n-card
+              v-for="item in groupItem.links"
+              :title="item.name"
+              size="small"
+              :bordered="false"
+            >
+              <n-space vertical>
+                <n-space align="center">
+                  <n-image
+                    v-if="item.logoUrl"
+                    :src="item.logoUrl"
+                    width="50"
+                    height="50"
+                    object-fit="contain"
+                  />
+                  <n-space vertical>
+                    <n-text>{{ item.desc }}</n-text>
+                    <n-text depth="3">{{ item.url }}</n-text>
+                  </n-space>
+                </n-space>
+                <n-button
+                  tag="a"
+                  :href="item.url"
+                  target="_blank"
+                  type="primary"
+                  size="small"
+                >
+                  访问链接
+                </n-button>
+              </n-space>
+            </n-card>
+          </n-space>
+        </n-thing>
+      </n-list-item>
+    </template>
+  </n-list>
 </template>
+
+<style scoped>
+.sortable-ghost {
+  opacity: 0.5;
+  background: #c8ebfb;
+}
+
+.sortable-drag {
+  opacity: 0.9;
+}
+
+.links-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.link-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.link-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.link-drag-handle,
+.group-drag-handle {
+  cursor: move;
+  user-select: none;
+}
+
+.n-space {
+  align-items: center;
+}
+
+/* 卡片样式优化 */
+.n-card {
+  margin-bottom: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+</style>
