@@ -9,7 +9,7 @@
             <article class="article-detail">
                 <h1 style="margin-bottom: 18px;">申请友情链接 / 联系我们</h1>
                 <div class="contact-form-card">
-                    <form id="friend-link-form" method="post" action="/api/friend-link/apply" autocomplete="off">
+                    <form id="friend-link-form" method="post" action="/api/bbs/apply-link-add" autocomplete="off">
                         <div class="form-group">
                             <label for="siteName">网站名称 <span class="required">*</span></label>
                             <input type="text" id="siteName" name="siteName" required maxlength="32" placeholder="如：GooseForum">
@@ -144,12 +144,25 @@ document.getElementById('friend-link-form')?.addEventListener('submit', function
     const btn = form.querySelector('.contact-submit-btn');
     btn.disabled = true;
     btn.textContent = '提交中...';
+
+    // 构造请求数据
+    const formData = {
+        siteName: form.siteName.value,
+        siteUrl: form.siteUrl.value,
+        siteLogo: form.siteLogo.value,
+        siteDesc: form.siteDesc.value,
+        contact: form.contact.value
+    };
+
     fetch(form.action, {
         method: 'POST',
-        body: new FormData(form)
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
     }).then(resp => resp.json())
       .then(res => {
-        if(res && res.success){
+        if(res && res.code===0){
             btn.textContent = '提交成功';
             alert('申请已提交，感谢您的支持！');
             form.reset();

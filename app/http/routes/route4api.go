@@ -61,7 +61,9 @@ func viewRoute(ginApp *gin.Engine) {
 	view.GET("/sponsors", controllers.Sponsors)
 	view.GET("/links", controllers.Links)
 	view.GET("/link-contact", controllers.Contact)
-	view.POST("/apply-link-add", UpButterReq(controllers.ApplyAddLink))
+
+	forumApi := ginApp.Group("api/bbs")
+	forumApi.POST("apply-link-add", UpButterReq(controllers.ApplyAddLink))
 }
 
 func forum(ginApp *gin.Engine) {
