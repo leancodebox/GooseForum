@@ -1,5 +1,6 @@
 [
   {
+    "tmp": "[default]\nconnect = \"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect\"\n",
     "tool": "dbhelper",
     "modelName": "article_like",
     "keyList": [
@@ -7,6 +8,37 @@
       {"field": "user_id", "type": "bigint unsigned", "key": "", "desc": "", "null": "NO", "default": "0"},
       {"field": "article_id", "type": "bigint unsigned", "key": "", "desc": "", "null": "NO", "default": "0"},
       {"field": "status", "type": "int", "key": "", "desc": "点赞状态（1:有效点赞 0:取消点赞）", "null": "NO", "default": "1"},
+      {"field": "create_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "update_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "apply_sheet",
+    "keyList": [
+      {"field": "id","type": "bigint unsigned", "key": "PRI", "desc": "主键", "null": "NO", "default": null},
+      {"field": "user_id", "type": "bigint unsigned", "key": "", "desc": "", "null": "NO", "default": "0"},
+      {"field": "type", "type": "tinyint", "key": "", "desc": "", "null": "NO", "default": "0"},
+      {"field": "status", "type": "tinyint", "key": "", "desc": "状态", "null": "NO", "default": "1"},
+      {"field": "title", "type": "varchar(255)", "key": "", "desc": "标题", "null": "NO", "default": "1"},
+      {"field": "content", "type": "text", "key": "", "desc": "具体内容", "null": "NO", "default": "1"},
+      {"field": "create_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "update_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "friendship_links",
+    "keyList": [
+      {"field": "id","type": "bigint unsigned", "key": "PRI", "desc": "主键", "null": "NO", "default": null},
+      {"field": "siteName", "type": "varchar(255)", "key": "", "desc": "站点名", "null": "NO", "default": "0"},
+      {"field": "siteUrl", "type": "varchar(255)", "key": "", "desc": "站点内容", "null": "NO", "default": "0"},
+      {"field": "siteLogo", "type": "varchar(255)", "key": "", "desc": "站点logo", "null": "NO", "default": ""},
+      {"field": "siteDesc", "type": "varchar(255)", "key": "", "desc": "站点介绍", "null": "NO", "default": ""},
+      {"field": "contact", "type": "varchar(255)", "key": "", "desc": "链接站长", "null": "NO", "default": ""},
+      {"field": "weight", "type": "int", "key": "", "desc": "权重", "null": "NO", "default": "0"},
+      {"field": "status", "type": "tinyint", "key": "", "desc": "状态 0 不展示 1 展示", "null": "NO", "default": "0"},
+      {"field": "link_group", "type": "varchar(32)", "key": "", "desc": "分类", "null": "NO", "default": "community"},
       {"field": "create_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
       {"field": "update_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
     ]
