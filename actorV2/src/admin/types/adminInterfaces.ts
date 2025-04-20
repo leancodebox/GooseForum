@@ -71,3 +71,17 @@ export interface ApplySheet {
     createTime: string,
     updateTime: string
 }
+
+
+export interface FriendLinksGroup {
+    name: string,
+    links: LinkItem[]
+}
+
+export interface LinkItem {
+    name: string
+    desc: string
+    url: string
+    logoUrl: string
+    status: 0 | 1 | any
+}

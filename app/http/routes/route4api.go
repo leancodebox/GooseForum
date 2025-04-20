@@ -112,6 +112,8 @@ func forum(ginApp *gin.Engine) {
 	adminApi.POST("category-delete", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.DeleteCategory))
 
 	adminApi.POST("apply-sheet-list", middleware.CheckPermission(permission.SiteManager), UpButterReq(controllers.ApplySheet))
+	adminApi.GET("friend-links", middleware.CheckPermission(permission.SiteManager), UpButterReq(controllers.GetFriendLinks))
+	adminApi.POST("save-friend-links", middleware.CheckPermission(permission.SiteManager), UpButterReq(controllers.SaveFriendLinks))
 
 }
 
