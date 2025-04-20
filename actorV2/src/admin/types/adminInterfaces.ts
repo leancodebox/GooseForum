@@ -58,3 +58,16 @@ export interface UserRole {
     permissions: Permissions[]
     createTime: string
 }
+
+
+export interface ApplySheet {
+    id: number,
+    userId: number,
+    applyUserInfo: string,
+    type: number,
+    status: number,
+    title: string,
+    content: string
+    createTime: string,
+    updateTime: string
+}
