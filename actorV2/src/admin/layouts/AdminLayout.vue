@@ -9,7 +9,9 @@ import {
   GridOutline,
   SettingsOutline,
   LogOutOutline,
-  PersonOutline
+  PersonOutline,
+  LinkOutline,
+  TicketOutline
 } from '@vicons/ionicons5'
 import {
   NLayout,
@@ -85,6 +87,18 @@ const menuOptions: MenuOption[] = [
     key: 'settings',
     icon: () => h(SettingsOutline),
     path: '/admin/settings'
+  },
+  {
+    label: '友情链接',
+    key: 'friendLinks',
+    icon: () => h(LinkOutline), // 需要导入LinkOutline图标
+    path: '/admin/friend-links'
+  },
+  {
+    label: '外部工单',
+    key: 'externalTickets',
+    icon: () => h(TicketOutline), // 需要导入TicketOutline图标
+    path: '/admin/external-tickets'
   }
 ]
 
