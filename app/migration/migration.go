@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
+	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
@@ -61,6 +62,7 @@ func migration(migration bool) {
 			&users.Entity{},
 			&taskQueue.Entity{},
 			&articleLike.Entity{},
+			&applySheet.Entity{},
 		); err != nil {
 			slog.Error("dbconnect migration err", "err", err)
 		} else {
