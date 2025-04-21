@@ -482,7 +482,7 @@ func GetFriendLinks(req component.BetterRequest[null]) component.Response {
 	if configEntity.Id == 0 {
 		lItem := LinkItem{
 			Name:    "GooseForum",
-			Desc:    "DESC-GooseForum",
+			Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
 			Url:     "https://gooseforum.online",
 			LogoUrl: "/static/pic/default-avatar.png",
 		}

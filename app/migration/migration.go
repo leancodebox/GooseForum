@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -149,6 +150,32 @@ func dataInit() {
 		UserId: adminUser.Id,
 	})
 
+	lItem := controllers.LinkItem{
+		Name:    "GooseForum",
+		Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
+		Url:     "https://gooseforum.online",
+		LogoUrl: "/static/pic/default-avatar.png",
+	}
+	res := []controllers.FriendLinksGroup{
+		{
+			Name:  "community",
+			Links: []controllers.LinkItem{lItem},
+		},
+		{
+			Name:  "blog",
+			Links: []controllers.LinkItem{lItem},
+		},
+		{
+			Name:  "tool",
+			Links: []controllers.LinkItem{lItem},
+		},
+	}
+	configEntity := pageConfig.GetByPageType(controllers.FriendShipLinks)
+	if configEntity.Id == 0 {
+		configEntity.PageType = controllers.FriendShipLinks
+		configEntity.Config = jsonopt.Encode(res)
+		pageConfig.CreateOrSave(&configEntity)
+	}
 	// 是否有用户
 	// 是否有文章类别
 	// 是否用文章
