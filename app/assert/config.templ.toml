@@ -1,7 +1,7 @@
 [app]
 name = "app"
 env = "production" # APP_ENV in local,production
-debug = true
+debug = false
 enabled = false
 
 [server]
