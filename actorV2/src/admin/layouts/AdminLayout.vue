@@ -19,6 +19,7 @@ import {
   NLayoutHeader,
   NLayoutContent,
   NLayoutFooter,
+  NFlex,
   NMenu,
   NBreadcrumb,
   NBreadcrumbItem,
@@ -156,8 +157,8 @@ const handleUserSelect = (key: string) => {
 <template>
   <n-layout style="height: 100vh; overflow: hidden;">
     <!-- 顶部导航栏 -->
-    <n-layout-header bordered style="z-index: 999; width: 100%; height: 64px; left: 0; top: 0;">
-      <n-flex justify="space-between" align="center" class="header-container">
+    <n-layout-header bordered style="z-index: 999; width: 100%; height: 64px;">
+      <n-flex justify="space-between" align="center" style="height: 100%; padding: 0 24px; background: #fff;">
         <n-flex align="center" gap="16">
           <n-button quaternary circle @click="collapsed = !collapsed">
             <template #icon>
@@ -214,13 +215,10 @@ const handleUserSelect = (key: string) => {
       </n-layout-sider>
       <!-- 内容区 -->
       <n-layout-content
-        :style="{
-          overflow: 'auto',
-          background: '#f5f6fa'
-        }"
+       
       >
-        <n-card :bordered="false">
-          <router-view />
+        <n-card :bordered="false" style="height: 100%; min-height: 0; display: flex; flex-direction: column;">
+          <router-view style="flex: 1 1 auto;"/>
         </n-card>
       </n-layout-content>
     </n-layout>
@@ -236,32 +234,6 @@ const handleUserSelect = (key: string) => {
 .logo-small {
   height: 32px;
   width: 32px;
-}
-
-.header-container {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  background-color: #fff;
-  box-sizing: border-box;
-  width: 100%;
-  right: 0;
-  position: relative;
-  z-index: 1000;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  margin-right: 24px;
 }
 
 .footer-container {
