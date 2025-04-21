@@ -274,7 +274,7 @@ onMounted(() => {
                 size="small"
                 :bordered="false"
                 style="width: 260px; min-height: 140px; cursor: pointer;"
-                @click="showEditLink(groupIndex, linkIndex, item)"
+                @click="startEdit ? showEditLink(groupIndex, linkIndex, item) : null"
               >
                 <template #header-extra>
                   <n-button
@@ -330,45 +330,48 @@ onMounted(() => {
       </template>
     </draggable>
 
-    <template v-if="!startEdit">
-      <n-list-item v-for="groupItem in friendLinks">
+    <template v-else>
+      <n-list-item v-for="(groupItem, groupIndex) in friendLinks">
         <n-thing>
           <template #header>
             <span>{{ groupItem.name }}</span>
           </template>
           <n-space class="links-container">
             <n-card
-              v-for="item in groupItem.links"
-              :title="null"
+              v-for="(item, linkIndex) in groupItem.links"
+              :title="item.name"
               size="small"
               :bordered="false"
-              class="link-item"
-              style="width: 260px; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; position: relative;"
+              style="width: 260px; min-height: 140px; cursor: pointer;"
+              @click="startEdit ? showEditLink(groupIndex, linkIndex, item) : null"
             >
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <n-image
-                  v-if="item.logoUrl"
-                  :src="item.logoUrl"
-                  width="48"
-                  height="48"
-                  object-fit="contain"
-                  style="border-radius: 8px; border: 1px solid #eee; background: #fafbfc;"
-                />
-                <div style="flex:1; min-width:0;">
-                  <div style="font-weight: bold; font-size: 16px; line-height: 1.2; margin-bottom: 2px;">{{ item.name }}</div>
-                  <div style="color: #666; font-size: 13px; margin-bottom: 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ item.desc }}</div>
-                  <div style="color: #999; font-size: 12px; word-break: break-all;">{{ item.url }}</div>
-                </div>
-              </div>
-              <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
-                <n-button
-                  tag="a"
-                  :href="item.url"
-                  target="_blank"
-                  type="primary"
-                  size="small"
-                >访问链接</n-button>
-              </div>
+              <n-flex vertical style="height: 100%; justify-content: space-between;">
+                <n-flex align="start" gap="12">
+                  <n-image
+                    v-if="item.logoUrl"
+                    :src="item.logoUrl"
+                    width="48"
+                    height="48"
+                    object-fit="contain"
+                    style="border-radius: 8px; border: 1px solid #eee; background: #fafbfc;"
+                  />
+                  <n-flex vertical style="flex:1; min-width:0;">
+                    <div style="font-weight: bold; font-size: 16px; line-height: 1.2; margin-bottom: 2px;">{{ item.name }}</div>
+                    <div style="color: #666; font-size: 13px; margin-bottom: 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ item.desc }}</div>
+                    <div style="color: #999; font-size: 12px; word-break: break-all;">{{ item.url }}</div>
+                  </n-flex>
+                </n-flex>
+                <n-flex justify="end" style="margin-top: 12px;">
+                  <n-button
+                    tag="a"
+                    :href="item.url"
+                    target="_blank"
+                    type="primary"
+                    size="small"
+                    @click.stop
+                  >访问链接</n-button>
+                </n-flex>
+              </n-flex>
             </n-card>
           </n-space>
         </n-thing>
