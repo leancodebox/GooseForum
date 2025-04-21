@@ -19,6 +19,7 @@ import {
   NLayoutHeader,
   NLayoutContent,
   NLayoutFooter,
+  NScrollbar ,
   NFlex,
   NMenu,
   NBreadcrumb,
@@ -217,9 +218,13 @@ const handleUserSelect = (key: string) => {
       <n-layout-content
        
       >
+      <n-scrollbar style="height: 100%;">
         <n-card :bordered="false" style="height: 100%; min-height: 0; display: flex; flex-direction: column;">
-          <router-view style="flex: 1 1 auto;"/>
+          
+            <router-view style="flex: 1 1 auto;"/>
+          
         </n-card>
+      </n-scrollbar>
       </n-layout-content>
     </n-layout>
   </n-layout>
