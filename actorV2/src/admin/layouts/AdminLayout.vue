@@ -157,8 +157,8 @@ const handleUserSelect = (key: string) => {
   <n-layout style="height: 100vh; overflow: hidden;">
     <!-- 顶部导航栏 -->
     <n-layout-header bordered style="z-index: 999; width: 100%; height: 64px; left: 0; top: 0;">
-      <div class="header-container">
-        <div class="header-left">
+      <n-flex justify="space-between" align="center" class="header-container">
+        <n-flex align="center" gap="16">
           <n-button quaternary circle @click="collapsed = !collapsed">
             <template #icon>
               <n-icon size="18">
@@ -171,8 +171,8 @@ const handleUserSelect = (key: string) => {
             <n-breadcrumb-item>管理系统</n-breadcrumb-item>
             <n-breadcrumb-item>{{ currentPageTitle }}</n-breadcrumb-item>
           </n-breadcrumb>
-        </div>
-        <div class="header-right">
+        </n-flex>
+        <n-flex align="center">
           <n-dropdown :options="userOptions" @select="handleUserSelect">
             <n-button text>
               管理员
@@ -183,8 +183,8 @@ const handleUserSelect = (key: string) => {
               </template>
             </n-button>
           </n-dropdown>
-        </div>
-      </div>
+        </n-flex>
+      </n-flex>
     </n-layout-header>
     <!-- 主体部分：侧边栏+内容区 -->
     <n-layout has-sider style="height: calc(100vh - 64px);">
@@ -228,14 +228,6 @@ const handleUserSelect = (key: string) => {
 </template>
 
 <style scoped>
-.logo-container {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  transition: height 0.2s cubic-bezier(.4,0,.2,1);
-}
 
 .logo {
   height: 32px;
