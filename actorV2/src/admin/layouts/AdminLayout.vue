@@ -154,81 +154,72 @@ const handleUserSelect = (key: string) => {
 </script>
 
 <template>
-  <n-layout has-sider position="absolute" style="height: 100vh; overflow: hidden;">
-    <!-- 侧边栏 -->
-    <n-layout-sider
-      bordered
-      collapse-mode="width"
-      :collapsed-width="64"
-      :width="240"
-      :collapsed="collapsed"
-      show-trigger
-      @collapse="collapsed = true"
-      @expand="collapsed = false"
-      :native-scrollbar="false"
-      position="absolute"
-      style="transition: width 0.2s cubic-bezier(.4,0,.2,1);"
-    >
-      <div class="logo-container">
-        <img v-if="collapsed"  src="/favicon.ico" alt="Logo" class="logo-small" />
-        <img v-else src="/favicon.ico" alt="Logo" class="logo" />
-      </div>
-      <n-menu
-        :collapsed="collapsed"
-        :collapsed-width="64"
-        :collapsed-icon-size="22"
-        :options="menuOptions"
-        :render-label="renderMenuLabel"
-        :render-icon="renderMenuIcon"
-        :value="activeKey"
-        @update:value="handleMenuUpdate"
-      />
-    </n-layout-sider>
-
-    <!-- 主内容区 -->
-    <n-layout :style="contentStyle">
-      <!-- 顶部导航栏 -->
-      <n-layout-header bordered position="absolute" style="z-index: 999; width: 100%; height: 64px; left: 0; top: 0;">
-        <div class="header-container">
-          <div class="header-left">
-            <n-button quaternary circle @click="collapsed = !collapsed">
+  <n-layout style="height: 100vh; overflow: hidden;">
+    <!-- 顶部导航栏 -->
+    <n-layout-header bordered style="z-index: 999; width: 100%; height: 64px; left: 0; top: 0;">
+      <div class="header-container">
+        <div class="header-left">
+          <n-button quaternary circle @click="collapsed = !collapsed">
+            <template #icon>
+              <n-icon size="18">
+                <MenuOutline />
+              </n-icon>
+            </template>
+          </n-button>
+          <n-breadcrumb>
+            <n-breadcrumb-item>GooseForum</n-breadcrumb-item>
+            <n-breadcrumb-item>管理系统</n-breadcrumb-item>
+            <n-breadcrumb-item>{{ currentPageTitle }}</n-breadcrumb-item>
+          </n-breadcrumb>
+        </div>
+        <div class="header-right">
+          <n-dropdown :options="userOptions" @select="handleUserSelect">
+            <n-button text>
+              管理员
               <template #icon>
-                <n-icon size="18">
-                  <MenuOutline />
+                <n-icon>
+                  <PersonOutline />
                 </n-icon>
               </template>
             </n-button>
-            <n-breadcrumb>
-              <n-breadcrumb-item>GooseForum</n-breadcrumb-item>
-              <n-breadcrumb-item>管理系统</n-breadcrumb-item>
-              <n-breadcrumb-item>{{ currentPageTitle }}</n-breadcrumb-item>
-            </n-breadcrumb>
-          </div>
-          <div class="header-right">
-            <n-dropdown :options="userOptions" @select="handleUserSelect">
-              <n-button text>
-                管理员
-                <template #icon>
-                  <n-icon>
-                    <PersonOutline />
-                  </n-icon>
-                </template>
-              </n-button>
-            </n-dropdown>
-          </div>
+          </n-dropdown>
         </div>
-      </n-layout-header>
-
+      </div>
+    </n-layout-header>
+    <!-- 主体部分：侧边栏+内容区 -->
+    <n-layout has-sider style="height: calc(100vh - 64px);">
+      <!-- 侧边栏 -->
+      <n-layout-sider
+        bordered
+        collapse-mode="width"
+        :collapsed-width="64"
+        :width="240"
+        :collapsed="collapsed"
+        show-trigger
+        @collapse="collapsed = true"
+        @expand="collapsed = false"
+        :native-scrollbar="false"
+        style="transition: width 0.2s cubic-bezier(.4,0,.2,1);"
+      >
+        <n-menu
+          :collapsed="collapsed"
+          :collapsed-width="64"
+          :collapsed-icon-size="22"
+          :options="menuOptions"
+          :render-label="renderMenuLabel"
+          :render-icon="renderMenuIcon"
+          :value="activeKey"
+          @update:value="handleMenuUpdate"
+        />
+      </n-layout-sider>
       <!-- 内容区 -->
       <n-layout-content
         :style="{
-          marginTop: '64px',
-          height: 'calc(100vh - 64px)',
           overflow: 'auto',
           background: '#f5f6fa'
         }"
       >
-        <n-card   :bordered="false">
+        <n-card :bordered="false">
           <router-view />
         </n-card>
       </n-layout-content>
