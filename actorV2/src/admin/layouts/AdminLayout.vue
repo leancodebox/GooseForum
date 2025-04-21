@@ -37,7 +37,10 @@ const collapsed = ref(false)
 // 计算主内容区样式
 const contentStyle = computed(() => {
   return {
+    transition: 'padding-left 0.2s cubic-bezier(.4,0,.2,1)',
     paddingLeft: collapsed.value ? '64px' : '240px',
+    minHeight: '100vh',
+    background: '#f5f6fa'
   }
 })
 
@@ -151,7 +154,7 @@ const handleUserSelect = (key: string) => {
 </script>
 
 <template>
-  <n-layout has-sider position="absolute">
+  <n-layout has-sider position="absolute" style="height: 100vh; overflow: hidden;">
     <!-- 侧边栏 -->
     <n-layout-sider
       bordered
@@ -164,6 +167,7 @@ const handleUserSelect = (key: string) => {
       @expand="collapsed = false"
       :native-scrollbar="false"
       position="absolute"
+      style="transition: width 0.2s cubic-bezier(.4,0,.2,1);"
     >
       <div class="logo-container">
         <img v-if="collapsed"  src="/favicon.ico" alt="Logo" class="logo-small" />
@@ -184,7 +188,7 @@ const handleUserSelect = (key: string) => {
     <!-- 主内容区 -->
     <n-layout :style="contentStyle">
       <!-- 顶部导航栏 -->
-      <n-layout-header bordered position="absolute" style="z-index: 999; width: 100%;">
+      <n-layout-header bordered position="absolute" style="z-index: 999; width: 100%; height: 64px; left: 0; top: 0;">
         <div class="header-container">
           <div class="header-left">
             <n-button quaternary circle @click="collapsed = !collapsed">
@@ -216,17 +220,21 @@ const handleUserSelect = (key: string) => {
       </n-layout-header>
 
       <!-- 内容区 -->
-      <n-layout-content content-style="padding: 24px;" :style="{ marginTop: '64px' }">
-        <n-card>
+      <n-layout-content
+        :style="{
+          marginTop: '64px',
+          height: 'calc(100vh - 64px)',
+          overflow: 'auto',
+          background: '#f5f6fa'
+        }"
+      >
+        <n-card   :bordered="false">
           <router-view />
         </n-card>
       </n-layout-content>
-
     </n-layout>
   </n-layout>
 </template>
-
-
 
 <style scoped>
 .logo-container {
@@ -235,6 +243,7 @@ const handleUserSelect = (key: string) => {
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  transition: height 0.2s cubic-bezier(.4,0,.2,1);
 }
 
 .logo {
@@ -256,6 +265,8 @@ const handleUserSelect = (key: string) => {
   box-sizing: border-box;
   width: 100%;
   right: 0;
+  position: relative;
+  z-index: 1000;
 }
 
 .header-left {
