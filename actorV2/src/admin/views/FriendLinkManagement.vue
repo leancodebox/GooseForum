@@ -240,48 +240,50 @@ onMounted(() => {
               </n-space>
               <span v-else>{{ groupItem.name }}</span>
             </template>
-            <n-space wrap>
-              <draggable
-                  v-model="groupItem.links"
-                  @change="(e) => handleLinkDrag(groupIndex, e)"
-                  item-key="url"
-                  handle=".link-drag-handle"
-                  :animation="150"
-                  class="links-container"
+            <n-space>
+              <n-card
+                v-for="(item, linkIndex) in groupItem.links"
+                :title="item.name"
+                size="small"
+                :bordered="false"
+                class="link-item"
+                @click="showEditLink(groupIndex, linkIndex, item)"
+                style="cursor:pointer;position:relative;"
               >
-                <template #item="{element: item, index: linkIndex}">
-                  <div class="link-item">
-                    <n-button
-                        circle
-                        size="tiny"
-                        class="link-drag-handle"
-                        v-if="startEdit"
-                    >
-                      ≡
-                    </n-button>
-                    <n-button
-                        :style="{width:'180px',overflow:'hidden',textOverflow:'ellipsis'}"
-                        dashed
-                        type="default"
-                        :size="'small'"
-                        @click="startEdit ? showEditLink(groupIndex, linkIndex, item) : null"
-                        :tag="startEdit ? 'button' : 'a'"
-                        :href="startEdit ? null : item.url"
-                    >
-                      {{ item.name }}
-                    </n-button>
-                    <n-button
-                        v-if="startEdit"
-                        circle
-                        type="error"
-                        :size="'small'"
-                        @click="handleDeleteLink(groupIndex, linkIndex)"
-                    >
-                      删
-                    </n-button>
-                  </div>
+                <template #header-extra>
+                  <n-button
+                    v-if="startEdit"
+                    circle
+                    type="error"
+                    size="small"
+                    style="position:absolute;top:8px;right:8px;z-index:2;"
+                    @click.stop="handleDeleteLink(groupIndex, linkIndex)"
+                  >删</n-button>
                 </template>
-              </draggable>
+                <n-space vertical>
+                  <n-space align="center">
+                    <n-image
+                      v-if="item.logoUrl"
+                      :src="item.logoUrl"
+                      width="50"
+                      height="50"
+                      object-fit="contain"
+                    />
+                    <n-space vertical>
+                      <n-text>{{ item.desc }}</n-text>
+                      <n-text depth="3">{{ item.url }}</n-text>
+                    </n-space>
+                  </n-space>
+                  <n-button
+                    tag="a"
+                    :href="item.url"
+                    target="_blank"
+                    type="primary"
+                    size="small"
+                    @click.stop
+                  >访问链接</n-button>
+                </n-space>
+              </n-card>
               <n-button
                   dashed
                   type="primary"
