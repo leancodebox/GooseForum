@@ -201,7 +201,6 @@ const handleUserSelect = (key: string) => {
         @collapse="collapsed = true"
         @expand="collapsed = false"
         :native-scrollbar="false"
-        style="transition: width 0.2s cubic-bezier(.4,0,.2,1);"
       >
         <n-menu
           :collapsed="collapsed"
