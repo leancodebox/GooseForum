@@ -160,42 +160,68 @@ onMounted(() => {
 <template>
   <n-modal v-model:show="showLinkModal">
     <n-card
-        style="width: 500px"
+        style="width: 520px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08);"
         :title="modalMode === 'add' ? '添加友情链接' : '编辑友情链接'"
         :bordered="false"
         size="huge"
     >
       <n-space vertical size="large">
-        <n-input
-            v-model:value="editingLink.name"
-            placeholder="链接名称"
-            clearable
-        />
-        <n-input
-            v-model:value="editingLink.desc"
-            placeholder="desc"
-            clearable
-        />
-        <n-input
-            v-model:value="editingLink.url"
-            placeholder="链接地址"
-            clearable
-        />
-        <n-input
-            v-model:value="editingLink.logoUrl"
-            placeholder="链接地址"
-            clearable
-        />
-        <n-switch v-model:value="editingLink.status" :checked-value="1" :unchecked-value="0"/>
-      </n-space>
-      <template #footer>
+        <n-grid cols="12" x-gap="16" y-gap="12">
+          <n-grid-item span="3">
+            <n-avatar
+              :src="editingLink.logoUrl || 'https://naive-ui.oss-cn-beijing.aliyuncs.com/logo.png'"
+              size="64"
+              style="border-radius: 8px; border: 1px solid #eee; background: #fafbfc;"
+            />
+          </n-grid-item>
+          <n-grid-item span="9">
+            <n-form label-placement="left" label-width="60">
+              <n-form-item label="名称">
+                <n-input
+                    v-model:value="editingLink.name"
+                    placeholder="请输入链接名称"
+                    clearable
+                    maxlength="20"
+                    show-count
+                />
+              </n-form-item>
+              <n-form-item label="描述">
+                <n-input
+                    v-model:value="editingLink.desc"
+                    placeholder="简要描述（可选）"
+                    clearable
+                    maxlength="40"
+                    show-count
+                />
+              </n-form-item>
+              <n-form-item label="地址">
+                <n-input
+                    v-model:value="editingLink.url"
+                    placeholder="请输入链接地址"
+                    clearable
+                />
+              </n-form-item>
+              <n-form-item label="Logo">
+                <n-input
+                    v-model:value="editingLink.logoUrl"
+                    placeholder="Logo图片URL（可选）"
+                    clearable
+                />
+              </n-form-item>
+              <n-form-item label="状态">
+                <n-switch v-model:value="editingLink.status" :checked-value="1" :unchecked-value="0"/>
+              </n-form-item>
+            </n-form>
+          </n-grid-item>
+        </n-grid>
+        <n-divider style="margin: 0 0 8px 0;"/>
         <n-space justify="end">
           <n-button @click="showLinkModal = false">取消</n-button>
           <n-button type="primary" @click="handleSaveLink">
             {{ modalMode === 'add' ? '添加' : '保存' }}
           </n-button>
         </n-space>
-      </template>
+      </n-space>
     </n-card>
   </n-modal>
 
