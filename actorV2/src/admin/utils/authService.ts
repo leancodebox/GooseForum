@@ -99,3 +99,9 @@ export function applySheetList(page = 1, pageSize = 10): Promise<Result<PageData
 export function getFriendLinks(): Promise<Result<FriendLinksGroup[]>> {
     return axiosInstance.get("/admin/friend-links")
 }
+
+export function saveFriendLinks(params:any): Promise<Result<FriendLinksGroup[]>> {
+    return axiosInstance.post("/admin/save-friend-links",{
+        linksInfo:params
+    })
+}

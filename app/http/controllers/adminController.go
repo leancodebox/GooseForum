@@ -478,21 +478,30 @@ type FriendLinksGroup struct {
 
 func GetFriendLinks(req component.BetterRequest[null]) component.Response {
 	configEntity := pageConfig.GetByPageType(FriendShipLinks)
-	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
-	lItem := LinkItem{
-		Name:    "NAME",
-		Desc:    "DESC-GooseForum",
-		Url:     "https://gooseforum.online",
-		LogoUrl: "/static/pic/default-avatar.png",
-	}
-	item := FriendLinksGroup{
-		Name:  "community",
-		Links: []LinkItem{lItem, lItem, lItem},
-	}
-	res = []FriendLinksGroup{
-		item,
-		item,
-		item,
+	var res []FriendLinksGroup
+	if configEntity.Id == 0 {
+		lItem := LinkItem{
+			Name:    "GooseForum",
+			Desc:    "DESC-GooseForum",
+			Url:     "https://gooseforum.online",
+			LogoUrl: "/static/pic/default-avatar.png",
+		}
+		res = []FriendLinksGroup{
+			FriendLinksGroup{
+				Name:  "community",
+				Links: []LinkItem{lItem},
+			},
+			FriendLinksGroup{
+				Name:  "blog",
+				Links: []LinkItem{lItem},
+			},
+			FriendLinksGroup{
+				Name:  "tool",
+				Links: []LinkItem{lItem},
+			},
+		}
+	} else {
+		res = jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
 	}
 	return component.SuccessResponse(res)
 }
