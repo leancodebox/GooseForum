@@ -2,7 +2,7 @@
 import {onMounted, ref} from 'vue'
 import {NButton, NCard, NInput, NList, NListItem, NModal, NSpace, NThing, useMessage} from 'naive-ui'
 import draggable from 'vuedraggable'
-import {getFriendLinks} from "@/admin/utils/authService.ts";
+import {getFriendLinks, saveFriendLinks} from "@/admin/utils/authService.ts";
 import type {FriendLinksGroup} from "@/admin/types/adminInterfaces.ts";
 
 const message = useMessage()
@@ -129,7 +129,8 @@ async function saveConfig() {
 
   try {
     // 调用API保存配置
-    // await saveFriendLinks(friendLinks.value)
+    // console.log(friendLinks.value)
+    await saveFriendLinks(friendLinks.value)
     message.success('保存成功')
   } catch (error) {
     message.error('保存失败')
@@ -255,7 +256,7 @@ onMounted(() => {
                 <n-button circle size="small" class="group-drag-handle">
                   ≡
                 </n-button>
-                <n-input v-model:value="groupItem.name"></n-input>
+                <n-input v-model:value="groupItem.name" disabled></n-input>
                 <n-button
                     type="error"
                     size="small"

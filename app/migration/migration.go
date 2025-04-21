@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
@@ -63,6 +64,7 @@ func migration(migration bool) {
 			&taskQueue.Entity{},
 			&articleLike.Entity{},
 			&applySheet.Entity{},
+			&pageConfig.Entity{},
 		); err != nil {
 			slog.Error("dbconnect migration err", "err", err)
 		} else {

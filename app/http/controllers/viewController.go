@@ -15,6 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
@@ -479,7 +480,14 @@ func getHost(c *gin.Context) string {
 }
 
 func Links(c *gin.Context) {
-	c.HTML(http.StatusOK, "links.gohtml", gin.H{"title": "友情链接 - GooseForum", "User": GetLoginUser(c)})
+
+	configEntity := pageConfig.GetByPageType(FriendShipLinks)
+	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
+	c.HTML(http.StatusOK, "links.gohtml", gin.H{
+		"title":            "友情链接 - GooseForum",
+		"User":             GetLoginUser(c),
+		"FriendLinksGroup": res,
+	})
 }
 
 func Contact(c *gin.Context) {
