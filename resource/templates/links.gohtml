@@ -16,8 +16,9 @@
                         {{if eq .Name `tool`}}<span class="group-icon group-icon-tool"></span>工具/产品类{{end}}
                     </h2>
                     <div class="links-list">
+                    {{ $groupName := .Name }}
                         {{range .Links}}
-                            <a class="friend-link-card community" href="{{.Url}}" target="_blank"
+                            <a class="friend-link-card {{$groupName}}" href="{{.Url}}" target="_blank"
                                rel="noopener nofollow">
                                 <img class="friend-link-logo" src="{{.LogoUrl}}"
                                      alt="{{.Name}} logo">
@@ -29,88 +30,6 @@
                         {{end}}
                     </div>
                 {{end}}
-                <!-- 社区类 -->
-                <h2 class="links-group-title"><span class="group-icon group-icon-community"></span>社区类</h2>
-                <div class="links-list">
-                    <a class="friend-link-card community" href="https://segmentfault.com/" target="_blank"
-                       rel="noopener nofollow">
-                        <img class="friend-link-logo" src="/static/pic/default-avatar.png" alt="SegmentFault logo">
-                        <div class="friend-link-info">
-                            <div class="friend-link-title">SegmentFault 思否</div>
-                            <div class="friend-link-desc">中国领先的开发者技术社区</div>
-                        </div>
-                    </a>
-                    <a class="friend-link-card community" href="https://www.v2ex.com/" target="_blank"
-                       rel="noopener nofollow">
-                        <img class="friend-link-logo" src="https://www.v2ex.com/static/icon-192.png" alt="V2EX logo">
-                        <div class="friend-link-info">
-                            <div class="friend-link-title">V2EX</div>
-                            <div class="friend-link-desc">创意工作者的社区</div>
-                        </div>
-                    </a>
-                    <a class="friend-link-card community" href="https://www.oschina.net/" target="_blank"
-                       rel="noopener nofollow">
-                        <img class="friend-link-logo" src="/static/pic/default-avatar.png" alt="开源中国 logo">
-                        <div class="friend-link-info">
-                            <div class="friend-link-title">开源中国</div>
-                            <div class="friend-link-desc">中文开源技术交流社区</div>
-                        </div>
-                    </a>
-                    <a class="friend-link-card community" href="https://learnku.com" target="_blank"
-                       rel="noopener nofollow">
-                        <img class="friend-link-logo" src="/static/pic/default-avatar.png" alt="Leanku logo">
-                        <div class="friend-link-info">
-                            <div class="friend-link-title">LearnKu</div>
-                            <div class="friend-link-desc">专为终身学习者定制的编程知识社区</div>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- 博客类 -->
-                <h2 class="links-group-title"><span class="group-icon group-icon-blog"></span>博客类</h2>
-                <div class="links-list">
-                    <a class="friend-link-card blog" href="https://coolshell.cn/" target="_blank"
-                       rel="noopener nofollow">
-                        <img class="friend-link-logo" src="/static/pic/default-avatar.png" alt="酷壳 logo">
-                        <div class="friend-link-info">
-                            <div class="friend-link-title">酷壳 - CoolShell</div>
-                            <div class="friend-link-desc">陈皓的技术博客</div>
-                        </div>
-                    </a>
-                    <a class="friend-link-card blog" href="https://www.ruanyifeng.com/blog/" target="_blank"
-                       rel="noopener nofollow">
-                        <img class="friend-link-logo" src="/static/pic/default-avatar.png" alt="阮一峰 logo">
-                        <div class="friend-link-info">
-                            <div class="friend-link-title">阮一峰的网络日志</div>
-                            <div class="friend-link-desc">科技、编程、互联网</div>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- 工具/产品类 -->
-                <h2 class="links-group-title"><span class="group-icon group-icon-tool"></span>工具/产品类</h2>
-                <div class="links-list">
-                    <a class="friend-link-card tool" href="https://www.jetbrains.com/" target="_blank"
-                       rel="noopener nofollow">
-                        <img class="friend-link-logo"
-                             src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png"
-                             alt="JetBrains logo">
-                        <div class="friend-link-info">
-                            <div class="friend-link-title">JetBrains</div>
-                            <div class="friend-link-desc">开发者工具与 IDE</div>
-                        </div>
-                    </a>
-                    <a class="friend-link-card tool" href="https://github.com/" target="_blank" rel="noopener nofollow">
-                        <img class="friend-link-logo"
-                             src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-                             alt="GitHub logo">
-                        <div class="friend-link-info">
-                            <div class="friend-link-title">GitHub</div>
-                            <div class="friend-link-desc">全球最大开源代码托管平台</div>
-                        </div>
-                    </a>
-                </div>
-
                 <div class="links-tips">
                     <p>欢迎优秀社区、博客、技术站点交换友链！请联系站长或在 <a href="/link-contact"
                                                                             target="_blank">联系我们</a> 页面留言。</p>
