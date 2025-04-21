@@ -267,15 +267,14 @@ onMounted(() => {
               </n-space>
               <span v-else>{{ groupItem.name }}</span>
             </template>
-            <n-space>
+            <n-space class="links-container">
               <n-card
                 v-for="(item, linkIndex) in groupItem.links"
                 :title="item.name"
                 size="small"
                 :bordered="false"
-                class="link-item"
+                style="width: 260px; min-height: 140px; cursor: pointer;"
                 @click="showEditLink(groupIndex, linkIndex, item)"
-                style="cursor:pointer;position:relative;"
               >
                 <template #header-extra>
                   <n-button
@@ -287,36 +286,41 @@ onMounted(() => {
                     @click.stop="handleDeleteLink(groupIndex, linkIndex)"
                   >删</n-button>
                 </template>
-                <n-space vertical>
-                  <n-space align="center">
+                <n-flex vertical style="height: 100%; justify-content: space-between;">
+                  <n-flex align="start" gap="12">
                     <n-image
                       v-if="item.logoUrl"
                       :src="item.logoUrl"
-                      width="50"
-                      height="50"
+                      width="48"
+                      height="48"
                       object-fit="contain"
+                      style="border-radius: 8px; border: 1px solid #eee; background: #fafbfc;"
                     />
-                    <n-space vertical>
-                      <n-text>{{ item.desc }}</n-text>
-                      <n-text depth="3">{{ item.url }}</n-text>
-                    </n-space>
-                  </n-space>
-                  <n-button
-                    tag="a"
-                    :href="item.url"
-                    target="_blank"
-                    type="primary"
-                    size="small"
-                    @click.stop
-                  >访问链接</n-button>
-                </n-space>
+                    <n-flex vertical style="flex:1; min-width:0;">
+                      <div style="font-weight: bold; font-size: 16px; line-height: 1.2; margin-bottom: 2px;">{{ item.name }}</div>
+                      <div style="color: #666; font-size: 13px; margin-bottom: 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ item.desc }}</div>
+                      <div style="color: #999; font-size: 12px; word-break: break-all;">{{ item.url }}</div>
+                    </n-flex>
+                  </n-flex>
+                  <n-flex justify="end" style="margin-top: 12px;">
+                    <n-button
+                      tag="a"
+                      :href="item.url"
+                      target="_blank"
+                      type="primary"
+                      size="small"
+                      @click.stop
+                    >访问链接</n-button>
+                  </n-flex>
+                </n-flex>
               </n-card>
               <n-button
-                  dashed
-                  type="primary"
-                  :size="'small'"
-                  v-if="startEdit"
-                  @click="showAddLink(groupIndex)"
+                dashed
+                type="primary"
+                :size="'small'"
+                v-if="startEdit"
+                @click="showAddLink(groupIndex)"
+                style="width: 260px; height: 140px;"
               >
                 添加链接
               </n-button>
@@ -332,37 +336,39 @@ onMounted(() => {
           <template #header>
             <span>{{ groupItem.name }}</span>
           </template>
-          <n-space>
+          <n-space class="links-container">
             <n-card
               v-for="item in groupItem.links"
-              :title="item.name"
+              :title="null"
               size="small"
               :bordered="false"
+              class="link-item"
+              style="width: 260px; min-height: 140px; display: flex; flex-direction: column; justify-content: space-between; position: relative;"
             >
-              <n-space vertical>
-                <n-space align="center">
-                  <n-image
-                    v-if="item.logoUrl"
-                    :src="item.logoUrl"
-                    width="50"
-                    height="50"
-                    object-fit="contain"
-                  />
-                  <n-space vertical>
-                    <n-text>{{ item.desc }}</n-text>
-                    <n-text depth="3">{{ item.url }}</n-text>
-                  </n-space>
-                </n-space>
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <n-image
+                  v-if="item.logoUrl"
+                  :src="item.logoUrl"
+                  width="48"
+                  height="48"
+                  object-fit="contain"
+                  style="border-radius: 8px; border: 1px solid #eee; background: #fafbfc;"
+                />
+                <div style="flex:1; min-width:0;">
+                  <div style="font-weight: bold; font-size: 16px; line-height: 1.2; margin-bottom: 2px;">{{ item.name }}</div>
+                  <div style="color: #666; font-size: 13px; margin-bottom: 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ item.desc }}</div>
+                  <div style="color: #999; font-size: 12px; word-break: break-all;">{{ item.url }}</div>
+                </div>
+              </div>
+              <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
                 <n-button
                   tag="a"
                   :href="item.url"
                   target="_blank"
                   type="primary"
                   size="small"
-                >
-                  访问链接
-                </n-button>
-              </n-space>
+                >访问链接</n-button>
+              </div>
             </n-card>
           </n-space>
         </n-thing>
@@ -384,8 +390,8 @@ onMounted(() => {
 .links-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
+  gap: 16px;
+  align-items: flex-start;
 }
 
 .link-item {
