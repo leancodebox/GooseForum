@@ -32,8 +32,8 @@ func frontend(ginApp *gin.Engine) {
 func auth(ginApp *gin.Engine) {
 	// 非登陆下的用户操作
 	ginApp.Group("api").
-		POST("reg", ginUpP(controllers.Register)).
-		POST("login", ginUpP(controllers.Login)).
+		//POST("reg", ginUpP(controllers.Register)).
+		//POST("login", ginUpP(controllers.Login)).
 		GET("get-captcha", ginUpNP(controllers.GetCaptcha)).
 		POST("get-user-info-show", ginUpP(controllers.GetUserInfo))
 	// 登陆状态下的用户操作
@@ -66,7 +66,7 @@ func viewRoute(ginApp *gin.Engine) {
 	forumApi.POST("apply-link-add", UpButterReq(controllers.ApplyAddLink))
 }
 
-func forum(ginApp *gin.Engine) {
+func forumRoute(ginApp *gin.Engine) {
 	forumApi := ginApp.Group("api/bbs")
 	// 站点统计
 	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
