@@ -36,7 +36,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	// 接口
 	auth(ginApp)
 	viewRoute(ginApp)
-	forum(ginApp)
+	forumRoute(ginApp)
 	fileServer(ginApp)
 
 	ginApp.NoRoute(controllers.NotFound)
