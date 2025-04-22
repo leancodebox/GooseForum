@@ -30,15 +30,7 @@ import (
 )
 
 func Logout(c *gin.Context) {
-	c.SetCookie(
-		"access_token",
-		"",
-		-1, // 24小时
-		"/",
-		"",    // 域名，为空表示当前域名
-		false, // 仅HTTPS
-		true,  // HttpOnly
-	)
+	jwt.TokenClean(c)
 	c.JSON(http.StatusOK, component.SuccessData(
 		"再见",
 	))
@@ -88,17 +80,9 @@ func RegisterHandle(c *gin.Context) {
 
 		c.JSON(200, component.FailData("注册异常，尝试登陆"))
 	}
-
 	// 设置Cookie
-	c.SetCookie(
-		"access_token",
-		token,
-		86400, // 24小时
-		"/",
-		"",    // 域名，为空表示当前域名
-		false, // 仅HTTPS
-		true,  // HttpOnly
-	)
+	jwt.TokenSetting(c, token)
+
 	c.JSON(http.StatusOK, component.SuccessData(
 		"登录成功",
 	))
@@ -139,16 +123,7 @@ func LoginHandler(c *gin.Context) {
 		c.JSON(200, component.FailData(err))
 		return
 	}
-	// 设置Cookie
-	c.SetCookie(
-		"access_token",
-		token,
-		86400, // 24小时
-		"/",
-		"",    // 域名，为空表示当前域名
-		false, // 仅HTTPS
-		true,  // HttpOnly
-	)
+	jwt.TokenSetting(c, token)
 	c.JSON(http.StatusOK, component.SuccessData(
 		"登录成功",
 	))
