@@ -7,6 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
@@ -22,12 +23,21 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
 	"html/template"
+	"regexp"
 	"strings"
 
 	"log/slog"
 	"net/http"
 	"time"
 )
+
+var (
+	usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{6,32}$`)
+)
+
+func ValidateUsername(username string) bool {
+	return usernameRegex.MatchString(username)
+}
 
 func Logout(c *gin.Context) {
 	jwt.TokenClean(c)
@@ -40,7 +50,15 @@ func Logout(c *gin.Context) {
 func RegisterHandle(c *gin.Context) {
 	var r RegReq
 	if err := c.ShouldBindJSON(&r); err != nil {
-		c.JSON(200, component.FailData("验证失败"))
+		c.JSON(200, component.FailData(err))
+		return
+	}
+	if err := validate.Valid(r); err != nil {
+		c.JSON(200, component.FailData(validate.FormatError(err)))
+		return
+	}
+	if !ValidateUsername(r.Username) {
+		c.JSON(200, component.FailData("用户名仅允许字母、数字、下划线、连字符，长度6-32"))
 		return
 	}
 	// 首先验证验证码
