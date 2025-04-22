@@ -1,7 +1,10 @@
 package jwtopt
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/spf13/cast"
+	"strings"
 	"sync"
 	"time"
 )
@@ -48,4 +51,39 @@ func VerifyToken(tokenStr string) (userId uint64, err error) {
 		return 0, err
 	}
 	return claims.UserId, err
+}
+
+func GetGinAccessToken(c *gin.Context) string {
+	var token string
+	token = c.GetHeader("Authorization")
+	token = strings.ReplaceAll(token, "Bearer ", "")
+	if token == "" {
+		token, _ = c.Cookie("access_token")
+	}
+	return token
+}
+
+func TokenSetting(c *gin.Context, newToken string) {
+	c.Header("New-Token", newToken)
+	c.SetCookie(
+		"access_token",
+		newToken,
+		cast.ToInt(validTime/time.Second), // 24小时
+		"/",
+		"",    // 域名，为空表示当前域名
+		false, // 仅HTTPS
+		true,  // HttpOnly
+	)
+}
+
+func TokenClean(c *gin.Context) {
+	c.SetCookie(
+		"access_token",
+		"",
+		-1, // 过期
+		"/",
+		"",    // 域名，为空表示当前域名
+		false, // 仅HTTPS
+		true,  // HttpOnly
+	)
 }
