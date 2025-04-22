@@ -93,7 +93,7 @@ func RegisterHandle(c *gin.Context) {
 	pointservice.InitUserPoints(userEntity.Id, 100)
 
 	// 生成 token
-	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
+	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
 	if err != nil {
 
 		c.JSON(200, component.FailData("注册异常，尝试登陆"))
@@ -135,7 +135,7 @@ func LoginHandler(c *gin.Context) {
 		c.JSON(200, component.FailData(err))
 		return
 	}
-	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
+	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
 	if err != nil {
 		slog.Info(cast.ToString(err))
 		c.JSON(200, component.FailData(err))

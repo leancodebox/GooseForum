@@ -23,6 +23,14 @@ func Std() *JWT {
 	return std
 }
 
+func CreateNewTokenDefault(userId uint64) (string, error) {
+	cc := CustomClaims{
+		UserId:           userId,
+		RegisteredClaims: GetBaseRegisteredClaims(validTime),
+	}
+	return Std().CreateToken(cc)
+}
+
 func CreateNewToken(userId uint64, expireTime time.Duration) (string, error) {
 	cc := CustomClaims{
 		UserId:           userId,
