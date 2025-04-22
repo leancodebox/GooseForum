@@ -20,10 +20,6 @@ import (
 	"github.com/spf13/cast"
 )
 
-const (
-	expireTime = time.Second * 86400 * 7
-)
-
 type RegReq struct {
 	Email          string `json:"email" validate:"required,email"`
 	Username       string `json:"userName"  validate:"required"`
