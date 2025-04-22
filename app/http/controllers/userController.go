@@ -8,13 +8,11 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
-	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
-	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 
 	"github.com/gin-gonic/gin"
@@ -27,56 +25,12 @@ const (
 )
 
 type RegReq struct {
-	Email          string `json:"email" validate:"required"`
+	Email          string `json:"email" validate:"required,email"`
 	Username       string `json:"userName"  validate:"required"`
 	Password       string `json:"passWord"  validate:"required"`
 	InvitationCode string `json:"invitationCode,omitempty"`
 	CaptchaId      string `json:"captchaId" validate:"required"`
 	CaptchaCode    string `json:"captchaCode" validate:"required"`
-}
-
-// Register 注册
-func Register(r RegReq) component.Response {
-	// 首先验证验证码
-	if !VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
-		return component.FailResponse("验证码错误或已过期")
-	}
-
-	// 检查用户名是否已存在
-	if users.ExistUsername(r.Username) {
-		return component.FailResponse("用户名已存在")
-	}
-
-	// 检查邮箱是否已存在
-	if users.ExistEmail(r.Email) {
-		return component.FailResponse("邮箱已被使用")
-	}
-
-	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
-	err := users.Create(userEntity)
-	if err != nil {
-		return component.FailResponse(cast.ToString(err))
-	}
-
-	if err = SendAEmail4User(userEntity); err != nil {
-		slog.Error("添加邮件任务到队列失败", "error", err)
-	}
-
-	// 初始化用户积分
-	pointservice.InitUserPoints(userEntity.Id, 100)
-
-	// 生成 token
-	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
-	if err != nil {
-		return component.FailResponse(cast.ToString(err))
-	}
-
-	return component.SuccessResponse(component.DataMap{
-		"username":  userEntity.Username,
-		"userId":    userEntity.Id,
-		"token":     token,
-		"avatarUrl": urlconfig.GetDefaultAvatar(),
-	})
 }
 
 func SendAEmail4User(userEntity *users.Entity) error {
@@ -103,27 +57,6 @@ type LoginReq struct {
 	Password    string `json:"password"   validate:"required"`
 	CaptchaId   string `json:"captchaId"`
 	CaptchaCode string `json:"captchaCode"`
-}
-
-// Login 登录只返回 token
-func Login(r LoginReq) component.Response {
-	if !VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
-		return component.FailResponse("验证失败")
-	}
-	userEntity, err := users.Verify(r.Username, r.Password)
-	if err != nil {
-		slog.Info(cast.ToString(err))
-		return component.FailResponse("验证失败")
-	}
-	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
-	if err != nil {
-		slog.Info(cast.ToString(err))
-		return component.FailResponse("验证失败")
-	}
-
-	return component.SuccessResponse(component.DataMap{
-		"token": token,
-	})
 }
 
 func GetCaptcha() component.Response {
