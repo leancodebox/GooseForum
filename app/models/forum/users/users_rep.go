@@ -4,6 +4,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 )
 
 func Get(id any) (entity Entity, err error) {
@@ -74,14 +75,8 @@ func Page(q PageQuery) struct {
 	Data     []Entity
 } {
 	var list []Entity
-	if q.Page > 0 {
-		q.Page -= 1
-	} else {
-		q.Page = 0
-	}
-	if q.PageSize < 1 {
-		q.PageSize = 10
-	}
+	q.Page = max(q.Page-1, 0)
+	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	b := builder()
 	cB := builder()
 	if q.Username != "" {
