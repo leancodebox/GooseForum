@@ -77,6 +77,13 @@ func (itself *Entity) GetWebAvatarUrl() string {
 	return strings.ReplaceAll(urlconfig.FilePath(itself.AvatarUrl), "\\", "/")
 }
 
+func (itself *Entity) GetShowName() string {
+	if itself.Nickname != "" {
+		return itself.Nickname
+	}
+	return itself.Username
+}
+
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
 // func (itself *Entity) BeforeCreate(tx *gorm.DB) (err error) {}
 // func (itself *Entity) AfterCreate(tx *gorm.DB) (err error) {}
