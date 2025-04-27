@@ -3,6 +3,7 @@ package articles
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"time"
 )
 
@@ -92,14 +93,8 @@ func Page[ResType SmallEntity | Entity](q PageQuery) struct {
 	Data     []ResType
 } {
 	var list []ResType
-	if q.Page > 0 {
-		q.Page -= 1
-	} else {
-		q.Page = 0
-	}
-	if q.PageSize < 1 {
-		q.PageSize = 10
-	}
+	q.Page = max(q.Page-1, 0)
+	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	b := builder()
 	if q.Search != "" {
 		b.Where(queryopt.Like(fieldContent, q.Search))
