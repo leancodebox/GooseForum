@@ -2,6 +2,11 @@ package controllers
 
 import (
 	"fmt"
+	"html/template"
+	"math/rand"
+	"regexp"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
@@ -22,9 +27,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
-	"html/template"
-	"regexp"
-	"strings"
 
 	"log/slog"
 	"net/http"
@@ -80,6 +82,7 @@ func RegisterHandle(c *gin.Context) {
 	}
 
 	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
+	userEntity.Nickname = generateGooseNickname()
 	err := users.Create(userEntity)
 	if err != nil {
 		c.JSON(200, component.FailData("注册失败"))
@@ -511,4 +514,22 @@ func ApplyAddLink(req component.BetterRequest[ApplyAddLinkReq]) component.Respon
 	applySheet.SaveOrCreateById(&entity)
 
 	return component.SuccessResponse("")
+}
+
+// 新增生成鹅相关昵称的函数
+func generateGooseNickname() string {
+	prefixes := []string{
+		"鹅", "大白鹅", "灰鹅", "小鹅", "鹅宝",
+		"Goose", "Gander", "Gosling", "Honker",
+	}
+
+	prefix := prefixes[rand.Intn(len(prefixes))]
+	
+	// 使用纳秒级时间戳+随机数确保唯一性
+	now := time.Now()
+	timestamp := now.UnixNano()
+	randomPart := rand.Intn(1000)
+	
+	// 组合成16进制字符串
+	return fmt.Sprintf("%s%x%03d", prefix, timestamp, randomPart)
 }
