@@ -24,6 +24,9 @@ export const useUserStore = defineStore('auth', () => {
             // 使用类型断言，确保返回值符合 UserInfo 接口
             let res = await getUserInfo() as unknown as Result<UserInfo>; // 这里会调用 Mock 数据
             userInfo.value = res.result
+            if (!userInfo.value.isAdmin) {
+                window.location.href = '/';
+            }
         } catch (error) {
             console.error('获取用户信息失败:', error);
         }
