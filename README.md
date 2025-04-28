@@ -33,6 +33,9 @@ GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分
 ```
 go build -ldflags="-w -s" .
 ```
+```shell
+npx @tailwindcss/cli -i ./static/css/input.css -o ./static/css/output.css --watch            
+```
 windows
 ```
 SET CGO_ENABLED=0
