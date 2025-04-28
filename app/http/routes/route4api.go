@@ -32,8 +32,6 @@ func frontend(ginApp *gin.Engine) {
 func auth(ginApp *gin.Engine) {
 	// 非登陆下的用户操作
 	ginApp.Group("api").
-		//POST("reg", ginUpP(controllers.Register)).
-		//POST("login", ginUpP(controllers.Login)).
 		GET("get-captcha", ginUpNP(controllers.GetCaptcha)).
 		POST("get-user-info-show", ginUpP(controllers.GetUserInfo))
 	// 登陆状态下的用户操作
