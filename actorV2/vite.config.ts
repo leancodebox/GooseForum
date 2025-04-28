@@ -40,7 +40,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: fileURLToPath(new URL('./index.html', import.meta.url)),
-        admin: fileURLToPath(new URL('./admin.html', import.meta.url))
+        admin: fileURLToPath(new URL('./admin.html', import.meta.url)),
+        post: fileURLToPath(new URL('./pages/post.html', import.meta.url)),
+        detail: fileURLToPath(new URL('./pages/detail.html', import.meta.url))
       }
     },
     emptyOutDir:true,
