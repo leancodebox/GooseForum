@@ -14,6 +14,22 @@ interface UserInfo {
     userId: number;
     username: string;
     website: string;
+    websiteName: string;
+    externalInformation: ExternalInformation;
+}
+
+
+export interface ExternalInformation {
+    github: ExternalInformationItem,
+    weibo: ExternalInformationItem,
+    bilibili: ExternalInformationItem,
+    twitter: ExternalInformationItem,
+    linkedIn: ExternalInformationItem,
+    zhihu: ExternalInformationItem,
+}
+
+export interface ExternalInformationItem {
+    link: string
 }
 
 export const useUserStore = defineStore('user', () => {

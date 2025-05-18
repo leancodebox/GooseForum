@@ -80,24 +80,28 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 	isAdmin := len(userRoleRs.GetRoleIdsByUserId(userEntity.Id)) > 0
 
 	return component.SuccessResponse(component.DataMap{
-		"username":  userEntity.Username,
-		"userId":    userEntity.Id,
-		"avatarUrl": avatarUrl,
-		"email":     userEntity.Email,
-		"nickname":  userEntity.Nickname,
-		"isAdmin":   isAdmin,
-		"bio":       userEntity.Bio,
-		"signature": userEntity.Signature,
-		"website":   userEntity.Website,
+		"username":            userEntity.Username,
+		"userId":              userEntity.Id,
+		"avatarUrl":           avatarUrl,
+		"email":               userEntity.Email,
+		"nickname":            userEntity.Nickname,
+		"isAdmin":             isAdmin,
+		"bio":                 userEntity.Bio,
+		"signature":           userEntity.Signature,
+		"website":             userEntity.Website,
+		"websiteName":         userEntity.WebsiteName,
+		"externalInformation": userEntity.GetExternalInformation(),
 	})
 }
 
 type EditUserInfoReq struct {
-	Nickname  string `json:"nickname"`
-	Email     string `json:"email"`
-	Bio       string `json:"bio"`
-	Signature string `json:"signature"`
-	Website   string `json:"website"`
+	Nickname            string                    `json:"nickname"`
+	Email               string                    `json:"email"`
+	Bio                 string                    `json:"bio"`
+	Signature           string                    `json:"signature"`
+	Website             string                    `json:"website"`
+	WebsiteName         string                    `json:"websiteName"`
+	ExternalInformation users.ExternalInformation `json:"externalInformation"`
 }
 
 // EditUserInfo 编辑用户
@@ -127,9 +131,9 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 	if req.Params.Signature != "" {
 		userEntity.Signature = req.Params.Signature
 	}
-	if req.Params.Website != "" {
-		userEntity.Website = req.Params.Website
-	}
+	userEntity.Website = req.Params.Website
+	userEntity.WebsiteName = req.Params.WebsiteName
+	userEntity.SetExternalInformation(req.Params.ExternalInformation)
 
 	err = users.Save(&userEntity)
 	if err != nil {

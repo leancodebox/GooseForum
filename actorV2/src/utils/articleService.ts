@@ -101,6 +101,8 @@ export function saveUserInfo(
     bio: String,
     signature: String,
     website: String,
+    websiteName: string,
+    externalInformation: any
 ): Promise<Result<any>> {
     return axiosInstance.post('set-user-info', {
         nickname: nickname,
@@ -108,12 +110,14 @@ export function saveUserInfo(
         bio: bio,
         signature: signature,
         website: website,
+        websiteName: websiteName,
+        externalInformation: externalInformation
     })
 }
 
 
 export function getUserArticles(page: number,
-                               pageSize: number): Promise<Result<PageData<ArticleListItem>>> {
+                                pageSize: number): Promise<Result<PageData<ArticleListItem>>> {
     return axiosInstance.post('bbs/get-user-articles', {
         page: page,
         pageSize: pageSize,
