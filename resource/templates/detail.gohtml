@@ -193,8 +193,16 @@
                            class="author-link"><i class="icon-github"></i> GitHub</a>
                         <a rel="nofollow noopener noreferrer" target="_blank" href="https://x.com"
                            class="author-link"><i class="icon-twitter"></i> Twitter</a>
-                        <a rel="nofollow noopener noreferrer" target="_blank" href="#" class="author-link"><i
-                                    class="icon-website"></i> 个人网站</a>
+                        {{if .website }}
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="{{.website}}" class="author-link"><i
+                                    class="icon-website"></i> {{if .websiteName}}{{.websiteName}}{{else}}{{.website}}{{end}}</a>
+                        {{end}}
+                        <br> Github : {{.externalInformation.Github.Link}}
+                        <br> Weibo : {{.externalInformation.Weibo.Link}}
+                        <br> Bilibili : {{.externalInformation.Bilibili.Link}}
+                        <br> Twitter : {{.externalInformation.Twitter.Link}}
+                        <br> LinkedIn : {{.externalInformation.LinkedIn.Link}}
+                        <br> Zhihu : {{.externalInformation.Zhihu.Link}}
                     </div>
                 </div>
             </div>

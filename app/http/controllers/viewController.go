@@ -328,9 +328,12 @@ func RenderArticleDetail(c *gin.Context) {
 	userMap := users.GetMapByIds(userIds)
 	author := "陶渊明"
 	avatarUrl := urlconfig.GetDefaultAvatar()
+	authorUserInfo := users.Entity{}
 	if user, ok := userMap[entity.UserId]; ok {
 		author = user.Username
 		avatarUrl = user.GetWebAvatarUrl()
+		authorUserInfo = *user
+		fmt.Println(authorUserInfo)
 	}
 	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
 		username := "陶渊明"
@@ -376,22 +379,25 @@ func RenderArticleDetail(c *gin.Context) {
 	}
 	// 构建模板数据
 	templateData := gin.H{
-		"articleId":       id,
-		"authorId":        authorId,
-		"title":           entity.Title + " - GooseForum",
-		"description":     TakeUpTo64Chars(entity.Content),
-		"year":            time.Now().Year(),
-		"articleTitle":    entity.Title,
-		"articleContent":  template.HTML(entity.RenderedHTML),
-		"LikeCount":       entity.LikeCount,
-		"ILike":           iLike,
-		"username":        author,
-		"commentList":     replyList,
-		"avatarUrl":       avatarUrl,
-		"User":            GetLoginUser(c),
-		"canonicalHref":   buildCanonicalHref(c),
-		"authorArticles":  authorArticles,
-		"articleCategory": acMap[id],
+		"articleId":           id,
+		"authorId":            authorId,
+		"title":               entity.Title + " - GooseForum",
+		"description":         TakeUpTo64Chars(entity.Content),
+		"year":                time.Now().Year(),
+		"articleTitle":        entity.Title,
+		"articleContent":      template.HTML(entity.RenderedHTML),
+		"LikeCount":           entity.LikeCount,
+		"ILike":               iLike,
+		"username":            author,
+		"commentList":         replyList,
+		"avatarUrl":           avatarUrl,
+		"User":                GetLoginUser(c),
+		"canonicalHref":       buildCanonicalHref(c),
+		"authorArticles":      authorArticles,
+		"articleCategory":     acMap[id],
+		"website":             authorUserInfo.Website,
+		"websiteName":         authorUserInfo.WebsiteName,
+		"externalInformation": authorUserInfo.GetExternalInformation(),
 	}
 	c.HTML(http.StatusOK, "detail.gohtml", templateData)
 }
@@ -524,12 +530,12 @@ func generateGooseNickname() string {
 	}
 
 	prefix := prefixes[rand.Intn(len(prefixes))]
-	
+
 	// 使用纳秒级时间戳+随机数确保唯一性
 	now := time.Now()
 	timestamp := now.UnixNano()
 	randomPart := rand.Intn(1000)
-	
+
 	// 组合成16进制字符串
 	return fmt.Sprintf("%s%x%03d", prefix, timestamp, randomPart)
 }
