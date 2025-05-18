@@ -189,20 +189,28 @@
                 {{end}}
                 <div class="author-expand">
                     <div class="author-links">
-                        <a rel="nofollow noopener noreferrer" target="_blank" href="https://github.com/"
-                           class="author-link"><i class="icon-github"></i> GitHub</a>
-                        <a rel="nofollow noopener noreferrer" target="_blank" href="https://x.com"
-                           class="author-link"><i class="icon-twitter"></i> Twitter</a>
                         {{if .website }}
                         <a rel="nofollow noopener noreferrer" target="_blank" href="{{.website}}" class="author-link"><i
                                     class="icon-website"></i> {{if .websiteName}}{{.websiteName}}{{else}}{{.website}}{{end}}</a>
                         {{end}}
-                        <br> Github : {{.externalInformation.Github.Link}}
-                        <br> Weibo : {{.externalInformation.Weibo.Link}}
-                        <br> Bilibili : {{.externalInformation.Bilibili.Link}}
-                        <br> Twitter : {{.externalInformation.Twitter.Link}}
-                        <br> LinkedIn : {{.externalInformation.LinkedIn.Link}}
-                        <br> Zhihu : {{.externalInformation.Zhihu.Link}}
+                        {{if .externalInformation.Github.Link}}
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="{{.externalInformation.Github.Link}}" class="author-link"><i class="icon-github"></i> GitHub</a>
+                        {{end}}
+                        {{if .externalInformation.Twitter.Link}}
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="{{.externalInformation.Twitter.Link}}" class="author-link"><i class="icon-twitter"></i> Twitter</a>
+                        {{end}}
+                        {{if .externalInformation.Weibo.Link}}
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="{{.externalInformation.Weibo.Link}}" class="author-link"><i class="icon-weibo"></i> Weibo</a>
+                        {{end}}
+                        {{if .externalInformation.Bilibili.Link}}
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="{{.externalInformation.Bilibili.Link}}" class="author-link"><i class="icon-bilibili"></i> Bilibili</a>
+                        {{end}}
+                        {{if .externalInformation.LinkedIn.Link}}
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="{{.externalInformation.LinkedIn.Link}}" class="author-link"><i class="icon-linkedin"></i> LinkedIn</a>
+                        {{end}}
+                        {{if .externalInformation.Zhihu.Link}}
+                        <a rel="nofollow noopener noreferrer" target="_blank" href="{{.externalInformation.Zhihu.Link}}" class="author-link"><i class="icon-zhihu"></i> Zhihu</a>
+                        {{end}}
                     </div>
                 </div>
             </div>
