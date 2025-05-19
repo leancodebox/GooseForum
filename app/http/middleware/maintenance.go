@@ -55,7 +55,7 @@ var maintenanceHTML []byte = []byte(`
 // SiteMaintenance 中间件用于检查站点是否处于维护状态
 func SiteMaintenance(c *gin.Context) {
 	// 从配置文件中读取维护模式状态
-	maintenance := preferences.GetBool("app.enabled")
+	maintenance := preferences.GetBool("app.maintenance")
 	if maintenance {
 		// 设置HTTP状态码为503 Service Unavailable
 		c.Writer.WriteHeader(http.StatusServiceUnavailable)
