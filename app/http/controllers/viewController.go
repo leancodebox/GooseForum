@@ -95,6 +95,11 @@ func RegisterHandle(c *gin.Context) {
 	// 初始化用户积分
 	pointservice.InitUserPoints(userEntity.Id, 100)
 
+	if userEntity.Id == 1 {
+		// For the first user registered, elevate it to admin group.
+
+	}
+
 	// 生成 token
 	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
 	if err != nil {
