@@ -3,9 +3,6 @@ package userservice
 import (
 	_ "embed"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/http/controllers"
-	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
@@ -15,6 +12,10 @@ import (
 
 //go:embed initBlog.md
 var initBlog string
+
+func GetInitBlog() string {
+	return initBlog
+}
 
 func FirstUserInit(adminUser *users.Entity) {
 	if adminUser.Id != 1 {
@@ -52,22 +53,5 @@ func FirstUserInit(adminUser *users.Entity) {
 		}
 		fmt.Println("用户角色关系不存在，创建用户角色关系")
 	}
-
-	category := articleCategory.Get(1)
-	if category.Id == 0 {
-		category.Category = "GooseForum"
-		articleCategory.SaveOrCreateById(&category)
-		fmt.Println("标签不存在，创建标签")
-	}
-	controllers.WriteArticles(component.BetterRequest[controllers.WriteArticleReq]{
-		Params: controllers.WriteArticleReq{
-			Id:         0,
-			Content:    initBlog,
-			Title:      "Hi With GooseForum",
-			Type:       1,
-			CategoryId: []uint64{1},
-		},
-		UserId: adminUser.Id,
-	})
 
 }

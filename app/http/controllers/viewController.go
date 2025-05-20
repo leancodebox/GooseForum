@@ -99,6 +99,16 @@ func RegisterHandle(c *gin.Context) {
 	if userEntity.Id == 1 {
 		// For the first user registered, elevate it to admin group.
 		userservice.FirstUserInit(userEntity)
+		WriteArticles(component.BetterRequest[WriteArticleReq]{
+			Params: WriteArticleReq{
+				Id:         0,
+				Content:    userservice.GetInitBlog(),
+				Title:      "Hi With GooseForum",
+				Type:       1,
+				CategoryId: []uint64{1},
+			},
+			UserId: userEntity.Id,
+		})
 	}
 
 	// 生成 token

@@ -2,6 +2,7 @@ package migration
 
 import (
 	_ "embed"
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
@@ -87,6 +88,13 @@ func migration(migration bool) {
 }
 
 func initData() {
+	category := articleCategory.Get(1)
+	if category.Id == 0 {
+		category.Category = "GooseForum"
+		articleCategory.SaveOrCreateById(&category)
+		fmt.Println("标签不存在，创建标签")
+	}
+	
 	lItem := controllers.LinkItem{
 		Name:    "GooseForum",
 		Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
