@@ -30,7 +30,8 @@ func StopJob() {
 	if !runCron {
 		return
 	}
-	c.Stop()
+	ctx := c.Stop()
+	<-ctx.Done()
 }
 
 func upCmd(cmd func()) func() {
