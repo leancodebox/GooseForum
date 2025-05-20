@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
 	"log"
 	"log/slog"
 	"net/http"
@@ -59,7 +60,7 @@ func runWeb(_ *cobra.Command, _ []string) {
 }
 
 func ginServe() {
-	go RunJob()
+	RunJob()
 	defer StopJob()
 
 	port := preferences.GetString("server.port", 8080)
@@ -96,7 +97,7 @@ func ginServe() {
 	fmt.Println("if in local you can http://localhost:" + port)
 
 	quit := make(chan os.Signal, 1)
-	listenSignal(quit)
+	signalwatch.ListenSignal(quit)
 	data := <-quit
 	slog.Info("Shutdown Server ...", "signal", data)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

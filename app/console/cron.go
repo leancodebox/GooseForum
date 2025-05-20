@@ -23,7 +23,7 @@ func RunJob() {
 	}))
 	slog.Info("reg cron", "entryID", entryID, "spec", backupSpec, "err", err)
 	runCron = true
-	c.Run()
+	c.Start()
 }
 
 func StopJob() {
