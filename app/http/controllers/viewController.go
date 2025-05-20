@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"html/template"
 	"math/rand"
 	"regexp"
@@ -97,7 +98,7 @@ func RegisterHandle(c *gin.Context) {
 
 	if userEntity.Id == 1 {
 		// For the first user registered, elevate it to admin group.
-
+		userservice.FirstUserInit(userEntity)
 	}
 
 	// 生成 token

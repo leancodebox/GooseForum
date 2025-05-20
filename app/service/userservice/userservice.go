@@ -16,7 +16,7 @@ import (
 //go:embed initBlog.md
 var initBlog string
 
-func FirstUserInit(adminUser users.Entity) {
+func FirstUserInit(adminUser *users.Entity) {
 	if adminUser.Id != 1 {
 		return
 	}
