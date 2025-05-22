@@ -85,3 +85,10 @@ export interface LinkItem {
     logoUrl: string
     status: 0 | 1 | any
 }
+
+export interface Sponsor {
+    level:string,
+    name:string,
+    logoUrl:string,
+    url:string,
+}

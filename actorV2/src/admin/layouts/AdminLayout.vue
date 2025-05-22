@@ -100,6 +100,12 @@ const menuOptions: MenuOption[] = [
     path: '/admin/friend-links'
   },
   {
+    label: '赞助商管理',
+    key: 'sponsorManager',
+    icon: () => h(LinkOutline), // 需要导入LinkOutline图标
+    path: '/admin/sponsor-manager'
+  },
+  {
     label: '外部工单',
     key: 'externalTickets',
     icon: () => h(TicketOutline), // 需要导入TicketOutline图标

@@ -92,6 +92,15 @@ const router = createRouter({
           }
         },
         {
+          path: 'sponsor-manager',
+          name: 'sponsorManager',
+          component: ()=>import('../views/SponsorManagement.vue'),
+          meta: {
+            title: '友情链接管理',
+            requiresAuth: true
+          }
+        },
+        {
           path: 'external-tickets',
           name: 'externalTickets',
           component: ExternalTicketManagement,
