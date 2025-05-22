@@ -209,6 +209,7 @@ func RenderIndex(c *gin.Context) {
 // RenderArticlesPage 渲染文章列表页面
 func RenderArticlesPage(c *gin.Context) {
 	filters := c.DefaultQuery("filters", "")
+	version := c.DefaultQuery("version", "")
 	categories := array.Filter(array.Map(strings.Split(filters, "-"), func(t string) int {
 		return cast.ToInt(t)
 	}), func(i int) bool {
@@ -304,14 +305,18 @@ func RenderArticlesPage(c *gin.Context) {
 		"PrevPage":            max(pageData.Page-1, 1),
 		"NextPage":            min(max(pageData.Page, 1)+1, totalPages),
 		"User":                GetLoginUser(c),
-		"articleCategoryList": articleCategoryList,
+		"ArticleCategoryList": articleCategoryList,
 		"recommendedArticles": getRecommendedArticles(),
 		"canonicalHref":       buildCanonicalHref(c),
 		"Filters":             filters,
 		"pagination":          pagination,
 	}
 
-	c.HTML(http.StatusOK, "list.gohtml", templateData)
+	if version == "v2" {
+		c.HTML(http.StatusOK, "postv2.gohtml", templateData)
+	} else {
+		c.HTML(http.StatusOK, "list.gohtml", templateData)
+	}
 }
 
 type PageButton struct {

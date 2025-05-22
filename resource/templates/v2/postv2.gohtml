@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    <meta name="description" content="{{.description}}">
+    {{if .keywords}}
+        <meta name="keywords" content="{{.keywords}}">
+    {{else}}
+        <meta name="keywords" content="GooseForum,forum,论坛,社区,Go,Python,PHP,Vue.js,Java,MySQL,Rust">
+    {{end}}
+    <link rel="icon" type="image/png" href="/static/pic/default-avatar.png">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="alternate" type="application/rss+xml" title="GooseForum RSS Feed" href="/rss.xml"/>
+    {{if .canonicalHref}}
+        <link rel="canonical" href="{{.canonicalHref}}">{{end}}
+    {{with metaList }}{{if .}}{{range .}}
+        <meta name="{{.Name}}" content="{{.Content}}"/>
+    {{end}}{{end}}{{end}}
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #4a6baf;">
+    <div class="container">
+        <a class="navbar-brand" href="#">GooseForumV2</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="list.html">文章列表</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="login.html">登录</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4 flex-grow-1">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-primary category-tag" data-value="全部"
+                              style="cursor: pointer">全部</span>
+                        <span class="badge bg-secondary category-tag" data-value="技术"
+                              style="cursor: pointer">技术</span>
+                        <span class="badge bg-secondary category-tag" data-value="生活"
+                              style="cursor: pointer">生活</span>
+                        <span class="badge bg-secondary category-tag" data-value="旅行"
+                              style="cursor: pointer">旅行</span>
+                    </div>
+                </div>
+            </div>
+            <div class="list-group mb-4">
+                {{range .Data}}
+                    <div class="list-group-item list-group-item-action">
+
+                        <div class="d-flex">
+                            <div class="flex-shrink-0 me-3">
+                                <a href="/user-profile/{{.AuthorId}}">
+                                    <img src="{{.AvatarUrl}}" width="40" height="40"
+                                         class="rounded-circle"
+                                         alt="{{.Username}}">
+                                </a>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span class="badge bg-secondary me-2">{{.TypeStr}}</span>
+                                        <a href="/post/{{.Id}}"><h5 class="mb-0 d-inline">{{.Title}}</h5></a>
+                                    </div>
+                                    <small class="text-muted">{{.LastUpdateTime}}</small>
+                                </div>
+                                <div class="mt-1">
+                                    <small class="text-muted">作者：{{.Username}}</small>
+                                    <span class="mx-2">·</span>
+                                    <small class="text-muted">标签：
+                                        {{range .Categories}}
+                                            {{.}}
+                                        {{end}}
+                                    </small>
+                                    <span class="mx-2">·</span>
+                                    <small class="text-muted">浏览：{{.ViewCount}}</small>
+                                    <span class="mx-2">·</span>
+                                    <small class="text-muted">评论：{{.CommentCount}}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {{end}}
+
+                <a href="detail.html" class="list-group-item list-group-item-action">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                            <img src="/static/pic/default-avatar.png" width="40" height="40" class="rounded-circle"
+                                 alt="作者头像">
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <span class="badge bg-secondary me-2">技术</span>
+                                    <h5 class="mb-0 d-inline">文章标题1</h5>
+                                </div>
+                                <small class="text-muted">2023-01-01</small>
+                            </div>
+                            <div class="mt-1">
+                                <small class="text-muted">作者：张三</small>
+                                <span class="mx-2">·</span>
+                                <small class="text-muted">标签：前端, JavaScript</small>
+                                <span class="mx-2">·</span>
+                                <small class="text-muted">浏览：120</small>
+                                <span class="mx-2">·</span>
+                                <small class="text-muted">评论：5</small>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">上一页</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">下一页</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-md-3">
+            <div class="card mb-3">
+                <div class="card-header">
+                    分类
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><a href="#">技术</a></li>
+                        <li><a href="#">生活</a></li>
+                        <li><a href="#">旅行</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    热门文章
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><a href="#">热门文章1</a></li>
+                        <li><a href="#">热门文章2</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-white py-3 mt-4" style="background-color: #4a6baf;">
+    <div class="container">
+        <p class="mb-0 text-center">© 2023 GooseForumV2. 保留所有权利.</p>
+    </div>
+</footer>
+
+<script src="/static/js/bootstrap.bundle.min.js"></script>
+<script>
+    const categoryTags = document.querySelectorAll('.category-tag');
+    const checkedCategories = [];
+
+    categoryTags.forEach(tag => {
+        tag.addEventListener('click', function () {
+            const value = this.getAttribute('data-value');
+
+            if (value === '全部') {
+                // 点击全部标签时取消其他标签的选择状态
+                categoryTags.forEach(t => {
+                    if (t !== this) {
+                        t.classList.remove('bg-primary');
+                        t.classList.add('bg-secondary');
+                    } else {
+                        t.classList.remove('bg-secondary');
+                        t.classList.add('bg-primary');
+                    }
+                });
+                checkedCategories.length = 0;
+            } else {
+                // 点击其他标签时取消全部标签的选择状态
+                document.querySelector('[data-value="全部"]').classList.remove('bg-primary');
+                document.querySelector('[data-value="全部"]').classList.add('bg-secondary');
+
+                if (this.classList.contains('bg-primary')) {
+                    this.classList.remove('bg-primary');
+                    this.classList.add('bg-secondary');
+                    const index = checkedCategories.indexOf(value);
+                    if (index > -1) {
+                        checkedCategories.splice(index, 1);
+                    }
+                } else {
+                    this.classList.remove('bg-secondary');
+                    this.classList.add('bg-primary');
+                    checkedCategories.push(value);
+                }
+            }
+
+            document.querySelectorAll('.list-group-item').forEach(item => {
+                const category = item.querySelector('.badge').textContent;
+                if (value === '全部' || checkedCategories.length === 0 || checkedCategories.includes(category)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+</body>
+
+</html>

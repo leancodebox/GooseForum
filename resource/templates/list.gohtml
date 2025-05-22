@@ -9,8 +9,8 @@
             <div class="articles-list">
                 <div class="category-filter">
                     <a href="#" class="filter-tag active" data-filter="all" role="button">全部</a>
-                    {{ if .articleCategoryList}}
-                        {{range .articleCategoryList}}
+                    {{ if .ArticleCategoryList}}
+                        {{range .ArticleCategoryList}}
                             <a href="#" class="filter-tag" data-filter="{{.Value}}" role="button">{{.Name}}</a>
                         {{end}}
                     {{end}}
@@ -145,7 +145,7 @@
                 <div class="sidebar-card">
                     <h3>热门标签</h3>
                     <div class="tag-cloud">
-                        {{range .articleCategoryList}}
+                        {{range .ArticleCategoryList}}
                             <a href="#" class="tag">{{.Name}}</a>
                         {{end}}
                     </div>
