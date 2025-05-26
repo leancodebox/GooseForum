@@ -59,6 +59,7 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     /*line-height: 1.6;*/
+    line-height: 1.6;
     font-size: 16px;
     color: var(--text-color);
     margin: 0;
@@ -799,4 +800,95 @@ footer {
 [data-theme="dark"] .markdown-body {
     background: unset !important;
     color: unset !important;
+}
+
+
+
+/* 通用部分样式 */
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* 页脚部分 */
+.main-footer {
+    background-color: var(--footer-bg);
+    padding: 1.5rem 0;
+    margin-top: 4rem;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    row-gap: 1rem;
+    column-gap: 3rem;
+}
+
+.footer-column h3 {
+    color: var(--text-color);
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.footer-link {
+    color: var(--text-color-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+    margin-block-start: 0 !important;
+    margin-block-end: 0 !important;;
+}
+
+.footer-link:hover {
+    color: var(--primary-color);
+}
+
+.footer-bottom {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer-legal {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.legal-link {
+    color: var(--text-color-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.legal-link:hover {
+    color: var(--primary-color);
+}
+
+.social-links {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    justify-content: center;
+}
+
+.social-link {
+    color: var(--text-color-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.social-link:hover {
+    color: var(--primary-color);
 }

@@ -551,14 +551,11 @@ func generateGooseNickname() string {
 		"鹅", "大白鹅", "灰鹅", "小鹅", "鹅宝",
 		"Goose", "Gander", "Gosling", "Honker",
 	}
-
 	prefix := prefixes[rand.Intn(len(prefixes))]
-
 	// 使用纳秒级时间戳+随机数确保唯一性
 	now := time.Now()
 	timestamp := now.UnixNano()
 	randomPart := rand.Intn(1000)
-
 	// 组合成16进制字符串
 	return fmt.Sprintf("%s%x%03d", prefix, timestamp, randomPart)
 }
