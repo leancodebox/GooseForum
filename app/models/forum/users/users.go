@@ -1,6 +1,9 @@
 package users
 
 import (
+	"database/sql/driver"
+	"errors"
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"strings"
@@ -105,6 +108,21 @@ type ExternalInformation struct {
 	Twitter  ExternalInformationItem `json:"twitter"`
 	LinkedIn ExternalInformationItem `json:"linkedIn"`
 	Zhihu    ExternalInformationItem `json:"zhihu"`
+}
+
+func (itself *ExternalInformation) Value() (driver.Value, error) {
+	return jsonopt.EncodeE(itself)
+}
+
+func (itself *ExternalInformation) Scan(value any) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
+	}
+
+	r, err := jsonopt.DecodeE[ExternalInformation](bytes)
+	*itself = r
+	return err
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
