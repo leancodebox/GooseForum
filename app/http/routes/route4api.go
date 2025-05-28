@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
@@ -8,19 +10,48 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/resource"
+	"html/template"
 	"io/fs"
 	"net/http"
 )
 
 func frontend(ginApp *gin.Engine) {
+
 	actGroup := ginApp.Group("/")
 	appFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
+	nuxtFs, _ := fs.Sub(assert.GetActorFs(), "frontend/nuxt")
 	staticFS, _ := resource.GetStaticFS()
+
 	actGroup.Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).
 		Use(middleware.BrowserCache).
 		StaticFS("static", http.FS(staticFS)).
-		StaticFS("app", http.FS(appFs))
+		StaticFS("app", http.FS(appFs)).
+		StaticFS("nuxt", http.FS(nuxtFs))
+
+	//nitro: {
+	//    output: {
+	//      publicDir: "/Users/one/workspace/GooseForum/app/assert/frontend/nuxt"
+	//    },
+	//  },
+	ginApp.GET("/new-post", func(c *gin.Context) {
+		t := template.Must(template.New("index").
+			Funcs(template.FuncMap{}).
+			ParseFS(nuxtFs,
+				"list/index.html",
+			))
+		fmt.Println(t.Tree)
+		// 3. 执行模板渲染到缓冲区
+		var buf bytes.Buffer
+		if err := t.ExecuteTemplate(&buf, "index.html", map[string]any{
+			"title": "newgooseforum",
+		}); err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		// 4. 直接返回渲染结果
+		c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
+	})
 
 	// SEO 相关路由
 	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
