@@ -12,7 +12,7 @@ type Entity struct {
 	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                              // 主键
 	PageType  string    `gorm:"column:page_type;uniqueIndex;type:varchar(128);not null;default:'';" json:"pageType"` // 页面类型
 	Config    string    `gorm:"column:config;type:text;" json:"content"`                                             //
-	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`                            //
+	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`                  //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 

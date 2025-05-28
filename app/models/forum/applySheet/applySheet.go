@@ -31,15 +31,15 @@ const fieldCreatedAt = "created_at"
 const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
-	Id            uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                 // 主键
-	UserId        uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`                  //
-	ApplyUserInfo string    `gorm:"column:apply_user_info;type:text;" json:"applyUserInfo"`                                 //
-	Type          SheetType `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`                               //
-	Status        int8      `gorm:"column:status;type:tinyint;not null;default:1;" json:"status"`                           // 状态
-	Title         string    `gorm:"column:title;type:varchar(255);not null;default:'';" json:"title"`                       // 标题
-	Content       string    `gorm:"column:content;type:text;" json:"content"`                                               // 具体内容
-	CreateTime    time.Time `gorm:"column:create_time;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"createTime"` //
-	UpdateTime    time.Time `gorm:"column:update_time;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"updateTime"` //
+	Id            uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                // 主键
+	UserId        uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"` //
+	ApplyUserInfo string    `gorm:"column:apply_user_info;type:text;" json:"applyUserInfo"`                //
+	Type          SheetType `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`              //
+	Status        int8      `gorm:"column:status;type:tinyint;not null;default:1;" json:"status"`          // 状态
+	Title         string    `gorm:"column:title;type:varchar(255);not null;default:'';" json:"title"`      // 标题
+	Content       string    `gorm:"column:content;type:text;" json:"content"`                              // 具体内容
+	CreatedAt     time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`          //
+	UpdatedAt     time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 
 type SheetType int8

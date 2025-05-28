@@ -71,7 +71,7 @@ type Entity struct {
 	Website             string     `gorm:"column:website;type:varchar(255);" json:"website"`                           // 个人网站
 	WebsiteName         string     `gorm:"column:website_name;type:varchar(64);" json:"websiteName"`                   // 个人网站名
 	ExternalInformation string     `gorm:"column:external_information;type:varchar(2048);" json:"externalInformation"` // 外部信息
-	CreatedAt           time.Time  `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`                   //
+	CreatedAt           time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`         //
 	UpdatedAt           time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 	DeletedAt           *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
 }

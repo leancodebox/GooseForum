@@ -47,13 +47,13 @@ func (p *NotificationPayload) Scan(value interface{}) error {
 
 type Entity struct {
 	Id        uint64              `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`
-	UserId    uint64              `gorm:"column:user_id;type:bigint;index;" json:"userId"`                // 接收通知的用户ID
-	Payload   NotificationPayload `gorm:"column:payload;type:json;" json:"payload"`                       // 通知内容(JSON)
-	EventType string              `gorm:"column:event_type;type:varchar(50);index;" json:"eventType"`     // 通知类型
-	IsRead    bool                `gorm:"column:is_read;type:boolean;default:false;index;" json:"isRead"` // 是否已读
-	ReadAt    *time.Time          `gorm:"column:read_at;type:timestamp;null;" json:"readAt"`              // 读取时间
-	CreatedAt time.Time           `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`       // 创建时间
-	UpdatedAt time.Time           `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`             // 更新时间
+	UserId    uint64              `gorm:"column:user_id;type:bigint;index;" json:"userId"`                    // 接收通知的用户ID
+	Payload   NotificationPayload `gorm:"column:payload;type:json;" json:"payload"`                           // 通知内容(JSON)
+	EventType string              `gorm:"column:event_type;type:varchar(50);index;" json:"eventType"`         // 通知类型
+	IsRead    bool                `gorm:"column:is_read;type:boolean;default:false;index;" json:"isRead"`     // 是否已读
+	ReadAt    *time.Time          `gorm:"column:read_at;type:timestamp;null;" json:"readAt"`                  // 读取时间
+	CreatedAt time.Time           `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
+	UpdatedAt time.Time           `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
 }
 
 func (itself *Entity) TableName() string {

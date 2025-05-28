@@ -17,7 +17,7 @@ type Entity struct {
 	Type      string    `gorm:"column:assert_type;index;type:varchar(64);not null;" json:"type"`             //
 	Data      []byte    `gorm:"column:content;type:BLOB;" json:"data"`                                       // 内容
 	UserId    uint64    `gorm:"column:user_id;index;type:bigint unsigned;not null;default:0;" json:"userId"` //
-	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`                    //
+	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`          //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 
