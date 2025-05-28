@@ -3,7 +3,7 @@ package preferences
 import (
 	"flag"
 	"github.com/leancodebox/GooseForum/app/assert"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/fileopt"
+	"github.com/leancodebox/GooseForum/app/bundles/fileopt"
 	"log/slog"
 	"sync"
 

@@ -3,7 +3,8 @@ package controllers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 
 	"strings"
 
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"

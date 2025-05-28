@@ -1,7 +1,7 @@
 package eventNotification
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"time"
 )
 

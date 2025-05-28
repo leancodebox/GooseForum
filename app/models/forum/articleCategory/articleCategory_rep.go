@@ -2,7 +2,7 @@ package articleCategory
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 )
 
 func create(entity *Entity) int64 {

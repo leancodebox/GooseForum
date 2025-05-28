@@ -3,8 +3,8 @@ package resource
 import (
 	"embed"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"html/template"
 	"io/fs"

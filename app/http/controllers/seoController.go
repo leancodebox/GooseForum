@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/spf13/cast"
 	"html"
 	"net/http"

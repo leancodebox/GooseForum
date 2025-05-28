@@ -2,8 +2,8 @@ package filequeue
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/fileopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
+	"github.com/leancodebox/GooseForum/app/bundles/fileopt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"io"
 	"sync"
 	"testing"

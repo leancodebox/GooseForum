@@ -1,6 +1,8 @@
 package role
 
-import "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+import (
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+)
 
 func create(entity *Entity) error {
 	result := builder().Create(entity)

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"

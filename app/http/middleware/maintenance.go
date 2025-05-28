@@ -1,9 +1,8 @@
 package middleware
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"net/http"
-
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 
 	"github.com/gin-gonic/gin"
 )

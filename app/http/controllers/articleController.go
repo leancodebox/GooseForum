@@ -2,13 +2,13 @@ package controllers
 
 import (
 	"fmt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"strings"
 	"sync"
 	"time"
 
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"

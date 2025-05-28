@@ -2,7 +2,7 @@ package dbconnect
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/sqlconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"sync"
 
 	"gorm.io/gorm"

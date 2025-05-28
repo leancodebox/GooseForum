@@ -1,8 +1,8 @@
 package userRoleRs
 
 import (
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 )
 

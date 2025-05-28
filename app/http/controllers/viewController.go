@@ -2,6 +2,10 @@ package controllers
 
 import (
 	"fmt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
+	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"html/template"
 	"math/rand"
@@ -9,10 +13,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
-	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"

@@ -2,6 +2,7 @@ package sqlconnect
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/glebarez/sqlite"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"gorm.io/driver/mysql"

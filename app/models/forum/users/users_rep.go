@@ -2,9 +2,9 @@ package users
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 )
 
 func Get(id any) (entity Entity, err error) {

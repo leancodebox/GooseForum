@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
 	"log"
 	"log/slog"
@@ -12,7 +13,6 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/routes"
 	"github.com/spf13/cast"

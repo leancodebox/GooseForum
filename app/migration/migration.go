@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
@@ -94,7 +94,7 @@ func initData() {
 		articleCategory.SaveOrCreateById(&category)
 		fmt.Println("标签不存在，创建标签")
 	}
-	
+
 	lItem := controllers.LinkItem{
 		Name:    "GooseForum",
 		Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",

@@ -5,12 +5,11 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"html/template"
 	"mime"
 	"net/smtp"
 	"time"
-
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 )
 
 type EmailConfig struct {

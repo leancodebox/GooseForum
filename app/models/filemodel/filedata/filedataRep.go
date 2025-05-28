@@ -2,12 +2,12 @@ package filedata
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"path"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
-	queryopt "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 )
 
 // 添加支持的图片类型映射

@@ -1,7 +1,7 @@
 package tokenservice
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"time"
 

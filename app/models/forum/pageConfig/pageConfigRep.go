@@ -2,7 +2,7 @@ package pageConfig
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 )
 
 func create(entity *Entity) int64 {

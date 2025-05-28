@@ -4,7 +4,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/jsonopt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"strings"
 	"time"

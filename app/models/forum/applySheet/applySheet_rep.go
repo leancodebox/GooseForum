@@ -1,7 +1,7 @@
 package applySheet
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/spf13/cast"
 	"math"
 	"time"

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
+	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"net/http"
 )

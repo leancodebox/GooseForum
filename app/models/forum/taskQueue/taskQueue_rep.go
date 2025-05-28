@@ -1,9 +1,8 @@
 package taskQueue
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"time"
-
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
 )
 
 func Create(entity *Entity) error {
