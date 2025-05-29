@@ -1,13 +1,12 @@
 package routes
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"github.com/leancodebox/GooseForum/resource"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
+	"github.com/leancodebox/GooseForum/resource"
+	"net/http"
 )
 
 func RegisterByGin(ginApp *gin.Engine) {
@@ -27,17 +26,19 @@ func RegisterByGin(ginApp *gin.Engine) {
 		c.String(http.StatusNotFound, "404")
 	})
 
-	// 前端资源
-	frontend(ginApp)
-
 	// 访问日志中间件
 	ginApp.Use(middleware.AccessLog)
 
 	// 接口
 	auth(ginApp)
 	viewRoute(ginApp)
+	viewRouteV2(ginApp)
 	forumRoute(ginApp)
 	fileServer(ginApp)
+
+	// 前端资源
+	// 因为存在 /*filepath 所以要放在最后面
+	frontend(ginApp)
 
 	ginApp.NoRoute(controllers.NotFound)
 

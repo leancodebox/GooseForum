@@ -12,41 +12,114 @@ import (
 	"github.com/leancodebox/GooseForum/resource"
 	"html/template"
 	"io/fs"
+	"log/slog"
 	"net/http"
+	"path/filepath"
+	"strings"
+	"sync"
 )
 
-func frontend(ginApp *gin.Engine) {
+var ht *template.Template
+var htOnce sync.Once
 
+func getHt() {
+	htOnce.Do(func() {
+		nuxtFs, _ := fs.Sub(assert.GetActorFs(), "frontend/nuxt")
+		// 创建基础模板
+		tmpl := template.New("base")
+		// 遍历文件系统
+		err := fs.WalkDir(nuxtFs, ".", func(path string, d fs.DirEntry, err error) error {
+			// 跳过目录和非 .html 文件
+			if d.IsDir() || filepath.Ext(path) != ".html" {
+				return nil
+			}
+			// 读取文件内容
+			content, err := fs.ReadFile(nuxtFs, path)
+			if err != nil {
+				return fmt.Errorf("error reading file %s: %v", path, err)
+			}
+			// 生成唯一的模板名
+			templateName := generateTemplateName(path)
+			// 解析模板
+			if _, err = tmpl.New(templateName).Parse(string(content)); err != nil {
+				return fmt.Errorf("error parsing template %s: %v", path, err)
+			}
+			fmt.Printf("Loaded template: %s -> %s\n", path, templateName)
+			return nil
+		})
+
+		if err != nil {
+			fmt.Printf("Error walking the filesystem: %v\n", err)
+		}
+		ht = tmpl
+	})
+}
+
+// generateTemplateName 将文件路径转换为唯一的模板名
+func generateTemplateName(path string) string {
+	// 移除前导的 ./ 或 .
+	path = strings.TrimPrefix(path, "./")
+	path = strings.TrimPrefix(path, ".")
+	// 替换路径分隔符为下划线
+	name := strings.ReplaceAll(path, "/", "_")
+	name = strings.ReplaceAll(name, "\\", "_")
+	// 移除 .html 扩展名
+	name = strings.TrimSuffix(name, ".html")
+	return name
+}
+
+// filteredFileSystem 包装原始文件系统并过滤掉 HTML 文件
+type filteredFileSystem struct {
+	fs fs.FS
+}
+
+func (f *filteredFileSystem) Open(name string) (fs.File, error) {
+	// 检查是否是 HTML 文件
+	if strings.HasSuffix(name, ".html") || strings.HasSuffix(name, ".htm") {
+		return nil, fs.ErrNotExist // 返回"文件不存在"错误
+	}
+	return f.fs.Open(name)
+}
+
+func frontend(ginApp *gin.Engine) {
 	actGroup := ginApp.Group("/")
 	appFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
-	nuxtFs, _ := fs.Sub(assert.GetActorFs(), "frontend/nuxt")
+	nuxtFs, _ := fs.Sub(assert.GetActorFs(), "frontend/nuxt/_nuxt")
 	staticFS, _ := resource.GetStaticFS()
-
+	filteredFs := &filteredFileSystem{fs: nuxtFs}
 	actGroup.Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).
 		Use(middleware.BrowserCache).
 		StaticFS("static", http.FS(staticFS)).
 		StaticFS("app", http.FS(appFs)).
-		StaticFS("nuxt", http.FS(nuxtFs))
+		StaticFS("_nuxt", http.FS(filteredFs))
+}
 
-	//nitro: {
-	//    output: {
-	//      publicDir: "/Users/one/workspace/GooseForum/app/assert/frontend/nuxt"
-	//    },
-	//  },
+func viewRouteV2(ginApp *gin.Engine) {
+	getHt()
+	// no use <NuxtLink :to="`/detail?id=${comment.postId}`" class="link link-primary">{{ comment.postTitle }}</NuxtLink>
+	// use <a href>
 	ginApp.GET("/new-post", func(c *gin.Context) {
-		t := template.Must(template.New("index").
-			Funcs(template.FuncMap{}).
-			ParseFS(nuxtFs,
-				"list/index.html",
-			))
-		fmt.Println(t.Tree)
 		// 3. 执行模板渲染到缓冲区
 		var buf bytes.Buffer
-		if err := t.ExecuteTemplate(&buf, "index.html", map[string]any{
+		if err := ht.ExecuteTemplate(&buf, "list_index", map[string]any{
+			"Title": "newgooseforum",
+		}); err != nil {
+			slog.Error(err.Error())
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		// 4. 直接返回渲染结果
+		c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
+	})
+	ginApp.GET("/new-post/:id", func(c *gin.Context) {
+		// 3. 执行模板渲染到缓冲区
+		var buf bytes.Buffer
+		if err := ht.ExecuteTemplate(&buf, "detail_index", map[string]any{
 			"title": "newgooseforum",
 		}); err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			slog.Error(err.Error())
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 		// 4. 直接返回渲染结果
