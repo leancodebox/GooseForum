@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 生产环境使用嵌入资源 -->
+    {{ if .Production }}
+    <link rel="stylesheet" href="/assets/{{ .Manifest "main.css" }}">
+    <script type="module" src="/assets/{{ .Manifest "main.js" }}"></script>
+    <!-- 开发环境直连Vite -->
+    {{ else }}
+    <script type="module" src="http://localhost:5173/src/main.js"></script>
+    {{ end }}
+</head>
+<body>
+
+</body>
+</html>

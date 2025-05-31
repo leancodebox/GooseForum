@@ -84,15 +84,15 @@ func (f *filteredFileSystem) Open(name string) (fs.File, error) {
 func frontend(ginApp *gin.Engine) {
 	actGroup := ginApp.Group("/")
 	appFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
-	nuxtFs, _ := fs.Sub(assert.GetActorFs(), "frontend/nuxt/_nuxt")
+	nuxtFs, _ := fs.Sub(assert.GetActorFs(), "frontend/nuxt")
 	staticFS, _ := resource.GetStaticFS()
-	filteredFs := &filteredFileSystem{fs: nuxtFs}
+	//filteredFs := &filteredFileSystem{fs: nuxtFs}
 	actGroup.Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).
 		Use(middleware.BrowserCache).
 		StaticFS("static", http.FS(staticFS)).
 		StaticFS("app", http.FS(appFs)).
-		StaticFS("_nuxt", http.FS(filteredFs))
+		StaticFS("nuxt", http.FS(nuxtFs))
 }
 
 func viewRouteV2(ginApp *gin.Engine) {
