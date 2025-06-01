@@ -129,7 +129,7 @@ func PostDetail(c *gin.Context) {
 		"Username":            author,
 		"CommentList":         replyList,
 		"AvatarUrl":           avatarUrl,
-		"User":                GetLoginUser(c),
+		"User":                loginUser,
 		"CanonicalHref":       buildCanonicalHref(c),
 		"AuthorArticles":      authorArticles,
 		"ArticleCategory":     acMap[id],

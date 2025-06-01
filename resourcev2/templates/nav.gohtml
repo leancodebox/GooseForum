@@ -14,15 +14,10 @@
     <div class="navbar-end">
         <!-- PC端操作按钮组 -->
         <div class="hidden lg:flex items-center gap-2">
-            <!-- 文章发布按钮 -->
-            <a href="/publish" class="btn btn-primary btn-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                发布
-            </a>
 
+            <!-- 主题切换按钮 -->
+            {{template "theme-toggle.gohtml" .}}
+            {{if and .User (gt .User.UserId 0)}}
             <!-- 消息通知按钮 -->
             <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle">
@@ -49,33 +44,39 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 主题切换按钮 -->
-            {{template "theme-toggle.gohtml" .}}
-            <!-- 登录按钮 -->
-            <a href="/login" class="btn btn-outline btn-sm">登录</a>
-
+            <!-- 文章发布按钮 -->
+            <a href="/publish" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                发布
+            </a>
             <!-- 用户头像下拉菜单 -->
             <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
                     <div class="w-8 rounded-full">
                         <img
-                                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"
-                                alt="用户头像"
+                                src="{{.User.AvatarUrl}}"
+                                alt="{{.User.Username}}"
                                 class="rounded-full"
                         />
                     </div>
                 </div>
                 <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
                     <li class="menu-title">
-                        <span>用户名</span>
+                        <span>{{.User.Username}}</span>
                     </li>
                     <li><a href="/profile">个人中心</a></li>
                     <li><a href="/profile">admin</a></li>
-                    <hr class="my-2">
+                    <hr class="my-2"/>
                     <li><a>退出登录</a></li>
                 </ul>
             </div>
+            {{else}}
+            <!-- 登录按钮 -->
+            <a href="/login" class="btn btn-outline btn-sm">登录</a>
+            {{end}}
         </div>
 
         <!-- 移动端操作按钮组 -->
