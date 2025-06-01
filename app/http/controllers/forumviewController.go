@@ -226,3 +226,21 @@ func PostV2(c *gin.Context) {
 		"Pagination":          pagination,
 	})
 }
+
+func User(c *gin.Context) {
+	id := cast.ToUint64(c.Param("id"))
+	showUser := GetUserShowByUserId(id)
+	if showUser.UserId == 0 {
+		errorPage(c, "用户不存在", "用户不存在")
+		return
+	}
+	last, _ := articles.GetLatestArticlesByUserId(id, 5)
+	viewrender.Render(c, "user.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"Articles":     articlesSmallEntity2Dto(last),
+		"Author":       showUser,
+		"User":         GetLoginUser(c),
+		"Title":        showUser.Username + " - GooseForum",
+		"Description":  showUser.Username + " 的个人简介 ",
+	})
+}

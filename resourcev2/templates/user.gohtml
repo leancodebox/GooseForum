@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <meta name="description" content="{{.Description}}">
+    <meta name="keywords" content="{{.Keywords}}">
+    <meta property="og:title" content="{{.Title}}">
+    <meta property="og:description" content="{{.Description}}">
+    <meta property="og:type" content="website">
+    {{if .IsProduction}}
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="/assets/main.css">
+    <script type="module" src="/assets/main.js"></script>
+    {{else}}
+    <script type="module" src="http://localhost:3001/@vite/client"></script>
+    <script type="module" src="http://localhost:3001/src/main.js"></script>
+    {{end}}
+</head>
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-4">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- 左侧用户信息 -->
+            <aside class="w-full lg:w-80 flex-shrink-0">
+                <div class="sticky top-24 space-y-4">
+                    <!-- 用户基本信息 -->
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body text-center">
+                            <div class="avatar mb-4 mx-auto">
+                                <div class="mask mask-squircle w-24 h-24">
+                                    <img src="{{.Author.AvatarUrl}}" alt="用户头像"/>
+                                </div>
+                            </div>
+                            <h1 class="card-title justify-center text-xl">{{.Author.Username}}</h1>
+                            <p class="text-base-content/70 mb-2">全栈开发工程师</p>
+
+                            <div class="flex justify-center gap-2 mb-4">
+                                <div class="badge badge-primary">VIP</div>
+                                <div class="badge badge-success">已认证</div>
+                                <div class="badge badge-warning">版主</div>
+                            </div>
+
+                            <div class="stats stats-vertical shadow-sm bg-base-100 w-full">
+                                <div class="stat py-2">
+                                    <div class="stat-title text-xs">发帖数</div>
+                                    <div class="stat-value text-lg">1</div>
+                                </div>
+                                <div class="stat py-2">
+                                    <div class="stat-title text-xs">获赞数</div>
+                                    <div class="stat-value text-lg text-success">2</div>
+                                </div>
+                                <div class="stat py-2">
+                                    <div class="stat-title text-xs">粉丝数</div>
+                                    <div class="stat-value text-lg text-primary">3</div>
+                                </div>
+                            </div>
+
+                            <div class="card-actions justify-center mt-4 gap-2">
+                                <button class="btn btn-primary btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                         viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    已关注
+                                </button>
+                                <button class="btn btn-ghost btn-sm" @click="sendMessage">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                         viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                    </svg>
+                                    私信
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户详细信息 -->
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body">
+                            <h2 class="card-title">详细信息</h2>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">注册时间：</span>
+                                    <span>{{.Author.CreateTime.Format "2006-01-02"}}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">最后活跃：</span>
+                                    <span>{{.Author.CreateTime.Format "2006-01-02"}}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">所在地：</span>
+                                    <span>中国</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">个人网站：</span>
+                                    <a href="" target="_blank" class="link link-primary">访问</a>
+                                </div>
+                                <div>
+                                    <div class="text-base-content/70 mb-1">个人简介：</div>
+                                    <div class="text-base-content">专注于前端和后端技术，热爱开源，喜欢分享技术心得。擅长
+                                        Vue.js、Node.js、Python 等技术栈。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 技能标签 -->
+                    <div class="card bg-base-100 shadow-xl" v-if="user.skills.length > 0">
+                        <div class="card-body">
+                            <h2 class="card-title">技能标签</h2>
+                            <div class="flex flex-wrap gap-2">
+                                <div class="badge badge-outline">TypeScript</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 右侧内容区域 -->
+            <main class="flex-1">
+                <!-- 标签页导航 -->
+                <div class="card bg-base-100 shadow-xl mb-6">
+                    <div class="card-body p-0">
+                        <div class="tabs tabs-lifted">
+                            <button class="tab tab-lg tab-active">
+                                发布的文章
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 发布的文章 -->
+                <div class="space-y-4">
+                    {{range .Articles}}
+                    <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+                        <div class="card-body">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-1">
+                                    <h3 class="card-title text-lg mb-2">
+                                        <a class="hover:text-primary" href="/post/{{.Id}}">{{.Title}}</a>
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                    <!-- 分页 -->
+                    <div class="flex justify-center mt-8">
+                        <div class="join bg-base-100 rounded-lg shadow-sm">
+                            <button class="join-item btn btn-sm bg-base-100 border-base-300">«
+                            </button>
+                            <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">{{ .currentPage }}</button>
+                            <button class="join-item btn btn-sm bg-base-100 border-base-300">»
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
+</body>
+</html>
