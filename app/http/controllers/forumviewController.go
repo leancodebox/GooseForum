@@ -32,12 +32,11 @@ func Home(c *gin.Context) {
 }
 
 func LoginView(c *gin.Context) {
-	viewrender.Render(c, "login.gohtml", map[string]any{
+	viewrender.Render(c, "login-vue.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
 		"Title":        "登录/注册 - GooseForum",
 	})
-
 }
 
 func PostDetail(c *gin.Context) {
