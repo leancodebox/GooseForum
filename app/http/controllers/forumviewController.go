@@ -244,3 +244,17 @@ func User(c *gin.Context) {
 		"Description":  showUser.Username + " 的个人简介 ",
 	})
 }
+
+func About(c *gin.Context) {
+	viewrender.Render(c, "about.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+	})
+}
+
+func SponsorsView(c *gin.Context) {
+	viewrender.Render(c, "sponsors.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+	})
+}

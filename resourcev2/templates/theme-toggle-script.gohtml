@@ -20,8 +20,6 @@
                 // 更新所有 theme-controller 输入框的状态
                 updateThemeControllers(theme);
 
-                // 更新活跃状态
-                updateActiveTheme(theme);
 
                 // 关闭下拉菜单 - 更好的方式
                 const dropdown = document.querySelector('.dropdown');
@@ -55,24 +53,6 @@
             }
         }
 
-        // 更新活跃主题的显示状态
-        function updateActiveTheme(currentTheme) {
-            try {
-                const themeItems = document.querySelectorAll('[data-theme]');
-                themeItems.forEach(item => {
-                    const itemTheme = item.getAttribute('data-theme');
-                    if (itemTheme === currentTheme) {
-                        item.classList.add('active');
-                        item.parentElement.classList.add('active');
-                    } else {
-                        item.classList.remove('active');
-                        item.parentElement.classList.remove('active');
-                    }
-                });
-            } catch (error) {
-                console.error('更新主题状态失败:', error);
-            }
-        }
 
         // 监听 theme-controller 变化
         function setupThemeControllers() {
@@ -101,9 +81,6 @@
 
                 // 更新主题控制器状态
                 updateThemeControllers(savedTheme);
-
-                // 更新活跃状态
-                updateActiveTheme(savedTheme);
 
                 // 设置主题控制器监听
                 setupThemeControllers();

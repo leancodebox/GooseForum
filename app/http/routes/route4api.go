@@ -58,7 +58,7 @@ func viewRoute(ginApp *gin.Engine) {
 	view.POST("/register", controllers.RegisterHandle)
 	view.POST("/logout", controllers.Logout)
 	view.GET("/user-profile/:id", controllers.UserProfile)
-	view.GET("/sponsors", controllers.Sponsors)
+	view.GET("/sponsors-old", controllers.Sponsors)
 	view.GET("/links", controllers.Links)
 	view.GET("/link-contact", controllers.Contact)
 
