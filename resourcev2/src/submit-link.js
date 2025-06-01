@@ -1,6 +1,6 @@
 import {createApp} from 'vue'
-import Main from './main.vue'
+import Page from './submit-link.vue'
 import './style.css'
 
-const app = createApp(Main)
+const app = createApp(Page)
 app.mount('#app')

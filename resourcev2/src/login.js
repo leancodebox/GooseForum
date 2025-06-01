@@ -1,5 +1,5 @@
 import {createApp} from 'vue'
-import Login from './Login.vue'
+import Login from './login.vue'
 import './style.css'
 
 const app = createApp(Login)

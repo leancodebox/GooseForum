@@ -123,6 +123,7 @@ func PostDetail(c *gin.Context) {
 		"ArticleTitle":        entity.Title,
 		"ArticleContent":      template.HTML(entity.RenderedHTML),
 		"LikeCount":           entity.LikeCount,
+		"ViewCount":           entity.ViewCount,
 		"CreateTime":          entity.CreatedAt.Format(time.DateTime),
 		"ILike":               iLike,
 		"Username":            author,
@@ -285,5 +286,37 @@ func LinksView(c *gin.Context) {
 		"User":             GetLoginUser(c),
 		"Title":            "友情链接 - GooseForum",
 		"FriendLinksGroup": res,
+	})
+}
+
+func Profile(c *gin.Context) {
+	viewrender.Render(c, "profile.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "个人中心 - GooseForum",
+	})
+}
+
+func Publish(c *gin.Context) {
+	viewrender.Render(c, "publish.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "发布中心 - GooseForum",
+	})
+}
+
+func Notifications(c *gin.Context) {
+	viewrender.Render(c, "notifications.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "发布中心 - GooseForum",
+	})
+}
+
+func SubmitLink(c *gin.Context) {
+	viewrender.Render(c, "submit-link.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "发布中心 - GooseForum",
 	})
 }

@@ -33,4 +33,8 @@ func view(ginApp *gin.Engine) {
 	ginApp.GET("/about", controllers.About)
 	ginApp.GET("/sponsors", controllers.SponsorsView)
 	ginApp.GET("/links", controllers.LinksView)
+	ginApp.GET("/profile", controllers.Profile)
+	ginApp.GET("/publish", controllers.Publish)
+	ginApp.GET("/notifications", controllers.Notifications)
+	ginApp.GET("/submit-link", controllers.SubmitLink)
 }

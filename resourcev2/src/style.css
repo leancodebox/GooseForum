@@ -2,3 +2,27 @@
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, retro, cyberpunk, valentine, garden, forest, aqua, luxury, dracula;
 }
+
+
+/* 修复 md-editor-v3 分割线不可见的问题 */
+.md-editor-resize-operate {
+  background-color: #e5e7eb !important;
+  border-left: 1px solid #d1d5db !important;
+  border-right: 1px solid #d1d5db !important;
+  width: 6px !important;
+}
+
+.md-editor-resize-operate:hover {
+  background-color: #3b82f6 !important;
+}
+
+/* 确保在暗色主题下也能看到分割线 */
+[data-theme="dark"] .md-editor-resize-operate {
+  background-color: #4b5563 !important;
+  border-left: 1px solid #6b7280 !important;
+  border-right: 1px solid #6b7280 !important;
+}
+
+[data-theme="dark"] .md-editor-resize-operate:hover {
+  background-color: #60a5fa !important;
+}

@@ -11,7 +11,11 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/main.js'),
-        login: resolve(__dirname, 'src/login.js')
+        login: resolve(__dirname, 'src/login.js'),
+        notifications: resolve(__dirname, 'src/notifications.js'),
+        profile: resolve(__dirname, 'src/profile.js'),
+        publish: resolve(__dirname, 'src/publish.js'),
+        'submit-link': resolve(__dirname, 'src/submit-link.js'),
       },
       output: {
         entryFileNames: 'assets/[name].js',
