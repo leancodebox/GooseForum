@@ -9,56 +9,15 @@
         <li class="menu-title">
             <span>选择主题</span>
         </li>
-        <li><a onclick="changeTheme('light')" data-theme="light"><span class="mr-2">☀️</span>浅色</a></li>
-        <li><a onclick="changeTheme('dark')" data-theme="dark"><span class="mr-2">🌙</span>深色</a></li>
-        <li><a onclick="changeTheme('retro')" data-theme="retro"><span class="mr-2">🎨</span>复古</a></li>
-        <li><a onclick="changeTheme('cyberpunk')" data-theme="cyberpunk"><span class="mr-2">🤖</span>赛博朋克</a></li>
-        <li><a onclick="changeTheme('valentine')" data-theme="valentine"><span class="mr-2">💝</span>情人节</a></li>
-        <li><a onclick="changeTheme('garden')" data-theme="garden"><span class="mr-2">🌸</span>花园</a></li>
-        <li><a onclick="changeTheme('forest')" data-theme="forest"><span class="mr-2">🌲</span>森林</a></li>
-        <li><a onclick="changeTheme('aqua')" data-theme="aqua"><span class="mr-2">🐠</span>水族馆</a></li>
-        <li><a onclick="changeTheme('luxury')" data-theme="luxury"><span class="mr-2">💎</span>奢华</a></li>
-        <li><a onclick="changeTheme('dracula')" data-theme="dracula"><span class="mr-2">🧛</span>拖拽</a></li>
+        <li><a onclick="changeTheme('light')"><span class="mr-2">☀️</span>浅色</a></li>
+        <li><a onclick="changeTheme('dark')"><span class="mr-2">🌙</span>深色</a></li>
+        <li><a onclick="changeTheme('retro')"><span class="mr-2">🎨</span>复古</a></li>
+        <li><a onclick="changeTheme('cyberpunk')"><span class="mr-2">🤖</span>赛博朋克</a></li>
+        <li><a onclick="changeTheme('valentine')"><span class="mr-2">💝</span>情人节</a></li>
+        <li><a onclick="changeTheme('garden')"><span class="mr-2">🌸</span>花园</a></li>
+        <li><a onclick="changeTheme('forest')"><span class="mr-2">🌲</span>森林</a></li>
+        <li><a onclick="changeTheme('aqua')"><span class="mr-2">🐠</span>水族馆</a></li>
+        <li><a onclick="changeTheme('luxury')"><span class="mr-2">💎</span>奢华</a></li>
+        <li><a onclick="changeTheme('dracula')"><span class="mr-2">🧛</span>拖拽</a></li>
     </ul>
 </div>
-
-<script>
-// 主题切换功能
-function changeTheme(theme) {
-    // 设置 HTML 元素的 data-theme 属性
-    document.documentElement.setAttribute('data-theme', theme);
-    
-    // 保存到 localStorage
-    localStorage.setItem('theme', theme);
-    
-    // 更新活跃状态
-    updateActiveTheme(theme);
-    
-    // 关闭下拉菜单
-    document.activeElement.blur();
-}
-
-// 更新活跃主题的显示状态
-function updateActiveTheme(currentTheme) {
-    const themeItems = document.querySelectorAll('[data-theme]');
-    themeItems.forEach(item => {
-        if (item.getAttribute('data-theme') === currentTheme) {
-            item.classList.add('active');
-        } else {
-            item.classList.remove('active');
-        }
-    });
-}
-
-// 页面加载时初始化主题
-document.addEventListener('DOMContentLoaded', function() {
-    // 从 localStorage 获取保存的主题，默认为 light
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    
-    // 应用主题
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    
-    // 更新活跃状态
-    updateActiveTheme(savedTheme);
-});
-</script>

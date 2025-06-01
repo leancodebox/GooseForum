@@ -1,0 +1,124 @@
+<script>
+    (function () {
+        'use strict';
+
+        // 防止重复初始化
+        if (window.themeToggleInitialized) {
+            return;
+        }
+        window.themeToggleInitialized = true;
+
+        // 主题切换功能
+        window.changeTheme = function (theme) {
+            try {
+                // 设置 HTML 元素的 data-theme 属性
+                document.documentElement.setAttribute('data-theme', theme);
+
+                // 保存到 localStorage
+                localStorage.setItem('theme', theme);
+
+                // 更新所有 theme-controller 输入框的状态
+                updateThemeControllers(theme);
+
+                // 更新活跃状态
+                updateActiveTheme(theme);
+
+                // 关闭下拉菜单 - 更好的方式
+                const dropdown = document.querySelector('.dropdown');
+                if (dropdown) {
+                    dropdown.removeAttribute('open');
+                    const details = dropdown.querySelector('details');
+                    if (details) {
+                        details.removeAttribute('open');
+                    }
+                }
+
+                // 移除焦点
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
+            } catch (error) {
+                console.error('主题切换失败:', error);
+            }
+        };
+
+        // 更新主题控制器状态
+        function updateThemeControllers(currentTheme) {
+            try {
+                // 更新所有 theme-controller 输入框
+                const controllers = document.querySelectorAll('.theme-controller');
+                controllers.forEach(controller => {
+                    controller.checked = controller.value === currentTheme;
+                });
+            } catch (error) {
+                console.error('更新主题控制器失败:', error);
+            }
+        }
+
+        // 更新活跃主题的显示状态
+        function updateActiveTheme(currentTheme) {
+            try {
+                const themeItems = document.querySelectorAll('[data-theme]');
+                themeItems.forEach(item => {
+                    const itemTheme = item.getAttribute('data-theme');
+                    if (itemTheme === currentTheme) {
+                        item.classList.add('active');
+                        item.parentElement.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                        item.parentElement.classList.remove('active');
+                    }
+                });
+            } catch (error) {
+                console.error('更新主题状态失败:', error);
+            }
+        }
+
+        // 监听 theme-controller 变化
+        function setupThemeControllers() {
+            try {
+                const controllers = document.querySelectorAll('.theme-controller');
+                controllers.forEach(controller => {
+                    controller.addEventListener('change', function () {
+                        if (this.checked && this.value) {
+                            window.changeTheme(this.value);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('设置主题控制器失败:', error);
+            }
+        }
+
+        // 页面加载时初始化主题
+        function initializeTheme() {
+            try {
+                // 从 localStorage 获取保存的主题，默认为 light
+                const savedTheme = localStorage.getItem('theme') || 'light';
+
+                // 应用主题
+                document.documentElement.setAttribute('data-theme', savedTheme);
+
+                // 更新主题控制器状态
+                updateThemeControllers(savedTheme);
+
+                // 更新活跃状态
+                updateActiveTheme(savedTheme);
+
+                // 设置主题控制器监听
+                setupThemeControllers();
+            } catch (error) {
+                console.error('主题初始化失败:', error);
+                // 降级到默认主题
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        }
+
+        // DOM 加载完成后初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeTheme);
+        } else {
+            initializeTheme();
+        }
+    })();
+</script>

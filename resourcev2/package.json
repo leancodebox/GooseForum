@@ -12,16 +12,15 @@
     "build:all": "npm run build && npm run go:build"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.8",
     "axios": "^1.9.0",
     "daisyui": "^5.0.43",
+    "tailwindcss": "^4.1.8",
     "vue": "^3.3.8",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.0",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6",
     "vite": "^5.0.0"
   }
 }
