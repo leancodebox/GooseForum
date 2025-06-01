@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
-import Guestbook from './Guestbook.vue'
+import Main from './Main.vue'
 import './style.css'
 
-const app = createApp(Guestbook)
+const app = createApp(Main)
 // app.mount('#guestbook-app')
