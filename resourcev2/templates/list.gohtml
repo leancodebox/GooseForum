@@ -11,7 +11,6 @@
     <meta property="og:type" content="website">
     {{if .IsProduction}}
     <link rel="stylesheet" href="/assets/style.css">
-    <link rel="stylesheet" href="/assets/main.css">
     <script type="module" src="/assets/main.js"></script>
     {{else}}
     <script type="module" src="http://localhost:3001/@vite/client"></script>
@@ -54,7 +53,7 @@
                                         <!-- 标题行 -->
                                         <div class="flex items-center gap-2 mb-1">
                                             <div class="badge badge-sm badge-primary">分享</div>
-                                            <a href="/post-v2/{{.Id}}"
+                                            <a href="/post/{{.Id}}"
                                                class="text-lg font-semibold text-base-content hover:text-primary hover:underline">{{.Title}}</a>
                                         </div>
                                         <!-- 用户信息行和统计信息合并为一行 -->
@@ -103,13 +102,26 @@
                         <div class="px-6 py-4 border-t border-base-200 bg-base-50">
                             <div class="flex justify-center">
                                 <div class="join">
-                                    <button class="join-item btn btn-sm">«</button>
-                                    {{range .Pagination}}
-                                    <button class="join-item btn btn-sm">
-                                        <a href="/post-v2?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}">{{.Page}}</a>
-                                    </button>
+                                    {{if ge .Page 2 }}
+                                    <a href="/post?page={{.PrevPage}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
+                                       aria-label="Previous">
+                                        <button class="join-item btn btn-sm">«</button>
+                                    </a>
                                     {{end}}
-                                    <button class="join-item btn btn-sm">»</button>
+                                    {{ $NowPage := .Page }}
+                                    {{range .Pagination}}
+                                    <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}">
+                                        <button class="join-item btn btn-sm {{if eq $NowPage .Page}}btn-active{{end}}">
+                                            {{.Page}}
+                                        </button>
+                                    </a>
+                                    {{end}}
+                                    {{if lt .Page .TotalPages}}
+                                    <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}"
+                                       aria-label="Next">
+                                        <button class="join-item btn btn-sm">»</button>
+                                    </a>
+                                    {{end}}
                                 </div>
                             </div>
                             <div class="text-center mt-2 text-sm text-base-content/60">

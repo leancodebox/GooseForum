@@ -10,10 +10,8 @@
     <meta property="og:description" content="{{.Description}}">
     <meta property="og:type" content="website">
     {{if .IsProduction}}
-    <!-- Vue.js CDN for production -->
     <link rel="stylesheet" href="/assets/style.css">
-    <link rel="stylesheet" href="/assets/login.css">
-    <script src="/assets/login.js"></script>
+    <script type="module" src="/assets/login.js"></script>
     {{else}}
     <!-- Development mode with Vite -->
     <script type="module" src="http://localhost:3001/@vite/client"></script>
