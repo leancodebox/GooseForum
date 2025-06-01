@@ -25,9 +25,11 @@ func viewAssert(ginApp *gin.Engine) {
 }
 
 func view(ginApp *gin.Engine) {
+	ginApp.GET("", controllers.Home)
 	ginApp.GET("/user/:id", controllers.User)
-	ginApp.GET("/post-v2", controllers.PostV2)
-	ginApp.GET("/post-v2/:id", controllers.PostDetail)
+	ginApp.GET("/post", controllers.PostV2)
+	ginApp.GET("/post/:id", controllers.PostDetail)
 	ginApp.GET("/about", controllers.About)
 	ginApp.GET("/sponsors", controllers.SponsorsView)
+	ginApp.GET("/links", controllers.LinksView)
 }

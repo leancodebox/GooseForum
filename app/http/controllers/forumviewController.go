@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
@@ -12,6 +13,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -20,6 +22,14 @@ import (
 	"strings"
 	"time"
 )
+
+func Home(c *gin.Context) {
+	viewrender.Render(c, "index.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "GooseForum",
+	})
+}
 
 func PostDetail(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
@@ -256,5 +266,16 @@ func SponsorsView(c *gin.Context) {
 	viewrender.Render(c, "sponsors.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
+	})
+}
+
+func LinksView(c *gin.Context) {
+	configEntity := pageConfig.GetByPageType(FriendShipLinks)
+	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
+	viewrender.Render(c, "links.gohtml", map[string]any{
+		"IsProduction":     setting.IsProduction(),
+		"User":             GetLoginUser(c),
+		"Title":            "友情链接 - GooseForum",
+		"FriendLinksGroup": res,
 	})
 }

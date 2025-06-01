@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <meta name="description" content="{{.Description}}">
+    <meta name="keywords" content="{{.Keywords}}">
+    <meta property="og:title" content="{{.Title}}">
+    <meta property="og:description" content="{{.Description}}">
+    <meta property="og:type" content="website">
+    {{if .IsProduction}}
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="/assets/main.css">
+    <script type="module" src="/assets/main.js"></script>
+    {{else}}
+    <script type="module" src="http://localhost:3001/@vite/client"></script>
+    <script type="module" src="http://localhost:3001/src/main.js"></script>
+    {{end}}
+</head>
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-4">
+        <div class="container mx-auto px-4 py-8 space-y-8">
+            <!-- 欢迎区域 -->
+            <div class="text-center py-12">
+                <h1 class="text-4xl md:text-5xl font-bold text-base-content mb-4">GooseForum</h1>
+                <p class="text-lg text-base-content/70 mb-8 max-w-2xl mx-auto">技术交流社区 · 分享知识 · 讨论技术 ·
+                    结识同行</p>
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <a href="/post" class="btn btn-primary">浏览文章</a>
+                    <a href="/publish" class="btn btn-outline">发布内容</a>
+                    <a href="/about" class="btn btn-ghost">了解更多</a>
+                </div>
+            </div>
+
+            <!-- 统计数据 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="stat bg-base-100 rounded-lg shadow-sm">
+                    <div class="stat-figure text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-title">注册用户</div>
+                    <div class="stat-value text-primary">1,234</div>
+                    <div class="stat-desc">本月新增 89 人</div>
+                </div>
+
+                <div class="stat bg-base-100 rounded-lg shadow-sm">
+                    <div class="stat-figure text-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-title">文章总数</div>
+                    <div class="stat-value text-secondary">567</div>
+                    <div class="stat-desc">今日新增 12 篇</div>
+                </div>
+
+                <div class="stat bg-base-100 rounded-lg shadow-sm">
+                    <div class="stat-figure text-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-title">评论数</div>
+                    <div class="stat-value text-accent">2,345</div>
+                    <div class="stat-desc">活跃讨论中</div>
+                </div>
+
+                <div class="stat bg-base-100 rounded-lg shadow-sm">
+                    <div class="stat-figure text-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                    </div>
+                    <div class="stat-title">友情链接</div>
+                    <div class="stat-value text-info">45</div>
+                    <div class="stat-desc">优质站点推荐</div>
+                </div>
+            </div>
+
+            <!-- 主要内容区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 最新文章 -->
+                <div class="lg:col-span-2">
+                    <div class="card bg-base-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="card-title text-xl">最新文章</h2>
+                                <a href="/post" class="btn btn-ghost btn-sm">查看更多</a>
+                            </div>
+                            <div class="space-y-3">
+                                <div v-for="i in 5" :key="i"
+                                     class="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg transition-colors">
+                                    <div class="avatar">
+                                        <div class="mask mask-squircle w-10 h-10">
+                                            <img src="https://img.daisyui.com/images/profile/demo/distracted1@192.webp"/>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <div class="badge badge-primary badge-sm">技术</div>
+                                            <a href="/detail" class="font-medium hover:text-primary">Vue 3 组合式 API
+                                                最佳实践分享</a>
+                                        </div>
+                                        <div class="text-sm text-base-content/60">
+                                            <span class="mr-3">张三</span>
+                                            <span class="mr-3">2小时前</span>
+                                            <span class="mr-3">👁 123</span>
+                                            <span>💬 5</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 侧边栏 -->
+                <div class="space-y-6">
+                    <!-- 热门话题 -->
+                    <div class="card bg-base-100 shadow-sm">
+                        <div class="card-body">
+                            <h3 class="card-title text-lg mb-4">🔥 热门话题</h3>
+                            <div class="space-y-2">
+                                <div class="badge badge-outline badge-lg w-full justify-start">#Vue3</div>
+                                <div class="badge badge-outline badge-lg w-full justify-start">#React</div>
+                                <div class="badge badge-outline badge-lg w-full justify-start">#Node.js</div>
+                                <div class="badge badge-outline badge-lg w-full justify-start">#TypeScript</div>
+                                <div class="badge badge-outline badge-lg w-full justify-start">#Golang</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 社区公告 -->
+                    <div class="card bg-base-100 shadow-sm">
+                        <div class="card-body">
+                            <h3 class="card-title text-lg mb-4">📢 社区公告</h3>
+                            <div class="space-y-3">
+                                <div class="alert alert-info">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6"
+                                         fill="none" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <h4 class="font-bold">系统维护通知</h4>
+                                        <div class="text-xs">今晚23:00-01:00进行系统维护</div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-base-content/70">
+                                    <div class="mb-2">• 新增文章编辑器功能</div>
+                                    <div class="mb-2">• 优化移动端体验</div>
+                                    <div>• 修复已知问题</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 快速链接 -->
+                    <div class="card bg-base-100 shadow-sm">
+                        <div class="card-body">
+                            <h3 class="card-title text-lg mb-4">🔗 快速链接</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="/links" class="btn btn-outline btn-sm">友情链接</a>
+                                <a href="/sponsors" class="btn btn-outline btn-sm">赞助商</a>
+                                <a href="/about" class="btn btn-outline btn-sm">关于我们</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
+</body>
+</html>
