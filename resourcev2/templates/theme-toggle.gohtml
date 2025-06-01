@@ -1,25 +1,64 @@
 <div class="dropdown dropdown-end">
-    <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle">
+    <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle" id="theme-toggle">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
         </svg>
     </div>
-    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-40">
+    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-48">
         <li class="menu-title">
             <span>选择主题</span>
         </li>
-        <li>
-            <a class="active"><span class="mr-2">☀️</span>浅色</a>
-            <a class="active"><span class="mr-2">🌙</span>深色</a>
-            <a class="active"><span class="mr-2">🎨</span>复古</a>
-            <a class="active"><span class="mr-2">🤖</span>赛博朋克</a>
-            <a class="active"><span class="mr-2">💝</span>情人节</a>
-            <a class="active"><span class="mr-2">🌸</span>花园</a>
-            <a class="active"><span class="mr-2">🌲</span>森林</a>
-            <a class="active"><span class="mr-2">🐠</span>水族馆</a>
-            <a class="active"><span class="mr-2">💎</span>奢华</a>
-            <a class="active"><span class="mr-2">🧛</span>拖拽</a>
-        </li>
+        <li><a onclick="changeTheme('light')" data-theme="light"><span class="mr-2">☀️</span>浅色</a></li>
+        <li><a onclick="changeTheme('dark')" data-theme="dark"><span class="mr-2">🌙</span>深色</a></li>
+        <li><a onclick="changeTheme('retro')" data-theme="retro"><span class="mr-2">🎨</span>复古</a></li>
+        <li><a onclick="changeTheme('cyberpunk')" data-theme="cyberpunk"><span class="mr-2">🤖</span>赛博朋克</a></li>
+        <li><a onclick="changeTheme('valentine')" data-theme="valentine"><span class="mr-2">💝</span>情人节</a></li>
+        <li><a onclick="changeTheme('garden')" data-theme="garden"><span class="mr-2">🌸</span>花园</a></li>
+        <li><a onclick="changeTheme('forest')" data-theme="forest"><span class="mr-2">🌲</span>森林</a></li>
+        <li><a onclick="changeTheme('aqua')" data-theme="aqua"><span class="mr-2">🐠</span>水族馆</a></li>
+        <li><a onclick="changeTheme('luxury')" data-theme="luxury"><span class="mr-2">💎</span>奢华</a></li>
+        <li><a onclick="changeTheme('dracula')" data-theme="dracula"><span class="mr-2">🧛</span>拖拽</a></li>
     </ul>
 </div>
+
+<script>
+// 主题切换功能
+function changeTheme(theme) {
+    // 设置 HTML 元素的 data-theme 属性
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    // 保存到 localStorage
+    localStorage.setItem('theme', theme);
+    
+    // 更新活跃状态
+    updateActiveTheme(theme);
+    
+    // 关闭下拉菜单
+    document.activeElement.blur();
+}
+
+// 更新活跃主题的显示状态
+function updateActiveTheme(currentTheme) {
+    const themeItems = document.querySelectorAll('[data-theme]');
+    themeItems.forEach(item => {
+        if (item.getAttribute('data-theme') === currentTheme) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+// 页面加载时初始化主题
+document.addEventListener('DOMContentLoaded', function() {
+    // 从 localStorage 获取保存的主题，默认为 light
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    
+    // 应用主题
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    // 更新活跃状态
+    updateActiveTheme(savedTheme);
+});
+</script>
