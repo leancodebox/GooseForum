@@ -52,7 +52,7 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.Use(middleware.JWTAuth)
 	viewRouteApp.GET("/post-old", controllers.RenderArticlesPage)
 	viewRouteApp.GET("/post-old/:id", controllers.RenderArticleDetail)
-	viewRouteApp.GET("/login", controllers.LoginPage)
+	viewRouteApp.GET("/login-old", controllers.LoginPage)
 	viewRouteApp.POST("/login", controllers.LoginHandler)
 	viewRouteApp.POST("/register", controllers.RegisterHandle)
 	viewRouteApp.POST("/logout", controllers.Logout)

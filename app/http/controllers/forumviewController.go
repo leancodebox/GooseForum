@@ -31,6 +31,15 @@ func Home(c *gin.Context) {
 	})
 }
 
+func LoginView(c *gin.Context) {
+	viewrender.Render(c, "login.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "登录/注册 - GooseForum",
+	})
+
+}
+
 func PostDetail(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
 	if id == 0 {
