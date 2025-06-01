@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
@@ -10,124 +8,22 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/resource"
-	"github.com/leancodebox/GooseForum/resourcev2"
-	"html/template"
 	"io/fs"
-	"log/slog"
 	"net/http"
-	"path/filepath"
-	"strings"
-	"sync"
 )
-
-var ht *template.Template
-var htOnce sync.Once
-
-func getHt() {
-	htOnce.Do(func() {
-		nuxtFs, _ := fs.Sub(assert.GetActorFs(), "frontend/nuxt")
-		// 创建基础模板
-		tmpl := template.New("base")
-		// 遍历文件系统
-		err := fs.WalkDir(nuxtFs, ".", func(path string, d fs.DirEntry, err error) error {
-			// 跳过目录和非 .html 文件
-			if d.IsDir() || filepath.Ext(path) != ".html" {
-				return nil
-			}
-			// 读取文件内容
-			content, err := fs.ReadFile(nuxtFs, path)
-			if err != nil {
-				return fmt.Errorf("error reading file %s: %v", path, err)
-			}
-			// 生成唯一的模板名
-			templateName := generateTemplateName(path)
-			// 解析模板
-			if _, err = tmpl.New(templateName).Parse(string(content)); err != nil {
-				return fmt.Errorf("error parsing template %s: %v", path, err)
-			}
-			fmt.Printf("Loaded template: %s -> %s\n", path, templateName)
-			return nil
-		})
-
-		if err != nil {
-			fmt.Printf("Error walking the filesystem: %v\n", err)
-		}
-		ht = tmpl
-	})
-}
-
-// generateTemplateName 将文件路径转换为唯一的模板名
-func generateTemplateName(path string) string {
-	// 移除前导的 ./ 或 .
-	path = strings.TrimPrefix(path, "./")
-	path = strings.TrimPrefix(path, ".")
-	// 替换路径分隔符为下划线
-	name := strings.ReplaceAll(path, "/", "_")
-	name = strings.ReplaceAll(name, "\\", "_")
-	// 移除 .html 扩展名
-	name = strings.TrimSuffix(name, ".html")
-	return name
-}
 
 func frontend(ginApp *gin.Engine) {
 	actGroup := ginApp.Group("/")
 	appFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
-	nuxtFs, _ := fs.Sub(assert.GetActorFs(), "frontend/nuxt")
 	staticFS, _ := resource.GetStaticFS()
-	//filteredFs := &filteredFileSystem{fs: nuxtFs}
 	actGroup.Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).
 		Use(middleware.BrowserCache).
 		StaticFS("static", http.FS(staticFS)).
-		StaticFS("app", http.FS(appFs)).
-		StaticFS("nuxt", http.FS(nuxtFs))
+		StaticFS("app", http.FS(appFs))
 }
 
 func viewRouteV2(ginApp *gin.Engine) {
-	getHt()
-	// no use <NuxtLink :to="`/detail?id=${comment.postId}`" class="link link-primary">{{ comment.postTitle }}</NuxtLink>
-	// use <a href>
-	ginApp.GET("/new-post", func(c *gin.Context) {
-		// 3. 执行模板渲染到缓冲区
-		var buf bytes.Buffer
-		if err := ht.ExecuteTemplate(&buf, "list_index", map[string]any{
-			"Title": "newgooseforum",
-		}); err != nil {
-			slog.Error(err.Error())
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-		// 4. 直接返回渲染结果
-		c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
-	})
-	ginApp.GET("/new-post/:id", func(c *gin.Context) {
-		// 3. 执行模板渲染到缓冲区
-		var buf bytes.Buffer
-		if err := ht.ExecuteTemplate(&buf, "detail_index", map[string]any{
-			"title": "newgooseforum",
-		}); err != nil {
-			slog.Error(err.Error())
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-		// 4. 直接返回渲染结果
-		c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
-	})
-
-	getHt4gooseforum()
-	ginApp.GET("/post-v2", func(c *gin.Context) {
-		var buf bytes.Buffer
-		if err := ht4gooseforum.ExecuteTemplate(&buf, "list.gohtml", map[string]any{
-			"title": "newgooseforum",
-		}); err != nil {
-			slog.Error(err.Error())
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-		// 4. 直接返回渲染结果
-		c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
-	})
-
 	// SEO 相关路由
 	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
 	ginApp.GET("/sitemap.xml", controllers.RenderSitemapXml)
@@ -227,17 +123,4 @@ func fileServer(ginApp *gin.Engine) {
 	r.POST("/img-upload", middleware.JWTAuth4Gin, controllers.SaveFileByGinContext)
 	// 文件获取接口 - 通过路径
 	r.GET("/img/*filename", middleware.BrowserCache, controllers.GetFileByFileName)
-}
-
-var ht4gooseforum *template.Template
-var htht4gooseforumOnce sync.Once
-
-func getHt4gooseforum() {
-	htht4gooseforumOnce.Do(func() {
-		// 创建基础模板
-		tmpl := template.New("resourcev2")
-		ht4gooseforum = template.Must(tmpl.ParseFS(resourcev2.GetTemplates(),
-			"templates/*.gohtml",
-		))
-	})
 }

@@ -18,12 +18,13 @@ func RegisterByGin(ginApp *gin.Engine) {
 	ginApp.Use(middleware.GinCors)
 
 	ginApp.GET("/reload", func(c *gin.Context) {
-		if !setting.IsProduction() {
-			ginApp.SetHTMLTemplate(resource.GetTemplates())
-			c.String(200, "模板已刷新")
+		if setting.IsProduction() {
+			c.String(http.StatusNotFound, "404")
 			return
 		}
-		c.String(http.StatusNotFound, "404")
+		Reload()
+		ginApp.SetHTMLTemplate(resource.GetTemplates())
+		c.String(200, "模板已刷新")
 	})
 
 	// 访问日志中间件
@@ -35,6 +36,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	viewRouteV2(ginApp)
 	forumRoute(ginApp)
 	fileServer(ginApp)
+	view(ginApp)
 
 	// 前端资源
 	// 因为存在 /*filepath 所以要放在最后面
