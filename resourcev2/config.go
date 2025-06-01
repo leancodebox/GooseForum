@@ -23,3 +23,10 @@ func GetTemplates() *template.Template {
 		"templates/*.gohtml",
 	))
 }
+
+//go:embed all:static/**
+var viewAssert embed.FS
+
+func GetViewAssert() *embed.FS {
+	return &viewAssert
+}

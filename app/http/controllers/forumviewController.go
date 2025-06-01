@@ -1,12 +1,228 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/app/datastruct"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
+	"github.com/spf13/cast"
+	"html/template"
+	"strings"
+	"time"
 )
 
+func PostDetail(c *gin.Context) {
+	id := cast.ToUint64(c.Param("id"))
+	if id == 0 {
+		errorPage(c, "页面不存在", "页面不存在")
+		return
+	}
+	req := GetArticlesDetailRequest{
+		Id:           id,
+		MaxCommentId: 0,
+		PageSize:     50,
+	}
+	entity := articles.Get(req.Id)
+	if entity.Id == 0 {
+		errorPage(c, "文章不存在", "文章不存在")
+		return
+	}
+	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSizeWithRange(req.PageSize, 10, 100))
+	userIds := array.Map(replyEntities, func(item reply.Entity) uint64 {
+		return item.UserId
+	})
+	userIds = append(userIds, entity.UserId)
+	userMap := users.GetMapByIds(userIds)
+	author := "陶渊明"
+	avatarUrl := urlconfig.GetDefaultAvatar()
+	authorUserInfo := users.Entity{}
+	if user, ok := userMap[entity.UserId]; ok {
+		author = user.Username
+		avatarUrl = user.GetWebAvatarUrl()
+		authorUserInfo = *user
+		fmt.Println(authorUserInfo)
+	}
+	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
+		username := "陶渊明"
+		if user, ok := userMap[item.UserId]; ok {
+			username = user.Username
+		}
+		// 获取被回复评论的用户名
+		replyToUsername := ""
+		if item.ReplyId > 0 {
+			if replyTo := reply.Get(item.ReplyId); replyTo.Id > 0 {
+				if replyUser, ok := userMap[replyTo.UserId]; ok {
+					replyToUsername = replyUser.Username
+				}
+			}
+		}
+		return ReplyDto{
+			Id:              item.Id,
+			ArticleId:       item.ArticleId,
+			UserId:          item.UserId,
+			Username:        username,
+			Content:         item.Content,
+			CreateTime:      item.CreatedAt.Format(time.RFC3339),
+			ReplyToUsername: replyToUsername,
+		}
+	})
+	articles.IncrementView(entity)
+	// 复用现有的数据获取逻辑
+	authorId := entity.UserId
+
+	if entity.RenderedVersion < markdown2html.GetVersion() || entity.RenderedHTML == "" {
+		mdInfo := markdown2html.MarkdownToHTML(entity.Content)
+		entity.RenderedHTML = mdInfo
+		entity.RenderedVersion = markdown2html.GetVersion()
+		articles.SaveNoUpdate(&entity)
+	}
+
+	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
+	acMap := articleCategoryMapList([]uint64{id})
+	iLike := false
+	loginUser := GetLoginUser(c)
+	if loginUser.UserId != 0 {
+		iLike = articleLike.GetByArticleId(loginUser.UserId, entity.Id).Status == 1
+	}
+	// 构建模板数据
+	viewrender.Render(c, "detail.gohtml", map[string]any{
+		"IsProduction":        setting.IsProduction(),
+		"ArticleId":           id,
+		"AuthorId":            authorId,
+		"Title":               entity.Title + " - GooseForum",
+		"Description":         TakeUpTo64Chars(entity.Content),
+		"Year":                time.Now().Year(),
+		"ArticleTitle":        entity.Title,
+		"ArticleContent":      template.HTML(entity.RenderedHTML),
+		"LikeCount":           entity.LikeCount,
+		"CreateTime":          entity.CreatedAt.Format(time.DateTime),
+		"ILike":               iLike,
+		"Username":            author,
+		"CommentList":         replyList,
+		"AvatarUrl":           avatarUrl,
+		"User":                GetLoginUser(c),
+		"CanonicalHref":       buildCanonicalHref(c),
+		"AuthorArticles":      authorArticles,
+		"ArticleCategory":     acMap[id],
+		"Keywords":            strings.Join(acMap[id], ","),
+		"Website":             authorUserInfo.Website,
+		"WebsiteName":         authorUserInfo.WebsiteName,
+		"ExternalInformation": authorUserInfo.GetExternalInformation(),
+	})
+}
+
 func PostV2(c *gin.Context) {
+	filters := c.DefaultQuery("filters", "")
+	categories := array.Filter(array.Map(strings.Split(filters, "-"), func(t string) int {
+		return cast.ToInt(t)
+	}), func(i int) bool {
+		return i > 0
+	})
+	param := GetArticlesPageRequest{
+		Page:       cast.ToInt(c.DefaultQuery("page", "1")),
+		PageSize:   cast.ToInt(c.DefaultQuery("pageSize", "20")),
+		Search:     c.Query("search"),
+		Categories: categories,
+	}
+	pageData := articles.Page[articles.SmallEntity](
+		articles.PageQuery{
+			Page:         max(param.Page, 1),
+			PageSize:     param.PageSize,
+			FilterStatus: true,
+			Categories:   param.Categories,
+		})
+	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
+		return t.UserId
+	})
+	userMap := users.GetMapByIds(userIds)
+
+	//获取文章的分类信息
+	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
+		return t.Id
+	})
+	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
+	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
+		return t.ArticleCategoryId
+	})
+	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	// 获取文章的分类和标签
+	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
+		return rs.ArticleId
+	})
+
+	articleList := array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
+		categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
+			if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+				return category.Category
+			}
+			return ""
+		})
+		username := ""
+		avatarUrl := urlconfig.GetDefaultAvatar()
+		if user, ok := userMap[t.UserId]; ok {
+			username = user.Username
+			avatarUrl = user.GetWebAvatarUrl()
+		}
+		return ArticlesSimpleDto{
+			Id:             t.Id,
+			Title:          t.Title,
+			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
+			Username:       username,
+			AuthorId:       t.UserId,
+			AvatarUrl:      avatarUrl,
+			ViewCount:      t.ViewCount,
+			CommentCount:   t.ReplyCount,
+			Category:       FirstOr(categoryNames, "未分类"),
+			Categories:     categoryNames,
+			CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
+				return rs.ArticleCategoryId
+			}),
+			Type:    t.Type,
+			TypeStr: articlesTypeMap[int(t.Type)].Name,
+		}
+	})
+	// 计算总页数
+	totalPages := (cast.ToInt(pageData.Total) + param.PageSize - 1) / param.PageSize
+	articleCategoryList := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
+		return datastruct.Option[string, uint64]{
+			Name:  t.Category,
+			Value: t.Id,
+		}
+	})
+	pagination := []PageButton{}
+	start := max(pageData.Page-3, 1)
+	for i := 1; i <= 7; i++ {
+		pagination = append(pagination, PageButton{Index: i, Page: start})
+		start += 1
+	}
+
 	viewrender.Render(c, "list.gohtml", map[string]any{
-		"title": "newgooseforum",
+		"IsProduction":        setting.IsProduction(),
+		"Title":               "GooseForum",
+		"Description":         "知无不言,言无不尽",
+		"Year":                time.Now().Year(),
+		"ArticleList":         articleList,
+		"Page":                pageData.Page,
+		"PageSize":            param.PageSize,
+		"Total":               pageData.Total,
+		"TotalPages":          totalPages,
+		"PrevPage":            max(pageData.Page-1, 1),
+		"NextPage":            min(max(pageData.Page, 1)+1, totalPages),
+		"User":                GetLoginUser(c),
+		"ArticleCategoryList": articleCategoryList,
+		"RecommendedArticles": getRecommendedArticles(),
+		"CanonicalHref":       buildCanonicalHref(c),
+		"Filters":             filters,
+		"Pagination":          pagination,
 	})
 }

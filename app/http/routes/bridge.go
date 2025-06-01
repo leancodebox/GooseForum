@@ -37,6 +37,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	forumRoute(ginApp)
 	fileServer(ginApp)
 	view(ginApp)
+	viewAssert(ginApp)
 
 	// 前端资源
 	// 因为存在 /*filepath 所以要放在最后面
