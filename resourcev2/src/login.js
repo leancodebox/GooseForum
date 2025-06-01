@@ -1,6 +1,10 @@
+// Vue 3 登录页面逻辑
 import { createApp } from 'vue'
 import './style.css'
-createApp({
+
+// 确保DOM加载完成后再创建Vue实例
+function initVueApp() {
+    const app = createApp({
     data() {
         return {
             // 当前激活的标签页
@@ -44,19 +48,36 @@ createApp({
     
     mounted() {
         // 从Go模板获取初始值
-        const usernameInput = document.querySelector('input[value]');
-        if (usernameInput && usernameInput.value) {
-            this.loginForm.username = usernameInput.value;
-            this.registerForm.username = usernameInput.value;
+        const loginUsernameInput = document.querySelector('#login input[name="username"]');
+        if (loginUsernameInput && loginUsernameInput.value) {
+            this.loginForm.username = loginUsernameInput.value;
         }
         
-        const emailInput = document.querySelector('input[type="email"][value]');
+        const registerUsernameInput = document.querySelector('#register input[name="username"]');
+        if (registerUsernameInput && registerUsernameInput.value) {
+            this.registerForm.username = registerUsernameInput.value;
+        }
+        
+        const emailInput = document.querySelector('#register input[name="email"]');
         if (emailInput && emailInput.value) {
             this.registerForm.email = emailInput.value;
         }
     },
     
     methods: {
+        // 切换标签页
+        switchTab(tab) {
+            this.activeTab = tab;
+            // 清空错误信息
+            this.loginErrors = { username: '', password: '' };
+            this.registerErrors = { username: '', email: '', password: '', confirmPassword: '' };
+        },
+        
+        // 获取CSRF令牌
+        getCSRFToken() {
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            return csrfMeta ? csrfMeta.getAttribute('content') : '';
+        },
         // 验证登录表单
         validateLoginForm() {
             this.loginErrors = {
@@ -139,6 +160,11 @@ createApp({
                 formData.append('password', this.loginForm.password);
                 formData.append('remember', this.loginForm.remember ? '1' : '0');
                 
+                const csrfToken = this.getCSRFToken();
+                if (csrfToken) {
+                    formData.append('_token', csrfToken);
+                }
+                
                 const response = await fetch('/login', {
                     method: 'POST',
                     body: formData,
@@ -192,6 +218,11 @@ createApp({
                 formData.append('password', this.registerForm.password);
                 formData.append('confirm_password', this.registerForm.confirmPassword);
                 
+                const csrfToken = this.getCSRFToken();
+                if (csrfToken) {
+                    formData.append('_token', csrfToken);
+                }
+                
                 const response = await fetch('/register', {
                     method: 'POST',
                     body: formData,
@@ -206,7 +237,7 @@ createApp({
                         // 注册成功
                         alert('注册成功！请查收邮箱验证邮件。');
                         // 切换到登录页面
-                        this.activeTab = 'login';
+                        this.switchTab('login');
                         // 清空注册表单
                         this.registerForm = {
                             username: '',
@@ -234,5 +265,16 @@ createApp({
                 this.registerLoading = false;
             }
         }
-    }
-}).mount('#login');
+    }});
+    
+    // 挂载Vue实例
+    app.mount('#login');
+    console.log('Vue应用已挂载到 #login');
+}
+
+// 确保DOM加载完成后再初始化Vue
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initVueApp);
+} else {
+    initVueApp();
+}
