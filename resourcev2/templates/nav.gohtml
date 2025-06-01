@@ -1,0 +1,102 @@
+<div class="navbar bg-base-100 shadow-sm border-b border-base-300">
+    <!-- PC端导航链接靠左 -->
+    <div class="navbar-start">
+        <a href="/" class="font-bold text-lg mr-4 hover:text-primary">GooseForum</a>
+        <ul class="menu menu-horizontal px-1 hidden lg:flex">
+            <li><a href="/list" class="py-1 px-3 text-base">文章列表</a></li>
+            <li><a href="/links" class="py-1 px-3 text-base">友情链接</a></li>
+            <li><a href="/sponsors" class="py-1 px-3 text-base">赞助商</a></li>
+            <li><a href="/about" class="py-1 px-3 text-base">关于我们</a></li>
+        </ul>
+    </div>
+
+    <!-- 右侧操作按钮区域 -->
+    <div class="navbar-end">
+        <!-- PC端操作按钮组 -->
+        <div class="hidden lg:flex items-center gap-2">
+            <!-- 文章发布按钮 -->
+            <a href="/publish" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                发布
+            </a>
+
+            <!-- 消息通知按钮 -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle">
+                    <div class="indicator">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM10.5 3.75a6 6 0 0 1 6 6v2.25a2.25 2.25 0 0 1-2.25 2.25H7.5a2.25 2.25 0 0 1-2.25-2.25V9.75a6 6 0 0 1 6-6z" />
+                        </svg>
+                        <span class="badge badge-xs badge-primary indicator-item">3</span>
+                    </div>
+                </div>
+                <div tabindex="0" class="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-base-100">
+                    <div class="card-body">
+                        <h3 class="font-bold text-sm">消息通知</h3>
+                        <div class="text-sm text-base-content/70">
+                            <div class="py-1">• 您的文章收到新评论</div>
+                            <div class="py-1">• 系统维护通知</div>
+                            <div class="py-1">• 新的关注者</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary btn-block btn-sm">查看全部</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主题切换按钮 -->
+
+            <!-- 登录按钮 -->
+            <a href="/login" class="btn btn-outline btn-sm">登录</a>
+
+            <!-- 用户头像下拉菜单 -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-8 rounded-full">
+                        <img
+                                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"
+                                alt="用户头像"
+                                class="rounded-full"
+                        />
+                    </div>
+                </div>
+                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <li class="menu-title">
+                        <span>用户名</span>
+                    </li>
+                    <li><a href="/profile">个人中心</a></li>
+                    <li><a href="/profile">admin</a></li>
+                    <hr class="my-2">
+                    <li><a>退出登录</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 移动端操作按钮组 -->
+        <div class="flex items-center gap-2 lg:hidden">
+            <!-- 移动端主题切换按钮 -->
+
+            <!-- 移动端汉堡菜单 -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+                    </svg>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-2 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a href="/list">文章列表</a></li>
+                    <li><a href="/links">友情链接</a></li>
+                    <li><a href="/sponsors">赞助商</a></li>
+                    <li><a href="/about">关于我们</a></li>
+                    <li><a href="/publish">发布文章</a></li>
+                    <li><a href="/notifications">消息通知</a></li>
+
+                    <li><a href="/login">登录/注册</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

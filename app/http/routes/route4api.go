@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/resource"
+	"github.com/leancodebox/GooseForum/resourcev2"
 	"html/template"
 	"io/fs"
 	"log/slog"
@@ -68,19 +69,6 @@ func generateTemplateName(path string) string {
 	return name
 }
 
-// filteredFileSystem 包装原始文件系统并过滤掉 HTML 文件
-type filteredFileSystem struct {
-	fs fs.FS
-}
-
-func (f *filteredFileSystem) Open(name string) (fs.File, error) {
-	// 检查是否是 HTML 文件
-	if strings.HasSuffix(name, ".html") || strings.HasSuffix(name, ".htm") {
-		return nil, fs.ErrNotExist // 返回"文件不存在"错误
-	}
-	return f.fs.Open(name)
-}
-
 func frontend(ginApp *gin.Engine) {
 	actGroup := ginApp.Group("/")
 	appFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
@@ -116,6 +104,20 @@ func viewRouteV2(ginApp *gin.Engine) {
 		// 3. 执行模板渲染到缓冲区
 		var buf bytes.Buffer
 		if err := ht.ExecuteTemplate(&buf, "detail_index", map[string]any{
+			"title": "newgooseforum",
+		}); err != nil {
+			slog.Error(err.Error())
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		// 4. 直接返回渲染结果
+		c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
+	})
+
+	getHt4gooseforum()
+	ginApp.GET("/post-v2", func(c *gin.Context) {
+		var buf bytes.Buffer
+		if err := ht4gooseforum.ExecuteTemplate(&buf, "list.gohtml", map[string]any{
 			"title": "newgooseforum",
 		}); err != nil {
 			slog.Error(err.Error())
@@ -225,4 +227,17 @@ func fileServer(ginApp *gin.Engine) {
 	r.POST("/img-upload", middleware.JWTAuth4Gin, controllers.SaveFileByGinContext)
 	// 文件获取接口 - 通过路径
 	r.GET("/img/*filename", middleware.BrowserCache, controllers.GetFileByFileName)
+}
+
+var ht4gooseforum *template.Template
+var htht4gooseforumOnce sync.Once
+
+func getHt4gooseforum() {
+	htht4gooseforumOnce.Do(func() {
+		// 创建基础模板
+		tmpl := template.New("resourcev2")
+		ht4gooseforum = template.Must(tmpl.ParseFS(resourcev2.GetTemplates(),
+			"templates/*.gohtml",
+		))
+	})
 }
