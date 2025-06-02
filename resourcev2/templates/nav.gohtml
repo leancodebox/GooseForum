@@ -18,6 +18,13 @@
             <!-- 主题切换按钮 -->
             {{template "theme-toggle.gohtml" .}}
             {{if and .User (gt .User.UserId 0)}}
+            <!-- 文章发布按钮 -->
+            <a href="/publish" class="btn btn-primary btn-sm btn-circle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+            </a>
             <!-- 消息通知按钮 -->
             <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle">
@@ -25,7 +32,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M15 17h5l-5 5v-5zM10.5 3.75a6 6 0 0 1 6 6v2.25a2.25 2.25 0 0 1-2.25 2.25H7.5a2.25 2.25 0 0 1-2.25-2.25V9.75a6 6 0 0 1 6-6z"/>
+                                  d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
                         </svg>
                         <span class="badge badge-xs badge-primary indicator-item">3</span>
                     </div>
@@ -39,19 +46,11 @@
                             <div class="py-1">• 新的关注者</div>
                         </div>
                         <div class="card-actions">
-                            <button class="btn btn-primary btn-block btn-sm">查看全部</button>
+                            <a href="/notifications"><button class="btn btn-primary btn-block btn-sm">查看全部</button></a>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- 文章发布按钮 -->
-            <a href="/publish" class="btn btn-primary btn-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                发布
-            </a>
             <!-- 用户头像下拉菜单 -->
             <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">

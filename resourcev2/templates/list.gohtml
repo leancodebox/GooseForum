@@ -139,26 +139,29 @@
                             <p class="text-base-content/70">这里是热门推荐内容，展示最受欢迎的帖子和话题。</p>
                         </div>
                     </div>
+                    {{if .RecommendedArticles}}
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
                             <h2 class="card-title">推荐文章</h2>
                             <div class="space-y-2">
                                 <div class="text-sm text-base-content/60">本周最热门文章</div>
                                 <div class="space-y-1">
-                                    <div class="text-sm hover:text-primary cursor-pointer">• 如何优化Vue.js应用性能
-                                    </div>
-                                    <div class="text-sm hover:text-primary cursor-pointer">• DaisyUI主题定制指南</div>
-                                    <div class="text-sm hover:text-primary cursor-pointer">• Nuxt3最佳实践分享</div>
+                                    {{range .RecommendedArticles}}
+                                    <a href="/post/{{.Id}}">
+                                        <div class="text-sm hover:text-primary cursor-pointer">• {{.Title}}</div>
+                                    </a>
+                                    {{end}}
                                 </div>
                             </div>
                         </div>
                     </div>
+                    {{end}}
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
                             <h2 class="card-title">赞助商</h2>
                             <p class="text-base-content/70">感谢我们的赞助商支持，让论坛能够持续为大家提供优质服务。</p>
                             <div class="card-actions justify-end">
-                                <button class="btn btn-primary btn-sm">了解更多</button>
+                                <a href="/sponsors"><button class="btn btn-primary btn-sm">了解更多</button></a>
                             </div>
                         </div>
                     </div>
