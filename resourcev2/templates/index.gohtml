@@ -58,8 +58,8 @@
                             </svg>
                         </div>
                         <div class="stat-title">注册用户</div>
-                        <div class="stat-value text-primary">1,234</div>
-                        <div class="stat-desc">本月新增 89 人</div>
+                        <div class="stat-value text-primary">{{.Stats.UserCount}}</div>
+                        <div class="stat-desc">本月新增 {{.Stats.UserMonthCount}} 人</div>
                     </div>
                 </div>
 
@@ -73,8 +73,8 @@
                             </svg>
                         </div>
                         <div class="stat-title">文章总数</div>
-                        <div class="stat-value text-secondary">567</div>
-                        <div class="stat-desc">今日新增 12 篇</div>
+                        <div class="stat-value text-secondary">{{.Stats.ArticleCount}}</div>
+                        <div class="stat-desc">今日新增 {{.Stats.ArticleMonthCount}} 篇</div>
                     </div>
                 </div>
 
@@ -88,7 +88,7 @@
                             </svg>
                         </div>
                         <div class="stat-title">评论数</div>
-                        <div class="stat-value text-accent">2,345</div>
+                        <div class="stat-value text-accent">{{.Stats.Reply}}</div>
                         <div class="stat-desc">活跃讨论中</div>
                     </div>
                 </div>

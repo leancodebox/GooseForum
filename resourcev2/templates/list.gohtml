@@ -144,13 +144,13 @@
                             <h2 class="card-title">推荐文章</h2>
                             <div class="space-y-2">
                                 <div class="text-sm text-base-content/60">本周最热门文章</div>
+                                {{range .RecommendedArticles}}
                                 <div class="space-y-1">
-                                    {{range .RecommendedArticles}}
                                     <a href="/post/{{.Id}}" class="text-sm hover:text-primary cursor-pointer">
                                         • {{.Title}}
                                     </a>
-                                    {{end}}
                                 </div>
+                                {{end}}
                             </div>
                         </div>
                     </div>

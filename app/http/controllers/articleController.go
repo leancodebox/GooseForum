@@ -3,68 +3,22 @@ package controllers
 import (
 	"fmt"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
-	"strings"
-	"sync"
-	"time"
-
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
+	"strings"
 )
-
-var (
-	siteStatsCacheHasCache bool
-	siteStatsCache         SiteStats
-	siteStatsCacheTime     time.Time
-	siteStatsCacheMutex    sync.Mutex
-)
-
-type SiteStats struct {
-	UserCount    int64 `json:"userCount"`
-	ArticleCount int64 `json:"articleCount"`
-	Reply        int64 `json:"reply"`
-}
-
-func GetSiteStatisticsData() SiteStats {
-	siteStatsCacheMutex.Lock()
-	defer siteStatsCacheMutex.Unlock()
-
-	if time.Since(siteStatsCacheTime) < 5*time.Second && siteStatsCacheHasCache {
-		return siteStatsCache
-	}
-
-	result := SiteStats{
-		UserCount:    users.GetCount(),
-		ArticleCount: articles.GetCount(),
-		Reply:        reply.GetCount(),
-	}
-
-	siteStatsCache = result
-	siteStatsCacheTime = time.Now()
-	siteStatsCacheHasCache = true
-	return siteStatsCache
-}
 
 func GetSiteStatistics() component.Response {
 	return component.SuccessResponse(GetSiteStatisticsData())
 }
-
-var articlesType = []datastruct.Option[string, int]{
-	{Name: "分享", Value: 1},
-	{Name: "求助", Value: 2},
-}
-
-var articlesTypeMap = array.Slice2Map(articlesType, func(v datastruct.Option[string, int]) int {
-	return v.Value
-})
 
 func GetArticlesEnum() component.Response {
 	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {

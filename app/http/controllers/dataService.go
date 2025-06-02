@@ -2,13 +2,62 @@ package controllers
 
 import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
+	"sync"
 	"time"
 )
+
+var articlesType = []datastruct.Option[string, int]{
+	{Name: "分享", Value: 1},
+	{Name: "求助", Value: 2},
+}
+
+var articlesTypeMap = array.Slice2Map(articlesType, func(v datastruct.Option[string, int]) int {
+	return v.Value
+})
+
+var (
+	siteStatsCacheHasCache bool
+	siteStatsCache         SiteStats
+	siteStatsCacheTime     time.Time
+	siteStatsCacheMutex    sync.Mutex
+)
+
+type SiteStats struct {
+	UserCount         int64 `json:"userCount"`
+	UserMonthCount    int64 `json:"userMonthCount"`
+	ArticleCount      int64 `json:"articleCount"`
+	ArticleMonthCount int64 `json:"articleMonthCount"`
+	Reply             int64 `json:"reply"`
+}
+
+func GetSiteStatisticsData() SiteStats {
+	siteStatsCacheMutex.Lock()
+	defer siteStatsCacheMutex.Unlock()
+
+	if time.Since(siteStatsCacheTime) < 5*time.Second && siteStatsCacheHasCache {
+		return siteStatsCache
+	}
+
+	result := SiteStats{
+		UserCount:         users.GetCount(),
+		UserMonthCount:    users.GetMonthCount(),
+		ArticleCount:      articles.GetCount(),
+		ArticleMonthCount: articles.GetMonthCount(),
+		Reply:             reply.GetCount(),
+	}
+
+	siteStatsCache = result
+	siteStatsCacheTime = time.Now()
+	siteStatsCacheHasCache = true
+	return siteStatsCache
+}
 
 // 初始化缓存
 var articleCache = &Cache[string, []articles.SmallEntity]{}

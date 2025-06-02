@@ -41,6 +41,13 @@ func GetCount() int64 {
 	builder().Count(&count)
 	return count
 }
+func GetMonthCount() int64 {
+	now := time.Now()
+	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	var count int64
+	builder().Where(queryopt.Ge(fieldCreatedAt, firstOfMonth)).Count(&count)
+	return count
+}
 
 func GetMaxId() uint64 {
 	var entity Entity
