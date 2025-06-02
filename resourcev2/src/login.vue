@@ -352,7 +352,10 @@ const handleLogin = async () => {
     const data = await response.json()
     
     if (data.code === 0) {
-      window.location.href = '/'
+      // 获取重定向参数，如果存在则跳转到原始页面，否则跳转到首页
+      const urlParams = new URLSearchParams(window.location.search)
+      const redirectUrl = urlParams.get('redirect')
+      window.location.href = redirectUrl || '/'
     } else {
       loginErrors.general = data.message || '登录失败，请检查用户名和密码'
       refreshCaptcha()
@@ -395,7 +398,10 @@ const handleRegister = async () => {
     const data = await response.json()
 
     if (data.code === 0) {
-      window.location.href = '/'
+      // 获取重定向参数，如果存在则跳转到原始页面，否则跳转到首页
+      const urlParams = new URLSearchParams(window.location.search)
+      const redirectUrl = urlParams.get('redirect')
+      window.location.href = redirectUrl || '/'
     } else {
       registerErrors.general = data.message || '注册失败，请稍后重试'
       refreshCaptcha()

@@ -1,10 +1,11 @@
 package middleware
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"net/http"
 )
 
 func JWTAuth4Gin(c *gin.Context) {
@@ -49,7 +50,10 @@ func JWTAuth(c *gin.Context) {
 func CheckLogin(c *gin.Context) {
 	userId := c.GetUint64("userId")
 	if userId == 0 {
-		c.Redirect(http.StatusFound, "/login")
+		// 获取当前请求的完整URL作为重定向参数
+		redirectURL := c.Request.URL.String()
+		c.Redirect(http.StatusFound, "/login?redirect="+redirectURL)
+		return
 	}
 	c.Next()
 }
