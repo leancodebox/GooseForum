@@ -24,10 +24,16 @@ import (
 )
 
 func Home(c *gin.Context) {
+
+	last, _ := articles.GetLatestArticles(7)
 	viewrender.Render(c, "index.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "GooseForum",
+		"IsProduction":     setting.IsProduction(),
+		"User":             GetLoginUser(c),
+		"Title":            "GooseForum",
+		"FeaturedArticles": articlesSmallEntity2Dto(getRecommendedArticles()), //回复最多的文章
+		"LatestArticles":   articlesSmallEntity2Dto(last),                     // 最新的文章
+		"Stats":            GetSiteStatisticsData(),
+		"CanonicalHref":    buildCanonicalHref(c),
 	})
 }
 
