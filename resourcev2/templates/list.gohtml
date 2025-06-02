@@ -178,80 +178,41 @@
     {{template "footer.gohtml" .}}
 </div>
 <script>
-    const filterTags = document.querySelectorAll('.filter-tag');
-    const allTag = document.querySelector('.filter-tag[data-filter="all"]');
-
-    // 页面加载时的初始状态现在由服务端渲染处理，无需JavaScript设置
-
-    filterTags.forEach(tag => {
+    // 极简化的标签过滤逻辑 - 服务端渲染状态，客户端只处理跳转
+    document.querySelectorAll('.filter-tag').forEach(tag => {
         tag.addEventListener('click', function (event) {
             event.preventDefault();
-            if (this.dataset.filter === 'all') {
-                // 如果点击的是"全部"，则取消其他标签的选中状态
-                filterTags.forEach(t => {
-                    if (t !== this) {
-                        t.classList.remove('btn-primary');
-                        t.classList.add('btn-outline');
-                        t.classList.remove('active');
-                    }
-                });
-                this.classList.remove('btn-outline');
-                this.classList.add('btn-primary');
-                this.classList.add('active');
-                updateUrlAndRefresh();
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentFilters = urlParams.get('filters') || '';
+            const clickedFilter = this.dataset.filter;
+            let newFilters = '';
+            if (clickedFilter === 'all') {
+                // 点击"全部"，清空所有过滤器
+                newFilters = '';
             } else {
-                // 处理其他标签的选中状态
-                if (this.classList.contains('active')) {
-                    this.classList.remove('btn-primary');
-                    this.classList.add('btn-outline');
-                    this.classList.remove('active');
+                // 处理分类标签的切换
+                const filterArray = currentFilters ? currentFilters.split('-') : [];
+                const filterIndex = filterArray.indexOf(clickedFilter);
+                
+                if (filterIndex > -1) {
+                    // 如果已选中，则移除
+                    filterArray.splice(filterIndex, 1);
                 } else {
-                    this.classList.remove('btn-outline');
-                    this.classList.add('btn-primary');
-                    this.classList.add('active');
+                    // 如果未选中，则添加
+                    filterArray.push(clickedFilter);
                 }
-
-                // 如果"全部"被选中，取消选中状态
-                if (allTag.classList.contains('active')) {
-                    allTag.classList.remove('btn-primary');
-                    allTag.classList.add('btn-outline');
-                    allTag.classList.remove('active');
-                }
-
-                // 如果没有任何标签被选中，则自动选中"全部"
-                const anyActive = Array.from(filterTags).some(t => t.classList.contains('active') && t !== allTag);
-                if (!anyActive) {
-                    allTag.classList.remove('btn-outline');
-                    allTag.classList.add('btn-primary');
-                    allTag.classList.add('active');
-                }
-                updateUrlAndRefresh();
+                newFilters = filterArray.join('-');
+            } 
+            // 构建新URL并跳转
+            urlParams.delete('page'); // 重置页码
+            if (newFilters) {
+                urlParams.set('filters', newFilters);
+            } else {
+                urlParams.delete('filters');
             }
+            window.location.href = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
         });
     });
-
-    function updateUrlAndRefresh() {
-        const selectedFilters = Array.from(filterTags)
-            .filter(tag => tag.classList.contains('active') && tag.dataset.filter !== 'all')
-            .map(tag => tag.dataset.filter);
-
-        // 获取当前URL中的其他参数
-        const urlParams = new URLSearchParams(window.location.search);
-
-        // 更新或添加filters参数
-        if (selectedFilters.length > 0) {
-            urlParams.set('filters', selectedFilters.join('-'));
-        } else {
-            urlParams.delete('filters');
-        }
-
-        // 重置页码为1
-        urlParams.delete('page');
-
-        // 构建新的URL并刷新页面
-        const baseUrl = window.location.pathname;
-        window.location.href = baseUrl + (urlParams.toString() ? '?' + urlParams.toString() : '');
-    }
 </script>
 </body>
 </html>
