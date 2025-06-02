@@ -27,6 +27,31 @@
 
 <script>hljs.highlightAll();</script>
 <style>
+    .markdown-body pre {
+        padding: 0 !important;
+        background: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        /* 让 pre 完全透明无圆角，所有视觉交给 code 控制 */
+    }
+
+    .markdown-body pre code {
+        display: block;
+        overflow-x: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        padding: 1.1em 1.5em;
+        background: var(--card-bg, #fafbfc);
+        font-size: 1em;
+        transition: box-shadow 0.2s, border-color 0.2s;
+        scrollbar-width: thin;
+        scrollbar-color: #bdbdbd #f5f5f5;
+    }
+
+    pre code:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
     .markdown-body {
         background: unset !important;
         color: unset !important;
@@ -126,6 +151,7 @@
 
                         <!-- 评论列表 -->
                         <div class="space-y-4">
+                            {{range .CommentList}}
                             <div class="flex gap-3">
                                 <div class="avatar">
                                     <div class="mask mask-squircle w-10 h-10">
@@ -134,11 +160,15 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-1">
-                                        <span class="font-semibold text-base-content">用户</span>
-                                        <span class="text-sm text-base-content/60">2小时前</span>
+                                        <span class="font-semibold text-base-content">{{.Username}}</span>
+                                        <span class="text-sm text-base-content/60">{{.CreateTime}}</span>
                                     </div>
+                                    {{if .ReplyToUsername}}
+                                    <p >回复 @{{.ReplyToUsername}}:</p>
+                                    {{end}}
                                     <p class="text-base-content mb-2">
-                                        这篇文章写得很好，对我很有帮助！特别是关于技术栈选择的部分，很有参考价值。</p>
+                                        {{.Content}}
+                                    </p>
                                     <div class="flex items-center gap-4 text-sm text-base-content/60">
                                         <button class="hover:text-primary flex items-center gap-1">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
@@ -154,6 +184,7 @@
                                     </div>
                                 </div>
                             </div>
+                            {{end}}
                         </div>
 
                         <!-- 加载更多评论 -->

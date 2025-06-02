@@ -185,6 +185,7 @@ type UserInfoShow struct {
 	AvatarUrl  string    `json:"avatarUrl"`
 	UserPoint  int64     `json:"userPoint"`
 	CreateTime time.Time `json:"createTime"`
+	IsAdmin    bool      `json:"isAdmin"`
 }
 
 // UploadAvatar 头像上传处理函数

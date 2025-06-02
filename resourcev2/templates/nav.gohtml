@@ -68,7 +68,9 @@
                         <span>{{.User.Username}}</span>
                     </li>
                     <li><a href="/profile">个人中心</a></li>
-                    <li><a href="/profile">admin</a></li>
+                    {{if .User.IsAdmin}}
+                    <li><a href="/app/admin">管理后台</a></li>
+                    {{end}}
                     <hr class="my-2"/>
                     <li><a onclick="handleLogout()">退出登录</a></li>
                 </ul>
