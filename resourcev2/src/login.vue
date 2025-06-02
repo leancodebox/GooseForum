@@ -14,12 +14,12 @@
           <form @submit.prevent="handleLogin" class="space-y-4">
             <div class="form-control">
               <label class="label">
-                <span class="label-text">用户名或邮箱</span>
+                <span class="label-text">用户名</span>
               </label>
               <input
                   v-model="loginForm.username"
                   type="text"
-                  placeholder="请输入用户名或邮箱"
+                  placeholder="请输入用户名"
                   class="input input-bordered w-full"
                   :class="{ 'input-error': loginErrors.username }"
                   required
@@ -45,10 +45,32 @@
               </label>
             </div>
             <div class="form-control">
-              <label class="cursor-pointer label justify-start">
-                <input v-model="loginForm.remember" type="checkbox" class="checkbox checkbox-primary" />
-                <span class="label-text ml-2">记住我</span>
+              <label class="label">
+                <span class="label-text">验证码</span>
               </label>
+              <div class="flex gap-2">
+                <input
+                    v-model="loginForm.captcha"
+                    type="text"
+                    placeholder="请输入验证码"
+                    class="input input-bordered flex-1"
+                    :class="{ 'input-error': loginErrors.captcha }"
+                    required
+                />
+                <img
+                    v-if="captchaImg"
+                    :src="captchaImg"
+                    alt="验证码"
+                    class="h-12 cursor-pointer border border-base-300 rounded"
+                    @click="refreshCaptcha"
+                />
+              </div>
+              <label v-if="loginErrors.captcha" class="label">
+                <span class="label-text-alt text-error">{{ loginErrors.captcha }}</span>
+              </label>
+            </div>
+            <div v-if="loginErrors.general" class="alert alert-error mb-4">
+              <span>{{ loginErrors.general }}</span>
             </div>
             <div class="form-control mt-6">
               <button type="submit" class="btn btn-primary w-full" :disabled="loginLoading">
@@ -131,10 +153,38 @@
               </label>
             </div>
             <div class="form-control">
+              <label class="label">
+                <span class="label-text">验证码</span>
+              </label>
+              <div class="flex gap-2">
+                <input
+                    v-model="registerForm.captcha"
+                    type="text"
+                    placeholder="请输入验证码"
+                    class="input input-bordered flex-1"
+                    :class="{ 'input-error': registerErrors.captcha }"
+                    required
+                />
+                <img
+                    v-if="captchaImg"
+                    :src="captchaImg"
+                    alt="验证码"
+                    class="h-12 cursor-pointer border border-base-300 rounded"
+                    @click="refreshCaptcha"
+                />
+              </div>
+              <label v-if="registerErrors.captcha" class="label">
+                <span class="label-text-alt text-error">{{ registerErrors.captcha }}</span>
+              </label>
+            </div>
+            <div class="form-control">
               <label class="cursor-pointer label justify-start">
                 <input v-model="registerForm.agree" type="checkbox" class="checkbox checkbox-primary" required />
                 <span class="label-text ml-2">我同意 <a href="#" class="link link-primary">用户协议</a> 和 <a href="#" class="link link-primary">隐私政策</a></span>
               </label>
+            </div>
+            <div v-if="registerErrors.general" class="alert alert-error mb-4">
+              <span>{{ registerErrors.general }}</span>
             </div>
             <div class="form-control mt-6">
               <button type="submit" class="btn btn-primary w-full" :disabled="registerLoading">
@@ -170,16 +220,20 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 
 // 当前激活的标签页
 const activeTab = ref('login')
+
+// 验证码相关
+const captchaImg = ref('')
+const captchaId = ref('')
 
 // 登录表单数据
 const loginForm = reactive({
   username: '',
   password: '',
-  remember: false
+  captcha: ''
 })
 
 // 注册表单数据
@@ -188,6 +242,7 @@ const registerForm = reactive({
   email: '',
   password: '',
   confirmPassword: '',
+  captcha: '',
   agree: false
 })
 
@@ -199,18 +254,39 @@ const registerErrors = reactive({})
 const loginLoading = ref(false)
 const registerLoading = ref(false)
 
+// 获取验证码
+const getCaptcha = async () => {
+  try {
+    const response = await fetch('/api/get-captcha')
+    const data = await response.json()
+    if (data.code === 0) {
+      captchaImg.value = data.result.captchaImg
+      captchaId.value = data.result.captchaId
+    }
+  } catch (error) {
+    console.error('获取验证码失败:', error)
+  }
+}
+
+// 刷新验证码
+const refreshCaptcha = () => {
+  getCaptcha()
+}
+
 // 表单验证函数
 const validateLogin = () => {
   const errors = {}
 
   if (!loginForm.username.trim()) {
-    errors.username = '请输入用户名或邮箱'
+    errors.username = '请输入用户名'
   }
 
   if (!loginForm.password.trim()) {
     errors.password = '请输入密码'
-  } else if (loginForm.password.length < 6) {
-    errors.password = '密码至少需要6位字符'
+  }
+
+  if (!loginForm.captcha.trim()) {
+    errors.captcha = '请输入验证码'
   }
 
   Object.assign(loginErrors, errors)
@@ -222,8 +298,6 @@ const validateRegister = () => {
 
   if (!registerForm.username.trim()) {
     errors.username = '请输入用户名'
-  } else if (registerForm.username.length < 3) {
-    errors.username = '用户名至少需要3位字符'
   }
 
   if (!registerForm.email.trim()) {
@@ -234,14 +308,16 @@ const validateRegister = () => {
 
   if (!registerForm.password.trim()) {
     errors.password = '请输入密码'
-  } else if (registerForm.password.length < 6) {
-    errors.password = '密码至少需要6位字符'
   }
 
   if (!registerForm.confirmPassword.trim()) {
     errors.confirmPassword = '请确认密码'
   } else if (registerForm.password !== registerForm.confirmPassword) {
     errors.confirmPassword = '两次输入的密码不一致'
+  }
+
+  if (!registerForm.captcha.trim()) {
+    errors.captcha = '请输入验证码'
   }
 
   Object.assign(registerErrors, errors)
@@ -260,17 +336,31 @@ const handleLogin = async () => {
   loginLoading.value = true
 
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: loginForm.username,
+        password: loginForm.password,
+        captchaId: captchaId.value,
+        captchaCode: loginForm.captcha
+      })
+    })
 
-    // 这里应该调用实际的登录API
-    console.log('登录数据:', loginForm)
-
-    // 登录成功后跳转
-    await navigateTo('/')
+    const data = await response.json()
+    
+    if (data.code === 0) {
+      window.location.href = '/'
+    } else {
+      loginErrors.general = data.message || '登录失败，请检查用户名和密码'
+      refreshCaptcha()
+    }
   } catch (error) {
-    console.error('登录失败:', error)
-    loginErrors.general = '登录失败，请检查用户名和密码'
+    console.error('登录请求失败:', error)
+    loginErrors.general = '登录失败，请稍后重试'
+    refreshCaptcha()
   } finally {
     loginLoading.value = false
   }
@@ -288,22 +378,46 @@ const handleRegister = async () => {
   registerLoading.value = true
 
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const response = await fetch('/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: registerForm.username,
+        email: registerForm.email,
+        password: registerForm.password,
+        captchaId: captchaId.value,
+        captchaCode: registerForm.captcha
+      })
+    })
 
-    // 这里应该调用实际的注册API
-    console.log('注册数据:', registerForm)
+    const data = await response.json()
 
-    // 注册成功后自动切换到登录
-    activeTab.value = 'login'
-
-    // 可以显示成功消息
-    alert('注册成功！请登录您的账户。')
+    if (data.code === 0) {
+      window.location.href = '/'
+    } else {
+      registerErrors.general = data.message || '注册失败，请稍后重试'
+      refreshCaptcha()
+    }
   } catch (error) {
-    console.error('注册失败:', error)
+    console.error('注册请求失败:', error)
     registerErrors.general = '注册失败，请稍后重试'
+    refreshCaptcha()
   } finally {
     registerLoading.value = false
   }
 }
+
+// 页面加载时获取验证码
+onMounted(() => {
+  getCaptcha()
+  
+  // 检查 URL 参数并切换到相应的标签
+  const urlParams = new URLSearchParams(window.location.search)
+  const model = urlParams.get('model')
+  if (model === 'register') {
+    activeTab.value = 'register'
+  }
+})
 </script>
