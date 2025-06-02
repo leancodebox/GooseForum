@@ -148,6 +148,7 @@ func PostDetail(c *gin.Context) {
 
 func PostV2(c *gin.Context) {
 	filters := c.DefaultQuery("filters", "")
+
 	categories := array.Filter(array.Map(strings.Split(filters, "-"), func(t string) int {
 		return cast.ToInt(t)
 	}), func(i int) bool {
@@ -243,6 +244,8 @@ func PostV2(c *gin.Context) {
 		"RecommendedArticles": getRecommendedArticles(),
 		"CanonicalHref":       buildCanonicalHref(c),
 		"Filters":             filters,
+		"FilterIds":           categories,
+		"NoFilter":            len(categories) == 0,
 		"Pagination":          pagination,
 	})
 }

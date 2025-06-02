@@ -31,12 +31,14 @@
                         <!-- 文章分类选择 -->
                         <div class="px-6 py-4 border-b border-base-200">
                             <div class="flex flex-wrap gap-2">
-                                <button class="btn btn-sm btn-primary filter-tag active" data-filter="all"
+                                <a class="btn btn-sm {{if .NoFilter}}btn-primary{{else}}btn-outline{{end}} filter-tag {{if .NoFilter}}active{{end}}" data-filter="all"
                                         role="button">全部
-                                </button>
+                                </a>
+                                {{$all := .FilterIds}}
                                 {{range .ArticleCategoryList}}
-                                <button class="btn btn-sm btn-outline filter-tag" data-filter="{{.Value}}"
-                                        role="button">{{.Name}}</button>
+                                {{$isActive := (containsInt $all .Value)}}
+                                <a class="btn btn-sm {{if $isActive}}btn-primary{{else}}btn-outline{{end}} filter-tag {{if $isActive}}active{{end}}" data-filter="{{.Value}}"
+                                        role="button">{{.Name}}</a>
                                 {{end}}
                             </div>
                         </div>
@@ -179,28 +181,7 @@
     const filterTags = document.querySelectorAll('.filter-tag');
     const allTag = document.querySelector('.filter-tag[data-filter="all"]');
 
-    // 页面加载时根据URL参数设置初始状态
-    document.addEventListener('DOMContentLoaded', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const filters = urlParams.get('filters');
-
-        if (filters) {
-            const filterArray = filters.split('-');
-            filterTags.forEach(tag => {
-                if (filterArray.includes(tag.dataset.filter)) {
-                    tag.classList.remove('btn-outline');
-                    tag.classList.add('btn-primary');
-                    tag.classList.add('active');
-                    // 如果有其他标签被选中，取消"全部"的选中状态
-                    if (tag.dataset.filter !== 'all') {
-                        allTag.classList.remove('btn-primary');
-                        allTag.classList.add('btn-outline');
-                        allTag.classList.remove('active');
-                    }
-                }
-            });
-        }
-    });
+    // 页面加载时的初始状态现在由服务端渲染处理，无需JavaScript设置
 
     filterTags.forEach(tag => {
         tag.addEventListener('click', function (event) {
