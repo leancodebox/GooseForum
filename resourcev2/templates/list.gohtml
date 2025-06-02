@@ -31,13 +31,13 @@
                         <!-- 文章分类选择 -->
                         <div class="px-6 py-4 border-b border-base-200">
                             <div class="flex flex-wrap gap-2">
-                                <a class="btn btn-sm {{if .NoFilter}}btn-primary{{else}}btn-outline{{end}} filter-tag {{if .NoFilter}}active{{end}}" data-filter="all"
+                                <a class="btn btn-sm {{if .NoFilter}}btn-primary{{end}} filter-tag {{if .NoFilter}}active{{end}}" data-filter="all"
                                         role="button">全部
                                 </a>
                                 {{$all := .FilterIds}}
                                 {{range .ArticleCategoryList}}
                                 {{$isActive := (containsInt $all .Value)}}
-                                <a class="btn btn-sm {{if $isActive}}btn-primary{{else}}btn-outline{{end}} filter-tag {{if $isActive}}active{{end}}" data-filter="{{.Value}}"
+                                <a class="btn btn-sm {{if $isActive}}btn-primary{{end}} filter-tag {{if $isActive}}active{{end}}" data-filter="{{.Value}}"
                                         role="button">{{.Name}}</a>
                                 {{end}}
                             </div>
