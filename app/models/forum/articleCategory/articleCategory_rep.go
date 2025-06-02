@@ -3,6 +3,7 @@ package articleCategory
 import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/datastruct"
 )
 
 func create(entity *Entity) int64 {
@@ -66,5 +67,14 @@ func GetByIds(ids []uint64) (entities []*Entity) {
 func GetMapByIds(ids []uint64) map[uint64]*Entity {
 	return collectionopt.Slice2Map(GetByIds(ids), func(v *Entity) uint64 {
 		return v.Id
+	})
+}
+
+func Label() []datastruct.Option[string, uint64] {
+	return collectionopt.Map(All(), func(t *Entity) datastruct.Option[string, uint64] {
+		return datastruct.Option[string, uint64]{
+			Name:  t.Category,
+			Value: t.Id,
+		}
 	})
 }

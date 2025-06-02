@@ -6,7 +6,6 @@ import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
@@ -27,13 +26,14 @@ func Home(c *gin.Context) {
 
 	last, _ := articles.GetLatestArticles(7)
 	viewrender.Render(c, "index.gohtml", map[string]any{
-		"IsProduction":     setting.IsProduction(),
-		"User":             GetLoginUser(c),
-		"Title":            "GooseForum",
-		"FeaturedArticles": articlesSmallEntity2Dto(getRecommendedArticles()), //回复最多的文章
-		"LatestArticles":   articlesSmallEntity2Dto(last),                     // 最新的文章
-		"Stats":            GetSiteStatisticsData(),
-		"CanonicalHref":    buildCanonicalHref(c),
+		"IsProduction":        setting.IsProduction(),
+		"CanonicalHref":       buildCanonicalHref(c),
+		"User":                GetLoginUser(c),
+		"Title":               "GooseForum",
+		"ArticleCategoryList": articleCategory.Label(),
+		"FeaturedArticles":    articlesSmallEntity2Dto(getRecommendedArticles()), //回复最多的文章
+		"LatestArticles":      articlesSmallEntity2Dto(last),                     // 最新的文章
+		"Stats":               GetSiteStatisticsData(),
 	})
 }
 
@@ -218,12 +218,7 @@ func PostV2(c *gin.Context) {
 	})
 	// 计算总页数
 	totalPages := (cast.ToInt(pageData.Total) + param.PageSize - 1) / param.PageSize
-	articleCategoryList := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
-		return datastruct.Option[string, uint64]{
-			Name:  t.Category,
-			Value: t.Id,
-		}
-	})
+	articleCategoryList := articleCategory.Label()
 	pagination := []PageButton{}
 	start := max(pageData.Page-3, 1)
 	for i := 1; i <= 7; i++ {
