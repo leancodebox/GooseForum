@@ -35,8 +35,8 @@ func view(ginApp *gin.Engine) {
 	viewRouteApp.GET("/about", controllers.About)
 	viewRouteApp.GET("/sponsors", controllers.SponsorsView)
 	viewRouteApp.GET("/links", controllers.LinksView)
-	viewRouteApp.GET("/profile", controllers.Profile)
-	viewRouteApp.GET("/publish", controllers.Publish)
-	viewRouteApp.GET("/notifications", controllers.Notifications)
+	viewRouteApp.GET("/profile", middleware.CheckLogin, controllers.Profile)
+	viewRouteApp.GET("/publish", middleware.CheckLogin, controllers.Publish)
+	viewRouteApp.GET("/notifications", middleware.CheckLogin, controllers.Notifications)
 	viewRouteApp.GET("/submit-link", controllers.SubmitLink)
 }
