@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { MdEditor } from 'md-editor-v3'
+import {computed, onMounted, onUnmounted, ref} from 'vue'
+import {MdEditor} from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
-import { getArticleEnum, getArticlesOrigin, submitArticle } from './utils/articleService.js'
-import { NConfigProvider, darkTheme, lightTheme, NSelect } from 'naive-ui'
-import { createSelectThemeOverrides, getBaseTheme } from './components/nu-theme.ts'
+import {getArticleEnum, getArticlesOrigin, submitArticle} from './utils/articleService.js'
+import {NConfigProvider, NSelect} from 'naive-ui'
+import {createSelectThemeOverrides, getBaseTheme} from './components/nu-theme.ts'
 
 // 表单数据 - 匹配后端接口结构
 const articleData = ref({
@@ -32,12 +32,6 @@ const toolbars = [
   'codeRow', 'code', 'link', 'image', 'table', 'mermaid', 'katex', '-',
   'revoke', 'next', 'save', '=', 'pageFullscreen', 'fullscreen', 'preview', 'htmlPreview', 'catalog'
 ]
-
-// 编辑器主题
-const editorTheme = computed(() => {
-  // 这里可以根据系统主题动态切换
-  return 'light'
-})
 
 // 状态管理
 const isSubmitting = ref(false)
@@ -130,6 +124,7 @@ const naiveTheme = computed(() => {
 })
 
 const naiveThemeOverrides = computed(() => {
+  console.log(currentTheme.value)
   return createSelectThemeOverrides(currentTheme.value)
 })
 
@@ -139,7 +134,7 @@ const observeThemeChange = () => {
   // 初始化当前主题
   const initialTheme = document.documentElement.getAttribute('data-theme') || 'light'
   currentTheme.value = initialTheme
-  
+
   // 创建 MutationObserver 监听主题变化
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -149,13 +144,13 @@ const observeThemeChange = () => {
       }
     })
   })
-  
+
   // 开始监听
   observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-theme']
   })
-  
+
   return observer
 }
 
@@ -179,9 +174,9 @@ onMounted(async () => {
     if (getUrlParams()) {
       await getOriginData()
     }
-    
+
     // 启动主题监听器
-    themeObserver = observeThemeChange()
+    const themeObserver = observeThemeChange()
   } catch (error) {
     console.error('初始化失败:', error)
   }
@@ -195,93 +190,92 @@ onUnmounted(() => {
 <template>
   <n-config-provider :theme="naiveTheme" :theme-overrides="naiveThemeOverrides">
     <div class="max-w-6xl mx-auto py-2 px-4">
-    <!-- 发布表单 -->
-    <form @submit.prevent="handleSubmit" class="space-y-6">
-      <!-- 基本信息响应式布局 -->
-      <div class="space-y-4">
-        <!-- 文章标题 - 始终占满宽度 -->
-        <div class="w-full">
-          <label class="form-control w-full">
-            <div class="label">
-              <span class="label-text font-medium">文章标题</span>
-              <span class="label-text-alt text-error">*</span>
+      <!-- 发布表单 -->
+      <form @submit.prevent="handleSubmit" class="space-y-6">
+        <!-- 基本信息响应式布局 -->
+        <div class="space-y-4">
+          <!-- 文章标题 - 始终占满宽度 -->
+          <div class="w-full">
+            <label class="form-control w-full">
+              <div class="label">
+                <span class="label-text font-medium">文章标题</span>
+                <span class="label-text-alt text-error">*</span>
+              </div>
+              <input v-model="articleData.articleTitle" type="text" placeholder="请输入文章标题"
+                     class="input input-bordered w-full"
+                     required/>
+            </label>
+          </div>
+
+          <!-- 类型和分类 - 响应式布局 -->
+          <div class="flex flex-col sm:flex-row gap-4">
+            <!-- 文章类型 -->
+            <div class="w-full sm:w-1/3">
+              <label class="form-control w-full">
+                <div class="label">
+                  <span class="label-text font-medium">类型</span>
+                  <span class="label-text-alt text-error">*</span>
+                </div>
+                <n-select
+                    class="bg-base-100"
+                    v-model="articleData.type"
+                    :options="typeList"
+                    placeholder="选择类型"
+                />
+              </label>
             </div>
-            <input v-model="articleData.articleTitle" type="text" placeholder="请输入文章标题" class="input input-bordered w-full"
-                   required />
-          </label>
-        </div>
 
-        <!-- 类型和分类 - 响应式布局 -->
-        <div class="flex flex-col sm:flex-row gap-4">
-          <!-- 文章类型 -->
-          <div class="w-full sm:w-1/3">
-            <label class="form-control w-full">
-              <div class="label">
-                <span class="label-text font-medium">类型</span>
-                <span class="label-text-alt text-error">*</span>
-              </div>
-              <n-select 
-                class="bg-base-100"
-                v-model="articleData.type" 
-                :options="typeList" 
-                placeholder="选择类型"
-              />
-            </label>
-          </div>
-
-          <!-- 分类选择 -->
-          <div class="w-full sm:w-2/3">
-            <label class="form-control w-full">
-              <div class="label">
-                <span class="label-text font-medium">文章分类</span>
-                <span class="label-text-alt text-error">*</span>
-              </div>
-              <n-select 
-                class="bg-base-100"
-                v-model="articleData.categoryId" 
-                :options="categories" 
-                placeholder="请选择分类"
-                :max-tag-count="3"
-                multiple
-              />
-            </label>
+            <!-- 分类选择 -->
+            <div class="w-full sm:w-2/3">
+              <label class="form-control w-full">
+                <div class="label">
+                  <span class="label-text font-medium">文章分类</span>
+                  <span class="label-text-alt text-error">*</span>
+                </div>
+                <n-select
+                    class="bg-base-100"
+                    v-model="articleData.categoryId"
+                    :options="categories"
+                    placeholder="请选择分类"
+                    :max-tag-count="3"
+                    multiple
+                />
+              </label>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Markdown 编辑器 -->
-
-
-      <div class="border border-base-300 bg-base-100 rounded-lg overflow-hidden">
-        <MdEditor
-            v-model="articleData.articleContent"
-            :height="500"
-            :preview="true"
-            :toolbars="toolbars"
-            :theme="editorTheme"
-            :previewTheme="'github'"
-            :uploadImg="false"
-            placeholder="请输入文章内容，支持 Markdown 语法"
-        />
-      </div>
+        <!-- Markdown 编辑器 -->
 
 
+        <div class="border border-base-300 bg-base-100 rounded-lg overflow-hidden">
+          <MdEditor
+              v-model="articleData.articleContent"
+              :height="500"
+              :preview="true"
+              :toolbars="toolbars"
+              :theme="['dark','garden','luxury','dracula'].indexOf(currentTheme)=== -1?'light':'dark'"
+              :previewTheme="'github'"
+              :uploadImg="false"
+              placeholder="请输入文章内容，支持 Markdown 语法"
+          />
+        </div>
 
 
-      <!-- 操作按钮 -->
-      <div class="flex flex-col sm:flex-row gap-4 pt-6">
-        <button type="submit" class="btn btn-primary flex-1 sm:flex-none sm:min-w-32" :disabled="isSubmitting">
-          <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
-          {{ isSubmitting ? '发布中...' : '发布文章' }}
-        </button>
+        <!-- 操作按钮 -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-6">
+          <button type="submit" class="btn btn-primary flex-1 sm:flex-none sm:min-w-32" :disabled="isSubmitting">
+            <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
+            {{ isSubmitting ? '发布中...' : '发布文章' }}
+          </button>
 
-        <button type="button" @click="saveDraft" class="btn btn-outline flex-1 sm:flex-none sm:min-w-32"
-                :disabled="isSubmitting">
-          保存草稿
-        </button>
+          <button type="button" @click="saveDraft" class="btn btn-outline flex-1 sm:flex-none sm:min-w-32"
+                  :disabled="isSubmitting">
+            保存草稿
+          </button>
 
-      </div>
-    </form>
+        </div>
+      </form>
 
 
     </div>
@@ -289,7 +283,7 @@ onUnmounted(() => {
 </template>
 
 
-<style >
+<style>
 
 /* 修复 md-editor-v3 分割线不可见的问题 */
 .md-editor-resize-operate {
@@ -333,9 +327,20 @@ onUnmounted(() => {
   margin: 0.25em 0;
 }
 
-.md-editor-preview ul ul { list-style-type: circle; }
-.md-editor-preview ul ul ul { list-style-type: square; }
-.md-editor-preview ol ol { list-style-type: lower-alpha; }
-.md-editor-preview ol ol ol { list-style-type: lower-roman; }
+.md-editor-preview ul ul {
+  list-style-type: circle;
+}
+
+.md-editor-preview ul ul ul {
+  list-style-type: square;
+}
+
+.md-editor-preview ol ol {
+  list-style-type: lower-alpha;
+}
+
+.md-editor-preview ol ol ol {
+  list-style-type: lower-roman;
+}
 
 </style>
