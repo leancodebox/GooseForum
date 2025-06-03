@@ -4,6 +4,7 @@ import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import { getArticleEnum, getArticlesOrigin, submitArticle } from './utils/articleService.js'
 import { NConfigProvider, darkTheme, lightTheme, NSelect } from 'naive-ui'
+import { createNaiveTheme } from './components/naive-ui-theme-config.js'
 
 // 表单数据 - 匹配后端接口结构
 const articleData = ref({
@@ -120,8 +121,35 @@ const getOriginData = async () => {
   }
 }
 
-// 页面初始化
-let themeObserver = null
+// 主题相关
+const currentTheme = ref('light')
+
+
+// 监听主题变化
+const observeThemeChange = () => {
+  // 初始化当前主题
+  const initialTheme = document.documentElement.getAttribute('data-theme') || 'light'
+  currentTheme.value = initialTheme
+  
+  // 创建 MutationObserver 监听主题变化
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        const newTheme = document.documentElement.getAttribute('data-theme') || 'light'
+        currentTheme.value = newTheme
+      }
+    })
+  })
+  
+  // 开始监听
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+  })
+  
+  return observer
+}
+
 
 onMounted(async () => {
   try {
@@ -151,16 +179,12 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  // 清理主题监听器
-  if (themeObserver) {
-    themeObserver.disconnect()
-  }
 })
 
 
 </script>
 <template>
-  <n-config-provider :theme="naiveTheme">
+  <n-config-provider >
     <div class="max-w-6xl mx-auto py-2 px-4">
     <!-- 发布表单 -->
     <form @submit.prevent="handleSubmit" class="space-y-6">
