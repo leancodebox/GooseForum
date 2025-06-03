@@ -8,6 +8,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"net/http"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 
@@ -73,7 +74,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			Validate:   t.Validate,
 			Prestige:   t.Prestige,
 			RoleList:   roleList,
-			CreateTime: t.CreatedAt.Format("2006-01-02 15:04:05"),
+			CreateTime: t.CreatedAt.Format(time.DateTime),
 		}
 	})
 	return component.SuccessPage(
@@ -178,8 +179,8 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 				Username:      username,
 				ArticleStatus: t.ArticleStatus,
 				ProcessStatus: t.ProcessStatus,
-				CreatedAt:     t.CreatedAt.Format("2006-01-02 15:04:05"),
-				UpdatedAt:     t.UpdatedAt.Format("2006-01-02 15:04:05"),
+				CreatedAt:     t.CreatedAt.Format(time.DateTime),
+				UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
 			}
 		}),
 		pageData.Page,
@@ -275,7 +276,7 @@ func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 			RoleName:    t.RoleName,
 			Effective:   t.Effective,
 			Permissions: permissionItemList,
-			CreateTime:  t.CreatedAt.Format("2006-01-02 15:04:05"),
+			CreateTime:  t.CreatedAt.Format(time.DateTime),
 		}
 	})
 

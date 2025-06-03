@@ -108,8 +108,8 @@ func articlesSmallEntity2Dto(data []articles.SmallEntity) []ArticlesSimpleDto {
 		return ArticlesSimpleDto{
 			Id:             t.Id,
 			Title:          t.Title,
-			LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
-			CreateTime:     t.CreatedAt.Format("2006-01-02 15:04:05"),
+			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
+			CreateTime:     t.CreatedAt.Format(time.DateTime),
 			AuthorId:       t.UserId,
 			Username:       username,
 			AvatarUrl:      avatarUrl,

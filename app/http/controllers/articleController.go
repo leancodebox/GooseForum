@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"strings"
+	"time"
 )
 
 func GetSiteStatistics() component.Response {
@@ -283,8 +284,8 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 			return ArticlesSimpleDto{
 				Id:             t.Id,
 				Title:          t.Title,
-				CreateTime:     t.CreatedAt.Format("2006-01-02 15:04:05"),
-				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
+				CreateTime:     t.CreatedAt.Format(time.DateTime),
+				LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
 				Username:       "", // 这里不需要用户名，因为是自己的文章
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,

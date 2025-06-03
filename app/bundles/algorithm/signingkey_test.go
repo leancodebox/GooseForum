@@ -8,5 +8,5 @@ func TestGenerateSigningKey(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(a)
-	
+
 }
