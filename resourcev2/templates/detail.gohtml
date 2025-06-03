@@ -117,6 +117,18 @@
                                 {{.ArticleContent}}
                             </div>
                         </div>
+                        
+                        <!-- 点赞按钮 -->
+                        <div class="flex gap-2 mt-6">
+                            <button id="like-btn" class="{{if .ILike}}bg-primary text-primary-content{{else}}bg-base-200 text-base-content{{end}} px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none" onclick="toggleLike()"
+                                    aria-label="点赞文章">
+                                <svg class="w-4 h-4 transition-all duration-300" viewBox="0 0 24 24">
+                                    <path fill="currentColor"
+                                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                                <span id="like-count">{{.LikeCount}}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -364,5 +376,50 @@
     </main>
     {{template "footer.gohtml" .}}
 </div>
+
+
+
+<script>
+    async function toggleLike() {
+        const likeBtn = document.getElementById('like-btn');
+        const likeCountSpan = document.getElementById('like-count');
+        const currentCount = parseInt(likeCountSpan.textContent);
+        const isLiked = likeBtn.classList.contains('bg-primary');
+        const action = isLiked ? 2 : 1;
+
+        try {
+            const response = await fetch('/api/bbs/like-articles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: {{.ArticleId}},
+                    action: action
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                if (action === 1) {
+                    likeBtn.classList.remove('bg-base-200', 'text-base-content');
+                    likeBtn.classList.add('bg-primary', 'text-primary-content');
+                    likeCountSpan.textContent = currentCount + 1;
+                } else {
+                    likeBtn.classList.remove('bg-primary', 'text-primary-content');
+                    likeBtn.classList.add('bg-base-200', 'text-base-content');
+                    likeCountSpan.textContent = currentCount - 1;
+                }
+            } else {
+                alert(result.msg || '操作失败，请稍后重试');
+            }
+        } catch (error) {
+            console.error('操作失败:', error);
+            alert('操作失败，请稍后重试');
+        }
+    }
+</script>
+
 </body>
 </html>
