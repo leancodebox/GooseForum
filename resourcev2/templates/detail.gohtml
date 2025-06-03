@@ -57,6 +57,7 @@
     pre code:hover {
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     }
+
     .markdown-body {
         background: unset !important;
         color: unset !important;
@@ -77,17 +78,18 @@
                 <!-- 文章详情卡片 -->
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body overflow-hidden">
-
                         <h1 class="card-title text-3xl font-bold text-base-content mb-4">
                             {{.ArticleTitle}}
                         </h1>
+                        {{if false}}
                         <div class="flex items-center gap-2 mb-4">
                             {{range .ArticleCategory}}
                             <div class="badge badge-primary">{{.}}</div>
+                            <div class="badge badge-outline">{{.}}</div>
                             {{end}}
-                            {{/*                            <div class="badge badge-outline badge-primary">前端开发</div>*/}}
                         </div>
-                        <div class="flex items-center text-base-content/70 mb-6">
+                        {{end}}
+                        <div class="flex items-center text-base-content/70 mb-6 border-b-gray-500">
                             <div class="avatar">
                                 <div class="mask mask-squircle w-8 h-8">
                                     <img src="{{.AvatarUrl}}" alt="{{.Username}}的头像"/>
@@ -96,7 +98,7 @@
                             <span class="ml-2 mr-4 flex-shrink-0">{{.Username}}</span>
                             <span class="mr-4 flex-shrink-0">{{.CreateTime}}</span>
                             {{if and .User (eq .User.UserId .AuthorId)}}
-                            <a href="/publish?id={{.ArticleId}}"  class="mr-4 flex-shrink-0">编辑</a>
+                            <a href="/publish?id={{.ArticleId}}" class="mr-4 flex-shrink-0">编辑</a>
                             {{end}}
                             <div class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
@@ -122,10 +124,12 @@
                                 {{.ArticleContent}}
                             </div>
                         </div>
-                        
+
                         <!-- 点赞按钮 -->
                         <div class="flex gap-2 mt-6">
-                            <button id="like-btn" class="{{if .ILike}}bg-primary text-primary-content{{else}}bg-base-200 text-base-content{{end}} px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none" onclick="toggleLike()"
+                            <button id="like-btn"
+                                    class="{{if .ILike}}bg-primary text-primary-content{{else}}bg-base-200 text-base-content{{end}} px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none"
+                                    onclick="toggleLike()"
                                     aria-label="点赞文章">
                                 <svg class="w-4 h-4 transition-all duration-300" viewBox="0 0 24 24">
                                     <path fill="currentColor"
@@ -186,7 +190,7 @@
                                         <span class="text-sm text-base-content/60">{{.CreateTime}}</span>
                                     </div>
                                     {{if .ReplyToUsername}}
-                                    <p >回复 @{{.ReplyToUsername}}:</p>
+                                    <p>回复 @{{.ReplyToUsername}}:</p>
                                     {{end}}
                                     <p class="text-base-content mb-2">
                                         {{.Content}}
@@ -381,7 +385,6 @@
     </main>
     {{template "footer.gohtml" .}}
 </div>
-
 
 
 <script>
