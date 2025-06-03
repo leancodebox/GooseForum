@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import { getArticleEnum, getArticlesOrigin, submitArticle } from './utils/articleService.js'
+import { NConfigProvider, darkTheme, lightTheme, NSelect } from 'naive-ui'
 
 // 表单数据 - 匹配后端接口结构
 const articleData = ref({
@@ -39,8 +40,6 @@ const editorTheme = computed(() => {
 
 // 状态管理
 const isSubmitting = ref(false)
-const isCategoryDropdownOpen = ref(false)
-const isTypeDropdownOpen = ref(false)
 
 // 获取URL参数（用于编辑模式）
 const getUrlParams = () => {
@@ -121,29 +120,9 @@ const getOriginData = async () => {
   }
 }
 
-// 切换分类选择
-const toggleCategory = (categoryId) => {
-  const index = articleData.value.categoryId.indexOf(categoryId)
-  if (index > -1) {
-    articleData.value.categoryId.splice(index, 1)
-  } else {
-    articleData.value.categoryId.push(categoryId)
-  }
-}
-
-// 点击外部关闭下拉框
-const handleClickOutside = (event) => {
-  // 检查是否点击在分类下拉框外部
-  if (!event.target.closest('.category-dropdown')) {
-    isCategoryDropdownOpen.value = false
-  }
-  // 检查是否点击在类型下拉框外部
-  if (!event.target.closest('.type-dropdown')) {
-    isTypeDropdownOpen.value = false
-  }
-}
-
 // 页面初始化
+let themeObserver = null
+
 onMounted(async () => {
   try {
     // 获取分类和类型选项
@@ -164,29 +143,25 @@ onMounted(async () => {
       await getOriginData()
     }
     
-    // 添加点击外部事件监听
-    document.addEventListener('click', handleClickOutside)
+    // 启动主题监听器
+    themeObserver = observeThemeChange()
   } catch (error) {
     console.error('初始化失败:', error)
   }
 })
 
-// 组件卸载时移除事件监听
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+  // 清理主题监听器
+  if (themeObserver) {
+    themeObserver.disconnect()
+  }
 })
 
 
 </script>
 <template>
-
-  <div class="max-w-6xl mx-auto py-8 px-4">
-    <!-- 页面标题 -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-base-content mb-2">发布文章</h1>
-      <p class="text-base-content/70">分享您的技术见解和经验</p>
-    </div>
-
+  <n-config-provider :theme="naiveTheme">
+    <div class="max-w-6xl mx-auto py-2 px-4">
     <!-- 发布表单 -->
     <form @submit.prevent="handleSubmit" class="space-y-6">
       <!-- 基本信息网格布局 -->
@@ -210,59 +185,12 @@ onUnmounted(() => {
               <span class="label-text font-medium">文章类型</span>
               <span class="label-text-alt text-error">*</span>
             </div>
-            
-            <!-- 自定义类型选择组件 -->
-            <div class="relative type-dropdown">
-              <!-- 选择框 -->
-              <div 
-                @click="isTypeDropdownOpen = !isTypeDropdownOpen"
-                class="min-h-12 px-3 py-2 border border-base-300 rounded-lg bg-base-100 cursor-pointer hover:border-base-400 focus-within:border-primary transition-colors flex items-center justify-between"
-              >
-                <!-- 当前选择的类型 -->
-                <span v-if="articleData.type" class="text-base-content">
-                  {{ typeList.find(t => t.value === articleData.type)?.label }}
-                </span>
-                <span v-else class="text-base-content/50">
-                  请选择文章类型
-                </span>
-                
-                <!-- 下拉箭头 -->
-                <svg 
-                  class="w-4 h-4 transition-transform duration-200" 
-                  :class="{ 'rotate-180': isTypeDropdownOpen }"
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-              </div>
-              
-              <!-- 下拉选项 -->
-              <div 
-                v-show="isTypeDropdownOpen"
-                class="absolute z-10 w-full mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-              >
-                <div 
-                  v-for="type in typeList" 
-                  :key="type.value"
-                  @click="articleData.type = type.value; isTypeDropdownOpen = false"
-                  class="flex items-center gap-3 px-3 py-2 hover:bg-base-200 cursor-pointer transition-colors"
-                  :class="{ 'bg-primary/10': articleData.type === type.value }"
-                >
-                  <!-- 选中指示器 -->
-                  <div class="flex items-center">
-                    <div 
-                      class="w-2 h-2 rounded-full transition-colors"
-                      :class="articleData.type === type.value ? 'bg-primary' : 'bg-transparent'"
-                    ></div>
-                  </div>
-                  
-                  <!-- 类型名称 -->
-                  <span class="flex-1">{{ type.label }}</span>
-                </div>
-              </div>
-            </div>
+            <n-select 
+            class="bg-base-100"
+              v-model="articleData.type" 
+              :options="typeList" 
+              placeholder="请选择文章类型"
+            />
           </label>
         </div>
 
@@ -273,82 +201,13 @@ onUnmounted(() => {
               <span class="label-text font-medium">文章分类</span>
               <span class="label-text-alt text-error">*</span>
             </div>
-            
-            <!-- 自定义多选组件 -->
-            <div class="relative category-dropdown">
-              <!-- 选择框 -->
-              <div 
-                @click="isCategoryDropdownOpen = !isCategoryDropdownOpen"
-                class="min-h-12 px-3 py-2 border border-base-300 rounded-lg bg-base-100 cursor-pointer hover:border-base-400 focus-within:border-primary transition-colors"
-              >
-                <!-- 已选择的标签 -->
-                <div v-if="articleData.categoryId.length > 0" class="flex flex-wrap gap-1">
-                  <span 
-                    v-for="categoryId in articleData.categoryId" 
-                    :key="categoryId"
-                    class="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-sm rounded-md"
-                  >
-                    {{ categories.find(c => c.value === categoryId)?.label }}
-                    <button 
-                      @click.stop="articleData.categoryId = articleData.categoryId.filter(id => id !== categoryId)"
-                      class="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
-                    >
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                
-                <!-- 占位符 -->
-                <div v-else class="text-base-content/50">
-                  请选择文章分类
-                </div>
-                
-                <!-- 下拉箭头 -->
-                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg 
-                    class="w-4 h-4 transition-transform duration-200" 
-                    :class="{ 'rotate-180': isCategoryDropdownOpen }"
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </div>
-              </div>
-              
-              <!-- 下拉选项 -->
-              <div 
-                v-show="isCategoryDropdownOpen"
-                class="absolute z-10 w-full mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-              >
-                <div 
-                  v-for="category in categories" 
-                  :key="category.value"
-                  @click="toggleCategory(category.value)"
-                  class="flex items-center gap-3 px-3 py-2 hover:bg-base-200 cursor-pointer transition-colors"
-                >
-                  <!-- 复选框 -->
-                  <div class="flex items-center">
-                    <input 
-                      type="checkbox" 
-                      :checked="articleData.categoryId.includes(category.value)"
-                      class="checkbox checkbox-primary checkbox-sm"
-                      readonly
-                    >
-                  </div>
-                  
-                  <!-- 分类名称 -->
-                  <span class="flex-1">{{ category.label }}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div class="label">
-              <span class="label-text-alt">可以选择多个分类</span>
-            </div>
+
+            <n-select 
+              class="bg-base-100"
+              v-model="articleData.categoryId" 
+              :options="categories" 
+              placeholder="请选择文章分类"
+            />
           </label>
         </div>
       </div>
@@ -388,7 +247,8 @@ onUnmounted(() => {
     </form>
 
 
-  </div>
+    </div>
+  </n-config-provider>
 </template>
 
 
