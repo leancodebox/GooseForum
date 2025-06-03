@@ -32,12 +32,17 @@
         background: none !important;
         border: none !important;
         border-radius: 0 !important;
+        max-width: 100%;
+        overflow: hidden;
         /* 让 pre 完全透明无圆角，所有视觉交给 code 控制 */
     }
 
     .markdown-body pre code {
         display: block;
         overflow-x: auto;
+        max-width: 100%;
+        white-space: pre;
+        word-break: normal;
         border: 1px solid #e0e0e0;
         border-radius: 6px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -68,10 +73,10 @@
     </header>
     <main class="flex-1 container mx-auto px-4 py-4">
         <div class="flex flex-col md:flex-row gap-6">
-            <section class="flex-1 space-y-6">
+            <section class="flex-1 space-y-6 min-w-0">
                 <!-- 文章详情卡片 -->
                 <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body">
+                    <div class="card-body overflow-hidden">
 
                         <h1 class="card-title text-3xl font-bold text-base-content mb-4">
                             {{.ArticleTitle}}
@@ -88,10 +93,10 @@
                                     <img src="{{.AvatarUrl}}" alt="{{.Username}}的头像"/>
                                 </div>
                             </div>
-                            <span class="ml-2 mr-4">{{.Username}}</span>
-                            <span class="mr-4">{{.CreateTime}}</span>
+                            <span class="ml-2 mr-4 flex-shrink-0">{{.Username}}</span>
+                            <span class="mr-4 flex-shrink-0">{{.CreateTime}}</span>
                             {{if and .User (eq .User.UserId .AuthorId)}}
-                            <a href="/publish?id={{.ArticleId}}"  class="mr-4">编辑</a>
+                            <a href="/publish?id={{.ArticleId}}"  class="mr-4 flex-shrink-0">编辑</a>
                             {{end}}
                             <div class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
@@ -112,7 +117,7 @@
                                 <span>{{.LikeCount}}</span>
                             </div>
                         </div>
-                        <div class="prose max-w-none text-base-content">
+                        <div class="prose max-w-none text-base-content overflow-hidden min-w-0">
                             <div class="markdown-body">
                                 {{.ArticleContent}}
                             </div>
@@ -134,7 +139,7 @@
 
                 <!-- 评论区域 -->
                 <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body">
+                    <div class="card-body overflow-hidden">
                         <h2 class="card-title mb-4">评论 (12)</h2>
 
                         <!-- 发表评论 -->
