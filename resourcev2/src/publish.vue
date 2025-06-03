@@ -164,10 +164,10 @@ onUnmounted(() => {
     <div class="max-w-6xl mx-auto py-2 px-4">
     <!-- 发布表单 -->
     <form @submit.prevent="handleSubmit" class="space-y-6">
-      <!-- 基本信息网格布局 -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- 文章标题 -->
-        <div class="lg:col-span-2">
+      <!-- 基本信息响应式布局 -->
+      <div class="space-y-4">
+        <!-- 文章标题 - 始终占满宽度 -->
+        <div class="w-full">
           <label class="form-control w-full">
             <div class="label">
               <span class="label-text font-medium">文章标题</span>
@@ -178,37 +178,41 @@ onUnmounted(() => {
           </label>
         </div>
 
-        <!-- 文章类型 -->
-        <div>
-          <label class="form-control w-full">
-            <div class="label">
-              <span class="label-text font-medium">文章类型</span>
-              <span class="label-text-alt text-error">*</span>
-            </div>
-            <n-select 
-            class="bg-base-100"
-              v-model="articleData.type" 
-              :options="typeList" 
-              placeholder="请选择文章类型"
-            />
-          </label>
-        </div>
+        <!-- 类型和分类 - 响应式布局 -->
+        <div class="flex flex-col sm:flex-row gap-4">
+          <!-- 文章类型 -->
+          <div class="w-full sm:w-1/3">
+            <label class="form-control w-full">
+              <div class="label">
+                <span class="label-text font-medium">类型</span>
+                <span class="label-text-alt text-error">*</span>
+              </div>
+              <n-select 
+                class="bg-base-100"
+                v-model="articleData.type" 
+                :options="typeList" 
+                placeholder="选择类型"
+              />
+            </label>
+          </div>
 
-        <!-- 分类选择 -->
-        <div>
-          <label class="form-control w-full">
-            <div class="label">
-              <span class="label-text font-medium">文章分类</span>
-              <span class="label-text-alt text-error">*</span>
-            </div>
-
-            <n-select 
-              class="bg-base-100"
-              v-model="articleData.categoryId" 
-              :options="categories" 
-              placeholder="请选择文章分类"
-            />
-          </label>
+          <!-- 分类选择 -->
+          <div class="w-full sm:w-2/3">
+            <label class="form-control w-full">
+              <div class="label">
+                <span class="label-text font-medium">文章分类</span>
+                <span class="label-text-alt text-error">*</span>
+              </div>
+              <n-select 
+                class="bg-base-100"
+                v-model="articleData.categoryId" 
+                :options="categories" 
+                placeholder="请选择分类"
+                :max-tag-count="3"
+                multiple
+              />
+            </label>
+          </div>
         </div>
       </div>
 
