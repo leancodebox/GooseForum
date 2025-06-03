@@ -1,16 +1,27 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
+import { getArticleEnum, getArticlesOrigin, submitArticle } from './utils/articleService.js'
 
-// 表单数据
-const form = ref({
-  title: '',
-  category: '',
-  type: 'original',
-  tags: '',
-  content: ''
+// 表单数据 - 匹配后端接口结构
+const articleData = ref({
+  id: 0,
+  articleContent: '',
+  articleTitle: '',
+  categoryId: [],
+  type: 1
 })
+
+// 动态选项数据
+const categories = ref([
+  {label: '分享', value: 1},
+  {label: '求助', value: 2},
+])
+
+const typeList = ref([
+  {label: 'GooseForum', value: 1},
+])
 
 // 编辑器配置
 const toolbars = [
@@ -29,17 +40,23 @@ const editorTheme = computed(() => {
 // 状态管理
 const isSubmitting = ref(false)
 
+// 获取URL参数（用于编辑模式）
+const getUrlParams = () => {
+  const urlParams = new URLSearchParams(window.location.search)
+  return urlParams.get('id')
+}
+
 // 表单验证
 const validateForm = () => {
-  if (!form.value.title.trim()) {
+  if (!articleData.value.articleTitle.trim()) {
     alert('请输入文章标题')
     return false
   }
-  if (!form.value.category) {
+  if (!articleData.value.categoryId || articleData.value.categoryId.length === 0) {
     alert('请选择文章分类')
     return false
   }
-  if (!form.value.content.trim()) {
+  if (!articleData.value.articleContent.trim()) {
     alert('请输入文章内容')
     return false
   }
@@ -49,18 +66,19 @@ const validateForm = () => {
 // 提交表单
 const handleSubmit = async () => {
   if (!validateForm()) return
+  if (isSubmitting.value) return
 
   isSubmitting.value = true
   try {
-    // 这里添加实际的提交逻辑
-    console.log('提交文章:', form.value)
-
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const response = await submitArticle(articleData.value)
+    if (response.code !== 0) {
+      alert(response.message || '发布失败，请重试')
+      return
+    }
 
     alert('文章发布成功！')
-    // 可以跳转到文章详情页或列表页
-    // await navigateTo('/list')
+    // 跳转到新发布的文章地址
+    window.location.href = `/post/${response.result}`
   } catch (error) {
     console.error('发布失败:', error)
     alert('发布失败，请重试')
@@ -72,14 +90,59 @@ const handleSubmit = async () => {
 // 保存草稿
 const saveDraft = async () => {
   try {
-    // 这里添加保存草稿的逻辑
-    console.log('保存草稿:', form.value)
+    // 这里可以添加保存草稿的逻辑
+    console.log('保存草稿:', articleData.value)
     alert('草稿保存成功！')
   } catch (error) {
     console.error('保存草稿失败:', error)
     alert('保存草稿失败，请重试')
   }
 }
+
+// 获取原始文章数据（编辑模式）
+const getOriginData = async () => {
+  const id = getUrlParams()
+  if (!id) return
+
+  try {
+    const res = await getArticlesOrigin(id)
+    if (res.code === 0 && res.result) {
+      articleData.value.articleTitle = res.result.articleTitle
+      articleData.value.articleContent = res.result.articleContent
+      articleData.value.categoryId = res.result.categoryId
+      articleData.value.type = res.result.type
+      articleData.value.id = parseInt(id)
+    }
+  } catch (err) {
+    console.error('获取文章数据失败:', err)
+    alert('获取文章数据失败')
+  }
+}
+
+// 页面初始化
+onMounted(async () => {
+  try {
+    // 获取分类和类型选项
+    const enumInfo = await getArticleEnum()
+    if (enumInfo.code === 0) {
+      categories.value = enumInfo.result.category.map((item) => ({
+        label: item.name,
+        value: item.value
+      }))
+      typeList.value = enumInfo.result.type.map((item) => ({
+        label: item.name,
+        value: item.value
+      }))
+    }
+
+    // 如果有 id 参数，说明是编辑模式
+    if (getUrlParams()) {
+      await getOriginData()
+    }
+  } catch (error) {
+    console.error('初始化失败:', error)
+  }
+})
 
 
 </script>
@@ -103,8 +166,23 @@ const saveDraft = async () => {
               <span class="label-text font-medium">文章标题</span>
               <span class="label-text-alt text-error">*</span>
             </div>
-            <input v-model="form.title" type="text" placeholder="请输入文章标题" class="input input-bordered w-full"
+            <input v-model="articleData.articleTitle" type="text" placeholder="请输入文章标题" class="input input-bordered w-full"
                    required />
+          </label>
+        </div>
+
+        <!-- 文章类型 -->
+        <div>
+          <label class="form-control w-full">
+            <div class="label">
+              <span class="label-text font-medium">文章类型</span>
+              <span class="label-text-alt text-error">*</span>
+            </div>
+            <select v-model="articleData.type" class="select select-bordered w-full" required>
+              <option v-for="type in typeList" :key="type.value" :value="type.value">
+                {{ type.label }}
+              </option>
+            </select>
           </label>
         </div>
 
@@ -115,44 +193,16 @@ const saveDraft = async () => {
               <span class="label-text font-medium">文章分类</span>
               <span class="label-text-alt text-error">*</span>
             </div>
-            <select v-model="form.category" class="select select-bordered w-full" required>
-              <option value="">请选择分类</option>
-              <option value="frontend">前端开发</option>
-              <option value="backend">后端开发</option>
-              <option value="mobile">移动开发</option>
-              <option value="devops">运维部署</option>
-              <option value="database">数据库</option>
-              <option value="ai">人工智能</option>
-              <option value="other">其他技术</option>
+            <select v-model="articleData.categoryId" class="select select-bordered w-full" multiple required>
+              <option v-for="category in categories" :key="category.value" :value="category.value">
+                {{ category.label }}
+              </option>
             </select>
-          </label>
-        </div>
-
-        <!-- 文章类型 -->
-        <div>
-          <label class="form-control w-full">
             <div class="label">
-              <span class="label-text font-medium">文章类型</span>
+              <span class="label-text-alt">可以选择多个分类</span>
             </div>
-            <select v-model="form.type" class="select select-bordered w-full">
-              <option value="original">原创</option>
-              <option value="reprint">转载</option>
-              <option value="translation">翻译</option>
-            </select>
           </label>
         </div>
-      </div>
-
-      <!-- 标签输入 -->
-      <div>
-        <label class="form-control w-full">
-          <div class="label">
-            <span class="label-text font-medium">文章标签</span>
-            <span class="label-text-alt">用逗号分隔多个标签</span>
-          </div>
-          <input v-model="form.tags" type="text" placeholder="例如: Vue.js, JavaScript, 前端"
-                 class="input input-bordered w-full" />
-        </label>
       </div>
 
       <!-- Markdown 编辑器 -->
@@ -160,11 +210,12 @@ const saveDraft = async () => {
 
       <div class="border border-base-300 bg-base-100 rounded-lg overflow-hidden">
         <MdEditor
-            v-model="form.content"
+            v-model="articleData.articleContent"
             :height="500"
             :preview="true"
             :toolbars="toolbars"
             :theme="editorTheme"
+            :previewTheme="'github'"
             :uploadImg="false"
             placeholder="请输入文章内容，支持 Markdown 语法"
         />
