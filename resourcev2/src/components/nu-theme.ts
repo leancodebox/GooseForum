@@ -164,7 +164,7 @@ export const createSelectThemeOverrides = (theme?: string): GlobalThemeOverrides
           placeholderColor: colors.baseContent + '80', // 50% opacity
           color: colors.base100,
           colorActive: colors.base200,
-          border: `1px solid ${colors.base200}`,
+          border: `1px solid ${colors.base300}`, // 使用base300增强边框对比度
           borderHover: `1px solid ${colors.primary}`,
           borderActive: `1px solid ${colors.primary}`,
           borderFocus: `1px solid ${colors.primary}`,
@@ -175,9 +175,9 @@ export const createSelectThemeOverrides = (theme?: string): GlobalThemeOverrides
         },
         InternalSelectMenu: {
           color: colors.base100,
-          optionColorActive: colors.primary,
+          optionColorActive: colors.base200, // 使用base200作为选中背景色
           optionTextColor: colors.baseContent,
-          optionTextColorActive: colors.primaryContent,
+          optionTextColorActive: colors.baseContent, // 选中时保持文字颜色一致
           groupHeaderTextColor: colors.baseContent,
           borderRadius: '0.5rem',
         }

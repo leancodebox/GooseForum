@@ -179,9 +179,9 @@ onMounted(async () => {
     if (getUrlParams()) {
       await getOriginData()
     }
-
+    
     // 启动主题监听器
-    const themeObserver = observeThemeChange()
+    themeObserver = observeThemeChange()
   } catch (error) {
     console.error('初始化失败:', error)
   }
