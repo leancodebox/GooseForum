@@ -72,14 +72,16 @@
                 <!-- 文章详情卡片 -->
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="badge badge-primary">技术分享</div>
-                            <div class="badge badge-outline">Vue.js</div>
-                            <div class="badge badge-outline">前端开发</div>
-                        </div>
+
                         <h1 class="card-title text-3xl font-bold text-base-content mb-4">
                             {{.ArticleTitle}}
                         </h1>
+                        <div class="flex items-center gap-2 mb-4">
+                            {{range .ArticleCategory}}
+                            <div class="badge badge-primary">{{.}}</div>
+                            {{end}}
+                            {{/*                            <div class="badge badge-outline badge-primary">前端开发</div>*/}}
+                        </div>
                         <div class="flex items-center text-base-content/70 mb-6">
                             <div class="avatar">
                                 <div class="mask mask-squircle w-8 h-8">
@@ -88,6 +90,9 @@
                             </div>
                             <span class="ml-2 mr-4">{{.Username}}</span>
                             <span class="mr-4">{{.CreateTime}}</span>
+                            {{if and .User (eq .User.UserId .AuthorId)}}
+                            <a href="/publish?id={{.ArticleId}}"  class="mr-4">编辑</a>
+                            {{end}}
                             <div class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
                                      viewBox="0 0 24 24"
