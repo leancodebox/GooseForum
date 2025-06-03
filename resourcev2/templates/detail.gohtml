@@ -147,16 +147,11 @@
                         <h2 class="card-title mb-4">评论 (12)</h2>
                         <!-- 发表评论 -->
                         {{if and .User (gt .User.UserId 0)}}
-                        <div class="mt-6 text-center">
-                                <a href="/login" class="btn btn-primary btn-sm">登录后发表评论</a>
-                        </div>
-                        {{else}}
                         <div role="alert" class="alert alert-success alert-outline">
                             <span>讨论应以学习和精进为目的。请勿发布不友善或者负能量的内容，与人为善，比聪明更重要！</span>
                         </div>
                         <div class="mb-6">
-
-                            <textarea class="textarea textarea-bordered w-full" placeholder="写下你的评论..."
+                            <textarea id="comment-input" class="textarea textarea-bordered w-full" placeholder="写下你的评论..."
                                       rows="3"></textarea>
                             <div class="flex justify-between items-center mt-2">
                                 <div class="flex items-center gap-2">
@@ -179,8 +174,12 @@
                                         图片
                                     </button>
                                 </div>
-                                <button class="btn btn-primary btn-sm">发表评论</button>
+                                <button id="main-comment-submit" class="btn btn-primary btn-sm">发表评论</button>
                             </div>
+                        </div>
+                        {{else}}
+                        <div class="mt-6 text-center">
+                            <a href="/login" class="btn btn-primary btn-sm">登录后发表评论</a>
                         </div>
                         {{end}}
 
@@ -214,8 +213,17 @@
                                             </svg>
                                             赞 (5)
                                         </button>
-                                        <button class="hover:text-primary">回复</button>
+                                        <button class="hover:text-primary" onclick="showReplyForm({{.Id}})">回复</button>
                                         <button class="hover:text-primary">举报</button>
+                                    </div>
+
+                                    <!-- 回复表单 -->
+                                    <div id="reply-form-{{.Id}}" class="reply-form mt-3" style="display: none;">
+                                        <textarea class="textarea textarea-bordered w-full comment-input" placeholder="写下你的回复..." rows="2"></textarea>
+                                        <div class="flex justify-end mt-2">
+                                            <button class="btn btn-primary btn-sm comment-submit" onclick="cancelReplyForm()">取消</button>
+                                            <button class="btn btn-primary btn-sm comment-submit" onclick="submitReply({{.Id}})">发表回复</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -397,6 +405,93 @@
 
 
 <script>
+    // 页面加载完成后绑定事件
+    document.addEventListener('DOMContentLoaded', function() {
+        const commentInput = document.getElementById('comment-input');
+        const commentSubmit = document.getElementById('main-comment-submit');
+
+        if (commentSubmit && commentInput) {
+            commentSubmit.addEventListener('click', async function () {
+                const content = commentInput.value.trim();
+                if (!content) {
+                    alert('请输入评论内容');
+                    return;
+                }
+                // 禁用提交按钮，显示加载状态
+                commentSubmit.disabled = true;
+                commentSubmit.textContent = '提交中...';
+                await submitComment(content, 0);
+                // 重置按钮状态
+                commentSubmit.disabled = false;
+                commentSubmit.textContent = '发表评论';
+            });
+        }
+    });
+
+    function cancelReplyForm() {
+        // 隐藏所有回复表单
+        document.querySelectorAll('.reply-form').forEach(form => {
+            form.style.display = 'none';
+        });
+    }
+
+    function showReplyForm(commentId) {
+        cancelReplyForm()
+
+        // 显示当前评论的回复表单
+        const replyForm = document.getElementById(`reply-form-${commentId}`);
+        if (replyForm) {
+            replyForm.style.display = 'block';
+            const textarea = replyForm.querySelector('.comment-input');
+            textarea.focus();
+        }
+    }
+
+    async function submitReply(replyId) {
+        const replyForm = document.getElementById(`reply-form-${replyId}`);
+        const textarea = replyForm.querySelector('.comment-input');
+        const content = textarea.value.trim();
+
+        if (!content) {
+            alert('请输入回复内容');
+            return;
+        }
+
+        const submitBtn = replyForm.querySelector('.comment-submit');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '提交中...';
+        await submitComment(content, replyId);
+        submitBtn.disabled = false;
+        submitBtn.textContent = '发表回复';
+    }
+
+    async function submitComment(content, replyId) {
+        try {
+            const response = await fetch('/api/bbs/articles-reply', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    articleId: {{.ArticleId}},
+                    content: content,
+                    replyId: replyId
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert(result.msg || '回复发表失败，请稍后重试');
+            }
+        } catch (error) {
+            console.error('回复发表失败:', error);
+            alert('回复发表失败，请稍后重试');
+        }
+    }
+
     async function toggleLike() {
         const likeBtn = document.getElementById('like-btn');
         const likeCountSpan = document.getElementById('like-count');

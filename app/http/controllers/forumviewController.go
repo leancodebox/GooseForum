@@ -96,7 +96,7 @@ func PostDetail(c *gin.Context) {
 			UserId:          item.UserId,
 			Username:        username,
 			Content:         item.Content,
-			CreateTime:      item.CreatedAt.Format(time.RFC3339),
+			CreateTime:      item.CreatedAt.Format(time.DateTime),
 			ReplyToUsername: replyToUsername,
 		}
 	})
