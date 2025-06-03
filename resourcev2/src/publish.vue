@@ -4,7 +4,7 @@ import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import { getArticleEnum, getArticlesOrigin, submitArticle } from './utils/articleService.js'
 import { NConfigProvider, darkTheme, lightTheme, NSelect } from 'naive-ui'
-import { createNaiveTheme } from './components/naive-ui-theme-config.js'
+import { createSelectThemeOverrides, getBaseTheme } from './components/nu-theme.ts'
 
 // 表单数据 - 匹配后端接口结构
 const articleData = ref({
@@ -124,6 +124,15 @@ const getOriginData = async () => {
 // 主题相关
 const currentTheme = ref('light')
 
+// Naive UI 主题配置
+const naiveTheme = computed(() => {
+  return getBaseTheme(currentTheme.value)
+})
+
+const naiveThemeOverrides = computed(() => {
+  return createSelectThemeOverrides(currentTheme.value)
+})
+
 
 // 监听主题变化
 const observeThemeChange = () => {
@@ -184,7 +193,7 @@ onUnmounted(() => {
 
 </script>
 <template>
-  <n-config-provider >
+  <n-config-provider :theme="naiveTheme" :theme-overrides="naiveThemeOverrides">
     <div class="max-w-6xl mx-auto py-2 px-4">
     <!-- 发布表单 -->
     <form @submit.prevent="handleSubmit" class="space-y-6">
