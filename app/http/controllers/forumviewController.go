@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
@@ -74,7 +73,6 @@ func PostDetail(c *gin.Context) {
 		author = user.Username
 		avatarUrl = user.GetWebAvatarUrl()
 		authorUserInfo = *user
-		fmt.Println(authorUserInfo)
 	}
 	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
 		username := "陶渊明"
