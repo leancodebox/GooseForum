@@ -218,5 +218,28 @@ const saveDraft = async () => {
   background-color: #60a5fa !important;
 }
 
+/* 列表样式 */
+.md-editor-preview ul,
+.md-editor-preview ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.md-editor-preview ul {
+  list-style-type: disc;
+}
+
+.md-editor-preview ol {
+  list-style-type: decimal;
+}
+
+.md-editor-preview li {
+  margin: 0.25em 0;
+}
+
+.md-editor-preview ul ul { list-style-type: circle; }
+.md-editor-preview ul ul ul { list-style-type: square; }
+.md-editor-preview ol ol { list-style-type: lower-alpha; }
+.md-editor-preview ol ol ol { list-style-type: lower-roman; }
 
 </style>
