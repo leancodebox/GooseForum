@@ -1,3 +1,4 @@
+```css
 @plugin "daisyui/theme" {
     name: "light";
     default: false;
@@ -568,3 +569,4 @@
     --depth: 0;
     --noise: 0;
 }
+```
