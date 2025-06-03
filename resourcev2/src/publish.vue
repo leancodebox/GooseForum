@@ -17,12 +17,12 @@ const articleData = ref({
 
 // 动态选项数据
 const categories = ref([
-  {label: '分享', value: 1},
-  {label: '求助', value: 2},
+  {label: 'GooseForum', value: 1},
 ])
 
 const typeList = ref([
-  {label: 'GooseForum', value: 1},
+  {label: '分享', value: 1},
+  {label: '求助', value: 2},
 ])
 
 // 编辑器配置
@@ -48,6 +48,7 @@ const validateForm = () => {
     alert('请输入文章标题')
     return false
   }
+  console.log(articleData.value)
   if (!articleData.value.categoryId || articleData.value.categoryId.length === 0) {
     alert('请选择文章分类')
     return false
@@ -217,8 +218,7 @@ onUnmounted(() => {
                   <span class="label-text-alt text-error">*</span>
                 </div>
                 <n-select
-                    class="bg-base-100"
-                    v-model="articleData.type"
+                    v-model:value="articleData.type"
                     :options="typeList"
                     placeholder="选择类型"
                 />
@@ -233,8 +233,7 @@ onUnmounted(() => {
                   <span class="label-text-alt text-error">*</span>
                 </div>
                 <n-select
-                    class="bg-base-100"
-                    v-model="articleData.categoryId"
+                    v-model:value="articleData.categoryId"
                     :options="categories"
                     placeholder="请选择分类"
                     :max-tag-count="3"
