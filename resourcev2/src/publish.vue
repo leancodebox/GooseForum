@@ -1,4 +1,88 @@
+<script setup>
+import { ref, computed } from 'vue'
+import { MdEditor } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
 
+// 表单数据
+const form = ref({
+  title: '',
+  category: '',
+  type: 'original',
+  tags: '',
+  content: ''
+})
+
+// 编辑器配置
+const toolbars = [
+  'bold', 'underline', 'italic', 'strikeThrough', '-',
+  'title', 'sub', 'sup', 'quote', 'unorderedList', 'orderedList', 'task', '-',
+  'codeRow', 'code', 'link', 'image', 'table', 'mermaid', 'katex', '-',
+  'revoke', 'next', 'save', '=', 'pageFullscreen', 'fullscreen', 'preview', 'htmlPreview', 'catalog'
+]
+
+// 编辑器主题
+const editorTheme = computed(() => {
+  // 这里可以根据系统主题动态切换
+  return 'light'
+})
+
+// 状态管理
+const isSubmitting = ref(false)
+
+// 表单验证
+const validateForm = () => {
+  if (!form.value.title.trim()) {
+    alert('请输入文章标题')
+    return false
+  }
+  if (!form.value.category) {
+    alert('请选择文章分类')
+    return false
+  }
+  if (!form.value.content.trim()) {
+    alert('请输入文章内容')
+    return false
+  }
+  return true
+}
+
+// 提交表单
+const handleSubmit = async () => {
+  if (!validateForm()) return
+
+  isSubmitting.value = true
+  try {
+    // 这里添加实际的提交逻辑
+    console.log('提交文章:', form.value)
+
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    alert('文章发布成功！')
+    // 可以跳转到文章详情页或列表页
+    // await navigateTo('/list')
+  } catch (error) {
+    console.error('发布失败:', error)
+    alert('发布失败，请重试')
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+// 保存草稿
+const saveDraft = async () => {
+  try {
+    // 这里添加保存草稿的逻辑
+    console.log('保存草稿:', form.value)
+    alert('草稿保存成功！')
+  } catch (error) {
+    console.error('保存草稿失败:', error)
+    alert('保存草稿失败，请重试')
+  }
+}
+
+
+</script>
 <template>
 
   <div class="max-w-6xl mx-auto py-8 px-4">
@@ -108,91 +192,7 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
-import { MdEditor } from 'md-editor-v3'
-import 'md-editor-v3/lib/style.css'
 
-// 表单数据
-const form = ref({
-  title: '',
-  category: '',
-  type: 'original',
-  tags: '',
-  content: ''
-})
-
-// 编辑器配置
-const toolbars = [
-  'bold', 'underline', 'italic', 'strikeThrough', '-',
-  'title', 'sub', 'sup', 'quote', 'unorderedList', 'orderedList', 'task', '-',
-  'codeRow', 'code', 'link', 'image', 'table', 'mermaid', 'katex', '-',
-  'revoke', 'next', 'save', '=', 'pageFullscreen', 'fullscreen', 'preview', 'htmlPreview', 'catalog'
-]
-
-// 编辑器主题
-const editorTheme = computed(() => {
-  // 这里可以根据系统主题动态切换
-  return 'light'
-})
-
-// 状态管理
-const isSubmitting = ref(false)
-
-// 表单验证
-const validateForm = () => {
-  if (!form.value.title.trim()) {
-    alert('请输入文章标题')
-    return false
-  }
-  if (!form.value.category) {
-    alert('请选择文章分类')
-    return false
-  }
-  if (!form.value.content.trim()) {
-    alert('请输入文章内容')
-    return false
-  }
-  return true
-}
-
-// 提交表单
-const handleSubmit = async () => {
-  if (!validateForm()) return
-
-  isSubmitting.value = true
-  try {
-    // 这里添加实际的提交逻辑
-    console.log('提交文章:', form.value)
-
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    alert('文章发布成功！')
-    // 可以跳转到文章详情页或列表页
-    // await navigateTo('/list')
-  } catch (error) {
-    console.error('发布失败:', error)
-    alert('发布失败，请重试')
-  } finally {
-    isSubmitting.value = false
-  }
-}
-
-// 保存草稿
-const saveDraft = async () => {
-  try {
-    // 这里添加保存草稿的逻辑
-    console.log('保存草稿:', form.value)
-    alert('草稿保存成功！')
-  } catch (error) {
-    console.error('保存草稿失败:', error)
-    alert('保存草稿失败，请重试')
-  }
-}
-
-
-</script>
 <style  scoped>
 /* 编辑器主题联动样式 */
 
