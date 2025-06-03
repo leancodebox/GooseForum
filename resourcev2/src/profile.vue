@@ -1,324 +1,5 @@
-<template>
-  <div class="container mx-auto px-4 py-8">
-    <div class="max-w-6xl mx-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- 左侧用户信息卡片 -->
-        <div class="lg:col-span-1">
-          <div class="card bg-base-100 shadow-xl sticky top-24">
-            <div class="card-body text-center">
-              <div class="avatar mb-4 mx-auto">
-                <div class="mask mask-squircle w-24 h-24">
-                  <img :src="userInfo.avatar" :alt="userInfo.username" />
-                </div>
-              </div>
-              <h2 class="card-title justify-center text-xl">{{ userInfo.username }}</h2>
-              <p class="text-base-content/70 text-sm mb-4">{{ userInfo.bio || '这个人很懒，什么都没留下' }}</p>
-
-              <div class="grid grid-cols-3 gap-4 mb-4">
-                <div class="text-center">
-                  <div class="text-lg font-bold text-base-content">{{ userInfo.articleCount }}</div>
-                  <div class="text-xs text-base-content/60">文章数</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-lg font-bold text-base-content">{{ userInfo.followingCount }}</div>
-                  <div class="text-xs text-base-content/60">获赞数</div>
-                </div>
-                <div class="text-center">
-                  <div class="text-lg font-bold text-base-content">{{ userInfo.followersCount }}</div>
-                  <div class="text-xs text-base-content/60">粉丝数</div>
-                </div>
-              </div>
-              <div class="mt-4">
-                <button class="btn btn-primary btn-sm btn-block" @click="editProfile">编辑资料</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 右侧主要内容区域 -->
-        <div class="lg:col-span-3">
-          <!-- 标签页导航 -->
-          <div class="tabs tabs-boxed mb-6">
-            <a v-for="tab in tabs" :key="tab.key" class="tab" :class="{ 'tab-active': activeTab === tab.key }"
-              @click="activeTab = tab.key">
-              {{ tab.label }}
-            </a>
-          </div>
-
-          <!-- 我的文章 -->
-          <div v-if="activeTab === 'articles'" class="space-y-4">
-            <div class="flex justify-between items-center">
-              <h2 class="text-2xl font-bold">我的文章</h2>
-              <a href="/publish" class="btn btn-primary btn-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                写文章
-              </a>
-            </div>
-
-            <div class="space-y-3">
-              <div v-for="article in myArticles" :key="article.id"
-                class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                <div class="card-body p-4">
-                  <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                      <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ article.title }}</h3>
-                      <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ article.summary }}</p>
-                      <div class="flex items-center gap-4 mt-3 text-sm text-base-content/60">
-                        <span>{{ article.publishTime }}</span>
-                        <span>{{ article.viewCount }} 阅读</span>
-                        <span>{{ article.likeCount }} 点赞</span>
-                        <span>{{ article.commentCount }} 评论</span>
-                        <div class="badge badge-outline badge-sm">{{ article.status }}</div>
-                      </div>
-                    </div>
-                    <div class="dropdown dropdown-end">
-                      <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                          stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                        </svg>
-                      </div>
-                      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
-                        <li><a @click="editArticle(article.id)">编辑</a></li>
-                        <li><a @click="viewStats(article.id)">数据</a></li>
-                        <li><a @click="deleteArticle(article.id)" class="text-error">删除</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 分页 -->
-            <div class="flex justify-center mt-8">
-              <div class="join bg-base-100 rounded-lg shadow-sm">
-                <button class="join-item btn btn-sm bg-base-100 border-base-300">«</button>
-                <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">1</button>
-                <button class="join-item btn btn-sm bg-base-100 border-base-300">2</button>
-                <button class="join-item btn btn-sm bg-base-100 border-base-300">3</button>
-                <button class="join-item btn btn-sm bg-base-100 border-base-300">»</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 我的收藏 -->
-          <div v-if="activeTab === 'favorites'" class="space-y-4">
-            <h2 class="text-2xl font-bold">我的收藏</h2>
-            <div class="space-y-3">
-              <div v-for="favorite in myFavorites" :key="favorite.id"
-                class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                <div class="card-body p-4">
-                  <div class="flex items-start gap-3">
-                    <div class="avatar">
-                      <div class="mask mask-squircle w-10 h-10">
-                        <img :src="favorite.author.avatar" :alt="favorite.author.username" />
-                      </div>
-                    </div>
-                    <div class="flex-1">
-                      <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ favorite.title }}</h3>
-                      <p class="text-sm text-base-content/70 mt-1">by {{ favorite.author.username }} · {{
-                        favorite.publishTime }}</p>
-                      <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ favorite.summary }}</p>
-                    </div>
-                    <button class="btn btn-ghost btn-sm" @click="removeFavorite(favorite.id)">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 我的评论 -->
-          <div v-if="activeTab === 'comments'" class="space-y-4">
-            <h2 class="text-2xl font-bold">我的评论</h2>
-            <div class="space-y-3">
-              <div v-for="comment in myComments" :key="comment.id" class="card bg-base-100 shadow-sm">
-                <div class="card-body p-4">
-                  <div class="text-sm text-base-content/70 mb-2">
-                    评论于文章：<span class="text-primary hover:underline cursor-pointer">{{ comment.articleTitle }}</span>
-                  </div>
-                  <p class="text-base-content mb-2">{{ comment.content }}</p>
-                  <div class="flex justify-between items-center text-sm text-base-content/60">
-                    <span>{{ comment.createTime }}</span>
-                    <div class="flex gap-2">
-                      <span>{{ comment.likeCount }} 点赞</span>
-                      <button class="text-error hover:underline" @click="deleteComment(comment.id)">删除</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 账户设置 -->
-          <div v-if="activeTab === 'settings'" class="space-y-6">
-            <h2 class="text-2xl font-bold">账户设置</h2>
-
-            <!-- 基本信息设置 -->
-            <div class="card bg-base-100 shadow-xl">
-              <div class="card-body">
-                <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">基本信息</h3>
-                <form @submit.prevent="updateProfile" class="grid grid-cols-1 gap-6">
-                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="form-control">
-                      <label class="label">
-                        <span class="label-text font-medium">用户名</span>
-                      </label>
-                      <input v-model="profileForm.username" type="text" class="input input-bordered w-full"
-                        placeholder="请输入用户名" required />
-                    </div>
-                    <div class="form-control">
-                      <label class="label">
-                        <span class="label-text font-medium">邮箱地址</span>
-                      </label>
-                      <input v-model="profileForm.email" type="email" class="input input-bordered w-full"
-                        placeholder="请输入邮箱地址" required />
-                    </div>
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text font-medium">个人简介</span>
-                      <span class="label-text-alt">{{ profileForm.bio?.length || 0 }}/200</span>
-                    </label>
-                    <textarea v-model="profileForm.bio" class="textarea textarea-bordered w-full" rows="4"
-                      placeholder="介绍一下自己..." maxlength="200"></textarea>
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text font-medium">头像设置</span>
-                    </label>
-                    <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start">
-                      <div class="avatar justify-self-center sm:justify-self-start">
-                        <div class="mask mask-squircle w-20 h-20">
-                          <img :src="profileForm.avatar" alt="头像预览" />
-                        </div>
-                      </div>
-                      <div class="grid grid-cols-1 gap-2">
-                        <input type="file" class="file-input file-input-bordered w-full" accept="image/*"
-                          @change="handleAvatarUpload" />
-                        <div class="text-sm text-base-content/60">
-                          支持 JPG、PNG 格式，文件大小不超过 2MB
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="grid grid-cols-1">
-                    <div class="flex justify-end pt-4 border-t border-base-300">
-                      <button type="submit" class="btn btn-primary min-w-32">保存更改</button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <!-- 密码修改 -->
-            <div class="card bg-base-100 shadow-xl">
-              <div class="card-body">
-                <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">修改密码</h3>
-                <form @submit.prevent="changePassword" class="grid grid-cols-1 gap-6">
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text font-medium">当前密码</span>
-                    </label>
-                    <input v-model="passwordForm.currentPassword" type="password" class="input input-bordered w-full"
-                      placeholder="请输入当前密码" required />
-                  </div>
-
-                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="form-control">
-                      <label class="label">
-                        <span class="label-text font-medium">新密码</span>
-                      </label>
-                      <input v-model="passwordForm.newPassword" type="password" class="input input-bordered w-full"
-                        placeholder="请输入新密码" required />
-                      <label class="label">
-                        <span class="label-text-alt">密码长度至少8位，包含字母和数字</span>
-                      </label>
-                    </div>
-
-                    <div class="form-control">
-                      <label class="label">
-                        <span class="label-text font-medium">确认新密码</span>
-                      </label>
-                      <input v-model="passwordForm.confirmPassword" type="password" class="input input-bordered w-full"
-                        placeholder="请再次输入新密码" required />
-                    </div>
-                  </div>
-
-                  <div class="grid grid-cols-1">
-                    <div class="flex justify-end pt-4 border-t border-base-300">
-                      <button type="submit" class="btn btn-secondary min-w-32">修改密码</button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <!-- 隐私设置 -->
-            <div class="card bg-base-100 shadow-xl">
-              <div class="card-body">
-                <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">隐私设置</h3>
-                <div class="grid grid-cols-1 gap-6">
-                  <div class="form-control">
-                    <label class="label cursor-pointer justify-start gap-4">
-                      <input v-model="privacySettings.showArticles" type="checkbox" class="toggle toggle-primary" />
-                      <div>
-                        <span class="label-text font-medium">公开文章列表</span>
-                        <div class="text-sm text-base-content/60">允许其他用户查看我发布的文章</div>
-                      </div>
-                    </label>
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label cursor-pointer justify-start gap-4">
-                      <input v-model="privacySettings.showFollowing" type="checkbox" class="toggle toggle-primary" />
-                      <div>
-                        <span class="label-text font-medium">公开关注列表</span>
-                        <div class="text-sm text-base-content/60">允许其他用户查看我的关注和粉丝</div>
-                      </div>
-                    </label>
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label cursor-pointer justify-start gap-4">
-                      <input v-model="privacySettings.emailNotifications" type="checkbox"
-                        class="toggle toggle-primary" />
-                      <div>
-                        <span class="label-text font-medium">邮件通知</span>
-                        <div class="text-sm text-base-content/60">接收评论、点赞等活动的邮件提醒</div>
-                      </div>
-                    </label>
-                  </div>
-
-                  <div class="grid grid-cols-1">
-                    <div class="flex justify-end pt-4 border-t border-base-300">
-                      <button class="btn btn-primary min-w-32" @click="savePrivacySettings">保存设置</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
-import { h, ref, reactive, onMounted } from 'vue'
+import {reactive, ref} from 'vue'
 // 用户信息
 const userInfo = reactive({
   id: 1,
@@ -335,10 +16,10 @@ const userInfo = reactive({
 // 标签页
 const activeTab = ref('articles')
 const tabs = [
-  { key: 'articles', label: '我的文章' },
-  { key: 'favorites', label: '我的收藏' },
-  { key: 'comments', label: '我的评论' },
-  { key: 'settings', label: '账户设置' }
+  {key: 'articles', label: '我的文章'},
+  {key: 'favorites', label: '我的收藏'},
+  {key: 'comments', label: '我的评论'},
+  {key: 'settings', label: '账户设置'}
 ]
 
 // 我的文章
@@ -530,6 +211,328 @@ const savePrivacySettings = async () => {
 }
 
 </script>
+<template>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- 左侧用户信息卡片 -->
+        <div class="lg:col-span-1">
+          <div class="card bg-base-100 shadow-xl sticky top-24">
+            <div class="card-body text-center">
+              <div class="avatar mb-4 mx-auto">
+                <div class="mask mask-squircle w-24 h-24">
+                  <img :src="userInfo.avatar" :alt="userInfo.username"/>
+                </div>
+              </div>
+              <h2 class="card-title justify-center text-xl">{{ userInfo.username }}</h2>
+              <p class="text-base-content/70 text-sm mb-4">{{ userInfo.bio || '这个人很懒，什么都没留下' }}</p>
+
+              <div class="grid grid-cols-3 gap-4 mb-4">
+                <div class="text-center">
+                  <div class="text-lg font-bold text-base-content">{{ userInfo.articleCount }}</div>
+                  <div class="text-xs text-base-content/60">文章数</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-lg font-bold text-base-content">{{ userInfo.followingCount }}</div>
+                  <div class="text-xs text-base-content/60">获赞数</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-lg font-bold text-base-content">{{ userInfo.followersCount }}</div>
+                  <div class="text-xs text-base-content/60">粉丝数</div>
+                </div>
+              </div>
+              <div class="mt-4">
+                <button class="btn btn-primary btn-sm btn-block" @click="editProfile">编辑资料</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧主要内容区域 -->
+        <div class="lg:col-span-3">
+          <!-- 标签页导航 -->
+          <div class="tabs tabs-boxed mb-6">
+            <a v-for="tab in tabs" :key="tab.key" class="tab" :class="{ 'tab-active': activeTab === tab.key }"
+               @click="activeTab = tab.key">
+              {{ tab.label }}
+            </a>
+          </div>
+
+          <!-- 我的文章 -->
+          <div v-if="activeTab === 'articles'" class="space-y-4">
+            <div class="flex justify-between items-center">
+              <h2 class="text-2xl font-bold">我的文章</h2>
+              <a href="/publish" class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                写文章
+              </a>
+            </div>
+
+            <div class="space-y-3">
+              <div v-for="article in myArticles" :key="article.id"
+                   class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="card-body p-4">
+                  <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                      <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ article.title }}</h3>
+                      <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ article.summary }}</p>
+                      <div class="flex items-center gap-4 mt-3 text-sm text-base-content/60">
+                        <span>{{ article.publishTime }}</span>
+                        <span>{{ article.viewCount }} 阅读</span>
+                        <span>{{ article.likeCount }} 点赞</span>
+                        <span>{{ article.commentCount }} 评论</span>
+                        <div class="badge badge-outline badge-sm">{{ article.status }}</div>
+                      </div>
+                    </div>
+                    <div class="dropdown dropdown-end">
+                      <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                        </svg>
+                      </div>
+                      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
+                        <li><a @click="editArticle(article.id)">编辑</a></li>
+                        <li><a @click="viewStats(article.id)">数据</a></li>
+                        <li><a @click="deleteArticle(article.id)" class="text-error">删除</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 分页 -->
+            <div class="flex justify-center mt-8">
+              <div class="join bg-base-100 rounded-lg shadow-sm">
+                <button class="join-item btn btn-sm bg-base-100 border-base-300">«</button>
+                <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">1</button>
+                <button class="join-item btn btn-sm bg-base-100 border-base-300">2</button>
+                <button class="join-item btn btn-sm bg-base-100 border-base-300">3</button>
+                <button class="join-item btn btn-sm bg-base-100 border-base-300">»</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 我的收藏 -->
+          <div v-if="activeTab === 'favorites'" class="space-y-4">
+            <h2 class="text-2xl font-bold">我的收藏</h2>
+            <div class="space-y-3">
+              <div v-for="favorite in myFavorites" :key="favorite.id"
+                   class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="card-body p-4">
+                  <div class="flex items-start gap-3">
+                    <div class="avatar">
+                      <div class="mask mask-squircle w-10 h-10">
+                        <img :src="favorite.author.avatar" :alt="favorite.author.username"/>
+                      </div>
+                    </div>
+                    <div class="flex-1">
+                      <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ favorite.title }}</h3>
+                      <p class="text-sm text-base-content/70 mt-1">by {{ favorite.author.username }} · {{
+                          favorite.publishTime
+                        }}</p>
+                      <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ favorite.summary }}</p>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" @click="removeFavorite(favorite.id)">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                           stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 我的评论 -->
+          <div v-if="activeTab === 'comments'" class="space-y-4">
+            <h2 class="text-2xl font-bold">我的评论</h2>
+            <div class="space-y-3">
+              <div v-for="comment in myComments" :key="comment.id" class="card bg-base-100 shadow-sm">
+                <div class="card-body p-4">
+                  <div class="text-sm text-base-content/70 mb-2">
+                    评论于文章：<span class="text-primary hover:underline cursor-pointer">{{
+                      comment.articleTitle
+                    }}</span>
+                  </div>
+                  <p class="text-base-content mb-2">{{ comment.content }}</p>
+                  <div class="flex justify-between items-center text-sm text-base-content/60">
+                    <span>{{ comment.createTime }}</span>
+                    <div class="flex gap-2">
+                      <span>{{ comment.likeCount }} 点赞</span>
+                      <button class="text-error hover:underline" @click="deleteComment(comment.id)">删除</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 账户设置 -->
+          <div v-if="activeTab === 'settings'" class="space-y-6">
+            <h2 class="text-2xl font-bold">账户设置</h2>
+
+            <!-- 基本信息设置 -->
+            <div class="card bg-base-100 shadow-xl">
+              <div class="card-body">
+                <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">基本信息</h3>
+                <form @submit.prevent="updateProfile" class="grid grid-cols-1 gap-6">
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="form-control">
+                      <label class="label">
+                        <span class="label-text font-medium">用户名</span>
+                      </label>
+                      <input v-model="profileForm.username" type="text" class="input input-bordered w-full"
+                             placeholder="请输入用户名" required/>
+                    </div>
+                    <div class="form-control">
+                      <label class="label">
+                        <span class="label-text font-medium">邮箱地址</span>
+                      </label>
+                      <input v-model="profileForm.email" type="email" class="input input-bordered w-full"
+                             placeholder="请输入邮箱地址" required/>
+                    </div>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">个人简介</span>
+                      <span class="label-text-alt">{{ profileForm.bio?.length || 0 }}/200</span>
+                    </label>
+                    <textarea v-model="profileForm.bio" class="textarea textarea-bordered w-full" rows="4"
+                              placeholder="介绍一下自己..." maxlength="200"></textarea>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">头像设置</span>
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start">
+                      <div class="avatar justify-self-center sm:justify-self-start">
+                        <div class="mask mask-squircle w-20 h-20">
+                          <img :src="profileForm.avatar" alt="头像预览"/>
+                        </div>
+                      </div>
+                      <div class="grid grid-cols-1 gap-2">
+                        <input type="file" class="file-input file-input-bordered w-full" accept="image/*"
+                               @change="handleAvatarUpload"/>
+                        <div class="text-sm text-base-content/60">
+                          支持 JPG、PNG 格式，文件大小不超过 2MB
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1">
+                    <div class="flex justify-end pt-4 border-t border-base-300">
+                      <button type="submit" class="btn btn-primary min-w-32">保存更改</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- 密码修改 -->
+            <div class="card bg-base-100 shadow-xl">
+              <div class="card-body">
+                <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">修改密码</h3>
+                <form @submit.prevent="changePassword" class="grid grid-cols-1 gap-6">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">当前密码</span>
+                    </label>
+                    <input v-model="passwordForm.currentPassword" type="password" class="input input-bordered w-full"
+                           placeholder="请输入当前密码" required/>
+                  </div>
+
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="form-control">
+                      <label class="label">
+                        <span class="label-text font-medium">新密码</span>
+                      </label>
+                      <input v-model="passwordForm.newPassword" type="password" class="input input-bordered w-full"
+                             placeholder="请输入新密码" required/>
+                      <label class="label">
+                        <span class="label-text-alt">密码长度至少8位，包含字母和数字</span>
+                      </label>
+                    </div>
+
+                    <div class="form-control">
+                      <label class="label">
+                        <span class="label-text font-medium">确认新密码</span>
+                      </label>
+                      <input v-model="passwordForm.confirmPassword" type="password" class="input input-bordered w-full"
+                             placeholder="请再次输入新密码" required/>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1">
+                    <div class="flex justify-end pt-4 border-t border-base-300">
+                      <button type="submit" class="btn btn-secondary min-w-32">修改密码</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- 隐私设置 -->
+            <div class="card bg-base-100 shadow-xl">
+              <div class="card-body">
+                <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">隐私设置</h3>
+                <div class="grid grid-cols-1 gap-6">
+                  <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-4">
+                      <input v-model="privacySettings.showArticles" type="checkbox" class="toggle toggle-primary"/>
+                      <div>
+                        <span class="label-text font-medium">公开文章列表</span>
+                        <div class="text-sm text-base-content/60">允许其他用户查看我发布的文章</div>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-4">
+                      <input v-model="privacySettings.showFollowing" type="checkbox" class="toggle toggle-primary"/>
+                      <div>
+                        <span class="label-text font-medium">公开关注列表</span>
+                        <div class="text-sm text-base-content/60">允许其他用户查看我的关注和粉丝</div>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-4">
+                      <input v-model="privacySettings.emailNotifications" type="checkbox"
+                             class="toggle toggle-primary"/>
+                      <div>
+                        <span class="label-text font-medium">邮件通知</span>
+                        <div class="text-sm text-base-content/60">接收评论、点赞等活动的邮件提醒</div>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="grid grid-cols-1">
+                    <div class="flex justify-end pt-4 border-t border-base-300">
+                      <button class="btn btn-primary min-w-32" @click="savePrivacySettings">保存设置</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 
 <style scoped>
 .line-clamp-2 {
