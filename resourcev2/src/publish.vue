@@ -40,6 +40,7 @@ const editorTheme = computed(() => {
 // 状态管理
 const isSubmitting = ref(false)
 const isCategoryDropdownOpen = ref(false)
+const isTypeDropdownOpen = ref(false)
 
 // 获取URL参数（用于编辑模式）
 const getUrlParams = () => {
@@ -132,8 +133,13 @@ const toggleCategory = (categoryId) => {
 
 // 点击外部关闭下拉框
 const handleClickOutside = (event) => {
-  if (!event.target.closest('.relative')) {
+  // 检查是否点击在分类下拉框外部
+  if (!event.target.closest('.category-dropdown')) {
     isCategoryDropdownOpen.value = false
+  }
+  // 检查是否点击在类型下拉框外部
+  if (!event.target.closest('.type-dropdown')) {
+    isTypeDropdownOpen.value = false
   }
 }
 
@@ -204,11 +210,59 @@ onUnmounted(() => {
               <span class="label-text font-medium">文章类型</span>
               <span class="label-text-alt text-error">*</span>
             </div>
-            <select v-model="articleData.type" class="select select-bordered w-full" required>
-              <option v-for="type in typeList" :key="type.value" :value="type.value">
-                {{ type.label }}
-              </option>
-            </select>
+            
+            <!-- 自定义类型选择组件 -->
+            <div class="relative type-dropdown">
+              <!-- 选择框 -->
+              <div 
+                @click="isTypeDropdownOpen = !isTypeDropdownOpen"
+                class="min-h-12 px-3 py-2 border border-base-300 rounded-lg bg-base-100 cursor-pointer hover:border-base-400 focus-within:border-primary transition-colors flex items-center justify-between"
+              >
+                <!-- 当前选择的类型 -->
+                <span v-if="articleData.type" class="text-base-content">
+                  {{ typeList.find(t => t.value === articleData.type)?.label }}
+                </span>
+                <span v-else class="text-base-content/50">
+                  请选择文章类型
+                </span>
+                
+                <!-- 下拉箭头 -->
+                <svg 
+                  class="w-4 h-4 transition-transform duration-200" 
+                  :class="{ 'rotate-180': isTypeDropdownOpen }"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+              
+              <!-- 下拉选项 -->
+              <div 
+                v-show="isTypeDropdownOpen"
+                class="absolute z-10 w-full mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                <div 
+                  v-for="type in typeList" 
+                  :key="type.value"
+                  @click="articleData.type = type.value; isTypeDropdownOpen = false"
+                  class="flex items-center gap-3 px-3 py-2 hover:bg-base-200 cursor-pointer transition-colors"
+                  :class="{ 'bg-primary/10': articleData.type === type.value }"
+                >
+                  <!-- 选中指示器 -->
+                  <div class="flex items-center">
+                    <div 
+                      class="w-2 h-2 rounded-full transition-colors"
+                      :class="articleData.type === type.value ? 'bg-primary' : 'bg-transparent'"
+                    ></div>
+                  </div>
+                  
+                  <!-- 类型名称 -->
+                  <span class="flex-1">{{ type.label }}</span>
+                </div>
+              </div>
+            </div>
           </label>
         </div>
 
@@ -221,7 +275,7 @@ onUnmounted(() => {
             </div>
             
             <!-- 自定义多选组件 -->
-            <div class="relative">
+            <div class="relative category-dropdown">
               <!-- 选择框 -->
               <div 
                 @click="isCategoryDropdownOpen = !isCategoryDropdownOpen"
