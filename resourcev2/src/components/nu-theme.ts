@@ -164,13 +164,12 @@ export const createSelectThemeOverrides = (theme?: string): GlobalThemeOverrides
           placeholderColor: colors.baseContent + '80', // 50% opacity
           color: colors.base100,
           colorActive: colors.base200,
-          border: `1px solid ${colors.base300}`, // 使用base300增强边框对比度
+          border: `1px solid ${colors.baseContent}30`, // 使用baseContent的淡化版本作为边框
           borderHover: `1px solid ${colors.primary}`,
           borderActive: `1px solid ${colors.primary}`,
           borderFocus: `1px solid ${colors.primary}`,
           boxShadowFocus: `0 0 0 2px ${colors.primary}40`, // 25% opacity
           loadingColor: colors.primary,
-          borderRadius: '0.5rem',
           fontWeight: '400'
         },
         InternalSelectMenu: {
@@ -179,7 +178,6 @@ export const createSelectThemeOverrides = (theme?: string): GlobalThemeOverrides
           optionTextColor: colors.baseContent,
           optionTextColorActive: colors.baseContent, // 选中时保持文字颜色一致
           groupHeaderTextColor: colors.baseContent,
-          borderRadius: '0.5rem',
         }
       }
     }
