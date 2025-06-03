@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import { getArticleEnum, getArticlesOrigin, submitArticle } from './utils/articleService.js'
@@ -39,6 +39,7 @@ const editorTheme = computed(() => {
 
 // 状态管理
 const isSubmitting = ref(false)
+const isCategoryDropdownOpen = ref(false)
 
 // 获取URL参数（用于编辑模式）
 const getUrlParams = () => {
@@ -119,6 +120,23 @@ const getOriginData = async () => {
   }
 }
 
+// 切换分类选择
+const toggleCategory = (categoryId) => {
+  const index = articleData.value.categoryId.indexOf(categoryId)
+  if (index > -1) {
+    articleData.value.categoryId.splice(index, 1)
+  } else {
+    articleData.value.categoryId.push(categoryId)
+  }
+}
+
+// 点击外部关闭下拉框
+const handleClickOutside = (event) => {
+  if (!event.target.closest('.relative')) {
+    isCategoryDropdownOpen.value = false
+  }
+}
+
 // 页面初始化
 onMounted(async () => {
   try {
@@ -139,9 +157,17 @@ onMounted(async () => {
     if (getUrlParams()) {
       await getOriginData()
     }
+    
+    // 添加点击外部事件监听
+    document.addEventListener('click', handleClickOutside)
   } catch (error) {
     console.error('初始化失败:', error)
   }
+})
+
+// 组件卸载时移除事件监听
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 
 
@@ -193,11 +219,79 @@ onMounted(async () => {
               <span class="label-text font-medium">文章分类</span>
               <span class="label-text-alt text-error">*</span>
             </div>
-            <select v-model="articleData.categoryId" class="select select-bordered w-full" multiple required>
-              <option v-for="category in categories" :key="category.value" :value="category.value">
-                {{ category.label }}
-              </option>
-            </select>
+            
+            <!-- 自定义多选组件 -->
+            <div class="relative">
+              <!-- 选择框 -->
+              <div 
+                @click="isCategoryDropdownOpen = !isCategoryDropdownOpen"
+                class="min-h-12 px-3 py-2 border border-base-300 rounded-lg bg-base-100 cursor-pointer hover:border-base-400 focus-within:border-primary transition-colors"
+              >
+                <!-- 已选择的标签 -->
+                <div v-if="articleData.categoryId.length > 0" class="flex flex-wrap gap-1">
+                  <span 
+                    v-for="categoryId in articleData.categoryId" 
+                    :key="categoryId"
+                    class="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-sm rounded-md"
+                  >
+                    {{ categories.find(c => c.value === categoryId)?.label }}
+                    <button 
+                      @click.stop="articleData.categoryId = articleData.categoryId.filter(id => id !== categoryId)"
+                      class="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </span>
+                </div>
+                
+                <!-- 占位符 -->
+                <div v-else class="text-base-content/50">
+                  请选择文章分类
+                </div>
+                
+                <!-- 下拉箭头 -->
+                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <svg 
+                    class="w-4 h-4 transition-transform duration-200" 
+                    :class="{ 'rotate-180': isCategoryDropdownOpen }"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- 下拉选项 -->
+              <div 
+                v-show="isCategoryDropdownOpen"
+                class="absolute z-10 w-full mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                <div 
+                  v-for="category in categories" 
+                  :key="category.value"
+                  @click="toggleCategory(category.value)"
+                  class="flex items-center gap-3 px-3 py-2 hover:bg-base-200 cursor-pointer transition-colors"
+                >
+                  <!-- 复选框 -->
+                  <div class="flex items-center">
+                    <input 
+                      type="checkbox" 
+                      :checked="articleData.categoryId.includes(category.value)"
+                      class="checkbox checkbox-primary checkbox-sm"
+                      readonly
+                    >
+                  </div>
+                  
+                  <!-- 分类名称 -->
+                  <span class="flex-1">{{ category.label }}</span>
+                </div>
+              </div>
+            </div>
+            
             <div class="label">
               <span class="label-text-alt">可以选择多个分类</span>
             </div>
