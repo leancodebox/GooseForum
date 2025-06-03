@@ -114,6 +114,22 @@ const themeColorMaps: Record<string, Record<string, string>> = {
     base200: '#1A2332', // oklch(28% 0.091 267.935)
     base300: '#0F1419', // oklch(22% 0.091 267.935)
     baseContent: '#B8E6FF' // oklch(90% 0.058 230.902)
+  },
+  luxury: {
+    primary: '#FFFFFF', // oklch(100% 0 0)
+    primaryContent: '#333333', // oklch(20% 0 0)
+    base100: '#242424', // oklch(14.076% 0.004 285.822)
+    base200: '#343434', // oklch(20.219% 0.004 308.229)
+    base300: '#3C3C3C', // oklch(23.219% 0.004 308.229)
+    baseContent: '#C1A875' // oklch(75.687% 0.123 76.89)
+  },
+  dracula: {
+    primary: '#FF79C6', // oklch(75.461% 0.183 346.812)
+    primaryContent: '#261A26', // oklch(15.092% 0.036 346.812)
+    base100: '#282A36', // oklch(28.822% 0.022 277.508)
+    base200: '#242631', // oklch(26.805% 0.02 277.508)
+    base300: '#21222C', // oklch(24.787% 0.019 277.508)
+    baseContent: '#F8F8F2' // oklch(97.747% 0.007 106.545)
   }
 }
 
@@ -130,7 +146,7 @@ const getThemeColors = (theme: string) => {
 
 // 判断是否为深色主题
 const isDarkTheme = (theme: string): boolean => {
-  const darkThemes = ['dark', 'synthwave', 'halloween', 'forest', 'aqua']
+  const darkThemes = ['dark', 'synthwave', 'halloween', 'forest', 'aqua', 'luxury', 'dracula']
   return darkThemes.includes(theme)
 }
 
@@ -148,7 +164,7 @@ export const createSelectThemeOverrides = (theme?: string): GlobalThemeOverrides
           placeholderColor: colors.baseContent + '80', // 50% opacity
           color: colors.base100,
           colorActive: colors.base200,
-          border: `1px solid ${colors.base300}`,
+          border: `1px solid ${colors.base200}`,
           borderHover: `1px solid ${colors.primary}`,
           borderActive: `1px solid ${colors.primary}`,
           borderFocus: `1px solid ${colors.primary}`,
