@@ -145,9 +145,17 @@
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body overflow-hidden">
                         <h2 class="card-title mb-4">评论 (12)</h2>
-
                         <!-- 发表评论 -->
+                        {{if and .User (gt .User.UserId 0)}}
+                        <div class="mt-6 text-center">
+                                <a href="/login" class="btn btn-primary btn-sm">登录后发表评论</a>
+                        </div>
+                        {{else}}
+                        <div role="alert" class="alert alert-success alert-outline">
+                            <span>讨论应以学习和精进为目的。请勿发布不友善或者负能量的内容，与人为善，比聪明更重要！</span>
+                        </div>
                         <div class="mb-6">
+
                             <textarea class="textarea textarea-bordered w-full" placeholder="写下你的评论..."
                                       rows="3"></textarea>
                             <div class="flex justify-between items-center mt-2">
@@ -174,6 +182,7 @@
                                 <button class="btn btn-primary btn-sm">发表评论</button>
                             </div>
                         </div>
+                        {{end}}
 
                         <!-- 评论列表 -->
                         <div class="space-y-4">
