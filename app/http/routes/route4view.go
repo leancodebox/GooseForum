@@ -26,7 +26,8 @@ func viewAssert(ginApp *gin.Engine) {
 
 func view(ginApp *gin.Engine) {
 	viewRouteApp := ginApp.Group("")
-	viewRouteApp.Use(middleware.JWTAuth)
+	viewRouteApp.Use(middleware.JWTAuth).
+		Use(gzip.Gzip(gzip.DefaultCompression))
 	viewRouteApp.GET("", controllers.Home)
 	viewRouteApp.GET("/login", controllers.LoginView)
 	viewRouteApp.GET("/user/:id", controllers.User)
