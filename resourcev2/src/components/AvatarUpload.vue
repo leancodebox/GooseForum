@@ -241,28 +241,26 @@ onUnmounted(() => {
       />
       
       <!-- 可点击的头像区域 -->
-      <div 
-        @click="triggerFileSelect"
-        class="cursor-pointer hover:opacity-80 transition-opacity duration-200 group"
-        :class="{ 'cursor-not-allowed opacity-50': uploading }"
-      >
-        <div class="avatar">
-          <div class="mask mask-squircle w-20 h-20 relative">
-            <img 
-              :src="currentAvatar || '/default-avatar.png'" 
-              alt="点击更换头像"
-              class="w-full h-full object-cover"
-            />
-            <!-- 悬停时显示的遮罩层 -->
-            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
+       <div class="avatar">
+         <div 
+           @click="triggerFileSelect"
+           class="mask mask-squircle w-20 h-20 relative cursor-pointer hover:opacity-80 transition-opacity duration-200 group"
+           :class="{ 'cursor-not-allowed opacity-50': uploading }"
+         >
+           <img 
+             :src="currentAvatar || '/default-avatar.png'" 
+             alt="点击更换头像"
+             class="w-full h-full object-cover"
+           />
+           <!-- 悬停时显示的遮罩层 -->
+           <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+             </svg>
+           </div>
+         </div>
+       </div>
       
       <div class="text-sm text-base-content/60">
         点击头像更换 • 支持 JPG、PNG、GIF 格式，文件大小不超过 2MB

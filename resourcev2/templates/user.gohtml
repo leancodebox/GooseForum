@@ -125,21 +125,11 @@
 
             <!-- 右侧内容区域 -->
             <main class="flex-1">
-                <!-- 标签页导航 -->
-                <div class="card bg-base-100 shadow-xl mb-6">
-                    <div class="card-body p-0">
-                        <div class="tabs tabs-lifted">
-                            <button class="tab tab-lg tab-active">
-                                发布的文章
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- 发布的文章 -->
                 <div class="space-y-4">
-                    <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                        <div class="card-body p-0">
+                    <div role="tablist" class="tabs tabs-lift">
+                        <input type="radio" name="my_tabs_2" class="tab" aria-label="发布的文章" checked="checked"/>
+                        <div class="tab-content border-base-300 bg-base-100 ">
                             <ul class="list">
                                 {{range .Articles}}
                                 <li class="list-row hover:bg-base-200 flex items-center gap-3 ">
@@ -199,13 +189,23 @@
                                 {{end}}
                             </ul>
                         </div>
+
+                        <input type="radio" name="my_tabs_2" class="tab" aria-label="评论记录"/>
+                        <div class="tab-content border-base-300 bg-base-100 p-10">你似乎来到了没有荒原存在的知识</div>
+
+                        <input type="radio" name="my_tabs_2" class="tab" aria-label="关注"/>
+                        <div class="tab-content border-base-300 bg-base-100 p-10">长老们，去别处看看吧 彡(-_-;)彡</div>
+
+                        <input type="radio" name="my_tabs_2" class="tab" aria-label="粉丝"/>
+                        <div class="tab-content border-base-300 bg-base-100 p-10">您访问的页面走丢在寻找梦想的路上了</div>
                     </div>
                     <!-- 分页 -->
                     <div class="flex justify-center mt-8">
                         <div class="join bg-base-100 rounded-lg shadow-sm">
                             <button class="join-item btn btn-sm bg-base-100 border-base-300">«
                             </button>
-                            <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">1</button>
+                            <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">∞
+                            </button>
                             <button class="join-item btn btn-sm bg-base-100 border-base-300">»
                             </button>
                         </div>

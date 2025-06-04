@@ -333,7 +333,6 @@ const savePrivacySettings = async () => {
         <!-- 密码修改 Tab -->
         <div v-if="activeTab === 'password'">
           <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">修改密码</h3>
-          <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">修改密码</h3>
           <form @submit.prevent="updatePassword" class="grid grid-cols-1 gap-6">
             <div class="form-control">
               <label class="label">
