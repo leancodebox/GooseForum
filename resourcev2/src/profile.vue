@@ -38,7 +38,6 @@ const userStats = reactive({
 // 加载用户信息的函数
 const loadUserInfo = async () => {
   try {
-    isLoading.value = true;
     const res = await getUserInfo();
     if (res.code === 0 && res.result) {
       // 更新用户信息
@@ -74,7 +73,6 @@ const handleUserInfoUpdated = () => {
 onMounted(() => {
   loadUserInfo();
 })
-
 
 
 // 我的文章
@@ -221,7 +219,7 @@ const deleteComment = (id) => {
               <!-- 用户信息 -->
               <div v-else>
                 <div class="avatar mb-4 mx-auto">
-                  <div class="mask mask-squircle w-24 h-24">
+                  <div class="mask mask-squircle w-24 h-24" >
                     <img :src="userInfo.avatarUrl || '/static/pic/default-avatar.png'"
                          :alt="userInfo.nickname || userInfo.username"/>
                   </div>
@@ -268,7 +266,7 @@ const deleteComment = (id) => {
           <!-- 主要内容 -->
           <div v-else>
 
-            <div  class="tabs tabs">
+            <div class="tabs">
               <input type="radio" name="my_tabs_3" class="tab" aria-label="我的文章" checked="checked"/>
               <div class="tab-content space-y-4 mt-3">
                 <div class="flex justify-between items-center">

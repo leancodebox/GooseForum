@@ -319,6 +319,9 @@ const savePrivacySettings = async () => {
               </label>
               <input v-model="passwordForm.newPassword" type="password" class="input input-bordered w-full"
                      placeholder="请输入新密码" required/>
+              <label class="label">
+                <span class="label-text-alt">密码长度至少8位，包含字母和数字</span>
+              </label>
             </div>
             <div class="form-control">
               <label class="label">
@@ -329,7 +332,7 @@ const savePrivacySettings = async () => {
             </div>
           </div>
           <div class="flex justify-end">
-            <button type="submit" class="btn btn-primary" :disabled="changingPassword">
+            <button type="submit" class="btn btn-secondary min-w-32" :disabled="changingPassword">
               <span v-if="changingPassword" class="loading loading-spinner loading-sm"></span>
               {{ changingPassword ? '修改中...' : '修改密码' }}
             </button>
