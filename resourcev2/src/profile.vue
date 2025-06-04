@@ -18,12 +18,12 @@ const userInfo = reactive<UserInfo>({
   websiteName: '',
   signature: '',
   externalInformation: {
-    github: { link: '' },
-    weibo: { link: '' },
-    bilibili: { link: '' },
-    twitter: { link: '' },
-    linkedIn: { link: '' },
-    zhihu: { link: '' }
+    github: {link: ''},
+    weibo: {link: ''},
+    bilibili: {link: ''},
+    twitter: {link: ''},
+    linkedIn: {link: ''},
+    zhihu: {link: ''}
   }
 })
 
@@ -75,14 +75,7 @@ onMounted(() => {
   loadUserInfo();
 })
 
-// 标签页
-const activeTab = ref('articles')
-const tabs = [
-  {key: 'articles', label: '我的文章'},
-  {key: 'favorites', label: '我的收藏'},
-  {key: 'comments', label: '我的评论'},
-  {key: 'settings', label: '账户设置'}
-]
+
 
 // 我的文章
 const myArticles = ref([
@@ -175,7 +168,11 @@ const profileForm = reactive({
 
 // 编辑资料
 const editProfile = () => {
-  activeTab.value = 'settings'
+  // 切换到账户设置tab
+  const settingsTab = document.querySelector('input[aria-label="账户设置"]')
+  if (settingsTab) {
+    settingsTab.checked = true
+  }
 }
 
 // 编辑文章
@@ -225,11 +222,16 @@ const deleteComment = (id) => {
               <div v-else>
                 <div class="avatar mb-4 mx-auto">
                   <div class="mask mask-squircle w-24 h-24">
-                    <img :src="userInfo.avatarUrl || '/static/pic/default-avatar.png'" :alt="userInfo.nickname || userInfo.username"/>
+                    <img :src="userInfo.avatarUrl || '/static/pic/default-avatar.png'"
+                         :alt="userInfo.nickname || userInfo.username"/>
                   </div>
                 </div>
-                <h2 class="card-title justify-center text-xl">{{ userInfo.nickname || userInfo.username || '用户' }}</h2>
-                <p class="text-base-content/70 text-sm mb-4">{{ userInfo.bio || userInfo.signature || '这个人很懒，什么都没留下' }}</p>
+                <h2 class="card-title justify-center text-xl">{{
+                    userInfo.nickname || userInfo.username || '用户'
+                  }}</h2>
+                <p class="text-base-content/70 text-sm mb-4">{{
+                    userInfo.bio || userInfo.signature || '这个人很懒，什么都没留下'
+                  }}</p>
 
                 <div class="grid grid-cols-3 gap-4 mb-4">
                   <div class="text-center">
@@ -262,141 +264,133 @@ const deleteComment = (id) => {
               <p class="text-base-content/70">正在加载用户信息...</p>
             </div>
           </div>
-          
+
           <!-- 主要内容 -->
           <div v-else>
-            <!-- 标签页导航 -->
-            <div class="tabs tabs-boxed mb-6">
-              <a v-for="tab in tabs" :key="tab.key" class="tab" :class="{ 'tab-active': activeTab === tab.key }"
-                 @click="activeTab = tab.key">
-                {{ tab.label }}
-              </a>
-            </div>
 
-          <!-- 我的文章 -->
-          <div v-if="activeTab === 'articles'" class="space-y-4">
-            <div class="flex justify-between items-center">
-              <h2 class="text-2xl font-bold">我的文章</h2>
-              <a href="/publish" class="btn btn-primary btn-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                写文章
-              </a>
-            </div>
-
-            <div class="space-y-3">
-              <div v-for="article in myArticles" :key="article.id"
-                   class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                <div class="card-body p-4">
-                  <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                      <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ article.title }}</h3>
-                      <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ article.summary }}</p>
-                      <div class="flex items-center gap-4 mt-3 text-sm text-base-content/60">
-                        <span>{{ article.publishTime }}</span>
-                        <span>{{ article.viewCount }} 阅读</span>
-                        <span>{{ article.likeCount }} 点赞</span>
-                        <span>{{ article.commentCount }} 评论</span>
-                        <div class="badge badge-outline badge-sm">{{ article.status }}</div>
+            <div role="tablist" class="tabs tabs-border">
+              <input type="radio" name="my_tabs_3" class="tab" aria-label="我的文章" checked="checked"/>
+              <div class="tab-content space-y-4 mt-3">
+                <div class="flex justify-between items-center">
+                  <h2 class="text-2xl font-bold">我的文章</h2>
+                  <a href="/publish" class="btn btn-primary btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    写文章
+                  </a>
+                </div>
+                <div class="space-y-3">
+                  <div v-for="article in myArticles" :key="article.id"
+                       class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="card-body p-4">
+                      <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                          <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ article.title }}</h3>
+                          <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ article.summary }}</p>
+                          <div class="flex items-center gap-4 mt-3 text-sm text-base-content/60">
+                            <span>{{ article.publishTime }}</span>
+                            <span>{{ article.viewCount }} 阅读</span>
+                            <span>{{ article.likeCount }} 点赞</span>
+                            <span>{{ article.commentCount }} 评论</span>
+                            <div class="badge badge-outline badge-sm">{{ article.status }}</div>
+                          </div>
+                        </div>
+                        <div class="dropdown dropdown-end">
+                          <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                          </div>
+                          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
+                            <li><a @click="editArticle(article.id)">编辑</a></li>
+                            <li><a @click="viewStats(article.id)">数据</a></li>
+                            <li><a @click="deleteArticle(article.id)" class="text-error">删除</a></li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
-                    <div class="dropdown dropdown-end">
-                      <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                        </svg>
+                  </div>
+                </div>
+                <!-- 分页 -->
+                <div class="flex justify-center mt-8">
+                  <div class="join bg-base-100 rounded-lg shadow-sm">
+                    <button class="join-item btn btn-sm bg-base-100 border-base-300">«</button>
+                    <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">1</button>
+                    <button class="join-item btn btn-sm bg-base-100 border-base-300">2</button>
+                    <button class="join-item btn btn-sm bg-base-100 border-base-300">3</button>
+                    <button class="join-item btn btn-sm bg-base-100 border-base-300">»</button>
+                  </div>
+                </div>
+              </div>
+
+              <input type="radio" name="my_tabs_3" class="tab" aria-label="我的收藏"/>
+              <div class="tab-content space-y-4 mt-3">
+                <div class="space-y-3">
+                  <div v-for="favorite in myFavorites" :key="favorite.id"
+                       class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="card-body p-4">
+                      <div class="flex items-start gap-3">
+                        <div class="avatar">
+                          <div class="mask mask-squircle w-10 h-10">
+                            <img :src="favorite.author.avatar" :alt="favorite.author.username"/>
+                          </div>
+                        </div>
+                        <div class="flex-1">
+                          <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ favorite.title }}</h3>
+                          <p class="text-sm text-base-content/70 mt-1">by {{ favorite.author.username }} · {{
+                              favorite.publishTime
+                            }}</p>
+                          <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ favorite.summary }}</p>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" @click="removeFavorite(favorite.id)">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                               stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"/>
+                          </svg>
+                        </button>
                       </div>
-                      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
-                        <li><a @click="editArticle(article.id)">编辑</a></li>
-                        <li><a @click="viewStats(article.id)">数据</a></li>
-                        <li><a @click="deleteArticle(article.id)" class="text-error">删除</a></li>
-                      </ul>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- 分页 -->
-            <div class="flex justify-center mt-8">
-              <div class="join bg-base-100 rounded-lg shadow-sm">
-                <button class="join-item btn btn-sm bg-base-100 border-base-300">«</button>
-                <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">1</button>
-                <button class="join-item btn btn-sm bg-base-100 border-base-300">2</button>
-                <button class="join-item btn btn-sm bg-base-100 border-base-300">3</button>
-                <button class="join-item btn btn-sm bg-base-100 border-base-300">»</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 我的收藏 -->
-          <div v-if="activeTab === 'favorites'" class="space-y-4">
-            <h2 class="text-2xl font-bold">我的收藏</h2>
-            <div class="space-y-3">
-              <div v-for="favorite in myFavorites" :key="favorite.id"
-                   class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                <div class="card-body p-4">
-                  <div class="flex items-start gap-3">
-                    <div class="avatar">
-                      <div class="mask mask-squircle w-10 h-10">
-                        <img :src="favorite.author.avatar" :alt="favorite.author.username"/>
+              <input type="radio" name="my_tabs_3" class="tab" aria-label="我的评论"/>
+              <div class="tab-content space-y-4 mt-2">
+                <div class="space-y-3">
+                  <div v-for="comment in myComments" :key="comment.id" class="card bg-base-100 shadow-sm">
+                    <div class="card-body p-4">
+                      <div class="text-sm text-base-content/70 mb-2">
+                        评论于文章：<span class="text-primary hover:underline cursor-pointer">{{
+                          comment.articleTitle
+                        }}</span>
+                      </div>
+                      <p class="text-base-content mb-2">{{ comment.content }}</p>
+                      <div class="flex justify-between items-center text-sm text-base-content/60">
+                        <span>{{ comment.createTime }}</span>
+                        <div class="flex gap-2">
+                          <span>{{ comment.likeCount }} 点赞</span>
+                          <button class="text-error hover:underline" @click="deleteComment(comment.id)">删除</button>
+                        </div>
                       </div>
                     </div>
-                    <div class="flex-1">
-                      <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ favorite.title }}</h3>
-                      <p class="text-sm text-base-content/70 mt-1">by {{ favorite.author.username }} · {{
-                          favorite.publishTime
-                        }}</p>
-                      <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ favorite.summary }}</p>
-                    </div>
-                    <button class="btn btn-ghost btn-sm" @click="removeFavorite(favorite.id)">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                           stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12"/>
-                      </svg>
-                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- 我的评论 -->
-          <div v-if="activeTab === 'comments'" class="space-y-4">
-            <h2 class="text-2xl font-bold">我的评论</h2>
-            <div class="space-y-3">
-              <div v-for="comment in myComments" :key="comment.id" class="card bg-base-100 shadow-sm">
-                <div class="card-body p-4">
-                  <div class="text-sm text-base-content/70 mb-2">
-                    评论于文章：<span class="text-primary hover:underline cursor-pointer">{{
-                      comment.articleTitle
-                    }}</span>
-                  </div>
-                  <p class="text-base-content mb-2">{{ comment.content }}</p>
-                  <div class="flex justify-between items-center text-sm text-base-content/60">
-                    <span>{{ comment.createTime }}</span>
-                    <div class="flex gap-2">
-                      <span>{{ comment.likeCount }} 点赞</span>
-                      <button class="text-error hover:underline" @click="deleteComment(comment.id)">删除</button>
-                    </div>
-                  </div>
-                </div>
+              <input type="radio" name="my_tabs_3" class="tab" aria-label="账户设置"/>
+              <div class="tab-content space-y-4 mt-2">
+                <AccountSettings
+                    :user-info="userInfo"
+                    @user-info-updated="handleUserInfoUpdated"
+                />
               </div>
             </div>
-          </div>
 
-            <!-- 账户设置 -->
-            <div v-if="activeTab === 'settings'" class="space-y-6">
-              <AccountSettings 
-                :user-info="userInfo" 
-                @user-info-updated="handleUserInfoUpdated"
-              />
-            </div>
           </div>
         </div>
       </div>
