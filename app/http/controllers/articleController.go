@@ -79,6 +79,7 @@ type ReplyDto struct {
 	Id              uint64 `json:"id"`
 	ArticleId       uint64 `json:"articleId"`
 	UserId          uint64 `json:"userId"`
+	UserAvatarUrl   string `json:"userAvatarUrl"`
 	Username        string `json:"username"`
 	Content         string `json:"content"`
 	CreateTime      string `json:"createTime"`

@@ -76,8 +76,10 @@ func PostDetail(c *gin.Context) {
 	}
 	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
 		username := "陶渊明"
+		userAvatarUrl := urlconfig.GetDefaultAvatar()
 		if user, ok := userMap[item.UserId]; ok {
 			username = user.Username
+			userAvatarUrl = user.GetWebAvatarUrl()
 		}
 		// 获取被回复评论的用户名
 		replyToUsername := ""
@@ -92,6 +94,7 @@ func PostDetail(c *gin.Context) {
 			Id:              item.Id,
 			ArticleId:       item.ArticleId,
 			UserId:          item.UserId,
+			UserAvatarUrl:   userAvatarUrl,
 			Username:        username,
 			Content:         item.Content,
 			CreateTime:      item.CreatedAt.Format(time.DateTime),
