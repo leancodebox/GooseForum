@@ -268,7 +268,7 @@ const deleteComment = (id) => {
           <!-- 主要内容 -->
           <div v-else>
 
-            <div role="tablist" class="tabs tabs-border">
+            <div  class="tabs tabs">
               <input type="radio" name="my_tabs_3" class="tab" aria-label="我的文章" checked="checked"/>
               <div class="tab-content space-y-4 mt-3">
                 <div class="flex justify-between items-center">

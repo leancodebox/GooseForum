@@ -160,7 +160,7 @@ const savePrivacySettings = async () => {
   <div class="w-full">
     <div class="tabs tabs-lift">
       <input type="radio" name="account_tabs" class="tab" aria-label="基本信息" checked="checked"/>
-       <div class="tab-content bg-base-100 border-base-300 p-6">
+      <div class="tab-content bg-base-100 border-base-300 p-6">
         <form @submit.prevent="updateProfile" class="grid grid-cols-1 gap-6">
           <div class="form-control">
             <label class="label">
@@ -302,7 +302,7 @@ const savePrivacySettings = async () => {
       </div>
 
       <input type="radio" name="account_tabs" class="tab" aria-label="修改密码"/>
-       <div class="tab-content bg-base-100 border-base-300 p-6">
+      <div class="tab-content bg-base-100 border-base-300 p-6">
         <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">修改密码</h3>
         <form @submit.prevent="updatePassword" class="grid grid-cols-1 gap-6">
           <div class="form-control">
@@ -338,7 +338,7 @@ const savePrivacySettings = async () => {
       </div>
 
       <input type="radio" name="account_tabs" class="tab" aria-label="隐私设置"/>
-       <div class="tab-content bg-base-100 border-base-300 p-6">
+      <div class="tab-content bg-base-100 border-base-300 p-6">
         <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">隐私设置</h3>
         <div class="grid grid-cols-1 gap-6">
           <div class="form-control">
@@ -379,10 +379,8 @@ const savePrivacySettings = async () => {
       </div>
     </div>
   </div>
-
 </template>
 
 
 <style scoped>
-/* AccountSettings 组件样式 */
 </style>
