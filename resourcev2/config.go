@@ -8,6 +8,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/spf13/cast"
 	"html/template"
+	"log/slog"
 	"path/filepath"
 	"slices"
 )
@@ -21,7 +22,8 @@ func GetTemplates() *template.Template {
 			"ContainsInt": func(s []int, v any) bool {
 				return slices.Contains(s, cast.ToInt(v))
 			},
-			"GetMetaList": GetMetaList,
+			"GetMetaList":     GetMetaList,
+			"GetRealFilePath": GetRealFilePath,
 		})
 	if !setting.IsProduction() {
 		fmt.Println("开发模式")
@@ -49,4 +51,34 @@ type MetaItem struct {
 
 func GetMetaList() []MetaItem {
 	return jsonopt.Decode[[]MetaItem](preferences.Get("site.metaList", "[]"))
+}
+
+var manifestMap = map[string]string{}
+
+func init() {
+	content, err := viewAssert.ReadFile(filepath.Join("static", "dist", ".vite", "manifest.json"))
+	if err != nil {
+		slog.Error("ManifestGetError")
+		return
+	}
+	type ManifestItem struct {
+		File    string   `json:"file"`
+		Name    string   `json:"name"`
+		Src     string   `json:"src"`
+		IsEntry bool     `json:"isEntry"`
+		Imports []string `json:"imports"`
+		Css     []string `json:"css"`
+	}
+	info := jsonopt.Decode[map[string]ManifestItem](content)
+	newManifestMap := map[string]string{}
+	for s, item := range info {
+		if item.File != "" {
+			newManifestMap[s] = item.File
+		}
+	}
+	manifestMap = newManifestMap
+}
+
+func GetRealFilePath(origin string) string {
+	return manifestMap[origin]
 }

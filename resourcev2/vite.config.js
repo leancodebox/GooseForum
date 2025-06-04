@@ -8,6 +8,7 @@ export default defineConfig({
   build: {
     outDir: 'static/dist',
     assetsDir: 'assets',
+    manifest: true, // 生成 manifest.json
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/main.js'),
@@ -16,11 +17,12 @@ export default defineConfig({
         profile: resolve(__dirname, 'src/profile.js'),
         publish: resolve(__dirname, 'src/publish.js'),
         'submit-link': resolve(__dirname, 'src/submit-link.js'),
+        'style': resolve(__dirname, 'src/style.css'),
       },
       output: {
-        entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name].[ext]'
+        // entryFileNames: 'assets/[name].js',
+        // chunkFileNames: 'assets/[name].js',
+        // assetFileNames: 'assets/[name].[ext]'
       }
     }
   },
