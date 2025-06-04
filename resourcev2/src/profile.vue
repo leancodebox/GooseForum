@@ -4,22 +4,63 @@ import AccountSettings from "./components/AccountSettings.vue";
 import {getUserInfo} from "@/utils/articleService.ts";
 import type {UserInfo} from "@/utils/articleInterfaces.ts";
 
+// 加载状态
+const isLoading = ref(true)
+
+// 用户信息 - 根据UserInfo接口定义
+const userInfo = reactive<UserInfo>({
+  avatarUrl: '/static/pic/default-avatar.png',
+  username: '',
+  nickname: '',
+  email: '',
+  bio: '',
+  website: '',
+  websiteName: '',
+  signature: '',
+  externalInformation: {
+    github: { link: '' },
+    weibo: { link: '' },
+    bilibili: { link: '' },
+    twitter: { link: '' },
+    linkedIn: { link: '' },
+    zhihu: { link: '' }
+  }
+})
+
+// 额外的统计信息（不在UserInfo接口中）
+const userStats = reactive({
+  articleCount: 0,
+  followingCount: 0,
+  followersCount: 0,
+  joinDate: ''
+})
 
 onMounted(async () => {
-  let res = await getUserInfo();
-  console.log(res.result)
-})
-// 用户信息
-const userInfo = reactive<UserInfo>({
-  id: 1,
-  username: 'GooseUser',
-  email: 'user@example.com',
-  avatar: '/static/pic/default-avatar.png',
-  bio: '热爱技术的开发者，专注于前端和全栈开发',
-  articleCount: 15,
-  followingCount: 42,
-  followersCount: 128,
-  joinDate: '2023-01-15'
+  try {
+    const res = await getUserInfo();
+    if (res.code === 0 && res.result) {
+      // 更新用户信息
+      Object.assign(userInfo, res.result);
+      // 同步更新表单数据
+      Object.assign(profileForm, {
+        username: res.result.username,
+        nickname: res.result.nickname,
+        email: res.result.email,
+        bio: res.result.bio,
+        signature: res.result.signature,
+        website: res.result.website,
+        websiteName: res.result.websiteName,
+        avatarUrl: res.result.avatarUrl
+      });
+      console.log('用户信息加载成功:', res.result);
+    } else {
+      console.error('获取用户信息失败:', res.message);
+    }
+  } catch (error) {
+    console.error('获取用户信息出错:', error);
+  } finally {
+    isLoading.value = false;
+  }
 })
 
 // 标签页
@@ -110,9 +151,13 @@ const myComments = ref([
 // 个人资料表单
 const profileForm = reactive({
   username: userInfo.username,
+  nickname: userInfo.nickname,
   email: userInfo.email,
   bio: userInfo.bio,
-  avatar: userInfo.avatar
+  signature: userInfo.signature,
+  website: userInfo.website,
+  websiteName: userInfo.websiteName,
+  avatarUrl: userInfo.avatarUrl
 })
 
 
@@ -160,30 +205,37 @@ const deleteComment = (id) => {
         <div class="lg:col-span-1">
           <div class="card bg-base-100 shadow-xl sticky top-24">
             <div class="card-body text-center">
-              <div class="avatar mb-4 mx-auto">
-                <div class="mask mask-squircle w-24 h-24">
-                  <img :src="userInfo.avatar" :alt="userInfo.username"/>
-                </div>
+              <!-- 加载状态 -->
+              <div v-if="isLoading" class="flex justify-center items-center py-8">
+                <span class="loading loading-spinner loading-lg"></span>
               </div>
-              <h2 class="card-title justify-center text-xl">{{ userInfo.username }}</h2>
-              <p class="text-base-content/70 text-sm mb-4">{{ userInfo.bio || '这个人很懒，什么都没留下' }}</p>
+              <!-- 用户信息 -->
+              <div v-else>
+                <div class="avatar mb-4 mx-auto">
+                  <div class="mask mask-squircle w-24 h-24">
+                    <img :src="userInfo.avatarUrl || '/static/pic/default-avatar.png'" :alt="userInfo.nickname || userInfo.username"/>
+                  </div>
+                </div>
+                <h2 class="card-title justify-center text-xl">{{ userInfo.nickname || userInfo.username || '用户' }}</h2>
+                <p class="text-base-content/70 text-sm mb-4">{{ userInfo.bio || userInfo.signature || '这个人很懒，什么都没留下' }}</p>
 
-              <div class="grid grid-cols-3 gap-4 mb-4">
-                <div class="text-center">
-                  <div class="text-lg font-bold text-base-content">{{ userInfo.articleCount }}</div>
-                  <div class="text-xs text-base-content/60">文章数</div>
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                  <div class="text-center">
+                    <div class="text-lg font-bold text-base-content">{{ userStats.articleCount }}</div>
+                    <div class="text-xs text-base-content/60">文章数</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-lg font-bold text-base-content">{{ userStats.followingCount }}</div>
+                    <div class="text-xs text-base-content/60">获赞数</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-lg font-bold text-base-content">{{ userStats.followersCount }}</div>
+                    <div class="text-xs text-base-content/60">粉丝数</div>
+                  </div>
                 </div>
-                <div class="text-center">
-                  <div class="text-lg font-bold text-base-content">{{ userInfo.followingCount }}</div>
-                  <div class="text-xs text-base-content/60">获赞数</div>
+                <div class="mt-4">
+                  <button class="btn btn-primary btn-sm btn-block" @click="editProfile">编辑资料</button>
                 </div>
-                <div class="text-center">
-                  <div class="text-lg font-bold text-base-content">{{ userInfo.followersCount }}</div>
-                  <div class="text-xs text-base-content/60">粉丝数</div>
-                </div>
-              </div>
-              <div class="mt-4">
-                <button class="btn btn-primary btn-sm btn-block" @click="editProfile">编辑资料</button>
               </div>
             </div>
           </div>
@@ -191,13 +243,23 @@ const deleteComment = (id) => {
 
         <!-- 右侧主要内容区域 -->
         <div class="lg:col-span-3">
-          <!-- 标签页导航 -->
-          <div class="tabs tabs-boxed mb-6">
-            <a v-for="tab in tabs" :key="tab.key" class="tab" :class="{ 'tab-active': activeTab === tab.key }"
-               @click="activeTab = tab.key">
-              {{ tab.label }}
-            </a>
+          <!-- 加载状态 -->
+          <div v-if="isLoading" class="flex justify-center items-center py-16">
+            <div class="text-center">
+              <span class="loading loading-spinner loading-lg mb-4"></span>
+              <p class="text-base-content/70">正在加载用户信息...</p>
+            </div>
           </div>
+          
+          <!-- 主要内容 -->
+          <div v-else>
+            <!-- 标签页导航 -->
+            <div class="tabs tabs-boxed mb-6">
+              <a v-for="tab in tabs" :key="tab.key" class="tab" :class="{ 'tab-active': activeTab === tab.key }"
+                 @click="activeTab = tab.key">
+                {{ tab.label }}
+              </a>
+            </div>
 
           <!-- 我的文章 -->
           <div v-if="activeTab === 'articles'" class="space-y-4">
@@ -316,9 +378,10 @@ const deleteComment = (id) => {
             </div>
           </div>
 
-          <!-- 账户设置 -->
-          <div v-if="activeTab === 'settings'" class="space-y-6">
-            <AccountSettings/>
+            <!-- 账户设置 -->
+            <div v-if="activeTab === 'settings'" class="space-y-6">
+              <AccountSettings/>
+            </div>
           </div>
         </div>
       </div>
