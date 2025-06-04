@@ -35,8 +35,10 @@ const userStats = reactive({
   joinDate: ''
 })
 
-onMounted(async () => {
+// 加载用户信息的函数
+const loadUserInfo = async () => {
   try {
+    isLoading.value = true;
     const res = await getUserInfo();
     if (res.code === 0 && res.result) {
       // 更新用户信息
@@ -61,6 +63,16 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
+}
+
+// 处理账户设置更新事件
+const handleUserInfoUpdated = () => {
+  console.log('收到用户信息更新通知，重新加载用户信息');
+  loadUserInfo();
+}
+
+onMounted(() => {
+  loadUserInfo();
 })
 
 // 标签页
@@ -380,7 +392,10 @@ const deleteComment = (id) => {
 
             <!-- 账户设置 -->
             <div v-if="activeTab === 'settings'" class="space-y-6">
-              <AccountSettings/>
+              <AccountSettings 
+                :user-info="userInfo" 
+                @user-info-updated="handleUserInfoUpdated"
+              />
             </div>
           </div>
         </div>

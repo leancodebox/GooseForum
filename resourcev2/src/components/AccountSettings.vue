@@ -1,8 +1,18 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref} from 'vue'
+import {onMounted, reactive, ref, watch} from 'vue'
 import AvatarUpload from './AvatarUpload.vue'
-import {changePassword, getUserInfo, saveUserInfo} from '@/utils/articleService.ts'
+import {changePassword, saveUserInfo} from '@/utils/articleService.ts'
 import type {UserInfo} from "@/utils/articleInterfaces";
+
+// 定义props
+const props = defineProps<{
+  userInfo: UserInfo
+}>()
+
+// 定义emits
+const emit = defineEmits<{
+  'user-info-updated': []
+}>()
 
 // 个人资料表单
 const profileForm = ref<UserInfo>({
@@ -24,11 +34,19 @@ const profileForm = ref<UserInfo>({
   },
 })
 
-onMounted(async () => {
-  let res = await getUserInfo();
-  console.log(res.result)
-  profileForm.value = res.result
+// 监听props变化，同步更新表单数据
+watch(() => props.userInfo, (newUserInfo) => {
+  if (newUserInfo) {
+    profileForm.value = { ...newUserInfo };
+    console.log('AccountSettings: 接收到用户信息更新', newUserInfo);
+  }
+}, { immediate: true, deep: true })
 
+onMounted(() => {
+  // 初始化时如果有用户信息就同步到表单
+  if (props.userInfo) {
+    profileForm.value = { ...props.userInfo };
+  }
 })
 
 
@@ -66,7 +84,9 @@ const updateProfile = async () => {
     )
 
     if (response.code === 0) {
-
+      alert('个人资料更新成功');
+      // 通知父组件重新获取用户信息
+      emit('user-info-updated');
     } else {
       alert(`更新失败: ${response.message || '请重试'}`)
     }
@@ -118,6 +138,8 @@ const updatePassword = async () => {
 // 头像更新回调
 const handleAvatarUpdated = (newAvatarUrl) => {
   profileForm.value.avatarUrl = newAvatarUrl
+  // 头像更新后也通知父组件刷新用户信息
+  emit('user-info-updated');
 }
 
 // 保存隐私设置

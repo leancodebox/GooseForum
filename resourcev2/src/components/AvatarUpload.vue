@@ -285,18 +285,20 @@ onUnmounted(() => {
         <!-- 操作按钮 -->
         <div class="modal-action">
           <button 
+            type="button"
             @click="closeCropModal" 
             class="btn btn-outline"
           >
             取消
           </button>
           <button 
+            type="button"
             @click="handleCropFinish" 
             class="btn btn-primary"
             :disabled="uploading"
           >
             <span v-if="uploading" class="loading loading-spinner loading-sm"></span>
-            {{ uploading ? '上传中...' : '确认裁切' }}
+            {{ uploading ? '上传中...' : '裁切并上传' }}
           </button>
         </div>
       </div>
