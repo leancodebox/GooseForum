@@ -130,6 +130,7 @@
                     <div role="tablist" class="tabs tabs-lift">
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="发布的文章" checked="checked"/>
                         <div class="tab-content border-base-300 bg-base-100 ">
+                            {{if .Articles}}
                             <ul class="list">
                                 {{range .Articles}}
                                 <li class="list-row hover:bg-base-200 flex items-center gap-3 ">
@@ -188,6 +189,22 @@
                                 </li>
                                 {{end}}
                             </ul>
+
+                            {{else}}
+                            <div class="card ">
+                                <div class="card-body flex items-center p-4">
+                                    <a href="/publish" class="btn btn-primary btn-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                             viewBox="0 0 24 24"
+                                             stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                        写文章
+                                    </a>
+                                </div>
+                            </div>
+                            {{end}}
                         </div>
 
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="评论记录"/>
@@ -197,7 +214,8 @@
                         <div class="tab-content border-base-300 bg-base-100 p-10">长老们，去别处看看吧 彡(-_-;)彡</div>
 
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="粉丝"/>
-                        <div class="tab-content border-base-300 bg-base-100 p-10">您访问的页面走丢在寻找梦想的路上了</div>
+                        <div class="tab-content border-base-300 bg-base-100 p-10">您访问的页面走丢在寻找梦想的路上了
+                        </div>
                     </div>
                     <!-- 分页 -->
                     <div class="flex justify-center mt-8">
