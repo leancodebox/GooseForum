@@ -2,7 +2,7 @@
 import {computed, onMounted, onUnmounted, ref} from 'vue'
 import {MdEditor} from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
-import {getArticleEnum, getArticlesOrigin, submitArticle} from './utils/articleService.js'
+import {getArticleEnum, getArticlesOrigin, submitArticle} from './utils/articleService.ts'
 import {NConfigProvider, NSelect} from 'naive-ui'
 import {createSelectThemeOverrides, getBaseTheme} from './components/nu-theme.ts'
 
@@ -272,11 +272,8 @@ onUnmounted(() => {
                   :disabled="isSubmitting">
             保存草稿
           </button>
-
         </div>
       </form>
-
-
     </div>
   </n-config-provider>
 </template>
