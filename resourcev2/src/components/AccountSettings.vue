@@ -195,17 +195,10 @@ const savePrivacySettings = async () => {
               <label class="label">
                 <span class="label-text font-medium">头像设置</span>
               </label>
-              <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start">
-                <div class="avatar justify-self-center sm:justify-self-start">
-                  <div class="mask mask-squircle w-20 h-20">
-                    <img :src="profileForm.avatarUrl" alt="头像预览"/>
-                  </div>
-                </div>
-                <AvatarUpload
-                    :current-avatar="profileForm.avatarUrl"
-                    @avatar-updated="handleAvatarUpdated"
-                />
-              </div>
+              <AvatarUpload
+                  :current-avatar="profileForm.avatarUrl"
+                  @avatar-updated="handleAvatarUpdated"
+              />
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="form-control">
