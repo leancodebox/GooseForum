@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 )
 
 //go:embed  all:templates/**
@@ -89,16 +90,24 @@ func GetRealFilePath(origin string) string {
 	return manifestMap[origin]
 }
 
+var htmlHeaderCache sync.Map
+
 func GetImportInfoPath(origin string) any {
 	if item, ok := manifestItemMap[origin]; ok {
-		sb := strings.Builder{}
-		sb.WriteString(fmt.Sprintf(`<script type="module" src="/%s"></script>`, item.File))
-		sb.WriteString("\n")
-		for _, value := range item.Css {
-			sb.WriteString(fmt.Sprintf(`<link rel="stylesheet" href="/%s">`, value))
+		if val, cacheOk := htmlHeaderCache.Load(origin); cacheOk {
+			return val.(template.HTML)
+		} else {
+			sb := strings.Builder{}
+			sb.WriteString(fmt.Sprintf(`<script type="module" src="/%s"></script>`, item.File))
 			sb.WriteString("\n")
+			for _, value := range item.Css {
+				sb.WriteString(fmt.Sprintf(`<link rel="stylesheet" href="/%s">`, value))
+				sb.WriteString("\n")
+			}
+			res := template.HTML(sb.String())
+			htmlHeaderCache.Store(origin, res)
+			return res
 		}
-		return template.HTML(sb.String())
 	}
 	return ""
 }

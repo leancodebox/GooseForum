@@ -22,17 +22,16 @@ import (
 )
 
 func Home(c *gin.Context) {
-
-	last, _ := articles.GetLatestArticles(7)
+	last := getLatestArticles()
 	viewrender.Render(c, "index.gohtml", map[string]any{
 		"IsProduction":        setting.IsProduction(),
 		"CanonicalHref":       buildCanonicalHref(c),
 		"User":                GetLoginUser(c),
 		"Title":               "GooseForum",
 		"ArticleCategoryList": articleCategory.Label(),
-		"FeaturedArticles":    articlesSmallEntity2Dto(getRecommendedArticles()), //回复最多的文章
-		"LatestArticles":      articlesSmallEntity2Dto(last),                     // 最新的文章
-		"Stats":               GetSiteStatisticsData(),
+		//"FeaturedArticles":    articlesSmallEntity2Dto(getRecommendedArticles()), //回复最多的文章
+		"LatestArticles": articlesSmallEntity2Dto(last), // 最新的文章
+		"Stats":          GetSiteStatisticsData(),
 	})
 }
 

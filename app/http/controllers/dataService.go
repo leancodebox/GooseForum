@@ -73,6 +73,18 @@ func getRecommendedArticles() []articles.SmallEntity {
 	return data
 }
 
+func getLatestArticles() []articles.SmallEntity {
+	data, _ := articleCache.GetOrLoad(
+		"GetLatestArticles7",
+		func() ([]articles.SmallEntity, error) {
+			return articles.GetLatestArticles(7)
+
+		},
+		10*time.Second, // 缓存5分钟
+	)
+	return data
+}
+
 func articlesSmallEntity2Dto(data []articles.SmallEntity) []ArticlesSimpleDto {
 	userIds := array.Map(data, func(t articles.SmallEntity) uint64 {
 		return t.UserId
