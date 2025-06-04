@@ -187,6 +187,7 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 	return UserInfoShow{
 		UserId:     userId,
 		Username:   user.Username,
+		Bio:        user.Bio,
 		Prestige:   user.Prestige,
 		AvatarUrl:  avatarUrl,
 		CreateTime: user.CreatedAt,
