@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"slices"
+	"strings"
 )
 
 //go:embed  all:templates/**
@@ -22,8 +23,9 @@ func GetTemplates() *template.Template {
 			"ContainsInt": func(s []int, v any) bool {
 				return slices.Contains(s, cast.ToInt(v))
 			},
-			"GetMetaList":     GetMetaList,
-			"GetRealFilePath": GetRealFilePath,
+			"GetMetaList":       GetMetaList,
+			"GetRealFilePath":   GetRealFilePath,
+			"GetImportInfoPath": GetImportInfoPath,
 		})
 	if !setting.IsProduction() {
 		fmt.Println("开发模式")
@@ -53,7 +55,17 @@ func GetMetaList() []MetaItem {
 	return jsonopt.Decode[[]MetaItem](preferences.Get("site.metaList", "[]"))
 }
 
+type ManifestItem struct {
+	File    string   `json:"file"`
+	Name    string   `json:"name"`
+	Src     string   `json:"src"`
+	IsEntry bool     `json:"isEntry"`
+	Imports []string `json:"imports"`
+	Css     []string `json:"css"`
+}
+
 var manifestMap = map[string]string{}
+var manifestItemMap = map[string]ManifestItem{}
 
 func init() {
 	content, err := viewAssert.ReadFile(filepath.Join("static", "dist", ".vite", "manifest.json"))
@@ -61,15 +73,9 @@ func init() {
 		slog.Error("ManifestGetError")
 		return
 	}
-	type ManifestItem struct {
-		File    string   `json:"file"`
-		Name    string   `json:"name"`
-		Src     string   `json:"src"`
-		IsEntry bool     `json:"isEntry"`
-		Imports []string `json:"imports"`
-		Css     []string `json:"css"`
-	}
+
 	info := jsonopt.Decode[map[string]ManifestItem](content)
+	manifestItemMap = info
 	newManifestMap := map[string]string{}
 	for s, item := range info {
 		if item.File != "" {
@@ -81,4 +87,18 @@ func init() {
 
 func GetRealFilePath(origin string) string {
 	return manifestMap[origin]
+}
+
+func GetImportInfoPath(origin string) any {
+	if item, ok := manifestItemMap[origin]; ok {
+		sb := strings.Builder{}
+		sb.WriteString(fmt.Sprintf(`<script type="module" src="/%s"></script>`, item.File))
+		sb.WriteString("\n")
+		for _, value := range item.Css {
+			sb.WriteString(fmt.Sprintf(`<link rel="stylesheet" href="/%s">`, value))
+			sb.WriteString("\n")
+		}
+		return template.HTML(sb.String())
+	}
+	return ""
 }

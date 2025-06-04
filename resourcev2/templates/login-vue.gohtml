@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "commonhead.gohtml" .}}
     {{if .IsProduction}}
-    <link rel="stylesheet" href="/assets/style.css">
-    <script type="module" src="/assets/login.js"></script>
+    <link rel="stylesheet" href="/{{GetRealFilePath `src/style.css`}}">
+    {{GetImportInfoPath `src/login.js`}}
     {{else}}
     <!-- Development mode with Vite -->
     <script type="module" src="http://localhost:3001/@vite/client"></script>
