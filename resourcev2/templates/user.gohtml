@@ -129,7 +129,7 @@
                 <div class="space-y-4">
                     <div role="tablist" class="tabs tabs-lift">
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="发布的文章" checked="checked"/>
-                        <div class="tab-content border-base-300 bg-base-100 ">
+                        <div class="tab-content border-base-300 bg-base-100 {{if not .Articles}} p-10 {{end}}">
                             {{if .Articles}}
                             <ul class="list">
                                 {{range .Articles}}
@@ -191,11 +191,7 @@
                             </ul>
 
                             {{else}}
-                            <div class="card ">
-                                <div class="card-body p-10">
-                                    假以时日一飞冲天
-                                </div>
-                            </div>
+                            假以时日一飞冲天
                             {{end}}
                         </div>
 
