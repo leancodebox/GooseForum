@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}}</title>
-    <meta name="description" content="{{.Description}}">
-    <meta name="keywords" content="{{.Keywords}}">
-    <meta property="og:title" content="{{.Title}}">
-    <meta property="og:description" content="{{.Description}}">
-    <meta property="og:type" content="website">
+    {{template "commonhead.gohtml" .}}
     {{if .IsProduction}}
     <link rel="stylesheet" href="/assets/style.css">
     <script type="module" src="/assets/main.js"></script>
@@ -36,7 +31,7 @@
                                 </a>
                                 {{$all := .FilterIds}}
                                 {{range .ArticleCategoryList}}
-                                {{$isActive := (containsInt $all .Value)}}
+                                {{$isActive := (ContainsInt $all .Value)}}
                                 <a class="btn btn-sm {{if $isActive}}btn-primary{{end}} filter-tag {{if $isActive}}active{{end}}" data-filter="{{.Value}}"
                                         role="button">{{.Name}}</a>
                                 {{end}}
@@ -193,7 +188,7 @@
                 // 处理分类标签的切换
                 const filterArray = currentFilters ? currentFilters.split('-') : [];
                 const filterIndex = filterArray.indexOf(clickedFilter);
-                
+
                 if (filterIndex > -1) {
                     // 如果已选中，则移除
                     filterArray.splice(filterIndex, 1);
@@ -202,7 +197,7 @@
                     filterArray.push(clickedFilter);
                 }
                 newFilters = filterArray.join('-');
-            } 
+            }
             // 构建新URL并跳转
             urlParams.delete('page'); // 重置页码
             if (newFilters) {
