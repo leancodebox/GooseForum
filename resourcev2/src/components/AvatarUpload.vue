@@ -4,7 +4,6 @@ import { VueCropper } from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
 import { uploadAvatar } from '../utils/articleService.ts'
 
-
 const emit = defineEmits(['avatar-updated'])
 
 // 状态变量

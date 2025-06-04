@@ -1,8 +1,16 @@
-<script setup>
-import {reactive, ref} from 'vue'
+<script setup lang="ts">
+import {onMounted, reactive, ref} from 'vue'
 import AccountSettings from "./components/AccountSettings.vue";
+import {getUserInfo} from "@/utils/articleService.ts";
+import type {UserInfo} from "@/utils/articleInterfaces.ts";
+
+
+onMounted(async () => {
+  let res = await getUserInfo();
+  console.log(res.result)
+})
 // 用户信息
-const userInfo = reactive({
+const userInfo = reactive<UserInfo>({
   id: 1,
   username: 'GooseUser',
   email: 'user@example.com',
@@ -107,19 +115,6 @@ const profileForm = reactive({
   avatar: userInfo.avatar
 })
 
-// 密码修改表单
-const passwordForm = reactive({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: ''
-})
-
-// 隐私设置
-const privacySettings = reactive({
-  showArticles: true,
-  showFollowing: true,
-  emailNotifications: true
-})
 
 // 编辑资料
 const editProfile = () => {
@@ -154,61 +149,6 @@ const removeFavorite = (id) => {
 const deleteComment = (id) => {
   console.log('删除评论:', id)
   myComments.value = myComments.value.filter(item => item.id !== id)
-}
-
-// 更新个人资料
-const updateProfile = async () => {
-  try {
-    console.log('更新个人资料:', profileForm)
-    // 这里应该调用实际的API
-    Object.assign(userInfo, profileForm)
-  } catch (error) {
-    console.error('更新失败:', error)
-  }
-}
-
-// 修改密码
-const changePassword = async () => {
-  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    alert('新密码和确认密码不一致')
-    return
-  }
-
-  try {
-    console.log('修改密码')
-    // 这里应该调用实际的API
-    // 重置表单
-    Object.assign(passwordForm, {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    })
-  } catch (error) {
-    console.error('修改密码失败:', error)
-  }
-}
-
-// 处理头像上传
-const handleAvatarUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    // 这里应该上传到服务器，目前使用本地预览
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      profileForm.avatar = e.target.result
-    }
-    reader.readAsDataURL(file)
-  }
-}
-
-// 保存隐私设置
-const savePrivacySettings = async () => {
-  try {
-    console.log('保存隐私设置:', privacySettings)
-    // 这里应该调用实际的API
-  } catch (error) {
-    console.error('保存失败:', error)
-  }
 }
 
 </script>

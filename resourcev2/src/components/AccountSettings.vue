@@ -4,7 +4,6 @@ import AvatarUpload from './AvatarUpload.vue'
 import {changePassword, getUserInfo, saveUserInfo} from '@/utils/articleService.ts'
 import type {UserInfo} from "@/utils/articleInterfaces";
 
-
 // 个人资料表单
 const profileForm = ref<UserInfo>({
   avatarUrl: "",
@@ -137,28 +136,31 @@ const savePrivacySettings = async () => {
 <template>
   <div class="w-full">
     <!-- Tab 导航 -->
-    <div class="tabs tabs-bordered w-full mb-6">
-      <button
-          class="tab tab-lg"
-          :class="{ 'tab-active': activeTab === 'profile' }"
-          @click="activeTab = 'profile'"
+    <div role="tablist" class="tabs tabs-lift ml-3">
+      <a 
+        role="tab" 
+        class="tab tab-lg"
+        :class="{ 'tab-active': activeTab === 'profile' }"
+        @click="activeTab = 'profile'"
       >
         基本信息
-      </button>
-      <button
-          class="tab tab-lg"
-          :class="{ 'tab-active': activeTab === 'password' }"
-          @click="activeTab = 'password'"
+      </a>
+      <a 
+        role="tab" 
+        class="tab tab-lg"
+        :class="{ 'tab-active': activeTab === 'password' }"
+        @click="activeTab = 'password'"
       >
         修改密码
-      </button>
-      <button
-          class="tab tab-lg"
-          :class="{ 'tab-active': activeTab === 'privacy' }"
-          @click="activeTab = 'privacy'"
+      </a>
+      <a 
+        role="tab" 
+        class="tab tab-lg"
+        :class="{ 'tab-active': activeTab === 'privacy' }"
+        @click="activeTab = 'privacy'"
       >
         隐私设置
-      </button>
+      </a>
     </div>
 
     <!-- Tab 内容 -->
@@ -166,7 +168,6 @@ const savePrivacySettings = async () => {
       <div class="card-body">
         <!-- 基本信息 Tab -->
         <div v-if="activeTab === 'profile'">
-          <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">基本信息</h3>
           <form @submit.prevent="updateProfile" class="grid grid-cols-1 gap-6">
             <div class="form-control">
               <label class="label">
