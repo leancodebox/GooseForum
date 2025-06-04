@@ -50,6 +50,9 @@ const privacySettings = reactive({
 // 密码修改状态
 const changingPassword = ref(false)
 
+// Tab 控制
+const activeTab = ref('profile')
+
 // 更新个人资料
 const updateProfile = async () => {
   try {
@@ -132,237 +135,259 @@ const savePrivacySettings = async () => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <h2 class="text-2xl font-bold">账户设置</h2>
-    <!-- 基本信息设置 -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">基本信息</h3>
-        <form @submit.prevent="updateProfile" class="grid grid-cols-1 gap-6">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">头像设置</span>
-            </label>
-            <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start">
-              <div class="avatar justify-self-center sm:justify-self-start">
-                <div class="mask mask-squircle w-20 h-20">
-                  <img :src="profileForm.avatarUrl" alt="头像预览"/>
-                </div>
-              </div>
-              <AvatarUpload
-                  :current-avatar="profileForm.avatarUrl"
-                  @avatar-updated="handleAvatarUpdated"
-              />
-            </div>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">用户名</span>
-              </label>
-              <input v-model="profileForm.username" type="text" class="input input-bordered w-full"
-                     placeholder="请输入用户名" disabled/>
-            </div>
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">邮箱</span>
-              </label>
-              <input v-model="profileForm.email" type="email" class="input input-bordered w-full"
-                     placeholder="请输入邮箱" disabled/>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">昵称</span>
-              </label>
-              <input v-model="profileForm.nickname" type="text" class="input input-bordered w-full"
-                     placeholder="请输入昵称"/>
-            </div>
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">个性签名</span>
-              </label>
-              <input v-model="profileForm.signature" type="text" class="input input-bordered w-full"
-                     placeholder="请输入个性签名"/>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">网站名</span>
-              </label>
-              <input v-model="profileForm.websiteName" type="text" class="input input-bordered w-full"
-                     placeholder="请输入网站名"/>
-            </div>
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">网站地址</span>
-              </label>
-              <input v-model="profileForm.website" type="text" class="input input-bordered w-full"
-                     placeholder="请输入网站地址"/>
-            </div>
-          </div>
-          <details tabindex="0" class="collapse collapse-arrow bg-base-100 border-base-300 border">
-            <summary class="collapse-title font-semibold">外站配置</summary>
-            <div class="collapse-content text-sm">
-
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Github</span>
-                  </label>
-                  <input v-model="profileForm.externalInformation.github.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入Github地址"/>
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">BiliBili</span>
-                  </label>
-                  <input v-model="profileForm.externalInformation.bilibili.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入BiliBili地址"/>
-                </div>
-              </div>
-
-
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Weibo</span>
-                  </label>
-                  <input v-model="profileForm.externalInformation.weibo.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入Weibo地址"/>
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Twitter</span>
-                  </label>
-                  <input v-model="profileForm.externalInformation.twitter.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入Twitter地址"/>
-                </div>
-              </div>
-
-
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">zhihu</span>
-                  </label>
-                  <input v-model="profileForm.externalInformation.zhihu.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入Zhihu地址"/>
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">linkedIn</span>
-                  </label>
-                  <input v-model="profileForm.externalInformation.linkedIn.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入LinkedIn地址"/>
-                </div>
-              </div>
-            </div>
-          </details>
-
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">个人简介</span>
-              <span class="label-text-alt">{{ profileForm.bio?.length || 0 }}/200</span>
-            </label>
-            <textarea v-model="profileForm.bio" class="textarea textarea-bordered w-full" rows="4"
-                      placeholder="介绍一下自己..." maxlength="200"></textarea>
-          </div>
-
-          <div class="flex justify-end">
-            <button type="submit" class="btn btn-primary">保存基本信息</button>
-          </div>
-        </form>
-      </div>
+  <div class="w-full">
+    <!-- Tab 导航 -->
+    <div class="tabs tabs-bordered w-full mb-6">
+      <button
+          class="tab tab-lg"
+          :class="{ 'tab-active': activeTab === 'profile' }"
+          @click="activeTab = 'profile'"
+      >
+        基本信息
+      </button>
+      <button
+          class="tab tab-lg"
+          :class="{ 'tab-active': activeTab === 'password' }"
+          @click="activeTab = 'password'"
+      >
+        修改密码
+      </button>
+      <button
+          class="tab tab-lg"
+          :class="{ 'tab-active': activeTab === 'privacy' }"
+          @click="activeTab = 'privacy'"
+      >
+        隐私设置
+      </button>
     </div>
 
-    <!-- 密码修改 -->
+    <!-- Tab 内容 -->
     <div class="card bg-base-100 shadow-xl">
       <div class="card-body">
-        <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">修改密码</h3>
-        <form @submit.prevent="updatePassword" class="grid grid-cols-1 gap-6">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">当前密码</span>
-            </label>
-            <input v-model="passwordForm.currentPassword" type="password" class="input input-bordered w-full"
-                   placeholder="请输入当前密码" required/>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 基本信息 Tab -->
+        <div v-if="activeTab === 'profile'">
+          <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">基本信息</h3>
+          <form @submit.prevent="updateProfile" class="grid grid-cols-1 gap-6">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">新密码</span>
+                <span class="label-text font-medium">头像设置</span>
               </label>
-              <input v-model="passwordForm.newPassword" type="password" class="input input-bordered w-full"
-                     placeholder="请输入新密码" required/>
+              <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start">
+                <div class="avatar justify-self-center sm:justify-self-start">
+                  <div class="mask mask-squircle w-20 h-20">
+                    <img :src="profileForm.avatarUrl" alt="头像预览"/>
+                  </div>
+                </div>
+                <AvatarUpload
+                    :current-avatar="profileForm.avatarUrl"
+                    @avatar-updated="handleAvatarUpdated"
+                />
+              </div>
             </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">用户名</span>
+                </label>
+                <input v-model="profileForm.username" type="text" class="input input-bordered w-full"
+                       placeholder="请输入用户名" disabled/>
+              </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">邮箱</span>
+                </label>
+                <input v-model="profileForm.email" type="email" class="input input-bordered w-full"
+                       placeholder="请输入邮箱" disabled/>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">昵称</span>
+                </label>
+                <input v-model="profileForm.nickname" type="text" class="input input-bordered w-full"
+                       placeholder="请输入昵称"/>
+              </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">个性签名</span>
+                </label>
+                <input v-model="profileForm.signature" type="text" class="input input-bordered w-full"
+                       placeholder="请输入个性签名"/>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">网站名</span>
+                </label>
+                <input v-model="profileForm.websiteName" type="text" class="input input-bordered w-full"
+                       placeholder="请输入网站名"/>
+              </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">网站地址</span>
+                </label>
+                <input v-model="profileForm.website" type="text" class="input input-bordered w-full"
+                       placeholder="请输入网站地址"/>
+              </div>
+            </div>
+            <details tabindex="0" class="collapse collapse-arrow bg-base-100 border-base-300 border">
+              <summary class="collapse-title font-semibold">外站配置</summary>
+              <div class="collapse-content text-sm">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Github</span>
+                    </label>
+                    <input v-model="profileForm.externalInformation.github.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入Github地址"/>
+                  </div>
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">BiliBili</span>
+                    </label>
+                    <input v-model="profileForm.externalInformation.bilibili.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入BiliBili地址"/>
+                  </div>
+                </div>
+
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Weibo</span>
+                    </label>
+                    <input v-model="profileForm.externalInformation.weibo.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入Weibo地址"/>
+                  </div>
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Twitter</span>
+                    </label>
+                    <input v-model="profileForm.externalInformation.twitter.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入Twitter地址"/>
+                  </div>
+                </div>
+
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">zhihu</span>
+                    </label>
+                    <input v-model="profileForm.externalInformation.zhihu.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入Zhihu地址"/>
+                  </div>
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">linkedIn</span>
+                    </label>
+                    <input v-model="profileForm.externalInformation.linkedIn.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入LinkedIn地址"/>
+                  </div>
+                </div>
+              </div>
+            </details>
+
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">确认新密码</span>
+                <span class="label-text font-medium">个人简介</span>
+                <span class="label-text-alt">{{ profileForm.bio?.length || 0 }}/200</span>
               </label>
-              <input v-model="passwordForm.confirmPassword" type="password" class="input input-bordered w-full"
-                     placeholder="请再次输入新密码" required/>
+              <textarea v-model="profileForm.bio" class="textarea textarea-bordered w-full" rows="4"
+                        placeholder="介绍一下自己..." maxlength="200"></textarea>
             </div>
-          </div>
-          <div class="flex justify-end">
-            <button type="submit" class="btn btn-primary" :disabled="changingPassword">
-              <span v-if="changingPassword" class="loading loading-spinner loading-sm"></span>
-              {{ changingPassword ? '修改中...' : '修改密码' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
 
-    <!-- 隐私设置 -->
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">隐私设置</h3>
-        <div class="grid grid-cols-1 gap-6">
-          <div class="form-control">
-            <label class="label cursor-pointer justify-start gap-4">
-              <input v-model="privacySettings.showArticles" type="checkbox" class="toggle toggle-primary"/>
-              <div>
-                <span class="label-text font-medium">公开文章列表</span>
-                <div class="text-sm text-base-content/60">允许其他用户查看我发布的文章</div>
+            <div class="flex justify-end">
+              <button type="submit" class="btn btn-primary">保存基本信息</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 密码修改 Tab -->
+        <div v-if="activeTab === 'password'">
+          <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">修改密码</h3>
+          <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">修改密码</h3>
+          <form @submit.prevent="updatePassword" class="grid grid-cols-1 gap-6">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">当前密码</span>
+              </label>
+              <input v-model="passwordForm.currentPassword" type="password" class="input input-bordered w-full"
+                     placeholder="请输入当前密码" required/>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">新密码</span>
+                </label>
+                <input v-model="passwordForm.newPassword" type="password" class="input input-bordered w-full"
+                       placeholder="请输入新密码" required/>
               </div>
-            </label>
-          </div>
-
-          <div class="form-control">
-            <label class="label cursor-pointer justify-start gap-4">
-              <input v-model="privacySettings.showFollowing" type="checkbox" class="toggle toggle-primary"/>
-              <div>
-                <span class="label-text font-medium">公开关注列表</span>
-                <div class="text-sm text-base-content/60">允许其他用户查看我的关注和粉丝</div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">确认新密码</span>
+                </label>
+                <input v-model="passwordForm.confirmPassword" type="password" class="input input-bordered w-full"
+                       placeholder="请再次输入新密码" required/>
               </div>
-            </label>
-          </div>
+            </div>
+            <div class="flex justify-end">
+              <button type="submit" class="btn btn-primary" :disabled="changingPassword">
+                <span v-if="changingPassword" class="loading loading-spinner loading-sm"></span>
+                {{ changingPassword ? '修改中...' : '修改密码' }}
+              </button>
+            </div>
+          </form>
+        </div>
 
-          <div class="form-control">
-            <label class="label cursor-pointer justify-start gap-4">
-              <input v-model="privacySettings.emailNotifications" type="checkbox"
-                     class="toggle toggle-primary"/>
-              <div>
-                <span class="label-text font-medium">邮件通知</span>
-                <div class="text-sm text-base-content/60">接收评论、点赞等活动的邮件提醒</div>
-              </div>
-            </label>
-          </div>
+        <!-- 隐私设置 Tab -->
+        <div v-if="activeTab === 'privacy'">
+          <h3 class="card-title text-lg mb-6 border-b border-base-300 pb-3">隐私设置</h3>
+          <div class="grid grid-cols-1 gap-6">
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-4">
+                <input v-model="privacySettings.showArticles" type="checkbox" class="toggle toggle-primary"/>
+                <div>
+                  <span class="label-text font-medium">公开文章列表</span>
+                  <div class="text-sm text-base-content/60">允许其他用户查看我发布的文章</div>
+                </div>
+              </label>
+            </div>
 
-          <div class="grid grid-cols-1">
-            <div class="flex justify-end pt-4 border-t border-base-300">
-              <button class="btn btn-primary min-w-32" @click="savePrivacySettings">保存设置</button>
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-4">
+                <input v-model="privacySettings.showFollowing" type="checkbox" class="toggle toggle-primary"/>
+                <div>
+                  <span class="label-text font-medium">公开关注列表</span>
+                  <div class="text-sm text-base-content/60">允许其他用户查看我的关注和粉丝</div>
+                </div>
+              </label>
+            </div>
+
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-4">
+                <input v-model="privacySettings.emailNotifications" type="checkbox"
+                       class="toggle toggle-primary"/>
+                <div>
+                  <span class="label-text font-medium">邮件通知</span>
+                  <div class="text-sm text-base-content/60">接收评论、点赞等活动的邮件提醒</div>
+                </div>
+              </label>
+            </div>
+
+            <div class="flex justify-end">
+              <button @click="savePrivacySettings" class="btn btn-primary">保存隐私设置</button>
             </div>
           </div>
         </div>
