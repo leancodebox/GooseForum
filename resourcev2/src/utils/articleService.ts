@@ -76,7 +76,7 @@ export function getUnreadCount(): Promise<Result<any>> {
 }
 
 // 标记通知为已读
-export function markAsRead(notificationId: any): Promise<Result<any>> {
+export function markAsReadById(notificationId: any): Promise<Result<any>> {
     return axiosInstance.post('/forum/notification/mark-read', {
         notificationId: notificationId
     })

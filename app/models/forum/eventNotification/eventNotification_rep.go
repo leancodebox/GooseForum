@@ -14,7 +14,7 @@ func Create(entity *Entity) error {
 func QueryByUserId(userId uint64, limit, startId int, unreadOnly bool) (notifications []*Entity, err error) {
 	db := builder().Where(queryopt.Eq("user_id", userId))
 	if startId != 0 {
-		builder().Where(queryopt.Lt("id", startId))
+		db.Where(queryopt.Lt("id", startId))
 	}
 	if unreadOnly {
 		db = db.Where(queryopt.Eq("is_read", false))

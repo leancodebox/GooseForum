@@ -1,23 +1,29 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from 'vue'
-import {queryNotificationList} from "@/utils/articleService.ts";
+import {markAllAsRead as markAllAsReadReq, markAsReadById, queryNotificationList} from "@/utils/articleService.ts";
 import type {Notifications} from "@/utils/articleInterfaces.ts";
 
 const notificationList = ref<Notifications[]>([])
 
 const queryParams = ref({
-  startId: 0,
+  startId: 2147483647,
   pageSize: 10,
   unread: true,
 })
 
 async function queryNotification() {
   let resp = await queryNotificationList(queryParams.value.startId, queryParams.value.pageSize, queryParams.value.unread)
-  notificationList.value = resp.result.list
+  resp.result.list.map(item => {
+    if (queryParams.value.startId > item.id) {
+      queryParams.value.startId = item.id
+    }
+  })
+  notificationList.value.push(...resp.result.list)
 }
 
 function cleanNotification() {
   notificationList.value = []
+  queryParams.value.startId = 9007199254740991
 }
 
 onMounted(async () => {
@@ -26,71 +32,7 @@ onMounted(async () => {
 
 
 // 消息数据
-const notifications = ref([
-  {
-    id: 1,
-    type: 'comment',
-    title: '新评论通知',
-    content: 'ReactDev 评论了你的文章《Vue 3 组合式 API 深度解析》',
-    relatedInfo: 'Vue 3 组合式 API 深度解析',
-    createTime: new Date('2024-01-15T10:30:00'),
-    isRead: false
-  },
-  {
-    id: 2,
-    type: 'like',
-    title: '点赞通知',
-    content: 'NodeMaster 点赞了你的文章《Nuxt.js 性能优化实战指南》',
-    relatedInfo: 'Nuxt.js 性能优化实战指南',
-    createTime: new Date('2024-01-15T09:15:00'),
-    isRead: false
-  },
-  {
-    id: 3,
-    type: 'follow',
-    title: '新关注者',
-    content: 'VueMaster 关注了你',
-    relatedInfo: 'VueMaster',
-    createTime: new Date('2024-01-14T16:45:00'),
-    isRead: false
-  },
-  {
-    id: 4,
-    type: 'system',
-    title: '系统通知',
-    content: '你的文章《TypeScript 进阶技巧分享》已通过审核并发布',
-    relatedInfo: 'TypeScript 进阶技巧分享',
-    createTime: new Date('2024-01-14T14:20:00'),
-    isRead: true
-  },
-  {
-    id: 5,
-    type: 'comment',
-    title: '新评论通知',
-    content: 'JSExpert 评论了你的文章《JavaScript 异步编程最佳实践》',
-    relatedInfo: 'JavaScript 异步编程最佳实践',
-    createTime: new Date('2024-01-13T11:30:00'),
-    isRead: true
-  },
-  {
-    id: 6,
-    type: 'like',
-    title: '点赞通知',
-    content: 'CSSMaster 点赞了你的文章《CSS Grid 布局完全指南》',
-    relatedInfo: 'CSS Grid 布局完全指南',
-    createTime: new Date('2024-01-12T15:20:00'),
-    isRead: true
-  },
-  {
-    id: 7,
-    type: 'system',
-    title: '系统维护通知',
-    content: '系统将于今晚 23:00-01:00 进行维护，期间可能无法访问',
-    relatedInfo: null,
-    createTime: new Date('2024-01-12T10:00:00'),
-    isRead: true
-  }
-])
+
 
 // 筛选器
 const activeFilter = ref('unread')
@@ -107,45 +49,14 @@ const filters = computed(() => {
 })
 
 
-// 过滤后的消息
-const filteredNotifications = computed(() => {
-  let filtered = notifications.value
-
-  switch (activeFilter.value) {
-    case 'unread':
-      filtered = filtered.filter(n => !n.isRead)
-      break
-    case 'comment':
-      filtered = filtered.filter(n => n.type === 'comment')
-      break
-    case 'like':
-      filtered = filtered.filter(n => n.type === 'like')
-      break
-    case 'follow':
-      filtered = filtered.filter(n => n.type === 'follow')
-      break
-    case 'system':
-      filtered = filtered.filter(n => n.type === 'system')
-      break
-  }
-
-  return filtered.sort((a, b) => b.createTime - a.createTime)
-})
-
 // 加载更多
 const displayCount = ref(10)
 
-// 显示的消息列表
-const displayedNotifications = computed(() => {
-  return filteredNotifications.value.slice(0, displayCount.value)
-})
 
 // 方法
-const markAsRead = (id) => {
-  const notification = notifications.value.find(n => n.id === id)
-  if (notification) {
-    notification.isRead = true
-  }
+const markAsRead = (notification: Notifications) => {
+  notification.isRead = true
+  markAsReadById(notification.id)
 }
 
 const markAsUnread = (id) => {
@@ -156,16 +67,14 @@ const markAsUnread = (id) => {
 }
 
 const markAllAsRead = () => {
-  notifications.value.forEach(n => {
+  markAllAsReadReq()
+  notificationList.value.forEach(n => {
     n.isRead = true
   })
 }
 
-const deleteNotification = (id) => {
-  const index = notifications.value.findIndex(n => n.id === id)
-  if (index > -1) {
-    notifications.value.splice(index, 1)
-  }
+const deleteNotification = (notification: Notifications) => {
+  // todo
 }
 
 const clearAll = () => {
@@ -175,12 +84,13 @@ const clearAll = () => {
 }
 
 const loadMore = () => {
-  displayCount.value += 10
+  queryNotification()
 }
 
 // 切换筛选器时重置显示数量
 const setFilter = (filterKey) => {
   activeFilter.value = filterKey
+  cleanNotification()
   switch (filterKey) {
     case 'unread':
       queryParams.value.unread = true
@@ -195,7 +105,6 @@ const setFilter = (filterKey) => {
     case 'like':
     case 'follow':
     case 'system':
-      cleanNotification()
       break
   }
 }
@@ -300,7 +209,7 @@ const getEmptyMessage = () => {
       </div>
 
       <!-- 消息列表 -->
-      <ul class="menu bg-base-200 rounded-box w-full">
+      <ul class="list bg-base-200 rounded-box w-full">
         <li
             v-for="notification in notificationList"
             :key="notification.id"
@@ -380,9 +289,8 @@ const getEmptyMessage = () => {
                     </svg>
                   </div>
                   <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
-                    <li v-if="!notification.isRead"><a @click="markAsRead(notification.id)">标记已读</a></li>
-                    <li v-else><a @click="markAsUnread(notification.id)">标记未读</a></li>
-                    <li><a @click="deleteNotification(notification.id)" class="text-error">删除</a></li>
+                    <li v-if="!notification.isRead"><a @click="markAsRead(notification)">标记已读</a></li>
+                    <li><a @click="deleteNotification(notification)" class="text-error">删除</a></li>
                   </ul>
                 </div>
               </div>
