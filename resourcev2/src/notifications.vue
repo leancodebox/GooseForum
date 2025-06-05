@@ -1,8 +1,25 @@
 <script setup lang="ts">
-import {computed, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {queryNotificationList} from "@/utils/articleService.ts";
 
-let r = queryNotificationList(0, 10, 1)
+const notificationList = ref([])
+
+const queryParams = ref({
+  startId: 0,
+  pageSize: 10,
+  unread: 0,
+})
+
+async function queryNotification() {
+  let resp = await queryNotificationList(0, 10, 1)
+  notificationList.value = resp.result.list
+}
+
+onMounted(async () => {
+  await queryNotification()
+})
+
+
 // 消息数据
 const notifications = ref([
   {
@@ -84,20 +101,13 @@ const filters = computed(() => {
     {key: 'all', label: '全部', count: all},
     {key: 'unread', label: '未读', count: unread},
     {key: 'comment', label: '评论', count: comment},
+    {key: 'reply', label: '回复', count: comment},
     {key: 'like', label: '点赞', count: like},
     {key: 'follow', label: '关注', count: follow},
     {key: 'system', label: '系统', count: system}
   ]
 })
 
-// 计算属性
-const totalCount = computed(() => notifications.value.length)
-const unreadCount = computed(() => notifications.value.filter(n => !n.isRead).length)
-const todayCount = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return notifications.value.filter(n => n.createTime >= today).length
-})
 
 // 过滤后的消息
 const filteredNotifications = computed(() => {
@@ -126,7 +136,6 @@ const filteredNotifications = computed(() => {
 
 // 加载更多
 const displayCount = ref(10)
-const hasMore = computed(() => displayCount.value < filteredNotifications.value.length)
 
 // 显示的消息列表
 const displayedNotifications = computed(() => {
@@ -173,6 +182,7 @@ const loadMore = () => {
 
 // 切换筛选器时重置显示数量
 const setFilter = (filterKey) => {
+  queryNotification()
   activeFilter.value = filterKey
   displayCount.value = 10
 }
@@ -256,7 +266,6 @@ const getEmptyMessage = () => {
               'badge-primary text-primary-content': activeFilter !== filter.key
             }"
           >
-            {{ filter.count }}
           </span>
         </button>
       </div>

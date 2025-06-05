@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 
 import axios from 'axios';
-import type {ArticleListItem, Notifications, PageData, Result,UserInfo} from "./articleInterfaces.ts";
+import type {ArticleListItem, Notifications, PageData, QueryList, Result, UserInfo} from "./articleInterfaces.ts";
 
 // 获取文章枚举
 export const getArticleEnum = async (): Promise<any> => {
@@ -62,7 +62,7 @@ export function getNotificationList(page: any, pageSize: any, unreadOnly: any): 
 }
 
 // 获取通知列表
-export function queryNotificationList(startId: number, pageSize: number, unreadOnly: any): Promise<Result<PageData<Notifications>>> {
+export function queryNotificationList(startId: number, pageSize: number, unreadOnly: any): Promise<Result<QueryList<Notifications>>> {
     return axiosInstance.post('/forum/notification/query', {
         startId: startId,
         pageSize: pageSize,

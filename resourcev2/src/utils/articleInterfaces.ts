@@ -11,6 +11,10 @@ export interface PageData<T> {
     total: number
 }
 
+export interface QueryList<T> {
+    list: T[];
+}
+
 export interface ArticleInfo {
     id: number;
     articleContent: string;
