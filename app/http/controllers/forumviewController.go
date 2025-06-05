@@ -273,6 +273,7 @@ func About(c *gin.Context) {
 	viewrender.Render(c, "about.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
+		"Title":        "关于 - GooseForum",
 		"Description":  "GooseForum's about",
 	})
 }
@@ -281,6 +282,7 @@ func SponsorsView(c *gin.Context) {
 	viewrender.Render(c, "sponsors.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
+		"Title":        "赞助商 - GooseForum",
 		"Description":  "GooseForum's sponsors",
 	})
 }
