@@ -30,6 +30,7 @@ func Home(c *gin.Context) {
 		"Title":               "GooseForum",
 		"ArticleCategoryList": articleCategory.Label(),
 		//"FeaturedArticles":    articlesSmallEntity2Dto(getRecommendedArticles()), //回复最多的文章
+		"Description":    "GooseForum's home",
 		"LatestArticles": articlesSmallEntity2Dto(last), // 最新的文章
 		"Stats":          GetSiteStatisticsData(),
 	})
@@ -272,6 +273,7 @@ func About(c *gin.Context) {
 	viewrender.Render(c, "about.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
+		"Description":  "GooseForum's about",
 	})
 }
 
@@ -279,6 +281,7 @@ func SponsorsView(c *gin.Context) {
 	viewrender.Render(c, "sponsors.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
+		"Description":  "GooseForum's sponsors",
 	})
 }
 
@@ -290,6 +293,7 @@ func LinksView(c *gin.Context) {
 		"User":             GetLoginUser(c),
 		"Title":            "友情链接 - GooseForum",
 		"FriendLinksGroup": res,
+		"Description":      "GooseForum's links",
 	})
 }
 
@@ -313,7 +317,7 @@ func Notifications(c *gin.Context) {
 	viewrender.Render(c, "notifications.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
-		"Title":        "发布中心 - GooseForum",
+		"Title":        "通知中心 - GooseForum",
 	})
 }
 
@@ -321,6 +325,7 @@ func SubmitLink(c *gin.Context) {
 	viewrender.Render(c, "submit-link.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
-		"Title":        "发布中心 - GooseForum",
+		"Title":        "友情链接申请 - GooseForum",
+		"Description":  "友情链接申请",
 	})
 }
