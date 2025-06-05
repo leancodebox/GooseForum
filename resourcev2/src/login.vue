@@ -403,7 +403,7 @@ const handleRegister = async () => {
       const redirectUrl = urlParams.get('redirect')
       window.location.href = redirectUrl || '/'
     } else {
-      registerErrors.general = data.message || '注册失败，请稍后重试'
+      registerErrors.general = data.msg || '注册失败，请稍后重试'
       refreshCaptcha()
     }
   } catch (error) {
