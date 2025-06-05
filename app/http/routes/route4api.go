@@ -61,12 +61,12 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/links-old", controllers.Links)
 	viewRouteApp.GET("/link-contact", controllers.Contact)
 
-	forumApi := ginApp.Group("api/bbs")
+	forumApi := ginApp.Group("api/forum")
 	forumApi.POST("apply-link-add", UpButterReq(controllers.ApplyAddLink))
 }
 
 func forumRoute(ginApp *gin.Engine) {
-	forumApi := ginApp.Group("api/bbs")
+	forumApi := ginApp.Group("api/forum")
 	// 站点统计
 	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	// 分类列表

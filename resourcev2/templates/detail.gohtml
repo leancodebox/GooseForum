@@ -466,7 +466,7 @@
 
     async function submitComment(content, replyId) {
         try {
-            const response = await fetch('/api/bbs/articles-reply', {
+            const response = await fetch('/api/forum/articles-reply', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -499,7 +499,7 @@
         const action = isLiked ? 2 : 1;
 
         try {
-            const response = await fetch('/api/bbs/like-articles', {
+            const response = await fetch('/api/forum/like-articles', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

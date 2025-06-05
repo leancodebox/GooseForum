@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive,computed } from 'vue'
+import {getNotificationList} from "@/utils/articleService.ts";
+let r = getNotificationList()
 // 消息数据
 const notifications = ref([
   {
@@ -121,32 +123,13 @@ const filteredNotifications = computed(() => {
   return filtered.sort((a, b) => b.createTime - a.createTime)
 })
 
-// 分页
-const currentPage = ref(1)
-const pageSize = ref(10)
-const totalPages = computed(() => Math.ceil(filteredNotifications.value.length / pageSize.value))
+// 加载更多
+const displayCount = ref(10)
+const hasMore = computed(() => displayCount.value < filteredNotifications.value.length)
 
-// 可见页码
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 7) {
-    for (let i = 1; i <= total; i++) {
-      pages.push(i)
-    }
-  } else {
-    if (current <= 4) {
-      pages.push(1, 2, 3, 4, 5, '...', total)
-    } else if (current >= total - 3) {
-      pages.push(1, '...', total - 4, total - 3, total - 2, total - 1, total)
-    } else {
-      pages.push(1, '...', current - 1, current, current + 1, '...', total)
-    }
-  }
-
-  return pages
+// 显示的消息列表
+const displayedNotifications = computed(() => {
+  return filteredNotifications.value.slice(0, displayCount.value)
 })
 
 // 方法
@@ -183,10 +166,14 @@ const clearAll = () => {
   }
 }
 
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
+const loadMore = () => {
+  displayCount.value += 10
+}
+
+// 切换筛选器时重置显示数量
+const setFilter = (filterKey) => {
+  activeFilter.value = filterKey
+  displayCount.value = 10
 }
 
 const formatTime = (time) => {
@@ -232,7 +219,7 @@ const getEmptyMessage = () => {
       <div class="flex justify-between items-center mb-2">
         <h1 class="text-3xl font-bold">消息中心</h1>
         <div class="flex gap-2">
-          <button class="btn btn-outline btn-sm" @click="markAllAsRead" :disabled="unreadCount === 0">
+          <button class="btn btn-outline btn-sm" @click="markAllAsRead" >
             全部标记为已读
           </button>
           <button class="btn btn-ghost btn-sm" @click="clearAll">
@@ -251,7 +238,7 @@ const getEmptyMessage = () => {
             'btn-primary text-primary-content shadow-lg': activeFilter === filter.key,
             'btn-ghost hover:btn-outline': activeFilter !== filter.key
           }"
-          @click="activeFilter = filter.key"
+          @click="setFilter(filter.key)"
         >
           {{ filter.label }}
           <span
@@ -268,78 +255,71 @@ const getEmptyMessage = () => {
       </div>
 
       <!-- 消息列表 -->
-      <div class="space-y-3">
-        <div
-          v-for="notification in filteredNotifications"
+      <ul class="menu bg-base-200 rounded-box w-full">
+        <li
+          v-for="notification in displayedNotifications"
           :key="notification.id"
-          class="card shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          class="w-full hover:bg-base-300 transition-colors"
           :class="{
-            'bg-base-100': notification.isRead,
-            'bg-primary/5 border-l-4 border-l-primary': !notification.isRead
+            'bg-primary/10 border-l-4 border-l-primary': !notification.isRead
           }"
-          @click="markAsRead(notification.id)"
         >
-          <div class="card-body p-4">
-            <div class="flex items-start gap-3">
-              <!-- 消息图标 -->
-              <div class="avatar placeholder">
-                <div class="bg-neutral text-neutral-content rounded-full w-10 h-10">
-                  <span class="text-xs">
-                    <svg v-if="notification.type === 'comment'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <svg v-else-if="notification.type === 'like'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <svg v-else-if="notification.type === 'follow'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </span>
-                </div>
+          <div class="flex items-center gap-3 p-3 cursor-pointer w-full" @click="markAsRead(notification.id)">
+            <!-- 消息图标 -->
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 rounded-full bg-neutral text-neutral-content flex items-center justify-center">
+                <svg v-if="notification.type === 'comment'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <svg v-else-if="notification.type === 'like'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <svg v-else-if="notification.type === 'follow'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
+            </div>
 
-              <!-- 消息内容 -->
-              <div class="flex-1">
-                <div class="flex items-start justify-between">
-                  <div class="flex-1">
-                    <h3 class="font-semibold text-base-content">{{ notification.title }}</h3>
-                    <p class="text-base-content/70 text-sm mt-1">{{ notification.content }}</p>
-
-                    <!-- 相关文章/用户信息 -->
-                    <div v-if="notification.relatedInfo" class="mt-2 p-2 bg-base-200 rounded text-sm">
-                      <span class="text-base-content/60">相关：</span>
-                      <span class="text-primary hover:underline cursor-pointer">{{ notification.relatedInfo }}</span>
-                    </div>
-
-                    <div class="flex items-center gap-4 mt-3 text-xs text-base-content/60">
-                      <span>{{ formatTime(notification.createTime) }}</span>
-                      <div class="badge badge-outline badge-xs">{{ getTypeLabel(notification.type) }}</div>
-                      <span v-if="!notification.isRead" class="text-primary font-medium">未读</span>
-                    </div>
+            <!-- 消息内容 -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-medium text-sm truncate">{{ notification.content }}</h4>
+                    <div class="badge badge-outline badge-xs flex-shrink-0">{{ getTypeLabel(notification.type) }}</div>
+                    <div v-if="!notification.isRead" class="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
                   </div>
-
-                  <!-- 操作按钮 -->
-                  <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle" @click.stop>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                      </svg>
-                    </div>
-                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
-                      <li v-if="!notification.isRead"><a @click="markAsRead(notification.id)">标记已读</a></li>
-                      <li v-else><a @click="markAsUnread(notification.id)">标记未读</a></li>
-                      <li><a @click="deleteNotification(notification.id)" class="text-error">删除</a></li>
-                    </ul>
+                  
+                  <div v-if="notification.relatedInfo" class="text-xs text-primary hover:underline cursor-pointer mt-1 truncate">
+                    {{ notification.relatedInfo }}
                   </div>
+                  
+                  <div class="text-xs text-base-content/60 mt-1">
+                    {{ formatTime(notification.createTime) }}
+                  </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="dropdown dropdown-end flex-shrink-0">
+                  <div tabindex="0" role="button" class="btn btn-ghost btn-xs btn-circle" @click.stop>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                    </svg>
+                  </div>
+                  <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
+                    <li v-if="!notification.isRead"><a @click="markAsRead(notification.id)">标记已读</a></li>
+                    <li v-else><a @click="markAsUnread(notification.id)">标记未读</a></li>
+                    <li><a @click="deleteNotification(notification.id)" class="text-error">删除</a></li>
+                  </ul>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </li>
+      </ul>
 
       <!-- 空状态 -->
       <div v-if="filteredNotifications.length === 0" class="text-center py-12">
@@ -348,21 +328,14 @@ const getEmptyMessage = () => {
         <p class="text-base-content/60">{{ getEmptyMessage() }}</p>
       </div>
 
-      <!-- 分页 -->
-      <div v-if="filteredNotifications.length > 0" class="flex justify-center mt-8">
-        <div class="join bg-base-100 rounded-lg shadow-sm">
-          <button class="join-item btn btn-sm bg-base-100 border-base-300" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">«</button>
-          <button
-            v-for="page in visiblePages"
-            :key="page"
-            class="join-item btn btn-sm bg-base-100 border-base-300"
-            :class="{ 'btn-active bg-primary text-primary-content border-primary': page === currentPage, 'btn-disabled': page === '...' }"
-            @click="page !== '...' && goToPage(page)"
-          >
-            {{ page }}
-          </button>
-          <button class="join-item btn btn-sm bg-base-100 border-base-300" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">»</button>
-        </div>
+      <!-- 加载更多按钮 -->
+      <div  class="flex justify-center mt-6">
+        <button class="btn btn-sm btn-outline" @click="loadMore">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+          加载更多消息
+        </button>
       </div>
     </div>
   </div>
