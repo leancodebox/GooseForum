@@ -78,6 +78,7 @@ func forumRoute(ginApp *gin.Engine) {
 	loginApi.POST("notification/list", UpButterReq(controllers.GetNotificationList))
 	loginApi.POST("notification/query", UpButterReq(controllers.QueryNotificationList))
 	loginApi.GET("notification/unread-count", UpButterReq(controllers.GetUnreadCount))
+	loginApi.GET("notification/last-unread", UpButterReq(controllers.GetLastUnread))
 	loginApi.POST("notification/mark-read", UpButterReq(controllers.MarkAsRead))
 	loginApi.POST("notification/mark-all-read", UpButterReq(controllers.MarkAllAsRead))
 	loginApi.POST("notification/delete", UpButterReq(controllers.DeleteNotification))

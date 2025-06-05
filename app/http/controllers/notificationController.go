@@ -106,6 +106,14 @@ func GetUnreadCount(req component.BetterRequest[GetUnreadCountReq]) component.Re
 	})
 }
 
+// GetLastUnread 获取未读通知数量
+func GetLastUnread(req component.BetterRequest[GetUnreadCountReq]) component.Response {
+	entity := eventNotification.GetLastUnread(req.UserId)
+	return component.SuccessResponse(component.DataMap{
+		"eventType": entity.EventType,
+	})
+}
+
 // MarkAsReadReq 标记通知已读请求
 type MarkAsReadReq struct {
 	NotificationId uint64 `json:"notificationId" validate:"required"`

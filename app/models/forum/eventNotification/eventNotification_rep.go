@@ -42,6 +42,16 @@ func GetByUserId(userId uint64, limit, offset int, unreadOnly bool) (notificatio
 	return
 }
 
+// GetLastUnread 获取用户未读通知数量
+func GetLastUnread(userId uint64) (entity Entity) {
+	builder().
+		Where(queryopt.Eq("user_id", userId)).
+		Where(queryopt.Eq("is_read", false)).
+		Order("id DESC").
+		First(&entity)
+	return
+}
+
 // GetUnreadCount 获取用户未读通知数量
 func GetUnreadCount(userId uint64) (count int64, err error) {
 	err = builder().
