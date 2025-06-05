@@ -76,6 +76,7 @@ func forumRoute(ginApp *gin.Engine) {
 	loginApi := forumApi.Use(middleware.JWTAuth4Gin)
 	// 通知相关接口
 	loginApi.POST("notification/list", UpButterReq(controllers.GetNotificationList))
+	loginApi.POST("notification/query", UpButterReq(controllers.QueryNotificationList))
 	loginApi.GET("notification/unread-count", UpButterReq(controllers.GetUnreadCount))
 	loginApi.POST("notification/mark-read", UpButterReq(controllers.MarkAsRead))
 	loginApi.POST("notification/mark-all-read", UpButterReq(controllers.MarkAllAsRead))

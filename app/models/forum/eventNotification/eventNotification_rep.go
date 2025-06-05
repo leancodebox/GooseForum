@@ -10,19 +10,31 @@ func Create(entity *Entity) error {
 	return builder().Create(entity).Error
 }
 
-// GetByUserId 获取用户的通知列表
-func GetByUserId(userId uint64, limit, offset int, unreadOnly bool) (notifications []*Entity, total int64, err error) {
+// QueryByUserId 获取用户的通知列表
+func QueryByUserId(userId uint64, limit, startId int, unreadOnly bool) (notifications []*Entity, err error) {
 	db := builder().Where(queryopt.Eq("user_id", userId))
-
+	if startId != 0 {
+		builder().Where(queryopt.Lt("id", startId))
+	}
 	if unreadOnly {
 		db = db.Where(queryopt.Eq("is_read", false))
 	}
+	err = db.Order(queryopt.Desc(`id`)).
+		Limit(limit).
+		Find(&notifications).Error
+	return
+}
 
+// GetByUserId 获取用户的通知列表
+func GetByUserId(userId uint64, limit, offset int, unreadOnly bool) (notifications []*Entity, total int64, err error) {
+	db := builder().Where(queryopt.Eq("user_id", userId))
+	if unreadOnly {
+		db = db.Where(queryopt.Eq("is_read", false))
+	}
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
-
 	err = db.Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).

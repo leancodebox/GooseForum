@@ -61,6 +61,15 @@ export function getNotificationList(page: any, pageSize: any, unreadOnly: any): 
     })
 }
 
+// 获取通知列表
+export function queryNotificationList(startId: number, pageSize: number, unreadOnly: any): Promise<Result<PageData<Notifications>>> {
+    return axiosInstance.post('/forum/notification/query', {
+        startId: startId,
+        pageSize: pageSize,
+        unreadOnly: unreadOnly,
+    })
+}
+
 // 获取未读通知数量
 export function getUnreadCount(): Promise<Result<any>> {
     return axiosInstance.get('/forum/notification/unread-count')

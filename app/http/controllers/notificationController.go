@@ -7,6 +7,46 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
+// QueryNotificationListReq 获取通知列表请求
+type QueryNotificationListReq struct {
+	StartId    int  `json:"startId"`
+	PageSize   int  `json:"pageSize" validate:"required,min=1,max=100"`
+	UnreadOnly bool `json:"unreadOnly"`
+}
+
+func QueryNotificationList(req component.BetterRequest[QueryNotificationListReq]) component.Response {
+	notifications, err := eventNotification.QueryByUserId(req.UserId, req.Params.PageSize, req.Params.StartId, req.Params.UnreadOnly)
+	if err != nil {
+		return component.FailResponse("获取通知列表失败")
+	}
+	var userIds []uint64
+	var actorIds []uint64
+	for _, notification := range notifications {
+		if notification.Payload.ActorId != 0 {
+			userIds = append(userIds, notification.Payload.ActorId)
+		}
+		if notification.Payload.ArticleId != 0 {
+			actorIds = append(actorIds, notification.Payload.ArticleId)
+		}
+	}
+	userMap := users.GetMapByIds(userIds)
+	articleMap := articles.GetMapByIds(actorIds)
+
+	// 转换数据
+	for _, notification := range notifications {
+		if userInfo, ok := userMap[notification.Payload.ActorId]; ok {
+			notification.Payload.ActorName = userInfo.Username
+		}
+		if articleInfo, ok := articleMap[notification.Payload.ArticleId]; ok {
+			notification.Payload.ArticleTitle = articleInfo.Title
+		}
+	}
+
+	return component.SuccessResponse(component.DataMap{
+		"list": notifications,
+	})
+}
+
 // GetNotificationListReq 获取通知列表请求
 type GetNotificationListReq struct {
 	Page       int  `json:"page" validate:"required,min=1"`
