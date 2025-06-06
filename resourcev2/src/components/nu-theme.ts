@@ -1,5 +1,5 @@
 
-import { NConfigProvider, GlobalThemeOverrides, darkTheme, lightTheme } from 'naive-ui'
+import { NConfigProvider, darkTheme, lightTheme } from 'naive-ui'
 
 // DaisyUI主题颜色映射
 const themeColorMaps: Record<string, Record<string, string>> = {
@@ -151,7 +151,7 @@ const isDarkTheme = (theme: string): boolean => {
 }
 
 // 创建Select主题配置
-export const createSelectThemeOverrides = (theme?: string): GlobalThemeOverrides => {
+export const createSelectThemeOverrides = (theme?: string):any => {
   const currentTheme = theme || getCurrentTheme()
   const colors = getThemeColors(currentTheme)
   const isLight = !isDarkTheme(currentTheme)
@@ -185,7 +185,7 @@ export const createSelectThemeOverrides = (theme?: string): GlobalThemeOverrides
 }
 
 // 默认主题配置
-export const themeOverrides: GlobalThemeOverrides = createSelectThemeOverrides()
+export const themeOverrides: any = createSelectThemeOverrides()
 
 // 获取基础主题
 export const getBaseTheme = (theme?: string) => {

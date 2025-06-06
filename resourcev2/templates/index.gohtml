@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "commonhead.gohtml" .}}
     {{if .IsProduction}}
-    <link rel="stylesheet" href="/{{GetRealFilePath `src/style.css`}}">
+    {{GetImportInfoPath `src/style.css`}}
     {{GetImportInfoPath `src/main.js`}}
     {{else}}
     <script type="module" src="http://localhost:3001/@vite/client"></script>
@@ -38,11 +38,11 @@
                         <div class="stat-figure text-primary">
                             <svg width="24" height="24" viewBox="0 0 48 48" fill="none"
                                  xmlns="http://www.w3.org/2000/svg" stroke="currentColor">
-                                <circle cx="14" cy="29" r="5" fill="none"  stroke-width="4"
+                                <circle cx="14" cy="29" r="5" fill="none" stroke-width="4"
                                         stroke-linecap="round" stroke-linejoin="round"/>
-                                <circle cx="34" cy="29" r="5" fill="none"  stroke-width="4"
+                                <circle cx="34" cy="29" r="5" fill="none" stroke-width="4"
                                         stroke-linecap="round" stroke-linejoin="round"/>
-                                <circle cx="24" cy="9" r="5" fill="none"  stroke-width="4"
+                                <circle cx="24" cy="9" r="5" fill="none" stroke-width="4"
                                         stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M24 44C24 38.4772 19.5228 34 14 34C8.47715 34 4 38.4772 4 44"
                                       stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>

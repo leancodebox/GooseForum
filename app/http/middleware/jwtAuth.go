@@ -53,6 +53,18 @@ func CheckLogin(c *gin.Context) {
 		// 获取当前请求的完整URL作为重定向参数
 		redirectURL := c.Request.URL.String()
 		c.Redirect(http.StatusFound, "/login?redirect="+redirectURL)
+		c.Abort()
+		return
+	}
+	c.Next()
+}
+
+func CheckNeedLogin(c *gin.Context) {
+	userId := c.GetUint64("userId")
+	if userId != 0 {
+		// 获取当前请求的完整URL作为重定向参数
+		c.Redirect(http.StatusFound, `/`)
+		c.Abort()
 		return
 	}
 	c.Next()

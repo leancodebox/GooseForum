@@ -17,16 +17,19 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 		if userId == 0 {
 			c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
 			c.Abort()
+			return
 		}
 		user, err := users.Get(userId)
 		if err != nil {
 			c.JSON(http.StatusForbidden, component.FailData("操作异常"))
 			c.Abort()
+			return
 		}
 		if permission.CheckUser(user.Id, permissionType) == false {
 			msg := fmt.Sprintf("%s-不可操作-%s", user.Username, permissionType.Name())
 			c.JSON(http.StatusForbidden, component.FailData(msg))
 			c.Abort()
+			return
 		}
 		c.Next()
 	}

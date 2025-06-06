@@ -29,7 +29,7 @@ func view(ginApp *gin.Engine) {
 	viewRouteApp.Use(middleware.JWTAuth).
 		Use(gzip.Gzip(gzip.DefaultCompression))
 	viewRouteApp.GET("", controllers.Home)
-	viewRouteApp.GET("/login", controllers.LoginView)
+	viewRouteApp.GET("/login", middleware.CheckNeedLogin, controllers.LoginView)
 	viewRouteApp.GET("/user/:id", controllers.User)
 	viewRouteApp.GET("/post", controllers.PostV2)
 	viewRouteApp.GET("/post/:id", controllers.PostDetail)

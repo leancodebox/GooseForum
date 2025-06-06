@@ -92,22 +92,38 @@ func GetRealFilePath(origin string) string {
 
 var htmlHeaderCache sync.Map
 
-func GetImportInfoPath(origin string) any {
+func GetImportInfoPath(origin string) template.HTML {
 	if item, ok := manifestItemMap[origin]; ok {
-		if val, cacheOk := htmlHeaderCache.Load(origin); cacheOk {
+		if val, cached := htmlHeaderCache.Load(origin); cached {
 			return val.(template.HTML)
-		} else {
-			sb := strings.Builder{}
-			sb.WriteString(fmt.Sprintf(`<script type="module" src="/%s"></script>`, item.File))
-			sb.WriteString("\n")
-			for _, value := range item.Css {
-				sb.WriteString(fmt.Sprintf(`<link rel="stylesheet" href="/%s">`, value))
-				sb.WriteString("\n")
-			}
-			res := template.HTML(sb.String())
-			htmlHeaderCache.Store(origin, res)
-			return res
 		}
+
+		sb := &strings.Builder{}
+
+		// 根据文件扩展名决定加载方式
+		fileExt := filepath.Ext(item.File)
+		switch fileExt {
+		case ".js", ".mjs", ".ts", ".jsx", ".tsx":
+			sb.WriteString(fmt.Sprintf(`<script type="module" src="/%s"></script>`, item.File))
+		case ".css":
+			sb.WriteString(fmt.Sprintf(`<link rel="stylesheet" href="/%s">`, item.File))
+		default:
+			// 非标准文件类型使用原处理逻辑
+			sb.WriteString(fmt.Sprintf(`<script type="module" src="/%s"></script>`, item.File))
+		}
+		sb.WriteByte('\n')
+
+		// 单独处理关联的CSS文件
+		for _, css := range item.Css {
+			if css != item.File { // 避免重复添加
+				sb.WriteString(fmt.Sprintf(`<link rel="stylesheet" href="/%s">`, css))
+				sb.WriteByte('\n')
+			}
+		}
+
+		res := template.HTML(sb.String())
+		htmlHeaderCache.Store(origin, res)
+		return res
 	}
 	return ""
 }
