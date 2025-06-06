@@ -15,6 +15,12 @@
                 // 保存到 localStorage
                 localStorage.setItem('theme', theme);
 
+                // 保存到 cookie，方便服务端读取
+                // 设置过期时间为1年
+                const expires = new Date();
+                expires.setFullYear(expires.getFullYear() + 1);
+                document.cookie = `theme=${theme}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+
                 // 更新所有 theme-controller 输入框的状态
                 updateThemeControllers(theme);
 
@@ -75,6 +81,12 @@
                 const savedTheme = localStorage.getItem('theme') || 'light';
                 // 应用主题
                 document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                // 确保cookie也设置了当前主题
+                const expires = new Date();
+                expires.setFullYear(expires.getFullYear() + 1);
+                document.cookie = `theme=${savedTheme}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+                
                 // 更新主题控制器状态
                 updateThemeControllers(savedTheme);
                 // 设置主题控制器监听

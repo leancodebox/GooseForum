@@ -29,7 +29,20 @@ func init() {
 }
 
 func Render(c *gin.Context, name string, data any) {
-	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, data); err != nil {
+	// 从cookie中读取主题设置
+	theme := "light" // 默认主题
+	if themeCookie, err := c.Cookie("theme"); err == nil && themeCookie != "" {
+		theme = themeCookie
+	}
+	// 将数据转换为map并添加主题信息
+	var templateData map[string]any
+	if dataMap, ok := data.(map[string]any); ok {
+		templateData = dataMap
+	} else {
+		templateData = map[string]any{"Data": data}
+	}
+	templateData["Theme"] = theme
+	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, templateData); err != nil {
 		slog.Error("render template err", "err", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
