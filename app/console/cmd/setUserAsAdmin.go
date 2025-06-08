@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/spf13/cobra"
 )
@@ -27,6 +27,11 @@ func runAdminSet(cmd *cobra.Command, _ []string) {
 		fmt.Println(err)
 		return
 	}
+	userEntity, _ := users.Get(userId)
+	if userEntity.Id == 0 {
+		fmt.Println("用户不存在")
+		return
+	}
 	// 判断有没有管理员角色
 	roleEntity := role.Get(1)
 	if roleEntity.Id == 0 {
@@ -45,13 +50,7 @@ func runAdminSet(cmd *cobra.Command, _ []string) {
 		fmt.Println("角色权限关系不存在，创建角色权限关系")
 	}
 
-	ur := userRoleRs.GetByUserIdAndRoleId(userId, roleEntity.Id)
-	if ur.Id == 0 {
-		ur.RoleId = roleEntity.Id
-		ur.UserId = userId
-		ur.Effective = 1
-		userRoleRs.SaveOrCreateById(&ur)
-		fmt.Println("用户角色关系不存在，创建用户角色关系")
-	}
+	userEntity.RoleId = roleEntity.Id
+	users.Save(&userEntity)
 
 }

@@ -21,7 +21,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
@@ -42,6 +41,7 @@ type UserItem struct {
 	Validate   int8                                `json:"validate"`
 	Prestige   int64                               `json:"prestige"`
 	RoleList   []datastruct.Option[string, uint64] `json:"roleList"`
+	RoleId     uint64                              `json:"roleId,omitempty"`
 	CreateTime string                              `json:"createTime"`
 }
 
@@ -52,18 +52,17 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 		Email:    req.Params.Email,
 	})
 
-	userIdList := array.Map(pageData.Data, func(t users.Entity) uint64 {
-		return t.Id
+	roleEntityList := role.AllEffective()
+	roleMap := array.Slice2Map(roleEntityList, func(v *role.Entity) uint64 {
+		return v.Id
 	})
-	userRoleMap := userRoleRs.GetRoleGroupByUserIds(userIdList)
 	list := array.Map(pageData.Data, func(t users.Entity) UserItem {
+		roleEntity := roleMap[t.RoleId]
 		var roleList []datastruct.Option[string, uint64]
-		if data, ok := userRoleMap[t.Id]; ok {
-			roleList = array.Map(data, func(rItem role.Entity) datastruct.Option[string, uint64] {
-				return datastruct.Option[string, uint64]{
-					Name:  rItem.RoleName,
-					Value: rItem.Id,
-				}
+		if roleEntity != nil {
+			roleList = append(roleList, datastruct.Option[string, uint64]{
+				Name:  roleEntity.RoleName,
+				Value: roleEntity.Id,
 			})
 		}
 		return UserItem{
@@ -74,6 +73,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			Validate:   t.Validate,
 			Prestige:   t.Prestige,
 			RoleList:   roleList,
+			RoleId:     t.RoleId,
 			CreateTime: t.CreatedAt.Format(time.DateTime),
 		}
 	})
@@ -86,10 +86,10 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 }
 
 type EditUserReq struct {
-	UserId   uint64   `json:"userId"`
-	Status   int8     `json:"status"`
-	Validate int8     `json:"validate"`
-	RoleId   []uint64 `json:"roleId"`
+	UserId   uint64 `json:"userId"`
+	Status   int8   `json:"status"`
+	Validate int8   `json:"validate"`
+	RoleId   uint64 `json:"roleId"`
 }
 
 func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
@@ -110,27 +110,10 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 		user.Validate = params.Validate
 		opt = true
 	}
-	ur := userRoleRs.GetByUserId(req.Params.UserId)
-	var canUpdate []uint64
-	// 更新数据
-	for _, item := range ur {
-		item.Effective = 0
-		if slices.Contains(req.Params.RoleId, item.RoleId) {
-			item.Effective = 1
-			canUpdate = append(canUpdate, item.RoleId)
-		}
-		userRoleRs.SaveOrCreateById(item)
-	}
-	// 删除数据
-	for _, item := range req.Params.RoleId {
-		if !slices.Contains(canUpdate, item) {
-			rsItem := userRoleRs.Entity{
-				RoleId:    item,
-				UserId:    req.Params.UserId,
-				Effective: 1,
-			}
-			userRoleRs.SaveOrCreateById(&rsItem)
-		}
+	if user.RoleId != params.RoleId {
+		msg = msg + fmt.Sprintf("[用户角色调整:%v->%v]", user.RoleId, params.RoleId)
+		user.RoleId = params.RoleId
+		opt = true
 	}
 	if opt {
 		users.Save(&user)

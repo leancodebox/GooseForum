@@ -61,6 +61,7 @@ type Entity struct {
 	Password            string     `gorm:"column:password;type:varchar(255);not null;default:'';" json:"password"`     //
 	MobileAreaCode      string     `gorm:"column:mobile_area_code;type:varchar(16);" json:"mobileAreaCode"`            //
 	MobilePhoneNumber   string     `gorm:"column:mobile_phone_number;type:varchar(64);" json:"mobilePhoneNumber"`      //
+	RoleId              uint64     `gorm:"column:role_id;type:bigint unsigned;not null;default:0;" json:"roleId"`      //
 	Status              int8       `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`               // 状态：0正常 1冻结
 	Validate            int8       `gorm:"column:validate;type:tinyint;not null;default:0;" json:"validate"`           // 是否验证通过: 0未通过/未验证 1 验证通过
 	ActivatedAt         time.Time  `gorm:"column:activated_at;type:datetime;" json:"activatedAt"`                      // 激活时间

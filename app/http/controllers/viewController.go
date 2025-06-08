@@ -6,7 +6,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"html/template"
 	"math/rand"
@@ -180,8 +179,6 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 	//userPoint := userPoints.Get(user.Id)
 	// 如果有头像，添加域名前缀
 	avatarUrl := user.GetWebAvatarUrl()
-	roleIds := userRoleRs.GetRoleIdsByUserId(userId)
-	hasRoleIds := len(roleIds) > 0
 	return UserInfoShow{
 		UserId:     userId,
 		Username:   user.Username,
@@ -189,7 +186,7 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 		Prestige:   user.Prestige,
 		AvatarUrl:  avatarUrl,
 		CreateTime: user.CreatedAt,
-		IsAdmin:    hasRoleIds,
+		IsAdmin:    user.RoleId > 0,
 		//UserPoint: userPoint.CurrentPoints,
 	}
 }

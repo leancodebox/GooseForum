@@ -4,7 +4,6 @@ import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"slices"
 )
 
@@ -49,13 +48,9 @@ func BuildOptions() []datastruct.Option[string, Enum] {
 	return l
 }
 
-// CheckUser 检查某人是否有某权限
-func CheckUser(userId uint64, permission Enum) bool {
-	roleIds := userRoleRs.GetRoleIdsByUserId(userId)
-	if roleIds == nil || len(roleIds) == 0 {
-		return false
-	}
-	pList := GetPermission(roleIds)
+// CheckRole 检查某人是否有某权限
+func CheckRole(roleId uint64, permission Enum) bool {
+	pList := GetPermission([]uint64{roleId})
 	if pList == nil || len(pList) == 0 {
 		return false
 	}

@@ -20,6 +20,7 @@ export interface User {
     userId: number;
     username: string;
     email: string;
+    roleId: number;
     status: number;
     validate: number;
     prestige: number;
@@ -87,8 +88,8 @@ export interface LinkItem {
 }
 
 export interface Sponsor {
-    level:string,
-    name:string,
-    logoUrl:string,
-    url:string,
+    level: string,
+    name: string,
+    logoUrl: string,
+    url: string,
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
@@ -76,16 +75,13 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 	// 处理头像URL
 	avatarUrl := userEntity.GetWebAvatarUrl()
 
-	// 检查用户是否有任意角色（是否是管理员）
-	isAdmin := len(userRoleRs.GetRoleIdsByUserId(userEntity.Id)) > 0
-
 	return component.SuccessResponse(component.DataMap{
 		"username":            userEntity.Username,
 		"userId":              userEntity.Id,
 		"avatarUrl":           avatarUrl,
 		"email":               userEntity.Email,
 		"nickname":            userEntity.Nickname,
-		"isAdmin":             isAdmin,
+		"isAdmin":             userEntity.RoleId != 0,
 		"bio":                 userEntity.Bio,
 		"signature":           userEntity.Signature,
 		"website":             userEntity.Website,

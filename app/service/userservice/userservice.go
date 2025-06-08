@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 )
@@ -42,16 +41,7 @@ func FirstUserInit(adminUser *users.Entity) {
 		fmt.Println("角色权限关系不存在，创建角色权限关系")
 	}
 
-	ur := userRoleRs.GetByUserIdAndRoleId(adminUser.Id, roleEntity.Id)
-	if ur.Id == 0 {
-		ur.RoleId = roleEntity.Id
-		ur.UserId = adminUser.Id
-		ur.Effective = 1
-		if err := userRoleRs.SaveOrCreateById(&ur); err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println("用户角色关系不存在，创建用户角色关系")
-	}
-
+	adminUser.RoleId = roleEntity.Id
+	users.Save(adminUser)
+	
 }

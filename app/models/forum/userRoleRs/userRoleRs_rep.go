@@ -44,17 +44,6 @@ func GetByUserId(userId uint64) (entities []*Entity) {
 	return
 }
 
-func GetByUserIdAndRoleId(userId, roleId uint64) (entities Entity) {
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldRoleId, roleId)).First(&entities)
-	return
-}
-
-func GetRoleIdsByUserId(userId uint64) []uint64 {
-	return array.Map(GetByUserId(userId), func(t *Entity) uint64 {
-		return t.RoleId
-	})
-}
-
 func GetByUserIds(userIds []uint64) (entities []*Entity) {
 	builder().Where(queryopt.In(fieldUserId, userIds)).Where(queryopt.Eq(fieldEffective, 1)).Find(&entities)
 	return

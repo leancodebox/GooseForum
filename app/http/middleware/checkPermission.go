@@ -25,7 +25,7 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		if permission.CheckUser(user.Id, permissionType) == false {
+		if permission.CheckRole(user.RoleId, permissionType) == false {
 			msg := fmt.Sprintf("%s-不可操作-%s", user.Username, permissionType.Name())
 			c.JSON(http.StatusForbidden, component.FailData(msg))
 			c.Abort()

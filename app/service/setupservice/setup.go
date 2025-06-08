@@ -5,10 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/leancodebox/GooseForum/app/models/forum/role"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
 const (
@@ -76,39 +72,6 @@ func InitDatabase(config DatabaseConfig) error {
 
 	// 执行数据库迁移
 	// TODO: 实现数据库迁移逻辑
-
-	return nil
-}
-
-// CreateAdminUser 创建管理员账号
-func CreateAdminUser(username, password, email string) error {
-	// 1. 创建用户
-	userEntity := users.MakeUser(username, password, email)
-	if err := users.Create(userEntity); err != nil {
-		return fmt.Errorf("创建用户失败: %w", err)
-	}
-
-	// 2. 创建管理员角色（如果不存在）
-	adminRole := role.Entity{
-		RoleName:  "超级管理员",
-		Effective: 1,
-	}
-	if err := role.SaveOrCreateById(&adminRole); err != nil {
-		return fmt.Errorf("创建角色失败: %w", err)
-	}
-
-	// 3. 分配所有权限给管理员角色
-	// TODO: 实现权限分配逻辑
-
-	// 4. 将用户设置为管理员
-	userRole := userRoleRs.Entity{
-		UserId:    userEntity.Id,
-		RoleId:    adminRole.Id,
-		Effective: 1,
-	}
-	if err := userRoleRs.SaveOrCreateById(&userRole); err != nil {
-		return fmt.Errorf("分配角色失败: %w", err)
-	}
 
 	return nil
 }
