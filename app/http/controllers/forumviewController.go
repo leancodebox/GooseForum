@@ -7,7 +7,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -28,7 +27,7 @@ func Home(c *gin.Context) {
 		"CanonicalHref":       buildCanonicalHref(c),
 		"User":                GetLoginUser(c),
 		"Title":               "GooseForum",
-		"ArticleCategoryList": articleCategory.Label(),
+		"ArticleCategoryList": articleCategoryLabel(),
 		//"FeaturedArticles":    articlesSmallEntity2Dto(getRecommendedArticles()), //回复最多的文章
 		"Description":    "GooseForum's home",
 		"LatestArticles": articlesSmallEntity2Dto(last), // 最新的文章
@@ -178,10 +177,7 @@ func PostV2(c *gin.Context) {
 		return t.Id
 	})
 	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
-	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
-		return t.ArticleCategoryId
-	})
-	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	categoryMap := articleCategoryMap()
 	// 获取文章的分类和标签
 	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
 		return rs.ArticleId
@@ -220,7 +216,7 @@ func PostV2(c *gin.Context) {
 	})
 	// 计算总页数
 	totalPages := (cast.ToInt(pageData.Total) + param.PageSize - 1) / param.PageSize
-	articleCategoryList := articleCategory.Label()
+	articleCategoryList := articleCategoryLabel()
 	pagination := []PageButton{}
 	start := max(pageData.Page-3, 1)
 	for i := 1; i <= 7; i++ {

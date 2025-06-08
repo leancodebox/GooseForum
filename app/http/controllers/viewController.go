@@ -15,11 +15,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
-	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -242,10 +240,7 @@ func RenderArticlesPage(c *gin.Context) {
 		return t.Id
 	})
 	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
-	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
-		return t.ArticleCategoryId
-	})
-	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	categoryMap := articleCategoryMap()
 	// 获取文章的分类和标签
 	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
 		return rs.ArticleId
@@ -284,12 +279,7 @@ func RenderArticlesPage(c *gin.Context) {
 	})
 	// 计算总页数
 	totalPages := (cast.ToInt(pageData.Total) + param.PageSize - 1) / param.PageSize
-	articleCategoryList := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
-		return datastruct.Option[string, uint64]{
-			Name:  t.Category,
-			Value: t.Id,
-		}
-	})
+	articleCategoryList := articleCategoryLabel()
 	pagination := []PageButton{}
 	start := max(pageData.Page-3, 1)
 	for i := 1; i <= 7; i++ {
@@ -434,10 +424,7 @@ func RenderArticleDetail(c *gin.Context) {
 
 func articleCategoryMapList(articleIds []uint64) map[uint64][]string {
 	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
-	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
-		return t.ArticleCategoryId
-	})
-	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	categoryMap := articleCategoryMap()
 	// 获取文章的分类和标签
 	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
 		return rs.ArticleId

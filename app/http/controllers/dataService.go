@@ -64,7 +64,7 @@ var articleCache = &Cache[string, []articles.SmallEntity]{}
 
 func getRecommendedArticles() []articles.SmallEntity {
 	data, _ := articleCache.GetOrLoad(
-		"hot_articles",
+		"getRecommendedArticles",
 		func() ([]articles.SmallEntity, error) {
 			return articles.GetRecommendedArticles(4)
 		},
@@ -75,12 +75,51 @@ func getRecommendedArticles() []articles.SmallEntity {
 
 func getLatestArticles() []articles.SmallEntity {
 	data, _ := articleCache.GetOrLoad(
-		"GetLatestArticles7",
+		"getLatestArticles",
 		func() ([]articles.SmallEntity, error) {
 			return articles.GetLatestArticles(7)
 
 		},
 		10*time.Second, // 缓存5分钟
+	)
+	return data
+}
+
+var articleCategoryCache = &Cache[string, []*articleCategory.Entity]{}
+
+func getArticleCategory() []*articleCategory.Entity {
+	data, _ := articleCategoryCache.GetOrLoad(
+		"getArticleCategory",
+		func() ([]*articleCategory.Entity, error) {
+			return articleCategory.All(), nil
+
+		},
+		1*time.Second, // 缓存5分钟
+	)
+	return data
+}
+
+func articleCategoryLabel() []datastruct.Option[string, uint64] {
+	return array.Map(getArticleCategory(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
+		return datastruct.Option[string, uint64]{
+			Name:  t.Category,
+			Value: t.Id,
+		}
+	})
+}
+
+var articleCategoryMapCache = &Cache[string, map[uint64]*articleCategory.Entity]{}
+
+// GetMapByIds 根据ID列表获取分类Map
+func articleCategoryMap() map[uint64]*articleCategory.Entity {
+	data, _ := articleCategoryMapCache.GetOrLoad(
+		"getArticleCategory",
+		func() (map[uint64]*articleCategory.Entity, error) {
+			return array.Slice2Map(articleCategory.All(), func(v *articleCategory.Entity) uint64 {
+				return v.Id
+			}), nil
+		},
+		1*time.Second, // 缓存5分钟
 	)
 	return data
 }
@@ -96,10 +135,7 @@ func articlesSmallEntity2Dto(data []articles.SmallEntity) []ArticlesSimpleDto {
 		return t.Id
 	})
 	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
-	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
-		return t.ArticleCategoryId
-	})
-	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	categoryMap := articleCategoryMap()
 	// 获取文章的分类和标签
 	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
 		return rs.ArticleId

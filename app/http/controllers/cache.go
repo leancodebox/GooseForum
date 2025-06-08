@@ -15,7 +15,7 @@ type cacheItem[V any] struct {
 	expiration int64 // 纳秒时间戳
 }
 
-// 核心调用方法（满足您要求的参数形式）
+// GetOrLoad 核心调用方法（满足您要求的参数形式）
 func (c *Cache[K, V]) GetOrLoad(
 	key K,
 	getData func() (V, error), // 数据加载函数

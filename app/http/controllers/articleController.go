@@ -3,10 +3,8 @@ package controllers
 import (
 	"fmt"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
-	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -22,12 +20,7 @@ func GetSiteStatistics() component.Response {
 }
 
 func GetArticlesEnum() component.Response {
-	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
-		return datastruct.Option[string, uint64]{
-			Name:  t.Category,
-			Value: t.Id,
-		}
-	})
+	res := articleCategoryLabel()
 	return component.SuccessResponse(map[string]any{
 		"category": res,
 		"type":     articlesType,
@@ -35,12 +28,7 @@ func GetArticlesEnum() component.Response {
 }
 
 func GetArticlesCategory() component.Response {
-	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
-		return datastruct.Option[string, uint64]{
-			Name:  t.Category,
-			Value: t.Id,
-		}
-	})
+	res := articleCategoryLabel()
 	return component.SuccessResponse(res)
 }
 
@@ -265,10 +253,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		return t.Id
 	})
 	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
-	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
-		return t.ArticleCategoryId
-	})
-	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	categoryMap := articleCategoryMap()
 
 	return component.SuccessPage(
 		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
