@@ -24,7 +24,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"log/slog"
 )
@@ -58,7 +57,6 @@ func migration(migration bool) {
 			&rolePermissionRs.Entity{},
 			&userFollow.Entity{},
 			&userPoints.Entity{},
-			&userRoleRs.Entity{},
 			&users.Entity{},
 			&taskQueue.Entity{},
 			&articleLike.Entity{},
