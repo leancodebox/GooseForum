@@ -59,8 +59,8 @@ func PostDetail(c *gin.Context) {
 		errorPage(c, "文章不存在", "文章不存在")
 		return
 	}
-	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSizeWithRange(req.PageSize, 10, 100))
-	userIds := array.Map(replyEntities, func(item reply.Entity) uint64 {
+	replyEntities := reply.GetByArticleId(entity.Id)
+	userIds := array.Map(replyEntities, func(item *reply.Entity) uint64 {
 		return item.UserId
 	})
 	userIds = append(userIds, entity.UserId)
@@ -73,7 +73,7 @@ func PostDetail(c *gin.Context) {
 		avatarUrl = user.GetWebAvatarUrl()
 		authorUserInfo = *user
 	}
-	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
+	replyList := array.Map(replyEntities, func(item *reply.Entity) ReplyDto {
 		username := "陶渊明"
 		userAvatarUrl := urlconfig.GetDefaultAvatar()
 		if user, ok := userMap[item.UserId]; ok {
@@ -217,7 +217,7 @@ func PostV2(c *gin.Context) {
 	// 计算总页数
 	totalPages := (cast.ToInt(pageData.Total) + param.PageSize - 1) / param.PageSize
 	articleCategoryList := articleCategoryLabel()
-	pagination := []PageButton{}
+	var pagination []PageButton
 	start := max(pageData.Page-3, 1)
 	for i := 1; i <= 7; i++ {
 		pagination = append(pagination, PageButton{Index: i, Page: start})

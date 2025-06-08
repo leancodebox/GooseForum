@@ -80,7 +80,7 @@ func getLatestArticles() []articles.SmallEntity {
 			return articles.GetLatestArticles(7)
 
 		},
-		10*time.Second, // 缓存5分钟
+		10*time.Second, // 缓存5s
 	)
 	return data
 }
@@ -94,7 +94,7 @@ func getArticleCategory() []*articleCategory.Entity {
 			return articleCategory.All(), nil
 
 		},
-		1*time.Second, // 缓存5分钟
+		1*time.Minute, // 缓存5分钟
 	)
 	return data
 }
@@ -119,7 +119,7 @@ func articleCategoryMap() map[uint64]*articleCategory.Entity {
 				return v.Id
 			}), nil
 		},
-		1*time.Second, // 缓存5分钟
+		1*time.Minute, // 缓存5分钟
 	)
 	return data
 }

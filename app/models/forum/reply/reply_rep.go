@@ -50,3 +50,8 @@ func GetByMaxIdPage(articleId uint64, id uint64, pageSize int) (entities []Entit
 	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Where(queryopt.Gt(pid, id)).Limit(pageSize).Find(&entities)
 	return
 }
+
+func GetByArticleId(articleId uint64) (entities []*Entity) {
+	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Limit(333).Order(queryopt.Desc(pid)).Find(&entities)
+	return
+}
