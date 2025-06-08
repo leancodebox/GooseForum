@@ -2,7 +2,6 @@ package resource
 
 import (
 	"embed"
-	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
@@ -61,7 +60,6 @@ func GetTemplates() *template.Template {
 	})
 
 	if isDevelopment() {
-		fmt.Println("开发模式")
 		// 开发模式下直接从目录读取模板
 		return template.Must(template.Must(tmpl.ParseGlob(filepath.Join("resource", "templates", "*.gohtml"))).
 			ParseGlob(filepath.Join("resource", "templates", "*", "*.gohtml")))
