@@ -2,7 +2,7 @@ package viewrender
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/resourcev2"
+	"github.com/leancodebox/GooseForum/resource"
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -16,12 +16,12 @@ var htht4gooseforumOnce sync.Once
 func getHt4gooseforum() {
 	htht4gooseforumOnce.Do(func() {
 		// 创建基础模板
-		ht4gooseforum = resourcev2.GetTemplates()
+		ht4gooseforum = resource.GetTemplates()
 	})
 }
 
 func Reload() {
-	ht4gooseforum = resourcev2.GetTemplates()
+	ht4gooseforum = resource.GetTemplates()
 }
 
 func init() {

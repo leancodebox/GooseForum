@@ -7,15 +7,15 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
-	"github.com/leancodebox/GooseForum/resourcev2"
+	"github.com/leancodebox/GooseForum/resource"
 	"io/fs"
 	"net/http"
 )
 
 func assertRouter(ginApp *gin.Engine) {
 	appFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
-	assetsFs, _ := fs.Sub(resourcev2.GetViewAssert(), "static/dist/assets")
-	staticFS, _ := resourcev2.GetStaticFS()
+	assetsFs, _ := fs.Sub(resource.GetViewAssert(), "static/dist/assets")
+	staticFS, _ := resource.GetStaticFS()
 	ginApp.Group("/").
 		Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).

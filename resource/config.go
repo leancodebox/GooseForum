@@ -1,4 +1,4 @@
-package resourcev2
+package resource
 
 import (
 	"embed"
@@ -34,8 +34,8 @@ func GetTemplates() *template.Template {
 		fmt.Println("开发模式")
 		// 开发模式下直接从目录读取模板
 		return template.Must(template.Must(
-			tmpl.ParseGlob(filepath.Join("resourcev2", "templates", "*.gohtml"))).
-			ParseGlob(filepath.Join("resourcev2", "templates", "*.gohtml")))
+			tmpl.ParseGlob(filepath.Join("resource", "templates", "*.gohtml"))).
+			ParseGlob(filepath.Join("resource", "templates", "*.gohtml")))
 	}
 	return template.Must(tmpl.ParseFS(templates,
 		"templates/*.gohtml",
@@ -52,7 +52,7 @@ func GetViewAssert() *embed.FS {
 // GetStaticFS 返回静态文件的文件系统
 func GetStaticFS() (fs.FS, error) {
 	if !setting.IsProduction() {
-		return os.DirFS(filepath.Join("resourceV2", "static")), nil
+		return os.DirFS(filepath.Join("resource", "static")), nil
 	}
 	static, err := fs.Sub(GetViewAssert(), "static")
 	if err != nil {
