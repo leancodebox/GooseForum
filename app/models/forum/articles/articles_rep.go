@@ -203,3 +203,9 @@ func GetLatestArticlesByUserId(userId uint64, limit int) ([]SmallEntity, error) 
 		Find(&articles).Error
 	return articles, err
 }
+
+func GetUserCount(userId uint64) int64 {
+	var count int64
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Count(&count)
+	return count
+}

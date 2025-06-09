@@ -256,12 +256,13 @@ func User(c *gin.Context) {
 	}
 	last, _ := articles.GetLatestArticlesByUserId(id, 5)
 	viewrender.Render(c, "user.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"Articles":     articlesSmallEntity2Dto(last),
-		"Author":       showUser,
-		"User":         GetLoginUser(c),
-		"Title":        showUser.Username + " - GooseForum",
-		"Description":  showUser.Username + " 的个人简介 ",
+		"IsProduction":  setting.IsProduction(),
+		"Articles":      articlesSmallEntity2Dto(last),
+		"ArticlesCount": articles.GetUserCount(showUser.UserId),
+		"Author":        showUser,
+		"User":          GetLoginUser(c),
+		"Title":         showUser.Username + " - GooseForum",
+		"Description":   showUser.Username + " 的个人简介 ",
 	})
 }
 
