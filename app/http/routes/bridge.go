@@ -1,43 +1,41 @@
 package routes
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"github.com/leancodebox/GooseForum/resource"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
+	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
+	"net/http"
 )
 
 func RegisterByGin(ginApp *gin.Engine) {
-	// 加载HTML模板
-	ginApp.SetHTMLTemplate(resource.GetTemplates())
 	// 基础中间件
 	ginApp.Use(middleware.SiteMaintenance)
 	ginApp.Use(middleware.SiteInfo)
 	ginApp.Use(middleware.GinCors)
 
 	ginApp.GET("/reload", func(c *gin.Context) {
-		if !setting.IsProduction() {
-			ginApp.SetHTMLTemplate(resource.GetTemplates())
-			c.String(200, "模板已刷新")
+		if setting.IsProduction() {
+			c.String(http.StatusNotFound, "404")
 			return
 		}
-		c.String(http.StatusNotFound, "404")
+		viewrender.Reload()
+		c.String(200, "模板已刷新")
 	})
-
-	// 前端资源
-	frontend(ginApp)
 
 	// 访问日志中间件
 	ginApp.Use(middleware.AccessLog)
 
+	siteInfoRoute(ginApp)
 	// 接口
-	auth(ginApp)
-	viewRoute(ginApp)
-	forum(ginApp)
+	apiRoute(ginApp)
+	// 文件
 	fileServer(ginApp)
+	// view
+	viewRoute(ginApp)
+	// 资源
+	assertRouter(ginApp)
 
 	ginApp.NoRoute(controllers.NotFound)
 

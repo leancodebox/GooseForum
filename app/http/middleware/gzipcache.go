@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"net/http"
 	"strings"
 	"sync"
@@ -33,6 +34,10 @@ func (w *cachingResponseWriter) Write(data []byte) (int, error) {
 	return w.ResponseWriter.Write(data)
 }
 func CacheMiddleware(c *gin.Context) {
+	if !setting.IsProduction() {
+		c.Next()
+		return
+	}
 	// 如果浏览器支持 Gzip 那么就开启缓存，否则就直接执行下个中间件
 	if acceptEncoding := c.Request.Header.Get("Accept-Encoding"); strings.Contains(acceptEncoding, "gzip") {
 		key := c.Request.URL.Path

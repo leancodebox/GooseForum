@@ -3,8 +3,8 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	timeopt "github.com/leancodebox/GooseForum/app/bundles/timopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN" {{if .Theme}}data-theme="{{.Theme}}"{{end}}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "commonhead.gohtml" .}}
+    {{if .IsProduction}}
+    {{GetImportInfoPath `src/style.css`}}
+    {{GetImportInfoPath `src/main.js`}}
+    {{else}}
+    <script type="module" src="http://localhost:3001/@vite/client"></script>
+    <script type="module" src="http://localhost:3001/src/main.js"></script>
+    {{end}}
+</head>
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-4">
+        <div class="max-w-4xl mx-auto space-y-8">
+            <!-- 页面标题 -->
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-base-content mb-4">关于 GooseForum</h1>
+                <p class="text-lg text-base-content/70">简单的社区构建软件 / Easy forum software for building friendly communities.</p>
+            </div>
+
+            <!-- 项目介绍 -->
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-2xl mb-4">🚀 项目简介</h2>
+                    <div class="prose max-w-none">
+                        <p class="text-base-content/80 leading-relaxed">
+                            GooseForum 是一个现代化的技术论坛平台，致力于为开发者提供一个高质量的技术交流和知识分享环境。
+                            我们相信技术的力量能够改变世界，而知识的分享能够让这种力量更加强大。
+                        </p>
+                        <p class="text-base-content/80 leading-relaxed">
+                            在这里，你可以分享你的技术见解、讨论最新的技术趋势、寻求技术问题的解决方案，
+                            也可以结识志同道合的开发者朋友，共同成长，共同进步。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 技术栈 -->
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-2xl mb-6">🛠️ 技术栈</h2>
+
+                    <!-- 前端技术 -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <span class="mr-2">🎨</span>
+                            前端技术
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center p-4 bg-base-200 rounded-lg">
+                                <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold text-lg">V</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Vite</h4>
+                                    <p class="text-sm text-base-content/60">一个超快的前端构建工具</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-base-200 rounded-lg">
+                                <div class="w-12 h-12 bg-green-400 rounded-lg flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold text-lg">V</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Vue 3</h4>
+                                    <p class="text-sm text-base-content/60">渐进式 JavaScript 框架，组合式 API</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-base-200 rounded-lg">
+                                <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold text-lg">T</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">TypeScript</h4>
+                                    <p class="text-sm text-base-content/60">类型安全的 JavaScript 超集</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-base-200 rounded-lg">
+                                <div class="w-12 h-12 bg-cyan-500 rounded-lg flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold text-lg">D</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">DaisyUI</h4>
+                                    <p class="text-sm text-base-content/60">基于 Tailwind CSS 的组件库</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 后端技术 -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <span class="mr-2">⚙️</span>
+                            后端技术
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center p-4 bg-base-200 rounded-lg">
+                                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold text-lg">Go</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Golang</h4>
+                                    <p class="text-sm text-base-content/60">高性能、并发友好的编程语言</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-base-200 rounded-lg">
+                                <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold text-lg">G</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Gin Framework</h4>
+                                    <p class="text-sm text-base-content/60">轻量级、高性能的 Go Web 框架</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-base-200 rounded-lg">
+                                <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold text-lg">S</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Sqlite</h4>
+                                    <p class="text-sm text-base-content/60">轻量级、嵌入式、零配置的关系型数据库管理系统</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-base-200 rounded-lg">
+                                <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold text-lg">G</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Gorm</h4>
+                                    <p class="text-sm text-base-content/60">The fantastic ORM library for Golang aims to be developer friendly.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 开发工具 -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <span class="mr-2">🔧</span>
+                            开发工具
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="badge badge-outline badge-lg">Docker</div>
+                            <div class="badge badge-outline badge-lg">Git</div>
+                            <div class="badge badge-outline badge-lg">GitHub Actions</div>
+                            <div class="badge badge-outline badge-lg">ESLint</div>
+                            <div class="badge badge-outline badge-lg">Prettier</div>
+                            <div class="badge badge-outline badge-lg">Vite</div>
+                            <div class="badge badge-outline badge-lg">pnpm</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 功能特性 -->
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-2xl mb-6">✨ 功能特性</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary-content" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold mb-2">文章发布</h3>
+                            <p class="text-sm text-base-content/60">支持 Markdown 编辑，代码高亮，图片上传</p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary-content" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold mb-2">实时评论</h3>
+                            <p class="text-sm text-base-content/60">支持嵌套回复，实时通知，表情包</p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent-content" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold mb-2">用户系统</h3>
+                            <p class="text-sm text-base-content/60">个人主页，关注系统，积分排行</p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-info rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-info-content" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold mb-2">智能搜索</h3>
+                            <p class="text-sm text-base-content/60">全文搜索，标签筛选，高级过滤</p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-warning rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-warning-content" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold mb-2">响应式设计</h3>
+                            <p class="text-sm text-base-content/60">完美适配桌面端、平板和手机</p>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-success rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-success-content" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM7 21h10a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a4 4 0 01-4 4z" />
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold mb-2">多主题支持</h3>
+                            <p class="text-sm text-base-content/60">10+ 精美主题，支持深色模式</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 联系我们 -->
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title text-2xl mb-6">📞 联系我们</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold mb-3">开发团队</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center">
+                                    <span class="w-20 text-base-content/60">项目负责人:</span>
+                                    <span>abandon1a2b</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="w-20 text-base-content/60">技术栈:</span>
+                                    <span>Golang + Tailwindcss + Vite </span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="w-20 text-base-content/60">开源协议:</span>
+                                    <span>MIT License</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold mb-3">社区链接</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <a href="https://github.com/leancodebox/GooseForum" class="btn btn-outline btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                    </svg>
+                                    GitHub
+                                </a>
+
+{{/*                                <a href="#" class="btn btn-outline btn-sm">*/}}
+{{/*                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 24 24">*/}}
+{{/*                                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>*/}}
+{{/*                                    </svg>*/}}
+{{/*                                    Twitter*/}}
+{{/*                                </a>*/}}
+{{/*                                <a href="#" class="btn btn-outline btn-sm">*/}}
+{{/*                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 24 24">*/}}
+{{/*                                        <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0190 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/>*/}}
+{{/*                                    </svg>*/}}
+{{/*                                    Discord*/}}
+{{/*                                </a>*/}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
+</body>
+</html>

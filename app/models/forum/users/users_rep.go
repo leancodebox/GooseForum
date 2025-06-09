@@ -2,8 +2,10 @@ package users
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"time"
 )
 
 func Get(id any) (entity Entity, err error) {
@@ -49,6 +51,14 @@ func GetCount() int64 {
 	return count
 }
 
+func GetMonthCount() int64 {
+	now := time.Now()
+	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	var count int64
+	builder().Where(queryopt.Ge(fieldCreatedAt, firstOfMonth)).Count(&count)
+	return count
+}
+
 func GetMaxId() uint64 {
 	var entity Entity
 	builder().Order(queryopt.Desc(pid)).Limit(1).First(&entity)
@@ -74,14 +84,8 @@ func Page(q PageQuery) struct {
 	Data     []Entity
 } {
 	var list []Entity
-	if q.Page > 0 {
-		q.Page -= 1
-	} else {
-		q.Page = 0
-	}
-	if q.PageSize < 1 {
-		q.PageSize = 10
-	}
+	q.Page = max(q.Page-1, 0)
+	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	b := builder()
 	cB := builder()
 	if q.Username != "" {

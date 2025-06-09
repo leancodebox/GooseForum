@@ -1,7 +1,14 @@
 import axiosInstance from './axiosInstance';
-import {enqueueMessage} from "./messageManager.ts";
-import axios from 'axios';
-import type {Articles, Category, Label, Result, User, UserRole} from "../types/adminInterfaces.ts";
+import type {
+    ApplySheet,
+    Articles,
+    Category,
+    FriendLinksGroup,
+    Label,
+    Result,
+    User,
+    UserRole
+} from "../types/adminInterfaces.ts";
 
 export interface PageData<T> {
     list: T[];
@@ -11,16 +18,16 @@ export interface PageData<T> {
 }
 
 // Mock 获取用户信息
-export const getUserInfo = async ():Promise<Result<any>> => {
+export const getUserInfo = async (): Promise<Result<any>> => {
     return axiosInstance.get("/get-user-info")
 }
 
 
-export function getUserList():Promise<Result<PageData<User>>> {
+export function getUserList(): Promise<Result<PageData<User>>> {
     return axiosInstance.post("admin/user-list")
 }
 
-export function editUser(userId:any, status:any, validate:any, roleId:any):Promise<Result<any>> {
+export function editUser(userId: any, status: any, validate: any, roleId: any): Promise<Result<any>> {
     return axiosInstance.post("admin/user-edit", {
         userId: userId,
         status: status,
@@ -29,19 +36,19 @@ export function editUser(userId:any, status:any, validate:any, roleId:any):Promi
     })
 }
 
-export function getAllRoleItem():Promise<Result<Label[]>>  {
+export function getAllRoleItem(): Promise<Result<Label[]>> {
     return axiosInstance.post('/admin/get-all-role-item')
 }
 
-export function getPermissionList():Promise<Result<Label[]>> {
+export function getPermissionList(): Promise<Result<Label[]>> {
     return axiosInstance.post("admin/get-permission-list")
 }
 
-export function getRoleList():Promise<Result<PageData<UserRole>>> {
+export function getRoleList(): Promise<Result<PageData<UserRole>>> {
     return axiosInstance.post("admin/role-list")
 }
 
-export function getRoleSave(id:any, roleName:any, permission:any):Promise<Result<any>>  {
+export function getRoleSave(id: any, roleName: any, permission: any): Promise<Result<any>> {
     return axiosInstance.post("admin/role-save", {
         id: id,
         roleName: roleName,
@@ -49,34 +56,52 @@ export function getRoleSave(id:any, roleName:any, permission:any):Promise<Result
     })
 }
 
-export function getRoleDel(id:any):Promise<Result<any>> {
+export function getRoleDel(id: any): Promise<Result<any>> {
     return axiosInstance.post("admin/role-delete", {
         id: id,
     })
 }
 
-export function getAdminArticlesList(page = 1, pageSize = 10):Promise<Result<PageData<Articles>>>  {
+export function getAdminArticlesList(page = 1, pageSize = 10): Promise<Result<PageData<Articles>>> {
     return axiosInstance.post("admin/articles-list", {
         page: page,
         pageSize: pageSize,
     })
 }
 
-export const getCategoryList = ():Promise<Result<Category[]>> => {
+export const getCategoryList = (): Promise<Result<Category[]>> => {
     return axiosInstance.post('/admin/category-list')
 }
 
-export const saveCategory = (data:any):Promise<Result<any>> => {
+export const saveCategory = (data: any): Promise<Result<any>> => {
     return axiosInstance.post('/admin/category-save', data)
 }
 
-export const deleteCategory = (id:any) :Promise<Result<any>> => {
+export const deleteCategory = (id: any): Promise<Result<any>> => {
     return axiosInstance.post('/admin/category-delete', {id})
 }
 
-export const editArticle = (id:any, processStatus:any):Promise<Result<any>> => {
+export const editArticle = (id: any, processStatus: any): Promise<Result<any>> => {
     return axiosInstance.post('/admin/article-edit', {
         id,
         processStatus
+    })
+}
+
+export function applySheetList(page = 1, pageSize = 10): Promise<Result<PageData<ApplySheet>>> {
+    return axiosInstance.post("/admin/apply-sheet-list", {
+        page: page,
+        pageSize: pageSize,
+    })
+}
+
+
+export function getFriendLinks(): Promise<Result<FriendLinksGroup[]>> {
+    return axiosInstance.get("/admin/friend-links")
+}
+
+export function saveFriendLinks(params:any): Promise<Result<FriendLinksGroup[]>> {
+    return axiosInstance.post("/admin/save-friend-links",{
+        linksInfo:params
     })
 }

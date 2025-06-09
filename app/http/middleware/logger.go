@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"log/slog"
 	"time"
 

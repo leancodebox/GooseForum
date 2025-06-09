@@ -29,7 +29,7 @@ type Entity struct {
 	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article,priority:1" json:"userId"`       // 用户
 	ArticleId uint64    `gorm:"column:article_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article,priority:2" json:"articleId"` //
 	Status    int       `gorm:"column:status;type:int;not null;default:1;" json:"status"`                                                            // 点赞状态（1:有效点赞 0:取消点赞）
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;" json:"createdAt"`                                                                  //
+	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                                                        //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;index;" json:"updatedAt"`
 }
 

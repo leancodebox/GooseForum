@@ -1,26 +1,73 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-{{template "head.gohtml" .}}
+<html lang="zh-CN" data-theme="{{.Theme}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "commonhead.gohtml" .}}
+    {{if .IsProduction}}
+    {{GetImportInfoPath `src/style.css`}}
+    {{GetImportInfoPath `src/main.js`}}
+    {{else}}
+    <script type="module" src="http://localhost:3001/@vite/client"></script>
+    <script type="module" src="http://localhost:3001/src/main.js"></script>
+    {{end}}
+</head>
 <body>
-{{template "nav_new.gohtml" .}}
-<main>
-    <h1>抱歉，出错了</h1>
-    <div class="error-content">
-        <p>{{.message}}</p>
-        <div class="error-actions">
-            <a href="/" class="btn btn-primary">返回首页</a>
-            <a href="javascript:history.back()" class="btn btn-secondary">返回上一页</a>
-{{/*            <a href="mailto:support@example.com" class="btn btn-outline">联系客服</a>*/}}
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-4 flex items-center justify-center">
+        <div class="text-center max-w-md mx-auto">
+            <!-- 错误图标 -->
+            <div class="mb-8">
+                <svg class="w-24 h-24 mx-auto text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+            </div>
+            
+            <!-- 错误标题 -->
+            <h1 class="text-4xl font-bold text-base-content mb-4">
+                {{if .title}}{{.title}}{{else}}页面出错了{{end}}
+            </h1>
+            
+            <!-- 错误消息 -->
+            <p class="text-lg text-base-content/70 mb-8">
+                {{if .message}}{{.message}}{{else}}抱歉，您访问的页面出现了错误{{end}}
+            </p>
+            
+            <!-- 操作按钮 -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/" class="btn btn-primary">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    返回首页
+                </a>
+                <button onclick="history.back()" class="btn btn-outline">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    返回上一页
+                </button>
+            </div>
+            
+            <!-- 错误详情（可选显示） -->
+            {{if .errorCode}}
+            <div class="mt-8 p-4 bg-base-300 rounded-lg">
+                <details class="text-sm text-base-content/60">
+                    <summary class="cursor-pointer hover:text-base-content">错误详情</summary>
+                    <div class="mt-2 space-y-1">
+                        {{if .errorCode}}<p>错误代码: {{.errorCode}}</p>{{end}}
+                        {{if .timestamp}}<p>时间: {{.timestamp}}</p>{{end}}
+                        {{if .requestId}}<p>请求ID: {{.requestId}}</p>{{end}}
+                    </div>
+                </details>
+            </div>
+            {{end}}
         </div>
-
-        <div class="error-details" style="display:none">
-            <p><small>错误代码: {{.errorCode}}</small></p>
-            <p><small>时间: {{.timestamp}}</small></p>
-        </div>
-    </div>
-</main>
-{{template "footer.gohtml" .}}
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
 </body>
 </html>
-
-

@@ -34,7 +34,7 @@ type Entity struct {
 	TargetId  uint64    `gorm:"column:target_id;type:bigint unsigned;not null;default:0;" json:"targetId"`         // 目标id
 	Content   string    `gorm:"column:content;type:text;" json:"content"`                                          //
 	ReplyId   uint64    `gorm:"column:reply_id;type:bigint;not null;default:0;" json:"replyId"`
-	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"` //
+	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/spf13/cast"
 	"html"
 	"net/http"
@@ -45,26 +45,28 @@ func RenderSitemapXml(c *gin.Context) {
 	for _, item := range list {
 		sb.WriteString(fmt.Sprintf(`    <url>
         <loc>%v/post/%v</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
+		<lastmod>%v</lastmod>
+        <priority>0.7</priority>
     </url>
-`, host, item.Id))
+`, host, item.Id, item.UpdatedAt.Format(time.RFC3339)))
 	}
 
 	sitemap := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
 	%v
     <url>
-        <loc>%s/</loc>
-        <changefreq>daily</changefreq>
+        <loc>%s/post</loc>
+        <priority>0.8</priority>
+    </url>
+	<url>
+        <loc>%s/links</loc>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>%s/post</loc>
-        <changefreq>hourly</changefreq>
-        <priority>0.9</priority>
+        <loc>%s/</loc>
+        <priority>1.0</priority>
     </url>
-</urlset>`, sb.String(), host, host)
+</urlset>`, sb.String(), host, host, host)
 
 	c.Header("Content-Type", "application/xml")
 	c.String(http.StatusOK, sitemap)

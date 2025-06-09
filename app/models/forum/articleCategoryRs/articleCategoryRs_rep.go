@@ -1,6 +1,8 @@
 package articleCategoryRs
 
-import "github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+import (
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+)
 
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)

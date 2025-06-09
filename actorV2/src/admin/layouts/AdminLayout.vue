@@ -9,7 +9,9 @@ import {
   GridOutline,
   SettingsOutline,
   LogOutOutline,
-  PersonOutline
+  PersonOutline,
+  LinkOutline,
+  TicketOutline
 } from '@vicons/ionicons5'
 import {
   NLayout,
@@ -17,6 +19,8 @@ import {
   NLayoutHeader,
   NLayoutContent,
   NLayoutFooter,
+  NScrollbar ,
+  NFlex,
   NMenu,
   NBreadcrumb,
   NBreadcrumbItem,
@@ -35,7 +39,10 @@ const collapsed = ref(false)
 // 计算主内容区样式
 const contentStyle = computed(() => {
   return {
+    transition: 'padding-left 0.2s cubic-bezier(.4,0,.2,1)',
     paddingLeft: collapsed.value ? '64px' : '240px',
+    minHeight: '100vh',
+    background: '#f5f6fa'
   }
 })
 
@@ -85,6 +92,24 @@ const menuOptions: MenuOption[] = [
     key: 'settings',
     icon: () => h(SettingsOutline),
     path: '/admin/settings'
+  },
+  {
+    label: '友情链接',
+    key: 'friendLinks',
+    icon: () => h(LinkOutline), // 需要导入LinkOutline图标
+    path: '/admin/friend-links'
+  },
+  {
+    label: '赞助商管理',
+    key: 'sponsorManager',
+    icon: () => h(LinkOutline), // 需要导入LinkOutline图标
+    path: '/admin/sponsor-manager'
+  },
+  {
+    label: '外部工单',
+    key: 'externalTickets',
+    icon: () => h(TicketOutline), // 需要导入TicketOutline图标
+    path: '/admin/external-tickets'
   }
 ]
 
@@ -137,91 +162,80 @@ const handleUserSelect = (key: string) => {
 </script>
 
 <template>
-  <n-layout has-sider position="absolute">
-    <!-- 侧边栏 -->
-    <n-layout-sider
-      bordered
-      collapse-mode="width"
-      :collapsed-width="64"
-      :width="240"
-      :collapsed="collapsed"
-      show-trigger
-      @collapse="collapsed = true"
-      @expand="collapsed = false"
-      :native-scrollbar="false"
-      position="absolute"
-    >
-      <div class="logo-container">
-        <img v-if="collapsed"  src="/favicon.ico" alt="Logo" class="logo-small" />
-        <img v-else src="/favicon.ico" alt="Logo" class="logo" />
-      </div>
-      <n-menu
-        :collapsed="collapsed"
-        :collapsed-width="64"
-        :collapsed-icon-size="22"
-        :options="menuOptions"
-        :render-label="renderMenuLabel"
-        :render-icon="renderMenuIcon"
-        :value="activeKey"
-        @update:value="handleMenuUpdate"
-      />
-    </n-layout-sider>
-
-    <!-- 主内容区 -->
-    <n-layout :style="contentStyle">
-      <!-- 顶部导航栏 -->
-      <n-layout-header bordered position="absolute" style="z-index: 999; width: 100%;">
-        <div class="header-container">
-          <div class="header-left">
-            <n-button quaternary circle @click="collapsed = !collapsed">
+  <n-layout style="height: 100vh; overflow: hidden;">
+    <!-- 顶部导航栏 -->
+    <n-layout-header bordered style="z-index: 999; width: 100%; height: 64px;">
+      <n-flex justify="space-between" align="center" style="height: 100%; padding: 0 24px; background: #fff;">
+        <n-flex align="center" gap="16">
+          <n-button quaternary circle @click="collapsed = !collapsed">
+            <template #icon>
+              <n-icon size="18">
+                <MenuOutline />
+              </n-icon>
+            </template>
+          </n-button>
+          <n-breadcrumb>
+            <n-breadcrumb-item>GooseForum</n-breadcrumb-item>
+            <n-breadcrumb-item>管理系统</n-breadcrumb-item>
+            <n-breadcrumb-item>{{ currentPageTitle }}</n-breadcrumb-item>
+          </n-breadcrumb>
+        </n-flex>
+        <n-flex align="center">
+          <n-dropdown :options="userOptions" @select="handleUserSelect">
+            <n-button text>
+              管理员
               <template #icon>
-                <n-icon size="18">
-                  <MenuOutline />
+                <n-icon>
+                  <PersonOutline />
                 </n-icon>
               </template>
             </n-button>
-            <n-breadcrumb>
-              <n-breadcrumb-item>GooseForum</n-breadcrumb-item>
-              <n-breadcrumb-item>管理系统</n-breadcrumb-item>
-              <n-breadcrumb-item>{{ currentPageTitle }}</n-breadcrumb-item>
-            </n-breadcrumb>
-          </div>
-          <div class="header-right">
-            <n-dropdown :options="userOptions" @select="handleUserSelect">
-              <n-button text>
-                管理员
-                <template #icon>
-                  <n-icon>
-                    <PersonOutline />
-                  </n-icon>
-                </template>
-              </n-button>
-            </n-dropdown>
-          </div>
-        </div>
-      </n-layout-header>
-
+          </n-dropdown>
+        </n-flex>
+      </n-flex>
+    </n-layout-header>
+    <!-- 主体部分：侧边栏+内容区 -->
+    <n-layout has-sider style="height: calc(100vh - 64px);">
+      <!-- 侧边栏 -->
+      <n-layout-sider
+        bordered
+        collapse-mode="width"
+        :collapsed-width="64"
+        :width="240"
+        :collapsed="collapsed"
+        show-trigger
+        @collapse="collapsed = true"
+        @expand="collapsed = false"
+        :native-scrollbar="false"
+      >
+        <n-menu
+          :collapsed="collapsed"
+          :collapsed-width="64"
+          :collapsed-icon-size="22"
+          :options="menuOptions"
+          :render-label="renderMenuLabel"
+          :render-icon="renderMenuIcon"
+          :value="activeKey"
+          @update:value="handleMenuUpdate"
+        />
+      </n-layout-sider>
       <!-- 内容区 -->
-      <n-layout-content content-style="padding: 24px;" :style="{ marginTop: '64px' }">
-        <n-card>
-          <router-view />
+      <n-layout-content
+       
+      >
+      <n-scrollbar style="height: 100%;">
+        <n-card :bordered="false" style="height: 100%; min-height: 0; display: flex; flex-direction: column;">
+          
+            <router-view style="flex: 1 1 auto;"/>
+          
         </n-card>
+      </n-scrollbar>
       </n-layout-content>
-
     </n-layout>
   </n-layout>
 </template>
 
-
-
 <style scoped>
-.logo-container {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
 
 .logo {
   height: 32px;
@@ -230,30 +244,6 @@ const handleUserSelect = (key: string) => {
 .logo-small {
   height: 32px;
   width: 32px;
-}
-
-.header-container {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  background-color: #fff;
-  box-sizing: border-box;
-  width: 100%;
-  right: 0;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  margin-right: 24px;
 }
 
 .footer-container {

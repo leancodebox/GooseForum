@@ -52,7 +52,7 @@ type Entity struct {
 	LikeCount       uint64     `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`             // 访问数量
 	ViewCount       uint64     `gorm:"column:view_count;index;type:bigint unsigned;not null;default:0;" json:"viewCount"`       // 访问数量
 	ReplyCount      uint64     `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"`           // 访问数量
-	CreatedAt       time.Time  `gorm:"column:created_at;autoCreateTime;" json:"createdAt"`                                      //
+	CreatedAt       time.Time  `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                            //
 	UpdatedAt       time.Time  `gorm:"column:updated_at;autoUpdateTime;index;" json:"updatedAt"`
 	DeletedAt       *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
 }
@@ -80,7 +80,7 @@ type SmallEntity struct {
 	ProcessStatus int8       `gorm:"column:process_status;type:tinyint;not null;default:0;" json:"processStatus"`   // 管理状态：0 正常 1 封禁
 	ViewCount     uint64     `gorm:"column:view_count;type:bigint unsigned;not null;default:0;" json:"viewCount"`   // 访问数量
 	ReplyCount    uint64     `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"` // 访问数量
-	CreatedAt     time.Time  `gorm:"column:created_at;autoCreateTime;" json:"createdAt"`                            //
+	CreatedAt     time.Time  `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                  //
 	UpdatedAt     time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 	DeletedAt     *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
 }

@@ -2,6 +2,13 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
+	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"net/http"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 
@@ -9,13 +16,11 @@ import (
 
 	"strings"
 
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
@@ -36,6 +41,7 @@ type UserItem struct {
 	Validate   int8                                `json:"validate"`
 	Prestige   int64                               `json:"prestige"`
 	RoleList   []datastruct.Option[string, uint64] `json:"roleList"`
+	RoleId     uint64                              `json:"roleId,omitempty"`
 	CreateTime string                              `json:"createTime"`
 }
 
@@ -46,18 +52,17 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 		Email:    req.Params.Email,
 	})
 
-	userIdList := array.Map(pageData.Data, func(t users.Entity) uint64 {
-		return t.Id
+	roleEntityList := role.AllEffective()
+	roleMap := array.Slice2Map(roleEntityList, func(v *role.Entity) uint64 {
+		return v.Id
 	})
-	userRoleMap := userRoleRs.GetRoleGroupByUserIds(userIdList)
 	list := array.Map(pageData.Data, func(t users.Entity) UserItem {
+		roleEntity := roleMap[t.RoleId]
 		var roleList []datastruct.Option[string, uint64]
-		if data, ok := userRoleMap[t.Id]; ok {
-			roleList = array.Map(data, func(rItem role.Entity) datastruct.Option[string, uint64] {
-				return datastruct.Option[string, uint64]{
-					Name:  rItem.RoleName,
-					Value: rItem.Id,
-				}
+		if roleEntity != nil {
+			roleList = append(roleList, datastruct.Option[string, uint64]{
+				Name:  roleEntity.RoleName,
+				Value: roleEntity.Id,
 			})
 		}
 		return UserItem{
@@ -68,7 +73,8 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			Validate:   t.Validate,
 			Prestige:   t.Prestige,
 			RoleList:   roleList,
-			CreateTime: t.CreatedAt.Format("2006-01-02 15:04:05"),
+			RoleId:     t.RoleId,
+			CreateTime: t.CreatedAt.Format(time.DateTime),
 		}
 	})
 	return component.SuccessPage(
@@ -80,10 +86,10 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 }
 
 type EditUserReq struct {
-	UserId   uint64   `json:"userId"`
-	Status   int8     `json:"status"`
-	Validate int8     `json:"validate"`
-	RoleId   []uint64 `json:"roleId"`
+	UserId   uint64 `json:"userId"`
+	Status   int8   `json:"status"`
+	Validate int8   `json:"validate"`
+	RoleId   uint64 `json:"roleId"`
 }
 
 func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
@@ -104,27 +110,10 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 		user.Validate = params.Validate
 		opt = true
 	}
-	ur := userRoleRs.GetByUserId(req.Params.UserId)
-	var canUpdate []uint64
-	// 更新数据
-	for _, item := range ur {
-		item.Effective = 0
-		if slices.Contains(req.Params.RoleId, item.RoleId) {
-			item.Effective = 1
-			canUpdate = append(canUpdate, item.RoleId)
-		}
-		userRoleRs.SaveOrCreateById(item)
-	}
-	// 删除数据
-	for _, item := range req.Params.RoleId {
-		if !slices.Contains(canUpdate, item) {
-			rsItem := userRoleRs.Entity{
-				RoleId:    item,
-				UserId:    req.Params.UserId,
-				Effective: 1,
-			}
-			userRoleRs.SaveOrCreateById(&rsItem)
-		}
+	if user.RoleId != params.RoleId {
+		msg = msg + fmt.Sprintf("[用户角色调整:%v->%v]", user.RoleId, params.RoleId)
+		user.RoleId = params.RoleId
+		opt = true
 	}
 	if opt {
 		users.Save(&user)
@@ -173,8 +162,8 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 				Username:      username,
 				ArticleStatus: t.ArticleStatus,
 				ProcessStatus: t.ProcessStatus,
-				CreatedAt:     t.CreatedAt.Format("2006-01-02 15:04:05"),
-				UpdatedAt:     t.UpdatedAt.Format("2006-01-02 15:04:05"),
+				CreatedAt:     t.CreatedAt.Format(time.DateTime),
+				UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
 			}
 		}),
 		pageData.Page,
@@ -270,7 +259,7 @@ func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 			RoleName:    t.RoleName,
 			Effective:   t.Effective,
 			Permissions: permissionItemList,
-			CreateTime:  t.CreatedAt.Format("2006-01-02 15:04:05"),
+			CreateTime:  t.CreatedAt.Format(time.DateTime),
 		}
 	})
 
@@ -420,4 +409,95 @@ func DeleteCategory(req component.BetterRequest[struct {
 	}
 	articleCategory.DeleteEntity(&entity)
 	return component.SuccessResponse(true)
+}
+
+type ApplySheetListReq struct {
+	Page     int    `form:"page"`
+	PageSize int    `form:"pageSize"`
+	Search   string `form:"search"`
+	UserId   uint64 `form:"userId"`
+}
+
+func ApplySheet(req component.BetterRequest[ApplySheetListReq]) component.Response {
+	pageData := applySheet.Page[applySheet.Entity](applySheet.PageQuery{
+		Page:     req.Params.Page,
+		PageSize: req.Params.PageSize,
+	})
+
+	return component.SuccessPage(array.Map(pageData.Data, func(item applySheet.Entity) applySheet.Entity {
+		return item
+	}),
+		pageData.Page,
+		pageData.PageSize,
+		pageData.Total,
+	)
+}
+
+const (
+	FriendShipLinks = `friendShipLinks`
+)
+
+var pageTypeList = []string{
+	FriendShipLinks,
+}
+
+func GetPageConfig(c *gin.Context) {
+	pageType := c.Param(`pageType`)
+	if !slices.Contains(pageTypeList, pageType) {
+		c.JSON(http.StatusOK, component.FailData(`类型不存在`))
+		return
+	}
+	configEntity := pageConfig.GetByPageType(pageType)
+
+	c.JSON(http.StatusOK, component.SuccessData(map[string]any{
+		`pageType`: pageType,
+		`config`:   configEntity.Config,
+	}))
+}
+
+type FriendLinksGroup struct {
+	Name  string     `json:"name,omitempty"`
+	Links []LinkItem `json:"links,omitempty"`
+}
+
+func GetFriendLinks(req component.BetterRequest[null]) component.Response {
+	configEntity := pageConfig.GetByPageType(FriendShipLinks)
+	var res []FriendLinksGroup
+	if configEntity.Id == 0 {
+		lItem := LinkItem{
+			Name:    "GooseForum",
+			Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
+			Url:     "https://gooseforum.online",
+			LogoUrl: "/static/pic/default-avatar.png",
+		}
+		res = []FriendLinksGroup{
+			FriendLinksGroup{
+				Name:  "community",
+				Links: []LinkItem{lItem},
+			},
+			FriendLinksGroup{
+				Name:  "blog",
+				Links: []LinkItem{lItem},
+			},
+			FriendLinksGroup{
+				Name:  "tool",
+				Links: []LinkItem{lItem},
+			},
+		}
+	} else {
+		res = jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
+	}
+	return component.SuccessResponse(res)
+}
+
+type SaveFriendLinksReq struct {
+	LinksInfo []FriendLinksGroup `json:"linksInfo"`
+}
+
+func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(FriendShipLinks)
+	configEntity.PageType = FriendShipLinks
+	configEntity.Config = jsonopt.Encode(req.Params.LinksInfo)
+	pageConfig.CreateOrSave(&configEntity)
+	return component.SuccessResponse("success")
 }

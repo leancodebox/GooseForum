@@ -2,91 +2,29 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
-	"strings"
-	"sync"
-	"time"
-
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/datastruct"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
+	"strings"
+	"time"
 )
-
-var (
-	siteStatsCacheHasCache bool
-	siteStatsCache         SiteStats
-	siteStatsCacheTime     time.Time
-	siteStatsCacheMutex    sync.Mutex
-)
-
-type SiteStats struct {
-	UserCount    int64 `json:"userCount"`
-	ArticleCount int64 `json:"articleCount"`
-	Reply        int64 `json:"reply"`
-}
-
-func GetSiteStatisticsData() SiteStats {
-	siteStatsCacheMutex.Lock()
-	defer siteStatsCacheMutex.Unlock()
-
-	if time.Since(siteStatsCacheTime) < 5*time.Second && siteStatsCacheHasCache {
-		return siteStatsCache
-	}
-
-	result := SiteStats{
-		UserCount:    users.GetCount(),
-		ArticleCount: articles.GetCount(),
-		Reply:        reply.GetCount(),
-	}
-
-	siteStatsCache = result
-	siteStatsCacheTime = time.Now()
-	siteStatsCacheHasCache = true
-	return siteStatsCache
-}
 
 func GetSiteStatistics() component.Response {
 	return component.SuccessResponse(GetSiteStatisticsData())
 }
 
-var articlesType = []datastruct.Option[string, int]{
-	{Name: "分享", Value: 1},
-	{Name: "求助", Value: 2},
-}
-
-var articlesTypeMap = array.Slice2Map(articlesType, func(v datastruct.Option[string, int]) int {
-	return v.Value
-})
-
 func GetArticlesEnum() component.Response {
-	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
-		return datastruct.Option[string, uint64]{
-			Name:  t.Category,
-			Value: t.Id,
-		}
-	})
+	res := articleCategoryLabel()
 	return component.SuccessResponse(map[string]any{
 		"category": res,
 		"type":     articlesType,
 	})
-}
-
-func GetArticlesCategory() component.Response {
-	res := array.Map(articleCategory.All(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
-		return datastruct.Option[string, uint64]{
-			Name:  t.Category,
-			Value: t.Id,
-		}
-	})
-	return component.SuccessResponse(res)
 }
 
 type GetArticlesPageRequest struct {
@@ -124,6 +62,7 @@ type ReplyDto struct {
 	Id              uint64 `json:"id"`
 	ArticleId       uint64 `json:"articleId"`
 	UserId          uint64 `json:"userId"`
+	UserAvatarUrl   string `json:"userAvatarUrl"`
 	Username        string `json:"username"`
 	Content         string `json:"content"`
 	CreateTime      string `json:"createTime"`
@@ -309,10 +248,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		return t.Id
 	})
 	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
-	categoryIds := array.Map(categoryRs, func(t *articleCategoryRs.Entity) uint64 {
-		return t.ArticleCategoryId
-	})
-	categoryMap := articleCategory.GetMapByIds(categoryIds)
+	categoryMap := articleCategoryMap()
 
 	return component.SuccessPage(
 		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
@@ -329,8 +265,8 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 			return ArticlesSimpleDto{
 				Id:             t.Id,
 				Title:          t.Title,
-				CreateTime:     t.CreatedAt.Format("2006-01-02 15:04:05"),
-				LastUpdateTime: t.UpdatedAt.Format("2006-01-02 15:04:05"),
+				CreateTime:     t.CreatedAt.Format(time.DateTime),
+				LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
 				Username:       "", // 这里不需要用户名，因为是自己的文章
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,

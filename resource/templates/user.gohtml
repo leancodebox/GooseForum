@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN" {{if .Theme}}data-theme="{{.Theme}}"{{end}}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "commonhead.gohtml" .}}
+    {{if .IsProduction}}
+    {{GetImportInfoPath `src/style.css`}}
+    {{GetImportInfoPath `src/main.js`}}
+    {{else}}
+    <script type="module" src="http://localhost:3001/@vite/client"></script>
+    <script type="module" src="http://localhost:3001/src/main.js"></script>
+    {{end}}
+</head>
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-4">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- 左侧用户信息 -->
+            <aside class="w-full lg:w-80 flex-shrink-0">
+                <div class="sticky top-24 space-y-4">
+                    <!-- 用户基本信息 -->
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body text-center">
+                            <div class="avatar mb-4 mx-auto">
+                                <div class="mask mask-squircle w-24 h-24">
+                                    <img src="{{.Author.AvatarUrl}}" alt="用户头像"/>
+                                </div>
+                            </div>
+                            <h1 class="card-title justify-center text-xl">{{.Author.Username}}</h1>
+                            <p class="text-base-content/70 mb-2">{{.Author.Signature}}</p>
+
+                            <div class="flex justify-center gap-2 mb-4">
+                                <div class="badge badge-primary">VIP</div>
+                                <div class="badge badge-success">已认证</div>
+                                <div class="badge badge-warning">版主</div>
+                            </div>
+
+                            <div class="stats shadow-sm bg-base-100 w-full">
+                                <div class="stat py-2">
+                                    <div class="stat-title text-xs">发帖数</div>
+                                    <div class="stat-value text-lg">{{.ArticlesCount}}</div>
+                                </div>
+                                <div class="stat py-2">
+                                    <div class="stat-title text-xs">获赞数</div>
+                                    <div class="stat-value text-lg text-success">*</div>
+                                </div>
+                                <div class="stat py-2">
+                                    <div class="stat-title text-xs">粉丝数</div>
+                                    <div class="stat-value text-lg text-primary">*</div>
+                                </div>
+                            </div>
+
+                            <div class="card-actions justify-center mt-4 gap-2">
+                                <button class="btn btn-primary btn-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                         viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    已关注
+                                </button>
+                                <button class="btn btn-ghost btn-sm" @click="sendMessage">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                         viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                    </svg>
+                                    私信
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户详细信息 -->
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body">
+                            <h2 class="card-title">详细信息</h2>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">注册时间：</span>
+                                    <span>{{.Author.CreateTime.Format "2006-01-02"}}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">最后活跃：</span>
+                                    <span>{{.Author.CreateTime.Format "2006-01-02"}}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">所在地：</span>
+                                    <span>中国</span>
+                                </div>
+{{/*                                <div class="flex justify-between">*/}}
+{{/*                                    <span class="text-base-content/70">个人网站：</span>*/}}
+{{/*                                    <a href="" target="_blank" class="link link-primary">访问</a>*/}}
+{{/*                                </div>*/}}
+                                <div>
+                                    <div class="text-base-content/70 mb-1">个人简介：</div>
+                                    <div class="text-base-content">{{.Author.Bio}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 技能标签 -->
+                    <div class="card bg-base-100 shadow-xl" v-if="user.skills.length > 0">
+                        <div class="card-body">
+                            <h2 class="card-title">技能标签</h2>
+                            <div class="flex flex-wrap gap-2">
+                                <div class="badge badge-outline">TypeScript</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 右侧内容区域 -->
+            <main class="flex-1">
+                <!-- 发布的文章 -->
+                <div class="space-y-4">
+                    <div role="tablist" class="tabs tabs-lift">
+                        <input type="radio" name="my_tabs_2" class="tab" aria-label="发布的文章" checked="checked"/>
+                        <div class="tab-content border-base-300 bg-base-100 {{if not .Articles}} p-10 {{end}}">
+                            {{if .Articles}}
+                            <ul class="list">
+                                {{range .Articles}}
+                                <li class="list-row hover:bg-base-200 flex items-center gap-3 ">
+                                    <!-- 左侧头像 -->
+                                    <a class="avatar" href="/user/{{.AuthorId}}">
+                                        <div class="w-10 rounded-full">
+                                            <img src="{{.AvatarUrl}}" alt="{{.Username}}"/>
+                                        </div>
+                                    </a>
+                                    <!-- 右侧内容 -->
+                                    <div class="flex-1">
+                                        <!-- 标题行 -->
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <div class="badge badge-sm badge-primary flex-shrink-0">{{.TypeStr}}</div>
+                                            <a href="/post/{{.Id}}"
+                                               class="text-lg font-semibold text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
+                                        </div>
+                                        <!-- 用户信息行和统计信息合并为一行 -->
+                                        <div class="flex items-center justify-between text-sm text-base-content/60">
+                                            <div class="flex items-center flex-wrap">
+                                                <a href="/user/{{.AuthorId}}" class="mr-3">{{.Username}}</a>
+                                                <span class="mr-3">2025-05-23 09:30:17</span>
+                                                {{range .Categories}}
+                                                <span class="badge badge-sm badge-ghost mr-1">{{.}}</span>
+                                                {{end}}
+                                            </div>
+                                            <div class="flex items-center">
+                                                <div class="flex items-center mr-4">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                                                         fill="none"
+                                                         viewBox="0 0 24 24"
+                                                         stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              stroke-width="2"
+                                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              stroke-width="2"
+                                                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                    </svg>
+                                                    <span class="flex-shrink-0">{{.ViewCount}}</span>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                                                         fill="none"
+                                                         viewBox="0 0 24 24"
+                                                         stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              stroke-width="2"
+                                                              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                                    </svg>
+                                                    <span class="flex-shrink-0"> {{.CommentCount}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                {{end}}
+                            </ul>
+
+                            {{else}}
+                            假以时日一飞冲天
+                            {{end}}
+                        </div>
+
+                        <input type="radio" name="my_tabs_2" class="tab" aria-label="评论记录"/>
+                        <div class="tab-content border-base-300 bg-base-100 p-10">你似乎来到了没有荒原存在的知识</div>
+
+                        <input type="radio" name="my_tabs_2" class="tab" aria-label="关注"/>
+                        <div class="tab-content border-base-300 bg-base-100 p-10">长老们，去别处看看吧 彡(-_-;)彡</div>
+
+                        <input type="radio" name="my_tabs_2" class="tab" aria-label="粉丝"/>
+                        <div class="tab-content border-base-300 bg-base-100 p-10">您访问的页面走丢在寻找梦想的路上了
+                        </div>
+                    </div>
+                    <!-- 分页 -->
+                    <div class="flex justify-center mt-8">
+                        <div class="join bg-base-100 rounded-lg shadow-sm">
+                            <button class="join-item btn btn-sm bg-base-100 border-base-300">«
+                            </button>
+                            <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">∞
+                            </button>
+                            <button class="join-item btn btn-sm bg-base-100 border-base-300">»
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
+</body>
+</html>

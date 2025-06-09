@@ -1,8 +1,8 @@
 [app]
 name = "app"
 env = "production" # APP_ENV in local,production
-debug = true
-enabled = false
+debug = false
+maintenance = false
 
 [server]
 url = "http://localhost"

@@ -1,8 +1,8 @@
 package userRoleRs
 
 import (
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 )
 
@@ -42,17 +42,6 @@ func Get(id any) (entity Entity) {
 func GetByUserId(userId uint64) (entities []*Entity) {
 	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldEffective, 1)).Find(&entities)
 	return
-}
-
-func GetByUserIdAndRoleId(userId, roleId uint64) (entities Entity) {
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldRoleId, roleId)).First(&entities)
-	return
-}
-
-func GetRoleIdsByUserId(userId uint64) []uint64 {
-	return array.Map(GetByUserId(userId), func(t *Entity) uint64 {
-		return t.RoleId
-	})
 }
 
 func GetByUserIds(userIds []uint64) (entities []*Entity) {

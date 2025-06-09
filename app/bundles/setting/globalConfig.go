@@ -2,7 +2,7 @@
 package setting
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
 const on = "on"

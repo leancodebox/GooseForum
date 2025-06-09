@@ -1,14 +1,27 @@
 <script setup lang="ts">
-import { ref, onMounted,onUnmounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/userStore'
-import { enqueueMessage } from '@/utils/messageManager'
-import { NPagination, NButton, NCard, NFlex, NImage, NInput, NList, NListItem, NModal, NSpace, NText, useMessage, NGrid, NGridItem, NTabs, NTabPane } from "naive-ui"
-import { VueCropper } from 'vue-cropper'
+import {onMounted, onUnmounted, ref, watch} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/userStore'
+import {enqueueMessage} from '@/utils/messageManager'
+import {
+  NButton,
+  NFlex,
+  NList,
+  NListItem,
+  NModal,
+  NPagination,
+  NSpace,
+  NTabPane,
+  NTabs,
+  NText,
+  useMessage
+} from "naive-ui"
+import {VueCropper} from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
 // 首先确保导入了 saveUserInfo 函数
-import {uploadAvatar, saveUserInfo, changePassword, getUserArticles} from "@/utils/articleService.ts";
-import type { ArticleListItem } from "@/types/articleInterfaces.ts";
+import {changePassword, getUserArticles, saveUserInfo, uploadAvatar} from "@/utils/articleService.ts";
+import type {ArticleListItem} from "@/types/articleInterfaces.ts";
+import type {ExternalInformation} from "@/stores/userStore.ts";
 
 
 // 定义用户表单接口
@@ -17,8 +30,11 @@ interface UserForm {
   email: string
   bio: string
   website: string
-  signature: string
+  websiteName: string
+  signature: string,
+  externalInformation: ExternalInformation
 }
+
 
 const message = useMessage()
 const avatarUrl = ref<string>('')
@@ -40,13 +56,13 @@ const activeTab = ref('个人资料')
 
 // 监听路由变化来同步tab状态
 watch(
-  () => route.query.tab,
-  (newTab) => {
-    if (newTab && ['个人资料', '我的文章', '修改密码'].includes(newTab as string)) {
-      activeTab.value = newTab as string
-    }
-  },
-  { immediate: true }
+    () => route.query.tab,
+    (newTab) => {
+      if (newTab && ['个人资料', '我的文章', '修改密码'].includes(newTab as string)) {
+        activeTab.value = newTab as string
+      }
+    },
+    {immediate: true}
 )
 
 // 当tab变化时更新URL
@@ -75,7 +91,16 @@ const userForm = ref<UserForm>({
   email: '',
   bio: '',
   website: '',
+  websiteName: '',
   signature: '',
+  externalInformation: {
+    github: {link:''},
+    weibo: {link:''},
+    bilibili: {link:''},
+    twitter: {link:''},
+    linkedIn: {link:''},
+    zhihu: {link:''},
+  }
 })
 
 // 分页相关变量
@@ -114,7 +139,9 @@ onMounted(async () => {
       email: userStore.userInfo.email || '',
       bio: userStore.userInfo.bio || '',
       website: userStore.userInfo.website || '',
+      websiteName: userStore.userInfo.websiteName || '',
       signature: userStore.userInfo.signature || '',
+      externalInformation: userStore.userInfo.externalInformation
     }
     avatarUrl.value = userStore.userInfo.avatarUrl || ''
   }
@@ -125,7 +152,7 @@ onMounted(async () => {
   await fetchUserArticles(currentPage.value, pageSize.value)
 })
 
-getUserArticles(1,10)
+getUserArticles(1, 10)
 
 
 // 更新用户信息
@@ -133,11 +160,13 @@ const updateProfile = async (): Promise<void> => {
   try {
     // 使用封装好的 saveUserInfo 函数替代直接调用 axiosInstance
     const response = await saveUserInfo(
-      userForm.value.nickname,
-      userForm.value.email,
-      userForm.value.bio,
-      userForm.value.signature,
-      userForm.value.website
+        userForm.value.nickname,
+        userForm.value.email,
+        userForm.value.bio,
+        userForm.value.signature,
+        userForm.value.website,
+        userForm.value.websiteName,
+        userForm.value.externalInformation,
     );
 
     if (response.code === 0) {
@@ -204,9 +233,9 @@ function compressImage(base64Data: string, maxWidth = 200): Promise<Blob> {
 
       // 转换为 blob，使用较低的质量值来减小文件大小
       canvas.toBlob(
-        (blob) => resolve(blob || new Blob()),
-        'image/jpeg',
-        0.8  // 压缩质量，0.8通常是质量和大小的好平衡点
+          (blob) => resolve(blob || new Blob()),
+          'image/jpeg',
+          0.8  // 压缩质量，0.8通常是质量和大小的好平衡点
       )
     }
   })
@@ -296,8 +325,8 @@ const updatePassword = async (): Promise<void> => {
   try {
     changingPassword.value = true;
     const response = await changePassword(
-      passwordForm.value.oldPassword,
-      passwordForm.value.newPassword
+        passwordForm.value.oldPassword,
+        passwordForm.value.newPassword
     );
 
     if (response.code === 0) {
@@ -371,8 +400,30 @@ const updatePassword = async (): Promise<void> => {
                 <input type="url" id="website" v-model="userForm.website">
               </div>
               <div class="form-group">
+                <label for="website">网站名</label>
+                <input type="text" id="websiteName" v-model="userForm.websiteName">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
                 <label for="signature">个性签名</label>
                 <input type="text" id="signature" v-model="userForm.signature">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="website">Github</label>
+                <input type="url" id="extInfoGithub" v-model="userForm.externalInformation.github.link">
+                <label for="website">Weibo</label>
+                <input type="url" id="extInfoWeibo" v-model="userForm.externalInformation.weibo.link">
+                <label for="website">bilibili</label>
+                <input type="url" id="extInfoBilibili" v-model="userForm.externalInformation.bilibili.link">
+                <label for="website">Twitter</label>
+                <input type="url" id="extInfoTwitter" v-model="userForm.externalInformation.twitter.link">
+                <label for="website">LinkedIn</label>
+                <input type="url" id="extInfoLinkedIn" v-model="userForm.externalInformation.linkedIn.link">
+                <label for="website">知乎</label>
+                <input type="url" id="extInfoZhihu" v-model="userForm.externalInformation.zhihu.link">
               </div>
             </div>
 
@@ -396,17 +447,19 @@ const updatePassword = async (): Promise<void> => {
                   <div class="article-meta">
                     <span class="publish-time">{{ article.createTime }}</span>
                     <span style="margin-left: 1em;"><i class="fas fa-eye"></i> {{ article.viewCount }}</span>
-                    <span style="margin-left: 1em;">分类: {{ article.categories?.join(', ') || article.category }}</span>
+                    <span style="margin-left: 1em;">分类: {{
+                        article.categories?.join(', ') || article.category
+                      }}</span>
                   </div>
                 </div>
               </n-list-item>
             </n-list>
             <div style="margin-top: 24px; text-align: right;">
               <n-pagination
-                v-model:page="currentPage"
-                :page-size="pageSize"
-                :item-count="total"
-                @update:page="handlePageChange"
+                  v-model:page="currentPage"
+                  :page-size="pageSize"
+                  :item-count="total"
+                  @update:page="handlePageChange"
               />
             </div>
           </div>
@@ -440,12 +493,14 @@ const updatePassword = async (): Promise<void> => {
 
   <!-- 裁切头像的模态框 -->
   <n-modal v-model:show="showCropModal" preset="card" :style="isSmallScreen ? 'width: 95%' : 'width: 600px'"
-    title="裁切头像" :mask-closable="false">
+           title="裁切头像" :mask-closable="false">
     <n-space vertical size="large">
       <div class="cropper-container">
         <vue-cropper ref="cropperRef" :img="previewUrl" :autoCrop="true" :fixedBox="true" :centerBox="true"
-          :fixed="true" :fixedNumber="[1, 1]" :canScale="true" :high="true" :maxImgSize="2048" :autoCropWidth="300"
-          :autoCropHeight="300" :outputSize="1" :infoTrue="true" style="height: 400px" @realTime="realTimePreview" />
+                     :fixed="true" :fixedNumber="[1, 1]" :canScale="true" :high="true" :maxImgSize="2048"
+                     :autoCropWidth="300"
+                     :autoCropHeight="300" :outputSize="1" :infoTrue="true" style="height: 400px"
+                     @realTime="realTimePreview"/>
       </div>
 
       <n-flex justify="space-between" align="center" :wrap="isSmallScreen">
@@ -453,7 +508,7 @@ const updatePassword = async (): Promise<void> => {
           <n-text depth="3">预览效果</n-text>
           <div class="preview-container">
             <div class="preview-circle">
-              <img :src="cropImg" style="width: 100%; height: 100%; object-fit: cover;" />
+              <img :src="cropImg" style="width: 100%; height: 100%; object-fit: cover;"/>
             </div>
           </div>
         </div>

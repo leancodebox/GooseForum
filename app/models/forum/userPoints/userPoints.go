@@ -21,7 +21,7 @@ const fieldUpdatedAt = "updated_at"
 type Entity struct {
 	UserId        uint64    `gorm:"primaryKey;column:user_id;autoIncrement;not null;" json:"userId"`            //
 	CurrentPoints int64     `gorm:"column:current_points;type:bigint;not null;default:0;" json:"currentPoints"` //
-	CreatedAt     time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`                   //
+	CreatedAt     time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`         //
 	UpdatedAt     time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 

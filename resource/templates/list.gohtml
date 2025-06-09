@@ -1,353 +1,213 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-{{template "head.gohtml" .}}
+<html lang="zh-CN" {{if .Theme}}data-theme="{{.Theme}}"{{end}}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "commonhead.gohtml" .}}
+    {{if .IsProduction}}
+    {{GetImportInfoPath `src/style.css`}}
+    {{GetImportInfoPath `src/main.js`}}
+    {{else}}
+    <script type="module" src="http://localhost:3001/@vite/client"></script>
+    <script type="module" src="http://localhost:3001/src/main.js"></script>
+    {{end}}
+</head>
 <body>
-{{template "nav_new.gohtml" .}}
-<main>
-    <div class="container">
-        <div class="main-content">
-            <div class="articles-list">
-                <div class="category-filter">
-                    <a href="#" class="filter-tag active" data-filter="all" role="button">全部</a>
-                    {{ if .articleCategoryList}}
-                        {{range .articleCategoryList}}
-                            <a href="#" class="filter-tag" data-filter="{{.Value}}" role="button">{{.Name}}</a>
-                        {{end}}
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-4">
+        <div class="flex flex-col md:flex-row gap-6">
+            <section class="flex-1">
+                <!-- 文章列表容器 -->
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body p-0">
+                        <!-- 文章分类选择 -->
+                        <div class="px-6 py-4 border-b border-base-200">
+                            <div class="flex flex-wrap gap-2">
+                                <a class="btn btn-sm {{if .NoFilter}}btn-primary{{end}} filter-tag {{if .NoFilter}}active{{end}}" data-filter="all"
+                                        role="button">全部
+                                </a>
+                                {{$all := .FilterIds}}
+                                {{range .ArticleCategoryList}}
+                                {{$isActive := (ContainsInt $all .Value)}}
+                                <a class="btn btn-sm {{if $isActive}}btn-primary{{end}} filter-tag {{if $isActive}}active{{end}}" data-filter="{{.Value}}"
+                                        role="button">{{.Name}}</a>
+                                {{end}}
+                            </div>
+                        </div>
+                        <!-- 文章列表 -->
+                        <ul class="list">
+                            {{range .ArticleList}}
+                            <li class="list-row hover:bg-base-200 flex items-center gap-3 ">
+                                <!-- 左侧头像 -->
+                                <a class="avatar" href="/user/{{.AuthorId}}">
+                                    <div class="w-10 rounded-full">
+                                        <img src="{{.AvatarUrl}}" alt="{{.Username}}"/>
+                                    </div>
+                                </a>
+                                <!-- 右侧内容 -->
+                                <div class="flex-1">
+                                    <!-- 标题行 -->
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <div class="badge badge-sm badge-primary flex-shrink-0">{{.TypeStr}}</div>
+                                        <a href="/post/{{.Id}}"
+                                           class="text-lg font-semibold text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
+                                    </div>
+                                    <!-- 用户信息行和统计信息合并为一行 -->
+                                    <div class="flex items-center justify-between text-sm text-base-content/60">
+                                        <div class="flex items-center flex-wrap">
+                                            <a href="/user/{{.AuthorId}}" class="mr-3">{{.Username}}</a>
+                                            <span class="mr-3">2025-05-23 09:30:17</span>
+                                            {{range .Categories}}
+                                            <span class="badge badge-sm badge-ghost mr-1">{{.}}</span>
+                                            {{end}}
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="flex items-center mr-4">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                                                     fill="none"
+                                                     viewBox="0 0 24 24"
+                                                     stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                <span class="flex-shrink-0">{{.ViewCount}}</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                                                     fill="none"
+                                                     viewBox="0 0 24 24"
+                                                     stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                                </svg>
+                                                <span class="flex-shrink-0"> {{.CommentCount}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            {{end}}
+                        </ul>
+
+                        <div class="px-6 py-4 border-t border-base-200 bg-base-50">
+                            <div class="flex justify-center">
+                                <div class="join">
+                                    {{if ge .Page 2 }}
+                                    <a href="/post?page={{.PrevPage}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
+                                       aria-label="Previous">
+                                        <button class="join-item btn btn-sm">«</button>
+                                    </a>
+                                    {{end}}
+                                    {{ $NowPage := .Page }}
+                                    {{range .Pagination}}
+                                    <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}">
+                                        <button class="join-item btn btn-sm {{if eq $NowPage .Page}}btn-active{{end}}">
+                                            {{.Page}}
+                                        </button>
+                                    </a>
+                                    {{end}}
+                                    {{if lt .Page .TotalPages}}
+                                    <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}"
+                                       aria-label="Next">
+                                        <button class="join-item btn btn-sm">»</button>
+                                    </a>
+                                    {{end}}
+                                </div>
+                            </div>
+                            <div class="text-center mt-2 text-sm text-base-content/60">
+                                第 {{ .Page }} 页，共 {{ .TotalPages }} 页
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <aside class="w-full md:w-80 flex-shrink-0">
+                <div class="sticky top-24 space-y-4">
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body">
+                            <h2 class="card-title">小帖士</h2>
+                            <p class="text-base-content/70">
+                                在我的后园，可以看见墙外有两株树，一株是枣树，还有一株也是枣树。</p>
+                        </div>
+                    </div>
+                    {{if .RecommendedArticles}}
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body">
+                            <h2 class="card-title">推荐文章</h2>
+                            <div class="space-y-2">
+                                <div class="text-sm text-base-content/60">本周最热门文章</div>
+                                {{range .RecommendedArticles}}
+                                <div class="space-y-1">
+                                    <a href="/post/{{.Id}}" class="text-sm hover:text-primary cursor-pointer">
+                                        • {{.Title}}
+                                    </a>
+                                </div>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
                     {{end}}
-                </div>
-                {{range .Data}}
-                    <article class="article-item">
-                        <div class="article-author">
-                            <a href="/user-profile/{{.AuthorId}}" >
-                            <img src="{{.AvatarUrl}}" alt="{{.Username}}" class="author-avatar-small">
-                            </a>
-                        </div>
-                        <div class="article-content">
-                            <div class="article-header">
-                                <span class="article-category-tag">{{.TypeStr}}</span>
-                                <a href="/post/{{.Id}}"><span class="article-title">{{.Title}}</span></a>
-                            </div>
-                            <div class="article-meta-info">
-                                <a href="/user-profile/{{.AuthorId}}" >
-                                <span>{{.Username}}</span>
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body">
+                            <h2 class="card-title">赞助商</h2>
+                            <p class="text-base-content/70">感谢我们的赞助商支持，让论坛能够持续为大家提供优质服务。</p>
+                            <div class="card-actions justify-end">
+                                <a href="/sponsors">
+                                    <button class="btn btn-primary btn-sm">了解更多</button>
                                 </a>
-                                <span>{{.LastUpdateTime}}</span>
-                                <div class="article-tags">
-                                    {{range .Categories}}
-                                        <span class="article-tag">{{.}}</span>
-                                    {{end}}
-                                </div>
-                                <div class="article-stats">
-                                    <span class="stat-item">
-                                        <span class="stat-icon">👁️</span>
-                                        {{.ViewCount}}
-                                    </span>
-                                    <span class="stat-item">
-                                        <span class="stat-icon">💬</span>
-                                        {{.CommentCount}}
-                                    </span>
-                                </div>
                             </div>
                         </div>
-                    </article>
-                {{end}}
-                <div class="pagination">
-                    <ul class="pagination">
-                        {{if gt .Page 1}}
-                            <li class="page-item">
-                                <a class="page-link" href="/post?page={{.PrevPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                        {{end}}
-                        {{range .pagination}}
-                            {{if eq .Index 1}}
-                                {{if ne .Page 1 }}
-                                    <li class="page-item">
-                                        <a class="page-link" href="/post?page=1{{if $.Filters}}&filters={{$.Filters}}{{end}}">1</a>
-                                    </li>
-                                    {{if gt .Page 2 }}
-                                        <li class="page-item">
-                                            <span class="page-link">...</span>
-                                        </li>
-                                    {{end}}
-                                {{end}}
-                            {{end}}
-                            <li class="page-item{{if eq .Page $.Page}} active{{end}}">
-                                <a class="page-link" href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}">{{.Page}}</a>
-                            </li>
-                            {{if eq .Index 7}}
-                                {{if ne .Page $.TotalPages}}
-                                    <li class="page-item">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="/post?page={{$.TotalPages}}{{if $.Filters}}&filters={{$.Filters}}{{end}}">{{$.TotalPages}}</a>
-                                    </li>
-                                {{end}}
-                            {{end}}
-                        {{end}}
-                        {{if lt .Page .TotalPages}}
-                            <li class="page-item">
-                                <a class="page-link" href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        {{end}}
-                    </ul>
+                    </div>
                 </div>
-            </div>
+            </aside>
         </div>
-
-        <aside class="sidebar">
-            {{ if false }}
-                <!-- 社区统计 -->
-                <div class="sidebar-card">
-                    <h3>社区统计</h3>
-                    <div class="author-stats">
-                        <div class="stat-item">
-                            <div class="number">1.2k</div>
-                            <div class="label">文章</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="number">3.5k</div>
-                            <div class="label">用户</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="number">8.7k</div>
-                            <div class="label">评论</div>
-                        </div>
-                    </div>
-                </div>
-            {{end}}
-            <!-- 新增的小帖士卡片 -->
-            <div class="sidebar-card">
-                <h3>小帖士</h3>
-                <div class="tips-content">
-                    <p>保持代码整洁，便于维护。定期备份你的项目，并使用版本控制系统管理代码，以确保项目的安全和可追溯性。</p>
-                </div>
-            </div>
-
-            <!-- 推荐文章 -->
-            {{if .recommendedArticles}}
-            <div class="sidebar-card">
-                <h3>推荐文章</h3>
-                <ul class="recommended-posts">
-                    {{range .recommendedArticles}}
-                        <li><a href="/post/{{.Id}}">{{.Title}}</a></li>
-                    {{end}}
-                </ul>
-            </div>
-            {{end}}
-
-            <!-- 标签云 -->
-            {{ if false }}
-                <div class="sidebar-card">
-                    <h3>热门标签</h3>
-                    <div class="tag-cloud">
-                        {{range .articleCategoryList}}
-                            <a href="#" class="tag">{{.Name}}</a>
-                        {{end}}
-                    </div>
-                </div>
-            {{end}}
-
-            <!-- 标签云 -->
-            <div class="sidebar-card">
-                <h3>赞助商</h3>
-                <div class="sponsors-grid">
-                    <a rel="nofollow noopener noreferrer" target="_blank" href="https://github.com/golang/go" class="sponsor-card">
-                        <img src="https://golang.google.cn/images/go-logo-blue.svg" alt="Docker" class="sponsor-logo">
-                        <h4 class="sponsor-name">golang</h4>
-                        <p class="sponsor-description">An open-source programming language supported by Google</p>
-                        <span class="sponsor-tag platinum">白金赞助</span>
-                    </a>
-                    <a rel="nofollow noopener noreferrer" target="_blank"  href="https://cn.vuejs.org/" class="sponsor-card">
-                        <img src="/static/pic/icons8-vue.js-96.png" alt="vue" class="sponsor-logo">
-                        <h4 class="sponsor-name">vue</h4>
-                        <p class="sponsor-description">渐进式 JavaScript 框架</p>
-                        <span class="sponsor-tag gold">金牌赞助</span>
-                    </a>
-                    <a rel="nofollow noopener noreferrer" target="_blank"  href="#" class="sponsor-card">
-                        <img src="/static/pic/default-avatar.png" alt="JetBrains" class="sponsor-logo">
-                        <h4 class="sponsor-name">JetBrains</h4>
-                        <p class="sponsor-description">开发工具</p>
-                        <span class="sponsor-tag silver">银牌赞助</span>
-                    </a>
-                    <a rel="nofollow noopener noreferrer" target="_blank"  href="https://www.sdut.edu.cn/" class="sponsor-card">
-                        <img src="/static/pic/sdut_80.png" alt="山东理工大学" class="sponsor-logo">
-                        <h4 class="sponsor-name">山东理工大学</h4>
-                        <p class="sponsor-description">厚德、博学、笃行、至善</p>
-                        <span class="sponsor-tag silver">银牌赞助</span>
-                    </a>
-                </div>
-                <a href="/sponsors" class="all-sponsors-link">
-                    查看所有赞助商 →
-                </a>
-            </div>
-        </aside>
-    </div>
-</main>
-{{template "footer.gohtml" .}}
-<style>
-    /* 类似 Bootstrap 的分页样式，使用 :root 变量 */
-    .pagination {
-        display: flex;
-        padding-left: 10px;
-        list-style: none;
-        justify-content: left;
-    }
-
-    .page-item {
-        margin: 0;
-    }
-
-    .page-item:first-child .page-link {
-        margin-left: 0;
-        border-top-left-radius: 0.25rem;
-        border-bottom-left-radius: 0.25rem;
-    }
-
-    .page-item:last-child .page-link {
-        border-top-right-radius: 0.25rem;
-        border-bottom-right-radius: 0.25rem;
-    }
-
-    .page-link {
-        position: relative;
-        display: block;
-        padding: 0.5rem 0.75rem;
-        margin-left: -1px;
-        line-height: 1.25;
-        color: var(--color-primary); /* 使用主要颜色变量 */
-        background-color: var(--card-bg); /* 使用卡片背景颜色变量 */
-        border: 1px solid var(--color-border); /* 使用边框颜色变量 */
-    }
-
-    .page-link:hover {
-        z-index: 2;
-        color: var(--primary-color-dark); /* 使用主要颜色的深色版本变量 */
-        text-decoration: none;
-        background-color: var(--hover-color); /* 使用悬停颜色变量 */
-        border-color: var(--color-border); /* 使用边框颜色变量 */
-    }
-
-    .page-link:focus {
-        z-index: 3;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(var(--color-primary), 0.25); /* 使用主要颜色变量 */
-    }
-
-    .page-item.active .page-link {
-        z-index: 3;
-        color: white;
-        background-color: var(--color-primary); /* 使用主要颜色变量 */
-        border-color: var(--color-primary); /* 使用主要颜色变量 */
-    }
-
-    .page-item.disabled .page-link {
-        color: var(--text-color-light); /* 使用次要文本颜色变量 */
-        pointer-events: none;
-        cursor: auto;
-        background-color: var(--card-bg); /* 使用卡片背景颜色变量 */
-        border-color: var(--color-border); /* 使用边框颜色变量 */
-    }
-
-    /* 小屏幕适配 */
-    @media (max-width: 768px) {
-        .page-link {
-            padding: 0.3rem 0.6rem;
-            font-size: 0.8rem;
-        }
-    }
-</style>
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
 <script>
-    const filterTags = document.querySelectorAll('.filter-tag');
-    const allTag = document.querySelector('.filter-tag[data-filter="all"]');
-
-    // 修改选择器以匹配新的 HTML 结构
-    const pageLinks = document.querySelectorAll('.page-link');
-
-    // 页面加载时根据URL参数设置初始状态
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const filters = urlParams.get('filters');
-
-        if (filters) {
-            const filterArray = filters.split('_');
-            filterTags.forEach(tag => {
-                if (filterArray.includes(tag.dataset.filter)) {
-                    tag.classList.add('active');
-                    // 如果有其他标签被选中，取消"全部"的选中状态
-                    if (tag.dataset.filter !== 'all') {
-                        allTag.classList.remove('active');
-                    }
-                }
-            });
-        }
-
-        // 设置当前页码的激活状态
-        const currentPage = parseInt(urlParams.get('page')) || 1;
-        pageLinks.forEach(link => {
-            const pageNumber = parseInt(link.textContent);
-            if (!isNaN(pageNumber) && pageNumber === currentPage) {
-                link.parentElement.classList.add('active');
-            }
-        });
-    });
-
-    filterTags.forEach(tag => {
-        tag.addEventListener('click', function(event) {
+    // 极简化的标签过滤逻辑 - 服务端渲染状态，客户端只处理跳转
+    document.querySelectorAll('.filter-tag').forEach(tag => {
+        tag.addEventListener('click', function (event) {
             event.preventDefault();
-            if (this.dataset.filter === 'all') {
-                // 如果点击的是"全部"，则取消其他标签的选中状态
-                filterTags.forEach(t => {
-                    if (t !== this) {
-                        t.classList.remove('active');
-                    }
-                });
-                this.classList.add('active'); // 确保"全部"被选中
-                updateUrlAndRefresh();
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentFilters = urlParams.get('filters') || '';
+            const clickedFilter = this.dataset.filter;
+            let newFilters = '';
+            if (clickedFilter === 'all') {
+                // 点击"全部"，清空所有过滤器
+                newFilters = '';
             } else {
-                // 处理其他标签的选中状态
-                this.classList.toggle('active');
-                // 如果"全部"被选中，取消选中状态
-                if (allTag.classList.contains('active')) {
-                    allTag.classList.remove('active');
+                // 处理分类标签的切换
+                const filterArray = currentFilters ? currentFilters.split('-') : [];
+                const filterIndex = filterArray.indexOf(clickedFilter);
+
+                if (filterIndex > -1) {
+                    // 如果已选中，则移除
+                    filterArray.splice(filterIndex, 1);
+                } else {
+                    // 如果未选中，则添加
+                    filterArray.push(clickedFilter);
                 }
-                // 如果没有任何标签被选中，则自动选中"全部"
-                const anyActive = Array.from(filterTags).some(t => t.classList.contains('active') && t !== allTag);
-                if (!anyActive) {
-                    allTag.classList.add('active');
-                }
-                updateUrlAndRefresh();
+                newFilters = filterArray.join('-');
             }
+            // 构建新URL并跳转
+            urlParams.delete('page'); // 重置页码
+            if (newFilters) {
+                urlParams.set('filters', newFilters);
+            } else {
+                urlParams.delete('filters');
+            }
+            window.location.href = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
         });
     });
-
-    function updateUrlAndRefresh() {
-        const selectedFilters = Array.from(filterTags)
-            .filter(tag => tag.classList.contains('active') && tag.dataset.filter !== 'all')
-            .map(tag => tag.dataset.filter);
-
-        // 获取当前URL中的其他参数
-        const urlParams = new URLSearchParams(window.location.search);
-
-        // 更新或添加filters参数
-        if (selectedFilters.length > 0) {
-            urlParams.set('filters', selectedFilters.join('_'));
-        } else {
-            urlParams.delete('filters');
-        }
-
-        // 保留页码参数
-        const page = urlParams.get('page');
-
-        // 构建新的URL并刷新页面
-        const baseUrl = window.location.pathname;
-        const newUrl = baseUrl + (urlParams.toString() ? '?' + urlParams.toString() : '');
-        window.location.href = newUrl; // 使用location.href进行页面刷新
-    }
 </script>
 </body>
 </html>

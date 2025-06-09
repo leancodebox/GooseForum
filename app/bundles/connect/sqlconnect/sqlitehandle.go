@@ -2,8 +2,8 @@ package sqlconnect
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/fileopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/fileopt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"gorm.io/gorm"
 	"log/slog"
 	"os"

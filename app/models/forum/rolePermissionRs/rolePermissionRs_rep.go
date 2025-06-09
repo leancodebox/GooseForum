@@ -1,8 +1,8 @@
 package rolePermissionRs
 
 import (
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 )
 
 func create(entity *Entity) int64 {

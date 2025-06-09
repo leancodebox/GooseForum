@@ -5,12 +5,11 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"html/template"
 	"mime"
 	"net/smtp"
 	"time"
-
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 )
 
 type EmailConfig struct {
@@ -197,15 +196,6 @@ func generateActivationEmailBody(username, token string) (string, error) {
 </body>
 </html>
 `
-	// 准备模板数据
-	data := struct {
-		Username       string
-		ActivationLink string
-	}{
-		Username: username,
-		ActivationLink: fmt.Sprintf("%s/api/activate?token=%s",
-			preferences.GetString("server.url"), token),
-	}
 
 	// 解析并执行模板
 	tmpl, err := template.New("activation").Parse(emailTemplate)
@@ -214,7 +204,11 @@ func generateActivationEmailBody(username, token string) (string, error) {
 	}
 
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, data)
+	err = tmpl.Execute(&buf, map[string]any{
+		"Username": username,
+		"ActivationLink": fmt.Sprintf("%s/api/activate?token=%s",
+			preferences.GetString("server.url"), token),
+	})
 	if err != nil {
 		return "", err
 	}

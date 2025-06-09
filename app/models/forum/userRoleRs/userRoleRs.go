@@ -29,7 +29,7 @@ type Entity struct {
 	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"` //
 	RoleId    uint64    `gorm:"column:role_id;type:bigint unsigned;not null;default:0;" json:"roleId"` //
 	Effective int       `gorm:"column:effective;type:int;not null;default:0;" json:"effective"`        //
-	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`              //
+	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`    //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 

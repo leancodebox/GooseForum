@@ -20,6 +20,7 @@ export interface User {
     userId: number;
     username: string;
     email: string;
+    roleId: number;
     status: number;
     validate: number;
     prestige: number;
@@ -57,4 +58,38 @@ export interface UserRole {
     effective: number,
     permissions: Permissions[]
     createTime: string
+}
+
+
+export interface ApplySheet {
+    id: number,
+    userId: number,
+    applyUserInfo: string,
+    type: number,
+    status: number,
+    title: string,
+    content: string
+    createTime: string,
+    updateTime: string
+}
+
+
+export interface FriendLinksGroup {
+    name: string,
+    links: LinkItem[]
+}
+
+export interface LinkItem {
+    name: string
+    desc: string
+    url: string
+    logoUrl: string
+    status: 0 | 1 | any
+}
+
+export interface Sponsor {
+    level: string,
+    name: string,
+    logoUrl: string,
+    url: string,
 }

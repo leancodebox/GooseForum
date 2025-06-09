@@ -8,6 +8,8 @@ import SystemSettings from '../views/SystemSettings.vue'
 import Login from '../views/Login.vue'
 import RolesView from '../views/RolesView.vue'
 import {useUserStore} from "../stores/auth.ts";
+import FriendLinkManagement from '../views/FriendLinkManagement.vue'
+import ExternalTicketManagement from '../views/ExternalTicketManagement.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -76,6 +78,34 @@ const router = createRouter({
           component: RolesView,
           meta: {
             title: '角色管理',
+            requiresAuth: true,
+            isAdmin: true
+          }
+        },
+        {
+          path: 'friend-links',
+          name: 'friendLinks',
+          component: FriendLinkManagement,
+          meta: {
+            title: '友情链接管理',
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'sponsor-manager',
+          name: 'sponsorManager',
+          component: ()=>import('../views/SponsorManagement.vue'),
+          meta: {
+            title: '友情链接管理',
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'external-tickets',
+          name: 'externalTickets',
+          component: ExternalTicketManagement,
+          meta: {
+            title: '外部工单管理',
             requiresAuth: true,
             isAdmin: true
           }

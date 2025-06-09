@@ -22,7 +22,7 @@ type Entity struct {
 	TaskJson    string    `gorm:"column:task_json;type:text;" json:"taskJson"`                           // 任务数据
 	RetryCount  uint8     `gorm:"column:retry_count;type:tinyint;not null;default:0;" json:"retryCount"` // 重试次数
 	LastError   string    `gorm:"column:last_error;type:text;" json:"lastError"`                         // 最后一次错误信息
-	CreatedAt   time.Time `gorm:"column:created_at;index;autoCreateTime;" json:"createdAt"`
+	CreatedAt   time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`
 	ProcessedAt time.Time `gorm:"column:processed_at;type:datetime;" json:"processedAt"` // 处理时间
 }
 

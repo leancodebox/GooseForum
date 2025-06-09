@@ -1,8 +1,9 @@
 package articles
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
-	"github.com/leancodebox/GooseForum/app/bundles/goose/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"time"
 )
 
@@ -38,6 +39,13 @@ func Get(id any) (entity Entity) {
 func GetCount() int64 {
 	var count int64
 	builder().Count(&count)
+	return count
+}
+func GetMonthCount() int64 {
+	now := time.Now()
+	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	var count int64
+	builder().Where(queryopt.Ge(fieldCreatedAt, firstOfMonth)).Count(&count)
 	return count
 }
 
@@ -85,21 +93,15 @@ type PageQuery struct {
 	Categories     []int
 }
 
-func Page[ResType SmallEntity | Entity](q PageQuery) struct {
+func Page[ResType SmallEntity](q PageQuery) struct {
 	Page     int
 	PageSize int
 	Total    int64
 	Data     []ResType
 } {
 	var list []ResType
-	if q.Page > 0 {
-		q.Page -= 1
-	} else {
-		q.Page = 0
-	}
-	if q.PageSize < 1 {
-		q.PageSize = 10
-	}
+	q.Page = max(q.Page-1, 0)
+	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	b := builder()
 	if q.Search != "" {
 		b.Where(queryopt.Like(fieldContent, q.Search))
@@ -120,7 +122,8 @@ func Page[ResType SmallEntity | Entity](q PageQuery) struct {
 	var total int64
 	total = 1200
 	//b.Count(&total)
-	b.Select("articles.*")
+	b.Select(" articles.id, articles.title, articles.type, articles.user_id, articles.article_status, articles.process_status," +
+		" articles.view_count, articles.reply_count, articles.created_at, articles.updated_at, articles.deleted_at")
 	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order(" articles.updated_at desc").Find(&list)
 	return struct {
 		Page     int
@@ -157,7 +160,7 @@ func GetLatestArticles(limit int) ([]SmallEntity, error) {
 	b.Where(queryopt.Eq(fieldArticleStatus, 1))
 	b.Where(queryopt.Eq(fieldProcessStatus, 0))
 	err := b.
-		Order("id desc").
+		Order(queryopt.Desc(pid)).
 		Limit(limit).
 		Find(&articles).Error
 	return articles, err
@@ -199,4 +202,10 @@ func GetLatestArticlesByUserId(userId uint64, limit int) ([]SmallEntity, error) 
 		Limit(limit).
 		Find(&articles).Error
 	return articles, err
+}
+
+func GetUserCount(userId uint64) int64 {
+	var count int64
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Count(&count)
+	return count
 }

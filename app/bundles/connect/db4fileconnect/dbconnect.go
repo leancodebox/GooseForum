@@ -2,9 +2,8 @@ package db4fileconnect
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/sqlconnect"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"sync"
-
-	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 
 	"gorm.io/gorm"
 )

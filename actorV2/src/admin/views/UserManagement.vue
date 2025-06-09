@@ -66,7 +66,7 @@ const userForm = reactive({
   id: 0,
   username: '',
   email: '',
-  role: [],
+  role: 0,
   status: 0,
   validate: 0,
   password: ''
@@ -209,7 +209,7 @@ const handleAddUser = () => {
   userForm.id = 0
   userForm.username = ''
   userForm.email = ''
-  userForm.role = []
+  userForm.role = 0
   userForm.status = 0
   userForm.password = ''
   userForm.validate = 0
@@ -222,9 +222,7 @@ const handleEditUser = (user: User) => {
   userForm.id = user.userId
   userForm.username = user.username
   userForm.email = user.email
-  userForm.role = !!user.roleList ? user.roleList.map(item => {
-    return item.value
-  }) : []
+  userForm.role = user.roleId
   userForm.status = user.status
   userForm.password = ''
   userForm.validate = user.validate
@@ -318,19 +316,23 @@ const handleSaveUser = () => {
           <n-form-item path="username" label="用户名">
             <n-input v-model:value="userForm.username" placeholder="请输入用户名"/>
           </n-form-item>
+
           <n-form-item path="email" label="邮箱">
             <n-input v-model:value="userForm.email" placeholder="请输入邮箱" disabled/>
           </n-form-item>
+
           <n-form-item label="角色" path="roleId">
-            <n-select v-model:value="userForm.role" multiple :options="roleOption"></n-select>
+            <n-select v-model:value="userForm.role"  :options="roleOption" clearable></n-select>
           </n-form-item>
 
           <n-form-item path="status" label="是否冻结">
             <n-switch v-model:value="userForm.status" :checked-value="1" :unchecked-value="0"/>
           </n-form-item>
+
           <n-form-item path="validate" label="验证通过">
             <n-switch v-model:value="userForm.validate" :checked-value="1" :unchecked-value="0"/>
           </n-form-item>
+
           <n-form-item v-if="!isEditing" path="password" label="密码">
             <n-input
                 v-model:value="userForm.password"

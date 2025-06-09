@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"io"
 	"log/slog"
@@ -8,13 +9,9 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
-	jwt "github.com/leancodebox/GooseForum/app/bundles/goose/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
-	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 
 	"github.com/gin-gonic/gin"
@@ -22,61 +19,13 @@ import (
 	"github.com/spf13/cast"
 )
 
-const (
-	expireTime = time.Second * 86400 * 7
-)
-
 type RegReq struct {
-	Email          string `json:"email" validate:"required"`
+	Email          string `json:"email" validate:"required,email"`
 	Username       string `json:"userName"  validate:"required"`
 	Password       string `json:"passWord"  validate:"required"`
 	InvitationCode string `json:"invitationCode,omitempty"`
 	CaptchaId      string `json:"captchaId" validate:"required"`
 	CaptchaCode    string `json:"captchaCode" validate:"required"`
-}
-
-// Register 注册
-func Register(r RegReq) component.Response {
-	// 首先验证验证码
-	if !VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
-		return component.FailResponse("验证码错误或已过期")
-	}
-
-	// 检查用户名是否已存在
-	if users.ExistUsername(r.Username) {
-		return component.FailResponse("用户名已存在")
-	}
-
-	// 检查邮箱是否已存在
-	if users.ExistEmail(r.Email) {
-		return component.FailResponse("邮箱已被使用")
-	}
-
-	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
-	err := users.Create(userEntity)
-	if err != nil {
-		return component.FailResponse(cast.ToString(err))
-	}
-
-	if err = SendAEmail4User(userEntity); err != nil {
-		slog.Error("添加邮件任务到队列失败", "error", err)
-	}
-
-	// 初始化用户积分
-	pointservice.InitUserPoints(userEntity.Id, 100)
-
-	// 生成 token
-	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
-	if err != nil {
-		return component.FailResponse(cast.ToString(err))
-	}
-
-	return component.SuccessResponse(component.DataMap{
-		"username":  userEntity.Username,
-		"userId":    userEntity.Id,
-		"token":     token,
-		"avatarUrl": urlconfig.GetDefaultAvatar(),
-	})
 }
 
 func SendAEmail4User(userEntity *users.Entity) error {
@@ -98,36 +47,8 @@ func SendAEmail4User(userEntity *users.Entity) error {
 	return nil
 }
 
-type LoginReq struct {
-	Username    string `json:"userName"   validate:"required"`
-	Password    string `json:"password"   validate:"required"`
-	CaptchaId   string `json:"captchaId"`
-	CaptchaCode string `json:"captchaCode"`
-}
-
-// Login 登录只返回 token
-func Login(r LoginReq) component.Response {
-	if !VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
-		return component.FailResponse("验证失败")
-	}
-	userEntity, err := users.Verify(r.Username, r.Password)
-	if err != nil {
-		slog.Info(cast.ToString(err))
-		return component.FailResponse("验证失败")
-	}
-	token, err := jwt.CreateNewToken(userEntity.Id, expireTime)
-	if err != nil {
-		slog.Info(cast.ToString(err))
-		return component.FailResponse("验证失败")
-	}
-
-	return component.SuccessResponse(component.DataMap{
-		"token": token,
-	})
-}
-
 func GetCaptcha() component.Response {
-	captchaId, captchaImg := GenerateCaptcha()
+	captchaId, captchaImg := captchaOpt.GenerateCaptcha()
 	return component.SuccessResponse(map[string]any{
 		"captchaId":  captchaId,
 		"captchaImg": captchaImg,
@@ -147,28 +68,29 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 	// 处理头像URL
 	avatarUrl := userEntity.GetWebAvatarUrl()
 
-	// 检查用户是否有任意角色（是否是管理员）
-	isAdmin := len(userRoleRs.GetRoleIdsByUserId(userEntity.Id)) > 0
-
 	return component.SuccessResponse(component.DataMap{
-		"username":  userEntity.Username,
-		"userId":    userEntity.Id,
-		"avatarUrl": avatarUrl,
-		"email":     userEntity.Email,
-		"nickname":  userEntity.Nickname,
-		"isAdmin":   isAdmin,
-		"bio":       userEntity.Bio,
-		"signature": userEntity.Signature,
-		"website":   userEntity.Website,
+		"username":            userEntity.Username,
+		"userId":              userEntity.Id,
+		"avatarUrl":           avatarUrl,
+		"email":               userEntity.Email,
+		"nickname":            userEntity.Nickname,
+		"isAdmin":             userEntity.RoleId != 0,
+		"bio":                 userEntity.Bio,
+		"signature":           userEntity.Signature,
+		"website":             userEntity.Website,
+		"websiteName":         userEntity.WebsiteName,
+		"externalInformation": userEntity.GetExternalInformation(),
 	})
 }
 
 type EditUserInfoReq struct {
-	Nickname  string `json:"nickname"`
-	Email     string `json:"email"`
-	Bio       string `json:"bio"`
-	Signature string `json:"signature"`
-	Website   string `json:"website"`
+	Nickname            string                    `json:"nickname"`
+	Email               string                    `json:"email"`
+	Bio                 string                    `json:"bio"`
+	Signature           string                    `json:"signature"`
+	Website             string                    `json:"website"`
+	WebsiteName         string                    `json:"websiteName"`
+	ExternalInformation users.ExternalInformation `json:"externalInformation"`
 }
 
 // EditUserInfo 编辑用户
@@ -198,9 +120,9 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 	if req.Params.Signature != "" {
 		userEntity.Signature = req.Params.Signature
 	}
-	if req.Params.Website != "" {
-		userEntity.Website = req.Params.Website
-	}
+	userEntity.Website = req.Params.Website
+	userEntity.WebsiteName = req.Params.WebsiteName
+	userEntity.SetExternalInformation(req.Params.ExternalInformation)
 
 	err = users.Save(&userEntity)
 	if err != nil {
@@ -222,36 +144,16 @@ func Invitation(req component.BetterRequest[null]) component.Response {
 	})
 }
 
-type GetUserInfoReq struct {
-	UserId uint64 `json:"userId"`
-}
-
-// GetUserInfo 游客访问某些用户时
-func GetUserInfo(req GetUserInfoReq) component.Response {
-	user, _ := users.Get(req.UserId)
-	if user.Id == 0 {
-		return component.FailResponse("用户不存在")
-	}
-	userPoint := userPoints.Get(user.Id)
-
-	// 如果有头像，添加域名前缀
-	avatarUrl := user.GetWebAvatarUrl()
-
-	return component.SuccessResponse(UserInfoShow{
-		Username:  user.Username,
-		Prestige:  user.Prestige,
-		AvatarUrl: avatarUrl,
-		UserPoint: userPoint.CurrentPoints,
-	})
-}
-
 type UserInfoShow struct {
 	UserId     uint64    `json:"userId,omitempty"`
 	Username   string    `json:"username"`
+	Bio        string    `json:"bio"`
+	Signature  string    `json:"Signature"`
 	Prestige   int64     `json:"prestige"`
 	AvatarUrl  string    `json:"avatarUrl"`
 	UserPoint  int64     `json:"userPoint"`
 	CreateTime time.Time `json:"createTime"`
+	IsAdmin    bool      `json:"isAdmin"`
 }
 
 // UploadAvatar 头像上传处理函数

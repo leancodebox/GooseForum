@@ -1,10 +1,9 @@
 package permission
 
 import (
-	array "github.com/leancodebox/GooseForum/app/bundles/goose/collectionopt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/userRoleRs"
 	"slices"
 )
 
@@ -22,9 +21,12 @@ func (receiver Enum) Name() string {
 		return "页面管理"
 	case RoleManager:
 		return "角色管理"
+	case SiteManager:
+		return "站点管理"
 	}
 	return ""
 }
+
 func (receiver Enum) Id() uint64 {
 	return uint64(receiver)
 }
@@ -35,23 +37,20 @@ const (
 	ArticlesManager
 	PageManager
 	RoleManager
+	SiteManager
 )
 
 func BuildOptions() []datastruct.Option[string, Enum] {
 	var l []datastruct.Option[string, Enum]
-	for i := Admin; i <= PageManager; i++ {
+	for i := Admin; i <= SiteManager; i++ {
 		l = append(l, datastruct.Option[string, Enum]{Name: i.Name(), Label: i.Name(), Value: i})
 	}
 	return l
 }
 
-// CheckUser 检查某人是否有某权限
-func CheckUser(userId uint64, permission Enum) bool {
-	roleIds := userRoleRs.GetRoleIdsByUserId(userId)
-	if roleIds == nil || len(roleIds) == 0 {
-		return false
-	}
-	pList := GetPermission(roleIds)
+// CheckRole 检查某人是否有某权限
+func CheckRole(roleId uint64, permission Enum) bool {
+	pList := GetPermission([]uint64{roleId})
 	if pList == nil || len(pList) == 0 {
 		return false
 	}
