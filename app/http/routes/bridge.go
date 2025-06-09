@@ -5,13 +5,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
-	"github.com/leancodebox/GooseForum/resource"
 	"net/http"
 )
 
 func RegisterByGin(ginApp *gin.Engine) {
-	// 加载HTML模板
-	ginApp.SetHTMLTemplate(resource.GetTemplates())
 	// 基础中间件
 	ginApp.Use(middleware.SiteMaintenance)
 	ginApp.Use(middleware.SiteInfo)
@@ -23,7 +20,6 @@ func RegisterByGin(ginApp *gin.Engine) {
 			return
 		}
 		Reload()
-		ginApp.SetHTMLTemplate(resource.GetTemplates())
 		c.String(200, "模板已刷新")
 	})
 
@@ -31,12 +27,11 @@ func RegisterByGin(ginApp *gin.Engine) {
 	ginApp.Use(middleware.AccessLog)
 
 	// 接口
-	auth(ginApp)
-	viewRoute(ginApp)
-	viewRouteV2(ginApp)
+	authApi(ginApp)
+	siteInfoRoute(ginApp)
 	forumRoute(ginApp)
 	fileServer(ginApp)
-	view(ginApp)
+	viewRoute(ginApp)
 	viewAssert(ginApp)
 
 	// 前端资源

@@ -5,9 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
+	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/resource"
+	"github.com/leancodebox/GooseForum/resourcev2"
 	"io/fs"
 	"net/http"
 )
@@ -23,7 +25,42 @@ func frontend(ginApp *gin.Engine) {
 		StaticFS("app", http.FS(appFs))
 }
 
-func viewRouteV2(ginApp *gin.Engine) {
+func Reload() {
+	viewrender.Reload()
+}
+
+func viewAssert(ginApp *gin.Engine) {
+	actGroup := ginApp.Group("/")
+	appFs, _ := fs.Sub(resourcev2.GetViewAssert(), "static/dist/assets")
+	actGroup.Use(middleware.CacheMiddleware).
+		Use(gzip.Gzip(gzip.DefaultCompression)).
+		Use(middleware.BrowserCache).
+		StaticFS("assets", http.FS(appFs))
+}
+
+func viewRoute(ginApp *gin.Engine) {
+	ginApp.POST("/login", controllers.LoginHandler)
+	ginApp.POST("/register", controllers.RegisterHandle)
+	ginApp.POST("/logout", controllers.Logout)
+
+	viewRouteApp := ginApp.Group("")
+	viewRouteApp.Use(middleware.JWTAuth).
+		Use(gzip.Gzip(gzip.DefaultCompression))
+	viewRouteApp.GET("", controllers.Home)
+	viewRouteApp.GET("/login", middleware.CheckNeedLogin, controllers.LoginView)
+	viewRouteApp.GET("/user/:id", controllers.User)
+	viewRouteApp.GET("/post", controllers.PostV2)
+	viewRouteApp.GET("/post/:id", controllers.PostDetail)
+	viewRouteApp.GET("/about", controllers.About)
+	viewRouteApp.GET("/sponsors", controllers.SponsorsView)
+	viewRouteApp.GET("/links", controllers.LinksView)
+	viewRouteApp.GET("/profile", middleware.CheckLogin, controllers.Profile)
+	viewRouteApp.GET("/publish", middleware.CheckLogin, controllers.Publish)
+	viewRouteApp.GET("/notifications", middleware.CheckLogin, controllers.Notifications)
+	viewRouteApp.GET("/submit-link", controllers.SubmitLink)
+}
+
+func siteInfoRoute(ginApp *gin.Engine) {
 	// SEO 相关路由
 	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
 	ginApp.GET("/sitemap.xml", controllers.RenderSitemapXml)
@@ -31,7 +68,7 @@ func viewRouteV2(ginApp *gin.Engine) {
 }
 
 // 认证相关服务
-func auth(ginApp *gin.Engine) {
+func authApi(ginApp *gin.Engine) {
 	// 非登陆下的用户操作
 	ginApp.Group("api").
 		GET("get-captcha", ginUpNP(controllers.GetCaptcha)).
@@ -47,26 +84,10 @@ func auth(ginApp *gin.Engine) {
 	ginApp.GET("api/activate", controllers.ActivateAccount)
 }
 
-func viewRoute(ginApp *gin.Engine) {
-	viewRouteApp := ginApp.Group("")
-	viewRouteApp.Use(middleware.JWTAuth)
-	viewRouteApp.GET("/post-old", controllers.RenderArticlesPage)
-	viewRouteApp.GET("/post-old/:id", controllers.RenderArticleDetail)
-	viewRouteApp.GET("/login-old", controllers.LoginPage)
-	viewRouteApp.POST("/login", controllers.LoginHandler)
-	viewRouteApp.POST("/register", controllers.RegisterHandle)
-	viewRouteApp.POST("/logout", controllers.Logout)
-	viewRouteApp.GET("/user-profile/:id", controllers.UserProfile)
-	viewRouteApp.GET("/sponsors-old", controllers.Sponsors)
-	viewRouteApp.GET("/links-old", controllers.Links)
-	viewRouteApp.GET("/link-contact", controllers.Contact)
-
-	forumApi := ginApp.Group("api/forum")
-	forumApi.POST("apply-link-add", UpButterReq(controllers.ApplyAddLink))
-}
-
 func forumRoute(ginApp *gin.Engine) {
 	forumApi := ginApp.Group("api/forum")
+
+	forumApi.POST("apply-link-add", UpButterReq(controllers.ApplyAddLink))
 	// 站点统计
 	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	// 分类列表

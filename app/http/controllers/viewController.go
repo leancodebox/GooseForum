@@ -7,7 +7,6 @@ import (
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
-	"html/template"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -15,16 +14,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
-	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
 
 	"log/slog"
@@ -191,232 +184,9 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 	}
 }
 
-func RenderIndex(c *gin.Context) {
-	last, _ := articles.GetLatestArticles(5)
-	templateData := gin.H{
-		"FeaturedArticles": articlesSmallEntity2Dto(getRecommendedArticles()),
-		"LatestArticles":   articlesSmallEntity2Dto(last),
-		"Stats":            GetSiteStatisticsData(),
-		"User":             GetLoginUser(c),
-		"title":            "GooseForum",
-		"description":      "GooseForum的首页",
-		"canonicalHref":    buildCanonicalHref(c),
-	}
-	c.HTML(http.StatusOK, "home.gohtml", templateData)
-}
-
-// RenderArticlesPage 渲染文章列表页面
-func RenderArticlesPage(c *gin.Context) {
-	filters := c.DefaultQuery("filters", "")
-	version := c.DefaultQuery("version", "")
-	categories := array.Filter(array.Map(strings.Split(filters, "-"), func(t string) int {
-		return cast.ToInt(t)
-	}), func(i int) bool {
-		return i > 0
-	})
-	param := GetArticlesPageRequest{
-		Page:       cast.ToInt(c.DefaultQuery("page", "1")),
-		PageSize:   cast.ToInt(c.DefaultQuery("pageSize", "20")),
-		Search:     c.Query("search"),
-		Categories: categories,
-	}
-	pageData := articles.Page[articles.SmallEntity](
-		articles.PageQuery{
-			Page:         max(param.Page, 1),
-			PageSize:     param.PageSize,
-			FilterStatus: true,
-			Categories:   param.Categories,
-		})
-	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
-		return t.UserId
-	})
-	userMap := users.GetMapByIds(userIds)
-
-	//获取文章的分类信息
-	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
-		return t.Id
-	})
-	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
-	categoryMap := articleCategoryMap()
-	// 获取文章的分类和标签
-	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
-		return rs.ArticleId
-	})
-
-	articleList := array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
-		categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
-			if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
-				return category.Category
-			}
-			return ""
-		})
-		username := ""
-		avatarUrl := urlconfig.GetDefaultAvatar()
-		if user, ok := userMap[t.UserId]; ok {
-			username = user.Username
-			avatarUrl = user.GetWebAvatarUrl()
-		}
-		return ArticlesSimpleDto{
-			Id:             t.Id,
-			Title:          t.Title,
-			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
-			Username:       username,
-			AuthorId:       t.UserId,
-			AvatarUrl:      avatarUrl,
-			ViewCount:      t.ViewCount,
-			CommentCount:   t.ReplyCount,
-			Category:       FirstOr(categoryNames, "未分类"),
-			Categories:     categoryNames,
-			CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
-				return rs.ArticleCategoryId
-			}),
-			Type:    t.Type,
-			TypeStr: articlesTypeMap[int(t.Type)].Name,
-		}
-	})
-	// 计算总页数
-	totalPages := (cast.ToInt(pageData.Total) + param.PageSize - 1) / param.PageSize
-	articleCategoryList := articleCategoryLabel()
-	pagination := []PageButton{}
-	start := max(pageData.Page-3, 1)
-	for i := 1; i <= 7; i++ {
-		pagination = append(pagination, PageButton{Index: i, Page: start})
-		start += 1
-	}
-	// 构建模板数据
-	templateData := gin.H{
-		"title":               "GooseForum",
-		"description":         "知无不言,言无不尽",
-		"year":                time.Now().Year(),
-		"Data":                articleList,
-		"Page":                pageData.Page,
-		"PageSize":            param.PageSize,
-		"Total":               pageData.Total,
-		"TotalPages":          totalPages,
-		"PrevPage":            max(pageData.Page-1, 1),
-		"NextPage":            min(max(pageData.Page, 1)+1, totalPages),
-		"User":                GetLoginUser(c),
-		"ArticleCategoryList": articleCategoryList,
-		"recommendedArticles": getRecommendedArticles(),
-		"canonicalHref":       buildCanonicalHref(c),
-		"Filters":             filters,
-		"pagination":          pagination,
-	}
-
-	if version == "v2" {
-		c.HTML(http.StatusOK, "postv2.gohtml", templateData)
-	} else {
-		c.HTML(http.StatusOK, "list.gohtml", templateData)
-	}
-}
-
 type PageButton struct {
 	Index int
 	Page  int
-}
-
-// RenderArticleDetail 渲染文章详情页面
-func RenderArticleDetail(c *gin.Context) {
-	id := cast.ToUint64(c.Param("id"))
-	if id == 0 {
-		errorPage(c, "页面不存在", "页面不存在")
-		return
-	}
-	req := GetArticlesDetailRequest{
-		Id:           id,
-		MaxCommentId: 0,
-		PageSize:     50,
-	}
-	entity := articles.Get(req.Id)
-	if entity.Id == 0 {
-		errorPage(c, "文章不存在", "文章不存在")
-		return
-	}
-	replyEntities := reply.GetByMaxIdPage(req.Id, req.MaxCommentId, boundPageSizeWithRange(req.PageSize, 10, 100))
-	userIds := array.Map(replyEntities, func(item reply.Entity) uint64 {
-		return item.UserId
-	})
-	userIds = append(userIds, entity.UserId)
-	userMap := users.GetMapByIds(userIds)
-	author := "陶渊明"
-	avatarUrl := urlconfig.GetDefaultAvatar()
-	authorUserInfo := users.Entity{}
-	if user, ok := userMap[entity.UserId]; ok {
-		author = user.Username
-		avatarUrl = user.GetWebAvatarUrl()
-		authorUserInfo = *user
-		fmt.Println(authorUserInfo)
-	}
-	replyList := array.Map(replyEntities, func(item reply.Entity) ReplyDto {
-		username := "陶渊明"
-		userAvatarUrl := urlconfig.GetDefaultAvatar()
-		if user, ok := userMap[item.UserId]; ok {
-			username = user.Username
-			userAvatarUrl = user.AvatarUrl
-		}
-		// 获取被回复评论的用户名
-		replyToUsername := ""
-		if item.ReplyId > 0 {
-			if replyTo := reply.Get(item.ReplyId); replyTo.Id > 0 {
-				if replyUser, ok := userMap[replyTo.UserId]; ok {
-					replyToUsername = replyUser.Username
-				}
-			}
-		}
-		return ReplyDto{
-			Id:              item.Id,
-			ArticleId:       item.ArticleId,
-			UserId:          item.UserId,
-			UserAvatarUrl:   userAvatarUrl,
-			Username:        username,
-			Content:         item.Content,
-			CreateTime:      item.CreatedAt.Format(time.RFC3339),
-			ReplyToUsername: replyToUsername,
-		}
-	})
-	articles.IncrementView(entity)
-	// 复用现有的数据获取逻辑
-	authorId := entity.UserId
-
-	if entity.RenderedVersion < markdown2html.GetVersion() || entity.RenderedHTML == "" {
-		mdInfo := markdown2html.MarkdownToHTML(entity.Content)
-		entity.RenderedHTML = mdInfo
-		entity.RenderedVersion = markdown2html.GetVersion()
-		articles.SaveNoUpdate(&entity)
-	}
-
-	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
-	acMap := articleCategoryMapList([]uint64{id})
-	iLike := false
-	loginUser := GetLoginUser(c)
-	if loginUser.UserId != 0 {
-		iLike = articleLike.GetByArticleId(loginUser.UserId, entity.Id).Status == 1
-	}
-	// 构建模板数据
-	templateData := gin.H{
-		"articleId":           id,
-		"authorId":            authorId,
-		"title":               entity.Title + " - GooseForum",
-		"description":         TakeUpTo64Chars(entity.Content),
-		"year":                time.Now().Year(),
-		"articleTitle":        entity.Title,
-		"articleContent":      template.HTML(entity.RenderedHTML),
-		"LikeCount":           entity.LikeCount,
-		"CreateTime":          entity.CreatedAt.Format(time.DateTime),
-		"ILike":               iLike,
-		"username":            author,
-		"commentList":         replyList,
-		"avatarUrl":           avatarUrl,
-		"User":                GetLoginUser(c),
-		"canonicalHref":       buildCanonicalHref(c),
-		"authorArticles":      authorArticles,
-		"articleCategory":     acMap[id],
-		"keywords":            strings.Join(acMap[id], ","),
-		"website":             authorUserInfo.Website,
-		"websiteName":         authorUserInfo.WebsiteName,
-		"externalInformation": authorUserInfo.GetExternalInformation(),
-	}
-	c.HTML(http.StatusOK, "detail.gohtml", templateData)
 }
 
 func articleCategoryMapList(articleIds []uint64) map[uint64][]string {
@@ -441,41 +211,6 @@ func articleCategoryMapList(articleIds []uint64) map[uint64][]string {
 	return res
 }
 
-func errorPage(c *gin.Context, title, message string) {
-	c.HTML(http.StatusNotFound, "error.gohtml", gin.H{
-		"title":   title,
-		"message": message,
-		"year":    time.Now().Year(),
-		"User":    GetLoginUser(c),
-	})
-}
-
-func LoginPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.gohtml", gin.H{"title": "登录/注册 - GooseForum", "User": GetLoginUser(c)})
-}
-
-func UserProfile(c *gin.Context) {
-	id := cast.ToUint64(c.Param("id"))
-	showUser := GetUserShowByUserId(id)
-	if showUser.UserId == 0 {
-		errorPage(c, "用户不存在", "用户不存在")
-		return
-	}
-	last, _ := articles.GetLatestArticlesByUserId(id, 5)
-	templateData := gin.H{
-		"Articles":    articlesSmallEntity2Dto(last),
-		"Author":      showUser,
-		"User":        GetLoginUser(c),
-		"title":       showUser.Username + " - GooseForum",
-		"description": showUser.Username + " 的个人简介 ",
-	}
-	c.HTML(http.StatusOK, "user_profile.gohtml", templateData)
-}
-
-func Sponsors(c *gin.Context) {
-	c.HTML(http.StatusOK, "sponsors.gohtml", gin.H{"title": "赞助商 - GooseForum", "User": GetLoginUser(c)})
-}
-
 func buildCanonicalHref(c *gin.Context) string {
 	scheme := "https"
 	if strings.HasPrefix(c.Request.Host, "localhost") {
@@ -493,21 +228,6 @@ func getHost(c *gin.Context) string {
 	}
 	host := fmt.Sprintf("%s://%s", scheme, c.Request.Host)
 	return preferences.Get("server.url", host)
-}
-
-func Links(c *gin.Context) {
-
-	configEntity := pageConfig.GetByPageType(FriendShipLinks)
-	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
-	c.HTML(http.StatusOK, "links.gohtml", gin.H{
-		"title":            "友情链接 - GooseForum",
-		"User":             GetLoginUser(c),
-		"FriendLinksGroup": res,
-	})
-}
-
-func Contact(c *gin.Context) {
-	c.HTML(http.StatusOK, "contact.gohtml", gin.H{"title": "友情链接 - GooseForum", "User": GetLoginUser(c)})
 }
 
 type ApplyAddLinkReq struct {
