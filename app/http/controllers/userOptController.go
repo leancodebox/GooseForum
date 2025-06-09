@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
-	"net/http"
 )
 
 // 添加激活处理函数
@@ -51,10 +51,9 @@ func renderActivationPage(c *gin.Context, success bool, message string) {
 	if success {
 		status = "成功"
 	}
-	c.HTML(http.StatusOK, "activate.gohtml", map[string]any{
+	viewrender.Render(c, "activate.gohtml", map[string]any{
 		"Status":  status,
 		"Message": message,
 		"Success": success,
 	})
-	return
 }

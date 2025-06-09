@@ -8,7 +8,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/spf13/cast"
 	"html/template"
+	"io/fs"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -45,6 +47,18 @@ var viewAssert embed.FS
 
 func GetViewAssert() *embed.FS {
 	return &viewAssert
+}
+
+// GetStaticFS 返回静态文件的文件系统
+func GetStaticFS() (fs.FS, error) {
+	if !setting.IsProduction() {
+		return os.DirFS(filepath.Join("resourceV2", "static")), nil
+	}
+	static, err := fs.Sub(GetViewAssert(), "static")
+	if err != nil {
+		return nil, err
+	}
+	return static, nil
 }
 
 type MetaItem struct {

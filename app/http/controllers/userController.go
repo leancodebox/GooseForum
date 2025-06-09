@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"io"
 	"log/slog"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
@@ -47,15 +47,8 @@ func SendAEmail4User(userEntity *users.Entity) error {
 	return nil
 }
 
-type LoginReq struct {
-	Username    string `json:"userName"   validate:"required"`
-	Password    string `json:"password"   validate:"required"`
-	CaptchaId   string `json:"captchaId"`
-	CaptchaCode string `json:"captchaCode"`
-}
-
 func GetCaptcha() component.Response {
-	captchaId, captchaImg := GenerateCaptcha()
+	captchaId, captchaImg := captchaOpt.GenerateCaptcha()
 	return component.SuccessResponse(map[string]any{
 		"captchaId":  captchaId,
 		"captchaImg": captchaImg,
@@ -148,29 +141,6 @@ func Invitation(req component.BetterRequest[null]) component.Response {
 	base36 := strconv.FormatInt(int64(req.UserId), 36)
 	return component.SuccessResponse(map[string]any{
 		"invitation": base36,
-	})
-}
-
-type GetUserInfoReq struct {
-	UserId uint64 `json:"userId"`
-}
-
-// GetUserInfo 游客访问某些用户时
-func GetUserInfo(req GetUserInfoReq) component.Response {
-	user, _ := users.Get(req.UserId)
-	if user.Id == 0 {
-		return component.FailResponse("用户不存在")
-	}
-	userPoint := userPoints.Get(user.Id)
-
-	// 如果有头像，添加域名前缀
-	avatarUrl := user.GetWebAvatarUrl()
-
-	return component.SuccessResponse(UserInfoShow{
-		Username:  user.Username,
-		Prestige:  user.Prestige,
-		AvatarUrl: avatarUrl,
-		UserPoint: userPoint.CurrentPoints,
 	})
 }
 

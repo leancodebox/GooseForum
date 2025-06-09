@@ -27,11 +27,6 @@ func GetArticlesEnum() component.Response {
 	})
 }
 
-func GetArticlesCategory() component.Response {
-	res := articleCategoryLabel()
-	return component.SuccessResponse(res)
-}
-
 type GetArticlesPageRequest struct {
 	Page       int    `form:"page"`
 	PageSize   int    `form:"pageSize"`

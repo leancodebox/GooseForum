@@ -1,4 +1,4 @@
-package controllers
+package captchaOpt
 
 import (
 	"log/slog"
@@ -99,7 +99,7 @@ func (s *captchaStore) cleanup() {
 	}
 }
 
-// 生成验证码
+// GenerateCaptcha 生成验证码
 func GenerateCaptcha() (string, string) {
 	// 配置验证码参数
 	driver := base64Captcha.NewDriverDigit(
@@ -121,7 +121,7 @@ func GenerateCaptcha() (string, string) {
 	return id, b64s // 返回验证码ID和base64图片字符串
 }
 
-// 验证验证码
+// VerifyCaptcha 验证验证码
 func VerifyCaptcha(captchaId, captchaCode string) bool {
 	if captchaId == "" || captchaCode == "" {
 		return false

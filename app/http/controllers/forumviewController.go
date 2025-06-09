@@ -146,7 +146,7 @@ func PostDetail(c *gin.Context) {
 	})
 }
 
-func PostV2(c *gin.Context) {
+func Post(c *gin.Context) {
 	filters := c.DefaultQuery("filters", "")
 
 	categories := array.Filter(array.Map(strings.Split(filters, "-"), func(t string) int {

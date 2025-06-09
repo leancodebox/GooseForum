@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
+	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"net/http"
 )
@@ -19,24 +20,22 @@ func RegisterByGin(ginApp *gin.Engine) {
 			c.String(http.StatusNotFound, "404")
 			return
 		}
-		Reload()
+		viewrender.Reload()
 		c.String(200, "模板已刷新")
 	})
 
 	// 访问日志中间件
 	ginApp.Use(middleware.AccessLog)
 
-	// 接口
-	authApi(ginApp)
 	siteInfoRoute(ginApp)
-	forumRoute(ginApp)
+	// 接口
+	apiRoute(ginApp)
+	// 文件
 	fileServer(ginApp)
+	// view
 	viewRoute(ginApp)
-	viewAssert(ginApp)
-
-	// 前端资源
-	// 因为存在 /*filepath 所以要放在最后面
-	frontend(ginApp)
+	// 资源
+	assertRouter(ginApp)
 
 	ginApp.NoRoute(controllers.NotFound)
 
