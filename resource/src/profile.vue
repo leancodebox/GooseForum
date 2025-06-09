@@ -109,47 +109,8 @@ const myArticles = ref([
   }
 ])
 
-// 我的收藏
-const myFavorites = ref([
-  {
-    id: 1,
-    title: 'React 18 新特性详解',
-    summary: 'React 18 带来了许多新特性，包括并发渲染、自动批处理等...',
-    author: {
-      username: 'ReactDev',
-      avatar: 'https://img.daisyui.com/images/profile/demo/3@94.webp'
-    },
-    publishTime: '2024-01-12'
-  },
-  {
-    id: 2,
-    title: 'Node.js 微服务架构实践',
-    summary: '基于 Node.js 构建微服务架构的实践经验分享...',
-    author: {
-      username: 'NodeMaster',
-      avatar: 'https://img.daisyui.com/images/profile/demo/4@94.webp'
-    },
-    publishTime: '2024-01-08'
-  }
-])
 
-// 我的评论
-const myComments = ref([
-  {
-    id: 1,
-    articleTitle: 'JavaScript 异步编程最佳实践',
-    content: '这篇文章写得很好，特别是关于 Promise 和 async/await 的部分，对我很有帮助！',
-    createTime: '2024-01-14 10:30',
-    likeCount: 5
-  },
-  {
-    id: 2,
-    articleTitle: 'CSS Grid 布局完全指南',
-    content: '感谢分享，Grid 布局确实比 Flexbox 在某些场景下更适用。',
-    createTime: '2024-01-13 15:20',
-    likeCount: 3
-  }
-])
+
 
 // 个人资料表单
 const profileForm = reactive({
@@ -191,17 +152,6 @@ const deleteArticle = (id) => {
   // 确认删除文章
 }
 
-// 移除收藏
-const removeFavorite = (id) => {
-  console.log('移除收藏:', id)
-  myFavorites.value = myFavorites.value.filter(item => item.id !== id)
-}
-
-// 删除评论
-const deleteComment = (id) => {
-  console.log('删除评论:', id)
-  myComments.value = myComments.value.filter(item => item.id !== id)
-}
 
 </script>
 <template>
@@ -230,7 +180,6 @@ const deleteComment = (id) => {
                 <p class="text-base-content/70 text-sm mb-4">{{
                     userInfo.bio || userInfo.signature || '这个人很懒，什么都没留下'
                   }}</p>
-
                 <div class="grid grid-cols-3 gap-4 mb-4">
                   <div class="text-center">
                     <div class="text-lg font-bold text-base-content">{{ userStats.articleCount }}</div>
@@ -265,7 +214,6 @@ const deleteComment = (id) => {
 
           <!-- 主要内容 -->
           <div v-else>
-
             <div class="tabs">
               <input type="radio" name="my_tabs_3" class="tab" aria-label="我的文章" checked="checked"/>
               <div class="tab-content space-y-4 mt-3">
@@ -328,53 +276,20 @@ const deleteComment = (id) => {
               <input type="radio" name="my_tabs_3" class="tab" aria-label="我的收藏"/>
               <div class="tab-content space-y-4 mt-3">
                 <div class="space-y-3">
-                  <div v-for="favorite in myFavorites" :key="favorite.id"
-                       class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="card-body p-4">
-                      <div class="flex items-start gap-3">
-                        <div class="avatar">
-                          <div class="mask mask-squircle w-10 h-10">
-                            <img :src="favorite.author.avatar" :alt="favorite.author.username"/>
-                          </div>
-                        </div>
-                        <div class="flex-1">
-                          <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ favorite.title }}</h3>
-                          <p class="text-sm text-base-content/70 mt-1">by {{ favorite.author.username }} · {{
-                              favorite.publishTime
-                            }}</p>
-                          <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ favorite.summary }}</p>
-                        </div>
-                        <button class="btn btn-ghost btn-sm" @click="removeFavorite(favorite.id)">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                               stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M6 18L18 6M6 6l12 12"/>
-                          </svg>
-                        </button>
-                      </div>
+                  <div class="card bg-base-100 shadow-sm w-full">
+                    <div class="card-body">
+                      <p>开发中开发中开发中ing</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <input type="radio" name="my_tabs_3" class="tab" aria-label="我的评论"/>
-              <div class="tab-content space-y-4 mt-2">
+              <div class="tab-content space-y-4 mt-3">
                 <div class="space-y-3">
-                  <div v-for="comment in myComments" :key="comment.id" class="card bg-base-100 shadow-sm">
-                    <div class="card-body p-4">
-                      <div class="text-sm text-base-content/70 mb-2">
-                        评论于文章：<span class="text-primary hover:underline cursor-pointer">{{
-                          comment.articleTitle
-                        }}</span>
-                      </div>
-                      <p class="text-base-content mb-2">{{ comment.content }}</p>
-                      <div class="flex justify-between items-center text-sm text-base-content/60">
-                        <span>{{ comment.createTime }}</span>
-                        <div class="flex gap-2">
-                          <span>{{ comment.likeCount }} 点赞</span>
-                          <button class="text-error hover:underline" @click="deleteComment(comment.id)">删除</button>
-                        </div>
-                      </div>
+                  <div class="card bg-base-100 shadow-sm w-full">
+                    <div class="card-body">
+                      <p>寻找中寻找中寻找中ing</p>
                     </div>
                   </div>
                 </div>
