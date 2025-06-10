@@ -8,8 +8,8 @@
       {"field": "user_id", "type": "bigint unsigned", "key": "", "desc": "", "null": "NO", "default": "0"},
       {"field": "article_id", "type": "bigint unsigned", "key": "", "desc": "", "null": "NO", "default": "0"},
       {"field": "status", "type": "int", "key": "", "desc": "点赞状态（1:有效点赞 0:取消点赞）", "null": "NO", "default": "1"},
-      {"field": "create_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
-      {"field": "update_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
     ]
   },
   {
@@ -22,8 +22,8 @@
       {"field": "status", "type": "tinyint", "key": "", "desc": "状态", "null": "NO", "default": "1"},
       {"field": "title", "type": "varchar(255)", "key": "", "desc": "标题", "null": "NO", "default": "1"},
       {"field": "content", "type": "text", "key": "", "desc": "具体内容", "null": "NO", "default": "1"},
-      {"field": "create_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
-      {"field": "update_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
     ]
   },
   {
@@ -39,8 +39,38 @@
       {"field": "weight", "type": "int", "key": "", "desc": "权重", "null": "NO", "default": "0"},
       {"field": "status", "type": "tinyint", "key": "", "desc": "状态 0 不展示 1 展示", "null": "NO", "default": "0"},
       {"field": "link_group", "type": "varchar(32)", "key": "", "desc": "分类", "null": "NO", "default": "community"},
-      {"field": "create_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
-      {"field": "update_time", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "user_statistics",
+    "keyList": [
+      {"field": "user_id", "type": "bigint unsigned", "key": "PRI", "desc": "用户ID", "null": "NO", "default": null},
+      {"field": "article_count", "type": "int unsigned", "key": "", "desc": "发表文章数", "null": "NO", "default": "0"},
+      {"field": "post_count", "type": "int unsigned", "key": "", "desc": "发帖数(包括主题和回复)", "null": "NO", "default": "0"},
+      {"field": "comment_count", "type": "int unsigned", "key": "", "desc": "评论数", "null": "NO", "default": "0"},
+      {"field": "follower_count", "type": "int unsigned", "key": "", "desc": "粉丝数", "null": "NO", "default": "0"},
+      {"field": "following_count", "type": "int unsigned", "key": "", "desc": "关注数", "null": "NO", "default": "0"},
+      {"field": "like_received_count", "type": "int unsigned", "key": "", "desc": "收到的点赞数", "null": "NO", "default": "0"},
+      {"field": "like_given_count", "type": "int unsigned", "key": "", "desc": "给出的点赞数", "null": "NO", "default": "0"},
+      {"field": "collection_count", "type": "int unsigned", "key": "", "desc": "收藏数", "null": "NO", "default": "0"},
+      {"field": "last_active_time", "type": "datetime", "key": "", "desc": "最后活跃时间", "null": "YES", "default": null},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "article_collection",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "主键", "null": "NO", "default": null},
+      {"field": "user_id", "type": "bigint unsigned", "key": "MUL", "desc": "用户ID", "null": "NO", "default": null},
+      {"field": "article_id", "type": "bigint unsigned", "key": "MUL", "desc": "文章ID", "null": "NO", "default": null},
+      {"field": "status", "type": "tinyint", "key": "", "desc": "有效收藏 1 无效收藏 0", "null": "NO", "default": "0"},
+      {"field": "create_time", "type": "datetime", "key": "", "desc": "收藏时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "update_time", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
     ]
   }
 ]
