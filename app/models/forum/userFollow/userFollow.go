@@ -15,6 +15,9 @@ const fieldUserId = "user_id"
 // fieldFollowUserId
 const fieldFollowUserId = "follow_user_id"
 
+// fieldStatus
+const fieldStatus = "status"
+
 // fieldCreatedAt
 const fieldCreatedAt = "created_at"
 
@@ -23,8 +26,8 @@ const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
 	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                                            //
-	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;uniqueIndex:uniq_user_follow,priority:1" json:"userId"`                                //
-	FollowUserId uint64    `gorm:"column:follow_user_id;type:bigint unsigned;not null;uniqueIndex:uniq_user_follow,priority:2;index:idx_follow;" json:"followUserId"` //
+	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;uniqueIndex:uniq_user_follow,priority:1" json:"userId"`                                // 主体
+	FollowUserId uint64    `gorm:"column:follow_user_id;type:bigint unsigned;not null;uniqueIndex:uniq_user_follow,priority:2;index:idx_follow;" json:"followUserId"` // 被关注者
 	Status       int       `gorm:"column:status;type:int;not null;default:1;" json:"status"`                                                                          // 1 关注 0 取消关注
 	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`                                                                //
 	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
