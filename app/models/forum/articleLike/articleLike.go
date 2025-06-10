@@ -18,11 +18,11 @@ const fieldArticleId = "article_id"
 // fieldStatus 点赞状态（1:有效点赞 0:取消点赞）
 const fieldStatus = "status"
 
-// fieldCreateTime
-const fieldCreateTime = "create_time"
+// fieldUpdatedAt
+const fieldCreatedAt = "created_at"
 
-// fieldUpdateTime
-const fieldUpdateTime = "update_time"
+// fieldUpdatedAt
+const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
 	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                              // 主键
