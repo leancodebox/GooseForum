@@ -145,3 +145,8 @@ func IncrementPrestige(addNumber int64, userId uint64) int64 {
 	result := builder().Exec("UPDATE users SET prestige = prestige+? where id = ?", addNumber, userId)
 	return result.RowsAffected
 }
+
+func QueryById(startId uint64, limit int) (entities []*Entity) {
+	builder().Where(queryopt.Gt(pid, startId)).Limit(limit).Order(queryopt.Asc(pid)).Find(&entities)
+	return
+}

@@ -45,8 +45,7 @@ const fieldUpdatedAt = "updated_at"
 type Entity struct {
 	UserId            uint64     `gorm:"primaryKey;column:user_id;autoIncrement;not null;" json:"userId"`                                                  // 用户ID
 	ArticleCount      uint       `gorm:"column:article_count;type:int unsigned;not null;default:0;" json:"articleCount"`                                   // 发表文章数
-	PostCount         uint       `gorm:"column:post_count;type:int unsigned;not null;default:0;" json:"postCount"`                                         // 发帖数(包括主题和回复)
-	CommentCount      uint       `gorm:"column:comment_count;type:int unsigned;not null;default:0;" json:"commentCount"`                                   // 评论数
+	ReplyCount        uint       `gorm:"column:reply_count;type:int unsigned;not null;default:0;" json:"replyCount"`                                       // 评论数
 	FollowerCount     uint       `gorm:"column:follower_count;type:int unsigned;not null;default:0;" json:"followerCount"`                                 // 粉丝数
 	FollowingCount    uint       `gorm:"column:following_count;type:int unsigned;not null;default:0;" json:"followingCount"`                               // 关注数
 	LikeReceivedCount uint       `gorm:"column:like_received_count;type:int unsigned;not null;default:0;" json:"likeReceivedCount"`                        // 收到的点赞数

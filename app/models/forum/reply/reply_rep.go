@@ -55,3 +55,9 @@ func GetByArticleId(articleId uint64) (entities []*Entity) {
 	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Limit(333).Order(queryopt.Desc(pid)).Find(&entities)
 	return
 }
+
+func GetUserCount(userId uint64) int64 {
+	var count int64
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Count(&count)
+	return count
+}
