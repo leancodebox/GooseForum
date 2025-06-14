@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -85,9 +84,12 @@ func ginServe() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
+	quit := make(chan os.Signal, 1)
+	signalwatch.ListenSignal(quit)
 	go func() {
 		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("listen: %s\n", err)
+			slog.Error("http serve ", "err", err)
+			quit <- os.Interrupt
 		}
 	}()
 
@@ -96,8 +98,6 @@ func ginServe() {
 	slog.Info("start use:" + cast.ToString(setting.GetUnitTime()))
 	fmt.Println("if in local you can http://localhost:" + port)
 
-	quit := make(chan os.Signal, 1)
-	signalwatch.ListenSignal(quit)
 	data := <-quit
 	slog.Info("Shutdown Server ...", "signal", data)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
