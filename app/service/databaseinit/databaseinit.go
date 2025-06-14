@@ -5,7 +5,7 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"log"
+	"log/slog"
 	"strings"
 )
 
@@ -25,7 +25,8 @@ func DBInit() {
 
 	db, err := sql.Open("mysql", dbUrl)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("init err", "err", err)
+		return
 	}
 	defer db.Close()
 
