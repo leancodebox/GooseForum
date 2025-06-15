@@ -25,12 +25,12 @@ const fieldCreateTime = "create_time"
 const fieldUpdateTime = "update_time"
 
 type Entity struct {
-	Id         uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                             // 主键
-	UserId     uint64    `gorm:"column:user_id;type:bigint unsigned;not null;" json:"userId"`                                                        // 用户ID
-	ArticleId  uint64    `gorm:"column:article_id;type:bigint unsigned;not null;" json:"articleId"`                                                  // 文章ID
-	Status     int8      `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`                                                       // 有效收藏 1 无效收藏 0
-	CreateTime time.Time `gorm:"column:create_time;type:datetime;not null;default:CURRENT_TIMESTAMP;" json:"createTime"`                             // 收藏时间
-	UpdateTime time.Time `gorm:"column:update_time;type:datetime;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;" json:"updateTime"` // 更新时间
+	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`             // 主键
+	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;" json:"userId"`        // 用户ID
+	ArticleId uint64    `gorm:"column:article_id;type:bigint unsigned;not null;" json:"articleId"`  // 文章ID
+	Status    int8      `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`       // 有效收藏 1 无效收藏 0
+	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
+	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
