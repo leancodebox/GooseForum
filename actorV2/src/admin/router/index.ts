@@ -10,6 +10,7 @@ import RolesView from '../views/RolesView.vue'
 import {useUserStore} from "../stores/auth.ts";
 import FriendLinkManagement from '../views/FriendLinkManagement.vue'
 import ExternalTicketManagement from '../views/ExternalTicketManagement.vue'
+import FooterManagement from '../views/FooterManagement.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -108,6 +109,15 @@ const router = createRouter({
             title: '外部工单管理',
             requiresAuth: true,
             isAdmin: true
+          }
+        },
+        {
+          path: 'footer-management',
+          name: 'footerManagement',
+          component: FooterManagement,
+          meta: {
+            title: 'Footer管理',
+            requiresAuth: true
           }
         }
       ]

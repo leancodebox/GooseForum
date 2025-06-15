@@ -11,7 +11,8 @@ import {
   LogOutOutline,
   PersonOutline,
   LinkOutline,
-  TicketOutline
+  TicketOutline,
+  LayersOutline
 } from '@vicons/ionicons5'
 import {
   NLayout,
@@ -110,6 +111,12 @@ const menuOptions: MenuOption[] = [
     key: 'externalTickets',
     icon: () => h(TicketOutline), // 需要导入TicketOutline图标
     path: '/admin/external-tickets'
+  },
+  {
+    label: 'Footer管理',
+    key: 'footerManagement',
+    icon: () => h(LayersOutline),
+    path: '/admin/footer-management'
   }
 ]
 

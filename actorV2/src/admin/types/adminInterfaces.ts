@@ -93,3 +93,17 @@ export interface Sponsor {
     logoUrl: string,
     url: string,
 }
+
+export interface FooterItem {
+    id: number
+    title: string
+    url: string
+    sort: number
+    status: number
+    createTime: string
+}
+
+export interface FooterGroup {
+    name: string
+    items: FooterItem[]
+}
