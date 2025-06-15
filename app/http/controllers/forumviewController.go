@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
@@ -12,6 +13,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
@@ -68,6 +70,8 @@ func PostDetail(c *gin.Context) {
 	author := "陶渊明"
 	avatarUrl := urlconfig.GetDefaultAvatar()
 	authorUserInfo := users.Entity{}
+	authorInfoStatistics := userStatistics.Get(entity.UserId)
+	fmt.Println(authorInfoStatistics)
 	if user, ok := userMap[entity.UserId]; ok {
 		author = user.Username
 		avatarUrl = user.GetWebAvatarUrl()
@@ -120,29 +124,31 @@ func PostDetail(c *gin.Context) {
 	}
 	// 构建模板数据
 	viewrender.Render(c, "detail.gohtml", map[string]any{
-		"IsProduction":        setting.IsProduction(),
-		"ArticleId":           id,
-		"AuthorId":            authorId,
-		"Title":               entity.Title + " - GooseForum",
-		"Description":         TakeUpTo64Chars(entity.Content),
-		"Year":                time.Now().Year(),
-		"ArticleTitle":        entity.Title,
-		"ArticleContent":      template.HTML(entity.RenderedHTML),
-		"LikeCount":           entity.LikeCount,
-		"ViewCount":           entity.ViewCount,
-		"CreateTime":          entity.CreatedAt.Format(time.DateTime),
-		"ILike":               iLike,
-		"Username":            author,
-		"CommentList":         replyList,
-		"AvatarUrl":           avatarUrl,
-		"User":                loginUser,
-		"CanonicalHref":       buildCanonicalHref(c),
-		"AuthorArticles":      authorArticles,
-		"ArticleCategory":     acMap[id],
-		"Keywords":            strings.Join(acMap[id], ","),
-		"Website":             authorUserInfo.Website,
-		"WebsiteName":         authorUserInfo.WebsiteName,
-		"ExternalInformation": authorUserInfo.GetExternalInformation(),
+		"IsProduction":         setting.IsProduction(),
+		"ArticleId":            id,
+		"AuthorId":             authorId,
+		"Title":                entity.Title + " - GooseForum",
+		"Description":          TakeUpTo64Chars(entity.Content),
+		"Year":                 time.Now().Year(),
+		"ArticleTitle":         entity.Title,
+		"ArticleContent":       template.HTML(entity.RenderedHTML),
+		"LikeCount":            entity.LikeCount,
+		"ViewCount":            entity.ViewCount,
+		"CreateTime":           entity.CreatedAt.Format(time.DateTime),
+		"ILike":                iLike,
+		"Username":             author,
+		"CommentList":          replyList,
+		"AvatarUrl":            avatarUrl,
+		"User":                 loginUser,
+		"CanonicalHref":        buildCanonicalHref(c),
+		"AuthorArticles":       authorArticles,
+		"ArticleCategory":      acMap[id],
+		"Keywords":             strings.Join(acMap[id], ","),
+		"Website":              authorUserInfo.Website,
+		"WebsiteName":          authorUserInfo.WebsiteName,
+		"ExternalInformation":  authorUserInfo.GetExternalInformation(),
+		"Bio":                  authorUserInfo.Bio,
+		"AuthorInfoStatistics": authorInfoStatistics,
 	})
 }
 

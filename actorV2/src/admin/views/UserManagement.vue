@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {computed, h, onMounted, reactive, ref} from 'vue'
 import {type FormInst, type FormRules, NButton, NSpace, NTag, useMessage} from 'naive-ui'
-import {AddOutline, CreateOutline, SearchOutline, TrashOutline} from '@vicons/ionicons5'
+import {CreateOutline, SearchOutline, TrashOutline} from '@vicons/ionicons5'
 import {editUser, getAllRoleItem, getUserList} from "@/admin/utils/authService.ts";
 import type {User} from "../types/adminInterfaces.ts";
 
@@ -203,18 +203,6 @@ const columns = [
   }
 ]
 
-// 添加用户
-const handleAddUser = () => {
-  isEditing.value = false
-  userForm.id = 0
-  userForm.username = ''
-  userForm.email = ''
-  userForm.role = 0
-  userForm.status = 0
-  userForm.password = ''
-  userForm.validate = 0
-  showUserModal.value = true
-}
 
 // 编辑用户
 const handleEditUser = (user: User) => {
@@ -239,20 +227,14 @@ const handleSaveUser = () => {
   userFormRef.value?.validate(async (errors) => {
     if (!errors) {
       try {
-        if (isEditing.value) {
-
-          await editUser(userForm.id, userForm.status, userForm.validate, userForm.role)
-          // 这里应该调用更新用户的API
-          message.success('用户更新成功')
-        } else {
-          // 这里应该调用添加用户的API
-          message.success('用户添加成功')
-        }
+        await editUser(userForm.id, userForm.status, userForm.validate, userForm.role)
+        // 这里应该调用更新用户的API
+        message.success('用户更新成功')
         showUserModal.value = false
         // 刷新用户列表
         await fetchUsers()
       } catch (error) {
-        message.error(isEditing.value ? '更新用户失败' : '添加用户失败')
+        message.error('更新用户失败')
         console.error(error)
       }
     }
@@ -278,14 +260,6 @@ const handleSaveUser = () => {
         <n-button type="primary" @click="handleSearch">
           搜索
         </n-button>
-        <n-button type="primary" @click="handleAddUser">
-          <template #icon>
-            <n-icon>
-              <AddOutline/>
-            </n-icon>
-          </template>
-          添加用户
-        </n-button>
       </n-space>
     </div>
 
@@ -301,7 +275,7 @@ const handleSaveUser = () => {
     <!-- 添加/编辑用户对话框 -->
     <n-modal
         v-model:show="showUserModal"
-        :title="isEditing ? '编辑用户' : '添加用户'"
+        :title="'添加用户'"
         style="width: 500px; max-width: 90%;"
     >
       <n-card>
@@ -322,7 +296,7 @@ const handleSaveUser = () => {
           </n-form-item>
 
           <n-form-item label="角色" path="roleId">
-            <n-select v-model:value="userForm.role"  :options="roleOption" clearable></n-select>
+            <n-select v-model:value="userForm.role" :options="roleOption" clearable></n-select>
           </n-form-item>
 
           <n-form-item path="status" label="是否冻结">

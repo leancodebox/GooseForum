@@ -55,6 +55,7 @@ export default defineConfig({
       '^/logout':'http://localhost:99',
       '^/static/*':'http://localhost:99',
       '^/post/*':'http://localhost:99',
+      '^/assets/*':'http://localhost:99',
     }
   },
 })
