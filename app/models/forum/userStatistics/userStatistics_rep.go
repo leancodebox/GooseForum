@@ -10,8 +10,6 @@ func save(entity *Entity) int64 {
 	return result.RowsAffected
 }
 
-
-
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.UserId == 0 {
 		return create(entity)
@@ -20,15 +18,40 @@ func SaveOrCreateById(entity *Entity) int64 {
 	}
 }
 
-
-
-
 func Get(id any) (entity Entity) {
 	builder().First(&entity, id)
 	return
 }
 
+func WriteArticle(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET article_count = article_count+1 where user_id = ?", userId)
+	return result.RowsAffected
+}
 
+func WriteComment(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET comment_count = comment_count+1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
+func LikeArticle(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET like_received_count = like_received_count+1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
+func GivenLike(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET like_given_count = like_given_count+1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
+func CancelLikeArticle(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET like_received_count = like_received_count-1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
+func CancelGivenLike(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET like_given_count = like_given_count-1 where user_id = ?", userId)
+	return result.RowsAffected
+}
 
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
@@ -39,7 +62,6 @@ func Get(id any) (entity Entity) {
 //	result := builder().Delete(entity)
 //	return result.RowsAffected
 //}
-
 
 //func all() (entities []*Entity) {
 //	builder().Find(&entities)

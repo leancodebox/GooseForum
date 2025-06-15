@@ -6,6 +6,7 @@ import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"math/rand"
 	"regexp"
@@ -78,6 +79,8 @@ func Register(c *gin.Context) {
 	if err != nil {
 		c.JSON(200, component.FailData("注册失败"))
 	}
+	userSt := userStatistics.Entity{UserId: userEntity.Id}
+	userStatistics.SaveOrCreateById(&userSt)
 
 	if err = SendAEmail4User(userEntity); err != nil {
 		slog.Error("添加邮件任务到队列失败", "error", err)
