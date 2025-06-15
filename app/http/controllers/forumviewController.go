@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
@@ -71,7 +70,6 @@ func PostDetail(c *gin.Context) {
 	avatarUrl := urlconfig.GetDefaultAvatar()
 	authorUserInfo := users.Entity{}
 	authorInfoStatistics := userStatistics.Get(entity.UserId)
-	fmt.Println(authorInfoStatistics)
 	if user, ok := userMap[entity.UserId]; ok {
 		author = user.Username
 		avatarUrl = user.GetWebAvatarUrl()
