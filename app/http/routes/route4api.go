@@ -54,10 +54,6 @@ func siteInfoRoute(ginApp *gin.Engine) {
 	ginApp.GET("/rss.xml", controllers.RenderRssV2)
 }
 
-// 认证相关服务
-func authApi(ginApp *gin.Engine) {
-}
-
 func apiRoute(ginApp *gin.Engine) {
 	// 非登陆下的用户操作
 	baseApi := ginApp.Group("api")
@@ -109,35 +105,39 @@ func apiRoute(ginApp *gin.Engine) {
 	// 文章点赞
 	forumLoginApi.POST("like-articles", UpButterReq(controllers.LikeArticle))
 
-	adminApi := baseApi.Group("admin").Use(middleware.JWTAuth4Gin)
+	adminApi := baseApi.Group("admin", middleware.JWTAuth4Gin)
 
 	// 用户管理
-	adminApi.POST("user-list", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.UserList))
-	adminApi.POST("user-edit", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.EditUser))
-	adminApi.POST("get-all-role-item", middleware.CheckPermission(permission.UserManager), UpButterReq(controllers.GetAllRoleItem))
+	adminApi.
+		Group("", middleware.CheckPermission(permission.UserManager)).
+		POST("user-list", UpButterReq(controllers.UserList)).
+		POST("user-edit", UpButterReq(controllers.EditUser)).
+		POST("get-all-role-item", UpButterReq(controllers.GetAllRoleItem))
 
-	// 文章管理
-	adminApi.POST("articles-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.ArticlesList))
-	adminApi.POST("article-edit", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.EditArticle))
+	// 文章管理 &  分类管理
+	adminApi.Group("", middleware.CheckPermission(permission.ArticlesManager)).
+		POST("articles-list", UpButterReq(controllers.ArticlesList)).
+		POST("article-edit", UpButterReq(controllers.EditArticle)).
+		POST("category-list", UpButterReq(controllers.GetCategoryList)).
+		POST("category-save", UpButterReq(controllers.SaveCategory)).
+		POST("category-delete", UpButterReq(controllers.DeleteCategory))
 
 	// 权限管理
-	adminApi.POST("get-permission-list", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.GetPermissionList))
-	adminApi.POST("role-list", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleList))
-	adminApi.POST("role-save", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleSave))
-	adminApi.POST("role-delete", middleware.CheckPermission(permission.RoleManager), UpButterReq(controllers.RoleDel))
+	adminApi.Group("", middleware.CheckPermission(permission.RoleManager)).
+		POST("get-permission-list", UpButterReq(controllers.GetPermissionList)).
+		POST("role-list", UpButterReq(controllers.RoleList)).
+		POST("role-save", UpButterReq(controllers.RoleSave)).
+		POST("role-delete", UpButterReq(controllers.RoleDel))
 
 	// 操作日志
-	adminApi.POST("opt-record-page", middleware.CheckPermission(permission.Admin), UpButterReq(controllers.OptRecordPage))
-
-	// 分类管理
-	adminApi.POST("category-list", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.GetCategoryList))
-	adminApi.POST("category-save", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.SaveCategory))
-	adminApi.POST("category-delete", middleware.CheckPermission(permission.ArticlesManager), UpButterReq(controllers.DeleteCategory))
+	adminApi.Group("", middleware.CheckPermission(permission.Admin)).
+		POST("opt-record-page", UpButterReq(controllers.OptRecordPage))
 
 	// 站点管理
-	adminApi.POST("apply-sheet-list", middleware.CheckPermission(permission.SiteManager), UpButterReq(controllers.ApplySheet))
-	adminApi.GET("friend-links", middleware.CheckPermission(permission.SiteManager), UpButterReq(controllers.GetFriendLinks))
-	adminApi.POST("save-friend-links", middleware.CheckPermission(permission.SiteManager), UpButterReq(controllers.SaveFriendLinks))
+	adminApi.Group("", middleware.CheckPermission(permission.SiteManager)).
+		POST("apply-sheet-list", UpButterReq(controllers.ApplySheet)).
+		GET("friend-links", UpButterReq(controllers.GetFriendLinks)).
+		POST("save-friend-links", UpButterReq(controllers.SaveFriendLinks))
 
 }
 
