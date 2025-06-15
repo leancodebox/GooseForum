@@ -3,12 +3,12 @@ package cmd
 import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCollection"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/leancodebox/GooseForum/storage/model/articleLike"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )

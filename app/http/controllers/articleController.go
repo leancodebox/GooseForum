@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"strings"
@@ -151,6 +152,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		}
 	} else {
 		articles.Create(&article)
+		userStatistics.WriteArticle(req.UserId)
 		for _, item := range req.Params.CategoryId {
 			rs := articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: item, Effective: 1}
 			articleCategoryRs.SaveOrCreateById(&rs)
@@ -192,6 +194,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		return component.FailResponse("评论失败:" + err.Error())
 	}
 	articles.IncrementReply(articleEntity)
+	userStatistics.WriteComment(req.UserId)
 	pointservice.RewardPoints(req.UserId, 2, pointservice.RewardPoints4Reply)
 	if articleEntity.UserId != req.UserId {
 		eventnotice.SendCommentNotification(articleEntity.UserId, articleEntity.Id,
@@ -317,8 +320,12 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 	if articleLike.SaveOrCreateById(&oldLike) > 0 {
 		if req.Params.Action == 1 {
 			articles.IncrementLike(articleEntity)
+			userStatistics.LikeArticle(req.UserId)
+			userStatistics.GivenLike(articleEntity.UserId)
 		} else {
 			articles.DecrementLike(articleEntity)
+			userStatistics.CancelLikeArticle(req.UserId)
+			userStatistics.CancelGivenLike(articleEntity.UserId)
 		}
 	}
 	return component.SuccessResponse(true)

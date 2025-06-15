@@ -32,6 +32,20 @@ func GetByArticleId(userId, articleId any) (entity Entity) {
 	return
 }
 
+func GetLikeReceivedCount(userId uint64) int64 {
+	var count int64
+	builder().
+		Joins("left join articles on articles.id = article_like.article_id").
+		Where("articles.user_id = ?", userId).Count(&count)
+	return count
+}
+
+func GetLikeGivenCount(userId uint64) int64 {
+	var count int64
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Count(&count)
+	return count
+}
+
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
 //	return result.RowsAffected
