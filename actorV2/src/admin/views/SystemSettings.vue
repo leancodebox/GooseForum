@@ -32,6 +32,9 @@
           <n-form-item path="siteCopyright" label="版权信息">
             <n-input v-model:value="basicForm.siteCopyright" placeholder="请输入版权信息" />
           </n-form-item>
+          <n-form-item path="footer" label="Footer设置">
+            <n-input v-model:value="basicForm.footer" placeholder="请输入版权信息" />
+          </n-form-item>
         </n-form>
         <div class="action-buttons">
           <n-button type="primary" @click="handleSaveBasic">保存设置</n-button>
@@ -168,7 +171,8 @@ const basicForm = reactive({
   siteKeywords: '论坛,社区,讨论,分享',
   siteUrl: 'https://example.com',
   siteIcp: '京ICP备12345678号',
-  siteCopyright: 'Copyright © 2023 GooseForum. All Rights Reserved.'
+  siteCopyright: 'Copyright © 2023 GooseForum. All Rights Reserved.',
+  footer :[]
 })
 
 // 基本设置验证规则

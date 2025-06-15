@@ -293,7 +293,7 @@ const handleSaveUser = () => {
         :columns="columns"
         :data="filteredUsers"
         :pagination="pagination"
-        :bordered="false"
+        :bordered="true"
         :loading="loading"
         striped
     />

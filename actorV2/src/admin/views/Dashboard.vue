@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <n-flex vertical>
     <n-grid :cols="24" :x-gap="16" :y-gap="16">
       <n-grid-item :span="6">
         <n-statistic label="总用户数">
@@ -23,20 +23,7 @@
       </n-grid-item>
     </n-grid>
 
-    <div class="chart-container">
-      <n-card title="用户增长趋势" class="chart-card">
-        <div class="chart-placeholder">
-          <n-empty description="图表区域" />
-        </div>
-      </n-card>
-      <n-card title="帖子发布趋势" class="chart-card">
-        <div class="chart-placeholder">
-          <n-empty description="图表区域" />
-        </div>
-      </n-card>
-    </div>
-
-    <n-card title="最近活动" class="recent-activity">
+    <n-card title="最近活动" style="margin-top: 16px">
       <n-list>
         <n-list-item v-for="(item, index) in recentActivities" :key="index">
           <n-thing :title="item.title" :description="item.time">
@@ -45,7 +32,7 @@
         </n-list-item>
       </n-list>
     </n-card>
-  </div>
+  </n-flex>
 </template>
 
 <script setup lang="ts">
@@ -82,25 +69,5 @@ const recentActivities = ref([
 </script>
 
 <style scoped>
-.chart-container {
-  display: flex;
-  gap: 16px;
-  margin-top: 16px;
-  margin-bottom: 16px;
-}
 
-.chart-card {
-  flex: 1;
-}
-
-.chart-placeholder {
-  height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.recent-activity {
-  margin-top: 16px;
-}
 </style>
