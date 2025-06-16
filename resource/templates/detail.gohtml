@@ -292,7 +292,7 @@
                                     <div class="text-xs text-base-content/60">获赞数</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-lg font-bold text-base-content">***</div>
+                                    <div class="text-lg font-bold text-base-content">{{.AuthorInfoStatistics.FollowerCount}}</div>
                                     <div class="text-xs text-base-content/60">粉丝数</div>
                                 </div>
                             </div>
@@ -390,7 +390,17 @@
 
                             <div class="card-actions justify-center">
                                 <a href="/user/{{.AuthorId}}" class="btn btn-primary btn-sm btn-block">查看主页</a>
-                                <button class="btn btn-outline btn-sm btn-block">关注作者</button>
+                                {{if and .User (gt .User.UserId 0) (not .IsOwnArticle)}}
+                                    <button id="follow-btn" 
+                                            class="btn btn-sm btn-block {{if .IsFollowing}}btn-outline{{else}}btn-secondary{{end}}" 
+                                            onclick="toggleFollow({{.AuthorId}})"
+                                            data-following="{{.IsFollowing}}">
+                                        <span id="follow-text">{{if .IsFollowing}}已关注{{else}}关注作者{{end}}</span>
+                                        <span id="follow-loading" class="loading loading-spinner loading-xs" style="display: none;"></span>
+                                    </button>
+                                {{else if not (and .User (gt .User.UserId 0))}}
+                                    <a href="/login" class="btn btn-outline btn-sm btn-block">登录后关注</a>
+                                {{end}}
                             </div>
                         </div>
                     </div>
@@ -559,6 +569,65 @@
         } catch (error) {
             console.error('操作失败:', error);
             alert('操作失败，请稍后重试');
+        }
+    }
+
+    // 关注/取消关注功能
+    async function toggleFollow(authorId) {
+        const followBtn = document.getElementById('follow-btn');
+        const followText = document.getElementById('follow-text');
+        const followLoading = document.getElementById('follow-loading');
+        
+        if (!followBtn) return;
+        
+        const isFollowing = followBtn.getAttribute('data-following') === 'true';
+        const action = isFollowing ? 2 : 1; // 1: 关注, 2: 取消关注
+        
+        // 显示加载状态
+        followText.style.display = 'none';
+        followLoading.style.display = 'inline-block';
+        followBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/api/forum/follow-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: authorId,
+                    action: action
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.code === 0) {
+                // 更新按钮状态
+                if (action === 1) {
+                    // 关注成功
+                    followBtn.classList.remove('btn-secondary');
+                    followBtn.classList.add('btn-outline');
+                    followText.textContent = '已关注';
+                    followBtn.setAttribute('data-following', 'true');
+                } else {
+                    // 取消关注成功
+                    followBtn.classList.remove('btn-outline');
+                    followBtn.classList.add('btn-secondary');
+                    followText.textContent = '关注作者';
+                    followBtn.setAttribute('data-following', 'false');
+                }
+            } else {
+                alert(result.msg || '操作失败，请稍后重试');
+            }
+        } catch (error) {
+            console.error('关注操作失败:', error);
+            alert('操作失败，请稍后重试');
+        } finally {
+            // 恢复按钮状态
+            followText.style.display = 'inline-block';
+            followLoading.style.display = 'none';
+            followBtn.disabled = false;
         }
     }
 </script>

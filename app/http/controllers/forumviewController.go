@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -116,9 +117,15 @@ func PostDetail(c *gin.Context) {
 	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
 	acMap := articleCategoryMapList([]uint64{id})
 	iLike := false
+	isFollowing := false
 	loginUser := GetLoginUser(c)
 	if loginUser.UserId != 0 {
 		iLike = articleLike.GetByArticleId(loginUser.UserId, entity.Id).Status == 1
+		// 检查是否已关注作者
+		if loginUser.UserId != entity.UserId {
+			followEntity := userFollow.GetByUserId(loginUser.UserId, entity.UserId)
+			isFollowing = followEntity.Status == 1
+		}
 	}
 	// 构建模板数据
 	viewrender.Render(c, "detail.gohtml", map[string]any{
@@ -148,6 +155,8 @@ func PostDetail(c *gin.Context) {
 		"Bio":                  authorUserInfo.Bio,
 		"Signature":            authorUserInfo.Signature,
 		"AuthorInfoStatistics": authorInfoStatistics,
+		"IsFollowing":          isFollowing,
+		"IsOwnArticle":         loginUser.UserId == entity.UserId,
 	})
 }
 
