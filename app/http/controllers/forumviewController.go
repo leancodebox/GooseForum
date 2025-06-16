@@ -1,6 +1,11 @@
 package controllers
 
 import (
+	_ "embed"
+	"html/template"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
@@ -17,9 +22,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
-	"html/template"
-	"strings"
-	"time"
 )
 
 func Home(c *gin.Context) {
@@ -297,6 +299,38 @@ func SponsorsView(c *gin.Context) {
 		"User":         GetLoginUser(c),
 		"Title":        "赞助商 - GooseForum",
 		"Description":  "GooseForum's sponsors",
+	})
+}
+
+//go:embed docs/terms-of-service.md
+var termsOfServiceMD string
+
+//go:embed docs/privacy-policy.md
+var privacyPolicyMD string
+
+// TermsOfService 用户协议页面
+func TermsOfService(c *gin.Context) {
+	htmlContent := markdown2html.MarkdownToHTML(termsOfServiceMD)
+	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "用户协议 - GooseForum",
+		"Subtitle":     "Terms of Service",
+		"Description":  "GooseForum 用户服务协议",
+		"Content":      template.HTML(htmlContent),
+	})
+}
+
+// PrivacyPolicy 隐私政策页面
+func PrivacyPolicy(c *gin.Context) {
+	htmlContent := markdown2html.MarkdownToHTML(privacyPolicyMD)
+	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "隐私政策 - GooseForum",
+		"Subtitle":     "Privacy Policy",
+		"Description":  "GooseForum 隐私保护政策",
+		"Content":      template.HTML(htmlContent),
 	})
 }
 

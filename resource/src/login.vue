@@ -180,7 +180,7 @@
             <div class="form-control">
               <label class="cursor-pointer label justify-start">
                 <input v-model="registerForm.agree" type="checkbox" class="checkbox checkbox-primary" required />
-                <span class="label-text ml-2">我同意 <a href="#" class="link link-primary">用户协议</a> 和 <a href="#" class="link link-primary">隐私政策</a></span>
+                <span class="label-text ml-2">我同意 <a href="/terms-of-service" target="_blank" class="link link-primary">用户协议</a> 和 <a href="/privacy-policy" target="_blank" class="link link-primary">隐私政策</a></span>
               </label>
             </div>
             <div v-if="registerErrors.general" class="alert alert-error mb-4">

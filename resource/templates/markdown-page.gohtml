@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN" {{if .Theme}}data-theme="{{.Theme}}"{{end}}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "commonhead.gohtml" .}}
+    {{if .IsProduction}}
+    {{GetImportInfoPath `src/style.css`}}
+    {{GetImportInfoPath `src/main.js`}}
+    {{else}}
+    <script type="module" src="http://localhost:3001/@vite/client"></script>
+    <script type="module" src="http://localhost:3001/src/main.js"></script>
+    {{end}}
+</head>
+<link rel="stylesheet"
+      href="/static/css/github-markdown.min.css">
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- 页面标题 -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-base-content mb-4">{{.Title}}</h1>
+                {{if .Subtitle}}
+                <p class="text-lg text-base-content/70">{{.Subtitle}}</p>
+                {{end}}
+            </div>
+
+            <!-- Markdown 内容 -->
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <div class="prose max-w-none text-base-content overflow-hidden min-w-0 markdown-body">
+                            {{.Content}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 返回链接 -->
+            <div class="text-center mt-8">
+                <a href="/" class="btn btn-outline btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    返回首页
+                </a>
+            </div>
+        </div>
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
+</body>
+</html>
