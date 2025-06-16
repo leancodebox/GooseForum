@@ -42,11 +42,11 @@
                             <div class="stats shadow-sm bg-base-100 w-full">
                                 <div class="stat py-2">
                                     <div class="stat-title text-xs">发帖数</div>
-                                    <div class="stat-value text-lg">{{.ArticlesCount}}</div>
+                                    <div class="stat-value text-lg">{{.AuthorInfoStatistics.ArticleCount}}</div>
                                 </div>
                                 <div class="stat py-2">
                                     <div class="stat-title text-xs">获赞数</div>
-                                    <div class="stat-value text-lg text-success">*</div>
+                                    <div class="stat-value text-lg text-success">{{.AuthorInfoStatistics.LikeReceivedCount}}</div>
                                 </div>
                                 <div class="stat py-2">
                                     <div class="stat-title text-xs">粉丝数</div>

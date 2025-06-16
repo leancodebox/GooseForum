@@ -29,15 +29,12 @@ var CmdServe = &cobra.Command{
 }
 
 func runWeb(_ *cobra.Command, _ []string) {
-	var (
-		debug = setting.IsDebug()
-	)
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	slog.Info("GooseForum:start")
 	slog.Info(fmt.Sprintf("GooseForum:useMem %d KB", m.Alloc/1024/8))
 
-	if debug {
+	if setting.IsDebug() {
 		go func() {
 			// go tool pprof http://localhost:7071/debug/pprof/profile
 			// go tool pprof -http=:9001 http://localhost:7071/debug/pprof/heap
@@ -49,11 +46,6 @@ func runWeb(_ *cobra.Command, _ []string) {
 		}()
 	}
 
-	//// 检查是否需要setup
-	//if !setupservice.IsInitialized() {
-	//	setupServe()
-	//}
-
 	// 启动主服务
 	ginServe()
 }
@@ -63,9 +55,8 @@ func ginServe() {
 	defer StopJob()
 
 	port := preferences.GetString("server.port", 8080)
-	isDebug := setting.IsDebug()
 	var engine *gin.Engine
-	if !isDebug {
+	if !setting.IsDebug() {
 		gin.DisableConsoleColor()
 		gin.SetMode(gin.ReleaseMode)
 		engine = gin.New()
