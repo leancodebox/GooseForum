@@ -38,7 +38,6 @@ const profileForm = ref<UserInfo>({
 watch(() => props.userInfo, (newUserInfo) => {
   if (newUserInfo) {
     profileForm.value = {...newUserInfo};
-    console.log('AccountSettings: 接收到用户信息更新', newUserInfo);
   }
 }, {immediate: true, deep: true})
 

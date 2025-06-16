@@ -182,15 +182,15 @@ const deleteArticle = (id) => {
                   }}</p>
                 <div class="grid grid-cols-3 gap-4 mb-4">
                   <div class="text-center">
-                    <div class="text-lg font-bold text-base-content">{{ userStats.articleCount }}</div>
+                    <div class="text-lg font-bold text-base-content">{{ userInfo?.authorInfoStatistics?.articleCount ??0 }}</div>
                     <div class="text-xs text-base-content/60">文章数</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-lg font-bold text-base-content">{{ userStats.followingCount }}</div>
+                    <div class="text-lg font-bold text-base-content">{{ userInfo?.authorInfoStatistics?.likeGivenCount ??0 }}</div>
                     <div class="text-xs text-base-content/60">获赞数</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-lg font-bold text-base-content">{{ userStats.followersCount }}</div>
+                    <div class="text-lg font-bold text-base-content">{{ userInfo?.authorInfoStatistics?.followerCount ??0 }}</div>
                     <div class="text-xs text-base-content/60">粉丝数</div>
                   </div>
                 </div>
@@ -234,7 +234,7 @@ const deleteArticle = (id) => {
                       <div class="flex justify-between items-start">
                         <div class="flex-1">
                           <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ article.title }}</h3>
-                          <p class="text-base-content/70 text-sm mt-2 line-clamp-2">{{ article.summary }}</p>
+                          <p class="text-base-content/70 text-sm mt-2">{{ article.summary }}</p>
                           <div class="flex items-center gap-4 mt-3 text-sm text-base-content/60">
                             <span>{{ article.publishTime }}</span>
                             <span>{{ article.viewCount }} 阅读</span>
@@ -313,10 +313,4 @@ const deleteArticle = (id) => {
 
 
 <style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
 </style>

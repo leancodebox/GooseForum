@@ -86,6 +86,17 @@ export interface ExternalInformation {
     zhihu: ExternalInformationItem,
 }
 
+export interface AuthorInfoStatistics {
+    userId:number,
+    articleCount:number,
+    replyCount:number,
+    followerCount:number,
+    followingCount:number,
+    likeReceivedCount:number,
+    likeGivenCount:number,
+    collectionCount:number,
+}
+
 // 定义用户表单接口
 export interface UserInfo {
     avatarUrl: string
@@ -97,4 +108,5 @@ export interface UserInfo {
     websiteName: string
     signature: string,
     externalInformation: ExternalInformation
+    authorInfoStatistics ?: AuthorInfoStatistics
 }

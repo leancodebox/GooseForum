@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
+	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"io"
 	"log/slog"
@@ -67,19 +68,21 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 
 	// 处理头像URL
 	avatarUrl := userEntity.GetWebAvatarUrl()
+	authorInfoStatistics := userStatistics.Get(userEntity.Id)
 
 	return component.SuccessResponse(component.DataMap{
-		"username":            userEntity.Username,
-		"userId":              userEntity.Id,
-		"avatarUrl":           avatarUrl,
-		"email":               userEntity.Email,
-		"nickname":            userEntity.Nickname,
-		"isAdmin":             userEntity.RoleId != 0,
-		"bio":                 userEntity.Bio,
-		"signature":           userEntity.Signature,
-		"website":             userEntity.Website,
-		"websiteName":         userEntity.WebsiteName,
-		"externalInformation": userEntity.GetExternalInformation(),
+		"username":             userEntity.Username,
+		"userId":               userEntity.Id,
+		"avatarUrl":            avatarUrl,
+		"email":                userEntity.Email,
+		"nickname":             userEntity.Nickname,
+		"isAdmin":              userEntity.RoleId != 0,
+		"bio":                  userEntity.Bio,
+		"signature":            userEntity.Signature,
+		"website":              userEntity.Website,
+		"websiteName":          userEntity.WebsiteName,
+		"externalInformation":  userEntity.GetExternalInformation(),
+		"authorInfoStatistics": authorInfoStatistics,
 	})
 }
 
