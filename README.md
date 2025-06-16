@@ -33,7 +33,7 @@ chmod +x ./GooseForum
 ./GooseForum serve
 ```
 
-GooseForum 在首次启动时，会创建初始管理员账号，管理员账号为`admin`、密码为`gooseforum`。如果你在个人中心更改了密码后忘记管理员密码，你可以通过执行`./GooseForum user:changePassword --userId=1 --password=q1234567890`命令进行重置。
+GooseForum 在首次启动后，第一个注册的账号即为管理员。如果你在个人中心更改了密码后忘记管理员密码，你可以通过执行`./GooseForum user:manage`命令进行重置。
 
 GooseForum 默认会监听99端口。你可以在浏览器中访问 http://服务器IP:99 进入 GooseForum。
 
