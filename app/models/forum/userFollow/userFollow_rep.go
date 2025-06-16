@@ -36,3 +36,8 @@ func GetFollowerCount(userId uint64) int64 {
 	builder().Where(queryopt.Eq(fieldFollowUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&count)
 	return count
 }
+
+func GetByUserId(userId, followUserId uint64) (entity Entity) {
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldFollowUserId, followUserId)).First(&entity)
+	return
+}

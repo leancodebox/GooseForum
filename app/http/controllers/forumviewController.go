@@ -146,6 +146,7 @@ func PostDetail(c *gin.Context) {
 		"WebsiteName":          authorUserInfo.WebsiteName,
 		"ExternalInformation":  authorUserInfo.GetExternalInformation(),
 		"Bio":                  authorUserInfo.Bio,
+		"Signature":            authorUserInfo.Signature,
 		"AuthorInfoStatistics": authorInfoStatistics,
 	})
 }

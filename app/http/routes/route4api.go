@@ -104,6 +104,8 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("get-user-articles", UpButterReq(controllers.GetUserArticles))
 	// 文章点赞
 	forumLoginApi.POST("like-articles", UpButterReq(controllers.LikeArticle))
+	// 关注
+	forumLoginApi.POST("follow-user", UpButterReq(controllers.FollowUser))
 
 	adminApi := baseApi.Group("admin", middleware.JWTAuth4Gin)
 

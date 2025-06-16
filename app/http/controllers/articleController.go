@@ -9,7 +9,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"strings"
@@ -327,6 +329,44 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 			articles.DecrementLike(articleEntity)
 			userStatistics.CancelLikeArticle(req.UserId)
 			userStatistics.CancelGivenLike(articleEntity.UserId)
+		}
+	}
+	return component.SuccessResponse(true)
+}
+
+type FollowUserReq struct {
+	Id     uint64 `json:"id"`
+	Action int    `json:"action" validate:"min=1,max=2"` // 1 like 2 cancel
+}
+
+func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {
+	userEntity, _ := users.Get(req.Params.Id)
+	if userEntity.Id == 0 {
+		return component.FailResponse("用户不存在")
+	}
+	userFollowEntity := userFollow.GetByUserId(req.UserId, req.Params.Id)
+	if userFollowEntity.Id == 0 {
+		userFollowEntity.UserId = req.UserId
+		userFollowEntity.FollowUserId = req.Params.Id
+	}
+	targetStatus := 0
+	if req.Params.Action == 1 {
+		targetStatus = 1
+	} else {
+		targetStatus = 0
+	}
+
+	if userFollowEntity.Status == targetStatus {
+		return component.SuccessResponse(true)
+	}
+	userFollowEntity.Status = targetStatus
+	if userFollow.SaveOrCreateById(&userFollowEntity) > 0 {
+		if req.Params.Action == 1 {
+			userStatistics.Following(req.UserId)
+			userStatistics.Follower(req.Params.Id)
+		} else {
+			userStatistics.CancelFollowing(req.UserId)
+			userStatistics.CancelFollower(req.Params.Id)
 		}
 	}
 	return component.SuccessResponse(true)

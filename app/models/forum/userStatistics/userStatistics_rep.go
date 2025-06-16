@@ -53,6 +53,30 @@ func CancelGivenLike(userId uint64) int64 {
 	return result.RowsAffected
 }
 
+// 增加关注
+func Following(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET follower_count = follower_count+1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
+// 取消关注
+func CancelFollowing(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET following_count = following_count-1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
+// 增加粉丝数
+func Follower(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET follower_count = follower_count+1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
+// 取消粉丝数量
+func CancelFollower(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET follower_count = follower_count-1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
 //	return result.RowsAffected
