@@ -115,11 +115,11 @@ func ExtractDescription(content string, maxLength int) string {
 	if maxLength <= 0 {
 		maxLength = 200 // 默认最大长度
 	}
-	
+
 	// 使用 goldmark 解析 markdown
 	reader := text.NewReader([]byte(content))
 	doc := markdown2html.GetParser().Parser().Parse(reader)
-	
+
 	// 提取纯文本
 	var textParts []string
 	err := ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
@@ -142,12 +142,12 @@ func ExtractDescription(content string, maxLength int) string {
 		}
 		return ast.WalkContinue, nil
 	})
-	
+
 	if err != nil {
 		// 如果解析失败，回退到简单的文本清理
 		return fallbackExtractDescription(content, maxLength)
 	}
-	
+
 	// 合并文本并清理
 	description := strings.Join(textParts, " ")
 	description = strings.ReplaceAll(description, "\n", " ")
@@ -157,7 +157,7 @@ func ExtractDescription(content string, maxLength int) string {
 		description = strings.ReplaceAll(description, "  ", " ")
 	}
 	description = strings.TrimSpace(description)
-	
+
 	// 截断到指定长度，确保不会截断中文字符
 	if utf8.RuneCountInString(description) > maxLength {
 		runes := []rune(description)
@@ -165,7 +165,7 @@ func ExtractDescription(content string, maxLength int) string {
 			description = string(runes[:maxLength]) + "..."
 		}
 	}
-	
+
 	return description
 }
 
@@ -174,40 +174,40 @@ func fallbackExtractDescription(content string, maxLength int) string {
 	// 简单清理：移除常见的 markdown 标记
 	lines := strings.Split(content, "\n")
 	var textLines []string
-	
+
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
-		
+
 		// 跳过代码块标记
 		if strings.HasPrefix(line, "```") {
 			continue
 		}
-		
+
 		// 跳过图片
 		if strings.Contains(line, "![]") || (strings.Contains(line, "![") && strings.Contains(line, "](") && strings.Contains(line, ")")) {
 			continue
 		}
-		
+
 		// 移除标题标记
 		if strings.HasPrefix(line, "#") {
 			line = strings.TrimLeft(line, "# ")
 		}
-		
+
 		// 移除列表标记
 		if strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* ") || strings.HasPrefix(line, "+ ") {
 			line = line[2:]
 		}
-		
+
 		if len(line) > 10 {
 			textLines = append(textLines, line)
 		}
 	}
-	
+
 	description := strings.Join(textLines, " ")
-	
+
 	// 截断到指定长度
 	if utf8.RuneCountInString(description) > maxLength {
 		runes := []rune(description)
@@ -215,7 +215,7 @@ func fallbackExtractDescription(content string, maxLength int) string {
 			description = string(runes[:maxLength]) + "..."
 		}
 	}
-	
+
 	return description
 }
 
