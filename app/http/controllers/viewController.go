@@ -40,21 +40,54 @@ func Logout(c *gin.Context) {
 	))
 }
 
+// ValidatePassword 验证密码复杂度
+func ValidatePassword(password string) error {
+	if len(password) < 8 {
+		return fmt.Errorf("密码长度不能少于8位")
+	}
+	if len(password) > 128 {
+		return fmt.Errorf("密码长度不能超过128位")
+	}
+	
+	// 检查是否包含数字
+	hasDigit := regexp.MustCompile(`[0-9]`).MatchString(password)
+	// 检查是否包含字母
+	hasLetter := regexp.MustCompile(`[a-zA-Z]`).MatchString(password)
+	
+	if !hasDigit || !hasLetter {
+		return fmt.Errorf("密码必须包含字母和数字")
+	}
+	
+	return nil
+}
+
 // Register 注册
 func Register(c *gin.Context) {
 	var r RegReq
 	if err := c.ShouldBindJSON(&r); err != nil {
-		c.JSON(200, component.FailData(err))
+		c.JSON(200, component.FailData("请求参数格式错误"))
 		return
 	}
 	if err := validate.Valid(r); err != nil {
 		c.JSON(200, component.FailData(validate.FormatError(err)))
 		return
 	}
+	
+	// 清理输入数据
+	r.Username = strings.TrimSpace(r.Username)
+	r.Email = strings.TrimSpace(strings.ToLower(r.Email))
+	
 	if !ValidateUsername(r.Username) {
 		c.JSON(200, component.FailData("用户名仅允许字母、数字、下划线、连字符，长度6-32"))
 		return
 	}
+	
+	// 验证密码复杂度
+	if err := ValidatePassword(r.Password); err != nil {
+		c.JSON(200, component.FailData(err.Error()))
+		return
+	}
+	
 	// 首先验证验证码
 	if !captchaOpt.VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
 		c.JSON(200, component.FailData("验证码错误或已过期"))
@@ -119,7 +152,7 @@ func Register(c *gin.Context) {
 }
 
 type LoginReq struct {
-	Username    string `json:"username" validate:"required"`
+	Username    string `json:"username" validate:"required"` // 可以是用户名或邮箱
 	Password    string `json:"password" validate:"required"`
 	CaptchaId   string `json:"captchaId"`
 	CaptchaCode string `json:"captchaCode"`
@@ -129,30 +162,58 @@ type LoginReq struct {
 func Login(c *gin.Context) {
 	var req LoginReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(200, component.FailData("验证失败"))
+		c.JSON(200, component.FailData("请求参数格式错误"))
 		return
 	}
-	username := req.Username
+	
+	// 验证输入参数
+	if err := validate.Valid(req); err != nil {
+		c.JSON(200, component.FailData("请求参数验证失败"))
+		return
+	}
+	
+	username := strings.TrimSpace(req.Username)
 	password := req.Password
 	captchaId := req.CaptchaId
 	captchaCode := req.CaptchaCode
 
-	if !captchaOpt.VerifyCaptcha(captchaId, captchaCode) {
-		c.JSON(200, component.FailData("验证失败"))
+	// 验证用户名/邮箱格式
+	if username == "" {
+		c.JSON(200, component.FailData("用户名或邮箱不能为空"))
 		return
 	}
+	
+	// 验证密码长度
+	if len(password) < 6 {
+		c.JSON(200, component.FailData("密码长度不能少于6位"))
+		return
+	}
+
+	if !captchaOpt.VerifyCaptcha(captchaId, captchaCode) {
+		c.JSON(200, component.FailData("验证码错误或已过期"))
+		return
+	}
+	
 	userEntity, err := users.Verify(username, password)
 	if err != nil {
-		slog.Info(cast.ToString(err))
-		c.JSON(200, component.FailData(err))
+		slog.Info("登录失败", "username", username, "error", err)
+		c.JSON(200, component.FailData("用户名/邮箱或密码错误"))
 		return
 	}
+	
+	// 检查用户状态
+	if userEntity.Status != 0 {
+		c.JSON(200, component.FailData("账户已被冻结，请联系管理员"))
+		return
+	}
+	
 	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
 	if err != nil {
-		slog.Info(cast.ToString(err))
-		c.JSON(200, component.FailData(err))
+		slog.Error("生成token失败", "userId", userEntity.Id, "error", err)
+		c.JSON(200, component.FailData("登录异常，请稍后重试"))
 		return
 	}
+	
 	jwt.TokenSetting(c, token)
 	c.JSON(http.StatusOK, component.SuccessData(
 		"登录成功",

@@ -13,9 +13,10 @@ func Get(id any) (entity Entity, err error) {
 	return
 }
 
-func Verify(username string, password string) (*Entity, error) {
+func Verify(usernameOrEmail string, password string) (*Entity, error) {
 	var user Entity
-	err := builder().Where(queryopt.Eq(fieldUsername, username)).First(&user).Error
+	// 尝试通过用户名或邮箱查找用户
+	err := builder().Where("username = ? OR email = ?", usernameOrEmail, usernameOrEmail).First(&user).Error
 	if err != nil {
 		return &user, err
 	}
@@ -24,6 +25,12 @@ func Verify(username string, password string) (*Entity, error) {
 		return &Entity{}, err
 	}
 	return &user, nil
+}
+
+// GetByEmail 通过邮箱获取用户
+func GetByEmail(email string) (entity Entity, err error) {
+	err = builder().Where("email = ?", email).First(&entity).Error
+	return
 }
 
 func MakeUser(name string, password string, email string) *Entity {
