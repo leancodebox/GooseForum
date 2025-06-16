@@ -51,3 +51,8 @@ func MarkdownToHTML(markdown string) string {
 	}
 	return buf.String()
 }
+
+// GetParser 获取 goldmark 解析器实例
+func GetParser() goldmark.Markdown {
+	return md
+}
