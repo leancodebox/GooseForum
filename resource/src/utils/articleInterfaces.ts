@@ -32,6 +32,7 @@ export interface ArticleListItem {
     commentCount: number
     category: string,
     categories: string[]
+    typeStr?:string
 }
 
 export interface ArticleResponse {

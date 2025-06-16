@@ -91,28 +91,9 @@ const editProfile = () => {
   }
 }
 
-// 编辑文章
-const editArticle = (id) => {
-  console.log('编辑文章:', id)
-  // 跳转到编辑页面
-}
-
-// 查看文章数据
-const viewStats = (id) => {
-  console.log('查看文章数据:', id)
-  // 显示文章统计数据
-}
-
-// 删除文章
-const deleteArticle = (id) => {
-  console.log('删除文章:', id)
-  // 确认删除文章
-}
-
-
 </script>
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div class="container mx-auto px-4 py-4">
     <div class="max-w-6xl mx-auto">
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- 左侧用户信息卡片 -->
@@ -180,17 +161,6 @@ const deleteArticle = (id) => {
             <div class="tabs">
               <input type="radio" name="my_tabs_3" class="tab" aria-label="我的文章" checked="checked"/>
               <div class="tab-content space-y-4 mt-3">
-                <div class="flex justify-between items-center">
-                  <h2 class="text-2xl font-bold">我的文章</h2>
-                  <a href="/publish" class="btn btn-primary btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    写文章
-                  </a>
-                </div>
-
                 <MyArticles :user-info="userInfo"></MyArticles>
               </div>
 
