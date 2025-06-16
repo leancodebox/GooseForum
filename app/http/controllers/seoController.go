@@ -76,7 +76,7 @@ var formatRFC822WithZone = "02 Jan 06 15:04 -0700"
 
 func RenderRssV2(c *gin.Context) {
 	host := getHost(c)
-	articleList, err := articles.GetLatestArticles(90)
+	articleList, err := articles.GetLatestArticles(100)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error generating RSS feed")
 		return
@@ -86,7 +86,7 @@ func RenderRssV2(c *gin.Context) {
 		return Item{
 			Title:       item.Title,
 			Link:        html.EscapeString(fmt.Sprintf("%s/post/%d", host, item.Id)),
-			Description: CDATA(item.Title),
+			Description: CDATA(item.Description),
 			PubDate:     item.CreatedAt.Format(formatRFC822WithZone),
 			GUID:        cast.ToString(item.Id),
 		}

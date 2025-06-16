@@ -75,6 +75,7 @@ func (itself *Entity) TableName() string {
 type SmallEntity struct {
 	Id            uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                        //
 	Title         string     `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`              //
+	Description   string     `gorm:"column:description;type:varchar(255);not null;default:'';" json:"description"`  // 文章描述，用于SEO
 	Type          int8       `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`                      // 文章类型：0 博文，1教程，2问答，3分享
 	UserId        uint64     `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`         //
 	ArticleStatus int8       `gorm:"column:article_status;type:tinyint;not null;default:0;" json:"articleStatus"`   // 文章状态：0 草稿 1 发布

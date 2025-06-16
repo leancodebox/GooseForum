@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCollection"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -11,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 func init() {
@@ -64,4 +66,44 @@ func runCheckAndRepairData(cmd *cobra.Command, args []string) {
 	}
 	fmt.Println("数据计算完毕")
 
+	// 修复文章描述
+	fmt.Println("开始修复文章描述")
+	repairArticleDescriptions()
+	fmt.Println("文章描述修复完毕")
+}
+
+// repairArticleDescriptions 修复所有文章的描述
+func repairArticleDescriptions() {
+	var articleStartId uint64 = 0
+	limit := 100
+	updatedCount := 0
+
+	for {
+		articleList := articles.QueryById(articleStartId, limit)
+		for _, article := range articleList {
+			if articleStartId < article.Id {
+				articleStartId = article.Id
+			}
+
+			// 如果描述为空或者很短，重新生成
+			if article.Description == "" || len(strings.TrimSpace(article.Description)) < 10 {
+				newDescription := markdown2html.ExtractDescription(article.Content, 200)
+				if newDescription != "" && newDescription != article.Description {
+					article.Description = newDescription
+					err := articles.Save(article)
+					if err != nil {
+						fmt.Printf("更新文章 %d 描述失败: %v\n", article.Id, err)
+					} else {
+						updatedCount++
+						fmt.Printf("已更新文章 %d 的描述: %s\n", article.Id, newDescription[:min(50, len(newDescription))])
+					}
+				}
+			}
+		}
+		if len(articleList) < limit {
+			break
+		}
+	}
+
+	fmt.Printf("共更新了 %d 篇文章的描述\n", updatedCount)
 }

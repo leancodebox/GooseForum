@@ -14,11 +14,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/text"
 	"strings"
 	"time"
-	"unicode/utf8"
 )
 
 func GetSiteStatistics() component.Response {
@@ -110,115 +107,6 @@ type WriteArticleReq struct {
 	CategoryId []uint64 `json:"categoryId" validate:"min=1,max=3"`
 }
 
-// ExtractDescription 从markdown内容中智能提取描述
-func ExtractDescription(content string, maxLength int) string {
-	if maxLength <= 0 {
-		maxLength = 200 // 默认最大长度
-	}
-
-	// 使用 goldmark 解析 markdown
-	reader := text.NewReader([]byte(content))
-	doc := markdown2html.GetParser().Parser().Parse(reader)
-
-	// 提取纯文本
-	var textParts []string
-	err := ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
-		if entering {
-			switch node := n.(type) {
-			case *ast.Text:
-				// 提取文本节点内容
-				text := string(node.Segment.Value(reader.Source()))
-				text = strings.TrimSpace(text)
-				if text != "" && len(text) > 3 {
-					textParts = append(textParts, text)
-				}
-			case *ast.CodeBlock, *ast.FencedCodeBlock:
-				// 跳过代码块
-				return ast.WalkSkipChildren, nil
-			case *ast.Image:
-				// 跳过图片
-				return ast.WalkSkipChildren, nil
-			}
-		}
-		return ast.WalkContinue, nil
-	})
-
-	if err != nil {
-		// 如果解析失败，回退到简单的文本清理
-		return fallbackExtractDescription(content, maxLength)
-	}
-
-	// 合并文本并清理
-	description := strings.Join(textParts, " ")
-	description = strings.ReplaceAll(description, "\n", " ")
-	description = strings.ReplaceAll(description, "\t", " ")
-	// 清理多余空格
-	for strings.Contains(description, "  ") {
-		description = strings.ReplaceAll(description, "  ", " ")
-	}
-	description = strings.TrimSpace(description)
-
-	// 截断到指定长度，确保不会截断中文字符
-	if utf8.RuneCountInString(description) > maxLength {
-		runes := []rune(description)
-		if len(runes) > maxLength {
-			description = string(runes[:maxLength]) + "..."
-		}
-	}
-
-	return description
-}
-
-// fallbackExtractDescription 简单的回退文本提取方法
-func fallbackExtractDescription(content string, maxLength int) string {
-	// 简单清理：移除常见的 markdown 标记
-	lines := strings.Split(content, "\n")
-	var textLines []string
-
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-
-		// 跳过代码块标记
-		if strings.HasPrefix(line, "```") {
-			continue
-		}
-
-		// 跳过图片
-		if strings.Contains(line, "![]") || (strings.Contains(line, "![") && strings.Contains(line, "](") && strings.Contains(line, ")")) {
-			continue
-		}
-
-		// 移除标题标记
-		if strings.HasPrefix(line, "#") {
-			line = strings.TrimLeft(line, "# ")
-		}
-
-		// 移除列表标记
-		if strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* ") || strings.HasPrefix(line, "+ ") {
-			line = line[2:]
-		}
-
-		if len(line) > 10 {
-			textLines = append(textLines, line)
-		}
-	}
-
-	description := strings.Join(textLines, " ")
-
-	// 截断到指定长度
-	if utf8.RuneCountInString(description) > maxLength {
-		runes := []rune(description)
-		if len(runes) > maxLength {
-			description = string(runes[:maxLength]) + "..."
-		}
-	}
-
-	return description
-}
-
 // WriteArticles 写文章
 func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Response {
 	if articles.CantWriteNew(req.UserId, 10) {
@@ -238,7 +126,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	article.Content = req.Params.Content
 	article.Title = req.Params.Title
 	// 自动生成文章描述
-	article.Description = ExtractDescription(req.Params.Content, 200)
+	article.Description = markdown2html.ExtractDescription(req.Params.Content, 200)
 	article.RenderedVersion = markdown2html.GetVersion()
 	article.RenderedHTML = "" // 用户提交后不用渲染，避免提交时间过长。
 	if article.Id > 0 {

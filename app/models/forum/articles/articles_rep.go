@@ -209,3 +209,9 @@ func GetUserCount(userId uint64) int64 {
 	builder().Where(queryopt.Eq(fieldUserId, userId)).Count(&count)
 	return count
 }
+
+// QueryById 根据ID批量查询文章
+func QueryById(startId uint64, limit int) (entities []*Entity) {
+	builder().Where(queryopt.Gt(pid, startId)).Limit(limit).Order(queryopt.Asc(pid)).Find(&entities)
+	return
+}
