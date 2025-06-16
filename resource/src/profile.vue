@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {onMounted, reactive, ref} from 'vue'
 import AccountSettings from "./components/AccountSettings.vue";
+import MyArticles from "./components/MyArticles.vue";
 import {getUserInfo} from "@/utils/articleService.ts";
 import type {UserInfo} from "@/utils/articleInterfaces.ts";
 
@@ -27,13 +28,6 @@ const userInfo = reactive<UserInfo>({
   }
 })
 
-// 额外的统计信息（不在UserInfo接口中）
-const userStats = reactive({
-  articleCount: 0,
-  followingCount: 0,
-  followersCount: 0,
-  joinDate: ''
-})
 
 // 加载用户信息的函数
 const loadUserInfo = async () => {
@@ -73,43 +67,6 @@ const handleUserInfoUpdated = () => {
 onMounted(() => {
   loadUserInfo();
 })
-
-
-// 我的文章
-const myArticles = ref([
-  {
-    id: 1,
-    title: 'Vue 3 组合式 API 深度解析',
-    summary: '详细介绍 Vue 3 组合式 API 的使用方法和最佳实践，包括 setup 函数、响应式系统等核心概念。',
-    publishTime: '2024-01-15',
-    viewCount: 1234,
-    likeCount: 89,
-    commentCount: 23,
-    status: '已发布'
-  },
-  {
-    id: 2,
-    title: 'Nuxt.js 性能优化实战指南',
-    summary: '从多个维度分析 Nuxt.js 应用的性能优化策略，包括代码分割、懒加载、缓存策略等。',
-    publishTime: '2024-01-10',
-    viewCount: 856,
-    likeCount: 67,
-    commentCount: 15,
-    status: '已发布'
-  },
-  {
-    id: 3,
-    title: 'TypeScript 进阶技巧分享',
-    summary: '分享一些 TypeScript 的高级用法和技巧，帮助开发者更好地使用类型系统。',
-    publishTime: '2024-01-05',
-    viewCount: 432,
-    likeCount: 34,
-    commentCount: 8,
-    status: '草稿'
-  }
-])
-
-
 
 
 // 个人资料表单
@@ -169,7 +126,7 @@ const deleteArticle = (id) => {
               <!-- 用户信息 -->
               <div v-else>
                 <div class="avatar mb-4 mx-auto">
-                  <div class="mask mask-squircle w-24 h-24" >
+                  <div class="mask mask-squircle w-24 h-24">
                     <img :src="userInfo.avatarUrl || '/static/pic/default-avatar.png'"
                          :alt="userInfo.nickname || userInfo.username"/>
                   </div>
@@ -182,15 +139,21 @@ const deleteArticle = (id) => {
                   }}</p>
                 <div class="grid grid-cols-3 gap-4 mb-4">
                   <div class="text-center">
-                    <div class="text-lg font-bold text-base-content">{{ userInfo?.authorInfoStatistics?.articleCount ??0 }}</div>
+                    <div class="text-lg font-bold text-base-content">
+                      {{ userInfo?.authorInfoStatistics?.articleCount ?? 0 }}
+                    </div>
                     <div class="text-xs text-base-content/60">文章数</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-lg font-bold text-base-content">{{ userInfo?.authorInfoStatistics?.likeGivenCount ??0 }}</div>
+                    <div class="text-lg font-bold text-base-content">
+                      {{ userInfo?.authorInfoStatistics?.likeGivenCount ?? 0 }}
+                    </div>
                     <div class="text-xs text-base-content/60">获赞数</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-lg font-bold text-base-content">{{ userInfo?.authorInfoStatistics?.followerCount ??0 }}</div>
+                    <div class="text-lg font-bold text-base-content">
+                      {{ userInfo?.authorInfoStatistics?.followerCount ?? 0 }}
+                    </div>
                     <div class="text-xs text-base-content/60">粉丝数</div>
                   </div>
                 </div>
@@ -227,50 +190,8 @@ const deleteArticle = (id) => {
                     写文章
                   </a>
                 </div>
-                <div class="space-y-3">
-                  <div v-for="article in myArticles" :key="article.id"
-                       class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="card-body p-4">
-                      <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                          <h3 class="card-title text-lg hover:text-primary cursor-pointer">{{ article.title }}</h3>
-                          <p class="text-base-content/70 text-sm mt-2">{{ article.summary }}</p>
-                          <div class="flex items-center gap-4 mt-3 text-sm text-base-content/60">
-                            <span>{{ article.publishTime }}</span>
-                            <span>{{ article.viewCount }} 阅读</span>
-                            <span>{{ article.likeCount }} 点赞</span>
-                            <span>{{ article.commentCount }} 评论</span>
-                            <div class="badge badge-outline badge-sm">{{ article.status }}</div>
-                          </div>
-                        </div>
-                        <div class="dropdown dropdown-end">
-                          <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                            </svg>
-                          </div>
-                          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
-                            <li><a @click="editArticle(article.id)">编辑</a></li>
-                            <li><a @click="viewStats(article.id)">数据</a></li>
-                            <li><a @click="deleteArticle(article.id)" class="text-error">删除</a></li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- 分页 -->
-                <div class="flex justify-center mt-8">
-                  <div class="join bg-base-100 rounded-lg shadow-sm">
-                    <button class="join-item btn btn-sm bg-base-100 border-base-300">«</button>
-                    <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">1</button>
-                    <button class="join-item btn btn-sm bg-base-100 border-base-300">2</button>
-                    <button class="join-item btn btn-sm bg-base-100 border-base-300">3</button>
-                    <button class="join-item btn btn-sm bg-base-100 border-base-300">»</button>
-                  </div>
-                </div>
+
+                <MyArticles :user-info="userInfo"></MyArticles>
               </div>
 
               <input type="radio" name="my_tabs_3" class="tab" aria-label="我的收藏"/>

@@ -29,6 +29,7 @@ export interface ArticleListItem {
     createTime: string,
     lastUpdateTime: string,
     viewCount: number,
+    commentCount: number
     category: string,
     categories: string[]
 }
@@ -99,6 +100,7 @@ export interface AuthorInfoStatistics {
 
 // 定义用户表单接口
 export interface UserInfo {
+    userId?: number
     avatarUrl: string
     username: string
     nickname: string

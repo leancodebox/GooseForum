@@ -44,7 +44,7 @@ type ArticlesSimpleDto struct {
 	Username       string   `json:"username,omitempty"`
 	AuthorId       uint64   `json:"authorId,omitempty"`
 	ViewCount      uint64   `json:"viewCount,omitempty"`
-	CommentCount   uint64   `json:"commentCount,omitempty"`
+	CommentCount   uint64   `json:"commentCount"`
 	Type           int8     `json:"type,omitempty"`
 	TypeStr        string   `json:"typeStr,omitempty"`
 	Category       string   `json:"category,omitempty"`
@@ -275,6 +275,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				CommentCount:   t.ReplyCount,
 				Category:       FirstOr(categoryNames, "未分类"),
 				Categories:     categoryNames,
+				TypeStr:        articlesTypeMap[int(t.Type)].Name,
 			}
 		}),
 		pageData.Page,
