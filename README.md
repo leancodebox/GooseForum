@@ -183,14 +183,12 @@ goreleaser build --clean --snapshot
 ### 编译相关
 
 ```
- go generate ./...
+go generate ./...
 ```
 ```
 go build -ldflags="-w -s" .
 ```
-```shell
-npx @tailwindcss/cli -i ./static/css/input.css -o ./static/css/output.css --watch            
-```
+
 windows
 ```
 SET CGO_ENABLED=0
