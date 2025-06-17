@@ -10,7 +10,7 @@
 
         <!-- 登录表单 -->
         <div v-if="activeTab === 'login'">
-          <h2 class="text-2xl font-bold text-base-content mb-6 text-center">欢迎回来</h2>
+          <h2 class="text-2xl font-medium text-base-content mb-6 text-center">欢迎回来</h2>
           <form @submit.prevent="handleLogin" class="space-y-4">
             <div class="form-control">
               <label class="label">
@@ -86,7 +86,7 @@
 
         <!-- 注册表单 -->
         <div v-if="activeTab === 'register'">
-          <h2 class="text-2xl font-bold text-base-content mb-6 text-center">创建账户</h2>
+          <h2 class="text-2xl font-medium text-base-content mb-6 text-center">创建账户</h2>
           <form @submit.prevent="handleRegister" class="space-y-4">
             <div class="form-control">
               <label class="label">

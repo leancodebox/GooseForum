@@ -221,7 +221,7 @@ const savePrivacySettings = async () => {
             </div>
           </div>
           <details tabindex="0" class="collapse collapse-arrow bg-base-100 border-base-300 border">
-            <summary class="collapse-title font-semibold">外站配置</summary>
+            <summary class="collapse-title font-medium">外站配置</summary>
             <div class="collapse-content text-sm">
 
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

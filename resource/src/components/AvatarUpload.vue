@@ -273,7 +273,7 @@ onUnmounted(() => {
     <!-- 裁切模态框 - 使用 daisyui Modal -->
     <div class="modal" :class="{ 'modal-open': showCropModal }">
       <div class="modal-box max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <h3 class="text-lg font-semibold mb-4">裁切头像</h3>
+        <h3 class="text-lg font-medium mb-4">裁切头像</h3>
         
         <div class="flex gap-6">
           <!-- 裁切区域 -->
