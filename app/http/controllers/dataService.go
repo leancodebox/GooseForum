@@ -2,10 +2,12 @@ package controllers
 
 import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -35,6 +37,7 @@ type SiteStats struct {
 	ArticleCount      int64 `json:"articleCount"`
 	ArticleMonthCount int64 `json:"articleMonthCount"`
 	Reply             int64 `json:"reply"`
+	LinksCount        int   `json:"linksCount"`
 }
 
 func GetSiteStatisticsData() SiteStats {
@@ -45,12 +48,19 @@ func GetSiteStatisticsData() SiteStats {
 		return siteStatsCache
 	}
 
+	configEntity := pageConfig.GetByPageType(FriendShipLinks)
+	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
+	linksCount := 0
+	for _, group := range res {
+		linksCount += len(group.Links)
+	}
 	result := SiteStats{
 		UserCount:         users.GetCount(),
 		UserMonthCount:    users.GetMonthCount(),
 		ArticleCount:      articles.GetCount(),
 		ArticleMonthCount: articles.GetMonthCount(),
 		Reply:             reply.GetCount(),
+		LinksCount:        linksCount,
 	}
 
 	siteStatsCache = result

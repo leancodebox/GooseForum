@@ -184,7 +184,7 @@ function formatDate(dateString: string) {
       
       <!-- 文章列表 -->
       <ul class="list" v-else>
-        <li class="list-row hover:bg-base-200 flex items-center gap-3" 
+        <li class="list-row hover:bg-base-200 flex items-center gap-3 px-4 py-2"
             :class="{ 'opacity-50': loading }" 
             v-for="item in listItem" 
             :key="item.id">

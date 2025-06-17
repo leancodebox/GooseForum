@@ -32,10 +32,9 @@ func Home(c *gin.Context) {
 		"User":                GetLoginUser(c),
 		"Title":               "GooseForum",
 		"ArticleCategoryList": articleCategoryLabel(),
-		//"FeaturedArticles":    articlesSmallEntity2Dto(getRecommendedArticles()), //回复最多的文章
-		"Description":    "GooseForum's home",
-		"LatestArticles": articlesSmallEntity2Dto(last), // 最新的文章
-		"Stats":          GetSiteStatisticsData(),
+		"Description":         "GooseForum's home",
+		"LatestArticles":      articlesSmallEntity2Dto(last), // 最新的文章
+		"Stats":               GetSiteStatisticsData(),
 	})
 }
 
