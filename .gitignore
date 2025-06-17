@@ -30,3 +30,4 @@ config.toml
 .DS_Store
 # Added by goreleaser init:
 dist/
+.trae/rules/project_rules.md
