@@ -104,9 +104,9 @@
                     {{if and .User (gt .User.UserId 0)}}
                     <li><a href="/publish">发布文章</a></li>
                     <li><a href="/notifications">消息通知</a></li>
-                    {{end}}
-
+                    {{else}}
                     <li><a href="/login">登录/注册</a></li>
+                    {{end}}
                 </ul>
             </div>
         </div>
