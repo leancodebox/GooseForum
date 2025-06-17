@@ -129,10 +129,10 @@ cd GooseForum
 
 #### 构建项目前后端分离资源并编译完整项目为二进制可执行文件
 
-GooseForum 项目主要由两部分组成：二者均在同一仓库，分别为主目录下的服务端和`actorv2`目录下的前后端分离项目，需要先构建`actorv2` 目录下的前后端分离项目。完整命令如下
+GooseForum 项目主要由两部分组成：二者均在同一仓库，分别为主目录下的服务端和`actor`目录下的前后端分离项目，需要先构建`actor` 目录下的前后端分离项目。完整命令如下
 
 ```shell
-cd actorv2
+cd actor
 npm i
 npm run build
 cd .. 
