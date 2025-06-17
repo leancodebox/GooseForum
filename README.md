@@ -1,7 +1,7 @@
 <h1  align="center">
   <br>
   <a href="https://github.com/leancodebox/GooseForum" alt="logo" >
-    <img src="resource/static/pic/default-avatar.png" width="140"/></a>
+    <img src="resource/static/pic/icon_300.png" width="140"/></a>
   <br>
   GooseForum
   <br>
