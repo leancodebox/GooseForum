@@ -199,7 +199,7 @@ onUnmounted(() => {
           <div class="w-full">
             <label class="form-control w-full">
               <div class="label">
-                <span class="label-text font-medium">文章标题</span>
+                <span class="label-text font-normal">文章标题</span>
                 <span class="label-text-alt text-error">*</span>
               </div>
               <input v-model="articleData.articleTitle" type="text" placeholder="请输入文章标题"
@@ -214,7 +214,7 @@ onUnmounted(() => {
             <div class="w-full sm:w-1/3">
               <label class="form-control w-full">
                 <div class="label">
-                  <span class="label-text font-medium">类型</span>
+                  <span class="label-text font-normal">类型</span>
                   <span class="label-text-alt text-error">*</span>
                 </div>
                 <n-select
@@ -229,7 +229,7 @@ onUnmounted(() => {
             <div class="w-full sm:w-2/3">
               <label class="form-control w-full">
                 <div class="label">
-                  <span class="label-text font-medium">文章分类</span>
+                  <span class="label-text font-normal">文章分类</span>
                   <span class="label-text-alt text-error">*</span>
                 </div>
                 <n-select

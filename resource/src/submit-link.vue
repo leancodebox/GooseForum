@@ -9,7 +9,7 @@
             </svg>
             返回
           </a>
-          <h1 class="card-title text-3xl font-medium text-base-content">申请友情链接</h1>
+          <h1 class="card-title text-3xl font-normal text-base-content">申请友情链接</h1>
         </div>
         
         <div class="alert alert-info mb-6">
@@ -17,7 +17,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <div>
-            <h3 class="font-medium">申请须知</h3>
+            <h3 class="font-normal">申请须知</h3>
             <div class="text-sm mt-1">
               请确保您的网站内容健康、有价值，且能够稳定访问。我们会在3-7个工作日内审核您的申请。
             </div>
@@ -30,7 +30,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">网站名称 <span class="text-error">*</span></span>
+                  <span class="label-text font-normal">网站名称 <span class="text-error">*</span></span>
                 </label>
                 <input 
                   v-model="form.siteName" 
@@ -47,7 +47,7 @@
 
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">网站地址 <span class="text-error">*</span></span>
+                  <span class="label-text font-normal">网站地址 <span class="text-error">*</span></span>
                 </label>
                 <input 
                   v-model="form.siteUrl" 
@@ -64,7 +64,7 @@
 
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">网站Logo</span>
+                  <span class="label-text font-normal">网站Logo</span>
                 </label>
                 <input 
                   v-model="form.siteLogo" 
@@ -83,7 +83,7 @@
 
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">网站分类 <span class="text-error">*</span></span>
+                  <span class="label-text font-normal">网站分类 <span class="text-error">*</span></span>
                 </label>
                 <select 
                   v-model="form.category" 
@@ -105,7 +105,7 @@
 
             <div class="form-control lg:col-span-2">
               <label class="label">
-                <span class="label-text font-medium">网站描述 <span class="text-error">*</span></span>
+                <span class="label-text font-normal">网站描述 <span class="text-error">*</span></span>
               </label>
               <textarea 
                 v-model="form.description" 
@@ -125,7 +125,7 @@
             <!-- 互链信息（必填） -->
             <div class="form-control lg:col-span-2">
               <label class="label">
-                <span class="label-text font-medium">回链页面地址 <span class="text-error">*</span></span>
+                <span class="label-text font-normal">回链页面地址 <span class="text-error">*</span></span>
               </label>
               <div class="text-sm text-base-content/70 mb-2">
                 💡 添加友情链接有助于提高申请通过率
@@ -149,12 +149,12 @@
 
           <!-- 联系信息 -->
           <div class="grid grid-cols-1 gap-6">
-            <h2 class="text-xl font-medium text-base-content border-b border-base-300 pb-3 mb-2">联系信息</h2>
+            <h2 class="text-xl font-normal text-base-content border-b border-base-300 pb-3 mb-2">联系信息</h2>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">联系人姓名 <span class="text-error">*</span></span>
+                  <span class="label-text font-normal">联系人姓名 <span class="text-error">*</span></span>
                 </label>
                 <input 
                   v-model="form.contactName" 
@@ -171,7 +171,7 @@
 
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">联系邮箱 <span class="text-error">*</span></span>
+                  <span class="label-text font-normal">联系邮箱 <span class="text-error">*</span></span>
                 </label>
                 <input 
                   v-model="form.contactEmail" 
@@ -192,11 +192,11 @@
 
           <!-- 附加信息 -->
           <div class="grid grid-cols-1 gap-6">
-            <h2 class="text-xl font-medium text-base-content border-b border-base-300 pb-3 mb-2">附加信息</h2>
+            <h2 class="text-xl font-normal text-base-content border-b border-base-300 pb-3 mb-2">附加信息</h2>
             
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">备注说明</span>
+                <span class="label-text font-normal">备注说明</span>
                 <span class="label-text-alt">{{ form.remarks?.length || 0 }}/500</span>
               </label>
               <textarea 

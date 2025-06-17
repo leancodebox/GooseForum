@@ -273,12 +273,12 @@ onUnmounted(() => {
     <!-- 裁切模态框 - 使用 daisyui Modal -->
     <div class="modal" :class="{ 'modal-open': showCropModal }">
       <div class="modal-box max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <h3 class="text-lg font-medium mb-4">裁切头像</h3>
+        <h3 class="text-lg font-normal mb-4">裁切头像</h3>
         
         <div class="flex gap-6">
           <!-- 裁切区域 -->
           <div class="flex-1">
-            <h4 class="text-sm font-medium mb-2">调整裁切区域</h4>
+            <h4 class="text-sm font-normal mb-2">调整裁切区域</h4>
             <VueCropper
                ref="cropperRef"
                :img="cropImg"
@@ -306,7 +306,7 @@ onUnmounted(() => {
           
           <!-- 预览区域 -->
           <div class="w-1/3">
-            <h4 class="text-sm font-medium mb-2">预览效果</h4>
+            <h4 class="text-sm font-normal mb-2">预览效果</h4>
             <div class="space-y-4">
               <div class="text-center">
                 <p class="text-xs text-gray-500 mb-2">大头像 (100x100)</p>

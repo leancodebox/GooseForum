@@ -84,7 +84,7 @@
                 <!-- 文章详情卡片 -->
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body overflow-hidden">
-                        <h1 class="card-title text-3xl font-medium text-base-content mb-4">
+                        <h1 class="card-title text-3xl font-normal text-base-content mb-4">
                             {{.ArticleTitle}}
                         </h1>
                         {{if false}}
@@ -206,7 +206,7 @@
                                     </a>
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2 mb-1">
-                                            <span class="font-semibold text-base-content">{{.Username}}</span>
+                                            <span class="font-normal text-base-content">{{.Username}}</span>
                                             <span class="text-sm text-base-content/60">{{.CreateTime}}</span>
                                         </div>
                                         {{if .ReplyToUsername}}
@@ -261,7 +261,7 @@
                     <!-- 作者信息卡片 -->
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title mb-3">作者信息</h2>
+                            <h2 class="card-title mb-3 font-normal">作者信息</h2>
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="avatar">
                                     <div class="mask mask-squircle w-16 h-16">
@@ -269,7 +269,7 @@
                                     </div>
                                 </div>
                                 <div class="flex-1">
-                                    <h3 class="font-medium text-base-content">{{.Username}}</h3>
+                                    <h3 class="font-normal text-base-content">{{.Username}}</h3>
                                     <p class="text-sm text-base-content/70">{{.Signature}}</p>
                                     <div class="flex items-center gap-2 mt-1">
                                         <div class="badge badge-xs badge-primary"></div>
@@ -284,15 +284,15 @@
                             <!-- 数据统计 - 一行展示 -->
                             <div class="grid grid-cols-3 gap-4 mb-1">
                                 <div class="text-center">
-                                    <div class="text-lg font-medium text-base-content">{{.AuthorInfoStatistics.ArticleCount}}</div>
+                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.ArticleCount}}</div>
                                     <div class="text-xs text-base-content/60">文章数</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-lg font-medium text-base-content">{{.AuthorInfoStatistics.LikeReceivedCount}}</div>
+                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.LikeReceivedCount}}</div>
                                     <div class="text-xs text-base-content/60">获赞数</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-lg font-medium text-base-content">{{.AuthorInfoStatistics.FollowerCount}}</div>
+                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.FollowerCount}}</div>
                                     <div class="text-xs text-base-content/60">粉丝数</div>
                                 </div>
                             </div>
@@ -412,7 +412,7 @@
                             <div class="space-y-3">
                                 {{range .AuthorArticles}}
                                     <div class="hover:bg-base-300 p-2 rounded cursor-pointer">
-                                        <h4 class="text-sm font-semibold text-base-content hover:text-primary">
+                                        <h4 class="text-sm font-normal text-base-content hover:text-primary">
                                             <a href="/post/{{.Id}}">{{.Title}}</a>
                                         </h4>
                                         <p class="text-xs text-base-content/60 mt-1">0.1k 阅读 · 1秒前</p>

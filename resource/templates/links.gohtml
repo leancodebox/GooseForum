@@ -25,7 +25,7 @@
                     <div class="card-body space-y-8">
                         <!-- 页面标题和介绍 -->
                         <div class="space-y-4">
-                            <h1 class="card-title text-3xl font-medium text-base-content">友情链接</h1>
+                            <h1 class="card-title text-3xl font-normal text-base-content">友情链接</h1>
                             <p class="text-base-content/70">
                                 这里收录了一些优质的技术网站和个人博客，欢迎大家互相学习交流。</p>
 
@@ -34,7 +34,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                                 <div>
-                                    <h3 class="font-medium">申请友情链接</h3>
+                                    <h3 class="font-normal">申请友情链接</h3>
                                     <div class="text-sm mt-1">
                                         如果您希望与我们交换友情链接，请查看右侧申请要求并联系我们。
                                     </div>
@@ -44,9 +44,8 @@
 
                         <!-- 技术社区 -->
                         {{range .FriendLinksGroup}}
-                        <div class="space-y-6">
-
-                            <h2 class="text-2xl font-medium border-b border-base-300 pb-3 flex items-center">
+                        <div class="space-y-2">
+                            <h2 class="text-2xl font-normal border-b border-base-300 pb-3 flex items-center">
                                 {{if eq .Name `community`}}
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-500" fill="none"
                                      viewBox="0 0 24 24" stroke="currentColor">
@@ -72,7 +71,7 @@
                                 个人博客
                                 {{end}}
                             </h2>
-                            <div class="rounded-lg p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="rounded-lg p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {{range .Links}}
                                 <div class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow border border-base-300">
                                     <div class="card-body p-4">
@@ -83,7 +82,7 @@
                                                 </div>
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <h3 class="font-medium text-base-content truncate">
+                                                <h3 class="font-normal text-base-content truncate">
                                                     <a href="{{.Url}}" target="_blank" rel="noopener noreferrer"
                                                        class="hover:text-primary" title="{{.Name}}">{{.Name}}</a>
                                                 </h3>
@@ -107,7 +106,7 @@
                     <!-- 申请友链 -->
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title">申请友链</h2>
+                            <h2 class="card-title font-normal">申请友链</h2>
                             <p class="text-sm text-base-content/70 mb-4">
                                 欢迎优质网站申请友情链接，我们会认真审核每一个申请。</p>
                             <div class="space-y-2 text-sm text-base-content/70">
@@ -153,7 +152,7 @@
                     <!-- 统计信息 -->
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title">链接统计</h2>
+                            <h2 class="card-title font-normal">链接统计</h2>
                             <div class="stats stats-vertical shadow-sm bg-base-100">
                                 <div class="stat py-2">
                                     <div class="stat-title text-xs">总链接数</div>
@@ -174,20 +173,20 @@
                     <!-- 最近更新 -->
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title">最近更新</h2>
+                            <h2 class="card-title font-normal">最近更新</h2>
                             <div class="space-y-3">
                                 <div class="text-sm">
-                                    <div class="font-semibold text-base-content">新增链接</div>
+                                    <div class="font-normal text-base-content">新增链接</div>
                                     <div class="text-base-content/70">Vue.js 官方文档</div>
                                     <div class="text-xs text-base-content/60">2天前</div>
                                 </div>
                                 <div class="text-sm">
-                                    <div class="font-semibold text-base-content">状态更新</div>
+                                    <div class="font-normal text-base-content">状态更新</div>
                                     <div class="text-base-content/70">检查了所有链接状态</div>
                                     <div class="text-xs text-base-content/60">1周前</div>
                                 </div>
                                 <div class="text-sm">
-                                    <div class="font-semibold text-base-content">分类调整</div>
+                                    <div class="font-normal text-base-content">分类调整</div>
                                     <div class="text-base-content/70">重新整理了开发工具分类</div>
                                     <div class="text-xs text-base-content/60">2周前</div>
                                 </div>

@@ -30,27 +30,27 @@
                                     <img src="{{.Author.AvatarUrl}}" alt="用户头像"/>
                                 </div>
                             </div>
-                            <h1 class="card-title justify-center text-xl">{{.Author.Username}}</h1>
+                            <h1 class="card-title justify-center text-xl font-normal">{{.Author.Username}}</h1>
                             <p class="text-base-content/70 mb-2">{{.Author.Signature}}</p>
 
-                            <div class="flex justify-center gap-2 mb-4">
+                            <div class="flex justify-center gap-2 mb-2">
                                 <div class="badge badge-primary">VIP</div>
                                 <div class="badge badge-success">已认证</div>
                                 <div class="badge badge-warning">版主</div>
                             </div>
 
                             <!-- 数据统计 - 一行展示 -->
-                            <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div class="grid grid-cols-3 gap-4 mb-2">
                                 <div class="text-center">
-                                    <div class="text-lg font-medium text-base-content">{{.AuthorInfoStatistics.ArticleCount}}</div>
+                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.ArticleCount}}</div>
                                     <div class="text-xs text-base-content/60">文章数</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-lg font-medium text-base-content">{{.AuthorInfoStatistics.LikeReceivedCount}}</div>
+                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.LikeReceivedCount}}</div>
                                     <div class="text-xs text-base-content/60">获赞数</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-lg font-medium text-base-content">{{.AuthorInfoStatistics.FollowerCount}}</div>
+                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.FollowerCount}}</div>
                                     <div class="text-xs text-base-content/60">粉丝数</div>
                                 </div>
                             </div>
@@ -141,7 +141,7 @@
                                         <div class="flex items-center gap-2 mb-1">
                                             <div class="badge badge-sm badge-primary flex-shrink-0">{{.TypeStr}}</div>
                                             <a href="/post/{{.Id}}"
-                                               class="text-lg font-medium text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
+                                               class="text-lg font-normal text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
                                         </div>
                                         <!-- 用户信息行和统计信息合并为一行 -->
                                         <div class="flex items-center justify-between text-sm text-base-content/60">

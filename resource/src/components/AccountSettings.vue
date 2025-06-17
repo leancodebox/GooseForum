@@ -163,7 +163,7 @@ const savePrivacySettings = async () => {
         <form @submit.prevent="updateProfile" class="grid grid-cols-1 gap-6">
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">头像设置</span>
+              <span class="label-text font-normal">头像设置</span>
             </label>
             <AvatarUpload
                 :current-avatar="profileForm.avatarUrl"
@@ -173,14 +173,14 @@ const savePrivacySettings = async () => {
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">用户名</span>
+                <span class="label-text font-normal">用户名</span>
               </label>
               <input v-model="profileForm.username" type="text" class="input input-bordered w-full"
                      placeholder="请输入用户名" disabled/>
             </div>
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">邮箱</span>
+                <span class="label-text font-normal">邮箱</span>
               </label>
               <input v-model="profileForm.email" type="email" class="input input-bordered w-full"
                      placeholder="请输入邮箱" disabled/>
@@ -190,14 +190,14 @@ const savePrivacySettings = async () => {
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">昵称</span>
+                <span class="label-text font-normal">昵称</span>
               </label>
               <input v-model="profileForm.nickname" type="text" class="input input-bordered w-full"
                      placeholder="请输入昵称"/>
             </div>
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">个性签名</span>
+                <span class="label-text font-normal">个性签名</span>
               </label>
               <input v-model="profileForm.signature" type="text" class="input input-bordered w-full"
                      placeholder="请输入个性签名"/>
@@ -207,27 +207,27 @@ const savePrivacySettings = async () => {
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">网站名</span>
+                <span class="label-text font-normal">网站名</span>
               </label>
               <input v-model="profileForm.websiteName" type="text" class="input input-bordered w-full"
                      placeholder="请输入网站名"/>
             </div>
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">网站地址</span>
+                <span class="label-text font-normal">网站地址</span>
               </label>
               <input v-model="profileForm.website" type="text" class="input input-bordered w-full"
                      placeholder="请输入网站地址"/>
             </div>
           </div>
           <details tabindex="0" class="collapse collapse-arrow bg-base-100 border-base-300 border">
-            <summary class="collapse-title font-medium">外站配置</summary>
+            <summary class="collapse-title font-normal">外站配置</summary>
             <div class="collapse-content text-sm">
 
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="form-control">
                   <label class="label">
-                    <span class="label-text font-medium">Github</span>
+                    <span class="label-text font-normal">Github</span>
                   </label>
                   <input v-model="profileForm.externalInformation.github.link" type="text"
                          class="input input-bordered w-full"
@@ -235,7 +235,7 @@ const savePrivacySettings = async () => {
                 </div>
                 <div class="form-control">
                   <label class="label">
-                    <span class="label-text font-medium">BiliBili</span>
+                    <span class="label-text font-normal">BiliBili</span>
                   </label>
                   <input v-model="profileForm.externalInformation.bilibili.link" type="text"
                          class="input input-bordered w-full"
@@ -247,7 +247,7 @@ const savePrivacySettings = async () => {
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="form-control">
                   <label class="label">
-                    <span class="label-text font-medium">Weibo</span>
+                    <span class="label-text font-normal">Weibo</span>
                   </label>
                   <input v-model="profileForm.externalInformation.weibo.link" type="text"
                          class="input input-bordered w-full"
@@ -255,7 +255,7 @@ const savePrivacySettings = async () => {
                 </div>
                 <div class="form-control">
                   <label class="label">
-                    <span class="label-text font-medium">Twitter</span>
+                    <span class="label-text font-normal">Twitter</span>
                   </label>
                   <input v-model="profileForm.externalInformation.twitter.link" type="text"
                          class="input input-bordered w-full"
@@ -267,7 +267,7 @@ const savePrivacySettings = async () => {
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="form-control">
                   <label class="label">
-                    <span class="label-text font-medium">zhihu</span>
+                    <span class="label-text font-normal">zhihu</span>
                   </label>
                   <input v-model="profileForm.externalInformation.zhihu.link" type="text"
                          class="input input-bordered w-full"
@@ -275,7 +275,7 @@ const savePrivacySettings = async () => {
                 </div>
                 <div class="form-control">
                   <label class="label">
-                    <span class="label-text font-medium">linkedIn</span>
+                    <span class="label-text font-normal">linkedIn</span>
                   </label>
                   <input v-model="profileForm.externalInformation.linkedIn.link" type="text"
                          class="input input-bordered w-full"
@@ -287,7 +287,7 @@ const savePrivacySettings = async () => {
 
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">个人简介</span>
+              <span class="label-text font-normal">个人简介</span>
               <span class="label-text-alt">{{ profileForm.bio?.length || 0 }}/200</span>
             </label>
             <textarea v-model="profileForm.bio" class="textarea textarea-bordered w-full" rows="4"
@@ -306,7 +306,7 @@ const savePrivacySettings = async () => {
         <form @submit.prevent="updatePassword" class="grid grid-cols-1 gap-6">
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">当前密码</span>
+              <span class="label-text font-normal">当前密码</span>
             </label>
             <input v-model="passwordForm.currentPassword" type="password" class="input input-bordered w-full"
                    placeholder="请输入当前密码" required/>
@@ -314,7 +314,7 @@ const savePrivacySettings = async () => {
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">新密码</span>
+                <span class="label-text font-normal">新密码</span>
               </label>
               <input v-model="passwordForm.newPassword" type="password" class="input input-bordered w-full"
                      placeholder="请输入新密码" required/>
@@ -324,7 +324,7 @@ const savePrivacySettings = async () => {
             </div>
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">确认新密码</span>
+                <span class="label-text font-normal">确认新密码</span>
               </label>
               <input v-model="passwordForm.confirmPassword" type="password" class="input input-bordered w-full"
                      placeholder="请再次输入新密码" required/>
@@ -347,7 +347,7 @@ const savePrivacySettings = async () => {
             <label class="label cursor-pointer justify-start gap-4">
               <input v-model="privacySettings.showArticles" type="checkbox" class="toggle toggle-primary"/>
               <div>
-                <span class="label-text font-medium">公开文章列表</span>
+                <span class="label-text font-normal">公开文章列表</span>
                 <div class="text-sm text-base-content/60">允许其他用户查看我发布的文章</div>
               </div>
             </label>
@@ -357,7 +357,7 @@ const savePrivacySettings = async () => {
             <label class="label cursor-pointer justify-start gap-4">
               <input v-model="privacySettings.showFollowing" type="checkbox" class="toggle toggle-primary"/>
               <div>
-                <span class="label-text font-medium">公开关注列表</span>
+                <span class="label-text font-normal">公开关注列表</span>
                 <div class="text-sm text-base-content/60">允许其他用户查看我的关注和粉丝</div>
               </div>
             </label>
@@ -368,7 +368,7 @@ const savePrivacySettings = async () => {
               <input v-model="privacySettings.emailNotifications" type="checkbox"
                      class="toggle toggle-primary"/>
               <div>
-                <span class="label-text font-medium">邮件通知</span>
+                <span class="label-text font-normal">邮件通知</span>
                 <div class="text-sm text-base-content/60">接收评论、点赞等活动的邮件提醒</div>
               </div>
             </label>

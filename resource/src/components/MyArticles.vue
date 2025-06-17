@@ -159,7 +159,7 @@ function formatDate(dateString: string) {
 <template>
   <div class="card bg-base-100 shadow-sm">
     <div class="flex justify-between items-center px-4 py-3 border-b border-base-300">
-      <h2 class="text-2xl font-medium">我的文章</h2>
+      <h2 class="text-2xl font-normal">我的文章</h2>
       <a href="/publish" class="btn btn-primary btn-sm">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
              stroke="currentColor">
@@ -178,7 +178,7 @@ function formatDate(dateString: string) {
       <!-- 空状态 -->
       <div v-else-if="!loading && listItem.length === 0" class="p-8 text-center">
         <div class="text-6xl mb-4">📝</div>
-        <p class="text-lg font-medium text-base-content/80 mb-2">还没有发布任何文章</p>
+        <p class="text-lg font-normal text-base-content/80 mb-2">还没有发布任何文章</p>
         <p class="text-base-content/60">开始创作你的第一篇文章吧！</p>
       </div>
       
@@ -200,7 +200,7 @@ function formatDate(dateString: string) {
             <div class="flex items-center gap-2 mb-1">
               <div class="badge badge-sm badge-primary flex-shrink-0">{{item.typeStr}}</div>
               <a :href="'/post/'+item.id"
-                 class="text-lg font-medium text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{
+                 class="text-lg font-normal text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{
                   item.title
                 }}</a>
             </div>

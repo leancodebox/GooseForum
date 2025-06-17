@@ -120,19 +120,19 @@ const editProfile = () => {
                   }}</p>
                 <div class="grid grid-cols-3 gap-4 mb-4">
                   <div class="text-center">
-                    <div class="text-lg font-medium text-base-content">
+                    <div class="text-lg font-normal text-base-content">
                       {{ userInfo?.authorInfoStatistics?.articleCount ?? 0 }}
                     </div>
                     <div class="text-xs text-base-content/60">文章数</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-lg font-medium text-base-content">
+                    <div class="text-lg font-normal text-base-content">
                       {{ userInfo?.authorInfoStatistics?.likeGivenCount ?? 0 }}
                     </div>
                     <div class="text-xs text-base-content/60">获赞数</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-lg font-medium text-base-content">
+                    <div class="text-lg font-normal text-base-content">
                       {{ userInfo?.authorInfoStatistics?.followerCount ?? 0 }}
                     </div>
                     <div class="text-xs text-base-content/60">粉丝数</div>

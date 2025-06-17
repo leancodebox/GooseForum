@@ -53,7 +53,7 @@
                                     <div class="flex items-center gap-2 mb-1">
                                         <div class="badge badge-sm badge-primary flex-shrink-0">{{.TypeStr}}</div>
                                         <a href="/post/{{.Id}}"
-                                           class="text-lg font-medium text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
+                                           class="text-lg font-normal text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
                                     </div>
                                     <!-- 用户信息行和统计信息合并为一行 -->
                                     <div class="flex items-center justify-between text-sm text-base-content/60">
@@ -133,7 +133,7 @@
                 <div class="sticky top-24 space-y-4">
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title">小帖士</h2>
+                            <h2 class="card-title font-normal">小帖士</h2>
                             <p class="text-base-content/70">
                                 在我的后园，可以看见墙外有两株树，一株是枣树，还有一株也是枣树。</p>
                         </div>
@@ -141,7 +141,7 @@
                     {{if .RecommendedArticles}}
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title">推荐文章</h2>
+                            <h2 class="card-title font-normal">推荐文章</h2>
                             <div class="space-y-2">
                                 {{range .RecommendedArticles}}
                                 <div class="space-y-1">
@@ -156,7 +156,7 @@
                     {{end}}
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title">赞助商</h2>
+                            <h2 class="card-title font-normal">赞助商</h2>
                             <p class="text-base-content/70">感谢我们的赞助商支持，让论坛能够持续为大家提供优质服务。</p>
                             <div class="card-actions justify-end">
                                 <a href="/sponsors">

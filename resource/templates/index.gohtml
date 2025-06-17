@@ -21,7 +21,7 @@
         <div class="container mx-auto px-2 py-2 space-y-8">
             <!-- 欢迎区域 -->
             <div class="text-center py-4">
-                <h1 class="text-4xl md:text-5xl font-medium text-base-content mb-4">GooseForum</h1>
+                <h1 class="text-4xl md:text-5xl font-normal text-base-content mb-4">GooseForum</h1>
                 <p class="text-lg text-base-content/70 mb-8 max-w-2xl mx-auto">技术交流社区 · 分享知识 · 讨论技术 ·
                     结识同行</p>
                 <div class="flex gap-4 justify-center flex-wrap">
@@ -112,8 +112,8 @@
                         <div class="card-body p-0">
                             <div class="px-6 py-4 border-b border-base-200">
                                 <div class="flex justify-between items-center">
-                                    <h2 class="card-title text-xl">最新文章</h2>
-                                    <a href="/post" class="btn btn-ghost btn-sm">查看更多</a>
+                                    <h2 class="card-title text-xl font-normal">最新文章</h2>
+                                    <a href="/post" class="btn btn-ghost btn-sm font-normal">查看更多</a>
                                 </div>
                             </div>
                             <ul class="list">
@@ -131,7 +131,7 @@
                                         <div class="flex items-start gap-2 mb-1">
                                             <div class="badge badge-sm badge-primary flex-shrink-0">{{.TypeStr}}</div>
                                             <a href="/post/{{.Id}}"
-                                               class="text-lg font-medium text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
+                                               class="text-lg font-normal text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
                                         </div>
                                         <!-- 用户信息行和统计信息合并为一行 -->
                                         <div class="flex items-center justify-between text-sm text-base-content/60">
@@ -183,7 +183,7 @@
                     <!-- 热门话题 -->
                     <div class="card bg-base-100 shadow-sm">
                         <div class="card-body">
-                            <h3 class="card-title text-lg mb-4">🔥 热门话题</h3>
+                            <h3 class="card-title text-lg mb-4 font-normal">🔥 热门话题</h3>
                             <div class="space-y-2">
                                 {{range .ArticleCategoryList}}
                                 <div class="badge badge-outline badge-lg w-full justify-start">#{{.Name}}</div>
@@ -195,7 +195,7 @@
                     <!-- 社区公告 -->
                     <div class="card bg-base-100 shadow-sm">
                         <div class="card-body">
-                            <h3 class="card-title text-lg mb-4">📢 社区公告</h3>
+                            <h3 class="card-title text-lg mb-4 font-normal">📢 社区公告</h3>
                             <div class="space-y-3">
                                 <div class="alert alert-info alert-outline">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6"
@@ -204,7 +204,7 @@
                                               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <div>
-                                        <h4 class="font-medium">系统维护通知</h4>
+                                        <h4 class="font-normal">系统维护通知</h4>
                                         <div class="text-xs">今晚23:00-01:00进行系统维护</div>
                                     </div>
                                 </div>
@@ -218,13 +218,13 @@
                     </div>
 
                     <!-- 快速链接 -->
-                    <div class="card bg-base-100 shadow-sm">
+                    <div class="card bg-base-100 shadow-sm ">
                         <div class="card-body">
-                            <h3 class="card-title text-lg mb-4">🔗 快速链接</h3>
+                            <h3 class="card-title text-lg mb-4 font-normal">🔗 快速链接</h3>
                             <div class="grid grid-cols-2 gap-2">
-                                <a href="/links" class="btn btn-outline btn-sm">友情链接</a>
-                                <a href="/sponsors" class="btn btn-outline btn-sm">赞助商</a>
-                                <a href="/about" class="btn btn-outline btn-sm">关于我们</a>
+                                <a href="/links" class="font-normal btn btn-outline btn-sm">友情链接</a>
+                                <a href="/sponsors" class="font-normal btn btn-outline btn-sm">赞助商</a>
+                                <a href="/about" class="font-normal btn btn-outline btn-sm">关于我们</a>
                             </div>
                         </div>
                     </div>

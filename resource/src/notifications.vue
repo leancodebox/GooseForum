@@ -172,7 +172,7 @@ const getEmptyMessage = () => {
   <div class="container mx-auto px-4 py-4">
     <div class="max-w-4xl mx-auto">
       <div class="flex justify-between items-center mb-2">
-        <h1 class="text-3xl font-medium">消息中心</h1>
+        <h1 class="text-3xl font-normal">消息中心</h1>
         <div class="flex gap-2">
           <button class="btn btn-outline btn-sm" @click="markAllAsRead">
             全部标记为已读
@@ -249,11 +249,11 @@ const getEmptyMessage = () => {
               <div class="flex items-start justify-between">
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
-                    <h4 class="font-medium text-sm truncate" v-if="notification.eventType==='comment'">
+                    <h4 class="font-normal text-sm truncate" v-if="notification.eventType==='comment'">
                       {{ notification.payload.actorName }} 评论了你的文章 {{ notification.payload.title }} :
                       {{ notification.payload.content }}
                     </h4>
-                    <h4 class="font-medium text-sm truncate" v-else>
+                    <h4 class="font-normal text-sm truncate" v-else>
                       {{ notification.payload.content }}
                     </h4>
                     <div class="badge badge-outline badge-xs flex-shrink-0">{{
@@ -302,7 +302,7 @@ const getEmptyMessage = () => {
       <!-- 空状态 -->
       <div v-if="notificationList.length === 0" class="text-center py-12">
         <div class="text-6xl mb-4">📭</div>
-        <h3 class="text-xl font-medium mb-2">暂无消息</h3>
+        <h3 class="text-xl font-normal mb-2">暂无消息</h3>
         <p class="text-base-content/60">{{ getEmptyMessage() }}</p>
       </div>
 
