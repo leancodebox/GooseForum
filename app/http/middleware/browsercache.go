@@ -19,7 +19,7 @@ func BrowserCache(c *gin.Context) {
 		c.Header("Cache-Control", "no-store")
 	} else {
 		// 其他情况下继续使用浏览器缓存
-		c.Header("Cache-Control", "public, max-age=86400")
+		c.Header("Cache-Control", "public, max-age=604800")
 	}
 	c.Next()
 }
