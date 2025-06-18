@@ -1,12 +1,12 @@
 # TodoList
 
+## 调研
+
+https://daisyui.com/docs/layout-and-typography/
+
 ## 清理计划
 
-- 6.8 删除resource 相关模板及相关模板控制器
-- 6.8 发布新版本v0.03
-- 6.10 清理无效静态资源
-- 6.14 清理无效 actor 页面
-
+- 6.30 清理无效 actor 页面
 
 ## 功能计划
 
