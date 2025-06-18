@@ -128,7 +128,7 @@
                             {{if .Articles}}
                             <ul class="list">
                                 {{range .Articles}}
-                                <li class="list-row hover:bg-base-200 flex items-center gap-3 px-4 py-2 ">
+                                <li class="list-row hover:bg-base-300 flex items-center gap-3 px-4 py-2 ">
                                     <!-- 左侧头像 -->
                                     <a class="avatar" href="/user/{{.AuthorId}}">
                                         <div class="w-10 rounded-full">
@@ -139,17 +139,17 @@
                                     <div class="flex-1">
                                         <!-- 标题行 -->
                                         <div class="flex items-center gap-2 mb-1">
-                                            <div class="badge badge-sm badge-primary flex-shrink-0">{{.TypeStr}}</div>
+                                            <div class="badge badge-sm badge-primary flex-shrink-0 px-1.5">{{.TypeStr}}</div>
                                             <a href="/post/{{.Id}}"
                                                class="text-lg font-normal text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
                                         </div>
                                         <!-- 用户信息行和统计信息合并为一行 -->
                                         <div class="flex items-center justify-between text-sm text-base-content/60">
                                             <div class="flex items-center flex-wrap">
-                                                <a href="/user/{{.AuthorId}}" class="mr-3">{{.Username}}</a>
-                                                <span class="mr-3">2025-05-23 09:30:17</span>
+                                                <a href="/user/{{.AuthorId}}" class="mr-1">{{.Username}}</a>
+                                                <span class="mr-1">{{.LastUpdateTime}}</span>
                                                 {{range .Categories}}
-                                                <span class="badge badge-sm badge-ghost mr-1">{{.}}</span>
+                                                <span class="badge badge-sm badge-ghost mr-1 px-1.5">{{.}}</span>
                                                 {{end}}
                                             </div>
                                             <div class="flex items-center">
