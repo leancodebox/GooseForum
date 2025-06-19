@@ -36,6 +36,8 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/FurqanSoftware/goldmark-katex v0.0.0-20230820031700-1c400212c1e1 // indirect
+	github.com/bluele/gcache v0.0.2 // indirect
 	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
@@ -54,6 +56,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/lithdew/quickjs v0.0.0-20200714182134-aaa42285c9d2 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect

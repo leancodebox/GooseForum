@@ -24,54 +24,6 @@
       "datePublished": "{{.CreateTime}}"
     }
 </script>
-<link rel="stylesheet"
-      href="/static/css/github-markdown.min.css">
-<link rel="stylesheet"
-      href="/static/css/codehightlight.css">
-<script src="/static/js/highlight.min.js"></script>
-<script>hljs.highlightAll();</script>
-<style>
-    .markdown-body pre {
-        padding: 0 !important;
-        background: none !important;
-        border: none !important;
-        border-radius: 0 !important;
-        max-width: 100%;
-        overflow: hidden;
-        /* 让 pre 完全透明无圆角，所有视觉交给 code 控制 */
-    }
-
-    .markdown-body pre code {
-        display: block;
-        overflow-x: auto;
-        max-width: 100%;
-        white-space: pre;
-        word-break: normal;
-        border: 1px solid #e0e0e0;
-        border-radius: 6px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        padding: 1.1em 1.5em;
-        background: var(--card-bg, #fafbfc);
-        font-size: 1em;
-        transition: box-shadow 0.2s, border-color 0.2s;
-        scrollbar-width: thin;
-        scrollbar-color: #bdbdbd #f5f5f5;
-    }
-
-    pre code:hover {
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    }
-
-    .markdown-body {
-        background: unset !important;
-        color: unset !important;
-    }
-
-    [data-theme="dark"] .markdown-body {
-        background: unset !important;
-        color: unset !important;
-    }
-</style>
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
     <header class="sticky top-0 z-50">
@@ -124,10 +76,12 @@
                                 <span>{{.LikeCount}}</span>
                             </div>
                         </div>
-                        <div class="prose max-w-none text-base-content overflow-hidden min-w-0">
-                            <div class="markdown-body">
-                                {{.ArticleContent}}
-                            </div>
+                        <div class="prose lg:prose-base md:prose-lg
+                         prose-h1:font-normal prose-h2:font-normal prose-h3:font-normal
+                         prose-pre:bg-base-200
+                         prose-code:text-base-content
+                         max-w-none text-base-content overflow-hidden min-w-0">
+                             {{.ArticleContent}}
                         </div>
 
                         <!-- 点赞按钮 -->
@@ -390,8 +344,8 @@
                             <div class="card-actions justify-center">
                                 <a href="/user/{{.AuthorId}}" class="btn btn-primary btn-sm btn-block">查看主页</a>
                                 {{if and .User (gt .User.UserId 0) (not .IsOwnArticle)}}
-                                    <button id="follow-btn" 
-                                            class="btn btn-sm btn-block {{if .IsFollowing}}btn-outline{{else}}btn-secondary{{end}}" 
+                                    <button id="follow-btn"
+                                            class="btn btn-sm btn-block {{if .IsFollowing}}btn-outline{{else}}btn-secondary{{end}}"
                                             onclick="toggleFollow({{.AuthorId}})"
                                             data-following="{{.IsFollowing}}">
                                         <span id="follow-text">{{if .IsFollowing}}已关注{{else}}关注作者{{end}}</span>
@@ -576,17 +530,17 @@
         const followBtn = document.getElementById('follow-btn');
         const followText = document.getElementById('follow-text');
         const followLoading = document.getElementById('follow-loading');
-        
+
         if (!followBtn) return;
-        
+
         const isFollowing = followBtn.getAttribute('data-following') === 'true';
         const action = isFollowing ? 2 : 1; // 1: 关注, 2: 取消关注
-        
+
         // 显示加载状态
         followText.style.display = 'none';
         followLoading.style.display = 'inline-block';
         followBtn.disabled = true;
-        
+
         try {
             const response = await fetch('/api/forum/follow-user', {
                 method: 'POST',
@@ -598,9 +552,9 @@
                     action: action
                 })
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok && result.code === 0) {
                 // 更新按钮状态
                 if (action === 1) {

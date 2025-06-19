@@ -1,8 +1,11 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography"{
+
+}
+
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, retro, cyberpunk, valentine, garden, forest, aqua, luxury, dracula;
 }
-
 @layer components {
   /* 多彩支持者徽章样式 */
   .badge-colorful {

@@ -12,8 +12,6 @@
     <script type="module" src="http://localhost:3001/src/main.js"></script>
     {{end}}
 </head>
-<link rel="stylesheet"
-      href="/static/css/github-markdown.min.css">
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
     <header class="sticky top-0 z-50">
@@ -32,9 +30,9 @@
             <!-- Markdown 内容 -->
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <div class="prose max-w-none text-base-content overflow-hidden min-w-0 markdown-body">
+                    <article class="prose lg:prose-base md:prose-lg max-w-none text-base-content overflow-hidden min-w-0">
                             {{.Content}}
-                    </div>
+                    </article>
                 </div>
             </div>
 

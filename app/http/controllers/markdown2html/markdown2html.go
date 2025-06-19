@@ -2,6 +2,7 @@ package markdown2html
 
 import (
 	"bytes"
+	"github.com/FurqanSoftware/goldmark-katex"
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
@@ -20,13 +21,14 @@ func GetVersion() uint32 {
 	return 2
 }
 
-var a = highlighting.Highlighting
-var b = highlighting.NewHighlighting(
+var highlightingDefault = highlighting.Highlighting
+var highlightingMonokai = highlighting.NewHighlighting(
 	highlighting.WithStyle("monokai"),
 	highlighting.WithFormatOptions(
 		chromahtml.WithLineNumbers(true),
 	),
 )
+var katexExtender = &katex.Extender{}
 
 var md = goldmark.New(
 	goldmark.WithExtensions(
