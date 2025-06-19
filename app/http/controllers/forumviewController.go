@@ -361,6 +361,14 @@ func Publish(c *gin.Context) {
 	})
 }
 
+func PublishV2(c *gin.Context) {
+	viewrender.Render(c, "publish-v2.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "发布中心 - GooseForum",
+	})
+}
+
 func Notifications(c *gin.Context) {
 	viewrender.Render(c, "notifications.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
