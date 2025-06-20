@@ -410,21 +410,41 @@ function showMessage(message, type = 'info') {
 // 初始化分类选择器
 function initCategorySelector() {
     const searchInput = document.getElementById('category-search')
-    const dropdown = document.getElementById('category-dropdown')
+    const popup = document.getElementById('category-popup')
+    const overlay = document.getElementById('category-overlay')
     const selectedContainer = document.getElementById('selected-categories')
+    const categorySelector = document.querySelector('.category-selector')
     
-    if (!searchInput || !dropdown || !selectedContainer) {
+    if (!searchInput || !popup || !overlay || !selectedContainer || !categorySelector) {
         return
     }
     
     // 搜索输入事件
     searchInput.addEventListener('input', handleCategorySearch)
-    searchInput.addEventListener('focus', showCategoryDropdown)
     
-    // 点击外部关闭下拉框
+    // 点击分类选择器模块显示浮层
+    categorySelector.addEventListener('click', (e) => {
+        // 如果点击的是已选标签的删除按钮，不触发浮层
+        if (e.target.closest('.remove-tag')) {
+            return
+        }
+        showCategoryPopup()
+    })
+    
+    // 点击遮罩层关闭浮层
+    overlay.addEventListener('click', hideCategoryPopup)
+    
+    // 点击外部关闭浮层
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.category-selector')) {
-            hideCategoryDropdown()
+        if (!e.target.closest('.category-selector') && !e.target.closest('#category-popup')) {
+            hideCategoryPopup()
+        }
+    })
+    
+    // ESC键关闭浮层
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideCategoryPopup()
         }
     })
     
@@ -449,72 +469,82 @@ function handleCategorySearch(e) {
     showCategoryDropdown()
 }
 
-// 显示分类下拉框
-function showCategoryDropdown() {
-    const dropdown = document.getElementById('category-dropdown')
-    if (dropdown) {
-        dropdown.classList.remove('hidden')
+// 显示分类选择浮层
+function showCategoryPopup() {
+    const popup = document.getElementById('category-popup')
+    const overlay = document.getElementById('category-overlay')
+    const searchInput = document.getElementById('category-search')
+    
+    if (popup && overlay) {
+        overlay.classList.remove('hidden')
+        popup.classList.remove('hidden')
+        
+        // 聚焦到搜索框
+        setTimeout(() => {
+            if (searchInput) {
+                searchInput.focus()
+            }
+        }, 100)
     }
 }
 
-// 隐藏分类下拉框
-function hideCategoryDropdown() {
-    const dropdown = document.getElementById('category-dropdown')
+// 隐藏分类选择浮层
+function hideCategoryPopup() {
+    const popup = document.getElementById('category-popup')
+    const overlay = document.getElementById('category-overlay')
     const searchInput = document.getElementById('category-search')
-    if (dropdown) {
-        dropdown.classList.add('hidden')
+    
+    if (popup && overlay) {
+        popup.classList.add('hidden')
+        overlay.classList.add('hidden')
     }
+    
+    // 清空搜索内容并重置过滤结果
     if (searchInput) {
         searchInput.value = ''
+        searchInput.blur()
+        // 重置过滤结果
+        categoryConfig.filteredCategories = [...categories]
+        renderCategoryOptions()
     }
 }
 
 // 渲染分类选项
 function renderCategoryOptions() {
     const optionsContainer = document.getElementById('category-options')
-    const noResults = document.getElementById('no-results')
+    if (!optionsContainer) return
     
-    if (!optionsContainer || !noResults) {
-        return
-    }
+    const filteredCategories = categoryConfig.filteredCategories
     
-    optionsContainer.innerHTML = ''
+    optionsContainer.innerHTML = filteredCategories.map(category => `
+        <div class="category-option p-2 hover:bg-gray-100 cursor-pointer" data-category-id="${category.id}">
+            ${category.name}
+        </div>
+    `).join('')
     
-    if (categoryConfig.filteredCategories.length === 0) {
-        noResults.classList.remove('hidden')
-        return
-    }
-    
-    noResults.classList.add('hidden')
-    
-    categoryConfig.filteredCategories.forEach(category => {
-        const isSelected = categoryConfig.selectedCategories.has(category.id)
-        const isDisabled = !isSelected && categoryConfig.selectedCategories.size >= categoryConfig.maxSelection
-        
-        const optionEl = document.createElement('div')
-        optionEl.className = `category-option flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
-            isSelected ? 'bg-primary text-primary-content' : 
-            isDisabled ? 'bg-base-200 text-base-content/40 cursor-not-allowed' : 
-            'hover:bg-base-200'
-        }`
-        
-        optionEl.innerHTML = `
-            <span class="flex-1">${category.name}</span>
-            ${isSelected ? '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>' : ''}
-        `
-        
-        if (!isDisabled) {
-            optionEl.addEventListener('click', () => {
-                if (isSelected) {
-                    removeCategorySelection(category.id)
-                } else {
-                    addCategorySelection(category)
-                }
-            })
-        }
-        
-        optionsContainer.appendChild(optionEl)
+    // 添加点击事件
+    optionsContainer.querySelectorAll('.category-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const categoryId = parseInt(option.dataset.categoryId)
+            selectCategory(categoryId)
+        })
     })
+}
+
+// 选择分类
+function selectCategory(categoryId) {
+    const category = categories.find(c => c.id === categoryId)
+    if (!category) return
+    
+    // 检查是否已选择
+    if (categoryConfig.selectedCategories.has(categoryId)) {
+        removeCategorySelection(categoryId)
+    } else {
+        addCategorySelection(category)
+    }
+    
+    // 选择后关闭浮层
+    hideCategoryPopup()
 }
 
 // 添加分类选择
@@ -530,7 +560,6 @@ function addCategorySelection(category) {
     updateSelectedCategoriesDisplay()
     updateHiddenSelect()
     renderCategoryOptions()
-    hideCategoryDropdown()
 }
 
 // 移除分类选择

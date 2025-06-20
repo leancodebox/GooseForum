@@ -156,31 +156,37 @@
                                 <!-- 分类选择器容器 -->
                                 <div class="category-selector relative">
                                     <!-- 已选分类标签展示区 -->
-                                    <div id="selected-categories" class="selected-tags mb-2 min-h-8 flex flex-wrap gap-2 p-2 border border-base-300 rounded-lg bg-base-100">
-                                        <span class="text-base-content/60 text-sm" id="category-placeholder">点击下方添加分类...</span>
+                                    <div id="selected-categories" class="selected-tags mb-2 min-h-8 flex flex-wrap gap-2 p-2 border border-base-300 rounded-lg bg-base-100 cursor-pointer hover:border-primary transition-colors">
+                                        <span class="text-base-content/60 text-sm" id="category-placeholder">点击此处选择分类...</span>
                                     </div>
                                     
-                                    <!-- 分类搜索输入框 -->
-                                    <div class="relative">
-                                        <input type="text" id="category-search" 
-                                               placeholder="搜索或选择分类..." 
-                                               class="input input-bordered w-full focus:input-primary"
-                                               autocomplete="off">
-                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                            <svg class="w-4 h-4 text-base-content/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- 分类下拉选项 -->
-                                    <div id="category-dropdown" class="absolute top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto hidden">
-                                        <div class="p-2">
-                                            <div id="category-options" class="space-y-1">
-                                                <!-- 分类选项将通过JS动态生成 -->
+                                    <!-- 分类选择浮层 -->
+                                    <div id="category-overlay" class="fixed inset-0 z-40 hidden"></div>
+                                    <div id="category-popup" class="absolute top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-lg shadow-xl z-50 hidden">
+                                        <!-- 搜索框 -->
+                                        <div class="p-3 border-b border-base-300">
+                                            <div class="relative">
+                                                <input type="text" id="category-search" 
+                                                       placeholder="搜索分类..." 
+                                                       class="input input-bordered w-full focus:input-primary"
+                                                       autocomplete="off">
+                                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                                    <svg class="w-4 h-4 text-base-content/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path>
+                                                    </svg>
+                                                </div>
                                             </div>
-                                            <div id="no-results" class="text-center text-base-content/60 py-4 hidden">
-                                                未找到匹配的分类
+                                        </div>
+                                        
+                                        <!-- 分类选项 -->
+                                        <div class="max-h-60 overflow-y-auto">
+                                            <div class="p-2">
+                                                <div id="category-options" class="space-y-1">
+                                                    <!-- 分类选项将通过JS动态生成 -->
+                                                </div>
+                                                <div id="no-results" class="text-center text-base-content/60 py-4 hidden">
+                                                    未找到匹配的分类
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
