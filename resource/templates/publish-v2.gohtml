@@ -150,7 +150,7 @@
                             <div class="form-control">
                                 <label class="label pb-1">
                                     <span class="label-text font-medium text-base-content">📂 文章分类</span>
-                                    <span class="label-text-alt text-base-content/60">最多选择5个</span>
+                                    <span class="label-text-alt text-base-content/60">最多选择3个</span>
                                 </label>
                                 
                                 <!-- 分类选择器容器 -->
@@ -216,19 +216,18 @@
                                     <div class="flex items-center gap-4">
                                         <div class="form-control">
                                             <label class="label cursor-pointer gap-2">
-                                                <input type="checkbox" class="checkbox checkbox-sm"/>
+                                                <input type="checkbox" class="checkbox checkbox-sm" disabled/>
                                                 <span class="label-text text-sm">保存为草稿</span>
                                             </label>
                                         </div>
                                         <div class="form-control">
                                             <label class="label cursor-pointer gap-2">
-                                                <input type="checkbox" class="checkbox checkbox-sm"/>
+                                                <input type="checkbox" class="checkbox checkbox-sm" checked disabled/>
                                                 <span class="label-text text-sm">允许评论</span>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <button class="btn btn-ghost btn-sm">清空内容</button>
                                         <button id="submit-article" class="btn btn-primary btn-sm">发布文章</button>
                                     </div>
                                 </div>
