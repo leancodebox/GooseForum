@@ -16,6 +16,7 @@ export default defineConfig({
         notifications: resolve(__dirname, 'src/notifications.js'),
         profile: resolve(__dirname, 'src/profile.js'),
         publish: resolve(__dirname, 'src/publish.js'),
+        'publish-v2': resolve(__dirname, 'src/publish-v2.js'),
         'submit-link': resolve(__dirname, 'src/submit-link.js'),
         'style': resolve(__dirname, 'src/style.css'),
       },
