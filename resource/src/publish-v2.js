@@ -348,11 +348,10 @@ async function submitArticle() {
             publishButton.textContent = '发布中...'
         }
         
-        const response = await fetch('/api/forum/submit-article', {
+        const response = await fetch('/api/forum/write-articles', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(articleData)
         })
@@ -364,12 +363,12 @@ async function submitArticle() {
         const result = await response.json()
         
         if (result.code === 0) {
-            showMessage(articleData.id ? '文章更新成功！' : '文章发布成功！', 'success')
+            showMessage(result.result ? '文章更新成功！' : '文章发布成功！', 'success')
             
             // 延迟跳转到文章列表或详情页
             setTimeout(() => {
-                window.location.href = '/'
-            }, 1500)
+                window.location.href = '/post/'+result.result
+            }, 300)
         } else {
             throw new Error(result.msg || '提交失败')
         }
