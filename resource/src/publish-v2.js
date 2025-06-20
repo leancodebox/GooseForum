@@ -411,11 +411,10 @@ function showMessage(message, type = 'info') {
 function initCategorySelector() {
     const searchInput = document.getElementById('category-search')
     const popup = document.getElementById('category-popup')
-    const overlay = document.getElementById('category-overlay')
     const selectedContainer = document.getElementById('selected-categories')
     const categorySelector = document.querySelector('.category-selector')
     
-    if (!searchInput || !popup || !overlay || !selectedContainer || !categorySelector) {
+    if (!searchInput || !popup || !selectedContainer || !categorySelector) {
         return
     }
     
@@ -424,6 +423,7 @@ function initCategorySelector() {
     
     // 点击分类选择器模块显示浮层
     categorySelector.addEventListener('click', (e) => {
+        console.log('点击了分类选择器模块')
         // 如果点击的是已选标签的删除按钮，不触发浮层
         if (e.target.closest('.remove-tag')) {
             return
@@ -431,15 +431,11 @@ function initCategorySelector() {
         showCategoryPopup()
     })
     
-    // 点击遮罩层关闭浮层
-    overlay.addEventListener('click', hideCategoryPopup)
-    
-    // 点击外部关闭浮层
+    // 点击外部关闭浮层，但点击下拉框内容不关闭
     document.addEventListener('click', (e) => {
-        // 检查点击是否在分类选择器、弹窗内部或者是分类选项
+        // 检查点击是否在分类选择器或弹窗内部
         if (!e.target.closest('.category-selector') && 
-            !e.target.closest('#category-popup') && 
-            !e.target.closest('.category-option')) {
+            !e.target.closest('#category-popup')) {
             hideCategoryPopup()
         }
     })
@@ -484,11 +480,9 @@ function handleCategorySearch(e) {
 // 显示分类选择浮层
 function showCategoryPopup() {
     const popup = document.getElementById('category-popup')
-    const overlay = document.getElementById('category-overlay')
     const searchInput = document.getElementById('category-search')
     
-    if (popup && overlay) {
-        overlay.classList.remove('hidden')
+    if (popup) {
         popup.classList.remove('hidden')
         
         // 聚焦到搜索框
@@ -503,12 +497,10 @@ function showCategoryPopup() {
 // 隐藏分类选择浮层
 function hideCategoryPopup() {
     const popup = document.getElementById('category-popup')
-    const overlay = document.getElementById('category-overlay')
     const searchInput = document.getElementById('category-search')
     
-    if (popup && overlay) {
+    if (popup) {
         popup.classList.add('hidden')
-        overlay.classList.add('hidden')
     }
     
     // 清空搜索内容并重置过滤结果
@@ -564,7 +556,7 @@ function selectCategory(categoryId) {
         addCategorySelection(category)
     }
     
-    // 不再自动关闭浮层，让用户可以继续选择
+    // 选择分类后不关闭浮层，让用户可以继续选择
     // hideCategoryPopup()
 }
 
