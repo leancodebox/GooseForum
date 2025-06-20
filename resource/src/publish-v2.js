@@ -283,9 +283,16 @@ async function getOriginData(articleId) {
                 setCategorySelection(articleData.categoryId)
             }
             
-            // 更新预览
+            // 更新预览和字符数统计
             if (window.updatePreview) {
                 window.updatePreview()
+            }
+            
+            // 更新字符数统计
+            const charCountElement = document.getElementById('char-count')
+            if (charCountElement && markdownEditor) {
+                const count = markdownEditor.value.length
+                charCountElement.textContent = count.toLocaleString()
             }
         } else {
             throw new Error(result.msg || '获取文章数据失败')
