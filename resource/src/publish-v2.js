@@ -531,7 +531,7 @@ function renderCategoryOptions() {
     optionsContainer.innerHTML = filteredCategories.map(category => {
         const isSelected = categoryConfig.selectedCategories.has(category.id)
         const selectedClass = isSelected ? 'bg-primary text-primary-content' : 'text-base-content'
-        const hoverClass = isSelected ? 'hover:bg-primary-focus hover:text-primary-content' : 'hover:bg-base-200 hover:text-base-content'
+        const hoverClass = isSelected ? ' hover:text-base-content' : 'hover:bg-base-200 hover:text-base-content'
         
         return `
             <div class="category-option p-2 cursor-pointer rounded transition-colors ${selectedClass} ${hoverClass}" data-category-id="${category.id}">
