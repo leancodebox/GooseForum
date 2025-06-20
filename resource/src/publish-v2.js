@@ -1,5 +1,9 @@
 import './style.css'
 
+// 导入npm安装的库
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
+
 // 检查是否在Vue环境中，如果不是则直接初始化markdown编辑器
 if (document.getElementById('markdown-editor')) {
     initMarkdownEditor()
@@ -12,15 +16,13 @@ function initMarkdownEditor() {
     const previewContent = document.getElementById('preview-content')
 
     // 配置marked选项
-    if (typeof marked !== 'undefined') {
-        marked.setOptions({
-            breaks: true,
-            gfm: true,
-            highlight: function(code, lang) {
-                return code // 简单返回代码，不做语法高亮
-            }
-        })
-    }
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+        highlight: function(code, lang) {
+            return code // 简单返回代码，不做语法高亮
+        }
+    })
 
     // 更新预览内容
     function updatePreview() {
@@ -33,17 +35,10 @@ function initMarkdownEditor() {
         // 转换markdown到HTML
         if (markdown.trim()) {
             try {
-                let html = ''
-                if (typeof marked !== 'undefined') {
-                    html = marked.parse(markdown)
-                    // 使用DOMPurify清理HTML（如果可用）
-                    if (typeof DOMPurify !== 'undefined') {
-                        html = DOMPurify.sanitize(html)
-                    }
-                } else {
-                    // 如果marked不可用，做简单的markdown转换
-                    html = simpleMarkdownToHtml(markdown)
-                }
+                // 使用marked解析markdown
+                let html = marked.parse(markdown)
+                // 使用DOMPurify清理HTML
+                html = DOMPurify.sanitize(html)
                 previewContent.innerHTML = html
             } catch (error) {
                 console.error('Markdown解析错误:', error)
@@ -126,7 +121,7 @@ function initMarkdownEditor() {
     // 添加一些示例内容
     if (!markdownEditor.value.trim()) {
         markdownEditor.value = ``
-        titleInput.value = '我的第一篇文章'
+        titleInput.value = ''
         updatePreview()
     }
 }

@@ -11,9 +11,6 @@
     <script type="module" src="http://localhost:3001/@vite/client"></script>
     <script type="module" src="http://localhost:3001/src/publish-v2.js"></script>
     {{end}}
-    <!-- Markdown解析库 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
 </head>
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
@@ -25,7 +22,6 @@
             <input type="radio" name="my_tabs_3" class="tab" aria-label="文章编写" checked="checked"/>
             <div class="tab-content bg-base-100 border-base-300 p-0">
                 <div class="flex flex-col h-full">
-
                     <!-- 编辑区域 -->
                     <div class="flex-1 p-6 space-y-6">
                         <!-- 文章标题区域 -->
@@ -35,7 +31,7 @@
                                 <span class="label-text-alt text-base-content/60">必填</span>
                             </label>
                             <input type="text" id="article-title" placeholder="请输入一个吸引人的标题..."
-                                   class="input input-bordered input-lg w-full focus:input-primary"/>
+                                   class="input input-bordered input-md w-full focus:input-primary"/>
                         </div>
                         <!-- 文章内容区域 -->
                         <div class="form-control flex-1">

@@ -13,6 +13,8 @@
     "@tailwindcss/vite": "^4.1.8",
     "axios": "^1.9.0",
     "daisyui": "^5.0.43",
+    "dompurify": "^3.2.6",
+    "marked": "^15.0.12",
     "md-editor-v3": "^5.6.0",
     "tailwindcss": "^4.1.8",
     "vue": "^3.3.8",
