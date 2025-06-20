@@ -33,6 +33,32 @@
                             <input type="text" id="article-title" placeholder="请输入一个吸引人的标题..."
                                    class="input input-bordered input-md w-full focus:input-primary"/>
                         </div>
+                        
+                        <!-- 分类和类型选择区域 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- 文章类型 -->
+                            <div class="form-control">
+                                <label class="label pb-1">
+                                    <span class="label-text font-medium text-base-content">🏷️ 文章类型</span>
+                                    <span class="label-text-alt text-base-content/60">必选</span>
+                                </label>
+                                <select id="article-type" class="select select-bordered w-full focus:select-primary">
+                                    <option value="">请选择类型</option>
+                                </select>
+                            </div>
+                            
+                            <!-- 文章分类 -->
+                            <div class="form-control">
+                                <label class="label pb-1">
+                                    <span class="label-text font-medium text-base-content">📂 文章分类</span>
+                                    <span class="label-text-alt text-base-content/60">必选</span>
+                                </label>
+                                <select id="article-category" class="select select-bordered w-full focus:select-primary" multiple>
+                                    <option value="">请选择分类</option>
+                                </select>
+                            </div>
+                        </div>
+                        
                         <!-- 文章内容区域 -->
                         <div class="form-control flex-1">
                             <label class="label pb-2">
@@ -70,7 +96,7 @@
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button class="btn btn-ghost btn-sm">清空内容</button>
-                                        <button class="btn btn-primary btn-sm">发布文章</button>
+                                        <button id="submit-article" class="btn btn-primary btn-sm">发布文章</button>
                                     </div>
                                 </div>
                             </div>
