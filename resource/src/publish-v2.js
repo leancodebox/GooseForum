@@ -45,7 +45,16 @@ function initMarkdownEditor() {
     initData()
 
     // 更新预览内容
-    function updatePreview() {
+    window.updatePreview = function() {
+        const titleInput = document.getElementById('article-title')
+        const markdownEditor = document.getElementById('markdown-editor')
+        const previewTitle = document.getElementById('preview-title')
+        const previewContent = document.getElementById('preview-content')
+        
+        if (!titleInput || !markdownEditor || !previewTitle || !previewContent) {
+            return
+        }
+        
         const title = titleInput.value.trim() || '文章标题预览'
         const markdown = markdownEditor.value
 
@@ -80,9 +89,9 @@ function initMarkdownEditor() {
     }
 
     // 监听输入事件
-    titleInput.addEventListener('input', updatePreview)
+    titleInput.addEventListener('input', window.updatePreview)
     markdownEditor.addEventListener('input', function() {
-        updatePreview()
+        window.updatePreview()
         updateCharCount()
     })
 
@@ -99,7 +108,7 @@ function initMarkdownEditor() {
                 articleData.content = ''
                 articleData.type = 1
                 articleData.categoryId = []
-                updatePreview()
+                window.updatePreview()
             }
         })
     }
@@ -131,7 +140,7 @@ function initMarkdownEditor() {
     })
 
     // 初始化预览和字符计数
-     updatePreview()
+     window.updatePreview()
      updateCharCount()
  }
 
@@ -243,7 +252,11 @@ async function getOriginData(articleId) {
             
             if (titleInput) titleInput.value = articleData.title
             if (markdownEditor) markdownEditor.value = articleData.content
-            if (typeSelect) typeSelect.value = articleData.type
+            
+            // 确保类型选择正确映射
+            if (typeSelect) {
+                typeSelect.value = articleData.type.toString()
+            }
             
             if (categorySelect) {
                 Array.from(categorySelect.options).forEach(option => {
@@ -252,7 +265,9 @@ async function getOriginData(articleId) {
             }
             
             // 更新预览
-            updatePreview()
+            if (window.updatePreview) {
+                window.updatePreview()
+            }
         } else {
             throw new Error(result.msg || '获取文章数据失败')
         }
