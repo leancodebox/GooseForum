@@ -436,7 +436,10 @@ function initCategorySelector() {
     
     // 点击外部关闭浮层
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.category-selector') && !e.target.closest('#category-popup')) {
+        // 检查点击是否在分类选择器、弹窗内部或者是分类选项
+        if (!e.target.closest('.category-selector') && 
+            !e.target.closest('#category-popup') && 
+            !e.target.closest('.category-option')) {
             hideCategoryPopup()
         }
     })
@@ -466,7 +469,16 @@ function handleCategorySearch(e) {
     }
     
     renderCategoryOptions()
-    showCategoryDropdown()
+    
+    // 显示或隐藏"无结果"提示
+    const noResultsEl = document.getElementById('no-results')
+    if (noResultsEl) {
+        if (categoryConfig.filteredCategories.length === 0 && searchTerm !== '') {
+            noResultsEl.classList.remove('hidden')
+        } else {
+            noResultsEl.classList.add('hidden')
+        }
+    }
 }
 
 // 显示分类选择浮层
@@ -516,11 +528,20 @@ function renderCategoryOptions() {
     
     const filteredCategories = categoryConfig.filteredCategories
     
-    optionsContainer.innerHTML = filteredCategories.map(category => `
-        <div class="category-option p-2 hover:bg-gray-100 cursor-pointer" data-category-id="${category.id}">
-            ${category.name}
-        </div>
-    `).join('')
+    optionsContainer.innerHTML = filteredCategories.map(category => {
+        const isSelected = categoryConfig.selectedCategories.has(category.id)
+        const selectedClass = isSelected ? 'bg-primary text-primary-content' : 'text-base-content'
+        const hoverClass = isSelected ? 'hover:bg-primary-focus hover:text-primary-content' : 'hover:bg-base-200 hover:text-base-content'
+        
+        return `
+            <div class="category-option p-2 cursor-pointer rounded transition-colors ${selectedClass} ${hoverClass}" data-category-id="${category.id}">
+                <div class="flex items-center justify-between">
+                    <span>${category.name}</span>
+                    ${isSelected ? '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>' : ''}
+                </div>
+            </div>
+        `
+    }).join('')
     
     // 添加点击事件
     optionsContainer.querySelectorAll('.category-option').forEach(option => {
@@ -543,8 +564,8 @@ function selectCategory(categoryId) {
         addCategorySelection(category)
     }
     
-    // 选择后关闭浮层
-    hideCategoryPopup()
+    // 不再自动关闭浮层，让用户可以继续选择
+    // hideCategoryPopup()
 }
 
 // 添加分类选择
