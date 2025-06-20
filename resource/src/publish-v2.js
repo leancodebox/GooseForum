@@ -187,7 +187,7 @@ async function getArticleEnum() {
                 typeSelect.innerHTML = '<option value="">请选择类型</option>'
                 result.result.type.forEach(type => {
                     const option = document.createElement('option')
-                    option.value = type.id
+                    option.value = type.value
                     option.textContent = type.name
                     typeSelect.appendChild(option)
                 })
@@ -198,11 +198,10 @@ async function getArticleEnum() {
             if (categorySelect && result.result.category) {
                 categories.length = 0
                 categories.push(...result.result.category)
-                
                 categorySelect.innerHTML = ''
                 result.result.category.forEach(category => {
                     const option = document.createElement('option')
-                    option.value = category.id
+                    option.value = category.value
                     option.textContent = category.name
                     categorySelect.appendChild(option)
                 })
