@@ -7,8 +7,8 @@ import DOMPurify from 'dompurify'
 // 文章数据
 const articleData = {
     id: 0,
-    articleContent: '',
-    articleTitle: '',
+    content: '',
+    title: '',
     categoryId: [],
     type: 1
 }
@@ -95,8 +95,8 @@ function initMarkdownEditor() {
                 markdownEditor.value = ''
                 typeSelect.value = ''
                 categorySelect.value = ''
-                articleData.articleTitle = ''
-                articleData.articleContent = ''
+                articleData.title = ''
+                articleData.content = ''
                 articleData.type = 1
                 articleData.categoryId = []
                 updatePreview()
@@ -114,11 +114,11 @@ function initMarkdownEditor() {
 
     // 表单字段事件监听
     titleInput.addEventListener('input', (e) => {
-        articleData.articleTitle = e.target.value
+        articleData.title = e.target.value
     })
 
     markdownEditor.addEventListener('input', (e) => {
-        articleData.articleContent = e.target.value
+        articleData.content = e.target.value
     })
 
     typeSelect.addEventListener('change', (e) => {
@@ -230,8 +230,8 @@ async function getOriginData(articleId) {
             const data = result.result
             
             // 更新文章数据
-            articleData.articleTitle = data.articleTitle || ''
-            articleData.articleContent = data.articleContent || ''
+            articleData.title = data.articleTitle || ''
+            articleData.content = data.articleContent || ''
             articleData.type = data.type || 1
             articleData.categoryId = data.categoryId || []
             
@@ -241,8 +241,8 @@ async function getOriginData(articleId) {
             const typeSelect = document.getElementById('article-type')
             const categorySelect = document.getElementById('article-category')
             
-            if (titleInput) titleInput.value = articleData.articleTitle
-            if (markdownEditor) markdownEditor.value = articleData.articleContent
+            if (titleInput) titleInput.value = articleData.title
+            if (markdownEditor) markdownEditor.value = articleData.content
             if (typeSelect) typeSelect.value = articleData.type
             
             if (categorySelect) {
@@ -264,13 +264,13 @@ async function getOriginData(articleId) {
 
 // 表单验证
 function validateForm() {
-    if (!articleData.articleTitle.trim()) {
+    if (!articleData.title.trim()) {
         showMessage('请输入文章标题', 'error')
         document.getElementById('article-title')?.focus()
         return false
     }
     
-    if (!articleData.articleContent.trim()) {
+    if (!articleData.content.trim()) {
         showMessage('请输入文章内容', 'error')
         document.getElementById('markdown-editor')?.focus()
         return false
