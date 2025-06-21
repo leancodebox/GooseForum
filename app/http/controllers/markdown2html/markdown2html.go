@@ -2,12 +2,14 @@ package markdown2html
 
 import (
 	"bytes"
+	"github.com/jkboxomine/goldmark-headingid"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/text"
+	"go.abhg.dev/goldmark/anchor"
 	"go.abhg.dev/goldmark/mermaid"
 	"log/slog"
 	"strings"
@@ -18,6 +20,7 @@ func GetVersion() uint32 {
 	return 2
 }
 
+var mermaidExtender = &mermaid.Extender{}
 var md = goldmark.New(
 	goldmark.WithExtensions(
 		extension.GFM,
@@ -25,8 +28,7 @@ var md = goldmark.New(
 		extension.Strikethrough,
 		extension.Linkify,
 		extension.TaskList,
-		&mermaid.Extender{},
-		//b,
+		&anchor.Extender{},
 	),
 	goldmark.WithParserOptions(
 		parser.WithAutoHeadingID(),
@@ -37,10 +39,12 @@ var md = goldmark.New(
 	),
 )
 
-// 添加新的服务端渲染的控制器方法
+// MarkdownToHTML 添加新的服务端渲染的控制器方法
 func MarkdownToHTML(markdown string) string {
 	var buf bytes.Buffer
-	if err := md.Convert([]byte(markdown), &buf); err != nil {
+	// 创建带有改进的标题 ID 生成的上下文
+	ctx := parser.NewContext(parser.WithIDs(headingid.NewIDs()))
+	if err := md.Convert([]byte(markdown), &buf, parser.WithContext(ctx)); err != nil {
 		slog.Error("转化失败", "err", err)
 	}
 	return buf.String()

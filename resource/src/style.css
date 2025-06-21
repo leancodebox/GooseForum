@@ -40,5 +40,19 @@
   .badge-colorful:nth-child(5n) {
     animation-delay: -4s;
   }
+
+  /* 锚点偏移样式，用于处理固定导航栏遮挡问题 */
+  .prose h1[id]:before,
+  .prose h2[id]:before,
+  .prose h3[id]:before,
+  .prose h4[id]:before,
+  .prose h5[id]:before,
+  .prose h6[id]:before {
+    content: "";
+    display: block;
+    height: 4rem; /* 64px，比导航栏高度稍大一些 */
+    margin-top: -4rem;
+    visibility: hidden;
+  }
 }
 

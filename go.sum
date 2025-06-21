@@ -93,6 +93,8 @@ github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.5 h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=
 github.com/jinzhu/now v1.1.5/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=
+github.com/jkboxomine/goldmark-headingid v0.0.0-20200109122657-8b6c16c18388 h1:4MFR9n9RQKlI4rga+mTDVL4MtJksUGtDZ4165XtV3tU=
+github.com/jkboxomine/goldmark-headingid v0.0.0-20200109122657-8b6c16c18388/go.mod h1:xH/ijSq3Vgq4lNSxBfgwTdAnSgGSvU2Kx3yxHwSB5FU=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
@@ -171,6 +173,8 @@ github.com/yuin/goldmark v1.7.9 h1:rVSeT+f7/lAM+bJHVm5YHGwNrnd40i1Ch2DEocEjHQ0=
 github.com/yuin/goldmark v1.7.9/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
 github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc h1:+IAOyRda+RLrxa1WC7umKOZRsGq4QrFFMYApOeHzQwQ=
 github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc/go.mod h1:ovIvrum6DQJA4QsJSovrkC4saKHQVs7TvcaeO8AIl5I=
+go.abhg.dev/goldmark/anchor v0.2.0 h1:RQZTodRc6VHSUoQYKFlyH0pokbhk1klwUuGgDmjGp2E=
+go.abhg.dev/goldmark/anchor v0.2.0/go.mod h1:Ym74zBV+QBKxK9ITOty680N9FT8otgGYvtYXroJUWms=
 go.abhg.dev/goldmark/mermaid v0.5.0 h1:mDkykpSPJ+5wCQ8bSXgzJ2KQskjXkI5Ndxz7JYDHW38=
 go.abhg.dev/goldmark/mermaid v0.5.0/go.mod h1:OCyk2o85TX2drWHH+HRy6bih2yZlUwbbv/R1MMh1YLs=
 go.uber.org/multierr v1.11.0 h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0=
