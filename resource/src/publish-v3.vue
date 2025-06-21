@@ -163,20 +163,11 @@ const getOriginData = async (articleId: string) => {
     
     if (result.code === 0 && result.result) {
       const data = result.result
-      
       // 更新文章数据
       articleData.title = data.articleTitle || ''
       articleData.content = data.articleContent || ''
       articleData.type = data.type || 1
       articleData.categoryId = data.categoryId || []
-      
-      // 设置分类选择
-      if (articleData.categoryId && articleData.categoryId.length > 0) {
-        categoryConfig.selectedCategories.clear()
-        articleData.categoryId.forEach(id => {
-          categoryConfig.selectedCategories.add(id)
-        })
-      }
     } else {
       throw new Error(result.msg || '获取文章数据失败')
     }

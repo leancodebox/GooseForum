@@ -54,5 +54,21 @@
     margin-top: -4rem;
     visibility: hidden;
   }
+
+  /* Mermaid 图表居中样式 */
+  .mermaid {
+    text-align: center;
+    margin: 1.5rem auto;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* 确保 Mermaid SVG 也居中 */
+  .mermaid svg {
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+  }
 }
 
