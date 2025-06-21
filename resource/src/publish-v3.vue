@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, nextTick } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { marked } from 'marked'
 
 // 类型定义
@@ -329,9 +329,43 @@ const initData = async () => {
   }
 }
 
+// 点击外部关闭分类弹窗
+const handleClickOutside = (event: Event) => {
+  const target = event.target as Element
+  const categorySelector = target.closest('.category-selector')
+  const categoryOption = target.closest('.category-option')
+  
+  // 如果点击的是分类选项，不关闭弹窗
+  if (categoryOption) {
+    return
+  }
+  
+  // 如果点击在选择器外部，关闭弹窗
+  if (!categorySelector && showCategoryPopup.value) {
+    showCategoryPopup.value = false
+  }
+}
+
+// ESC键关闭分类弹窗
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && showCategoryPopup.value) {
+    showCategoryPopup.value = false
+  }
+}
+
 // 生命周期
 onMounted(() => {
   initData()
+  
+  // 添加全局事件监听器
+  document.addEventListener('click', handleClickOutside)
+  document.addEventListener('keydown', handleKeyDown)
+})
+
+// 组件卸载时清理事件监听器
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('keydown', handleKeyDown)
 })
 </script>
 
