@@ -48,7 +48,7 @@ const md = new MarkdownIt({
   html: true,        // 启用 HTML 标签
   linkify: true,     // 自动转换 URL 为链接
   typographer: true, // 启用排版替换
-  breaks: true,     // 不自动转换换行符（与 CommonMark 一致）
+  breaks: true,     // 
 })
   .use(markdownItTaskLists, { enabled: false }) // 启用任务列表支持
 

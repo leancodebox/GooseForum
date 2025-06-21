@@ -13,7 +13,6 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/text"
-	"go.abhg.dev/goldmark/anchor"
 )
 
 func GetVersion() uint32 {
@@ -27,7 +26,7 @@ var md = goldmark.New(
 		extension.Strikethrough,
 		extension.Linkify,
 		extension.TaskList,
-		&anchor.Extender{},
+		extension.Typographer,
 	),
 	goldmark.WithParserOptions(
 		parser.WithAutoHeadingID(),
