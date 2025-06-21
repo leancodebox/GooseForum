@@ -23,10 +23,12 @@ function initAnchorLinks() {
             e.preventDefault()
             const target = document.getElementById(heading.id)
             if (target) {
+                // 计算目标位置，考虑 scroll-margin-top: 4rem
+                const targetPosition = target.offsetTop;
                 // 平滑滚动到目标位置
-                target.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
                 })
                 // 更新 URL hash
                 history.pushState(null, null, `#${heading.id}`)
@@ -37,7 +39,6 @@ function initAnchorLinks() {
         heading.appendChild(anchor)
     })
 }
-
 
 
 // 页面加载完成后初始化
