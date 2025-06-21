@@ -21,9 +21,6 @@ export default defineConfig({
         'style': resolve(__dirname, 'src/style.css'),
       },
       output: {
-        // entryFileNames: 'assets/[name].js',
-        // chunkFileNames: 'assets/[name].js',
-        // assetFileNames: 'assets/[name].[ext]'
       }
     }
   },
