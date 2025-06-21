@@ -10,7 +10,6 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/text"
 	"go.abhg.dev/goldmark/anchor"
-	"go.abhg.dev/goldmark/mermaid"
 	"log/slog"
 	"strings"
 	"unicode/utf8"
@@ -20,7 +19,6 @@ func GetVersion() uint32 {
 	return 2
 }
 
-var mermaidExtender = &mermaid.Extender{}
 var md = goldmark.New(
 	goldmark.WithExtensions(
 		extension.GFM,

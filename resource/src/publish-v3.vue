@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, nextTick, watch } from 'vue'
-import { marked } from 'marked'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {marked} from 'marked'
 import mermaid from 'mermaid'
 import CategorySelector from './components/CategorySelector.vue'
 
@@ -23,8 +23,6 @@ interface TypeOption {
   name: string
 }
 
-
-
 // 响应式数据
 const articleData = reactive<ArticleData>({
   id: 0,
@@ -37,8 +35,6 @@ const articleData = reactive<ArticleData>({
 const categories = ref<Category[]>([])
 const typeList = ref<TypeOption[]>([])
 const isSubmitting = ref(false)
-
-
 
 
 // 计算属性
@@ -54,12 +50,32 @@ marked.use({
   silent: false,    // 不静默错误
   renderer: {
     code(token: any) {
-      const { text: code, lang: language } = token
+      const {text: code, lang: language} = token
       if (language === 'mermaid') {
         const id = 'mermaid-' + Math.random().toString(36).substr(2, 9)
-        return `<div class="mermaid" id="${id}" data-mermaid-code="${code.replace(/"/g, '&quot;')}"></div>`
+        try {
+          // 直接同步渲染并返回 SVG
+          const renderResult = mermaid.render(id + '_svg', code)
+          // 如果是 Promise，返回占位符并异步处理
+          renderResult.then(({svg}) => {
+            const element = document.getElementById(id)
+            if (element) {
+              element.innerHTML = svg
+            }
+          }).catch(error => {
+            console.error('Mermaid渲染错误:', error)
+            const element = document.getElementById(id)
+            if (element) {
+              element.innerHTML = `<div class="text-error">Mermaid图表渲染失败: ${error.message}</div>`
+            }
+          })
+          return `<div id="${id}" class="mermaid">${code}</div>`
+        } catch (error) {
+          console.error('Mermaid渲染错误:', error)
+          return `<div class="text-error">Mermaid图表渲染失败: ${error.message}</div>`
+        }
       }
-      return false // 使用默认渲染
+      return false
     }
   }
 })
@@ -68,7 +84,7 @@ const previewContent = computed(() => {
   if (!articleData.content.trim()) {
     return '<p class="text-base-content/60">在左侧编辑区域输入内容，预览将在这里显示...</p>'
   }
-  
+
   try {
     // 解析 Markdown 内容
     const htmlContent = marked.parse(articleData.content)
@@ -80,36 +96,9 @@ const previewContent = computed(() => {
 })
 
 
-
 const charCount = computed(() => {
   return articleData.content.length.toLocaleString()
 })
-
-// 监听预览内容变化，渲染 Mermaid 图表
-watch(previewContent, async () => {
-  await nextTick()
-  const mermaidElements = document.querySelectorAll('.mermaid[data-mermaid-code]')
-  
-  for (const element of mermaidElements) {
-    const code = element.getAttribute('data-mermaid-code')
-    const id = element.id
-    
-    if (code && id) {
-      try {
-        const { svg } = await mermaid.render(id + '_svg', code)
-        element.innerHTML = svg
-        element.removeAttribute('data-mermaid-code')
-      } catch (error) {
-        console.error('Mermaid渲染错误:', error)
-        element.innerHTML = `<div class="text-error">Mermaid图表渲染失败: ${error.message}</div>`
-        element.removeAttribute('data-mermaid-code')
-      }
-    }
-  }
-}, { flush: 'post' })
-
-
-
 
 
 // 消息提示相关
@@ -130,9 +119,8 @@ const showMessage = (message: string, type: 'info' | 'success' | 'error' = 'info
     text: message,
     type
   }
-  
   messages.value.push(newMessage)
-  
+
   // 自动移除
   setTimeout(() => {
     removeMessage(messageId)
@@ -151,19 +139,18 @@ const getArticleEnum = async () => {
     const response = await fetch('/api/forum/get-articles-enum', {
       method: 'GET'
     })
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    
+
     const result = await response.json()
-    
+
     if (result.code === 0) {
       // 填充类型选项
       if (result.result.type) {
         typeList.value = result.result.type
       }
-      
       // 填充分类选项
       if (result.result.category) {
         categories.value = result.result.category.map((category: any) => ({
@@ -181,36 +168,31 @@ const getArticleEnum = async () => {
 }
 
 const getOriginData = async (articleId: string) => {
-  try {
-    const response = await fetch('/api/forum/get-articles-origin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: parseInt(articleId)
-      })
+  const response = await fetch('/api/forum/get-articles-origin', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: parseInt(articleId)
     })
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    
-    const result = await response.json()
-    
-    if (result.code === 0 && result.result) {
-      const data = result.result
-      // 更新文章数据
-      articleData.title = data.articleTitle || ''
-      articleData.content = data.articleContent || ''
-      articleData.type = data.type || 1
-      articleData.categoryId = data.categoryId || []
-    } else {
-      throw new Error(result.msg || '获取文章数据失败')
-    }
-  } catch (error) {
-    console.error('获取文章数据失败:', error)
-    throw error
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+
+  const result = await response.json()
+
+  if (result.code === 0 && result.result) {
+    const data = result.result
+    // 更新文章数据
+    articleData.title = data.articleTitle || ''
+    articleData.content = data.articleContent || ''
+    articleData.type = data.type || 1
+    articleData.categoryId = data.categoryId || []
+  } else {
+    throw new Error(result.msg || '获取文章数据失败')
   }
 }
 
@@ -219,32 +201,32 @@ const validateForm = (): boolean => {
     showMessage('请输入文章标题', 'error')
     return false
   }
-  
+
   if (!articleData.content.trim()) {
     showMessage('请输入文章内容', 'error')
     return false
   }
-  
+
   if (!articleData.type) {
     showMessage('请选择文章类型', 'error')
     return false
   }
-  
+
   if (!articleData.categoryId.length) {
     showMessage('请选择文章分类', 'error')
     return false
   }
-  
+
   return true
 }
 
 const submitArticle = async () => {
   if (isSubmitting.value) return
-  
+
   if (!validateForm()) return
-  
+
   isSubmitting.value = true
-  
+
   try {
     const response = await fetch('/api/forum/write-articles', {
       method: 'POST',
@@ -253,16 +235,16 @@ const submitArticle = async () => {
       },
       body: JSON.stringify(articleData)
     })
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    
+
     const result = await response.json()
-    
+
     if (result.code === 0) {
       showMessage(result.result ? '文章更新成功！' : '文章发布成功！', 'success')
-      
+
       // 延迟跳转到文章列表或详情页
       setTimeout(() => {
         window.location.href = '/post/' + result.result
@@ -300,11 +282,11 @@ const initData = async () => {
   try {
     // 获取分类和类型选项
     await getArticleEnum()
-    
+
     // 检查是否为编辑模式
     const urlParams = new URLSearchParams(window.location.search)
     const articleId = urlParams.get('id')
-    
+
     if (articleId) {
       articleData.id = parseInt(articleId)
       await getOriginData(articleId)
@@ -316,7 +298,6 @@ const initData = async () => {
 }
 
 
-
 // 生命周期
 onMounted(async () => {
   // 初始化 mermaid
@@ -325,7 +306,7 @@ onMounted(async () => {
     theme: 'default',
     securityLevel: 'loose'
   })
-  
+
   await initData()
 })
 </script>
@@ -333,24 +314,17 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen flex flex-col bg-base-200">
     <!-- 消息提示组件 -->
-    <div class="fixed top-4 right-4 z-50 space-y-2">
-      <div 
-        v-for="message in messages" 
-        :key="message.id"
-        :class="[
-          'alert w-auto max-w-sm transition-all duration-300',
-          {
-            'alert-info': message.type === 'info',
-            'alert-success': message.type === 'success',
-            'alert-error': message.type === 'error'
-          }
-        ]"
-      >
+    <div class="fixed top-16 right-4 z-150 space-y-2">
+      <div v-for="message in messages" :key="message.id" :class="[
+                'alert w-auto max-w-sm transition-all duration-300',
+                {
+                    'alert-info': message.type === 'info',
+                    'alert-success': message.type === 'success',
+                    'alert-error': message.type === 'error'
+                }
+            ]">
         <span>{{ message.text }}</span>
-        <button 
-          @click="removeMessage(message.id)"
-          class="btn btn-sm btn-ghost"
-        >
+        <button @click="removeMessage(message.id)" class="btn btn-sm btn-ghost">
           ×
         </button>
       </div>
@@ -361,54 +335,39 @@ onMounted(async () => {
         <div class="tab-content bg-base-100 border-base-300 p-0">
           <div class="flex flex-col h-full">
             <!-- 编辑区域 -->
-            <div class="flex-1 p-6 space-y-6">
+            <div class="flex-1 p-6 space-y-2">
               <!-- 文章标题区域 -->
               <div class="form-control">
                 <label class="label pb-1">
                   <span class="label-text font-medium text-base-content">📝 文章标题</span>
                   <span class="label-text-alt text-base-content/60">必填</span>
                 </label>
-                <input 
-                  type="text" 
-                  v-model="articleData.title"
-                  placeholder="请输入一个吸引人的标题..."
-                  class="input input-bordered input-md w-full focus:input-primary"
-                />
+                <input type="text" v-model="articleData.title" placeholder="请输入一个吸引人的标题..."
+                       class="input input-bordered input-md w-full focus:input-primary"/>
               </div>
-              
+
               <!-- 分类和类型选择区域 -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <!-- 文章类型 -->
                 <div class="form-control">
                   <label class="label pb-1">
                     <span class="label-text font-medium text-base-content">🏷️ 文章类型</span>
                     <span class="label-text-alt text-base-content/60">必选</span>
                   </label>
-                  <select 
-                    v-model="articleData.type" 
-                    class="select select-bordered w-full focus:select-primary"
-                  >
+                  <select v-model="articleData.type"
+                          class="select select-bordered w-full focus:select-primary">
                     <option value="">请选择类型</option>
-                    <option 
-                      v-for="type in typeList" 
-                      :key="type.value" 
-                      :value="type.value"
-                    >
+                    <option v-for="type in typeList" :key="type.value" :value="type.value">
                       {{ type.name }}
                     </option>
                   </select>
                 </div>
-                
+
                 <!-- 文章分类 -->
-        <CategorySelector
-          v-model="articleData.categoryId"
-          :categories="categories"
-          :max-selection="3"
-          @change="handleCategoryChange"
-          @error="handleCategoryError"
-        />
+                <CategorySelector v-model="articleData.categoryId" :categories="categories"
+                                  :max-selection="3" @change="handleCategoryChange" @error="handleCategoryError"/>
               </div>
-              
+
               <!-- 文章内容区域 -->
               <div class="form-control flex-1">
                 <label class="label pb-2">
@@ -416,13 +375,12 @@ onMounted(async () => {
                   <span class="label-text-alt text-base-content/60">支持 Markdown 语法</span>
                 </label>
                 <div class="relative flex-1">
-                  <textarea 
-                    v-model="articleData.content"
-                    class="textarea textarea-bordered w-full h-full min-h-96 resize-none focus:textarea-primary font-mono text-sm leading-relaxed"
-                    placeholder="开启你的创作..."
-                  ></textarea>
+                                    <textarea v-model="articleData.content"
+                                              class="textarea textarea-bordered w-full h-full min-h-96 resize-none focus:textarea-primary font-mono text-sm leading-relaxed"
+                                              placeholder="开启你的创作..."></textarea>
                   <!-- 字数统计 -->
-                  <div class="absolute bottom-2 right-4 text-xs text-base-content/50 bg-base-100 px-2 py-1 rounded">
+                  <div
+                      class="absolute bottom-2 right-4 text-xs text-base-content/50 bg-base-100 px-2 py-1 rounded">
                     <span>{{ charCount }}</span> 字符
                   </div>
                 </div>
@@ -441,23 +399,18 @@ onMounted(async () => {
                       </div>
                       <div class="form-control">
                         <label class="label cursor-pointer gap-2">
-                          <input type="checkbox" class="checkbox checkbox-sm" checked disabled/>
+                          <input type="checkbox" class="checkbox checkbox-sm" checked
+                                 disabled/>
                           <span class="label-text text-sm">允许评论</span>
                         </label>
                       </div>
                     </div>
                     <div class="flex items-center gap-2">
-                      <button 
-                        @click="clearContent"
-                        class="btn btn-ghost btn-sm"
-                      >
+                      <button @click="clearContent" class="btn btn-ghost btn-sm">
                         清空内容
                       </button>
-                      <button 
-                        @click="submitArticle"
-                        :disabled="isSubmitting"
-                        class="btn btn-primary btn-sm"
-                      >
+                      <button @click="submitArticle" :disabled="isSubmitting"
+                              class="btn btn-primary btn-sm">
                         {{ isSubmitting ? '发布中...' : '发布文章' }}
                       </button>
                     </div>
@@ -473,10 +426,9 @@ onMounted(async () => {
           <div class="mb-4">
             <h1 class="text-2xl font-normal text-base-content mb-4">标题：{{ previewTitle }}</h1>
           </div>
-          <div 
-            class="prose lg:prose-base md:prose-lg prose-h1:font-normal prose-h2:font-normal prose-h3:font-normal prose-pre:bg-base-200 prose-code:text-base-content max-w-none text-base-content overflow-hidden min-w-0"
-            v-html="previewContent"
-          ></div>
+          <div
+              class="prose lg:prose-base md:prose-lg prose-h1:font-normal prose-h2:font-normal prose-h3:font-normal prose-pre:bg-base-200 prose-code:text-base-content max-w-none text-base-content overflow-hidden min-w-0"
+              v-html="previewContent"></div>
         </div>
       </div>
     </main>
@@ -484,13 +436,4 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* 分类标签动画 */
-.category-tag {
-  animation: fadeIn 0.2s ease-in;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
 </style>
