@@ -38,24 +38,9 @@ function initAnchorLinks() {
     })
 }
 
-// 处理页面加载时的 hash 跳转
-function handleInitialHash() {
-    if (window.location.hash) {
-        const target = document.querySelector(window.location.hash)
-        if (target) {
-            // 延迟滚动，确保页面完全加载
-            setTimeout(() => {
-                target.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                })
-            }, 100)
-        }
-    }
-}
+
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
     initAnchorLinks()
-    handleInitialHash()
 })
