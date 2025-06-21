@@ -28,6 +28,7 @@
     "@vitejs/plugin-vue-jsx": "^4.1.1",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.7.0",
+    "glob": "^11.0.3",
     "jsdom": "^26.0.0",
     "naive-ui": "^2.41.0",
     "typescript": "~5.8.0",
