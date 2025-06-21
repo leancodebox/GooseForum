@@ -35,10 +35,11 @@ func GetTemplates() *template.Template {
 		// 开发模式下直接从目录读取模板
 		return template.Must(template.Must(
 			tmpl.ParseGlob(filepath.Join("resource", "templates", "*.gohtml"))).
-			ParseGlob(filepath.Join("resource", "templates", "*.gohtml")))
+			ParseGlob(filepath.Join("resource", "templates", "*", "*.gohtml")))
 	}
 	return template.Must(tmpl.ParseFS(templates,
 		"templates/*.gohtml",
+		"templates/*/*.gohtml",
 	))
 }
 
