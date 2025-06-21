@@ -4,12 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "commonhead.gohtml" .}}
-    {{if .IsProduction}}
-    {{GetImportInfoPath `src/style.css`}}
     {{GetImportInfoPath `src/profile.js`}}
-    {{else}}
-    <script type="module" src="http://localhost:3001/src/profile.js"></script>
-    {{end}}
 </head>
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
