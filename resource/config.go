@@ -3,10 +3,6 @@ package resource
 import (
 	"embed"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"github.com/spf13/cast"
 	"html/template"
 	"io/fs"
 	"log/slog"
@@ -15,6 +11,11 @@ import (
 	"slices"
 	"strings"
 	"sync"
+
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/spf13/cast"
 )
 
 //go:embed  all:templates/**
@@ -82,7 +83,6 @@ type ManifestItem struct {
 	Assets         []string `json:"assets"`
 }
 
-var manifestMap = map[string]string{}
 var manifestItemMap = map[string]ManifestItem{}
 
 func init() {
@@ -93,6 +93,36 @@ func init() {
 	}
 	info := jsonopt.Decode[map[string]ManifestItem](content)
 	manifestItemMap = info
+
+	// 仅在生产环境预构建 HTML 缓存
+	if setting.IsProduction() {
+		prebuildProductionCache()
+	}
+}
+
+// prebuildProductionCache 在生产环境初始化时预先构建所有资源的 HTML 缓存
+func prebuildProductionCache() {
+	// 分析 manifestItemMap 构建缓存
+	for key, item := range manifestItemMap {
+		// 为所有入口文件和重要资源预构建缓存
+		if item.IsEntry {
+			cacheKey := fmt.Sprintf("%s_%v", key, true)
+			html := generateProductionHTML(key)
+			htmlHeaderCache.Store(cacheKey, template.HTML(html))
+		}
+	}
+
+	slog.Info("Production HTML cache prebuilt successfully", "cached_items", getCacheSize())
+}
+
+// getCacheSize 获取当前缓存项数量（用于监控）
+func getCacheSize() int {
+	count := 0
+	htmlHeaderCache.Range(func(_, _ interface{}) bool {
+		count++
+		return true
+	})
+	return count
 }
 
 var htmlHeaderCache sync.Map
