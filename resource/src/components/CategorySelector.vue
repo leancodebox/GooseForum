@@ -184,14 +184,14 @@ watch(() => props.maxSelection, (newVal) => {
       >
         <span 
           v-if="selectedCategoriesDisplay.length === 0" 
-          class="text-base-content/60 text-sm"
+          class="text-base-content/60 text-sm py-0.25"
         >
           {{ placeholder }}
         </span>
         <span 
           v-for="category in selectedCategoriesDisplay" 
           :key="category.id"
-          class="category-tag inline-flex items-center gap-1 px-2 py-0.5 bg-primary text-primary-content text-sm rounded-full"
+          class="category-tag inline-flex items-center gap-1 px-2 py-0.25 bg-primary text-primary-content text-sm rounded-full"
         >
           <span>{{ category.name }}</span>
           <button 
