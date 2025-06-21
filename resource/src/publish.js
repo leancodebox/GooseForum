@@ -16,14 +16,13 @@ function initMarkdownEditor() {
     const previewTitle = document.getElementById('preview-title')
     const previewContent = document.getElementById('preview-content')
 
-    // 配置marked选项
+    // 配置marked选项 - 使用 marked.use() 替代已废弃的 setOptions()
     if (typeof marked !== 'undefined') {
-        marked.setOptions({
-            breaks: true,
-            gfm: true,
-            highlight: function(code, lang) {
-                return code // 简单返回代码，不做语法高亮
-            }
+        marked.use({
+            breaks: true,  // 支持换行符转换
+            gfm: true,     // 启用 GitHub Flavored Markdown
+            pedantic: false, // 不严格遵循原始 markdown.pl
+            silent: false    // 不静默错误
         })
     }
 

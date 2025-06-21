@@ -40,12 +40,12 @@ function initMarkdownEditor() {
     const typeSelect = document.getElementById('article-type')
     const categorySelect = document.getElementById('article-category')
 
-    // 配置marked选项
-    marked.setOptions({
-        breaks: true,
-        gfm: true,
-        headerIds: false,
-        mangle: false
+    // 配置marked选项 - 使用 marked.use() 替代已废弃的 setOptions()
+    marked.use({
+        breaks: true,  // 支持换行符转换
+        gfm: true,     // 启用 GitHub Flavored Markdown
+        pedantic: false, // 不严格遵循原始 markdown.pl
+        silent: false    // 不静默错误
     })
 
     // 初始化数据

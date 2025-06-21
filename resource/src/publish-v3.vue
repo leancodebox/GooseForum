@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { marked } from 'marked'
-import DOMPurify from 'dompurify'
 
 // 类型定义
 interface ArticleData {
@@ -25,7 +24,6 @@ interface TypeOption {
 interface CategoryConfig {
   maxSelection: number
   selectedCategories: Set<number>
-  filteredCategories: Category[]
 }
 
 // 响应式数据
@@ -45,13 +43,20 @@ const categorySearchTerm = ref('')
 
 const categoryConfig = reactive<CategoryConfig>({
   maxSelection: 3,
-  selectedCategories: new Set(),
-  filteredCategories: []
+  selectedCategories: new Set()
 })
 
 // 计算属性
 const previewTitle = computed(() => {
   return articleData.title.trim() || '文章标题预览'
+})
+
+// 优化 marked 配置 - 使用 marked.use() 替代已废弃的 setOptions()
+marked.use({
+  breaks: true,  // 支持换行符转换
+  gfm: true,     // 启用 GitHub Flavored Markdown
+  pedantic: false, // 不严格遵循原始 markdown.pl
+  silent: false    // 不静默错误
 })
 
 const previewContent = computed(() => {
@@ -60,8 +65,8 @@ const previewContent = computed(() => {
   }
   
   try {
-    let html = marked.parse(articleData.content)
-    return DOMPurify.sanitize(html)
+    // 直接返回 marked 解析的结果，不使用 DOMPurify
+    return marked.parse(articleData.content)
   } catch (error) {
     console.error('Markdown解析错误:', error)
     return '<p class="text-error">Markdown解析出错，请检查语法</p>'
@@ -87,13 +92,7 @@ const selectedCategoriesDisplay = computed(() => {
     .filter(Boolean) as Category[]
 })
 
-// 配置marked选项
-marked.setOptions({
-  breaks: true,
-  gfm: true,
-  headerIds: false,
-  mangle: false
-})
+
 
 // 消息提示相关
 interface Message {
@@ -153,7 +152,6 @@ const getArticleEnum = async () => {
           id: category.value,
           name: category.name
         }))
-        categoryConfig.filteredCategories = [...categories.value]
       }
     } else {
       throw new Error(result.msg || '获取枚举数据失败')
@@ -567,7 +565,7 @@ onMounted(() => {
         <input type="radio" name="my_tabs_3" class="tab" aria-label="预览"/>
         <div class="tab-content bg-base-100 border-base-300 p-6">
           <div class="mb-4">
-            <h1 class="text-2xl font-normal text-base-content mb-4">{{ previewTitle }}</h1>
+            <h1 class="text-2xl font-normal text-base-content mb-4">标题：{{ previewTitle }}</h1>
           </div>
           <div 
             class="prose lg:prose-base md:prose-lg prose-h1:font-normal prose-h2:font-normal prose-h3:font-normal prose-pre:bg-base-200 prose-code:text-base-content max-w-none text-base-content overflow-hidden min-w-0"
@@ -580,108 +578,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.markdown-editor {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  resize: vertical;
-}
-
-.preview-content {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.preview-content h1, .preview-content h2, .preview-content h3,
-.preview-content h4, .preview-content h5, .preview-content h6 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.preview-content p {
-  margin-bottom: 1rem;
-}
-
-.preview-content ul, .preview-content ol {
-  margin-bottom: 1rem;
-  padding-left: 2rem;
-}
-
-.preview-content blockquote {
-  border-left: 4px solid #e5e7eb;
-  padding-left: 1rem;
-  margin: 1rem 0;
-  font-style: italic;
-}
-
-.preview-content code {
-  background-color: #f3f4f6;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-}
-
-.preview-content pre {
-  background-color: #f3f4f6;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin: 1rem 0;
-}
-
-.preview-content pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-/* 分类选择器样式 */
-.category-selector {
-  position: relative;
-}
-
-.category-input-area {
-  min-height: 2.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  background-color: white;
-  cursor: text;
-  transition: border-color 0.2s;
-}
-
-.category-input-area:hover {
-  border-color: #9ca3af;
-}
-
-.category-input-area:focus-within {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.category-search {
-  border: none;
-  outline: none;
-  background: transparent;
-  flex: 1;
-  min-width: 120px;
-}
-
-.category-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.category-option:hover {
-  background-color: #f3f4f6;
-}
-
+/* 分类标签动画 */
 .category-tag {
   animation: fadeIn 0.2s ease-in;
 }
@@ -689,9 +586,5 @@ onMounted(() => {
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
-}
-
-.remove-tag:hover {
-  background-color: rgba(255, 255, 255, 0.2);
 }
 </style>
