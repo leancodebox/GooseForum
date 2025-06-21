@@ -2,9 +2,7 @@ package markdown2html
 
 import (
 	"bytes"
-	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/yuin/goldmark"
-	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
@@ -19,14 +17,6 @@ import (
 func GetVersion() uint32 {
 	return 2
 }
-
-var highlightingDefault = highlighting.Highlighting
-var highlightingMonokai = highlighting.NewHighlighting(
-	highlighting.WithStyle("monokai"),
-	highlighting.WithFormatOptions(
-		chromahtml.WithLineNumbers(true),
-	),
-)
 
 var md = goldmark.New(
 	goldmark.WithExtensions(
