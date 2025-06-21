@@ -87,7 +87,7 @@ func getLatestArticles() []articles.SmallEntity {
 	data, _ := articleCache.GetOrLoad(
 		"getLatestArticles",
 		func() ([]articles.SmallEntity, error) {
-			return articles.GetLatestArticles(7)
+			return articles.GetLatestArticles(15)
 
 		},
 		10*time.Second, // 缓存5s
