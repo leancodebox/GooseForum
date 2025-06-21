@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {computed, onMounted, reactive, ref} from 'vue'
-import {marked} from 'marked'
+import MarkdownIt from 'markdown-it'
+import markdownItTaskLists from 'markdown-it-task-lists'
 import mermaid from 'mermaid'
 import CategorySelector from './components/CategorySelector.vue'
 
@@ -42,43 +43,56 @@ const previewTitle = computed(() => {
   return articleData.title.trim() || '文章标题预览'
 })
 
-// 优化 marked 配置 - 使用 marked.use() 替代已废弃的 setOptions()
-marked.use({
-  breaks: true,  // 支持换行符转换
-  gfm: true,     // 启用 GitHub Flavored Markdown
-  pedantic: false, // 不严格遵循原始 markdown.pl
-  silent: false,    // 不静默错误
-  renderer: {
-    code(token: any) {
-      const {text: code, lang: language} = token
-      if (language === 'mermaid') {
-        const id = 'mermaid-' + Math.random().toString(36).substr(2, 9)
-        try {
-          // 直接同步渲染并返回 SVG
-          const renderResult = mermaid.render(id + '_svg', code)
-          // 如果是 Promise，返回占位符并异步处理
-          renderResult.then(({svg}) => {
-            const element = document.getElementById(id)
-            if (element) {
-              element.innerHTML = svg
-            }
-          }).catch(error => {
-            console.error('Mermaid渲染错误:', error)
-            const element = document.getElementById(id)
-            if (element) {
-              element.innerHTML = `<div class="text-error">Mermaid图表渲染失败: ${error.message}</div>`
-            }
-          })
-          return `<div id="${id}" class="mermaid">${code}</div>`
-        } catch (error) {
+// 配置 markdown-it 以保持与服务端 Goldmark 的高度一致性
+const md = new MarkdownIt({
+  html: true,        // 启用 HTML 标签
+  linkify: true,     // 自动转换 URL 为链接
+  typographer: true, // 启用排版替换
+  breaks: false,     // 不自动转换换行符（与 CommonMark 一致）
+})
+  .use(markdownItTaskLists, { enabled: false }) // 启用任务列表支持
+
+// 自定义 fence 渲染器以支持 Mermaid
+const defaultFence = md.renderer.rules.fence
+md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
+  const token = tokens[idx]
+  const info = token.info ? token.info.trim() : ''
+  const langName = info ? info.split(/\s+/g)[0] : ''
+  
+  if (langName === 'mermaid') {
+    const id = 'mermaid-' + Math.random().toString(36).substr(2, 9)
+    const code = token.content.trim()
+    
+    // 异步渲染 Mermaid 图表
+    setTimeout(() => {
+      try {
+        mermaid.render(id + '_svg', code).then(({svg}) => {
+          const element = document.getElementById(id)
+          if (element) {
+            element.innerHTML = svg
+          }
+        }).catch(error => {
           console.error('Mermaid渲染错误:', error)
-          return `<div class="text-error">Mermaid图表渲染失败: ${error.message}</div>`
+          const element = document.getElementById(id)
+          if (element) {
+            element.innerHTML = `<div class="text-error">Mermaid图表渲染失败: ${error.message}</div>`
+          }
+        })
+      } catch (error) {
+        console.error('Mermaid渲染错误:', error)
+        const element = document.getElementById(id)
+        if (element) {
+          element.innerHTML = `<div class="text-error">Mermaid图表渲染失败: ${error.message}</div>`
         }
       }
-      return false
-    }
+    }, 0)
+    
+    return `<div id="${id}" class="mermaid-container">${code}</div>`
   }
-})
+  
+  // 使用默认的 fence 渲染器处理其他代码块
+  return defaultFence(tokens, idx, options, env, slf)
+}
 
 const previewContent = computed(() => {
   if (!articleData.content.trim()) {
@@ -86,8 +100,8 @@ const previewContent = computed(() => {
   }
 
   try {
-    // 解析 Markdown 内容
-    const htmlContent = marked.parse(articleData.content)
+    // 使用 markdown-it 解析 Markdown 内容
+    const htmlContent = md.render(articleData.content)
     return htmlContent
   } catch (error) {
     console.error('Markdown解析错误:', error)
@@ -424,7 +438,7 @@ onMounted(async () => {
         <input type="radio" name="my_tabs_3" class="tab" aria-label="预览"/>
         <div class="tab-content bg-base-100 border-base-300 p-6">
           <div class="mb-4">
-            <h1 class="text-2xl font-normal text-base-content mb-4">标题：{{ previewTitle }}</h1>
+            <h1 class="text-3xl font-normal text-base-content mb-4 border-b border-b-gray-200 pb-2">{{ previewTitle }}</h1>
           </div>
           <div
               class="prose lg:prose-base md:prose-lg prose-h1:font-normal prose-h2:font-normal prose-h3:font-normal prose-pre:bg-base-200 prose-code:text-base-content max-w-none text-base-content overflow-hidden min-w-0"
