@@ -5,7 +5,6 @@ go 1.23.0
 toolchain go1.24.0
 
 require (
-	github.com/alecthomas/chroma/v2 v2.16.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/gin-contrib/gzip v1.2.3
@@ -17,6 +16,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/iancoleman/strcase v0.3.0
+	github.com/jkboxomine/goldmark-headingid v0.0.0-20200109122657-8b6c16c18388
 	github.com/json-iterator/go v1.1.12
 	github.com/mojocn/base64Captcha v1.3.8
 	github.com/robfig/cron/v3 v3.0.1
@@ -24,8 +24,6 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.0
 	github.com/yuin/goldmark v1.7.9
-	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
-	go.abhg.dev/goldmark/mermaid v0.5.0
 	golang.org/x/crypto v0.37.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
@@ -39,7 +37,6 @@ require (
 	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
-	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/gin-contrib/sse v1.0.0 // indirect
@@ -52,7 +49,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/jkboxomine/goldmark-headingid v0.0.0-20200109122657-8b6c16c18388 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -68,7 +64,6 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
-	go.abhg.dev/goldmark/anchor v0.2.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.15.0 // indirect
 	golang.org/x/image v0.26.0 // indirect
