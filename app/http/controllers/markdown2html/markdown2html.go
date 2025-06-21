@@ -2,7 +2,11 @@ package markdown2html
 
 import (
 	"bytes"
-	"github.com/jkboxomine/goldmark-headingid"
+	"log/slog"
+	"strings"
+	"unicode/utf8"
+
+	headingid "github.com/jkboxomine/goldmark-headingid"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -10,9 +14,6 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/text"
 	"go.abhg.dev/goldmark/anchor"
-	"log/slog"
-	"strings"
-	"unicode/utf8"
 )
 
 func GetVersion() uint32 {
@@ -33,7 +34,6 @@ var md = goldmark.New(
 	),
 	goldmark.WithRendererOptions(
 		html.WithHardWraps(),
-		html.WithXHTML(),
 	),
 )
 

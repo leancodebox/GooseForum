@@ -48,7 +48,7 @@ const md = new MarkdownIt({
   html: true,        // 启用 HTML 标签
   linkify: true,     // 自动转换 URL 为链接
   typographer: true, // 启用排版替换
-  breaks: false,     // 不自动转换换行符（与 CommonMark 一致）
+  breaks: true,     // 不自动转换换行符（与 CommonMark 一致）
 })
   .use(markdownItTaskLists, { enabled: false }) // 启用任务列表支持
 
@@ -87,7 +87,7 @@ md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
       }
     }, 0)
     
-    return `<div id="${id}" class="mermaid-container">${code}</div>`
+    return `<div id="${id}" class="mermaid">${code}</div>`
   }
   
   // 使用默认的 fence 渲染器处理其他代码块
