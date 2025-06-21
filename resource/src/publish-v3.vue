@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, nextTick, watch } from 'vue'
 import { marked } from 'marked'
+import mermaid from 'mermaid'
 import CategorySelector from './components/CategorySelector.vue'
 
 // 类型定义
@@ -50,7 +51,17 @@ marked.use({
   breaks: true,  // 支持换行符转换
   gfm: true,     // 启用 GitHub Flavored Markdown
   pedantic: false, // 不严格遵循原始 markdown.pl
-  silent: false    // 不静默错误
+  silent: false,    // 不静默错误
+  renderer: {
+    code(token: any) {
+      const { text: code, lang: language } = token
+      if (language === 'mermaid') {
+        const id = 'mermaid-' + Math.random().toString(36).substr(2, 9)
+        return `<div class="mermaid" id="${id}" data-mermaid-code="${code.replace(/"/g, '&quot;')}"></div>`
+      }
+      return false // 使用默认渲染
+    }
+  }
 })
 
 const previewContent = computed(() => {
@@ -59,17 +70,43 @@ const previewContent = computed(() => {
   }
   
   try {
-    // 直接返回 marked 解析的结果，不使用 DOMPurify
-    return marked.parse(articleData.content)
+    // 解析 Markdown 内容
+    const htmlContent = marked.parse(articleData.content)
+    return htmlContent
   } catch (error) {
     console.error('Markdown解析错误:', error)
     return '<p class="text-error">Markdown解析出错，请检查语法</p>'
   }
 })
 
+
+
 const charCount = computed(() => {
   return articleData.content.length.toLocaleString()
 })
+
+// 监听预览内容变化，渲染 Mermaid 图表
+watch(previewContent, async () => {
+  await nextTick()
+  const mermaidElements = document.querySelectorAll('.mermaid[data-mermaid-code]')
+  
+  for (const element of mermaidElements) {
+    const code = element.getAttribute('data-mermaid-code')
+    const id = element.id
+    
+    if (code && id) {
+      try {
+        const { svg } = await mermaid.render(id + '_svg', code)
+        element.innerHTML = svg
+        element.removeAttribute('data-mermaid-code')
+      } catch (error) {
+        console.error('Mermaid渲染错误:', error)
+        element.innerHTML = `<div class="text-error">Mermaid图表渲染失败: ${error.message}</div>`
+        element.removeAttribute('data-mermaid-code')
+      }
+    }
+  }
+}, { flush: 'post' })
 
 
 
@@ -281,8 +318,15 @@ const initData = async () => {
 
 
 // 生命周期
-onMounted(() => {
-  initData()
+onMounted(async () => {
+  // 初始化 mermaid
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'default',
+    securityLevel: 'loose'
+  })
+  
+  await initData()
 })
 </script>
 
