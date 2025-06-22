@@ -102,10 +102,8 @@
                                     {{end}}
                                     {{ $NowPage := .Page }}
                                     {{range .Pagination}}
-                                    <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}">
-                                        <button class="join-item btn btn-sm {{if eq $NowPage .Page}}btn-active{{end}}">
+                                    <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}" class="join-item btn btn-sm" {{if eq $NowPage .Page}}disabled{{end}}>
                                             {{.Page}}
-                                        </button>
                                     </a>
                                     {{end}}
                                     {{if lt .Page .TotalPages}}
