@@ -1,11 +1,15 @@
-<h1  align="center">
-  <br>
-  <a href="https://github.com/leancodebox/GooseForum" alt="logo" >
-    <img src="resource/static/pic/icon_300.png" width="140"/></a>
-  <br>
-  GooseForum
-  <br>
-</h1>
+<div align="center">
+  <img src="resource/static/pic/icon_300.png" width="140"/>
+  <p align="center">
+  <a href="https://github.com/leancodebox/GooseForum/releases"><img src="https://img.shields.io/github/release/leancodebox/GooseForum.svg" alt="GitHub release"></a>
+  <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.23+-blue.svg" alt="Go version"></a>
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue-3.0+-green.svg" alt="Vue version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/leancodebox/GooseForum.svg" alt="License"></a>
+  <a href="https://github.com/leancodebox/GooseForum/stargazers"><img src="https://img.shields.io/github/stars/leancodebox/GooseForum.svg?style=social" alt="GitHub stars"></a>
+  </p>
+  <h1>GooseForum</h1>
+  <p>现代化的 Go + Tailwindcss  论坛系统</p>
+</div>
 
 
 GooseForum 是一个现代化的论坛系统，采用 Vue 3 + Go 的前后端分离架构。提供了极低依赖的安装方式。
