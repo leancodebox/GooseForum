@@ -47,8 +47,10 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
 env_files:
-  github_token: ~/.path/to/my/github_token
+  github_token: ~/.local/github_token
+
 release:
   footer: >-
 
