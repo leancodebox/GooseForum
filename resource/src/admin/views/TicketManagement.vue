@@ -180,15 +180,15 @@
                   </div>
                 </td>
                 <td>
-                  <div class="badge badge-outline">{{ getCategoryText(ticket.category) }}</div>
+                  <div class="badge badge-outline badge-sm whitespace-nowrap">{{ getCategoryText(ticket.category) }}</div>
                 </td>
                 <td>
-                  <div class="badge" :class="getPriorityBadgeClass(ticket.priority)">
+                  <div class="badge badge-sm whitespace-nowrap" :class="getPriorityBadgeClass(ticket.priority)">
                     {{ getPriorityText(ticket.priority) }}
                   </div>
                 </td>
                 <td>
-                  <div class="badge" :class="getStatusBadgeClass(ticket.status)">
+                  <div class="badge badge-sm whitespace-nowrap" :class="getStatusBadgeClass(ticket.status)">
                     {{ getStatusText(ticket.status) }}
                   </div>
                 </td>
@@ -211,12 +211,12 @@
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
                       <li><a @click="viewTicket(ticket)">查看详情</a></li>
-                      <li><a @click="replyTicket(ticket)">回复</a></li>
-                      <li><a @click="assignTicket(ticket)">分配处理人</a></li>
+                      <li><a @click="viewTicket(ticket)">回复</a></li>
+                      <li><a>分配处理人</a></li>
                       <li><a @click="changeStatus(ticket, 'in_progress')" v-if="ticket.status === 'open'">标记为处理中</a></li>
                       <li><a @click="changeStatus(ticket, 'resolved')" v-if="ticket.status === 'in_progress'">标记为已解决</a></li>
                       <li><a @click="changeStatus(ticket, 'closed')" v-if="ticket.status === 'resolved'">关闭工单</a></li>
-                      <li><a @click="changePriority(ticket)">修改优先级</a></li>
+                      <li><a>修改优先级</a></li>
                       <li><a @click="deleteTicket(ticket)" class="text-error">删除</a></li>
                     </ul>
                   </div>
@@ -496,10 +496,10 @@
                   <button class="btn btn-ghost btn-xs" @click="useTemplate(template)">
                     使用
                   </button>
-                  <button class="btn btn-ghost btn-xs" @click="editTemplate(template)">
+                  <button class="btn btn-ghost btn-xs">
                     编辑
                   </button>
-                  <button class="btn btn-ghost btn-xs text-error" @click="deleteTemplate(template)">
+                  <button class="btn btn-ghost btn-xs text-error">
                     删除
                   </button>
                 </div>
@@ -507,7 +507,7 @@
             </div>
           </div>
           
-          <button class="btn btn-outline w-full" @click="addTemplate">
+          <button class="btn btn-outline w-full">
             <PlusIcon class="w-4 h-4" />
             添加新模板
           </button>
@@ -748,7 +748,7 @@ const generateMockTickets = (): Ticket[] => {
         name: '管理员1',
         email: 'admin1@example.com'
       } : undefined,
-      replies: Math.floor(Math.random() * 5),
+      replies: [],
       createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
     })
