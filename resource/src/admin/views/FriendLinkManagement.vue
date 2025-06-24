@@ -95,7 +95,7 @@
                     <div class="avatar">
                       <div class="mask mask-squircle w-12 h-12">
                         <img 
-                          :src="link.logo || '/static/pic/default-website.png'" 
+                          :src="link.logo || '/static/pic/icon.png'" 
                           :alt="link.name"
                           @error="handleImageError"
                         />
@@ -653,12 +653,12 @@ const formatDate = (dateString: string) => {
 
 const handleImageError = (event: Event) => {
   const target = event.target as HTMLImageElement
-  target.src = '/static/pic/default-website.png'
+  target.src = '/static/pic/icon.png'
 }
 
 const handlePreviewError = (event: Event) => {
   const target = event.target as HTMLImageElement
-  target.src = '/static/pic/default-website.png'
+  target.src = '/static/pic/icon.png'
 }
 
 // 组件挂载时获取数据
@@ -679,7 +679,7 @@ onMounted(() => {
 }
 
 /* 图片加载失败样式 */
-img[src="/static/pic/default-website.png"] {
+img[src="/static/pic/icon.png"] {
   background-color: hsl(var(--b3));
 }
 </style>

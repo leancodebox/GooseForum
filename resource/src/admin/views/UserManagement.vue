@@ -78,16 +78,6 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>
-                  <label>
-                    <input 
-                      type="checkbox" 
-                      class="checkbox" 
-                      :checked="isAllSelected"
-                      @change="toggleSelectAll"
-                    />
-                  </label>
-                </th>
                 <th>用户信息</th>
                 <th>角色</th>
                 <th>状态</th>
@@ -98,16 +88,6 @@
             </thead>
             <tbody>
               <tr v-for="user in users" :key="user.id">
-                <td>
-                  <label>
-                    <input 
-                      type="checkbox" 
-                      class="checkbox" 
-                      :value="user.id"
-                      v-model="selectedUsers"
-                    />
-                  </label>
-                </td>
                 <td>
                   <div class="flex items-center gap-3">
                     <div class="avatar">
@@ -122,12 +102,12 @@
                   </div>
                 </td>
                 <td>
-                  <div class="badge" :class="getRoleBadgeClass(user.role)">
+                  <div class="badge badge-sm whitespace-nowrap" :class="getRoleBadgeClass(user.role)">
                     {{ getRoleText(user.role) }}
                   </div>
                 </td>
                 <td>
-                  <div class="badge" :class="getStatusBadgeClass(user.status)">
+                  <div class="badge badge-sm whitespace-nowrap" :class="getStatusBadgeClass(user.status)">
                     {{ getStatusText(user.status) }}
                   </div>
                 </td>
@@ -192,27 +172,7 @@
       </div>
     </div>
 
-    <!-- 批量操作 -->
-    <div v-if="selectedUsers.length > 0" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-      <div class="card bg-base-100 shadow-lg border border-base-300">
-        <div class="card-body p-4">
-          <div class="flex items-center gap-4">
-            <span class="text-sm font-medium">已选择 {{ selectedUsers.length }} 个用户</span>
-            <div class="flex gap-2">
-              <button class="btn btn-sm btn-warning" @click="batchBan">
-                批量封禁
-              </button>
-              <button class="btn btn-sm btn-error" @click="batchDelete">
-                批量删除
-              </button>
-              <button class="btn btn-sm btn-ghost" @click="clearSelection">
-                取消选择
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
   </div>
 
   <!-- 用户编辑/创建模态框 -->
@@ -320,7 +280,6 @@ interface User {
 const users = ref<User[]>([])
 const loading = ref(false)
 const searchQuery = ref('')
-const selectedUsers = ref<number[]>([])
 const userModal = ref<HTMLDialogElement>()
 const isEditing = ref(false)
 
@@ -349,10 +308,6 @@ const userForm = reactive({
 })
 
 // 计算属性
-const isAllSelected = computed(() => {
-  return users.value.length > 0 && selectedUsers.value.length === users.value.length
-})
-
 const totalPages = computed(() => {
   return Math.ceil(pagination.total / pagination.pageSize)
 })
@@ -433,17 +388,7 @@ const changePage = (page: number) => {
   fetchUsers()
 }
 
-const toggleSelectAll = () => {
-  if (isAllSelected.value) {
-    selectedUsers.value = []
-  } else {
-    selectedUsers.value = users.value.map(user => user.id)
-  }
-}
 
-const clearSelection = () => {
-  selectedUsers.value = []
-}
 
 const openCreateModal = () => {
   isEditing.value = false
@@ -535,29 +480,7 @@ const deleteUser = async (user: User) => {
   }
 }
 
-const batchBan = async () => {
-  if (confirm(`确定要封禁选中的 ${selectedUsers.value.length} 个用户吗？`)) {
-    try {
-      await api.post('/api/admin/users/batch-ban', { userIds: selectedUsers.value })
-      clearSelection()
-      fetchUsers()
-    } catch (error) {
-      console.error('批量封禁失败:', error)
-    }
-  }
-}
 
-const batchDelete = async () => {
-  if (confirm(`确定要删除选中的 ${selectedUsers.value.length} 个用户吗？此操作不可恢复！`)) {
-    try {
-      await api.post('/api/admin/users/batch-delete', { userIds: selectedUsers.value })
-      clearSelection()
-      fetchUsers()
-    } catch (error) {
-      console.error('批量删除失败:', error)
-    }
-  }
-}
 
 // 工具函数
 const getRoleBadgeClass = (role: string) => {
@@ -622,21 +545,5 @@ onMounted(() => {
 .modal-box {
   max-height: 90vh;
   overflow-y: auto;
-}
-
-/* 批量操作栏动画 */
-.fixed {
-  animation: slideUp 0.3s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translate(-50%, 100%);
-    opacity: 0;
-  }
-  to {
-    transform: translate(-50%, 0);
-    opacity: 1;
-  }
 }
 </style>

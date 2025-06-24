@@ -98,16 +98,6 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>
-                  <label>
-                    <input 
-                      type="checkbox" 
-                      class="checkbox" 
-                      :checked="isAllSelected"
-                      @change="toggleSelectAll"
-                    />
-                  </label>
-                </th>
                 <th>帖子信息</th>
                 <th>作者</th>
                 <th>分类</th>
@@ -119,16 +109,6 @@
             </thead>
             <tbody>
               <tr v-for="post in posts" :key="post.id">
-                <td>
-                  <label>
-                    <input 
-                      type="checkbox" 
-                      class="checkbox" 
-                      :value="post.id"
-                      v-model="selectedPosts"
-                    />
-                  </label>
-                </td>
                 <td>
                   <div class="flex items-start gap-3">
                     <div class="avatar" v-if="post.thumbnail">
@@ -168,10 +148,10 @@
                   </div>
                 </td>
                 <td>
-                  <div class="badge badge-outline">{{ post.category.name }}</div>
+                  <div class="badge badge-outline badge-sm whitespace-nowrap">{{ post.category.name }}</div>
                 </td>
                 <td>
-                  <div class="badge" :class="getStatusBadgeClass(post.status)">
+                  <div class="badge badge-sm whitespace-nowrap" :class="getStatusBadgeClass(post.status)">
                     {{ getStatusText(post.status) }}
                   </div>
                 </td>
@@ -244,30 +224,7 @@
       </div>
     </div>
 
-    <!-- 批量操作 -->
-    <div v-if="selectedPosts.length > 0" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-      <div class="card bg-base-100 shadow-lg border border-base-300">
-        <div class="card-body p-4">
-          <div class="flex items-center gap-4">
-            <span class="text-sm font-medium">已选择 {{ selectedPosts.length }} 篇帖子</span>
-            <div class="flex gap-2">
-              <button class="btn btn-sm btn-info" @click="batchApprove">
-                批量审核
-              </button>
-              <button class="btn btn-sm btn-warning" @click="batchReject">
-                批量拒绝
-              </button>
-              <button class="btn btn-sm btn-error" @click="batchDelete">
-                批量删除
-              </button>
-              <button class="btn btn-sm btn-ghost" @click="clearSelection">
-                取消选择
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -316,7 +273,6 @@ const posts = ref<Post[]>([])
 const categories = ref<Category[]>([])
 const loading = ref(false)
 const searchQuery = ref('')
-const selectedPosts = ref<number[]>([])
 
 // 筛选条件
 const filters = reactive({
@@ -334,10 +290,6 @@ const pagination = reactive({
 })
 
 // 计算属性
-const isAllSelected = computed(() => {
-  return posts.value.length > 0 && selectedPosts.value.length === posts.value.length
-})
-
 const totalPages = computed(() => {
   return Math.ceil(pagination.total / pagination.pageSize)
 })
@@ -448,17 +400,7 @@ const changePage = (page: number) => {
   fetchPosts()
 }
 
-const toggleSelectAll = () => {
-  if (isAllSelected.value) {
-    selectedPosts.value = []
-  } else {
-    selectedPosts.value = posts.value.map(post => post.id)
-  }
-}
 
-const clearSelection = () => {
-  selectedPosts.value = []
-}
 
 const editPost = (post: Post) => {
   // 跳转到编辑页面
@@ -515,67 +457,13 @@ const deletePost = async (post: Post) => {
   }
 }
 
-const batchApprove = async () => {
-  if (confirm(`确定要审核通过选中的 ${selectedPosts.value.length} 篇帖子吗？`)) {
-    try {
-      // 批量审核通过 - 接口未实现，使用模拟数据
-      console.warn('批量审核通过接口未实现')
-      // await api.post('/api/admin/articles-batch-edit', { ids: selectedPosts.value, action: 'approve' })
-      clearSelection()
-      fetchPosts()
-    } catch (error) {
-      console.error('批量审核失败:', error)
-    }
-  }
-}
 
-const batchReject = async () => {
-  const reason = prompt('请输入拒绝原因:')
-  if (reason && confirm(`确定要拒绝选中的 ${selectedPosts.value.length} 篇帖子吗？`)) {
-    try {
-      // 批量拒绝 - 接口未实现，使用模拟数据
-      console.warn('批量拒绝接口未实现')
-      // await api.post('/api/admin/articles-batch-edit', { ids: selectedPosts.value, action: 'reject', reason })
-      clearSelection()
-      fetchPosts()
-    } catch (error) {
-      console.error('批量拒绝失败:', error)
-    }
-  }
-}
-
-const batchDelete = async () => {
-  if (confirm(`确定要删除选中的 ${selectedPosts.value.length} 篇帖子吗？此操作不可恢复！`)) {
-    try {
-      // 批量删除 - 接口未实现，使用模拟数据
-      console.warn('批量删除接口未实现')
-      // await api.post('/api/admin/articles-batch-edit', { ids: selectedPosts.value, action: 'delete' })
-      clearSelection()
-      fetchPosts()
-    } catch (error) {
-      console.error('批量删除失败:', error)
-    }
-  }
-}
 
 const exportPosts = async () => {
   try {
     // 导出接口未实现，使用模拟数据
     console.warn('导出接口未实现')
     return
-    // const response = await api.get('/api/admin/articles-export', {
-    //   responseType: 'blob'
-    // })
-    
-    // 创建下载链接
-    const url = window.URL.createObjectURL(new Blob([response.data]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', `posts_${new Date().toISOString().split('T')[0]}.xlsx`)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    window.URL.revokeObjectURL(url)
   } catch (error) {
     console.error('导出失败:', error)
     alert('导出功能暂未实现')
@@ -641,19 +529,5 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* 批量操作栏动画 */
-.fixed {
-  animation: slideUp 0.3s ease-out;
-}
 
-@keyframes slideUp {
-  from {
-    transform: translate(-50%, 100%);
-    opacity: 0;
-  }
-  to {
-    transform: translate(-50%, 0);
-    opacity: 1;
-  }
-}
 </style>

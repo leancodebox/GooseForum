@@ -16,21 +16,18 @@
         </div>
 
         <div class="flex-1">
-
-          <h1 class="text-xl font-semibold text-base-content">
-            <div class="breadcrumbs text-sm" v-if="breadcrumbs.length > 0">
-              <ul>
-                <li v-for="(crumb, index) in breadcrumbs" :key="index">
-                  <router-link v-if="crumb.path && index < breadcrumbs.length - 1" :to="crumb.path"
-                    class="link link-hover">
-                    {{ crumb.name }}
-                  </router-link>
-                  <span v-else>{{ crumb.name }}</span>
-                </li>
-              </ul>
-            </div>
-            <span v-else>{{ pageTitle }}</span>
-          </h1>
+          <div class="breadcrumbs text-sm" v-if="breadcrumbs.length > 0">
+            <ul>
+              <li v-for="(crumb, index) in breadcrumbs" :key="index">
+                <router-link v-if="crumb.path && index < breadcrumbs.length - 1" :to="crumb.path"
+                  class="link link-hover">
+                  {{ crumb.name }}
+                </router-link>
+                <span v-else>{{ crumb.name }}</span>
+              </li>
+            </ul>
+          </div>
+          <span v-else>{{ pageTitle }}</span>
         </div>
 
         <div class="flex-none">
@@ -77,7 +74,8 @@
         isCollapsed ? 'w-16' : 'w-64'
       ]">
         <!-- Logo 和折叠按钮 -->
-        <div class="p-2 border-b border-base-300 flex items-center" :class="isCollapsed ? 'justify-center' : 'justify-between'">
+        <div class="p-2 border-b border-base-300 flex items-center"
+          :class="isCollapsed ? 'justify-center' : 'justify-between'">
           <div v-if="!isCollapsed">
             <h2 class="text-xl font-bold text-primary">GooseForum</h2>
             <p class="text-sm text-base-content/70">管理后台</p>

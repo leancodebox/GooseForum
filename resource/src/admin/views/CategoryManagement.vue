@@ -97,7 +97,7 @@
                   </div>
                 </td>
                 <td>
-                  <div class="badge" :class="category.status === 'active' ? 'badge-success' : 'badge-error'">
+                  <div class="badge badge-sm whitespace-nowrap" :class="category.status === 'active' ? 'badge-success' : 'badge-error'">
                     {{ category.status === 'active' ? '启用' : '禁用' }}
                   </div>
                 </td>
