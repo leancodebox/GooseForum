@@ -15,10 +15,10 @@
     <!-- 搜索和筛选 -->
     <div class="card bg-base-100 shadow">
       <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">搜索分类</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">搜索分类</span>
             </label>
             <div class="relative">
               <input 
@@ -33,10 +33,10 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">状态筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">状态筛选</span>
             </label>
-            <select v-model="filters.status" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部状态</option>
               <option value="active">启用</option>
               <option value="inactive">禁用</option>
@@ -44,14 +44,26 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">排序方式</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">类型筛选</span>
             </label>
-            <select v-model="filters.sortBy" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.type" class="select select-bordered w-full" @change="handleFilter">
+              <option value="">全部类型</option>
+              <option value="forum">论坛分类</option>
+              <option value="blog">博客分类</option>
+              <option value="news">新闻分类</option>
+            </select>
+          </div>
+          
+          <div class="form-control">
+            <label class="label pb-1">
+              <span class="label-text text-sm">排序方式</span>
+            </label>
+            <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
               <option value="sort_order">排序权重</option>
               <option value="name">分类名称</option>
-              <option value="post_count">帖子数量</option>
               <option value="created_at">创建时间</option>
+              <option value="post_count">帖子数量</option>
             </select>
           </div>
         </div>
@@ -290,6 +302,7 @@ const categoryModal = ref<HTMLDialogElement>()
 // 筛选条件
 const filters = reactive({
   status: '',
+  type: '',
   sortBy: 'sort_order'
 })
 

@@ -21,16 +21,16 @@
     <!-- 搜索和筛选 -->
     <div class="card bg-base-100 shadow">
       <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">搜索帖子</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">搜索帖子</span>
             </label>
             <div class="relative">
               <input 
                 v-model="searchQuery" 
                 type="text" 
-                placeholder="标题、内容、作者" 
+                placeholder="帖子标题、作者" 
                 class="input input-bordered w-full pl-10"
                 @input="handleSearch"
               />
@@ -39,52 +39,41 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">分类筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">分类筛选</span>
             </label>
-            <select v-model="filters.category" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.category" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部分类</option>
-              <option v-for="category in categories" :key="category.id" :value="category.id">
-                {{ category.name }}
-              </option>
+              <option value="tech">技术讨论</option>
+              <option value="general">综合讨论</option>
+              <option value="help">求助问答</option>
+              <option value="share">资源分享</option>
             </select>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">状态筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">状态筛选</span>
             </label>
-            <select v-model="filters.status" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部状态</option>
               <option value="published">已发布</option>
               <option value="draft">草稿</option>
-              <option value="pending">待审核</option>
-              <option value="rejected">已拒绝</option>
+              <option value="hidden">已隐藏</option>
+              <option value="deleted">已删除</option>
             </select>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">发布时间</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">发布时间</span>
             </label>
-            <select v-model="filters.dateRange" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.dateRange" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部时间</option>
               <option value="today">今天</option>
               <option value="week">本周</option>
               <option value="month">本月</option>
-            </select>
-          </div>
-          
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">排序方式</span>
-            </label>
-            <select v-model="filters.sortBy" class="select select-bordered" @change="handleFilter">
-              <option value="created_at">发布时间</option>
-              <option value="updated_at">更新时间</option>
-              <option value="views">浏览量</option>
-              <option value="comments">评论数</option>
-              <option value="likes">点赞数</option>
+              <option value="year">本年</option>
             </select>
           </div>
         </div>

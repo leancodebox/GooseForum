@@ -60,10 +60,10 @@
     <!-- 搜索和筛选 -->
     <div class="card bg-base-100 shadow">
       <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">搜索工单</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">搜索工单</span>
             </label>
             <div class="relative">
               <input 
@@ -78,10 +78,10 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">状态筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">状态筛选</span>
             </label>
-            <select v-model="filters.status" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部状态</option>
               <option value="open">待处理</option>
               <option value="in_progress">处理中</option>
@@ -91,10 +91,10 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">优先级</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">优先级</span>
             </label>
-            <select v-model="filters.priority" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.priority" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部优先级</option>
               <option value="low">低</option>
               <option value="normal">普通</option>
@@ -104,10 +104,10 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">分类筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">分类筛选</span>
             </label>
-            <select v-model="filters.category" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.category" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部分类</option>
               <option value="bug">Bug反馈</option>
               <option value="feature">功能建议</option>
@@ -118,10 +118,10 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">排序方式</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">排序方式</span>
             </label>
-            <select v-model="filters.sortBy" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
               <option value="created_at">创建时间</option>
               <option value="updated_at">更新时间</option>
               <option value="priority">优先级</option>

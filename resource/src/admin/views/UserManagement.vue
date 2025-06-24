@@ -15,10 +15,10 @@
     <!-- 搜索和筛选 -->
     <div class="card bg-base-100 shadow">
       <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">搜索用户</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">搜索用户</span>
             </label>
             <div class="relative">
               <input 
@@ -33,10 +33,10 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">角色筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">角色筛选</span>
             </label>
-            <select v-model="filters.role" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.role" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部角色</option>
               <option value="admin">管理员</option>
               <option value="moderator">版主</option>
@@ -45,26 +45,27 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">状态筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">状态筛选</span>
             </label>
-            <select v-model="filters.status" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部状态</option>
-              <option value="active">正常</option>
+              <option value="active">活跃</option>
+              <option value="inactive">非活跃</option>
               <option value="banned">已封禁</option>
-              <option value="pending">待激活</option>
             </select>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">注册时间</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">注册时间</span>
             </label>
-            <select v-model="filters.dateRange" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.dateRange" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部时间</option>
               <option value="today">今天</option>
               <option value="week">本周</option>
               <option value="month">本月</option>
+              <option value="year">本年</option>
             </select>
           </div>
         </div>

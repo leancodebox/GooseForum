@@ -60,16 +60,16 @@
     <!-- 搜索和筛选 -->
     <div class="card bg-base-100 shadow">
       <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">搜索赞助</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">搜索赞助</span>
             </label>
             <div class="relative">
               <input 
                 v-model="searchQuery" 
                 type="text" 
-                placeholder="赞助者姓名、留言" 
+                placeholder="赞助者姓名、备注" 
                 class="input input-bordered w-full pl-10"
                 @input="handleSearch"
               />
@@ -78,39 +78,40 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">状态筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">状态筛选</span>
             </label>
-            <select v-model="filters.status" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部状态</option>
               <option value="pending">待确认</option>
               <option value="confirmed">已确认</option>
               <option value="displayed">已展示</option>
-              <option value="hidden">已隐藏</option>
+              <option value="expired">已过期</option>
             </select>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">金额范围</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">金额范围</span>
             </label>
-            <select v-model="filters.amountRange" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.amountRange" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部金额</option>
-              <option value="0-50">¥0 - ¥50</option>
-              <option value="50-100">¥50 - ¥100</option>
-              <option value="100-500">¥100 - ¥500</option>
-              <option value="500+">¥500+</option>
+              <option value="0-50">0-50元</option>
+              <option value="50-100">50-100元</option>
+              <option value="100-500">100-500元</option>
+              <option value="500+">500元以上</option>
             </select>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">排序方式</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">排序方式</span>
             </label>
-            <select v-model="filters.sortBy" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
               <option value="created_at">赞助时间</option>
               <option value="amount">赞助金额</option>
-              <option value="sponsor_name">赞助者姓名</option>
+              <option value="status">状态</option>
+              <option value="sponsor_name">赞助者</option>
             </select>
           </div>
         </div>

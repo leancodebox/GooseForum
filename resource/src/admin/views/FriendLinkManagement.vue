@@ -15,10 +15,10 @@
     <!-- 搜索和筛选 -->
     <div class="card bg-base-100 shadow">
       <div class="card-body">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">搜索链接</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">搜索友链</span>
             </label>
             <div class="relative">
               <input 
@@ -33,39 +33,39 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">状态筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">状态筛选</span>
             </label>
-            <select v-model="filters.status" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部状态</option>
-              <option value="active">显示</option>
-              <option value="inactive">隐藏</option>
+              <option value="active">启用</option>
+              <option value="inactive">禁用</option>
+              <option value="pending">待审核</option>
             </select>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">分类筛选</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">分类筛选</span>
             </label>
-            <select v-model="filters.category" class="select select-bordered" @change="handleFilter">
+            <select v-model="filters.category" class="select select-bordered w-full" @change="handleFilter">
               <option value="">全部分类</option>
               <option value="tech">技术类</option>
               <option value="blog">博客类</option>
               <option value="forum">论坛类</option>
-              <option value="tool">工具类</option>
               <option value="other">其他</option>
             </select>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">排序方式</span>
+            <label class="label pb-1">
+              <span class="label-text text-sm">排序方式</span>
             </label>
-            <select v-model="filters.sortBy" class="select select-bordered" @change="handleFilter">
-              <option value="sort_order">排序权重</option>
+            <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
+              <option value="created_at">创建时间</option>
               <option value="name">网站名称</option>
-              <option value="created_at">添加时间</option>
-              <option value="click_count">点击次数</option>
+              <option value="status">状态</option>
+              <option value="category">分类</option>
             </select>
           </div>
         </div>
