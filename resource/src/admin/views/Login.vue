@@ -23,6 +23,7 @@
                 class="input input-bordered w-full pl-12"
                 :class="{ 'input-error': errors.username }"
                 required
+                @blur="handleRememberChange"
               />
               <UserIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/50 input-icon" />
             </div>
@@ -57,6 +58,43 @@
             </div>
             <label v-if="errors.password" class="label">
               <span class="label-text-alt text-error">{{ errors.password }}</span>
+            </label>
+          </div>
+          
+          <!-- 验证码输入 -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">验证码</span>
+            </label>
+            <div class="flex gap-2">
+              <div class="relative flex-1">
+                <input 
+                  v-model="form.captcha"
+                  type="text" 
+                  placeholder="请输入验证码" 
+                  class="input input-bordered w-full pl-12"
+                  :class="{ 'input-error': errors.captcha }"
+                  maxlength="6"
+                  required
+                />
+                <ExclamationTriangleIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/50 input-icon" />
+              </div>
+              <div class="w-24 h-12">
+                <img
+                  v-if="captchaImg"
+                  :src="captchaImg"
+                  alt="验证码"
+                  class="w-full h-full object-cover rounded cursor-pointer border border-base-300 hover:border-primary"
+                  @click="refreshCaptcha"
+                  title="点击刷新验证码"
+                />
+                <div v-else class="w-full h-full bg-base-200 rounded flex items-center justify-center text-xs text-base-content/50">
+                  加载中...
+                </div>
+              </div>
+            </div>
+            <label v-if="errors.captcha" class="label">
+              <span class="label-text-alt text-error">{{ errors.captcha }}</span>
             </label>
           </div>
           
@@ -123,22 +161,49 @@ const authStore = useAuthStore()
 const form = reactive({
   username: '',
   password: '',
+  captcha: '',
   remember: false
 })
 
 // 表单验证错误
 const errors = reactive({
   username: '',
-  password: ''
+  password: '',
+  captcha: ''
 })
+
+// 验证码相关
+const captchaImg = ref('')
+const captchaId = ref('')
 
 // 显示密码
 const showPassword = ref(false)
+
+// 获取验证码
+const getCaptcha = async () => {
+  try {
+    const response = await fetch('/api/get-captcha')
+    const data = await response.json()
+    if (data.code === 0) {
+      captchaImg.value = data.result.captchaImg
+      captchaId.value = data.result.captchaId
+    }
+  } catch (error) {
+    console.error('获取验证码失败:', error)
+  }
+}
+
+// 刷新验证码
+const refreshCaptcha = () => {
+  form.captcha = ''
+  getCaptcha()
+}
 
 // 表单验证
 const validateForm = () => {
   errors.username = ''
   errors.password = ''
+  errors.captcha = ''
   
   let isValid = true
   
@@ -158,6 +223,11 @@ const validateForm = () => {
     isValid = false
   }
   
+  if (!form.captcha.trim()) {
+    errors.captcha = '请输入验证码'
+    isValid = false
+  }
+  
   return isValid
 }
 
@@ -169,13 +239,18 @@ const handleLogin = async () => {
   
   const result = await authStore.login({
     username: form.username,
-    password: form.password
+    password: form.password,
+    captchaId: captchaId.value,
+    captchaCode: form.captcha
   })
   
   if (result.success) {
     // 登录成功，跳转到目标页面或仪表盘
     const redirect = route.query.redirect as string || '/admin'
     router.push(redirect)
+  } else {
+    // 登录失败，刷新验证码
+    refreshCaptcha()
   }
 }
 
@@ -192,6 +267,9 @@ onMounted(() => {
     form.username = savedUsername
     form.remember = true
   }
+  
+  // 获取验证码
+  getCaptcha()
 })
 
 // 监听记住我选项
@@ -216,12 +294,41 @@ const handleRememberChange = () => {
 }
 
 /* 修复输入框聚焦时图标颜色问题 */
-.input:focus + .input-icon {
-  color: hsl(var(--bc) / 0.7);
+.input-icon {
+  color: hsl(var(--bc) / 0.5) !important;
+  transition: color 0.2s ease;
 }
 
+/* 当输入框容器获得焦点时，图标颜色变深 */
 .relative:focus-within .input-icon {
-  color: hsl(var(--bc) / 0.7);
+  color: hsl(var(--bc) / 0.75) !important;
+}
+
+/* 强制覆盖Tailwind的text-base-content/50类 */
+.input-icon.text-base-content\/50 {
+  color: hsl(var(--bc) / 0.5) !important;
+}
+
+.relative:focus-within .input-icon.text-base-content\/50 {
+  color: hsl(var(--bc) / 0.75) !important;
+}
+
+/* 额外的选择器确保覆盖所有可能的Tailwind类 */
+.absolute.input-icon {
+  color: hsl(var(--bc) / 0.5) !important;
+}
+
+.relative:focus-within .absolute.input-icon {
+  color: hsl(var(--bc) / 0.75) !important;
+}
+
+/* 针对具体的图标元素 */
+.relative .absolute[class*="text-base-content"] {
+  color: hsl(var(--bc) / 0.5) !important;
+}
+
+.relative:focus-within .absolute[class*="text-base-content"] {
+  color: hsl(var(--bc) / 0.75) !important;
 }
 
 /* 登录按钮动画 */

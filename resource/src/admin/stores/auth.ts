@@ -14,6 +14,8 @@ export interface User {
 export interface LoginCredentials {
   username: string
   password: string
+  captchaId?: string
+  captchaCode?: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
