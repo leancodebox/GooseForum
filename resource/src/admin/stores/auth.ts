@@ -87,7 +87,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 初始化认证状态
   const initAuth = async () => {
-    if (user.value) {
+    if (!user.value) {
       await fetchUserInfo()
     }
   }
