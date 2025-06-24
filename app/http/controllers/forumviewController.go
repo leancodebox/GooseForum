@@ -392,3 +392,12 @@ func SubmitLink(c *gin.Context) {
 		"Description":  "友情链接申请",
 	})
 }
+
+func Admin(c *gin.Context) {
+	viewrender.Render(c, "admin.gohtml", map[string]any{
+		"IsProduction": setting.IsProduction(),
+		"User":         GetLoginUser(c),
+		"Title":        "管理 - GooseForum",
+		"Description":  "GooseForum's Admin",
+	})
+}

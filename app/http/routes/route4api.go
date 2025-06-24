@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"io/fs"
+	"net/http"
+
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/assert"
@@ -8,8 +11,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/resource"
-	"io/fs"
-	"net/http"
 )
 
 func assertRouter(ginApp *gin.Engine) {
@@ -47,6 +48,7 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/publish", middleware.CheckLogin, controllers.PublishV3)
 	viewRouteApp.GET("/notifications", middleware.CheckLogin, controllers.Notifications)
 	viewRouteApp.GET("/submit-link", controllers.SubmitLink)
+	viewRouteApp.GET("/admin/*path", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), controllers.Admin)
 }
 
 func siteInfoRoute(ginApp *gin.Engine) {
