@@ -37,7 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const response = await axiosInstance.post('/api/admin/login', credentials)
+      const response = await axiosInstance.post('/login', credentials)
       const { token: newToken, user: userData } = response.data.data
 
       // 保存 token 和用户信息
@@ -60,7 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 退出登录
   const logout = async () => {
     try {
-      await axiosInstance.post('/api/admin/logout')
+      await axiosInstance.post('/logout')
     } catch (err) {
       console.warn('退出登录请求失败:', err)
     } finally {
@@ -78,7 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     loading.value = true
     try {
-      const response = await axiosInstance.get('/api/admin/user/info')
+      const response = await axiosInstance.get('/api/get-user-info')
       user.value = response.data.data
     } catch (err: any) {
       console.error('获取用户信息失败:', err)

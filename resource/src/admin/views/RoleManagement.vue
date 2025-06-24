@@ -369,7 +369,7 @@ const fetchRoles = async () => {
       ...filters
     }
     
-    const response = await api.get('/api/admin/roles', params)
+    const response = await api.post('/api/admin/role-list', params)
     roles.value = response.data.data
   } catch (error) {
     console.error('获取角色列表失败:', error)

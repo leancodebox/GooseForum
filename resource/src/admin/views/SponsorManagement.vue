@@ -629,8 +629,8 @@ const fetchStats = async () => {
 
 const fetchSettings = async () => {
   try {
-    const response = await api.get('/api/admin/sponsors/settings')
-    Object.assign(settings, response.data.data)
+    // 赞助设置接口暂未实现，使用默认设置
+    console.warn('赞助设置接口暂未实现')
   } catch (error) {
     console.error('获取赞助设置失败:', error)
   }

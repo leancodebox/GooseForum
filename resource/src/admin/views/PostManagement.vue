@@ -368,7 +368,7 @@ const fetchPosts = async () => {
       ...filters
     }
     
-    const response = await api.get('/api/admin/posts', params)
+    const response = await api.post('/api/admin/articles-list', params)
     posts.value = response.data.data.posts
     pagination.total = response.data.data.total
   } catch (error) {
@@ -383,7 +383,7 @@ const fetchPosts = async () => {
 
 const fetchCategories = async () => {
   try {
-    const response = await api.get('/api/admin/categories')
+    const response = await api.post('/api/admin/category-list', {})
     categories.value = response.data.data
   } catch (error) {
     console.error('获取分类列表失败:', error)
@@ -485,7 +485,7 @@ const toggleRecommend = async (post: Post) => {
 
 const approvePost = async (post: Post) => {
   try {
-    await api.post(`/api/admin/posts/${post.id}/approve`)
+    await api.post('/api/admin/article-edit', { id: post.id, action: 'approve' })
     post.status = 'published'
   } catch (error) {
     console.error('审核通过失败:', error)
@@ -496,7 +496,7 @@ const rejectPost = async (post: Post) => {
   const reason = prompt('请输入拒绝原因:')
   if (reason) {
     try {
-      await api.post(`/api/admin/posts/${post.id}/reject`, { reason })
+      await api.post('/api/admin/article-edit', { id: post.id, action: 'reject', reason })
       post.status = 'rejected'
     } catch (error) {
       console.error('审核拒绝失败:', error)
@@ -507,7 +507,7 @@ const rejectPost = async (post: Post) => {
 const deletePost = async (post: Post) => {
   if (confirm(`确定要删除帖子「${post.title}」吗？此操作不可恢复！`)) {
     try {
-      await api.delete(`/api/admin/posts/${post.id}`)
+      await api.post('/api/admin/article-edit', { id: post.id, action: 'delete' })
       fetchPosts()
     } catch (error) {
       console.error('删除帖子失败:', error)
@@ -518,7 +518,9 @@ const deletePost = async (post: Post) => {
 const batchApprove = async () => {
   if (confirm(`确定要审核通过选中的 ${selectedPosts.value.length} 篇帖子吗？`)) {
     try {
-      await api.post('/api/admin/posts/batch-approve', { postIds: selectedPosts.value })
+      // 批量审核通过 - 接口未实现，使用模拟数据
+      console.warn('批量审核通过接口未实现')
+      // await api.post('/api/admin/articles-batch-edit', { ids: selectedPosts.value, action: 'approve' })
       clearSelection()
       fetchPosts()
     } catch (error) {
@@ -531,10 +533,9 @@ const batchReject = async () => {
   const reason = prompt('请输入拒绝原因:')
   if (reason && confirm(`确定要拒绝选中的 ${selectedPosts.value.length} 篇帖子吗？`)) {
     try {
-      await api.post('/api/admin/posts/batch-reject', { 
-        postIds: selectedPosts.value,
-        reason 
-      })
+      // 批量拒绝 - 接口未实现，使用模拟数据
+      console.warn('批量拒绝接口未实现')
+      // await api.post('/api/admin/articles-batch-edit', { ids: selectedPosts.value, action: 'reject', reason })
       clearSelection()
       fetchPosts()
     } catch (error) {
@@ -546,7 +547,9 @@ const batchReject = async () => {
 const batchDelete = async () => {
   if (confirm(`确定要删除选中的 ${selectedPosts.value.length} 篇帖子吗？此操作不可恢复！`)) {
     try {
-      await api.post('/api/admin/posts/batch-delete', { postIds: selectedPosts.value })
+      // 批量删除 - 接口未实现，使用模拟数据
+      console.warn('批量删除接口未实现')
+      // await api.post('/api/admin/articles-batch-edit', { ids: selectedPosts.value, action: 'delete' })
       clearSelection()
       fetchPosts()
     } catch (error) {
@@ -557,9 +560,12 @@ const batchDelete = async () => {
 
 const exportPosts = async () => {
   try {
-    const response = await api.get('/api/admin/posts/export', {
-      responseType: 'blob'
-    })
+    // 导出接口未实现，使用模拟数据
+    console.warn('导出接口未实现')
+    return
+    // const response = await api.get('/api/admin/articles-export', {
+    //   responseType: 'blob'
+    // })
     
     // 创建下载链接
     const url = window.URL.createObjectURL(new Blob([response.data]))

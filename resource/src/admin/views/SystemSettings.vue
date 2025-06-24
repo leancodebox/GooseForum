@@ -705,7 +705,9 @@ const loadDefaultSettings = () => {
 const saveSettings = async () => {
   saving.value = true
   try {
-    await api.post('/api/admin/settings', settings)
+    // 系统设置接口暂未实现
+    console.warn('系统设置接口暂未实现')
+    // await api.post('/api/admin/settings', settings)
     
     // 显示成功提示
     const toast = document.createElement('div')

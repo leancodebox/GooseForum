@@ -265,7 +265,7 @@ const formatRelativeTime = (date: Date) => {
 // 获取统计数据
 const fetchStats = async () => {
   try {
-    const response = await api.get('/api/admin/stats')
+    const response = await api.get('/api/forum/get-site-statistics')
     stats.value = response.data.data
   } catch (error) {
     console.error('获取统计数据失败:', error)

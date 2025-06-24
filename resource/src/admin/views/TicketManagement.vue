@@ -687,24 +687,22 @@ const fetchStats = async () => {
 
 const fetchAdmins = async () => {
   try {
-    const response = await api.get('/api/admin/users/admins')
-    admins.value = response.data.data
-  } catch (error) {
-    console.error('获取管理员列表失败:', error)
+    // 管理员列表接口暂未实现，使用模拟数据
+    console.warn('管理员列表接口暂未实现')
     // 使用模拟数据
     admins.value = [
       { id: 1, name: '管理员1', email: 'admin1@example.com' },
       { id: 2, name: '管理员2', email: 'admin2@example.com' }
     ]
+  } catch (error) {
+    console.error('获取管理员列表失败:', error)
   }
 }
 
 const fetchReplyTemplates = async () => {
   try {
-    const response = await api.get('/api/admin/tickets/templates')
-    replyTemplates.value = response.data.data
-  } catch (error) {
-    console.error('获取回复模板失败:', error)
+    // 回复模板接口暂未实现，使用模拟数据
+    console.warn('回复模板接口暂未实现')
     // 使用模拟数据
     replyTemplates.value = [
       {

@@ -383,7 +383,7 @@ const fetchUsers = async () => {
       ...filters
     }
     
-    const response = await api.get('/api/admin/users', params)
+    const response = await api.post('/api/admin/user-list', params)
     users.value = response.data.data.users
     pagination.total = response.data.data.total
   } catch (error) {
@@ -527,7 +527,7 @@ const unbanUser = async (user: User) => {
 const deleteUser = async (user: User) => {
   if (confirm(`确定要删除用户 ${user.username} 吗？此操作不可恢复！`)) {
     try {
-      await api.delete(`/api/admin/users/${user.id}`)
+      await api.post('/api/admin/user-edit', { id: user.id, action: 'delete' })
       fetchUsers()
     } catch (error) {
       console.error('删除用户失败:', error)

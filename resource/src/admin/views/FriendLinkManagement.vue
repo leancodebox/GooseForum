@@ -417,9 +417,9 @@ const fetchFriendLinks = async () => {
       ...filters
     }
     
-    const response = await api.get('/api/admin/friend-links', params)
-    friendLinks.value = response.data.data.links
-    pagination.total = response.data.data.total
+    const response = await api.get('/api/admin/friend-links')
+    friendLinks.value = response.data.data.links || response.data.data
+    pagination.total = response.data.data.total || friendLinks.value.length
   } catch (error) {
     console.error('获取友情链接列表失败:', error)
     // 使用模拟数据
@@ -548,13 +548,11 @@ const saveLink = async () => {
   try {
     const data = { ...linkForm }
     
-    if (editingLink.value) {
-      // 编辑友情链接
-      await api.put(`/api/admin/friend-links/${editingLink.value.id}`, data)
-    } else {
-      // 创建友情链接
-      await api.post('/api/admin/friend-links', data)
-    }
+    // 统一使用保存友情链接接口
+    await api.post('/api/admin/save-friend-links', {
+      ...data,
+      id: editingLink.value?.id
+    })
     
     closeModal()
     fetchFriendLinks()
@@ -570,7 +568,10 @@ const saveLink = async () => {
 
 const toggleStatus = async (link: FriendLink) => {
   try {
-    await api.post(`/api/admin/friend-links/${link.id}/toggle-status`)
+    await api.post('/api/admin/save-friend-links', {
+      id: link.id,
+      status: link.status === 'active' ? 'inactive' : 'active'
+    })
     link.status = link.status === 'active' ? 'inactive' : 'active'
   } catch (error) {
     console.error('切换状态失败:', error)
@@ -581,7 +582,10 @@ const toggleStatus = async (link: FriendLink) => {
 
 const moveUp = async (link: FriendLink) => {
   try {
-    await api.post(`/api/admin/friend-links/${link.id}/move-up`)
+    await api.post('/api/admin/save-friend-links', {
+      id: link.id,
+      action: 'move-up'
+    })
     fetchFriendLinks()
   } catch (error) {
     console.error('上移失败:', error)
@@ -590,7 +594,10 @@ const moveUp = async (link: FriendLink) => {
 
 const moveDown = async (link: FriendLink) => {
   try {
-    await api.post(`/api/admin/friend-links/${link.id}/move-down`)
+    await api.post('/api/admin/save-friend-links', {
+      id: link.id,
+      action: 'move-down'
+    })
     fetchFriendLinks()
   } catch (error) {
     console.error('下移失败:', error)
@@ -600,7 +607,10 @@ const moveDown = async (link: FriendLink) => {
 const deleteLink = async (link: FriendLink) => {
   if (confirm(`确定要删除友情链接「${link.name}」吗？此操作不可恢复！`)) {
     try {
-      await api.delete(`/api/admin/friend-links/${link.id}`)
+      await api.post('/api/admin/save-friend-links', {
+        id: link.id,
+        action: 'delete'
+      })
       fetchFriendLinks()
     } catch (error) {
       console.error('删除友情链接失败:', error)
