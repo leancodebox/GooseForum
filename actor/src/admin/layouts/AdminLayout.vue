@@ -77,12 +77,6 @@ const menuOptions: MenuOption[] = [
     path: '/admin/roles'
   },
   {
-    label: '帖子管理',
-    key: 'posts',
-    icon: () => h(DocumentTextOutline),
-    path: '/admin/posts'
-  },
-  {
     label: '分类管理',
     key: 'categories',
     icon: () => h(GridOutline),
