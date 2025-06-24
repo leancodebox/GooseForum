@@ -13,12 +13,6 @@ export const axiosInstance = axios.create({
 // 请求拦截器
 axiosInstance.interceptors.request.use(
   (config) => {
-    // 从 localStorage 获取 token
-    const token = localStorage.getItem('admin_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    
     // 添加时间戳防止缓存
     if (config.method === 'get') {
       config.params = {

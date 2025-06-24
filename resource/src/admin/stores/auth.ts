@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { axiosInstance } from '../utils/axiosInstance'
 
 export interface User {
-  id: number
+  userId: number
   username: string
   email: string
   avatar?: string
@@ -20,13 +20,12 @@ export interface LoginCredentials {
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const token = ref<string | null>(localStorage.getItem('admin_token'))
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   // 计算属性
   const isAuthenticated = computed(() => {
-    return !!token.value && !!user.value
+    return !!user.value
   })
 
   const isAdmin = computed(() => {
@@ -40,18 +39,14 @@ export const useAuthStore = defineStore('auth', () => {
 
     try {
       const response = await axiosInstance.post('/login', credentials)
-      const { token: newToken, user: userData } = response.data.data
-
-      // 保存 token 和用户信息
-      token.value = newToken
-      user.value = userData
-      localStorage.setItem('admin_token', newToken)
-
-      // 设置 axios 默认 header
-      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
-
-      return { success: true }
+      if (response.data.code === 0) {
+        await fetchUserInfo()
+        return { success: true }
+      } else {
+        return { success: false, error: response.data.msg }
+      }
     } catch (err: any) {
+      console.error(err)
       error.value = err.response?.data?.message || '登录失败'
       return { success: false, error: error.value }
     } finally {
@@ -68,20 +63,17 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       // 清除本地状态
       user.value = null
-      token.value = null
-      localStorage.removeItem('admin_token')
-      delete axiosInstance.defaults.headers.common['Authorization']
     }
   }
 
   // 获取用户信息
   const fetchUserInfo = async () => {
-    if (!token.value) return
 
     loading.value = true
     try {
       const response = await axiosInstance.get('/api/get-user-info')
-      user.value = response.data.data
+      user.value = response.data.result
+      console.log(user.value)
     } catch (err: any) {
       console.error('获取用户信息失败:', err)
       // 如果 token 无效，清除认证状态
@@ -95,8 +87,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 初始化认证状态
   const initAuth = async () => {
-    if (token.value) {
-      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+    if (user.value) {
       await fetchUserInfo()
     }
   }
@@ -108,18 +99,18 @@ export const useAuthStore = defineStore('auth', () => {
     // 这里可以根据实际的权限系统进行扩展
     return false
   }
+  initAuth()
 
   return {
     // 状态
     user,
-    token,
     loading,
     error,
-    
+
     // 计算属性
     isAuthenticated,
     isAdmin,
-    
+
     // 方法
     login,
     logout,

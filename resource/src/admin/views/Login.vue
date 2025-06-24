@@ -9,82 +9,75 @@
         </div>
         
         <!-- 登录表单 -->
-        <form @submit.prevent="handleLogin" class="space-y-6">
+        <form @submit.prevent="handleLogin" class="space-y-4">
           <!-- 用户名输入 -->
           <div class="form-control">
-            <label class="label">
+            <div class="label">
               <span class="label-text font-medium">用户名</span>
-            </label>
-            <div class="relative">
+            </div>
+            <label class="input input-bordered flex items-center gap-2 w-full">
+              <UserIcon class="h-4 w-4 opacity-70" />
               <input 
                 v-model="form.username"
                 type="text" 
+                class="grow" 
                 placeholder="请输入用户名" 
-                class="input input-bordered w-full pl-12"
-                :class="{ 'input-error': errors.username }"
                 required
+                minlength="3"
                 @blur="handleRememberChange"
               />
-              <UserIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/50 input-icon" />
-            </div>
-            <label v-if="errors.username" class="label">
-              <span class="label-text-alt text-error">{{ errors.username }}</span>
             </label>
           </div>
           
           <!-- 密码输入 -->
           <div class="form-control">
-            <label class="label">
+            <div class="label">
               <span class="label-text font-medium">密码</span>
-            </label>
-            <div class="relative">
+            </div>
+            <label class="input input-bordered flex items-center gap-2 w-full">
+              <LockClosedIcon class="h-4 w-4 opacity-70" />
               <input 
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'" 
+                class="grow" 
                 placeholder="请输入密码" 
-                class="input input-bordered w-full pl-12 pr-12"
-                :class="{ 'input-error': errors.password }"
                 required
+                minlength="6"
               />
-              <LockClosedIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/50 input-icon" />
               <button 
                 type="button"
                 @click="showPassword = !showPassword"
-                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/50 hover:text-base-content transition-colors"
+                class="opacity-70 hover:opacity-100 transition-opacity"
               >
-                <EyeIcon v-if="!showPassword" class="w-5 h-5" />
-                <EyeSlashIcon v-else class="w-5 h-5" />
+                <EyeIcon v-if="!showPassword" class="h-4 w-4" />
+                <EyeSlashIcon v-else class="h-4 w-4" />
               </button>
-            </div>
-            <label v-if="errors.password" class="label">
-              <span class="label-text-alt text-error">{{ errors.password }}</span>
             </label>
           </div>
           
           <!-- 验证码输入 -->
           <div class="form-control">
-            <label class="label">
+            <div class="label">
               <span class="label-text font-medium">验证码</span>
-            </label>
-            <div class="flex gap-2">
-              <div class="relative flex-1">
+            </div>
+            <div class="flex gap-3 items-stretch w-full">
+              <label class="input input-bordered flex items-center gap-2 flex-1">
+                <ExclamationTriangleIcon class="h-4 w-4 opacity-70" />
                 <input 
                   v-model="form.captcha"
                   type="text" 
+                  class="grow" 
                   placeholder="请输入验证码" 
-                  class="input input-bordered w-full pl-12"
-                  :class="{ 'input-error': errors.captcha }"
                   maxlength="6"
                   required
                 />
-                <ExclamationTriangleIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/50 input-icon" />
-              </div>
-              <div class="w-24 h-12">
+              </label>
+              <div class="w-24 flex-shrink-0">
                 <img
                   v-if="captchaImg"
                   :src="captchaImg"
                   alt="验证码"
-                  class="w-full h-full object-cover rounded cursor-pointer border border-base-300 hover:border-primary"
+                  class="w-full h-full object-cover rounded cursor-pointer border border-base-300 hover:border-primary transition-colors"
                   @click="refreshCaptcha"
                   title="点击刷新验证码"
                 />
@@ -93,9 +86,6 @@
                 </div>
               </div>
             </div>
-            <label v-if="errors.captcha" class="label">
-              <span class="label-text-alt text-error">{{ errors.captcha }}</span>
-            </label>
           </div>
           
           <!-- 记住我 -->
@@ -117,7 +107,7 @@
           </div>
           
           <!-- 登录按钮 -->
-          <div class="form-control mt-8">
+          <div class="form-control mt-6">
             <button 
               type="submit" 
               class="btn btn-primary w-full"
@@ -165,12 +155,7 @@ const form = reactive({
   remember: false
 })
 
-// 表单验证错误
-const errors = reactive({
-  username: '',
-  password: '',
-  captcha: ''
-})
+
 
 // 验证码相关
 const captchaImg = ref('')
@@ -199,44 +184,10 @@ const refreshCaptcha = () => {
   getCaptcha()
 }
 
-// 表单验证
-const validateForm = () => {
-  errors.username = ''
-  errors.password = ''
-  errors.captcha = ''
-  
-  let isValid = true
-  
-  if (!form.username.trim()) {
-    errors.username = '请输入用户名'
-    isValid = false
-  } else if (form.username.length < 3) {
-    errors.username = '用户名至少3个字符'
-    isValid = false
-  }
-  
-  if (!form.password) {
-    errors.password = '请输入密码'
-    isValid = false
-  } else if (form.password.length < 6) {
-    errors.password = '密码至少6个字符'
-    isValid = false
-  }
-  
-  if (!form.captcha.trim()) {
-    errors.captcha = '请输入验证码'
-    isValid = false
-  }
-  
-  return isValid
-}
+
 
 // 处理登录
 const handleLogin = async () => {
-  if (!validateForm()) {
-    return
-  }
-  
   const result = await authStore.login({
     username: form.username,
     password: form.password,
@@ -287,48 +238,6 @@ const handleRememberChange = () => {
 .card {
   backdrop-filter: blur(10px);
   border: 1px solid hsl(var(--bc) / 0.1);
-}
-
-.input:focus {
-  box-shadow: 0 0 0 2px hsl(var(--p) / 0.2);
-}
-
-/* 修复输入框聚焦时图标颜色问题 */
-.input-icon {
-  color: hsl(var(--bc) / 0.5) !important;
-  transition: color 0.2s ease;
-}
-
-/* 当输入框容器获得焦点时，图标颜色变深 */
-.relative:focus-within .input-icon {
-  color: hsl(var(--bc) / 0.75) !important;
-}
-
-/* 强制覆盖Tailwind的text-base-content/50类 */
-.input-icon.text-base-content\/50 {
-  color: hsl(var(--bc) / 0.5) !important;
-}
-
-.relative:focus-within .input-icon.text-base-content\/50 {
-  color: hsl(var(--bc) / 0.75) !important;
-}
-
-/* 额外的选择器确保覆盖所有可能的Tailwind类 */
-.absolute.input-icon {
-  color: hsl(var(--bc) / 0.5) !important;
-}
-
-.relative:focus-within .absolute.input-icon {
-  color: hsl(var(--bc) / 0.75) !important;
-}
-
-/* 针对具体的图标元素 */
-.relative .absolute[class*="text-base-content"] {
-  color: hsl(var(--bc) / 0.5) !important;
-}
-
-.relative:focus-within .absolute[class*="text-base-content"] {
-  color: hsl(var(--bc) / 0.75) !important;
 }
 
 /* 登录按钮动画 */

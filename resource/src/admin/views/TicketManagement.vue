@@ -716,6 +716,8 @@ const fetchReplyTemplates = async () => {
         content: '您的问题已经解决，如果还有其他疑问，请随时联系我们。'
       }
     ]
+  } catch (error) {
+    console.error('获取回复模板失败:', error)
   }
 }
 
