@@ -331,8 +331,6 @@ const fetchUsers = async () => {
       ...filters
     }
     const response = await getUserList()
-    console.log(response)
-    console.log(response.data)
     users.value = response.result.list
     
     pagination.total = response.result.total
