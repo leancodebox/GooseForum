@@ -74,7 +74,7 @@
         isCollapsed ? 'w-16' : 'w-64'
       ]">
         <!-- Logo 和折叠按钮 -->
-        <div class="p-2 border-b border-base-300 flex items-center"
+        <div class="p-2 border-b border-base-300 flex items-center h-16"
           :class="isCollapsed ? 'justify-center' : 'justify-between'">
           <div v-if="!isCollapsed">
             <h2 class="text-xl font-bold text-primary">GooseForum</h2>
@@ -88,7 +88,7 @@
         </div>
 
         <!-- 菜单 -->
-        <ul class="menu space-y-2 w-full" :class="isCollapsed ? 'p-1' : 'p-4'">
+        <ul class="menu space-y-2 w-full" :class="isCollapsed ? 'p-1 pt-4' : 'p-4'">
           <li v-for="item in menuItems" :key="item.key">
             <router-link :to="item.path" :class="[
               'flex items-center gap-3 p-3 rounded-lg transition-colors',
