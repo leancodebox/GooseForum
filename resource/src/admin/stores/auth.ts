@@ -21,11 +21,12 @@ export interface LoginCredentials {
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const loading = ref(false)
+  const loading = ref(true) // 初始状态为加载中
   const error = ref<string | null>(null)
+  const initialized = ref(false)
+  
   // 获取用户信息
   const fetchUserInfo = async () => {
-
     loading.value = true
     try {
       const response = await getUserInfo()
@@ -38,14 +39,18 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } finally {
       loading.value = false
+      initialized.value = true
     }
   }
+  
   // 初始化认证状态
   const initAuth = async () => {
-    if (!user.value) {
+    if (!initialized.value) {
       await fetchUserInfo()
     }
   }
+  
+  // 立即初始化
   initAuth()
   // 计算属性
   const isAuthenticated = computed(() => {
@@ -106,6 +111,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     loading,
     error,
+    initialized,
 
     // 计算属性
     isAuthenticated,

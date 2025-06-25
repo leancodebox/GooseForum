@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { watch } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import AdminLayout from '../layouts/AdminLayout.vue'
 
@@ -133,14 +134,26 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
+
   // 设置页面标题
   if (to.meta.title) {
     document.title = `${to.meta.title} - GooseForum 管理后台`
   }
-  
+
   // 检查是否需要认证
   if (to.meta.requiresAuth) {
+    // 等待认证状态初始化完成
+    if (authStore.loading) {
+      await new Promise(resolve => {
+        const unwatch = watch(() => authStore.loading, (loading) => {
+          if (!loading) {
+            unwatch()
+            resolve(void 0)
+          }
+        })
+      })
+    }
+
     if (!authStore.isAuthenticated) {
       // 未登录，跳转到登录页
       next({
@@ -149,21 +162,22 @@ router.beforeEach(async (to, from, next) => {
       })
       return
     }
-    
+
     // 检查是否需要管理员权限
     if (to.meta.requiresAdmin && !authStore.isAdmin) {
       // 权限不足，跳转到仪表盘
+      console.warn('用户权限不足，跳转到仪表盘')
       next('/admin')
       return
     }
   }
-  
+
   // 如果已登录且访问登录页，跳转到仪表盘
   if (to.path === '/admin/login' && authStore.isAuthenticated) {
     next('/admin')
     return
   }
-  
+
   next()
 })
 

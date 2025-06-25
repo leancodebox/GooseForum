@@ -12,7 +12,10 @@ import { useAuthStore } from './admin/stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 
-onMounted(() => {
+onMounted(async () => {
+  // 等待认证状态初始化完成
+  await authStore.initAuth()
+  
   // 检查认证状态
   if (!authStore.isAuthenticated && router.currentRoute.value.path !== '/admin/login') {
     router.push('/admin/login')
