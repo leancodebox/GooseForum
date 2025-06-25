@@ -23,7 +23,30 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
+  // 获取用户信息
+  const fetchUserInfo = async () => {
 
+    loading.value = true
+    try {
+      const response = await getUserInfo()
+      user.value = response.result
+    } catch (err: any) {
+      console.error('获取用户信息失败:', err)
+      // 如果 token 无效，清除认证状态
+      if (err.response?.status === 401) {
+        await logout()
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+  // 初始化认证状态
+  const initAuth = async () => {
+    if (!user.value) {
+      await fetchUserInfo()
+    }
+  }
+  initAuth()
   // 计算属性
   const isAuthenticated = computed(() => {
     return !!user.value
@@ -67,30 +90,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // 获取用户信息
-  const fetchUserInfo = async () => {
 
-    loading.value = true
-    try {
-      const response = await getUserInfo()
-      user.value = response.result
-    } catch (err: any) {
-      console.error('获取用户信息失败:', err)
-      // 如果 token 无效，清除认证状态
-      if (err.response?.status === 401) {
-        await logout()
-      }
-    } finally {
-      loading.value = false
-    }
-  }
 
-  // 初始化认证状态
-  const initAuth = async () => {
-    if (!user.value) {
-      await fetchUserInfo()
-    }
-  }
+
 
   // 检查权限
   const hasPermission = (permission: string) => {
@@ -99,8 +101,6 @@ export const useAuthStore = defineStore('auth', () => {
     // 这里可以根据实际的权限系统进行扩展
     return false
   }
-  initAuth()
-
   return {
     // 状态
     user,
