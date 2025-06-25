@@ -71,27 +71,28 @@
       <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
       <aside :class="[
         'min-h-full bg-base-100 border-r border-base-300 transition-all duration-300',
-        isCollapsed ? 'w-16' : 'w-64'
+        isCollapsed ? 'w-12' : 'w-48'
       ]">
         <!-- Logo 和折叠按钮 -->
         <div class="p-2 border-b border-base-300 flex items-center h-16"
           :class="isCollapsed ? 'justify-center' : 'justify-between'">
-          <div v-if="!isCollapsed">
-            <h2 class="text-xl font-bold text-primary">GooseForum</h2>
-            <p class="text-sm text-base-content/70">管理后台</p>
+          <div class="transition-all duration-300 overflow-hidden"
+            :class="isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'">
+            <h2 class="text-xl font-bold text-primary whitespace-nowrap">GooseForum</h2>
+            <p class="text-sm text-base-content/70 whitespace-nowrap">管理后台</p>
           </div>
-          <button @click="toggleSidebar" class="btn btn-ghost btn-sm btn-circle hidden lg:flex"
-            :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'">
-            <ChevronLeftIcon v-if="!isCollapsed" class="w-4 h-4" />
-            <ChevronRightIcon v-else class="w-4 h-4" />
+          <button @click="toggleSidebar" class="btn btn-ghost btn-sm btn-circle hidden lg:flex transition-transform duration-300"
+            :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'"
+            :class="isCollapsed ? 'rotate-180' : ''">
+            <ChevronLeftIcon class="w-4 h-4" />
           </button>
         </div>
 
         <!-- 菜单 -->
-        <ul class="menu space-y-2 w-full" :class="isCollapsed ? 'p-1 pt-4' : 'p-4'">
+        <ul class="menu space-y-2 w-full" :class="isCollapsed ? 'p-1 pt-4' : 'p-1 pt-4'">
           <li v-for="item in menuItems" :key="item.key">
             <router-link :to="item.path" :class="[
-              'flex items-center gap-3 p-3 rounded-lg transition-colors',
+              'flex items-center p-2 rounded-lg h-10',
               {
                 'bg-primary text-primary-content': $route.path === item.path,
                 'hover:bg-base-200': $route.path !== item.path,
