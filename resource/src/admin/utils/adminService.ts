@@ -23,8 +23,11 @@ export const getUserInfo = async (): Promise<Result<any>> => {
 }
 
 
-export function getUserList(): Promise<Result<PageData<User>>> {
-    return axiosInstance.post('api/admin/user-list')
+export function getUserList(page:number,size:number): Promise<Result<PageData<User>>> {
+    return axiosInstance.post('api/admin/user-list',{
+        page:page,
+        pageSize:size,
+    })
 }
 
 export function editUser(userId: any, status: any, validate: any, roleId: any): Promise<Result<any>> {

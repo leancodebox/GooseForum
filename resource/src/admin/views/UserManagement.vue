@@ -1,72 +1,42 @@
 <template>
   <div class="space-y-6">
-    <!-- 页面标题和操作 -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-base-content">用户管理</h1>
-        <p class="text-base-content/70 mt-1">管理系统中的所有用户</p>
-      </div>
-      <button class="btn btn-primary" @click="openCreateModal">
-        <PlusIcon class="w-4 h-4" />
-        添加用户
-      </button>
-    </div>
 
     <!-- 搜索和筛选 -->
     <div class="card bg-base-100 shadow">
-      <div class="card-body">
+      <div class="card-body p-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">搜索用户</span>
+            <label class="floating-label">
+              <span>用户名</span>
+              <input v-model="searchQuery" type="text" placeholder="username" class="input input-md"  @input="handleSearch" />
             </label>
-            <div class="relative">
-              <input 
-                v-model="searchQuery" 
-                type="text" 
-                placeholder="用户名、邮箱" 
-                class="input input-bordered w-full pl-10"
-                @input="handleSearch"
-              />
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" />
-            </div>
           </div>
-          
+
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">角色筛选</span>
+            <label class="select">
+              <span class="label">封禁状态</span>
+              <select v-model="filters.status" class="select select-bordered" @change="handleFilter">
+                <option value=""></option>
+                <option value="active">活跃</option>
+                <option value="inactive">非活跃</option>
+                <option value="banned">已封禁</option>
+              </select>
             </label>
-            <select v-model="filters.role" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部角色</option>
-              <option value="admin">管理员</option>
-              <option value="moderator">版主</option>
-              <option value="user">普通用户</option>
-            </select>
           </div>
-          
+
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">状态筛选</span>
+            <label class="select">
+              <span class="label">验证状态</span>
+              <select v-model="filters.dateRange" class="select select-bordered" @change="handleFilter">
+                <option value=""></option>
+                <option value="active">活跃</option>
+                <option value="inactive">非活跃</option>
+                <option value="banned">已封禁</option>
+              </select>
             </label>
-            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部状态</option>
-              <option value="active">活跃</option>
-              <option value="inactive">非活跃</option>
-              <option value="banned">已封禁</option>
-            </select>
           </div>
-          
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">注册时间</span>
-            </label>
-            <select v-model="filters.dateRange" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部时间</option>
-              <option value="today">今天</option>
-              <option value="week">本周</option>
-              <option value="month">本月</option>
-              <option value="year">本年</option>
-            </select>
+            <button @click="fetchUsers" class="btn btn-primary " >搜索</button>
           </div>
         </div>
       </div>
@@ -76,12 +46,13 @@
     <div class="card bg-base-100 shadow">
       <div class="card-body p-0">
         <div class="overflow-x-auto">
-          <table class="table table-zebra">
+          <table class="table table-sm">
             <thead>
               <tr>
                 <th>用户信息</th>
                 <th>角色</th>
                 <th>状态</th>
+                <th>验证</th>
                 <th>注册时间</th>
                 <th>最后登录</th>
                 <th>操作</th>
@@ -103,13 +74,20 @@
                   </div>
                 </td>
                 <td>
-                  <div class="badge badge-sm whitespace-nowrap" :class="getRoleBadgeClass(user.roleId)">
-                    {{ getRoleText(user.roleId) }}
+                  <div class="badge badge-sm whitespace-nowrap badge-soft badge-primary" v-for="item in user.roleList">
+                    {{ item.name }}
                   </div>
                 </td>
                 <td>
-                  <div class="badge badge-sm whitespace-nowrap" :class="getStatusBadgeClass(user.status)">
-                    {{ getStatusText(user.status) }}
+                  <div class="badge badge-sm badge-outline whitespace-nowrap"
+                    :class="user.status === 1 ? 'badge-error' : 'badge-success'">
+                    {{ user.status === 0 ? '正常' : '已封禁' }}
+                  </div>
+                </td>
+                <td>
+                  <div class="badge badge-sm badge-outline whitespace-nowrap"
+                    :class="user.validate === 1 ? 'badge-success' : 'badge-warning'">
+                    {{ user.validate === 1 ? '验证' : '未验证' }}
                   </div>
                 </td>
                 <td>{{ formatDate(user.createTime) }}</td>
@@ -120,7 +98,7 @@
                       <EllipsisVerticalIcon class="w-4 h-4" />
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                      <li><a @click="editUser(user)">编辑</a></li>
+                      <li><a @click="editUserItem(user)">编辑</a></li>
                       <li><a @click="resetPassword(user)">重置密码</a></li>
                       <li v-if="user.status === 1">
                         <a @click="banUser(user)" class="text-warning">封禁用户</a>
@@ -136,36 +114,25 @@
             </tbody>
           </table>
         </div>
-        
+
         <!-- 分页 -->
         <div class="flex justify-between items-center p-4 border-t border-base-300">
           <div class="text-sm text-base-content/70">
-            显示 {{ (pagination.page - 1) * pagination.pageSize + 1 }} - 
-            {{ Math.min(pagination.page * pagination.pageSize, pagination.total) }} 
+            显示 {{ (pagination.page - 1) * pagination.pageSize + 1 }} -
+            {{ Math.min(pagination.page * pagination.pageSize, pagination.total) }}
             共 {{ pagination.total }} 条
           </div>
           <div class="join">
-            <button 
-              class="join-item btn btn-sm" 
-              :disabled="pagination.page <= 1"
-              @click="changePage(pagination.page - 1)"
-            >
+            <button class="join-item btn btn-sm" :disabled="pagination.page <= 1"
+              @click="changePage(pagination.page - 1)">
               上一页
             </button>
-            <button 
-              v-for="page in visiblePages" 
-              :key="page"
-              class="join-item btn btn-sm"
-              :class="{ 'btn-active': page === pagination.page }"
-              @click="changePage(page)"
-            >
+            <button v-for="page in visiblePages" :key="page" class="join-item btn btn-sm"
+              :class="{ 'btn-active': page === pagination.page }" @click="changePage(page)">
               {{ page }}
             </button>
-            <button 
-              class="join-item btn btn-sm" 
-              :disabled="pagination.page >= totalPages"
-              @click="changePage(pagination.page + 1)"
-            >
+            <button class="join-item btn btn-sm" :disabled="pagination.page >= totalPages"
+              @click="changePage(pagination.page + 1)">
               下一页
             </button>
           </div>
@@ -180,68 +147,61 @@
   <dialog ref="userModal" class="modal">
     <div class="modal-box w-11/12 max-w-2xl">
       <h3 class="font-bold text-lg mb-4">{{ isEditing ? '编辑用户' : '添加用户' }}</h3>
-      
+
       <form @submit.prevent="saveUser" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">用户名 *</span>
+            <label class="floating-label">
+              <span class="label">用户名</span>
+              <input v-model="userForm.username" placeholder="username" type="text" class="input" required disabled />
             </label>
-            <input 
-              v-model="userForm.username" 
-              type="text" 
-              class="input input-bordered" 
-              required
-            />
           </div>
-          
+
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">邮箱 *</span>
+            <label class="floating-label">
+              <span class="label">邮箱</span>
+              <input v-model="userForm.email" placeholder="email@example.com" type="text" class="input" required
+                disabled />
             </label>
-            <input 
-              v-model="userForm.email" 
-              type="email" 
-              class="input input-bordered" 
-              required
-            />
           </div>
-          
+
           <div class="form-control" v-if="!isEditing">
             <label class="label">
               <span class="label-text">密码 *</span>
             </label>
-            <input 
-              v-model="userForm.password" 
-              type="password" 
-              class="input input-bordered" 
-              :required="!isEditing"
-            />
+            <input v-model="userForm.password" type="password" class="input input-bordered" :required="!isEditing" />
           </div>
-          
+
+
           <div class="form-control">
             <label class="label">
-              <span class="label-text">角色</span>
+              <span class="label-text">封禁</span>
             </label>
-            <select v-model="userForm.role" class="select select-bordered">
-              <option value="user">普通用户</option>
-              <option value="moderator">版主</option>
-              <option value="admin">管理员</option>
-            </select>
+            <input v-model="userForm.status" type="checkbox" class="toggle toggle-primary" 
+             :true-value="1" 
+            :false-value="0"/>
           </div>
-          
+
           <div class="form-control">
             <label class="label">
-              <span class="label-text">状态</span>
+              <span class="label-text">验证</span>
             </label>
-            <select v-model="userForm.status" class="select select-bordered">
-              <option value="active">正常</option>
-              <option value="banned">已封禁</option>
-              <option value="pending">待激活</option>
-            </select>
+            <input v-model="userForm.validate" type="checkbox" class="toggle toggle-primary" :true-value="1"
+            :false-value="0"/>
           </div>
+          <div class="form-control">
+            <label class="select">
+              <span class="label">角色</span>
+              <select v-model="userForm.roleId">
+                <option >无</option>
+                
+                <option :value="item.value" v-for="item in roleOption">{{item.name}}</option>
+              </select>
+            </label>
+          </div>
+
         </div>
-        
+
         <div class="modal-action">
           <button type="button" class="btn" @click="closeModal">取消</button>
           <button type="submit" class="btn btn-primary" :disabled="loading">
@@ -264,9 +224,10 @@ import {
   EllipsisVerticalIcon
 } from '@heroicons/vue/24/outline'
 import { api } from '../utils/axiosInstance'
-import { getUserList } from '../utils/adminService.ts'
+import { editUser, getAllRoleItem, getUserList } from '../utils/adminService.ts'
 import type {
-    User,
+  Label,
+  User,
 } from '../utils/adminInterfaces.ts';
 
 // 响应式数据
@@ -278,7 +239,6 @@ const isEditing = ref(false)
 
 // 筛选条件
 const filters = reactive({
-  role: '',
   status: '',
   dateRange: ''
 })
@@ -286,18 +246,19 @@ const filters = reactive({
 // 分页
 const pagination = reactive({
   page: 1,
-  pageSize: 10,
+  pageSize: 20,
   total: 0
 })
 
 // 用户表单
 const userForm = reactive({
-  id: 0,
+  userId: 0,
   username: '',
   email: '',
   password: '',
-  role: 'user',
-  status: 'active'
+  roleId: 0,
+  status: 0,
+  validate:0,
 })
 
 // 计算属性
@@ -309,14 +270,14 @@ const visiblePages = computed(() => {
   const current = pagination.page
   const total = totalPages.value
   const pages = []
-  
+
   let start = Math.max(1, current - 2)
   let end = Math.min(total, current + 2)
-  
+
   for (let i = start; i <= end; i++) {
     pages.push(i)
   }
-  
+
   return pages
 })
 
@@ -330,13 +291,13 @@ const fetchUsers = async () => {
       search: searchQuery.value,
       ...filters
     }
-    const response = await getUserList()
+    const response = await getUserList(pagination.page,pagination.pageSize)
     users.value = response.result.list
-    
+
     pagination.total = response.result.total
   } catch (error) {
     console.error('获取用户列表失败:', error)
-    
+
     pagination.total = 100
   } finally {
     loading.value = false
@@ -366,7 +327,7 @@ const openCreateModal = () => {
   userModal.value?.showModal()
 }
 
-const editUser = (user: User) => {
+const editUserItem = (user: User) => {
   isEditing.value = true
   Object.assign(userForm, user)
   userModal.value?.showModal()
@@ -391,12 +352,7 @@ const resetUserForm = () => {
 const saveUser = async () => {
   loading.value = true
   try {
-    if (isEditing.value) {
-      await api.put(`/api/admin/users/${userForm.id}`, userForm)
-    } else {
-      await api.post('/api/admin/users', userForm)
-    }
-    
+    await editUser(userForm.userId, userForm.status, userForm.validate, userForm.roleId)
     closeModal()
     fetchUsers()
   } catch (error) {
@@ -452,42 +408,6 @@ const deleteUser = async (user: User) => {
 
 
 
-// 工具函数
-const getRoleBadgeClass = (role: number) => {
-  const classes = {
-    1: 'badge-error',
-    2: 'badge-warning',
-    3: 'badge-info'
-  }
-  return classes[role as keyof typeof classes] || 'badge-ghost'
-}
-
-const getRoleText = (role: number) => {
-  const texts = {
-    0: '管理员',
-    1: '版主',
-    2: '普通用户'
-  }
-  return texts[role as keyof typeof texts] || role
-}
-
-const getStatusBadgeClass = (status: number) => {
-  const classes = {
-    1: 'badge-success',
-    2: 'badge-error',
-    3: 'badge-warning'
-  }
-  return classes[status as keyof typeof classes] || 'badge-ghost'
-}
-
-const getStatusText = (status: number) => {
-  const texts = {
-    1: '正常',
-    2: '已封禁',
-    3: '待激活'
-  }
-  return texts[status as keyof typeof texts] || status
-}
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString('zh-CN', {
@@ -498,22 +418,13 @@ const formatDate = (dateString: string) => {
     minute: '2-digit'
   })
 }
-
+let roleOption = ref<Label[]>([])
 // 组件挂载时获取数据
-onMounted(() => {
+onMounted(async() => {
   fetchUsers()
+  let res = await getAllRoleItem()
+  roleOption.value = res.result
 })
 </script>
 
-<style scoped>
-/* 自定义样式 */
-.table th {
-  background-color: hsl(var(--b2));
-  font-weight: 600;
-}
-
-.modal-box {
-  max-height: 90vh;
-  overflow-y: auto;
-}
-</style>
+<style scoped></style>

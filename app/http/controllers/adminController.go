@@ -31,6 +31,8 @@ type UserListReq struct {
 	Username string `json:"username"`
 	UserId   uint64 `json:"userId"`
 	Email    string `json:"email"`
+	Page     int    `json:"page"`
+	PageSize int    `json:"pageSize"`
 }
 
 type UserItem struct {
@@ -48,6 +50,8 @@ type UserItem struct {
 
 func UserList(req component.BetterRequest[UserListReq]) component.Response {
 	var pageData = users.Page(users.PageQuery{
+		Page:     req.Params.Page,
+		PageSize: req.Params.PageSize,
 		Username: req.Params.Username,
 		UserId:   req.Params.UserId,
 		Email:    req.Params.Email,
