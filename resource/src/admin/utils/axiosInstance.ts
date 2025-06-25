@@ -36,7 +36,7 @@ axiosInstance.interceptors.response.use(
     
     // 如果后端返回的是标准格式 { code, message, data }
     if (data && typeof data === 'object' && 'code' in data) {
-      if (data.code === 200 || data.code === 0) {
+      if (data.code === 0) {
         return response
       } else {
         // 业务错误

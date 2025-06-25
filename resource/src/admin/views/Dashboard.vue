@@ -19,8 +19,8 @@
             <UsersIcon class="w-8 h-8" />
           </div>
           <div class="stat-title">总用户数</div>
-          <div class="stat-value text-primary">{{ stats.totalUsers }}</div>
-          <div class="stat-desc">↗︎ 今日新增 {{ stats.todayUsers }}</div>
+          <div class="stat-value text-primary">{{ stats.userCount }}</div>
+          <div class="stat-desc">↗︎ 本月新增 {{ stats.userMonthCount }}</div>
         </div>
       </div>
 
@@ -30,8 +30,8 @@
             <DocumentTextIcon class="w-8 h-8" />
           </div>
           <div class="stat-title">总帖子数</div>
-          <div class="stat-value text-secondary">{{ stats.totalPosts }}</div>
-          <div class="stat-desc">↗︎ 今日新增 {{ stats.todayPosts }}</div>
+          <div class="stat-value text-secondary">{{ stats.articleCount }}</div>
+          <div class="stat-desc">↗︎ 本月新增 {{ stats.articleMonthCount }}</div>
         </div>
       </div>
 
@@ -41,8 +41,8 @@
             <ChatBubbleLeftRightIcon class="w-8 h-8" />
           </div>
           <div class="stat-title">总评论数</div>
-          <div class="stat-value text-accent">{{ stats.totalComments }}</div>
-          <div class="stat-desc">↗︎ 今日新增 {{ stats.todayComments }}</div>
+          <div class="stat-value text-accent">{{ stats.reply }}</div>
+          <div class="stat-desc">↗︎ 今日新增 x </div>
         </div>
       </div>
 
@@ -52,8 +52,8 @@
             <EyeIcon class="w-8 h-8" />
           </div>
           <div class="stat-title">总访问量</div>
-          <div class="stat-value text-info">{{ formatNumber(stats.totalViews) }}</div>
-          <div class="stat-desc">↗︎ 今日访问 {{ formatNumber(stats.todayViews) }}</div>
+          <div class="stat-value text-info">x </div>
+          <div class="stat-desc">↗︎ 今日访问 x </div>
         </div>
       </div>
     </div>
@@ -183,14 +183,12 @@ const authStore = useAuthStore()
 
 // 统计数据
 const stats = ref({
-  totalUsers: 0,
-  todayUsers: 0,
-  totalPosts: 0,
-  todayPosts: 0,
-  totalComments: 0,
-  todayComments: 0,
-  totalViews: 0,
-  todayViews: 0
+  userCount: 12,
+  userMonthCount: 4,
+  articleCount: 199,
+  articleMonthCount: 10,
+  reply: 14,
+  linksCount: 7,
 })
 
 // 最近活动
@@ -266,31 +264,18 @@ const formatRelativeTime = (date: Date) => {
 const fetchStats = async () => {
   try {
     const response = await api.get('/api/forum/get-site-statistics')
-    stats.value = response.data.data
+    stats.value = response.data.result
   } catch (error) {
     console.error('获取统计数据失败:', error)
-    // 使用模拟数据
-    stats.value = {
-      totalUsers: 1234,
-      todayUsers: 42,
-      totalPosts: 5678,
-      todayPosts: 87,
-      totalComments: 12345,
-      todayComments: 156,
-      totalViews: 987654,
-      todayViews: 3421
-    }
   }
 }
 
 // 获取最近活动
 const fetchRecentActivities = async () => {
   try {
-    const response = await api.get('/api/admin/activities/recent')
-    recentActivities.value = response.data.data
+    
   } catch (error) {
     console.error('获取最近活动失败:', error)
-    // 使用模拟数据（已在上面定义）
   }
 }
 

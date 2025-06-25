@@ -73,7 +73,6 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await axiosInstance.get('/api/get-user-info')
       user.value = response.data.result
-      console.log(user.value)
     } catch (err: any) {
       console.error('获取用户信息失败:', err)
       // 如果 token 无效，清除认证状态
