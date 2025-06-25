@@ -143,7 +143,7 @@ const toggleSidebar = () => {
 const menuItems = ref([
   {
     key: 'dashboard',
-    label: '仪表盘',
+    label: '仪表盘-todo',
     path: '/admin',
     icon: HomeIcon
   },
@@ -155,43 +155,43 @@ const menuItems = ref([
   },
   {
     key: 'roles',
-    label: '角色管理',
+    label: '角色管理 *',
     path: '/admin/roles',
     icon: ShieldCheckIcon
   },
   {
     key: 'posts',
-    label: '帖子管理',
+    label: '帖子管理 *',
     path: '/admin/posts',
     icon: DocumentTextIcon
   },
   {
     key: 'categories',
-    label: '分类管理',
+    label: '分类管理 *',
     path: '/admin/categories',
     icon: TagIcon
   },
   {
     key: 'friend-links',
-    label: '友情链接',
+    label: '友情链接 *',
     path: '/admin/friend-links',
     icon: LinkIcon
   },
   {
     key: 'sponsors',
-    label: '赞助管理',
+    label: '赞助管理-todo',
     path: '/admin/sponsors',
     icon: GiftIcon
   },
   {
     key: 'tickets',
-    label: '工单管理',
+    label: '工单管理-todo',
     path: '/admin/tickets',
     icon: TicketIcon
   },
   {
     key: 'settings',
-    label: '系统设置',
+    label: '系统设置-todo',
     path: '/admin/settings',
     icon: CogIcon
   }
