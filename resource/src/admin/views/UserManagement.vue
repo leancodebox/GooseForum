@@ -8,12 +8,12 @@
           <div class="form-control">
             <label class="floating-label">
               <span>用户名</span>
-              <input v-model="searchQuery" type="text" placeholder="username" class="input input-md"  @input="handleSearch" />
+              <input v-model="searchQuery" type="text" placeholder="username" class="input input-md w-full"  @input="handleSearch" />
             </label>
           </div>
 
           <div class="form-control">
-            <label class="select">
+            <label class="select w-full">
               <span class="label">封禁状态</span>
               <select v-model="filters.status" class="select select-bordered" @change="handleFilter">
                 <option value=""></option>
@@ -25,7 +25,7 @@
           </div>
 
           <div class="form-control">
-            <label class="select">
+            <label class="select w-full">
               <span class="label">验证状态</span>
               <select v-model="filters.dateRange" class="select select-bordered" @change="handleFilter">
                 <option value=""></option>
@@ -35,8 +35,8 @@
               </select>
             </label>
           </div>
-          <div class="form-control">
-            <button @click="fetchUsers" class="btn btn-primary " >搜索</button>
+          <div class="form-control flex justify-center">
+            <button @click="fetchUsers" class="btn btn-primary w-full" >搜索</button>
           </div>
         </div>
       </div>
@@ -172,21 +172,20 @@
             <input v-model="userForm.password" type="password" class="input input-bordered" :required="!isEditing" />
           </div>
 
-
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">封禁</span>
+            <label class="label pr-4 p-2">
+              <span class="label-text">封禁:</span>
             </label>
-            <input v-model="userForm.status" type="checkbox" class="toggle toggle-primary" 
+            <input v-model="userForm.status" type="checkbox" class="toggle toggle-error" 
              :true-value="1" 
             :false-value="0"/>
           </div>
 
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">验证</span>
+            <label class="label pr-4 p-2">
+              <span class="label-text">验证:</span>
             </label>
-            <input v-model="userForm.validate" type="checkbox" class="toggle toggle-primary" :true-value="1"
+            <input v-model="userForm.validate" type="checkbox" class="toggle toggle-success" :true-value="1"
             :false-value="0"/>
           </div>
           <div class="form-control">
