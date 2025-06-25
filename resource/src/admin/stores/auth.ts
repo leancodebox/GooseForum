@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { axiosInstance } from '../utils/axiosInstance'
-import { getUserInfo } from '../utils/authService'
+import { getUserInfo } from '../utils/adminService'
 
 export interface User {
   userId: number

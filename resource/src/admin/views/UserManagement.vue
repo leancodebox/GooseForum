@@ -264,7 +264,7 @@ import {
   EllipsisVerticalIcon
 } from '@heroicons/vue/24/outline'
 import { api } from '../utils/axiosInstance'
-import { getUserList } from '../utils/authService'
+import { getUserList } from '../utils/adminService.ts'
 import type {
     User,
 } from '../utils/adminInterfaces.ts';

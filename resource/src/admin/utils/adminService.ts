@@ -1,4 +1,4 @@
-import axiosInstance from './axiosInstance';
+import axiosInstance from './axiosInstance.ts';
 import type {
     ApplySheet,
     Articles,
@@ -104,4 +104,8 @@ export function saveFriendLinks(params:any): Promise<Result<FriendLinksGroup[]>>
     return axiosInstance.post('api/admin/save-friend-links',{
         linksInfo:params
     })
+}
+
+export function getSiteStatistics(): Promise<Result<any>> {
+    return axiosInstance.get('/api/forum/get-site-statistics')
 }
