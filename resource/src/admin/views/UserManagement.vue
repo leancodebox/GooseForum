@@ -88,12 +88,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in users" :key="user.id">
+              <tr v-for="user in users" :key="user.userId">
                 <td>
                   <div class="flex items-center gap-3">
                     <div class="avatar">
                       <div class="mask mask-squircle w-12 h-12">
-                        <img :src="user.avatar || '/static/pic/default-avatar.png'" :alt="user.username" />
+                        <img :src="user.avatarUrl || '/static/pic/default-avatar.png'" :alt="user.username" />
                       </div>
                     </div>
                     <div>
@@ -103,8 +103,8 @@
                   </div>
                 </td>
                 <td>
-                  <div class="badge badge-sm whitespace-nowrap" :class="getRoleBadgeClass(user.role)">
-                    {{ getRoleText(user.role) }}
+                  <div class="badge badge-sm whitespace-nowrap" :class="getRoleBadgeClass(user.roleId)">
+                    {{ getRoleText(user.roleId) }}
                   </div>
                 </td>
                 <td>
@@ -112,8 +112,8 @@
                     {{ getStatusText(user.status) }}
                   </div>
                 </td>
-                <td>{{ formatDate(user.createdAt) }}</td>
-                <td>{{ user.lastLoginAt ? formatDate(user.lastLoginAt) : '从未登录' }}</td>
+                <td>{{ formatDate(user.createTime) }}</td>
+                <td>{{ user.createTime ? formatDate(user.createTime) : '从未登录' }}</td>
                 <td>
                   <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
@@ -122,7 +122,7 @@
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
                       <li><a @click="editUser(user)">编辑</a></li>
                       <li><a @click="resetPassword(user)">重置密码</a></li>
-                      <li v-if="user.status === 'active'">
+                      <li v-if="user.status === 1">
                         <a @click="banUser(user)" class="text-warning">封禁用户</a>
                       </li>
                       <li v-else>
@@ -264,18 +264,10 @@ import {
   EllipsisVerticalIcon
 } from '@heroicons/vue/24/outline'
 import { api } from '../utils/axiosInstance'
-
-// 用户数据类型
-interface User {
-  id: number
-  username: string
-  email: string
-  avatar?: string
-  role: string
-  status: string
-  createdAt: string
-  lastLoginAt?: string
-}
+import { getUserList } from '../utils/authService'
+import type {
+    User,
+} from '../utils/adminInterfaces.ts';
 
 // 响应式数据
 const users = ref<User[]>([])
@@ -338,40 +330,19 @@ const fetchUsers = async () => {
       search: searchQuery.value,
       ...filters
     }
+    const response = await getUserList()
+    console.log(response)
+    console.log(response.data)
+    users.value = response.result.list
     
-    const response = await api.post('/api/admin/user-list', params)
-    users.value = response.data.data.users
-    pagination.total = response.data.data.total
+    pagination.total = response.result.total
   } catch (error) {
     console.error('获取用户列表失败:', error)
-    // 使用模拟数据
-    users.value = generateMockUsers()
+    
     pagination.total = 100
   } finally {
     loading.value = false
   }
-}
-
-// 生成模拟数据
-const generateMockUsers = (): User[] => {
-  const roles = ['admin', 'moderator', 'user']
-  const statuses = ['active', 'banned', 'pending']
-  const mockUsers: User[] = []
-  
-  for (let i = 1; i <= pagination.pageSize; i++) {
-    mockUsers.push({
-      id: (pagination.page - 1) * pagination.pageSize + i,
-      username: `user${i}`,
-      email: `user${i}@example.com`,
-      avatar: `/static/pic/default-avatar.png`,
-      role: roles[Math.floor(Math.random() * roles.length)],
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      lastLoginAt: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString() : undefined
-    })
-  }
-  
-  return mockUsers
 }
 
 const handleSearch = () => {
@@ -440,7 +411,7 @@ const saveUser = async () => {
 const resetPassword = async (user: User) => {
   if (confirm(`确定要重置用户 ${user.username} 的密码吗？`)) {
     try {
-      await api.post(`/api/admin/users/${user.id}/reset-password`)
+      await api.post(`/api/admin/users/${user.userId}/reset-password`)
       alert('密码重置成功')
     } catch (error) {
       console.error('重置密码失败:', error)
@@ -451,7 +422,7 @@ const resetPassword = async (user: User) => {
 const banUser = async (user: User) => {
   if (confirm(`确定要封禁用户 ${user.username} 吗？`)) {
     try {
-      await api.post(`/api/admin/users/${user.id}/ban`)
+      await api.post(`/api/admin/users/${user.userId}/ban`)
       fetchUsers()
     } catch (error) {
       console.error('封禁用户失败:', error)
@@ -462,7 +433,7 @@ const banUser = async (user: User) => {
 const unbanUser = async (user: User) => {
   if (confirm(`确定要解除用户 ${user.username} 的封禁吗？`)) {
     try {
-      await api.post(`/api/admin/users/${user.id}/unban`)
+      await api.post(`/api/admin/users/${user.userId}/unban`)
       fetchUsers()
     } catch (error) {
       console.error('解除封禁失败:', error)
@@ -473,7 +444,7 @@ const unbanUser = async (user: User) => {
 const deleteUser = async (user: User) => {
   if (confirm(`确定要删除用户 ${user.username} 吗？此操作不可恢复！`)) {
     try {
-      await api.post('/api/admin/user-edit', { id: user.id, action: 'delete' })
+      await api.post('/api/admin/user-edit', { id: user.userId, action: 'delete' })
       fetchUsers()
     } catch (error) {
       console.error('删除用户失败:', error)
@@ -484,38 +455,38 @@ const deleteUser = async (user: User) => {
 
 
 // 工具函数
-const getRoleBadgeClass = (role: string) => {
+const getRoleBadgeClass = (role: number) => {
   const classes = {
-    admin: 'badge-error',
-    moderator: 'badge-warning',
-    user: 'badge-info'
+    1: 'badge-error',
+    2: 'badge-warning',
+    3: 'badge-info'
   }
   return classes[role as keyof typeof classes] || 'badge-ghost'
 }
 
-const getRoleText = (role: string) => {
+const getRoleText = (role: number) => {
   const texts = {
-    admin: '管理员',
-    moderator: '版主',
-    user: '普通用户'
+    0: '管理员',
+    1: '版主',
+    2: '普通用户'
   }
   return texts[role as keyof typeof texts] || role
 }
 
-const getStatusBadgeClass = (status: string) => {
+const getStatusBadgeClass = (status: number) => {
   const classes = {
-    active: 'badge-success',
-    banned: 'badge-error',
-    pending: 'badge-warning'
+    1: 'badge-success',
+    2: 'badge-error',
+    3: 'badge-warning'
   }
   return classes[status as keyof typeof classes] || 'badge-ghost'
 }
 
-const getStatusText = (status: string) => {
+const getStatusText = (status: number) => {
   const texts = {
-    active: '正常',
-    banned: '已封禁',
-    pending: '待激活'
+    1: '正常',
+    2: '已封禁',
+    3: '待激活'
   }
   return texts[status as keyof typeof texts] || status
 }

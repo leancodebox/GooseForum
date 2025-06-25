@@ -3,7 +3,7 @@ import type { AxiosResponse, AxiosError } from 'axios'
 
 // 创建 axios 实例
 export const axiosInstance = axios.create({
-  baseURL: '', // 使用相对路径，由代理处理
+  baseURL: '/', // 使用相对路径，由代理处理
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
@@ -20,7 +20,7 @@ axiosInstance.interceptors.request.use(
         _t: Date.now()
       }
     }
-    
+
     return config
   },
   (error) => {
@@ -31,13 +31,17 @@ axiosInstance.interceptors.request.use(
 // 响应拦截器
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
+    const res = response.data
+    if (res === undefined) {
+      return response
+    }
     // 统一处理响应数据
     const { data } = response
-    
+
     // 如果后端返回的是标准格式 { code, message, data }
     if (data && typeof data === 'object' && 'code' in data) {
       if (data.code === 0) {
-        return response
+        return data
       } else {
         // 业务错误
         const error = new Error(data.message || '请求失败') as any
@@ -46,14 +50,13 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error)
       }
     }
-    
-    return response
+    return data
   },
   (error: AxiosError) => {
     // 处理 HTTP 错误
     if (error.response) {
       const { status, data } = error.response
-      
+
       switch (status) {
         case 401:
           // 未授权，清除 token 并跳转到登录页
@@ -74,7 +77,7 @@ axiosInstance.interceptors.response.use(
         default:
           console.error(`请求错误: ${status}`)
       }
-      
+
       // 如果后端返回了错误信息，使用后端的错误信息
       if (data && typeof data === 'object' && 'message' in data) {
         error.message = (data as any).message
@@ -86,26 +89,26 @@ axiosInstance.interceptors.response.use(
       // 其他错误
       error.message = error.message || '请求失败'
     }
-    
+
     return Promise.reject(error)
   }
 )
 
 // 导出常用的请求方法
 export const api = {
-  get: <T = any>(url: string, params?: any) => 
+  get: <T = any>(url: string, params?: any) =>
     axiosInstance.get<T>(url, { params }),
-  
-  post: <T = any>(url: string, data?: any) => 
+
+  post: <T = any>(url: string, data?: any) =>
     axiosInstance.post<T>(url, data),
-  
-  put: <T = any>(url: string, data?: any) => 
+
+  put: <T = any>(url: string, data?: any) =>
     axiosInstance.put<T>(url, data),
-  
-  delete: <T = any>(url: string, params?: any) => 
+
+  delete: <T = any>(url: string, params?: any) =>
     axiosInstance.delete<T>(url, { params }),
-  
-  patch: <T = any>(url: string, data?: any) => 
+
+  patch: <T = any>(url: string, data?: any) =>
     axiosInstance.patch<T>(url, data)
 }
 

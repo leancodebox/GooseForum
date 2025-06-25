@@ -19,6 +19,7 @@ export interface Label {
 export interface User {
     userId: number;
     username: string;
+    avatarUrl:string;
     email: string;
     roleId: number;
     status: number;

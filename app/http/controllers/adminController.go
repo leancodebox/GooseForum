@@ -36,6 +36,7 @@ type UserListReq struct {
 type UserItem struct {
 	UserId     uint64                              `json:"userId"`
 	Username   string                              `json:"username"`
+	AvatarUrl  string                              `json:"avatarUrl"`
 	Email      string                              `json:"email"`
 	Status     int8                                `json:"status"`
 	Validate   int8                                `json:"validate"`
@@ -65,8 +66,10 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 				Value: roleEntity.Id,
 			})
 		}
+
 		return UserItem{
 			UserId:     t.Id,
+			AvatarUrl:  t.GetWebAvatarUrl(),
 			Username:   t.Username,
 			Email:      t.Email,
 			Status:     t.Status,

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { axiosInstance } from '../utils/axiosInstance'
+import { getUserInfo } from '../utils/authService'
 
 export interface User {
   userId: number
@@ -71,8 +72,8 @@ export const useAuthStore = defineStore('auth', () => {
 
     loading.value = true
     try {
-      const response = await axiosInstance.get('/api/get-user-info')
-      user.value = response.data.result
+      const response = await getUserInfo()
+      user.value = response.result
     } catch (err: any) {
       console.error('获取用户信息失败:', err)
       // 如果 token 无效，清除认证状态
