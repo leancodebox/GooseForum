@@ -71,7 +71,7 @@
       <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
       <aside :class="[
         'min-h-full bg-base-100 border-r border-base-300 transition-all duration-300',
-        isCollapsed ? 'w-12' : 'w-48'
+        isCollapsed ? 'w-12' : 'w-64'
       ]">
         <!-- Logo 和折叠按钮 -->
         <div class="p-2 border-b border-base-300 flex items-center h-16"
@@ -92,7 +92,7 @@
         <ul class="menu space-y-2 w-full" :class="isCollapsed ? 'p-1 pt-4' : 'p-1 pt-4'">
           <li v-for="item in menuItems" :key="item.key">
             <router-link :to="item.path" :class="[
-              'flex items-center p-2 rounded-lg h-10',
+              'flex items-center p-2 rounded-lg',
               {
                 'bg-primary text-primary-content': $route.path === item.path,
                 'hover:bg-base-200': $route.path !== item.path,
