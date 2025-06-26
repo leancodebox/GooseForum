@@ -1,438 +1,260 @@
 <template>
-  <div class="space-y-6">
-    <!-- 页面标题和操作 -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-base-content">分类管理</h1>
-        <p class="text-base-content/70 mt-1">管理论坛的帖子分类</p>
-      </div>
-      <button class="btn btn-primary" @click="openCreateModal">
-        <PlusIcon class="w-4 h-4" />
-        新建分类
+  <div class="p-6">
+    <!-- 页面标题和操作按钮 -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">分类管理</h1>
+      <button
+          @click="openCreateModal"
+          class="btn btn-primary"
+      >
+        <PlusIcon class="w-5 h-5 mr-2"/>
+        新增分类
       </button>
     </div>
 
-    <!-- 搜索和筛选 -->
-    <div class="card bg-base-100 shadow">
-      <div class="card-body">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">搜索分类</span>
-            </label>
-            <div class="relative">
-              <input 
-                v-model="searchQuery" 
-                type="text" 
-                placeholder="分类名称、描述" 
-                class="input input-bordered w-full pl-10"
-                @input="handleSearch"
-              />
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" />
-            </div>
-          </div>
-          
-          <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">状态筛选</span>
-            </label>
-            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部状态</option>
-              <option value="active">启用</option>
-              <option value="inactive">禁用</option>
-            </select>
-          </div>
-          
-          <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">类型筛选</span>
-            </label>
-            <select v-model="filters.type" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部类型</option>
-              <option value="forum">论坛分类</option>
-              <option value="blog">博客分类</option>
-              <option value="news">新闻分类</option>
-            </select>
-          </div>
-          
-          <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">排序方式</span>
-            </label>
-            <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
-              <option value="sort_order">排序权重</option>
-              <option value="name">分类名称</option>
-              <option value="created_at">创建时间</option>
-              <option value="post_count">帖子数量</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- 分类列表 -->
-    <div class="card bg-base-100 shadow">
-      <div class="card-body p-0">
-        <div class="overflow-x-auto">
-          <table class="table table-zebra">
-            <thead>
-              <tr>
-                <th>分类信息</th>
-                <th>状态</th>
-                <th>帖子数量</th>
-                <th>排序权重</th>
-                <th>创建时间</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="category in categories" :key="category.id">
-                <td>
-                  <div class="flex items-center gap-3">
-                    <div class="avatar placeholder" v-if="category.icon">
-                      <div class="bg-neutral text-neutral-content rounded-full w-12">
-                        <span class="text-xl">{{ category.icon }}</span>
-                      </div>
-                    </div>
-                    <div class="avatar placeholder" v-else>
-                      <div class="bg-neutral text-neutral-content rounded-full w-12">
-                        <span class="text-xs">{{ category.name.charAt(0) }}</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div class="font-bold">{{ category.name }}</div>
-                      <div class="text-sm text-base-content/70">{{ category.description || '暂无描述' }}</div>
-                      <div class="text-xs text-base-content/50" v-if="category.slug">
-                        标识: {{ category.slug }}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div class="badge badge-sm whitespace-nowrap" :class="category.status === 'active' ? 'badge-success' : 'badge-error'">
-                    {{ category.status === 'active' ? '启用' : '禁用' }}
-                  </div>
-                </td>
-                <td>
-                  <div class="stat-value text-sm">{{ category.postCount }}</div>
-                </td>
-                <td>
-                  <div class="badge badge-outline">{{ category.sortOrder }}</div>
-                </td>
-                <td class="text-sm">{{ formatDate(category.createdAt) }}</td>
-                <td>
-                  <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
-                      <EllipsisVerticalIcon class="w-4 h-4" />
-                    </div>
-                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                      <li><a @click="editCategory(category)">编辑</a></li>
-                      <li><a @click="toggleStatus(category)">{{ category.status === 'active' ? '禁用' : '启用' }}</a></li>
-                      <li><a @click="moveUp(category)" :disabled="isFirst(category)">上移</a></li>
-                      <li><a @click="moveDown(category)" :disabled="isLast(category)">下移</a></li>
-                      <li><a @click="deleteCategory(category)" class="text-error">删除</a></li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <div class="bg-white rounded-lg shadow">
+      <div class="overflow-x-auto">
+        <!-- 加载状态 -->
+        <div v-if="loading" class="flex justify-center items-center py-12">
+          <span class="loading loading-spinner loading-lg"></span>
         </div>
+        
+        <!-- 空状态 -->
+        <div v-else-if="categories.length === 0" class="text-center py-12">
+          <div class="text-gray-500 mb-4">暂无分类数据</div>
+          <button @click="openCreateModal" class="btn btn-primary btn-sm">
+            <PlusIcon class="w-4 h-4 mr-1"/>
+            创建第一个分类
+          </button>
+        </div>
+        
+        <!-- 分类表格 -->
+        <table v-else class="table table-zebra w-full">
+          <thead>
+          <tr>
+            <th class="text-left">ID</th>
+            <th class="text-left">分类名称</th>
+            <th class="text-left">排序</th>
+            <th class="text-left">状态</th>
+            <th class="text-left">操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-for="category in categories" :key="category.id" class="hover">
+            <td class="font-mono text-sm">{{ category.id }}</td>
+            <td class="font-medium">{{ category.category }}</td>
+            <td>
+              <span class="badge badge-outline">{{ category.sort }}</span>
+            </td>
+            <td>
+              <span class="badge" :class="getStatusClass(category.status)">
+                {{ getStatusText(category.status) }}
+              </span>
+            </td>
+            <td>
+              <div class="flex gap-2">
+                <button 
+                  @click="openEditModal(category)"
+                  class="btn btn-sm btn-outline btn-primary"
+                  title="编辑分类"
+                >
+                  <PencilIcon class="w-4 h-4"/>
+                </button>
+                <button 
+                  @click="openDeleteModal(category)"
+                  class="btn btn-sm btn-outline btn-error"
+                  title="删除分类"
+                >
+                  <TrashIcon class="w-4 h-4"/>
+                </button>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- 创建/编辑分类模态框 -->
+    <!-- 分类编辑模态框 -->
     <dialog ref="categoryModal" class="modal">
-      <div class="modal-box w-11/12 max-w-2xl">
+      <div class="modal-box w-11/12 max-w-md">
         <form method="dialog">
-          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="closeModal">✕</button>
         </form>
         
         <h3 class="font-bold text-lg mb-4">
-          {{ editingCategory ? '编辑分类' : '新建分类' }}
+          {{ modalMode === 'create' ? '新增分类' : '编辑分类' }}
         </h3>
         
         <div class="space-y-4">
+          <!-- 分类名称 -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">分类名称 <span class="text-error">*</span></span>
+              <span class="label-text font-medium">分类名称 <span class="text-error">*</span></span>
             </label>
             <input 
-              v-model="categoryForm.name" 
+              v-model="formData.category"
               type="text" 
-              placeholder="请输入分类名称" 
-              class="input input-bordered"
-              :class="{ 'input-error': errors.name }"
+              placeholder="请输入分类名称"
+              class="input input-bordered w-full"
+              :disabled="saving"
             />
-            <label class="label" v-if="errors.name">
-              <span class="label-text-alt text-error">{{ errors.name }}</span>
-            </label>
           </div>
           
+          <!-- 排序 -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">分类标识</span>
+              <span class="label-text font-medium">排序</span>
             </label>
             <input 
-              v-model="categoryForm.slug" 
-              type="text" 
-              placeholder="自动生成或手动输入" 
-              class="input input-bordered"
+              v-model.number="formData.sort"
+              type="number" 
+              placeholder="请输入排序值"
+              class="input input-bordered w-full"
+              :disabled="saving"
+              min="0"
             />
-            <label class="label">
-              <span class="label-text-alt">用于URL，留空将自动生成</span>
-            </label>
           </div>
           
+          <!-- 状态 -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text">分类描述</span>
+              <span class="label-text font-medium">状态</span>
             </label>
-            <textarea 
-              v-model="categoryForm.description" 
-              class="textarea textarea-bordered" 
-              placeholder="请输入分类描述"
-              rows="3"
-            ></textarea>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">分类图标</span>
-              </label>
-              <input 
-                v-model="categoryForm.icon" 
-                type="text" 
-                placeholder="如: 📚 或 FontAwesome类名" 
-                class="input input-bordered"
-              />
-            </div>
-            
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">排序权重</span>
-              </label>
-              <input 
-                v-model.number="categoryForm.sortOrder" 
-                type="number" 
-                placeholder="数字越小越靠前" 
-                class="input input-bordered"
-                min="0"
-              />
-            </div>
-          </div>
-          
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">分类颜色</span>
-            </label>
-            <div class="flex items-center gap-2">
-              <input 
-                v-model="categoryForm.color" 
-                type="color" 
-                class="w-12 h-10 rounded border border-base-300"
-              />
-              <input 
-                v-model="categoryForm.color" 
-                type="text" 
-                placeholder="#000000" 
-                class="input input-bordered flex-1"
-              />
-            </div>
-          </div>
-          
-          <div class="form-control">
-            <label class="cursor-pointer label">
-              <span class="label-text">启用状态</span>
-              <input 
-                v-model="categoryForm.status" 
-                type="checkbox" 
-                class="toggle toggle-primary" 
-                true-value="active"
-                false-value="inactive"
-              />
-            </label>
+            <select v-model.number="formData.status" class="select select-bordered w-full" :disabled="saving">
+              <option :value="1">启用</option>
+              <option :value="0">禁用</option>
+            </select>
           </div>
         </div>
         
         <div class="modal-action">
-          <button type="button" class="btn btn-ghost" @click="closeModal">取消</button>
-          <button type="button" class="btn btn-primary" @click="saveCategory" :disabled="saving">
-            <span v-if="saving" class="loading loading-spinner loading-sm"></span>
+          <button 
+            @click="closeModal"
+            class="btn btn-outline"
+            :disabled="saving"
+          >
+            取消
+          </button>
+          <button 
+            @click="saveCategory_"
+            class="btn btn-primary"
+            :disabled="saving"
+          >
+            <span v-if="saving" class="loading loading-spinner loading-sm mr-2"></span>
             {{ saving ? '保存中...' : '保存' }}
           </button>
         </div>
       </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="closeModal">close</button>
+      </form>
+    </dialog>
+
+    <!-- 删除确认模态框 -->
+    <dialog ref="deleteModal" class="modal">
+      <div class="modal-box w-11/12 max-w-sm">
+        <h3 class="font-bold text-lg mb-4 text-error">确认删除</h3>
+        
+        <div class="mb-6">
+          <p class="text-gray-600 mb-2">您确定要删除以下分类吗？</p>
+          <div v-if="categoryToDelete" class="bg-gray-50 p-3 rounded-lg">
+            <div class="font-medium">{{ categoryToDelete.category }}</div>
+            <div class="text-sm text-gray-500">ID: {{ categoryToDelete.id }}</div>
+          </div>
+          <p class="text-sm text-error mt-2">此操作不可撤销！</p>
+        </div>
+        
+        <div class="modal-action">
+          <button 
+            @click="closeDeleteModal"
+            class="btn btn-outline"
+            :disabled="deleting"
+          >
+            取消
+          </button>
+          <button 
+            @click="confirmDelete"
+            class="btn btn-error"
+            :disabled="deleting"
+          >
+            <span v-if="deleting" class="loading loading-spinner loading-sm mr-2"></span>
+            {{ deleting ? '删除中...' : '确认删除' }}
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="closeDeleteModal">close</button>
+      </form>
     </dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, nextTick } from 'vue'
-import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  EllipsisVerticalIcon
-} from '@heroicons/vue/24/outline'
-import { api } from '../utils/axiosInstance'
-
-// 数据类型定义
-interface Category {
-  id: number
-  name: string
-  slug?: string
-  description?: string
-  icon?: string
-  color?: string
-  status: 'active' | 'inactive'
-  sortOrder: number
-  postCount: number
-  createdAt: string
-}
+import {onMounted, ref, reactive} from 'vue'
+import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/outline'
+import {getCategoryList,saveCategory,deleteCategory} from "@/admin/utils/adminService.ts";
+import type {Category} from "@/admin/utils/adminInterfaces.ts";
 
 // 响应式数据
 const categories = ref<Category[]>([])
 const loading = ref(false)
 const saving = ref(false)
-const searchQuery = ref('')
+const deleting = ref(false)
 const editingCategory = ref<Category | null>(null)
 const categoryModal = ref<HTMLDialogElement>()
-
-// 筛选条件
-const filters = reactive({
-  status: '',
-  type: '',
-  sortBy: 'sort_order'
-})
+const deleteModal = ref<HTMLDialogElement>()
+const modalMode = ref<'create' | 'edit'>('create')
+const categoryToDelete = ref<Category | null>(null)
 
 // 表单数据
-const categoryForm = reactive({
-  name: '',
-  slug: '',
-  description: '',
-  icon: '',
-  color: '#3b82f6',
-  status: 'active' as 'active' | 'inactive',
-  sortOrder: 0
-})
-
-// 表单验证错误
-const errors = reactive({
-  name: ''
+const formData = reactive({
+  id: 0,
+  category: '',
+  sort: 0,
+  status: 1
 })
 
 // 方法
 const fetchCategories = async () => {
   loading.value = true
   try {
-    const params = {
-      search: searchQuery.value,
-      ...filters
-    }
-    
-    const response = await api.get('/api/admin/categories', params)
-    categories.value = response.data.data
+    let resp = await getCategoryList()
+    categories.value = resp.result
   } catch (error) {
     console.error('获取分类列表失败:', error)
-    // 使用模拟数据
-    categories.value = generateMockCategories()
   } finally {
     loading.value = false
   }
 }
 
-// 生成模拟数据
-const generateMockCategories = (): Category[] => {
-  return [
-    {
-      id: 1,
-      name: '技术分享',
-      slug: 'tech-share',
-      description: '分享技术经验、教程和心得',
-      icon: '💻',
-      color: '#3b82f6',
-      status: 'active',
-      sortOrder: 1,
-      postCount: 156,
-      createdAt: '2024-01-15T10:30:00Z'
-    },
-    {
-      id: 2,
-      name: '问题求助',
-      slug: 'help',
-      description: '遇到问题时寻求帮助和解答',
-      icon: '❓',
-      color: '#f59e0b',
-      status: 'active',
-      sortOrder: 2,
-      postCount: 89,
-      createdAt: '2024-01-15T10:35:00Z'
-    },
-    {
-      id: 3,
-      name: '项目展示',
-      slug: 'showcase',
-      description: '展示个人或团队的项目作品',
-      icon: '🚀',
-      color: '#10b981',
-      status: 'active',
-      sortOrder: 3,
-      postCount: 67,
-      createdAt: '2024-01-15T10:40:00Z'
-    },
-    {
-      id: 4,
-      name: '经验交流',
-      slug: 'experience',
-      description: '分享工作和学习中的经验',
-      icon: '💡',
-      color: '#8b5cf6',
-      status: 'active',
-      sortOrder: 4,
-      postCount: 43,
-      createdAt: '2024-01-15T10:45:00Z'
-    },
-    {
-      id: 5,
-      name: '资源分享',
-      slug: 'resources',
-      description: '分享有用的工具、资源和链接',
-      icon: '📚',
-      color: '#ef4444',
-      status: 'inactive',
-      sortOrder: 5,
-      postCount: 21,
-      createdAt: '2024-01-15T10:50:00Z'
-    }
-  ]
-}
-
-const handleSearch = () => {
+// 组件挂载时获取数据
+onMounted(() => {
   fetchCategories()
-}
+})
 
-const handleFilter = () => {
-  fetchCategories()
+const resetForm = () => {
+  formData.id = 0
+  formData.category = ''
+  formData.sort = 0
+  formData.status = 1
 }
 
 const openCreateModal = () => {
-  editingCategory.value = null
+  modalMode.value = 'create'
   resetForm()
+  editingCategory.value = null
   categoryModal.value?.showModal()
 }
 
-const editCategory = (category: Category) => {
+const openEditModal = (category: Category) => {
+  modalMode.value = 'edit'
   editingCategory.value = category
-  Object.assign(categoryForm, {
-    name: category.name,
-    slug: category.slug || '',
-    description: category.description || '',
-    icon: category.icon || '',
-    color: category.color || '#3b82f6',
-    status: category.status,
-    sortOrder: category.sortOrder
-  })
+  formData.id = category.id
+  formData.category = category.category
+  formData.sort = category.sort
+  formData.status = category.status
   categoryModal.value?.showModal()
 }
 
@@ -441,158 +263,60 @@ const closeModal = () => {
   resetForm()
 }
 
-const resetForm = () => {
-  Object.assign(categoryForm, {
-    name: '',
-    slug: '',
-    description: '',
-    icon: '',
-    color: '#3b82f6',
-    status: 'active',
-    sortOrder: 0
-  })
-  Object.assign(errors, {
-    name: ''
-  })
-}
-
-const validateForm = () => {
-  errors.name = ''
-  
-  if (!categoryForm.name.trim()) {
-    errors.name = '分类名称不能为空'
-    return false
-  }
-  
-  if (categoryForm.name.length > 50) {
-    errors.name = '分类名称不能超过50个字符'
-    return false
-  }
-  
-  return true
-}
-
-const saveCategory = async () => {
-  if (!validateForm()) {
+const saveCategory_ = async () => {
+  if (!formData.category.trim()) {
+    alert('请输入分类名称')
     return
   }
   
   saving.value = true
   try {
-    const data = { ...categoryForm }
-    
-    if (editingCategory.value) {
-      // 编辑分类
-      await api.put(`/api/admin/categories/${editingCategory.value.id}`, data)
-    } else {
-      // 创建分类
-      await api.post('/api/admin/categories', data)
-    }
-    
+    const id = modalMode.value === 'edit' ? formData.id : 0
+    await saveCategory(id, formData.category, formData.sort, formData.status)
     closeModal()
-    fetchCategories()
+    await fetchCategories()
   } catch (error) {
     console.error('保存分类失败:', error)
-    // 模拟保存成功
-    closeModal()
-    fetchCategories()
+    alert('保存失败，请重试')
   } finally {
     saving.value = false
   }
 }
 
-const toggleStatus = async (category: Category) => {
-  try {
-    await api.post(`/api/admin/categories/${category.id}/toggle-status`)
-    category.status = category.status === 'active' ? 'inactive' : 'active'
-  } catch (error) {
-    console.error('切换状态失败:', error)
-    // 模拟切换成功
-    category.status = category.status === 'active' ? 'inactive' : 'active'
-  }
+const openDeleteModal = (category: Category) => {
+  categoryToDelete.value = category
+  deleteModal.value?.showModal()
 }
 
-const moveUp = async (category: Category) => {
-  try {
-    await api.post(`/api/admin/categories/${category.id}/move-up`)
-    fetchCategories()
-  } catch (error) {
-    console.error('上移失败:', error)
-  }
+const closeDeleteModal = () => {
+  deleteModal.value?.close()
+  categoryToDelete.value = null
 }
 
-const moveDown = async (category: Category) => {
-  try {
-    await api.post(`/api/admin/categories/${category.id}/move-down`)
-    fetchCategories()
-  } catch (error) {
-    console.error('下移失败:', error)
-  }
-}
-
-const deleteCategory = async (category: Category) => {
-  if (category.postCount > 0) {
-    alert('该分类下还有帖子，无法删除！请先移动或删除相关帖子。')
-    return
-  }
+const confirmDelete = async () => {
+  if (!categoryToDelete.value) return
   
-  if (confirm(`确定要删除分类「${category.name}」吗？此操作不可恢复！`)) {
-    try {
-      await api.delete(`/api/admin/categories/${category.id}`)
-      fetchCategories()
-    } catch (error) {
-      console.error('删除分类失败:', error)
-    }
+  deleting.value = true
+  try {
+    await deleteCategory(categoryToDelete.value.id)
+    closeDeleteModal()
+    await fetchCategories()
+  } catch (error) {
+    console.error('删除分类失败:', error)
+    alert(error.message)
+  } finally {
+    deleting.value = false
   }
 }
 
-// 计算属性
-const isFirst = (category: Category) => {
-  const sortedCategories = [...categories.value].sort((a, b) => a.sortOrder - b.sortOrder)
-  return sortedCategories[0]?.id === category.id
+const getStatusText = (status: number) => {
+  return status === 0 ? '启用' : '禁用'
 }
 
-const isLast = (category: Category) => {
-  const sortedCategories = [...categories.value].sort((a, b) => a.sortOrder - b.sortOrder)
-  return sortedCategories[sortedCategories.length - 1]?.id === category.id
+const getStatusClass = (status: number) => {
+  return status === 0 ? 'badge-success' : 'badge-error'
 }
-
-// 工具函数
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-// 组件挂载时获取数据
-onMounted(() => {
-  fetchCategories()
-})
 </script>
 
 <style scoped>
-.table th {
-  background-color: hsl(var(--b2));
-  font-weight: 600;
-}
-
-/* 颜色预览样式 */
-input[type="color"] {
-  -webkit-appearance: none;
-  border: none;
-  cursor: pointer;
-}
-
-input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch {
-  border: none;
-  border-radius: 4px;
-}
 </style>

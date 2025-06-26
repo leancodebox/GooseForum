@@ -66,6 +66,13 @@ func BatchCreate(entities []*Entity) int64 {
 	return result.RowsAffected
 }
 
+func GetOneByCategoryId(cId uint64) (entity Entity) {
+	builder().
+		Where(queryopt.Eq(fieldArticleCategoryId, cId)).
+		Where(queryopt.Eq(fieldEffective, 1)).First(&entity)
+	return
+}
+
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
 //	return result.RowsAffected

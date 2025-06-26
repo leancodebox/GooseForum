@@ -156,13 +156,13 @@ const menuItems = ref([
   },
   {
     key: 'roles',
-    label: '角色管理 *',
+    label: '角色管理',
     path: '/admin/roles',
     icon: ShieldCheckIcon
   },
   {
     key: 'posts',
-    label: '帖子管理 *',
+    label: '帖子管理',
     path: '/admin/posts',
     icon: DocumentTextIcon
   },

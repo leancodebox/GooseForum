@@ -6,6 +6,7 @@ import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"net/http"
 	"time"
@@ -413,6 +414,9 @@ func DeleteCategory(req component.BetterRequest[struct {
 	}
 	if articleCategory.Count() == 1 {
 		return component.FailResponse("至少保留1个分类")
+	}
+	if articleCategoryRs.GetOneByCategoryId(entity.Id).Id > 0 {
+		return component.FailResponse("当前分类存在有效文章")
 	}
 	articleCategory.DeleteEntity(&entity)
 	return component.SuccessResponse(true)

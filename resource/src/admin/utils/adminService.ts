@@ -76,20 +76,19 @@ export const getCategoryList = (): Promise<Result<Category[]>> => {
     return axiosInstance.post('api/admin/category-list')
 }
 
-export const saveCategory = (data: any): Promise<Result<any>> => {
-    return axiosInstance.post('api/admin/category-save', data)
+export const saveCategory = (id: number,category:string,sort:number,status:number): Promise<Result<any>> => {
+    return axiosInstance.post('api/admin/category-save', {
+        id:id,
+        category:category,
+        sort:sort,
+        status:status,
+    })
 }
 
-export const deleteCategory = (id: any): Promise<Result<any>> => {
+export const deleteCategory = (id: number): Promise<Result<any>> => {
     return axiosInstance.post('api/admin/category-delete', {id})
 }
 
-export const editArticle = (id: any, processStatus: any): Promise<Result<any>> => {
-    return axiosInstance.post('api/admin/article-edit', {
-        id,
-        processStatus
-    })
-}
 
 export function applySheetList(page = 1, pageSize = 10): Promise<Result<PageData<ApplySheet>>> {
     return axiosInstance.post('api/admin/apply-sheet-list', {
