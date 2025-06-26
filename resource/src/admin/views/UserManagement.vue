@@ -3,17 +3,17 @@
 
     <!-- 搜索和筛选 -->
     <div class="card bg-base-100 shadow">
-      <div class="card-body p-4">
+      <div class="card-body p-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="form-control">
             <label class="floating-label">
               <span>用户名</span>
-              <input v-model="searchQuery" type="text" placeholder="username" class="input input-md w-full"  @input="handleSearch" />
+              <input v-model="searchQuery" type="text" placeholder="username" class="input input-sm w-full"  @input="handleSearch" />
             </label>
           </div>
 
           <div class="form-control">
-            <label class="select w-full">
+            <label class="select w-full select-sm">
               <span class="label">封禁状态</span>
               <select v-model="filters.status" class="select select-bordered" @change="handleFilter">
                 <option value=""></option>
@@ -25,7 +25,7 @@
           </div>
 
           <div class="form-control">
-            <label class="select w-full">
+            <label class="select select-sm w-full">
               <span class="label">验证状态</span>
               <select v-model="filters.dateRange" class="select select-bordered" @change="handleFilter">
                 <option value=""></option>
@@ -36,7 +36,7 @@
             </label>
           </div>
           <div class="form-control flex justify-center">
-            <button @click="fetchUsers" class="btn btn-primary w-full" >搜索</button>
+            <button @click="fetchUsers" class="btn btn-primary btn-sm w-full" >搜索</button>
           </div>
         </div>
       </div>
