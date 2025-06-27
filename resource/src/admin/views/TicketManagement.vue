@@ -61,72 +61,69 @@
     <div class="card bg-base-100 shadow">
       <div class="card-body">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-          <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">搜索工单</span>
-            </label>
-            <div class="relative">
+          <div class="form-control relative">
+            <label class="floating-label">
+              <span>搜索工单</span>
               <input 
                 v-model="searchQuery" 
                 type="text" 
-                placeholder="工单标题、用户名" 
-                class="input input-bordered w-full pl-10"
+                class="input input-bordered w-full"
+                placeholder="标题、用户名"
                 @input="handleSearch"
               />
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" />
-            </div>
+            </label>
           </div>
           
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">状态筛选</span>
+            <label class="floating-label">
+              <span>状态筛选</span>
+              <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
+                <option value="">全部状态</option>
+                <option value="open">待处理</option>
+                <option value="in_progress">处理中</option>
+                <option value="resolved">已解决</option>
+                <option value="closed">已关闭</option>
+              </select>
             </label>
-            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部状态</option>
-              <option value="open">待处理</option>
-              <option value="in_progress">处理中</option>
-              <option value="resolved">已解决</option>
-              <option value="closed">已关闭</option>
-            </select>
           </div>
           
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">优先级</span>
+            <label class="floating-label">
+              <span>优先级</span>
+              <select v-model="filters.priority" class="select select-bordered w-full" @change="handleFilter">
+                <option value="">全部优先级</option>
+                <option value="low">低</option>
+                <option value="normal">普通</option>
+                <option value="high">高</option>
+                <option value="urgent">紧急</option>
+              </select>
             </label>
-            <select v-model="filters.priority" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部优先级</option>
-              <option value="low">低</option>
-              <option value="normal">普通</option>
-              <option value="high">高</option>
-              <option value="urgent">紧急</option>
-            </select>
           </div>
           
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">分类筛选</span>
+            <label class="floating-label">
+              <span>分类筛选</span>
+              <select v-model="filters.category" class="select select-bordered w-full" @change="handleFilter">
+                <option value="">全部分类</option>
+                <option value="bug">Bug反馈</option>
+                <option value="feature">功能建议</option>
+                <option value="support">技术支持</option>
+                <option value="account">账户问题</option>
+                <option value="other">其他</option>
+              </select>
             </label>
-            <select v-model="filters.category" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部分类</option>
-              <option value="bug">Bug反馈</option>
-              <option value="feature">功能建议</option>
-              <option value="support">技术支持</option>
-              <option value="account">账户问题</option>
-              <option value="other">其他</option>
-            </select>
           </div>
           
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">排序方式</span>
+            <label class="floating-label">
+              <span>排序方式</span>
+              <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
+                <option value="created_at">创建时间</option>
+                <option value="updated_at">更新时间</option>
+                <option value="priority">优先级</option>
+                <option value="status">状态</option>
+              </select>
             </label>
-            <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
-              <option value="created_at">创建时间</option>
-              <option value="updated_at">更新时间</option>
-              <option value="priority">优先级</option>
-              <option value="status">状态</option>
-            </select>
           </div>
         </div>
       </div>
@@ -139,50 +136,59 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>工单信息</th>
-                <th>用户</th>
-                <th>分类</th>
-                <th>优先级</th>
-                <th>状态</th>
-                <th>处理人</th>
-                <th>创建时间</th>
-                <th>操作</th>
+                <th class="w-1/3 min-w-[250px]">工单信息</th>
+                <th class="w-40 min-w-[150px] hidden md:table-cell">用户</th>
+                <th class="w-24 min-w-[80px] hidden lg:table-cell">分类</th>
+                <th class="w-20 min-w-[80px] hidden sm:table-cell">优先级</th>
+                <th class="w-20 min-w-[80px]">状态</th>
+                <th class="w-32 min-w-[120px] hidden lg:table-cell">处理人</th>
+                <th class="w-32 min-w-[120px] hidden sm:table-cell">创建时间</th>
+                <th class="w-20 min-w-[80px]">操作</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="ticket in tickets" :key="ticket.id" class="hover">
                 <td>
-                  <div class="space-y-1">
-                    <div class="font-bold text-base cursor-pointer hover:text-primary" @click="viewTicket(ticket)">
+                  <div class="space-y-1 min-w-0">
+                    <div class="font-bold text-base cursor-pointer hover:text-primary break-words" @click="viewTicket(ticket)">
                       #{{ ticket.id }} {{ ticket.title }}
                     </div>
-                    <div class="text-sm text-base-content/70 line-clamp-2">
-                      {{ ticket.description.substring(0, 100) }}{{ ticket.description.length > 100 ? '...' : '' }}
+                    <div class="text-sm text-base-content/70 line-clamp-2 break-words">
+                      <span class="block sm:hidden">{{ ticket.description.substring(0, 60) }}{{ ticket.description.length > 60 ? '...' : '' }}</span>
+                      <span class="hidden sm:block">{{ ticket.description.substring(0, 120) }}{{ ticket.description.length > 120 ? '...' : '' }}</span>
                     </div>
-                    <div class="flex items-center gap-2 text-xs text-base-content/50">
+                    <div class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-base-content/50">
                       <span>{{ ticket.replies }} 回复</span>
-                      <span>•</span>
-                      <span>最后更新: {{ formatRelativeTime(ticket.updatedAt) }}</span>
+                      <span class="hidden sm:inline">•</span>
+                      <span class="hidden sm:inline">最后更新: {{ formatRelativeTime(ticket.updatedAt) }}</span>
+                      <!-- 在小屏幕显示用户信息 -->
+                      <span class="md:hidden">•</span>
+                      <span class="md:hidden">{{ ticket.user.name }}</span>
+                      <!-- 在小屏幕显示优先级 -->
+                      <span class="sm:hidden">•</span>
+                      <div class="sm:hidden badge badge-xs" :class="getPriorityBadgeClass(ticket.priority)">
+                        {{ getPriorityText(ticket.priority) }}
+                      </div>
                     </div>
                   </div>
                 </td>
-                <td>
-                  <div class="flex items-center gap-3">
-                    <div class="avatar placeholder">
+                <td class="hidden md:table-cell">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="avatar placeholder flex-shrink-0">
                       <div class="bg-neutral text-neutral-content rounded-full w-10">
                         <span class="text-sm">{{ ticket.user.name.charAt(0) }}</span>
                       </div>
                     </div>
-                    <div>
-                      <div class="font-medium">{{ ticket.user.name }}</div>
-                      <div class="text-sm text-base-content/70">{{ ticket.user.email }}</div>
+                    <div class="min-w-0">
+                      <div class="font-medium truncate">{{ ticket.user.name }}</div>
+                      <div class="text-sm text-base-content/70 truncate">{{ ticket.user.email }}</div>
                     </div>
                   </div>
                 </td>
-                <td>
+                <td class="hidden lg:table-cell">
                   <div class="badge badge-outline badge-sm whitespace-nowrap">{{ getCategoryText(ticket.category) }}</div>
                 </td>
-                <td>
+                <td class="hidden sm:table-cell">
                   <div class="badge badge-sm whitespace-nowrap" :class="getPriorityBadgeClass(ticket.priority)">
                     {{ getPriorityText(ticket.priority) }}
                   </div>
@@ -192,18 +198,18 @@
                     {{ getStatusText(ticket.status) }}
                   </div>
                 </td>
-                <td>
-                  <div v-if="ticket.assignee" class="flex items-center gap-2">
-                    <div class="avatar placeholder">
+                <td class="hidden lg:table-cell">
+                  <div v-if="ticket.assignee" class="flex items-center gap-2 min-w-0">
+                    <div class="avatar placeholder flex-shrink-0">
                       <div class="bg-primary text-primary-content rounded-full w-8">
                         <span class="text-xs">{{ ticket.assignee.name.charAt(0) }}</span>
                       </div>
                     </div>
-                    <span class="text-sm">{{ ticket.assignee.name }}</span>
+                    <span class="text-sm truncate">{{ ticket.assignee.name }}</span>
                   </div>
                   <span v-else class="text-sm text-base-content/50">未分配</span>
                 </td>
-                <td class="text-sm">{{ formatDate(ticket.createdAt) }}</td>
+                <td class="text-sm whitespace-nowrap hidden sm:table-cell">{{ formatDate(ticket.createdAt) }}</td>
                 <td>
                   <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
@@ -264,95 +270,93 @@
 
     <!-- 创建工单模态框 -->
     <dialog ref="ticketModal" class="modal">
-      <div class="modal-box w-11/12 max-w-3xl">
+      <div class="modal-box w-full max-w-3xl">
         <form method="dialog">
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
         
         <h3 class="font-bold text-lg mb-4">创建工单</h3>
         
-        <div class="space-y-4">
+        <div class="space-y-6">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">工单标题 <span class="text-error">*</span></span>
+            <label class="floating-label" :class="{ 'input-error': errors.title }">
+              <span>工单标题 *</span>
+              <input 
+                v-model="ticketForm.title" 
+                type="text" 
+                class="input input-bordered w-full"
+                placeholder="请输入工单标题"
+              />
             </label>
-            <input 
-              v-model="ticketForm.title" 
-              type="text" 
-              placeholder="请输入工单标题" 
-              class="input input-bordered"
-              :class="{ 'input-error': errors.title }"
-            />
-            <label class="label" v-if="errors.title">
+            <div class="label" v-if="errors.title">
               <span class="label-text-alt text-error">{{ errors.title }}</span>
-            </label>
+            </div>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">分类</span>
+              <label class="floating-label">
+                <span>分类</span>
+                <select v-model="ticketForm.category" class="select select-bordered w-full">
+                  <option value="bug">Bug反馈</option>
+                  <option value="feature">功能建议</option>
+                  <option value="support">技术支持</option>
+                  <option value="account">账户问题</option>
+                  <option value="other">其他</option>
+                </select>
               </label>
-              <select v-model="ticketForm.category" class="select select-bordered">
-                <option value="bug">Bug反馈</option>
-                <option value="feature">功能建议</option>
-                <option value="support">技术支持</option>
-                <option value="account">账户问题</option>
-                <option value="other">其他</option>
-              </select>
             </div>
             
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">优先级</span>
+              <label class="floating-label">
+                <span>优先级</span>
+                <select v-model="ticketForm.priority" class="select select-bordered w-full">
+                  <option value="low">低</option>
+                  <option value="normal">普通</option>
+                  <option value="high">高</option>
+                  <option value="urgent">紧急</option>
+                </select>
               </label>
-              <select v-model="ticketForm.priority" class="select select-bordered">
-                <option value="low">低</option>
-                <option value="normal">普通</option>
-                <option value="high">高</option>
-                <option value="urgent">紧急</option>
-              </select>
             </div>
             
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">处理人</span>
+              <label class="floating-label">
+                <span>处理人</span>
+                <select v-model="ticketForm.assigneeId" class="select select-bordered w-full">
+                  <option value="">未分配</option>
+                  <option v-for="admin in admins" :key="admin.id" :value="admin.id">
+                    {{ admin.name }}
+                  </option>
+                </select>
               </label>
-              <select v-model="ticketForm.assigneeId" class="select select-bordered">
-                <option value="">未分配</option>
-                <option v-for="admin in admins" :key="admin.id" :value="admin.id">
-                  {{ admin.name }}
-                </option>
-              </select>
             </div>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">用户邮箱</span>
+            <label class="floating-label">
+              <span>用户邮箱</span>
+              <input 
+                v-model="ticketForm.userEmail" 
+                type="email" 
+                class="input input-bordered w-full"
+                placeholder="user@example.com"
+              />
             </label>
-            <input 
-              v-model="ticketForm.userEmail" 
-              type="email" 
-              placeholder="user@example.com" 
-              class="input input-bordered"
-            />
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">问题描述 <span class="text-error">*</span></span>
+            <label class="floating-label" :class="{ 'textarea-error': errors.description }">
+              <span>问题描述 <span class="text-error">*</span></span>
+              <textarea 
+                v-model="ticketForm.description" 
+                class="textarea textarea-bordered w-full" 
+                placeholder="请详细描述问题..."
+                rows="6"
+              ></textarea>
             </label>
-            <textarea 
-              v-model="ticketForm.description" 
-              class="textarea textarea-bordered" 
-              placeholder="请详细描述问题..."
-              rows="6"
-              :class="{ 'textarea-error': errors.description }"
-            ></textarea>
-            <label class="label" v-if="errors.description">
+            <div class="label" v-if="errors.description">
               <span class="label-text-alt text-error">{{ errors.description }}</span>
-            </label>
+            </div>
           </div>
         </div>
         
@@ -446,15 +450,15 @@
           <!-- 回复表单 -->
           <div class="border-t border-base-300 pt-4">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">添加回复</span>
+              <label class="floating-label">
+                <span>添加回复</span>
+                <textarea 
+                  v-model="replyContent" 
+                  class="textarea textarea-bordered" 
+                  placeholder="输入回复内容..."
+                  rows="4"
+                ></textarea>
               </label>
-              <textarea 
-                v-model="replyContent" 
-                class="textarea textarea-bordered" 
-                placeholder="输入回复内容..."
-                rows="4"
-              ></textarea>
             </div>
             <div class="flex justify-between items-center mt-4">
               <div class="flex gap-2">

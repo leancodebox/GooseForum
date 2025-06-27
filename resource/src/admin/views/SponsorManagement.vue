@@ -62,57 +62,54 @@
       <div class="card-body">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">搜索赞助</span>
-            </label>
-            <div class="relative">
-              <input 
-                v-model="searchQuery" 
-                type="text" 
-                placeholder="赞助者姓名、备注" 
-                class="input input-bordered w-full pl-10"
-                @input="handleSearch"
+            <label class="floating-label">
+              <span>状态筛选</span>
+              <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="赞助者姓名、备注"
+                  class="input input-bordered w-full "
+                  @input="handleSearch"
               />
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" />
-            </div>
+            </label>
           </div>
           
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">状态筛选</span>
+            <label class="floating-label">
+              <span>状态筛选</span>
+              <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
+                <option value="">全部状态</option>
+                <option value="pending">待确认</option>
+                <option value="confirmed">已确认</option>
+                <option value="displayed">已展示</option>
+                <option value="expired">已过期</option>
+              </select>
             </label>
-            <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部状态</option>
-              <option value="pending">待确认</option>
-              <option value="confirmed">已确认</option>
-              <option value="displayed">已展示</option>
-              <option value="expired">已过期</option>
-            </select>
           </div>
           
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">金额范围</span>
+            <label class="floating-label">
+              <span>金额范围</span>
+              <select v-model="filters.amountRange" class="select select-bordered w-full" @change="handleFilter">
+                <option value="">全部金额</option>
+                <option value="0-50">0-50元</option>
+                <option value="50-100">50-100元</option>
+                <option value="100-500">100-500元</option>
+                <option value="500+">500元以上</option>
+              </select>
             </label>
-            <select v-model="filters.amountRange" class="select select-bordered w-full" @change="handleFilter">
-              <option value="">全部金额</option>
-              <option value="0-50">0-50元</option>
-              <option value="50-100">50-100元</option>
-              <option value="100-500">100-500元</option>
-              <option value="500+">500元以上</option>
-            </select>
           </div>
           
           <div class="form-control">
-            <label class="label pb-1">
-              <span class="label-text text-sm">排序方式</span>
+            <label class="floating-label">
+              <span>排序方式</span>
+              <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
+                <option value="created_at">赞助时间</option>
+                <option value="amount">赞助金额</option>
+                <option value="status">状态</option>
+                <option value="sponsor_name">赞助者</option>
+              </select>
             </label>
-            <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
-              <option value="created_at">赞助时间</option>
-              <option value="amount">赞助金额</option>
-              <option value="status">状态</option>
-              <option value="sponsor_name">赞助者</option>
-            </select>
           </div>
         </div>
       </div>
@@ -125,17 +122,17 @@
           <table class="table table-zebra">
             <thead>
               <tr>
-                <th>
+                <th class="w-12">
                   <label>
                     <input type="checkbox" class="checkbox" v-model="selectAll" @change="toggleSelectAll" />
                   </label>
                 </th>
-                <th>赞助者信息</th>
-                <th>赞助金额</th>
-                <th>留言</th>
-                <th>状态</th>
-                <th>赞助时间</th>
-                <th>操作</th>
+                <th class="w-1/4 min-w-[200px]">赞助者信息</th>
+                <th class="w-32 min-w-[120px]">赞助金额</th>
+                <th class="w-1/3 min-w-[200px]">留言</th>
+                <th class="w-24 min-w-[80px]">状态</th>
+                <th class="w-32 min-w-[120px] hidden sm:table-cell">赞助时间</th>
+                <th class="w-20 min-w-[80px]">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -166,18 +163,19 @@
                   <div class="text-xs text-base-content/70">{{ sponsor.paymentMethod }}</div>
                 </td>
                 <td>
-                  <div class="max-w-xs">
-                    <div class="text-sm" :title="sponsor.message">
-                      {{ sponsor.message ? (sponsor.message.length > 50 ? sponsor.message.substring(0, 50) + '...' : sponsor.message) : '无留言' }}
+                  <div class="max-w-xs min-w-0">
+                    <div class="text-sm break-words" :title="sponsor.message">
+                      <span class="block sm:hidden">{{ sponsor.message ? (sponsor.message.length > 30 ? sponsor.message.substring(0, 30) + '...' : sponsor.message) : '无留言' }}</span>
+                      <span class="hidden sm:block">{{ sponsor.message ? (sponsor.message.length > 80 ? sponsor.message.substring(0, 80) + '...' : sponsor.message) : '无留言' }}</span>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <div class="badge" :class="getStatusBadgeClass(sponsor.status)">
+                  <div class="badge badge-sm whitespace-nowrap" :class="getStatusBadgeClass(sponsor.status)">
                     {{ getStatusText(sponsor.status) }}
                   </div>
                 </td>
-                <td class="text-sm">{{ formatDate(sponsor.createdAt) }}</td>
+                <td class="text-sm whitespace-nowrap hidden sm:table-cell">{{ formatDate(sponsor.createdAt) }}</td>
                 <td>
                   <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
@@ -247,7 +245,7 @@
 
     <!-- 创建/编辑赞助模态框 -->
     <dialog ref="sponsorModal" class="modal">
-      <div class="modal-box w-11/12 max-w-2xl">
+      <div class="modal-box w-full max-w-2xl">
         <form method="dialog">
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
@@ -257,91 +255,89 @@
         </h3>
         
         <div class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">赞助者姓名 <span class="text-error">*</span></span>
+              <label class="floating-label" :class="{ 'input-error': errors.sponsorName }">
+                <span>赞助者姓名 *</span>
+                <input 
+                  v-model="sponsorForm.sponsorName" 
+                  type="text" 
+                  class="input input-bordered w-full" 
+                  placeholder="请输入赞助者姓名"
+                />
               </label>
-              <input 
-                v-model="sponsorForm.sponsorName" 
-                type="text" 
-                placeholder="请输入赞助者姓名" 
-                class="input input-bordered"
-                :class="{ 'input-error': errors.sponsorName }"
-              />
-              <label class="label" v-if="errors.sponsorName">
+              <div class="label" v-if="errors.sponsorName">
                 <span class="label-text-alt text-error">{{ errors.sponsorName }}</span>
-              </label>
+              </div>
             </div>
             
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">赞助金额 <span class="text-error">*</span></span>
+              <label class="floating-label" :class="{ 'input-error': errors.amount }">
+                <span>赞助金额 *</span>
+                <input 
+                  v-model.number="sponsorForm.amount" 
+                  type="number" 
+                  class="input input-bordered w-full"
+                  placeholder="请输入赞助金额"
+                  min="0"
+                  step="0.01"
+                />
               </label>
-              <input 
-                v-model.number="sponsorForm.amount" 
-                type="number" 
-                placeholder="0.00" 
-                class="input input-bordered"
-                :class="{ 'input-error': errors.amount }"
-                min="0"
-                step="0.01"
-              />
-              <label class="label" v-if="errors.amount">
+              <div class="label" v-if="errors.amount">
                 <span class="label-text-alt text-error">{{ errors.amount }}</span>
-              </label>
+              </div>
             </div>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">联系方式</span>
+              <label class="floating-label">
+                <span>联系方式</span>
+                <input 
+                  v-model="sponsorForm.contact" 
+                  type="text" 
+                  class="input input-bordered w-full"
+                  placeholder="邮箱、电话等"
+                />
               </label>
-              <input 
-                v-model="sponsorForm.contact" 
-                type="text" 
-                placeholder="邮箱、电话等" 
-                class="input input-bordered"
-              />
             </div>
             
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">支付方式</span>
+              <label class="floating-label">
+                <span>支付方式</span>
+                <select v-model="sponsorForm.paymentMethod" class="select select-bordered w-full">
+                  <option value="alipay">支付宝</option>
+                  <option value="wechat">微信支付</option>
+                  <option value="bank">银行转账</option>
+                  <option value="paypal">PayPal</option>
+                  <option value="other">其他</option>
+                </select>
               </label>
-              <select v-model="sponsorForm.paymentMethod" class="select select-bordered">
-                <option value="alipay">支付宝</option>
-                <option value="wechat">微信支付</option>
-                <option value="bank">银行转账</option>
-                <option value="paypal">PayPal</option>
-                <option value="other">其他</option>
-              </select>
             </div>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">赞助留言</span>
+            <label class="floating-label">
+              <span>赞助留言</span>
+              <textarea 
+                v-model="sponsorForm.message" 
+                class="textarea textarea-bordered w-full" 
+                placeholder="赞助者的留言或祝福"
+                rows="3"
+              ></textarea>
             </label>
-            <textarea 
-              v-model="sponsorForm.message" 
-              class="textarea textarea-bordered" 
-              placeholder="赞助者的留言或祝福"
-              rows="3"
-            ></textarea>
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">状态</span>
+            <label class="floating-label">
+              <span>状态</span>
+              <select v-model="sponsorForm.status" class="select select-bordered w-full">
+                <option value="pending">待确认</option>
+                <option value="confirmed">已确认</option>
+                <option value="displayed">已展示</option>
+                <option value="hidden">已隐藏</option>
+              </select>
             </label>
-            <select v-model="sponsorForm.status" class="select select-bordered">
-              <option value="pending">待确认</option>
-              <option value="confirmed">已确认</option>
-              <option value="displayed">已展示</option>
-              <option value="hidden">已隐藏</option>
-            </select>
           </div>
         </div>
         
@@ -357,7 +353,7 @@
 
     <!-- 赞助设置模态框 -->
     <dialog ref="settingsModal" class="modal">
-      <div class="modal-box w-11/12 max-w-2xl">
+      <div class="modal-box w-full max-w-2xl">
         <form method="dialog">
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
@@ -377,54 +373,54 @@
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">赞助页面标题</span>
+            <label class="floating-label">
+              <span>赞助页面标题</span>
+              <input 
+                v-model="settings.title" 
+                type="text" 
+                placeholder="支持我们" 
+                class="input input-bordered w-full"
+              />
             </label>
-            <input 
-              v-model="settings.title" 
-              type="text" 
-              placeholder="支持我们" 
-              class="input input-bordered"
-            />
           </div>
           
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">赞助页面描述</span>
+            <label class="floating-label">
+              <span>赞助页面描述</span>
+              <textarea 
+                v-model="settings.description" 
+                class="textarea textarea-bordered w-full" 
+                placeholder="感谢您的支持..."
+                rows="3"
+              ></textarea>
             </label>
-            <textarea 
-              v-model="settings.description" 
-              class="textarea textarea-bordered" 
-              placeholder="感谢您的支持..."
-              rows="3"
-            ></textarea>
           </div>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">最小赞助金额</span>
+              <label class="floating-label">
+                <span>最小赞助金额</span>
+                <input 
+                  v-model.number="settings.minAmount" 
+                  type="number" 
+                  placeholder="1.00" 
+                  class="input input-bordered w-full"
+                  min="0"
+                  step="0.01"
+                />
               </label>
-              <input 
-                v-model.number="settings.minAmount" 
-                type="number" 
-                placeholder="1.00" 
-                class="input input-bordered"
-                min="0"
-                step="0.01"
-              />
             </div>
             
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">推荐赞助金额</span>
+              <label class="floating-label">
+                <span>推荐赞助金额</span>
+                <input 
+                  v-model="settings.suggestedAmounts" 
+                  type="text" 
+                  placeholder="10,50,100,500" 
+                  class="input input-bordered w-full"
+                />
               </label>
-              <input 
-                v-model="settings.suggestedAmounts" 
-                type="text" 
-                placeholder="10,50,100,500" 
-                class="input input-bordered"
-              />
             </div>
           </div>
           
