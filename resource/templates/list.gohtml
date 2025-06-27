@@ -20,15 +20,17 @@
                         <!-- 文章分类选择 -->
                         <div class="px-6 py-4 border-b border-base-200">
                             <div class="flex flex-wrap gap-2">
-                                <a class="btn btn-sm {{if .NoFilter}}btn-primary{{end}} filter-tag {{if .NoFilter}}active{{end}}" data-filter="all"
+                                <a class="btn btn-sm btn-soft join-item {{if .NoFilter}}btn-primary{{end}} filter-tag {{if .NoFilter}}active{{end}}" data-filter="all"
                                         role="button">全部
                                 </a>
+                                <div class="join">
                                 {{$all := .FilterIds}}
                                 {{range .ArticleCategoryList}}
                                 {{$isActive := (ContainsInt $all .Value)}}
-                                <a class="btn btn-sm {{if $isActive}}btn-primary{{end}} filter-tag {{if $isActive}}active{{end}}" data-filter="{{.Value}}"
+                                <a class="btn btn-sm btn-soft join-item {{if $isActive}}btn-primary{{end}} filter-tag {{if $isActive}}active{{end}}" data-filter="{{.Value}}"
                                         role="button">{{.Name}}</a>
                                 {{end}}
+                                </div>
                             </div>
                         </div>
                         <!-- 文章列表 -->
