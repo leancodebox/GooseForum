@@ -210,9 +210,9 @@ onMounted(() => {
         ghost-class="opacity-50"
       >
         <template #item="{ element: group, index: groupIndex }">
-          <div class="card bg-base-100 shadow-lg border-2 border-primary/20 hover:border-primary/40 transition-colors duration-200">
+          <div class="card bg-base-100 shadow-md hover:shadow-xl transition-shadow duration-300">
             <!-- 分组标题 -->
-            <div class="bg-gradient-to-r from-base-200 to-base-300 p-3 rounded-t-lg border-b border-base-300">
+            <div class="bg-gradient-to-r from-primary/10 to-primary/20 p-3 rounded-t-lg ">
               <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2 flex-1 min-w-0">
                   <div class="cursor-move text-base-content/60">
@@ -263,10 +263,10 @@ onMounted(() => {
                 ghost-class="opacity-50"
               >
                 <template #item="{ element: link, index: linkIndex }">
-                  <div class="card bg-gradient-to-br from-base-100 to-base-50 border border-base-300 hover:shadow-lg hover:border-primary/30 transition-all duration-200">
-                    <div class="card-body p-4">
-                      <!-- 头部：拖拽手柄 + 操作按钮 -->
-                      <div class="flex items-center justify-between mb-3">
+                  <div class="card bg-gradient-to-br from-base-100 to-base-200/50 shadow-sm hover:shadow-md transition-shadow duration-200 ">
+                    <!-- 头部：拖拽手柄 + 操作按钮 -->
+                    <div class="bg-gradient-to-r from-primary/8 to-primary/15 p-2 rounded-t-lg">
+                      <div class="flex items-center justify-between">
                         <div class="cursor-move text-base-content/40">
                           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
@@ -287,8 +287,10 @@ onMounted(() => {
                           </button>
                         </div>
                       </div>
-                      
-                      <!-- 链接信息 -->
+                    </div>
+                    
+                    <!-- 链接信息 -->
+                    <div class="card-body p-4 pt-3">
                       <div class="space-y-2">
                         <div class="flex items-center gap-2">
                           <img 
