@@ -168,18 +168,18 @@ onMounted(() => {
           <table class="table table-zebra">
             <thead>
             <tr>
-              <th>帖子信息</th>
-              <th>作者</th>
-              <th>分类</th>
-              <th>状态</th>
-              <th>统计</th>
-              <th>发布时间</th>
-              <th>操作</th>
+              <th class="w-2/5 min-w-[300px]">帖子信息</th>
+              <th class="w-32 min-w-[120px]">作者</th>
+              <th class="w-20 min-w-[80px]">分类</th>
+              <th class="w-24 min-w-[96px]">状态</th>
+              <th class="w-20 min-w-[80px]">统计</th>
+              <th class="w-28 min-w-[112px]">发布时间</th>
+              <th class="w-16 min-w-[64px]">操作</th>
             </tr>
             </thead>
             <tbody>
             <tr v-for="post in posts" :key="post.id">
-              <td>
+              <td class="w-2/5 min-w-[300px]">
                 <div class="flex items-start gap-3">
                   <div class="avatar" v-if="post.userAvatarUrl">
                     <div class="mask mask-squircle w-12 h-12">
@@ -187,7 +187,7 @@ onMounted(() => {
                     </div>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <div class="font-bold text-sm line-clamp-2">{{ post.title }}</div>
+                    <a :href="'/post/'+post.id" class="font-bold text-sm line-clamp-2">{{ post.title }}</a>
                     <div class="text-xs text-base-content/70 line-clamp-1 mt-1">
                       {{ post.description || '暂无摘要' }}
                     </div>
@@ -205,7 +205,7 @@ onMounted(() => {
                   </div>
                 </div>
               </td>
-              <td>
+              <td class="w-32 min-w-[120px]">
                 <div class="flex items-center gap-2">
                   <div class="avatar">
                     <div class="w-8 h-8 rounded-full">
@@ -213,30 +213,32 @@ onMounted(() => {
                     </div>
                   </div>
                   <div class="text-sm">
-                    <div class="font-medium">{{ post.username }}</div>
+                    <a :href="'/user/'+post.userId" class="font-medium">{{ post.username }}</a>
                   </div>
                 </div>
               </td>
-              <td>
+              <td class="w-20 min-w-[80px]">
                 <div class="badge badge-outline badge-sm whitespace-nowrap">{{ getTypeLabel(post.type) }}</div>
               </td>
-              <td>
-                <div class="badge badge-sm whitespace-nowrap" :class="getStatusBadgeClass(post.articleStatus)">
-                  {{ getStatusText(post.articleStatus) }}
-                </div>
-                <div class="badge badge-sm whitespace-nowrap badge-error" v-if="post.processStatus==1">
-                  封禁
+              <td class="w-24 min-w-[96px]">
+                <div class="flex flex-col gap-1">
+                  <div class="badge badge-sm whitespace-nowrap" :class="getStatusBadgeClass(post.articleStatus)">
+                    {{ getStatusText(post.articleStatus) }}
+                  </div>
+                  <div class="badge badge-sm whitespace-nowrap badge-error" v-if="post.processStatus==1">
+                    封禁
+                  </div>
                 </div>
               </td>
-              <td>
+              <td class="w-20 min-w-[80px]">
                 <div class="text-xs space-y-1">
                   <div>浏览: {{ post.viewCount }}</div>
                   <div>评论: {{ post.replyCount }}</div>
                   <div>点赞: {{ post.likeCount }}</div>
                 </div>
               </td>
-              <td class="text-xs">{{ formatDate(post.createdAt) }}</td>
-              <td>
+              <td class="w-28 min-w-[112px] text-xs whitespace-nowrap">{{ formatDate(post.createdAt) }}</td>
+              <td class="w-16 min-w-[64px]">
                 <div class="dropdown dropdown-end">
                   <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
                     <EllipsisVerticalIcon class="w-4 h-4"/>

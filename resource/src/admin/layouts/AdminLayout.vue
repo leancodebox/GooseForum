@@ -162,7 +162,7 @@ const menuItems = ref([
   },
   {
     key: 'posts',
-    label: '帖子管理 *',
+    label: '帖子管理',
     path: '/admin/posts',
     icon: DocumentTextIcon
   },
