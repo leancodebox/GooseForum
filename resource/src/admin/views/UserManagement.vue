@@ -53,8 +53,8 @@
                 <th>角色</th>
                 <th>状态</th>
                 <th>验证</th>
-                <th>注册时间</th>
-                <th>最后登录</th>
+                <th class="w-32">注册时间</th>
+                <th class="w-32">最后登录</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -90,8 +90,8 @@
                     {{ user.validate === 1 ? '验证' : '未验证' }}
                   </div>
                 </td>
-                <td>{{ formatDate(user.createTime) }}</td>
-                <td>{{ user.createTime ? formatDate(user.createTime) : '从未登录' }}</td>
+                <td class="whitespace-nowrap">{{ formatDate(user.createTime) }}</td>
+                <td class="whitespace-nowrap">{{ user.createTime ? formatDate(user.createTime) : '从未登录' }}</td>
                 <td>
                   <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-xs">

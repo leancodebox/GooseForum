@@ -178,11 +178,11 @@ const getStatusClass = (effective: number) => {
             <thead>
               <tr>
                 <th class="w-16">ID</th>
-                <th>角色名称</th>
-                <th class="w-20">状态</th>
+                <th class="w-32">角色名称</th>
+                <th class="w-24">状态</th>
                 <th>权限</th>
                 <th class="w-32">创建时间</th>
-                <th class="w-32">操作</th>
+                <th class="w-24">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -192,7 +192,7 @@ const getStatusClass = (effective: number) => {
                   <div class="font-medium">{{ role.roleName }}</div>
                 </td>
                 <td>
-                  <div class="badge badge-sm" :class="getStatusClass(role.effective)">
+                  <div class="badge badge-sm whitespace-nowrap" :class="getStatusClass(role.effective)">
                     {{ getStatusText(role.effective) }}
                   </div>
                 </td>
@@ -201,7 +201,7 @@ const getStatusClass = (effective: number) => {
                     {{ getPermissionNames(role.permissions) }}
                   </div>
                 </td>
-                <td class="text-sm text-base-content/70">
+                <td class="text-sm text-base-content/70 whitespace-nowrap">
                   {{ new Date(role.createTime).toLocaleDateString() }}
                 </td>
                 <td>
