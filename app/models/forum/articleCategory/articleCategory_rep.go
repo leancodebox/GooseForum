@@ -2,6 +2,7 @@ package articleCategory
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 )
 
 func create(entity *Entity) int64 {
@@ -28,6 +29,11 @@ func Get(id any) (entity Entity) {
 		return entity
 	}
 	builder().First(&entity, id)
+	return
+}
+
+func GetOne() (entity Entity) {
+	builder().Order(queryopt.Desc(pid)).First(&entity)
 	return
 }
 

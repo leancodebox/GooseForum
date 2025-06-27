@@ -19,7 +19,7 @@ export interface Label {
 export interface User {
     userId: number;
     username: string;
-    avatarUrl:string;
+    avatarUrl: string;
     email: string;
     roleId: number;
     status: number;
@@ -37,6 +37,23 @@ export interface Articles {
     username: string
     articleStatus: number,
     processStatus: number,
+    createdAt: string
+    updatedAt: string
+}
+
+export interface AdminArticlesItem {
+    id: number,
+    title: string
+    description: string
+    type: number
+    userId: number
+    username: string
+    userAvatarUrl: string,
+    articleStatus: number,
+    processStatus: number,
+    viewCount: number
+    replyCount: number
+    likeCount: number
     createdAt: string
     updatedAt: string
 }

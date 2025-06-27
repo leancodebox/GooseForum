@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance.ts';
 import type {
+    AdminArticlesItem,
     ApplySheet,
-    Articles,
     Category,
     FriendLinksGroup,
     Label,
@@ -23,10 +23,10 @@ export const getUserInfo = async (): Promise<Result<any>> => {
 }
 
 
-export function getUserList(page:number,size:number): Promise<Result<PageData<User>>> {
-    return axiosInstance.post('api/admin/user-list',{
-        page:page,
-        pageSize:size,
+export function getUserList(page: number, size: number): Promise<Result<PageData<User>>> {
+    return axiosInstance.post('api/admin/user-list', {
+        page: page,
+        pageSize: size,
     })
 }
 
@@ -65,7 +65,7 @@ export function getRoleDel(id: any): Promise<Result<any>> {
     })
 }
 
-export function getAdminArticlesList(page = 1, pageSize = 10): Promise<Result<PageData<Articles>>> {
+export function getAdminArticlesList(page = 1, pageSize = 10): Promise<Result<PageData<AdminArticlesItem>>> {
     return axiosInstance.post('api/admin/articles-list', {
         page: page,
         pageSize: pageSize,
@@ -76,12 +76,12 @@ export const getCategoryList = (): Promise<Result<Category[]>> => {
     return axiosInstance.post('api/admin/category-list')
 }
 
-export const saveCategory = (id: number,category:string,sort:number,status:number): Promise<Result<any>> => {
+export const saveCategory = (id: number, category: string, sort: number, status: number): Promise<Result<any>> => {
     return axiosInstance.post('api/admin/category-save', {
-        id:id,
-        category:category,
-        sort:sort,
-        status:status,
+        id: id,
+        category: category,
+        sort: sort,
+        status: status,
     })
 }
 
@@ -89,6 +89,12 @@ export const deleteCategory = (id: number): Promise<Result<any>> => {
     return axiosInstance.post('api/admin/category-delete', {id})
 }
 
+export const editArticle = (id: any, processStatus: any): Promise<Result<any>> => {
+    return axiosInstance.post('api/admin/article-edit', {
+        id,
+        processStatus
+    })
+}
 
 export function applySheetList(page = 1, pageSize = 10): Promise<Result<PageData<ApplySheet>>> {
     return axiosInstance.post('api/admin/apply-sheet-list', {
@@ -102,12 +108,16 @@ export function getFriendLinks(): Promise<Result<FriendLinksGroup[]>> {
     return axiosInstance.get('api/admin/friend-links')
 }
 
-export function saveFriendLinks(params:any): Promise<Result<FriendLinksGroup[]>> {
-    return axiosInstance.post('api/admin/save-friend-links',{
-        linksInfo:params
+export function saveFriendLinks(params: any): Promise<Result<FriendLinksGroup[]>> {
+    return axiosInstance.post('api/admin/save-friend-links', {
+        linksInfo: params
     })
 }
 
 export function getSiteStatistics(): Promise<Result<any>> {
-    return axiosInstance.get('/api/forum/get-site-statistics')
+    return axiosInstance.get('api/forum/get-site-statistics')
+}
+
+export const getArticleEnum = async (): Promise<Result<Record<string,Label[]>>> => {
+    return axiosInstance.get('api/forum/get-articles-enum');
 }

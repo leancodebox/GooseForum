@@ -90,7 +90,7 @@ func migration(migration bool) {
 }
 
 func initData() {
-	category := articleCategory.Get(1)
+	category := articleCategory.GetOne()
 	if category.Id == 0 {
 		category.Category = "GooseForum"
 		articleCategory.SaveOrCreateById(&category)

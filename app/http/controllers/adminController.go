@@ -149,27 +149,53 @@ type ArticlesInfoDto struct {
 	UpdatedAt     string `json:"updatedAt"`     // 改为 string 类型
 }
 
+type ArticlesInfoAdminDto struct {
+	Id            uint64 `json:"id"`
+	Title         string `json:"title"`
+	Description   string `json:"description"`
+	Type          int8   `json:"type"`   // 文章类型：0 博文，1教程，2问答，3分享
+	UserId        uint64 `json:"userId"` //
+	Username      string `json:"username"`
+	UserAvatarUrl string `json:"userAvatarUrl"`
+	ArticleStatus int8   `json:"articleStatus"` // 文章状态：0 草稿 1 发布
+	ProcessStatus int8   `json:"processStatus"` // 管理状态：0 正常 1 封禁
+	ViewCount     uint64 `json:"viewCount"`
+	ReplyCount    uint64 `json:"replyCount"`
+	LikeCount     uint64 `json:"likeCount"`
+	CreatedAt     string `json:"createdAt"` // 改为 string 类型
+	UpdatedAt     string `json:"updatedAt"` // 改为 string 类型
+}
+
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
 	param := req.Params
 	pageData := articles.Page[articles.SmallEntity](articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
+	fmt.Println(pageData)
 	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
 	return component.SuccessPage(
-		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesInfoDto {
+		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesInfoAdminDto {
 			username := ""
+			userAvatarUrl := ""
 			if user, _ := userMap[t.UserId]; user != nil {
 				username = user.Username
+				userAvatarUrl = user.GetWebAvatarUrl()
 			}
-			return ArticlesInfoDto{
+			fmt.Println(t.Id, t.Description)
+			return ArticlesInfoAdminDto{
 				Id:            t.Id,
 				Title:         t.Title,
+				Description:   t.Description,
 				Type:          t.Type,
 				UserId:        t.UserId,
 				Username:      username,
+				UserAvatarUrl: userAvatarUrl,
 				ArticleStatus: t.ArticleStatus,
 				ProcessStatus: t.ProcessStatus,
+				ViewCount:     t.ViewCount,
+				ReplyCount:    t.ReplyCount,
+				LikeCount:     t.LikeCount,
 				CreatedAt:     t.CreatedAt.Format(time.DateTime),
 				UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
 			}
