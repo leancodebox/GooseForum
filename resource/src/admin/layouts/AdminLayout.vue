@@ -20,7 +20,7 @@
       <!-- Logo 区域 - 独立容器 -->
       <div class="flex-none hidden lg:flex items-center mr-4">
         <div class="transition-all duration-300 ease-in-out overflow-hidden">
-          <h2 class="text-lg font-bold text-primary whitespace-nowrap">GooseForum</h2>
+          <a href="/" class="font-normal text-lg mr-4 hover:text-primary">GooseForum</a>
         </div>
       </div>
 
