@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6">
+  <div class="space-y-6">
     <!-- 页面标题和操作按钮 -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold text-gray-900">分类管理</h1>
