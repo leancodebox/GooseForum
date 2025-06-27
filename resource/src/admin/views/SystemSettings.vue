@@ -19,6 +19,17 @@
       </div>
     </div>
 
+    <!-- 成功提示 -->
+    <div v-if="showSuccessAlert" class="alert alert-success">
+      <CheckCircleIcon class="w-6 h-6" />
+      <span>设置保存成功！</span>
+    </div>
+
+    <!-- 错误提示 -->
+    <div v-if="showErrorAlert" class="alert alert-error">
+      <XCircleIcon class="w-6 h-6" />
+      <span>{{ errorMessage }}</span>
+    </div>
     <!-- 设置表单 -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- 基本设置 -->
@@ -412,17 +423,6 @@
       </div>
     </div>
 
-    <!-- 成功提示 -->
-    <div v-if="showSuccessAlert" class="alert alert-success">
-      <CheckCircleIcon class="w-6 h-6" />
-      <span>设置保存成功！</span>
-    </div>
-
-    <!-- 错误提示 -->
-    <div v-if="showErrorAlert" class="alert alert-error">
-      <XCircleIcon class="w-6 h-6" />
-      <span>{{ errorMessage }}</span>
-    </div>
   </div>
 </template>
 

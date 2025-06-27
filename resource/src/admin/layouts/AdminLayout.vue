@@ -174,7 +174,7 @@ const menuItems = ref([
   },
   {
     key: 'friend-links',
-    label: '友情链接 *',
+    label: '友情链接',
     path: '/admin/friend-links',
     icon: LinkIcon
   },
