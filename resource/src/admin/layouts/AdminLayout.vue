@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen ">
     <!-- 顶部导航栏 - 100%宽度 -->
-    <header class="navbar bg-base-100 shadow-sm border-b border-base-300 fixed top-0 left-0 right-0 z-50">
+    <header class="navbar bg-base-100 shadow-sm border-b border-base-300 fixed top-0 left-0 right-0 z-50 rounded-bl-lg rounded-br-lg">
       <div class="flex-none">
         <!-- 移动端菜单按钮 -->
         <label for="drawer-toggle" class="btn btn-square btn-ghost lg:hidden">
@@ -11,10 +11,17 @@
         </label>
         
         <!-- 桌面端侧边栏切换按钮 -->
-        <button @click="toggleSidebar" class="btn btn-ghost btn-sm hidden lg:flex transition-all duration-300"
+        <button @click="toggleSidebar" class="btn btn-ghost btn-sm hidden lg:flex transition-all duration-300 mr-2"
           :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'">
           <ChevronLeftIcon class="w-5 h-5 transition-transform duration-300" :class="isCollapsed ? 'rotate-180' : ''" />
         </button>
+      </div>
+      
+      <!-- Logo 区域 - 独立容器 -->
+      <div class="flex-none hidden lg:flex items-center mr-4">
+        <div class="transition-all duration-300 ease-in-out overflow-hidden">
+          <h2 class="text-lg font-bold text-primary whitespace-nowrap">GooseForum</h2>
+        </div>
       </div>
 
       <div class="flex-1">
@@ -69,7 +76,7 @@
 
       <!-- 主内容区 -->
       <div class="drawer-content flex flex-col transition-all duration-300 ease-in-out"
-        :style="{ marginLeft: isCollapsed ? '3rem' : '12rem' }">
+        :style="{ marginLeft: contentMarginLeft }">
         <main class="flex-1 p-6 min-h-screen">
           <router-view />
         </main>
@@ -79,25 +86,12 @@
       <div class="drawer-side">
         <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay lg:hidden"></label>
         <aside :class="[
-          'min-h-full bg-base-100 border-r border-base-300 fixed top-16 left-0 bottom-0 z-40',
+          'min-h-full bg-base-100 border-r border-base-300 fixed top-0 left-0 bottom-0 z-30',
           'transition-all duration-300 ease-in-out transform',
           isCollapsed ? 'w-12' : 'w-48'
         ]">
-          <!-- Logo 区域 -->
-          <div class="p-3 border-b border-base-300 flex items-center justify-center h-16"
-            :class="isCollapsed ? 'px-2' : 'px-4'">
-            <div class="transition-all duration-300 ease-in-out overflow-hidden"
-              :class="isCollapsed ? 'w-0 opacity-0 scale-75' : 'w-auto opacity-100 scale-100'">
-              <h2 class="text-lg font-bold text-primary whitespace-nowrap">GooseForum</h2>
-              <p class="text-xs text-base-content/70 whitespace-nowrap">管理后台</p>
-            </div>
-            <div v-if="isCollapsed" class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center transition-all duration-300">
-              <span class="text-primary-content font-bold text-sm">G</span>
-            </div>
-          </div>
-
           <!-- 菜单 -->
-          <nav class="flex-1 overflow-y-auto">
+          <nav class="flex-1 overflow-y-auto pt-20">
             <ul class="menu w-full" :class="isCollapsed ? 'p-1' : 'p-2'">
               <li v-for="item in menuItems" :key="item.key" class="mb-1">
                 <router-link :to="item.path" :class="[
@@ -124,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import {
@@ -147,6 +141,23 @@ const userStore = useAuthStore()
 
 // 侧边栏折叠状态
 const isCollapsed = ref(false)
+
+// 窗口宽度响应式状态
+const windowWidth = ref(window.innerWidth)
+
+// 监听窗口大小变化
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+// 计算主内容区的左边距
+const contentMarginLeft = computed(() => {
+  // 只在大屏幕（lg断点，1024px及以上）时应用边距
+  if (windowWidth.value >= 1024) {
+    return isCollapsed.value ? '3rem' : '12rem'
+  }
+  return '0'
+})
 
 // 切换侧边栏折叠状态
 const toggleSidebar = () => {
@@ -246,20 +257,31 @@ const logout = async () => {
   router.push('/admin/login')
 }
 
-// 初始化主题和侧边栏状态
+// 组件挂载时初始化
 onMounted(() => {
-  const savedTheme = localStorage.getItem('theme') || 'light'
-  document.documentElement.setAttribute('data-theme', savedTheme)
-
-  const themeController = document.querySelector('.theme-controller') as HTMLInputElement
-  if (themeController) {
-    themeController.checked = savedTheme === 'dark'
-  }
-
-  // 恢复侧边栏折叠状态
+  // 从localStorage恢复侧边栏状态
   const savedCollapsed = localStorage.getItem('sidebar-collapsed')
-  if (savedCollapsed) {
+  if (savedCollapsed !== null) {
     isCollapsed.value = savedCollapsed === 'true'
   }
+
+  // 从localStorage恢复主题
+  const savedTheme = localStorage.getItem('theme')
+  if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme)
+    const themeController = document.querySelector('.theme-controller') as HTMLInputElement
+    if (themeController) {
+      themeController.checked = savedTheme === 'dark'
+    }
+  }
+
+  // 添加窗口大小变化监听
+  window.addEventListener('resize', handleResize)
 })
+
+// 组件卸载时清理
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
+
 </script>
