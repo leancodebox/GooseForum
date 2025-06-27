@@ -123,6 +123,12 @@ const formatDate = (dateString: string) => {
   })
 }
 
+const getTypeLabel = (typeValue: number) => {
+  const typeItem = typeLabel.value.find(item => item.value === typeValue)
+  console.log(typeLabel.value,typeValue)
+  return typeItem?.name??'文章'
+}
+
 async function fetchLabel() {
   const resp = await getArticleEnum()
   typeLabel.value = resp.result.type
@@ -212,7 +218,7 @@ onMounted(() => {
                 </div>
               </td>
               <td>
-                <div class="badge badge-outline badge-sm whitespace-nowrap">{{ post.type }}</div>
+                <div class="badge badge-outline badge-sm whitespace-nowrap">{{ getTypeLabel(post.type) }}</div>
               </td>
               <td>
                 <div class="badge badge-sm whitespace-nowrap" :class="getStatusBadgeClass(post.articleStatus)">
