@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- 页面标题和操作按钮 -->
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">分类管理</h1>
+      <h1 class="text-2xl font-bold text-base-content">分类管理</h1>
       <button
           @click="openCreateModal"
           class="btn btn-primary"
@@ -13,7 +13,7 @@
     </div>
 
     <!-- 分类列表 -->
-    <div class="bg-white rounded-lg shadow">
+    <div class="bg-base-100 rounded-lg shadow">
       <div class="overflow-x-auto">
         <!-- 加载状态 -->
         <div v-if="loading" class="flex justify-center items-center py-12">
@@ -22,7 +22,7 @@
         
         <!-- 空状态 -->
         <div v-else-if="categories.length === 0" class="text-center py-12">
-          <div class="text-gray-500 mb-4">暂无分类数据</div>
+          <div class="text-base-content/70 mb-4">暂无分类数据</div>
           <button @click="openCreateModal" class="btn btn-primary btn-sm">
             <PlusIcon class="w-4 h-4 mr-1"/>
             创建第一个分类
@@ -158,10 +158,10 @@
         <h3 class="font-bold text-lg mb-4 text-error">确认删除</h3>
         
         <div class="mb-6">
-          <p class="text-gray-600 mb-2">您确定要删除以下分类吗？</p>
-          <div v-if="categoryToDelete" class="bg-gray-50 p-3 rounded-lg">
-            <div class="font-medium">{{ categoryToDelete.category }}</div>
-            <div class="text-sm text-gray-500">ID: {{ categoryToDelete.id }}</div>
+          <p class="text-base-content/80 mb-2">您确定要删除以下分类吗？</p>
+          <div v-if="categoryToDelete" class="bg-base-200 p-3 rounded-lg">
+            <div class="font-medium text-base-content">{{ categoryToDelete.category }}</div>
+            <div class="text-sm text-base-content/60">ID: {{ categoryToDelete.id }}</div>
           </div>
           <p class="text-sm text-error mt-2">此操作不可撤销！</p>
         </div>
