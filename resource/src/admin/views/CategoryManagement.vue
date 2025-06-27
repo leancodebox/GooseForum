@@ -48,7 +48,7 @@
               <span class="badge badge-outline">{{ category.sort }}</span>
             </td>
             <td>
-              <span class="badge" :class="getStatusClass(category.status)">
+              <span class="badge whitespace-nowrap" :class="getStatusClass(category.status)">
                 {{ getStatusText(category.status) }}
               </span>
             </td>
