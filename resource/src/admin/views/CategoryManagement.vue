@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- 页面标题和操作按钮 -->
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-base-content">分类管理</h1>
+      <h1 class="text-2xl font-normal text-base-content">分类管理</h1>
       <button
           @click="openCreateModal"
           class="btn btn-primary"
@@ -42,8 +42,8 @@
           </thead>
           <tbody>
           <tr v-for="category in categories" :key="category.id" class="hover">
-            <td class="font-mono text-sm">{{ category.id }}</td>
-            <td class="font-medium">{{ category.category }}</td>
+            <td class="font-normal text-sm">{{ category.id }}</td>
+            <td class="font-normal">{{ category.category }}</td>
             <td>
               <span class="badge badge-outline">{{ category.sort }}</span>
             </td>
@@ -83,7 +83,7 @@
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="closeModal">✕</button>
         </form>
         
-        <h3 class="font-bold text-lg mb-4">
+        <h3 class="font-normal text-lg mb-4">
           {{ modalMode === 'create' ? '新增分类' : '编辑分类' }}
         </h3>
         
@@ -91,7 +91,7 @@
           <!-- 分类名称 -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">分类名称 <span class="text-error">*</span></span>
+              <span class="label-text font-normal">分类名称 <span class="text-error">*</span></span>
             </label>
             <input 
               v-model="formData.category"
@@ -105,7 +105,7 @@
           <!-- 排序 -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">排序</span>
+              <span class="label-text font-normal">排序</span>
             </label>
             <input 
               v-model.number="formData.sort"
@@ -120,7 +120,7 @@
           <!-- 状态 -->
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">状态</span>
+              <span class="label-text font-normal">状态</span>
             </label>
             <select v-model.number="formData.status" class="select select-bordered w-full" :disabled="saving">
               <option :value="1">启用</option>
@@ -155,12 +155,12 @@
     <!-- 删除确认模态框 -->
     <dialog ref="deleteModal" class="modal">
       <div class="modal-box w-11/12 max-w-sm">
-        <h3 class="font-bold text-lg mb-4 text-error">确认删除</h3>
+        <h3 class="font-normal text-lg mb-4 text-error">确认删除</h3>
         
         <div class="mb-6">
           <p class="text-base-content/80 mb-2">您确定要删除以下分类吗？</p>
           <div v-if="categoryToDelete" class="bg-base-200 p-3 rounded-lg">
-            <div class="font-medium text-base-content">{{ categoryToDelete.category }}</div>
+            <div class="font-normal text-base-content">{{ categoryToDelete.category }}</div>
             <div class="text-sm text-base-content/60">ID: {{ categoryToDelete.id }}</div>
           </div>
           <p class="text-sm text-error mt-2">此操作不可撤销！</p>

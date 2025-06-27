@@ -68,7 +68,7 @@
                       </div>
                     </div>
                     <div>
-                      <div class="font-bold">{{ user.username }}</div>
+                      <div class="font-normal">{{ user.username }}</div>
                       <div class="text-sm opacity-50">{{ user.email }}</div>
                     </div>
                   </div>
@@ -146,7 +146,7 @@
   <!-- 用户编辑/创建模态框 -->
   <dialog ref="userModal" class="modal">
     <div class="modal-box w-11/12 max-w-2xl">
-      <h3 class="font-bold text-lg mb-4">{{ isEditing ? '编辑用户' : '添加用户' }}</h3>
+      <h3 class="font-normal text-lg mb-4">{{ isEditing ? '编辑用户' : '添加用户' }}</h3>
 
       <form @submit.prevent="saveUser" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

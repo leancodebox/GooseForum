@@ -4,7 +4,7 @@
       <div class="card-body">
         <!-- Logo 和标题 -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-primary mb-2">GooseForum</h1>
+          <h1 class="text-3xl font-normal text-primary mb-2">GooseForum</h1>
           <p class="text-base-content/70">管理后台登录</p>
         </div>
         
@@ -13,7 +13,7 @@
           <!-- 用户名输入 -->
           <div class="form-control">
             <div class="label">
-              <span class="label-text font-medium">用户名</span>
+              <span class="label-text font-normal">用户名</span>
             </div>
             <label class="input input-bordered flex items-center gap-2 w-full">
               <UserIcon class="h-4 w-4 opacity-70" />
@@ -32,7 +32,7 @@
           <!-- 密码输入 -->
           <div class="form-control">
             <div class="label">
-              <span class="label-text font-medium">密码</span>
+              <span class="label-text font-normal">密码</span>
             </div>
             <label class="input input-bordered flex items-center gap-2 w-full">
               <LockClosedIcon class="h-4 w-4 opacity-70" />
@@ -58,7 +58,7 @@
           <!-- 验证码输入 -->
           <div class="form-control">
             <div class="label">
-              <span class="label-text font-medium">验证码</span>
+              <span class="label-text font-normal">验证码</span>
             </div>
             <div class="flex gap-3 items-stretch w-full">
               <label class="input input-bordered flex items-center gap-2 flex-1">

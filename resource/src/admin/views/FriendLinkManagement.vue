@@ -175,7 +175,7 @@ onMounted(() => {
   <div class="space-y-6">
     <!-- 页面标题 -->
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">友情链接管理</h1>
+      <h1 class="text-2xl font-normal">友情链接管理</h1>
       <div class="flex gap-2">
         <button 
           class="btn btn-primary btn-sm"
@@ -220,7 +220,7 @@ onMounted(() => {
                       <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
                     </svg>
                   </div>
-                  <h2 class="text-lg font-semibold truncate">{{ group.name }}</h2>
+                  <h2 class="text-lg font-normal truncate">{{ group.name }}</h2>
                   <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 items-start sm:items-center">
                     <span class="badge badge-neutral text-xs whitespace-nowrap">{{ group.links.length }}</span>
                     <span class="text-xs text-base-content/60 hidden sm:inline">个链接</span>
@@ -300,7 +300,7 @@ onMounted(() => {
                             class="w-6 h-6 rounded object-cover flex-shrink-0"
                             @error="($event.target as HTMLImageElement).style.display='none'"
                           >
-                          <h3 class="font-medium truncate flex-1">{{ link.name }}</h3>
+                          <h3 class="font-normal truncate flex-1">{{ link.name }}</h3>
                           <div class="form-control flex-shrink-0">
                             <label class="cursor-pointer label p-0">
                               <input 
@@ -336,7 +336,7 @@ onMounted(() => {
     <!-- 添加/编辑分组模态框 -->
     <dialog class="modal" :class="{ 'modal-open': showAddGroupModal }">
       <div class="modal-box w-96 max-w-sm">
-        <h3 class="text-lg font-bold text-center mb-4">
+        <h3 class="text-lg font-normal text-center mb-4">
           {{ editingGroupIndex >= 0 ? '编辑分组' : '添加分组' }}
         </h3>
         <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-6">
@@ -362,7 +362,7 @@ onMounted(() => {
     <!-- 添加/编辑链接模态框 -->
     <dialog class="modal" :class="{ 'modal-open': showAddLinkModal }">
       <div class="modal-box w-full max-w-lg">
-        <h3 class="text-lg font-bold text-center mb-4">
+        <h3 class="text-lg font-normal text-center mb-4">
           {{ editingLinkIndex >= 0 ? '编辑链接' : '添加链接' }}
         </h3>
         <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-6">

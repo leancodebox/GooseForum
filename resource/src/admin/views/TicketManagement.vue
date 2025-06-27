@@ -3,7 +3,7 @@
     <!-- 页面标题和操作 -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-base-content">工单管理</h1>
+        <h1 class="text-2xl font-normal text-base-content">工单管理</h1>
         <p class="text-base-content/70 mt-1">处理用户反馈和技术支持请求</p>
       </div>
       <div class="flex gap-2">
@@ -150,7 +150,7 @@
               <tr v-for="ticket in tickets" :key="ticket.id" class="hover">
                 <td>
                   <div class="space-y-1 min-w-0">
-                    <div class="font-bold text-base cursor-pointer hover:text-primary break-words" @click="viewTicket(ticket)">
+                    <div class="font-normal text-base cursor-pointer hover:text-primary break-words" @click="viewTicket(ticket)">
                       #{{ ticket.id }} {{ ticket.title }}
                     </div>
                     <div class="text-sm text-base-content/70 line-clamp-2 break-words">
@@ -180,7 +180,7 @@
                       </div>
                     </div>
                     <div class="min-w-0">
-                      <div class="font-medium truncate">{{ ticket.user.name }}</div>
+                      <div class="font-normal truncate">{{ ticket.user.name }}</div>
                       <div class="text-sm text-base-content/70 truncate">{{ ticket.user.email }}</div>
                     </div>
                   </div>
@@ -275,7 +275,7 @@
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
         
-        <h3 class="font-bold text-lg mb-4">创建工单</h3>
+        <h3 class="font-normal text-lg mb-4">创建工单</h3>
         
         <div class="space-y-6">
           <div class="form-control">
@@ -382,7 +382,7 @@
           <div class="border-b border-base-300 pb-4">
             <div class="flex items-start justify-between">
               <div>
-                <h3 class="font-bold text-xl">#{{ selectedTicket.id }} {{ selectedTicket.title }}</h3>
+                <h3 class="font-normal text-xl">#{{ selectedTicket.id }} {{ selectedTicket.title }}</h3>
                 <div class="flex items-center gap-4 mt-2 text-sm text-base-content/70">
                   <span>创建时间: {{ formatDate(selectedTicket.createdAt) }}</span>
                   <span>最后更新: {{ formatDate(selectedTicket.updatedAt) }}</span>
@@ -410,7 +410,7 @@
                     </div>
                   </div>
                   <div>
-                    <div class="font-medium">{{ selectedTicket.user.name }}</div>
+                    <div class="font-normal">{{ selectedTicket.user.name }}</div>
                     <div class="text-sm text-base-content/70">{{ selectedTicket.user.email }}</div>
                   </div>
                   <div class="ml-auto text-sm text-base-content/70">
@@ -433,7 +433,7 @@
                     </div>
                   </div>
                   <div>
-                    <div class="font-medium">{{ reply.author.name }}</div>
+                    <div class="font-normal">{{ reply.author.name }}</div>
                     <div class="text-sm text-base-content/70">{{ reply.author.role === 'admin' ? '管理员' : '用户' }}</div>
                   </div>
                   <div class="ml-auto text-sm text-base-content/70">
@@ -486,14 +486,14 @@
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
         
-        <h3 class="font-bold text-lg mb-4">回复模板管理</h3>
+        <h3 class="font-normal text-lg mb-4">回复模板管理</h3>
         
         <div class="space-y-4">
           <div v-for="template in replyTemplates" :key="template.id" class="card bg-base-200">
             <div class="card-body">
               <div class="flex justify-between items-start">
                 <div class="flex-1">
-                  <h4 class="font-medium">{{ template.title }}</h4>
+                  <h4 class="font-normal">{{ template.title }}</h4>
                   <p class="text-sm text-base-content/70 mt-1">{{ template.content.substring(0, 100) }}...</p>
                 </div>
                 <div class="flex gap-2">

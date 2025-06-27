@@ -36,7 +36,7 @@
             </li>
           </ul>
         </div>
-        <span v-else class="text-lg font-semibold">{{ pageTitle }}</span>
+        <span v-else class="text-lg font-normal">{{ pageTitle }}</span>
       </div>
 
       <div class="flex-none gap-2">
@@ -106,7 +106,7 @@
                   <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200"
                     :class="{ 'scale-110': $route.path === item.path }" />
                   <span v-if="!isCollapsed" class="ml-3 truncate transition-all duration-300 ease-in-out"
-                    :class="{ 'font-medium': $route.path === item.path }">{{ item.label }}</span>
+                    :class="{ 'font-normal': $route.path === item.path }">{{ item.label }}</span>
                 </router-link>
               </li>
             </ul>

@@ -147,7 +147,7 @@ onMounted(() => {
     <!-- 页面标题和操作 -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-base-content">帖子管理</h1>
+        <h1 class="text-2xl font-normal text-base-content">帖子管理</h1>
         <p class="text-base-content/70 mt-1">管理系统中的所有帖子内容</p>
       </div>
       <div class="flex gap-2">
@@ -187,7 +187,7 @@ onMounted(() => {
                     </div>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <a :href="'/post/'+post.id" class="font-bold text-sm line-clamp-2">{{ post.title }}</a>
+                    <a :href="'/post/'+post.id" class="font-normal text-sm line-clamp-2">{{ post.title }}</a>
                     <div class="text-xs text-base-content/70 line-clamp-1 mt-1">
                       {{ post.description || '暂无摘要' }}
                     </div>
@@ -213,7 +213,7 @@ onMounted(() => {
                     </div>
                   </div>
                   <div class="text-sm">
-                    <a :href="'/user/'+post.userId" class="font-medium">{{ post.username }}</a>
+                    <a :href="'/user/'+post.userId" class="font-normal">{{ post.username }}</a>
                   </div>
                 </div>
               </td>

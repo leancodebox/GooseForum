@@ -3,7 +3,7 @@
     <!-- 页面标题 -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-base-content">仪表盘</h1>
+        <h1 class="text-2xl font-normal text-base-content">仪表盘</h1>
         <p class="text-base-content/70 mt-1">欢迎回来，{{ authStore.user?.username }}！</p>
       </div>
       <div class="text-sm text-base-content/60">
@@ -88,7 +88,7 @@
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-base-content truncate">{{ activity.user }}</p>
+                <p class="text-sm font-normal text-base-content truncate">{{ activity.user }}</p>
                 <p class="text-xs text-base-content/70 truncate">{{ activity.action }}</p>
                 <p class="text-xs text-base-content/50">{{ formatRelativeTime(activity.time) }}</p>
               </div>
@@ -106,28 +106,28 @@
           <h2 class="card-title">系统状态</h2>
           <div class="space-y-4">
             <div class="flex items-center justify-between">
-              <span class="text-sm font-medium">服务器状态</span>
+              <span class="text-sm font-normal">服务器状态</span>
               <div class="badge badge-success gap-2">
                 <div class="w-2 h-2 bg-success rounded-full"></div>
                 正常运行
               </div>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm font-medium">数据库连接</span>
+              <span class="text-sm font-normal">数据库连接</span>
               <div class="badge badge-success gap-2">
                 <div class="w-2 h-2 bg-success rounded-full"></div>
                 连接正常
               </div>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm font-medium">内存使用</span>
+              <span class="text-sm font-normal">内存使用</span>
               <div class="flex items-center gap-2">
                 <progress class="progress progress-primary w-20" value="65" max="100"></progress>
                 <span class="text-sm">65%</span>
               </div>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm font-medium">磁盘使用</span>
+              <span class="text-sm font-normal">磁盘使用</span>
               <div class="flex items-center gap-2">
                 <progress class="progress progress-warning w-20" value="78" max="100"></progress>
                 <span class="text-sm">78%</span>

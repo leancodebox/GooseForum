@@ -3,7 +3,7 @@
     <!-- 页面标题 -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-base-content">系统设置</h1>
+        <h1 class="text-2xl font-normal text-base-content">系统设置</h1>
         <p class="text-base-content/70 mt-1">配置和管理系统参数</p>
       </div>
       <div class="flex gap-2">
@@ -102,7 +102,7 @@
                   <label class="label cursor-pointer justify-start gap-4">
                     <input v-model="settings.allowRegistration" type="checkbox" class="toggle toggle-primary" />
                     <div class="flex flex-col">
-                      <span class="label-text font-medium">允许用户注册</span>
+                      <span class="label-text font-normal">允许用户注册</span>
                       <span class="label-text-alt text-base-content/60">开启后新用户可以注册账号</span>
                     </div>
                   </label>
@@ -111,7 +111,7 @@
                   <label class="label cursor-pointer justify-start gap-4">
                     <input v-model="settings.requireEmailVerification" type="checkbox" class="toggle toggle-primary" />
                     <div class="flex flex-col">
-                      <span class="label-text font-medium">需要邮箱验证</span>
+                      <span class="label-text font-normal">需要邮箱验证</span>
                       <span class="label-text-alt text-base-content/60">新用户注册后需验证邮箱</span>
                     </div>
                   </label>
@@ -182,7 +182,7 @@
                   <label class="label cursor-pointer justify-start gap-4">
                     <input v-model="settings.requirePostApproval" type="checkbox" class="toggle toggle-primary" />
                     <div class="flex flex-col">
-                      <span class="label-text font-medium">需要审核新帖子</span>
+                      <span class="label-text font-normal">需要审核新帖子</span>
                       <span class="label-text-alt text-base-content/60">新发布的帖子需要管理员审核</span>
                     </div>
                   </label>
@@ -191,7 +191,7 @@
                   <label class="label cursor-pointer justify-start gap-4">
                     <input v-model="settings.requireCommentApproval" type="checkbox" class="toggle toggle-primary" />
                     <div class="flex flex-col">
-                      <span class="label-text font-medium">需要审核评论</span>
+                      <span class="label-text font-normal">需要审核评论</span>
                       <span class="label-text-alt text-base-content/60">新发布的评论需要管理员审核</span>
                     </div>
                   </label>
@@ -267,7 +267,7 @@
                   <label class="label cursor-pointer justify-start gap-4">
                     <input v-model="settings.enableEmail" type="checkbox" class="toggle toggle-primary" />
                     <div class="flex flex-col">
-                      <span class="label-text font-medium">启用邮件服务</span>
+                      <span class="label-text font-normal">启用邮件服务</span>
                       <span class="label-text-alt text-base-content/60">开启后系统可以发送邮件通知</span>
                     </div>
                   </label>
@@ -277,7 +277,7 @@
                     <input v-model="settings.smtpSSL" type="checkbox" class="toggle toggle-primary"
                       :disabled="!settings.enableEmail" />
                     <div class="flex flex-col">
-                      <span class="label-text font-medium">启用SSL/TLS</span>
+                      <span class="label-text font-normal">启用SSL/TLS</span>
                       <span class="label-text-alt text-base-content/60">推荐开启以提高安全性</span>
                     </div>
                   </label>
@@ -350,28 +350,28 @@
             </h2>
             <div class="space-y-4">
               <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-                <span class="text-sm font-medium">服务器状态</span>
+                <span class="text-sm font-normal">服务器状态</span>
                 <div class="badge badge-success gap-2">
                   <div class="w-2 h-2 bg-success rounded-full"></div>
                   正常
                 </div>
               </div>
               <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-                <span class="text-sm font-medium">数据库</span>
+                <span class="text-sm font-normal">数据库</span>
                 <div class="badge badge-success gap-2">
                   <div class="w-2 h-2 bg-success rounded-full"></div>
                   连接正常
                 </div>
               </div>
               <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-                <span class="text-sm font-medium">缓存服务</span>
+                <span class="text-sm font-normal">缓存服务</span>
                 <div class="badge badge-warning gap-2">
                   <div class="w-2 h-2 bg-warning rounded-full"></div>
                   未启用
                 </div>
               </div>
               <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-                <span class="text-sm font-medium">邮件服务</span>
+                <span class="text-sm font-normal">邮件服务</span>
                 <div :class="['badge gap-2', settings.enableEmail ? 'badge-success' : 'badge-error']">
                   <div :class="['w-2 h-2 rounded-full', settings.enableEmail ? 'bg-success' : 'bg-error']"></div>
                   {{ settings.enableEmail ? '已启用' : '未启用' }}
@@ -395,7 +395,7 @@
                   <label class="label cursor-pointer justify-start gap-4">
                     <input v-model="settings.enableCaptcha" type="checkbox" class="toggle toggle-primary" />
                     <div class="flex flex-col">
-                      <span class="label-text font-medium">启用验证码</span>
+                      <span class="label-text font-normal">启用验证码</span>
                       <span class="label-text-alt text-base-content/60">登录和注册时需要验证码</span>
                     </div>
                   </label>
@@ -404,7 +404,7 @@
                   <label class="label cursor-pointer justify-start gap-4">
                     <input v-model="settings.enableIPLimit" type="checkbox" class="toggle toggle-primary" />
                     <div class="flex flex-col">
-                      <span class="label-text font-medium">启用IP限制</span>
+                      <span class="label-text font-normal">启用IP限制</span>
                       <span class="label-text-alt text-base-content/60">限制可疑IP地址访问</span>
                     </div>
                   </label>
@@ -448,7 +448,7 @@
                 <label class="label cursor-pointer justify-start gap-4">
                   <input v-model="settings.enablePageCache" type="checkbox" class="toggle toggle-primary" />
                   <div class="flex flex-col">
-                    <span class="label-text font-medium">启用页面缓存</span>
+                    <span class="label-text font-normal">启用页面缓存</span>
                     <span class="label-text-alt text-base-content/60">缓存页面内容以提高性能</span>
                   </div>
                 </label>
@@ -488,7 +488,7 @@
                 <label class="label cursor-pointer justify-start gap-4">
                   <input v-model="settings.enableAutoBackup" type="checkbox" class="toggle toggle-primary" />
                   <div class="flex flex-col">
-                    <span class="label-text font-medium">启用自动备份</span>
+                    <span class="label-text font-normal">启用自动备份</span>
                     <span class="label-text-alt text-base-content/60">定期自动备份系统数据</span>
                   </div>
                 </label>

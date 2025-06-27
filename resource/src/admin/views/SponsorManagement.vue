@@ -3,7 +3,7 @@
     <!-- 页面标题和操作 -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-base-content">赞助管理</h1>
+        <h1 class="text-2xl font-normal text-base-content">赞助管理</h1>
         <p class="text-base-content/70 mt-1">管理网站的赞助信息和赞助商</p>
       </div>
       <div class="flex gap-2">
@@ -150,14 +150,14 @@
                       </div>
                     </div>
                     <div>
-                      <div class="font-bold">{{ sponsor.sponsorName }}</div>
+                      <div class="font-normal">{{ sponsor.sponsorName }}</div>
                       <div class="text-sm text-base-content/70">{{ sponsor.contact || '未提供联系方式' }}</div>
                       <div class="text-xs text-base-content/50">ID: {{ sponsor.id }}</div>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <div class="font-bold text-lg" :class="getAmountColor(sponsor.amount)">
+                  <div class="font-normal text-lg" :class="getAmountColor(sponsor.amount)">
                     ¥{{ sponsor.amount.toLocaleString() }}
                   </div>
                   <div class="text-xs text-base-content/70">{{ sponsor.paymentMethod }}</div>
@@ -250,7 +250,7 @@
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
         
-        <h3 class="font-bold text-lg mb-4">
+        <h3 class="font-normal text-lg mb-4">
           {{ editingSponsor ? '编辑赞助信息' : '添加赞助记录' }}
         </h3>
         
@@ -358,7 +358,7 @@
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
         
-        <h3 class="font-bold text-lg mb-4">赞助设置</h3>
+        <h3 class="font-normal text-lg mb-4">赞助设置</h3>
         
         <div class="space-y-4">
           <div class="form-control">

@@ -146,7 +146,7 @@ const getStatusClass = (effective: number) => {
     <!-- 页面标题和操作 -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-base-content">角色管理</h1>
+        <h1 class="text-2xl font-normal text-base-content">角色管理</h1>
         <p class="text-base-content/70 mt-1">管理系统角色和权限</p>
       </div>
       <button class="btn btn-primary btn-sm" @click="openCreateModal">
@@ -187,9 +187,9 @@ const getStatusClass = (effective: number) => {
             </thead>
             <tbody>
               <tr v-for="role in roles" :key="role.roleId">
-                <td class="font-mono text-sm">{{ role.roleId }}</td>
+                <td class="font-normal text-sm">{{ role.roleId }}</td>
                 <td>
-                  <div class="font-medium">{{ role.roleName }}</div>
+                  <div class="font-normal">{{ role.roleName }}</div>
                 </td>
                 <td>
                   <div class="badge badge-sm whitespace-nowrap" :class="getStatusClass(role.effective)">
@@ -228,7 +228,7 @@ const getStatusClass = (effective: number) => {
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="closeModal">✕</button>
         </form>
         
-        <h3 class="font-bold text-lg mb-4">
+        <h3 class="font-normal text-lg mb-4">
           {{ modalMode === 'create' ? '新建角色' : '编辑角色' }}
         </h3>
         
@@ -296,9 +296,9 @@ const getStatusClass = (effective: number) => {
     <!-- 删除确认模态框 -->
     <dialog ref="deleteModal" class="modal">
       <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">确认删除</h3>
+        <h3 class="font-normal text-lg mb-4">确认删除</h3>
         <p class="mb-4">
-          确定要删除角色 <span class="font-medium text-primary">{{ roleToDelete?.roleName }}</span> 吗？
+          确定要删除角色 <span class="font-normal text-primary">{{ roleToDelete?.roleName }}</span> 吗？
         </p>
         <p class="text-sm text-base-content/70 mb-6">
           此操作不可撤销，请谨慎操作。

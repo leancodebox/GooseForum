@@ -2,11 +2,11 @@
   <div class="min-h-screen flex items-center justify-center bg-base-200">
     <div class="text-center">
       <div class="mb-8">
-        <h1 class="text-9xl font-bold text-primary opacity-20">404</h1>
+        <h1 class="text-9xl font-normal text-primary opacity-20">404</h1>
       </div>
       
       <div class="space-y-4">
-        <h2 class="text-3xl font-bold text-base-content">页面不存在</h2>
+        <h2 class="text-3xl font-normal text-base-content">页面不存在</h2>
         <p class="text-base-content/70 max-w-md mx-auto">
           抱歉，您访问的页面不存在或已被移除。请检查URL是否正确，或返回管理后台首页。
         </p>
