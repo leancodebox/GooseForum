@@ -71,7 +71,7 @@
       <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
       <aside :class="[
         'min-h-full bg-base-100 border-r border-base-300 transition-all duration-300',
-        isCollapsed ? 'w-12' : 'w-64'
+        isCollapsed ? 'w-12' : 'w-48'
       ]">
         <!-- Logo 和折叠按钮 -->
         <div class="p-2 border-b border-base-300 flex items-center h-16"
