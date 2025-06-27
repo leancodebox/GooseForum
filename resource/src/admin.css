@@ -5,8 +5,67 @@
 }
 
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, retro, cyberpunk, valentine, garden, forest, aqua, luxury, dracula;
+  themes: cmyk --default, dark --prefersdark, light, retro, cyberpunk, valentine, garden, forest, aqua, luxury, dracula;
 }
 @layer components {
+  /* 统一的滚动条样式 */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--bc) / 0.3) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+    border: none;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--bc) / 0.3);
+    border-radius: 1px;
+    border: none;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--bc) / 0.5);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  
+  /* 更细的滚动条变体 */
+  .scrollbar-ultra-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--bc) / 0.2) transparent;
+  }
+  
+  .scrollbar-ultra-thin::-webkit-scrollbar {
+    width: 1px;
+    height: 1px;
+    border: none;
+  }
+  
+  .scrollbar-ultra-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-ultra-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--bc) / 0.2);
+    border-radius: 0.5px;
+    border: none;
+  }
+  
+  .scrollbar-ultra-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--bc) / 0.4);
+  }
+  
+  .scrollbar-ultra-thin::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }
 

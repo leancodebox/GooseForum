@@ -80,7 +80,7 @@
       <div class="card bg-base-100 shadow">
         <div class="card-body">
           <h2 class="card-title">最近活动</h2>
-          <div class="space-y-4 max-h-64 overflow-y-auto">
+          <div class="space-y-4 max-h-64 overflow-y-auto scrollbar-thin">
             <div v-for="(activity, index) in recentActivities" :key="index" class="flex items-start gap-3">
               <div class="avatar placeholder">
                 <div class="bg-neutral text-neutral-content rounded-full w-8 h-8">
@@ -305,19 +305,5 @@ onMounted(() => {
 .btn:hover {
   transform: translateY(-1px);
   transition: transform 0.2s ease;
-}
-
-/* 活动列表滚动条 */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 4px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: hsl(var(--b2));
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: hsl(var(--bc) / 0.3);
-  border-radius: 2px;
 }
 </style>

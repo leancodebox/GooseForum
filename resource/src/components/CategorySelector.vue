@@ -175,7 +175,7 @@ watch(() => props.maxSelection, (newVal) => {
       <div 
         @click="toggleCategoryPopup"
         :class="[
-          'selected-tags mb-2 min-h-8 max-h-20 flex flex-wrap gap-2 p-2 border border-base-content/30 rounded-lg bg-base-100 transition-colors overflow-y-auto',
+          'selected-tags mb-2 min-h-8 max-h-20 flex flex-wrap gap-2 p-2 border border-base-content/30 rounded-lg bg-base-100 transition-colors overflow-y-auto scrollbar-thin',
           {
             'cursor-pointer hover:border-primary': !disabled,
             'cursor-not-allowed opacity-60': disabled
@@ -229,7 +229,7 @@ watch(() => props.maxSelection, (newVal) => {
         </div>
         
         <!-- 分类选项 -->
-        <div class="max-h-60 overflow-y-auto">
+        <div class="max-h-60 overflow-y-auto scrollbar-thin">
           <div class="p-2">
             <div class="space-y-1">
               <div 

@@ -263,7 +263,7 @@ const getStatusClass = (effective: number) => {
             <label class="label">
               <span class="label-text">权限配置</span>
             </label>
-            <div class="border border-base-300 rounded-lg p-4 max-h-48 overflow-y-auto">
+            <div class="border border-base-300 rounded-lg p-4 max-h-48 overflow-y-auto scrollbar-thin">
               <div v-if="permissions.length === 0" class="text-center text-base-content/50 py-4">
                 暂无权限数据
               </div>

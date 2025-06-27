@@ -50,6 +50,18 @@ func GetViewAssert() *embed.FS {
 	return &viewAssert
 }
 
+// GetAssetsFS 返回静态文件的文件系统
+func GetAssetsFS() (fs.FS, error) {
+	if !setting.IsProduction() {
+		return os.DirFS(filepath.Join("resource", "static", "dist", "assets")), nil
+	}
+	static, err := fs.Sub(GetViewAssert(), filepath.Join("static", "dist", "assets"))
+	if err != nil {
+		return nil, err
+	}
+	return static, nil
+}
+
 // GetStaticFS 返回静态文件的文件系统
 func GetStaticFS() (fs.FS, error) {
 	if !setting.IsProduction() {

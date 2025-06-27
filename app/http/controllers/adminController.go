@@ -182,7 +182,6 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 				username = user.Username
 				userAvatarUrl = user.GetWebAvatarUrl()
 			}
-			fmt.Println(t.Id, t.Description)
 			return ArticlesInfoAdminDto{
 				Id:            t.Id,
 				Title:         t.Title,

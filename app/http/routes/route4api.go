@@ -1,12 +1,10 @@
 package routes
 
 import (
-	"io/fs"
 	"net/http"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/assert"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
 	"github.com/leancodebox/GooseForum/app/service/permission"
@@ -14,16 +12,14 @@ import (
 )
 
 func assertRouter(ginApp *gin.Engine) {
-	appFs, _ := fs.Sub(assert.GetActorFs(), "frontend/dist")
-	assetsFs, _ := fs.Sub(resource.GetViewAssert(), "static/dist/assets")
+	assetsFs, _ := resource.GetAssetsFS()
 	staticFS, _ := resource.GetStaticFS()
 	ginApp.Group("/").
 		Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).
 		Use(middleware.BrowserCache).
 		StaticFS("assets", http.FS(assetsFs)).
-		StaticFS("static", http.FS(staticFS)).
-		StaticFS("app", http.FS(appFs))
+		StaticFS("static", http.FS(staticFS))
 }
 
 func viewRoute(ginApp *gin.Engine) {
