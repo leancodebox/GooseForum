@@ -37,47 +37,52 @@
         <!-- 网站基本信息 -->
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <div class="flex justify-between">
-              <h2 class="card-title flex items-center gap-2">
-                <GlobeAltIcon class="w-5 h-5" />
-                网站基本信息
-              </h2>
-               <button class="btn btn-primary ml-auto btn-sm">保存</button>
-            </div>
+            <h2 class="card-title flex items-center gap-2 mb-6">
+              <GlobeAltIcon class="w-5 h-5" />
+              网站基本信息
+            </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">网站名称</span>
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <label class="floating-label">
+                  <span>网站名称</span>
+                  <input v-model="settings.siteName" type="text" placeholder="请输入网站名称" class="input input-bordered w-full" />
                 </label>
-                <input v-model="settings.siteName" type="text" placeholder="请输入网站名称" class="input input-bordered" />
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">网站域名</span>
+                <label class="floating-label">
+                  <span>网站域名</span>
+                  <input v-model="settings.siteUrl" type="url" placeholder="请输入网站域名" class="input input-bordered w-full" />
                 </label>
-                <input v-model="settings.siteUrl" type="url" placeholder="https://example.com"
-                  class="input input-bordered" />
               </div>
-              <div class="form-control md:col-span-2">
-                <fieldset class="fieldset">
-                  <legend class="fieldset-legend">Your bio</legend>
-                  <textarea class="textarea h-24" placeholder="Bio" v-model="settings.siteDescription"></textarea>
-                  <div class="label">Optional</div>
-                </fieldset>
-              </div>
+
               <div class="form-control">
-                <label class="label">
-                  <span class="label-text">网站关键词</span>
+                <label class="floating-label">
+                  <span>网站描述</span>
+                  <textarea class="textarea textarea-bordered h-24 w-full" placeholder="请输入网站描述" v-model="settings.siteDescription"></textarea>
                 </label>
-                <input v-model="settings.siteKeywords" type="text" placeholder="关键词1,关键词2,关键词3"
-                  class="input input-bordered" />
+                <div class="label">
+                  <span class="label-text-alt text-base-content/60">用于SEO和网站介绍</span>
+                </div>
               </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">ICP备案号</span>
-                </label>
-                <input v-model="settings.icpNumber" type="text" placeholder="请输入ICP备案号" class="input input-bordered" />
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>网站关键词</span>
+                    <input v-model="settings.siteKeywords" type="text" placeholder="请输入网站关键词" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">用逗号分隔多个关键词</span>
+                  </div>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>ICP备案号</span>
+                    <input v-model="settings.icpNumber" type="text" placeholder="请输入ICP备案号" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">可选，用于网站底部显示</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -86,53 +91,78 @@
         <!-- 用户设置 -->
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title flex items-center gap-2">
+            <h2 class="card-title flex items-center gap-2 mb-6">
               <UsersIcon class="w-5 h-5" />
               用户设置
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text">允许用户注册</span>
-                  <input v-model="settings.allowRegistration" type="checkbox" class="toggle toggle-primary" />
-                </label>
+
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="form-control">
+                  <label class="label cursor-pointer justify-start gap-4">
+                    <input v-model="settings.allowRegistration" type="checkbox" class="toggle toggle-primary" />
+                    <div class="flex flex-col">
+                      <span class="label-text font-medium">允许用户注册</span>
+                      <span class="label-text-alt text-base-content/60">开启后新用户可以注册账号</span>
+                    </div>
+                  </label>
+                </div>
+                <div class="form-control">
+                  <label class="label cursor-pointer justify-start gap-4">
+                    <input v-model="settings.requireEmailVerification" type="checkbox" class="toggle toggle-primary" />
+                    <div class="flex flex-col">
+                      <span class="label-text font-medium">需要邮箱验证</span>
+                      <span class="label-text-alt text-base-content/60">新用户注册后需验证邮箱</span>
+                    </div>
+                  </label>
+                </div>
               </div>
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text">需要邮箱验证</span>
-                  <input v-model="settings.requireEmailVerification" type="checkbox" class="toggle toggle-primary" />
-                </label>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>默认用户角色</span>
+                    <select v-model="settings.defaultUserRole" class="select select-bordered w-full">
+                      <option value="" disabled>请选择默认用户角色</option>
+                      <option value="user">普通用户</option>
+                      <option value="vip">VIP用户</option>
+                      <option value="moderator">版主</option>
+                    </select>
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">新注册用户的默认权限级别</span>
+                  </div>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>用户名最小长度</span>
+                    <input v-model.number="settings.minUsernameLength" type="number" min="2" max="20" placeholder="请输入用户名最小长度" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">用户名允许的最少字符数</span>
+                  </div>
+                </div>
               </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">默认用户角色</span>
-                </label>
-                <select v-model="settings.defaultUserRole" class="select select-bordered">
-                  <option value="user">普通用户</option>
-                  <option value="vip">VIP用户</option>
-                  <option value="moderator">版主</option>
-                </select>
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">用户名最小长度</span>
-                </label>
-                <input v-model.number="settings.minUsernameLength" type="number" min="2" max="20"
-                  class="input input-bordered" />
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">密码最小长度</span>
-                </label>
-                <input v-model.number="settings.minPasswordLength" type="number" min="6" max="50"
-                  class="input input-bordered" />
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">会话过期时间(小时)</span>
-                </label>
-                <input v-model.number="settings.sessionTimeout" type="number" min="1" max="720"
-                  class="input input-bordered" />
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>密码最小长度</span>
+                    <input v-model.number="settings.minPasswordLength" type="number" min="6" max="50" placeholder="请输入密码最小长度" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">密码允许的最少字符数</span>
+                  </div>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>会话过期时间(小时)</span>
+                    <input v-model.number="settings.sessionTimeout" type="number" min="1" max="720" placeholder="请输入会话过期时间" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">用户登录状态保持时间</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -141,60 +171,83 @@
         <!-- 内容设置 -->
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title flex items-center gap-2">
+            <h2 class="card-title flex items-center gap-2 mb-6">
               <DocumentTextIcon class="w-5 h-5" />
               内容设置
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text">需要审核新帖子</span>
-                  <input v-model="settings.requirePostApproval" type="checkbox" class="toggle toggle-primary" />
-                </label>
+
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="form-control">
+                  <label class="label cursor-pointer justify-start gap-4">
+                    <input v-model="settings.requirePostApproval" type="checkbox" class="toggle toggle-primary" />
+                    <div class="flex flex-col">
+                      <span class="label-text font-medium">需要审核新帖子</span>
+                      <span class="label-text-alt text-base-content/60">新发布的帖子需要管理员审核</span>
+                    </div>
+                  </label>
+                </div>
+                <div class="form-control">
+                  <label class="label cursor-pointer justify-start gap-4">
+                    <input v-model="settings.requireCommentApproval" type="checkbox" class="toggle toggle-primary" />
+                    <div class="flex flex-col">
+                      <span class="label-text font-medium">需要审核评论</span>
+                      <span class="label-text-alt text-base-content/60">新发布的评论需要管理员审核</span>
+                    </div>
+                  </label>
+                </div>
               </div>
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text">需要审核评论</span>
-                  <input v-model="settings.requireCommentApproval" type="checkbox" class="toggle toggle-primary" />
-                </label>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>每页帖子数量</span>
+                    <input v-model.number="settings.postsPerPage" type="number" min="5" max="100" placeholder="请输入每页帖子数量" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">列表页面每页显示的帖子数量</span>
+                  </div>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>帖子标题最大长度</span>
+                    <input v-model.number="settings.maxTitleLength" type="number" min="10" max="200" placeholder="请输入帖子标题最大长度" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">帖子标题允许的最大字符数</span>
+                  </div>
+                </div>
               </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">每页帖子数量</span>
-                </label>
-                <input v-model.number="settings.postsPerPage" type="number" min="5" max="100"
-                  class="input input-bordered" />
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>帖子内容最大长度</span>
+                    <input v-model.number="settings.maxContentLength" type="number" min="100" max="50000" placeholder="请输入帖子内容最大长度" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">帖子内容允许的最大字符数</span>
+                  </div>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>最大文件大小(MB)</span>
+                    <input v-model.number="settings.maxFileSize" type="number" min="1" max="100" placeholder="请输入最大文件大小" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">单个文件上传的大小限制</span>
+                  </div>
+                </div>
               </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">帖子标题最大长度</span>
-                </label>
-                <input v-model.number="settings.maxTitleLength" type="number" min="10" max="200"
-                  class="input input-bordered" />
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">帖子内容最大长度</span>
-                </label>
-                <input v-model.number="settings.maxContentLength" type="number" min="100" max="50000"
-                  class="input input-bordered" />
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">允许的文件类型</span>
-                </label>
-                <input v-model="settings.allowedFileTypes" type="text" placeholder="jpg,png,gif,pdf,doc"
-                  class="input input-bordered" />
-              </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               <div class="form-control">
-                <label class="label">
-                  <span class="label-text">最大文件大小(MB)</span>
+                <label class="floating-label">
+                  <span>允许的文件类型</span>
+                  <input v-model="settings.allowedFileTypes" type="text" placeholder="请输入允许的文件类型" class="input input-bordered bg-base-200 w-full" />
                 </label>
-                <input v-model.number="settings.maxFileSize" type="number" min="1" max="100"
-                  class="input input-bordered" />
+                <div class="label">
+                  <span class="label-text-alt text-base-content/60">用逗号分隔多个文件扩展名</span>
+                </div>
               </div>
             </div>
           </div>
@@ -203,64 +256,84 @@
         <!-- 邮件设置 -->
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title flex items-center gap-2">
+            <h2 class="card-title flex items-center gap-2 mb-6">
               <EnvelopeIcon class="w-5 h-5" />
               邮件设置
             </h2>
-            <div class="space-y-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="form-control">
-                  <label class="label cursor-pointer">
-                    <span class="label-text">启用邮件服务</span>
+                  <label class="label cursor-pointer justify-start gap-4">
                     <input v-model="settings.enableEmail" type="checkbox" class="toggle toggle-primary" />
+                    <div class="flex flex-col">
+                      <span class="label-text font-medium">启用邮件服务</span>
+                      <span class="label-text-alt text-base-content/60">开启后系统可以发送邮件通知</span>
+                    </div>
                   </label>
                 </div>
                 <div class="form-control">
-                  <label class="label cursor-pointer">
-                    <span class="label-text">启用SSL/TLS</span>
+                  <label class="label cursor-pointer justify-start gap-4">
                     <input v-model="settings.smtpSSL" type="checkbox" class="toggle toggle-primary"
                       :disabled="!settings.enableEmail" />
+                    <div class="flex flex-col">
+                      <span class="label-text font-medium">启用SSL/TLS</span>
+                      <span class="label-text-alt text-base-content/60">推荐开启以提高安全性</span>
+                    </div>
                   </label>
                 </div>
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">SMTP服务器</span>
+                  <label class="floating-label">
+                    <span>SMTP服务器</span>
+                    <input v-model="settings.smtpHost" type="text" placeholder="请输入SMTP服务器地址" class="input input-bordered w-full" :disabled="!settings.enableEmail" />
                   </label>
-                  <input v-model="settings.smtpHost" type="text" placeholder="smtp.example.com"
-                    class="input input-bordered" :disabled="!settings.enableEmail" />
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">邮件服务器地址</span>
+                  </div>
                 </div>
                 <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">SMTP端口</span>
+                  <label class="floating-label">
+                    <span>SMTP端口</span>
+                    <input v-model.number="settings.smtpPort" type="number" placeholder="请输入SMTP端口" class="input input-bordered w-full" :disabled="!settings.enableEmail" />
                   </label>
-                  <input v-model.number="settings.smtpPort" type="number" placeholder="587" class="input input-bordered"
-                    :disabled="!settings.enableEmail" />
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">发件人邮箱</span>
-                  </label>
-                  <input v-model="settings.smtpUsername" type="email" placeholder="noreply@example.com"
-                    class="input input-bordered" :disabled="!settings.enableEmail" />
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">邮箱密码</span>
-                  </label>
-                  <input v-model="settings.smtpPassword" type="password" placeholder="请输入邮箱密码"
-                    class="input input-bordered" :disabled="!settings.enableEmail" />
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">通常为25、465或587</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="mt-4">
-              <button @click="testEmail" class="btn btn-outline btn-info btn-sm"
-                :disabled="!settings.enableEmail || testingEmail">
-                <span v-if="testingEmail" class="loading loading-spinner loading-sm"></span>
-                <PaperAirplaneIcon v-else class="w-4 h-4" />
-                测试邮件发送
-              </button>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>发件人邮箱</span>
+                    <input v-model="settings.smtpUsername" type="email" placeholder="请输入发件人邮箱" class="input input-bordered w-full" :disabled="!settings.enableEmail" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">用于发送邮件的邮箱地址</span>
+                  </div>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>邮箱密码</span>
+                    <input v-model="settings.smtpPassword" type="password" placeholder="请输入邮箱密码" class="input input-bordered w-full" :disabled="!settings.enableEmail" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">邮箱密码或应用专用密码</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-base-300">
+                <button @click="testEmail" class="btn btn-outline btn-info btn-sm"
+                  :disabled="!settings.enableEmail || testingEmail">
+                  <span v-if="testingEmail" class="loading loading-spinner loading-sm"></span>
+                  <PaperAirplaneIcon v-else class="w-4 h-4" />
+                  测试邮件发送
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -271,35 +344,35 @@
         <!-- 系统状态 -->
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title flex items-center gap-2">
+            <h2 class="card-title flex items-center gap-2 mb-6">
               <ServerIcon class="w-5 h-5" />
               系统状态
             </h2>
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-sm">服务器状态</span>
-                <div class="badge badge-success gap-1">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                <span class="text-sm font-medium">服务器状态</span>
+                <div class="badge badge-success gap-2">
                   <div class="w-2 h-2 bg-success rounded-full"></div>
                   正常
                 </div>
               </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm">数据库</span>
-                <div class="badge badge-success gap-1">
+              <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                <span class="text-sm font-medium">数据库</span>
+                <div class="badge badge-success gap-2">
                   <div class="w-2 h-2 bg-success rounded-full"></div>
                   连接正常
                 </div>
               </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm">缓存服务</span>
-                <div class="badge badge-warning gap-1">
+              <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                <span class="text-sm font-medium">缓存服务</span>
+                <div class="badge badge-warning gap-2">
                   <div class="w-2 h-2 bg-warning rounded-full"></div>
                   未启用
                 </div>
               </div>
-              <div class="flex items-center justify-between">
-                <span class="text-sm">邮件服务</span>
-                <div :class="['badge gap-1', settings.enableEmail ? 'badge-success' : 'badge-error']">
+              <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                <span class="text-sm font-medium">邮件服务</span>
+                <div :class="['badge gap-2', settings.enableEmail ? 'badge-success' : 'badge-error']">
                   <div :class="['w-2 h-2 rounded-full', settings.enableEmail ? 'bg-success' : 'bg-error']"></div>
                   {{ settings.enableEmail ? '已启用' : '未启用' }}
                 </div>
@@ -311,36 +384,52 @@
         <!-- 安全设置 -->
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title flex items-center gap-2">
+            <h2 class="card-title flex items-center gap-2 mb-6">
               <ShieldCheckIcon class="w-5 h-5" />
               安全设置
             </h2>
-            <div class="space-y-4">
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text">启用验证码</span>
-                  <input v-model="settings.enableCaptcha" type="checkbox" class="toggle toggle-primary" />
-                </label>
+
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 gap-6">
+                <div class="form-control">
+                  <label class="label cursor-pointer justify-start gap-4">
+                    <input v-model="settings.enableCaptcha" type="checkbox" class="toggle toggle-primary" />
+                    <div class="flex flex-col">
+                      <span class="label-text font-medium">启用验证码</span>
+                      <span class="label-text-alt text-base-content/60">登录和注册时需要验证码</span>
+                    </div>
+                  </label>
+                </div>
+                <div class="form-control">
+                  <label class="label cursor-pointer justify-start gap-4">
+                    <input v-model="settings.enableIPLimit" type="checkbox" class="toggle toggle-primary" />
+                    <div class="flex flex-col">
+                      <span class="label-text font-medium">启用IP限制</span>
+                      <span class="label-text-alt text-base-content/60">限制可疑IP地址访问</span>
+                    </div>
+                  </label>
+                </div>
               </div>
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text">启用IP限制</span>
-                  <input v-model="settings.enableIPLimit" type="checkbox" class="toggle toggle-primary" />
-                </label>
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">登录失败限制</span>
-                </label>
-                <input v-model.number="settings.maxLoginAttempts" type="number" min="3" max="10"
-                  class="input input-bordered input-sm" />
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">锁定时间(分钟)</span>
-                </label>
-                <input v-model.number="settings.lockoutDuration" type="number" min="5" max="1440"
-                  class="input input-bordered input-sm" />
+
+              <div class="grid grid-cols-1 gap-6">
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>登录失败限制</span>
+                    <input v-model.number="settings.maxLoginAttempts" type="number" min="3" max="10" placeholder="请输入登录失败限制次数" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">超过次数将锁定账户</span>
+                  </div>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>锁定时间(分钟)</span>
+                    <input v-model.number="settings.lockoutDuration" type="number" min="5" max="1440" placeholder="请输入锁定时间" class="input input-bordered w-full" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">账户被锁定的持续时间</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -349,25 +438,33 @@
         <!-- 缓存设置 -->
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title flex items-center gap-2">
+            <h2 class="card-title flex items-center gap-2 mb-6">
               <BoltIcon class="w-5 h-5" />
               缓存设置
             </h2>
-            <div class="space-y-4">
+
+            <div class="space-y-6">
               <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text">启用页面缓存</span>
+                <label class="label cursor-pointer justify-start gap-4">
                   <input v-model="settings.enablePageCache" type="checkbox" class="toggle toggle-primary" />
+                  <div class="flex flex-col">
+                    <span class="label-text font-medium">启用页面缓存</span>
+                    <span class="label-text-alt text-base-content/60">缓存页面内容以提高性能</span>
+                  </div>
                 </label>
               </div>
+
               <div class="form-control">
-                <label class="label">
-                  <span class="label-text">缓存过期时间(分钟)</span>
+                <label class="floating-label">
+                  <span>缓存过期时间(分钟)</span>
+                  <input v-model.number="settings.cacheExpiration" type="number" min="1" max="1440" placeholder="请输入缓存过期时间" class="input input-bordered w-full" :disabled="!settings.enablePageCache" />
                 </label>
-                <input v-model.number="settings.cacheExpiration" type="number" min="1" max="1440"
-                  class="input input-bordered input-sm" :disabled="!settings.enablePageCache" />
+                <div class="label">
+                  <span class="label-text-alt text-base-content/60">缓存数据的有效期</span>
+                </div>
               </div>
-              <div class="mt-4">
+
+              <div class="pt-4 border-t border-base-300">
                 <button @click="clearCache" class="btn btn-outline btn-warning btn-sm w-full" :disabled="clearingCache">
                   <span v-if="clearingCache" class="loading loading-spinner loading-sm"></span>
                   <TrashIcon v-else class="w-4 h-4" />
@@ -381,36 +478,49 @@
         <!-- 备份设置 -->
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title flex items-center gap-2">
+            <h2 class="card-title flex items-center gap-2 mb-6">
               <CloudArrowUpIcon class="w-5 h-5" />
               备份设置
             </h2>
-            <div class="space-y-4">
+
+            <div class="space-y-6">
               <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text">自动备份</span>
+                <label class="label cursor-pointer justify-start gap-4">
                   <input v-model="settings.enableAutoBackup" type="checkbox" class="toggle toggle-primary" />
+                  <div class="flex flex-col">
+                    <span class="label-text font-medium">启用自动备份</span>
+                    <span class="label-text-alt text-base-content/60">定期自动备份系统数据</span>
+                  </div>
                 </label>
               </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">备份频率</span>
-                </label>
-                <select v-model="settings.backupFrequency" class="select select-bordered select-sm"
-                  :disabled="!settings.enableAutoBackup">
-                  <option value="daily">每日</option>
-                  <option value="weekly">每周</option>
-                  <option value="monthly">每月</option>
-                </select>
+
+              <div class="grid grid-cols-1 gap-6">
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>备份频率</span>
+                    <select v-model="settings.backupFrequency" class="select select-bordered w-full" :disabled="!settings.enableAutoBackup">
+                      <option value="" disabled>请选择备份频率</option>
+                      <option value="daily">每日</option>
+                      <option value="weekly">每周</option>
+                      <option value="monthly">每月</option>
+                    </select>
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">自动备份的执行频率</span>
+                  </div>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>保留备份数量</span>
+                    <input v-model.number="settings.backupRetention" type="number" min="1" max="30" placeholder="请输入保留备份数量" class="input input-bordered w-full" :disabled="!settings.enableAutoBackup" />
+                  </label>
+                  <div class="label">
+                    <span class="label-text-alt text-base-content/60">最多保留的备份文件数量</span>
+                  </div>
+                </div>
               </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">保留备份数量</span>
-                </label>
-                <input v-model.number="settings.backupRetention" type="number" min="1" max="30"
-                  class="input input-bordered input-sm" :disabled="!settings.enableAutoBackup" />
-              </div>
-              <div class="mt-4">
+              
+              <div class="pt-4 border-t border-base-300">
                 <button @click="createBackup" class="btn btn-outline btn-info btn-sm w-full" :disabled="creatingBackup">
                   <span v-if="creatingBackup" class="loading loading-spinner loading-sm"></span>
                   <CloudArrowUpIcon v-else class="w-4 h-4" />
