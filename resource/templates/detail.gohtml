@@ -375,12 +375,9 @@
                         <div class="card-body">
                             <h2 class="card-title">热门话题</h2>
                             <div class="flex flex-wrap gap-2">
-                                <div class="badge badge-outline hover:badge-primary cursor-pointer">#Vue.js</div>
-                                <div class="badge badge-outline hover:badge-primary cursor-pointer">#前端开发</div>
-                                <div class="badge badge-outline hover:badge-primary cursor-pointer">#Nuxt.js</div>
-                                <div class="badge badge-outline hover:badge-primary cursor-pointer">#DaisyUI</div>
-                                <div class="badge badge-outline hover:badge-primary cursor-pointer">#性能优化</div>
-                                <div class="badge badge-outline hover:badge-primary cursor-pointer">#用户体验</div>
+                                {{range .ArticleCategoryList}}
+                                <a class="badge badge-outline hover:badge-primary cursor-pointer" href="/post?filters={{.Value}}">#{{.Name}}</a>
+                                {{end}}
                             </div>
                         </div>
                     </div>

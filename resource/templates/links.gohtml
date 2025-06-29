@@ -149,43 +149,35 @@
                             <div class="stats stats-vertical shadow-sm bg-base-100">
                                 <div class="stat py-2">
                                     <div class="stat-title text-xs">总链接数</div>
-                                    <div class="stat-value text-lg">1</div>
+                                    <div class="stat-value text-lg">{{.TotalCounter}}</div>
                                 </div>
                                 <div class="stat py-2">
                                     <div class="stat-title text-xs">正常链接</div>
-                                    <div class="stat-value text-lg text-success">1</div>
+                                    <div class="stat-value text-lg text-success">{{.TotalCounter}}</div>
                                 </div>
                                 <div class="stat py-2">
                                     <div class="stat-title text-xs">本月新增</div>
-                                    <div class="stat-value text-lg text-primary">1</div>
+                                    <div class="stat-value text-lg text-primary">{{.TotalCounter}}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- 最近更新 -->
+                    {{if .RecommendedArticles}}
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title font-normal">最近更新</h2>
-                            <div class="space-y-3">
-                                <div class="text-sm">
-                                    <div class="font-normal text-base-content">新增链接</div>
-                                    <div class="text-base-content/70">Vue.js 官方文档</div>
-                                    <div class="text-xs text-base-content/60">2天前</div>
+                            <h2 class="card-title font-normal">推荐文章</h2>
+                            <div class="space-y-2">
+                                {{range .RecommendedArticles}}
+                                <div class="space-y-1">
+                                    <a href="/post/{{.Id}}" class="text-sm hover:text-primary cursor-pointer">
+                                        • {{.Title}}
+                                    </a>
                                 </div>
-                                <div class="text-sm">
-                                    <div class="font-normal text-base-content">状态更新</div>
-                                    <div class="text-base-content/70">检查了所有链接状态</div>
-                                    <div class="text-xs text-base-content/60">1周前</div>
-                                </div>
-                                <div class="text-sm">
-                                    <div class="font-normal text-base-content">分类调整</div>
-                                    <div class="text-base-content/70">重新整理了开发工具分类</div>
-                                    <div class="text-xs text-base-content/60">2周前</div>
-                                </div>
+                                {{end}}
                             </div>
                         </div>
                     </div>
+                    {{end}}
                 </div>
             </aside>
         </div>

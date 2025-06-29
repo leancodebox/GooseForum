@@ -178,9 +178,9 @@
                     <div class="card bg-base-100 shadow-sm">
                         <div class="card-body">
                             <h3 class="card-title text-lg mb-4 font-normal">🔥 热门话题</h3>
-                            <div class="space-y-2">
+                            <div class="flex flex-wrap gap-2">
                                 {{range .ArticleCategoryList}}
-                                <div class="badge badge-outline badge-lg w-full justify-start">#{{.Name}}</div>
+                                <a class="badge badge-outline hover:badge-primary cursor-pointer" href="/post?filters={{.Value}}">#{{.Name}}</a>
                                 {{end}}
                             </div>
                         </div>
@@ -210,7 +210,22 @@
                             </div>
                         </div>
                     </div>
-
+                    {{if .RecommendedArticles}}
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body">
+                            <h2 class="card-title font-normal">推荐文章</h2>
+                            <div class="space-y-2">
+                                {{range .RecommendedArticles}}
+                                <div class="space-y-1">
+                                    <a href="/post/{{.Id}}" class="text-sm hover:text-primary cursor-pointer">
+                                        • {{.Title}}
+                                    </a>
+                                </div>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
                     <!-- 快速链接 -->
                     <div class="card bg-base-100 shadow-sm ">
                         <div class="card-body">

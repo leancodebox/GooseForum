@@ -35,6 +35,7 @@ func Home(c *gin.Context) {
 		"Description":         "GooseForum's home",
 		"LatestArticles":      articlesSmallEntity2Dto(last), // 最新的文章
 		"Stats":               GetSiteStatisticsData(),
+		"RecommendedArticles": getRecommendedArticles(),
 	})
 }
 
@@ -158,6 +159,7 @@ func PostDetail(c *gin.Context) {
 		"AuthorInfoStatistics": authorInfoStatistics,
 		"IsFollowing":          isFollowing,
 		"IsOwnArticle":         loginUser.UserId == entity.UserId,
+		"ArticleCategoryList":  articleCategoryLabel(),
 	})
 }
 
@@ -336,12 +338,18 @@ func PrivacyPolicy(c *gin.Context) {
 func LinksView(c *gin.Context) {
 	configEntity := pageConfig.GetByPageType(FriendShipLinks)
 	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
+	totalCounter := 0
+	for _, group := range res {
+		totalCounter += len(group.Links)
+	}
 	viewrender.Render(c, "links.gohtml", map[string]any{
-		"IsProduction":     setting.IsProduction(),
-		"User":             GetLoginUser(c),
-		"Title":            "友情链接 - GooseForum",
-		"FriendLinksGroup": res,
-		"Description":      "GooseForum's links",
+		"IsProduction":        setting.IsProduction(),
+		"User":                GetLoginUser(c),
+		"Title":               "友情链接 - GooseForum",
+		"FriendLinksGroup":    res,
+		"Description":         "GooseForum's links",
+		"TotalCounter":        totalCounter,
+		"RecommendedArticles": getRecommendedArticles(),
 	})
 }
 
