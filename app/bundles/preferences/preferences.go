@@ -1,11 +1,15 @@
 package preferences
 
 import (
+	"bytes"
+	_ "embed"
 	"flag"
-	"github.com/leancodebox/GooseForum/app/assert"
+	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/bundles/fileopt"
 	"log/slog"
 	"sync"
+	"text/template"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cast"
@@ -15,10 +19,27 @@ import (
 // Viper 库实例
 var v *viper.Viper
 
+//go:embed config.templ.toml
+var configTempl []byte
+
+func GenerateConfig() []byte {
+	var b bytes.Buffer
+	t := template.New("config.templ.toml")
+	t = template.Must(t.Parse(string(configTempl)))
+	err := t.Execute(&b, map[string]any{
+		"SigningKey": algorithm.SafeGenerateSigningKey(32),
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return b.Bytes()
+}
+
 // 初始化配置信息，完成对环境变量以及 conf 信息的加载
 func init() {
 	if !fileopt.IsExist("config.toml") {
-		err := fileopt.FilePutContents("./config.toml", assert.GenerateConfig())
+		err := fileopt.FilePutContents("config.toml", GenerateConfig())
 		if err != nil {
 			panic(err)
 		}

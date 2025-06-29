@@ -43,6 +43,13 @@ func GetTemplates() *template.Template {
 	))
 }
 
+//go:embed static/pic/default-avatar.png
+var defaultAvatar []byte
+
+func GetDefaultAvatar() []byte {
+	return defaultAvatar
+}
+
 //go:embed all:static/**
 var viewAssert embed.FS
 
