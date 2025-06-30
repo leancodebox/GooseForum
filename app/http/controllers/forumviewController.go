@@ -138,6 +138,7 @@ func PostDetail(c *gin.Context) {
 		"AuthorId":             authorId,
 		"Title":                entity.Title + " - GooseForum",
 		"Description":          entity.Description,
+		"OgType":               "article",
 		"Year":                 time.Now().Year(),
 		"ArticleTitle":         entity.Title,
 		"ArticleContent":       template.HTML(entity.RenderedHTML),
