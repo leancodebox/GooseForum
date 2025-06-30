@@ -131,22 +131,21 @@
                         <div class="absolute inset-0 pointer-events-none select-none overflow-hidden">
                             <!-- 第一层水印 -->
                             <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-10">
-                                <div class="text-6xl font-black text-gray-600 whitespace-nowrap animate-pulse">
-                                    {{.ForumInfo.Title}} • {{.ForumInfo.Title}} • {{.ForumInfo.Title}} • {{.ForumInfo.Title}}
+                                <div class="text-7xl font-black text-gray-800 whitespace-nowrap animate-pulse">
+                                    {{.ForumInfo.Title}} 
                                 </div>
                             </div>
-                            
                             <!-- 第二层水印 -->
-                            <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-5 translate-y-8">
-                                <div class="text-4xl font-bold text-gray-500 whitespace-nowrap">
-                                    {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}}
+                            <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-5 translate-y-16">
+                                <div class="text-5xl font-bold text-gray-500 whitespace-nowrap">
+                                    {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}}
                                 </div>
                             </div>
                             
                             <!-- 第三层水印 -->
-                            <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-3 -translate-y-8">
-                                <div class="text-8xl font-black text-gray-700 whitespace-nowrap">
-                                    {{.ForumInfo.Title}} ★ {{.ForumInfo.Title}} ★ {{.ForumInfo.Title}}
+                            <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-3 -translate-y-16">
+                                <div class="text-9xl font-black text-gray-700 whitespace-nowrap">
+                                    {{.ForumInfo.Title}} ★ {{.ForumInfo.Title}} 
                                 </div>
                             </div>
                         </div>
@@ -187,7 +186,7 @@
                                     <span class="text-xs font-semibold text-accent">{{.Stats.Reply}}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs text-base-content/70">在线用户</span>
+                                    <span class="text-xs text-base-content/70">友情链接</span>
                                     <span class="text-xs font-semibold text-info">{{.Stats.LinksCount}}</span>
                                 </div>
                             </div>

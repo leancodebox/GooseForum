@@ -22,11 +22,11 @@
                         <div class="lg:col-span-6 text-center lg:text-left">
                             <h1 class="text-2xl lg:text-4xl font-bold mb-2">
                                 <span class="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                                    GooseForum
+                                    {{.GooseForumInfo.Title}}
                                 </span>
                             </h1>
                             <p class="text-sm lg:text-base text-base-content/70 mb-4 max-w-md mx-auto lg:mx-0">
-                                开放交流社区 · 分享见解 · 畅所欲言 · 共同成长
+                                {{.GooseForumInfo.Desc}}
                             </p>
                             <div class="flex gap-2 justify-center lg:justify-start flex-wrap">
                                 <a href="/post" class="btn btn-primary btn-sm">浏览文章</a>

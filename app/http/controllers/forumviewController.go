@@ -36,6 +36,7 @@ func Home(c *gin.Context) {
 		"LatestArticles":      articlesSmallEntity2Dto(last), // 最新的文章
 		"Stats":               GetSiteStatisticsData(),
 		"RecommendedArticles": getRecommendedArticles(),
+		"GooseForumInfo":      GetGooseForumInfo(),
 	})
 }
 
@@ -169,6 +170,14 @@ type ForumInfo struct {
 	Independence bool
 }
 
+func GetGooseForumInfo() ForumInfo {
+	return ForumInfo{
+		Title:        "GooseForum",
+		Desc:         "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆",
+		Independence: false,
+	}
+}
+
 func Post(c *gin.Context) {
 	filters := c.DefaultQuery("filters", "")
 	categories := array.Filter(array.Map(strings.Split(filters, "-"), func(t string) int {
@@ -178,11 +187,7 @@ func Post(c *gin.Context) {
 	})
 	page := cast.ToInt(c.DefaultQuery("page", "1"))
 	pageSize := cast.ToInt(c.DefaultQuery("pageSize", "20"))
-	forumInfo := ForumInfo{
-		Title:        "GooseForum",
-		Desc:         "开放交流社区 · 分享见解 · 畅所欲言 · 共同成长",
-		Independence: false,
-	}
+	var forumInfo ForumInfo = GetGooseForumInfo()
 	pageData := articles.Page[articles.SmallEntity](
 		articles.PageQuery{
 			Page:         max(page, 1),
