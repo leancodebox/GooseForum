@@ -76,10 +76,11 @@ export const getCategoryList = (): Promise<Result<Category[]>> => {
     return axiosInstance.post('api/admin/category-list')
 }
 
-export const saveCategory = (id: number, category: string, sort: number, status: number): Promise<Result<any>> => {
+export const saveCategory = (id: number, category: string,desc:string, sort: number, status: number): Promise<Result<any>> => {
     return axiosInstance.post('api/admin/category-save', {
         id: id,
         category: category,
+        desc:desc,
         sort: sort,
         status: status,
     })

@@ -61,6 +61,7 @@ export interface AdminArticlesItem {
 export interface Category {
     id: number
     category: string,
+    desc: string,
     sort: number
     status: number
 }

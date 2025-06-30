@@ -1,3 +1,132 @@
+<script setup lang="ts">
+import {onMounted, ref, reactive} from 'vue'
+import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/outline'
+import {getCategoryList,saveCategory,deleteCategory} from "@/admin/utils/adminService.ts";
+import type {Category, Label} from "@/admin/utils/adminInterfaces.ts";
+
+// 响应式数据
+const categories = ref<Category[]>([])
+const loading = ref(false)
+const saving = ref(false)
+const deleting = ref(false)
+const editingCategory = ref<Category | null>(null)
+const categoryModal = ref<HTMLDialogElement>()
+const deleteModal = ref<HTMLDialogElement>()
+const modalMode = ref<'create' | 'edit'>('create')
+const categoryToDelete = ref<Category | null>(null)
+
+// 表单数据
+const formData = reactive({
+  id: 0,
+  category: '',
+  desc:'',
+  sort: 0,
+  status: 1
+})
+
+// 方法
+const fetchCategories = async () => {
+  loading.value = true
+  try {
+    let resp = await getCategoryList()
+    categories.value = resp.result
+  } catch (error) {
+    console.error('获取分类列表失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchCategories()
+})
+
+const resetForm = () => {
+  formData.id = 0
+  formData.category = ''
+  formData.desc = ''
+  formData.sort = 0
+  formData.status = 1
+}
+
+const openCreateModal = () => {
+  modalMode.value = 'create'
+  resetForm()
+  editingCategory.value = null
+  categoryModal.value?.showModal()
+}
+
+const openEditModal = (category: Category) => {
+  modalMode.value = 'edit'
+  editingCategory.value = category
+  formData.id = category.id
+  formData.category = category.category
+  formData.desc = category.desc
+  formData.sort = category.sort
+  formData.status = category.status
+  categoryModal.value?.showModal()
+}
+
+const closeModal = () => {
+  categoryModal.value?.close()
+  resetForm()
+}
+
+const saveCategory_ = async () => {
+  if (!formData.category.trim()) {
+    alert('请输入分类名称')
+    return
+  }
+
+  saving.value = true
+  try {
+    const id = modalMode.value === 'edit' ? formData.id : 0
+    await saveCategory(id, formData.category,formData.desc, formData.sort, formData.status)
+    closeModal()
+    await fetchCategories()
+  } catch (error) {
+    console.error('保存分类失败:', error)
+    alert('保存失败，请重试')
+  } finally {
+    saving.value = false
+  }
+}
+
+const openDeleteModal = (category: Category) => {
+  categoryToDelete.value = category
+  deleteModal.value?.showModal()
+}
+
+const closeDeleteModal = () => {
+  deleteModal.value?.close()
+  categoryToDelete.value = null
+}
+
+const confirmDelete = async () => {
+  if (!categoryToDelete.value) return
+
+  deleting.value = true
+  try {
+    await deleteCategory(categoryToDelete.value.id)
+    closeDeleteModal()
+    await fetchCategories()
+  } catch (error) {
+    console.error('删除分类失败:', error)
+    alert(error.message)
+  } finally {
+    deleting.value = false
+  }
+}
+
+const getStatusText = (status: number) => {
+  return status === 0 ? '启用' : '禁用'
+}
+
+const getStatusClass = (status: number) => {
+  return status === 0 ? 'badge-success' : 'badge-error'
+}
+</script>
 <template>
   <div class="space-y-6">
     <!-- 页面标题和操作按钮 -->
@@ -5,7 +134,7 @@
       <h1 class="text-2xl font-normal text-base-content">分类管理</h1>
       <button
           @click="openCreateModal"
-          class="btn btn-primary"
+          class="btn btn-primary btn-sm"
       >
         <PlusIcon class="w-5 h-5 mr-2"/>
         新增分类
@@ -35,6 +164,7 @@
           <tr>
             <th class="text-left">ID</th>
             <th class="text-left">分类名称</th>
+            <th class="text-left">描述</th>
             <th class="text-left">排序</th>
             <th class="text-left">状态</th>
             <th class="text-left">操作</th>
@@ -44,6 +174,7 @@
           <tr v-for="category in categories" :key="category.id" class="hover">
             <td class="font-normal text-sm">{{ category.id }}</td>
             <td class="font-normal">{{ category.category }}</td>
+            <td class="font-normal">{{ category.desc }}</td>
             <td>
               <span class="badge badge-outline">{{ category.sort }}</span>
             </td>
@@ -83,63 +214,75 @@
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="closeModal">✕</button>
         </form>
         
-        <h3 class="font-normal text-lg mb-4">
+        <h3 class="font-normal text-lg mb-8">
           {{ modalMode === 'create' ? '新增分类' : '编辑分类' }}
         </h3>
         
         <div class="space-y-4">
           <!-- 分类名称 -->
           <div class="form-control">
-            <label class="label">
+            <label class="floating-label">
               <span class="label-text font-normal">分类名称 <span class="text-error">*</span></span>
+              <input
+                  v-model="formData.category"
+                  type="text"
+                  placeholder="请输入分类名称"
+                  class="input input-bordered w-full"
+                  :disabled="saving"
+              />
             </label>
-            <input 
-              v-model="formData.category"
-              type="text" 
-              placeholder="请输入分类名称"
-              class="input input-bordered w-full"
-              :disabled="saving"
-            />
+          </div>
+
+          <div class="form-control">
+            <label class="floating-label">
+              <span class="label-text font-normal">分类描述 <span class="text-error">*</span></span>
+              <input
+                  v-model="formData.desc"
+                  type="text"
+                  placeholder="请输入分类描述"
+                  class="input input-bordered w-full"
+              />
+            </label>
           </div>
           
           <!-- 排序 -->
           <div class="form-control">
-            <label class="label">
+            <label class="floating-label">
               <span class="label-text font-normal">排序</span>
+              <input
+                  v-model.number="formData.sort"
+                  type="number"
+                  placeholder="请输入排序值"
+                  class="input input-bordered w-full"
+                  :disabled="saving"
+                  min="0"
+              />
             </label>
-            <input 
-              v-model.number="formData.sort"
-              type="number" 
-              placeholder="请输入排序值"
-              class="input input-bordered w-full"
-              :disabled="saving"
-              min="0"
-            />
           </div>
           
           <!-- 状态 -->
           <div class="form-control">
-            <label class="label">
+            <label class="floating-label">
               <span class="label-text font-normal">状态</span>
+              <select v-model.number="formData.status" class="select select-bordered w-full" :disabled="saving">
+                <option :value="1">启用</option>
+                <option :value="0">禁用</option>
+              </select>
             </label>
-            <select v-model.number="formData.status" class="select select-bordered w-full" :disabled="saving">
-              <option :value="1">启用</option>
-              <option :value="0">禁用</option>
-            </select>
           </div>
         </div>
         
         <div class="modal-action">
           <button 
             @click="closeModal"
-            class="btn btn-outline"
+            class="btn btn-outline btn-sm"
             :disabled="saving"
           >
             取消
           </button>
           <button 
             @click="saveCategory_"
-            class="btn btn-primary"
+            class="btn btn-primary btn-sm"
             :disabled="saving"
           >
             <span v-if="saving" class="loading loading-spinner loading-sm mr-2"></span>
@@ -190,133 +333,5 @@
     </dialog>
   </div>
 </template>
-
-<script setup lang="ts">
-import {onMounted, ref, reactive} from 'vue'
-import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/outline'
-import {getCategoryList,saveCategory,deleteCategory} from "@/admin/utils/adminService.ts";
-import type {Category} from "@/admin/utils/adminInterfaces.ts";
-
-// 响应式数据
-const categories = ref<Category[]>([])
-const loading = ref(false)
-const saving = ref(false)
-const deleting = ref(false)
-const editingCategory = ref<Category | null>(null)
-const categoryModal = ref<HTMLDialogElement>()
-const deleteModal = ref<HTMLDialogElement>()
-const modalMode = ref<'create' | 'edit'>('create')
-const categoryToDelete = ref<Category | null>(null)
-
-// 表单数据
-const formData = reactive({
-  id: 0,
-  category: '',
-  sort: 0,
-  status: 1
-})
-
-// 方法
-const fetchCategories = async () => {
-  loading.value = true
-  try {
-    let resp = await getCategoryList()
-    categories.value = resp.result
-  } catch (error) {
-    console.error('获取分类列表失败:', error)
-  } finally {
-    loading.value = false
-  }
-}
-
-// 组件挂载时获取数据
-onMounted(() => {
-  fetchCategories()
-})
-
-const resetForm = () => {
-  formData.id = 0
-  formData.category = ''
-  formData.sort = 0
-  formData.status = 1
-}
-
-const openCreateModal = () => {
-  modalMode.value = 'create'
-  resetForm()
-  editingCategory.value = null
-  categoryModal.value?.showModal()
-}
-
-const openEditModal = (category: Category) => {
-  modalMode.value = 'edit'
-  editingCategory.value = category
-  formData.id = category.id
-  formData.category = category.category
-  formData.sort = category.sort
-  formData.status = category.status
-  categoryModal.value?.showModal()
-}
-
-const closeModal = () => {
-  categoryModal.value?.close()
-  resetForm()
-}
-
-const saveCategory_ = async () => {
-  if (!formData.category.trim()) {
-    alert('请输入分类名称')
-    return
-  }
-  
-  saving.value = true
-  try {
-    const id = modalMode.value === 'edit' ? formData.id : 0
-    await saveCategory(id, formData.category, formData.sort, formData.status)
-    closeModal()
-    await fetchCategories()
-  } catch (error) {
-    console.error('保存分类失败:', error)
-    alert('保存失败，请重试')
-  } finally {
-    saving.value = false
-  }
-}
-
-const openDeleteModal = (category: Category) => {
-  categoryToDelete.value = category
-  deleteModal.value?.showModal()
-}
-
-const closeDeleteModal = () => {
-  deleteModal.value?.close()
-  categoryToDelete.value = null
-}
-
-const confirmDelete = async () => {
-  if (!categoryToDelete.value) return
-  
-  deleting.value = true
-  try {
-    await deleteCategory(categoryToDelete.value.id)
-    closeDeleteModal()
-    await fetchCategories()
-  } catch (error) {
-    console.error('删除分类失败:', error)
-    alert(error.message)
-  } finally {
-    deleting.value = false
-  }
-}
-
-const getStatusText = (status: number) => {
-  return status === 0 ? '启用' : '禁用'
-}
-
-const getStatusClass = (status: number) => {
-  return status === 0 ? 'badge-success' : 'badge-error'
-}
-</script>
-
 <style scoped>
 </style>

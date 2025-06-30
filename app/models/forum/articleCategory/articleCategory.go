@@ -19,9 +19,10 @@ const fieldCreatedAt = "created_at"
 const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
-	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                 //
-	Category  string    `gorm:"column:category;type:varchar(255);not null;default:'';" json:"category"` //
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`           //
+	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                //
+	Category  string    `gorm:"column:category;type:varchar(64);not null;default:'';" json:"category"` //
+	Desc      string    `gorm:"column:desc;type:varchar(255);not null;default:'';" json:"desc"`        //
+	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`          //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 

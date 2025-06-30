@@ -388,6 +388,7 @@ type CategoryListReq struct {
 type CategoryItem struct {
 	Id       uint64 `json:"id"`
 	Category string `json:"category"`
+	Desc     string `json:"desc"`
 	Sort     int    `json:"sort"`
 	Status   int8   `json:"status"`
 }
@@ -399,6 +400,7 @@ func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Res
 		return CategoryItem{
 			Id:       t.Id,
 			Category: t.Category,
+			Desc:     t.Desc,
 			//Sort:     t.Sort,
 			//Status:   t.Status,
 		}
@@ -408,6 +410,7 @@ func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Res
 type CategorySaveReq struct {
 	Id       uint64 `json:"id"`
 	Category string `json:"category" validate:"required"`
+	Desc     string `json:"desc"`
 	Sort     int    `json:"sort"`
 	Status   int8   `json:"status"`
 }
@@ -423,6 +426,7 @@ func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Respon
 		return component.FailResponse("数据不存在")
 	}
 	entity.Category = req.Params.Category
+	entity.Desc = req.Params.Desc
 
 	articleCategory.SaveOrCreateById(&entity)
 	return component.SuccessResponse(true)
