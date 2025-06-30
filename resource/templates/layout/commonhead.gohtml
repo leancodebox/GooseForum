@@ -2,10 +2,12 @@
 <meta name="description" content="{{.Description}}">
 <meta name="keywords"
       content="{{if .Keywords}}{{.Keywords}}{{else}}GooseForum{{end}}">
+<meta property="og:site_name" content="GooseForum">
 <meta property="og:title" content="{{.Title}}">
 <meta property="og:description" content="{{.Description}}">
 <meta property="og:type" content="{{if .OgType}}{{.OgType}}{{else}}website{{end}}">
 <link rel="alternate" type="application/rss+xml" title="GooseForum RSS Feed" href="/rss.xml"/>{{if .CanonicalHref}}
-<link rel="canonical" href="{{.CanonicalHref}}">{{end}}{{with GetMetaList }}{{range .}}
+<link rel="canonical" href="{{.CanonicalHref}}">
+<meta property="og:url" content="{{.CanonicalHref}}"/>{{end}}{{with GetMetaList }}{{range .}}
 <meta name="{{.Name}}" content="{{.Content}}"/>{{end}}{{end}}
 <link rel="icon" type="image/png" href="/static/pic/icon.png">
