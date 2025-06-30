@@ -44,7 +44,7 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/publish", middleware.CheckLogin, controllers.PublishV3)
 	viewRouteApp.GET("/notifications", middleware.CheckLogin, controllers.Notifications)
 	viewRouteApp.GET("/submit-link", controllers.SubmitLink)
-	viewRouteApp.GET("/admin/*path", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), controllers.Admin)
+	viewRouteApp.GET("/admin/*path", controllers.Admin)
 }
 
 func siteInfoRoute(ginApp *gin.Engine) {

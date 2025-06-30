@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { axiosInstance } from '../utils/axiosInstance'
-import { getUserInfo } from '../utils/adminService'
+import {getUserInfo, type PageData} from '../utils/adminService'
+import type {AdminArticlesItem, Result} from "@/admin/utils/adminInterfaces.ts";
 
 export interface User {
   userId: number
@@ -67,16 +68,17 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      const response = await axiosInstance.post('/login', credentials)
-      if (response.data.code === 0) {
+      const response = await axiosInstance.post('/login', credentials) as Result<any>
+      console.log(response.result)
+      if (response.code === 0) {
         await fetchUserInfo()
         return { success: true }
       } else {
-        return { success: false, error: response.data.msg }
+        return { success: false, error: response.message }
       }
     } catch (err: any) {
       console.error(err)
-      error.value = err.response?.data?.message || '登录失败'
+      error.value = err.toString || '登录失败'
       return { success: false, error: error.value }
     } finally {
       loading.value = false
