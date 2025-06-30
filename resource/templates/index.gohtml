@@ -14,15 +14,16 @@
     <main class="flex-1 container mx-auto px-4 py-4">
         <div class="container mx-auto px-2 py-1 space-y-6">
             <!-- 超紧凑解构式Hero区域 -->
-            <div class="relative overflow-hidden bg-gradient-to-br from-base-100 via-base-50 to-base-200/50 rounded-2xl border border-base-300/30">
+            <div class="relative overflow-hidden rounded-2xl">
                 <div class="relative0 p-4 lg:p-6">
                     <!-- 解构式布局 -->
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
                         <!-- 主标题区域 -->
                         <div class="lg:col-span-6 text-center lg:text-left">
                             <h1 class="text-2xl lg:text-4xl font-bold mb-2">
-                                <span class="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                                    {{.GooseForumInfo.Title}}
+                                <span class="text-primary font-bold drop-shadow-lg hover:drop-shadow-xl transition-all duration-300 relative hover:text-primary-focus">
+                                    <span class="absolute inset-0 bg-primary/20 blur-md rounded-lg -z-10 opacity-0 hover:opacity-100 transition-opacity duration-500 scale-110"></span>
+                                    <span class="relative z-10">{{.GooseForumInfo.Title}}</span>
                                 </span>
                             </h1>
                             <p class="text-sm lg:text-base text-base-content/70 mb-4 max-w-md mx-auto lg:mx-0">
