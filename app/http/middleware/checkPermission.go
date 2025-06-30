@@ -34,3 +34,25 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func CheckPermissionOrNoUser(permissionType permission.Enum) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userIdData, _ := c.Get("userId")
+		userId := cast.ToUint64(userIdData)
+		if userId == 0 {
+			return
+		}
+		user, err := users.Get(userId)
+		if err != nil {
+			c.JSON(http.StatusForbidden, component.FailData("操作异常"))
+			c.Abort()
+			return
+		}
+		if permission.CheckRole(user.RoleId, permissionType) == false {
+			c.Redirect(http.StatusFound, "/")
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
