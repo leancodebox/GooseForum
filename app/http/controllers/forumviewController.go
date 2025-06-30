@@ -164,6 +164,8 @@ func PostDetail(c *gin.Context) {
 		"IsOwnArticle":         loginUser.UserId == entity.UserId,
 		"ArticleCategoryList":  articleCategoryLabel(),
 		"ArticleJSONLD":        generateArticleJSONLD(c, entity, author),
+		"PublishedTime":        entity.CreatedAt.Format(time.RFC3339),
+		"ModifiedTime":         entity.UpdatedAt.Format(time.RFC3339),
 	})
 }
 
