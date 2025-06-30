@@ -128,57 +128,55 @@
                     <!-- 列表介绍卡片 - Hero风格 -->
                     <div class="relative overflow-hidden bg-gradient-to-br from-base-100 via-base-50 to-base-200/50 rounded-xl border border-base-300/30 shadow-xl">
                         <div class="relative p-4">
+
                             <!-- 主标题区域 -->
-                            <div class="text-center mb-4">
+                            <div class="text-start mb-4">
                                 <h1 class="text-xl font-bold mb-2">
                                     <span class="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                                        GooseForum
+                                        {{.ForumInfo.Title}}
                                     </span>
                                 </h1>
                                 <p class="text-sm text-base-content/70 mb-3">
-                                    开放交流社区 · 分享见解 · 畅所欲言 · 共同成长
+                                    {{.ForumInfo.Desc}}
                                 </p>
                             </div>
-                            
-                            <!-- 内容统计 -->
+                            {{if not .ForumInfo.Independence}}
+                            <!-- 社区统计 -->
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                    <span class="text-xs font-medium">内容统计</span>
+                                    <span class="text-xs font-medium">社区统计</span>
                                 </div>
                                 <span class="text-xs text-base-content/60">实时数据</span>
                             </div>
+                            <div class="space-y-2 mb-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-base-content/70">注册用户</span>
+                                    <span class="text-xs font-semibold text-primary">{{.Stats.ArticleCount}}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-base-content/70">文章总数</span>
+                                    <span class="text-xs font-semibold text-secondary">{{.Stats.ArticleCount}}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-base-content/70">评论总数</span>
+                                    <span class="text-xs font-semibold text-accent">{{.Stats.Reply}}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-base-content/70">在线用户</span>
+                                    <span class="text-xs font-semibold text-info">{{.Stats.LinksCount}}</span>
+                                </div>
+                            </div>
+                            {{end}}
                             
-                            <div class="space-y-2 mb-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs text-base-content/70">技术文章</span>
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-12 h-1 bg-primary/20 rounded-full overflow-hidden">
-                                            <div class="w-3/4 h-full bg-primary rounded-full"></div>
-                                        </div>
-                                        <span class="text-xs font-semibold text-primary">75%</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs text-base-content/70">经验分享</span>
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-12 h-1 bg-secondary/20 rounded-full overflow-hidden">
-                                            <div class="w-2/3 h-full bg-secondary rounded-full"></div>
-                                        </div>
-                                        <span class="text-xs font-semibold text-secondary">65%</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs text-base-content/70">讨论话题</span>
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-12 h-1 bg-accent/20 rounded-full overflow-hidden">
-                                            <div class="w-1/2 h-full bg-accent rounded-full"></div>
-                                        </div>
-                                        <span class="text-xs font-semibold text-accent">50%</span>
-                                    </div>
-                                </div>
+                            <!-- 文章发布按钮 -->
+                            <div class="mt-4 pt-3 border-t border-base-300/30">
+                                <a href="/publish" class="btn btn-primary btn-sm w-full gap-2 hover:shadow-lg transition-all duration-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    发布文章
+                                </a>
                             </div>
                             
                             <!-- 装饰性图标 -->

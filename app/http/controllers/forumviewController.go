@@ -163,26 +163,32 @@ func PostDetail(c *gin.Context) {
 	})
 }
 
+type ForumInfo struct {
+	Title        string
+	Desc         string
+	Independence bool
+}
+
 func Post(c *gin.Context) {
 	filters := c.DefaultQuery("filters", "")
-
 	categories := array.Filter(array.Map(strings.Split(filters, "-"), func(t string) int {
 		return cast.ToInt(t)
 	}), func(i int) bool {
 		return i > 0
 	})
-	param := GetArticlesPageRequest{
-		Page:       cast.ToInt(c.DefaultQuery("page", "1")),
-		PageSize:   cast.ToInt(c.DefaultQuery("pageSize", "20")),
-		Search:     c.Query("search"),
-		Categories: categories,
+	page := cast.ToInt(c.DefaultQuery("page", "1"))
+	pageSize := cast.ToInt(c.DefaultQuery("pageSize", "20"))
+	forumInfo := ForumInfo{
+		Title:        "GooseForum",
+		Desc:         "开放交流社区 · 分享见解 · 畅所欲言 · 共同成长",
+		Independence: false,
 	}
 	pageData := articles.Page[articles.SmallEntity](
 		articles.PageQuery{
-			Page:         max(param.Page, 1),
-			PageSize:     param.PageSize,
+			Page:         max(page, 1),
+			PageSize:     pageSize,
 			FilterStatus: true,
-			Categories:   param.Categories,
+			Categories:   categories,
 		})
 	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
 		return t.UserId
@@ -232,13 +238,20 @@ func Post(c *gin.Context) {
 		}
 	})
 	// 计算总页数
-	totalPages := (cast.ToInt(pageData.Total) + param.PageSize - 1) / param.PageSize
+	totalPages := (cast.ToInt(pageData.Total) + pageSize - 1) / pageSize
 	articleCategoryList := articleCategoryLabel()
 	var pagination []PageButton
 	start := max(pageData.Page-3, 1)
 	for i := 1; i <= 7; i++ {
 		pagination = append(pagination, PageButton{Index: i, Page: start})
 		start += 1
+	}
+	if len(categories) == 1 {
+		if category, ok := categoryMap[cast.ToUint64(categories[0])]; ok {
+			forumInfo.Independence = true
+			forumInfo.Desc = category.Desc
+			forumInfo.Title = category.Category
+		}
 	}
 
 	viewrender.Render(c, "list.gohtml", map[string]any{
@@ -248,7 +261,7 @@ func Post(c *gin.Context) {
 		"Year":                time.Now().Year(),
 		"ArticleList":         articleList,
 		"Page":                pageData.Page,
-		"PageSize":            param.PageSize,
+		"PageSize":            pageSize,
 		"Total":               pageData.Total,
 		"TotalPages":          totalPages,
 		"PrevPage":            max(pageData.Page-1, 1),
@@ -261,6 +274,8 @@ func Post(c *gin.Context) {
 		"FilterIds":           categories,
 		"NoFilter":            len(categories) == 0,
 		"Pagination":          pagination,
+		"Stats":               GetSiteStatisticsData(),
+		"ForumInfo":           forumInfo,
 	})
 }
 
