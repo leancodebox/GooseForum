@@ -127,7 +127,31 @@
                 <div class="sticky top-24 space-y-4">
                     <!-- 列表介绍卡片 - Hero风格 -->
                     <div class="relative overflow-hidden bg-gradient-to-br from-base-100 via-base-50 to-base-200/50 rounded-xl border border-base-300/30 shadow-xl">
-                        <div class="relative p-4">
+                        <!-- 水印背景 - 纯Tailwind实现 -->
+                        <div class="absolute inset-0 pointer-events-none select-none overflow-hidden">
+                            <!-- 第一层水印 -->
+                            <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-10">
+                                <div class="text-6xl font-black text-gray-600 whitespace-nowrap animate-pulse">
+                                    {{.ForumInfo.Title}} • {{.ForumInfo.Title}} • {{.ForumInfo.Title}} • {{.ForumInfo.Title}}
+                                </div>
+                            </div>
+                            
+                            <!-- 第二层水印 -->
+                            <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-5 translate-y-8">
+                                <div class="text-4xl font-bold text-gray-500 whitespace-nowrap">
+                                    {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}}
+                                </div>
+                            </div>
+                            
+                            <!-- 第三层水印 -->
+                            <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-3 -translate-y-8">
+                                <div class="text-8xl font-black text-gray-700 whitespace-nowrap">
+                                    {{.ForumInfo.Title}} ★ {{.ForumInfo.Title}} ★ {{.ForumInfo.Title}}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="relative p-4 z-10">
 
                             <!-- 主标题区域 -->
                             <div class="text-start mb-4">
