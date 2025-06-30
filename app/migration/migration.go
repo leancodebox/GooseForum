@@ -93,6 +93,7 @@ func initData() {
 	category := articleCategory.GetOne()
 	if category.Id == 0 {
 		category.Category = "GooseForum"
+		category.Desc = "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆"
 		articleCategory.SaveOrCreateById(&category)
 		fmt.Println("标签不存在，创建标签")
 	}
