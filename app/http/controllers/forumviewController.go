@@ -30,7 +30,7 @@ func Home(c *gin.Context) {
 		"IsProduction":        setting.IsProduction(),
 		"CanonicalHref":       buildCanonicalHref(c),
 		"User":                GetLoginUser(c),
-		"Title":               "GooseForum",
+		"Title":               "GooseForum - 自由漫谈的江湖茶馆",
 		"ArticleCategoryList": articleCategoryLabel(),
 		"Description":         "GooseForum's home",
 		"LatestArticles":      articlesSmallEntity2Dto(last), // 最新的文章
@@ -248,21 +248,30 @@ func Post(c *gin.Context) {
 	var pagination []PageButton
 	start := max(pageData.Page-3, 1)
 	for i := 1; i <= 7; i++ {
+		if start > totalPages {
+			break
+		}
 		pagination = append(pagination, PageButton{Index: i, Page: start})
 		start += 1
 	}
+
+	title := "GooseForum - 自由漫谈的江湖茶馆"
+	description := "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆"
 	if len(categories) == 1 {
 		if category, ok := categoryMap[cast.ToUint64(categories[0])]; ok {
 			forumInfo.Independence = true
 			forumInfo.Desc = category.Desc
 			forumInfo.Title = category.Category
+
+			title = category.Category + " 社区 | GooseForum"
+			description = category.Desc
 		}
 	}
 
 	viewrender.Render(c, "list.gohtml", map[string]any{
 		"IsProduction":        setting.IsProduction(),
-		"Title":               "GooseForum",
-		"Description":         "知无不言,言无不尽",
+		"Title":               title,
+		"Description":         description,
 		"Year":                time.Now().Year(),
 		"ArticleList":         articleList,
 		"Page":                pageData.Page,
