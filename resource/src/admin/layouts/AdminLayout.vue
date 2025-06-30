@@ -13,7 +13,7 @@
         <!-- 桌面端侧边栏切换按钮 -->
         <button @click="toggleSidebar" class="btn btn-ghost btn-sm hidden lg:flex transition-all duration-300 mr-2"
           :title="isCollapsed ? '展开侧边栏' : '折叠侧边栏'">
-          <ChevronLeftIcon class="w-5 h-5 transition-transform duration-300" :class="isCollapsed ? 'rotate-180' : ''" />
+          <Bars3Icon class="w-5 h-5 transition-all duration-300" :class="isCollapsed ? 'opacity-60' : 'opacity-100'" />
         </button>
       </div>
       
@@ -97,16 +97,16 @@
                 <router-link :to="item.path" :class="[
                   'flex items-center rounded-lg transition-all duration-200 ease-in-out',
                   {
-                    'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content': $route.path === item.path,
-                    'text-base-content hover:bg-base-200 hover:text-base-content hover:scale-105': $route.path !== item.path,
+                    'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content': isPathActive(item.path),
+                    'text-base-content hover:bg-base-200 hover:text-base-content hover:scale-105': !isPathActive(item.path),
                     'justify-center p-2': isCollapsed,
                     'justify-start p-3': !isCollapsed
                   }
                 ]" :title="isCollapsed ? item.label : ''">
                   <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200"
-                    :class="{ 'scale-110': $route.path === item.path }" />
+                    :class="{ 'scale-110': isPathActive(item.path) }" />
                   <span v-if="!isCollapsed" class="ml-3 truncate transition-all duration-300 ease-in-out"
-                    :class="{ 'font-normal': $route.path === item.path }">{{ item.label }}</span>
+                    :class="{ 'font-normal': isPathActive(item.path) }">{{ item.label }}</span>
                 </router-link>
               </li>
             </ul>
@@ -132,7 +132,8 @@ import {
   ShieldCheckIcon,
   GiftIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  Bars3Icon
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -163,6 +164,13 @@ const contentMarginLeft = computed(() => {
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
   localStorage.setItem('sidebar-collapsed', isCollapsed.value.toString())
+}
+
+// 路径匹配函数 - 处理末尾斜杠问题
+const isPathActive = (itemPath: string) => {
+  const currentPath = route.path.replace(/\/$/, '') || '/'
+  const targetPath = itemPath.replace(/\/$/, '') || '/'
+  return currentPath === targetPath
 }
 
 // 菜单项
