@@ -276,13 +276,16 @@ func articleCategoryMapList(articleIds []uint64) map[uint64][]string {
 }
 
 func buildCanonicalHref(c *gin.Context) string {
+	return getBaseUri(c) + c.Request.URL.String()
+}
+
+func getBaseUri(c *gin.Context) string {
 	scheme := "https"
 	if strings.HasPrefix(c.Request.Host, "localhost") {
 		scheme = "http"
 	}
 	host := fmt.Sprintf("%s://%s", scheme, c.Request.Host)
-	baseUri := preferences.Get("server.url", host)
-	return baseUri + c.Request.URL.String()
+	return preferences.Get("server.url", host)
 }
 
 func getHost(c *gin.Context) string {

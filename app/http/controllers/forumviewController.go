@@ -2,6 +2,7 @@ package controllers
 
 import (
 	_ "embed"
+	"fmt"
 	"html/template"
 	"strings"
 	"time"
@@ -161,6 +162,7 @@ func PostDetail(c *gin.Context) {
 		"IsFollowing":          isFollowing,
 		"IsOwnArticle":         loginUser.UserId == entity.UserId,
 		"ArticleCategoryList":  articleCategoryLabel(),
+		"ArticleJSONLD":        generateArticleJSONLD(c, entity, author),
 	})
 }
 
@@ -176,6 +178,34 @@ func GetGooseForumInfo() ForumInfo {
 		Desc:         "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆",
 		Independence: false,
 	}
+}
+
+// generateArticleJSONLD 生成文章的JSON-LD结构化数据
+func generateArticleJSONLD(c *gin.Context, entity articles.Entity, author string) template.JS {
+	jsonLD := map[string]any{
+		"@context": "https://schema.org",
+		"@type":    "Article",
+		"headline": entity.Title,
+		"author": map[string]any{
+			"@type": "Person",
+			"name":  author,
+			"url":   fmt.Sprintf("%s/user/%d", getBaseUri(c), entity.UserId),
+		},
+		"publisher": map[string]any{
+			"@type": "Organization",
+			"name":  "GooseForum",
+			"url":   getBaseUri(c),
+		},
+		"datePublished": entity.CreatedAt.Format(time.RFC3339),
+		"url":           buildCanonicalHref(c),
+		"interactionStatistic": map[string]any{
+			"@type":                "InteractionCounter",
+			"interactionType":      "https://schema.org/ViewAction",
+			"userInteractionCount": entity.ViewCount,
+		},
+	}
+	jsonString := jsonopt.EncodeFormat(jsonLD)
+	return template.JS(jsonString)
 }
 
 func Post(c *gin.Context) {

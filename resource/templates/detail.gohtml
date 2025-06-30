@@ -7,16 +7,7 @@
     {{GetImportInfoPath `src/detail.js`}}
 </head>
 <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": "{{.articleTitle}}",
-      "author": {
-        "@type": "Person",
-        "name": "{{.username}}"
-      },
-      "datePublished": "{{.CreateTime}}"
-    }
+{{.ArticleJSONLD}}
 </script>
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
