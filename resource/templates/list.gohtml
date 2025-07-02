@@ -29,7 +29,7 @@
                                 {{range .ArticleCategoryList}}
                                 {{$isActive := (ContainsInt $all .Value)}}
                                 <a class="px-2 tab gap-1 {{if $isActive}}tab-active{{end}} filter-tag" data-filter="{{.Value}}">
-                                    <div class="status {{if $isActive}}status-primary{{else}} {{end}}"></div>
+                                    <div class="status {{if $isActive}}status-primary{{end}}"></div>
                                     {{.Name}}
                                 </a>
                                 {{end}}
