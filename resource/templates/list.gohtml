@@ -17,17 +17,24 @@
                 <!-- 文章列表容器 -->
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body p-0 gap-0">
-                        <!-- 文章分类选择 -->
-
-                        <div class="px-2 py-2 border-b border-base-200 tabs tabs-boxed">
-                                <a class="tab {{if .NoFilter}}tab-active{{end}} filter-tag" data-filter="all">全部</a>
+                        <!-- 选项卡风格变体1：带图标的选项卡 -->
+                        <div class="px-4 py-3 border-b border-base-200 tabs tabs-boxed bg-base-100">
+                                <a class="tab gap-2 {{if .NoFilter}}tab-active{{end}} filter-tag" data-filter="all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                    </svg>
+                                    全部
+                                </a>
                                 {{$all := .FilterIds}}
                                 {{range .ArticleCategoryList}}
                                 {{$isActive := (ContainsInt $all .Value)}}
-                                <a class="tab {{if $isActive}}tab-active{{end}} filter-tag"
-                                   data-filter="{{.Value}}">{{.Name}}</a>
+                                <a class="px-2 tab gap-1 {{if $isActive}}tab-active{{end}} filter-tag" data-filter="{{.Value}}">
+                                    <div class="status {{if $isActive}}status-primary{{else}} {{end}}"></div>
+                                    {{.Name}}
+                                </a>
                                 {{end}}
                         </div>
+
 
                         <!-- 文章列表 -->
                         <ul class="list">
