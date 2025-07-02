@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
@@ -28,7 +29,13 @@ func GetTemplates() *template.Template {
 				return slices.Contains(s, cast.ToInt(v))
 			},
 			"GetMetaList":       GetMetaList,
-			"GetImportInfoPath": GetImportInfoPath,
+			"GetImportInfoPath": GetImportInfoPath, // 添加更多优化的模板函数
+			"safeHTML": func(s string) template.HTML {
+				return template.HTML(s)
+			},
+			"formatTime": func(t time.Time) string {
+				return t.Format("2006-01-02 15:04:05")
+			},
 		})
 	if !setting.IsProduction() {
 		fmt.Println("开发模式")
