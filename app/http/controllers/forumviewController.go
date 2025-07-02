@@ -344,6 +344,7 @@ func User(c *gin.Context) {
 		"User":                 GetLoginUser(c),
 		"Title":                showUser.Username + " - GooseForum",
 		"Description":          showUser.Username + " 的个人简介 ",
+		"OgType":               "profile",
 	})
 }
 
