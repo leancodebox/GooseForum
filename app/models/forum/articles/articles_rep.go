@@ -4,6 +4,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/spf13/cast"
 	"time"
 )
 
@@ -119,12 +120,15 @@ func Page[ResType SmallEntity](q PageQuery) struct {
 		b.Where("article_category_rs.effective = ? ", 1)
 		b.Group("articles.id")
 	}
-	var total int64
-	total = 1200
 	//b.Count(&total)
 	b.Select(" articles.id, articles.title,articles.description, articles.type, articles.user_id, articles.article_status, articles.process_status," +
 		" articles.view_count, articles.reply_count, articles.like_count, articles.created_at, articles.updated_at, articles.deleted_at")
 	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order(" articles.updated_at desc").Find(&list)
+	var total int64
+	total = 1200
+	if len(list) < q.PageSize {
+		total = cast.ToInt64(q.Page*q.PageSize + len(list))
+	}
 	return struct {
 		Page     int
 		PageSize int
