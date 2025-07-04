@@ -184,12 +184,12 @@ const authStore = useAuthStore()
 
 // 统计数据
 const stats = ref({
-  userCount: 12,
-  userMonthCount: 4,
-  articleCount: 199,
-  articleMonthCount: 10,
-  reply: 14,
-  linksCount: 7,
+  userCount: 0,
+  userMonthCount: 0,
+  articleCount: 0,
+  articleMonthCount: 0,
+  reply: 0,
+  linksCount: 0,
 })
 
 // 最近活动
