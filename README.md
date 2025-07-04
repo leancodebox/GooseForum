@@ -1,256 +1,258 @@
 <div align="center">
   <img src="resource/static/pic/icon_300.png" width="140"/>
-  <p align="center">
-  <a href="https://github.com/leancodebox/GooseForum/releases"><img src="https://img.shields.io/github/release/leancodebox/GooseForum.svg" alt="GitHub release"></a>
-  <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.23+-blue.svg" alt="Go version"></a>
-  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue-3.0+-green.svg" alt="Vue version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/leancodebox/GooseForum.svg" alt="License"></a>
-  <a href="https://github.com/leancodebox/GooseForum/stargazers"><img src="https://img.shields.io/github/stars/leancodebox/GooseForum.svg?style=social" alt="GitHub stars"></a>
-  </p>
   <h1>GooseForum</h1>
-  <p>现代化的 Go + Tailwindcss  论坛系统</p>
+  <p>🚀 现代化的 Go + Vue 3 + TailwindCSS 论坛系统</p>
+  
+  <p>
+    <a href="https://github.com/leancodebox/GooseForum/releases"><img src="https://img.shields.io/github/release/leancodebox/GooseForum.svg" alt="GitHub release"></a>
+    <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.23+-blue.svg" alt="Go version"></a>
+    <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue-3.0+-green.svg" alt="Vue version"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/leancodebox/GooseForum.svg" alt="License"></a>
+    <a href="https://github.com/leancodebox/GooseForum/stargazers"><img src="https://img.shields.io/github/stars/leancodebox/GooseForum.svg?style=social" alt="GitHub stars"></a>
+  </p>
 </div>
 
+## 📖 项目简介
 
-GooseForum 是一个现代化的论坛系统，采用 Golang + Tailwindcss 开发。提供了极低依赖的安装方式。
+GooseForum 是一个现代化的技术交流社区平台，采用 Go + Vue 3 + TailwindCSS 技术栈开发。提供极简的部署方式和丰富的社区功能，专为技术开发者打造的轻量级论坛系统。
 
-如果你向知道GooseForum运行效果怎么样，请点击[GooseForum](https://gooseforum.online/)进行体验。
+🌐 **在线体验**: [GooseForum](https://gooseforum.online/)
 
-# GooseForum 快速上手
+## ✨ 核心特性
 
-[在GooseForum上查看快手上手](https://gooseforum.online/post/371)
+### 🎯 用户体系
+- **用户注册/登录** - 支持邮箱激活
+- **权限管理** - 基于角色的权限控制系统
+- **用户中心** - 个人资料管理、头像上传
+- **积分系统** - 签到、发帖、回复积分奖励
+- **管理后台** - 完整的后台管理功能
 
-## 获取 GooseForum
+### 📝 内容管理
+- **文章发布** - 支持 Markdown 编辑器
+- **评论系统** - 多级评论回复
+- **文章分类** - 灵活的分类管理
+- **标签系统** - 文章标签化管理
+- **内容审核** - 管理员内容审核功能
 
-你可以在 [GitHub Release](https://github.com/leancodebox/GooseForum/releases) 页面获取已经构建打包完成的主程序。其中每个版本都提供了常见系统架构下可用的主程序，命名规则为`GooseForum_操作系统_CPU架构.tar.gz` 。比如，普通 64 位 Linux 系统上部署 v0.0.2 版本，则应该下载GooseForum_Linux_x86_64.tar.gz。
+### 🛠 技术特性
+- **单文件部署** - 编译后单个可执行文件
+- **SQLite 支持** - 默认使用 SQLite，支持 MySQL
+- **自动备份** - 定时数据库备份
+- **响应式设计** - 完美支持移动端
+- **主题切换** - 支持明暗主题
+- **SEO 友好** - 完整的 SEO 优化
 
-## 启动 GooseForum
+## 🚀 快速开始
 
-```shell
-#解压获取到的主程序
-tar -zxvf GooseForum_OS_ARCH.tar.gz
+### 方式一：下载预编译版本（推荐）
+
+1. 从 [GitHub Releases](https://github.com/leancodebox/GooseForum/releases) 下载对应系统的预编译版本
+2. 解压并启动：
+
+```bash
+# 解压下载的文件
+tar -zxvf GooseForum_Linux_x86_64.tar.gz
 
 # 赋予执行权限
 chmod +x ./GooseForum
 
-# 启动 GooseForum
+# 启动服务
 ./GooseForum serve
 ```
 
-GooseForum 在首次启动后，第一个注册的账号即为管理员。如果你在个人中心更改了密码后忘记管理员密码，你可以通过执行`./GooseForum user:manage`命令进行重置。
+### 使用 GoReleaser 快速构建
 
-GooseForum 默认会监听99端口。你可以在浏览器中访问 http://服务器IP:99 进入 GooseForum。
+```bash
+# 安装 GoReleaser
+go install github.com/goreleaser/goreleaser@latest
 
-如果你需要进入管理员页面可以通过访问  http://服务器IP:99/admin 进入
+# 构建所有平台
+goreleaser build --snapshot --clean
 
-以上步骤操作完后，最简单的部署就完成了。你可能需要一些更为具体的配置，才能让 GooseForum 更好的工作，具体流程请参考下面的配置流程。
+# 构建当前平台
+goreleaser build --snapshot --clean --single-target
+```
 
-## 配置文件 
 
-GooseForum 启动总会默认检查执行的同级目录是否存在`config.toml`，如果不存在则会进行创建，同时使用本文件进行项目启动。默认情况下，你不需要更改任何配置。如果有需要你可以参考下方相关配置文件解释
+
+3. 访问 `http://localhost:99` 开始使用
+
+> 💡 **提示**: 首次启动后，第一个注册的账号将自动成为管理员
+
+### 方式二：从源码构建
+
+#### 环境要求
+- Go 1.23+
+- Node.js 18+
+- npm 或 yarn
+
+#### 构建步骤
+
+```bash
+# 克隆项目
+git clone https://github.com/leancodebox/GooseForum.git
+cd GooseForum
+
+# 构建前端资源
+cd resource
+npm install
+npm run build
+cd ..
+
+# 构建后端
+go mod tidy
+go build -ldflags="-w -s" .
+
+# 启动服务
+./GooseForum serve
+```
+
+## 🔧 配置说明
+
+GooseForum 启动时会自动创建 `config.toml` 配置文件，主要配置项：
 
 ```toml
-[app]
-name = "app"
-env = "production" # APP_ENV in local,production 会影响某些加载逻辑，生产环境不要更改
-debug = false # 日志会更详细一般不用调整
-
 [server]
-url = "http://localhost" # 影响一些地址返回的url ，例如 rss sitemap
-port = 99 # 启动端口
-
-[footer]
-url = "https://github.com/leanCodeBox/GooseForum" # 项目
-text = "Powered by GooseForum"
-
-[jwtopt]
-signingKey="signingKey" # 项目生成的为一个随机 signingKey 你和别人的不会一样，一般情况不用修改，修改的话，会导致已经登录的用户退出登录。
-validTime = 604800
-
-[mail]
-host = "smtp.example.com" # 邮箱相关配置，可以用来邮件激活
-port = 587
-username = "noreply@example.com"
-password = "your-password"
-from_name = "GooseForum"
-
-[db]
-migration = "on" # on,off # 数据库迁移 ，如果你没有进行GooseForum 版本替换，可以启动一次后调整为 off
-backupSqlite = true # 是否定时备份sqlite数据库 
-backupDir = "./storage/databasebackup/" # 备份地址
-keep = 7 # 备份数量
-spec = "0 3 * * *" # cron定时 ，这一句是每天凌晨3点更新，默认不用调整
+port = 99                    # 服务端口
+url = "http://localhost"     # 站点URL
 
 [db.default]
-connection = "sqlite"# in mysql sqlite # 默认使用sqlite 项目使用wal，一般不用调整也可以
-url = "db_user:db_pass@tcp(db_host:3306)/db_name?charset=utf8mb4&parseTime=True&loc=Local"
-path = "./storage/database/sqlite.db"# :memory:|./storage/database/sqlite.db
+connection = "sqlite"        # 数据库类型 (sqlite/mysql)
+path = "./storage/database/sqlite.db"  # SQLite 数据库路径
 
-maxIdleConnections = 3
-maxOpenConnections = 5
-maxLifeSeconds = 300
-
-[db.file]
-connection = "sqlite"# in mysql sqlite
-url = "root:root_password@tcp(127.0.0.1:3306)/goose_forum?charset=utf8mb4&parseTime=True&loc=Local"
-path = "./storage/database/file.db"# :memory:|./storage/database/sqlite.db
-
-maxIdleConnections = 3
-maxOpenConnections = 5
-maxLifeSeconds = 300
-
-
-[log]
-type = "file"# LOG_TYPE stdout,file 日志输出格式，如果使用 stdout 会在控制台输出
-path = "./storage/logs/run.log"
-rolling = false # 是否开启滚动 true ,false
-maxage = 10 # 最大日期
-maxsize = 256 # 最大文件大小 MB
-maxBackUps = 30 # 最大保留文件数量
-
-[site] # html 中 meta 扩展内容，如果你有baidu等验证网站所有权的需要，可以更改此处
-metaList="""
-[{"name":"author","content":"GooseForum's Friend"}] 
-"""
+[mail]
+host = "smtp.example.com"    # SMTP 服务器
+port = 587                   # SMTP 端口
+username = "your@email.com"  # 邮箱用户名
+password = "your-password"   # 邮箱密码
 ```
 
-## 构建
+📖 **详细配置说明**: [配置文档](docs/configuration.md)
 
-### 环境准备
+## 🏗 技术架构
 
-- 参照 [Getting Started - The Go Programming Language](https://go.dev/doc/install)  安装并配置 Go 语言开发环境 (>=1.18)；
-- 参考 [下载|Node.js](https://nodejs.org/zh-cn/download/) 安装 Node.js;
+### 后端技术栈
+- **Go 1.23+** - 主要开发语言
+- **Gin** - Web 框架
+- **GORM** - ORM 框架
+- **SQLite/MySQL** - 数据库支持
+- **JWT** - 身份认证
+- **Viper** - 配置管理
+- **Cobra** - 命令行工具
 
+### 前端技术栈
+- **Vue 3** - 前端框架 (Composition API)
+- **Vite** - 构建工具
+- **TailwindCSS 4** - CSS 框架
+- **DaisyUI** - UI 组件库
+- **TypeScript** - 类型支持
+- **Pinia** - 状态管理
+- **Vue Router** - 路由管理
 
-### 开始构建
+### 开发工具
+- **Air** - 热重载开发
+- **GoReleaser** - 自动化构建发布
+- **Vitest** - 前端测试
 
-#### 克隆代码
-
-```shell
-git clone git@github.com:leancodebox/GooseForum.git
-cd GooseForum
-```
-
-#### 构建项目前后端分离资源并编译完整项目为二进制可执行文件
-
-GooseForum 项目主要由两部分组成：二者均在同一仓库，分别为主目录下的服务端和`actor`目录下的前后端分离项目，需要先构建`actor` 目录下的前后端分离项目。完整命令如下
-
-```shell
-cd actor
-npm i
-npm run build
-cd .. 
-go mod tidy
-go build 
-```
-
-编译完成后，会在项目根目录下生成最终的可执行文件 `GooseForum` 。
-
-#### 构建助手
-
-你可以使用 goreleaser 快速完成构建、打包等操作，使用方法如下：
-
-##### 安装 goreleaser
-
-```shell
-go install github.com/goreleaser/goreleaser@latest
-```
-
-##### 构建项目
-
-```shell
-goreleaser build --clean --single-target --snapshot
-```
-
-或者交叉编译出所有可用版本：
-```shell
-goreleaser build --clean --snapshot
-```
-
-------------------------------------------
-
-### 技术栈
-
-#### 前端
-- Vue 3 (Composition API)
-- Vue Router
-- Naive UI
-- Vite
-- JavaScript/ES6+
-
-#### 后端
-- Go
-- Gin Framework
-
-### 项目结构
-
-### 编译相关
+## 📁 项目结构
 
 ```
-go generate ./...
-```
-```
-go build -ldflags="-w -s" .
-```
-
-windows
-```
-SET CGO_ENABLED=0
-SET GOOS=darwin
-SET GOARCH=amd64
-go build
-
-SET CGO_ENABLED=0
-SET GOOS=darwin
-SET GOARCH=arm64
-go build
-
-SET CGO_ENABLED=0
-SET GOOS=linux
-SET GOARCH=amd64
-go build
+GooseForum/
+├── app/                    # 后端应用代码
+│   ├── bundles/           # 工具包
+│   ├── console/           # 命令行工具
+│   ├── http/              # HTTP 控制器和路由
+│   ├── models/            # 数据模型
+│   └── service/           # 业务服务
+├── resource/              # 前端资源
+│   ├── src/               # Vue 源码
+│   ├── static/            # 静态资源
+│   └── templates/         # Go 模板
+├── docs/                  # 项目文档
+├── main.go               # 程序入口
+└── config.toml           # 配置文件
 ```
 
-powershell
-```powershell
-#设置Linux编译环境
-$env:CGO_ENABLED="0"
-$env:GOOS="linux"
-$env:GOARCH="amd64"
- 
-$env:CGO_ENABLED=""
-$env:GOOS=""
-$env:GOARCH=""
-# 开始编译
-go build .
+## 🛡 管理功能
 
-#https://learn.microsoft.com/zh-cn/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-5.1
+### 用户管理
+```bash
+# 重置管理员密码
+./GooseForum user:manage
+
+# 设置用户邮箱
+./GooseForum user:set-email
 ```
 
-mac
+### 数据备份
+- 自动定时备份 SQLite 数据库
+- 可配置备份频率和保留数量
+- 备份文件存储在 `./storage/databasebackup/` 目录
+
+## 🔄 开发模式
+
+```bash
+# 安装 Air 热重载工具
+go install github.com/cosmtrek/air@latest
+
+# 启动开发模式
+air
+
+# 前端开发模式
+cd resource
+npm run dev
 ```
-go build
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" .
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build
+
+## 📦 部署建议
+
+### 生产环境部署
+1. 使用反向代理 (Nginx/Apache)
+2. 配置 HTTPS 证书
+3. 设置定时备份
+4. 监控日志文件
+
+### Docker 部署
+```dockerfile
+# Dockerfile 示例
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY GooseForum .
+CMD ["./GooseForum", "serve"]
 ```
 
-linux
-```
-go build
-CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build
-CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build
-```
+## 🤝 贡献指南
 
-# Todo
+1. Fork 本项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建 Pull Request
 
-[TodoList](./TodoList.md)
+## 📋 开发计划
 
+- [ ] 多语言支持
+- [ ] 私信功能
+- [ ] 更多主题选择
+- [ ] 插件系统
+- [ ] API 文档
 
-# goreleaser
+## 📄 许可证
 
-```shell
-goreleaser release --snapshot --clean  
-goreleaser release  --clean
-```
+本项目基于 [MIT License](LICENSE) 开源协议。
+
+## 📚 相关文档
+
+- [配置文档](docs/configuration.md) - 详细的配置选项说明
+- [开发指南](docs/development.md) - 开发环境搭建和贡献指南
+
+## 🙏 致谢
+
+感谢所有为 GooseForum 项目做出贡献的开发者！
+
+---
+
+<div align="center">
+  <p>如果这个项目对你有帮助，请给我们一个 ⭐️</p>
+  <p>Made with ❤️ by <a href="https://github.com/leancodebox">LeanCodeBox</a></p>
+</div>
