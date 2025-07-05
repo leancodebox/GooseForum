@@ -87,11 +87,11 @@
         <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay lg:hidden"></label>
         <aside :class="[
           'min-h-full bg-base-100 border-r border-base-300 fixed top-0 left-0 bottom-0 ',
-          'transition-all duration-300 ease-in-out transform',
+          'transition-all duration-300 ease-in-out transform overflow-x-hidden',
           isCollapsed ? 'w-12' : 'w-48'
         ]">
           <!-- 菜单 -->
-          <nav class="flex-1 overflow-y-auto scrollbar-ultra-thin pt-20">
+          <nav class="flex-1 overflow-y-auto overflow-x-hidden scrollbar-ultra-thin pt-20">
             <ul class="menu w-full" :class="isCollapsed ? 'p-1' : 'p-2'">
               <li v-for="item in menuItems" :key="item.key" class="mb-1">
                 <router-link :to="item.path" :class="[
