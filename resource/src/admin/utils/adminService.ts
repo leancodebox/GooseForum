@@ -122,3 +122,26 @@ export function getSiteStatistics(): Promise<Result<any>> {
 export const getArticleEnum = async (): Promise<Result<Record<string,Label[]>>> => {
     return axiosInstance.get('api/forum/get-articles-enum');
 }
+
+// 网页设置相关接口
+export interface WebSettingsConfig {
+    metaTags: string;
+    customCSS: string;
+    customJS: string;
+    externalLinks: string;
+    favicon: string;
+    appleTouchIcon: string;
+    ogImage: string;
+    twitterCardType: string;
+    structuredData: string;
+}
+
+export const getWebSettings = (): Promise<Result<WebSettingsConfig>> => {
+    return axiosInstance.get('api/admin/web-settings');
+}
+
+export const saveWebSettings = (settings: WebSettingsConfig): Promise<Result<any>> => {
+    return axiosInstance.post('api/admin/save-web-settings', {
+        settings: settings
+    });
+}

@@ -2,6 +2,7 @@ package pageConfig
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 )
 
@@ -31,4 +32,14 @@ func Get(id any) (entity Entity) {
 func GetByPageType(pageType string) (entity Entity) {
 	builder().Where(queryopt.Eq(filedPageType, pageType)).First(&entity)
 	return
+}
+
+func GetConfigByPageType[T any](pageType string, defaultValue T) T {
+	var entity Entity
+	builder().Where(queryopt.Eq(filedPageType, pageType)).First(&entity)
+	if entity.Id > 0 {
+		return jsonopt.Decode[T](entity.Config)
+	} else {
+		return defaultValue
+	}
 }

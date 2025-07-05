@@ -133,7 +133,8 @@ import {
   GiftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  Bars3Icon
+  Bars3Icon,
+  GlobeAltIcon
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -228,6 +229,12 @@ const menuItems = ref([
     label: '系统设置-todo',
     path: '/admin/settings',
     icon: CogIcon
+  },
+  {
+    key: 'web-settings',
+    label: '网页设置',
+    path: '/admin/web-settings',
+    icon: GlobeAltIcon
   }
 ])
 

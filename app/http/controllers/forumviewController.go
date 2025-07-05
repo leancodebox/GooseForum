@@ -410,8 +410,8 @@ type LinkStatisticsInfo struct {
 }
 
 func LinksView(c *gin.Context) {
-	configEntity := pageConfig.GetByPageType(FriendShipLinks)
-	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
+	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
+	res := jsonopt.Decode[[]pageConfig.FriendLinksGroup](configEntity.Config)
 	totalCounter := 0
 	var statistics []LinkStatistics
 	for _, group := range res {

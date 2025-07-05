@@ -472,17 +472,9 @@ func ApplySheet(req component.BetterRequest[ApplySheetListReq]) component.Respon
 	)
 }
 
-const (
-	FriendShipLinks = `friendShipLinks`
-)
-
-var pageTypeList = []string{
-	FriendShipLinks,
-}
-
 func GetPageConfig(c *gin.Context) {
 	pageType := c.Param(`pageType`)
-	if !slices.Contains(pageTypeList, pageType) {
+	if !slices.Contains(pageConfig.PageTypeList, pageType) {
 		c.JSON(http.StatusOK, component.FailData(`类型不存在`))
 		return
 	}
@@ -494,49 +486,65 @@ func GetPageConfig(c *gin.Context) {
 	}))
 }
 
-type FriendLinksGroup struct {
-	Name  string     `json:"name,omitempty"`
-	Links []LinkItem `json:"links,omitempty"`
-}
-
 func GetFriendLinks(req component.BetterRequest[null]) component.Response {
-	configEntity := pageConfig.GetByPageType(FriendShipLinks)
-	var res []FriendLinksGroup
-	if configEntity.Id == 0 {
-		lItem := LinkItem{
-			Name:    "GooseForum",
-			Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
-			Url:     "https://gooseforum.online",
-			LogoUrl: "/static/pic/default-avatar.png",
-		}
-		res = []FriendLinksGroup{
-			FriendLinksGroup{
-				Name:  "community",
-				Links: []LinkItem{lItem},
-			},
-			FriendLinksGroup{
-				Name:  "blog",
-				Links: []LinkItem{lItem},
-			},
-			FriendLinksGroup{
-				Name:  "tool",
-				Links: []LinkItem{lItem},
-			},
-		}
-	} else {
-		res = jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
+	lItem := pageConfig.LinkItem{
+		Name:    "GooseForum",
+		Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
+		Url:     "https://gooseforum.online",
+		LogoUrl: "/static/pic/default-avatar.png",
 	}
+	res := pageConfig.GetConfigByPageType(pageConfig.WebSettings, []pageConfig.FriendLinksGroup{
+		{
+			Name:  "community",
+			Links: []pageConfig.LinkItem{lItem},
+		},
+		{
+			Name:  "blog",
+			Links: []pageConfig.LinkItem{lItem},
+		},
+		{
+			Name:  "tool",
+			Links: []pageConfig.LinkItem{lItem},
+		},
+	})
 	return component.SuccessResponse(res)
 }
 
 type SaveFriendLinksReq struct {
-	LinksInfo []FriendLinksGroup `json:"linksInfo"`
+	LinksInfo []pageConfig.FriendLinksGroup `json:"linksInfo"`
 }
 
 func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(FriendShipLinks)
-	configEntity.PageType = FriendShipLinks
+	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
+	configEntity.PageType = pageConfig.FriendShipLinks
 	configEntity.Config = jsonopt.Encode(req.Params.LinksInfo)
+	pageConfig.CreateOrSave(&configEntity)
+	return component.SuccessResponse("success")
+}
+
+// WebSettings 网页设置相关结构
+
+// GetWebSettings 获取网页设置
+func GetWebSettings(req component.BetterRequest[null]) component.Response {
+	settings := pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{
+		MetaTags:      "",
+		CustomCSS:     "",
+		CustomJS:      "",
+		ExternalLinks: "",
+		Favicon:       "",
+	})
+	return component.SuccessResponse(settings)
+}
+
+type SaveWebSettingsReq struct {
+	Settings pageConfig.WebSettingsConfig `json:"settings"`
+}
+
+// SaveWebSettings 保存网页设置
+func SaveWebSettings(req component.BetterRequest[SaveWebSettingsReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(pageConfig.WebSettings)
+	configEntity.PageType = pageConfig.WebSettings
+	configEntity.Config = jsonopt.Encode(req.Params.Settings)
 	pageConfig.CreateOrSave(&configEntity)
 	return component.SuccessResponse("success")
 }

@@ -2,30 +2,49 @@ package viewrender
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/http/controllers/datacache"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/resource"
 	"html/template"
 	"log/slog"
 	"net/http"
-	"strings"
 	"sync"
+	"time"
 )
 
 var ht4gooseforum *template.Template
 var htht4gooseforumOnce sync.Once
 
-func getHt4gooseforum() {
-	htht4gooseforumOnce.Do(func() {
-		// 创建基础模板
-		ht4gooseforum = resource.GetTemplates()
-	})
-}
-
 func Reload() {
-	ht4gooseforum = resource.GetTemplates()
+	ht4gooseforum = resource.GetTemplates(GlobalFunc())
 }
 
 func init() {
-	getHt4gooseforum()
+	htht4gooseforumOnce.Do(func() {
+		// 创建基础模板
+		Reload()
+	})
+}
+
+var webSettingsCache = &datacache.Cache[string, pageConfig.WebSettingsConfig]{}
+
+func GlobalFunc() template.FuncMap {
+	return template.FuncMap{
+		"WebPageSettings": func() pageConfig.WebSettingsConfig {
+			data, _ := webSettingsCache.GetOrLoad("websetcache", func() (pageConfig.WebSettingsConfig, error) {
+				return pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{
+					MetaTags:      "",
+					CustomCSS:     "",
+					CustomJS:      "",
+					ExternalLinks: "",
+					Favicon:       "",
+				}), nil
+			},
+				time.Second*5,
+			)
+			return data
+		},
+	}
 }
 
 func Render(c *gin.Context, name string, data any) {
@@ -46,17 +65,4 @@ func Render(c *gin.Context, name string, data any) {
 		slog.Error("render template err", "err", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
-}
-
-// generateTemplateName 将文件路径转换为唯一的模板名
-func generateTemplateName(path string) string {
-	// 移除前导的 ./ 或 .
-	path = strings.TrimPrefix(path, "./")
-	path = strings.TrimPrefix(path, ".")
-	// 替换路径分隔符为下划线
-	name := strings.ReplaceAll(path, "/", "_")
-	name = strings.ReplaceAll(name, "\\", "_")
-	// 移除 .html 扩展名
-	name = strings.TrimSuffix(name, ".html")
-	return name
 }

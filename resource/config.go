@@ -22,21 +22,21 @@ import (
 //go:embed  all:templates/**
 var templates embed.FS
 
-func GetTemplates() *template.Template {
+func GetTemplates(globalFunc template.FuncMap) *template.Template {
 	tmpl := template.New("resource_v2").
 		Funcs(template.FuncMap{
 			"ContainsInt": func(s []int, v any) bool {
 				return slices.Contains(s, cast.ToInt(v))
 			},
-			"GetMetaList":       GetMetaList,
 			"GetImportInfoPath": GetImportInfoPath, // 添加更多优化的模板函数
-			"safeHTML": func(s string) template.HTML {
+			"SafeHTML": func(s string) template.HTML {
 				return template.HTML(s)
 			},
-			"formatTime": func(t time.Time) string {
+			"FormatTime": func(t time.Time) string {
 				return t.Format("2006-01-02 15:04:05")
 			},
-		})
+		}).
+		Funcs(globalFunc)
 	if !setting.IsProduction() {
 		fmt.Println("开发模式")
 		// 开发模式下直接从目录读取模板

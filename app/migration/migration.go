@@ -7,7 +7,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
@@ -98,29 +97,29 @@ func initData() {
 		fmt.Println("标签不存在，创建标签")
 	}
 
-	lItem := controllers.LinkItem{
+	lItem := pageConfig.LinkItem{
 		Name:    "GooseForum",
 		Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
 		Url:     "https://gooseforum.online",
 		LogoUrl: "/static/pic/default-avatar.png",
 	}
-	res := []controllers.FriendLinksGroup{
+	res := []pageConfig.FriendLinksGroup{
 		{
 			Name:  "community",
-			Links: []controllers.LinkItem{lItem},
+			Links: []pageConfig.LinkItem{lItem},
 		},
 		{
 			Name:  "blog",
-			Links: []controllers.LinkItem{lItem},
+			Links: []pageConfig.LinkItem{lItem},
 		},
 		{
 			Name:  "tool",
-			Links: []controllers.LinkItem{lItem},
+			Links: []pageConfig.LinkItem{lItem},
 		},
 	}
-	configEntity := pageConfig.GetByPageType(controllers.FriendShipLinks)
+	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
 	if configEntity.Id == 0 {
-		configEntity.PageType = controllers.FriendShipLinks
+		configEntity.PageType = pageConfig.FriendShipLinks
 		configEntity.Config = jsonopt.Encode(res)
 		pageConfig.CreateOrSave(&configEntity)
 	}

@@ -29,3 +29,37 @@ type Entity struct {
 func (itself *Entity) TableName() string {
 	return tableName
 }
+
+const (
+	FriendShipLinks = `friendShipLinks`
+	WebSettings     = `webSettings`
+)
+
+var PageTypeList = []string{
+	FriendShipLinks,
+	WebSettings,
+}
+
+type WebSettingsConfig struct {
+	MetaTags        string `json:"metaTags"`
+	CustomCSS       string `json:"customCSS"`
+	CustomJS        string `json:"customJS"`
+	ExternalLinks   string `json:"externalLinks"`
+	Favicon         string `json:"favicon"`
+	AppleTouchIcon  string `json:"appleTouchIcon"`
+	OgImage         string `json:"ogImage"`
+	TwitterCardType string `json:"twitterCardType"`
+	StructuredData  string `json:"structuredData"`
+}
+
+type LinkItem struct {
+	Name    string `json:"name"`
+	Desc    string `json:"desc"`
+	Url     string `json:"url"`
+	LogoUrl string `json:"logoUrl"`
+}
+
+type FriendLinksGroup struct {
+	Name  string     `json:"name,omitempty"`
+	Links []LinkItem `json:"links,omitempty"`
+}

@@ -4,6 +4,7 @@ import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
+	"github.com/leancodebox/GooseForum/app/http/controllers/datacache"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -48,8 +49,8 @@ func GetSiteStatisticsData() SiteStats {
 		return siteStatsCache
 	}
 
-	configEntity := pageConfig.GetByPageType(FriendShipLinks)
-	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
+	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
+	res := jsonopt.Decode[[]pageConfig.FriendLinksGroup](configEntity.Config)
 	linksCount := 0
 	for _, group := range res {
 		linksCount += len(group.Links)
@@ -70,7 +71,7 @@ func GetSiteStatisticsData() SiteStats {
 }
 
 // 初始化缓存
-var articleCache = &Cache[string, []articles.SmallEntity]{}
+var articleCache = &datacache.Cache[string, []articles.SmallEntity]{}
 
 func getRecommendedArticles() []articles.SmallEntity {
 	data, _ := articleCache.GetOrLoad(
@@ -95,7 +96,7 @@ func getLatestArticles() []articles.SmallEntity {
 	return data
 }
 
-var articleCategoryCache = &Cache[string, []*articleCategory.Entity]{}
+var articleCategoryCache = &datacache.Cache[string, []*articleCategory.Entity]{}
 
 func getArticleCategory() []*articleCategory.Entity {
 	data, _ := articleCategoryCache.GetOrLoad(
@@ -118,7 +119,7 @@ func articleCategoryLabel() []datastruct.Option[string, uint64] {
 	})
 }
 
-var articleCategoryMapCache = &Cache[string, map[uint64]*articleCategory.Entity]{}
+var articleCategoryMapCache = &datacache.Cache[string, map[uint64]*articleCategory.Entity]{}
 
 // GetMapByIds 根据ID列表获取分类Map
 func articleCategoryMap() map[uint64]*articleCategory.Entity {

@@ -138,7 +138,9 @@ func apiRoute(ginApp *gin.Engine) {
 	adminApi.Group("", middleware.CheckPermission(permission.SiteManager)).
 		POST("apply-sheet-list", UpButterReq(controllers.ApplySheet)).
 		GET("friend-links", UpButterReq(controllers.GetFriendLinks)).
-		POST("save-friend-links", UpButterReq(controllers.SaveFriendLinks))
+		POST("save-friend-links", UpButterReq(controllers.SaveFriendLinks)).
+		GET("web-settings", UpButterReq(controllers.GetWebSettings)).
+		POST("save-web-settings", UpButterReq(controllers.SaveWebSettings))
 
 }
 
