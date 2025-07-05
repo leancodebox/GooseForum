@@ -64,25 +64,26 @@
                                 个人博客
                                 {{end}}
                             </h2>
-                            <div class="rounded-lg p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="rounded-lg p-3 grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-7 gap-3">
                                 {{range .Links}}
-                                <div class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow border border-base-300">
-                                    <div class="card-body p-4">
-                                        <div class="flex items-start gap-3">
-                                            <div class="avatar flex-shrink-0">
-                                                <div class="mask mask-squircle w-12 h-12">
-                                                    <img src="{{.LogoUrl}}" alt="{{.Name}} logo"/>
-                                                </div>
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <h3 class="font-normal text-base-content truncate">
-                                                    <a href="{{.Url}}" target="_blank" rel="noopener noreferrer"
-                                                       class="hover:text-primary" title="{{.Name}}">{{.Name}}</a>
-                                                </h3>
-                                                <p class="text-sm text-base-content/80 line-clamp-2" title="{{.Desc}}">{{.Desc}}</p>
+                                <div class="group">
+                                    <a href="{{.Url}}" target="_blank" rel="noopener noreferrer" 
+                                       class="flex flex-col items-center p-2 rounded-lg hover:bg-base-200 transition-colors" 
+                                       title="{{.Name}} - {{.Desc}}">
+                                        <div class="avatar mb-2">
+                                            <div class="mask mask-squircle w-12 h-12 group-hover:scale-110 transition-transform">
+                                                <img src="{{.LogoUrl}}" alt="{{.Name}} logo"/>
                                             </div>
                                         </div>
-                                    </div>
+                                        <div class="text-center w-full">
+                                            <div class="text-xs text-base-content/80 group-hover:text-primary truncate w-full leading-tight font-medium">
+                                                {{.Name}}
+                                            </div>
+                                            <div class="text-xs text-base-content/60 truncate w-full leading-tight mt-0.5">
+                                                {{.Desc}}
+                                            </div>
+                                        </div>
+                                    </a>
                                 </div>
                                 {{end}}
                             </div>
