@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/spf13/cast"
 )
@@ -86,15 +85,6 @@ func GetStaticFS() (fs.FS, error) {
 		return nil, err
 	}
 	return static, nil
-}
-
-type MetaItem struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
-}
-
-func GetMetaList() []MetaItem {
-	return jsonopt.Decode[[]MetaItem](preferences.Get("site.metaList", "[]"))
 }
 
 type ManifestItem struct {
