@@ -534,7 +534,8 @@ import {
   ChartBarIcon
 } from '@heroicons/vue/24/outline'
 import { api } from '../utils/axiosInstance'
-
+import {applySheetList} from "@/admin/utils/adminService.ts";
+applySheetList()
 // 数据类型定义
 interface User {
   id: number

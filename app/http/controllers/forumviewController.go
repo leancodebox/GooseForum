@@ -398,12 +398,41 @@ func PrivacyPolicy(c *gin.Context) {
 	})
 }
 
+type LinkStatistics struct {
+	Name       string
+	Counter    int
+	Proportion int
+}
+type LinkStatisticsInfo struct {
+	Community LinkStatistics
+	Blog      LinkStatistics
+	Tool      LinkStatistics
+}
+
 func LinksView(c *gin.Context) {
 	configEntity := pageConfig.GetByPageType(FriendShipLinks)
 	res := jsonopt.Decode[[]FriendLinksGroup](configEntity.Config)
 	totalCounter := 0
+	var statistics []LinkStatistics
 	for _, group := range res {
+		counter := len(group.Links)
 		totalCounter += len(group.Links)
+		statistics = append(statistics, LinkStatistics{
+			Name:       group.Name,
+			Counter:    counter,
+			Proportion: 0,
+		})
+	}
+	var linkStatisticsInfo LinkStatisticsInfo
+	for i, item := range statistics {
+		statistics[i].Proportion = item.Counter * 100 / totalCounter
+		if item.Name == `tool` {
+			linkStatisticsInfo.Tool = statistics[i]
+		} else if item.Name == `blog` {
+			linkStatisticsInfo.Blog = statistics[i]
+		} else if item.Name == `community` {
+			linkStatisticsInfo.Community = statistics[i]
+		}
 	}
 	viewrender.Render(c, "links.gohtml", map[string]any{
 		"IsProduction":        setting.IsProduction(),
@@ -413,6 +442,7 @@ func LinksView(c *gin.Context) {
 		"Description":         "GooseForum's links",
 		"TotalCounter":        totalCounter,
 		"RecommendedArticles": getRecommendedArticles(),
+		"LinkStatisticsInfo":  linkStatisticsInfo,
 	})
 }
 
