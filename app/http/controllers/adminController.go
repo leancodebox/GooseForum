@@ -2,13 +2,11 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
-	"net/http"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
@@ -470,20 +468,6 @@ func ApplySheet(req component.BetterRequest[ApplySheetListReq]) component.Respon
 		pageData.PageSize,
 		pageData.Total,
 	)
-}
-
-func GetPageConfig(c *gin.Context) {
-	pageType := c.Param(`pageType`)
-	if !slices.Contains(pageConfig.PageTypeList, pageType) {
-		c.JSON(http.StatusOK, component.FailData(`类型不存在`))
-		return
-	}
-	configEntity := pageConfig.GetByPageType(pageType)
-
-	c.JSON(http.StatusOK, component.SuccessData(map[string]any{
-		`pageType`: pageType,
-		`config`:   configEntity.Config,
-	}))
 }
 
 func GetFriendLinks(req component.BetterRequest[null]) component.Response {

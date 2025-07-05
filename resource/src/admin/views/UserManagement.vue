@@ -55,7 +55,7 @@
                 <th>验证</th>
                 <th class="w-32">注册时间</th>
                 <th class="w-32">最后登录</th>
-                <th>操作</th>
+                <th class="min-w-[140px]">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -92,22 +92,23 @@
                 </td>
                 <td class="whitespace-nowrap">{{ formatDate(user.createTime) }}</td>
                 <td class="whitespace-nowrap">{{ user.createTime ? formatDate(user.createTime) : '从未登录' }}</td>
-                <td>
-                  <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
-                      <EllipsisVerticalIcon class="w-4 h-4" />
-                    </div>
-                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                      <li><a @click="editUserItem(user)">编辑</a></li>
-                      <li><a @click="resetPassword(user)">重置密码</a></li>
-                      <li v-if="user.status === 1">
-                        <a @click="banUser(user)" class="text-warning">封禁用户</a>
-                      </li>
-                      <li v-else>
-                        <a @click="unbanUser(user)" class="text-success">解除封禁</a>
-                      </li>
-                      <li><a @click="deleteUser(user)" class="text-error">删除</a></li>
-                    </ul>
+                <td class="min-w-[140px]">
+                  <div class="flex items-center gap-0">
+                    <button @click="editUserItem(user)" class="btn btn-ghost btn-xs p-1" title="编辑">
+                      <PencilIcon class="w-4 h-4" />
+                    </button>
+                    <button @click="resetPassword(user)" class="btn btn-ghost btn-xs p-1" title="重置密码">
+                      <KeyIcon class="w-4 h-4" />
+                    </button>
+                    <button v-if="user.status === 0" @click="banUser(user)" class="btn btn-ghost btn-xs text-warning p-1" title="封禁用户">
+                      <NoSymbolIcon class="w-4 h-4" />
+                    </button>
+                    <button v-else @click="unbanUser(user)" class="btn btn-ghost btn-xs text-success p-1" title="解除封禁">
+                      <CheckCircleIcon class="w-4 h-4" />
+                    </button>
+                    <button @click="deleteUser(user)" class="btn btn-ghost btn-xs text-error p-1" title="删除">
+                      <TrashIcon class="w-4 h-4" />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -220,7 +221,11 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import {
   PlusIcon,
   MagnifyingGlassIcon,
-  EllipsisVerticalIcon
+  PencilIcon,
+  KeyIcon,
+  NoSymbolIcon,
+  CheckCircleIcon,
+  TrashIcon
 } from '@heroicons/vue/24/outline'
 import { api } from '../utils/axiosInstance'
 import { editUser, getAllRoleItem, getUserList } from '../utils/adminService.ts'
