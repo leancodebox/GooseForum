@@ -100,45 +100,57 @@
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
                             <h2 class="card-title font-normal">申请友链</h2>
-                            <p class="text-sm text-base-content/70 mb-4">
+                            <p class="text-sm text-base-content/70 mb-1">
                                 欢迎优质网站申请友情链接，我们会认真审核每一个申请。</p>
-                            <div class="space-y-2 text-sm text-base-content/70">
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success" fill="none"
-                                         viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M5 13l4 4L19 7"/>
+                            <div class="space-y-1 text-xs text-base-content/60">
+                                <div class="flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
-                                    <span>网站内容健康正向</span>
+                                    <span>内容健康正向</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success" fill="none"
-                                         viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M5 13l4 4L19 7"/>
+                                <div class="flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
                                     <span>技术相关或有价值</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success" fill="none"
-                                         viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M5 13l4 4L19 7"/>
+                                <div class="flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
                                     <span>网站稳定可访问</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-success" fill="none"
-                                         viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M5 13l4 4L19 7"/>
+                                <div class="flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
                                     <span>优先考虑互链</span>
                                 </div>
                             </div>
-                            <div class="card-actions justify-center mt-4">
-                                <a href="/submit-link" class="btn btn-primary btn-sm btn-block">立即申请</a>
-                            </div>
+                            <!-- 友链申请表单 -->
+                            <form id="linkApplyForm" class="space-y-3 mb-4">
+                                <div class="form-control">
+                                    <input type="text" name="siteName" placeholder="网站名称" class="input input-bordered input-sm w-full" required maxlength="50">
+                                </div>
+                                <div class="form-control">
+                                    <input type="text" name="siteDesc" placeholder="网站简介" class="input input-bordered input-sm w-full" required maxlength="100">
+                                </div>
+                                <div class="form-control">
+                                    <input type="url" name="siteLogo" placeholder="Logo地址 (https://...)" class="input input-bordered input-sm w-full" required>
+                                </div>
+                                <div class="form-control">
+                                    <input type="url" name="siteUrl" placeholder="网站链接 (https://...)" class="input input-bordered input-sm w-full" required>
+                                </div>
+                                <div class="form-control">
+                                    <input type="email" name="email" placeholder="联系邮箱" class="input input-bordered input-sm w-full" required>
+                                </div>
+                                <div class="form-control">
+                                    <input type="text" name="contact" placeholder="联系方式/回链页面" class="input input-bordered input-sm w-full" required>
+                                </div>
+                                <button type="submit" id="submitBtn" class="btn btn-primary btn-sm btn-block">提交申请</button>
+                            </form>
+                            
                         </div>
                     </div>
 
@@ -184,5 +196,56 @@
     </main>
     {{template "footer.gohtml" .}}
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('linkApplyForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // 获取表单数据
+        const formData = new FormData(form);
+        const data = {
+            siteName: formData.get('siteName'),
+            siteDesc: formData.get('siteDesc'),
+            siteLogo: formData.get('siteLogo'),
+            siteUrl: formData.get('siteUrl'),
+            email: formData.get('email'),
+            contact: formData.get('contact')
+        };
+        
+        // 禁用提交按钮
+        submitBtn.disabled = true;
+        submitBtn.textContent = '提交中...';
+        
+        try {
+            const response = await fetch('/api/forum/apply-link-add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert('申请提交成功！我们会在24小时内处理您的申请。');
+                form.reset();
+            } else {
+                const error = await response.json();
+                alert('提交失败：' + (error.message || '请稍后重试'));
+            }
+        } catch (error) {
+            console.error('提交错误:', error);
+            alert('网络错误，请稍后重试');
+        } finally {
+            // 恢复提交按钮
+            submitBtn.disabled = false;
+            submitBtn.textContent = '提交申请';
+        }
+    });
+});
+</script>
 </body>
 </html>

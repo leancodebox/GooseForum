@@ -31,7 +31,8 @@ type ApplyAddLinkReq struct {
 	SiteUrl  string `json:"siteUrl" validate:"required"`
 	SiteLogo string `json:"siteLogo" validate:"required"`
 	SiteDesc string `json:"siteDesc" validate:"required"`
-	Contact  string `json:"contact" validate:"required"`
+	Email    string `json:"email"`
+	Contact  string `json:"contact"`
 }
 
 func ApplyAddLink(req component.BetterRequest[ApplyAddLinkReq]) component.Response {

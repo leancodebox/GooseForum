@@ -423,22 +423,6 @@ func Profile(c *gin.Context) {
 		"Title":        "个人中心 - GooseForum",
 	})
 }
-
-func Publish(c *gin.Context) {
-	viewrender.Render(c, "publish.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "发布中心 - GooseForum",
-	})
-}
-
-func PublishV2(c *gin.Context) {
-	viewrender.Render(c, "publish-v2.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "发布中心 - GooseForum",
-	})
-}
 func PublishV3(c *gin.Context) {
 	viewrender.Render(c, "publish-v3.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
@@ -452,15 +436,6 @@ func Notifications(c *gin.Context) {
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
 		"Title":        "通知中心 - GooseForum",
-	})
-}
-
-func SubmitLink(c *gin.Context) {
-	viewrender.Render(c, "submit-link.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "友情链接申请 - GooseForum",
-		"Description":  "友情链接申请",
 	})
 }
 
