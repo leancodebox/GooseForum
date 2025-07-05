@@ -477,7 +477,7 @@ func GetFriendLinks(req component.BetterRequest[null]) component.Response {
 		Url:     "https://gooseforum.online",
 		LogoUrl: "/static/pic/default-avatar.png",
 	}
-	res := pageConfig.GetConfigByPageType(pageConfig.WebSettings, []pageConfig.FriendLinksGroup{
+	res := pageConfig.GetConfigByPageType(pageConfig.FriendShipLinks, []pageConfig.FriendLinksGroup{
 		{
 			Name:  "community",
 			Links: []pageConfig.LinkItem{lItem},
