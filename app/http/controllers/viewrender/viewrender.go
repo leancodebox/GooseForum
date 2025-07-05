@@ -32,13 +32,7 @@ func GlobalFunc() template.FuncMap {
 	return template.FuncMap{
 		"WebPageSettings": func() pageConfig.WebSettingsConfig {
 			data, _ := webSettingsCache.GetOrLoad("websetcache", func() (pageConfig.WebSettingsConfig, error) {
-				return pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{
-					MetaTags:      "",
-					CustomCSS:     "",
-					CustomJS:      "",
-					ExternalLinks: "",
-					Favicon:       "",
-				}), nil
+				return pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{}), nil
 			},
 				time.Second*5,
 			)

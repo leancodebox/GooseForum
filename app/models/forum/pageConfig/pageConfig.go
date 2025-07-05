@@ -41,15 +41,9 @@ var PageTypeList = []string{
 }
 
 type WebSettingsConfig struct {
-	MetaTags        string `json:"metaTags"`
-	CustomCSS       string `json:"customCSS"`
-	CustomJS        string `json:"customJS"`
-	ExternalLinks   string `json:"externalLinks"`
-	Favicon         string `json:"favicon"`
-	AppleTouchIcon  string `json:"appleTouchIcon"`
-	OgImage         string `json:"ogImage"`
-	TwitterCardType string `json:"twitterCardType"`
-	StructuredData  string `json:"structuredData"`
+	ExternalLinks string `json:"externalLinks,omitempty"`
+	CustomJS      string `json:"customJS,omitempty"`
+	Favicon       string `json:"favicon,omitempty"`
 }
 
 type LinkItem struct {

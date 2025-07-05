@@ -526,13 +526,7 @@ func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.
 
 // GetWebSettings 获取网页设置
 func GetWebSettings(req component.BetterRequest[null]) component.Response {
-	settings := pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{
-		MetaTags:      "",
-		CustomCSS:     "",
-		CustomJS:      "",
-		ExternalLinks: "",
-		Favicon:       "",
-	})
+	settings := pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{})
 	return component.SuccessResponse(settings)
 }
 

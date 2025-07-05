@@ -225,17 +225,17 @@ const menuItems = ref([
     icon: TicketIcon
   },
   {
+    key: 'web-settings',
+    label: '网页设置',
+    path: '/admin/web-settings',
+    icon: GlobeAltIcon
+  },
+  {
     key: 'settings',
     label: '系统设置-todo',
     path: '/admin/settings',
     icon: CogIcon
   },
-  {
-    key: 'web-settings',
-    label: '网页设置',
-    path: '/admin/web-settings',
-    icon: GlobeAltIcon
-  }
 ])
 
 // 页面标题

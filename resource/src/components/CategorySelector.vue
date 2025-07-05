@@ -165,7 +165,7 @@ watch(() => props.maxSelection, (newVal) => {
 <template>
   <div class="form-control">
     <label class="label pb-1" v-if="label">
-      <span class="label-text font-medium text-base-content">{{ label }}</span>
+      <span class="label-text font-normal text-base-content">{{ label }}</span>
       <span class="label-text-alt text-base-content/60" v-if="labelAlt">{{ labelAlt }}</span>
     </label>
     

@@ -125,15 +125,9 @@ export const getArticleEnum = async (): Promise<Result<Record<string,Label[]>>> 
 
 // 网页设置相关接口
 export interface WebSettingsConfig {
-    metaTags: string;
-    customCSS: string;
     customJS: string;
     externalLinks: string;
     favicon: string;
-    appleTouchIcon: string;
-    ogImage: string;
-    twitterCardType: string;
-    structuredData: string;
 }
 
 export const getWebSettings = (): Promise<Result<WebSettingsConfig>> => {

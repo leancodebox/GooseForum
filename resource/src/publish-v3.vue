@@ -353,7 +353,7 @@ onMounted(async () => {
               <!-- 文章标题区域 -->
               <div class="form-control">
                 <label class="label pb-1">
-                  <span class="label-text font-medium text-base-content">📝 文章标题</span>
+                  <span class="label-text font-normal text-base-content">📝 文章标题</span>
                   <span class="label-text-alt text-base-content/60">必填</span>
                 </label>
                 <input type="text" v-model="articleData.title" placeholder="请输入一个吸引人的标题..."
@@ -365,7 +365,7 @@ onMounted(async () => {
                 <!-- 文章类型 -->
                 <div class="form-control">
                   <label class="label pb-1">
-                    <span class="label-text font-medium text-base-content">🏷️ 文章类型</span>
+                    <span class="label-text font-normal text-base-content">🏷️ 文章类型</span>
                     <span class="label-text-alt text-base-content/60">必选</span>
                   </label>
                   <select v-model="articleData.type"
@@ -385,7 +385,7 @@ onMounted(async () => {
               <!-- 文章内容区域 -->
               <div class="form-control flex-1">
                 <label class="label pb-2">
-                  <span class="label-text font-medium text-base-content">✍️ 文章内容</span>
+                  <span class="label-text font-normal text-base-content">✍️ 文章内容</span>
                   <span class="label-text-alt text-base-content/60">支持 Markdown 语法</span>
                 </label>
                 <div class="relative flex-1">
