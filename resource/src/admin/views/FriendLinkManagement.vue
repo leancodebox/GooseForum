@@ -320,7 +320,7 @@ onMounted(() => {
 
                         <div class="w-full">
                           <h3 class="text-xs font-medium truncate" :title="link.name">{{ link.name }}</h3>
-                          <p v-if="link.desc" class="text-xs text-base-content/60 truncate mt-1" :title="link.desc">
+                          <p v-if="link.desc" class="text-xs text-base-content/60 line-clamp-2 mt-1" :title="link.desc">
                             {{ link.desc }}</p>
                         </div>
 
