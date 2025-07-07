@@ -2,10 +2,11 @@ package filedata
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 
 	"github.com/google/uuid"
 )
@@ -118,7 +119,7 @@ func SaveFileFromUpload(userId uint64, fileData []byte, filename string, customP
 
 // 在 supportedImageTypes 映射后添加新的常量
 const (
-	MaxFileSize = 2 * 1024 * 1024 // 2MB
+	MaxFileSize = 4 * 1024 * 1024 // 4MB
 	AvatarPath  = "avatars"
 )
 
@@ -130,4 +131,19 @@ func SaveAvatar(userId uint64, fileData []byte, filename string) (*Entity, error
 		time.Now().Unix())
 
 	return SaveFileFromUpload(userId, fileData, filename, avatarPath)
+}
+
+// CountUserUploadsInTimeRange 统计用户在指定时间范围内的上传次数
+func CountUserUploadsInTimeRange(userId uint64, startTime, endTime time.Time) int64 {
+	var count int64
+	builder().Where("user_id = ? AND created_at >= ? AND created_at <= ?", userId, startTime, endTime).Count(&count)
+	return count
+}
+
+// CountUserUploadsToday 统计用户今日上传次数
+func CountUserUploadsToday(userId uint64) int64 {
+	now := time.Now()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	endOfDay := startOfDay.Add(24 * time.Hour).Add(-time.Nanosecond)
+	return CountUserUploadsInTimeRange(userId, startOfDay, endOfDay)
 }

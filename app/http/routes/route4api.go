@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -146,8 +147,8 @@ func apiRoute(ginApp *gin.Engine) {
 
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
-	// 文件上传接口
-	r.POST("/img-upload", middleware.JWTAuth4Gin, controllers.SaveFileByGinContext)
+	// 文件上传接口 - 每日最多上传50张图片
+	r.POST("/img-upload", middleware.JWTAuth4Gin, middleware.FileUploadRateLimit(50, 24*time.Hour), controllers.SaveImgByGinContext)
 	// 文件获取接口 - 通过路径
 	r.GET("/img/*filename", middleware.BrowserCache, controllers.GetFileByFileName)
 }

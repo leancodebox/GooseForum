@@ -324,7 +324,7 @@ const uploadImage = async (file: File): Promise<string> => {
     const result = await response.json()
     console.log(result)
     if (result.code === 0 && result.result) {
-      return result.result
+      return result.result.url
     } else {
       throw new Error(result.msg || '上传失败')
     }
