@@ -47,7 +47,9 @@ func checkUserRegistrationTime(userId uint64, minDays int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
+	if user.Status == 1 {
+		return false, nil
+	}
 	// 计算用户注册时间到现在的天数
 	now := time.Now()
 	registrationTime := user.CreatedAt
