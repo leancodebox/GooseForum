@@ -342,7 +342,7 @@ const insertImageToContent = (imageUrl: string, altText: string = '') => {
   const textBefore = articleData.content.substring(0, cursorPos)
   const textAfter = articleData.content.substring(textarea.selectionEnd)
   
-  const imageMarkdown = `![${altText}](${imageUrl})`
+  const imageMarkdown = `![${altText}](${imageUrl})\n`
   articleData.content = textBefore + imageMarkdown + textAfter
   
   // 设置光标位置到插入的图片后面
