@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/resource"
 	"io"
 	"net/http"
@@ -35,14 +36,14 @@ func SaveFileByGinContext(c *gin.Context) {
 	// 获取上传的文件
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File upload failed"})
+		c.JSON(http.StatusBadRequest, component.FailData("File upload failed"))
 		return
 	}
 
 	// 打开上传的文件
 	src, err := file.Open()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "File open failed"})
+		c.JSON(http.StatusInternalServerError, component.FailData("File open failed"))
 		return
 	}
 	defer src.Close()
@@ -50,7 +51,7 @@ func SaveFileByGinContext(c *gin.Context) {
 	// 读取文件内容
 	fileData, err := io.ReadAll(src)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file"})
+		c.JSON(http.StatusInternalServerError, component.FailData("Failed to read file"))
 		return
 	}
 
@@ -60,12 +61,10 @@ func SaveFileByGinContext(c *gin.Context) {
 	// 保存文件
 	entity, err := filedata.SaveFileFromUpload(userId, fileData, file.Filename, folderName)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+		c.JSON(http.StatusInternalServerError, component.FailData(err.Error()))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "File uploaded successfully",
-		"name":    entity.Name,
-	})
+	c.JSON(http.StatusOK, component.SuccessData(entity.GetAccessPath()))
 }

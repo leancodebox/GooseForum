@@ -1,6 +1,7 @@
 package filedata
 
 import (
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"time"
 )
 
@@ -33,4 +34,8 @@ type Entity struct {
 
 func (itself *Entity) TableName() string {
 	return tableName
+}
+
+func (itself *Entity) GetAccessPath() string {
+	return urlconfig.FilePath(itself.Name)
 }

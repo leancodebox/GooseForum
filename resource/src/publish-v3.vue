@@ -36,6 +36,9 @@ const articleData = reactive<ArticleData>({
 const categories = ref<Category[]>([])
 const typeList = ref<TypeOption[]>([])
 const isSubmitting = ref(false)
+const isUploading = ref(false)
+const uploadProgress = ref(0)
+const isDragOver = ref(false)
 
 
 // 计算属性
@@ -292,6 +295,153 @@ const clearContent = () => {
   }
 }
 
+// 图片上传相关方法
+const uploadImage = async (file: File): Promise<string> => {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('请选择图片文件')
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error('图片大小不能超过10MB')
+  }
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  isUploading.value = true
+  uploadProgress.value = 0
+
+  try {
+    const response = await fetch('/file/img-upload', {
+      method: 'POST',
+      body: formData
+    })
+
+    if (!response.ok) {
+      throw new Error(`上传失败: ${response.status}`)
+    }
+
+    const result = await response.json()
+    console.log(result)
+    if (result.code === 0 && result.result) {
+      return result.result
+    } else {
+      throw new Error(result.msg || '上传失败')
+    }
+  } finally {
+    isUploading.value = false
+    uploadProgress.value = 0
+  }
+}
+
+const insertImageToContent = (imageUrl: string, altText: string = '') => {
+  const textarea = document.querySelector('textarea') as HTMLTextAreaElement
+  if (!textarea) return
+
+  const cursorPos = textarea.selectionStart
+  const textBefore = articleData.content.substring(0, cursorPos)
+  const textAfter = articleData.content.substring(textarea.selectionEnd)
+  
+  const imageMarkdown = `![${altText}](${imageUrl})`
+  articleData.content = textBefore + imageMarkdown + textAfter
+  
+  // 设置光标位置到插入的图片后面
+  setTimeout(() => {
+    const newPos = cursorPos + imageMarkdown.length
+    textarea.setSelectionRange(newPos, newPos)
+    textarea.focus()
+  }, 0)
+}
+
+const handleFileSelect = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const files = input.files
+  if (!files || files.length === 0) return
+
+  try {
+    for (const file of Array.from(files)) {
+      showMessage('正在上传图片...', 'info')
+      const imageUrl = await uploadImage(file)
+      insertImageToContent(imageUrl, file.name.split('.')[0])
+      showMessage('图片上传成功！', 'success')
+    }
+  } catch (error) {
+    console.error('图片上传失败:', error)
+    showMessage((error as Error).message || '图片上传失败', 'error')
+  } finally {
+    // 清空input值，允许重复选择同一文件
+    input.value = ''
+  }
+}
+
+const handlePaste = async (event: ClipboardEvent) => {
+  const items = event.clipboardData?.items
+  if (!items) return
+
+  for (const item of Array.from(items)) {
+    if (item.type.startsWith('image/')) {
+      event.preventDefault()
+      const file = item.getAsFile()
+      if (!file) continue
+
+      try {
+        showMessage('正在上传剪贴板图片...', 'info')
+        const imageUrl = await uploadImage(file)
+        insertImageToContent(imageUrl, '剪贴板图片')
+        showMessage('图片上传成功！', 'success')
+      } catch (error) {
+        console.error('图片上传失败:', error)
+        showMessage((error as Error).message || '图片上传失败', 'error')
+      }
+      break
+    }
+  }
+}
+
+const handleDragOver = (event: DragEvent) => {
+  event.preventDefault()
+  event.stopPropagation()
+  event.dataTransfer!.dropEffect = 'copy'
+  isDragOver.value = true
+}
+
+const handleDragLeave = (event: DragEvent) => {
+  event.preventDefault()
+  event.stopPropagation()
+  // 只有当离开整个拖拽区域时才隐藏提示
+  const currentTarget = event.currentTarget as HTMLElement
+  if (!currentTarget?.contains(event.relatedTarget as Node)) {
+    isDragOver.value = false
+  }
+}
+
+const handleDrop = async (event: DragEvent) => {
+  event.preventDefault()
+  event.stopPropagation()
+  isDragOver.value = false
+  const files = event.dataTransfer?.files
+  if (!files || files.length === 0) return
+
+  try {
+    for (const file of Array.from(files)) {
+      if (file.type.startsWith('image/')) {
+        showMessage('正在上传拖拽图片...', 'info')
+        const imageUrl = await uploadImage(file)
+        insertImageToContent(imageUrl, file.name.split('.')[0])
+        showMessage('图片上传成功！', 'success')
+      }
+    }
+  } catch (error) {
+    console.error('图片上传失败:', error)
+    showMessage((error as Error).message || '图片上传失败', 'error')
+  }
+}
+
+const triggerFileInput = () => {
+  const fileInput = document.getElementById('imageUpload') as HTMLInputElement
+  fileInput?.click()
+}
+
 const initData = async () => {
   try {
     // 获取分类和类型选项
@@ -345,7 +495,7 @@ onMounted(async () => {
     </div>
     <main class="flex-1 container mx-auto px-4 py-4">
       <div class="tabs tabs-lift">
-        <input type="radio" name="my_tabs_3" class="tab" aria-label="文章编写" checked="checked"/>
+        <input type="radio" name="my_tabs_3" class="tab" aria-label="文章编写" :checked="true"/>
         <div class="tab-content bg-base-100 border-base-300 p-0">
           <div class="flex flex-col h-full">
             <!-- 编辑区域 -->
@@ -380,18 +530,74 @@ onMounted(async () => {
                                   :max-selection="3" @change="handleCategoryChange" @error="handleCategoryError"/>
               </div>
 
+              <!-- 图片上传工具栏 -->
+              <div class="flex items-center gap-2 mb-2 p-2 bg-base-200 rounded-lg">
+                <button @click="triggerFileInput" type="button" class="btn btn-sm btn-ghost gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  上传图片
+                </button>
+                <div class="text-xs text-base-content/60">
+                  支持拖拽、粘贴上传 | 最大10MB
+                </div>
+                <div v-if="isUploading" class="flex items-center gap-2 ml-auto">
+                  <span class="loading loading-spinner loading-sm"></span>
+                  <span class="text-xs">上传中...</span>
+                </div>
+              </div>
+
+              <!-- 隐藏的文件输入框 -->
+              <input 
+                id="imageUpload" 
+                type="file" 
+                accept="image/*" 
+                multiple 
+                @change="handleFileSelect" 
+                class="hidden"
+              />
+
               <!-- 文章内容区域 -->
               <div class="form-control flex-1">
                 <label class="floating-label pb-2">
                   <span class="font-normal text-base-content">✍️ 文章内容-支持 Markdown 语法</span>
                   <div class="relative flex-1">
-                                    <textarea v-model="articleData.content"
-                                              class="textarea textarea-bordered w-full h-full min-h-96 resize-none focus:textarea-primary font-mono text-sm leading-relaxed"
-                                              placeholder="开启你的创作..."></textarea>
-                    <!-- 字数统计 -->
-                    <div
-                        class="absolute bottom-2 right-4 text-xs text-base-content/50 bg-base-100 px-2 py-1 rounded">
-                      <span>{{ charCount }}</span> 字符
+                    
+
+                    
+                    <!-- 文本编辑区域 -->
+                    <div 
+                      class="relative"
+                      @dragover="handleDragOver"
+                      @dragleave="handleDragLeave"
+                      @drop="handleDrop"
+                    >
+                      <textarea 
+                        v-model="articleData.content"
+                        @paste="handlePaste"
+                        class="textarea textarea-bordered w-full h-full min-h-96 resize-none focus:textarea-primary font-mono text-sm leading-relaxed"
+                        placeholder="开启你的创作...\n\n💡 提示：\n• 直接粘贴图片即可上传\n• 拖拽图片到此区域上传\n• 点击上方按钮选择图片"
+                      ></textarea>
+                      
+                      <!-- 拖拽提示层 -->
+                       <div 
+                         class="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary rounded-lg flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200"
+                         :class="{ 'opacity-100': isDragOver || isUploading }"
+                       >
+                        <div class="text-center">
+                           <svg class="w-12 h-12 mx-auto mb-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                           </svg>
+                           <p class="text-primary font-medium">
+                             {{ isUploading ? '正在上传图片...' : '释放以上传图片' }}
+                           </p>
+                         </div>
+                      </div>
+                      
+                      <!-- 字数统计 -->
+                      <div class="absolute bottom-2 right-4 text-xs text-base-content/50 bg-base-100 px-2 py-1 rounded">
+                        <span>{{ charCount }}</span> 字符
+                      </div>
                     </div>
                   </div>
                 </label>
