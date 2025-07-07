@@ -148,7 +148,7 @@ func apiRoute(ginApp *gin.Engine) {
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
 	// 文件上传接口 - 每日最多上传50张图片
-	r.POST("/img-upload", middleware.JWTAuth4Gin, middleware.FileUploadRateLimit(50, 24*time.Hour), controllers.SaveImgByGinContext)
+	r.POST("/img-upload", middleware.JWTAuth4Gin, middleware.FileUploadRateLimit(33, 24*time.Hour), controllers.SaveImgByGinContext)
 	// 文件获取接口 - 通过路径
 	r.GET("/img/*filename", middleware.BrowserCache, controllers.GetFileByFileName)
 }
