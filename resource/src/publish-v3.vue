@@ -352,29 +352,27 @@ onMounted(async () => {
             <div class="flex-1 p-6 space-y-2">
               <!-- 文章标题区域 -->
               <div class="form-control">
-                <label class="label pb-1">
+                <label class="floating-label pb-1">
                   <span class="label-text font-normal text-base-content">📝 文章标题</span>
-                  <span class="label-text-alt text-base-content/60">必填</span>
+                  <input type="text" v-model="articleData.title" placeholder="请输入一个吸引人的标题..."
+                         class="input input-bordered input-md w-full focus:input-primary"/>
                 </label>
-                <input type="text" v-model="articleData.title" placeholder="请输入一个吸引人的标题..."
-                       class="input input-bordered input-md w-full focus:input-primary"/>
               </div>
 
               <!-- 分类和类型选择区域 -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <!-- 文章类型 -->
                 <div class="form-control">
-                  <label class="label pb-1">
-                    <span class="label-text font-normal text-base-content">🏷️ 文章类型</span>
-                    <span class="label-text-alt text-base-content/60">必选</span>
+                  <label class="floating-label pb-1">
+                    <span class="label-text font-normal text-base-content">🏷️ 文章类型(必选)</span>
+                    <select v-model="articleData.type"
+                            class="select select-bordered w-full focus:select-primary">
+                      <option value="">请选择类型</option>
+                      <option v-for="type in typeList" :key="type.value" :value="type.value">
+                        {{ type.name }}
+                      </option>
+                    </select>
                   </label>
-                  <select v-model="articleData.type"
-                          class="select select-bordered w-full focus:select-primary">
-                    <option value="">请选择类型</option>
-                    <option v-for="type in typeList" :key="type.value" :value="type.value">
-                      {{ type.name }}
-                    </option>
-                  </select>
                 </div>
 
                 <!-- 文章分类 -->
@@ -384,20 +382,19 @@ onMounted(async () => {
 
               <!-- 文章内容区域 -->
               <div class="form-control flex-1">
-                <label class="label pb-2">
-                  <span class="label-text font-normal text-base-content">✍️ 文章内容</span>
-                  <span class="label-text-alt text-base-content/60">支持 Markdown 语法</span>
-                </label>
-                <div class="relative flex-1">
+                <label class="floating-label pb-2">
+                  <span class="font-normal text-base-content">✍️ 文章内容-支持 Markdown 语法</span>
+                  <div class="relative flex-1">
                                     <textarea v-model="articleData.content"
                                               class="textarea textarea-bordered w-full h-full min-h-96 resize-none focus:textarea-primary font-mono text-sm leading-relaxed"
                                               placeholder="开启你的创作..."></textarea>
-                  <!-- 字数统计 -->
-                  <div
-                      class="absolute bottom-2 right-4 text-xs text-base-content/50 bg-base-100 px-2 py-1 rounded">
-                    <span>{{ charCount }}</span> 字符
+                    <!-- 字数统计 -->
+                    <div
+                        class="absolute bottom-2 right-4 text-xs text-base-content/50 bg-base-100 px-2 py-1 rounded">
+                      <span>{{ charCount }}</span> 字符
+                    </div>
                   </div>
-                </div>
+                </label>
               </div>
 
               <!-- 底部操作区域 -->
