@@ -316,16 +316,28 @@ const uploadImage = async (file: File): Promise<string> => {
       method: 'POST',
       body: formData
     })
-    const result = await response.json()
-    if (!response.ok) {
-      throw new Error(`上传失败: ${response.status}-${result?.msg}`)
+    
+    let result
+    try {
+      result = await response.json()
+    } catch {
+      throw new Error('服务器响应格式错误')
     }
-    console.log(result)
-    if (result.code === 0 && result.result) {
+    
+    if (!response.ok) {
+      throw new Error(`上传失败: ${response.status} - ${result?.msg || '服务器错误'}`)
+    }
+    
+    if (result?.code === 0 && result?.result?.url) {
       return result.result.url
     } else {
-      throw new Error(result.msg || '上传失败')
+      throw new Error(result?.msg || '上传失败，请重试')
     }
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('网络连接失败，请检查网络后重试')
+    }
+    throw error
   } finally {
     isUploading.value = false
     uploadProgress.value = 0
