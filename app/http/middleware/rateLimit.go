@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/cast"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/spf13/cast"
 )
 
 // isAllowedByDatabase 基于数据库记录检查用户是否允许上传
@@ -16,7 +17,7 @@ func isAllowedByDatabase(userId uint64, maxCount int, window time.Duration) bool
 	// 根据时间窗口计算查询范围
 	now := time.Now()
 	var startTime time.Time
-	
+
 	if window == 24*time.Hour {
 		// 如果是24小时窗口，使用今日统计方法
 		count := filedata.CountUserUploadsToday(userId)
@@ -40,6 +41,21 @@ func getUserUploadCount(userId uint64, window time.Duration) int64 {
 	}
 }
 
+// checkUserRegistrationTime 检查用户注册时间是否超过指定天数
+func checkUserRegistrationTime(userId uint64, minDays int) (bool, error) {
+	user, err := users.Get(userId)
+	if err != nil {
+		return false, err
+	}
+
+	// 计算用户注册时间到现在的天数
+	now := time.Now()
+	registrationTime := user.CreatedAt
+	daysSinceRegistration := int(now.Sub(registrationTime).Hours() / 24)
+
+	return daysSinceRegistration >= minDays, nil
+}
+
 // FileUploadRateLimit 文件上传频率限制中间件
 // maxUploads: 最大上传次数
 // window: 时间窗口
@@ -52,17 +68,31 @@ func FileUploadRateLimit(maxUploads int, window time.Duration) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		userId := cast.ToUint64(userIdData)
 		if userId == 0 {
 			c.JSON(http.StatusUnauthorized, component.FailData("无效的用户ID"))
 			c.Abort()
 			return
 		}
-		
+
+		// 检查用户注册时间是否超过3天
+		isEligible, err := checkUserRegistrationTime(userId, 3)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, component.FailData("获取用户信息失败"))
+			c.Abort()
+			return
+		}
+
+		if !isEligible {
+			c.JSON(http.StatusForbidden, component.FailData("注册未满3天的用户暂时无法上传图片"))
+			c.Abort()
+			return
+		}
+
 		// 获取当前上传次数
 		currentCount := getUserUploadCount(userId, window)
-		
+
 		// 检查频率限制
 		if currentCount >= int64(maxUploads) {
 			var timeDesc string
@@ -71,22 +101,13 @@ func FileUploadRateLimit(maxUploads int, window time.Duration) gin.HandlerFunc {
 			} else {
 				timeDesc = fmt.Sprintf("最近%v", window)
 			}
-			
+
 			msg := fmt.Sprintf("上传频率超限，%s已上传%d张图片，最多允许%d张", timeDesc, currentCount, maxUploads)
-			c.JSON(http.StatusTooManyRequests, gin.H{
-				"code": 429,
-				"msg":  msg,
-				"data": gin.H{
-					"current_count": currentCount,
-					"max_count":     maxUploads,
-					"remaining":     maxUploads - int(currentCount),
-					"window":        window.String(),
-				},
-			})
+			c.JSON(http.StatusTooManyRequests, component.FailData(msg))
 			c.Abort()
 			return
 		}
-		
+
 		c.Next()
 	}
 }

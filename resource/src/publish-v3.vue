@@ -316,12 +316,10 @@ const uploadImage = async (file: File): Promise<string> => {
       method: 'POST',
       body: formData
     })
-
-    if (!response.ok) {
-      throw new Error(`上传失败: ${response.status}`)
-    }
-
     const result = await response.json()
+    if (!response.ok) {
+      throw new Error(`上传失败: ${response.status}-${result?.msg}`)
+    }
     console.log(result)
     if (result.code === 0 && result.result) {
       return result.result.url
