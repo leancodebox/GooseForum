@@ -81,6 +81,9 @@ func (itself *Entity) GetWebAvatarUrl() string {
 	if itself.AvatarUrl == "" {
 		return urlconfig.GetDefaultAvatar()
 	}
+	if strings.HasPrefix(itself.AvatarUrl, "/static/pic/") {
+		return itself.AvatarUrl
+	}
 	return strings.ReplaceAll(urlconfig.FilePath(itself.AvatarUrl), "\\", "/")
 }
 

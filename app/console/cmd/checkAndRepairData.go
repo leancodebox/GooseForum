@@ -37,6 +37,10 @@ func runCheckAndRepairData(cmd *cobra.Command, args []string) {
 			if userStartId < userItem.Id {
 				userStartId = userItem.Id
 			}
+			if userItem.AvatarUrl == "" {
+				userItem.AvatarUrl = users.RandAvatarUrl()
+				users.Save(userItem)
+			}
 			userSt := userStatistics.Get(userItem.Id)
 			if userSt.UserId == 0 {
 				fmt.Println("用户统计信息不存在，开始初始化")

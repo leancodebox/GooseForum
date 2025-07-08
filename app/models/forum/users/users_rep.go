@@ -1,10 +1,12 @@
 package users
 
 import (
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"math/rand"
 	"time"
 )
 
@@ -36,7 +38,13 @@ func GetByEmail(email string) (entity Entity, err error) {
 func MakeUser(name string, password string, email string) *Entity {
 	user := Entity{Username: name, Email: email}
 	user.SetPassword(password)
+	user.AvatarUrl = RandAvatarUrl()
 	return &user
+}
+
+func RandAvatarUrl() string {
+	randomNum := rand.Intn(8) + 1
+	return fmt.Sprintf("/static/pic/%d.webp", randomNum)
 }
 
 func Create(entity *Entity) error {
