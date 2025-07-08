@@ -36,12 +36,12 @@
                             </div>
                         {{end}}
                         <div class="flex items-center text-base-content/70 mb-6 border-b border-b-gray-200 pb-2">
-                            <div class="avatar">
+                            <a class="avatar" href="/user/{{.AuthorId}}">
                                 <div class="mask mask-squircle w-8 h-8">
                                     <img src="{{.AvatarUrl}}" alt="{{.Username}}的头像"/>
                                 </div>
-                            </div>
-                            <span class="ml-2 mr-4 flex-shrink-0">{{.Username}}</span>
+                            </a>
+                            <a  href="/user/{{.AuthorId}}" class="ml-2 mr-4 flex-shrink-0">{{.Username}}</a>
                             <span class="mr-4 flex-shrink-0">{{.CreateTime}}</span>
                             {{if and .User (eq .User.UserId .AuthorId)}}
                                 <a href="/publish?id={{.ArticleId}}" class="mr-4 flex-shrink-0">编辑</a>
@@ -206,13 +206,13 @@
                         <div class="card-body">
                             <h2 class="card-title mb-3 font-normal">作者信息</h2>
                             <div class="flex items-center gap-3 mb-4">
-                                <div class="avatar">
+                                <a  href="/user/{{.AuthorId}}" class="avatar">
                                     <div class="mask mask-squircle w-16 h-16">
                                         <img src="{{.AvatarUrl}}" alt="{{.Username}}的头像"/>
                                     </div>
-                                </div>
+                                </a>
                                 <div class="flex-1">
-                                    <h3 class="font-normal text-base-content">{{.Username}}</h3>
+                                    <a href="/user/{{.AuthorId}}" class="font-normal text-base-content">{{.Username}}</a>
                                     <p class="text-sm text-base-content/70">{{.Signature}}</p>
                                     <div class="flex items-center gap-2 mt-1">
                                         <div class="badge badge-xs badge-primary"></div>
