@@ -248,7 +248,7 @@ onUnmounted(() => {
            :class="{ 'cursor-not-allowed opacity-50': uploading }"
          >
            <img 
-             :src="currentAvatar || '/default-avatar.png'" 
+             :src="currentAvatar || '/default-avatar.webp'"
              alt="点击更换头像"
              class="w-full h-full object-cover"
            />

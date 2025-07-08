@@ -57,7 +57,7 @@
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
             <div class="w-8 rounded-full">
-              <img :src="userStore.user?.avatar || '/static/pic/default-avatar.png'"
+              <img :src="userStore.user?.avatar || '/static/pic/default-avatar.webp'"
                 :alt="userStore.user?.username" />
             </div>
           </div>

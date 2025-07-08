@@ -64,7 +64,7 @@
                   <div class="flex items-center gap-3">
                     <div class="avatar">
                       <div class="mask mask-squircle w-12 h-12">
-                        <img :src="user.avatarUrl || '/static/pic/default-avatar.png'" :alt="user.username" />
+                        <img :src="user.avatarUrl || '/static/pic/default-avatar.webp'" :alt="user.username" />
                       </div>
                     </div>
                     <div>

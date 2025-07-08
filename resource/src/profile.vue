@@ -10,7 +10,7 @@ const isLoading = ref(true)
 
 // 用户信息 - 根据UserInfo接口定义
 const userInfo = reactive<UserInfo>({
-  avatarUrl: '/static/pic/default-avatar.png',
+  avatarUrl: '/static/pic/default-avatar.webp',
   username: '',
   nickname: '',
   email: '',
@@ -108,7 +108,7 @@ const editProfile = () => {
               <div v-else>
                 <div class="avatar mb-4 mx-auto">
                   <div class="mask mask-squircle w-24 h-24">
-                    <img :src="userInfo.avatarUrl || '/static/pic/default-avatar.png'"
+                    <img :src="userInfo.avatarUrl || '/static/pic/default-avatar.webp'"
                          :alt="userInfo.nickname || userInfo.username"/>
                   </div>
                 </div>

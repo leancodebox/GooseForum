@@ -49,7 +49,7 @@ func GetTemplates(globalFunc template.FuncMap) *template.Template {
 	))
 }
 
-//go:embed static/pic/default-avatar.png
+//go:embed static/pic/default-avatar.webp
 var defaultAvatar []byte
 
 func GetDefaultAvatar() []byte {

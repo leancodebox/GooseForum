@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="resource/static/pic/icon_300.png" width="140"/>
+  <img src="resource/static/pic/icon_300.webp" width="140"/>
   <h1>GooseForum</h1>
   <p>🚀 现代化的 Go + Vue 3 + TailwindCSS 论坛系统</p>
   

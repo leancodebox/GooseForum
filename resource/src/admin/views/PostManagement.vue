@@ -209,7 +209,7 @@ onMounted(() => {
                 <div class="flex items-center gap-2">
                   <div class="avatar">
                     <div class="w-8 h-8 rounded-full">
-                      <img :src="post.userAvatarUrl || '/static/pic/default-avatar.png'" :alt="post.username"/>
+                      <img :src="post.userAvatarUrl || '/static/pic/default-avatar.webp'" :alt="post.username"/>
                     </div>
                   </div>
                   <div class="text-sm">
