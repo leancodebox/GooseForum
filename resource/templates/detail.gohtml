@@ -44,7 +44,7 @@
                             <a  href="/user/{{.AuthorId}}" class="ml-2 mr-4 flex-shrink-0">{{.Username}}</a>
                             <span class="mr-4 flex-shrink-0">{{.CreateTime}}</span>
                             {{if and .User (eq .User.UserId .AuthorId)}}
-                                <a href="/publish?id={{.ArticleId}}" class="mr-4 flex-shrink-0">编辑</a>
+                                <a href="/publish?id={{.ArticleId}}" class="mr-4 text-primary flex-shrink-0">编辑</a>
                             {{end}}
                             <div class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
@@ -231,7 +231,7 @@
                                     <div class="text-xs text-base-content/60">文章数</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.LikeReceivedCount}}</div>
+                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.LikeGivenCount}}</div>
                                     <div class="text-xs text-base-content/60">获赞数</div>
                                 </div>
                                 <div class="text-center">
