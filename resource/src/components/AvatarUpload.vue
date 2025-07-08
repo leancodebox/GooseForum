@@ -79,7 +79,7 @@ const handleFileSelect = async (event) => {
 }
 
 // 图片压缩函数，支持WebP格式
-const compressImage = (base64Data, maxWidth = 200) => {
+const compressImage = (base64Data, maxWidth = 160) => {
   return new Promise((resolve) => {
     const img = new Image()
     img.src = base64Data

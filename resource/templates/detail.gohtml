@@ -355,9 +355,7 @@
                             <div class="space-y-3">
                                 {{range .AuthorArticles}}
                                     <div class="hover:bg-base-300 p-2 rounded cursor-pointer">
-                                        <h4 class="text-sm font-normal text-base-content hover:text-primary">
-                                            <a href="/post/{{.Id}}">{{.Title}}</a>
-                                        </h4>
+                                        <a class="text-sm font-normal text-base-content hover:text-primary" href="/post/{{.Id}}">{{.Title}}</a>
                                         <p class="text-xs text-base-content/60 mt-1">0.1k 阅读 · 1秒前</p>
                                     </div>
                                 {{end}}
