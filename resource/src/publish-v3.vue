@@ -295,76 +295,21 @@ const clearContent = () => {
   }
 }
 
-// 检查浏览器是否支持WebP
-const supportsWebP = (): boolean => {
-  const canvas = document.createElement('canvas')
-  canvas.width = 1
-  canvas.height = 1
-  return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0
-}
-
-// 将图片转换为WebP格式
-const convertToWebP = async (file: File, quality: number = 0.8): Promise<File> => {
-  return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    const img = new Image()
-    
-    img.onload = () => {
-      canvas.width = img.width
-      canvas.height = img.height
-      
-      if (ctx) {
-        ctx.drawImage(img, 0, 0)
-        
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const webpFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webp'), {
-              type: 'image/webp',
-              lastModified: Date.now()
-            })
-            resolve(webpFile)
-          } else {
-            reject(new Error('WebP转换失败'))
-          }
-        }, 'image/webp', quality)
-      } else {
-        reject(new Error('Canvas上下文获取失败'))
-      }
-    }
-    
-    img.onerror = () => {
-      reject(new Error('图片加载失败'))
-    }
-    
-    img.src = URL.createObjectURL(file)
-  })
-}
+// 导入图片处理工具函数
+import { processImageFile, validateImageFile } from './utils/imageUtils'
 
 // 图片上传相关方法
 const uploadImage = async (file: File): Promise<string> => {
-  if (!file.type.startsWith('image/')) {
-    throw new Error('请选择图片文件')
+  // 使用工具函数验证图片文件
+  const validationError = validateImageFile(file, 10 * 1024 * 1024)
+  if (validationError) {
+    throw new Error(validationError)
   }
 
-  if (file.size > 10 * 1024 * 1024) {
-    throw new Error('图片大小不能超过10MB')
-  }
-
-  let fileToUpload = file
-  
-  // 如果浏览器支持WebP且文件不是WebP格式，则转换为WebP
-  if (supportsWebP() && !file.type.includes('webp')) {
-    try {
-      showMessage('正在优化图片格式...', 'info')
-      fileToUpload = await convertToWebP(file, 0.85)
-      console.log(`图片已转换为WebP格式，原大小: ${(file.size / 1024).toFixed(1)}KB，转换后: ${(fileToUpload.size / 1024).toFixed(1)}KB`)
-    } catch (error) {
-      console.warn('WebP转换失败，使用原始文件:', error)
-      // 转换失败时使用原始文件
-      fileToUpload = file
-    }
-  }
+  // 使用工具函数处理图片
+  const { file: fileToUpload } = await processImageFile(file, 0.85, (message) => {
+    showMessage(message, 'info')
+  })
 
   const formData = new FormData()
   formData.append('file', fileToUpload)

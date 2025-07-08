@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { VueCropper } from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
 import { uploadAvatar } from '../utils/articleService.ts'
+import { processImageFile, validateImageFile } from '../utils/imageUtils'
 
 const props = defineProps({
   currentAvatar: {
@@ -32,14 +33,14 @@ const triggerFileSelect = () => {
 }
 
 // 处理文件选择
-const handleFileSelect = (event) => {
+const handleFileSelect = async (event) => {
   const file = event.target.files[0]
   if (!file) return
 
-  // 验证文件类型
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']
-  if (!allowedTypes.includes(file.type)) {
-    alert('只支持 jpg、png、gif 格式的图片')
+  // 使用工具函数验证文件
+  const validationError = validateImageFile(file, 2 * 1024 * 1024)
+  if (validationError) {
+    alert(validationError)
     // 重置文件输入框
     if (fileInputRef.value) {
       fileInputRef.value.value = ''
@@ -47,14 +48,16 @@ const handleFileSelect = (event) => {
     return
   }
 
-  // 验证文件大小（2MB）
-  if (file.size > 2 * 1024 * 1024) {
-    alert('图片大小不能超过 2MB')
-    // 重置文件输入框
-    if (fileInputRef.value) {
-      fileInputRef.value.value = ''
+  // 处理图片（WebP转换等）
+  let processedFile = file
+  try {
+    const { file: optimizedFile, converted } = await processImageFile(file, 0.85)
+    processedFile = optimizedFile
+    if (converted) {
+      console.log(`头像图片已优化为WebP格式，原大小: ${(file.size / 1024).toFixed(1)}KB，优化后: ${(optimizedFile.size / 1024).toFixed(1)}KB`)
     }
-    return
+  } catch (error) {
+    console.warn('图片优化失败，使用原始文件:', error)
   }
 
   // 清理之前的URL
@@ -62,7 +65,7 @@ const handleFileSelect = (event) => {
     URL.revokeObjectURL(previewUrl.value)
   }
 
-  // 使用FileReader读取文件
+  // 使用FileReader读取处理后的文件
   const reader = new FileReader()
   reader.onload = (e) => {
     const result = e.target?.result
@@ -72,10 +75,10 @@ const handleFileSelect = (event) => {
       showCropModal.value = true
     }
   }
-  reader.readAsDataURL(file)
+  reader.readAsDataURL(processedFile)
 }
 
-// 图片压缩函数
+// 图片压缩函数，支持WebP格式
 const compressImage = (base64Data, maxWidth = 200) => {
   return new Promise((resolve) => {
     const img = new Image()
@@ -84,7 +87,7 @@ const compressImage = (base64Data, maxWidth = 200) => {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
       if (ctx == null) {
-        resolve(new Blob())
+        resolve({ blob: new Blob(), format: 'jpeg', filename: 'avatar.jpg' })
         return
       }
 
@@ -102,12 +105,35 @@ const compressImage = (base64Data, maxWidth = 200) => {
       // 绘制图片
       ctx.drawImage(img, 0, 0, width, height)
 
-      // 转换为 blob，使用较低的质量值来减小文件大小
-      canvas.toBlob(
-          (blob) => resolve(blob || new Blob()),
+      // 检查浏览器是否支持WebP
+      const testCanvas = document.createElement('canvas')
+      testCanvas.width = 1
+      testCanvas.height = 1
+      const supportsWebP = testCanvas.toDataURL('image/webp').indexOf('data:image/webp') === 0
+
+      if (supportsWebP) {
+        // 使用WebP格式
+        canvas.toBlob(
+          (blob) => resolve({ 
+            blob: blob || new Blob(), 
+            format: 'webp', 
+            filename: 'avatar.webp' 
+          }),
+          'image/webp',
+          0.85  // WebP质量
+        )
+      } else {
+        // 降级到JPEG格式
+        canvas.toBlob(
+          (blob) => resolve({ 
+            blob: blob || new Blob(), 
+            format: 'jpeg', 
+            filename: 'avatar.jpg' 
+          }),
           'image/jpeg',
-          0.8  // 压缩质量，0.8通常是质量和大小的好平衡点
-      )
+          0.8  // JPEG质量
+        )
+      }
     }
   })
 }
@@ -121,7 +147,7 @@ const handleCropFinish = async () => {
       uploading.value = true
       try {
         // 压缩裁切后的图片
-        const compressedBlob = await compressImage(base64Data)
+        const { blob: compressedBlob, format, filename } = await compressImage(base64Data)
 
         // 检查压缩后的大小
         if (compressedBlob.size > 500 * 1024) { // 500KB 限制
@@ -130,9 +156,11 @@ const handleCropFinish = async () => {
           return
         }
 
+        console.log(`头像已压缩为${format.toUpperCase()}格式，文件大小: ${(compressedBlob.size / 1024).toFixed(1)}KB`)
+
         // 创建FormData
         const formData = new FormData()
-        formData.append('avatar', compressedBlob, 'avatar.jpg')
+        formData.append('avatar', compressedBlob, filename)
 
         const response = await uploadAvatar(formData)
         if (response.code === 0) {
