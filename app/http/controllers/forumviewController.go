@@ -89,10 +89,12 @@ func PostDetail(c *gin.Context) {
 		}
 		// 获取被回复评论的用户名
 		replyToUsername := ""
+		var replyToUserId uint64 = 0
 		if item.ReplyId > 0 {
 			if replyTo := reply.Get(item.ReplyId); replyTo.Id > 0 {
 				if replyUser, ok := userMap[replyTo.UserId]; ok {
 					replyToUsername = replyUser.Username
+					replyToUserId = replyTo.UserId
 				}
 			}
 		}
@@ -105,6 +107,7 @@ func PostDetail(c *gin.Context) {
 			Content:         item.Content,
 			CreateTime:      item.CreatedAt.Format(time.DateTime),
 			ReplyToUsername: replyToUsername,
+			ReplyToUserId:   replyToUserId,
 		}
 	})
 	articles.IncrementView(entity)

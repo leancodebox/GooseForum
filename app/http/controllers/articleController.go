@@ -71,6 +71,7 @@ type ReplyDto struct {
 	CreateTime      string `json:"createTime"`
 	ReplyToId       uint64 `json:"replyToId,omitempty"`
 	ReplyToUsername string `json:"replyToUsername,omitempty"`
+	ReplyToUserId   uint64 `json:"replyToUserId,omitempty"`
 }
 
 type WriteArticlesOriginReq struct {

@@ -152,10 +152,10 @@
                                             <span class="font-normal text-base-content">{{.Username}}</span>
                                             <span class="text-sm text-base-content/60">{{.CreateTime}}</span>
                                         </div>
-                                        {{if .ReplyToUsername}}
-                                            <p>回复 @{{.ReplyToUsername}}:</p>
-                                        {{end}}
                                         <p class="text-base-content mb-2">
+                                            {{if .ReplyToUsername}}
+                                            <a href="/user/{{.ReplyToUserId}}" class="text-primary" class="mr-1">@{{.ReplyToUsername}}</a>
+                                            {{end}}
                                             {{Nl2br .Content}}
                                         </p>
                                         <div class="flex items-center gap-4 text-sm text-base-content/60">
