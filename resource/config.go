@@ -34,6 +34,13 @@ func GetTemplates(globalFunc template.FuncMap) *template.Template {
 			"FormatTime": func(t time.Time) string {
 				return t.Format("2006-01-02 15:04:05")
 			},
+			"Nl2br": func(text string) template.HTML {
+				// 将换行符转换为HTML的<br>标签
+				// 先进行HTML转义，然后替换换行符
+				escaped := template.HTMLEscapeString(text)
+				result := strings.ReplaceAll(escaped, "\n", "<br>")
+				return template.HTML(result)
+			},
 		}).
 		Funcs(globalFunc)
 	if !setting.IsProduction() {
