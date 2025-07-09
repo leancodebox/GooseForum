@@ -1,6 +1,7 @@
 package articles
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -90,4 +91,28 @@ type SmallEntity struct {
 
 func (itself *SmallEntity) TableName() string {
 	return tableName
+}
+
+func (itself *SmallEntity) PubDate() string {
+	now := time.Now()
+	duration := now.Sub(itself.CreatedAt)
+
+	// 使用秒数进行计算，避免重复的浮点运算
+	seconds := int64(duration.Seconds())
+
+	if seconds < 60 {
+		return "刚刚"
+	} else if seconds < 3600 { // 60 * 60
+		minutes := seconds / 60
+		return fmt.Sprintf("%d分钟前", minutes)
+	} else if seconds < 86400 { // 24 * 60 * 60
+		hours := seconds / 3600
+		return fmt.Sprintf("%d小时前", hours)
+	} else if seconds < 604800 { // 7 * 24 * 60 * 60
+		days := seconds / 86400
+		return fmt.Sprintf("%d天前", days)
+	} else {
+		// 超过7天显示具体日期
+		return itself.CreatedAt.Format("2006-01-02")
+	}
 }

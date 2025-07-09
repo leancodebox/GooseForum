@@ -343,11 +343,14 @@
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
                             <h2 class="card-title">相关推荐</h2>
-                            <div class="space-y-3">
+                            <div class="space-y-1">
                                 {{range .AuthorArticles}}
                                     <div class="hover:bg-base-300 p-2 rounded cursor-pointer">
                                         <a class="text-sm font-normal text-base-content hover:text-primary" href="/post/{{.Id}}">{{.Title}}</a>
-                                        <p class="text-xs text-base-content/60 mt-1">0.1k 阅读 · 1秒前</p>
+                                        <div class="flex justify-between items-center text-xs text-base-content/60 mt-1">
+                                            <span>{{.ViewCount}} 阅读</span>
+                                            <span>{{.PubDate}}</span>
+                                        </div>
                                     </div>
                                 {{end}}
                             </div>
