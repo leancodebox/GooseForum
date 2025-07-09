@@ -8,11 +8,11 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/gin-contrib/gzip v1.2.3
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
-	github.com/go-playground/validator/v10 v10.26.0
+	github.com/go-playground/validator/v10 v10.27.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/iancoleman/strcase v0.3.0
@@ -20,16 +20,15 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/mojocn/base64Captcha v1.3.8
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/spf13/cast v1.7.1
+	github.com/spf13/cast v1.9.2
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/viper v1.20.0
-	github.com/yuin/goldmark v1.7.9
-	golang.org/x/crypto v0.37.0
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
+	github.com/spf13/viper v1.20.1
+	github.com/yuin/goldmark v1.7.12
+	golang.org/x/crypto v0.39.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v3 v3.0.1
-	gorm.io/driver/mysql v1.5.6
-	gorm.io/gorm v1.25.10
+	gorm.io/driver/mysql v1.6.0
+	gorm.io/gorm v1.30.0
 )
 
 require (
@@ -68,8 +67,8 @@ require (
 	golang.org/x/arch v0.15.0 // indirect
 	golang.org/x/image v0.26.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	modernc.org/libc v1.22.5 // indirect
