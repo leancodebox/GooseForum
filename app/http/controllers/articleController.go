@@ -221,7 +221,7 @@ func TakeUpTo64Chars(s string) string {
 }
 
 type DeleteReplyId struct {
-	ReplyId uint64 `json:"repoId"`
+	ReplyId uint64 `json:"replyId"`
 }
 
 func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response {

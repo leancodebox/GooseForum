@@ -140,6 +140,7 @@
 
                         <!-- 评论列表 -->
                         <div class="space-y-4">
+                            {{$LoginUser := .User}}
                             {{range .CommentList}}
                                 <div class="flex gap-3" id="reply_{{.Id}}">
                                     <a class="avatar" href="/user/{{.UserId}}">
@@ -172,8 +173,10 @@
                                             <button class="hover:text-primary" onclick="showReplyForm({{.Id}})">回复
                                             </button>
                                             <button class="hover:text-primary">举报</button>
+                                            {{if and $LoginUser (eq $LoginUser.UserId .UserId)}}
+                                            <button class="hover:text-primary" onclick="deleteReply({{.Id}})">删除</button>
+                                            {{end}}
                                         </div>
-
                                         <!-- 回复表单 -->
                                         <div id="reply-form-{{.Id}}" class="reply-form mt-3" style="display: none;">
                                         <textarea class="textarea textarea-bordered w-full comment-input"

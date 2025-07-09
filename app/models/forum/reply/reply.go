@@ -1,6 +1,7 @@
 package reply
 
 import (
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -36,6 +37,7 @@ type Entity struct {
 	ReplyId   uint64    `gorm:"column:reply_id;type:bigint;not null;default:0;" json:"replyId"`
 	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
+	gorm.DeletedAt
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
