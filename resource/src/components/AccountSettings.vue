@@ -158,7 +158,7 @@ const savePrivacySettings = async () => {
   <!-- Tab 导航 -->
   <div class="w-full">
     <div class="tabs tabs-lift">
-      <input type="radio" name="account_tabs" class="tab" aria-label="基本信息" checked="checked"/>
+      <input type="radio" name="account_tabs" class="tab" aria-label="基本信息" checked/>
       <div class="tab-content bg-base-100 border-base-300 p-6">
         <form @submit.prevent="updateProfile" class="grid grid-cols-1 gap-6">
           <div class="form-control">
@@ -172,114 +172,105 @@ const savePrivacySettings = async () => {
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text font-normal">用户名</span>
+              <label class="floating-label">
+                <span>用户名</span>
+                <input v-model="profileForm.username" type="text" class="input input-bordered w-full"
+                       placeholder="请输入用户名" disabled/>
               </label>
-              <input v-model="profileForm.username" type="text" class="input input-bordered w-full"
-                     placeholder="请输入用户名" disabled/>
             </div>
             <div class="form-control">
-              <label class="label">
-                <span class="label-text font-normal">邮箱</span>
+              <label class="floating-label">
+                <span>邮箱</span>
+                <input v-model="profileForm.email" type="email" class="input input-bordered w-full"
+                       placeholder="请输入邮箱" disabled/>
               </label>
-              <input v-model="profileForm.email" type="email" class="input input-bordered w-full"
-                     placeholder="请输入邮箱" disabled/>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-normal">昵称</span>
-              </label>
-              <input v-model="profileForm.nickname" type="text" class="input input-bordered w-full"
-                     placeholder="请输入昵称"/>
-            </div>
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-normal">个性签名</span>
-              </label>
-              <input v-model="profileForm.signature" type="text" class="input input-bordered w-full"
-                     placeholder="请输入个性签名"/>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text font-normal">网站名</span>
+              <label class="floating-label">
+                <span>昵称</span>
+                <input v-model="profileForm.nickname" type="text" class="input input-bordered w-full"
+                       placeholder="请输入昵称"/>
               </label>
-              <input v-model="profileForm.websiteName" type="text" class="input input-bordered w-full"
-                     placeholder="请输入网站名"/>
             </div>
             <div class="form-control">
-              <label class="label">
-                <span class="label-text font-normal">网站地址</span>
+              <label class="floating-label">
+                <span>个性签名</span>
+                <input v-model="profileForm.signature" type="text" class="input input-bordered w-full"
+                       placeholder="请输入个性签名"/>
               </label>
-              <input v-model="profileForm.website" type="text" class="input input-bordered w-full"
-                     placeholder="请输入网站地址"/>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="form-control">
+              <label class="floating-label">
+                <span>网站名</span>
+                <input v-model="profileForm.websiteName" type="text" class="input input-bordered w-full"
+                       placeholder="请输入网站名"/>
+              </label>
+            </div>
+            <div class="form-control">
+              <label class="floating-label">
+                <span>网站地址</span>
+                <input v-model="profileForm.website" type="text" class="input input-bordered w-full"
+                       placeholder="请输入网站地址"/>
+              </label>
             </div>
           </div>
           <details tabindex="0" class="collapse collapse-arrow bg-base-100 border-base-300 border">
             <summary class="collapse-title font-normal">外站配置</summary>
             <div class="collapse-content text-sm">
-
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-normal">Github</span>
+                  <label class="floating-label">
+                    <span>Github</span>
+                    <input v-model="profileForm.externalInformation.github.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入Github地址"/>
                   </label>
-                  <input v-model="profileForm.externalInformation.github.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入Github地址"/>
                 </div>
                 <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-normal">BiliBili</span>
+                  <label class="floating-label">
+                    <span>BiliBili</span>
+                    <input v-model="profileForm.externalInformation.bilibili.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入BiliBili地址"/>
                   </label>
-                  <input v-model="profileForm.externalInformation.bilibili.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入BiliBili地址"/>
-                </div>
-              </div>
-
-
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-normal">Weibo</span>
-                  </label>
-                  <input v-model="profileForm.externalInformation.weibo.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入Weibo地址"/>
                 </div>
                 <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-normal">Twitter</span>
+                  <label class="floating-label">
+                    <span>Weibo</span>
+                    <input v-model="profileForm.externalInformation.weibo.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入Weibo地址"/>
                   </label>
-                  <input v-model="profileForm.externalInformation.twitter.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入Twitter地址"/>
-                </div>
-              </div>
-
-
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-normal">zhihu</span>
-                  </label>
-                  <input v-model="profileForm.externalInformation.zhihu.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入Zhihu地址"/>
                 </div>
                 <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-normal">linkedIn</span>
+                  <label class="floating-label">
+                    <span>Twitter</span>
+                    <input v-model="profileForm.externalInformation.twitter.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入Twitter地址"/>
                   </label>
-                  <input v-model="profileForm.externalInformation.linkedIn.link" type="text"
-                         class="input input-bordered w-full"
-                         placeholder="请输入LinkedIn地址"/>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>zhihu</span>
+                    <input v-model="profileForm.externalInformation.zhihu.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入Zhihu地址"/>
+                  </label>
+                </div>
+                <div class="form-control">
+                  <label class="floating-label">
+                    <span>linkedIn</span>
+                    <input v-model="profileForm.externalInformation.linkedIn.link" type="text"
+                           class="input input-bordered w-full"
+                           placeholder="请输入LinkedIn地址"/>
+                  </label>
                 </div>
               </div>
             </div>
