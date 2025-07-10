@@ -63,7 +63,7 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.GET("activate", controllers.ActivateAccount)
 
 	// 登陆状态下的用户操作
-	loginApi := ginApp.Group("api").Use(middleware.JWTAuth4Gin)
+	loginApi := ginApp.Group("api").Use(middleware.JWTAuthCheck)
 	// 用户信息
 	loginApi.GET("get-user-info", UpButterReq(controllers.UserInfo))
 	// 设置用户信息
@@ -82,7 +82,7 @@ func apiRoute(ginApp *gin.Engine) {
 	// 分类列表
 	forumApi.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
 
-	forumLoginApi := forumApi.Use(middleware.JWTAuth4Gin)
+	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
 	// 通知相关接口
 	forumLoginApi.POST("notification/list", UpButterReq(controllers.GetNotificationList))
 	forumLoginApi.POST("notification/query", UpButterReq(controllers.QueryNotificationList))
@@ -107,7 +107,7 @@ func apiRoute(ginApp *gin.Engine) {
 	// 关注
 	forumLoginApi.POST("follow-user", UpButterReq(controllers.FollowUser))
 
-	adminApi := baseApi.Group("admin", middleware.JWTAuth4Gin)
+	adminApi := baseApi.Group("admin", middleware.JWTAuthCheck)
 
 	// 用户管理
 	adminApi.
@@ -148,7 +148,7 @@ func apiRoute(ginApp *gin.Engine) {
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
 	// 文件上传接口 - 每日最多上传n张图片
-	r.POST("/img-upload", middleware.JWTAuth4Gin, middleware.FileUploadRateLimit(33, 24*time.Hour), controllers.SaveImgByGinContext)
+	r.POST("/img-upload", middleware.JWTAuthCheck, middleware.FileUploadRateLimit(33, 24*time.Hour), controllers.SaveImgByGinContext)
 	// 文件获取接口 - 通过路径
 	r.GET("/img/*filename", middleware.BrowserCache, controllers.GetFileByFileName)
 }

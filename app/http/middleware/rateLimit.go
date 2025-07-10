@@ -9,7 +9,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/spf13/cast"
 )
 
 // isAllowedByDatabase 基于数据库记录检查用户是否允许上传
@@ -63,21 +62,12 @@ func checkUserRegistrationTime(userId uint64, minDays int) (bool, error) {
 // window: 时间窗口
 func FileUploadRateLimit(maxUploads int, window time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 获取用户ID
-		userIdData, exists := c.Get("userId")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, component.FailData("未登录"))
-			c.Abort()
-			return
-		}
-
-		userId := cast.ToUint64(userIdData)
+		userId := c.GetUint64("userId")
 		if userId == 0 {
-			c.JSON(http.StatusUnauthorized, component.FailData("无效的用户ID"))
+			c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
 			c.Abort()
 			return
 		}
-
 		// 检查用户注册时间是否超过3天
 		isEligible, err := checkUserRegistrationTime(userId, 3)
 		if err != nil {

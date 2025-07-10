@@ -1,5 +1,7 @@
 package userStatistics
 
+import "time"
+
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
@@ -74,6 +76,12 @@ func Follower(userId uint64) int64 {
 // 取消粉丝数量
 func CancelFollower(userId uint64) int64 {
 	result := builder().Exec("UPDATE user_statistics SET follower_count = follower_count-1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
+func UpdateUserActivity(userId uint64, lastActiveTime time.Time) int64 {
+
+	result := builder().Updates(Entity{UserId: userId, LastActiveTime: &lastActiveTime})
 	return result.RowsAffected
 }
 

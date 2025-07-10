@@ -1,31 +1,20 @@
 package middleware
 
 import (
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 )
 
-func JWTAuth4Gin(c *gin.Context) {
-	token := jwt.GetGinAccessToken(c)
-	if token == "" {
-		c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
+func JWTAuthCheck(c *gin.Context) {
+	JWTAuth(c)
+	if c.GetUint64("userId") == 0 {
+		c.JSON(http.StatusUnauthorized, component.FailData("not authorized"))
 		c.Abort()
 		return
 	}
-	userId, newToken, err := jwt.VerifyTokenWithFresh(token)
-	if err != nil {
-		errorMsg := err.Error()
-		c.JSON(http.StatusUnauthorized, component.FailData(errorMsg))
-		c.Abort()
-		return
-	}
-	if token != newToken {
-		jwt.TokenSetting(c, newToken)
-	}
-	c.Set("userId", userId)
 	c.Next()
 }
 

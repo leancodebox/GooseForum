@@ -3,7 +3,6 @@ package routes
 import (
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/spf13/cast"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,8 +34,7 @@ func ginUpNP(action func() component.Response) func(c *gin.Context) {
 
 func UpButterReq[T any](action func(ctx component.BetterRequest[T]) component.Response) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		userIdData, _ := c.Get("userId")
-		userId := cast.ToUint64(userIdData)
+		userId := c.GetUint64("userId")
 		var params T
 		_ = c.ShouldBind(&params)
 		c.Set("requestData", params)

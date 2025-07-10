@@ -17,7 +17,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
-	"github.com/spf13/cast"
 )
 
 type RegReq struct {
@@ -162,12 +161,12 @@ type UserInfoShow struct {
 // UploadAvatar 头像上传处理函数
 func UploadAvatar(c *gin.Context) {
 	// 从 context 中获取用户 ID
-	userIdData, exists := c.Get("userId")
-	if !exists {
+	userId := c.GetUint64("userId")
+	
+	if userId == 0 {
 		c.JSON(200, component.FailData("未登录"))
 		return
 	}
-	userId := cast.ToUint64(userIdData)
 
 	// 获取用户信息
 	userEntity, err := users.Get(userId)

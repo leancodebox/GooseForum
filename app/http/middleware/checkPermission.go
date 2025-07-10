@@ -6,14 +6,12 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/permission"
-	"github.com/spf13/cast"
 	"net/http"
 )
 
 func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userIdData, _ := c.Get("userId")
-		userId := cast.ToUint64(userIdData)
+		userId := c.GetUint64("userId")
 		if userId == 0 {
 			c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
 			c.Abort()
@@ -37,8 +35,7 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 
 func CheckPermissionOrNoUser(permissionType permission.Enum) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userIdData, _ := c.Get("userId")
-		userId := cast.ToUint64(userIdData)
+		userId := c.GetUint64("userId")
 		if userId == 0 {
 			return
 		}

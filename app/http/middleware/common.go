@@ -3,7 +3,6 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/spf13/cast"
 )
 
 // 获取用户，如果没有初始化就获取不到
@@ -23,8 +22,7 @@ func getUser(c *gin.Context) (users.Entity, bool) {
 			return userEntity, true
 		}
 	}
-	userIdData, _ := c.Get("userId")
-	userId := cast.ToUint64(userIdData)
+	userId := c.GetUint64("userId")
 	if userId == 0 {
 		return users.Entity{}, false
 	}
