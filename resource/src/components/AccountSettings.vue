@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {onMounted, reactive, ref, watch} from 'vue'
 import AvatarUpload from './AvatarUpload.vue'
-import {changePassword, saveUserInfo} from '@/utils/articleService.ts'
+import {changePassword, saveUserInfo, saveUserEmail, saveUserName} from '@/utils/articleService.ts'
 import type {UserInfo} from "@/utils/articleInterfaces";
 
 // 定义props
@@ -163,18 +163,14 @@ const saveUsername = async () => {
 
   try {
     usernameUpdating.value = true
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const response = await saveUserName(profileForm.value.username)
 
-    // 模拟成功响应
-    const success = Math.random() > 0.2 // 80%成功率
-
-    if (success) {
+    if (response.code === 0) {
       alert('用户名更新成功')
       usernameEditing.value = false
       emit('user-info-updated')
     } else {
-      throw new Error('用户名已存在')
+      alert(`更新失败: ${response.message || '请重试'}`)
     }
   } catch (error) {
     console.error('更新用户名失败:', error)
@@ -208,18 +204,14 @@ const saveEmail = async () => {
 
   try {
     emailUpdating.value = true
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const response = await saveUserEmail(profileForm.value.email)
 
-    // 模拟成功响应
-    const success = Math.random() > 0.2 // 80%成功率
-
-    if (success) {
+    if (response.code === 0) {
       alert('邮箱更新成功')
       emailEditing.value = false
       emit('user-info-updated')
     } else {
-      throw new Error('邮箱已被使用')
+      alert(`更新失败: ${response.message || '请重试'}`)
     }
   } catch (error) {
     console.error('更新邮箱失败:', error)
@@ -265,12 +257,15 @@ const savePrivacySettings = async () => {
                 <span>用户名</span>
                 <input v-model="profileForm.username" type="text" class="input input-bordered w-full"
                        placeholder="请输入用户名" :disabled="!usernameEditing"/>
-                <button v-if="!usernameEditing" @click="toggleUsernameEdit" class="btn btn-primary join-item">更改</button>
+                <button v-if="!usernameEditing" @click="toggleUsernameEdit" class="btn btn-primary join-item">更改
+                </button>
                 <button v-else @click="saveUsername" class="btn btn-success join-item" :disabled="usernameUpdating">
                   <span v-if="usernameUpdating" class="loading loading-spinner loading-sm"></span>
                   {{ usernameUpdating ? '保存中...' : '保存' }}
                 </button>
-                <button v-if="usernameEditing && !usernameUpdating" @click="toggleUsernameEdit" class="btn btn-warning join-item">取消</button>
+                <button v-if="usernameEditing && !usernameUpdating" @click="toggleUsernameEdit"
+                        class="btn btn-warning join-item">取消
+                </button>
               </label>
             </div>
             <div class="form-control">
@@ -283,7 +278,9 @@ const savePrivacySettings = async () => {
                   <span v-if="emailUpdating" class="loading loading-spinner loading-sm"></span>
                   {{ emailUpdating ? '保存中...' : '保存' }}
                 </button>
-                <button v-if="emailEditing && !emailUpdating" @click="toggleEmailEdit" class="btn  btn-warning  join-item">取消</button>
+                <button v-if="emailEditing && !emailUpdating" @click="toggleEmailEdit"
+                        class="btn  btn-warning  join-item">取消
+                </button>
               </label>
             </div>
           </div>

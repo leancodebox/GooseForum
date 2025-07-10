@@ -102,6 +102,7 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 	if users.ExistEmail(newEmail) {
 		return component.FailResponse("邮箱已被使用")
 	}
+	userEntity.Email = newEmail
 
 	err = users.Save(&userEntity)
 	if err != nil {

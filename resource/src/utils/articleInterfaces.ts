@@ -1,5 +1,5 @@
 export interface Result<T> {
-    code: 0 | 1;
+    code: 0 | 1; // 0 成功 1 失败
     result: T;
     message: string;
 }
