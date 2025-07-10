@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref, nextTick} from 'vue'
+import { onMounted, reactive, ref, nextTick } from 'vue'
 import AccountSettings from "./components/AccountSettings.vue";
 import MyArticles from "./components/MyArticles.vue";
-import {getUserInfo} from "@/utils/articleService.ts";
-import type {UserInfo} from "@/utils/articleInterfaces.ts";
+import { getUserInfo } from "@/utils/articleService.ts";
+import type { UserInfo } from "@/utils/articleInterfaces.ts";
 
 // 加载状态
 const isLoading = ref(true)
@@ -25,12 +25,12 @@ const userInfo = reactive<UserInfo>({
   websiteName: '',
   signature: '',
   externalInformation: {
-    github: {link: ''},
-    weibo: {link: ''},
-    bilibili: {link: ''},
-    twitter: {link: ''},
-    linkedIn: {link: ''},
-    zhihu: {link: ''}
+    github: { link: '' },
+    weibo: { link: '' },
+    bilibili: { link: '' },
+    twitter: { link: '' },
+    linkedIn: { link: '' },
+    zhihu: { link: '' }
   }
 })
 
@@ -62,8 +62,6 @@ const loadUserInfo = async () => {
   } finally {
     isLoading.value = false;
     // 在加载完成后检查URL参数
-    await nextTick();
-    checkUrlParams();
   }
 }
 
@@ -77,7 +75,7 @@ const handleUserInfoUpdated = () => {
 const checkUrlParams = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const tab = urlParams.get('tab');
-  
+
   if (tab === 'settings') {
     if (settingsTabRef.value) {
       settingsTabRef.value.checked = true;
@@ -90,8 +88,10 @@ const checkUrlParams = () => {
   }
 }
 
-onMounted(() => {
-  loadUserInfo();
+onMounted(async () => {
+  await loadUserInfo();
+  await nextTick();
+  checkUrlParams();
 })
 
 
@@ -135,15 +135,15 @@ const editProfile = async () => {
                 <div class="avatar mb-4 mx-auto">
                   <div class="mask mask-squircle w-24 h-24">
                     <img :src="userInfo.avatarUrl || '/static/pic/default-avatar.webp'"
-                         :alt="userInfo.nickname || userInfo.username"/>
+                      :alt="userInfo.nickname || userInfo.username" />
                   </div>
                 </div>
                 <h2 class="card-title justify-center text-xl">{{
-                    userInfo.nickname || userInfo.username || '用户'
-                  }}</h2>
+                  userInfo.nickname || userInfo.username || '用户'
+                }}</h2>
                 <p class="text-base-content/70 text-sm mb-4">{{
-                    userInfo.bio || userInfo.signature || '这个人很懒，什么都没留下'
-                  }}</p>
+                  userInfo.bio || userInfo.signature || '这个人很懒，什么都没留下'
+                }}</p>
                 <div class="grid grid-cols-3 gap-4 mb-4">
                   <div class="text-center">
                     <div class="text-lg font-normal text-base-content">
@@ -185,12 +185,12 @@ const editProfile = async () => {
           <!-- 主要内容 -->
           <div v-else>
             <div class="tabs">
-              <input ref="articlesTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的文章"/>
+              <input ref="articlesTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的文章" />
               <div class="tab-content space-y-4 mt-3">
                 <MyArticles :user-info="userInfo"></MyArticles>
               </div>
 
-              <input ref="collectionsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的收藏"/>
+              <input ref="collectionsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的收藏" />
               <div class="tab-content space-y-4 mt-3">
                 <div class="space-y-3">
                   <div class="card bg-base-100 shadow-sm w-full">
@@ -201,7 +201,7 @@ const editProfile = async () => {
                 </div>
               </div>
 
-              <input ref="commentsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的评论"/>
+              <input ref="commentsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的评论" />
               <div class="tab-content space-y-4 mt-3">
                 <div class="space-y-3">
                   <div class="card bg-base-100 shadow-sm w-full">
@@ -212,12 +212,9 @@ const editProfile = async () => {
                 </div>
               </div>
 
-              <input ref="settingsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="账户设置"/>
+              <input ref="settingsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="账户设置" />
               <div class="tab-content space-y-4 mt-2">
-                <AccountSettings
-                    :user-info="userInfo"
-                    @user-info-updated="handleUserInfoUpdated"
-                />
+                <AccountSettings :user-info="userInfo" @user-info-updated="handleUserInfoUpdated" />
               </div>
             </div>
 
@@ -229,5 +226,4 @@ const editProfile = async () => {
 </template>
 
 
-<style scoped>
-</style>
+<style scoped></style>
