@@ -217,14 +217,21 @@
                                     <a href="/user/{{.AuthorId}}" class="font-normal text-base-content">{{.Username}}</a>
                                     <p class="text-sm text-base-content/70">{{.Signature}}</p>
                                     <div class="flex items-center gap-2 mt-1">
-                                        <div class="badge badge-xs badge-primary"></div>
+                                        {{if IsOnline .AuthorInfoStatistics.LastActiveTime }}
+                                        <div aria-label="success" class="status status-success status-lg"></div>
                                         <span class="text-xs text-base-content/60">在线</span>
+                                        {{else}}
+                                        <div aria-label="status" class="status status-lg"></div>
+                                        <span class="text-xs text-base-content/60">离线</span>
+                                        {{end}}
                                     </div>
                                 </div>
                             </div>
+                            {{if .Bio}}
                             <p class="text-sm text-base-content/70 mb-2">
                                 {{.Bio}}
                             </p>
+                            {{end}}
 
                             <!-- 数据统计 - 一行展示 -->
                             <div class="grid grid-cols-3 gap-4 mb-1">

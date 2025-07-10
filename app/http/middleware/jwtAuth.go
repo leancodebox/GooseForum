@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,6 +34,7 @@ func JWTAuth(c *gin.Context) {
 		jwt.TokenSetting(c, newToken)
 	}
 	c.Set("userId", userId)
+	userservice.UpdateUserActivity(userId)
 	c.Next()
 }
 

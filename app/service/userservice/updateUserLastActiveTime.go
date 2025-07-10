@@ -1,9 +1,10 @@
 package userservice
 
 import (
-	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"sync"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 )
 
 // UserActivityTask 用户活跃时间更新任务
@@ -11,11 +12,6 @@ type UserActivityTask struct {
 	UserID         uint64    // 用户ID
 	LastActiveTime time.Time // 最后活跃时间
 	CreatedAt      time.Time // 任务创建时间
-}
-
-// UserActivityRequest 用户活跃时间更新请求
-type UserActivityRequest struct {
-	UserID uint64
 }
 
 // UserActivityManager 用户活跃时间管理器
@@ -50,6 +46,14 @@ func GetUserActivityManager() *UserActivityManager {
 
 // UpdateUserActivity 更新用户活跃时间
 func (m *UserActivityManager) UpdateUserActivity(userID uint64) {
+	// 检查是否已关闭
+	m.mu.RLock()
+	if m.closed {
+		m.mu.RUnlock()
+		return
+	}
+	m.mu.RUnlock()
+
 	// 非阻塞发送到channel
 	select {
 	case m.requestCh <- userID:
@@ -130,57 +134,55 @@ func (m *UserActivityManager) processExpiredTasks() {
 func (m *UserActivityManager) flushTasks(tasks []*UserActivityTask) {
 	for _, task := range tasks {
 		// 异步刷入，避免阻塞主流程
-		go func(t *UserActivityTask) {
-			userStatistics.UpdateUserActivity(t.UserID, t.LastActiveTime)
-		}(task)
+		userStatistics.UpdateUserActivity(task.UserID, task.LastActiveTime)
 	}
 }
 
 // Close 关闭管理器，刷入所有剩余任务
 func (m *UserActivityManager) Close() {
-	// 先标记为关闭状态
 	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	if m.closed {
-		m.mu.Unlock()
 		return
 	}
 	m.closed = true
-	m.mu.Unlock()
 
-	// 关闭channel和定时器
-	close(m.closeCh)
+	// 停止定时器和关闭信号
 	m.ticker.Stop()
-
-	// 等待后台goroutine结束
+	close(m.closeCh)
 	m.wg.Wait()
 
-	// 处理channel中剩余的请求
+	// 处理剩余请求并刷入所有任务
 	close(m.requestCh)
 	for userID := range m.requestCh {
-		m.handleUserActivityRequest(userID)
-	}
-
-	// 刷入所有剩余任务
-	m.mu.Lock()
-	var remainingTasks []*UserActivityTask
-	for _, task := range m.tasks {
-		remainingTasks = append(remainingTasks, task)
-	}
-
-	if len(remainingTasks) > 0 {
-		// 同步刷入，确保数据不丢失
-		for _, task := range remainingTasks {
-			userStatistics.UpdateUserActivity(task.UserID, task.LastActiveTime)
+		now := time.Now()
+		// 检查是否已存在该用户的任务
+		if task, exists := m.tasks[userID]; exists {
+			// 更新最后活跃时间为当前时间
+			task.LastActiveTime = now
+		} else {
+			// 创建新任务
+			m.tasks[userID] = &UserActivityTask{
+				UserID:         userID,
+				LastActiveTime: now,
+				CreatedAt:      now,
+			}
 		}
 	}
 
-	// 清空任务队列
-	m.tasks = make(map[uint64]*UserActivityTask)
-	m.mu.Unlock()
+	// 同步刷入所有剩余任务
+	for _, task := range m.tasks {
+		userStatistics.UpdateUserActivity(task.UserID, task.LastActiveTime)
+	}
+	m.tasks = nil
 }
 
 // UpdateUserActivity 全局函数，更新用户活跃时间
 func UpdateUserActivity(userID uint64) {
+	if userID == 0 {
+		return
+	}
 	GetUserActivityManager().UpdateUserActivity(userID)
 }
 

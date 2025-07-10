@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"log/slog"
 	"net/http"
 	"os"
@@ -51,6 +52,7 @@ func runWeb(_ *cobra.Command, _ []string) {
 }
 
 func ginServe() {
+	defer userservice.CloseUpdateUserLastActiveTime()
 	RunJob()
 	defer StopJob()
 
