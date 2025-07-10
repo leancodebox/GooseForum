@@ -118,6 +118,23 @@ export function saveUserInfo(
     })
 }
 
+export function saveUserEmail(
+    email?: String,
+): Promise<Result<any>> {
+    return axiosInstance.post('set-user-email', {
+        email: email,
+    })
+}
+
+
+export function saveUserName(
+    newUsername?: String,
+): Promise<Result<any>> {
+    return axiosInstance.post('set-user-name', {
+        username: newUsername,
+    })
+}
+
 
 export function getUserArticles(page: number,
                                 pageSize: number): Promise<Result<PageData<ArticleListItem>>> {

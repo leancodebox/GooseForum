@@ -85,9 +85,65 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 	})
 }
 
+type EditUserEmailReq struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+// EditUserEmail 编辑用户
+func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Response {
+	userEntity, err := req.GetUser()
+	if err != nil {
+		return component.FailResponse("获取用户信息失败")
+	}
+
+	newEmail := req.GetParams().Email
+	// 如果要修改邮箱,需要检查邮箱是否已被使用
+	// 检查邮箱是否已存在
+	if users.ExistEmail(newEmail) {
+		return component.FailResponse("邮箱已被使用")
+	}
+
+	err = users.Save(&userEntity)
+	if err != nil {
+		return component.FailResponse("更新用户信息失败")
+	}
+
+	if err = SendAEmail4User(&userEntity); err == nil {
+		slog.Info("验证邮件发送失败", "error", err)
+	}
+
+	return component.SuccessResponse("更新成功")
+}
+
+type EditUsernameReq struct {
+	Username string `json:"username" validate:"required"`
+}
+
+// EditUsername 编辑用户
+func EditUsername(req component.BetterRequest[EditUsernameReq]) component.Response {
+	userEntity, err := req.GetUser()
+	if err != nil {
+		return component.FailResponse("获取用户信息失败")
+	}
+	newUsername := req.GetParams().Username
+	if !ValidateUsername(newUsername) {
+		return component.FailResponse("用户名仅允许字母、数字、下划线、连字符，长度6-32")
+	}
+	// 检查用户名是否已存在
+	if users.ExistUsername(newUsername) {
+		return component.FailResponse("用户名已存在")
+	}
+	userEntity.Username = newUsername
+	err = users.Save(&userEntity)
+	if err != nil {
+		return component.FailResponse("更新用户信息失败")
+	}
+
+	return component.SuccessResponse("更新成功")
+}
+
 type EditUserInfoReq struct {
 	Nickname            string                    `json:"nickname"`
-	Email               string                    `json:"email"`
 	Bio                 string                    `json:"bio"`
 	Signature           string                    `json:"signature"`
 	Website             string                    `json:"website"`
@@ -102,20 +158,7 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 		return component.FailResponse("获取用户信息失败")
 	}
 
-	// 如果要修改邮箱,需要检查邮箱是否已被使用
-	needSendEmail := false
-	if req.Params.Email != "" && req.Params.Email != userEntity.Email {
-		if users.ExistEmail(req.Params.Email) {
-			return component.FailResponse("邮箱已被使用")
-		}
-		userEntity.Email = req.Params.Email
-		needSendEmail = true
-	}
-
-	// 更新其他字段
-	if req.Params.Nickname != "" {
-		userEntity.Nickname = req.Params.Nickname
-	}
+	userEntity.Nickname = req.Params.Nickname
 	if req.Params.Bio != "" {
 		userEntity.Bio = req.Params.Bio
 	}
@@ -130,12 +173,6 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 	if err != nil {
 		return component.FailResponse("更新用户信息失败")
 	}
-	if needSendEmail {
-		if err = SendAEmail4User(&userEntity); err == nil {
-			slog.Info("验证邮件发送失败", "error", err)
-		}
-	}
-
 	return component.SuccessResponse("更新成功")
 }
 
@@ -162,7 +199,7 @@ type UserInfoShow struct {
 func UploadAvatar(c *gin.Context) {
 	// 从 context 中获取用户 ID
 	userId := c.GetUint64("userId")
-	
+
 	if userId == 0 {
 		c.JSON(200, component.FailData("未登录"))
 		return

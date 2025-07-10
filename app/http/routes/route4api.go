@@ -68,6 +68,8 @@ func apiRoute(ginApp *gin.Engine) {
 	loginApi.GET("get-user-info", UpButterReq(controllers.UserInfo))
 	// 设置用户信息
 	loginApi.POST("set-user-info", UpButterReq(controllers.EditUserInfo))
+	loginApi.POST("set-user-email", UpButterReq(controllers.EditUserEmail))
+	loginApi.POST("set-user-name", UpButterReq(controllers.EditUsername))
 	// 邀请码
 	loginApi.POST("invitation", UpButterReq(controllers.Invitation))
 	// 上传头像

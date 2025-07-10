@@ -27,10 +27,18 @@ import (
 
 var (
 	usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{6,32}$`)
+	// 简单的Email正则表达式
+	// 匹配格式：username@domain.tld
+	emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 )
 
 func ValidateUsername(username string) bool {
 	return usernameRegex.MatchString(username)
+}
+
+func IsValidEmail(email string) bool {
+	// 检查是否匹配
+	return emailRegex.MatchString(email)
 }
 
 func Logout(c *gin.Context) {

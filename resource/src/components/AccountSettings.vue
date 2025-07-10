@@ -66,6 +66,12 @@ const privacySettings = reactive({
 // 密码修改状态
 const changingPassword = ref(false)
 
+// 用户名和邮箱编辑状态
+const usernameEditing = ref(false)
+const emailEditing = ref(false)
+const usernameUpdating = ref(false)
+const emailUpdating = ref(false)
+
 // AccountSettings组件现在使用radio button tabs，不需要activeTab状态
 
 // 更新个人资料
@@ -140,6 +146,89 @@ const handleAvatarUpdated = (newAvatarUrl) => {
   emit('user-info-updated');
 }
 
+// 用户名编辑相关函数
+const toggleUsernameEdit = () => {
+  usernameEditing.value = !usernameEditing.value
+  if (!usernameEditing.value) {
+    // 取消编辑时恢复原值
+    profileForm.value.username = props.userInfo.username
+  }
+}
+
+const saveUsername = async () => {
+  if (!profileForm.value.username.trim()) {
+    alert('用户名不能为空')
+    return
+  }
+
+  try {
+    usernameUpdating.value = true
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    // 模拟成功响应
+    const success = Math.random() > 0.2 // 80%成功率
+
+    if (success) {
+      alert('用户名更新成功')
+      usernameEditing.value = false
+      emit('user-info-updated')
+    } else {
+      throw new Error('用户名已存在')
+    }
+  } catch (error) {
+    console.error('更新用户名失败:', error)
+    alert(`更新失败: ${error.message || '请重试'}`)
+  } finally {
+    usernameUpdating.value = false
+  }
+}
+
+// 邮箱编辑相关函数
+const toggleEmailEdit = () => {
+  emailEditing.value = !emailEditing.value
+  if (!emailEditing.value) {
+    // 取消编辑时恢复原值
+    profileForm.value.email = props.userInfo.email
+  }
+}
+
+const saveEmail = async () => {
+  if (!profileForm.value.email.trim()) {
+    alert('邮箱不能为空')
+    return
+  }
+
+  // 简单的邮箱格式验证
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(profileForm.value.email)) {
+    alert('请输入有效的邮箱地址')
+    return
+  }
+
+  try {
+    emailUpdating.value = true
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    // 模拟成功响应
+    const success = Math.random() > 0.2 // 80%成功率
+
+    if (success) {
+      alert('邮箱更新成功')
+      emailEditing.value = false
+      emit('user-info-updated')
+    } else {
+      throw new Error('邮箱已被使用')
+    }
+  } catch (error) {
+    console.error('更新邮箱失败:', error)
+    alert(`更新失败: ${error.message || '请重试'}`)
+  } finally {
+    emailUpdating.value = false
+  }
+}
+
 // 保存隐私设置
 const savePrivacySettings = async () => {
   try {
@@ -171,18 +260,30 @@ const savePrivacySettings = async () => {
             />
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="form-control">
-              <label class="floating-label">
+            <div class="form-control ">
+              <label class="floating-label join w-full">
                 <span>用户名</span>
                 <input v-model="profileForm.username" type="text" class="input input-bordered w-full"
-                       placeholder="请输入用户名" disabled/>
+                       placeholder="请输入用户名" :disabled="!usernameEditing"/>
+                <button v-if="!usernameEditing" @click="toggleUsernameEdit" class="btn btn-primary join-item">更改</button>
+                <button v-else @click="saveUsername" class="btn btn-success join-item" :disabled="usernameUpdating">
+                  <span v-if="usernameUpdating" class="loading loading-spinner loading-sm"></span>
+                  {{ usernameUpdating ? '保存中...' : '保存' }}
+                </button>
+                <button v-if="usernameEditing && !usernameUpdating" @click="toggleUsernameEdit" class="btn btn-warning join-item">取消</button>
               </label>
             </div>
             <div class="form-control">
-              <label class="floating-label">
+              <label class="floating-label join w-full">
                 <span>邮箱</span>
                 <input v-model="profileForm.email" type="email" class="input input-bordered w-full"
-                       placeholder="请输入邮箱" disabled/>
+                       placeholder="请输入邮箱" :disabled="!emailEditing"/>
+                <button v-if="!emailEditing" @click="toggleEmailEdit" class="btn btn-primary join-item">更改</button>
+                <button v-else @click="saveEmail" class="btn btn-success join-item" :disabled="emailUpdating">
+                  <span v-if="emailUpdating" class="loading loading-spinner loading-sm"></span>
+                  {{ emailUpdating ? '保存中...' : '保存' }}
+                </button>
+                <button v-if="emailEditing && !emailUpdating" @click="toggleEmailEdit" class="btn  btn-warning  join-item">取消</button>
               </label>
             </div>
           </div>
