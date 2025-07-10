@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, reactive, ref} from 'vue'
+import {onMounted, reactive, ref, nextTick} from 'vue'
 import AccountSettings from "./components/AccountSettings.vue";
 import MyArticles from "./components/MyArticles.vue";
 import {getUserInfo} from "@/utils/articleService.ts";
@@ -7,6 +7,12 @@ import type {UserInfo} from "@/utils/articleInterfaces.ts";
 
 // 加载状态
 const isLoading = ref(true)
+
+// 标签页 refs
+const articlesTabRef = ref<HTMLInputElement>()
+const collectionsTabRef = ref<HTMLInputElement>()
+const commentsTabRef = ref<HTMLInputElement>()
+const settingsTabRef = ref<HTMLInputElement>()
 
 // 用户信息 - 根据UserInfo接口定义
 const userInfo = reactive<UserInfo>({
@@ -55,6 +61,9 @@ const loadUserInfo = async () => {
     console.error('获取用户信息出错:', error);
   } finally {
     isLoading.value = false;
+    // 在加载完成后检查URL参数
+    await nextTick();
+    checkUrlParams();
   }
 }
 
@@ -62,6 +71,23 @@ const loadUserInfo = async () => {
 const handleUserInfoUpdated = () => {
   console.log('收到用户信息更新通知，重新加载用户信息');
   loadUserInfo();
+}
+
+// 检查URL参数并切换到对应标签页
+const checkUrlParams = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+  
+  if (tab === 'settings') {
+    if (settingsTabRef.value) {
+      settingsTabRef.value.checked = true;
+    }
+  } else {
+    // 默认选中"我的文章"标签页
+    if (articlesTabRef.value) {
+      articlesTabRef.value.checked = true;
+    }
+  }
 }
 
 onMounted(() => {
@@ -83,11 +109,11 @@ const profileForm = reactive({
 
 
 // 编辑资料
-const editProfile = () => {
-  // 切换到账户设置tab
-  const settingsTab = document.querySelector('input[aria-label="账户设置"]')
-  if (settingsTab) {
-    settingsTab.checked = true
+const editProfile = async () => {
+  // 等待DOM渲染完成后切换到账户设置tab
+  await nextTick();
+  if (settingsTabRef.value) {
+    settingsTabRef.value.checked = true;
   }
 }
 
@@ -159,12 +185,12 @@ const editProfile = () => {
           <!-- 主要内容 -->
           <div v-else>
             <div class="tabs">
-              <input type="radio" name="my_tabs_3" class="tab" aria-label="我的文章" checked="checked"/>
+              <input ref="articlesTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的文章"/>
               <div class="tab-content space-y-4 mt-3">
                 <MyArticles :user-info="userInfo"></MyArticles>
               </div>
 
-              <input type="radio" name="my_tabs_3" class="tab" aria-label="我的收藏"/>
+              <input ref="collectionsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的收藏"/>
               <div class="tab-content space-y-4 mt-3">
                 <div class="space-y-3">
                   <div class="card bg-base-100 shadow-sm w-full">
@@ -175,7 +201,7 @@ const editProfile = () => {
                 </div>
               </div>
 
-              <input type="radio" name="my_tabs_3" class="tab" aria-label="我的评论"/>
+              <input ref="commentsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的评论"/>
               <div class="tab-content space-y-4 mt-3">
                 <div class="space-y-3">
                   <div class="card bg-base-100 shadow-sm w-full">
@@ -186,7 +212,7 @@ const editProfile = () => {
                 </div>
               </div>
 
-              <input type="radio" name="my_tabs_3" class="tab" aria-label="账户设置"/>
+              <input ref="settingsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="账户设置"/>
               <div class="tab-content space-y-4 mt-2">
                 <AccountSettings
                     :user-info="userInfo"
