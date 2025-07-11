@@ -35,7 +35,7 @@
                             </div>
 
                             <!-- 数据统计 - 一行展示 -->
-                            <div class="grid grid-cols-3 gap-4 mb-2">
+                            <div class="grid grid-cols-3 gap-4 mb-1">
                                 <div class="text-center">
                                     <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.ArticleCount}}</div>
                                     <div class="text-xs text-base-content/60">文章数</div>
@@ -50,23 +50,21 @@
                                 </div>
                             </div>
 
-                            <div class="card-actions justify-center mt-4 gap-2">
-                                <button class="btn btn-primary btn-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                         viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                    已关注
-                                </button>
-                                <button class="btn btn-ghost btn-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                         viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                                    </svg>
-                                    私信
-                                </button>
+                            <hr class="my-1 border-gray-200">
+
+                            <div class="card-actions justify-center">
+                                {{if and .User (gt .User.UserId 0) (ne .User.UserId .Author.UserId)}}
+                                    <button id="follow-btn"
+                                            class="btn btn-sm btn-block {{if .IsFollowingAuthor}}btn-outline{{else}}btn-secondary{{end}}"
+                                            onclick="toggleFollow({{.Author.UserId}})"
+                                            data-following="{{.IsFollowingAuthor}}">
+                                        <span id="follow-text">{{if .IsFollowingAuthor}}已关注{{else}}关注作者{{end}}</span>
+                                        <span id="follow-loading" class="loading loading-spinner loading-xs" style="display: none;"></span>
+                                    </button>
+                                {{else if not (and .User (gt .User.UserId 0))}}
+                                    <a href="/login" class="btn btn-outline btn-sm btn-block">登录后关注</a>
+                                {{end}}
+                                <button class="btn btn-ghost btn-sm btn-block">私信</button>
                             </div>
                         </div>
                     </div>
@@ -84,29 +82,11 @@
                                     <span class="text-base-content/70">最后活跃：</span>
                                     <span>{{.Author.CreateTime.Format "2006-01-02"}}</span>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-base-content/70">所在地：</span>
-                                    <span>中国</span>
-                                </div>
-{{/*                                <div class="flex justify-between">*/}}
-{{/*                                    <span class="text-base-content/70">个人网站：</span>*/}}
-{{/*                                    <a href="" target="_blank" class="link link-primary">访问</a>*/}}
-{{/*                                </div>*/}}
                                 <div>
                                     <div class="text-base-content/70 mb-1">个人简介：</div>
                                     <div class="text-base-content">{{.Author.Bio}}
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 技能标签 -->
-                    <div class="card bg-base-100 shadow-xl" v-if="user.skills.length > 0">
-                        <div class="card-body">
-                            <h2 class="card-title">技能标签</h2>
-                            <div class="flex flex-wrap gap-2">
-                                <div class="badge badge-outline">TypeScript</div>
                             </div>
                         </div>
                     </div>
@@ -189,21 +169,85 @@
                         <div class="tab-content border-base-300 bg-base-100 p-10">你似乎来到了没有荒原存在的知识</div>
 
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="关注"/>
-                        <div class="tab-content border-base-300 bg-base-100 p-10">长老们，去别处看看吧 彡(-_-;)彡</div>
+                        <div class="tab-content border-base-300 bg-base-100 {{if not .FollowingList}} p-10 {{end}}">
+                            {{if .FollowingList}}
+                            <ul class="list">
+                                {{range .FollowingList}}
+                                <li class="list-row hover:bg-base-300 flex items-center gap-3 px-4 py-2">
+                                    <!-- 左侧头像 -->
+                                    <a class="avatar" href="/user/{{.Id}}">
+                                        <div class="w-10 rounded-full">
+                                            <img src="{{.GetWebAvatarUrl}}" alt="{{.Username}}"/>
+                                        </div>
+                                    </a>
+                                    <!-- 右侧内容 -->
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <a href="/user/{{.Id}}" class="text-base font-medium text-base-content hover:text-primary hover:underline">{{.Username}}</a>
+                                                {{if .Bio}}
+                                                <p class="text-sm text-base-content/60 mt-1">{{.Bio}}</p>
+                                                {{end}}
+                                            </div>
+                                            {{if and (gt $.User.UserId 0) (ne $.User.UserId .Id)}}
+                                                {{$isFollowing := index $.FollowingStatusMap .Id}}
+                                                <button class="btn btn-sm {{if $isFollowing}}btn-outline{{else}}btn-primary{{end}} follow-btn"
+                                                        onclick="toggleUserFollow({{.Id}}, this)"
+                                                        data-following="{{$isFollowing}}"
+                                                        data-user-id="{{.Id}}">
+                                                    <span class="follow-text">{{if $isFollowing}}已关注{{else}}关注{{end}}</span>
+                                                    <span class="follow-loading loading loading-spinner loading-xs" style="display: none;"></span>
+                                                </button>
+                                            {{end}}
+                                        </div>
+                                    </div>
+                                </li>
+                                {{end}}
+                            </ul>
+                            {{else}}
+                            <div class="text-center text-base-content/60">暂无关注的用户</div>
+                            {{end}}
+                        </div>
 
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="粉丝"/>
-                        <div class="tab-content border-base-300 bg-base-100 p-10">您访问的页面走丢在寻找梦想的路上了
-                        </div>
-                    </div>
-                    <!-- 分页 -->
-                    <div class="flex justify-center mt-8">
-                        <div class="join bg-base-100 rounded-lg shadow-sm">
-                            <button class="join-item btn btn-sm bg-base-100 border-base-300">«
-                            </button>
-                            <button class="join-item btn btn-sm bg-primary text-primary-content border-primary">∞
-                            </button>
-                            <button class="join-item btn btn-sm bg-base-100 border-base-300">»
-                            </button>
+                        <div class="tab-content border-base-300 bg-base-100 {{if not .FollowerList}} p-10 {{end}}">
+                            {{if .FollowerList}}
+                            <ul class="list">
+                                {{range .FollowerList}}
+                                <li class="list-row hover:bg-base-300 flex items-center gap-3 px-4 py-2">
+                                    <!-- 左侧头像 -->
+                                    <a class="avatar" href="/user/{{.Id}}">
+                                        <div class="w-10 rounded-full">
+                                            <img src="{{.GetWebAvatarUrl}}" alt="{{.Username}}"/>
+                                        </div>
+                                    </a>
+                                    <!-- 右侧内容 -->
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <a href="/user/{{.Id}}" class="text-base font-medium text-base-content hover:text-primary hover:underline">{{.Username}}</a>
+                                                {{if .Bio}}
+                                                <p class="text-sm text-base-content/60 mt-1">{{.Bio}}</p>
+                                                {{end}}
+                                            </div>
+                                            {{if and (gt $.User.UserId 0) (ne $.User.UserId .Id)}}
+                                                {{$isFollowing := index $.FollowerStatusMap .Id}}
+                                                <button class="btn btn-sm {{if $isFollowing}}btn-outline{{else}}btn-primary{{end}} follow-btn"
+                                                        onclick="toggleUserFollow({{.Id}}, this)"
+                                                        data-following="{{$isFollowing}}"
+                                                        data-user-id="{{.Id}}">
+                                                    <span class="follow-text">{{if $isFollowing}}已关注{{else}}关注{{end}}</span>
+                                                    <span class="follow-loading loading loading-spinner loading-xs" style="display: none;"></span>
+                                                </button>
+                                            {{end}}
+                                        </div>
+                                    </div>
+                                </li>
+                                {{end}}
+                            </ul>
+                            {{else}}
+                            <div class="text-center text-base-content/60">暂无粉丝</div>
+                            {{end}}
                         </div>
                     </div>
                 </div>
@@ -212,5 +256,125 @@
     </main>
     {{template "footer.gohtml" .}}
 </div>
+
+<script>
+    // 关注/取消关注功能 - 用于左侧用户卡片
+    async function toggleFollow(authorId) {
+        const followBtn = document.getElementById('follow-btn');
+        const followText = document.getElementById('follow-text');
+        const followLoading = document.getElementById('follow-loading');
+
+        if (!followBtn) return;
+
+        const isFollowing = followBtn.getAttribute('data-following') === 'true';
+        const action = isFollowing ? 2 : 1; // 1: 关注, 2: 取消关注
+
+        // 显示加载状态
+        followText.style.display = 'none';
+        followLoading.style.display = 'inline-block';
+        followBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/forum/follow-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: authorId,
+                    action: action
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.code === 0) {
+                // 更新按钮状态
+                if (action === 1) {
+                    // 关注成功
+                    followBtn.classList.remove('btn-secondary');
+                    followBtn.classList.add('btn-outline');
+                    followText.textContent = '已关注';
+                    followBtn.setAttribute('data-following', 'true');
+                } else {
+                    // 取消关注成功
+                    followBtn.classList.remove('btn-outline');
+                    followBtn.classList.add('btn-secondary');
+                    followText.textContent = '关注作者';
+                    followBtn.setAttribute('data-following', 'false');
+                }
+            } else {
+                alert(result.msg || '操作失败，请稍后重试');
+            }
+        } catch (error) {
+            console.error('关注操作失败:', error);
+            alert('操作失败，请稍后重试');
+        } finally {
+            // 恢复按钮状态
+            followText.style.display = 'inline-block';
+            followLoading.style.display = 'none';
+            followBtn.disabled = false;
+        }
+    }
+
+    // 关注/取消关注功能 - 用于关注列表和粉丝列表
+    async function toggleUserFollow(userId, buttonElement) {
+        const followText = buttonElement.querySelector('.follow-text');
+        const followLoading = buttonElement.querySelector('.follow-loading');
+        
+        if (!buttonElement) return;
+        
+        const isFollowing = buttonElement.getAttribute('data-following') === 'true';
+        const action = isFollowing ? 2 : 1; // 1: 关注, 2: 取消关注
+        
+        // 显示加载状态
+        followText.style.display = 'none';
+        followLoading.style.display = 'inline-block';
+        buttonElement.disabled = true;
+        
+        try {
+            const response = await fetch('/api/forum/follow-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: userId,
+                    action: action
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.code === 0) {
+                // 更新按钮状态
+                if (action === 1) {
+                    // 关注成功
+                    buttonElement.classList.remove('btn-primary');
+                    buttonElement.classList.add('btn-outline');
+                    followText.textContent = '已关注';
+                    buttonElement.setAttribute('data-following', 'true');
+                } else {
+                    // 取消关注成功
+                    buttonElement.classList.remove('btn-outline');
+                    buttonElement.classList.add('btn-primary');
+                    followText.textContent = '关注';
+                    buttonElement.setAttribute('data-following', 'false');
+                }
+            } else {
+                alert(result.msg || '操作失败，请稍后重试');
+            }
+        } catch (error) {
+            console.error('关注操作失败:', error);
+            alert('操作失败，请稍后重试');
+        } finally {
+            // 恢复按钮状态
+            followText.style.display = 'inline-block';
+            followLoading.style.display = 'none';
+            buttonElement.disabled = false;
+        }
+    }
+</script>
+
 </body>
 </html>

@@ -1,13 +1,14 @@
 package controllers
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
-	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"io"
 	"log/slog"
 	"strconv"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
+	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
