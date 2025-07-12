@@ -352,28 +352,49 @@ func User(c *gin.Context) {
 	var isFollowingAuthor bool
 
 	if currentUser.UserId > 0 {
-		followingStatusMap = make(map[uint64]bool)
-		followerStatusMap = make(map[uint64]bool)
+		// 收集所有需要查询关注状态的用户ID
+		var targetUserIds []uint64
 
-		// 检查是否关注了页面作者
+		// 添加页面作者ID（如果不是自己）
 		if currentUser.UserId != id {
-			authorFollowEntity := userFollow.GetByUserId(currentUser.UserId, id)
-			isFollowingAuthor = authorFollowEntity.Id > 0 && authorFollowEntity.Status == 1
+			targetUserIds = append(targetUserIds, id)
 		}
 
-		// 检查关注列表中的用户状态
+		// 添加关注列表中的用户ID（排除自己）
 		for _, user := range followingList {
 			if user.Id != currentUser.UserId {
-				followEntity := userFollow.GetByUserId(currentUser.UserId, user.Id)
-				followingStatusMap[user.Id] = followEntity.Id > 0 && followEntity.Status == 1
+				targetUserIds = append(targetUserIds, user.Id)
 			}
 		}
 
-		// 检查粉丝列表中的用户状态
+		// 添加粉丝列表中的用户ID（排除自己）
 		for _, user := range followerList {
 			if user.Id != currentUser.UserId {
-				followEntity := userFollow.GetByUserId(currentUser.UserId, user.Id)
-				followerStatusMap[user.Id] = followEntity.Id > 0 && followEntity.Status == 1
+				targetUserIds = append(targetUserIds, user.Id)
+			}
+		}
+
+		// 一次性批量查询所有关注状态
+		allFollowStatusMap := userFollow.GetFollowStatusMap(currentUser.UserId, targetUserIds)
+
+		// 设置页面作者的关注状态
+		if currentUser.UserId != id {
+			isFollowingAuthor = allFollowStatusMap[id]
+		}
+
+		// 构建关注列表的状态映射
+		followingStatusMap = make(map[uint64]bool)
+		for _, user := range followingList {
+			if user.Id != currentUser.UserId {
+				followingStatusMap[user.Id] = allFollowStatusMap[user.Id]
+			}
+		}
+
+		// 构建粉丝列表的状态映射
+		followerStatusMap = make(map[uint64]bool)
+		for _, user := range followerList {
+			if user.Id != currentUser.UserId {
+				followerStatusMap[user.Id] = allFollowStatusMap[user.Id]
 			}
 		}
 	}
@@ -389,6 +410,7 @@ func User(c *gin.Context) {
 		"FollowingStatusMap":   followingStatusMap,
 		"FollowerStatusMap":    followerStatusMap,
 		"IsFollowingAuthor":    isFollowingAuthor,
+		"ExternalInformation":  showUser.ExternalInformation,
 		"User":                 currentUser,
 		"Title":                showUser.Username + " - GooseForum",
 		"Description":          showUser.Username + " 的个人简介 ",

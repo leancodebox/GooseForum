@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"net/http"
@@ -19,6 +20,8 @@ func JWTAuthCheck(c *gin.Context) {
 	c.Next()
 }
 
+const SkipUpdateUserActivity = "SkipUpdateUserActivity"
+
 func JWTAuth(c *gin.Context) {
 	token := jwt.GetGinAccessToken(c)
 	if token == "" {
@@ -34,7 +37,15 @@ func JWTAuth(c *gin.Context) {
 		jwt.TokenSetting(c, newToken)
 	}
 	c.Set("userId", userId)
-	userservice.UpdateUserActivity(userId)
+	c.Next()
+	if c.GetBool(SkipUpdateUserActivity) {
+		fmt.Println("skip update user activity")
+		userservice.UpdateUserActivity(userId)
+	}
+}
+
+func NoUpdateUserActivity(c *gin.Context) {
+	c.Set(SkipUpdateUserActivity, true)
 	c.Next()
 }
 

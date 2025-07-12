@@ -244,14 +244,15 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 	// 如果有头像，添加域名前缀
 	avatarUrl := user.GetWebAvatarUrl()
 	return UserInfoShow{
-		UserId:     userId,
-		Username:   user.Username,
-		Bio:        user.Bio,
-		Signature:  user.Signature,
-		Prestige:   user.Prestige,
-		AvatarUrl:  avatarUrl,
-		CreateTime: user.CreatedAt,
-		IsAdmin:    user.RoleId > 0,
+		UserId:              userId,
+		Username:            user.Username,
+		Bio:                 user.Bio,
+		Signature:           user.Signature,
+		Prestige:            user.Prestige,
+		AvatarUrl:           avatarUrl,
+		CreateTime:          user.CreatedAt,
+		IsAdmin:             user.RoleId > 0,
+		ExternalInformation: user.ExternalInformation,
 		//UserPoint: userPoint.CurrentPoints,
 	}
 }

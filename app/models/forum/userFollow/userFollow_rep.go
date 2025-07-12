@@ -45,6 +45,23 @@ func GetByUserId(userId, followUserId uint64) (entity Entity) {
 	return
 }
 
+// GetFollowStatusMap 批量获取用户对指定用户列表的关注状态
+func GetFollowStatusMap(userId uint64, targetUserIds []uint64) map[uint64]bool {
+	if len(targetUserIds) == 0 {
+		return make(map[uint64]bool)
+	}
+	
+	var followEntities []Entity
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.In(fieldFollowUserId, targetUserIds)).Where(queryopt.Eq(fieldStatus, 1)).Find(&followEntities)
+	
+	statusMap := make(map[uint64]bool)
+	for _, entity := range followEntities {
+		statusMap[entity.FollowUserId] = true
+	}
+	
+	return statusMap
+}
+
 // GetFollowingList 获取用户关注列表
 func GetFollowingList(userId uint64, page, pageSize int) ([]*users.EntityComplete, int64) {
 	offset := (page - 1) * pageSize

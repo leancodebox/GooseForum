@@ -41,11 +41,8 @@ func GetTemplates(globalFunc template.FuncMap) *template.Template {
 				result := strings.ReplaceAll(escaped, "\n", "<br>")
 				return template.HTML(result)
 			},
-			"IsOnline": func(t *time.Time) bool {
-				if t == nil {
-					return false
-				}
-				return time.Now().Sub(*t) < 120*time.Second
+			"IsOnline": func(t time.Time) bool {
+				return time.Now().Sub(t) < 120*time.Second
 			},
 		}).
 		Funcs(globalFunc)

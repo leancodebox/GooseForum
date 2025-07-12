@@ -79,9 +79,9 @@ func CancelFollower(userId uint64) int64 {
 	return result.RowsAffected
 }
 
+// 更新活跃时间
 func UpdateUserActivity(userId uint64, lastActiveTime time.Time) int64 {
-
-	result := builder().Updates(Entity{UserId: userId, LastActiveTime: &lastActiveTime})
+	result := builder().Updates(Entity{UserId: userId, LastActiveTime: lastActiveTime})
 	return result.RowsAffected
 }
 

@@ -45,7 +45,7 @@ func runCheckAndRepairData(cmd *cobra.Command, args []string) {
 			if userSt.UserId == 0 {
 				fmt.Println("用户统计信息不存在，开始初始化")
 				userSt.UserId = userItem.Id
-				userSt.LastActiveTime = &userItem.UpdatedAt
+				userSt.LastActiveTime = userItem.UpdatedAt
 			}
 			userSt.ArticleCount = cast.ToUint(articles.GetUserCount(userItem.Id))
 			fmt.Println("获取文章总量", userSt.ArticleCount)

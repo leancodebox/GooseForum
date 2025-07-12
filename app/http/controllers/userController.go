@@ -186,15 +186,16 @@ func Invitation(req component.BetterRequest[null]) component.Response {
 }
 
 type UserInfoShow struct {
-	UserId     uint64    `json:"userId,omitempty"`
-	Username   string    `json:"username"`
-	Bio        string    `json:"bio"`
-	Signature  string    `json:"Signature"`
-	Prestige   int64     `json:"prestige"`
-	AvatarUrl  string    `json:"avatarUrl"`
-	UserPoint  int64     `json:"userPoint"`
-	CreateTime time.Time `json:"createTime"`
-	IsAdmin    bool      `json:"isAdmin"`
+	UserId              uint64                    `json:"userId,omitempty"`
+	Username            string                    `json:"username"`
+	Bio                 string                    `json:"bio"`
+	Signature           string                    `json:"Signature"`
+	Prestige            int64                     `json:"prestige"`
+	AvatarUrl           string                    `json:"avatarUrl"`
+	UserPoint           int64                     `json:"userPoint"`
+	CreateTime          time.Time                 `json:"createTime"`
+	IsAdmin             bool                      `json:"isAdmin"`
+	ExternalInformation users.ExternalInformation `json:"externalInformation"`
 }
 
 // UploadAvatar 头像上传处理函数

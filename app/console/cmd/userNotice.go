@@ -92,10 +92,6 @@ func getUserBatch(startId uint64, limit int) []*users.EntityComplete {
 
 // 判断用户是否最近活跃（7天内）
 func isUserActiveRecently(userStats *userStatistics.Entity) bool {
-	if userStats == nil || userStats.LastActiveTime == nil {
-		return false
-	}
-
 	// 检查最后活跃时间是否在7天内
 	sevenDaysAgo := time.Now().AddDate(0, 0, -7)
 	return userStats.LastActiveTime.After(sevenDaysAgo)
