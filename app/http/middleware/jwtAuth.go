@@ -38,8 +38,9 @@ func JWTAuth(c *gin.Context) {
 	c.Set("userId", userId)
 	c.Next()
 	if c.GetBool(SkipUpdateUserActivity) {
-		userservice.UpdateUserActivity(userId)
+		return
 	}
+	userservice.UpdateUserActivity(userId)
 }
 
 func NoUpdateUserActivity(c *gin.Context) {
