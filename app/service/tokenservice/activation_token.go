@@ -14,7 +14,7 @@ type ActivationClaims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateActivationTokenByUser(entity users.Entity) (string, error) {
+func GenerateActivationTokenByUser(entity users.EntityComplete) (string, error) {
 	return GenerateActivationToken(entity.Id, entity.Email)
 }
 

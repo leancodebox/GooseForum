@@ -10,13 +10,13 @@ import (
 	"time"
 )
 
-func Get(id any) (entity Entity, err error) {
+func Get(id any) (entity EntityComplete, err error) {
 	err = builder().Where(pid, id).First(&entity).Error
 	return
 }
 
-func Verify(usernameOrEmail string, password string) (*Entity, error) {
-	var user Entity
+func Verify(usernameOrEmail string, password string) (*EntityComplete, error) {
+	var user EntityComplete
 	// 尝试通过用户名或邮箱查找用户
 	err := builder().Where("username = ? OR email = ?", usernameOrEmail, usernameOrEmail).First(&user).Error
 	if err != nil {
@@ -24,19 +24,19 @@ func Verify(usernameOrEmail string, password string) (*Entity, error) {
 	}
 	err = algorithm.VerifyEncryptPassword(user.Password, password)
 	if err != nil {
-		return &Entity{}, err
+		return &EntityComplete{}, err
 	}
 	return &user, nil
 }
 
 // GetByEmail 通过邮箱获取用户
-func GetByEmail(email string) (entity Entity, err error) {
+func GetByEmail(email string) (entity EntityComplete, err error) {
 	err = builder().Where("email = ?", email).First(&entity).Error
 	return
 }
 
-func MakeUser(name string, password string, email string) *Entity {
-	user := Entity{Username: name, Email: email}
+func MakeUser(name string, password string, email string) *EntityComplete {
+	user := EntityComplete{Username: name, Email: email}
 	user.SetPassword(password)
 	user.AvatarUrl = RandAvatarUrl()
 	return &user
@@ -47,16 +47,16 @@ func RandAvatarUrl() string {
 	return fmt.Sprintf("/static/pic/%d.webp", randomNum)
 }
 
-func Create(entity *Entity) error {
+func Create(entity *EntityComplete) error {
 	return builder().Create(&entity).Error
 }
 
-func Save(entity *Entity) error {
+func Save(entity *EntityComplete) error {
 	result := builder().Save(entity)
 	return result.Error
 }
 
-func All() (entities []*Entity) {
+func All() (entities []*EntityComplete) {
 	builder().Find(&entities)
 	return
 }
@@ -75,12 +75,12 @@ func GetMonthCount() int64 {
 }
 
 func GetMaxId() uint64 {
-	var entity Entity
+	var entity EntityComplete
 	builder().Order(queryopt.Desc(pid)).Limit(1).First(&entity)
 	return entity.Id
 }
 
-func GetByUsername(username string) (entities *Entity) {
+func GetByUsername(username string) (entities *EntityComplete) {
 	builder().Where(queryopt.Eq(fieldUsername, username)).First(entities)
 	return
 }
@@ -96,9 +96,9 @@ func Page(q PageQuery) struct {
 	Page     int
 	PageSize int
 	Total    int64
-	Data     []Entity
+	Data     []EntityComplete
 } {
-	var list []Entity
+	var list []EntityComplete
 	q.Page = max(q.Page-1, 0)
 	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	b := builder()
@@ -124,11 +124,11 @@ func Page(q PageQuery) struct {
 		Page     int
 		PageSize int
 		Total    int64
-		Data     []Entity
+		Data     []EntityComplete
 	}{Page: q.Page, PageSize: q.PageSize, Data: list, Total: total}
 }
 
-func GetByIds(userIds []uint64) (entities []*Entity) {
+func GetByIds(userIds []uint64) (entities []*EntityComplete) {
 	if len(userIds) == 0 {
 		return
 	}
@@ -136,8 +136,8 @@ func GetByIds(userIds []uint64) (entities []*Entity) {
 	return
 }
 
-func GetMapByIds(userIds []uint64) map[uint64]*Entity {
-	return collectionopt.Slice2Map(GetByIds(userIds), func(v *Entity) uint64 {
+func GetMapByIds(userIds []uint64) map[uint64]*EntityComplete {
+	return collectionopt.Slice2Map(GetByIds(userIds), func(v *EntityComplete) uint64 {
 		return v.Id
 	})
 }
@@ -161,7 +161,7 @@ func IncrementPrestige(addNumber int64, userId uint64) int64 {
 	return result.RowsAffected
 }
 
-func QueryById(startId uint64, limit int) (entities []*Entity) {
+func QueryById(startId uint64, limit int) (entities []*EntityComplete) {
 	builder().Where(queryopt.Gt(pid, startId)).Limit(limit).Order(queryopt.Asc(pid)).Find(&entities)
 	return
 }

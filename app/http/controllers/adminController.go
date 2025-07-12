@@ -60,7 +60,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 	roleMap := array.Slice2Map(roleEntityList, func(v *role.Entity) uint64 {
 		return v.Id
 	})
-	list := array.Map(pageData.Data, func(t users.Entity) UserItem {
+	list := array.Map(pageData.Data, func(t users.EntityComplete) UserItem {
 		roleEntity := roleMap[t.RoleId]
 		var roleList []datastruct.Option[string, uint64]
 		if roleEntity != nil {

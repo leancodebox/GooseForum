@@ -16,7 +16,7 @@ func GetInitBlog() string {
 	return initBlog
 }
 
-func FirstUserInit(adminUser *users.Entity) {
+func FirstUserInit(adminUser *users.EntityComplete) {
 	if adminUser.Id != 1 {
 		return
 	}
@@ -43,5 +43,5 @@ func FirstUserInit(adminUser *users.Entity) {
 
 	adminUser.RoleId = roleEntity.Id
 	users.Save(adminUser)
-	
+
 }

@@ -84,7 +84,7 @@ func runUserNotice(cmd *cobra.Command, args []string) {
 }
 
 // 分批获取用户列表
-func getUserBatch(startId uint64, limit int) []*users.Entity {
+func getUserBatch(startId uint64, limit int) []*users.EntityComplete {
 	// 使用 QueryById 方法分批获取用户，避免一次性加载所有数据
 	userList := users.QueryById(startId, limit)
 	return userList
@@ -150,7 +150,7 @@ func shouldSendNotification(userId uint64) bool {
 }
 
 // 构建邮件内容
-func buildEmailContent(user *users.Entity, notifications []*eventNotification.Entity) map[string]interface{} {
+func buildEmailContent(user *users.EntityComplete, notifications []*eventNotification.Entity) map[string]interface{} {
 	// 统计不同类型的通知数量
 	notificationStats := make(map[string]int)
 	for _, notification := range notifications {
@@ -171,7 +171,7 @@ func buildEmailContent(user *users.Entity, notifications []*eventNotification.En
 }
 
 // 打印邮件内容（模拟发送）
-func printEmailContent(user *users.Entity, emailContent map[string]interface{}) {
+func printEmailContent(user *users.EntityComplete, emailContent map[string]interface{}) {
 	fmt.Printf("  ✅ 准备发送邮件通知\n")
 	fmt.Printf("  📧 收件人: %s <%s>\n", emailContent["username"], emailContent["to"])
 	fmt.Printf("  📋 主题: %s\n", emailContent["subject"])

@@ -29,7 +29,7 @@ type RegReq struct {
 	CaptchaCode    string `json:"captchaCode" validate:"required"`
 }
 
-func SendAEmail4User(userEntity *users.Entity) error {
+func SendAEmail4User(userEntity *users.EntityComplete) error {
 	token, err := tokenservice.GenerateActivationTokenByUser(*userEntity)
 	if err != nil {
 		return err

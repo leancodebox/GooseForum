@@ -12,12 +12,12 @@ func builder() *gorm.DB {
 	return db.Connect().Table(tableName)
 }
 
-func first(db *gorm.DB) (el *Entity) {
+func first(db *gorm.DB) (el *EntityComplete) {
 	db.First(&el)
 	return
 }
 
-func getList(db *gorm.DB) (el []*Entity) {
+func getList(db *gorm.DB) (el []*EntityComplete) {
 	db.Find(&el)
 	return
 }

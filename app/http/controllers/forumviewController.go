@@ -73,7 +73,7 @@ func PostDetail(c *gin.Context) {
 	userMap := users.GetMapByIds(userIds)
 	author := "陶渊明"
 	avatarUrl := urlconfig.GetDefaultAvatar()
-	authorUserInfo := users.Entity{}
+	authorUserInfo := users.EntityComplete{}
 	authorInfoStatistics := userStatistics.Get(entity.UserId)
 	if user, ok := userMap[entity.UserId]; ok {
 		author = user.Username
@@ -338,29 +338,29 @@ func User(c *gin.Context) {
 	}
 	last, _ := articles.GetLatestArticlesByUserId(id, 5)
 	authorInfoStatistics := userStatistics.Get(id)
-	
+
 	// 获取关注和粉丝列表（默认显示前10个）
 	followingList, _ := userFollow.GetFollowingList(id, 1, 10)
 	followerList, _ := userFollow.GetFollowerList(id, 1, 10)
-	
+
 	// 获取当前登录用户信息
 	currentUser := GetLoginUser(c)
-	
+
 	// 检查当前用户是否关注了列表中的用户
 	var followingStatusMap map[uint64]bool
 	var followerStatusMap map[uint64]bool
 	var isFollowingAuthor bool
-	
+
 	if currentUser.UserId > 0 {
 		followingStatusMap = make(map[uint64]bool)
 		followerStatusMap = make(map[uint64]bool)
-		
+
 		// 检查是否关注了页面作者
 		if currentUser.UserId != id {
 			authorFollowEntity := userFollow.GetByUserId(currentUser.UserId, id)
 			isFollowingAuthor = authorFollowEntity.Id > 0 && authorFollowEntity.Status == 1
 		}
-		
+
 		// 检查关注列表中的用户状态
 		for _, user := range followingList {
 			if user.Id != currentUser.UserId {
@@ -368,7 +368,7 @@ func User(c *gin.Context) {
 				followingStatusMap[user.Id] = followEntity.Id > 0 && followEntity.Status == 1
 			}
 		}
-		
+
 		// 检查粉丝列表中的用户状态
 		for _, user := range followerList {
 			if user.Id != currentUser.UserId {
@@ -377,7 +377,7 @@ func User(c *gin.Context) {
 			}
 		}
 	}
-	
+
 	viewrender.Render(c, "user.gohtml", map[string]any{
 		"IsProduction":         setting.IsProduction(),
 		"Articles":             articlesSmallEntity2Dto(last),

@@ -53,54 +53,6 @@ const fieldUpdatedAt = "updated_at"
 // fieldDeletedAt
 const fieldDeletedAt = "deleted_at"
 
-type Entity struct {
-	Id                  uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                       //
-	Username            string     `gorm:"column:username;index;type:varchar(255);not null;default:'';" json:"username"` //
-	Nickname            string     `gorm:"column:nickname;type:varchar(255);not null;default:'';" json:"nickname"`       //
-	Email               string     `gorm:"column:email;index;type:varchar(255);not null;default:'';" json:"email"`       //
-	Password            string     `gorm:"column:password;type:varchar(255);not null;default:'';" json:"password"`       //
-	MobileAreaCode      string     `gorm:"column:mobile_area_code;type:varchar(16);" json:"mobileAreaCode"`              //
-	MobilePhoneNumber   string     `gorm:"column:mobile_phone_number;type:varchar(64);" json:"mobilePhoneNumber"`        //
-	RoleId              uint64     `gorm:"column:role_id;type:bigint unsigned;not null;default:0;" json:"roleId"`        //
-	Status              int8       `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`                 // 状态：0正常 1冻结
-	Validate            int8       `gorm:"column:validate;type:tinyint;not null;default:0;" json:"validate"`             // 是否验证通过: 0未通过/未验证 1 验证通过
-	ActivatedAt         time.Time  `gorm:"column:activated_at;type:datetime;" json:"activatedAt"`                        // 激活时间
-	Prestige            int64      `gorm:"column:prestige;type:bigint;not null;default:0;" json:"prestige"`              // 声望
-	AvatarUrl           string     `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"`                        // 头像URL
-	Bio                 string     `gorm:"column:bio;type:varchar(500);" json:"bio"`                                     // 个人简介
-	Signature           string     `gorm:"column:signature;type:varchar(255);" json:"signature"`                         // 署名
-	Website             string     `gorm:"column:website;type:varchar(255);" json:"website"`                             // 个人网站
-	WebsiteName         string     `gorm:"column:website_name;type:varchar(64);" json:"websiteName"`                     // 个人网站名
-	ExternalInformation string     `gorm:"column:external_information;type:varchar(2048);" json:"externalInformation"`   // 外部信息
-	CreatedAt           time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`           //
-	UpdatedAt           time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
-	DeletedAt           *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"` //
-}
-
-func (itself *Entity) GetWebAvatarUrl() string {
-	if itself.AvatarUrl == "" {
-		return urlconfig.GetDefaultAvatar()
-	}
-	if strings.HasPrefix(itself.AvatarUrl, "/static/pic/") {
-		return itself.AvatarUrl
-	}
-	return strings.ReplaceAll(urlconfig.FilePath(itself.AvatarUrl), "\\", "/")
-}
-
-func (itself *Entity) GetShowName() string {
-	if itself.Nickname != "" {
-		return itself.Nickname
-	}
-	return itself.Username
-}
-
-func (itself *Entity) GetExternalInformation() ExternalInformation {
-	return jsonopt.Decode[ExternalInformation](itself.ExternalInformation)
-}
-func (itself *Entity) SetExternalInformation(info ExternalInformation) {
-	itself.ExternalInformation = jsonopt.Encode(info)
-}
-
 type ExternalInformationItem struct {
 	Link string `json:"link"`
 }
@@ -123,33 +75,85 @@ func (itself *ExternalInformation) Scan(value any) error {
 	if !ok {
 		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
 	}
-
 	r, err := jsonopt.DecodeE[ExternalInformation](bytes)
 	*itself = r
 	return err
 }
 
-// func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
-// func (itself *Entity) BeforeCreate(tx *gorm.DB) (err error) {}
-// func (itself *Entity) AfterCreate(tx *gorm.DB) (err error) {}
-// func (itself *Entity) BeforeUpdate(tx *gorm.DB) (err error) {}
-// func (itself *Entity) AfterUpdate(tx *gorm.DB) (err error) {}
-// func (itself *Entity) AfterSave(tx *gorm.DB) (err error) {}
-// func (itself *Entity) BeforeDelete(tx *gorm.DB) (err error) {}
-// func (itself *Entity) AfterDelete(tx *gorm.DB) (err error) {}
-// func (itself *Entity) AfterFind(tx *gorm.DB) (err error) {}
+type EntityComplete struct {
+	// base
+	Id          uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      //
+	Username    string     `gorm:"column:username;index;type:varchar(64);not null;default:'';" json:"username"` //
+	Email       string     `gorm:"column:email;index;type:varchar(128);not null;default:'';" json:"email"`      //
+	Password    string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"password"`      //
+	Status      int8       `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`                // 状态：0正常 1冻结
+	Validate    int8       `gorm:"column:validate;type:tinyint;not null;default:0;" json:"validate"`            // 是否验证通过: 0未通过/未验证 1 验证通过
+	ActivatedAt *time.Time `gorm:"column:activated_at;type:datetime;" json:"activatedAt"`                       // 激活时间
 
-func (itself *Entity) TableName() string {
+	// info
+	Nickname            string `gorm:"column:nickname;type:varchar(64);not null;default:'';" json:"nickname"`        //
+	RoleId              uint64 `gorm:"column:role_id;type:bigint unsigned;not null;default:0;" json:"roleId"`        //
+	Prestige            int64  `gorm:"column:prestige;type:bigint;not null;default:0;" json:"prestige"`              // 声望
+	AvatarUrl           string `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"`                        // 头像URL
+	Bio                 string `gorm:"column:bio;type:varchar(500);not null;default:'';" json:"bio"`                 // 个人简介
+	Signature           string `gorm:"column:signature;type:varchar(255);not null;default:'';" json:"signature"`     // 署名
+	WebsiteName         string `gorm:"column:website_name;type:varchar(64);not null;default:'';" json:"websiteName"` // 个人网站名
+	Website             string `gorm:"column:website;type:varchar(255);not null;default:'';" json:"website"`         // 个人网站
+	ExternalInformation string `gorm:"column:external_information;type:varchar(2048);" json:"externalInformation"`   // 外部信息
+
+	// status
+	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
+	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
+	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;index;" json:"deletedAt"` //
+
+	// 用户统计信息
+
+	ArticleCount      uint       `gorm:"column:article_count;type:int unsigned;not null;default:0;" json:"articleCount"`            // 发表文章数
+	ReplyCount        uint       `gorm:"column:reply_count;type:int unsigned;not null;default:0;" json:"replyCount"`                // 评论数
+	FollowerCount     uint       `gorm:"column:follower_count;type:int unsigned;not null;default:0;" json:"followerCount"`          // 粉丝数
+	FollowingCount    uint       `gorm:"column:following_count;type:int unsigned;not null;default:0;" json:"followingCount"`        // 关注数
+	LikeReceivedCount uint       `gorm:"column:like_received_count;type:int unsigned;not null;default:0;" json:"likeReceivedCount"` // 收到的点赞数
+	LikeGivenCount    uint       `gorm:"column:like_given_count;type:int unsigned;not null;default:0;" json:"likeGivenCount"`       // 给出的点赞数
+	CollectionCount   uint       `gorm:"column:collection_count;type:int unsigned;not null;default:0;" json:"collectionCount"`      // 收藏数
+	LastActiveTime    *time.Time `gorm:"column:last_active_time;type:datetime;" json:"lastActiveTime"`                              // 最后活跃时间
+}
+
+func (itself *EntityComplete) GetWebAvatarUrl() string {
+	if itself.AvatarUrl == "" {
+		return urlconfig.GetDefaultAvatar()
+	}
+	if strings.HasPrefix(itself.AvatarUrl, "/static/pic/") {
+		return itself.AvatarUrl
+	}
+	return strings.ReplaceAll(urlconfig.FilePath(itself.AvatarUrl), "\\", "/")
+}
+
+func (itself *EntityComplete) GetShowName() string {
+	if itself.Nickname != "" {
+		return itself.Nickname
+	}
+	return itself.Username
+}
+
+func (itself *EntityComplete) GetExternalInformation() ExternalInformation {
+	return jsonopt.Decode[ExternalInformation](itself.ExternalInformation)
+}
+func (itself *EntityComplete) SetExternalInformation(info ExternalInformation) {
+	itself.ExternalInformation = jsonopt.Encode(info)
+}
+
+func (itself *EntityComplete) TableName() string {
 	return tableName
 }
 
-func (itself *Entity) SetPassword(password string) *Entity {
+func (itself *EntityComplete) SetPassword(password string) *EntityComplete {
 	itself.Password, _ = algorithm.MakePassword(password)
 	return itself
 }
 
-func (itself *Entity) Activate() error {
+func (itself *EntityComplete) Activate() error {
 	itself.Validate = 1
-	itself.ActivatedAt = time.Now()
+	activatedAt := time.Now()
+	itself.ActivatedAt = &activatedAt
 	return Save(itself)
 }

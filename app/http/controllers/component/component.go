@@ -16,7 +16,7 @@ type BetterRequest[T any] struct {
 	Params   T
 	UserId   uint64
 	userSet  bool
-	userInfo users.Entity
+	userInfo users.EntityComplete
 }
 type Null struct {
 }
@@ -26,7 +26,7 @@ func (r *BetterRequest[T]) GetParams() T {
 	return r.Params
 }
 
-func (r *BetterRequest[T]) GetUser() (users.Entity, error) {
+func (r *BetterRequest[T]) GetUser() (users.EntityComplete, error) {
 	if r.userSet != false {
 		return r.userInfo, nil
 	}

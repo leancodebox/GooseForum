@@ -59,7 +59,7 @@ func migration(migration bool) {
 			&rolePermissionRs.Entity{},
 			&userFollow.Entity{},
 			&userPoints.Entity{},
-			&users.Entity{},
+			&users.EntityComplete{},
 			&taskQueue.Entity{},
 			&articleLike.Entity{},
 			&applySheet.Entity{},
