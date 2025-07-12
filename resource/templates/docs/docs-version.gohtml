@@ -1,4 +1,3 @@
-{{define "docs-version.gohtml"}}
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="{{.Theme}}">
 <head>
@@ -12,24 +11,24 @@
     <header class="sticky top-0 z-50">
         {{template "nav.gohtml" .}}
     </header>
-    
     <!-- 面包屑导航 -->
-    <div class="bg-base-100 border-b border-base-200">
-        <div class="container mx-auto px-6 py-4">
-            <nav class="flex items-center space-x-2 text-sm font-medium">
-                {{range $index, $breadcrumb := .Breadcrumbs}}
-                {{if ne $index 0}}
-                <svg class="w-4 h-4 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path>
-                </svg>
-                {{end}}
-                {{if .url}}
-                <a href="{{.url}}" class="text-base-content/60 hover:text-primary transition-colors duration-200">{{.title}}</a>
-                {{else}}
-                <span class="text-base-content font-semibold">{{.title}}</span>
-                {{end}}
-                {{end}}
-            </nav>
+    <div class="bg-base-100 border-b border-base-300 shadow-sm flex-shrink-0">
+        <div class="container px-6 py-2 flex items-start space-x-3">
+            <!-- 面包屑导航 -->
+            <div class="breadcrumbs max-w-xs text-sm">
+                <ul>
+                    {{range $index, $breadcrumb := .Breadcrumbs}}
+                    <li>
+                        {{if .url}}
+                        <a href="{{.url}}"
+                           class="text-base-content/60 hover:text-primary transition-colors duration-200 truncate">{{.title}}</a>
+                        {{else}}
+                        <span class="text-base-content font-semibold truncate">{{.title}}</span>
+                        {{end}}
+                    </li>
+                    {{end}}
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -168,4 +167,3 @@
 </div>
 </body>
 </html>
-{{end}}
