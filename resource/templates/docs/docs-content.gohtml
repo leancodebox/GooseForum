@@ -1,4 +1,3 @@
-{{define "docs-content.gohtml"}}
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="{{.Theme}}">
 <head>
@@ -12,45 +11,60 @@
     <header class="flex-shrink-0">
         {{template "nav.gohtml" .}}
     </header>
-    
     <!-- 面包屑导航 -->
     <div class="bg-base-100 border-b border-base-300 shadow-sm flex-shrink-0">
         <div class="container mx-auto px-6 py-4">
-            <nav class="flex items-center space-x-2 text-sm font-medium">
-                {{range $index, $breadcrumb := .Breadcrumbs}}
-                {{if ne $index 0}}
-                <svg class="w-4 h-4 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path>
-                </svg>
-                {{end}}
-                {{if .url}}
-                <a href="{{.url}}" class="text-base-content/60 hover:text-primary transition-colors duration-200">{{.title}}</a>
-                {{else}}
-                <span class="text-base-content font-semibold">{{.title}}</span>
-                {{end}}
-                {{end}}
-            </nav>
+            <div class="flex items-center justify-between">
+                <!-- 移动端菜单按钮和面包屑 -->
+                <div class="flex items-center space-x-3">
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobile-menu-toggle"
+                            class="md:hidden inline-flex items-center justify-center w-8 h-8 bg-primary text-primary-content rounded-lg shadow-sm hover:bg-primary/90 transition-all duration-200">
+                        <svg id="menu-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg id="close-icon" class="w-4 h-4 hidden" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    <!-- 面包屑导航 -->
+                    <nav class="flex items-center space-x-2 text-sm font-medium">
+                        {{range $index, $breadcrumb := .Breadcrumbs}}
+                        {{if ne $index 0}}
+                        <svg class="w-4 h-4 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M9 5l7 7-7 7"></path>
+                        </svg>
+                        {{end}}
+                        {{if .url}}
+                        <a href="{{.url}}"
+                           class="text-base-content/60 hover:text-primary transition-colors duration-200 truncate">{{.title}}</a>
+                        {{else}}
+                        <span class="text-base-content font-semibold truncate">{{.title}}</span>
+                        {{end}}
+                        {{end}}
+                    </nav>
+                </div>
+            </div>
         </div>
     </div>
 
-    <main class="flex-1 lg:flex min-h-0">
-        <!-- 移动端菜单按钮 -->
-        <div class="lg:hidden bg-base-100 border-b border-base-200 px-6 py-3 flex-shrink-0">
-            <button id="mobile-menu-toggle" class="inline-flex items-center gap-2 px-3 py-2 text-base-content hover:text-primary transition-colors duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-                <span class="font-medium">目录导航</span>
-            </button>
-        </div>
+    <main class="flex-1 flex min-h-0">
 
         <!-- 侧边栏 -->
-        <aside id="docs-sidebar" class="hidden lg:block lg:w-72 xl:w-80 bg-base-100 border-r border-base-300 shadow-sm lg:h-full lg:overflow-y-auto lg:relative absolute top-0 left-0 right-0 z-50 lg:z-auto shadow-xl lg:shadow-none max-h-full overflow-y-auto flex-shrink-0">
+        <aside id="docs-sidebar"
+               class="w-80 bg-base-100 border-r border-base-300 flex-shrink-0 h-full overflow-y-auto hidden md:block transition-all duration-300 ease-in-out">
             <div class="p-5">
                 <!-- 项目信息 -->
                 <div class="mb-6 p-4 bg-base-50 border border-base-200 rounded-xl">
                     <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center text-lg flex-shrink-0">📚</div>
+                        <div class="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
+                            📚
+                        </div>
                         <div class="min-w-0 flex-1">
                             <h2 class="text-lg font-bold text-base-content mb-1 truncate">{{.Project.Name}}</h2>
                             <p class="text-sm text-base-content/70 mb-2 line-clamp-2">{{.Project.Description}}</p>
@@ -62,13 +76,15 @@
                 <!-- 目录导航 -->
                 <div class="mb-6">
                     <div class="flex items-center gap-2 mb-4">
-                        <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">📋</div>
+                        <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
+                            📋
+                        </div>
                         <h3 class="text-base font-semibold text-base-content">目录</h3>
                     </div>
                     <nav class="space-y-1">
                         {{range .Directory}}
                         <div>
-                            <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}" 
+                            <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
                                class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {{if eq .Slug $.CurrentSlug}}bg-primary/10 text-primary border-l-2 border-primary{{else}}text-base-content/70 hover:text-base-content hover:bg-base-100{{end}}">
                                 <div class="w-1.5 h-1.5 rounded-full {{if eq .Slug $.CurrentSlug}}bg-primary{{else}}bg-base-content/30 group-hover:bg-base-content/50{{end}} transition-colors duration-200"></div>
                                 <span class="truncate">{{.Title}}</span>
@@ -76,7 +92,7 @@
                             {{if .Children}}
                             <div class="ml-6 mt-1 space-y-1">
                                 {{range .Children}}
-                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}" 
+                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
                                    class="group flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-all duration-200 {{if eq .Slug $.CurrentSlug}}bg-primary/5 text-primary{{else}}text-base-content/60 hover:text-base-content hover:bg-base-50{{end}}">
                                     <div class="w-1 h-1 rounded-full {{if eq .Slug $.CurrentSlug}}bg-primary{{else}}bg-base-content/20 group-hover:bg-base-content/40{{end}} transition-colors duration-200"></div>
                                     <span class="truncate">{{.Title}}</span>
@@ -92,27 +108,34 @@
                 <!-- 版本选择 -->
                 <div class="mb-6">
                     <div class="flex items-center gap-2 mb-3">
-                        <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">🏷️</div>
+                        <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
+                            🏷️
+                        </div>
                         <h3 class="text-base font-semibold text-base-content">版本</h3>
                     </div>
                     <div class="dropdown dropdown-top w-full">
-                        <label tabindex="0" class="flex items-center justify-between w-full px-3 py-2 bg-base-100 border border-base-300 rounded-lg text-sm font-medium hover:border-primary hover:text-primary transition-all duration-200 cursor-pointer">
+                        <label tabindex="0"
+                               class="flex items-center justify-between w-full px-3 py-2 bg-base-100 border border-base-300 rounded-lg text-sm font-medium hover:border-primary hover:text-primary transition-all duration-200 cursor-pointer">
                             <span>{{.Version.Version}}</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </label>
-                        <ul tabindex="0" class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-lg border border-base-200 w-full mt-1">
+                        <ul tabindex="0"
+                            class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-lg border border-base-200 w-full mt-1">
                             {{if .ProjectVersions}}
                             {{range .ProjectVersions}}
                             {{if eq .Version $.Version.Version}}
-                            <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}} (当前)</a></li>
+                            <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}} (当前)</a>
+                            </li>
                             {{else}}
                             <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}}</a></li>
                             {{end}}
                             {{end}}
                             {{else}}
-                            <li><a href="/docs/{{.Project.Slug}}/{{.Version.Version}}" class="text-sm">{{.Version.Version}} (当前)</a></li>
+                            <li><a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
+                                   class="text-sm">{{.Version.Version}} (当前)</a></li>
                             {{end}}
                         </ul>
                     </div>
@@ -121,27 +144,37 @@
                 <!-- 快速导航 -->
                 <div class="mb-6">
                     <div class="flex items-center gap-2 mb-3">
-                        <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">🧭</div>
+                        <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
+                            🧭
+                        </div>
                         <h3 class="text-base font-semibold text-base-content">快速导航</h3>
                     </div>
                     <div class="space-y-2">
-                        <a href="/docs/{{.Project.Slug}}/{{.Version.Version}}" class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
+                        <a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
+                           class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M15 19l-7-7 7-7"></path>
                             </svg>
                             <span>返回版本目录</span>
                         </a>
-                        <a href="/docs/{{.Project.Slug}}" class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
+                        <a href="/docs/{{.Project.Slug}}"
+                           class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
                             </svg>
                             <span>返回项目</span>
                         </a>
-                        <a href="/docs" class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/60 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
+                        <a href="/docs"
+                           class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/60 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
                             </svg>
                             <span>文档中心</span>
                         </a>
@@ -150,8 +183,143 @@
             </div>
         </aside>
 
+        <!-- 移动端侧边栏遮罩层 -->
+        <div id="sidebar-backdrop"
+             class="fixed inset-0 z-40 bg-black/50 md:hidden opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
+
+        <!-- 移动端侧边栏 -->
+        <aside id="mobile-sidebar"
+               class="fixed top-0 left-0 z-50 w-80 max-w-[85vw] h-full bg-base-100 shadow-2xl md:hidden transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+            <div class="relative w-full h-full">
+                <div class="p-5">
+                    <!-- 项目信息 -->
+                    <div class="mb-6 p-4 bg-base-50 border border-base-200 rounded-xl">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
+                                📚
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h2 class="text-lg font-bold text-base-content mb-1 truncate">{{.Project.Name}}</h2>
+                                <p class="text-sm text-base-content/70 mb-2 line-clamp-2">{{.Project.Description}}</p>
+                                <div class="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full border border-primary/20 inline-block">{{.Version.Version}}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 目录导航 -->
+                    <div class="mb-6">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
+                                📋
+                            </div>
+                            <h3 class="text-base font-semibold text-base-content">目录</h3>
+                        </div>
+                        <nav class="space-y-1">
+                            {{range .Directory}}
+                            <div>
+                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
+                                   class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {{if eq .Slug $.CurrentSlug}}bg-primary/10 text-primary border-l-2 border-primary{{else}}text-base-content/70 hover:text-base-content hover:bg-base-100{{end}}">
+                                    <div class="w-1.5 h-1.5 rounded-full {{if eq .Slug $.CurrentSlug}}bg-primary{{else}}bg-base-content/30 group-hover:bg-base-content/50{{end}} transition-colors duration-200"></div>
+                                    <span class="truncate">{{.Title}}</span>
+                                </a>
+                                {{if .Children}}
+                                <div class="ml-6 mt-1 space-y-1">
+                                    {{range .Children}}
+                                    <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
+                                       class="group flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-all duration-200 {{if eq .Slug $.CurrentSlug}}bg-primary/5 text-primary{{else}}text-base-content/60 hover:text-base-content hover:bg-base-50{{end}}">
+                                        <div class="w-1 h-1 rounded-full {{if eq .Slug $.CurrentSlug}}bg-primary{{else}}bg-base-content/20 group-hover:bg-base-content/40{{end}} transition-colors duration-200"></div>
+                                        <span class="truncate">{{.Title}}</span>
+                                    </a>
+                                    {{end}}
+                                </div>
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </nav>
+                    </div>
+
+                    <!-- 版本选择 -->
+                    <div class="mb-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
+                                🏷️
+                            </div>
+                            <h3 class="text-base font-semibold text-base-content">版本</h3>
+                        </div>
+                        <div class="dropdown dropdown-top w-full">
+                            <label tabindex="0"
+                                   class="flex items-center justify-between w-full px-3 py-2 bg-base-100 border border-base-300 rounded-lg text-sm font-medium hover:border-primary hover:text-primary transition-all duration-200 cursor-pointer">
+                                <span>{{.Version.Version}}</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                          d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </label>
+                            <ul tabindex="0"
+                                class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-lg border border-base-200 w-full mt-1">
+                                {{if .ProjectVersions}}
+                                {{range .ProjectVersions}}
+                                {{if eq .Version $.Version.Version}}
+                                <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}}
+                                    (当前)</a></li>
+                                {{else}}
+                                <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}}</a>
+                                </li>
+                                {{end}}
+                                {{end}}
+                                {{else}}
+                                <li><a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
+                                       class="text-sm">{{.Version.Version}} (当前)</a></li>
+                                {{end}}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 快速导航 -->
+                    <div class="mb-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
+                                🧭
+                            </div>
+                            <h3 class="text-base font-semibold text-base-content">快速导航</h3>
+                        </div>
+                        <div class="space-y-2">
+                            <a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
+                               class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                          d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                                <span>返回版本目录</span>
+                            </a>
+                            <a href="/docs/{{.Project.Slug}}"
+                               class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                          d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
+                                </svg>
+                                <span>返回项目</span>
+                            </a>
+                            <a href="/docs"
+                               class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/60 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                          d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
+                                </svg>
+                                <span>文档中心</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
         <!-- 主内容区 -->
-        <div class="flex-1 lg:max-w-none lg:h-full lg:overflow-y-auto bg-base-100 relative">
+        <div class="flex-1 h-full overflow-y-auto bg-base-100 relative">
             <div class="px-6 lg:px-8 xl:px-12 py-6 lg:py-8">
                 <!-- 文档标题 -->
                 <header class="mb-8">
@@ -159,7 +327,8 @@
                     <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/60">
                         <div class="flex items-center gap-2 px-3 py-1.5 bg-base-100 border border-base-200 rounded-lg">
                             <svg class="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                             <span class="font-medium">创建时间</span>
                             <span>{{.Content.CreatedAt.Format "2006-01-02 15:04"}}</span>
@@ -167,7 +336,8 @@
                         {{if ne .Content.CreatedAt .Content.UpdatedAt}}
                         <div class="flex items-center gap-2 px-3 py-1.5 bg-base-100 border border-base-200 rounded-lg">
                             <svg class="w-4 h-4 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
                             <span class="font-medium">更新时间</span>
                             <span>{{.Content.UpdatedAt.Format "2006-01-02 15:04"}}</span>
@@ -201,31 +371,37 @@
                         </div>
                         <h3 class="text-lg font-bold text-base-content">文档反馈</h3>
                     </div>
-                    <p class="text-sm text-base-content/70 mb-6 leading-relaxed">如果您发现文档有任何问题或建议，请告诉我们，帮助我们改进文档质量。</p>
+                    <p class="text-sm text-base-content/70 mb-6 leading-relaxed">
+                        如果您发现文档有任何问题或建议，请告诉我们，帮助我们改进文档质量。</p>
                     <div class="flex flex-wrap gap-3">
                         <button class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-content font-medium rounded-lg hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V18m-7-8a2 2 0 01-2-2V6a2 2 0 012-2h2.343M11 7L9 5l2-2m0 4l2 2-2 2m0 0h7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V18m-7-8a2 2 0 01-2-2V6a2 2 0 012-2h2.343M11 7L9 5l2-2m0 4l2 2-2 2m0 0h7"></path>
                             </svg>
                             <span>有用</span>
                         </button>
                         <button class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/10 transition-all duration-200 shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                             <span>需要改进</span>
                         </button>
                         <button class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-error hover:text-error hover:bg-error/10 transition-all duration-200 shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                             </svg>
                             <span>报告问题</span>
                         </button>
-                        <a href="/post" class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/10 transition-all duration-200 shadow-sm">
+                        <a href="/post"
+                           class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/10 transition-all duration-200 shadow-sm">
                             <span>💬</span>
                             <span>发帖讨论</span>
                         </a>
-                        <a href="/about" class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/10 transition-all duration-200 shadow-sm">
+                        <a href="/about"
+                           class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/10 transition-all duration-200 shadow-sm">
                             <span>📧</span>
                             <span>联系我们</span>
                         </a>
@@ -236,91 +412,93 @@
     </main>
 </div>
 
-</div>
-
-<!-- 移动端侧边栏遮罩 -->
-<div id="sidebar-overlay" class="hidden lg:hidden fixed inset-0 bg-black/50 z-40" onclick="document.getElementById('mobile-menu-toggle').click()"></div>
 
 <script>
- // 移动端侧边栏切换和导航高亮
- document.addEventListener('DOMContentLoaded', function() {
-     // 移动端菜单切换
-     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-     const docsSidebar = document.getElementById('docs-sidebar');
-     const sidebarOverlay = document.getElementById('sidebar-overlay');
-     
-     function toggleSidebar() {
-         if (docsSidebar && sidebarOverlay) {
-             const isHidden = docsSidebar.classList.contains('hidden');
-             
-             if (isHidden) {
-                 // 显示侧边栏
-                 docsSidebar.classList.remove('hidden');
-                 docsSidebar.classList.add('block');
-                 sidebarOverlay.classList.remove('hidden');
-                 document.body.style.overflow = 'hidden'; // 防止背景滚动
-             } else {
-                 // 隐藏侧边栏
-                 docsSidebar.classList.add('hidden');
-                 docsSidebar.classList.remove('block');
-                 sidebarOverlay.classList.add('hidden');
-                 document.body.style.overflow = '';
-             }
-             
-             // 更新按钮图标
-             if (mobileMenuToggle) {
-                 const icon = mobileMenuToggle.querySelector('svg');
-                 if (isHidden) {
-                     icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path>';
-                 } else {
-                     icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path>';
-                 }
-             }
-         }
-     }
-     
-     if (mobileMenuToggle) {
-         mobileMenuToggle.addEventListener('click', toggleSidebar);
-     }
-     
-     // 点击遮罩层关闭侧边栏
-     if (sidebarOverlay) {
-         sidebarOverlay.addEventListener('click', toggleSidebar);
-     }
-     
-     // ESC键关闭侧边栏
-     document.addEventListener('keydown', function(e) {
-         if (e.key === 'Escape' && docsSidebar && !docsSidebar.classList.contains('hidden')) {
-             toggleSidebar();
-         }
-     });
-     
-     // 窗口大小改变时处理侧边栏状态
-     window.addEventListener('resize', function() {
-         if (window.innerWidth >= 1024) { // lg断点
-             if (docsSidebar && sidebarOverlay) {
-                 docsSidebar.classList.remove('hidden', 'block');
-                 sidebarOverlay.classList.add('hidden');
-                 document.body.style.overflow = '';
-                 
-                 // 重置按钮图标
-                 if (mobileMenuToggle) {
-                     const icon = mobileMenuToggle.querySelector('svg');
-                     icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"></path>';
-                 }
-             }
-         }
-     });
-     
-     // 平滑滚动到当前激活的导航项
-     const activeItem = document.querySelector('.docs-nav-item.active');
-     if (activeItem) {
-         setTimeout(() => {
-             activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-         }, 100);
-     }
- });
+    document.addEventListener('DOMContentLoaded', function () {
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+
+        let isSidebarOpen = false;
+
+        function toggleMobileSidebar() {
+            isSidebarOpen = !isSidebarOpen;
+
+            if (isSidebarOpen) {
+                // 显示移动端侧边栏
+                mobileSidebar.classList.remove('-translate-x-full');
+                mobileSidebar.classList.add('translate-x-0');
+
+                // 显示遮罩层
+                sidebarBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+                sidebarBackdrop.classList.add('opacity-100', 'pointer-events-auto');
+
+                document.body.style.overflow = 'hidden';
+
+                // 切换图标
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+            } else {
+                // 隐藏移动端侧边栏
+                mobileSidebar.classList.remove('translate-x-0');
+                mobileSidebar.classList.add('-translate-x-full');
+
+                // 隐藏遮罩层
+                sidebarBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
+                sidebarBackdrop.classList.add('opacity-0', 'pointer-events-none');
+
+                document.body.style.overflow = '';
+
+                // 切换图标
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            }
+        }
+
+        // 移动端菜单按钮点击事件
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', toggleMobileSidebar);
+        }
+
+        // 背景遮罩点击事件
+        if (sidebarBackdrop) {
+            sidebarBackdrop.addEventListener('click', function () {
+                if (isSidebarOpen) {
+                    toggleMobileSidebar();
+                }
+            });
+        }
+
+        // ESC键关闭侧边栏
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && isSidebarOpen) {
+                toggleMobileSidebar();
+            }
+        });
+
+        // 窗口大小改变时的处理
+        window.addEventListener('resize', function () {
+            if (window.innerWidth >= 768) { // md断点
+                if (isSidebarOpen) {
+                    toggleMobileSidebar();
+                }
+            }
+        });
+
+        // 移动端侧边栏内的链接点击后自动关闭侧边栏
+        const mobileSidebarLinks = mobileSidebar.querySelectorAll('a');
+        mobileSidebarLinks.forEach(link => {
+            link.addEventListener('click', function () {
+                if (isSidebarOpen) {
+                    setTimeout(() => {
+                        toggleMobileSidebar();
+                    }, 150); // 延迟关闭，让用户看到点击效果
+                }
+            });
+        });
+    });
 </script>
 </body>
 </html>
-{{end}}
