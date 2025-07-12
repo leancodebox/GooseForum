@@ -1,0 +1,194 @@
+{{define "docs-content.gohtml"}}
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{.Theme}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "commonhead.gohtml" .}}
+    {{GetImportInfoPath `src/docs.js`}}
+    <style>
+        .docs-sidebar {
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        .docs-content {
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        .docs-nav-item {
+            transition: all 0.2s ease;
+        }
+        .docs-nav-item:hover {
+            background-color: hsl(var(--b3));
+        }
+        .docs-nav-item.active {
+            background-color: hsl(var(--p) / 0.1);
+            border-left: 3px solid hsl(var(--p));
+        }
+        .markdown-content h1 {
+            @apply text-3xl font-bold mt-8 mb-4 text-base-content;
+        }
+        .markdown-content h2 {
+            @apply text-2xl font-semibold mt-6 mb-3 text-base-content;
+        }
+        .markdown-content h3 {
+            @apply text-xl font-medium mt-4 mb-2 text-base-content;
+        }
+        .markdown-content p {
+            @apply mb-4 text-base-content/80 leading-relaxed;
+        }
+        .markdown-content code {
+            @apply bg-base-300 px-2 py-1 rounded text-sm font-mono;
+        }
+        .markdown-content pre {
+            @apply bg-base-300 p-4 rounded-lg overflow-x-auto mb-4;
+        }
+        .markdown-content ul, .markdown-content ol {
+            @apply mb-4 pl-6;
+        }
+        .markdown-content li {
+            @apply mb-2 text-base-content/80;
+        }
+    </style>
+</head>
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    
+    <!-- 面包屑导航 -->
+    <div class="bg-base-100 border-b border-base-300">
+        <div class="container mx-auto px-4 py-3">
+            <div class="breadcrumbs text-sm">
+                <ul>
+                    {{range .Breadcrumbs}}
+                    <li>
+                        {{if .url}}
+                        <a href="{{.url}}" class="link link-hover">{{.title}}</a>
+                        {{else}}
+                        <span class="text-base-content/70">{{.title}}</span>
+                        {{end}}
+                    </li>
+                    {{end}}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-1 flex">
+        <!-- 侧边栏 -->
+        <aside class="w-80 bg-base-100 border-r border-base-300 docs-sidebar">
+            <div class="p-6">
+                <!-- 项目信息 -->
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-base-content mb-2">{{.Project.Name}}</h2>
+                    <p class="text-sm text-base-content/70 mb-3">{{.Project.Description}}</p>
+                    <div class="badge badge-primary badge-sm">{{.Version.Version}}</div>
+                </div>
+
+                <!-- 目录导航 -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-base-content mb-3">📋 目录</h3>
+                    <nav class="space-y-1">
+                        {{range .Directory}}
+                        <div>
+                            <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}" 
+                               class="docs-nav-item block px-3 py-2 rounded-md text-sm {{if eq .Slug $.CurrentSlug}}active{{end}}">
+                                {{.Title}}
+                            </a>
+                            {{if .Children}}
+                            <div class="ml-4 mt-1 space-y-1">
+                                {{range .Children}}
+                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}" 
+                                   class="docs-nav-item block px-3 py-2 rounded-md text-sm {{if eq .Slug $.CurrentSlug}}active{{end}}">
+                                    {{.Title}}
+                                </a>
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </div>
+                        {{end}}
+                    </nav>
+                </div>
+
+                <!-- 版本选择 -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-base-content mb-3">🏷️ 版本</h3>
+                    <div class="dropdown dropdown-top w-full">
+                        <label tabindex="0" class="btn btn-outline btn-sm w-full justify-between">
+                            {{.Version.Version}}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </label>
+                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full">
+                            <li><a href="/docs/{{.Project.Slug}}/{{.Version.Version}}">{{.Version.Version}} (当前)</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 docs-content">
+            <div class="max-w-4xl mx-auto p-8">
+                <!-- 文档标题 -->
+                <div class="mb-8">
+                    <h1 class="text-4xl font-bold text-base-content mb-4">{{.Content.Title}}</h1>
+                    <div class="flex items-center gap-4 text-sm text-base-content/50">
+                        <span>创建时间: {{.Content.CreatedAt.Format "2006-01-02 15:04"}}</span>
+                        <span>更新时间: {{.Content.UpdatedAt.Format "2006-01-02 15:04"}}</span>
+                    </div>
+                </div>
+
+                <!-- 文档内容 -->
+                <article class="markdown-content prose prose-lg max-w-none">
+                    {{.HTMLContent}}
+                </article>
+
+                <!-- 页面导航 -->
+                <div class="mt-12 pt-8 border-t border-base-300">
+                    <div class="flex justify-between items-center">
+                        <div class="flex-1">
+                            <!-- 这里可以添加上一页链接 -->
+                        </div>
+                        <div class="flex-1 text-right">
+                            <!-- 这里可以添加下一页链接 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 反馈区域 -->
+                <div class="mt-12 p-6 bg-base-100 rounded-lg border border-base-300">
+                    <h3 class="text-lg font-semibold text-base-content mb-3">📝 文档反馈</h3>
+                    <p class="text-base-content/70 mb-4">如果您发现文档有错误或需要改进的地方，欢迎反馈给我们。</p>
+                    <div class="flex gap-3">
+                        <a href="/post" class="btn btn-primary btn-sm">
+                            💬 发帖讨论
+                        </a>
+                        <a href="/about" class="btn btn-outline btn-sm">
+                            📧 联系我们
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    {{template "footer.gohtml" .}}
+</div>
+
+<script>
+// 侧边栏导航高亮
+document.addEventListener('DOMContentLoaded', function() {
+    // 平滑滚动到当前激活的导航项
+    const activeItem = document.querySelector('.docs-nav-item.active');
+    if (activeItem) {
+        activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+</script>
+</body>
+</html>
+{{end}}

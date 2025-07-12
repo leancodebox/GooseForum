@@ -1,0 +1,99 @@
+@import "tailwindcss" source(none);
+@source "../templates/docs";
+@source "../templates/layout";
+@plugin "@tailwindcss/typography"{
+
+}
+
+@plugin "daisyui" {
+    themes: light --default, dark --prefersdark, retro, cyberpunk, valentine, garden, forest, aqua, luxury, dracula;
+}
+
+@plugin "daisyui/theme" {
+    name: "light";
+    default: false;
+    prefersdark: false;
+    color-scheme: "light";
+    --color-base-100: oklch(100% 0 0);
+    --color-base-200: oklch(98% 0 0);
+    --color-base-300: oklch(95% 0 0);
+    --color-base-content: oklch(21% 0.006 285.885);
+    --color-primary: oklch(60% 0.18 277.023);
+    --color-primary-content: oklch(93% 0.034 272.788);
+    --color-secondary: oklch(70% 0.18 354.308);
+    --color-secondary-content: oklch(94% 0.028 342.258);
+    --color-accent: oklch(80% 0.12 181.912);
+    --color-accent-content: oklch(38% 0.063 188.416);
+    --color-neutral: oklch(14% 0.005 285.823);
+    --color-neutral-content: oklch(92% 0.004 286.32);
+    --color-info: oklch(78% 0.12 232.661);
+    --color-info-content: oklch(29% 0.066 243.157);
+    --color-success: oklch(75% 0.20 145); /* 调整：提高绿色色度+微调色调 */
+    --color-success-content: oklch(30% 0.09 145); /* 加深文本对比度 */
+    --color-warning: oklch(80% 0.22 75); /* 调整：增强黄色色度+微调色调 */
+    --color-warning-content: oklch(35% 0.15 75); /* 加深文本对比度 */
+    --color-error: oklch(75% 0.14 13.428);
+    --color-error-content: oklch(27% 0.105 12.094);
+    --radius-selector: 0.5rem;
+    --radius-field: 0.25rem;
+    --radius-box: 0.5rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 1;
+    --noise: 0;
+}
+@layer components {
+    /* 多彩支持者徽章样式 */
+    .badge-colorful {
+        @apply badge badge-lg p-3;
+        animation: colorful-badge 8s ease-in-out infinite;
+    }
+
+    @keyframes colorful-badge {
+        0% { background-color: #ef4444; color: white; }
+        14% { background-color: #f97316; color: white; }
+        28% { background-color: #eab308; color: black; }
+        42% { background-color: #22c55e; color: white; }
+        56% { background-color: #3b82f6; color: white; }
+        70% { background-color: #6366f1; color: white; }
+        84% { background-color: #a855f7; color: white; }
+        100% { background-color: #ef4444; color: white; }
+    }
+
+    /* 为了避免所有徽章同时变色，添加延迟变体 */
+    .badge-colorful:nth-child(2n) {
+        animation-delay: -1s;
+    }
+
+    .badge-colorful:nth-child(3n) {
+        animation-delay: -2s;
+    }
+
+    .badge-colorful:nth-child(4n) {
+        animation-delay: -3s;
+    }
+
+    .badge-colorful:nth-child(5n) {
+        animation-delay: -4s;
+    }
+    :target {
+        scroll-margin-top: 4rem;
+    }
+    /* Mermaid 图表居中样式 */
+    .mermaid {
+        text-align: center;
+        margin: 1.5rem auto;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    /* 确保 Mermaid SVG 也居中 */
+    .mermaid svg {
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+    }
+}
+

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @source not "admin";
+@source not "../templates/docs";
 @plugin "@tailwindcss/typography"{
 
 }

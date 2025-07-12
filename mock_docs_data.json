@@ -1,0 +1,119 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "name": "GooseForum 使用指南",
+      "slug": "gooseforum-guide",
+      "description": "完整的 GooseForum 论坛系统使用指南，包含安装、配置、使用等详细说明",
+      "status": 1,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-15T16:30:00Z"
+    },
+    {
+      "id": 2,
+      "name": "API 参考文档",
+      "slug": "api-reference",
+      "description": "GooseForum API 接口的详细参考文档，包含所有可用的 REST API 端点",
+      "status": 1,
+      "created_at": "2024-01-05T14:20:00Z",
+      "updated_at": "2024-01-20T09:15:00Z"
+    },
+    {
+      "id": 3,
+      "name": "开发者指南",
+      "slug": "developer-guide",
+      "description": "面向开发者的技术文档，包含架构设计、扩展开发、主题定制等内容",
+      "status": 1,
+      "created_at": "2024-01-10T11:45:00Z",
+      "updated_at": "2024-01-25T13:20:00Z"
+    }
+  ],
+  "versions": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "version": "v1.0",
+      "name": "稳定版本",
+      "description": "GooseForum 1.0 稳定版本的完整使用指南",
+      "directory": "[{\"slug\":\"getting-started\",\"title\":\"快速开始\",\"description\":\"快速安装和配置 GooseForum\",\"children\":[{\"slug\":\"installation\",\"title\":\"安装指南\"},{\"slug\":\"configuration\",\"title\":\"基础配置\"}]},{\"slug\":\"user-guide\",\"title\":\"用户指南\",\"description\":\"面向普通用户的使用说明\",\"children\":[{\"slug\":\"posting\",\"title\":\"发帖指南\"},{\"slug\":\"profile\",\"title\":\"个人资料\"}]},{\"slug\":\"admin-guide\",\"title\":\"管理员指南\",\"description\":\"论坛管理和维护指南\"}]",
+      "is_default": true,
+      "status": 1,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-15T16:30:00Z"
+    },
+    {
+      "id": 2,
+      "project_id": 2,
+      "version": "v1.0",
+      "name": "API v1.0",
+      "description": "第一版 API 接口文档",
+      "directory": "[{\"slug\":\"authentication\",\"title\":\"身份认证\",\"description\":\"API 认证方式说明\"},{\"slug\":\"posts-api\",\"title\":\"帖子 API\",\"description\":\"帖子相关的 API 接口\",\"children\":[{\"slug\":\"create-post\",\"title\":\"创建帖子\"},{\"slug\":\"get-posts\",\"title\":\"获取帖子列表\"}]},{\"slug\":\"users-api\",\"title\":\"用户 API\",\"description\":\"用户相关的 API 接口\"}]",
+      "is_default": true,
+      "status": 1,
+      "created_at": "2024-01-05T14:20:00Z",
+      "updated_at": "2024-01-20T09:15:00Z"
+    },
+    {
+      "id": 3,
+      "project_id": 3,
+      "version": "v1.0",
+      "name": "开发版本",
+      "description": "面向开发者的技术文档",
+      "directory": "[{\"slug\":\"architecture\",\"title\":\"系统架构\",\"description\":\"GooseForum 的整体架构设计\"},{\"slug\":\"database\",\"title\":\"数据库设计\",\"description\":\"数据库表结构和关系说明\"},{\"slug\":\"theming\",\"title\":\"主题开发\",\"description\":\"如何开发和定制主题\"}]",
+      "is_default": true,
+      "status": 1,
+      "created_at": "2024-01-10T11:45:00Z",
+      "updated_at": "2024-01-25T13:20:00Z"
+    }
+  ],
+  "contents": [
+    {
+      "id": 1,
+      "version_id": 1,
+      "slug": "getting-started",
+      "title": "快速开始",
+      "content": "# 快速开始\n\n欢迎使用 GooseForum！这是一个现代化的论坛系统，基于 Go 语言开发。\n\n## 系统要求\n\n- Go 1.19 或更高版本\n- SQLite 3.x 或 MySQL 5.7+\n- 现代浏览器支持\n\n## 快速安装\n\n1. 下载最新版本\n2. 解压到目标目录\n3. 运行初始化命令\n4. 启动服务\n\n```bash\n./GooseForum init:db\n./GooseForum serve\n```\n\n安装完成后，访问 http://localhost:8080 即可开始使用。",
+      "parent_id": 0,
+      "sort_order": 1,
+      "status": 1,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-15T16:30:00Z"
+    },
+    {
+      "id": 2,
+      "version_id": 1,
+      "slug": "installation",
+      "title": "安装指南",
+      "content": "# 安装指南\n\n本章节详细介绍如何安装 GooseForum。\n\n## 下载\n\n从 GitHub Releases 页面下载最新版本：\n\n- [下载地址](https://github.com/leancodebox/GooseForum/releases)\n\n## 系统要求\n\n### 硬件要求\n- CPU: 1 核心以上\n- 内存: 512MB 以上\n- 存储: 100MB 以上可用空间\n\n### 软件要求\n- 操作系统: Linux, macOS, Windows\n- 数据库: SQLite (默认) 或 MySQL\n\n## 安装步骤\n\n### 1. 解压文件\n\n```bash\ntar -xzf GooseForum-linux-amd64.tar.gz\ncd GooseForum\n```\n\n### 2. 初始化数据库\n\n```bash\n./GooseForum init:db\n```\n\n### 3. 启动服务\n\n```bash\n./GooseForum serve\n```\n\n安装完成！",
+      "parent_id": 1,
+      "sort_order": 1,
+      "status": 1,
+      "created_at": "2024-01-01T10:30:00Z",
+      "updated_at": "2024-01-15T16:30:00Z"
+    },
+    {
+      "id": 3,
+      "version_id": 1,
+      "slug": "configuration",
+      "title": "基础配置",
+      "content": "# 基础配置\n\n安装完成后，您需要进行一些基础配置。\n\n## 配置文件\n\nGooseForum 使用环境变量进行配置，主要配置项包括：\n\n### 数据库配置\n\n```bash\n# SQLite (默认)\nDB_TYPE=sqlite\nDB_PATH=./data/forum.db\n\n# MySQL\nDB_TYPE=mysql\nDB_HOST=localhost\nDB_PORT=3306\nDB_NAME=gooseforum\nDB_USER=root\nDB_PASSWORD=password\n```\n\n### 服务器配置\n\n```bash\n# 服务端口\nPORT=8080\n\n# 域名配置\nDOMAIN=localhost\n\n# 是否启用 HTTPS\nHTTPS=false\n```\n\n### 邮件配置\n\n```bash\n# SMTP 服务器\nSMTP_HOST=smtp.gmail.com\nSMTP_PORT=587\nSMTP_USER=your-email@gmail.com\nSMTP_PASSWORD=your-password\n```\n\n## 管理员账户\n\n首次启动后，使用以下命令创建管理员账户：\n\n```bash\n./GooseForum user:manage\n```\n\n按照提示输入用户名、邮箱和密码即可。",
+      "parent_id": 1,
+      "sort_order": 2,
+      "status": 1,
+      "created_at": "2024-01-01T11:00:00Z",
+      "updated_at": "2024-01-15T16:30:00Z"
+    },
+    {
+      "id": 4,
+      "version_id": 2,
+      "slug": "authentication",
+      "title": "身份认证",
+      "content": "# API 身份认证\n\nGooseForum API 使用 JWT (JSON Web Token) 进行身份认证。\n\n## 获取访问令牌\n\n### 登录接口\n\n```http\nPOST /api/auth/login\nContent-Type: application/json\n\n{\n  \"username\": \"your-username\",\n  \"password\": \"your-password\"\n}\n```\n\n### 响应示例\n\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"expires_in\": 3600,\n    \"user\": {\n      \"id\": 1,\n      \"username\": \"admin\",\n      \"email\": \"admin@example.com\"\n    }\n  }\n}\n```\n\n## 使用访问令牌\n\n在后续的 API 请求中，需要在请求头中包含访问令牌：\n\n```http\nAuthorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\n```\n\n## 令牌刷新\n\n当访问令牌即将过期时，可以使用刷新令牌获取新的访问令牌：\n\n```http\nPOST /api/auth/refresh\nContent-Type: application/json\n\n{\n  \"refresh_token\": \"your-refresh-token\"\n}\n```",
+      "parent_id": 0,
+      "sort_order": 1,
+      "status": 1,
+      "created_at": "2024-01-05T14:20:00Z",
+      "updated_at": "2024-01-20T09:15:00Z"
+    }
+  ]
+}

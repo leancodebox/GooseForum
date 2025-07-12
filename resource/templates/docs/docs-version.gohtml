@@ -1,0 +1,149 @@
+{{define "docs-version.gohtml"}}
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{.Theme}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "commonhead.gohtml" .}}
+    {{GetImportInfoPath `src/docs.js`}}
+</head>
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    
+    <!-- 面包屑导航 -->
+    <div class="bg-base-100 border-b border-base-300">
+        <div class="container mx-auto px-4 py-3">
+            <div class="breadcrumbs text-sm">
+                <ul>
+                    {{range .Breadcrumbs}}
+                    <li>
+                        {{if .url}}
+                        <a href="{{.url}}" class="link link-hover">{{.title}}</a>
+                        {{else}}
+                        <span class="text-base-content/70">{{.title}}</span>
+                        {{end}}
+                    </li>
+                    {{end}}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-1 container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- 版本信息 -->
+            <div class="bg-base-100 rounded-lg shadow-lg p-8 mb-8">
+                <div class="flex items-start gap-6">
+                    <div class="text-6xl">🏷️</div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-4">
+                            <h1 class="text-3xl font-bold text-base-content">{{.Project.Name}}</h1>
+                            <div class="badge badge-primary badge-lg">{{.Version.Version}}</div>
+                        </div>
+                        <h2 class="text-xl font-semibold text-base-content mb-3">{{.Version.Title}}</h2>
+                        <p class="text-lg text-base-content/70 mb-6">{{.Version.Description}}</p>
+                        <div class="flex items-center gap-4 text-sm text-base-content/50">
+                            <span>发布时间: {{.Version.CreatedAt.Format "2006-01-02 15:04"}}</span>
+                            <span>更新时间: {{.Version.UpdatedAt.Format "2006-01-02 15:04"}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文档目录 -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-base-content mb-6">📋 文档目录</h2>
+                <div class="bg-base-100 rounded-lg shadow-md">
+                    <div class="p-6">
+                        {{if .Directory}}
+                        <nav class="space-y-2">
+                            {{range .Directory}}
+                            <div class="border-l-2 border-base-300 pl-4">
+                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}" 
+                                   class="block p-4 rounded-lg hover:bg-base-200 transition-colors duration-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-2xl">📄</span>
+                                            <div>
+                                                <h3 class="font-semibold text-base-content">{{.Title}}</h3>
+                                                {{if .Description}}
+                                                <p class="text-sm text-base-content/60 mt-1">{{.Description}}</p>
+                                                {{end}}
+                                            </div>
+                                        </div>
+                                        <svg class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </div>
+                                </a>
+                                
+                                {{if .Children}}
+                                <div class="ml-8 mt-2 space-y-1">
+                                    {{range .Children}}
+                                    <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}" 
+                                       class="block p-3 rounded-md hover:bg-base-200 transition-colors duration-200">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-lg">📃</span>
+                                                <span class="font-medium text-base-content">{{.Title}}</span>
+                                            </div>
+                                            <svg class="w-4 h-4 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </div>
+                                    </a>
+                                    {{end}}
+                                </div>
+                                {{end}}
+                            </div>
+                            {{end}}
+                        </nav>
+                        {{else}}
+                        <!-- 空状态 -->
+                        <div class="text-center py-12">
+                            <div class="text-4xl mb-4">📝</div>
+                            <h3 class="text-xl font-semibold text-base-content mb-2">暂无文档</h3>
+                            <p class="text-base-content/70">该版本暂无可用文档，敬请期待...</p>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 版本切换 -->
+            <div class="bg-base-100 rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-lg font-semibold text-base-content mb-4">🔄 切换版本</h3>
+                <div class="flex flex-wrap gap-2">
+                    <div class="badge badge-primary badge-lg">{{.Version.Version}} (当前)</div>
+                    <!-- 这里可以添加其他版本的链接 -->
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex justify-between items-center">
+                <a href="/docs/{{.Project.Slug}}" class="btn btn-outline">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    返回项目
+                </a>
+                
+                <a href="/docs" class="btn btn-ghost">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
+                    </svg>
+                    文档中心
+                </a>
+            </div>
+        </div>
+    </main>
+    
+    {{template "footer.gohtml" .}}
+</div>
+</body>
+</html>
+{{end}}

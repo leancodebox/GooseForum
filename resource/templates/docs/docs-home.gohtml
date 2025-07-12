@@ -1,0 +1,75 @@
+{{define "docs-home.gohtml"}}
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{.Theme}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "commonhead.gohtml" .}}
+    {{GetImportInfoPath `src/docs.js`}}
+</head>
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- 页面标题 -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-normal text-base-content mb-4">📚 文档中心</h1>
+                <p class="text-lg text-base-content/70">完整的使用指南和API参考文档</p>
+            </div>
+
+            <!-- 项目列表 -->
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {{range .Projects}}
+                <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="card-body">
+                        <h2 class="card-title text-xl mb-3 font-normal">
+                            <span class="text-2xl mr-2">📖</span>
+                            {{.Name}}
+                        </h2>
+                        <p class="text-base-content/70 mb-4">{{.Description}}</p>
+                        <div class="flex justify-between items-center text-sm text-base-content/50 mb-4">
+                            <span>创建时间: {{.CreatedAt.Format "2006-01-02"}}</span>
+                            <span>更新时间: {{.UpdatedAt.Format "2006-01-02"}}</span>
+                        </div>
+                        <div class="card-actions justify-end">
+                            <a href="/docs/{{.Slug}}" class="btn btn-primary btn-sm">
+                                开始阅读
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+
+            {{if not .Projects}}
+            <!-- 空状态 -->
+            <div class="text-center py-16">
+                <div class="text-6xl mb-4">📝</div>
+                <h3 class="text-2xl font-semibold text-base-content mb-2">暂无文档</h3>
+                <p class="text-base-content/70">文档正在准备中，敬请期待...</p>
+            </div>
+            {{end}}
+
+            <!-- 底部说明 -->
+            <div class="mt-16 text-center">
+                <div class="divider"></div>
+                <p class="text-base-content/50 text-sm">
+                    如果您在使用过程中遇到问题，欢迎
+                    <a href="/post" class="link link-primary">发帖讨论</a>
+                    或
+                    <a href="/about" class="link link-primary">联系我们</a>
+                </p>
+            </div>
+        </div>
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
+</body>
+</html>
+{{end}}
