@@ -14,68 +14,128 @@
     </header>
     
     <!-- 面包屑导航 -->
-    <div class="bg-base-100 border-b border-base-300">
+    <div class="bg-base-100 border-b border-base-300/60">
         <div class="container mx-auto px-4 py-3">
-            <div class="breadcrumbs text-sm">
-                <ul>
-                    {{range .Breadcrumbs}}
-                    <li>
-                        {{if .url}}
-                        <a href="{{.url}}" class="link link-hover">{{.title}}</a>
-                        {{else}}
-                        <span class="text-base-content/70">{{.title}}</span>
-                        {{end}}
-                    </li>
+            <div class="flex items-center gap-2 text-sm">
+                {{range $index, $breadcrumb := .Breadcrumbs}}
+                {{if $index}}
+                <svg class="w-4 h-4 text-base-content/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path>
+                </svg>
+                {{end}}
+                
+                {{if .url}}
+                <a href="{{.url}}" class="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-base-200 hover:text-primary transition-colors duration-200">
+                    {{if eq $index 0}}
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 21l4-4 4 4"></path>
+                    </svg>
                     {{end}}
-                </ul>
+                    <span class="font-medium text-base-content/80">{{.title}}</span>
+                </a>
+                {{else}}
+                <div class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-base-200">
+                    <svg class="w-4 h-4 text-base-content/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="font-medium text-base-content">{{.title}}</span>
+                </div>
+                {{end}}
+                {{end}}
             </div>
         </div>
     </div>
 
-    <main class="flex-1 container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
+    <main class="flex-1 container mx-auto px-4 py-6">
+        <div class="max-w-5xl mx-auto">
             <!-- 项目信息 -->
-            <div class="bg-base-100 rounded-lg shadow-lg p-8 mb-8">
+            <div class="bg-base-100 rounded-xl border border-base-300/60 p-6 mb-6 shadow-sm">
                 <div class="flex items-start gap-6">
-                    <div class="text-6xl">📖</div>
-                    <div class="flex-1">
-                        <h1 class="text-4xl font-bold text-base-content mb-4">{{.Project.Name}}</h1>
-                        <p class="text-lg text-base-content/70 mb-6">{{.Project.Description}}</p>
-                        <div class="flex items-center gap-4 text-sm text-base-content/50">
-                            <span>创建时间: {{.Project.CreatedAt.Format "2006-01-02 15:04"}}</span>
-                            <span>更新时间: {{.Project.UpdatedAt.Format "2006-01-02 15:04"}}</span>
+                    <!-- 项目图标 -->
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-base-200 rounded-xl flex items-center justify-center text-2xl border border-base-300/40">
+                            📖
+                        </div>
+                    </div>
+                    
+                    <!-- 项目信息 -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3 mb-3">
+                            <h1 class="text-2xl lg:text-3xl font-semibold text-base-content">{{.Project.Name}}</h1>
+                            <div class="badge badge-neutral badge-sm font-medium">项目</div>
+                        </div>
+                        
+                        <p class="text-base text-base-content/75 mb-4 leading-relaxed">{{.Project.Description}}</p>
+                        
+                        <!-- 元数据 -->
+                        <div class="flex flex-wrap items-center gap-5 text-sm text-base-content/65">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>创建于 {{.Project.CreatedAt.Format "2006-01-02"}}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                <span>更新于 {{.Project.UpdatedAt.Format "2006-01-02"}}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- 版本列表 -->
-            <div class="mb-8">
-                <h2 class="text-2xl font-bold text-base-content mb-6">📋 版本列表</h2>
+            <div class="mb-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-7 h-7 bg-base-200 rounded-lg flex items-center justify-center text-sm border border-base-300/40">
+                        📋
+                    </div>
+                    <h2 class="text-xl font-semibold text-base-content">版本列表</h2>
+                    <div class="badge badge-neutral badge-sm font-medium">{{len .Versions}} 个版本</div>
+                </div>
+                
                 <div class="grid gap-4">
                     {{range .Versions}}
-                    <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow duration-300">
-                        <div class="card-body">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <h3 class="card-title text-xl mb-2">
-                                        <span class="badge badge-primary badge-lg mr-3">{{.Version}}</span>
-                                        {{.Name}}
-                                    </h3>
-                                    <p class="text-base-content/70 mb-4">{{.Description}}</p>
-                                    <div class="flex items-center gap-4 text-sm text-base-content/50">
-                                        <span>发布时间: {{.CreatedAt.Format "2006-01-02 15:04"}}</span>
-                                        <span>更新时间: {{.UpdatedAt.Format "2006-01-02 15:04"}}</span>
+                    <div class="bg-base-100 rounded-xl border border-base-300/60 p-5 hover:border-base-300 hover:shadow-md transition-all duration-200">
+                        <div class="flex items-start justify-between gap-5">
+                            <div class="flex-1 min-w-0">
+                                <!-- 版本标题 -->
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="badge badge-neutral badge-md font-mono font-medium">v{{.Version}}</div>
+                                    <h3 class="text-lg font-medium text-base-content">{{.Name}}</h3>
+                                </div>
+                                
+                                <!-- 描述 -->
+                                <p class="text-base-content/75 mb-3 leading-relaxed">{{.Description}}</p>
+                                
+                                <!-- 元数据 -->
+                                <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/65">
+                                    <div class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span>发布于 {{.CreatedAt.Format "2006-01-02"}}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                        <span>更新于 {{.UpdatedAt.Format "2006-01-02"}}</span>
                                     </div>
                                 </div>
-                                <div class="card-actions">
-                                    <a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="btn btn-primary">
-                                        查看文档
-                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    </a>
-                                </div>
+                            </div>
+                            
+                            <!-- 操作按钮 -->
+                            <div class="flex-shrink-0">
+                                <a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="btn btn-primary btn-sm hover:btn-primary transition-colors duration-200">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
+                                    查看文档
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -85,18 +145,26 @@
 
             {{if not .Versions}}
             <!-- 空状态 -->
-            <div class="text-center py-16">
-                <div class="text-6xl mb-4">📝</div>
-                <h3 class="text-2xl font-semibold text-base-content mb-2">暂无版本</h3>
-                <p class="text-base-content/70">该项目暂无可用版本，敬请期待...</p>
+            <div class="bg-base-100 rounded-xl border border-base-300/60 p-10 text-center">
+                <!-- 图标 -->
+                <div class="w-14 h-14 bg-base-200 rounded-xl flex items-center justify-center text-xl mx-auto mb-5 border border-base-300/40">
+                    📝
+                </div>
+                
+                <!-- 标题和描述 -->
+                <h3 class="text-xl font-semibold text-base-content mb-3">暂无版本</h3>
+                <p class="text-base-content/75 mb-5 max-w-sm mx-auto leading-relaxed">该项目暂无可用版本，请稍后再来查看或联系管理员了解更多信息。</p>
+                
+                <!-- 状态徽章 -->
+                <div class="badge badge-neutral badge-md font-medium">开发中</div>
             </div>
             {{end}}
 
             <!-- 返回按钮 -->
-            <div class="mt-12 text-center">
-                <a href="/docs" class="btn btn-outline">
+            <div class="mt-10 flex justify-center">
+                <a href="/docs" class="btn btn-outline hover:btn-primary transition-colors duration-200">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path>
                     </svg>
                     返回文档中心
                 </a>
