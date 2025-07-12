@@ -4,10 +4,11 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"strings"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 )
@@ -71,7 +72,7 @@ func (itself *ExternalInformation) Value() (driver.Value, error) {
 }
 
 func (itself *ExternalInformation) Scan(value any) error {
-	bytes, ok := value.([]byte)
+	bytes, ok := value.(string)
 	if !ok {
 		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
 	}
@@ -91,15 +92,15 @@ type EntityComplete struct {
 	ActivatedAt *time.Time `gorm:"column:activated_at;type:datetime;" json:"activatedAt"`                       // 激活时间
 
 	// info
-	Nickname            string `gorm:"column:nickname;type:varchar(64);not null;default:'';" json:"nickname"`        //
-	RoleId              uint64 `gorm:"column:role_id;type:bigint unsigned;not null;default:0;" json:"roleId"`        //
-	Prestige            int64  `gorm:"column:prestige;type:bigint;not null;default:0;" json:"prestige"`              // 声望
-	AvatarUrl           string `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"`                        // 头像URL
-	Bio                 string `gorm:"column:bio;type:varchar(500);not null;default:'';" json:"bio"`                 // 个人简介
-	Signature           string `gorm:"column:signature;type:varchar(255);not null;default:'';" json:"signature"`     // 署名
-	WebsiteName         string `gorm:"column:website_name;type:varchar(64);not null;default:'';" json:"websiteName"` // 个人网站名
-	Website             string `gorm:"column:website;type:varchar(255);not null;default:'';" json:"website"`         // 个人网站
-	ExternalInformation string `gorm:"column:external_information;type:varchar(2048);" json:"externalInformation"`   // 外部信息
+	Nickname            string              `gorm:"column:nickname;type:varchar(64);not null;default:'';" json:"nickname"`                  //
+	RoleId              uint64              `gorm:"column:role_id;type:bigint unsigned;not null;default:0;" json:"roleId"`                  //
+	Prestige            int64               `gorm:"column:prestige;type:bigint;not null;default:0;" json:"prestige"`                        // 声望
+	AvatarUrl           string              `gorm:"column:avatar_url;type:varchar(255);" json:"avatarUrl"`                                  // 头像URL
+	Bio                 string              `gorm:"column:bio;type:varchar(500);not null;default:'';" json:"bio"`                           // 个人简介
+	Signature           string              `gorm:"column:signature;type:varchar(255);not null;default:'';" json:"signature"`               // 署名
+	WebsiteName         string              `gorm:"column:website_name;type:varchar(64);not null;default:'';" json:"websiteName"`           // 个人网站名
+	Website             string              `gorm:"column:website;type:varchar(255);not null;default:'';" json:"website"`                   // 个人网站
+	ExternalInformation ExternalInformation `gorm:"column:external_information;type:varchar(2048);default:'{}'" json:"externalInformation"` // 外部信息
 
 	// status
 	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
@@ -115,13 +116,6 @@ func (itself *EntityComplete) GetWebAvatarUrl() string {
 		return itself.AvatarUrl
 	}
 	return strings.ReplaceAll(urlconfig.FilePath(itself.AvatarUrl), "\\", "/")
-}
-
-func (itself *EntityComplete) GetExternalInformation() ExternalInformation {
-	return jsonopt.Decode[ExternalInformation](itself.ExternalInformation)
-}
-func (itself *EntityComplete) SetExternalInformation(info ExternalInformation) {
-	itself.ExternalInformation = jsonopt.Encode(info)
 }
 
 func (itself *EntityComplete) TableName() string {

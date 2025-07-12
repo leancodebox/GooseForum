@@ -88,6 +88,7 @@ func repairArticleDescriptions() {
 			if articleStartId < article.Id {
 				articleStartId = article.Id
 			}
+			article.LikeCount = cast.ToUint64(articleLike.GetArticleLikeByArticleId(article.Id))
 
 			// 如果描述为空或者很短，重新生成
 			if article.Description == "" || len(strings.TrimSpace(article.Description)) < 10 {

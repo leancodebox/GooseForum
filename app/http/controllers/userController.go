@@ -81,7 +81,7 @@ func UserInfo(req component.BetterRequest[null]) component.Response {
 		"signature":            userEntity.Signature,
 		"website":              userEntity.Website,
 		"websiteName":          userEntity.WebsiteName,
-		"externalInformation":  userEntity.GetExternalInformation(),
+		"externalInformation":  userEntity.ExternalInformation,
 		"authorInfoStatistics": authorInfoStatistics,
 	})
 }
@@ -169,7 +169,7 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 	}
 	userEntity.Website = req.Params.Website
 	userEntity.WebsiteName = req.Params.WebsiteName
-	userEntity.SetExternalInformation(req.Params.ExternalInformation)
+	userEntity.ExternalInformation = req.Params.ExternalInformation
 
 	err = users.Save(&userEntity)
 	if err != nil {

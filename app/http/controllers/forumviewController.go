@@ -159,7 +159,7 @@ func PostDetail(c *gin.Context) {
 		"Keywords":             strings.Join(acMap[id], ","),
 		"Website":              authorUserInfo.Website,
 		"WebsiteName":          authorUserInfo.WebsiteName,
-		"ExternalInformation":  authorUserInfo.GetExternalInformation(),
+		"ExternalInformation":  authorUserInfo.ExternalInformation,
 		"Bio":                  authorUserInfo.Bio,
 		"Signature":            authorUserInfo.Signature,
 		"AuthorInfoStatistics": authorInfoStatistics,

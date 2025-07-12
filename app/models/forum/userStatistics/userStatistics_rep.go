@@ -57,7 +57,7 @@ func CancelGivenLike(userId uint64) int64 {
 
 // 增加关注
 func Following(userId uint64) int64 {
-	result := builder().Exec("UPDATE user_statistics SET follower_count = follower_count+1 where user_id = ?", userId)
+	result := builder().Exec("UPDATE user_statistics SET following_count = following_count+1 where user_id = ?", userId)
 	return result.RowsAffected
 }
 
