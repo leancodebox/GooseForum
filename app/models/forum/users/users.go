@@ -105,17 +105,6 @@ type EntityComplete struct {
 	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
 	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;index;" json:"deletedAt"` //
-
-	// 用户统计信息
-
-	ArticleCount      uint       `gorm:"column:article_count;type:int unsigned;not null;default:0;" json:"articleCount"`            // 发表文章数
-	ReplyCount        uint       `gorm:"column:reply_count;type:int unsigned;not null;default:0;" json:"replyCount"`                // 评论数
-	FollowerCount     uint       `gorm:"column:follower_count;type:int unsigned;not null;default:0;" json:"followerCount"`          // 粉丝数
-	FollowingCount    uint       `gorm:"column:following_count;type:int unsigned;not null;default:0;" json:"followingCount"`        // 关注数
-	LikeReceivedCount uint       `gorm:"column:like_received_count;type:int unsigned;not null;default:0;" json:"likeReceivedCount"` // 收到的点赞数
-	LikeGivenCount    uint       `gorm:"column:like_given_count;type:int unsigned;not null;default:0;" json:"likeGivenCount"`       // 给出的点赞数
-	CollectionCount   uint       `gorm:"column:collection_count;type:int unsigned;not null;default:0;" json:"collectionCount"`      // 收藏数
-	LastActiveTime    *time.Time `gorm:"column:last_active_time;type:datetime;" json:"lastActiveTime"`                              // 最后活跃时间
 }
 
 func (itself *EntityComplete) GetWebAvatarUrl() string {
@@ -126,13 +115,6 @@ func (itself *EntityComplete) GetWebAvatarUrl() string {
 		return itself.AvatarUrl
 	}
 	return strings.ReplaceAll(urlconfig.FilePath(itself.AvatarUrl), "\\", "/")
-}
-
-func (itself *EntityComplete) GetShowName() string {
-	if itself.Nickname != "" {
-		return itself.Nickname
-	}
-	return itself.Username
 }
 
 func (itself *EntityComplete) GetExternalInformation() ExternalInformation {
