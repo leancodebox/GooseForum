@@ -14,40 +14,51 @@
     </header>
     
     <!-- 面包屑导航 -->
-    <div class="bg-base-100 border-b border-base-300">
-        <div class="container mx-auto px-4 py-3">
-            <div class="breadcrumbs text-sm">
-                <ul>
-                    {{range .Breadcrumbs}}
-                    <li>
-                        {{if .url}}
-                        <a href="{{.url}}" class="link link-hover">{{.title}}</a>
-                        {{else}}
-                        <span class="text-base-content/70">{{.title}}</span>
-                        {{end}}
-                    </li>
-                    {{end}}
-                </ul>
-            </div>
+    <div class="bg-base-100 border-b border-base-200">
+        <div class="container mx-auto px-6 py-4">
+            <nav class="flex items-center space-x-2 text-sm font-medium">
+                {{range $index, $breadcrumb := .Breadcrumbs}}
+                {{if ne $index 0}}
+                <svg class="w-4 h-4 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path>
+                </svg>
+                {{end}}
+                {{if .url}}
+                <a href="{{.url}}" class="text-base-content/60 hover:text-primary transition-colors duration-200">{{.title}}</a>
+                {{else}}
+                <span class="text-base-content font-semibold">{{.title}}</span>
+                {{end}}
+                {{end}}
+            </nav>
         </div>
     </div>
 
     <main class="flex-1 container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto">
             <!-- 版本信息 -->
-            <div class="bg-base-100 rounded-lg shadow-lg p-8 mb-8">
+            <div class="bg-base-100 border border-base-200 rounded-xl p-8 mb-8">
                 <div class="flex items-start gap-6">
-                    <div class="text-6xl">🏷️</div>
+                    <div class="w-16 h-16 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center text-2xl">🏷️</div>
                     <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-4">
-                            <h1 class="text-3xl font-bold text-base-content">{{.Project.Name}}</h1>
-                            <div class="badge badge-primary badge-lg">{{.Version.Version}}</div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <h1 class="text-2xl font-bold text-base-content">{{.Project.Name}}</h1>
+                            <div class="px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full border border-primary/20">{{.Version.Version}}</div>
                         </div>
-                        <h2 class="text-xl font-semibold text-base-content mb-3">{{.Version.Name}}</h2>
-                        <p class="text-lg text-base-content/70 mb-6">{{.Version.Description}}</p>
-                        <div class="flex items-center gap-4 text-sm text-base-content/50">
-                            <span>发布时间: {{.Version.CreatedAt.Format "2006-01-02 15:04"}}</span>
-                            <span>更新时间: {{.Version.UpdatedAt.Format "2006-01-02 15:04"}}</span>
+                        <h2 class="text-lg font-semibold text-base-content mb-2">{{.Version.Name}}</h2>
+                        <p class="text-base text-base-content/70 mb-4 leading-relaxed">{{.Version.Description}}</p>
+                        <div class="flex items-center gap-6 text-sm text-base-content/50">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V6a2 2 0 012-2h4a2 2 0 012 2v1m-6 0h8m-8 0v13a2 2 0 002 2h4a2 2 0 002-2V7"></path>
+                                </svg>
+                                <span>发布: {{.Version.CreatedAt.Format "2006-01-02"}}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                <span>更新: {{.Version.UpdatedAt.Format "2006-01-02"}}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -55,47 +66,50 @@
 
             <!-- 文档目录 -->
             <div class="mb-8">
-                <h2 class="text-2xl font-bold text-base-content mb-6">📋 文档目录</h2>
-                <div class="bg-base-100 rounded-lg shadow-md">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center text-lg">📋</div>
+                    <h2 class="text-xl font-bold text-base-content">文档目录</h2>
+                </div>
+                <div class="bg-base-100 border border-base-200 rounded-xl">
                     <div class="p-6">
                         {{if .Directory}}
-                        <nav class="space-y-2">
+                        <nav class="space-y-3">
                             {{range .Directory}}
-                            <div class="border-l-2 border-base-300 pl-4">
+                            <div class="group border border-base-200 rounded-lg hover:border-primary/30 hover:shadow-sm transition-all duration-200">
                                 <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}" 
-                                   class="block p-4 rounded-lg hover:bg-base-200 transition-colors duration-200">
+                                   class="block p-4">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-2xl">📄</span>
+                                            <div class="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center text-lg">📄</div>
                                             <div>
-                                                <h3 class="font-semibold text-base-content">{{.Title}}</h3>
+                                                <h3 class="font-semibold text-base-content group-hover:text-primary transition-colors duration-200">{{.Title}}</h3>
                                                 {{if .Description}}
                                                 <p class="text-sm text-base-content/60 mt-1">{{.Description}}</p>
                                                 {{end}}
                                             </div>
                                         </div>
-                                        <svg class="w-5 h-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        <svg class="w-5 h-5 text-base-content/40 group-hover:text-primary transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path>
                                         </svg>
                                     </div>
                                 </a>
                                 
                                 {{if .Children}}
-                                <div class="ml-8 mt-2 space-y-1">
-                                    {{range .Children}}
-                                    <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}" 
-                                       class="block p-3 rounded-md hover:bg-base-200 transition-colors duration-200">
-                                        <div class="flex items-center justify-between">
+                                <div class="border-t border-base-200 bg-base-50 px-4 py-3">
+                                    <div class="space-y-2">
+                                        {{range .Children}}
+                                        <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}" 
+                                           class="flex items-center justify-between p-2 rounded-md hover:bg-base-100 transition-colors duration-200 group/child">
                                             <div class="flex items-center gap-2">
-                                                <span class="text-lg">📃</span>
-                                                <span class="font-medium text-base-content">{{.Title}}</span>
+                                                <div class="w-6 h-6 bg-primary/5 border border-primary/10 rounded flex items-center justify-center text-xs">📃</div>
+                                                <span class="font-medium text-base-content text-sm group-hover/child:text-primary transition-colors duration-200">{{.Title}}</span>
                                             </div>
-                                            <svg class="w-4 h-4 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            <svg class="w-4 h-4 text-base-content/30 group-hover/child:text-primary transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path>
                                             </svg>
-                                        </div>
-                                    </a>
-                                    {{end}}
+                                        </a>
+                                        {{end}}
+                                    </div>
                                 </div>
                                 {{end}}
                             </div>
@@ -103,10 +117,10 @@
                         </nav>
                         {{else}}
                         <!-- 空状态 -->
-                        <div class="text-center py-12">
-                            <div class="text-4xl mb-4">📝</div>
-                            <h3 class="text-xl font-semibold text-base-content mb-2">暂无文档</h3>
-                            <p class="text-base-content/70">该版本暂无可用文档，敬请期待...</p>
+                        <div class="text-center py-16">
+                            <div class="w-16 h-16 bg-base-200 border border-base-300 rounded-xl flex items-center justify-center text-2xl mx-auto mb-4">📝</div>
+                            <h3 class="text-lg font-semibold text-base-content mb-2">暂无文档</h3>
+                            <p class="text-base-content/60 text-sm">该版本暂无可用文档，敬请期待...</p>
                         </div>
                         {{end}}
                     </div>
@@ -114,14 +128,17 @@
             </div>
 
             <!-- 版本切换 -->
-            <div class="bg-base-100 rounded-lg shadow-md p-6 mb-8">
-                <h3 class="text-lg font-semibold text-base-content mb-4">🔄 切换版本</h3>
-                <div class="flex flex-wrap gap-2">
+            <div class="bg-base-100 border border-base-200 rounded-xl p-6 mb-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center text-lg">🔄</div>
+                    <h3 class="text-lg font-semibold text-base-content">切换版本</h3>
+                </div>
+                <div class="flex flex-wrap gap-3">
                     {{range .ProjectVersions}}
                     {{if eq .Version $.Version.Version}}
-                    <div class="badge badge-primary badge-lg">{{.Version}} (当前)</div>
+                    <div class="px-4 py-2 bg-primary text-primary-content text-sm font-medium rounded-lg border border-primary">{{.Version}} (当前)</div>
                     {{else}}
-                    <a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="badge badge-outline badge-lg hover:badge-primary transition-colors duration-200">{{.Version}}</a>
+                    <a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="px-4 py-2 bg-base-100 border border-base-300 text-base-content text-sm font-medium rounded-lg hover:border-primary hover:text-primary transition-all duration-200">{{.Version}}</a>
                     {{end}}
                     {{end}}
                 </div>
@@ -129,17 +146,17 @@
 
             <!-- 操作按钮 -->
             <div class="flex justify-between items-center">
-                <a href="/docs/{{.Project.Slug}}" class="btn btn-outline">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                <a href="/docs/{{.Project.Slug}}" class="inline-flex items-center gap-2 px-4 py-2 border border-base-300 text-base-content text-sm font-medium rounded-lg hover:border-primary hover:text-primary transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path>
                     </svg>
                     返回项目
                 </a>
                 
-                <a href="/docs" class="btn btn-ghost">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
+                <a href="/docs" class="inline-flex items-center gap-2 px-4 py-2 text-base-content/60 text-sm font-medium rounded-lg hover:text-primary hover:bg-base-100 transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
                     </svg>
                     文档中心
                 </a>
