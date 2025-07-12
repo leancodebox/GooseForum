@@ -8,13 +8,13 @@
     {{GetImportInfoPath `src/docs.js`}}
 </head>
 <body>
-<div class="h-screen bg-base-50 flex flex-col">
+<div class="h-screen bg-base-200 flex flex-col">
     <header class="flex-shrink-0">
         {{template "nav.gohtml" .}}
     </header>
     
     <!-- 面包屑导航 -->
-    <div class="bg-base-100 border-b border-base-200 flex-shrink-0">
+    <div class="bg-base-100 border-b border-base-300 shadow-sm flex-shrink-0">
         <div class="container mx-auto px-6 py-4">
             <nav class="flex items-center space-x-2 text-sm font-medium">
                 {{range $index, $breadcrumb := .Breadcrumbs}}
@@ -45,7 +45,7 @@
         </div>
 
         <!-- 侧边栏 -->
-        <aside id="docs-sidebar" class="hidden lg:block lg:w-72 xl:w-80 bg-base-100 border-r border-base-200 lg:h-full lg:overflow-y-auto lg:relative absolute top-0 left-0 right-0 z-50 lg:z-auto shadow-xl lg:shadow-none max-h-full overflow-y-auto flex-shrink-0">
+        <aside id="docs-sidebar" class="hidden lg:block lg:w-72 xl:w-80 bg-base-100 border-r border-base-300 shadow-sm lg:h-full lg:overflow-y-auto lg:relative absolute top-0 left-0 right-0 z-50 lg:z-auto shadow-xl lg:shadow-none max-h-full overflow-y-auto flex-shrink-0">
             <div class="p-5">
                 <!-- 项目信息 -->
                 <div class="mb-6 p-4 bg-base-50 border border-base-200 rounded-xl">
@@ -151,14 +151,14 @@
         </aside>
 
         <!-- 主内容区 -->
-        <div class="flex-1 lg:max-w-none lg:h-full lg:overflow-y-auto">
+        <div class="flex-1 lg:max-w-none lg:h-full lg:overflow-y-auto bg-base-100 relative">
             <div class="px-6 lg:px-8 xl:px-12 py-6 lg:py-8">
                 <!-- 文档标题 -->
                 <header class="mb-8">
                     <h1 class="text-2xl lg:text-3xl xl:text-4xl font-bold text-base-content mb-4 leading-tight">{{.Content.Title}}</h1>
                     <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/60">
                         <div class="flex items-center gap-2 px-3 py-1.5 bg-base-100 border border-base-200 rounded-lg">
-                            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                             <span class="font-medium">创建时间</span>
@@ -166,7 +166,7 @@
                         </div>
                         {{if ne .Content.CreatedAt .Content.UpdatedAt}}
                         <div class="flex items-center gap-2 px-3 py-1.5 bg-base-100 border border-base-200 rounded-lg">
-                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
                             <span class="font-medium">更新时间</span>
@@ -194,7 +194,7 @@
                 </nav>
 
                 <!-- 反馈区域 -->
-                <div class="mt-12 p-6 bg-gradient-to-br from-base-100 to-base-50 border border-base-200 rounded-2xl">
+                <div class="mt-12 p-6 bg-gradient-to-r from-base-200 to-primary/10 border border-base-300 rounded-xl shadow-sm">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-8 h-8 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center">
                             <span class="text-lg">📝</span>
@@ -209,23 +209,23 @@
                             </svg>
                             <span>有用</span>
                         </button>
-                        <button class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/5 transition-all duration-200">
+                        <button class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/10 transition-all duration-200 shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                             <span>需要改进</span>
                         </button>
-                        <button class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content/70 font-medium rounded-lg hover:border-red-300 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
+                        <button class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-error hover:text-error hover:bg-error/10 transition-all duration-200 shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                             </svg>
                             <span>报告问题</span>
                         </button>
-                        <a href="/post" class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/5 transition-all duration-200">
+                        <a href="/post" class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/10 transition-all duration-200 shadow-sm">
                             <span>💬</span>
                             <span>发帖讨论</span>
                         </a>
-                        <a href="/about" class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/5 transition-all duration-200">
+                        <a href="/about" class="inline-flex items-center gap-2 px-4 py-2 bg-base-100 border border-base-300 text-base-content font-medium rounded-lg hover:border-primary hover:text-primary hover:bg-primary/10 transition-all duration-200 shadow-sm">
                             <span>📧</span>
                             <span>联系我们</span>
                         </a>
