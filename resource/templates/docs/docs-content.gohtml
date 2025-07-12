@@ -13,42 +13,35 @@
     </header>
     <!-- 面包屑导航 -->
     <div class="bg-base-100 border-b border-base-300 shadow-sm flex-shrink-0">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <!-- 移动端菜单按钮和面包屑 -->
-                <div class="flex items-center space-x-3">
-                    <!-- 移动端菜单按钮 -->
-                    <button id="mobile-menu-toggle"
-                            class="md:hidden inline-flex items-center justify-center w-8 h-8 bg-primary text-primary-content rounded-lg shadow-sm hover:bg-primary/90 transition-all duration-200">
-                        <svg id="menu-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                        <svg id="close-icon" class="w-4 h-4 hidden" fill="none" stroke="currentColor"
-                             viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-
-                    <!-- 面包屑导航 -->
-                    <nav class="flex items-center space-x-2 text-sm font-medium">
-                        {{range $index, $breadcrumb := .Breadcrumbs}}
-                        {{if ne $index 0}}
-                        <svg class="w-4 h-4 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                  d="M9 5l7 7-7 7"></path>
-                        </svg>
-                        {{end}}
+        <div class="container px-6 py-2 flex items-start space-x-3">
+            <!-- 移动端菜单按钮和面包屑 -->
+            <!-- 移动端菜单按钮 -->
+            <button id="mobile-menu-toggle"
+                    class="md:hidden inline-flex items-center justify-center w-8 h-8 bg-primary text-primary-content rounded-lg shadow-sm hover:bg-primary/90 transition-all duration-200">
+                <svg id="menu-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+                <svg id="close-icon" class="w-4 h-4 hidden" fill="none" stroke="currentColor"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <!-- 面包屑导航 -->
+            <div class="breadcrumbs max-w-xs text-sm">
+                <ul>
+                    {{range $index, $breadcrumb := .Breadcrumbs}}
+                    <li>
                         {{if .url}}
                         <a href="{{.url}}"
                            class="text-base-content/60 hover:text-primary transition-colors duration-200 truncate">{{.title}}</a>
                         {{else}}
                         <span class="text-base-content font-semibold truncate">{{.title}}</span>
                         {{end}}
-                        {{end}}
-                    </nav>
-                </div>
+                    </li>
+                    {{end}}
+                </ul>
             </div>
         </div>
     </div>

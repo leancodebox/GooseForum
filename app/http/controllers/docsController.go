@@ -404,7 +404,6 @@ func DocsContent(c *gin.Context) {
 	breadcrumbs := []map[string]string{
 		{"title": "文档中心", "url": "/docs"},
 		{"title": project.Name, "url": fmt.Sprintf("/docs/%s", project.Slug)},
-		{"title": version.Name, "url": fmt.Sprintf("/docs/%s/%s", project.Slug, version.Version)},
 		{"title": content.Title, "url": ""},
 	}
 
@@ -412,19 +411,19 @@ func DocsContent(c *gin.Context) {
 	htmlContent := template.HTML(markdown2html.MarkdownToHTML(content.Content))
 
 	viewrender.Render(c, "docs-content.gohtml", map[string]any{
-		"IsProduction":     setting.IsProduction(),
-		"User":             GetLoginUser(c),
-		"Title":            fmt.Sprintf("%s - %s - %s", content.Title, project.Name, "GooseForum"),
-		"Description":      fmt.Sprintf("%s - %s", content.Title, project.Description),
-		"Project":          project,
-		"Version":          version,
-		"Content":          content,
-		"HTMLContent":      htmlContent,
-		"Directory":        directory,
-		"VersionContents":  versionContents,
-		"ProjectVersions":  projectVersions,
-		"Breadcrumbs":      breadcrumbs,
-		"CanonicalHref":    buildCanonicalHref(c),
-		"CurrentSlug":      contentSlug,
+		"IsProduction":    setting.IsProduction(),
+		"User":            GetLoginUser(c),
+		"Title":           fmt.Sprintf("%s - %s - %s", content.Title, project.Name, "GooseForum"),
+		"Description":     fmt.Sprintf("%s - %s", content.Title, project.Description),
+		"Project":         project,
+		"Version":         version,
+		"Content":         content,
+		"HTMLContent":     htmlContent,
+		"Directory":       directory,
+		"VersionContents": versionContents,
+		"ProjectVersions": projectVersions,
+		"Breadcrumbs":     breadcrumbs,
+		"CanonicalHref":   buildCanonicalHref(c),
+		"CurrentSlug":     contentSlug,
 	})
 }
