@@ -15,8 +15,8 @@ const fieldArticleCount = "article_count"
 // fieldPostCount 发帖数(包括主题和回复)
 const fieldPostCount = "post_count"
 
-// fieldCommentCount 评论数
-const fieldCommentCount = "comment_count"
+// fieldReplyCount 评论数
+const fieldReplyCount = "reply_count"
 
 // fieldFollowerCount 粉丝数
 const fieldFollowerCount = "follower_count"

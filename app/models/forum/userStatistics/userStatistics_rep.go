@@ -31,7 +31,7 @@ func WriteArticle(userId uint64) int64 {
 }
 
 func WriteComment(userId uint64) int64 {
-	result := builder().Exec("UPDATE user_statistics SET comment_count = comment_count+1 where user_id = ?", userId)
+	result := builder().Exec("UPDATE user_statistics SET reply_count = reply_count+1 where user_id = ?", userId)
 	return result.RowsAffected
 }
 
