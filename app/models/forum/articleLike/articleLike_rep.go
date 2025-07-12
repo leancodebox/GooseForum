@@ -44,7 +44,7 @@ func GetLikeReceivedCount(userId uint64) int64 {
 
 func GetLikeGivenCount(userId uint64) int64 {
 	var count int64
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Count(&count)
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&count)
 	return count
 }
 

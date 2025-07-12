@@ -76,6 +76,9 @@ func (itself *ExternalInformation) Scan(value any) error {
 	if !ok {
 		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
 	}
+	if len(bytes) == 0 {
+		return nil
+	}
 	r, err := jsonopt.DecodeE[ExternalInformation](bytes)
 	*itself = r
 	return err
