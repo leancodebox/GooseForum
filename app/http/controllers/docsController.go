@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"html/template"
 	"os"
 	"time"
@@ -214,22 +213,30 @@ func DocsProject(c *gin.Context) {
 		return
 	}
 
-	// 查找默认版本
-	var defaultVersion *DocVersion
+	// 获取该项目的所有版本
+	projectVersions := make([]DocVersion, 0)
 	for _, v := range versions {
-		if v.ProjectID == project.ID && v.IsDefault && v.Status == 1 {
-			defaultVersion = &v
-			break
+		if v.ProjectID == project.ID && v.Status == 1 {
+			projectVersions = append(projectVersions, v)
 		}
 	}
 
-	if defaultVersion == nil {
-		errorPage(c, "版本不存在", "找不到项目的默认版本")
-		return
+	// 构建面包屑导航
+	breadcrumbs := []map[string]string{
+		{"title": "文档中心", "url": "/docs"},
+		{"title": project.Name, "url": ""},
 	}
 
-	// 重定向到默认版本的首页
-	c.Redirect(302, fmt.Sprintf("/docs/%s/%s", projectSlug, defaultVersion.Version))
+	viewrender.Render(c, "docs-project.gohtml", map[string]any{
+		"IsProduction":  setting.IsProduction(),
+		"User":          GetLoginUser(c),
+		"Title":         fmt.Sprintf("%s - 文档中心 - GooseForum", project.Name),
+		"Description":   project.Description,
+		"Project":       project,
+		"Versions":      projectVersions,
+		"Breadcrumbs":   breadcrumbs,
+		"CanonicalHref": buildCanonicalHref(c),
+	})
 }
 
 // DocsVersion 版本首页 - 显示版本的第一个文档
@@ -276,32 +283,40 @@ func DocsVersion(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(version)
-	// 解析目录结构，找到第一个文档
+	// 解析目录结构
 	var directory []DirectoryItem
-	fmt.Println(string(version.Directory))
-	res := jsonopt.Decode[[]DirectoryItem](string(version.Directory))
-	fmt.Println(res)
 	if err := json.Unmarshal([]byte(version.Directory), &directory); err != nil {
-		fmt.Printf(err.Error())
 		errorPage(c, "数据错误", "无法解析目录结构")
 		return
 	}
 
-	if len(directory) == 0 {
-		errorPage(c, "内容为空", "该版本暂无文档内容")
-		return
+	// 获取该项目的所有版本，用于版本切换
+	projectVersions := make([]DocVersion, 0)
+	for _, v := range versions {
+		if v.ProjectID == project.ID && v.Status == 1 {
+			projectVersions = append(projectVersions, v)
+		}
 	}
 
-	// 找到第一个文档的slug
-	firstDocSlug := directory[0].Slug
-	if firstDocSlug == "" {
-		errorPage(c, "内容错误", "无法找到首页文档")
-		return
+	// 构建面包屑导航
+	breadcrumbs := []map[string]string{
+		{"title": "文档中心", "url": "/docs"},
+		{"title": project.Name, "url": fmt.Sprintf("/docs/%s", project.Slug)},
+		{"title": version.Name, "url": ""},
 	}
 
-	// 重定向到第一个文档
-	c.Redirect(302, fmt.Sprintf("/docs/%s/%s/%s", projectSlug, versionSlug, firstDocSlug))
+	viewrender.Render(c, "docs-version.gohtml", map[string]any{
+		"IsProduction":    setting.IsProduction(),
+		"User":            GetLoginUser(c),
+		"Title":           fmt.Sprintf("%s %s - %s - GooseForum", project.Name, version.Name, "文档中心"),
+		"Description":     fmt.Sprintf("%s - %s", project.Description, version.Description),
+		"Project":         project,
+		"Version":         version,
+		"Directory":       directory,
+		"ProjectVersions": projectVersions,
+		"Breadcrumbs":     breadcrumbs,
+		"CanonicalHref":   buildCanonicalHref(c),
+	})
 }
 
 // DocsContent 文档内容页面
