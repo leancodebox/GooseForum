@@ -43,7 +43,7 @@
                             <h1 class="text-3xl font-bold text-base-content">{{.Project.Name}}</h1>
                             <div class="badge badge-primary badge-lg">{{.Version.Version}}</div>
                         </div>
-                        <h2 class="text-xl font-semibold text-base-content mb-3">{{.Version.Title}}</h2>
+                        <h2 class="text-xl font-semibold text-base-content mb-3">{{.Version.Name}}</h2>
                         <p class="text-lg text-base-content/70 mb-6">{{.Version.Description}}</p>
                         <div class="flex items-center gap-4 text-sm text-base-content/50">
                             <span>发布时间: {{.Version.CreatedAt.Format "2006-01-02 15:04"}}</span>
@@ -117,8 +117,13 @@
             <div class="bg-base-100 rounded-lg shadow-md p-6 mb-8">
                 <h3 class="text-lg font-semibold text-base-content mb-4">🔄 切换版本</h3>
                 <div class="flex flex-wrap gap-2">
-                    <div class="badge badge-primary badge-lg">{{.Version.Version}} (当前)</div>
-                    <!-- 这里可以添加其他版本的链接 -->
+                    {{range .ProjectVersions}}
+                    {{if eq .Version $.Version.Version}}
+                    <div class="badge badge-primary badge-lg">{{.Version}} (当前)</div>
+                    {{else}}
+                    <a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="badge badge-outline badge-lg hover:badge-primary transition-colors duration-200">{{.Version}}</a>
+                    {{end}}
+                    {{end}}
                 </div>
             </div>
 

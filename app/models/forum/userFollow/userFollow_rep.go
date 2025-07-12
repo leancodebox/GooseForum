@@ -50,15 +50,15 @@ func GetFollowStatusMap(userId uint64, targetUserIds []uint64) map[uint64]bool {
 	if len(targetUserIds) == 0 {
 		return make(map[uint64]bool)
 	}
-	
+
 	var followEntities []Entity
 	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.In(fieldFollowUserId, targetUserIds)).Where(queryopt.Eq(fieldStatus, 1)).Find(&followEntities)
-	
+
 	statusMap := make(map[uint64]bool)
 	for _, entity := range followEntities {
 		statusMap[entity.FollowUserId] = true
 	}
-	
+
 	return statusMap
 }
 

@@ -3,12 +3,13 @@ package controllers
 import (
 	"bytes"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/resource"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/resource"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"

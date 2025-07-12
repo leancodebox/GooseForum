@@ -123,8 +123,45 @@
                             </svg>
                         </label>
                         <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full">
+                            {{if .ProjectVersions}}
+                            {{range .ProjectVersions}}
+                            {{if eq .Version $.Version.Version}}
+                            <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}">{{.Version}} (当前)</a></li>
+                            {{else}}
+                            <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}">{{.Version}}</a></li>
+                            {{end}}
+                            {{end}}
+                            {{else}}
                             <li><a href="/docs/{{.Project.Slug}}/{{.Version.Version}}">{{.Version.Version}} (当前)</a></li>
+                            {{end}}
                         </ul>
+                    </div>
+                </div>
+
+                <!-- 快速导航 -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-base-content mb-3">🧭 快速导航</h3>
+                    <div class="space-y-2">
+                        <a href="/docs/{{.Project.Slug}}/{{.Version.Version}}" class="btn btn-outline btn-sm w-full justify-start">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                            返回版本目录
+                        </a>
+                        <a href="/docs/{{.Project.Slug}}" class="btn btn-outline btn-sm w-full justify-start">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
+                            </svg>
+                            返回项目
+                        </a>
+                        <a href="/docs" class="btn btn-ghost btn-sm w-full justify-start">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
+                            </svg>
+                            文档中心
+                        </a>
                     </div>
                 </div>
             </div>

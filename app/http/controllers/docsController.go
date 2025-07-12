@@ -392,6 +392,14 @@ func DocsContent(c *gin.Context) {
 		}
 	}
 
+	// 获取该项目的所有版本，用于版本切换
+	projectVersions := make([]DocVersion, 0)
+	for _, v := range versions {
+		if v.ProjectID == project.ID && v.Status == 1 {
+			projectVersions = append(projectVersions, v)
+		}
+	}
+
 	// 构建面包屑导航
 	breadcrumbs := []map[string]string{
 		{"title": "文档中心", "url": "/docs"},
@@ -404,18 +412,19 @@ func DocsContent(c *gin.Context) {
 	htmlContent := template.HTML(markdown2html.MarkdownToHTML(content.Content))
 
 	viewrender.Render(c, "docs-content.gohtml", map[string]any{
-		"IsProduction":    setting.IsProduction(),
-		"User":            GetLoginUser(c),
-		"Title":           fmt.Sprintf("%s - %s - %s", content.Title, project.Name, "GooseForum"),
-		"Description":     fmt.Sprintf("%s - %s", content.Title, project.Description),
-		"Project":         project,
-		"Version":         version,
-		"Content":         content,
-		"HTMLContent":     htmlContent,
-		"Directory":       directory,
-		"VersionContents": versionContents,
-		"Breadcrumbs":     breadcrumbs,
-		"CanonicalHref":   buildCanonicalHref(c),
-		"CurrentSlug":     contentSlug,
+		"IsProduction":     setting.IsProduction(),
+		"User":             GetLoginUser(c),
+		"Title":            fmt.Sprintf("%s - %s - %s", content.Title, project.Name, "GooseForum"),
+		"Description":      fmt.Sprintf("%s - %s", content.Title, project.Description),
+		"Project":          project,
+		"Version":          version,
+		"Content":          content,
+		"HTMLContent":      htmlContent,
+		"Directory":        directory,
+		"VersionContents":  versionContents,
+		"ProjectVersions":  projectVersions,
+		"Breadcrumbs":      breadcrumbs,
+		"CanonicalHref":    buildCanonicalHref(c),
+		"CurrentSlug":      contentSlug,
 	})
 }
