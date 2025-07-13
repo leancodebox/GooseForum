@@ -122,19 +122,19 @@
                       <PencilIcon class="w-3 h-3"/>
                       <span class="ml-1">编辑</span>
                     </button>
-                    <button 
-                        v-if="content.isPublished === 0" 
-                        class="btn btn-xs btn-success" 
-                        @click="publishContent(content)" 
+                    <button
+                        v-if="content.isPublished === 0"
+                        class="btn btn-xs btn-success"
+                        @click="publishContent(content)"
                         title="发布"
                     >
                       <CheckIcon class="w-3 h-3"/>
                       <span class="ml-1">发布</span>
                     </button>
-                    <button 
-                        v-else 
-                        class="btn btn-xs btn-neutral" 
-                        @click="draftContent(content)" 
+                    <button
+                        v-else
+                        class="btn btn-xs btn-neutral"
+                        @click="draftContent(content)"
                         title="设为草稿"
                     >
                       <ArchiveBoxIcon class="w-3 h-3"/>
@@ -154,18 +154,18 @@
                     <button class="btn btn-xs btn-warning" @click="editContent(content)" title="编辑">
                       <PencilIcon class="w-3 h-3"/>
                     </button>
-                    <button 
-                        v-if="content.isPublished === 0" 
-                        class="btn btn-xs btn-success" 
-                        @click="publishContent(content)" 
+                    <button
+                        v-if="content.isPublished === 0"
+                        class="btn btn-xs btn-success"
+                        @click="publishContent(content)"
                         title="发布"
                     >
                       <CheckIcon class="w-3 h-3"/>
                     </button>
-                    <button 
-                        v-else 
-                        class="btn btn-xs btn-neutral" 
-                        @click="draftContent(content)" 
+                    <button
+                        v-else
+                        class="btn btn-xs btn-neutral"
+                        @click="draftContent(content)"
                         title="设为草稿"
                     >
                       <ArchiveBoxIcon class="w-3 h-3"/>
@@ -242,32 +242,32 @@
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
         <h3 class="font-bold text-lg mb-4">{{ isEditing ? '编辑内容' : '新建内容' }}</h3>
-        
+
         <div class="space-y-4">
           <!-- 项目选择 -->
           <div>
-            <label class="label">
+            <label class="floating-label">
               <span class="label-text">所属项目 <span class="text-error">*</span></span>
+              <select v-model="formData.projectId" class="select select-bordered w-full" :disabled="isEditing" @change="onFormProjectChange">
+                <option value="">请选择项目</option>
+                <option v-for="project in projects" :key="project.id" :value="project.id">
+                  {{ project.name }}
+                </option>
+              </select>
             </label>
-            <select v-model="formData.projectId" class="select select-bordered w-full" :disabled="isEditing" @change="onFormProjectChange">
-              <option value="">请选择项目</option>
-              <option v-for="project in projects" :key="project.id" :value="project.id">
-                {{ project.name }}
-              </option>
-            </select>
           </div>
 
           <!-- 版本选择 -->
           <div>
-            <label class="label">
+            <label class="floating-label">
               <span class="label-text">所属版本 <span class="text-error">*</span></span>
+              <select v-model="formData.versionId" class="select select-bordered w-full" :disabled="isEditing || !formData.projectId">
+                <option value="0">请选择版本</option>
+                <option v-for="version in formFilteredVersions" :key="version.id" :value="version.id">
+                  {{ version.name }}
+                </option>
+              </select>
             </label>
-            <select v-model="formData.versionId" class="select select-bordered w-full" :disabled="isEditing || !formData.projectId">
-              <option value="0">请选择版本</option>
-              <option v-for="version in formFilteredVersions" :key="version.id" :value="version.id">
-                {{ version.name }}
-              </option>
-            </select>
           </div>
 
           <!-- 标题 -->
@@ -326,17 +326,17 @@
             </label>
             <div class="border border-base-300 rounded-lg">
               <div class="flex border-b border-base-300 bg-base-200 rounded-t-lg">
-                <button 
-                    type="button" 
-                    class="px-3 py-2 text-sm" 
+                <button
+                    type="button"
+                    class="px-3 py-2 text-sm"
                     :class="editorTab === 'edit' ? 'bg-base-100 border-b-2 border-primary' : 'hover:bg-base-300'"
                     @click="editorTab = 'edit'"
                 >
                   编辑
                 </button>
-                <button 
-                    type="button" 
-                    class="px-3 py-2 text-sm" 
+                <button
+                    type="button"
+                    class="px-3 py-2 text-sm"
                     :class="editorTab === 'preview' ? 'bg-base-100 border-b-2 border-primary' : 'hover:bg-base-300'"
                     @click="previewContent"
                 >
@@ -383,7 +383,7 @@
               {{ getStatusText(viewingContent.isPublished) }}
             </span>
           </div>
-          
+
           <div class="text-sm text-base-content/70 mb-4">
             <p>版本：{{ viewingContent.projectName }} - {{ viewingContent.versionName }}</p>
             <p>URL标识：{{ viewingContent.slug }}</p>
@@ -393,9 +393,9 @@
             <p>创建时间：{{ formatDate(viewingContent.createdAt) }}</p>
             <p>更新时间：{{ formatDate(viewingContent.updatedAt) }}</p>
           </div>
-          
+
           <div class="divider"></div>
-          
+
           <div class="prose max-w-none" v-html="viewingContent.content"></div>
         </div>
       </div>
@@ -405,9 +405,9 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue';
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
   ArrowPathIcon,
   EyeIcon,
   PencilIcon,
@@ -419,8 +419,8 @@ import {
   ChevronRightIcon
 } from '@heroicons/vue/24/outline';
 import { DocsContentService, DocsProjectService } from '../../utils/docsService';
-import type { 
-  DocsContentItem, 
+import type {
+  DocsContentItem,
   DocsContentListReq,
   DocsContentCreateReq,
   DocsContentUpdateReq,
@@ -589,11 +589,11 @@ const editContent = async (content: DocsContentItem) => {
     formData.slug = detail.slug;
     formData.content = detail.content;
     formData.sortOrder = detail.sortOrder;
-    
+
     // 根据版本ID找到对应的项目ID
     const version = versions.value.find(v => v.id === detail.versionId);
     formData.projectId = version ? version.projectId : '';
-    
+
     editorTab.value = 'edit';
     (document.getElementById('content_modal') as HTMLDialogElement)?.showModal();
   } catch (error) {
@@ -621,7 +621,7 @@ const previewContent = async () => {
     editorTab.value = 'preview';
     return;
   }
-  
+
   try {
     const response = await DocsContentService.previewContent({ content: formData.content });
     previewHtml.value = response.html;
@@ -638,7 +638,7 @@ const saveContent = async () => {
     showToast('请填写必填字段', 'warning');
     return;
   }
-  
+
   saving.value = true;
   try {
     if (isEditing.value && formData.id) {
@@ -700,7 +700,7 @@ const deleteContent = async (content: DocsContentItem) => {
   if (!confirm(`确定要删除内容「${content.title}」吗？此操作不可恢复。`)) {
     return;
   }
-  
+
   try {
     await DocsContentService.deleteContent({ id: content.id });
     showToast('内容删除成功', 'success');
