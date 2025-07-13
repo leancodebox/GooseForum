@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4">
+  <div class="space-y-6">
     <!-- 页面标题 -->
     <div class="flex justify-between items-center mb-2">
       <h2 class="text-xl font-normal text-base-content">文档版本管理</h2>
