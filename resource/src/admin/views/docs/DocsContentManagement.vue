@@ -10,50 +10,68 @@
     </div>
 
     <!-- 搜索筛选 -->
-    <div class="bg-base-200 p-3 rounded-lg mb-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-3 items-end">
-        <div class="md:col-span-2">
-          <label class="floating-label join w-full">
-            <span>搜索标题或内容</span>
-            <input
-                v-model="searchParams.keyword"
-                type="text"
-                placeholder="搜索标题或内容"
-                class="input input-bordered input-sm w-full"
-                @keyup.enter="loadContents"
-            />
-          </label>
+    <div class="card bg-base-100 shadow-sm mb-6">
+      <div class="card-body p-4">
+        <div class="flex flex-wrap gap-3 items-end">
+          <div class="flex-1 min-w-64">
+             <label class="floating-label join w-full">
+               <span>搜索标题或内容</span>
+               <input
+                   v-model="searchParams.keyword"
+                   type="text"
+                   placeholder="搜索标题或内容"
+                   class="input input-bordered input-sm w-full"
+                   @keyup.enter="loadContents"
+               />
+             </label>
+           </div>
+
+          <div class="min-w-40">
+             <label class="floating-label join w-full">
+               <span>项目</span>
+               <select v-model="selectedProjectId" class="select select-bordered select-sm" @change="onProjectChange">
+                 <option value="">全部项目</option>
+                 <option v-for="project in projects" :key="project.id" :value="project.id">
+                   {{ project.name }}
+                 </option>
+               </select>
+             </label>
+           </div>
+
+           <div class="min-w-40">
+             <label class="floating-label join w-full">
+               <span>版本</span>
+               <select v-model="searchParams.versionId" class="select select-bordered select-sm" :disabled="!selectedProjectId">
+                 <option value="">全部版本</option>
+                 <option v-for="version in filteredVersions" :key="version.id" :value="version.id">
+                   {{ version.name }}
+                 </option>
+               </select>
+             </label>
+           </div>
+
+           <div class="min-w-32">
+             <label class="floating-label join w-full">
+               <span>状态</span>
+               <select v-model="searchParams.status" class="select select-bordered select-sm">
+                 <option value="">全部状态</option>
+                 <option v-for="option in CONTENT_STATUS_OPTIONS" :key="option.value" :value="option.value">
+                   {{ option.label }}
+                 </option>
+               </select>
+             </label>
+           </div>
+
+          <button class="btn btn-neutral btn-sm" @click="loadContents">
+            <MagnifyingGlassIcon class="w-4 h-4"/>
+            搜索
+          </button>
+
+          <button class="btn btn-ghost btn-sm" @click="resetSearch">
+            <ArrowPathIcon class="w-4 h-4"/>
+            重置
+          </button>
         </div>
-
-        <label class="floating-label join w-full">
-          <span>版本</span>
-          <select v-model="searchParams.versionId" class="select select-bordered select-sm">
-            <option value="">全部版本</option>
-            <option v-for="version in versions" :key="version.id" :value="version.id">
-              {{ version.projectName }} - {{ version.name }}
-            </option>
-          </select>
-        </label>
-
-        <label class="floating-label join w-full">
-          <span>状态</span>
-          <select v-model="searchParams.status" class="select select-bordered select-sm">
-            <option value="">全部状态</option>
-            <option v-for="option in CONTENT_STATUS_OPTIONS" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-
-        <button class="btn btn-neutral btn-sm" @click="loadContents">
-          <MagnifyingGlassIcon class="w-4 h-4"/>
-          搜索
-        </button>
-
-        <button class="btn btn-ghost btn-sm" @click="resetSearch">
-          <ArrowPathIcon class="w-4 h-4"/>
-          重置
-        </button>
       </div>
     </div>
 
@@ -226,15 +244,28 @@
         <h3 class="font-bold text-lg mb-4">{{ isEditing ? '编辑内容' : '新建内容' }}</h3>
         
         <div class="space-y-4">
+          <!-- 项目选择 -->
+          <div>
+            <label class="label">
+              <span class="label-text">所属项目 <span class="text-error">*</span></span>
+            </label>
+            <select v-model="formData.projectId" class="select select-bordered w-full" :disabled="isEditing" @change="onFormProjectChange">
+              <option value="">请选择项目</option>
+              <option v-for="project in projects" :key="project.id" :value="project.id">
+                {{ project.name }}
+              </option>
+            </select>
+          </div>
+
           <!-- 版本选择 -->
           <div>
             <label class="label">
               <span class="label-text">所属版本 <span class="text-error">*</span></span>
             </label>
-            <select v-model="formData.versionId" class="select select-bordered w-full" :disabled="isEditing">
-              <option value="">请选择版本</option>
-              <option v-for="version in versions" :key="version.id" :value="version.id">
-                {{ version.projectName }} - {{ version.name }}
+            <select v-model="formData.versionId" class="select select-bordered w-full" :disabled="isEditing || !formData.projectId">
+              <option value="0">请选择版本</option>
+              <option v-for="version in formFilteredVersions" :key="version.id" :value="version.id">
+                {{ version.name }}
               </option>
             </select>
           </div>
@@ -393,7 +424,8 @@ import type {
   DocsContentListReq,
   DocsContentCreateReq,
   DocsContentUpdateReq,
-  DocsVersionItem
+  DocsVersionItem,
+  DocsProjectItem
 } from '../../utils/docsInterfaces';
 import { CONTENT_STATUS_OPTIONS } from '../../utils/docsInterfaces';
 import { formatDate } from '../../utils/dateUtils';
@@ -403,7 +435,9 @@ import { showToast } from '../../utils/toast';
 const loading = ref(false);
 const saving = ref(false);
 const contents = ref<DocsContentItem[]>([]);
+const projects = ref<DocsProjectItem[]>([]);
 const versions = ref<DocsVersionItem[]>([]);
+const selectedProjectId = ref<number | string>('');
 const total = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(20);
@@ -422,7 +456,8 @@ const searchParams = reactive<DocsContentListReq>({
 });
 
 // 表单数据
-const formData = reactive<DocsContentCreateReq & { id?: number }>({
+const formData = reactive<DocsContentCreateReq & { id?: number; projectId?: number | string }>({
+  projectId: '',
   versionId: 0,
   title: '',
   slug: '',
@@ -433,6 +468,22 @@ const formData = reactive<DocsContentCreateReq & { id?: number }>({
 // 计算属性
 const totalPages = computed(() => Math.ceil(total.value / pageSize.value));
 
+// 根据选中的项目过滤版本列表（筛选区域用）
+const filteredVersions = computed(() => {
+  if (!selectedProjectId.value) {
+    return versions.value;
+  }
+  return versions.value.filter(version => version.projectId === Number(selectedProjectId.value));
+});
+
+// 根据表单中选中的项目过滤版本列表（新建/编辑表单用）
+const formFilteredVersions = computed(() => {
+  if (!formData.projectId) {
+    return [];
+  }
+  return versions.value.filter(version => version.projectId === Number(formData.projectId));
+});
+
 // 状态样式
 const getStatusClass = (isPublished: number) => {
   return isPublished === 1 ? 'badge-success' : 'badge-warning';
@@ -440,6 +491,19 @@ const getStatusClass = (isPublished: number) => {
 
 const getStatusText = (isPublished: number) => {
   return isPublished === 1 ? '已发布' : '草稿';
+};
+
+// 加载项目列表
+const loadProjects = async () => {
+  try {
+    const response = await DocsProjectService.getProjectList({ page: 1, pageSize: 1000 });
+    projects.value = response.list || [];
+  } catch (error) {
+    console.error('加载项目列表失败:', error);
+    showToast('加载项目列表失败', 'error');
+    // 确保在错误情况下projects仍然是空数组
+    projects.value = [];
+  }
 };
 
 // 加载版本列表
@@ -453,6 +517,21 @@ const loadVersions = async () => {
     // 确保在错误情况下versions仍然是空数组
     versions.value = [];
   }
+};
+
+// 项目变化处理（筛选区域用）
+const onProjectChange = () => {
+  // 清空版本选择
+  searchParams.versionId = undefined;
+  // 重新加载内容列表
+  currentPage.value = 1;
+  loadContents();
+};
+
+// 表单项目变化处理
+const onFormProjectChange = () => {
+  // 清空版本选择
+  formData.versionId = 0;
 };
 
 // 加载内容列表
@@ -480,6 +559,7 @@ const resetSearch = () => {
   searchParams.keyword = '';
   searchParams.versionId = undefined;
   searchParams.status = undefined;
+  selectedProjectId.value = '';
   currentPage.value = 1;
   loadContents();
 };
@@ -509,6 +589,11 @@ const editContent = async (content: DocsContentItem) => {
     formData.slug = detail.slug;
     formData.content = detail.content;
     formData.sortOrder = detail.sortOrder;
+    
+    // 根据版本ID找到对应的项目ID
+    const version = versions.value.find(v => v.id === detail.versionId);
+    formData.projectId = version ? version.projectId : '';
+    
     editorTab.value = 'edit';
     (document.getElementById('content_modal') as HTMLDialogElement)?.showModal();
   } catch (error) {
@@ -634,6 +719,7 @@ const closeModal = () => {
 // 重置表单数据
 const resetFormData = () => {
   formData.id = undefined;
+  formData.projectId = '';
   formData.versionId = 0;
   formData.title = '';
   formData.slug = '';
@@ -643,6 +729,7 @@ const resetFormData = () => {
 
 // 组件挂载
 onMounted(() => {
+  loadProjects();
   loadVersions();
   loadContents();
 });

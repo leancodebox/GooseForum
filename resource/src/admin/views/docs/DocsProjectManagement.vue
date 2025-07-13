@@ -10,52 +10,58 @@
     </div>
 
     <!-- 搜索筛选 -->
-    <div class="bg-base-200 p-3 rounded-lg mb-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-3 items-end">
-        <div class="md:col-span-2">
-          <label class="floating-label join w-full">
-            <span>搜索项目名称或描述</span>
-            <input
-                v-model="searchParams.keyword"
-                type="text"
-                placeholder="搜索项目名称或描述"
-                class="input input-bordered input-sm w-full"
-                @keyup.enter="loadProjects"
-            />
-          </label>
-        </div>
+    <div class="card bg-base-100 shadow-sm mb-6">
+      <div class="card-body p-4">
+        <div class="flex flex-wrap gap-3 items-end">
+          <div class="flex-1 min-w-64">
+            <label class="floating-label join w-full">
+              <span>搜索项目名称或描述</span>
+              <input
+                  v-model="searchParams.keyword"
+                  type="text"
+                  placeholder="搜索项目名称或描述"
+                  class="input input-bordered input-sm w-full"
+                  @keyup.enter="loadProjects"
+              />
+            </label>
+          </div>
 
-        <label class="floating-label join w-full">
-          <span>状态</span>
-          <select v-model="searchParams.status" class="select select-bordered select-sm">
-            <option value="">全部状态</option>
-            <option v-for="option in PROJECT_STATUS_OPTIONS" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
+          <div class="min-w-32">
+            <label class="floating-label join w-full">
+              <span>状态</span>
+              <select v-model="searchParams.status" class="select select-bordered select-sm">
+                <option value="">全部状态</option>
+                <option v-for="option in PROJECT_STATUS_OPTIONS" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </label>
+          </div>
 
-        <label class="floating-label join w-full">
-          <span>公开性</span>
-          <select v-model="searchParams.isPublic" class="select select-bordered select-sm">
-            <option value="">全部公开性</option>
-            <option v-for="option in PUBLIC_STATUS_OPTIONS" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
+          <div class="min-w-32">
+            <label class="floating-label join w-full">
+              <span>公开性</span>
+              <select v-model="searchParams.isPublic" class="select select-bordered select-sm">
+                <option value="">全部公开性</option>
+                <option v-for="option in PUBLIC_STATUS_OPTIONS" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </label>
+          </div>
 
-        <button class="btn btn-neutral btn-sm" @click="loadProjects">
-          <MagnifyingGlassIcon class="w-4 h-4"/>
-          搜索
-        </button>
+          <button class="btn btn-neutral btn-sm" @click="loadProjects">
+            <MagnifyingGlassIcon class="w-4 h-4"/>
+            搜索
+          </button>
 
-        <button class="btn btn-ghost btn-sm" @click="resetSearch">
-          <ArrowPathIcon class="w-4 h-4"/>
-          重置
-        </button>
-      </div>
-    </div>
+          <button class="btn btn-ghost btn-sm" @click="resetSearch">
+             <ArrowPathIcon class="w-4 h-4"/>
+             重置
+           </button>
+         </div>
+       </div>
+     </div>
 
     <!-- 项目列表 -->
     <div>
