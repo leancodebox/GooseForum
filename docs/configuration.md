@@ -191,32 +191,6 @@ maxBackUps = 30                 # 最大保留日志文件数量
 - `maxsize`: 单个日志文件超过指定大小后会自动切割
 - `maxBackUps`: 保留的历史日志文件数量
 
-### [site] 站点元数据配置
-
-```toml
-[site]
-metaList = """
-[{"name":"author","content":"GooseForum's Friend"}]
-"""
-```
-
-**配置说明：**
-- `metaList`: HTML meta 标签配置，JSON 数组格式
-- 用于 SEO 优化、网站验证等
-
-**常见配置示例：**
-```toml
-[site]
-metaList = """
-[
-  {"name":"author","content":"GooseForum Team"},
-  {"name":"description","content":"现代化的技术交流社区"},
-  {"name":"keywords","content":"论坛,技术,交流,Go,Vue"},
-  {"name":"baidu-site-verification","content":"your-baidu-verification-code"},
-  {"name":"google-site-verification","content":"your-google-verification-code"}
-]
-"""
-```
 
 ## 🔄 配置文件热重载
 

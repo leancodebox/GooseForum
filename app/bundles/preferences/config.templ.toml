@@ -57,8 +57,3 @@ maxage = 10 # 最大日期
 maxsize = 256 # 最大文件大小 MB
 maxBackUps = 30 # 最大保留文件数量
 
-
-[site]
-metaList="""
-[{"name":"author","content":"GooseForum's Friend"}]
-"""

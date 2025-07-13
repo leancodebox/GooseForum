@@ -252,8 +252,6 @@ func DocsVersion(c *gin.Context) {
 	breadcrumbs := []map[string]string{
 		{"title": "文档中心", "url": "/docs"},
 		{"title": project.Name, "url": ""},
-		//{"title": project.Name, "url": fmt.Sprintf("/docs/%s", project.Slug)},
-		//{"title": version.Name, "url": ""},
 	}
 
 	viewrender.Render(c, "docs-version.gohtml", map[string]any{

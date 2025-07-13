@@ -72,5 +72,79 @@
       {"field": "create_time", "type": "datetime", "key": "", "desc": "收藏时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
       {"field": "update_time", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
     ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "doc_projects",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "项目ID", "null": "NO", "default": null},
+      {"field": "name", "type": "varchar(100)", "key": "", "desc": "项目名称", "null": "NO", "default": ""},
+      {"field": "slug", "type": "varchar(100)", "key": "UNI", "desc": "项目标识符", "null": "NO", "default": ""},
+      {"field": "description", "type": "text", "key": "", "desc": "项目描述", "null": "YES", "default": null},
+      {"field": "repository_url", "type": "varchar(255)", "key": "", "desc": "仓库地址", "null": "YES", "default": null},
+      {"field": "homepage_url", "type": "varchar(255)", "key": "", "desc": "项目主页", "null": "YES", "default": null},
+      {"field": "logo_url", "type": "varchar(255)", "key": "", "desc": "项目Logo", "null": "YES", "default": null},
+      {"field": "status", "type": "tinyint", "key": "", "desc": "状态(1:活跃 2:维护 3:废弃)", "null": "NO", "default": "1"},
+      {"field": "is_public", "type": "tinyint", "key": "", "desc": "是否公开(0:私有 1:公开)", "null": "NO", "default": "1"},
+      {"field": "owner_id", "type": "bigint unsigned", "key": "", "desc": "项目所有者ID", "null": "NO", "default": "0"},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"},
+      {"field": "deleted_at", "type": "datetime", "key": "", "desc": "删除时间", "null": "YES", "default": null}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "doc_versions",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "版本ID", "null": "NO", "default": null},
+      {"field": "name", "type": "varchar(50)", "key": "", "desc": "版本名称", "null": "NO", "default": ""},
+      {"field": "slug", "type": "varchar(50)", "key": "", "desc": "版本标识符", "null": "NO", "default": ""},
+      {"field": "description", "type": "text", "key": "", "desc": "版本描述", "null": "YES", "default": null},
+      {"field": "is_default", "type": "tinyint", "key": "", "desc": "是否默认版本(0:否 1:是)", "null": "NO", "default": "0"},
+      {"field": "is_published", "type": "tinyint", "key": "", "desc": "是否发布(0:草稿 1:已发布)", "null": "NO", "default": "0"},
+      {"field": "sort_order", "type": "int", "key": "", "desc": "排序权重", "null": "NO", "default": "0"},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"},
+      {"field": "deleted_at", "type": "datetime", "key": "", "desc": "删除时间", "null": "YES", "default": null}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "doc_contents",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "内容ID", "null": "NO", "default": null},
+      {"field": "title", "type": "varchar(200)", "key": "", "desc": "文档标题", "null": "NO", "default": ""},
+      {"field": "slug", "type": "varchar(200)", "key": "", "desc": "文档标识符", "null": "NO", "default": ""},
+      {"field": "content", "type": "longtext", "key": "", "desc": "文档内容(Markdown)", "null": "YES", "default": null},
+      {"field": "content_html", "type": "longtext", "key": "", "desc": "渲染后的HTML内容", "null": "YES", "default": null},
+      {"field": "excerpt", "type": "text", "key": "", "desc": "文档摘要", "null": "YES", "default": null},
+      {"field": "toc", "type": "json", "key": "", "desc": "目录结构(JSON)", "null": "YES", "default": null},
+      {"field": "meta_keywords", "type": "varchar(255)", "key": "", "desc": "SEO关键词", "null": "YES", "default": null},
+      {"field": "meta_description", "type": "text", "key": "", "desc": "SEO描述", "null": "YES", "default": null},
+      {"field": "is_published", "type": "tinyint", "key": "", "desc": "是否发布(0:草稿 1:已发布)", "null": "NO", "default": "0"},
+      {"field": "sort_order", "type": "int", "key": "", "desc": "排序权重", "null": "NO", "default": "0"},
+      {"field": "author_id", "type": "bigint unsigned", "key": "", "desc": "作者ID", "null": "NO", "default": "0"},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"},
+      {"field": "deleted_at", "type": "datetime", "key": "", "desc": "删除时间", "null": "YES", "default": null}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "operation_logs",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "日志ID", "null": "NO", "default": null},
+      {"field": "entity_type", "type": "varchar(50)", "key": "", "desc": "实体类型", "null": "NO", "default": ""},
+      {"field": "entity_id", "type": "bigint unsigned", "key": "", "desc": "实体ID", "null": "NO", "default": "0"},
+      {"field": "operation_type", "type": "varchar(20)", "key": "", "desc": "操作类型(create/update/delete)", "null": "NO", "default": ""},
+      {"field": "field_name", "type": "varchar(100)", "key": "", "desc": "字段名称", "null": "YES", "default": null},
+      {"field": "old_value", "type": "text", "key": "", "desc": "旧值", "null": "YES", "default": null},
+      {"field": "new_value", "type": "text", "key": "", "desc": "新值", "null": "YES", "default": null},
+      {"field": "metadata", "type": "json", "key": "", "desc": "扩展元数据", "null": "YES", "default": null},
+      {"field": "user_id", "type": "bigint unsigned", "key": "", "desc": "操作用户ID", "null": "NO", "default": "0"},
+      {"field": "ip_address", "type": "varchar(45)", "key": "", "desc": "操作IP地址", "null": "YES", "default": null},
+      {"field": "user_agent", "type": "text", "key": "", "desc": "用户代理", "null": "YES", "default": null},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "操作时间", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+    ]
   }
 ]
