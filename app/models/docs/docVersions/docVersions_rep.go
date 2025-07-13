@@ -10,8 +10,6 @@ func save(entity *Entity) int64 {
 	return result.RowsAffected
 }
 
-
-
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
@@ -19,9 +17,6 @@ func SaveOrCreateById(entity *Entity) int64 {
 		return save(entity)
 	}
 }
-
-
-
 
 func Get(id any) (entity Entity) {
 	builder().First(&entity, id)
@@ -37,30 +32,30 @@ func GetByIdString(id string) (entity Entity) {
 // GetVersionList 获取版本列表
 func GetVersionList(page, pageSize int, projectId uint64, keyword string, status int) (entities []Entity, total int64, err error) {
 	query := builder()
-	
+
 	// 项目ID过滤
 	if projectId > 0 {
 		query = query.Where("project_id = ?", projectId)
 	}
-	
+
 	// 关键词搜索
 	if keyword != "" {
-		query = query.Where("name LIKE ? OR slug LIKE ? OR description LIKE ?", 
+		query = query.Where("name LIKE ? OR slug LIKE ? OR description LIKE ?",
 			"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%")
 	}
-	
+
 	// 状态过滤
 	if status >= 0 {
 		query = query.Where("status = ?", status)
 	}
-	
+
 	// 获取总数
 	query.Count(&total)
-	
+
 	// 分页查询
 	offset := (page - 1) * pageSize
 	result := query.Offset(offset).Limit(pageSize).Order("sort_order ASC, created_at DESC").Find(&entities)
-	
+
 	return entities, total, result.Error
 }
 

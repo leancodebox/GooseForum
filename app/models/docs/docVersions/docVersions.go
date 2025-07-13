@@ -41,7 +41,7 @@ const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
 	Id          uint64          `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                  // 版本ID
-	ProjectId   uint64          `gorm:"column:project_id;type:bigint;not null;" json:"projectId"`               // 项目ID
+	ProjectId   uint64          `gorm:"column:project_id;type:bigint;not null;" json:"projectId"`                // 项目ID
 	Name        string          `gorm:"column:name;type:varchar(50);not null;default:'';" json:"name"`           // 版本名称
 	Slug        string          `gorm:"column:slug;type:varchar(50);not null;default:'';" json:"slug"`           // 版本标识符
 	Description string          `gorm:"column:description;type:text;" json:"description"`                        // 版本描述

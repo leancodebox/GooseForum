@@ -1,9 +1,10 @@
 package component
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"net/http"
 )
 
 type Status int

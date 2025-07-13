@@ -1,9 +1,10 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
