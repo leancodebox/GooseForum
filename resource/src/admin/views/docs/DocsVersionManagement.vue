@@ -75,31 +75,15 @@
         <p class="text-base-content/70">暂无版本数据</p>
       </div>
 
-      <div v-else class="space-y-2">
-        <div
-            v-for="version in versions"
-            :key="version.id"
-            class="bg-base-100 rounded-lg shadow-sm border border-base-300 p-3 hover:shadow-md transition-shadow"
-        >
-          <div class="flex items-center gap-3">
-            <!-- 拖拽手柄 -->
-            <div class="flex-shrink-0">
-              <Bars3Icon class="w-4 h-4 text-base-content/30 cursor-grab"/>
-            </div>
-
-            <!-- 版本图标 -->
-            <div class="avatar flex-shrink-0 hidden sm:block">
-              <div class="w-8 h-8 rounded bg-base-200 flex items-center justify-center">
-                <TagIcon class="w-4 h-4 text-base-content/50"/>
-              </div>
-            </div>
-
-            <!-- 版本信息 -->
-            <div class="flex-1 min-w-0">
-              <!-- 第一行：标题、徽章和操作按钮 -->
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 min-w-0 flex-1">
-                  <h4 class="font-semibold text-base-content text-base truncate">{{ version.name }}</h4>
+      <div v-else class="bg-base-100">
+        <ul class="list shadow-md rounded-box ">
+          <li v-for="version in versions" :key="version.id" class="flex items-center justify-between px-4 py-2 hover:bg-base-200 rounded-lg transition-colors list-row">
+            <!-- 左侧：版本信息 -->
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <!-- 版本详情 -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="font-semibold text-base truncate">{{ version.name }}</h4>
                   <div class="flex items-center gap-1 flex-shrink-0">
                     <span v-if="version.isDefault" class="badge badge-primary badge-xs">默认</span>
                     <span class="badge badge-xs" :class="getStatusClass(version.status)">
@@ -107,106 +91,95 @@
                     </span>
                   </div>
                 </div>
-
-                <!-- 操作按钮 -->
-                <div class="flex gap-1 flex-shrink-0">
-                  <!-- 大屏幕显示完整按钮 -->
-                  <div class="hidden lg:flex gap-1">
-                    <button class="btn btn-xs btn-ghost" @click="viewVersion(version)" title="查看">
-                      <EyeIcon class="w-3 h-3"/>
-                      <span class="ml-1">查看</span>
-                    </button>
-                    <button class="btn btn-xs btn-info" @click="editDirectory(version)" title="目录结构">
-                      <FolderIcon class="w-3 h-3"/>
-                      <span class="ml-1">目录</span>
-                    </button>
-                    <button 
-                      v-if="!version.isDefault" 
-                      class="btn btn-xs btn-success" 
-                      @click="setDefaultVersion(version)" 
-                      title="设为默认"
-                    >
-                      <StarIcon class="w-3 h-3"/>
-                      <span class="ml-1">设为默认</span>
-                    </button>
-                    <button class="btn btn-xs btn-warning" @click="editVersion(version)" title="编辑">
-                      <PencilIcon class="w-3 h-3"/>
-                      <span class="ml-1">编辑</span>
-                    </button>
-                    <button class="btn btn-xs btn-error" @click="deleteVersion(version)" title="删除">
-                      <TrashIcon class="w-3 h-3"/>
-                      <span class="ml-1">删除</span>
-                    </button>
-                  </div>
-
-                  <!-- 中等屏幕显示图标按钮 -->
-                  <div class="hidden md:flex lg:hidden gap-1">
-                    <button class="btn btn-xs btn-ghost" @click="viewVersion(version)" title="查看">
-                      <EyeIcon class="w-3 h-3"/>
-                    </button>
-                    <button class="btn btn-xs btn-info" @click="editDirectory(version)" title="目录结构">
-                      <FolderIcon class="w-3 h-3"/>
-                    </button>
-                    <button 
-                      v-if="!version.isDefault" 
-                      class="btn btn-xs btn-success" 
-                      @click="setDefaultVersion(version)" 
-                      title="设为默认"
-                    >
-                      <StarIcon class="w-3 h-3"/>
-                    </button>
-                    <button class="btn btn-xs btn-warning" @click="editVersion(version)" title="编辑">
-                      <PencilIcon class="w-3 h-3"/>
-                    </button>
-                    <button class="btn btn-xs btn-error" @click="deleteVersion(version)" title="删除">
-                      <TrashIcon class="w-3 h-3"/>
-                    </button>
-                  </div>
-
-                  <!-- 小屏幕显示下拉菜单 -->
-                  <div class="dropdown dropdown-end md:hidden">
-                    <div tabindex="0" role="button" class="btn btn-xs btn-ghost">
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path>
-                      </svg>
-                    </div>
-                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
-                      <li><a @click="viewVersion(version)">查看</a></li>
-                      <li><a @click="editDirectory(version)">目录</a></li>
-                      <li v-if="!version.isDefault"><a @click="setDefaultVersion(version)">设为默认</a></li>
-                      <li><a @click="editVersion(version)">编辑</a></li>
-                      <li><a @click="deleteVersion(version)" class="text-error">删除</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 第二行：详细信息 -->
-              <div class="flex items-center justify-between gap-2 mt-1">
-                <div class="flex items-center gap-2 min-w-0 flex-1">
-                  <span class="text-xs font-mono bg-base-200 text-base-content/70 px-1.5 py-0.5 rounded flex-shrink-0">
+                <div class="flex items-center gap-2 text-sm text-base-content/70">
+                  <span class="font-mono bg-base-200 px-2 py-0.5 rounded text-xs">
                     {{ version.slug }}
                   </span>
-                  <span class="text-xs text-base-content/60 truncate">
-                    {{ version.projectName }}
-                  </span>
-                  <span v-if="version.description" class="text-xs text-base-content/50 truncate hidden sm:block">
-                    {{ version.description }}
+                  <span class="truncate">{{ version.projectName }}</span>
+                  <span v-if="version.description" class="truncate hidden sm:block text-base-content/50">
+                    · {{ version.description }}
                   </span>
                 </div>
-
-                <div class="flex items-center gap-2 flex-shrink-0">
-                  <span class="badge badge-xs badge-outline">
-                    #{{ version.sortOrder }}
-                  </span>
-                  <span class="text-xs text-base-content/40 hidden sm:block">
-                    {{ formatDate(version.createdAt) }}
-                  </span>
+                <div class="flex items-center gap-2 mt-1 text-xs text-base-content/50">
+                  <span>排序: #{{ version.sortOrder }}</span>
+                  <span class="hidden sm:block">{{ formatDate(version.createdAt) }}</span>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+
+            <!-- 右侧：操作按钮 -->
+            <div class="flex gap-1 flex-shrink-0">
+              <!-- 大屏幕显示完整按钮 -->
+              <div class="hidden lg:flex gap-1">
+                <button class="btn btn-xs btn-ghost" @click="viewVersion(version)" title="查看">
+                  <EyeIcon class="w-3 h-3"/>
+                  <span class="ml-1">查看</span>
+                </button>
+                <button class="btn btn-xs btn-info" @click="editDirectory(version)" title="目录结构">
+                  <FolderIcon class="w-3 h-3"/>
+                  <span class="ml-1">目录</span>
+                </button>
+                <button 
+                  v-if="!version.isDefault" 
+                  class="btn btn-xs btn-success" 
+                  @click="setDefaultVersion(version)" 
+                  title="设为默认"
+                >
+                  <StarIcon class="w-3 h-3"/>
+                  <span class="ml-1">设为默认</span>
+                </button>
+                <button class="btn btn-xs btn-warning" @click="editVersion(version)" title="编辑">
+                  <PencilIcon class="w-3 h-3"/>
+                  <span class="ml-1">编辑</span>
+                </button>
+                <button class="btn btn-xs btn-error" @click="deleteVersion(version)" title="删除">
+                  <TrashIcon class="w-3 h-3"/>
+                  <span class="ml-1">删除</span>
+                </button>
+              </div>
+
+              <!-- 中等屏幕显示图标按钮 -->
+              <div class="hidden md:flex lg:hidden gap-1">
+                <button class="btn btn-xs btn-ghost" @click="viewVersion(version)" title="查看">
+                  <EyeIcon class="w-3 h-3"/>
+                </button>
+                <button class="btn btn-xs btn-info" @click="editDirectory(version)" title="目录结构">
+                  <FolderIcon class="w-3 h-3"/>
+                </button>
+                <button 
+                  v-if="!version.isDefault" 
+                  class="btn btn-xs btn-success" 
+                  @click="setDefaultVersion(version)" 
+                  title="设为默认"
+                >
+                  <StarIcon class="w-3 h-3"/>
+                </button>
+                <button class="btn btn-xs btn-warning" @click="editVersion(version)" title="编辑">
+                  <PencilIcon class="w-3 h-3"/>
+                </button>
+                <button class="btn btn-xs btn-error" @click="deleteVersion(version)" title="删除">
+                  <TrashIcon class="w-3 h-3"/>
+                </button>
+              </div>
+
+              <!-- 小屏幕显示下拉菜单 -->
+              <div class="dropdown dropdown-end md:hidden">
+                <div tabindex="0" role="button" class="btn btn-xs btn-ghost">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path>
+                  </svg>
+                </div>
+                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
+                  <li><a @click="viewVersion(version)">查看</a></li>
+                  <li><a @click="editDirectory(version)">目录</a></li>
+                  <li v-if="!version.isDefault"><a @click="setDefaultVersion(version)">设为默认</a></li>
+                  <li><a @click="editVersion(version)">编辑</a></li>
+                  <li><a @click="deleteVersion(version)" class="text-error">删除</a></li>
+                </ul>
+              </div>
+            </div>
+          </li>
+        </ul>
       </div>
 
       <!-- 分页 -->
@@ -392,7 +365,6 @@ import {
 } from '../../utils/docsInterfaces';
 import {
   ArrowPathIcon,
-  Bars3Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
   DocumentTextIcon,
