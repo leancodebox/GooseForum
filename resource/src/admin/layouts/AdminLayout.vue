@@ -95,110 +95,75 @@
             <ul class="menu bg-base-100 w-full h-full overflow-y-auto transition-all duration-300 ease-in-out" :class="isCollapsed ? 'p-1' : 'p-2'">
               <template v-for="item in menuItems" :key="item.key">
                 <!-- 普通菜单项 -->
-                <li v-if="!item.children" class="mb-1">
+                <li v-if="!item.children">
                   <router-link :to="item.path" :class="[
-                    'flex items-center rounded-lg transition-all duration-200 ease-in-out h-10',
                     {
-                      'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content': isPathActive(item.path),
-                      'text-base-content hover:bg-base-200 hover:text-base-content hover:scale-105': !isPathActive(item.path),
-                      'justify-center px-1': isCollapsed,
-                      'justify-start px-3': !isCollapsed
+                      'active': isPathActive(item.path),
+                      'justify-center': isCollapsed
                     }
                   ]" :title="isCollapsed ? item.label : ''">
-                    <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200"
-                      :class="{ 'scale-110': isPathActive(item.path) }" />
-                    <span v-if="!isCollapsed" class="ml-3 truncate transition-all duration-300 ease-in-out"
-                      :class="{ 'font-normal': isPathActive(item.path) }">{{ item.label }}</span>
+                    <component :is="item.icon" class="w-5 h-5" />
+                    <span v-if="!isCollapsed">{{ item.label }}</span>
                   </router-link>
                 </li>
                 
                 <!-- 带子菜单的菜单项 -->
-                <li v-else class="mb-1">
-                  <!-- 折叠状态下显示为普通菜单项 -->
+                <li v-else>
+                  <!-- 折叠状态下使用悬停显示子菜单 -->
                   <template v-if="isCollapsed">
-                    <!-- 悬停显示子菜单的 Popover -->
-                    <!-- 如果有激活的子菜单，点击父级菜单跳转到激活的子菜单 -->
-                    <router-link v-if="isParentActive(item)" :to="getActiveChildPath(item)" :class="[
-                      'flex items-center rounded-lg transition-all duration-200 ease-in-out h-10 relative',
-                      'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content',
-                      'justify-center px-1'
-                    ]" :title="item.label" @mouseenter="showSubmenu(item.key)" @mouseleave="hideSubmenu(item.key)">
-                      <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200 scale-110" />
+                    <div class="relative group">
+                       <!-- 父级菜单项 -->
+                       <router-link v-if="isParentActive(item)" :to="getActiveChildPath(item)" :class="[
+                         {
+                           'active': isParentActive(item),
+                           'justify-center': isCollapsed
+                         }
+                       ]" :title="item.label">
+                         <component :is="item.icon" class="w-5 h-5" />
+                       </router-link>
+                       <a v-else :class="[
+                         {
+                           'justify-center': isCollapsed
+                         }
+                       ]" :title="item.label">
+                         <component :is="item.icon" class="w-5 h-5" />
+                       </a>
                       
-                      <!-- 悬停时显示的子菜单 Popover -->
-                      <div v-show="activeSubmenu === item.key" class="absolute left-full top-0 ml-2 transition-all duration-200 z-[60]">
-                        <ul class="menu bg-base-100 shadow-lg rounded-box min-w-48 border border-base-300">
-                          <li v-for="child in item.children" :key="child.key">
-                            <router-link :to="child.path" :class="[
-                              'flex items-center rounded-lg transition-all duration-200 ease-in-out text-sm h-10',
-                              {
-                                'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content': isPathActive(child.path),
-                                'text-base-content hover:bg-base-200 hover:text-base-content': !isPathActive(child.path)
-                              },
-                              'px-2'
-                            ]">
-                              <component :is="child.icon" class="w-4 h-4 flex-shrink-0 mr-2" />
-                              <span class="truncate">{{ child.label }}</span>
-                            </router-link>
-                          </li>
-                        </ul>
-                      </div>
-                    </router-link>
-                    <!-- 如果没有激活的子菜单，显示为普通图标（不可点击） -->
-                    <div v-else :class="[
-                      'flex items-center rounded-lg transition-all duration-200 ease-in-out cursor-default h-10 relative',
-                      'text-base-content hover:bg-base-200 hover:text-base-content hover:scale-105',
-                      'justify-center px-1'
-                    ]" :title="item.label" @mouseenter="showSubmenu(item.key)" @mouseleave="hideSubmenu(item.key)">
-                      <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200" />
-                      
-                      <!-- 悬停时显示的子菜单 Popover -->
-                      <div v-show="activeSubmenu === item.key" class="absolute left-full top-0 ml-2 transition-all duration-200 z-[60]">
-                        <ul class="menu bg-base-100 shadow-lg rounded-box min-w-48 border border-base-300">
-                          <li v-for="child in item.children" :key="child.key">
-                            <router-link :to="child.path" :class="[
-                              'flex items-center rounded-lg transition-all duration-200 ease-in-out text-sm h-10',
-                              {
-                                'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content': isPathActive(child.path),
-                                'text-base-content hover:bg-base-200 hover:text-base-content': !isPathActive(child.path)
-                              },
-                              'px-2'
-                            ]">
-                              <component :is="child.icon" class="w-4 h-4 flex-shrink-0 mr-2" />
-                              <span class="truncate">{{ child.label }}</span>
-                            </router-link>
-                          </li>
-                        </ul>
-                      </div>
+                      <!-- 悬停时显示的子菜单 -->
+                      <ul class="menu bg-base-100 shadow-lg rounded-box min-w-48 border border-base-300 absolute left-full top-0 ml-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <li v-for="child in item.children" :key="child.key">
+                          <router-link :to="child.path" :class="[
+                            {
+                              'active': isPathActive(child.path)
+                            }
+                          ]">
+                            <component :is="child.icon" class="w-4 h-4" />
+                            <span>{{ child.label }}</span>
+                          </router-link>
+                        </li>
+                      </ul>
                     </div>
                   </template>
                   
-                  <!-- 展开状态下显示为可折叠菜单 -->
+                  <!-- 展开状态下使用DaisyUI原生的details/summary -->
                   <details v-else :open="isParentActive(item)">
                     <summary :class="[
-                      'flex items-center rounded-lg transition-all duration-200 ease-in-out cursor-pointer h-10',
                       {
-                        'bg-primary text-primary-content shadow-md': isParentActive(item),
-                        'text-base-content hover:bg-base-200 hover:text-base-content hover:scale-105': !isParentActive(item)
-                      },
-                      'px-3'
+                        'active': isParentActive(item)
+                      }
                     ]">
-                      <component :is="item.icon" class="w-5 h-5 flex-shrink-0 mr-3 transition-transform duration-200"
-                        :class="{ 'scale-110': isParentActive(item) }" />
-                      <span class="truncate transition-all duration-300 ease-in-out">{{ item.label }}</span>
+                      <component :is="item.icon" class="w-5 h-5" />
+                      <span>{{ item.label }}</span>
                     </summary>
-                    <ul class="ml-4 mt-1 space-y-1">
+                    <ul>
                       <li v-for="child in item.children" :key="child.key">
                         <router-link :to="child.path" :class="[
-                          'flex items-center rounded-lg transition-all duration-200 ease-in-out text-sm h-10',
                           {
-                            'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content': isPathActive(child.path),
-                            'text-base-content hover:bg-base-200 hover:text-base-content': !isPathActive(child.path)
-                          },
-                          'px-2'
+                            'active': isPathActive(child.path)
+                          }
                         ]">
-                          <component :is="child.icon" class="w-4 h-4 flex-shrink-0 mr-2" />
-                          <span class="truncate">{{ child.label }}</span>
+                          <component :is="child.icon" class="w-4 h-4" />
+                          <span>{{ child.label }}</span>
                         </router-link>
                       </li>
                     </ul>
@@ -258,9 +223,6 @@ const userStore = useAuthStore()
 // 侧边栏折叠状态
 const isCollapsed = ref(false)
 
-// 当前显示的子菜单
-const activeSubmenu = ref<string | null>(null)
-
 // 窗口宽度响应式状态
 const windowWidth = ref(window.innerWidth)
 
@@ -284,8 +246,9 @@ const toggleSidebar = () => {
   localStorage.setItem('sidebar-collapsed', isCollapsed.value.toString())
 }
 
-// 路径匹配函数 - 处理末尾斜杠问题
+// 路径匹配函数 - 精确匹配
 const isPathActive = (itemPath: string) => {
+  if (!itemPath) return false
   const currentPath = route.path.replace(/\/$/, '') || '/'
   const targetPath = itemPath.replace(/\/$/, '') || '/'
   return currentPath === targetPath
@@ -302,18 +265,6 @@ const getActiveChildPath = (parentItem: MenuItem) => {
   if (!parentItem.children) return '/admin'
   const activeChild = parentItem.children.find((child: MenuItem) => child.path && isPathActive(child.path))
   return activeChild?.path || parentItem.children[0]?.path || '/admin'
-}
-
-// 显示子菜单
-const showSubmenu = (key: string) => {
-  activeSubmenu.value = key
-}
-
-// 隐藏子菜单
-const hideSubmenu = (key: string) => {
-  if (activeSubmenu.value === key) {
-    activeSubmenu.value = null
-  }
 }
 
 // 菜单项
