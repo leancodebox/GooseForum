@@ -87,7 +87,7 @@
                 <!-- 普通菜单项 -->
                 <li v-if="!item.children">
                   <router-link :to="item.path" :class="{
-                    'menu-active': isPathActive(item.path)
+                    'bg-primary text-primary-content': isPathActive(item.path)
                   }">
                     <component :is="item.icon" class="w-5 h-5"/>
                     <span>{{ item.label }}</span>
@@ -105,7 +105,7 @@
                       <li v-for="child in item.children" :key="child.key">
                         <router-link :to="child.path" :class="[
                           {
-                            'menu-active': isPathActive(child.path)
+                            'bg-primary text-primary-content': isPathActive(child.path)
                           }
                         ]">
                           <component :is="child.icon" class="w-4 h-4"/>

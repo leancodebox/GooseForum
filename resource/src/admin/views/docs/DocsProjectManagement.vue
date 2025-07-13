@@ -2,7 +2,7 @@
   <div class="p-4">
     <!-- 页面标题 -->
     <div class="flex justify-between items-center mb-2">
-      <h2 class="text-xl font-bold text-base-content">文档项目管理</h2>
+      <h2 class="text-xl font-normal text-base-content">文档项目管理</h2>
       <button class="btn btn-primary btn-sm" @click="openCreateModal">
         <PlusIcon class="w-4 h-4"/>
         新建项目
@@ -202,7 +202,7 @@
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
 
-        <h3 class="font-bold text-lg mb-4">{{ isEditing ? '编辑项目' : '新建项目' }}</h3>
+        <h3 class="font-normal text-lg mb-4">{{ isEditing ? '编辑项目' : '新建项目' }}</h3>
 
         <form @submit.prevent="submitForm" class="space-y-4">
           <!-- 项目名称 -->
