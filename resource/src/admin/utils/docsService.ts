@@ -4,6 +4,11 @@ import type {
   DocsProjectCreateReq,
   DocsProjectUpdateReq,
   DocsProjectItem,
+  DocsVersionListReq,
+  DocsVersionCreateReq,
+  DocsVersionUpdateReq,
+  DocsVersionItem,
+  DirectoryNode,
   PageResponse,
   ApiResponse
 } from './docsInterfaces';
@@ -12,44 +17,110 @@ import type {
 export class DocsProjectService {
   // 获取项目列表
   static async getProjectList(params: DocsProjectListReq): Promise<PageResponse<DocsProjectItem>> {
-    const response = await axiosInstance.post<ApiResponse<PageResponse<DocsProjectItem>>>(
+    const response = await axiosInstance.post(
       '/api/admin/docs/projects/list',
       params
-    );
-    return response.data.result;
+    ) as any;
+    return response.result;
   }
 
   // 获取项目详情
   static async getProjectDetail(id: number): Promise<DocsProjectItem> {
-    const response = await axiosInstance.get<ApiResponse<DocsProjectItem>>(
+    const response = await axiosInstance.get(
       `/api/admin/docs/projects/${id}`
-    );
-    return response.data.result;
+    ) as any;
+    return response.result;
   }
 
   // 创建项目
   static async createProject(data: DocsProjectCreateReq): Promise<DocsProjectItem> {
-    const response = await axiosInstance.post<ApiResponse<DocsProjectItem>>(
+    const response = await axiosInstance.post(
       '/api/admin/docs/projects',
       data
-    );
-    return response.data.result;
+    ) as any;
+    return response.result;
   }
 
   // 更新项目
   static async updateProject(id: number, data: DocsProjectUpdateReq): Promise<DocsProjectItem> {
-    const response = await axiosInstance.put<ApiResponse<DocsProjectItem>>(
+    const response = await axiosInstance.put(
       `/api/admin/docs/projects/${id}`,
       data
-    );
-    return response.data.result;
+    ) as any;
+    return response.result;
   }
 
   // 删除项目
   static async deleteProject(id: number): Promise<void> {
-    await axiosInstance.delete<ApiResponse<void>>(
+    await axiosInstance.delete(
       `/api/admin/docs/projects/${id}`
     );
+  }
+
+  // 文档版本管理API服务
+  // 获取版本列表
+  static async getVersionList(params: DocsVersionListReq): Promise<PageResponse<DocsVersionItem>> {
+    const response = await axiosInstance.post(
+      '/api/admin/docs/versions/list',
+      params
+    ) as any;
+    return response.result;
+  }
+
+  // 获取版本详情
+  static async getVersionDetail(id: number): Promise<DocsVersionItem> {
+    const response = await axiosInstance.get(
+      `/api/admin/docs/versions/${id}`
+    ) as any;
+    return response.result;
+  }
+
+  // 创建版本
+  static async createVersion(data: DocsVersionCreateReq): Promise<DocsVersionItem> {
+    const response = await axiosInstance.post(
+      '/api/admin/docs/versions',
+      data
+    ) as any;
+    return response.result;
+  }
+
+  // 更新版本
+  static async updateVersion(id: number, data: DocsVersionUpdateReq): Promise<DocsVersionItem> {
+    const response = await axiosInstance.put(
+      `/api/admin/docs/versions/${id}`,
+      data
+    ) as any;
+    return response.result;
+  }
+
+  // 删除版本
+  static async deleteVersion(id: number): Promise<void> {
+    await axiosInstance.delete(
+      `/api/admin/docs/versions/${id}`
+    );
+  }
+
+  // 设置默认版本
+  static async setDefaultVersion(id: number): Promise<void> {
+    await axiosInstance.put(
+      `/api/admin/docs/versions/${id}/set-default`
+    );
+  }
+
+  // 更新目录结构
+  static async updateDirectory(id: number, directoryStructure: DirectoryNode[]): Promise<void> {
+    await axiosInstance.put(
+      `/api/admin/docs/versions/${id}/directory`,
+      { directoryStructure }
+    );
+  }
+
+  // 获取项目的版本列表（用于下拉选择）
+  static async getProjectVersions(projectId: number): Promise<DocsVersionItem[]> {
+    const response = await axiosInstance.get(
+      `/api/admin/docs/projects/${projectId}/versions`
+    ) as any;
+    return response.result;
   }
 }
 

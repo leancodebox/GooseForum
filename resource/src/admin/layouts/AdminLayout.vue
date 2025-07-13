@@ -232,6 +232,12 @@ const menuItems = ref([
     icon: BookOpenIcon
   },
   {
+    key: 'docs-versions',
+    label: '文档版本管理',
+    path: '/admin/docs/versions',
+    icon: TagIcon
+  },
+  {
     key: 'web-settings',
     label: '网页设置',
     path: '/admin/web-settings',

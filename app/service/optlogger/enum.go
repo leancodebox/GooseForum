@@ -12,6 +12,8 @@ func (receiver OptEnum) TargetTypeEnum() TargetTypeEnum {
 		return User
 	case CreateDocProject, UpdateDocProject, DeleteDocProject:
 		return DocProject
+	case CreateDocVersion, UpdateDocVersion, DeleteDocVersion:
+		return DocVersion
 	}
 	return System
 }
@@ -28,6 +30,12 @@ func (receiver OptEnum) Name() string {
 		return "更新文档项目"
 	case DeleteDocProject:
 		return "删除文档项目"
+	case CreateDocVersion:
+		return "创建文档版本"
+	case UpdateDocVersion:
+		return "更新文档版本"
+	case DeleteDocVersion:
+		return "删除文档版本"
 	}
 	return ""
 }
@@ -42,6 +50,9 @@ const (
 	CreateDocProject
 	UpdateDocProject
 	DeleteDocProject
+	CreateDocVersion
+	UpdateDocVersion
+	DeleteDocVersion
 )
 
 type TargetTypeEnum int
@@ -54,6 +65,8 @@ func (receiver TargetTypeEnum) Name() string {
 		return "用户"
 	case DocProject:
 		return "文档项目"
+	case DocVersion:
+		return "文档版本"
 	}
 	return ""
 }
@@ -67,4 +80,5 @@ const (
 	User                      = iota
 	Article                   = iota
 	DocProject                = iota
+	DocVersion                = iota
 )

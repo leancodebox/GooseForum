@@ -125,6 +125,16 @@ const routes: RouteRecordRaw[] = [
           requiresAdmin: true
         }
       },
+      {
+        path: 'docs/versions',
+        name: 'AdminDocsVersions',
+        component: () => import('../views/docs/DocsVersionManagement.vue'),
+        meta: {
+          title: '文档版本管理',
+          requiresAuth: true,
+          requiresAdmin: true
+        }
+      },
     ]
   },
   {

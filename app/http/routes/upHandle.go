@@ -44,8 +44,9 @@ func UpButterReq[T any](action func(ctx component.BetterRequest[T]) component.Re
 			return
 		}
 		response := action(component.BetterRequest[T]{
-			Params: params,
-			UserId: userId,
+			Params:     params,
+			UserId:     userId,
+			GinContext: c,
 		})
 		c.JSON(response.Code, response.Data)
 	}

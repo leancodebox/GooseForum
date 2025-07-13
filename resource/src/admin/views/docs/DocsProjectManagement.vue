@@ -1,256 +1,329 @@
 <template>
-  <div class="docs-project-management">
+  <div class="p-4">
     <!-- 页面标题 -->
-    <div class="page-header">
-      <h2>文档项目管理</h2>
-      <button class="btn btn-primary" @click="showCreateModal = true">
-        <i class="fas fa-plus"></i> 新建项目
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="text-xl font-bold text-base-content">文档项目管理</h2>
+      <button class="btn btn-primary btn-sm" @click="openCreateModal">
+        <PlusIcon class="w-4 h-4"/>
+        新建项目
       </button>
     </div>
 
     <!-- 搜索筛选 -->
-    <div class="search-filters">
-      <div class="filter-row">
-        <div class="filter-item">
-          <label>关键词:</label>
-          <input 
-            v-model="searchParams.keyword" 
-            type="text" 
-            placeholder="搜索项目名称或描述"
-            @keyup.enter="loadProjects"
-          />
+    <div class="bg-base-200 p-3 rounded-lg mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-3 items-end">
+        <div class="md:col-span-2">
+          <label class="floating-label join w-full">
+            <span>搜索项目名称或描述</span>
+            <input
+                v-model="searchParams.keyword"
+                type="text"
+                placeholder="搜索项目名称或描述"
+                class="input input-bordered input-sm w-full"
+                @keyup.enter="loadProjects"
+            />
+          </label>
         </div>
-        <div class="filter-item">
-          <label>状态:</label>
-          <select v-model="searchParams.status">
+
+        <label class="floating-label join w-full">
+          <span>状态</span>
+          <select v-model="searchParams.status" class="select select-bordered select-sm">
             <option value="">全部状态</option>
             <option v-for="option in PROJECT_STATUS_OPTIONS" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
           </select>
-        </div>
-        <div class="filter-item">
-          <label>公开性:</label>
-          <select v-model="searchParams.isPublic">
-            <option value="">全部</option>
+        </label>
+
+        <label class="floating-label join w-full">
+          <span>公开性</span>
+          <select v-model="searchParams.isPublic" class="select select-bordered select-sm">
+            <option value="">全部公开性</option>
             <option v-for="option in PUBLIC_STATUS_OPTIONS" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
           </select>
-        </div>
-        <div class="filter-actions">
-          <button class="btn btn-secondary" @click="loadProjects">
-            <i class="fas fa-search"></i> 搜索
-          </button>
-          <button class="btn btn-light" @click="resetSearch">
-            <i class="fas fa-undo"></i> 重置
-          </button>
-        </div>
+        </label>
+
+        <button class="btn btn-neutral btn-sm" @click="loadProjects">
+          <MagnifyingGlassIcon class="w-4 h-4"/>
+          搜索
+        </button>
+
+        <button class="btn btn-ghost btn-sm" @click="resetSearch">
+          <ArrowPathIcon class="w-4 h-4"/>
+          重置
+        </button>
       </div>
     </div>
 
     <!-- 项目列表 -->
-    <div class="project-list">
-      <div v-if="loading" class="loading">
-        <i class="fas fa-spinner fa-spin"></i> 加载中...
-      </div>
-      
-      <div v-else-if="projects.length === 0" class="empty-state">
-        <i class="fas fa-folder-open"></i>
-        <p>暂无项目数据</p>
+    <div>
+      <div v-if="loading" class="flex justify-center items-center py-8">
+        <span class="loading loading-spinner loading-lg"></span>
+        <span class="ml-2 text-base-content">加载中...</span>
       </div>
 
-      <div v-else class="table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>项目信息</th>
-              <th>状态</th>
-              <th>所有者</th>
-              <th>创建时间</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="project in projects" :key="project.id">
-              <td>
-                <div class="project-info">
-                  <div class="project-logo">
-                    <img v-if="project.logoUrl" :src="project.logoUrl" :alt="project.name" />
-                    <i v-else class="fas fa-book"></i>
+      <div v-else-if="projects.length === 0" class="text-center py-8">
+        <FolderOpenIcon class="w-12 h-12 text-base-content/50 mb-3 mx-auto"/>
+        <p class="text-base-content/70">暂无项目数据</p>
+      </div>
+
+      <div v-else class="space-y-2">
+        <div
+            v-for="project in projects"
+            :key="project.id"
+            class="bg-base-100 rounded-lg shadow-sm border border-base-300 p-3 hover:shadow-md transition-shadow cursor-move"
+        >
+          <div class="flex items-center gap-3">
+            <!-- 拖拽手柄 -->
+            <div class="flex-shrink-0">
+              <Bars3Icon class="w-4 h-4 text-base-content/30 cursor-grab"/>
+            </div>
+
+            <!-- 项目Logo -->
+            <div class="avatar flex-shrink-0 hidden sm:block">
+              <div class="w-8 h-8 rounded-lg">
+                <img v-if="project.logoUrl" :src="project.logoUrl" :alt="project.name" class="object-cover"/>
+                <div v-else class="bg-base-200 flex items-center justify-center w-full h-full">
+                  <BookOpenIcon class="w-4 h-4 text-base-content/50"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- 项目信息 -->
+            <div class="flex-1 min-w-0">
+              <!-- 第一行：项目名称 + 徽章 + 操作按钮 -->
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 flex-1 min-w-0">
+                  <h4 class="font-semibold text-base-content text-base truncate">{{ project.name }}</h4>
+                  <div class="flex gap-1 flex-shrink-0">
+                    <span class="badge badge-xs" :class="getStatusClass(project.status)">
+                      {{ getStatusText(project.status) }}
+                    </span>
+                    <span class="badge badge-xs" :class="getPublicClass(project.isPublic)">
+                      {{ getPublicText(project.isPublic) }}
+                    </span>
                   </div>
-                  <div class="project-details">
-                    <h4>{{ project.name }}</h4>
-                    <p class="slug">{{ project.slug }}</p>
-                    <p class="description">{{ project.description || '暂无描述' }}</p>
+                </div>
+
+                <!-- 操作按钮 - 响应式设计 -->
+                <div class="flex gap-1 flex-shrink-0">
+                  <!-- 大屏幕：显示完整按钮 -->
+                  <div class="hidden lg:flex gap-1">
+                    <button class="btn btn-xs btn-ghost" @click="viewProject(project)" title="查看">
+                      <EyeIcon class="w-3 h-3"/>
+                      <span class="ml-1">查看</span>
+                    </button>
+                    <button class="btn btn-xs btn-warning" @click="editProject(project)" title="编辑">
+                      <PencilIcon class="w-3 h-3"/>
+                      <span class="ml-1">编辑</span>
+                    </button>
+                    <button class="btn btn-xs btn-error" @click="deleteProject(project)" title="删除">
+                      <TrashIcon class="w-3 h-3"/>
+                      <span class="ml-1">删除</span>
+                    </button>
+                  </div>
+
+                  <!-- 中等屏幕：只显示图标 -->
+                  <div class="hidden md:flex lg:hidden gap-1">
+                    <button class="btn btn-xs btn-ghost" @click="viewProject(project)" title="查看">
+                      <EyeIcon class="w-3 h-3"/>
+                    </button>
+                    <button class="btn btn-xs btn-warning" @click="editProject(project)" title="编辑">
+                      <PencilIcon class="w-3 h-3"/>
+                    </button>
+                    <button class="btn btn-xs btn-error" @click="deleteProject(project)" title="删除">
+                      <TrashIcon class="w-3 h-3"/>
+                    </button>
+                  </div>
+
+                  <!-- 小屏幕：下拉菜单 -->
+                  <div class="dropdown dropdown-end md:hidden">
+                    <div tabindex="0" role="button" class="btn btn-xs btn-ghost">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path>
+                      </svg>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
+                      <li><a @click="viewProject(project)"><EyeIcon class="w-3 h-3"/>查看</a></li>
+                      <li><a @click="editProject(project)"><PencilIcon class="w-3 h-3"/>编辑</a></li>
+                      <li><a @click="deleteProject(project)"><TrashIcon class="w-3 h-3"/>删除</a></li>
+                    </ul>
                   </div>
                 </div>
-              </td>
-              <td>
-                <div class="status-badges">
-                  <span class="badge" :class="getStatusClass(project.status)">
-                    {{ getStatusText(project.status) }}
-                  </span>
-                  <span class="badge" :class="getPublicClass(project.isPublic)">
-                    {{ getPublicText(project.isPublic) }}
-                  </span>
-                </div>
-              </td>
-              <td>
-                <div class="owner-info">
-                  <span>{{ project.ownerName || '未知用户' }}</span>
-                  <small>(ID: {{ project.ownerId }})</small>
-                </div>
-              </td>
-              <td>
-                <div class="time-info">
-                  <div>{{ formatDate(project.createdAt) }}</div>
-                  <small>更新: {{ formatDate(project.updatedAt) }}</small>
-                </div>
-              </td>
-              <td>
-                <div class="actions">
-                  <button class="btn btn-sm btn-info" @click="viewProject(project)">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button class="btn btn-sm btn-warning" @click="editProject(project)">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn btn-sm btn-danger" @click="deleteProject(project)">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+
+              <!-- 第二行：项目标识 + 描述 + 所有者 + 创建时间 -->
+              <div class="flex items-center gap-2 mt-1 text-xs text-base-content/70">
+                <span class="font-mono bg-base-200 px-1.5 py-0.5 rounded flex-shrink-0">{{ project.slug }}</span>
+                <span class="truncate flex-1 hidden sm:block">{{ project.description || '暂无描述' }}</span>
+                <span class="flex-shrink-0 hidden md:block">{{ project.ownerName || '未知用户' }}</span>
+                <span class="flex-shrink-0 hidden lg:block">{{ formatDate(project.createdAt) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 分页 -->
-      <div v-if="totalPages > 1" class="pagination">
-        <button 
-          class="btn btn-sm" 
-          :disabled="currentPage <= 1" 
-          @click="changePage(currentPage - 1)"
-        >
-          上一页
-        </button>
-        <span class="page-info">
-          第 {{ currentPage }} 页，共 {{ totalPages }} 页，总计 {{ total }} 条
-        </span>
-        <button 
-          class="btn btn-sm" 
-          :disabled="currentPage >= totalPages" 
-          @click="changePage(currentPage + 1)"
-        >
-          下一页
-        </button>
+      <div v-if="totalPages > 1" class="flex justify-between items-center mt-4 pt-4 border-t border-base-200">
+        <div class="text-xs text-base-content/60">
+          共 {{ total }} 个项目
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+              class="btn btn-sm"
+              :disabled="currentPage <= 1"
+              @click="changePage(currentPage - 1)"
+          >
+            <ChevronLeftIcon class="w-4 h-4"/>
+            <span class="ml-1">上一页</span>
+          </button>
+          <span class="text-sm text-base-content/70 px-3">
+            第 {{ currentPage }} 页 / 共 {{ totalPages }} 页
+          </span>
+          <button
+              class="btn btn-sm"
+              :disabled="currentPage >= totalPages"
+              @click="changePage(currentPage + 1)"
+          >
+            <span class="mr-1">下一页</span>
+            <ChevronRightIcon class="w-4 h-4"/>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- 创建/编辑项目模态框 -->
-    <div v-if="showCreateModal || showEditModal" class="modal-overlay" @click="closeModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h3>{{ showCreateModal ? '新建项目' : '编辑项目' }}</h3>
-          <button class="close-btn" @click="closeModal">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="submitForm">
-            <div class="form-group">
-              <label>项目名称 *</label>
-              <input 
-                v-model="formData.name" 
-                type="text" 
-                required 
+    <dialog id="project_modal" class="modal">
+      <div class="modal-box w-11/12 max-w-2xl">
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <h3 class="font-bold text-lg mb-4">{{ isEditing ? '编辑项目' : '新建项目' }}</h3>
+
+        <form @submit.prevent="submitForm" class="space-y-4">
+          <!-- 项目名称 -->
+          <label class="floating-label">
+            <input
+                v-model="formData.name"
+                type="text"
+                required
                 placeholder="请输入项目名称"
+                class="input input-bordered w-full"
+            />
+            <span>项目名称 *</span>
+          </label>
+
+          <!-- 项目标识 -->
+          <fieldset class="fieldset">
+            <label class="floating-label">
+              <input
+                  v-model="formData.slug"
+                  type="text"
+                  required
+                  placeholder="请输入项目标识"
+                  pattern="[a-zA-Z0-9-_]+"
+                  class="input input-bordered w-full"
               />
-            </div>
-            <div class="form-group">
-              <label>项目标识 *</label>
-              <input 
-                v-model="formData.slug" 
-                type="text" 
-                required 
-                placeholder="请输入项目标识（英文字母、数字）"
-                pattern="[a-zA-Z0-9-_]+"
-              />
-              <small>用于URL路径，只能包含字母、数字、连字符和下划线</small>
-            </div>
-            <div class="form-group">
-              <label>项目描述</label>
-              <textarea 
-                v-model="formData.description" 
+              <span>项目标识 *</span>
+            </label>
+            <span class="label text-xs text-base-content/60">用于URL路径，只能包含字母、数字、连字符和下划线</span>
+          </fieldset>
+
+          <!-- 项目描述 -->
+          <label class="floating-label">
+            <textarea
+                v-model="formData.description"
                 placeholder="请输入项目描述"
                 rows="3"
-              ></textarea>
-            </div>
-            <div class="form-group">
-              <label>Logo URL</label>
-              <input 
-                v-model="formData.logoUrl" 
-                type="url" 
+                class="textarea textarea-bordered w-full"
+            ></textarea>
+            <span>项目描述</span>
+          </label>
+
+          <!-- Logo URL -->
+          <label class="floating-label">
+            <input
+                v-model="formData.logoUrl"
+                type="url"
                 placeholder="请输入Logo图片URL"
-              />
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>状态 *</label>
-                <select v-model="formData.status" required>
-                  <option v-for="option in PROJECT_STATUS_OPTIONS" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                  </option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>公开性 *</label>
-                <select v-model="formData.isPublic" required>
-                  <option v-for="option in PUBLIC_STATUS_OPTIONS" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                  </option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>所有者ID *</label>
-              <input 
-                v-model.number="formData.ownerId" 
-                type="number" 
-                required 
+                class="input input-bordered w-full"
+            />
+            <span>Logo URL</span>
+          </label>
+
+          <!-- 状态和公开性 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="select select-bordered">
+              <span class="label">状态 *</span>
+              <select v-model="formData.status" required>
+                <option v-for="option in PROJECT_STATUS_OPTIONS" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </label>
+
+            <label class="select select-bordered">
+              <span class="label">公开性 *</span>
+              <select v-model="formData.isPublic" required>
+                <option v-for="option in PUBLIC_STATUS_OPTIONS" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <!-- 所有者ID -->
+          <label class="floating-label">
+            <input
+                v-model.number="formData.ownerId"
+                type="number"
+                required
                 placeholder="请输入所有者用户ID"
-              />
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" @click="closeModal">取消</button>
+                class="input input-bordered w-full"
+            />
+            <span>所有者ID *</span>
+          </label>
+        </form>
+
+        <div class="modal-action">
+          <button class="btn" @click="closeModal">取消</button>
           <button class="btn btn-primary" @click="submitForm" :disabled="submitting">
-            <i v-if="submitting" class="fas fa-spinner fa-spin"></i>
-            {{ submitting ? '提交中...' : (showCreateModal ? '创建' : '更新') }}
+            <span v-if="submitting" class="loading loading-spinner loading-sm"></span>
+            {{ submitting ? '提交中...' : (isEditing ? '更新' : '创建') }}
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue';
+import {computed, onMounted, reactive, ref} from 'vue';
 import DocsProjectService from '../../utils/docsService';
-import {
-  PROJECT_STATUS_OPTIONS,
-  PUBLIC_STATUS_OPTIONS,
-  ProjectStatus,
-  PublicStatus
-} from '../../utils/docsInterfaces';
 import type {
+  DocsProjectCreateReq,
   DocsProjectItem,
   DocsProjectListReq,
-  DocsProjectCreateReq,
   DocsProjectUpdateReq
 } from '../../utils/docsInterfaces';
+import {PROJECT_STATUS_OPTIONS, ProjectStatus, PUBLIC_STATUS_OPTIONS, PublicStatus} from '../../utils/docsInterfaces';
+import {
+  ArrowPathIcon,
+  Bars3Icon,
+  BookOpenIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EyeIcon,
+  FolderOpenIcon,
+  MagnifyingGlassIcon,
+  PencilIcon,
+  PlusIcon,
+  TrashIcon
+} from '@heroicons/vue/24/outline';
 
 // 响应式数据
 const loading = ref(false);
@@ -270,8 +343,7 @@ const searchParams = reactive<DocsProjectListReq>({
 });
 
 // 模态框状态
-const showCreateModal = ref(false);
-const showEditModal = ref(false);
+const isEditing = ref(false);
 const editingProject = ref<DocsProjectItem | null>(null);
 
 // 表单数据
@@ -326,7 +398,15 @@ const viewProject = (project: DocsProjectItem) => {
   console.log('查看项目:', project);
 };
 
+const openCreateModal = () => {
+  isEditing.value = false;
+  resetForm();
+  const modal = document.getElementById('project_modal') as HTMLDialogElement;
+  modal?.showModal();
+};
+
 const editProject = (project: DocsProjectItem) => {
+  isEditing.value = true;
   editingProject.value = project;
   formData.name = project.name;
   formData.slug = project.slug;
@@ -335,14 +415,15 @@ const editProject = (project: DocsProjectItem) => {
   formData.status = project.status;
   formData.isPublic = project.isPublic;
   formData.ownerId = project.ownerId;
-  showEditModal.value = true;
+  const modal = document.getElementById('project_modal') as HTMLDialogElement;
+  modal?.showModal();
 };
 
 const deleteProject = async (project: DocsProjectItem) => {
   if (!confirm(`确定要删除项目 "${project.name}" 吗？此操作不可恢复。`)) {
     return;
   }
-  
+
   try {
     await DocsProjectService.deleteProject(project.id);
     alert('删除成功');
@@ -354,8 +435,9 @@ const deleteProject = async (project: DocsProjectItem) => {
 };
 
 const closeModal = () => {
-  showCreateModal.value = false;
-  showEditModal.value = false;
+  const modal = document.getElementById('project_modal') as HTMLDialogElement;
+  modal?.close();
+  isEditing.value = false;
   editingProject.value = null;
   resetForm();
 };
@@ -373,10 +455,10 @@ const resetForm = () => {
 const submitForm = async () => {
   submitting.value = true;
   try {
-    if (showCreateModal.value) {
+    if (!isEditing.value) {
       await DocsProjectService.createProject(formData);
       alert('创建成功');
-    } else if (showEditModal.value && editingProject.value) {
+    } else if (editingProject.value) {
       const updateData: DocsProjectUpdateReq = {
         id: editingProject.value.id,
         ...formData
@@ -402,10 +484,14 @@ const getStatusText = (status: number) => {
 
 const getStatusClass = (status: number) => {
   switch (status) {
-    case ProjectStatus.DRAFT: return 'badge-secondary';
-    case ProjectStatus.ACTIVE: return 'badge-success';
-    case ProjectStatus.ARCHIVED: return 'badge-warning';
-    default: return 'badge-secondary';
+    case ProjectStatus.DRAFT:
+      return 'badge-neutral';
+    case ProjectStatus.ACTIVE:
+      return 'badge-success';
+    case ProjectStatus.ARCHIVED:
+      return 'badge-warning';
+    default:
+      return 'badge-neutral';
   }
 };
 
@@ -414,7 +500,7 @@ const getPublicText = (isPublic: number) => {
 };
 
 const getPublicClass = (isPublic: number) => {
-  return isPublic === PublicStatus.PUBLIC ? 'badge-info' : 'badge-dark';
+  return isPublic === PublicStatus.PUBLIC ? 'badge-info' : 'badge-ghost';
 };
 
 const formatDate = (dateStr: string) => {
@@ -426,367 +512,3 @@ onMounted(() => {
   loadProjects();
 });
 </script>
-
-<style scoped>
-.docs-project-management {
-  padding: 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  margin: 0;
-  color: #333;
-}
-
-.search-filters {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-.filter-row {
-  display: flex;
-  gap: 15px;
-  align-items: end;
-  flex-wrap: wrap;
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.filter-item label {
-  font-weight: 500;
-  color: #555;
-}
-
-.filter-item input,
-.filter-item select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  min-width: 150px;
-}
-
-.filter-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.loading {
-  text-align: center;
-  padding: 40px;
-  color: #666;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 60px;
-  color: #999;
-}
-
-.empty-state i {
-  font-size: 48px;
-  margin-bottom: 15px;
-}
-
-.table-container {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.table th {
-  background: #f8f9fa;
-  font-weight: 600;
-  color: #555;
-}
-
-.project-info {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.project-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.project-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.project-logo i {
-  color: #999;
-  font-size: 18px;
-}
-
-.project-details h4 {
-  margin: 0 0 4px 0;
-  font-size: 16px;
-  color: #333;
-}
-
-.project-details .slug {
-  margin: 0 0 4px 0;
-  font-size: 12px;
-  color: #666;
-  font-family: monospace;
-  background: #f5f5f5;
-  padding: 2px 6px;
-  border-radius: 3px;
-  display: inline-block;
-}
-
-.project-details .description {
-  margin: 0;
-  font-size: 13px;
-  color: #777;
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.status-badges {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
-  text-align: center;
-  min-width: 50px;
-}
-
-.badge-success { background: #d4edda; color: #155724; }
-.badge-warning { background: #fff3cd; color: #856404; }
-.badge-secondary { background: #e2e3e5; color: #383d41; }
-.badge-info { background: #d1ecf1; color: #0c5460; }
-.badge-dark { background: #d6d8db; color: #1b1e21; }
-
-.owner-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.owner-info small {
-  color: #999;
-  font-size: 11px;
-}
-
-.time-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 13px;
-}
-
-.time-info small {
-  color: #999;
-  font-size: 11px;
-}
-
-.actions {
-  display: flex;
-  gap: 5px;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  transition: all 0.2s;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary { background: #007bff; color: white; }
-.btn-primary:hover:not(:disabled) { background: #0056b3; }
-
-.btn-secondary { background: #6c757d; color: white; }
-.btn-secondary:hover:not(:disabled) { background: #545b62; }
-
-.btn-info { background: #17a2b8; color: white; }
-.btn-info:hover:not(:disabled) { background: #117a8b; }
-
-.btn-warning { background: #ffc107; color: #212529; }
-.btn-warning:hover:not(:disabled) { background: #e0a800; }
-
-.btn-danger { background: #dc3545; color: white; }
-.btn-danger:hover:not(:disabled) { background: #c82333; }
-
-.btn-light { background: #f8f9fa; color: #212529; border: 1px solid #dee2e6; }
-.btn-light:hover:not(:disabled) { background: #e2e6ea; }
-
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 12px;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-  padding: 20px;
-}
-
-.page-info {
-  color: #666;
-  font-size: 14px;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #eee;
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: #333;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: #999;
-  padding: 5px;
-}
-
-.close-btn:hover {
-  color: #333;
-}
-
-.modal-body {
-  padding: 20px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-row {
-  display: flex;
-  gap: 15px;
-}
-
-.form-row .form-group {
-  flex: 1;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #555;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-}
-
-.form-group small {
-  display: block;
-  margin-top: 5px;
-  color: #666;
-  font-size: 12px;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 20px;
-  border-top: 1px solid #eee;
-}
-</style>

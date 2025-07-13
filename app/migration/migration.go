@@ -7,6 +7,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/app/models/docs/docContents"
+	"github.com/leancodebox/GooseForum/app/models/docs/docOperationLogs"
+	"github.com/leancodebox/GooseForum/app/models/docs/docProjects"
+	"github.com/leancodebox/GooseForum/app/models/docs/docVersions"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
@@ -67,6 +71,10 @@ func migration(migration bool) {
 			&userStatistics.Entity{},
 			&articleCollection.Entity{},
 			&kvstore.Entity{},
+			&docProjects.Entity{},
+			&docVersions.Entity{},
+			&docContents.Entity{},
+			&docOperationLogs.Entity{},
 		); err != nil {
 			slog.Error("dbconnect migration err", "err", err)
 		} else {
