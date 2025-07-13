@@ -50,7 +50,7 @@
 
         <!-- 侧边栏 -->
         <aside id="docs-sidebar"
-               class="w-60 bg-base-100 border-r border-base-300 flex-shrink-0 h-full overflow-y-auto hidden md:block transition-all duration-300 ease-in-out">
+               class="w-80 max-w-[85vw] md:w-60 bg-base-100 border-r border-base-300 md:flex-shrink-0 h-full overflow-y-auto md:block fixed md:relative top-0 left-0 z-50 md:z-auto shadow-2xl md:shadow-none transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out">
             <div class="p-2">
                 <!-- 项目信息 -->
                 <div class="min-w-0 flex-1 p-2">
@@ -181,145 +181,6 @@
         <div id="sidebar-backdrop"
              class="fixed inset-0 z-40 bg-black/50 md:hidden opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
 
-        <!-- 移动端侧边栏 -->
-        <aside id="mobile-sidebar"
-               class="fixed top-0 left-0 z-50 w-80 max-w-[85vw] h-full bg-base-100 shadow-2xl md:hidden transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
-            <div class="relative w-full h-full">
-                <div class="p-5">
-                    <!-- 项目信息 -->
-                    <div class="mb-6 p-4 bg-base-50 border border-base-200 rounded-xl">
-                        <div class="flex items-start gap-3">
-                            <div class="text-2xl flex-shrink-0">
-                                📚
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <h2 class="text-lg font-bold text-base-content mb-1 truncate">{{.Project.Name}}</h2>
-                                <p class="text-sm text-base-content/70 mb-2 line-clamp-2">{{.Project.Description}}</p>
-                                <div class="badge badge-primary badge-outline text-xs">{{.Version.Version}}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 目录导航 -->
-                    <div class="mb-6">
-                        <h3 class="text-base font-semibold text-base-content mb-4 flex items-center gap-2">
-                            📋 目录
-                        </h3>
-                        <ul class="menu bg-base-100 rounded-box w-full p-0">
-                            {{range .Directory}}
-                            <li>
-                                {{if .Children}}
-                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
-                                   class="{{if eq .Slug $.CurrentSlug}}active{{end}}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    {{.Title}}
-                                </a>
-                                <ul>
-                                    {{range .Children}}
-                                    <li>
-                                        <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
-                                           class="{{if eq .Slug $.CurrentSlug}}active{{end}}">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                            </svg>
-                                            {{.Title}}
-                                        </a>
-                                    </li>
-                                    {{end}}
-                                </ul>
-                                {{else}}
-                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
-                                   class="{{if eq .Slug $.CurrentSlug}}active{{end}}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    {{.Title}}
-                                </a>
-                                {{end}}
-                            </li>
-                            {{end}}
-                        </ul>
-                    </div>
-
-                    <!-- 版本选择 -->
-                    <div class="mb-6">
-                        <h3 class="text-base font-semibold text-base-content mb-3 flex items-center gap-2">
-                            🏷️ 版本
-                        </h3>
-                        <div class="dropdown dropdown-top w-full">
-                            <label tabindex="0"
-                                   class="flex items-center justify-between w-full px-3 py-2 bg-base-100 border border-base-300 rounded-lg text-sm font-medium hover:border-primary hover:text-primary transition-all duration-200 cursor-pointer">
-                                <span>{{.Version.Version}}</span>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                          d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </label>
-                            <ul tabindex="0"
-                                class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-lg border border-base-200 w-full mt-1">
-                                {{if .ProjectVersions}}
-                                {{range .ProjectVersions}}
-                                {{if eq .Version $.Version.Version}}
-                                <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}}
-                                    (当前)</a></li>
-                                {{else}}
-                                <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}}</a>
-                                </li>
-                                {{end}}
-                                {{end}}
-                                {{else}}
-                                <li><a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
-                                       class="text-sm">{{.Version.Version}} (当前)</a></li>
-                                {{end}}
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- 快速导航 -->
-                    <div class="mb-6">
-                        <h3 class="text-base font-semibold text-base-content mb-3 flex items-center gap-2">
-                            🧭 快速导航
-                        </h3>
-                        <div class="space-y-2">
-                            <a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
-                               class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                          d="M15 19l-7-7 7-7"></path>
-                                </svg>
-                                <span>返回版本目录</span>
-                            </a>
-                            <a href="/docs/{{.Project.Slug}}"
-                               class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                          d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
-                                </svg>
-                                <span>返回项目</span>
-                            </a>
-                            <a href="/docs"
-                               class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/60 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                          d="M8 5a2 2 0 012-2h2a2 2 0 012 2v0H8v0z"></path>
-                                </svg>
-                                <span>文档中心</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
         <!-- 主内容区 -->
         <div class="flex-1 h-full overflow-y-auto bg-base-100 relative">
             <div class="px-6 lg:px-8 xl:px-12 py-6 lg:py-8">
@@ -418,7 +279,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const mobileSidebar = document.getElementById('docs-sidebar');
         const sidebarBackdrop = document.getElementById('sidebar-backdrop');
         const menuIcon = document.getElementById('menu-icon');
         const closeIcon = document.getElementById('close-icon');
@@ -489,17 +350,19 @@
             }
         });
 
-        // 移动端侧边栏内的链接点击后自动关闭侧边栏
-        const mobileSidebarLinks = mobileSidebar.querySelectorAll('a');
-        mobileSidebarLinks.forEach(link => {
-            link.addEventListener('click', function () {
-                if (isSidebarOpen) {
-                    setTimeout(() => {
-                        toggleMobileSidebar();
-                    }, 150); // 延迟关闭，让用户看到点击效果
-                }
+        // 侧边栏内的链接点击后自动关闭侧边栏（仅移动端）
+        if (mobileSidebar) {
+            const sidebarLinks = mobileSidebar.querySelectorAll('a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    if (isSidebarOpen && window.innerWidth < 768) {
+                        setTimeout(() => {
+                            toggleMobileSidebar();
+                        }, 150); // 延迟关闭，让用户看到点击效果
+                    }
+                });
             });
-        });
+        }
     });
 </script>
 </body>
