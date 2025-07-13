@@ -131,7 +131,7 @@
   },
   {
     "tool": "dbhelper",
-    "modelName": "operation_logs",
+    "modelName": "doc_operation_logs",
     "keyList": [
       {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "日志ID", "null": "NO", "default": null},
       {"field": "entity_type", "type": "varchar(50)", "key": "", "desc": "实体类型", "null": "NO", "default": ""},
