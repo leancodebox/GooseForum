@@ -93,22 +93,81 @@
           <!-- 菜单 -->
           <nav class="flex-1 overflow-y-auto overflow-x-hidden scrollbar-ultra-thin pt-20">
             <ul class="menu w-full" :class="isCollapsed ? 'p-1' : 'p-2'">
-              <li v-for="item in menuItems" :key="item.key" class="mb-1">
-                <router-link :to="item.path" :class="[
-                  'flex items-center rounded-lg transition-all duration-200 ease-in-out',
-                  {
-                    'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content': isPathActive(item.path),
-                    'text-base-content hover:bg-base-200 hover:text-base-content hover:scale-105': !isPathActive(item.path),
-                    'justify-center p-2': isCollapsed,
-                    'justify-start p-3': !isCollapsed
-                  }
-                ]" :title="isCollapsed ? item.label : ''">
-                  <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200"
-                    :class="{ 'scale-110': isPathActive(item.path) }" />
-                  <span v-if="!isCollapsed" class="ml-3 truncate transition-all duration-300 ease-in-out"
-                    :class="{ 'font-normal': isPathActive(item.path) }">{{ item.label }}</span>
-                </router-link>
-              </li>
+              <template v-for="item in menuItems" :key="item.key">
+                <!-- 普通菜单项 -->
+                <li v-if="!item.children" class="mb-1">
+                  <router-link :to="item.path" :class="[
+                    'flex items-center rounded-lg transition-all duration-200 ease-in-out',
+                    {
+                      'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content': isPathActive(item.path),
+                      'text-base-content hover:bg-base-200 hover:text-base-content hover:scale-105': !isPathActive(item.path),
+                      'justify-center p-2': isCollapsed,
+                      'justify-start p-3': !isCollapsed
+                    }
+                  ]" :title="isCollapsed ? item.label : ''">
+                    <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200"
+                      :class="{ 'scale-110': isPathActive(item.path) }" />
+                    <span v-if="!isCollapsed" class="ml-3 truncate transition-all duration-300 ease-in-out"
+                      :class="{ 'font-normal': isPathActive(item.path) }">{{ item.label }}</span>
+                  </router-link>
+                </li>
+                
+                <!-- 带子菜单的菜单项 -->
+                <li v-else class="mb-1">
+                  <!-- 折叠状态下显示为普通菜单项 -->
+                  <template v-if="isCollapsed">
+                    <!-- 如果有激活的子菜单，点击父级菜单跳转到激活的子菜单 -->
+                    <router-link v-if="isParentActive(item)" :to="getActiveChildPath(item)" :class="[
+                      'flex items-center rounded-lg transition-all duration-200 ease-in-out',
+                      'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content',
+                      'justify-center p-2'
+                    ]" :title="item.label">
+                      <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200 scale-110" />
+                    </router-link>
+                    <!-- 如果没有激活的子菜单，显示为普通图标（不可点击） -->
+                    <div v-else :class="[
+                      'flex items-center rounded-lg transition-all duration-200 ease-in-out cursor-default',
+                      'text-base-content hover:bg-base-200 hover:text-base-content hover:scale-105',
+                      'justify-center p-2'
+                    ]" :title="item.label">
+                      <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200" />
+                    </div>
+                  </template>
+                  
+                  <!-- 展开状态下显示为可折叠菜单 -->
+                  <details v-else :open="isParentActive(item)">
+                    <summary :class="[
+                      'flex items-center rounded-lg transition-all duration-200 ease-in-out cursor-pointer',
+                      {
+                        'bg-base-200 text-base-content font-medium': isParentActive(item),
+                        'text-base-content hover:bg-base-200 hover:text-base-content hover:scale-105': !isParentActive(item)
+                      },
+                      'justify-start p-3'
+                    ]">
+                      <component :is="item.icon" class="w-5 h-5 flex-shrink-0 transition-transform duration-200"
+                        :class="{ 'scale-110': isParentActive(item) }" />
+                      <span class="ml-3 truncate transition-all duration-300 ease-in-out">{{ item.label }}</span>
+                    </summary>
+                    <ul class="ml-4 mt-1 space-y-1">
+                      <li v-for="child in item.children" :key="child.key">
+                        <router-link :to="child.path" :class="[
+                          'flex items-center rounded-lg transition-all duration-200 ease-in-out text-sm',
+                          {
+                            'bg-primary text-primary-content shadow-md hover:bg-primary/90 hover:text-primary-content': isPathActive(child.path),
+                            'text-base-content/70 hover:bg-base-200 hover:text-base-content': !isPathActive(child.path)
+                          },
+                          'justify-start p-2'
+                        ]">
+                          <component :is="child.icon" class="w-4 h-4 flex-shrink-0 transition-transform duration-200"
+                            :class="{ 'scale-110': isPathActive(child.path) }" />
+                          <span class="ml-2 truncate transition-all duration-300 ease-in-out"
+                            :class="{ 'font-medium': isPathActive(child.path) }">{{ child.label }}</span>
+                        </router-link>
+                      </li>
+                    </ul>
+                  </details>
+                </li>
+              </template>
             </ul>
           </nav>
         </aside>
@@ -135,8 +194,25 @@ import {
   ChevronRightIcon,
   Bars3Icon,
   GlobeAltIcon,
-  BookOpenIcon
+  BookOpenIcon,
+  FolderIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/vue/24/outline'
+import type { Component } from 'vue'
+
+// 菜单项类型定义
+interface MenuItem {
+  key: string
+  label: string
+  path?: string
+  icon: Component
+  children?: MenuItem[]
+}
+
+interface MenuItemResult {
+  item: MenuItem
+  parent: MenuItem | null
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -175,8 +251,21 @@ const isPathActive = (itemPath: string) => {
   return currentPath === targetPath
 }
 
+// 判断父级菜单是否激活（子菜单中有激活项）
+const isParentActive = (parentItem: MenuItem) => {
+  if (!parentItem.children) return false
+  return parentItem.children.some((child: MenuItem) => child.path && isPathActive(child.path))
+}
+
+// 获取激活的子菜单路径（用于折叠状态下的父级菜单点击）
+const getActiveChildPath = (parentItem: MenuItem) => {
+  if (!parentItem.children) return '/admin'
+  const activeChild = parentItem.children.find((child: MenuItem) => child.path && isPathActive(child.path))
+  return activeChild?.path || parentItem.children[0]?.path || '/admin'
+}
+
 // 菜单项
-const menuItems = ref([
+const menuItems = ref<MenuItem[]>([
   {
     key: 'dashboard',
     label: '仪表盘-todo',
@@ -226,16 +315,23 @@ const menuItems = ref([
     icon: TicketIcon
   },
   {
-    key: 'docs-projects',
-    label: '文档项目管理',
-    path: '/admin/docs/projects',
-    icon: BookOpenIcon
-  },
-  {
-    key: 'docs-versions',
-    label: '文档版本管理',
-    path: '/admin/docs/versions',
-    icon: TagIcon
+    key: 'docs',
+    label: '文档管理',
+    icon: FolderIcon,
+    children: [
+      {
+        key: 'docs-projects',
+        label: '项目管理',
+        path: '/admin/docs/projects',
+        icon: BookOpenIcon
+      },
+      {
+        key: 'docs-versions',
+        label: '版本管理',
+        path: '/admin/docs/versions',
+        icon: DocumentDuplicateIcon
+      }
+    ]
   },
   {
     key: 'web-settings',
@@ -251,10 +347,27 @@ const menuItems = ref([
   },
 ])
 
+// 查找当前菜单项（支持嵌套菜单）
+const findCurrentMenuItem = (path: string): MenuItemResult | null => {
+  for (const item of menuItems.value) {
+    if (item.path === path) {
+      return { item, parent: null }
+    }
+    if (item.children) {
+      for (const child of item.children) {
+        if (child.path === path) {
+          return { item: child, parent: item }
+        }
+      }
+    }
+  }
+  return null
+}
+
 // 页面标题
 const pageTitle = computed(() => {
-  const currentItem = menuItems.value.find(item => item.path === route.path)
-  return currentItem?.label || '管理后台'
+  const result = findCurrentMenuItem(route.path)
+  return result?.item?.label || '管理后台'
 })
 
 // 面包屑导航
@@ -262,9 +375,14 @@ const breadcrumbs = computed(() => {
   const crumbs = [{ name: '首页', path: '/admin' }]
 
   if (route.path !== '/admin') {
-    const currentItem = menuItems.value.find(item => item.path === route.path)
-    if (currentItem) {
-      crumbs.push({ name: currentItem.label, path: route.path })
+    const result = findCurrentMenuItem(route.path)
+    if (result) {
+      // 如果有父级菜单，先添加父级
+      if (result.parent) {
+        crumbs.push({ name: result.parent.label, path: null })
+      }
+      // 添加当前页面
+      crumbs.push({ name: result.item.label, path: route.path })
     }
   }
 
