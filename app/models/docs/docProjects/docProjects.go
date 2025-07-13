@@ -46,16 +46,14 @@ const fieldUpdatedAt = "updated_at"
 const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
-	Id            uint64 `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                  // 项目ID
-	Name          string `gorm:"column:name;type:varchar(100);not null;default:'';" json:"name"`          // 项目名称
-	Slug          string `gorm:"column:slug;type:varchar(100);not null;default:'';" json:"slug"`          // 项目标识符
-	Description   string `gorm:"column:description;type:text;" json:"description"`                        // 项目描述
-	RepositoryUrl string `gorm:"column:repository_url;type:varchar(255);" json:"repositoryUrl"`           // 仓库地址
-	HomepageUrl   string `gorm:"column:homepage_url;type:varchar(255);" json:"homepageUrl"`               // 项目主页
-	LogoUrl       string `gorm:"column:logo_url;type:varchar(255);" json:"logoUrl"`                       // 项目Logo
-	Status        int8   `gorm:"column:status;type:tinyint;not null;default:1;" json:"status"`            // 状态(1:活跃 2:维护 3:废弃)
-	IsPublic      int8   `gorm:"column:is_public;type:tinyint;not null;default:1;" json:"isPublic"`       // 是否公开(0:私有 1:公开)
-	OwnerId       uint64 `gorm:"column:owner_id;type:bigint unsigned;not null;default:0;" json:"ownerId"` // 项目所有者ID
+	Id          uint64 `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                  // 项目ID
+	Name        string `gorm:"column:name;type:varchar(100);not null;default:'';" json:"name"`          // 项目名称
+	Slug        string `gorm:"column:slug;type:varchar(100);not null;default:'';" json:"slug"`          // 项目标识符
+	Description string `gorm:"column:description;type:text;" json:"description"`                        // 项目描述
+	LogoUrl     string `gorm:"column:logo_url;type:varchar(255);not null;default:'';" json:"logoUrl"`   // 项目Logo
+	Status      int8   `gorm:"column:status;type:tinyint;not null;default:1;" json:"status"`            // 状态(1:活跃 2:维护 3:废弃)
+	IsPublic    int8   `gorm:"column:is_public;type:tinyint;not null;default:1;" json:"isPublic"`       // 是否公开(0:私有 1:公开)
+	OwnerId     uint64 `gorm:"column:owner_id;type:bigint unsigned;not null;default:0;" json:"ownerId"` // 项目所有者ID
 
 	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
 	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间

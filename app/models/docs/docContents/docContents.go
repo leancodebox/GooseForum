@@ -52,18 +52,20 @@ const fieldUpdatedAt = "updated_at"
 const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
-	Id              uint64 `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                    // 内容ID
-	Title           string `gorm:"column:title;type:varchar(200);not null;default:'';" json:"title"`          // 文档标题
-	Slug            string `gorm:"column:slug;type:varchar(200);not null;default:'';" json:"slug"`            // 文档标识符
-	Content         string `gorm:"column:content;type:longtext;" json:"content"`                              // 文档内容(Markdown)
-	ContentHtml     string `gorm:"column:content_html;type:longtext;" json:"contentHtml"`                     // 渲染后的HTML内容
-	Excerpt         string `gorm:"column:excerpt;type:text;" json:"excerpt"`                                  // 文档摘要
-	Toc             string `gorm:"column:toc;type:json;" json:"toc"`                                          // 目录结构(JSON)
-	MetaKeywords    string `gorm:"column:meta_keywords;type:varchar(255);" json:"metaKeywords"`               // SEO关键词
-	MetaDescription string `gorm:"column:meta_description;type:text;" json:"metaDescription"`                 // SEO描述
-	IsPublished     int8   `gorm:"column:is_published;type:tinyint;not null;default:0;" json:"isPublished"`   // 是否发布(0:草稿 1:已发布)
-	SortOrder       int    `gorm:"column:sort_order;type:int;not null;default:0;" json:"sortOrder"`           // 排序权重
-	AuthorId        uint64 `gorm:"column:author_id;type:bigint unsigned;not null;default:0;" json:"authorId"` // 作者ID
+	Id                 uint64 `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                         // 内容ID
+	VersionId          uint64 `gorm:"column:version_id;not null;default:0;uniqueIndex:version_id,slug:1" json:"versionId"`            // 版本
+	Title              string `gorm:"column:title;type:varchar(200);not null;default:'';" json:"title"`                               // 文档标题
+	Slug               string `gorm:"column:slug;type:varchar(200);not null;default:'';uniqueIndex:version_id,slug:2" json:"slug"`    // 文档标识符
+	OriginContent      string `gorm:"column:content;type:text;" json:"OriginContent"`                                                 // 文档内容(Markdown)
+	Content            string `gorm:"column:content;type:text;" json:"content"`                                                       // 文档内容(Markdown)
+	ContentHtml        string `gorm:"column:content_html;type:text;" json:"contentHtml"`                                              // 渲染后的HTML内容
+	ContentHtmlVersion uint32 `gorm:"column:content_html_version;type:bigint unsigned;not null;default:0;" json:"contentHtmlVersion"` //md 的渲染器版本
+	Toc                string `gorm:"column:toc;type:json;" json:"toc"`                                                               // 目录结构(JSON)
+	IsPublished        int8   `gorm:"column:is_published;type:tinyint;not null;default:0;" json:"isPublished"`                        // 是否发布(0:草稿 1:已发布)
+	SortOrder          int    `gorm:"column:sort_order;type:int;not null;default:0;" json:"sortOrder"`                                // 排序权重
+
+	LikeCount uint64 `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`       // 喜欢数量
+	ViewCount uint64 `gorm:"column:view_count;index;type:bigint unsigned;not null;default:0;" json:"viewCount"` // 访问数量
 
 	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
 	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
