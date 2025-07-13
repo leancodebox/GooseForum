@@ -87,7 +87,7 @@
                 <!-- 普通菜单项 -->
                 <li v-if="!item.children">
                   <router-link :to="item.path" :class="{
-                    'active': isPathActive(item.path)
+                    'menu-active': isPathActive(item.path)
                   }">
                     <component :is="item.icon" class="w-5 h-5"/>
                     <span>{{ item.label }}</span>
@@ -97,9 +97,7 @@
                 <!-- 带子菜单的菜单项 -->
                 <li v-else>
                   <details :open="isParentActive(item)">
-                    <summary :class="{
-                      'active': isParentActive(item)
-                    }">
+                    <summary>
                       <component :is="item.icon" class="w-5 h-5"/>
                       <span>{{ item.label }}</span>
                     </summary>
@@ -107,7 +105,7 @@
                       <li v-for="child in item.children" :key="child.key">
                         <router-link :to="child.path" :class="[
                           {
-                            'active': isPathActive(child.path)
+                            'menu-active': isPathActive(child.path)
                           }
                         ]">
                           <component :is="child.icon" class="w-4 h-4"/>
