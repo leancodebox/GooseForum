@@ -45,7 +45,7 @@ func GetVersionList(page, pageSize int, projectId uint64, keyword string, status
 	}
 
 	// 状态过滤
-	if status >= 0 {
+	if status > 0 {
 		query = query.Where("status = ?", status)
 	}
 

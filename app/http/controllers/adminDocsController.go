@@ -642,7 +642,7 @@ type DocsVersionListReq struct {
 	PageSize  int     `json:"pageSize"`
 	ProjectId *uint64 `json:"projectId"`
 	Keyword   string  `json:"keyword"`
-	Status    *int8   `json:"status"`
+	Status    int8    `json:"status"`
 }
 
 // DocsVersionCreateReq 创建版本请求
@@ -715,8 +715,8 @@ func AdminDocsVersionList(req component.BetterRequest[DocsVersionListReq]) compo
 		projectId = *params.ProjectId
 	}
 	status := -1
-	if params.Status != nil {
-		status = int(*params.Status)
+	if params.Status != 0 {
+		status = int(params.Status)
 	}
 	versions, total, err := docVersions.GetVersionList(page, pageSize, projectId, params.Keyword, status)
 	if err != nil {
