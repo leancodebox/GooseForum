@@ -185,66 +185,12 @@ func DocsHome(c *gin.Context) {
 	})
 }
 
-// DocsProject 项目首页 - 显示默认版本的文档
-func DocsProject(c *gin.Context) {
-	projectSlug := c.Param("project")
-	if projectSlug == "" {
-		errorPage(c, "项目不存在", "项目标识不能为空")
-		return
-	}
-
-	projects, versions, _, err := loadMockData()
-	if err != nil {
-		errorPage(c, "加载数据失败", "无法加载文档数据")
-		return
-	}
-
-	// 查找项目
-	var project *DocProject
-	for _, p := range projects {
-		if p.Slug == projectSlug && p.Status == 1 {
-			project = &p
-			break
-		}
-	}
-
-	if project == nil {
-		errorPage(c, "项目不存在", "找不到指定的文档项目")
-		return
-	}
-
-	// 获取该项目的所有版本
-	projectVersions := make([]DocVersion, 0)
-	for _, v := range versions {
-		if v.ProjectID == project.ID && v.Status == 1 {
-			projectVersions = append(projectVersions, v)
-		}
-	}
-
-	// 构建面包屑导航
-	breadcrumbs := []map[string]string{
-		{"title": "文档中心", "url": "/docs"},
-		{"title": project.Name, "url": ""},
-	}
-
-	viewrender.Render(c, "docs-project.gohtml", map[string]any{
-		"IsProduction":  setting.IsProduction(),
-		"User":          GetLoginUser(c),
-		"Title":         fmt.Sprintf("%s - 文档中心 - GooseForum", project.Name),
-		"Description":   project.Description,
-		"Project":       project,
-		"Versions":      projectVersions,
-		"Breadcrumbs":   breadcrumbs,
-		"CanonicalHref": buildCanonicalHref(c),
-	})
-}
-
 // DocsVersion 版本首页 - 显示版本的第一个文档
 func DocsVersion(c *gin.Context) {
 	projectSlug := c.Param("project")
 	versionSlug := c.Param("version")
 
-	if projectSlug == "" || versionSlug == "" {
+	if projectSlug == "" {
 		errorPage(c, "参数错误", "项目或版本标识不能为空")
 		return
 	}
@@ -272,7 +218,11 @@ func DocsVersion(c *gin.Context) {
 	}
 
 	for _, v := range versions {
-		if v.ProjectID == project.ID && v.Version == versionSlug && v.Status == 1 {
+		if versionSlug != "" && v.ProjectID == project.ID && v.Version == versionSlug && v.Status == 1 {
+			version = &v
+			break
+		}
+		if versionSlug == "" && v.ProjectID == project.ID && v.IsDefault && v.Status == 1 {
 			version = &v
 			break
 		}
@@ -301,8 +251,9 @@ func DocsVersion(c *gin.Context) {
 	// 构建面包屑导航
 	breadcrumbs := []map[string]string{
 		{"title": "文档中心", "url": "/docs"},
-		{"title": project.Name, "url": fmt.Sprintf("/docs/%s", project.Slug)},
-		{"title": version.Name, "url": ""},
+		{"title": project.Name, "url": ""},
+		//{"title": project.Name, "url": fmt.Sprintf("/docs/%s", project.Slug)},
+		//{"title": version.Name, "url": ""},
 	}
 
 	viewrender.Render(c, "docs-version.gohtml", map[string]any{

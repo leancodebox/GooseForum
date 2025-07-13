@@ -48,7 +48,7 @@ func viewRoute(ginApp *gin.Engine) {
 
 	// 文档相关路由
 	viewRouteApp.GET("/docs", controllers.DocsHome)
-	viewRouteApp.GET("/docs/:project", controllers.DocsProject)
+	viewRouteApp.GET("/docs/:project", controllers.DocsVersion)
 	viewRouteApp.GET("/docs/:project/:version", controllers.DocsVersion)
 	viewRouteApp.GET("/docs/:project/:version/:content", controllers.DocsContent)
 }
