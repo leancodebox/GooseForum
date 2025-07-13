@@ -2,7 +2,7 @@
   <div class="min-h-screen ">
     <!-- 顶部导航栏 - 100%宽度 -->
     <header
-        class="navbar bg-base-100 shadow-sm border-b border-base-300 fixed top-0 left-0 right-0 z-50 rounded-bl-lg rounded-br-lg">
+        class="navbar bg-base-100 shadow-sm border-b border-base-300 fixed top-0 left-0 right-0 z-50 rounded-bl-lg rounded-br-lg min-h-14">
       <div class="flex-none">
         <!-- 移动端菜单按钮 -->
         <label for="drawer-toggle" class="btn btn-square btn-ghost lg:hidden">
