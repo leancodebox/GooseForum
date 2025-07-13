@@ -3,6 +3,12 @@ export interface Result<T> {
     result: T;
     message: string;
 }
+export interface PageData<T> {
+    list: T[];
+    page: number
+    size: number
+    total: number
+}
 
 
 export interface Role {

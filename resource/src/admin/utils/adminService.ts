@@ -7,15 +7,10 @@ import type {
     Label,
     Result,
     User,
-    UserRole
+    UserRole,
+    PageData
 } from './adminInterfaces.ts';
 
-export interface PageData<T> {
-    list: T[];
-    page: number
-    size: number
-    total: number
-}
 
 // Mock 获取用户信息
 export const getUserInfo = async (): Promise<Result<any>> => {

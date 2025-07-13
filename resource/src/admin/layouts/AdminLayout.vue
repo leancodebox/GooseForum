@@ -225,9 +225,22 @@ const menuItems = ref<MenuItem[]>([
   },
   {
     key: 'tickets',
-    label: '工单管理-todo',
-    path: '/admin/tickets',
-    icon: TicketIcon
+    label: '工单管理',
+    icon: TicketIcon,
+    children: [
+      {
+        key: 'tickets-management',
+        label: '工单管理',
+        path: '/admin/tickets',
+        icon: TicketIcon
+      },
+      {
+        key: 'tickets-view',
+        label: '工单查看',
+        path: '/admin/tickets/view',
+        icon: DocumentTextIcon
+      }
+    ]
   },
   {
     key: 'docs',
