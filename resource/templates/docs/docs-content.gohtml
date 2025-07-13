@@ -13,11 +13,11 @@
     </header>
     <!-- 面包屑导航 -->
     <div class="bg-base-100 border-b border-base-300 shadow-sm flex-shrink-0">
-        <div class="container px-6 py-2 flex items-start space-x-3">
+        <div class="container px-3 py-2 flex items-center space-x-1">
             <!-- 移动端菜单按钮和面包屑 -->
             <!-- 移动端菜单按钮 -->
             <button id="mobile-menu-toggle"
-                    class="md:hidden inline-flex items-center justify-center w-8 h-8 bg-primary text-primary-content rounded-lg shadow-sm hover:bg-primary/90 transition-all duration-200">
+                    class="btn btn-ghost btn-sm md:hidden w-8 h-8 min-h-8 p-0">
                 <svg id="menu-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 6h16M4 12h16M4 18h16"></path>
@@ -50,62 +50,66 @@
 
         <!-- 侧边栏 -->
         <aside id="docs-sidebar"
-               class="w-80 bg-base-100 border-r border-base-300 flex-shrink-0 h-full overflow-y-auto hidden md:block transition-all duration-300 ease-in-out">
-            <div class="p-5">
+               class="w-60 bg-base-100 border-r border-base-300 flex-shrink-0 h-full overflow-y-auto hidden md:block transition-all duration-300 ease-in-out">
+            <div class="p-2">
                 <!-- 项目信息 -->
-                <div class="mb-6 p-4 bg-base-50 border border-base-200 rounded-xl">
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
-                            📚
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <h2 class="text-lg font-bold text-base-content mb-1 truncate">{{.Project.Name}}</h2>
-                            <p class="text-sm text-base-content/70 mb-2 line-clamp-2">{{.Project.Description}}</p>
-                            <div class="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full border border-primary/20 inline-block">{{.Version.Version}}</div>
-                        </div>
-                    </div>
+                <div class="min-w-0 flex-1 p-2">
+                    <h2 class="text-lg font-bold text-base-content mb-1 truncate">{{.Project.Name}}</h2>
+                    <p class="text-sm text-base-content/70 mb-2 line-clamp-2">{{.Project.Description}}</p>
+                    <div class="badge badge-primary badge-outline text-xs">{{.Version.Version}}</div>
                 </div>
-
+                <hr class="my-2 border-gray-200">
                 <!-- 目录导航 -->
                 <div class="mb-6">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
-                            📋
-                        </div>
-                        <h3 class="text-base font-semibold text-base-content">目录</h3>
-                    </div>
-                    <nav class="space-y-1">
+                    <h3 class="text-base font-semibold text-base-content mb-4 flex items-center gap-2">
+                        📋 目录
+                    </h3>
+                    <ul class="menu bg-base-100 rounded-box w-full p-0">
                         {{range .Directory}}
-                        <div>
-                            <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
-                               class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {{if eq .Slug $.CurrentSlug}}bg-primary/10 text-primary border-l-2 border-primary{{else}}text-base-content/70 hover:text-base-content hover:bg-base-100{{end}}">
-                                <div class="w-1.5 h-1.5 rounded-full {{if eq .Slug $.CurrentSlug}}bg-primary{{else}}bg-base-content/30 group-hover:bg-base-content/50{{end}} transition-colors duration-200"></div>
-                                <span class="truncate">{{.Title}}</span>
-                            </a>
+                        <li>
                             {{if .Children}}
-                            <div class="ml-6 mt-1 space-y-1">
+                            <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
+                               class="{{if eq .Slug $.CurrentSlug}}active{{end}}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                {{.Title}}
+                            </a>
+                            <ul>
                                 {{range .Children}}
-                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
-                                   class="group flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-all duration-200 {{if eq .Slug $.CurrentSlug}}bg-primary/5 text-primary{{else}}text-base-content/60 hover:text-base-content hover:bg-base-50{{end}}">
-                                    <div class="w-1 h-1 rounded-full {{if eq .Slug $.CurrentSlug}}bg-primary{{else}}bg-base-content/20 group-hover:bg-base-content/40{{end}} transition-colors duration-200"></div>
-                                    <span class="truncate">{{.Title}}</span>
-                                </a>
+                                <li>
+                                    <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
+                                       class="{{if eq .Slug $.CurrentSlug}}active{{end}}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                        </svg>
+                                        {{.Title}}
+                                    </a>
+                                </li>
                                 {{end}}
-                            </div>
+                            </ul>
+                            {{else}}
+                            <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
+                               class="{{if eq .Slug $.CurrentSlug}}active{{end}}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                {{.Title}}
+                            </a>
                             {{end}}
-                        </div>
+                        </li>
                         {{end}}
-                    </nav>
+                    </ul>
                 </div>
 
                 <!-- 版本选择 -->
                 <div class="mb-6">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
-                            🏷️
-                        </div>
-                        <h3 class="text-base font-semibold text-base-content">版本</h3>
-                    </div>
+                    <h3 class="text-base font-semibold text-base-content mb-3 flex items-center gap-2">
+                        🏷️ 版本
+                    </h3>
                     <div class="dropdown dropdown-top w-full">
                         <label tabindex="0"
                                class="flex items-center justify-between w-full px-3 py-2 bg-base-100 border border-base-300 rounded-lg text-sm font-medium hover:border-primary hover:text-primary transition-all duration-200 cursor-pointer">
@@ -136,12 +140,9 @@
 
                 <!-- 快速导航 -->
                 <div class="mb-6">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
-                            🧭
-                        </div>
-                        <h3 class="text-base font-semibold text-base-content">快速导航</h3>
-                    </div>
+                    <h3 class="text-base font-semibold text-base-content mb-3 flex items-center gap-2">
+                        🧭 快速导航
+                    </h3>
                     <div class="space-y-2">
                         <a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
                            class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
@@ -188,57 +189,68 @@
                     <!-- 项目信息 -->
                     <div class="mb-6 p-4 bg-base-50 border border-base-200 rounded-xl">
                         <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
+                            <div class="text-2xl flex-shrink-0">
                                 📚
                             </div>
                             <div class="min-w-0 flex-1">
                                 <h2 class="text-lg font-bold text-base-content mb-1 truncate">{{.Project.Name}}</h2>
                                 <p class="text-sm text-base-content/70 mb-2 line-clamp-2">{{.Project.Description}}</p>
-                                <div class="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full border border-primary/20 inline-block">{{.Version.Version}}</div>
+                                <div class="badge badge-primary badge-outline text-xs">{{.Version.Version}}</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- 目录导航 -->
                     <div class="mb-6">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
-                                📋
-                            </div>
-                            <h3 class="text-base font-semibold text-base-content">目录</h3>
-                        </div>
-                        <nav class="space-y-1">
+                        <h3 class="text-base font-semibold text-base-content mb-4 flex items-center gap-2">
+                            📋 目录
+                        </h3>
+                        <ul class="menu bg-base-100 rounded-box w-full p-0">
                             {{range .Directory}}
-                            <div>
-                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
-                                   class="group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {{if eq .Slug $.CurrentSlug}}bg-primary/10 text-primary border-l-2 border-primary{{else}}text-base-content/70 hover:text-base-content hover:bg-base-100{{end}}">
-                                    <div class="w-1.5 h-1.5 rounded-full {{if eq .Slug $.CurrentSlug}}bg-primary{{else}}bg-base-content/30 group-hover:bg-base-content/50{{end}} transition-colors duration-200"></div>
-                                    <span class="truncate">{{.Title}}</span>
-                                </a>
+                            <li>
                                 {{if .Children}}
-                                <div class="ml-6 mt-1 space-y-1">
+                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
+                                   class="{{if eq .Slug $.CurrentSlug}}active{{end}}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    {{.Title}}
+                                </a>
+                                <ul>
                                     {{range .Children}}
-                                    <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
-                                       class="group flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-all duration-200 {{if eq .Slug $.CurrentSlug}}bg-primary/5 text-primary{{else}}text-base-content/60 hover:text-base-content hover:bg-base-50{{end}}">
-                                        <div class="w-1 h-1 rounded-full {{if eq .Slug $.CurrentSlug}}bg-primary{{else}}bg-base-content/20 group-hover:bg-base-content/40{{end}} transition-colors duration-200"></div>
-                                        <span class="truncate">{{.Title}}</span>
-                                    </a>
+                                    <li>
+                                        <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
+                                           class="{{if eq .Slug $.CurrentSlug}}active{{end}}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                            </svg>
+                                            {{.Title}}
+                                        </a>
+                                    </li>
                                     {{end}}
-                                </div>
+                                </ul>
+                                {{else}}
+                                <a href="/docs/{{$.Project.Slug}}/{{$.Version.Version}}/{{.Slug}}"
+                                   class="{{if eq .Slug $.CurrentSlug}}active{{end}}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    {{.Title}}
+                                </a>
                                 {{end}}
-                            </div>
+                            </li>
                             {{end}}
-                        </nav>
+                        </ul>
                     </div>
 
                     <!-- 版本选择 -->
                     <div class="mb-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
-                                🏷️
-                            </div>
-                            <h3 class="text-base font-semibold text-base-content">版本</h3>
-                        </div>
+                        <h3 class="text-base font-semibold text-base-content mb-3 flex items-center gap-2">
+                            🏷️ 版本
+                        </h3>
                         <div class="dropdown dropdown-top w-full">
                             <label tabindex="0"
                                    class="flex items-center justify-between w-full px-3 py-2 bg-base-100 border border-base-300 rounded-lg text-sm font-medium hover:border-primary hover:text-primary transition-all duration-200 cursor-pointer">
@@ -270,12 +282,9 @@
 
                     <!-- 快速导航 -->
                     <div class="mb-6">
-                        <div class="flex items-center gap-2 mb-3">
-                            <div class="w-6 h-6 bg-primary/10 border border-primary/20 rounded flex items-center justify-center text-sm">
-                                🧭
-                            </div>
-                            <h3 class="text-base font-semibold text-base-content">快速导航</h3>
-                        </div>
+                        <h3 class="text-base font-semibold text-base-content mb-3 flex items-center gap-2">
+                            🧭 快速导航
+                        </h3>
                         <div class="space-y-2">
                             <a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
                                class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
