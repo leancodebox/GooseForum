@@ -135,6 +135,16 @@ const routes: RouteRecordRaw[] = [
           requiresAdmin: true
         }
       },
+      {
+        path: 'docs/contents',
+        name: 'AdminDocsContents',
+        component: () => import('../views/docs/DocsContentManagement.vue'),
+        meta: {
+          title: '文档内容管理',
+          requiresAuth: true,
+          requiresAdmin: true
+        }
+      },
     ]
   },
   {

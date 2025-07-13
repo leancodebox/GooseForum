@@ -8,6 +8,15 @@ import type {
   DocsVersionCreateReq,
   DocsVersionUpdateReq,
   DocsVersionItem,
+  DocsContentListReq,
+  DocsContentCreateReq,
+  DocsContentUpdateReq,
+  DocsContentDeleteReq,
+  DocsContentPublishReq,
+  DocsContentDraftReq,
+  DocsContentPreviewReq,
+  DocsContentItem,
+  DocsContentPreviewResponse,
   DirectoryNode,
   PageResponse,
   ApiResponse
@@ -119,6 +128,82 @@ export class DocsProjectService {
   static async getProjectVersions(projectId: number): Promise<DocsVersionItem[]> {
     const response = await axiosInstance.get(
       `/api/admin/docs/projects/${projectId}/versions`
+    ) as any;
+    return response.result;
+  }
+}
+
+// 文档内容管理API服务
+export class DocsContentService {
+  // 获取内容列表
+  static async getContentList(params: DocsContentListReq): Promise<PageResponse<DocsContentItem>> {
+    const response = await axiosInstance.post(
+      '/api/admin/docs/contents/list',
+      params
+    ) as any;
+    return response.result;
+  }
+
+  // 获取内容详情
+  static async getContentDetail(id: number): Promise<DocsContentItem> {
+    const response = await axiosInstance.get(
+      `/api/admin/docs/contents/${id}`
+    ) as any;
+    return response.result;
+  }
+
+  // 创建内容
+  static async createContent(data: DocsContentCreateReq): Promise<DocsContentItem> {
+    const response = await axiosInstance.post(
+      '/api/admin/docs/contents',
+      data
+    ) as any;
+    return response.result;
+  }
+
+  // 更新内容
+  static async updateContent(id: number, data: DocsContentUpdateReq): Promise<DocsContentItem> {
+    const response = await axiosInstance.put(
+      `/api/admin/docs/contents/${id}`,
+      data
+    ) as any;
+    return response.result;
+  }
+
+  // 删除内容
+  static async deleteContent(data: DocsContentDeleteReq): Promise<void> {
+    await axiosInstance.delete(
+      `/api/admin/docs/contents/${data.id}`
+    );
+  }
+
+  // 发布内容
+  static async publishContent(data: DocsContentPublishReq): Promise<void> {
+    await axiosInstance.put(
+      `/api/admin/docs/contents/${data.id}/publish`
+    );
+  }
+
+  // 设为草稿
+  static async draftContent(data: DocsContentDraftReq): Promise<void> {
+    await axiosInstance.put(
+      `/api/admin/docs/contents/${data.id}/draft`
+    );
+  }
+
+  // 预览内容
+  static async previewContent(data: DocsContentPreviewReq): Promise<DocsContentPreviewResponse> {
+    const response = await axiosInstance.post(
+      '/api/admin/docs/contents/preview',
+      data
+    ) as any;
+    return response.result;
+  }
+
+  // 获取版本的内容列表（用于下拉选择）
+  static async getVersionContents(versionId: number): Promise<DocsContentItem[]> {
+    const response = await axiosInstance.get(
+      `/api/admin/docs/versions/${versionId}/contents`
     ) as any;
     return response.result;
   }

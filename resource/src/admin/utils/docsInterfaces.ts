@@ -173,3 +173,101 @@ export interface DirectoryNode {
   description?: string;
   children?: DirectoryNode[];
 }
+
+// ===== 内容管理相关接口 =====
+
+// 内容列表请求参数
+export interface DocsContentListReq {
+  page: number;
+  pageSize: number;
+  versionId?: number;
+  keyword?: string;
+  status?: number; // 0:草稿 1:已发布
+}
+
+// 创建内容请求参数
+export interface DocsContentCreateReq {
+  versionId: number;
+  title: string;
+  slug: string;
+  content?: string;
+  sortOrder?: number;
+}
+
+// 更新内容请求参数
+export interface DocsContentUpdateReq {
+  id: number;
+  versionId: number;
+  title: string;
+  slug: string;
+  content?: string;
+  sortOrder?: number;
+}
+
+// 删除内容请求参数
+export interface DocsContentDeleteReq {
+  id: number;
+}
+
+// 发布内容请求参数
+export interface DocsContentPublishReq {
+  id: number;
+}
+
+// 设为草稿请求参数
+export interface DocsContentDraftReq {
+  id: number;
+}
+
+// 预览内容请求参数
+export interface DocsContentPreviewReq {
+  content: string;
+}
+
+// 内容列表项
+export interface DocsContentItem {
+  id: number;
+  versionId: number;
+  versionName: string;
+  projectId: number;
+  projectName: string;
+  title: string;
+  slug: string;
+  content: string;
+  isPublished: number;
+  sortOrder: number;
+  viewCount: number;
+  likeCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 预览响应
+export interface DocsContentPreviewResponse {
+  html: string;
+  toc: string;
+}
+
+// 内容发布状态枚举
+export enum ContentStatus {
+  DRAFT = 0,
+  PUBLISHED = 1
+}
+
+// 内容状态选项
+export const CONTENT_STATUS_OPTIONS = [
+  { label: '草稿', value: ContentStatus.DRAFT },
+  { label: '已发布', value: ContentStatus.PUBLISHED }
+];
+
+// 内容排序选项
+export const CONTENT_SORT_OPTIONS = [
+  { label: '创建时间（最新）', value: 'created_at_desc' },
+  { label: '创建时间（最早）', value: 'created_at_asc' },
+  { label: '更新时间（最新）', value: 'updated_at_desc' },
+  { label: '更新时间（最早）', value: 'updated_at_asc' },
+  { label: '排序权重（升序）', value: 'sort_order_asc' },
+  { label: '排序权重（降序）', value: 'sort_order_desc' },
+  { label: '标题（A-Z）', value: 'title_asc' },
+  { label: '标题（Z-A）', value: 'title_desc' }
+];

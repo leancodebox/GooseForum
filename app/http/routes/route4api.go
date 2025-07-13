@@ -164,7 +164,15 @@ func apiRoute(ginApp *gin.Engine) {
 		PUT("docs/versions/:id", UpButterReq(controllers.AdminDocsVersionUpdate)).
 		DELETE("docs/versions/:id", UpButterReq(controllers.AdminDocsVersionDelete)).
 		PUT("docs/versions/:id/set-default", UpButterReq(controllers.AdminDocsVersionSetDefault)).
-		PUT("docs/versions/:id/directory", UpButterReq(controllers.AdminDocsVersionDirectoryUpdate))
+		PUT("docs/versions/:id/directory", UpButterReq(controllers.AdminDocsVersionDirectoryUpdate)).
+		POST("docs/contents/list", UpButterReq(controllers.AdminDocsContentList)).
+		GET("docs/contents/:id", UpButterReq(controllers.AdminDocsContentDetail)).
+		POST("docs/contents", UpButterReq(controllers.AdminDocsContentCreate)).
+		PUT("docs/contents/:id", UpButterReq(controllers.AdminDocsContentUpdate)).
+		DELETE("docs/contents/:id", UpButterReq(controllers.AdminDocsContentDelete)).
+		POST("docs/contents/:id/publish", UpButterReq(controllers.AdminDocsContentPublish)).
+		POST("docs/contents/:id/draft", UpButterReq(controllers.AdminDocsContentDraft)).
+		POST("docs/contents/preview", UpButterReq(controllers.AdminDocsContentPreview))
 
 }
 

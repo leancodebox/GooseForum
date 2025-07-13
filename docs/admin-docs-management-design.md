@@ -71,7 +71,6 @@ PUT    /api/admin/docs/versions/:id/directory      # 更新目录结构
 - 实时预览
 - 自动保存草稿
 - 内容发布控制
-- SEO优化设置
 - 文档排序管理
 
 **API接口:**

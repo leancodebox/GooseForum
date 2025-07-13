@@ -245,6 +245,12 @@ const menuItems = ref<MenuItem[]>([
         label: '版本管理',
         path: '/admin/docs/versions',
         icon: DocumentDuplicateIcon
+      },
+      {
+        key: 'docs-contents',
+        label: '内容管理',
+        path: '/admin/docs/contents',
+        icon: DocumentTextIcon
       }
     ]
   },

@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	"time"
 
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/models/docs/docContents"
 	"github.com/leancodebox/GooseForum/app/models/docs/docProjects"
 	"github.com/leancodebox/GooseForum/app/models/docs/docVersions"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -143,6 +145,168 @@ func AdminDocsProjectDetail(req component.BetterRequest[component.Null]) compone
 	return component.SuccessResponse(response)
 }
 
+// AdminDocsContentCreate 创建内容
+func AdminDocsContentCreate(req component.BetterRequest[DocsContentCreateReq]) component.Response {
+	params := req.Params
+
+	// 检查版本是否存在
+	version := docVersions.Get(params.VersionId)
+	if version.Id == 0 {
+		return component.FailResponse("版本不存在")
+	}
+
+	// 检查slug在版本内是否已存在
+	if docContents.ExistsBySlugAndVersionId(params.Slug, params.VersionId) {
+		return component.FailResponse("该版本下内容标识符已存在")
+	}
+
+	// 创建内容
+	content := &docContents.Entity{
+		VersionId:   params.VersionId,
+		Title:       params.Title,
+		Slug:        params.Slug,
+		Content:     params.Content,
+		SortOrder:   params.SortOrder,
+		IsPublished: 0, // 默认为草稿
+	}
+
+	rowsAffected := docContents.SaveOrCreateById(content)
+	if rowsAffected == 0 {
+		return component.FailResponse("创建内容失败")
+	}
+
+	// 记录操作日志
+	optlogger.UserOpt(req.UserId, optlogger.CreateDocContent, content.Id, fmt.Sprintf("创建文档内容: %s", params.Title))
+
+	return component.SuccessResponse(map[string]interface{}{
+		"id": content.Id,
+	})
+}
+
+// AdminDocsContentUpdate 更新内容
+func AdminDocsContentUpdate(req component.BetterRequest[DocsContentUpdateReq]) component.Response {
+	params := req.Params
+
+	// 获取原内容信息
+	originalContent := docContents.Get(params.Id)
+	if originalContent.Id == 0 {
+		return component.FailResponse("内容不存在")
+	}
+
+	// 检查版本是否存在
+	version := docVersions.Get(params.VersionId)
+	if version.Id == 0 {
+		return component.FailResponse("版本不存在")
+	}
+
+	// 检查slug在版本内是否被其他内容使用
+	if params.Slug != originalContent.Slug && docContents.ExistsBySlugAndVersionIdExcludeId(params.Slug, params.VersionId, params.Id) {
+		return component.FailResponse("该版本下内容标识符已被其他内容使用")
+	}
+
+	// 更新内容
+	updatedContent := &docContents.Entity{
+		Id:        params.Id,
+		VersionId: params.VersionId,
+		Title:     params.Title,
+		Slug:      params.Slug,
+		Content:   params.Content,
+		SortOrder: params.SortOrder,
+		// 保持原有的发布状态
+		IsPublished: originalContent.IsPublished,
+	}
+
+	rowsAffected := docContents.SaveOrCreateById(updatedContent)
+	if rowsAffected == 0 {
+		return component.FailResponse("更新内容失败")
+	}
+
+	// 记录操作日志
+	optlogger.UserOpt(req.UserId, optlogger.UpdateDocContent, params.Id, fmt.Sprintf("更新文档内容: %s", params.Title))
+
+	return component.SuccessResponse("内容更新成功")
+}
+
+// AdminDocsContentDelete 删除内容
+func AdminDocsContentDelete(req component.BetterRequest[DocsContentDeleteReq]) component.Response {
+	params := req.Params
+
+	// 获取内容信息
+	content := docContents.Get(params.Id)
+	if content.Id == 0 {
+		return component.FailResponse("内容不存在")
+	}
+
+	// 删除内容
+	rowsAffected := docContents.Delete(params.Id)
+	if rowsAffected == 0 {
+		return component.FailResponse("删除内容失败")
+	}
+
+	// 记录操作日志
+	optlogger.UserOpt(req.UserId, optlogger.DeleteDocContent, params.Id, "删除文档内容")
+
+	return component.SuccessResponse("内容删除成功")
+}
+
+// AdminDocsContentPublish 发布内容
+func AdminDocsContentPublish(req component.BetterRequest[DocsContentPublishReq]) component.Response {
+	params := req.Params
+
+	// 获取内容信息
+	content := docContents.Get(params.Id)
+	if content.Id == 0 {
+		return component.FailResponse("内容不存在")
+	}
+
+	// 更新发布状态
+	rowsAffected := docContents.UpdatePublishStatus(params.Id, 1)
+	if rowsAffected == 0 {
+		return component.FailResponse("发布内容失败")
+	}
+
+	// 记录操作日志
+	optlogger.UserOpt(req.UserId, optlogger.PublishDocContent, params.Id, "发布文档内容")
+
+	return component.SuccessResponse("内容发布成功")
+}
+
+// AdminDocsContentDraft 设为草稿
+func AdminDocsContentDraft(req component.BetterRequest[DocsContentDraftReq]) component.Response {
+	params := req.Params
+
+	// 获取内容信息
+	content := docContents.Get(params.Id)
+	if content.Id == 0 {
+		return component.FailResponse("内容不存在")
+	}
+
+	// 更新发布状态
+	rowsAffected := docContents.UpdatePublishStatus(params.Id, 0)
+	if rowsAffected == 0 {
+		return component.FailResponse("设为草稿失败")
+	}
+
+	// 记录操作日志
+	optlogger.UserOpt(req.UserId, optlogger.DraftDocContent, params.Id, "设为草稿")
+
+	return component.SuccessResponse("内容已设为草稿")
+}
+
+// AdminDocsContentPreview 预览内容
+func AdminDocsContentPreview(req component.BetterRequest[DocsContentPreviewReq]) component.Response {
+	params := req.Params
+
+	// TODO: 这里需要集成Markdown渲染器
+	// 暂时返回原始内容和空的目录
+	response := DocsContentPreviewResponse{
+		Html: "<p>" + params.Content + "</p>", // 临时处理
+		Toc:  "",                              // 临时为空
+	}
+
+	return component.SuccessResponse(response)
+}
+
 // AdminDocsProjectCreate 创建项目
 func AdminDocsProjectCreate(req component.BetterRequest[DocsProjectCreateReq]) component.Response {
 	params := req.Params
@@ -273,6 +437,200 @@ func AdminDocsProjectDelete(req component.BetterRequest[DocsProjectDeleteReq]) c
 	optlogger.UserOpt(req.UserId, optlogger.DeleteDocProject, project.Id, "删除文档项目: "+project.Name)
 
 	return component.SuccessResponse(nil)
+}
+
+// ==================== 内容管理模块 ====================
+
+// DocsContentListReq 内容列表请求
+type DocsContentListReq struct {
+	Page      int     `json:"page"`
+	PageSize  int     `json:"pageSize"`
+	VersionId *uint64 `json:"versionId"`
+	Keyword   string  `json:"keyword"`
+	Status    *int8   `json:"status"` // 0:草稿 1:已发布
+}
+
+// DocsContentCreateReq 创建内容请求
+type DocsContentCreateReq struct {
+	VersionId uint64 `json:"versionId" validate:"required"`
+	Title     string `json:"title" validate:"required,min=1,max=200"`
+	Slug      string `json:"slug" validate:"required,min=1,max=200"`
+	Content   string `json:"content"`
+	SortOrder int    `json:"sortOrder"`
+}
+
+// DocsContentUpdateReq 更新内容请求
+type DocsContentUpdateReq struct {
+	Id        uint64 `json:"id" validate:"required"`
+	VersionId uint64 `json:"versionId" validate:"required"`
+	Title     string `json:"title" validate:"required,min=1,max=200"`
+	Slug      string `json:"slug" validate:"required,min=1,max=200"`
+	Content   string `json:"content"`
+	SortOrder int    `json:"sortOrder"`
+}
+
+// DocsContentDeleteReq 删除内容请求
+type DocsContentDeleteReq struct {
+	Id uint64 `json:"id" validate:"required"`
+}
+
+// DocsContentPublishReq 发布内容请求
+type DocsContentPublishReq struct {
+	Id uint64 `json:"id" validate:"required"`
+}
+
+// DocsContentDraftReq 设为草稿请求
+type DocsContentDraftReq struct {
+	Id uint64 `json:"id" validate:"required"`
+}
+
+// DocsContentPreviewReq 预览内容请求
+type DocsContentPreviewReq struct {
+	Content string `json:"content" validate:"required"`
+}
+
+// DocsContentItem 内容项响应
+type DocsContentItem struct {
+	Id          uint64 `json:"id"`
+	VersionId   uint64 `json:"versionId"`
+	VersionName string `json:"versionName"`
+	ProjectId   uint64 `json:"projectId"`
+	ProjectName string `json:"projectName"`
+	Title       string `json:"title"`
+	Slug        string `json:"slug"`
+	Content     string `json:"content"`
+	IsPublished int8   `json:"isPublished"`
+	SortOrder   int    `json:"sortOrder"`
+	ViewCount   uint64 `json:"viewCount"`
+	LikeCount   uint64 `json:"likeCount"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+// DocsContentPreviewResponse 预览响应
+type DocsContentPreviewResponse struct {
+	Html string `json:"html"`
+	Toc  string `json:"toc"`
+}
+
+// AdminDocsContentList 内容列表
+func AdminDocsContentList(req component.BetterRequest[DocsContentListReq]) component.Response {
+	params := req.Params
+
+	// 设置默认值
+	page := max(params.Page, 1)
+	pageSize := params.PageSize
+	if pageSize <= 0 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	// 获取内容列表
+	versionId := uint64(0)
+	if params.VersionId != nil {
+		versionId = *params.VersionId
+	}
+	status := -1
+	if params.Status != nil {
+		status = int(*params.Status)
+	}
+	contents, total, err := docContents.GetContentList(page, pageSize, versionId, params.Keyword, status)
+	if err != nil {
+		return component.FailResponse("获取内容列表失败: " + err.Error())
+	}
+
+	// 转换为响应格式
+	var items []DocsContentItem
+	for _, content := range contents {
+		// 获取版本信息
+		version := docVersions.Get(content.VersionId)
+		versionName := ""
+		projectId := uint64(0)
+		projectName := ""
+		if version.Id != 0 {
+			versionName = version.Name
+			projectId = version.ProjectId
+			// 获取项目信息
+			project := docProjects.Get(version.ProjectId)
+			if project.Id != 0 {
+				projectName = project.Name
+			}
+		}
+
+		item := DocsContentItem{
+			Id:          content.Id,
+			VersionId:   content.VersionId,
+			VersionName: versionName,
+			ProjectId:   projectId,
+			ProjectName: projectName,
+			Title:       content.Title,
+			Slug:        content.Slug,
+			Content:     content.Content,
+			IsPublished: content.IsPublished,
+			SortOrder:   content.SortOrder,
+			ViewCount:   content.ViewCount,
+			LikeCount:   content.LikeCount,
+			CreatedAt:   content.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:   content.UpdatedAt.Format("2006-01-02 15:04:05"),
+		}
+		items = append(items, item)
+	}
+
+	response := map[string]interface{}{
+		"list":     items,
+		"total":    total,
+		"page":     page,
+		"pageSize": pageSize,
+	}
+
+	return component.SuccessResponse(response)
+}
+
+// AdminDocsContentDetail 内容详情
+func AdminDocsContentDetail(req component.BetterRequest[component.Null]) component.Response {
+	// 从URL参数中获取ID
+	id := req.GinContext.Param("id")
+	if id == "" {
+		return component.FailResponse("内容ID不能为空")
+	}
+
+	content := docContents.GetByIdString(id)
+	if content.Id == 0 {
+		return component.FailResponse("内容不存在")
+	}
+
+	// 获取版本信息
+	version := docVersions.Get(content.VersionId)
+	versionName := ""
+	projectId := uint64(0)
+	projectName := ""
+	if version.Id != 0 {
+		versionName = version.Name
+		projectId = version.ProjectId
+		// 获取项目信息
+		project := docProjects.Get(version.ProjectId)
+		if project.Id != 0 {
+			projectName = project.Name
+		}
+	}
+
+	response := DocsContentItem{
+		Id:          content.Id,
+		VersionId:   content.VersionId,
+		VersionName: versionName,
+		ProjectId:   projectId,
+		ProjectName: projectName,
+		Title:       content.Title,
+		Slug:        content.Slug,
+		Content:     content.Content,
+		IsPublished: content.IsPublished,
+		SortOrder:   content.SortOrder,
+		ViewCount:   content.ViewCount,
+		LikeCount:   content.LikeCount,
+		CreatedAt:   content.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:   content.UpdatedAt.Format("2006-01-02 15:04:05"),
+	}
+
+	return component.SuccessResponse(response)
 }
 
 // ============ 版本管理相关 ============
