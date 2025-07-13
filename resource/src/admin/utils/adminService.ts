@@ -125,7 +125,6 @@ export const getArticleEnum = async (): Promise<Result<Record<string,Label[]>>> 
 
 // 网页设置相关接口
 export interface WebSettingsConfig {
-    customJS: string;
     externalLinks: string;
     favicon: string;
 }

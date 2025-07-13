@@ -8,14 +8,6 @@
           <PlusIcon class="w-4 h-4"/>
           添加根目录
         </button>
-        <button class="btn btn-sm btn-ghost" @click="expandAll">
-          <ChevronDownIcon class="w-4 h-4"/>
-          展开全部
-        </button>
-        <button class="btn btn-sm btn-ghost" @click="collapseAll">
-          <ChevronRightIcon class="w-4 h-4"/>
-          收起全部
-        </button>
       </div>
     </div>
 
@@ -225,23 +217,6 @@ function addChildRecursive(items, parentId, newItem) {
   return false
 }
 
-// 展开/收起全部
-function expandAll() {
-  setExpandedRecursive(treeData.value, true)
-}
-
-function collapseAll() {
-  setExpandedRecursive(treeData.value, false)
-}
-
-function setExpandedRecursive(items, expanded) {
-  items.forEach(item => {
-    item.expanded = expanded
-    if (item.children) {
-      setExpandedRecursive(item.children, expanded)
-    }
-  })
-}
 
 // 树形结构变化
 function onTreeChange() {

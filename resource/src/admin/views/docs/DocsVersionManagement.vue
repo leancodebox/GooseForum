@@ -77,7 +77,8 @@
 
       <div v-else class="bg-base-100">
         <ul class="list shadow-md rounded-box ">
-          <li v-for="version in versions" :key="version.id" class="flex items-center justify-between px-4 py-2 hover:bg-base-200 rounded-lg transition-colors list-row">
+          <li v-for="version in versions" :key="version.id"
+              class="flex items-center justify-between px-4 py-2 hover:bg-base-200 rounded-lg transition-colors list-row">
             <!-- 左侧：版本信息 -->
             <div class="flex items-center gap-3 flex-1 min-w-0">
               <!-- 版本详情 -->
@@ -119,11 +120,11 @@
                   <FolderIcon class="w-3 h-3"/>
                   <span class="ml-1">目录</span>
                 </button>
-                <button 
-                  v-if="!version.isDefault" 
-                  class="btn btn-xs btn-success" 
-                  @click="setDefaultVersion(version)" 
-                  title="设为默认"
+                <button
+                    v-if="!version.isDefault"
+                    class="btn btn-xs btn-success"
+                    @click="setDefaultVersion(version)"
+                    title="设为默认"
                 >
                   <StarIcon class="w-3 h-3"/>
                   <span class="ml-1">设为默认</span>
@@ -146,11 +147,11 @@
                 <button class="btn btn-xs btn-info" @click="editDirectory(version)" title="目录结构">
                   <FolderIcon class="w-3 h-3"/>
                 </button>
-                <button 
-                  v-if="!version.isDefault" 
-                  class="btn btn-xs btn-success" 
-                  @click="setDefaultVersion(version)" 
-                  title="设为默认"
+                <button
+                    v-if="!version.isDefault"
+                    class="btn btn-xs btn-success"
+                    @click="setDefaultVersion(version)"
+                    title="设为默认"
                 >
                   <StarIcon class="w-3 h-3"/>
                 </button>
@@ -166,7 +167,8 @@
               <div class="dropdown dropdown-end md:hidden">
                 <div tabindex="0" role="button" class="btn btn-xs btn-ghost">
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 5v.01M12 12v.01M12 19v.01"></path>
                   </svg>
                 </div>
                 <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
@@ -331,7 +333,7 @@
           </div>
 
           <!-- 树形目录编辑器 -->
-          <DirectoryTreeEditor v-model="directoryStructure" />
+          <DirectoryTreeEditor v-model="directoryStructure"/>
         </div>
 
         <div class="modal-action">
@@ -348,21 +350,16 @@
 
 <script setup lang="ts">
 import {computed, onMounted, reactive, ref} from 'vue';
-import { DocsProjectService } from '../../utils/docsService';
+import {DocsProjectService} from '../../utils/docsService';
 import type {
+  DirectoryNode,
+  DocsProjectItem,
   DocsVersionCreateReq,
   DocsVersionItem,
   DocsVersionListReq,
-  DocsVersionUpdateReq,
-  DocsProjectItem,
-  DirectoryNode
+  DocsVersionUpdateReq
 } from '../../utils/docsInterfaces';
-import {
-  VERSION_STATUS_OPTIONS,
-  VersionStatus,
-  DEFAULT_STATUS_OPTIONS,
-  DefaultStatus
-} from '../../utils/docsInterfaces';
+import {DEFAULT_STATUS_OPTIONS, DefaultStatus, VERSION_STATUS_OPTIONS, VersionStatus} from '../../utils/docsInterfaces';
 import {
   ArrowPathIcon,
   ChevronLeftIcon,
@@ -375,7 +372,6 @@ import {
   PencilIcon,
   PlusIcon,
   StarIcon,
-  TagIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline';
 import DirectoryTreeEditor from '../../components/DirectoryTreeEditor.vue';
@@ -506,7 +502,7 @@ const setDefaultVersion = async (version: DocsVersionItem) => {
     loadVersions();
   } catch (error) {
     console.error('设置默认版本失败:', error);
-    alert('设置默认版本失败，请重试');
+    alert(error?.message ?? '设置默认版本失败，请重试');
   }
 };
 

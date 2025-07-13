@@ -15,8 +15,6 @@ import { getWebSettings, saveWebSettings, type WebSettingsConfig } from '../util
 
 // 设置数据
 const settings = ref({
-  // 自定义JavaScript
-  customJS: '',
   // 外部资源链接
   externalLinks: '',
   // 网站图标
@@ -67,7 +65,6 @@ const saveSettings = async () => {
 const resetToDefaults = () => {
   if (confirm('确定要重置为默认设置吗？这将清空当前所有自定义内容。')) {
     Object.assign(settings.value, {
-      customJS: '',
       externalLinks: '',
       favicon: '',
     })
@@ -155,22 +152,6 @@ onMounted(() => {
                 </label>
                 <div class="label">
                   <span class="label-text-alt text-base-content/60">外部CSS和JS资源链接，每行一个链接</span>
-                </div>
-              </div>
-
-
-              <!-- 自定义JavaScript -->
-              <div class="form-control">
-                <label class="floating-label">
-                  <span>自定义JavaScript</span>
-                  <textarea 
-                    v-model="settings.customJS" 
-                    class="textarea textarea-bordered h-24 w-full font-mono text-sm"
-                    placeholder="请输入自定义JavaScript代码，例如：&#10;console.log('Custom script loaded');&#10;// 你的自定义代码"
-                  ></textarea>
-                </label>
-                <div class="label">
-                  <span class="label-text-alt text-base-content/60">自定义脚本代码，将被包含在&lt;script&gt;标签中</span>
                 </div>
               </div>
 

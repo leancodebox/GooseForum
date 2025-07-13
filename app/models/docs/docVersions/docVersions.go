@@ -1,6 +1,7 @@
 package docVersions
 
 import (
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -51,9 +52,9 @@ type Entity struct {
 	SortOrder   int             `gorm:"column:sort_order;type:int;not null;default:0;" json:"sortOrder"`         // 排序权重
 	Directory   []DirectoryItem `gorm:"column:directory;type:text;serializer:json" json:"directory"`
 
-	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
-	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
-	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                  // 删除时间
+	CreatedAt time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
+	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
+	DeletedAt gorm.DeletedAt
 }
 
 // DirectoryItem 目录项结构

@@ -1,6 +1,7 @@
 package users
 
 import (
+	"gorm.io/gorm"
 	"strings"
 	"time"
 
@@ -85,9 +86,9 @@ type EntityComplete struct {
 	ExternalInformation ExternalInformation `gorm:"column:external_information;type:varchar(2048);default:'{}';serializer:json" json:"externalInformation"` // 外部信息
 
 	// status
-	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
-	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
-	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;index;" json:"deletedAt"` //
+	CreatedAt time.Time      `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
+	DeletedAt gorm.DeletedAt //
 }
 
 func (itself *EntityComplete) GetWebAvatarUrl() string {

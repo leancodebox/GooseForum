@@ -79,9 +79,9 @@
       <!-- 侧边栏 -->
       <div class="drawer-side z-30">
         <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay lg:hidden"></label>
-        <aside class="w-48 min-h-full bg-base-100 border-r border-base-300 fixed top-0 left-0 bottom-0 z-40">
+        <aside class="w-46 min-h-full bg-base-100 border-r border-base-300 fixed top-0 left-0 bottom-0 z-40">
           <!-- 菜单 -->
-          <nav class="flex-1 scrollbar-ultra-thin pt-20">
+          <nav class="flex-1 scrollbar-ultra-thin pt-16">
             <ul class="menu bg-base-100 w-full h-full">
               <template v-for="item in menuItems" :key="item.key">
                 <!-- 普通菜单项 -->

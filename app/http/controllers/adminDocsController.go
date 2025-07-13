@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/spf13/cast"
 	"time"
 
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
@@ -669,7 +670,6 @@ type DocsVersionUpdateReq struct {
 
 // DocsVersionDeleteReq 删除版本请求
 type DocsVersionDeleteReq struct {
-	Id uint64 `json:"id" validate:"required"`
 }
 
 // DocsVersionSetDefaultReq 设置默认版本请求
@@ -920,10 +920,12 @@ func AdminDocsVersionUpdate(req component.BetterRequest[DocsVersionUpdateReq]) c
 
 // AdminDocsVersionDelete 删除版本（软删除）
 func AdminDocsVersionDelete(req component.BetterRequest[DocsVersionDeleteReq]) component.Response {
-	params := req.Params
-
+	id := cast.ToUint64(req.GinContext.Param("id"))
+	if id == 0 {
+		return component.FailResponse("版本ID不能为空")
+	}
 	// 获取版本信息
-	version := docVersions.Get(params.Id)
+	version := docVersions.Get(id)
 	if version.Id == 0 {
 		return component.FailResponse("版本不存在")
 	}
@@ -934,12 +936,12 @@ func AdminDocsVersionDelete(req component.BetterRequest[DocsVersionDeleteReq]) c
 	}
 
 	// 检查版本下是否有文档
-	if docVersions.HasDocuments(params.Id) {
+	if docVersions.HasDocuments(id) {
 		return component.FailResponse("该版本下存在文档，无法删除")
 	}
 
 	// 执行软删除
-	rowsAffected := docVersions.SoftDelete(params.Id)
+	rowsAffected := docVersions.SoftDelete(id)
 	if rowsAffected <= 0 {
 		return component.FailResponse("删除版本失败")
 	}

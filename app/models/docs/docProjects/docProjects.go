@@ -1,6 +1,7 @@
 package docProjects
 
 import (
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -55,9 +56,9 @@ type Entity struct {
 	IsPublic    int8   `gorm:"column:is_public;type:tinyint;not null;default:1;" json:"isPublic"`       // 是否公开(0:私有 1:公开)
 	OwnerId     uint64 `gorm:"column:owner_id;type:bigint unsigned;not null;default:0;" json:"ownerId"` // 项目所有者ID
 
-	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
-	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
-	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                  // 删除时间
+	CreatedAt time.Time      `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
+	DeletedAt gorm.DeletedAt // 删除时间
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

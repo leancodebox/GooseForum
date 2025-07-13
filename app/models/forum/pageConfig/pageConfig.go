@@ -42,7 +42,6 @@ var PageTypeList = []string{
 
 type WebSettingsConfig struct {
 	ExternalLinks string `json:"externalLinks,omitempty"`
-	CustomJS      string `json:"customJS,omitempty"`
 	Favicon       string `json:"favicon,omitempty"`
 }
 

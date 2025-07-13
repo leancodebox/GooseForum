@@ -1,6 +1,7 @@
 package docContents
 
 import (
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -67,9 +68,9 @@ type Entity struct {
 	LikeCount uint64 `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`       // 喜欢数量
 	ViewCount uint64 `gorm:"column:view_count;index;type:bigint unsigned;not null;default:0;" json:"viewCount"` // 访问数量
 
-	CreatedAt time.Time  `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
-	UpdatedAt time.Time  `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
-	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deletedAt"`                  // 删除时间
+	CreatedAt time.Time      `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
+	DeletedAt gorm.DeletedAt // 删除时间
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
