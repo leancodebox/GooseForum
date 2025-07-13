@@ -47,7 +47,7 @@ func GetTemplates(globalFunc template.FuncMap) *template.Template {
 		}).
 		Funcs(globalFunc)
 	if !setting.IsProduction() {
-		fmt.Println("开发模式")
+		slog.Info("GetTemplates not running in production mode")
 		// 开发模式下直接从目录读取模板
 		return template.Must(template.Must(
 			tmpl.ParseGlob(filepath.Join("resource", "templates", "*.gohtml"))).
