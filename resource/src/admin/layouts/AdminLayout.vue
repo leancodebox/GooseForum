@@ -134,7 +134,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   Bars3Icon,
-  GlobeAltIcon
+  GlobeAltIcon,
+  BookOpenIcon
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -223,6 +224,12 @@ const menuItems = ref([
     label: '工单管理-todo',
     path: '/admin/tickets',
     icon: TicketIcon
+  },
+  {
+    key: 'docs-projects',
+    label: '文档项目管理',
+    path: '/admin/docs/projects',
+    icon: BookOpenIcon
   },
   {
     key: 'web-settings',

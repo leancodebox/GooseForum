@@ -10,8 +10,6 @@ func save(entity *Entity) int64 {
 	return result.RowsAffected
 }
 
-
-
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
@@ -20,28 +18,77 @@ func SaveOrCreateById(entity *Entity) int64 {
 	}
 }
 
-
-
-
 func Get(id any) (entity Entity) {
 	builder().First(&entity, id)
 	return
 }
 
+// GetProjectList 分页查询项目列表
+func GetProjectList(page, pageSize int, keyword string, status *int8, isPublic *int8) ([]Entity, int64, error) {
+	var entities []Entity
+	var total int64
 
+	query := builder().Where("deleted_at IS NULL")
 
-//func saveAll(entities []*Entity) int64 {
-//	result := builder().Save(entities)
-//	return result.RowsAffected
-//}
+	// 关键词搜索
+	if keyword != "" {
+		query = query.Where("name LIKE ? OR description LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
+	}
 
-//func deleteEntity(entity *Entity) int64 {
-//	result := builder().Delete(entity)
-//	return result.RowsAffected
-//}
+	// 状态筛选
+	if status != nil {
+		query = query.Where("status = ?", *status)
+	}
 
+	// 公开性筛选
+	if isPublic != nil {
+		query = query.Where("is_public = ?", *isPublic)
+	}
 
-//func all() (entities []*Entity) {
-//	builder().Find(&entities)
-//	return
-//}
+	// 获取总数
+	query.Count(&total)
+
+	// 分页查询
+	offset := (page - 1) * pageSize
+	err := query.Offset(offset).Limit(pageSize).Order("created_at DESC").Find(&entities).Error
+
+	return entities, total, err
+}
+
+// ExistsBySlug 检查slug是否存在
+func ExistsBySlug(slug string) bool {
+	var count int64
+	builder().Where("slug = ? AND deleted_at IS NULL", slug).Count(&count)
+	return count > 0
+}
+
+// ExistsBySlugExcludeId 检查slug是否存在（排除指定ID）
+func ExistsBySlugExcludeId(slug string, excludeId uint64) bool {
+	var count int64
+	builder().Where("slug = ? AND id != ? AND deleted_at IS NULL", slug, excludeId).Count(&count)
+	return count > 0
+}
+
+// SoftDelete 软删除
+func SoftDelete(id uint64) int64 {
+	result := builder().Where("id = ?", id).Update("deleted_at", "NOW()")
+	return result.RowsAffected
+}
+
+// GetBySlug 根据slug获取项目
+func GetBySlug(slug string) (entity Entity) {
+	builder().Where("slug = ? AND deleted_at IS NULL", slug).First(&entity)
+	return
+}
+
+// GetAllActive 获取所有活跃项目
+func GetAllActive() (entities []Entity) {
+	builder().Where("status = ? AND deleted_at IS NULL", 2).Find(&entities)
+	return
+}
+
+// GetByOwnerId 根据所有者ID获取项目列表
+func GetByOwnerId(ownerId uint64) (entities []Entity) {
+	builder().Where("owner_id = ? AND deleted_at IS NULL", ownerId).Find(&entities)
+	return
+}

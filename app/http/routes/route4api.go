@@ -151,6 +151,14 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("web-settings", UpButterReq(controllers.GetWebSettings)).
 		POST("save-web-settings", UpButterReq(controllers.SaveWebSettings))
 
+	// 文档管理
+	adminApi.Group("", middleware.CheckPermission(permission.Admin)).
+		POST("docs/projects/list", UpButterReq(controllers.AdminDocsProjectList)).
+		GET("docs/projects/:id", UpButterReq(controllers.AdminDocsProjectDetail)).
+		POST("docs/projects", UpButterReq(controllers.AdminDocsProjectCreate)).
+		PUT("docs/projects/:id", UpButterReq(controllers.AdminDocsProjectUpdate)).
+		DELETE("docs/projects/:id", UpButterReq(controllers.AdminDocsProjectDelete))
+
 }
 
 func fileServer(ginApp *gin.Engine) {

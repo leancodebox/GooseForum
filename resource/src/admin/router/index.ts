@@ -115,6 +115,16 @@ const routes: RouteRecordRaw[] = [
           requiresAdmin: true
         }
       },
+      {
+        path: 'docs/projects',
+        name: 'AdminDocsProjects',
+        component: () => import('../views/docs/DocsProjectManagement.vue'),
+        meta: {
+          title: '文档项目管理',
+          requiresAuth: true,
+          requiresAdmin: true
+        }
+      },
     ]
   },
   {
