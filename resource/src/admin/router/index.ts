@@ -87,15 +87,6 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
-        path: 'tickets',
-        name: 'AdminTickets',
-        component: () => import('../views/TicketManagement.vue'),
-        meta: {
-          title: '工单管理',
-          requiresAuth: true
-        }
-      },
-      {
         path: 'tickets/view',
         name: 'AdminTicketsView',
         component: () => import('../views/TicketView.vue'),

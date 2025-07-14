@@ -18,7 +18,8 @@
 
           <div class="form-control">
             <label class="floating-label">
-              <select v-model="searchParams.type" class="select select-sm select-bordered w-full" @change="handleFilter">
+              <select v-model="searchParams.type" class="select select-sm select-bordered w-full"
+                      @change="handleFilter">
                 <option value="">全部类型</option>
                 <option value="1">Bug反馈</option>
                 <option value="2">功能建议</option>
@@ -32,7 +33,8 @@
 
           <div class="form-control">
             <label class="floating-label">
-              <select v-model="searchParams.status" class="select select-sm select-bordered w-full" @change="handleFilter">
+              <select v-model="searchParams.status" class="select select-sm select-bordered w-full"
+                      @change="handleFilter">
                 <option value="">全部状态</option>
                 <option value="1">待处理</option>
                 <option value="2">处理中</option>
@@ -54,7 +56,7 @@
     </div>
 
     <!-- 工单列表 -->
-    <div class="card bg-base-100 shadow">
+    <div class="card shadow">
       <div class="card-body p-0">
         <!-- 加载状态 -->
         <div v-if="loading" class="flex justify-center items-center py-12">
@@ -70,23 +72,17 @@
         </div>
 
         <!-- 工单列表 -->
-        <div v-else class="bg-base-100 rounded-box p-4">
-          <ul class="space-y-3">
+        <div v-else class="bg-base-100 rounded-box">
+          <ul class="list shadow-md rounded-box ">
             <li v-for="sheet in applySheets" :key="sheet.id"
-                class="flex items-center justify-between p-4 hover:bg-base-200 rounded-lg transition-colors border border-base-300">
+                class="flex items-center justify-between px-4 py-2 hover:bg-base-200 rounded-lg transition-colors list-row">
               <!-- 左侧：工单信息 -->
               <div class="flex items-center gap-3 flex-1 min-w-0">
-                <!-- 工单图标 -->
-                <div class="avatar flex-shrink-0">
-                  <div class="w-10 h-10 rounded bg-base-200 flex items-center justify-center">
-                    <DocumentTextIcon class="w-5 h-5 text-base-content/50"/>
-                  </div>
-                </div>
-
                 <!-- 工单详情 -->
                 <div class="flex-1 min-w-0">
+                  <!-- 第一行：标题和状态 -->
                   <div class="flex items-center gap-2 mb-1">
-                    <h4 class="font-semibold text-base truncate">#{{ sheet.id }} {{ sheet.title }}</h4>
+                    <h4 class="font-medium text-sm truncate">#{{ sheet.id }} {{ sheet.title }}</h4>
                     <div class="flex items-center gap-1 flex-shrink-0">
                       <span class="badge badge-xs" :class="getTypeClass(sheet.type)">
                         {{ getTypeText(sheet.type) }}
@@ -96,17 +92,13 @@
                       </span>
                     </div>
                   </div>
-                  <div class="flex items-center gap-2 text-sm text-base-content/70">
+                  <!-- 第二行：用户信息和时间 -->
+                  <div class="flex items-center gap-2 text-xs text-base-content/60">
                     <span class="truncate">{{ sheet.applyUserInfo }}</span>
-                    <span v-if="sheet.content" class="truncate hidden sm:block text-base-content/50">
-                      · {{ sheet.content.substring(0, 50) }}{{ sheet.content.length > 50 ? '...' : '' }}
-                    </span>
-                  </div>
-                  <div class="flex items-center gap-2 mt-1 text-xs text-base-content/50">
-                    <span>用户ID: {{ sheet.userId }}</span>
-                    <span class="hidden sm:block">创建时间: {{ formatDate(sheet.createTime) }}</span>
-                    <span v-if="sheet.updateTime !== sheet.createTime" class="hidden sm:block">
-                      · 更新时间: {{ formatDate(sheet.updateTime) }}
+                    <span class="hidden sm:inline">·</span>
+                    <span class="hidden sm:inline">{{ formatDate(sheet.createTime) }}</span>
+                    <span v-if="sheet.content" class="hidden md:inline text-base-content/50">
+                      · {{ sheet.content.substring(0, 30) }}{{ sheet.content.length > 30 ? '...' : '' }}
                     </span>
                   </div>
                 </div>
@@ -151,36 +143,69 @@
                 </div>
               </div>
             </li>
+
+            <li class="flex flex-col items-center gap-3 p-2 px-4">
+
+              <div class="text-xs text-base-content/60">
+                共 {{ total }} 个工单，每页 {{ pageSize }} 个
+              </div>
+              <div class="flex items-center gap-1">
+                <!-- 上一页 -->
+                <button
+                    class="btn btn-xs"
+                    :disabled="currentPage <= 1"
+                    @click="changePage(currentPage - 1)"
+                >
+                  <ChevronLeftIcon class="w-3 h-3"/>
+                </button>
+
+                <!-- 页码按钮 -->
+                <div class="flex items-center gap-1">
+                  <!-- 第一页 -->
+                  <button
+                      v-if="currentPage > 3"
+                      class="btn btn-xs"
+                      @click="changePage(1)"
+                  >
+                    1
+                  </button>
+                  <span v-if="currentPage > 4" class="px-1 text-xs">...</span>
+
+                  <!-- 当前页附近的页码 -->
+                  <button
+                      v-for="page in getVisiblePages()"
+                      :key="page"
+                      class="btn btn-xs"
+                      :class="{ 'btn-primary': page === currentPage }"
+                      @click="changePage(page)"
+                  >
+                    {{ page }}
+                  </button>
+
+                  <!-- 最后一页 -->
+                  <span v-if="currentPage < totalPages - 3" class="px-1 text-xs">...</span>
+                  <button
+                      v-if="currentPage < totalPages - 2"
+                      class="btn btn-xs"
+                      @click="changePage(totalPages)"
+                  >
+                    {{ totalPages }}
+                  </button>
+                </div>
+
+                <!-- 下一页 -->
+                <button
+                    class="btn btn-xs"
+                    :disabled="currentPage >= totalPages"
+                    @click="changePage(currentPage + 1)"
+                >
+                  <ChevronRightIcon class="w-3 h-3"/>
+                </button>
+              </div>
+            </li>
           </ul>
         </div>
 
-        <!-- 分页 -->
-        <div v-if="totalPages > 1" class="flex justify-between items-center mt-4 pt-4 border-t border-base-200">
-          <div class="text-xs text-base-content/60">
-            共 {{ total }} 个工单
-          </div>
-          <div class="flex items-center gap-2">
-            <button
-                class="btn btn-sm"
-                :disabled="currentPage <= 1"
-                @click="changePage(currentPage - 1)"
-            >
-              <ChevronLeftIcon class="w-4 h-4"/>
-              <span class="ml-1">上一页</span>
-            </button>
-            <span class="text-sm text-base-content/70 px-3">
-              第 {{ currentPage }} 页 / 共 {{ totalPages }} 页
-            </span>
-            <button
-                class="btn btn-sm"
-                :disabled="currentPage >= totalPages"
-                @click="changePage(currentPage + 1)"
-            >
-              <span class="mr-1">下一页</span>
-              <ChevronRightIcon class="w-4 h-4"/>
-            </button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -196,60 +221,64 @@
         <div v-if="selectedSheet" class="grid grid-cols-2 gap-4">
           <div>
             <label class="floating-label">
-              <input type="text" class="input input-bordered w-full" :value="'#' + selectedSheet.id" readonly />
+              <input type="text" class="input input-bordered w-full" :value="'#' + selectedSheet.id" readonly/>
               <span>工单ID</span>
             </label>
           </div>
           <div>
             <label class="floating-label">
-              <input type="text" class="input input-bordered w-full" :value="selectedSheet.userId" readonly />
+              <input type="text" class="input input-bordered w-full" :value="selectedSheet.userId" readonly/>
               <span>用户ID</span>
             </label>
           </div>
 
           <div class="col-span-2">
             <label class="floating-label">
-              <input type="text" class="input input-bordered w-full" :value="selectedSheet.title" readonly />
+              <input type="text" class="input input-bordered w-full" :value="selectedSheet.title" readonly/>
               <span>工单标题</span>
             </label>
           </div>
 
           <div class="col-span-2">
             <label class="floating-label">
-              <input type="text" class="input input-bordered w-full" :value="selectedSheet.applyUserInfo" readonly />
+              <input type="text" class="input input-bordered w-full" :value="selectedSheet.applyUserInfo" readonly/>
               <span>申请用户信息</span>
             </label>
           </div>
 
           <div>
             <label class="floating-label">
-              <input type="text" class="input input-bordered w-full" :value="getTypeText(selectedSheet.type)" readonly />
+              <input type="text" class="input input-bordered w-full" :value="getTypeText(selectedSheet.type)" readonly/>
               <span>工单类型</span>
             </label>
           </div>
           <div>
             <label class="floating-label">
-              <input type="text" class="input input-bordered w-full" :value="getStatusText(selectedSheet.status)" readonly />
+              <input type="text" class="input input-bordered w-full" :value="getStatusText(selectedSheet.status)"
+                     readonly/>
               <span>工单状态</span>
             </label>
           </div>
 
           <div class="col-span-2">
             <label class="floating-label">
-              <textarea class="textarea textarea-bordered w-full h-32" :value="selectedSheet.content" readonly></textarea>
+              <textarea class="textarea textarea-bordered w-full h-32" :value="selectedSheet.content"
+                        readonly></textarea>
               <span>工单内容</span>
             </label>
           </div>
 
           <div>
             <label class="floating-label">
-              <input type="text" class="input input-bordered w-full" :value="formatDate(selectedSheet.createTime)" readonly />
+              <input type="text" class="input input-bordered w-full" :value="formatDate(selectedSheet.createTime)"
+                     readonly/>
               <span>创建时间</span>
             </label>
           </div>
           <div>
             <label class="floating-label">
-              <input type="text" class="input input-bordered w-full" :value="formatDate(selectedSheet.updateTime)" readonly />
+              <input type="text" class="input input-bordered w-full" :value="formatDate(selectedSheet.updateTime)"
+                     readonly/>
               <span>更新时间</span>
             </label>
           </div>
@@ -346,6 +375,23 @@ const changePage = (page: number) => {
     currentPage.value = page
     loadApplySheets()
   }
+}
+
+// 获取可见的页码
+const getVisiblePages = (): number[] => {
+  const pages: number[] = []
+  const current = currentPage.value
+  const total = totalPages.value
+
+  // 显示当前页前后各1页
+  const start = Math.max(1, current - 1)
+  const end = Math.min(total, current + 1)
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+
+  return pages
 }
 
 // 查看工单详情
