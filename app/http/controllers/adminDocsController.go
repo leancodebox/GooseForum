@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/spf13/cast"
 	"time"
+
+	"github.com/spf13/cast"
 
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
