@@ -1,23 +1,14 @@
 <template>
   <div class="space-y-6">
-    <!-- 页面标题 -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-normal text-base-content">工单查看</h1>
-        <p class="text-base-content/70 mt-1">查看和浏览用户提交的工单信息</p>
-      </div>
-    </div>
-
-    <!-- 筛选区域 -->
     <div class="card bg-base-100 shadow">
-      <div class="card-body">
+      <div class="card-body p-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="form-control">
             <label class="floating-label">
               <input
                   v-model="searchParams.title"
                   type="text"
-                  class="input input-bordered w-full"
+                  class="input input-sm input-bordered w-full"
                   placeholder="搜索工单标题"
                   @input="handleSearch"
               />
@@ -27,7 +18,7 @@
 
           <div class="form-control">
             <label class="floating-label">
-              <select v-model="searchParams.type" class="select select-bordered w-full" @change="handleFilter">
+              <select v-model="searchParams.type" class="select select-sm select-bordered w-full" @change="handleFilter">
                 <option value="">全部类型</option>
                 <option value="1">Bug反馈</option>
                 <option value="2">功能建议</option>
@@ -41,7 +32,7 @@
 
           <div class="form-control">
             <label class="floating-label">
-              <select v-model="searchParams.status" class="select select-bordered w-full" @change="handleFilter">
+              <select v-model="searchParams.status" class="select select-sm select-bordered w-full" @change="handleFilter">
                 <option value="">全部状态</option>
                 <option value="1">待处理</option>
                 <option value="2">处理中</option>
@@ -53,7 +44,7 @@
           </div>
 
           <div class="form-control">
-            <button class="btn btn-outline" @click="resetSearch">
+            <button class="btn btn-sm btn-outline" @click="resetSearch">
               <ArrowPathIcon class="w-4 h-4"/>
               重置
             </button>
@@ -202,75 +193,65 @@
 
         <h3 class="font-normal text-lg mb-4">工单详情</h3>
 
-        <div v-if="selectedSheet" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="label">
-                <span class="label-text font-medium">工单ID</span>
-              </label>
-              <div class="text-base">#{{ selectedSheet.id }}</div>
-            </div>
-            <div>
-              <label class="label">
-                <span class="label-text font-medium">用户ID</span>
-              </label>
-              <div class="text-base">{{ selectedSheet.userId }}</div>
-            </div>
-          </div>
-
+        <div v-if="selectedSheet" class="grid grid-cols-2 gap-4">
           <div>
-            <label class="label">
-              <span class="label-text font-medium">工单标题</span>
+            <label class="floating-label">
+              <input type="text" class="input input-bordered w-full" :value="'#' + selectedSheet.id" readonly />
+              <span>工单ID</span>
             </label>
-            <div class="text-base">{{ selectedSheet.title }}</div>
           </div>
-
           <div>
-            <label class="label">
-              <span class="label-text font-medium">申请用户信息</span>
+            <label class="floating-label">
+              <input type="text" class="input input-bordered w-full" :value="selectedSheet.userId" readonly />
+              <span>用户ID</span>
             </label>
-            <div class="text-base">{{ selectedSheet.applyUserInfo }}</div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="label">
-                <span class="label-text font-medium">工单类型</span>
-              </label>
-              <div class="badge" :class="getTypeClass(selectedSheet.type)">
-                {{ getTypeText(selectedSheet.type) }}
-              </div>
-            </div>
-            <div>
-              <label class="label">
-                <span class="label-text font-medium">工单状态</span>
-              </label>
-              <div class="badge" :class="getStatusClass(selectedSheet.status)">
-                {{ getStatusText(selectedSheet.status) }}
-              </div>
-            </div>
+          <div class="col-span-2">
+            <label class="floating-label">
+              <input type="text" class="input input-bordered w-full" :value="selectedSheet.title" readonly />
+              <span>工单标题</span>
+            </label>
+          </div>
+
+          <div class="col-span-2">
+            <label class="floating-label">
+              <input type="text" class="input input-bordered w-full" :value="selectedSheet.applyUserInfo" readonly />
+              <span>申请用户信息</span>
+            </label>
           </div>
 
           <div>
-            <label class="floating-label w-f">
+            <label class="floating-label">
+              <input type="text" class="input input-bordered w-full" :value="getTypeText(selectedSheet.type)" readonly />
+              <span>工单类型</span>
+            </label>
+          </div>
+          <div>
+            <label class="floating-label">
+              <input type="text" class="input input-bordered w-full" :value="getStatusText(selectedSheet.status)" readonly />
+              <span>工单状态</span>
+            </label>
+          </div>
+
+          <div class="col-span-2">
+            <label class="floating-label">
+              <textarea class="textarea textarea-bordered w-full h-32" :value="selectedSheet.content" readonly></textarea>
               <span>工单内容</span>
-              <textarea class="textarea">{{ selectedSheet.content }}</textarea>
             </label>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="label">
-                <span class="label-text font-medium">创建时间</span>
-              </label>
-              <div class="text-sm">{{ formatDate(selectedSheet.createTime) }}</div>
-            </div>
-            <div>
-              <label class="label">
-                <span class="label-text font-medium">更新时间</span>
-              </label>
-              <div class="text-sm">{{ formatDate(selectedSheet.updateTime) }}</div>
-            </div>
+          <div>
+            <label class="floating-label">
+              <input type="text" class="input input-bordered w-full" :value="formatDate(selectedSheet.createTime)" readonly />
+              <span>创建时间</span>
+            </label>
+          </div>
+          <div>
+            <label class="floating-label">
+              <input type="text" class="input input-bordered w-full" :value="formatDate(selectedSheet.updateTime)" readonly />
+              <span>更新时间</span>
+            </label>
           </div>
         </div>
 
