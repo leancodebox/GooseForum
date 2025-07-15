@@ -270,9 +270,6 @@ func DocsContent(c *gin.Context) {
 		UpdatedAt: docContentEntity.UpdatedAt,
 	}
 
-	// 解析目录结构
-	var directory []DirectoryItem
-
 	// 获取该版本的所有内容，用于构建导航
 	versionContents := make([]DocContent, 0)
 
@@ -295,7 +292,7 @@ func DocsContent(c *gin.Context) {
 		"Version":         version,
 		"Content":         content,
 		"HTMLContent":     htmlContent,
-		"Directory":       directory,
+		"Directory":       version.Directory,
 		"VersionContents": versionContents,
 		"ProjectVersions": projectVersions,
 		"Breadcrumbs":     breadcrumbs,
