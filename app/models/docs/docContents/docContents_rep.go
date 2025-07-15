@@ -119,3 +119,8 @@ func GetBySlug(versionId uint64, slug string) (entity Entity) {
 	builder().Where(queryopt.Eq(fieldVersionId, versionId)).Where(queryopt.Eq(fieldSlug, slug)).First(&entity)
 	return
 }
+
+func GetByVerionIds(versionId []uint64) (entity []*SimpleEntity) {
+	builder().Where(queryopt.In(fieldVersionId, versionId)).Find(&entity)
+	return
+}

@@ -89,3 +89,18 @@ type Entity struct {
 func (itself *Entity) TableName() string {
 	return tableName
 }
+
+type SimpleEntity struct {
+	Id        uint64 `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                      // 内容ID
+	VersionId uint64 `gorm:"column:version_id;not null;default:0;uniqueIndex:version_id,slug:1" json:"versionId"`         // 版本
+	Title     string `gorm:"column:title;type:varchar(200);not null;default:'';" json:"title"`                            // 文档标题
+	Slug      string `gorm:"column:slug;type:varchar(200);not null;default:'';uniqueIndex:version_id,slug:2" json:"slug"` // 文档标识符
+
+	CreatedAt time.Time      `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
+	UpdatedAt time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
+	DeletedAt gorm.DeletedAt // 删除时间
+}
+
+func (itself *SimpleEntity) TableName() string {
+	return tableName
+}

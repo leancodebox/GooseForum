@@ -729,12 +729,18 @@ func AdminDocsVersionList(req component.BetterRequest[DocsVersionListReq]) compo
 		return v.ProjectId
 	})
 	projectMap := make(map[uint64]string)
-	for _, projectId := range projectIds {
-		project := docProjects.Get(projectId)
+	for _, itemProjectId := range projectIds {
+		project := docProjects.Get(itemProjectId)
 		if project.Id != 0 {
-			projectMap[projectId] = project.Name
+			projectMap[itemProjectId] = project.Name
 		}
 	}
+	versionIds := array.Map(versions, func(version docVersions.Entity) uint64 {
+		return version.Id
+	})
+	contentGroup := array.GroupBy(docContents.GetByVerionIds(versionIds), func(t *docContents.SimpleEntity) uint64 {
+		return t.VersionId
+	})
 
 	// 转换响应格式
 	versionList := array.Map(versions, func(version docVersions.Entity) DocsVersionItem {
@@ -742,6 +748,19 @@ func AdminDocsVersionList(req component.BetterRequest[DocsVersionListReq]) compo
 		if name, exists := projectMap[version.ProjectId]; exists {
 			projectName = name
 		}
+
+		versionContent := contentGroup[version.Id]
+		contentList := array.Map(versionContent, func(t *docContents.SimpleEntity) docVersions.DirectoryItem {
+			return docVersions.DirectoryItem{
+				Title:       t.Title,
+				Slug:        t.Slug,
+				Description: "",
+				Children:    nil,
+			}
+		})
+		version.Directory = append(version.Directory, contentList...)
+		// version.Directory
+		// 这里要把两者合并，
 		return DocsVersionItem{
 			Id:                 version.Id,
 			ProjectId:          version.ProjectId,

@@ -54,14 +54,6 @@ type DocContent struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// DirectoryItem 目录项结构
-type DirectoryItem struct {
-	Title       string           `json:"title"`
-	Slug        string           `json:"slug"`
-	Description string           `json:"description,omitempty"`
-	Children    []*DirectoryItem `json:"children,omitempty"`
-}
-
 // DocsHome 文档首页 - 显示所有项目列表
 func DocsHome(c *gin.Context) {
 	docProjectsList := docProjects.GetAllActive()
