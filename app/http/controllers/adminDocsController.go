@@ -738,7 +738,7 @@ func AdminDocsVersionList(req component.BetterRequest[DocsVersionListReq]) compo
 	versionIds := array.Map(versions, func(version docVersions.Entity) uint64 {
 		return version.Id
 	})
-	contentGroup := array.GroupBy(docContents.GetByVerionIds(versionIds), func(t *docContents.SimpleEntity) uint64 {
+	contentGroup := array.GroupBy(docContents.GetByVersionIds(versionIds), func(t *docContents.SimpleEntity) uint64 {
 		return t.VersionId
 	})
 
@@ -758,9 +758,7 @@ func AdminDocsVersionList(req component.BetterRequest[DocsVersionListReq]) compo
 				Children:    nil,
 			}
 		})
-		version.Directory = append(version.Directory, contentList...)
-		// version.Directory
-		// 这里要把两者合并，
+		resDirectory := docVersions.BuildSafeDescription(version.Directory, contentList)
 		return DocsVersionItem{
 			Id:                 version.Id,
 			ProjectId:          version.ProjectId,
@@ -771,7 +769,7 @@ func AdminDocsVersionList(req component.BetterRequest[DocsVersionListReq]) compo
 			Status:             version.Status,
 			IsDefault:          version.IsDefault,
 			SortOrder:          version.SortOrder,
-			DirectoryStructure: version.Directory,
+			DirectoryStructure: resDirectory,
 			CreatedAt:          version.CreatedAt.Format(time.DateTime),
 			UpdatedAt:          version.UpdatedAt.Format(time.DateTime),
 		}

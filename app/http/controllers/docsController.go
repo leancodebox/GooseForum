@@ -139,6 +139,7 @@ func DocsVersion(c *gin.Context) {
 		CreatedAt:   docProjectEntity.CreatedAt,
 		UpdatedAt:   docProjectEntity.UpdatedAt,
 	}
+
 	version = &DocVersion{
 		ID:          targetVersion.Id,
 		ProjectID:   targetVersion.ProjectId,
@@ -151,6 +152,17 @@ func DocsVersion(c *gin.Context) {
 		CreatedAt:   targetVersion.CreatedAt,
 		UpdatedAt:   targetVersion.UpdatedAt,
 	}
+	versionContentList := docContents.GetByVersionId(targetVersion.Id)
+	contentList := array.Map(versionContentList, func(t *docContents.SimpleEntity) docVersions.DirectoryItem {
+		return docVersions.DirectoryItem{
+			Id:          t.Id,
+			Title:       t.Title,
+			Slug:        t.Slug,
+			Description: "",
+			Children:    nil,
+		}
+	})
+	resDirectory := docVersions.BuildSafeDescription(targetVersion.Directory, contentList)
 
 	// 构建面包屑导航
 	breadcrumbs := []map[string]string{
@@ -165,7 +177,7 @@ func DocsVersion(c *gin.Context) {
 		"Description":     fmt.Sprintf("%s - %s", project.Description, version.Description),
 		"Project":         project,
 		"Version":         version,
-		"Directory":       version.Directory,
+		"Directory":       resDirectory,
 		"ProjectVersions": projectVersions,
 		"Breadcrumbs":     breadcrumbs,
 		"CanonicalHref":   buildCanonicalHref(c),
@@ -272,6 +284,18 @@ func DocsContent(c *gin.Context) {
 		{"title": content.Title, "url": ""},
 	}
 
+	versionContentList := docContents.GetByVersionId(targetVersion.Id)
+	contentList := array.Map(versionContentList, func(t *docContents.SimpleEntity) docVersions.DirectoryItem {
+		return docVersions.DirectoryItem{
+			Id:          t.Id,
+			Title:       t.Title,
+			Slug:        t.Slug,
+			Description: "",
+			Children:    nil,
+		}
+	})
+	resDirectory := docVersions.BuildSafeDescription(targetVersion.Directory, contentList)
+
 	// 渲染Markdown内容为HTML
 	htmlContent := template.HTML(markdown2html.MarkdownToHTML(content.Content))
 
@@ -284,7 +308,7 @@ func DocsContent(c *gin.Context) {
 		"Version":         version,
 		"Content":         content,
 		"HTMLContent":     htmlContent,
-		"Directory":       version.Directory,
+		"Directory":       resDirectory,
 		"VersionContents": versionContents,
 		"ProjectVersions": projectVersions,
 		"Breadcrumbs":     breadcrumbs,

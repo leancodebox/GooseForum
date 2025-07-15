@@ -59,10 +59,11 @@ type Entity struct {
 
 // DirectoryItem 目录项结构
 type DirectoryItem struct {
-	Title       string           `json:"title"`
-	Slug        string           `json:"slug"`
-	Description string           `json:"description,omitempty"`
-	Children    []*DirectoryItem `json:"children,omitempty"`
+	Id          uint64          `json:"id"`
+	Title       string          `json:"title"`
+	Slug        string          `json:"slug"`
+	Description string          `json:"description,omitempty"`
+	Children    []DirectoryItem `json:"children,omitempty"`
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
@@ -77,4 +78,56 @@ type DirectoryItem struct {
 
 func (itself *Entity) TableName() string {
 	return tableName
+}
+
+func BuildSafeDescription(tree []DirectoryItem, contentList []DirectoryItem) []DirectoryItem {
+	// 创建contentList的slug映射，用于快速查找
+	contentMap := make(map[string]DirectoryItem)
+	for _, content := range contentList {
+		contentMap[content.Slug] = content
+	}
+
+	// 递归处理目录结构的函数
+	var processDirectoryItems func(items []DirectoryItem) []DirectoryItem
+	processDirectoryItems = func(items []DirectoryItem) []DirectoryItem {
+		var result []DirectoryItem
+		for _, dirItem := range items {
+			if content, exists := contentMap[dirItem.Slug]; exists {
+				// 使用contentList中的最新数据，但保留原有的Children结构
+				updatedItem := content
+				if len(dirItem.Children) > 0 {
+					// 递归处理子项
+					updatedItem.Children = processDirectoryItems(dirItem.Children)
+				}
+				result = append(result, updatedItem)
+				// 从contentMap中删除已处理的项目
+				delete(contentMap, dirItem.Slug)
+			} else if len(dirItem.Children) > 0 {
+				// 如果当前项不存在但有子项，递归处理子项
+				processedChildren := processDirectoryItems(dirItem.Children)
+				// 只有当处理后还有有效子项时才保留父项
+				if len(processedChildren) > 0 {
+					dirItem.Children = processedChildren
+					result = append(result, dirItem)
+				}
+			}
+			// 如果当前项不存在且没有子项，则跳过（不添加到result中）
+		}
+		return result
+	}
+
+	// 处理version.Directory，过滤掉不存在的内容
+	validDirectoryItems := processDirectoryItems(tree)
+
+	// 将contentList中剩余的（不在version.Directory中的）项目追加到最后
+	for _, remainingContent := range contentMap {
+		validDirectoryItems = append(validDirectoryItems, remainingContent)
+	}
+
+	// 转换为非指针类型的切片
+	var resDirectory []DirectoryItem
+	for _, item := range validDirectoryItems {
+		resDirectory = append(resDirectory, item)
+	}
+	return resDirectory
 }
