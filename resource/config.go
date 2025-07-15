@@ -2,7 +2,6 @@ package resource
 
 import (
 	"embed"
-	"errors"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -45,19 +44,18 @@ func GetTemplates(globalFunc template.FuncMap) *template.Template {
 			"IsOnline": func(t time.Time) bool {
 				return time.Now().Sub(t) < 120*time.Second
 			},
-			"dict": func(values ...interface{}) (map[string]interface{}, error) {
-				if len(values)%2 != 0 {
-					return nil, errors.New("invalid dict call")
-				}
-				dict := make(map[string]interface{}, len(values)/2)
-				for i := 0; i < len(values); i += 2 {
-					key, ok := values[i].(string)
-					if !ok {
-						return nil, errors.New("dict keys must be strings")
+			"dict": func(v ...any) map[string]any {
+				dict := map[string]any{}
+				lenv := len(v)
+				for i := 0; i < lenv; i += 2 {
+					key := cast.ToString(v[i])
+					if i+1 >= lenv {
+						dict[key] = ""
+						continue
 					}
-					dict[key] = values[i+1]
+					dict[key] = v[i+1]
 				}
-				return dict, nil
+				return dict
 			},
 		}).
 		Funcs(globalFunc)
