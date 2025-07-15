@@ -217,7 +217,7 @@ func AdminDocsContentUpdate(req component.BetterRequest[DocsContentUpdateReq]) c
 		// 保持原有的发布状态
 		IsPublished: originalContent.IsPublished,
 	}
-
+	fmt.Println(updatedContent)
 	rowsAffected := docContents.SaveOrCreateById(updatedContent)
 	if rowsAffected == 0 {
 		return component.FailResponse("更新内容失败")

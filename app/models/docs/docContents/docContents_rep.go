@@ -1,5 +1,7 @@
 package docContents
 
+import "github.com/leancodebox/GooseForum/app/bundles/queryopt"
+
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
@@ -111,4 +113,9 @@ func GetByVersionId(versionId uint64) []*Entity {
 	var contents []*Entity
 	builder().Where("version_id = ?", versionId).Order("sort_order ASC, created_at DESC").Find(&contents)
 	return contents
+}
+
+func GetBySlug(versionId uint64, slug string) (entity Entity) {
+	builder().Where(queryopt.Eq(fieldVersionId, versionId)).Where(queryopt.Eq(fieldSlug, slug)).First(&entity)
+	return
 }

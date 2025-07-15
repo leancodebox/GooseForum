@@ -1,10 +1,13 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/models/docs/docContents"
+	"github.com/leancodebox/GooseForum/app/models/docs/docProjects"
+	"github.com/leancodebox/GooseForum/app/models/docs/docVersions"
+	"github.com/spf13/cast"
 	"html/template"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -26,16 +29,16 @@ type DocProject struct {
 
 // DocVersion 文档版本结构
 type DocVersion struct {
-	ID          uint64    `json:"id"`
-	ProjectID   uint64    `json:"project_id"`
-	Version     string    `json:"version"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Directory   string    `json:"directory"` // JSON格式的目录结构
-	IsDefault   bool      `json:"is_default"`
-	Status      int       `json:"status"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID          uint64                      `json:"id"`
+	ProjectID   uint64                      `json:"project_id"`
+	Version     string                      `json:"version"`
+	Name        string                      `json:"name"`
+	Description string                      `json:"description"`
+	Directory   []docVersions.DirectoryItem `json:"directory"` // JSON格式的目录结构
+	IsDefault   bool                        `json:"is_default"`
+	Status      int                         `json:"status"`
+	CreatedAt   time.Time                   `json:"created_at"`
+	UpdatedAt   time.Time                   `json:"updated_at"`
 }
 
 // DocContent 文档内容结构
@@ -45,7 +48,6 @@ type DocContent struct {
 	Slug      string    `json:"slug"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
-	ParentID  uint64    `json:"parent_id"`
 	SortOrder int       `json:"sort_order"`
 	Status    int       `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
@@ -60,127 +62,27 @@ type DirectoryItem struct {
 	Children    []*DirectoryItem `json:"children,omitempty"`
 }
 
-// 从JSON文件加载数据的函数
-func loadMockData() ([]DocProject, []DocVersion, []DocContent, error) {
-	// 从JSON文件读取模拟数据
-	data, err := os.ReadFile("mock_docs_data.json")
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("读取模拟数据文件失败: %v", err)
-	}
-
-	var mockData struct {
-		Projects []struct {
-			ID          int       `json:"id"`
-			Slug        string    `json:"slug"`
-			Name        string    `json:"name"`
-			Description string    `json:"description"`
-			Status      int       `json:"status"`
-			CreatedAt   time.Time `json:"created_at"`
-			UpdatedAt   time.Time `json:"updated_at"`
-		} `json:"projects"`
-		Versions []struct {
-			ID          int       `json:"id"`
-			ProjectID   int       `json:"project_id"`
-			Version     string    `json:"version"`
-			Name        string    `json:"name"`
-			Description string    `json:"description"`
-			Directory   string    `json:"directory"`
-			IsDefault   bool      `json:"is_default"`
-			Status      int       `json:"status"`
-			CreatedAt   time.Time `json:"created_at"`
-			UpdatedAt   time.Time `json:"updated_at"`
-		} `json:"versions"`
-		Contents []struct {
-			ID        int       `json:"id"`
-			VersionID int       `json:"version_id"`
-			Slug      string    `json:"slug"`
-			Title     string    `json:"title"`
-			Content   string    `json:"content"`
-			ParentID  int       `json:"parent_id"`
-			SortOrder int       `json:"sort_order"`
-			Status    int       `json:"status"`
-			CreatedAt time.Time `json:"created_at"`
-			UpdatedAt time.Time `json:"updated_at"`
-		} `json:"contents"`
-	}
-
-	if err := json.Unmarshal(data, &mockData); err != nil {
-		return nil, nil, nil, fmt.Errorf("解析模拟数据失败: %v", err)
-	}
-
-	// 转换项目数据
-	var projects []DocProject
-	for _, p := range mockData.Projects {
-		projects = append(projects, DocProject{
-			ID:          uint64(p.ID),
-			Slug:        p.Slug,
-			Name:        p.Name,
-			Description: p.Description,
-			Status:      p.Status,
-			CreatedAt:   p.CreatedAt,
-			UpdatedAt:   p.UpdatedAt,
-		})
-	}
-
-	// 转换版本数据
-	var versions []DocVersion
-	for _, v := range mockData.Versions {
-		versions = append(versions, DocVersion{
-			ID:          uint64(v.ID),
-			ProjectID:   uint64(v.ProjectID),
-			Version:     v.Version,
-			Name:        v.Name,
-			Description: v.Description,
-			Directory:   v.Directory,
-			IsDefault:   v.IsDefault,
-			Status:      v.Status,
-			CreatedAt:   v.CreatedAt,
-			UpdatedAt:   v.UpdatedAt,
-		})
-	}
-
-	// 转换内容数据
-	var contents []DocContent
-	for _, c := range mockData.Contents {
-		contents = append(contents, DocContent{
-			ID:        uint64(c.ID),
-			VersionID: uint64(c.VersionID),
-			Slug:      c.Slug,
-			Title:     c.Title,
-			Content:   c.Content,
-			ParentID:  uint64(c.ParentID),
-			SortOrder: c.SortOrder,
-			Status:    c.Status,
-			CreatedAt: c.CreatedAt,
-			UpdatedAt: c.UpdatedAt,
-		})
-	}
-
-	return projects, versions, contents, nil
-}
-
 // DocsHome 文档首页 - 显示所有项目列表
 func DocsHome(c *gin.Context) {
-	projects, _, _, err := loadMockData()
-	if err != nil {
-		errorPage(c, "加载数据失败", "无法加载文档数据")
-		return
-	}
-
-	// 过滤已发布的项目
-	publishedProjects := make([]DocProject, 0)
-	for _, project := range projects {
-		if project.Status == 1 {
-			publishedProjects = append(publishedProjects, project)
+	docProjectsList := docProjects.GetAllActive()
+	projects := array.Map(docProjectsList, func(t docProjects.Entity) DocProject {
+		return DocProject{
+			ID:          t.Id,
+			Slug:        t.Slug,
+			Name:        t.Name,
+			Description: t.Description,
+			Status:      cast.ToInt(t.Status),
+			CreatedAt:   t.CreatedAt,
+			UpdatedAt:   t.UpdatedAt,
 		}
-	}
+	})
 
 	viewrender.Render(c, "docs-home.gohtml", map[string]any{
 		"IsProduction":  setting.IsProduction(),
 		"User":          GetLoginUser(c),
 		"Title":         "文档中心 - GooseForum",
 		"Description":   "GooseForum 文档中心，包含完整的使用指南和API参考",
-		"Projects":      publishedProjects,
+		"Projects":      projects,
 		"CanonicalHref": buildCanonicalHref(c),
 	})
 }
@@ -195,9 +97,9 @@ func DocsVersion(c *gin.Context) {
 		return
 	}
 
-	projects, versions, _, err := loadMockData()
-	if err != nil {
-		errorPage(c, "加载数据失败", "无法加载文档数据")
+	docProjectEntity := docProjects.GetBySlug(projectSlug)
+	if docProjectEntity.Id == 0 {
+		errorPage(c, "参数错误", "项目或版本标识不能为空")
 		return
 	}
 
@@ -205,47 +107,57 @@ func DocsVersion(c *gin.Context) {
 	var project *DocProject
 	var version *DocVersion
 
-	for _, p := range projects {
-		if p.Slug == projectSlug && p.Status == 1 {
-			project = &p
+	// 获取该项目的所有版本，用于版本切换
+	projectVersions := make([]DocVersion, 0)
+	docVersionList := docVersions.GetVersionByProject(docProjectEntity.Id)
+	var targetVersion *docVersions.Entity
+	for _, v := range docVersionList {
+		if versionSlug != "" && v.Slug == versionSlug {
+			targetVersion = v
+			break
+		} else if versionSlug == "" && v.IsDefault == 1 {
+			targetVersion = v
 			break
 		}
+		projectVersions = append(projectVersions, DocVersion{
+			ID:          v.Id,
+			ProjectID:   v.ProjectId,
+			Version:     v.Slug,
+			Name:        v.Description,
+			Description: v.Description,
+			Directory:   v.Directory,
+			IsDefault:   v.IsDefault == 1,
+			Status:      cast.ToInt(v.Status),
+			CreatedAt:   v.CreatedAt,
+			UpdatedAt:   v.UpdatedAt,
+		})
 	}
 
-	if project == nil {
-		errorPage(c, "项目不存在", "找不到指定的文档项目")
-		return
-	}
-
-	for _, v := range versions {
-		if versionSlug != "" && v.ProjectID == project.ID && v.Version == versionSlug && v.Status == 1 {
-			version = &v
-			break
-		}
-		if versionSlug == "" && v.ProjectID == project.ID && v.IsDefault && v.Status == 1 {
-			version = &v
-			break
-		}
-	}
-
-	if version == nil {
+	if targetVersion == nil {
 		errorPage(c, "版本不存在", "找不到指定的文档版本")
 		return
 	}
 
-	// 解析目录结构
-	var directory []DirectoryItem
-	if err := json.Unmarshal([]byte(version.Directory), &directory); err != nil {
-		errorPage(c, "数据错误", "无法解析目录结构")
-		return
+	project = &DocProject{
+		ID:          docProjectEntity.Id,
+		Slug:        docProjectEntity.Slug,
+		Name:        docProjectEntity.Name,
+		Description: docProjectEntity.Description,
+		Status:      cast.ToInt(docProjectEntity.Status),
+		CreatedAt:   docProjectEntity.CreatedAt,
+		UpdatedAt:   docProjectEntity.UpdatedAt,
 	}
-
-	// 获取该项目的所有版本，用于版本切换
-	projectVersions := make([]DocVersion, 0)
-	for _, v := range versions {
-		if v.ProjectID == project.ID && v.Status == 1 {
-			projectVersions = append(projectVersions, v)
-		}
+	version = &DocVersion{
+		ID:          targetVersion.Id,
+		ProjectID:   targetVersion.ProjectId,
+		Version:     targetVersion.Slug,
+		Name:        targetVersion.Description,
+		Description: targetVersion.Description,
+		Directory:   targetVersion.Directory,
+		IsDefault:   targetVersion.IsDefault == 1,
+		Status:      cast.ToInt(targetVersion.Status),
+		CreatedAt:   targetVersion.CreatedAt,
+		UpdatedAt:   targetVersion.UpdatedAt,
 	}
 
 	// 构建面包屑导航
@@ -261,7 +173,7 @@ func DocsVersion(c *gin.Context) {
 		"Description":     fmt.Sprintf("%s - %s", project.Description, version.Description),
 		"Project":         project,
 		"Version":         version,
-		"Directory":       directory,
+		"Directory":       version.Directory,
 		"ProjectVersions": projectVersions,
 		"Breadcrumbs":     breadcrumbs,
 		"CanonicalHref":   buildCanonicalHref(c),
@@ -279,9 +191,43 @@ func DocsContent(c *gin.Context) {
 		return
 	}
 
-	projects, versions, contents, err := loadMockData()
-	if err != nil {
-		errorPage(c, "加载数据失败", "无法加载文档数据")
+	docProjectEntity := docProjects.GetBySlug(projectSlug)
+	if docProjectEntity.Id == 0 {
+		errorPage(c, "参数错误", "项目或版本标识不能为空")
+		return
+	}
+
+	// 获取该项目的所有版本，用于版本切换
+	projectVersions := make([]DocVersion, 0)
+	docVersionList := docVersions.GetVersionByProject(docProjectEntity.Id)
+	var targetVersion *docVersions.Entity
+	for _, v := range docVersionList {
+		if v.Slug == versionSlug {
+			targetVersion = v
+			break
+		}
+		projectVersions = append(projectVersions, DocVersion{
+			ID:          v.Id,
+			ProjectID:   v.ProjectId,
+			Version:     v.Slug,
+			Name:        v.Description,
+			Description: v.Description,
+			Directory:   v.Directory,
+			IsDefault:   v.IsDefault == 1,
+			Status:      cast.ToInt(v.Status),
+			CreatedAt:   v.CreatedAt,
+			UpdatedAt:   v.UpdatedAt,
+		})
+	}
+
+	if targetVersion == nil {
+		errorPage(c, "版本不存在", "找不到指定的文档版本")
+		return
+	}
+	fmt.Println(targetVersion.Id, contentSlug)
+	docContentEntity := docContents.GetBySlug(targetVersion.Id, contentSlug)
+	if docContentEntity.Id == 0 {
+		errorPage(c, "内容不存在", "找不到指定的文档内容")
 		return
 	}
 
@@ -290,64 +236,45 @@ func DocsContent(c *gin.Context) {
 	var version *DocVersion
 	var content *DocContent
 
-	for _, p := range projects {
-		if p.Slug == projectSlug && p.Status == 1 {
-			project = &p
-			break
-		}
+	project = &DocProject{
+		ID:          docProjectEntity.Id,
+		Slug:        docProjectEntity.Slug,
+		Name:        docProjectEntity.Name,
+		Description: docProjectEntity.Description,
+		Status:      cast.ToInt(docProjectEntity.Status),
+		CreatedAt:   docProjectEntity.CreatedAt,
+		UpdatedAt:   docProjectEntity.UpdatedAt,
+	}
+	version = &DocVersion{
+		ID:          targetVersion.Id,
+		ProjectID:   targetVersion.ProjectId,
+		Version:     targetVersion.Slug,
+		Name:        targetVersion.Description,
+		Description: targetVersion.Description,
+		Directory:   targetVersion.Directory,
+		IsDefault:   targetVersion.IsDefault == 1,
+		Status:      cast.ToInt(targetVersion.Status),
+		CreatedAt:   targetVersion.CreatedAt,
+		UpdatedAt:   targetVersion.UpdatedAt,
 	}
 
-	if project == nil {
-		errorPage(c, "项目不存在", "找不到指定的文档项目")
-		return
-	}
-
-	for _, v := range versions {
-		if v.ProjectID == project.ID && v.Version == versionSlug && v.Status == 1 {
-			version = &v
-			break
-		}
-	}
-
-	if version == nil {
-		errorPage(c, "版本不存在", "找不到指定的文档版本")
-		return
-	}
-
-	for _, cnt := range contents {
-		if cnt.VersionID == version.ID && cnt.Slug == contentSlug && cnt.Status == 1 {
-			content = &cnt
-			break
-		}
-	}
-
-	if content == nil {
-		errorPage(c, "内容不存在", "找不到指定的文档内容")
-		return
+	content = &DocContent{
+		ID:        docContentEntity.Id,
+		VersionID: docContentEntity.VersionId,
+		Slug:      docContentEntity.Slug,
+		Title:     docContentEntity.Title,
+		Content:   docContentEntity.Content,
+		SortOrder: docContentEntity.SortOrder,
+		Status:    1,
+		CreatedAt: docContentEntity.CreatedAt,
+		UpdatedAt: docContentEntity.UpdatedAt,
 	}
 
 	// 解析目录结构
 	var directory []DirectoryItem
-	if err := json.Unmarshal([]byte(version.Directory), &directory); err != nil {
-		errorPage(c, "数据错误", "无法解析目录结构")
-		return
-	}
 
 	// 获取该版本的所有内容，用于构建导航
 	versionContents := make([]DocContent, 0)
-	for _, cnt := range contents {
-		if cnt.VersionID == version.ID && cnt.Status == 1 {
-			versionContents = append(versionContents, cnt)
-		}
-	}
-
-	// 获取该项目的所有版本，用于版本切换
-	projectVersions := make([]DocVersion, 0)
-	for _, v := range versions {
-		if v.ProjectID == project.ID && v.Status == 1 {
-			projectVersions = append(projectVersions, v)
-		}
-	}
 
 	// 构建面包屑导航
 	breadcrumbs := []map[string]string{

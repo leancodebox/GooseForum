@@ -28,7 +28,7 @@ func GetProjectList(page, pageSize int, keyword string, status *int8, isPublic *
 	var entities []Entity
 	var total int64
 
-	query := builder().Where("deleted_at IS NULL")
+	query := builder()
 
 	// 关键词搜索
 	if keyword != "" {
@@ -58,14 +58,14 @@ func GetProjectList(page, pageSize int, keyword string, status *int8, isPublic *
 // ExistsBySlug 检查slug是否存在
 func ExistsBySlug(slug string) bool {
 	var count int64
-	builder().Where("slug = ? AND deleted_at IS NULL", slug).Count(&count)
+	builder().Where("slug = ? ", slug).Count(&count)
 	return count > 0
 }
 
 // ExistsBySlugExcludeId 检查slug是否存在（排除指定ID）
 func ExistsBySlugExcludeId(slug string, excludeId uint64) bool {
 	var count int64
-	builder().Where("slug = ? AND id != ? AND deleted_at IS NULL", slug, excludeId).Count(&count)
+	builder().Where("slug = ? AND id != ? ", slug, excludeId).Count(&count)
 	return count > 0
 }
 
@@ -77,18 +77,18 @@ func SoftDelete(id uint64) int64 {
 
 // GetBySlug 根据slug获取项目
 func GetBySlug(slug string) (entity Entity) {
-	builder().Where("slug = ? AND deleted_at IS NULL", slug).First(&entity)
+	builder().Where("slug = ? ", slug).First(&entity)
 	return
 }
 
 // GetAllActive 获取所有活跃项目
 func GetAllActive() (entities []Entity) {
-	builder().Where("status = ? AND deleted_at IS NULL", 2).Find(&entities)
+	builder().Where("status = ?", 2).Find(&entities)
 	return
 }
 
 // GetByOwnerId 根据所有者ID获取项目列表
 func GetByOwnerId(ownerId uint64) (entities []Entity) {
-	builder().Where("owner_id = ? AND deleted_at IS NULL", ownerId).Find(&entities)
+	builder().Where("owner_id = ? ", ownerId).Find(&entities)
 	return
 }

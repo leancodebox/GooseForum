@@ -1,5 +1,7 @@
 package docVersions
 
+import "github.com/leancodebox/GooseForum/app/bundles/queryopt"
+
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
 	return result.RowsAffected
@@ -100,4 +102,9 @@ func Create(entity *Entity) int64 {
 // Save 公开的保存方法
 func Save(entity *Entity) int64 {
 	return save(entity)
+}
+
+func GetVersionByProject(projectId uint64) (entities []*Entity) {
+	builder().Where(queryopt.Eq(fieldProjectId, projectId)).Find(&entities)
+	return
 }

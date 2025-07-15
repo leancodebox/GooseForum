@@ -13,6 +13,9 @@ const pid = "id"
 // fieldTitle 文档标题
 const fieldTitle = "title"
 
+// fieldVersionId 版本id
+const fieldVersionId = "version_id"
+
 // fieldSlug 文档标识符
 const fieldSlug = "slug"
 
@@ -57,7 +60,7 @@ type Entity struct {
 	VersionId          uint64 `gorm:"column:version_id;not null;default:0;uniqueIndex:version_id,slug:1" json:"versionId"`            // 版本
 	Title              string `gorm:"column:title;type:varchar(200);not null;default:'';" json:"title"`                               // 文档标题
 	Slug               string `gorm:"column:slug;type:varchar(200);not null;default:'';uniqueIndex:version_id,slug:2" json:"slug"`    // 文档标识符
-	OriginContent      string `gorm:"column:content;type:text;" json:"OriginContent"`                                                 // 文档内容(Markdown)
+	OriginContent      string `gorm:"column:origin_content;type:text;" json:"OriginContent"`                                          // 文档内容(Markdown)
 	Content            string `gorm:"column:content;type:text;" json:"content"`                                                       // 文档内容(Markdown)
 	ContentHtml        string `gorm:"column:content_html;type:text;" json:"contentHtml"`                                              // 渲染后的HTML内容
 	ContentHtmlVersion uint32 `gorm:"column:content_html_version;type:bigint unsigned;not null;default:0;" json:"contentHtmlVersion"` //md 的渲染器版本
