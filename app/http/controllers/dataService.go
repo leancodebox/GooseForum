@@ -12,8 +12,15 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
-	"sync"
 	"time"
+)
+
+// 初始化缓存
+var (
+	GetSiteStatisticsDataCache = &datacache.Cache[string, SiteStats]{}
+	articleCache               = &datacache.Cache[string, []articles.SmallEntity]{}
+	articleCategoryCache       = &datacache.Cache[string, []*articleCategory.Entity]{}
+	articleCategoryMapCache    = &datacache.Cache[string, map[uint64]*articleCategory.Entity]{}
 )
 
 var articlesType = []datastruct.Option[string, int]{
@@ -25,13 +32,6 @@ var articlesTypeMap = array.Slice2Map(articlesType, func(v datastruct.Option[str
 	return v.Value
 })
 
-var (
-	siteStatsCacheHasCache bool
-	siteStatsCache         SiteStats
-	siteStatsCacheTime     time.Time
-	siteStatsCacheMutex    sync.Mutex
-)
-
 type SiteStats struct {
 	UserCount         int64 `json:"userCount"`
 	UserMonthCount    int64 `json:"userMonthCount"`
@@ -42,36 +42,24 @@ type SiteStats struct {
 }
 
 func GetSiteStatisticsData() SiteStats {
-	siteStatsCacheMutex.Lock()
-	defer siteStatsCacheMutex.Unlock()
-
-	if time.Since(siteStatsCacheTime) < 5*time.Second && siteStatsCacheHasCache {
-		return siteStatsCache
-	}
-
-	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
-	res := jsonopt.Decode[[]pageConfig.FriendLinksGroup](configEntity.Config)
-	linksCount := 0
-	for _, group := range res {
-		linksCount += len(group.Links)
-	}
-	result := SiteStats{
-		UserCount:         users.GetCount(),
-		UserMonthCount:    users.GetMonthCount(),
-		ArticleCount:      articles.GetCount(),
-		ArticleMonthCount: articles.GetMonthCount(),
-		Reply:             reply.GetCount(),
-		LinksCount:        linksCount,
-	}
-
-	siteStatsCache = result
-	siteStatsCacheTime = time.Now()
-	siteStatsCacheHasCache = true
-	return siteStatsCache
+	data, _ := GetSiteStatisticsDataCache.GetOrLoad("", func() (SiteStats, error) {
+		configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
+		res := jsonopt.Decode[[]pageConfig.FriendLinksGroup](configEntity.Config)
+		linksCount := 0
+		for _, group := range res {
+			linksCount += len(group.Links)
+		}
+		return SiteStats{
+			UserCount:         users.GetCount(),
+			UserMonthCount:    users.GetMonthCount(),
+			ArticleCount:      articles.GetCount(),
+			ArticleMonthCount: articles.GetMonthCount(),
+			Reply:             reply.GetCount(),
+			LinksCount:        linksCount,
+		}, nil
+	}, time.Second*5)
+	return data
 }
-
-// 初始化缓存
-var articleCache = &datacache.Cache[string, []articles.SmallEntity]{}
 
 func getRecommendedArticles() []articles.SmallEntity {
 	data, _ := articleCache.GetOrLoad(
@@ -96,8 +84,6 @@ func getLatestArticles() []articles.SmallEntity {
 	return data
 }
 
-var articleCategoryCache = &datacache.Cache[string, []*articleCategory.Entity]{}
-
 func getArticleCategory() []*articleCategory.Entity {
 	data, _ := articleCategoryCache.GetOrLoad(
 		"getArticleCategory",
@@ -118,8 +104,6 @@ func articleCategoryLabel() []datastruct.Option[string, uint64] {
 		}
 	})
 }
-
-var articleCategoryMapCache = &datacache.Cache[string, map[uint64]*articleCategory.Entity]{}
 
 // GetMapByIds 根据ID列表获取分类Map
 func articleCategoryMap() map[uint64]*articleCategory.Entity {

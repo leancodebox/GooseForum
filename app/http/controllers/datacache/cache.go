@@ -42,9 +42,9 @@ func (c *Cache[K, V]) GetOrLoad(
 	}
 
 	// 缓存结果（带超时控制）
-	c.items.Store(key, cacheItem[V]{
+	c.items.Store(key, &cacheItem[V]{
 		value:      newVal,
-		expiration: time.Now().Add(timeout).UnixNano(),
+		expiration: time.Now().Add(timeout).Unix(),
 	})
 
 	return newVal, nil
@@ -53,8 +53,8 @@ func (c *Cache[K, V]) GetOrLoad(
 // 私有方法：带过期检查的读取
 func (c *Cache[K, V]) get(key K) (V, bool) {
 	if item, ok := c.items.Load(key); ok {
-		cached := item.(cacheItem[V])
-		if time.Now().UnixNano() < cached.expiration {
+		cached := item.(*cacheItem[V])
+		if time.Now().Unix() < cached.expiration {
 			return cached.value, true
 		}
 		c.items.Delete(key) // 自动清理过期项
