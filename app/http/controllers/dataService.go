@@ -17,10 +17,10 @@ import (
 
 // 初始化缓存
 var (
-	GetSiteStatisticsDataCache = &datacache.Cache[string, SiteStats]{}
-	articleCache               = &datacache.Cache[string, []articles.SmallEntity]{}
-	articleCategoryCache       = &datacache.Cache[string, []*articleCategory.Entity]{}
-	articleCategoryMapCache    = &datacache.Cache[string, map[uint64]*articleCategory.Entity]{}
+	siteStatisticsDataCache = &datacache.Cache[string, SiteStats]{}
+	articleCache            = &datacache.Cache[string, []articles.SmallEntity]{}
+	articleCategoryCache    = &datacache.Cache[string, []*articleCategory.Entity]{}
+	articleCategoryMapCache = &datacache.Cache[string, map[uint64]*articleCategory.Entity]{}
 )
 
 var articlesType = []datastruct.Option[string, int]{
@@ -42,7 +42,7 @@ type SiteStats struct {
 }
 
 func GetSiteStatisticsData() SiteStats {
-	data, _ := GetSiteStatisticsDataCache.GetOrLoad("", func() (SiteStats, error) {
+	data, _ := siteStatisticsDataCache.GetOrLoad("", func() (SiteStats, error) {
 		configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
 		res := jsonopt.Decode[[]pageConfig.FriendLinksGroup](configEntity.Config)
 		linksCount := 0

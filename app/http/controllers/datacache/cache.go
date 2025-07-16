@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Cache 本 cache 目前不包含定时清理，请在有限场景使用
 type Cache[K comparable, V any] struct {
 	items sync.Map
 	mu    sync.RWMutex
@@ -12,7 +13,7 @@ type Cache[K comparable, V any] struct {
 
 type cacheItem[V any] struct {
 	value      V
-	expiration int64 // 纳秒时间戳
+	expiration int64 // 毫秒时间戳
 }
 
 // GetOrLoad 核心调用方法（满足您要求的参数形式）
