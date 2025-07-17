@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"time"
 
 	"github.com/spf13/cast"
@@ -117,8 +118,8 @@ func AdminDocsProjectList(req component.BetterRequest[DocsProjectListReq]) compo
 // AdminDocsProjectDetail 获取项目详情
 func AdminDocsProjectDetail(req component.BetterRequest[component.Null]) component.Response {
 	// 从URL参数中获取ID需要通过gin.Context，这里暂时使用固定值
-	// TODO: 需要修改为从URL参数获取ID的方式
-	project := docProjects.Get(1) // 临时使用固定ID
+	id := cast.ToInt64(req.GinContext.Param("id"))
+	project := docProjects.Get(id) // 临时使用固定ID
 	if project.Id == 0 {
 		return component.FailResponse("项目不存在")
 	}
@@ -299,11 +300,9 @@ func AdminDocsContentDraft(req component.BetterRequest[DocsContentDraftReq]) com
 func AdminDocsContentPreview(req component.BetterRequest[DocsContentPreviewReq]) component.Response {
 	params := req.Params
 
-	// TODO: 这里需要集成Markdown渲染器
-	// 暂时返回原始内容和空的目录
 	response := DocsContentPreviewResponse{
-		Html: "<p>" + params.Content + "</p>", // 临时处理
-		Toc:  "",                              // 临时为空
+		Html: markdown2html.MarkdownToHTML(params.Content), // 临时处理
+		Toc:  "",                                           // 临时为空
 	}
 
 	return component.SuccessResponse(response)

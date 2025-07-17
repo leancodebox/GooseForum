@@ -245,30 +245,31 @@
 
         <div class="space-y-4">
           <!-- 项目选择 -->
-          <div>
-            <label class="floating-label">
-              <span class="label-text">所属项目 <span class="text-error">*</span></span>
-              <select v-model="formData.projectId" class="select select-bordered w-full" :disabled="isEditing" @change="onFormProjectChange">
-                <option value="">请选择项目</option>
-                <option v-for="project in projects" :key="project.id" :value="project.id">
-                  {{ project.name }}
-                </option>
-              </select>
-            </label>
+          <div class="flex space-x-4">
+            <div class="flex-1">
+              <label class="floating-label">
+                <span class="label-text">所属项目 <span class="text-error">*</span></span>
+                <select v-model="formData.projectId" class="select select-bordered w-full" :disabled="isEditing" @change="onFormProjectChange">
+                  <option value="">请选择项目</option>
+                  <option v-for="project in projects" :key="project.id" :value="project.id">
+                    {{ project.name }}
+                  </option>
+                </select>
+              </label>
+            </div>
+            <div class="flex-1">
+              <label class="floating-label">
+                <span class="label-text">所属版本 <span class="text-error">*</span></span>
+                <select v-model="formData.versionId" class="select select-bordered w-full" :disabled="isEditing || !formData.projectId">
+                  <option value="0">请选择版本</option>
+                  <option v-for="version in formFilteredVersions" :key="version.id" :value="version.id">
+                    {{ version.name }}
+                  </option>
+                </select>
+              </label>
+            </div>
           </div>
 
-          <!-- 版本选择 -->
-          <div>
-            <label class="floating-label">
-              <span class="label-text">所属版本 <span class="text-error">*</span></span>
-              <select v-model="formData.versionId" class="select select-bordered w-full" :disabled="isEditing || !formData.projectId">
-                <option value="0">请选择版本</option>
-                <option v-for="version in formFilteredVersions" :key="version.id" :value="version.id">
-                  {{ version.name }}
-                </option>
-              </select>
-            </label>
-          </div>
 
           <!-- 标题 -->
           <div>
@@ -286,36 +287,39 @@
           </div>
 
           <!-- Slug -->
-          <div>
-            <div class="relative">
-              <input
-                  v-model="formData.slug"
-                  type="text"
-                  placeholder=" "
-                  class="input input-bordered w-full"
-                  pattern="[a-zA-Z0-9-]+"
-                  maxlength="100"
-                  required
-              />
-              <span class="absolute -top-2 left-3 bg-base-200 px-1 text-xs text-base-content/70 z-10">URL标识 *</span>
+          <div class="flex space-x-4">
+            <!-- Slug -->
+            <div class="flex-1">
+              <div class="relative">
+                <input
+                    v-model="formData.slug"
+                    type="text"
+                    placeholder=" "
+                    class="input input-bordered w-full"
+                    pattern="[a-zA-Z0-9-]+"
+                    maxlength="100"
+                    required
+                />
+                <span class="absolute -top-2 left-3 bg-base-200 px-1 text-xs text-base-content/70 z-10">URL标识 *</span>
+              </div>
+              <div class="text-xs text-base-content/60 mt-1">用于生成URL，只能包含字母、数字、连字符</div>
             </div>
-            <div class="text-xs text-base-content/60 mt-1">用于生成URL，只能包含字母、数字、连字符</div>
-          </div>
 
-          <!-- 排序权重 -->
-          <div>
-            <div class="relative">
-              <input
-                  v-model.number="formData.sortOrder"
-                  type="number"
-                  placeholder=" "
-                  class="input input-bordered w-full"
-                  min="0"
-                  max="9999"
-              />
-              <span class="absolute -top-2 left-3 bg-base-200 px-1 text-xs text-base-content/70 z-10">排序权重</span>
+            <!-- 排序权重 -->
+            <div class="w-32">
+              <div class="relative">
+                <input
+                    v-model.number="formData.sortOrder"
+                    type="number"
+                    placeholder=" "
+                    class="input input-bordered w-full"
+                    min="0"
+                    max="9999"
+                />
+                <span class="absolute -top-2 left-3 bg-base-200 px-1 text-xs text-base-content/70 z-10">排序权重</span>
+              </div>
+              <div class="text-xs text-base-content/60 mt-1">数值越小排序越靠前</div>
             </div>
-            <div class="text-xs text-base-content/60 mt-1">数值越小排序越靠前</div>
           </div>
 
           <!-- 内容编辑器 -->
