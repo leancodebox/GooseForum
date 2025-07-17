@@ -1,11 +1,12 @@
 package articles
 
 import (
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/spf13/cast"
-	"time"
 )
 
 func Create(entity *Entity) int64 {
@@ -114,7 +115,7 @@ func Page[ResType SmallEntity](q PageQuery) struct {
 		b.Where(queryopt.Eq(fieldArticleStatus, 1))
 		b.Where(queryopt.Eq(fieldProcessStatus, 0))
 	}
-	if q.Categories != nil && len(q.Categories) > 0 {
+	if len(q.Categories) > 0 {
 		b.Joins("left join article_category_rs on articles.id = article_category_rs.article_id")
 		b.Where("article_category_rs.article_category_id IN (?)", q.Categories)
 		b.Where("article_category_rs.effective = ? ", 1)

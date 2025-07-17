@@ -112,3 +112,25 @@ func repairArticleDescriptions() {
 
 	fmt.Printf("共更新了 %d 篇文章的描述\n", updatedCount)
 }
+
+func buildMeilisearch() {
+	var articleStartId uint64 = 0
+	limit := 100
+	updatedCount := 0
+
+	for {
+		articleList := articles.QueryById(articleStartId, limit)
+		for _, article := range articleList {
+			if articleStartId < article.Id {
+				articleStartId = article.Id
+			}
+			markdown2html.ExtractSearchContent(article.Content)
+			// 构建meilisearch
+		}
+		if len(articleList) < limit {
+			break
+		}
+	}
+
+	fmt.Printf("共更新了 %d 篇文章的描述\n", updatedCount)
+}

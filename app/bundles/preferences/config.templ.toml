@@ -48,6 +48,9 @@ maxIdleConnections = 3
 maxOpenConnections = 5
 maxLifeSeconds = 300
 
+[meilisearch]
+url = "http://localhost:7700"
+masterkey=""
 
 [log]
 type = "file"# LOG_TYPE stdout,file
