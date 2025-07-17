@@ -25,7 +25,6 @@ type cachingResponseWriter struct {
 
 func (w *cachingResponseWriter) WriteHeader(code int) {
 	w.statusCode = code
-	w.headers = w.Header().Clone() // Clone headers to avoid concurrent map writes
 	w.ResponseWriter.WriteHeader(code)
 }
 
@@ -39,7 +38,7 @@ func CacheMiddleware(c *gin.Context) {
 		return
 	}
 	// 如果浏览器支持 Gzip 那么就开启缓存，否则就直接执行下个中间件
-	if acceptEncoding := c.Request.Header.Get("Accept-Encoding"); strings.Contains(acceptEncoding, "gzip") {
+	if strings.Contains(c.Request.Header.Get("Content-Encoding"), "gzip") {
 		key := c.Request.URL.Path
 		// 检查缓存
 		if val, ok := gzipCache.Load(key); ok {
@@ -50,7 +49,6 @@ func CacheMiddleware(c *gin.Context) {
 						c.Header(k, v)
 					}
 				}
-
 				c.Data(cachedResp.statusCode, cachedResp.headers.Get("Content-Type"), cachedResp.body.Bytes())
 				c.Abort()
 				return
