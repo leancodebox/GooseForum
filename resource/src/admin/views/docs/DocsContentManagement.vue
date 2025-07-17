@@ -245,7 +245,7 @@
 
         <div class="space-y-4">
           <!-- 项目选择 -->
-          <div class="flex space-x-4">
+          <div class="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
             <div class="flex-1">
               <label class="floating-label">
                 <span class="label-text">所属项目 <span class="text-error">*</span></span>
@@ -287,7 +287,7 @@
           </div>
 
           <!-- Slug -->
-          <div class="flex space-x-4">
+          <div class="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
             <!-- Slug -->
             <div class="flex-1">
               <div class="relative">
@@ -306,7 +306,7 @@
             </div>
 
             <!-- 排序权重 -->
-            <div class="w-32">
+            <div class="w-full sm:w-32">
               <div class="relative">
                 <input
                     v-model.number="formData.sortOrder"
