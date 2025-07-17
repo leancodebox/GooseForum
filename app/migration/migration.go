@@ -46,56 +46,48 @@ func migration(migration bool) {
 	}
 	// 自动迁移
 	var err error
-	if !dbconnect.IsSqlite() {
-		slog.Info("dbconnect 非sqlite不执行迁移")
-		return
+
+	db := dbconnect.Connect()
+	if err = db.AutoMigrate(
+		&articleCategory.Entity{},
+		&articleCategoryRs.Entity{},
+		&articles.Entity{},
+		&eventNotification.Entity{},
+		&optRecord.Entity{},
+		&pointsRecord.Entity{},
+		&reply.Entity{},
+		&role.Entity{},
+		&rolePermissionRs.Entity{},
+		&userFollow.Entity{},
+		&userPoints.Entity{},
+		&users.EntityComplete{},
+		&taskQueue.Entity{},
+		&articleLike.Entity{},
+		&applySheet.Entity{},
+		&pageConfig.Entity{},
+		&userStatistics.Entity{},
+		&articleCollection.Entity{},
+		&kvstore.Entity{},
+		&docProjects.Entity{},
+		&docVersions.Entity{},
+		&docContents.Entity{},
+		&docOperationLogs.Entity{},
+	); err != nil {
+		slog.Error("dbconnect migration err", "err", err)
 	} else {
-		db := dbconnect.Connect()
-		if err = db.AutoMigrate(
-			&articleCategory.Entity{},
-			&articleCategoryRs.Entity{},
-			&articles.Entity{},
-			&eventNotification.Entity{},
-			&optRecord.Entity{},
-			&pointsRecord.Entity{},
-			&reply.Entity{},
-			&role.Entity{},
-			&rolePermissionRs.Entity{},
-			&userFollow.Entity{},
-			&userPoints.Entity{},
-			&users.EntityComplete{},
-			&taskQueue.Entity{},
-			&articleLike.Entity{},
-			&applySheet.Entity{},
-			&pageConfig.Entity{},
-			&userStatistics.Entity{},
-			&articleCollection.Entity{},
-			&kvstore.Entity{},
-			&docProjects.Entity{},
-			&docVersions.Entity{},
-			&docContents.Entity{},
-			&docOperationLogs.Entity{},
-		); err != nil {
-			slog.Error("dbconnect migration err", "err", err)
-		} else {
-			slog.Info("dbconnect migration end")
-		}
+		slog.Info("dbconnect migration end")
 	}
 
-	if !db4fileconnect.IsSqlite() {
-		slog.Info("db4fileconnect 非sqlite不执行迁移")
-		return
+	// 因为图片数据库比较大，所以单独迁移
+	db4file := db4fileconnect.Connect()
+	if err = db4file.AutoMigrate(
+		&filedata.Entity{},
+	); err != nil {
+		slog.Error("db4fileconnect migration err", "err", err)
 	} else {
-		// 因为图片数据库比较大，所以单独迁移
-		db4file := db4fileconnect.Connect()
-		if err = db4file.AutoMigrate(
-			&filedata.Entity{},
-		); err != nil {
-			slog.Error("db4fileconnect migration err", "err", err)
-		} else {
-			slog.Info("db4fileconnect migration end")
-		}
+		slog.Info("db4fileconnect migration end")
 	}
+	
 }
 
 func initData() {

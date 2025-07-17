@@ -11,24 +11,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
-// isAllowedByDatabase 基于数据库记录检查用户是否允许上传
-func isAllowedByDatabase(userId uint64, maxCount int, window time.Duration) bool {
-	// 根据时间窗口计算查询范围
-	now := time.Now()
-	var startTime time.Time
-
-	if window == 24*time.Hour {
-		// 如果是24小时窗口，使用今日统计方法
-		count := filedata.CountUserUploadsToday(userId)
-		return count < int64(maxCount)
-	} else {
-		// 其他时间窗口，使用通用方法
-		startTime = now.Add(-window)
-		count := filedata.CountUserUploadsInTimeRange(userId, startTime, now)
-		return count < int64(maxCount)
-	}
-}
-
 // getUserUploadCount 获取用户当前上传计数
 func getUserUploadCount(userId uint64, window time.Duration) int64 {
 	if window == 24*time.Hour {
@@ -102,9 +84,4 @@ func FileUploadRateLimit(maxUploads int, window time.Duration) gin.HandlerFunc {
 
 		c.Next()
 	}
-}
-
-// GetUserUploadCount 获取用户当前上传计数（用于调试）
-func GetUserUploadCount(userId uint64, window time.Duration) int64 {
-	return getUserUploadCount(userId, window)
 }
