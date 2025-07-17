@@ -70,8 +70,8 @@ func ExistsBySlugExcludeId(slug string, excludeId uint64) bool {
 }
 
 // SoftDelete 软删除
-func SoftDelete(id uint64) int64 {
-	result := builder().Where("id = ?", id).Update("deleted_at", "NOW()")
+func SoftDelete(entity *Entity) int64 {
+	result := builder().Delete(entity)
 	return result.RowsAffected
 }
 

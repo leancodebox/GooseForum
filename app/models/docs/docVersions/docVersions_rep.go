@@ -82,8 +82,8 @@ func ClearDefaultByProjectId(projectId uint64) int64 {
 }
 
 // SoftDelete 软删除版本
-func SoftDelete(id uint64) int64 {
-	result := builder().Where("id = ?", id).Update("deleted_at", "NOW()")
+func SoftDelete(entity *Entity) int64 {
+	result := builder().Delete(entity)
 	return result.RowsAffected
 }
 

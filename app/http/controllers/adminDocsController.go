@@ -430,7 +430,7 @@ func AdminDocsProjectDelete(req component.BetterRequest[DocsProjectDeleteReq]) c
 	}
 
 	// 执行软删除
-	rowsAffected := docProjects.SoftDelete(params.Id)
+	rowsAffected := docProjects.SoftDelete(&project)
 	if rowsAffected <= 0 {
 		return component.FailResponse("删除项目失败")
 	}
@@ -959,7 +959,7 @@ func AdminDocsVersionDelete(req component.BetterRequest[DocsVersionDeleteReq]) c
 	}
 
 	// 执行软删除
-	rowsAffected := docVersions.SoftDelete(id)
+	rowsAffected := docVersions.SoftDelete(&version)
 	if rowsAffected <= 0 {
 		return component.FailResponse("删除版本失败")
 	}

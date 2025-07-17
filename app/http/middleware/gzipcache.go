@@ -2,14 +2,20 @@ package middleware
 
 import (
 	"bytes"
-	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"net/http"
 	"strings"
 	"sync"
+
+	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
 
 var gzipCache sync.Map
+var bufferPool = sync.Pool{
+	New: func() interface{} {
+		return bytes.NewBuffer(nil)
+	},
+}
 
 type cachedResponse struct {
 	statusCode int
@@ -19,13 +25,17 @@ type cachedResponse struct {
 type cachingResponseWriter struct {
 	gin.ResponseWriter
 	statusCode int
-	headers    http.Header
 	body       *bytes.Buffer
 }
 
 func (w *cachingResponseWriter) WriteHeader(code int) {
 	w.statusCode = code
 	w.ResponseWriter.WriteHeader(code)
+}
+
+func (w *cachingResponseWriter) resetAndPut() {
+	w.body.Reset()
+	bufferPool.Put(w.body)
 }
 
 func (w *cachingResponseWriter) Write(data []byte) (int, error) {
@@ -38,7 +48,7 @@ func CacheMiddleware(c *gin.Context) {
 		return
 	}
 	// 如果浏览器支持 Gzip 那么就开启缓存，否则就直接执行下个中间件
-	if strings.Contains(c.Request.Header.Get("Content-Encoding"), "gzip") {
+	if strings.Contains(c.Request.Header.Get("Accept-Encoding"), "gzip") {
 		key := c.Request.URL.Path
 		// 检查缓存
 		if val, ok := gzipCache.Load(key); ok {
@@ -58,9 +68,8 @@ func CacheMiddleware(c *gin.Context) {
 		// 使用自定义ResponseWriter
 		writer := &cachingResponseWriter{
 			ResponseWriter: c.Writer,
-			statusCode:     http.StatusOK, // 初始状态码，可能会被WriteHeader修改
-			headers:        make(http.Header),
-			body:           bytes.NewBuffer([]byte{}),
+			statusCode:     http.StatusOK,
+			body:           bufferPool.Get().(*bytes.Buffer),
 		}
 		c.Writer = writer
 		c.Next()
@@ -69,9 +78,11 @@ func CacheMiddleware(c *gin.Context) {
 		if writer.statusCode == http.StatusOK {
 			gzipCache.Store(key, cachedResponse{
 				statusCode: writer.statusCode,
-				headers:    writer.headers.Clone(), // Clone headers to avoid modification after storing
+				headers:    writer.Header().Clone(),
 				body:       writer.body,
 			})
+		} else {
+			writer.resetAndPut()
 		}
 	} else {
 		c.Next()
