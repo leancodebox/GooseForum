@@ -35,11 +35,13 @@ func WriteComment(userId uint64) int64 {
 	return result.RowsAffected
 }
 
+// 收到的点赞
 func LikeArticle(userId uint64) int64 {
 	result := builder().Exec("UPDATE user_statistics SET like_received_count = like_received_count+1 where user_id = ?", userId)
 	return result.RowsAffected
 }
 
+// 给出的点赞数
 func GivenLike(userId uint64) int64 {
 	result := builder().Exec("UPDATE user_statistics SET like_given_count = like_given_count+1 where user_id = ?", userId)
 	return result.RowsAffected

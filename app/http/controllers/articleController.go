@@ -326,12 +326,12 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 	if articleLike.SaveOrCreateById(&oldLike) > 0 {
 		if req.Params.Action == 1 {
 			articles.IncrementLike(articleEntity)
-			userStatistics.LikeArticle(req.UserId)
-			userStatistics.GivenLike(articleEntity.UserId)
+			userStatistics.LikeArticle(articleEntity.UserId)
+			userStatistics.GivenLike(req.UserId)
 		} else {
 			articles.DecrementLike(articleEntity)
-			userStatistics.CancelLikeArticle(req.UserId)
-			userStatistics.CancelGivenLike(articleEntity.UserId)
+			userStatistics.CancelLikeArticle(articleEntity.UserId)
+			userStatistics.CancelGivenLike(req.UserId)
 		}
 	}
 	return component.SuccessResponse(true)
