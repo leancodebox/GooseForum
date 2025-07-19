@@ -89,6 +89,8 @@ func apiRoute(ginApp *gin.Engine) {
 	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	// 分类列表
 	forumApi.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
+	// 搜索文章
+	forumApi.POST("search-articles", UpButterReq(controllers.SearchArticles))
 
 	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
 	// 通知相关接口
