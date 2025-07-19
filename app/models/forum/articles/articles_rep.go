@@ -62,7 +62,7 @@ func GetByUserAndTitle(userId, title any) (entity Entity) {
 	return
 }
 
-func GetByIds(ids []uint64) (entities []*Entity) {
+func GetByIds(ids []uint64) (entities []*SmallEntity) {
 	if len(ids) == 0 {
 		return
 	}
@@ -70,8 +70,8 @@ func GetByIds(ids []uint64) (entities []*Entity) {
 	return
 }
 
-func GetMapByIds(ids []uint64) map[uint64]*Entity {
-	return collectionopt.Slice2Map(GetByIds(ids), func(v *Entity) uint64 {
+func GetMapByIds(ids []uint64) map[uint64]*SmallEntity {
+	return collectionopt.Slice2Map(GetByIds(ids), func(v *SmallEntity) uint64 {
 		return v.Id
 	})
 }

@@ -2,7 +2,13 @@ package controllers
 
 import (
 	"fmt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"math"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -100,8 +106,61 @@ func SearchPage(c *gin.Context) {
 		result, err := searchservice.SearchArticles(searchReq)
 		fmt.Println(result, err)
 		if err == nil {
-			templateData["SearchResponse"] = result
 
+			templateData["SearchResponse"] = result
+			ids := array.Map(result.Results, func(t searchservice.SearchResult) uint64 {
+				return t.ID
+			})
+			articleEntityList := articles.GetByIds(ids)
+			userIds := array.Map(articleEntityList, func(t *articles.SmallEntity) uint64 {
+				return t.UserId
+			})
+			userMap := users.GetMapByIds(userIds)
+
+			//获取文章的分类信息
+			articleIds := array.Map(articleEntityList, func(t *articles.SmallEntity) uint64 {
+				return t.Id
+			})
+			categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
+			categoryMap := articleCategoryMap()
+			// 获取文章的分类和标签
+			categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
+				return rs.ArticleId
+			})
+
+			articleList := array.Map(articleEntityList, func(t *articles.SmallEntity) ArticlesSimpleDto {
+				categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
+					if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+						return category.Category
+					}
+					return ""
+				})
+				username := ""
+				avatarUrl := urlconfig.GetDefaultAvatar()
+				if user, ok := userMap[t.UserId]; ok {
+					username = user.Username
+					avatarUrl = user.GetWebAvatarUrl()
+				}
+				return ArticlesSimpleDto{
+					Id:             t.Id,
+					Title:          t.Title,
+					LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
+					Username:       username,
+					AuthorId:       t.UserId,
+					AvatarUrl:      avatarUrl,
+					ViewCount:      t.ViewCount,
+					CommentCount:   t.ReplyCount,
+					Category:       FirstOr(categoryNames, "未分类"),
+					Categories:     categoryNames,
+					CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
+						return rs.ArticleCategoryId
+					}),
+					Type:    t.Type,
+					TypeStr: articlesTypeMap[int(t.Type)].Name,
+				}
+			})
+
+			templateData["ArticleList"] = articleList
 			// 计算分页信息
 			totalPages := int(math.Ceil(float64(result.Total) / float64(pageSize)))
 			templateData["TotalPages"] = totalPages
