@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{.Theme}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "commonhead.gohtml" .}}
+    {{GetImportInfoPath `src/main.js`}}
+</head>
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-4">
+        <div class="container mx-auto px-4 py-8">
+            <!-- 搜索头部 -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold mb-4">搜索结果{{.Query}}</h1>
+
+                <!-- 搜索框 -->
+                <div class="max-w-2xl">
+                    <div class="form-control">
+                        <div class="input-group">
+                            <input type="text" id="search-query" placeholder="搜索文章..."
+                                   class="input input-bordered flex-1" value="{{.Query}}"/>
+                            <button class="btn btn-primary" onclick="performSearch()">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                搜索
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 搜索统计信息 -->
+                {{if .Query}}
+                <div class="mt-4 text-sm text-base-content/70">
+                    {{if .SearchResponse}}
+                    搜索 "{{.Query}}" 找到 {{.SearchResponse.Total}} 个结果
+                    {{else}}
+                    搜索 "{{.Query}}" 没有找到相关结果
+                    {{end}}
+                </div>
+                {{end}}
+            </div>
+
+            <!-- 搜索结果 -->
+            {{if .SearchResponse}}
+            {{if gt .SearchResponse.Total 0}}
+            <div class="space-y-6">
+                {{range .SearchResponse.Results}}
+                <div class="card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-shadow">
+                    <div class="card-body p-6">
+                        <h2 class="card-title text-xl mb-2">
+                            <a href="/post/{{.ID}}" class="link link-hover text-primary">
+                                {{.Title}}
+                            </a>
+                        </h2>
+                        <div class="text-sm text-base-content/60">
+                            文章ID: {{.ID}}
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+
+            <!-- 分页 -->
+            {{if gt .SearchResponse.Total 10}}
+            <div class="mt-8 flex justify-center">
+                <div class="join">
+                    {{$currentPage := .CurrentPage}}
+                    {{$totalPages := .TotalPages}}
+                    {{$query := .Query}}
+
+                    {{if gt $currentPage 1}}
+                    <a href="/search?q={{$query}}&page={{sub $currentPage 1}}" class="join-item btn">«</a>
+                    {{end}}
+
+                    {{range $page := .PageNumbers}}
+                    {{if eq $page $currentPage}}
+                    <button class="join-item btn btn-active">{{$page}}</button>
+                    {{else}}
+                    <a href="/search?q={{$query}}&page={{$page}}" class="join-item btn">{{$page}}</a>
+                    {{end}}
+                    {{end}}
+
+                    {{if lt $currentPage $totalPages}}
+                    <a href="/search?q={{$query}}&page={{add $currentPage 1}}" class="join-item btn">»</a>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+            {{else}}
+            <!-- 无结果提示 -->
+            <div class="text-center py-12">
+                <div class="text-6xl mb-4">🔍</div>
+                <h3 class="text-xl font-semibold mb-2">没有找到相关结果</h3>
+                <p class="text-base-content/70 mb-4">尝试使用不同的关键词或检查拼写</p>
+                <div class="space-y-2 text-sm text-base-content/60">
+                    <p>• 使用更简单的关键词</p>
+                    <p>• 检查关键词拼写</p>
+                    <p>• 尝试使用同义词</p>
+                </div>
+            </div>
+            {{end}}
+            {{else if .Query}}
+            <!-- 搜索错误 -->
+            <div class="text-center py-12">
+                <div class="text-6xl mb-4">⚠️</div>
+                <h3 class="text-xl font-semibold mb-2">搜索出现错误</h3>
+                <p class="text-base-content/70">请稍后重试或联系管理员</p>
+            </div>
+            {{else}}
+            <!-- 初始状态 -->
+            <div class="text-center py-12">
+                <div class="text-6xl mb-4">🔍</div>
+                <h3 class="text-xl font-semibold mb-2">开始搜索</h3>
+                <p class="text-base-content/70">在上方输入关键词来搜索文章</p>
+            </div>
+            {{end}}
+        </div>
+
+        <script>
+            function performSearch() {
+                const searchInput = document.getElementById('search-query');
+                const query = searchInput.value.trim();
+
+                if (query) {
+                    window.location.href = `/search?q=${encodeURIComponent(query)}`;
+                }
+            }
+
+            // 搜索框回车事件
+            document.addEventListener('DOMContentLoaded', function () {
+                const searchInput = document.getElementById('search-query');
+                if (searchInput) {
+                    searchInput.addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter') {
+                            performSearch();
+                        }
+                    });
+
+                    // 自动聚焦搜索框
+                    searchInput.focus();
+                }
+            });
+        </script>
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
+</body>
+</html>
+

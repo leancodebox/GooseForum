@@ -1,8 +1,14 @@
 package controllers
 
 import (
+	"fmt"
+	"math"
+
+	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/spf13/cast"
 )
 
 // SearchArticlesRequest 搜索文章请求结构
@@ -63,4 +69,61 @@ func SearchArticles(req component.BetterRequest[SearchArticlesRequest]) componen
 	}
 
 	return component.SuccessResponse(responseData)
+}
+
+// SearchPage 搜索页面
+func SearchPage(c *gin.Context) {
+	query := c.Query("q")
+	page := cast.ToInt(c.DefaultQuery("page", "1"))
+	pageSize := 10 // 页面显示固定每页10条
+
+	// 构建模板数据
+	templateData := map[string]any{
+		"Query":       query,
+		"CurrentPage": page,
+		"ShowSearch":  true, // 控制导航栏搜索框显示
+	}
+
+	// 如果有搜索关键词，执行搜索
+	if query != "" {
+		// 计算偏移量
+		offset := (page - 1) * pageSize
+
+		// 构建搜索请求
+		searchReq := searchservice.SearchRequest{
+			Query:  query,
+			Limit:  pageSize,
+			Offset: offset,
+		}
+
+		// 执行搜索
+		result, err := searchservice.SearchArticles(searchReq)
+		fmt.Println(result, err)
+		if err == nil {
+			templateData["SearchResponse"] = result
+
+			// 计算分页信息
+			totalPages := int(math.Ceil(float64(result.Total) / float64(pageSize)))
+			templateData["TotalPages"] = totalPages
+
+			// 生成页码列表（显示当前页前后2页）
+			var pageNumbers []int
+			start := page - 2
+			if start < 1 {
+				start = 1
+			}
+			end := page + 2
+			if end > totalPages {
+				end = totalPages
+			}
+			for i := start; i <= end; i++ {
+				pageNumbers = append(pageNumbers, i)
+			}
+			templateData["PageNumbers"] = pageNumbers
+		}
+	}
+
+	fmt.Println(templateData["Query"])
+	// 渲染模板
+	viewrender.Render(c, "search.gohtml", templateData)
 }

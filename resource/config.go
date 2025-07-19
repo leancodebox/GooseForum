@@ -57,6 +57,12 @@ func GetTemplates(globalFunc template.FuncMap) *template.Template {
 				}
 				return dict
 			},
+			"add": func(a, b int) int {
+				return a + b
+			},
+			"sub": func(a, b int) int {
+				return a - b
+			},
 		}).
 		Funcs(globalFunc)
 	if !setting.IsProduction() {
