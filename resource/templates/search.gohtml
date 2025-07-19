@@ -49,7 +49,7 @@
             <!-- 搜索结果 -->
             {{if .SearchResponse}}
 
-            <div class="card bg-base-100 shadow-xl pb-4">
+            <div class="card bg-base-100 shadow-xl">
             {{if .ArticleList}}
             <!-- 文章列表 -->
             <ul class="list">
@@ -114,26 +114,26 @@
 
             <!-- 分页 -->
             {{if gt .SearchResponse.Total 10}}
-            <div class="mt-8 flex justify-center">
+            <div class="py-8 border-t border-base-200 flex justify-center">
                 <div class="join">
                     {{$currentPage := .CurrentPage}}
                     {{$totalPages := .TotalPages}}
                     {{$query := .Query}}
 
                     {{if gt $currentPage 1}}
-                    <a href="/search?q={{$query}}&page={{sub $currentPage 1}}" class="join-item btn">«</a>
+                    <a href="/search?q={{$query}}&page={{sub $currentPage 1}}" class="join-item btn btn-sm">«</a>
                     {{end}}
 
                     {{range $page := .PageNumbers}}
                     {{if eq $page $currentPage}}
-                    <button class="join-item btn btn-active">{{$page}}</button>
+                    <button class="join-item btn btn-sm btn-active">{{$page}}</button>
                     {{else}}
-                    <a href="/search?q={{$query}}&page={{$page}}" class="join-item btn">{{$page}}</a>
+                    <a href="/search?q={{$query}}&page={{$page}}" class="join-item btn btn-sm">{{$page}}</a>
                     {{end}}
                     {{end}}
 
                     {{if lt $currentPage $totalPages}}
-                    <a href="/search?q={{$query}}&page={{add $currentPage 1}}" class="join-item btn">»</a>
+                    <a href="/search?q={{$query}}&page={{add $currentPage 1}}" class="join-item btn btn-sm">»</a>
                     {{end}}
                 </div>
             </div>
@@ -143,7 +143,7 @@
             <!-- 无结果提示 -->
             <div class="text-center py-12">
                 <div class="text-6xl mb-4">🔍</div>
-                <h3 class="text-xl font-semibold mb-2">没有找到相关结果</h3>
+                <h3 class="text-xl font-normal mb-2">没有找到相关结果</h3>
                 <p class="text-base-content/70 mb-4">尝试使用不同的关键词或检查拼写</p>
                 <div class="space-y-2 text-sm text-base-content/60">
                     <p>• 使用更简单的关键词</p>
@@ -156,14 +156,14 @@
             <!-- 搜索错误 -->
             <div class="text-center py-12">
                 <div class="text-6xl mb-4">⚠️</div>
-                <h3 class="text-xl font-semibold mb-2">搜索出现错误</h3>
+                <h3 class="text-xl font-normal mb-2">搜索出现错误</h3>
                 <p class="text-base-content/70">请稍后重试或联系管理员</p>
             </div>
             {{else}}
             <!-- 初始状态 -->
             <div class="text-center py-12">
                 <div class="text-6xl mb-4">🔍</div>
-                <h3 class="text-xl font-semibold mb-2">开始搜索</h3>
+                <h3 class="text-xl font-normal mb-2">开始搜索</h3>
                 <p class="text-base-content/70">在上方输入关键词来搜索文章</p>
             </div>
             {{end}}
