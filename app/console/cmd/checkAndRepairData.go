@@ -13,6 +13,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/meilisearchmodel"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
@@ -137,17 +138,7 @@ func repairArticleDescriptions() {
 }
 
 // ArticleSearchDocument 文章搜索文档结构
-type ArticleSearchDocument struct {
-	ID            uint64   `json:"id"`
-	Title         string   `json:"title"`         // 主要搜索字段
-	SearchContent string   `json:"searchContent"` // 优化后的搜索文本
-	Type          int8     `json:"type"`          // 可过滤字段
-	ArticleStatus int8     `json:"articleStatus"` // 可过滤字段
-	ProcessStatus int8     `json:"processStatus"` // 可过滤字段
-	Category      []uint64 `json:"category"`
-	CreatedAt     int64    `json:"createdAt"` // 时间戳(Unix)
-	UpdatedAt     int64    `json:"updatedAt"` // 时间戳(Unix)
-}
+type ArticleSearchDocument meilisearchmodel.Doc
 
 // convertToSearchDocument 转换文章实体为搜索文档
 func convertToSearchDocument(article *articles.Entity) ArticleSearchDocument {
@@ -252,8 +243,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 	filterableAttributes := []string{
 		"type",
 		"userId",
-		"articleStatus",
-		"processStatus",
+		"category",
 	}
 	_, err = index.UpdateFilterableAttributes(&filterableAttributes)
 	if err != nil {
@@ -271,7 +261,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 	}
 
 	// 设置显示字段（返回所有字段）
-	displayedAttributes := []string{"*"}
+	displayedAttributes := []string{"id", "title"}
 	_, err = index.UpdateDisplayedAttributes(&displayedAttributes)
 	if err != nil {
 		return fmt.Errorf("设置显示字段失败: %v", err)
