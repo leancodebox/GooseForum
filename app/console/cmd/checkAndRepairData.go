@@ -179,8 +179,8 @@ func buildMeilisearch() {
 
 	// 配置索引设置
 	fmt.Println("配置索引设置...")
-	err := configureIndex(index)
-	if err != nil {
+
+	if err := configureIndex(index); err != nil {
 		fmt.Printf("配置索引失败: %v\n", err)
 		return
 	}
@@ -198,29 +198,31 @@ func buildMeilisearch() {
 		}
 
 		// 转换为搜索文档
-		var documents []ArticleSearchDocument
 		for _, article := range articleList {
 			if articleStartId < article.Id {
 				articleStartId = article.Id
 			}
-
+			var task *meilisearch.TaskInfo
+			var err error
 			// 只索引已发布且正常状态的文章
 			if article.ArticleStatus == 1 && article.ProcessStatus == 0 {
 				doc := convertToSearchDocument(article)
-				task, err := index.AddDocuments(doc, "id")
+				task, err = index.AddDocuments(doc, "id")
 				fmt.Println("task", task, err)
 				if err != nil {
-					fmt.Printf("批次 %d 添加文档失败: %v\n", totalBatches+1, err)
-					failedCount += len(documents)
+					fmt.Printf(" 添加文档失败: %v %v\n", article, err)
 				} else {
-					fmt.Printf("批次 %d: 成功添加 %d 篇文章到索引 (TaskUID: %d)\n",
-						totalBatches+1, len(documents), task.TaskUID)
-					processedCount += len(documents)
+					fmt.Printf("id:%v 成功添加 %d 篇文章到索引 (TaskUID: %d)\n",
+						doc.ID, 1, task.TaskUID)
+					processedCount += 1
+				}
+			} else {
+				_, err = index.Delete(cast.ToString(article.Id))
+				if err != nil {
+					fmt.Println("删除失败", err.Error())
 				}
 			}
 		}
-
-		totalBatches++
 
 		if len(articleList) < limit {
 			break
