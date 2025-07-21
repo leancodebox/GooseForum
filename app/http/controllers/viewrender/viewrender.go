@@ -8,22 +8,17 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
-	"sync"
 	"time"
 )
 
 var ht4gooseforum *template.Template
-var htht4gooseforumOnce sync.Once
 
 func Reload() {
 	ht4gooseforum = resource.GetTemplates(GlobalFunc())
 }
 
 func init() {
-	htht4gooseforumOnce.Do(func() {
-		// 创建基础模板
-		Reload()
-	})
+	Reload()
 }
 
 var webSettingsCache = &datacache.Cache[string, pageConfig.WebSettingsConfig]{}
