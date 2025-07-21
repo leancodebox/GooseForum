@@ -6,7 +6,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/datacache"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
@@ -124,20 +123,10 @@ func articlesSmallEntity2Dto(data []articles.SmallEntity) []ArticlesSimpleDto {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
-
-	//获取文章的分类信息
-	articleIds := array.Map(data, func(t articles.SmallEntity) uint64 {
-		return t.Id
-	})
-	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
 	categoryMap := articleCategoryMap()
-	// 获取文章的分类和标签
-	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
-		return rs.ArticleId
-	})
 	return array.Map(data, func(t articles.SmallEntity) ArticlesSimpleDto {
-		categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
-			if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+		categoryNames := array.Map(t.CategoryId, func(item uint64) string {
+			if category, ok := categoryMap[item]; ok {
 				return category.Category
 			}
 			return ""
@@ -160,11 +149,9 @@ func articlesSmallEntity2Dto(data []articles.SmallEntity) []ArticlesSimpleDto {
 			CommentCount:   t.ReplyCount,
 			Category:       FirstOr(categoryNames, "未分类"),
 			Categories:     categoryNames,
-			CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
-				return rs.ArticleCategoryId
-			}),
-			Type:    t.Type,
-			TypeStr: articlesTypeMap[int(t.Type)].Name,
+			CategoriesId:   t.CategoryId,
+			Type:           t.Type,
+			TypeStr:        articlesTypeMap[int(t.Type)].Name,
 		}
 	})
 }

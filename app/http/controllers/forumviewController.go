@@ -13,7 +13,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -110,7 +109,10 @@ func PostDetail(c *gin.Context) {
 			ReplyToUserId:   replyToUserId,
 		}
 	})
+
+	// todo sync run
 	articles.IncrementView(entity)
+
 	// 复用现有的数据获取逻辑
 	authorId := entity.UserId
 
@@ -122,7 +124,15 @@ func PostDetail(c *gin.Context) {
 	}
 
 	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
-	acMap := articleCategoryMapList([]uint64{id})
+	categoryMap := articleCategoryMap()
+	articleCategory := array.Map(entity.CategoryId, func(item uint64) string {
+		if cateItem, ok := categoryMap[item]; ok {
+			return cateItem.Category
+		} else {
+			return ""
+		}
+	})
+
 	iLike := false
 	isFollowing := false
 	loginUser := GetLoginUser(c)
@@ -155,8 +165,8 @@ func PostDetail(c *gin.Context) {
 		"User":                 loginUser,
 		"CanonicalHref":        buildCanonicalHref(c),
 		"AuthorArticles":       authorArticles,
-		"ArticleCategory":      acMap[id],
-		"Keywords":             strings.Join(acMap[id], ","),
+		"ArticleCategory":      articleCategory,
+		"Keywords":             strings.Join(articleCategory, ","),
 		"Website":              authorUserInfo.Website,
 		"WebsiteName":          authorUserInfo.WebsiteName,
 		"ExternalInformation":  authorUserInfo.ExternalInformation,
@@ -236,20 +246,11 @@ func Post(c *gin.Context) {
 	})
 	userMap := users.GetMapByIds(userIds)
 
-	//获取文章的分类信息
-	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
-		return t.Id
-	})
-	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
 	categoryMap := articleCategoryMap()
-	// 获取文章的分类和标签
-	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
-		return rs.ArticleId
-	})
 
 	articleList := array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
-		categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
-			if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+		categoryNames := array.Map(t.CategoryId, func(item uint64) string {
+			if category, ok := categoryMap[item]; ok {
 				return category.Category
 			}
 			return ""
@@ -271,11 +272,9 @@ func Post(c *gin.Context) {
 			CommentCount:   t.ReplyCount,
 			Category:       FirstOr(categoryNames, "未分类"),
 			Categories:     categoryNames,
-			CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
-				return rs.ArticleCategoryId
-			}),
-			Type:    t.Type,
-			TypeStr: articlesTypeMap[int(t.Type)].Name,
+			CategoriesId:   t.CategoryId,
+			Type:           t.Type,
+			TypeStr:        articlesTypeMap[int(t.Type)].Name,
 		}
 	})
 	// 计算总页数

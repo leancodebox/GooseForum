@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -104,7 +103,6 @@ func SearchPage(c *gin.Context) {
 
 		// 执行搜索
 		result, err := searchservice.SearchArticles(searchReq)
-		fmt.Println(result, err)
 		if err == nil {
 
 			templateData["SearchResponse"] = result
@@ -117,20 +115,11 @@ func SearchPage(c *gin.Context) {
 			})
 			userMap := users.GetMapByIds(userIds)
 
-			//获取文章的分类信息
-			articleIds := array.Map(articleEntityList, func(t *articles.SmallEntity) uint64 {
-				return t.Id
-			})
-			categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
 			categoryMap := articleCategoryMap()
-			// 获取文章的分类和标签
-			categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
-				return rs.ArticleId
-			})
 
 			articleList := array.Map(articleEntityList, func(t *articles.SmallEntity) ArticlesSimpleDto {
-				categoryNames := array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) string {
-					if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+				categoryNames := array.Map(t.CategoryId, func(item uint64) string {
+					if category, ok := categoryMap[item]; ok {
 						return category.Category
 					}
 					return ""
@@ -152,11 +141,9 @@ func SearchPage(c *gin.Context) {
 					CommentCount:   t.ReplyCount,
 					Category:       FirstOr(categoryNames, "未分类"),
 					Categories:     categoryNames,
-					CategoriesId: array.Map(categoriesGroup[t.Id], func(rs *articleCategoryRs.Entity) uint64 {
-						return rs.ArticleCategoryId
-					}),
-					Type:    t.Type,
-					TypeStr: articlesTypeMap[int(t.Type)].Name,
+					CategoriesId:   t.CategoryId,
+					Type:           t.Type,
+					TypeStr:        articlesTypeMap[int(t.Type)].Name,
 				}
 			})
 

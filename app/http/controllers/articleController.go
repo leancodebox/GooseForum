@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
+	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"strings"
 	"time"
 )
@@ -87,16 +88,13 @@ func WriteArticlesOrigin(req component.BetterRequest[WriteArticlesOriginReq]) co
 	if entity.UserId != req.UserId {
 		return component.FailResponse("不存在")
 	}
-	categoryRs := articleCategoryRs.GetByArticleIdsEffective([]uint64{entity.Id})
 
 	return component.SuccessResponse(map[string]any{
 		"userId":         entity.UserId,
 		"type":           entity.Type,
 		"articleTitle":   entity.Title,
 		"articleContent": entity.Content,
-		"categoryId": array.Map(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
-			return rs.ArticleCategoryId
-		}),
+		"categoryId":     entity.CategoryId,
 	})
 }
 
@@ -123,6 +121,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		article.UserId = req.UserId
 		article.Type = req.Params.Type
 	}
+	article.CategoryId = req.Params.CategoryId
 	article.ArticleStatus = 1
 	article.Content = req.Params.Content
 	article.Title = req.Params.Title
@@ -164,6 +163,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		}
 		pointservice.RewardPoints(req.UserId, 10, pointservice.RewardPoints4WriteArticles)
 	}
+	searchservice.BuildSingleArticleSearchDocument(&article)
 	return component.SuccessResponse(article.Id)
 }
 
@@ -250,22 +250,12 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		UserId:       req.UserId,
 		FilterStatus: true,
 	})
-
-	//获取文章的分类信息
-	articleIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
-		return t.Id
-	})
-	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
 	categoryMap := articleCategoryMap()
-
 	return component.SuccessPage(
 		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
-			// 获取文章的分类和标签
-			categories := array.Filter(categoryRs, func(rs *articleCategoryRs.Entity) bool {
-				return rs.ArticleId == t.Id
-			})
-			categoryNames := array.Map(categories, func(rs *articleCategoryRs.Entity) string {
-				if category, ok := categoryMap[rs.ArticleCategoryId]; ok {
+
+			categoryNames := array.Map(t.CategoryId, func(t uint64) string {
+				if category, ok := categoryMap[t]; ok {
 					return category.Category
 				}
 				return ""

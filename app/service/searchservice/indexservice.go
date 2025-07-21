@@ -2,14 +2,13 @@ package searchservice
 
 import (
 	"fmt"
-	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/meilisearchmodel"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/spf13/cast"
+	"log/slog"
 )
 
 // ArticleSearchDocument 文章搜索文档结构
@@ -27,9 +26,7 @@ type IndexBuildResult struct {
 func convertToSearchDocument(article *articles.Entity) ArticleSearchDocument {
 	// 提取优化的搜索内容
 	searchContent := markdown2html.ExtractSearchContent(article.Content)
-	categoryIds := array.Map(articleCategoryRs.GetByArticleIdsEffective([]uint64{article.Id}), func(rs *articleCategoryRs.Entity) uint64 {
-		return cast.ToUint64(rs.Id)
-	})
+	categoryIds := article.CategoryId
 	return ArticleSearchDocument{
 		ID:            article.Id,
 		Title:         article.Title,
@@ -41,6 +38,28 @@ func convertToSearchDocument(article *articles.Entity) ArticleSearchDocument {
 		CreatedAt:     article.CreatedAt.Unix(),
 		UpdatedAt:     article.UpdatedAt.Unix(),
 	}
+}
+
+func BuildSingleArticleSearchDocument(article *articles.Entity) (*meilisearch.TaskInfo, error) {
+	// 获取 Meilisearch 客户端
+	client := meiliconnect.GetClient()
+	indexName := meilisearchmodel.Index
+	index := client.Index(indexName)
+	var task *meilisearch.TaskInfo
+	var err error
+	// 只索引已发布且正常状态的文章
+	if article.ArticleStatus == 1 && article.ProcessStatus == 0 {
+		doc := convertToSearchDocument(article)
+		task, err = index.AddDocuments(doc, "id")
+		slog.Info(fmt.Sprintf("处理文章 ID:%v, TaskUID: %v, Error: %v\n", doc.ID, getTaskUID(task), err))
+	} else {
+		// 删除不符合条件的文章
+		_, err = index.Delete(cast.ToString(article.Id))
+		if err != nil {
+			slog.Info(fmt.Sprintf("删除文档失败: %v, Error: %v\n", article.Id, err))
+		}
+	}
+	return task, err
 }
 
 // BuildMeilisearchIndex 构建Meilisearch索引
@@ -69,31 +88,18 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 		if len(articleList) == 0 {
 			break
 		}
-
 		// 转换为搜索文档
 		for _, article := range articleList {
 			if articleStartId < article.Id {
 				articleStartId = article.Id
 			}
-			var task *meilisearch.TaskInfo
-			var err error
-			// 只索引已发布且正常状态的文章
-			if article.ArticleStatus == 1 && article.ProcessStatus == 0 {
-				doc := convertToSearchDocument(article)
-				task, err = index.AddDocuments(doc, "id")
-				fmt.Printf("处理文章 ID:%v, TaskUID: %v, Error: %v\n", doc.ID, getTaskUID(task), err)
-				if err != nil {
-					fmt.Printf("添加文档失败: %v %v\n", article.Id, err)
-					failedCount++
-				} else {
-					processedCount++
-				}
+			task, err := BuildSingleArticleSearchDocument(article)
+			fmt.Printf("处理文章 ID:%v, TaskUID: %v, Error: %v\n", article.Id, getTaskUID(task), err)
+			if err != nil {
+				fmt.Printf("更新文档失败: %v %v\n", article.Id, err)
+				failedCount++
 			} else {
-				// 删除不符合条件的文章
-				_, err = index.Delete(cast.ToString(article.Id))
-				if err != nil {
-					fmt.Printf("删除文档失败: %v, Error: %v\n", article.Id, err)
-				}
+				processedCount++
 			}
 		}
 

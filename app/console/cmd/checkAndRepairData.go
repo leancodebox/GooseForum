@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCollection"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -113,8 +115,12 @@ func repairArticleDescriptions() {
 			if articleStartId < article.Id {
 				articleStartId = article.Id
 			}
+			cateIds := array.Map(articleCategoryRs.GetByArticleId(article.Id), func(t *articleCategoryRs.Entity) uint64 {
+				return t.ArticleCategoryId
+			})
+			article.CategoryId = cateIds
 			article.LikeCount = cast.ToUint64(articleLike.GetArticleLikeByArticleId(article.Id))
-
+			articles.Save(article)
 			// 如果描述为空或者很短，重新生成
 			if article.Description == "" || len(strings.TrimSpace(article.Description)) < 10 {
 				newDescription := markdown2html.ExtractDescription(article.Content, 200)

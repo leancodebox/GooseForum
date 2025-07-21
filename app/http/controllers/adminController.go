@@ -7,6 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"slices"
 	"time"
 
@@ -228,7 +229,7 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 	}
 	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
 		fmt.Sprintf("文章%s操作:[%s]", status, article.Title))
-
+	searchservice.BuildSingleArticleSearchDocument(&article)
 	return component.SuccessResponse("操作成功")
 }
 
