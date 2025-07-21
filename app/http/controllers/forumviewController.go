@@ -3,6 +3,7 @@ package controllers
 import (
 	_ "embed"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"html/template"
 	"strings"
 	"time"
@@ -110,9 +111,6 @@ func PostDetail(c *gin.Context) {
 		}
 	})
 
-	// todo sync run
-	articles.IncrementView(entity)
-
 	// 复用现有的数据获取逻辑
 	authorId := entity.UserId
 
@@ -123,7 +121,10 @@ func PostDetail(c *gin.Context) {
 		articles.SaveNoUpdate(&entity)
 	}
 
-	authorArticles, _ := articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
+	authorArticles := hotdataserve.GetOrLoad(fmt.Sprintf("authorId:hot:%v", authorId), func() ([]articles.SmallEntity, error) {
+		return articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
+	})
+
 	categoryMap := articleCategoryMap()
 	articleCategory := array.Map(entity.CategoryId, func(item uint64) string {
 		if cateItem, ok := categoryMap[item]; ok {
@@ -180,6 +181,7 @@ func PostDetail(c *gin.Context) {
 		"PublishedTime":        entity.CreatedAt.Format(time.RFC3339),
 		"ModifiedTime":         entity.UpdatedAt.Format(time.RFC3339),
 	})
+	articles.IncrementView(entity)
 }
 
 type ForumInfo struct {

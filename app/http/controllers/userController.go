@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"io"
 	"log/slog"
 	"strconv"
@@ -105,7 +107,7 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 	}
 	userEntity.Email = newEmail
 
-	err = users.Save(&userEntity)
+	err = SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponse("更新用户信息失败")
 	}
@@ -136,7 +138,7 @@ func EditUsername(req component.BetterRequest[EditUsernameReq]) component.Respon
 		return component.FailResponse("用户名已存在")
 	}
 	userEntity.Username = newUsername
-	err = users.Save(&userEntity)
+	err = SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponse("更新用户信息失败")
 	}
@@ -171,7 +173,7 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 	userEntity.WebsiteName = req.Params.WebsiteName
 	userEntity.ExternalInformation = req.Params.ExternalInformation
 
-	err = users.Save(&userEntity)
+	err = SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponse("更新用户信息失败")
 	}
@@ -246,7 +248,7 @@ func UploadAvatar(c *gin.Context) {
 
 	// 更新用户头像信息
 	userEntity.AvatarUrl = fileEntity.Name
-	if err := users.Save(&userEntity); err != nil {
+	if err := SaveUser(&userEntity); err != nil {
 		c.JSON(200, component.FailData("更新用户信息失败"))
 		return
 	}
@@ -277,10 +279,20 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 
 	// 更新密码
 	userEntity.SetPassword(req.Params.NewPassword)
-	err = users.Save(&userEntity)
+	err = SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponse("更新密码失败")
 	}
 
 	return component.SuccessResponse("密码修改成功")
+}
+
+func SaveUser(userEntity *users.EntityComplete) error {
+	err := users.Save(userEntity)
+	if err == nil {
+		if cacheErr := hotdataserve.Reload(fmt.Sprintf("user:%v", userEntity.Id), user2userShow(*userEntity)); cacheErr != nil {
+			slog.Error(cacheErr.Error())
+		}
+	}
+	return err
 }

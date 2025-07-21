@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -236,21 +238,13 @@ func GetUserShowByUserId(userId uint64) UserInfoShow {
 	if userId == 0 {
 		return UserInfoShow{}
 	}
-	user, _ := users.Get(userId)
-	if user.Id == 0 {
-		return UserInfoShow{}
-	}
-	return UserInfoShow{
-		UserId:              userId,
-		Username:            user.Username,
-		Bio:                 user.Bio,
-		Signature:           user.Signature,
-		Prestige:            user.Prestige,
-		AvatarUrl:           user.GetWebAvatarUrl(),
-		CreateTime:          user.CreatedAt,
-		IsAdmin:             user.RoleId > 0,
-		ExternalInformation: user.ExternalInformation,
-	}
+	return hotdataserve.GetOrLoad(fmt.Sprintf("user:%v", userId), func() (UserInfoShow, error) {
+		user, _ := users.Get(userId)
+		if user.Id == 0 {
+			return UserInfoShow{}, errors.New("no found")
+		}
+		return user2userShow(user), nil
+	})
 }
 
 type PageButton struct {
