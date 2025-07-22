@@ -44,39 +44,6 @@
   --noise: 0;
 }
 @layer components {
-  /* 多彩支持者徽章样式 */
-  .badge-colorful {
-    @apply badge badge-lg p-3;
-    animation: colorful-badge 8s ease-in-out infinite;
-  }
-  
-  @keyframes colorful-badge {
-    0% { background-color: #ef4444; color: white; }
-    14% { background-color: #f97316; color: white; }
-    28% { background-color: #eab308; color: black; }
-    42% { background-color: #22c55e; color: white; }
-    56% { background-color: #3b82f6; color: white; }
-    70% { background-color: #6366f1; color: white; }
-    84% { background-color: #a855f7; color: white; }
-    100% { background-color: #ef4444; color: white; }
-  }
-  
-  /* 为了避免所有徽章同时变色，添加延迟变体 */
-  .badge-colorful:nth-child(2n) {
-    animation-delay: -1s;
-  }
-  
-  .badge-colorful:nth-child(3n) {
-    animation-delay: -2s;
-  }
-  
-  .badge-colorful:nth-child(4n) {
-    animation-delay: -3s;
-  }
-  
-  .badge-colorful:nth-child(5n) {
-    animation-delay: -4s;
-  }
   :target {
     scroll-margin-top: 4rem;
   }
@@ -87,7 +54,6 @@
     max-width: 100%;
     overflow-x: auto;
   }
-
   /* 确保 Mermaid SVG 也居中 */
   .mermaid svg {
     max-width: 100%;
