@@ -9,27 +9,42 @@
     </div>
 
     <!-- DaisyUI Tab组件 -->
-    <div role="tablist" class="tabs tabs-bordered">
-      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="站点信息" checked />
-      <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
-        <SiteInfoTab />
+    <div role="tablist" class="tabs tabs-lift">
+      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="站点信息" checked/>
+      <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
+        <SiteInfoTab/>
+      </div>
+      
+      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="SEO设置"/>
+      <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
+        <SeoTab/>
       </div>
 
-      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="SEO设置" />
-      <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
-        <SeoTab />
+      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="其他设置"/>
+      <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
+        <OtherTab/>
       </div>
 
-      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="其他设置" />
-      <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
-        <OtherTab />
+      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="内容设置"/>
+      <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
+        <ContentTab/>
+      </div>
+
+      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="用户设置"/>
+      <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
+        <UserTab/>
+      </div>
+
+      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="邮件设置"/>
+      <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
+        <MailTab/>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { SiteInfoTab, SeoTab, OtherTab } from './site-settings/index'
+import {ContentTab, MailTab, OtherTab, SeoTab, SiteInfoTab, UserTab} from './site-settings/index'
 </script>
 
 <style scoped>
