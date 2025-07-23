@@ -11,86 +11,73 @@
       </div>
     </div>
 
-    <!-- 统计卡片 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="stats shadow bg-base-100">
-        <div class="stat">
-          <div class="stat-figure text-primary">
-            <UsersIcon class="w-8 h-8" />
-          </div>
-          <div class="stat-title">总用户数</div>
-          <div class="stat-value text-primary">{{ stats.userCount }}</div>
-          <div class="stat-desc">↗︎ 本月新增 {{ stats.userMonthCount }}</div>
-        </div>
-      </div>
-
-      <div class="stats shadow bg-base-100">
-        <div class="stat">
-          <div class="stat-figure text-secondary">
-            <DocumentTextIcon class="w-8 h-8" />
-          </div>
-          <div class="stat-title">总帖子数</div>
-          <div class="stat-value text-secondary">{{ stats.articleCount }}</div>
-          <div class="stat-desc">↗︎ 本月新增 {{ stats.articleMonthCount }}</div>
-        </div>
-      </div>
-
-      <div class="stats shadow bg-base-100">
-        <div class="stat">
-          <div class="stat-figure text-accent">
-            <ChatBubbleLeftRightIcon class="w-8 h-8" />
-          </div>
-          <div class="stat-title">总评论数</div>
-          <div class="stat-value text-accent">{{ stats.reply }}</div>
-          <div class="stat-desc">↗︎ 今日新增 x </div>
-        </div>
-      </div>
-
-      <div class="stats shadow bg-base-100">
-        <div class="stat">
-          <div class="stat-figure text-info">
-            <EyeIcon class="w-8 h-8" />
-          </div>
-          <div class="stat-title">总访问量</div>
-          <div class="stat-value text-info">x </div>
-          <div class="stat-desc">↗︎ 今日访问 x </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 图表和活动 -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- 访问趋势图 -->
-      <div class="lg:col-span-2">
+    <!-- 图表和统计 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- 访问统计图表 -->
+      <div class="lg:col-span-9">
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title">访问趋势</h2>
-            <div class="h-64 flex items-center justify-center border-2 border-dashed border-base-300 rounded-lg">
-              <div class="text-center text-base-content/50">
-                <ChartBarIcon class="w-12 h-12 mx-auto mb-2" />
-                <p>图表组件待集成</p>
-                <p class="text-sm">可集成 Chart.js 或 ECharts</p>
+            <h2 class="card-title">访问统计</h2>
+            <div class="h-64 flex items-center justify-center border border-base-300 rounded">
+              <div class="text-center">
+                <ChartBarIcon class="w-16 h-16 mx-auto text-base-300 mb-4" />
+                <p class="text-base-content/50">图表组件待集成</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 最近活动 -->
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <h2 class="card-title">最近活动</h2>
-          <div class="space-y-4 max-h-64 overflow-y-auto scrollbar-thin">
-            <div v-for="(activity, index) in recentActivities" :key="index" class="flex items-start gap-3">
-              <div class="avatar placeholder">
-                <div class="bg-neutral text-neutral-content rounded-full w-8 h-8">
-                  <span class="text-xs">{{ activity.user.charAt(0).toUpperCase() }}</span>
+      <!-- 系统统计 -->
+      <div class="lg:col-span-3">
+        <div class="card bg-base-100 shadow">
+          <div class="card-body">
+            <h2 class="card-title">系统统计</h2>
+            <div class="space-y-2 h-64">
+              <!-- 用户统计 -->
+              <div class="flex items-center justify-between p-2 border border-base-300 rounded">
+                <div class="flex items-center space-x-2">
+                  <UsersIcon class="w-4 h-4 text-primary" />
+                  <div>
+                    <p class="text-xs text-base-content/70">用户</p>
+                    <p class="text-sm font-bold text-base-content">{{ formatNumber(stats.userCount) }}</p>
+                  </div>
+                </div>
+                <p class="text-xs text-base-content/50">+{{ stats.userMonthCount }}</p>
+              </div>
+
+              <!-- 帖子统计 -->
+              <div class="flex items-center justify-between p-2 border border-base-300 rounded">
+                <div class="flex items-center space-x-2">
+                  <DocumentTextIcon class="w-4 h-4 text-secondary" />
+                  <div>
+                    <p class="text-xs text-base-content/70">帖子</p>
+                    <p class="text-sm font-bold text-base-content">{{ formatNumber(stats.articleCount) }}</p>
+                  </div>
+                </div>
+                <p class="text-xs text-base-content/50">+{{ stats.articleMonthCount }}</p>
+              </div>
+
+              <!-- 评论统计 -->
+              <div class="flex items-center justify-between p-2 border border-base-300 rounded">
+                <div class="flex items-center space-x-2">
+                  <ChatBubbleLeftRightIcon class="w-4 h-4 text-accent" />
+                  <div>
+                    <p class="text-xs text-base-content/70">评论</p>
+                    <p class="text-sm font-bold text-base-content">{{ formatNumber(stats.reply) }}</p>
+                  </div>
                 </div>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-normal text-base-content truncate">{{ activity.user }}</p>
-                <p class="text-xs text-base-content/70 truncate">{{ activity.action }}</p>
-                <p class="text-xs text-base-content/50">{{ formatRelativeTime(activity.time) }}</p>
+
+              <!-- 访问统计 -->
+              <div class="flex items-center justify-between p-2 border border-base-300 rounded">
+                <div class="flex items-center space-x-2">
+                  <EyeIcon class="w-4 h-4 text-info" />
+                  <div>
+                    <p class="text-xs text-base-content/70">访问</p>
+                    <p class="text-sm font-bold text-base-content">x</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -99,9 +86,9 @@
     </div>
 
     <!-- 系统状态和快捷操作 -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <!-- 快捷操作 -->
-      <div class="card bg-base-100 shadow">
+      <div class="card bg-base-100 shadow lg:col-span-4">
         <div class="card-body">
           <h2 class="card-title">快捷操作</h2>
           <div class="grid grid-cols-2 gap-4">
@@ -124,6 +111,85 @@
           </div>
         </div>
       </div>
+
+      <!-- 项目版本信息 -->
+      <div class="card bg-base-100 shadow lg:col-span-8">
+        <div class="card-body">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="card-title flex items-center gap-2">
+              <CodeBracketIcon class="w-5 h-5" />
+              项目版本
+            </h2>
+            <a
+              href="https://github.com/leancodebox/GooseForum/releases"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-ghost btn-sm"
+            >
+              <ArrowTopRightOnSquareIcon class="w-4 h-4" />
+              查看全部
+            </a>
+          </div>
+
+          <!-- GitHub Releases 信息 -->
+          <div class="h-80 border border-base-300 rounded-lg overflow-hidden bg-base-50">
+            <div v-if="loadingReleases" class="flex items-center justify-center h-full">
+              <span class="loading loading-spinner loading-md"></span>
+              <span class="ml-2">加载中...</span>
+            </div>
+
+            <div v-else-if="releases.length > 0" class="p-4 h-full overflow-y-auto">
+              <div v-for="release in releases.slice(0, 3)" :key="release.id" class="mb-4 last:mb-0">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                      <TagIcon class="w-4 h-4 text-primary" />
+                      {{ release.tag_name }}
+                      <span v-if="release.prerelease" class="badge badge-warning badge-xs">预发布</span>
+                      <span v-else-if="release.draft" class="badge badge-ghost badge-xs">草稿</span>
+                    </h3>
+                    <p class="text-xs text-base-content/70 mt-1">{{ formatRelativeTime(new Date(release.published_at)) }}</p>
+                    <p class="text-sm mt-2 line-clamp-2">{{ release.body || '暂无发布说明' }}</p>
+                  </div>
+                  <a
+                    :href="release.html_url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-ghost btn-xs ml-2"
+                  >
+                    <ArrowTopRightOnSquareIcon class="w-3 h-3" />
+                  </a>
+                </div>
+                <div class="divider my-2 last:hidden"></div>
+              </div>
+            </div>
+
+            <div v-else class="flex flex-col items-center justify-center h-full text-base-content/50">
+              <CodeBracketIcon class="w-12 h-12 mb-2" />
+              <p class="text-sm">暂无发布信息</p>
+              <a
+                href="https://github.com/leancodebox/GooseForum/releases"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-ghost btn-sm mt-2"
+              >
+                查看GitHub页面
+              </a>
+            </div>
+          </div>
+
+          <!-- 备用信息显示 -->
+          <div class="mt-4 text-sm text-base-content/70">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 bg-success rounded-full"></div>
+              <span>当前版本：{{ currentVersion }}</span>
+            </div>
+            <div class="mt-1">
+              <span>最后更新：{{ lastUpdateTime }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -138,7 +204,9 @@ import {
   EyeIcon,
   ChartBarIcon,
   TagIcon,
-  CogIcon
+  CogIcon,
+  CodeBracketIcon,
+  ArrowTopRightOnSquareIcon
 } from '@heroicons/vue/24/outline'
 import { api } from '../utils/axiosInstance'
 import { getSiteStatistics } from '../utils/adminService'
@@ -155,34 +223,33 @@ const stats = ref({
   linksCount: 0,
 })
 
-// 最近活动
-const recentActivities = ref([
-  {
-    user: 'admin',
-    action: '发布了新帖子《Vue3 最佳实践》',
-    time: new Date(Date.now() - 10 * 60 * 1000)
-  },
-  {
-    user: 'user123',
-    action: '注册了新账户',
-    time: new Date(Date.now() - 30 * 60 * 1000)
-  },
-  {
-    user: 'moderator',
-    action: '审核通过了帖子《Go语言入门》',
-    time: new Date(Date.now() - 60 * 60 * 1000)
-  },
-  {
-    user: 'editor',
-    action: '更新了分类设置',
-    time: new Date(Date.now() - 2 * 60 * 60 * 1000)
-  },
-  {
-    user: 'user456',
-    action: '发表了评论',
-    time: new Date(Date.now() - 3 * 60 * 60 * 1000)
+// 版本信息
+const currentVersion = ref('v1.0.0')
+const lastUpdateTime = ref('2024-01-01')
+const releases = ref([])
+const loadingReleases = ref(false)
+
+// 获取GitHub Releases
+const fetchReleases = async () => {
+  loadingReleases.value = true
+  try {
+    const response = await fetch('https://api.github.com/repos/leancodebox/GooseForum/releases')
+    if (response.ok) {
+      const data = await response.json()
+      releases.value = data
+      if (data.length > 0) {
+        currentVersion.value = data[0].tag_name
+        lastUpdateTime.value = new Date(data[0].published_at).toLocaleDateString('zh-CN')
+      }
+    }
+  } catch (error) {
+    console.error('获取releases失败:', error)
+  } finally {
+    loadingReleases.value = false
   }
-])
+}
+
+
 
 // 格式化数字
 const formatNumber = (num: number) => {
@@ -234,39 +301,14 @@ const fetchStats = async () => {
   }
 }
 
-// 获取最近活动
-const fetchRecentActivities = async () => {
-  try {
 
-  } catch (error) {
-    console.error('获取最近活动失败:', error)
-  }
-}
 
 // 组件挂载时获取数据
 onMounted(() => {
   fetchStats()
-  fetchRecentActivities()
+  fetchReleases()
 })
 </script>
 
 <style scoped>
-/* 自定义样式 */
-.stats {
-  border: 1px solid hsl(var(--bc) / 0.1);
-}
-
-.card {
-  border: 1px solid hsl(var(--bc) / 0.1);
-}
-
-.progress {
-  height: 0.5rem;
-}
-
-/* 悬停效果 */
-.btn:hover {
-  transform: translateY(-1px);
-  transition: transform 0.2s ease;
-}
 </style>
