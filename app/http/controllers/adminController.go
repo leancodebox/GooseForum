@@ -576,3 +576,36 @@ func SaveSponsors(req component.BetterRequest[SaveSponsorsReq]) component.Respon
 	pageConfig.CreateOrSave(&configEntity)
 	return component.SuccessResponse("success")
 }
+
+// GetSiteSettings 获取站点设置
+func GetSiteSettings(req component.BetterRequest[null]) component.Response {
+	defaultSettings := pageConfig.SiteSettingsConfig{
+		SiteName:           "GooseForum",
+		SiteLogo:           "",
+		SiteDescription:    "一个现代化的论坛系统",
+		SiteKeywords:       "forum,discussion,community",
+		SiteUrl:            "https://localhost:3000",
+		TitleTemplate:      "{title} - {siteName}",
+		DefaultDescription: "一个现代化的论坛系统，提供优质的讨论体验",
+		IcpNumber:          "",
+		Timezone:           "Asia/Shanghai",
+		DefaultLanguage:    "zh-CN",
+		MaintenanceMode:    false,
+		MaintenanceMessage: "站点正在维护中，请稍后再试。",
+	}
+	res := pageConfig.GetConfigByPageType(pageConfig.SiteSettings, defaultSettings)
+	return component.SuccessResponse(res)
+}
+
+type SaveSiteSettingsReq struct {
+	Settings pageConfig.SiteSettingsConfig `json:"settings"`
+}
+
+// SaveSiteSettings 保存站点设置
+func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(pageConfig.SiteSettings)
+	configEntity.PageType = pageConfig.SiteSettings
+	configEntity.Config = jsonopt.Encode(req.Params.Settings)
+	pageConfig.CreateOrSave(&configEntity)
+	return component.SuccessResponse("success")
+}

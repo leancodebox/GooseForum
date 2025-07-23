@@ -35,6 +35,7 @@ const (
 	WebSettings     = `webSettings`
 	FooterLinks     = `footerLinks`
 	SponsorsPage    = `sponsors`
+	SiteSettings    = `siteSettings`
 )
 
 var PageTypeList = []string{
@@ -42,6 +43,7 @@ var PageTypeList = []string{
 	WebSettings,
 	FooterLinks,
 	SponsorsPage,
+	SiteSettings,
 }
 
 type WebSettingsConfig struct {
@@ -104,4 +106,25 @@ type Sponsors struct {
 type SponsorsConfig struct {
 	Sponsors Sponsors      `json:"sponsors"`
 	Users    []UserSponsor `json:"users"`
+}
+
+// 站点设置配置
+type SiteSettingsConfig struct {
+	// 站点基本信息
+	SiteName        string `json:"siteName"`
+	SiteLogo        string `json:"siteLogo"`
+	SiteDescription string `json:"siteDescription"`
+	SiteKeywords    string `json:"siteKeywords"`
+	SiteUrl         string `json:"siteUrl"`
+	
+	// SEO设置
+	TitleTemplate      string `json:"titleTemplate"`
+	DefaultDescription string `json:"defaultDescription"`
+	IcpNumber          string `json:"icpNumber"`
+	
+	// 其他设置
+	Timezone           string `json:"timezone"`
+	DefaultLanguage    string `json:"defaultLanguage"`
+	MaintenanceMode    bool   `json:"maintenanceMode"`
+	MaintenanceMessage string `json:"maintenanceMessage"`
 }

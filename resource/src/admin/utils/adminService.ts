@@ -135,6 +135,32 @@ export const saveWebSettings = (settings: WebSettingsConfig): Promise<Result<any
     });
 }
 
+// 站点设置相关接口
+export interface SiteSettingsConfig {
+    siteName: string;
+    siteLogo: string;
+    siteDescription: string;
+    siteKeywords: string;
+    siteUrl: string;
+    titleTemplate: string;
+    defaultDescription: string;
+    icpNumber: string;
+    timezone: string;
+    defaultLanguage: string;
+    maintenanceMode: boolean;
+    maintenanceMessage: string;
+}
+
+export const getSiteSettings = (): Promise<Result<SiteSettingsConfig>> => {
+    return axiosInstance.get('api/admin/site-settings');
+}
+
+export const saveSiteSettings = (settings: SiteSettingsConfig): Promise<Result<any>> => {
+    return axiosInstance.post('api/admin/save-site-settings', {
+        settings: settings
+    });
+}
+
 // Footer管理相关接口
 export interface FooterItem {
     name: string;

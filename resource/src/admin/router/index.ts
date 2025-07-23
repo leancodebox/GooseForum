@@ -125,6 +125,15 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'site-settings',
+        name: 'SiteSettings',
+        component: () => import('../views/SiteSettings.vue'),
+        meta: {
+          title: '站点设置',
+          requiresAuth: true
+        }
+      },
+      {
         path: 'docs/projects',
         name: 'AdminDocsProjects',
         component: () => import('../views/docs/DocsProjectManagement.vue'),

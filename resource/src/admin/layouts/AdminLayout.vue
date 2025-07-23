@@ -267,6 +267,12 @@ const menuItems = ref<MenuItem[]>([
     icon: GlobeAltIcon
   },
   {
+    key: 'site-settings',
+    label: '站点设置',
+    path: '/admin/site-settings',
+    icon: GlobeAltIcon
+  },
+  {
     key: 'settings',
     label: '系统设置-todo',
     path: '/admin/settings',
