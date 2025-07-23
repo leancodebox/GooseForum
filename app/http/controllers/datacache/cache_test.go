@@ -8,10 +8,10 @@ import (
 
 func TestCache_GetOrLoad(t *testing.T) {
 	c := Cache[string, string]{}
-	a, _ := c.GetOrLoad("", func() (string, error) {
+	a, _ := c.GetOrLoadE("", func() (string, error) {
 		return "a", nil
 	}, time.Minute)
-	c.GetOrLoad("", func() (string, error) {
+	c.GetOrLoadE("", func() (string, error) {
 		return "a", nil
 	}, time.Minute)
 

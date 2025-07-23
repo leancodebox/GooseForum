@@ -40,7 +40,7 @@ func Reload[T any](key string, dataObj T) error {
 var footerConfigCache = &datacache.Cache[string, pageConfig.FooterConfig]{}
 
 func GetFooterConfigCache() pageConfig.FooterConfig {
-	data, _ := footerConfigCache.GetOrLoad("", func() (pageConfig.FooterConfig, error) {
+	data, _ := footerConfigCache.GetOrLoadE("", func() (pageConfig.FooterConfig, error) {
 		return pageConfig.GetConfigByPageType(pageConfig.FooterLinks, defaultconfig.GetDefaultFooter()), nil
 	}, time.Minute)
 	return data

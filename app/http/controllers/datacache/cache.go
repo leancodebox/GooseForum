@@ -16,8 +16,17 @@ type cacheItem[V any] struct {
 	expiration int64 // 毫秒时间戳
 }
 
-// GetOrLoad 核心调用方法（满足您要求的参数形式）
 func (c *Cache[K, V]) GetOrLoad(
+	key K,
+	getData func() (V, error), // 数据加载函数
+	timeout time.Duration, // 缓存超时时间
+) (value V) {
+	data, _ := c.GetOrLoadE(key, getData, timeout)
+	return data
+}
+
+// GetOrLoadE 核心调用方法（满足您要求的参数形式）
+func (c *Cache[K, V]) GetOrLoadE(
 	key K,
 	getData func() (V, error), // 数据加载函数
 	timeout time.Duration, // 缓存超时时间

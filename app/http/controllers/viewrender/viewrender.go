@@ -27,7 +27,7 @@ var webSettingsCache = &datacache.Cache[string, pageConfig.WebSettingsConfig]{}
 func GlobalFunc() template.FuncMap {
 	return template.FuncMap{
 		"WebPageSettings": func() pageConfig.WebSettingsConfig {
-			data, _ := webSettingsCache.GetOrLoad("websetcache", func() (pageConfig.WebSettingsConfig, error) {
+			data, _ := webSettingsCache.GetOrLoadE("websetcache", func() (pageConfig.WebSettingsConfig, error) {
 				return pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{}), nil
 			},
 				time.Second*5,

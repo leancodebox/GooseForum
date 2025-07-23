@@ -18,6 +18,7 @@ import (
 var (
 	siteStatisticsDataCache = &datacache.Cache[string, SiteStats]{}
 	articleCache            = &datacache.Cache[string, []articles.SmallEntity]{}
+	articleSimpleDtoCache   = &datacache.Cache[string, []ArticlesSimpleDto]{}
 	articleCategoryCache    = &datacache.Cache[string, []*articleCategory.Entity]{}
 	articleCategoryMapCache = &datacache.Cache[string, map[uint64]*articleCategory.Entity]{}
 )
@@ -41,7 +42,7 @@ type SiteStats struct {
 }
 
 func GetSiteStatisticsData() SiteStats {
-	data, _ := siteStatisticsDataCache.GetOrLoad("", func() (SiteStats, error) {
+	data, _ := siteStatisticsDataCache.GetOrLoadE("", func() (SiteStats, error) {
 		configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
 		res := jsonopt.Decode[[]pageConfig.FriendLinksGroup](configEntity.Config)
 		linksCount := 0
@@ -61,7 +62,7 @@ func GetSiteStatisticsData() SiteStats {
 }
 
 func getRecommendedArticles() []articles.SmallEntity {
-	data, _ := articleCache.GetOrLoad(
+	data, _ := articleCache.GetOrLoadE(
 		"getRecommendedArticles",
 		func() ([]articles.SmallEntity, error) {
 			return articles.GetRecommendedArticles(4)
@@ -72,7 +73,7 @@ func getRecommendedArticles() []articles.SmallEntity {
 }
 
 func getLatestArticles() []articles.SmallEntity {
-	data, _ := articleCache.GetOrLoad(
+	data, _ := articleCache.GetOrLoadE(
 		"getLatestArticles",
 		func() ([]articles.SmallEntity, error) {
 			return articles.GetLatestArticles(20)
@@ -84,7 +85,7 @@ func getLatestArticles() []articles.SmallEntity {
 }
 
 func getArticleCategory() []*articleCategory.Entity {
-	data, _ := articleCategoryCache.GetOrLoad(
+	data, _ := articleCategoryCache.GetOrLoadE(
 		"getArticleCategory",
 		func() ([]*articleCategory.Entity, error) {
 			return articleCategory.All(), nil
@@ -106,7 +107,7 @@ func articleCategoryLabel() []datastruct.Option[string, uint64] {
 
 // GetMapByIds 根据ID列表获取分类Map
 func articleCategoryMap() map[uint64]*articleCategory.Entity {
-	data, _ := articleCategoryMapCache.GetOrLoad(
+	data, _ := articleCategoryMapCache.GetOrLoadE(
 		"getArticleCategory",
 		func() (map[uint64]*articleCategory.Entity, error) {
 			return array.Slice2Map(articleCategory.All(), func(v *articleCategory.Entity) uint64 {
@@ -123,6 +124,9 @@ func articlesSmallEntity2Dto(data []articles.SmallEntity) []ArticlesSimpleDto {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
+	return articlesSmallEntityWithUser2Dto(data, userMap)
+}
+func articlesSmallEntityWithUser2Dto(data []articles.SmallEntity, userMap map[uint64]*users.EntityComplete) []ArticlesSimpleDto {
 	categoryMap := articleCategoryMap()
 	return array.Map(data, func(t articles.SmallEntity) ArticlesSimpleDto {
 		categoryNames := array.Map(t.CategoryId, func(item uint64) string {

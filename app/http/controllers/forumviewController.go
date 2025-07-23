@@ -26,7 +26,9 @@ import (
 )
 
 func Home(c *gin.Context) {
-	last := getLatestArticles()
+	latestArticles := articleSimpleDtoCache.GetOrLoad("home:getLatestArticles", func() ([]ArticlesSimpleDto, error) {
+		return articlesSmallEntity2Dto(getLatestArticles()), nil
+	}, time.Second*10)
 	viewrender.Render(c, "index.gohtml", map[string]any{
 		"IsProduction":        setting.IsProduction(),
 		"CanonicalHref":       buildCanonicalHref(c),
@@ -34,7 +36,7 @@ func Home(c *gin.Context) {
 		"Title":               "GooseForum - 自由漫谈的江湖茶馆",
 		"ArticleCategoryList": articleCategoryLabel(),
 		"Description":         "GooseForum's home",
-		"LatestArticles":      articlesSmallEntity2Dto(last), // 最新的文章
+		"LatestArticles":      latestArticles, // 最新的文章
 		"Stats":               GetSiteStatisticsData(),
 		"RecommendedArticles": getRecommendedArticles(),
 		"GooseForumInfo":      GetGooseForumInfo(),
