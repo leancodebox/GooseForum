@@ -37,7 +37,7 @@ func Reload[T any](key string, dataObj T) error {
 	return errors.New("no cache")
 }
 
-var footerConfigCache = &datacache.Cache[string, pageConfig.FooterConfig]{}
+var footerConfigCache = &datacache.Cache[pageConfig.FooterConfig]{}
 
 func GetFooterConfigCache() pageConfig.FooterConfig {
 	data, _ := footerConfigCache.GetOrLoadE("", func() (pageConfig.FooterConfig, error) {
@@ -46,7 +46,7 @@ func GetFooterConfigCache() pageConfig.FooterConfig {
 	return data
 }
 
-var sponsorsConfigCache = &datacache.Cache[string, pageConfig.SponsorsConfig]{}
+var sponsorsConfigCache = &datacache.Cache[pageConfig.SponsorsConfig]{}
 
 func SponsorsConfigCache() pageConfig.SponsorsConfig {
 	data, _ := sponsorsConfigCache.GetOrLoadE("", func() (pageConfig.SponsorsConfig, error) {
@@ -55,7 +55,7 @@ func SponsorsConfigCache() pageConfig.SponsorsConfig {
 	return data
 }
 
-var siteSettingsConfigCache = &datacache.Cache[string, pageConfig.SiteSettingsConfig]{}
+var siteSettingsConfigCache = &datacache.Cache[pageConfig.SiteSettingsConfig]{}
 
 func GetSiteSettingsConfigCache() pageConfig.SiteSettingsConfig {
 	data, _ := siteSettingsConfigCache.GetOrLoadE("", func() (pageConfig.SiteSettingsConfig, error) {

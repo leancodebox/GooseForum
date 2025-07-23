@@ -16,11 +16,11 @@ import (
 
 // 初始化缓存
 var (
-	siteStatisticsDataCache = &datacache.Cache[string, SiteStats]{}
-	articleCache            = &datacache.Cache[string, []articles.SmallEntity]{}
-	articleSimpleDtoCache   = &datacache.Cache[string, []ArticlesSimpleDto]{}
-	articleCategoryCache    = &datacache.Cache[string, []*articleCategory.Entity]{}
-	articleCategoryMapCache = &datacache.Cache[string, map[uint64]*articleCategory.Entity]{}
+	siteStatisticsDataCache = &datacache.Cache[SiteStats]{}
+	articleCache            = &datacache.Cache[[]articles.SmallEntity]{}
+	articleSimpleDtoCache   = &datacache.Cache[[]ArticlesSimpleDto]{}
+	articleCategoryCache    = &datacache.Cache[[]*articleCategory.Entity]{}
+	articleCategoryMapCache = &datacache.Cache[map[uint64]*articleCategory.Entity]{}
 )
 
 var articlesType = []datastruct.Option[string, int]{

@@ -23,7 +23,7 @@ func init() {
 	Reload()
 }
 
-var webSettingsCache = &datacache.Cache[string, pageConfig.WebSettingsConfig]{}
+var webSettingsCache = &datacache.Cache[pageConfig.WebSettingsConfig]{}
 
 func GlobalFunc() template.FuncMap {
 	return template.FuncMap{

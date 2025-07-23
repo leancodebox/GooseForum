@@ -2,15 +2,14 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"io"
 	"log/slog"
 	"strconv"
-	"time"
-
-	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
-	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -187,18 +186,7 @@ func Invitation(req component.BetterRequest[null]) component.Response {
 	})
 }
 
-type UserInfoShow struct {
-	UserId              uint64                    `json:"userId,omitempty"`
-	Username            string                    `json:"username"`
-	Bio                 string                    `json:"bio"`
-	Signature           string                    `json:"Signature"`
-	Prestige            int64                     `json:"prestige"`
-	AvatarUrl           string                    `json:"avatarUrl"`
-	UserPoint           int64                     `json:"userPoint"`
-	CreateTime          time.Time                 `json:"createTime"`
-	IsAdmin             bool                      `json:"isAdmin"`
-	ExternalInformation users.ExternalInformation `json:"externalInformation"`
-}
+type UserInfoShow vo.UserInfoShow
 
 // UploadAvatar 头像上传处理函数
 func UploadAvatar(c *gin.Context) {
