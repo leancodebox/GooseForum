@@ -19,7 +19,7 @@
         <div class="card-body p-4">
           <div class="flex justify-between items-center mb-3">
             <h2 class="card-title text-lg font-normal">HTML内容列表</h2>
-            <button @click="addHtmlItem" class="btn btn-success btn-xs">
+            <button @click="addPItem" class="btn btn-success btn-xs">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
               </svg>
@@ -29,7 +29,7 @@
           
           <div class="space-y-3 max-h-96 overflow-y-auto">
             <draggable
-              v-model="footerConfig.htmlList"
+              v-model="footerConfig.primary"
               :item-key="(item, index) => `html-${index}`"
               class="space-y-3"
               :animation="200"
@@ -45,12 +45,12 @@
                          </svg>
                        </div>
                        <input 
-                         v-model="htmlItem.item" 
+                         v-model="htmlItem.content"
                          placeholder="请输入HTML项内容"
                          class="input input-bordered input-sm flex-1"
                        />
                        <button 
-                         @click="removeHtmlItem(htmlIndex)" 
+                         @click="removePItem(htmlIndex)"
                          class="btn btn-error btn-xs"
                        >
                          删除
@@ -61,7 +61,7 @@
                </template>
             </draggable>
             
-            <div v-if="footerConfig.htmlList.length === 0" class="text-center py-8 text-base-content/60">
+            <div v-if="footerConfig.primary.length === 0" class="text-center py-8 text-base-content/60">
               暂无HTML项，点击上方按钮添加
             </div>
           </div>
@@ -181,8 +181,7 @@ import draggable from 'vuedraggable'
 
 const loading = ref(false)
 const footerConfig = ref<FooterConfig>({
-  content: '',
-  htmlList: [],
+  primary: [],
   list: []
 })
 
@@ -192,8 +191,7 @@ const loadFooterConfig = async () => {
     const response = await getFooterLinks()
     if (response.code === 0) {
       footerConfig.value = {
-        content: response.result.content || '',
-        htmlList: response.result.htmlList || [],
+        primary: response.result.primary || [],
         list: response.result.list || []
       }
     }
@@ -222,15 +220,15 @@ const saveFooterConfig = async () => {
 }
 
 // 添加HTML项
-const addHtmlItem = () => {
-  footerConfig.value.htmlList.push({
-    item: ''
+const addPItem = () => {
+  footerConfig.value.primary.push({
+    content: ''
   })
 }
 
 // 删除HTML项
-const removeHtmlItem = (index: number) => {
-  footerConfig.value.htmlList.splice(index, 1)
+const removePItem = (index: number) => {
+  footerConfig.value.primary.splice(index, 1)
 }
 
 // 添加分组

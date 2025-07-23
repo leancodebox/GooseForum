@@ -69,11 +69,11 @@ type FooterGroup struct {
 	Children []FooterItem `json:"children"`
 }
 
-type HtmlItem struct {
-	Item string `json:"item"`
+type PItem struct {
+	Content string `json:"content"`
 }
 
 type FooterConfig struct {
-	HtmlList []HtmlItem    `json:"htmlList"`
-	List     []FooterGroup `json:"list"`
+	Primary []PItem       `json:"primary"`
+	List    []FooterGroup `json:"list"`
 }

@@ -4,9 +4,9 @@ import "github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 
 // Footer管理相关
 var defaultFooter = pageConfig.FooterConfig{
-	HtmlList: []pageConfig.HtmlItem{
-		{Item: `Power by <a href="https://github.com/leancodebox/GooseForum">GooseForum</a>.`},
-		{Item: `Providing reliable tech since 2025`},
+	Primary: []pageConfig.PItem{
+		{Content: `Power by <a href="https://github.com/leancodebox/GooseForum">GooseForum</a>.`},
+		{Content: `Providing reliable tech since 2025`},
 	},
 	List: []pageConfig.FooterGroup{
 		{

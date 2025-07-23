@@ -145,13 +145,12 @@ export interface FooterGroup {
     children: FooterItem[];
 }
 
-export interface HtmlItem {
-    item: string;
+export interface PItem {
+    content: string;
 }
 
 export interface FooterConfig {
-    content: string;
-    htmlList: HtmlItem[];
+    primary: PItem[];
     list: FooterGroup[];
 }
 
