@@ -2,6 +2,7 @@ package searchservice
 
 import (
 	"fmt"
+
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	"github.com/leancodebox/GooseForum/app/models/meilisearchmodel"
 	"github.com/meilisearch/meilisearch-go"
@@ -67,7 +68,7 @@ func SearchArticles(req SearchRequest) (*SearchResponse, error) {
 		if hitMap, ok := hit.(map[string]interface{}); ok {
 			id := cast.ToUint64(hitMap["id"])
 			title := cast.ToString(hitMap["title"])
-			
+
 			if id > 0 {
 				results = append(results, SearchResult{
 					ID:    id,

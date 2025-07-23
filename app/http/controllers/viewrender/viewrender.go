@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/datacache"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/resource"
 	"html/template"
 	"log/slog"
@@ -46,6 +47,8 @@ func Render(c *gin.Context, name string, templateData map[string]any) {
 		theme = themeCookie
 	}
 	templateData["Theme"] = theme
+	templateData["Footer"] = hotdataserve.GetFooterConfigCache()
+
 	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, templateData); err != nil {
 		slog.Error("render template err", "err", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)

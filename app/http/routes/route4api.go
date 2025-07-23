@@ -152,7 +152,9 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("friend-links", UpButterReq(controllers.GetFriendLinks)).
 		POST("save-friend-links", UpButterReq(controllers.SaveFriendLinks)).
 		GET("web-settings", UpButterReq(controllers.GetWebSettings)).
-		POST("save-web-settings", UpButterReq(controllers.SaveWebSettings))
+		POST("save-web-settings", UpButterReq(controllers.SaveWebSettings)).
+		GET("footer-links", UpButterReq(controllers.GetFooterLinks)).
+		POST("save-footer-links", UpButterReq(controllers.SaveFooterLinks))
 
 	// 文档管理
 	adminApi.Group("", middleware.CheckPermission(permission.Admin)).

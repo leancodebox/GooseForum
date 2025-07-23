@@ -33,11 +33,13 @@ func (itself *Entity) TableName() string {
 const (
 	FriendShipLinks = `friendShipLinks`
 	WebSettings     = `webSettings`
+	FooterLinks     = `footerLinks`
 )
 
 var PageTypeList = []string{
 	FriendShipLinks,
 	WebSettings,
+	FooterLinks,
 }
 
 type WebSettingsConfig struct {
@@ -55,4 +57,23 @@ type LinkItem struct {
 type FriendLinksGroup struct {
 	Name  string     `json:"name,omitempty"`
 	Links []LinkItem `json:"links,omitempty"`
+}
+
+type FooterItem struct {
+	Name string `json:"name"`
+	Url  string `json:"url"`
+}
+
+type FooterGroup struct {
+	Name     string       `json:"name"`
+	Children []FooterItem `json:"children"`
+}
+
+type HtmlItem struct {
+	Item string `json:"item"`
+}
+
+type FooterConfig struct {
+	HtmlList []HtmlItem    `json:"htmlList"`
+	List     []FooterGroup `json:"list"`
 }

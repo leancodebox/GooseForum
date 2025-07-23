@@ -78,6 +78,15 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
+        path: 'footer-links',
+        name: 'AdminFooterLinks',
+        component: () => import('../views/FooterManagement.vue'),
+        meta: {
+          title: '页脚管理',
+          requiresAuth: true
+        }
+      },
+      {
         path: 'sponsors',
         name: 'AdminSponsors',
         component: () => import('../views/SponsorManagement.vue'),

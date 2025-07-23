@@ -218,6 +218,12 @@ const menuItems = ref<MenuItem[]>([
     icon: LinkIcon
   },
   {
+    key: 'footer-links',
+    label: '页脚管理',
+    path: '/admin/footer-links',
+    icon: LinkIcon
+  },
+  {
     key: 'sponsors',
     label: '赞助管理-todo',
     path: '/admin/sponsors',

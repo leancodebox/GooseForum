@@ -133,3 +133,34 @@ export const saveWebSettings = (settings: WebSettingsConfig): Promise<Result<any
         settings: settings
     });
 }
+
+// Footer管理相关接口
+export interface FooterItem {
+    name: string;
+    url: string;
+}
+
+export interface FooterGroup {
+    name: string;
+    children: FooterItem[];
+}
+
+export interface HtmlItem {
+    item: string;
+}
+
+export interface FooterConfig {
+    content: string;
+    htmlList: HtmlItem[];
+    list: FooterGroup[];
+}
+
+export const getFooterLinks = (): Promise<Result<FooterConfig>> => {
+    return axiosInstance.get('api/admin/footer-links');
+}
+
+export const saveFooterLinks = (footerConfig: FooterConfig): Promise<Result<any>> => {
+    return axiosInstance.post('api/admin/save-footer-links', {
+        footerConfig: footerConfig
+    });
+}

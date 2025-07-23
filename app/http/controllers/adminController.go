@@ -2,14 +2,16 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
+	"slices"
+	"time"
+
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
-	"slices"
-	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 
@@ -524,6 +526,25 @@ func SaveWebSettings(req component.BetterRequest[SaveWebSettingsReq]) component.
 	configEntity := pageConfig.GetByPageType(pageConfig.WebSettings)
 	configEntity.PageType = pageConfig.WebSettings
 	configEntity.Config = jsonopt.Encode(req.Params.Settings)
+	pageConfig.CreateOrSave(&configEntity)
+	return component.SuccessResponse("success")
+}
+
+// GetFooterLinks 获取页脚配置
+func GetFooterLinks(req component.BetterRequest[null]) component.Response {
+	res := pageConfig.GetConfigByPageType(pageConfig.FooterLinks, defaultconfig.GetDefaultFooter())
+	return component.SuccessResponse(res)
+}
+
+type SaveFooterLinksReq struct {
+	FooterConfig pageConfig.FooterConfig `json:"footerConfig"`
+}
+
+// SaveFooterLinks 保存页脚配置
+func SaveFooterLinks(req component.BetterRequest[SaveFooterLinksReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(pageConfig.FooterLinks)
+	configEntity.PageType = pageConfig.FooterLinks
+	configEntity.Config = jsonopt.Encode(req.Params.FooterConfig)
 	pageConfig.CreateOrSave(&configEntity)
 	return component.SuccessResponse("success")
 }
