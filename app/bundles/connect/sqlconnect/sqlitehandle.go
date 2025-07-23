@@ -60,6 +60,11 @@ func backupSQLite(db *gorm.DB, backupPath string) error {
 	if result.Error != nil {
 		return result.Error
 	}
+	// 碎片清理
+	result = db.Exec("VACUUM")
+	if result.Error != nil {
+		return result.Error
+	}
 	return nil
 }
 
