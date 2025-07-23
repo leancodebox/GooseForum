@@ -1,7 +1,7 @@
 <nav class="navbar bg-base-100 shadow-sm border-b border-base-300 min-h-14" aria-label="主导航">
     <!-- PC端导航链接靠左 -->
     <div class="navbar-start">
-        <a href="/" class="font-normal text-lg mr-4 hover:text-primary" aria-label="GooseForum">GooseForum</a>
+        <a href="/" class="font-normal text-lg mr-4 hover:text-primary" aria-label="{{.SiteSetting.SiteName}}">{{.SiteSetting.SiteName}}</a>
         <ul class="menu menu-horizontal px-1 hidden lg:flex py-0" aria-label="主菜单">
             <li><a href="/post" class="py-1 px-3 text-base">社区</a></li>
             <li><a href="/docs" class="py-1 px-3 text-base">文档</a></li>
@@ -209,7 +209,7 @@
     function performSearch() {
         const searchInput = document.getElementById('search-input');
         const query = searchInput.value.trim();
-        
+
         if (query) {
             window.location.href = `/search?q=${encodeURIComponent(query)}`;
         }

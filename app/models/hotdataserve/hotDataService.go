@@ -54,3 +54,12 @@ func SponsorsConfigCache() pageConfig.SponsorsConfig {
 	}, time.Minute)
 	return data
 }
+
+var siteSettingsConfigCache = &datacache.Cache[string, pageConfig.SiteSettingsConfig]{}
+
+func GetSiteSettingsConfigCache() pageConfig.SiteSettingsConfig {
+	data, _ := siteSettingsConfigCache.GetOrLoadE("", func() (pageConfig.SiteSettingsConfig, error) {
+		return pageConfig.GetConfigByPageType(pageConfig.SiteSettings, defaultconfig.GetDefaultSiteSettingsConfig()), nil
+	}, time.Minute)
+	return data
+}

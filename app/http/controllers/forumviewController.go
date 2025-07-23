@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
@@ -30,7 +29,6 @@ func Home(c *gin.Context) {
 		return articlesSmallEntity2Dto(getLatestArticles()), nil
 	}, time.Second*10)
 	viewrender.Render(c, "index.gohtml", map[string]any{
-		"IsProduction":        setting.IsProduction(),
 		"CanonicalHref":       buildCanonicalHref(c),
 		"User":                GetLoginUser(c),
 		"Title":               "GooseForum - 自由漫谈的江湖茶馆",
@@ -45,9 +43,8 @@ func Home(c *gin.Context) {
 
 func LoginView(c *gin.Context) {
 	viewrender.Render(c, "login-vue.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "登录/注册 - GooseForum",
+		"User":  GetLoginUser(c),
+		"Title": "登录/注册 - GooseForum",
 	})
 }
 
@@ -149,7 +146,6 @@ func PostDetail(c *gin.Context) {
 	}
 	// 构建模板数据
 	viewrender.Render(c, "detail.gohtml", map[string]any{
-		"IsProduction":         setting.IsProduction(),
 		"ArticleId":            id,
 		"AuthorId":             authorId,
 		"Title":                entity.Title + " - GooseForum",
@@ -308,7 +304,6 @@ func Post(c *gin.Context) {
 	}
 
 	viewrender.Render(c, "list.gohtml", map[string]any{
-		"IsProduction":        setting.IsProduction(),
 		"Title":               title,
 		"Description":         description,
 		"Year":                time.Now().Year(),
@@ -403,7 +398,6 @@ func User(c *gin.Context) {
 	}
 
 	viewrender.Render(c, "user.gohtml", map[string]any{
-		"IsProduction":         setting.IsProduction(),
 		"Articles":             articlesSmallEntity2Dto(last),
 		"ArticlesCount":        articles.GetUserCount(showUser.UserId),
 		"Author":               showUser,
@@ -423,17 +417,15 @@ func User(c *gin.Context) {
 
 func About(c *gin.Context) {
 	viewrender.Render(c, "about.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "关于 - GooseForum",
-		"Description":  "GooseForum's about",
+		"User":        GetLoginUser(c),
+		"Title":       "关于 - GooseForum",
+		"Description": "GooseForum's about",
 	})
 }
 
 func SponsorsView(c *gin.Context) {
 	sponsorsInfo := hotdataserve.SponsorsConfigCache()
 	viewrender.Render(c, "sponsors.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
 		"Title":        "赞助商 - GooseForum",
 		"Description":  "GooseForum's sponsors",
@@ -451,12 +443,11 @@ var privacyPolicyMD string
 func TermsOfService(c *gin.Context) {
 	htmlContent := markdown2html.MarkdownToHTML(termsOfServiceMD)
 	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "用户协议 - GooseForum",
-		"Subtitle":     "Terms of Service",
-		"Description":  "GooseForum 用户服务协议",
-		"Content":      template.HTML(htmlContent),
+		"User":        GetLoginUser(c),
+		"Title":       "用户协议 - GooseForum",
+		"Subtitle":    "Terms of Service",
+		"Description": "GooseForum 用户服务协议",
+		"Content":     template.HTML(htmlContent),
 	})
 }
 
@@ -464,12 +455,11 @@ func TermsOfService(c *gin.Context) {
 func PrivacyPolicy(c *gin.Context) {
 	htmlContent := markdown2html.MarkdownToHTML(privacyPolicyMD)
 	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "隐私政策 - GooseForum",
-		"Subtitle":     "Privacy Policy",
-		"Description":  "GooseForum 隐私保护政策",
-		"Content":      template.HTML(htmlContent),
+		"User":        GetLoginUser(c),
+		"Title":       "隐私政策 - GooseForum",
+		"Subtitle":    "Privacy Policy",
+		"Description": "GooseForum 隐私保护政策",
+		"Content":     template.HTML(htmlContent),
 	})
 }
 
@@ -510,7 +500,6 @@ func LinksView(c *gin.Context) {
 		}
 	}
 	viewrender.Render(c, "links.gohtml", map[string]any{
-		"IsProduction":        setting.IsProduction(),
 		"User":                GetLoginUser(c),
 		"Title":               "友情链接 - GooseForum",
 		"FriendLinksGroup":    res,
@@ -523,32 +512,28 @@ func LinksView(c *gin.Context) {
 
 func Profile(c *gin.Context) {
 	viewrender.Render(c, "profile.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "个人中心 - GooseForum",
+		"User":  GetLoginUser(c),
+		"Title": "个人中心 - GooseForum",
 	})
 }
 func PublishV3(c *gin.Context) {
 	viewrender.Render(c, "publish-v3.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "发布中心 - GooseForum",
+		"User":  GetLoginUser(c),
+		"Title": "发布中心 - GooseForum",
 	})
 }
 
 func Notifications(c *gin.Context) {
 	viewrender.Render(c, "notifications.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "通知中心 - GooseForum",
+		"User":  GetLoginUser(c),
+		"Title": "通知中心 - GooseForum",
 	})
 }
 
 func Admin(c *gin.Context) {
 	viewrender.Render(c, "admin.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        "管理 - GooseForum",
-		"Description":  "GooseForum's Admin",
+		"User":        GetLoginUser(c),
+		"Title":       "管理 - GooseForum",
+		"Description": "GooseForum's Admin",
 	})
 }
