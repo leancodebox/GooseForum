@@ -8,9 +8,6 @@ maintenance = false
 url = "http://localhost"
 port = 99
 
-[footer]
-url = "https://github.com/leanCodeBox/GooseForum"
-text = "Powered by GooseForum"
 
 [jwtopt]
 signingKey="{{.SigningKey}}"
