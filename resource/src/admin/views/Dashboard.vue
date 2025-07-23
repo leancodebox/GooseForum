@@ -100,43 +100,6 @@
 
     <!-- 系统状态和快捷操作 -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- 系统状态 -->
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <h2 class="card-title">系统状态</h2>
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-normal">服务器状态</span>
-              <div class="badge badge-success gap-2">
-                <div class="w-2 h-2 bg-success rounded-full"></div>
-                正常运行
-              </div>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-normal">数据库连接</span>
-              <div class="badge badge-success gap-2">
-                <div class="w-2 h-2 bg-success rounded-full"></div>
-                连接正常
-              </div>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-normal">内存使用</span>
-              <div class="flex items-center gap-2">
-                <progress class="progress progress-primary w-20" value="65" max="100"></progress>
-                <span class="text-sm">65%</span>
-              </div>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-normal">磁盘使用</span>
-              <div class="flex items-center gap-2">
-                <progress class="progress progress-warning w-20" value="78" max="100"></progress>
-                <span class="text-sm">78%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- 快捷操作 -->
       <div class="card bg-base-100 shadow">
         <div class="card-body">
@@ -274,7 +237,7 @@ const fetchStats = async () => {
 // 获取最近活动
 const fetchRecentActivities = async () => {
   try {
-    
+
   } catch (error) {
     console.error('获取最近活动失败:', error)
   }

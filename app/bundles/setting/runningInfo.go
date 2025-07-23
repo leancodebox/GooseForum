@@ -21,3 +21,7 @@ func GetUnitTime() time.Duration {
 	unitTime = time.Now()
 	return unit
 }
+
+func GetStart() time.Time {
+	return start
+}
