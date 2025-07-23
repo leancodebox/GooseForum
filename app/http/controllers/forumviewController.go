@@ -431,11 +431,13 @@ func About(c *gin.Context) {
 }
 
 func SponsorsView(c *gin.Context) {
+	sponsorsInfo := hotdataserve.SponsorsConfigCache()
 	viewrender.Render(c, "sponsors.gohtml", map[string]any{
 		"IsProduction": setting.IsProduction(),
 		"User":         GetLoginUser(c),
 		"Title":        "赞助商 - GooseForum",
 		"Description":  "GooseForum's sponsors",
+		"SponsorsInfo": sponsorsInfo,
 	})
 }
 

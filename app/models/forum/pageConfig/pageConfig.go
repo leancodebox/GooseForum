@@ -34,12 +34,14 @@ const (
 	FriendShipLinks = `friendShipLinks`
 	WebSettings     = `webSettings`
 	FooterLinks     = `footerLinks`
+	SponsorsPage    = `sponsors`
 )
 
 var PageTypeList = []string{
 	FriendShipLinks,
 	WebSettings,
 	FooterLinks,
+	SponsorsPage,
 }
 
 type WebSettingsConfig struct {
@@ -76,4 +78,30 @@ type PItem struct {
 type FooterConfig struct {
 	Primary []PItem       `json:"primary"`
 	List    []FooterGroup `json:"list"`
+}
+
+// 赞助商相关数据结构
+type SponsorItem struct {
+	Name string   `json:"name"`
+	Logo string   `json:"logo"`
+	Info string   `json:"info"`
+	Url  string   `json:"url"`
+	Tag  []string `json:"tag"`
+}
+
+type UserSponsor struct {
+	Name   string `json:"name"`
+	Amount string `json:"amount"`
+	Time   string `json:"time"`
+}
+type Sponsors struct {
+	Level0 []SponsorItem `json:"level0"`
+	Level1 []SponsorItem `json:"level1"`
+	Level2 []SponsorItem `json:"level2"`
+	Level3 []SponsorItem `json:"level3"`
+}
+
+type SponsorsConfig struct {
+	Sponsors Sponsors      `json:"sponsors"`
+	Users    []UserSponsor `json:"users"`
 }

@@ -8,7 +8,8 @@ import type {
     Result,
     User,
     UserRole,
-    PageData
+    PageData,
+    SponsorsConfig
 } from './adminInterfaces.ts';
 
 
@@ -161,5 +162,16 @@ export const getFooterLinks = (): Promise<Result<FooterConfig>> => {
 export const saveFooterLinks = (footerConfig: FooterConfig): Promise<Result<any>> => {
     return axiosInstance.post('api/admin/save-footer-links', {
         footerConfig: footerConfig
+    });
+}
+
+// 赞助商管理相关接口
+export const getSponsors = (): Promise<Result<SponsorsConfig>> => {
+    return axiosInstance.get('api/admin/sponsors');
+}
+
+export const saveSponsors = (sponsorsInfo: SponsorsConfig): Promise<Result<any>> => {
+    return axiosInstance.post('api/admin/save-sponsors', {
+        sponsorsInfo: sponsorsInfo
     });
 }

@@ -45,3 +45,12 @@ func GetFooterConfigCache() pageConfig.FooterConfig {
 	}, time.Minute)
 	return data
 }
+
+var sponsorsConfigCache = &datacache.Cache[string, pageConfig.SponsorsConfig]{}
+
+func SponsorsConfigCache() pageConfig.SponsorsConfig {
+	data, _ := sponsorsConfigCache.GetOrLoadE("", func() (pageConfig.SponsorsConfig, error) {
+		return pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, pageConfig.SponsorsConfig{}), nil
+	}, time.Minute)
+	return data
+}

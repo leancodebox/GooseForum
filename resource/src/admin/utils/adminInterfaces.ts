@@ -112,11 +112,29 @@ export interface LinkItem {
     status: 0 | 1 | any
 }
 
-export interface Sponsor {
-    level: string,
-    name: string,
-    logoUrl: string,
-    url: string,
+export interface SponsorItem {
+    name: string
+    logo: string
+    info: string
+    url: string
+    tag: string[]
+}
+
+export interface UserSponsor {
+  name: string
+  logo: string
+  amount: string
+  time: string
+}
+
+export interface SponsorsConfig {
+    sponsors: {
+        level0: SponsorItem[]
+        level1: SponsorItem[]
+        level2: SponsorItem[]
+        level3: SponsorItem[]
+    }
+    users: UserSponsor[]
 }
 
 export interface FooterItem {

@@ -548,3 +548,31 @@ func SaveFooterLinks(req component.BetterRequest[SaveFooterLinksReq]) component.
 	pageConfig.CreateOrSave(&configEntity)
 	return component.SuccessResponse("success")
 }
+
+// GetSponsors 获取赞助商配置
+func GetSponsors(req component.BetterRequest[null]) component.Response {
+	defaultSponsors := pageConfig.SponsorsConfig{
+		Sponsors: pageConfig.Sponsors{
+			Level0: []pageConfig.SponsorItem{},
+			Level1: []pageConfig.SponsorItem{},
+			Level2: []pageConfig.SponsorItem{},
+			Level3: []pageConfig.SponsorItem{},
+		},
+		Users: []pageConfig.UserSponsor{},
+	}
+	res := pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, defaultSponsors)
+	return component.SuccessResponse(res)
+}
+
+type SaveSponsorsReq struct {
+	SponsorsInfo pageConfig.SponsorsConfig `json:"sponsorsInfo"`
+}
+
+// SaveSponsors 保存赞助商配置
+func SaveSponsors(req component.BetterRequest[SaveSponsorsReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(pageConfig.SponsorsPage)
+	configEntity.PageType = pageConfig.SponsorsPage
+	configEntity.Config = jsonopt.Encode(req.Params.SponsorsInfo)
+	pageConfig.CreateOrSave(&configEntity)
+	return component.SuccessResponse("success")
+}

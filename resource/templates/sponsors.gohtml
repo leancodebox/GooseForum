@@ -38,7 +38,8 @@
                             </div>
                         </div>
 
-                        <!-- 钻石赞助商 -->
+                        <!-- 特别赞助商 (Level 0) -->
+                        {{if .SponsorsInfo.Sponsors.Level0}}
                         <div class="space-y-6">
                             <h2 class="text-2xl font-normal border-b border-base-300 pb-3 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-yellow-500"
@@ -49,6 +50,7 @@
                             </h2>
 
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {{range .SponsorsInfo.Sponsors.Level0}}
                                 <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden border border-base-300">
                                     <!-- 背景装饰圆形 -->
                                     <div class="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-amber-400/10 to-yellow-500/10 rounded-full"></div>
@@ -58,34 +60,40 @@
                                     <div class="absolute bottom-1/3 right-8 w-8 h-8 bg-gradient-to-br from-amber-400/20 to-yellow-500/20 rounded-full"></div>
                                     <div class="absolute top-1/4 left-1/3 w-6 h-6 bg-gradient-to-br from-amber-400/15 to-yellow-500/15 rounded-full"></div>
 
-                                    <div class="card-body p-6 relative z-10 ">
+                                    <div class="card-body p-6 relative z-10">
                                         <div class="flex items-center gap-4 mb-4">
                                             <div class="avatar">
                                                 <div class="mask mask-squircle w-16 h-16">
-                                                    <img src="/static/pic/sdut_80.webp"
-                                                         alt="山东理工大学"/>
+                                                    <img src="{{.Logo}}"
+                                                         alt="{{.Name}}"/>
                                                 </div>
                                             </div>
                                             <div class="flex-1">
                                                 <h3 class="font-normal text-xl text-base-content">
-                                                    <a href="https://www.sdut.edu.cn/" target="_blank"
+                                                    {{if .Url}}
+                                                    <a href="{{.Url}}" target="_blank"
                                                        rel="noopener noreferrer"
-                                                       class="hover:text-primary">山东理工大学</a>
+                                                       class="hover:text-primary">{{.Name}}</a>
+                                                    {{else}}
+                                                    {{.Name}}
+                                                    {{end}}
                                                 </h3>
                                                 <div class="badge badge-warning badge-sm font-normal">特别赞助商</div>
                                             </div>
                                         </div>
-                                        <p class="text-base-content/80 mb-4">厚德、博学、笃行、至善</p>
+                                        {{if .Info}}
+                                        <p class="text-base-content/80 mb-4">{{.Info}}</p>
+                                        {{end}}
+                                        {{if .Tag}}
                                         <div class="flex flex-wrap gap-2 mb-4">
-                                            <div class="badge badge-outline badge-sm">山东</div>
-                                            <div class="badge badge-outline badge-sm">淄博</div>
-                                            <div class="badge badge-outline badge-sm">高校</div>
+                                            {{range .Tag}}
+                                            <div class="badge badge-outline badge-sm">{{.}}</div>
+                                            {{end}}
                                         </div>
-                                        <div class="card-actions justify-between items-center">
-                                            <div class="text-sm text-base-content/60">
-                                                赞助时间：2013年9月
-                                            </div>
-                                            <a href="https://www.sdut.edu.cn/" target="_blank"
+                                        {{end}}
+                                        <div class="card-actions justify-end items-center">
+                                            {{if .Url}}
+                                            <a href="{{.Url}}" target="_blank"
                                                rel="noopener noreferrer" class="btn btn-primary btn-sm">
                                                 访问官网
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1"
@@ -95,12 +103,197 @@
                                                           d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                                 </svg>
                                             </a>
+                                            {{end}}
                                         </div>
                                     </div>
                                 </div>
+                                {{end}}
                             </div>
-
                         </div>
+                        {{end}}
+
+                        <!-- 金牌赞助商 (Level 1) -->
+                        {{if .SponsorsInfo.Sponsors.Level1}}
+                        <div class="space-y-6">
+                            <h2 class="text-xl font-normal border-b border-base-300 pb-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-yellow-400"
+                                     fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                金牌赞助商
+                            </h2>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {{range .SponsorsInfo.Sponsors.Level1}}
+                                <div class="card bg-base-100 shadow-md hover:shadow-lg transition-all duration-300 border border-base-300 relative overflow-hidden">
+                                    <!-- 背景装饰圆形 - 金牌级别 -->
+                                    <div class="absolute -top-4 -right-4 w-12 h-12 bg-gradient-to-br from-yellow-400/8 to-amber-500/8 rounded-full"></div>
+                                    <div class="absolute -bottom-3 -left-3 w-10 h-10 bg-gradient-to-br from-yellow-400/10 to-amber-500/10 rounded-full"></div>
+                                    <div class="absolute top-1/2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400/6 to-amber-500/6 rounded-full"></div>
+                                    <div class="absolute bottom-1/4 right-4 w-4 h-4 bg-gradient-to-br from-yellow-400/12 to-amber-500/12 rounded-full"></div>
+                                    
+                                    <div class="card-body p-4 relative z-10">
+                                        <div class="flex items-center gap-3 mb-3">
+                                            <div class="avatar">
+                                                <div class="mask mask-squircle w-12 h-12">
+                                                    <img src="{{.Logo}}" alt="{{.Name}}"/>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1">
+                                                <h3 class="font-normal text-lg text-base-content">
+                                                    {{if .Url}}
+                                                    <a href="{{.Url}}" target="_blank" rel="noopener noreferrer" class="hover:text-primary">{{.Name}}</a>
+                                                    {{else}}
+                                                    {{.Name}}
+                                                    {{end}}
+                                                </h3>
+                                                <div class="badge badge-primary badge-sm font-normal">金牌赞助商</div>
+                                            </div>
+                                        </div>
+                                        {{if .Info}}
+                                        <p class="text-base-content/80 text-sm mb-3">{{.Info}}</p>
+                                        {{end}}
+                                        {{if .Tag}}
+                                        <div class="flex flex-wrap gap-1 mb-3">
+                                            {{range .Tag}}
+                                            <div class="badge badge-outline badge-xs">{{.}}</div>
+                                            {{end}}
+                                        </div>
+                                        {{end}}
+                                        {{if .Url}}
+                                        <div class="card-actions justify-end">
+                                            <a href="{{.Url}}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">
+                                                访问
+                                            </a>
+                                        </div>
+                                        {{end}}
+                                    </div>
+                                </div>
+                                {{end}}
+                            </div>
+                        </div>
+                        {{end}}
+
+                        <!-- 银牌赞助商 (Level 2) -->
+                        {{if .SponsorsInfo.Sponsors.Level2}}
+                        <div class="space-y-6">
+                            <h2 class="text-xl font-normal border-b border-base-300 pb-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400"
+                                     fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                银牌赞助商
+                            </h2>
+
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                {{range .SponsorsInfo.Sponsors.Level2}}
+                                <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-300 relative overflow-hidden">
+                                    <!-- 背景装饰圆形 - 银牌级别 -->
+                                    <div class="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-gray-400/6 to-slate-500/6 rounded-full"></div>
+                                    <div class="absolute -bottom-2 -left-2 w-6 h-6 bg-gradient-to-br from-gray-400/8 to-slate-500/8 rounded-full"></div>
+                                    <div class="absolute top-1/3 right-2 w-3 h-3 bg-gradient-to-br from-gray-400/10 to-slate-500/10 rounded-full"></div>
+                                    
+                                    <div class="card-body p-3 relative z-10">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div class="avatar">
+                                                <div class="mask mask-squircle w-10 h-10">
+                                                    <img src="{{.Logo}}" alt="{{.Name}}"/>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <h3 class="font-normal text-sm text-base-content truncate">
+                                                    {{if .Url}}
+                                                    <a href="{{.Url}}" target="_blank" rel="noopener noreferrer" class="hover:text-primary">{{.Name}}</a>
+                                                    {{else}}
+                                                    {{.Name}}
+                                                    {{end}}
+                                                </h3>
+                                                <div class="badge badge-secondary badge-xs font-normal">银牌</div>
+                                            </div>
+                                        </div>
+                                        {{if .Info}}
+                                        <p class="text-base-content/70 text-xs mb-2 line-clamp-2">{{.Info}}</p>
+                                        {{end}}
+                                        {{if .Tag}}
+                                        <div class="flex flex-wrap gap-1 mb-2">
+                                            {{range .Tag}}
+                                            <div class="badge badge-outline badge-xs">{{.}}</div>
+                                            {{end}}
+                                        </div>
+                                        {{end}}
+                                        {{if .Url}}
+                                        <div class="card-actions justify-end">
+                                            <a href="{{.Url}}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-xs">
+                                                访问
+                                            </a>
+                                        </div>
+                                        {{end}}
+                                    </div>
+                                </div>
+                                {{end}}
+                            </div>
+                        </div>
+                        {{end}}
+
+                        <!-- 铜牌赞助商 (Level 3) -->
+                        {{if .SponsorsInfo.Sponsors.Level3}}
+                        <div class="space-y-6">
+                            <h2 class="text-xl font-normal border-b border-base-300 pb-3 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-orange-500"
+                                     fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                铜牌赞助商
+                            </h2>
+
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                {{range .SponsorsInfo.Sponsors.Level3}}
+                                <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-300 relative overflow-hidden">
+                                    <!-- 背景装饰圆形 - 铜牌级别 -->
+                                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-orange-400/4 to-amber-600/4 rounded-full"></div>
+                                    <div class="absolute -bottom-1 -left-1 w-3 h-3 bg-gradient-to-br from-orange-400/6 to-amber-600/6 rounded-full"></div>
+                                    
+                                    <div class="card-body p-3 relative z-10">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div class="avatar">
+                                                <div class="mask mask-squircle w-12 h-12">
+                                                    <img src="{{.Logo}}" alt="{{.Name}}"/>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <h3 class="font-normal text-sm text-base-content truncate">
+                                                    {{if .Url}}
+                                                    <a href="{{.Url}}" target="_blank" rel="noopener noreferrer" class="hover:text-primary">{{.Name}}</a>
+                                                    {{else}}
+                                                    {{.Name}}
+                                                    {{end}}
+                                                </h3>
+                                                <div class="badge badge-accent badge-xs font-normal">铜牌</div>
+                                            </div>
+                                        </div>
+                                        {{if .Info}}
+                                        <p class="text-base-content/70 text-xs mb-2 line-clamp-2">{{.Info}}</p>
+                                        {{end}}
+                                        {{if .Tag}}
+                                        <div class="flex flex-wrap gap-1 mb-2">
+                                            {{range .Tag}}
+                                            <div class="badge badge-outline badge-xs">{{.}}</div>
+                                            {{end}}
+                                        </div>
+                                        {{end}}
+                                        {{if .Url}}
+                                        <div class="card-actions justify-end">
+                                            <a href="{{.Url}}" target="_blank" rel="noopener noreferrer" class="btn btn-accent btn-xs">
+                                                访问
+                                            </a>
+                                        </div>
+                                        {{end}}
+                                    </div>
+                                </div>
+                                {{end}}
+                            </div>
+                        </div>
+                        {{end}}
 
                         <!-- 社区支持者 -->
                         <div class="space-y-6">

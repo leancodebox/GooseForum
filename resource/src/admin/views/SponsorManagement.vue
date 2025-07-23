@@ -1,986 +1,586 @@
 <template>
-  <div class="space-y-6">
-    <!-- 页面标题和操作 -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-normal text-base-content">赞助管理</h1>
-        <p class="text-base-content/70 mt-1">管理网站的赞助信息和赞助商</p>
-      </div>
-      <div class="flex gap-2">
-        <button class="btn btn-outline" @click="openSettingsModal">
-          <CogIcon class="w-4 h-4" />
-          赞助设置
+  <div class="">
+    <!-- 页面标题 -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-normal text-gray-800">赞助商管理</h1>
+      <div class="flex gap-3">
+        <button
+          @click="addUserSponsor"
+          class="btn btn-secondary btn-sm"
+        >
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+          添加用户赞助
         </button>
-        <button class="btn btn-primary" @click="openCreateModal">
-          <PlusIcon class="w-4 h-4" />
-          添加赞助
+        <button
+          @click="saveSponsorsData"
+          class="btn btn-success btn-sm"
+          :class="{ 'loading': saving }"
+          :disabled="saving"
+        >
+          <svg v-if="!saving" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          {{ saving ? '保存中...' : '保存' }}
         </button>
       </div>
     </div>
 
-    <!-- 统计卡片 -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="stat bg-base-100 shadow rounded-lg">
-        <div class="stat-figure text-primary">
-          <CurrencyDollarIcon class="w-8 h-8" />
-        </div>
-        <div class="stat-title">总赞助金额</div>
-        <div class="stat-value text-primary">¥{{ stats.totalAmount.toLocaleString() }}</div>
-        <div class="stat-desc">累计收到赞助</div>
-      </div>
-      
-      <div class="stat bg-base-100 shadow rounded-lg">
-        <div class="stat-figure text-secondary">
-          <UserGroupIcon class="w-8 h-8" />
-        </div>
-        <div class="stat-title">赞助人数</div>
-        <div class="stat-value text-secondary">{{ stats.totalSponsors }}</div>
-        <div class="stat-desc">累计赞助人数</div>
-      </div>
-      
-      <div class="stat bg-base-100 shadow rounded-lg">
-        <div class="stat-figure text-accent">
-          <CalendarIcon class="w-8 h-8" />
-        </div>
-        <div class="stat-title">本月赞助</div>
-        <div class="stat-value text-accent">¥{{ stats.monthlyAmount.toLocaleString() }}</div>
-        <div class="stat-desc">{{ stats.monthlyCount }} 笔赞助</div>
-      </div>
-      
-      <div class="stat bg-base-100 shadow rounded-lg">
-        <div class="stat-figure text-info">
-          <ChartBarIcon class="w-8 h-8" />
-        </div>
-        <div class="stat-title">平均金额</div>
-        <div class="stat-value text-info">¥{{ stats.averageAmount.toFixed(0) }}</div>
-        <div class="stat-desc">单笔平均赞助</div>
-      </div>
-    </div>
-
-    <!-- 搜索和筛选 -->
-    <div class="card bg-base-100 shadow">
+    <!-- 赞助商级别管理 -->
+    <div class="card bg-base-100 shadow-xl mb-6">
       <div class="card-body">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div class="form-control">
-            <label class="floating-label">
-              <span>状态筛选</span>
-              <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="赞助者姓名、备注"
-                  class="input input-bordered w-full "
-                  @input="handleSearch"
-              />
-            </label>
-          </div>
-          
-          <div class="form-control">
-            <label class="floating-label">
-              <span>状态筛选</span>
-              <select v-model="filters.status" class="select select-bordered w-full" @change="handleFilter">
-                <option value="">全部状态</option>
-                <option value="pending">待确认</option>
-                <option value="confirmed">已确认</option>
-                <option value="displayed">已展示</option>
-                <option value="expired">已过期</option>
-              </select>
-            </label>
-          </div>
-          
-          <div class="form-control">
-            <label class="floating-label">
-              <span>金额范围</span>
-              <select v-model="filters.amountRange" class="select select-bordered w-full" @change="handleFilter">
-                <option value="">全部金额</option>
-                <option value="0-50">0-50元</option>
-                <option value="50-100">50-100元</option>
-                <option value="100-500">100-500元</option>
-                <option value="500+">500元以上</option>
-              </select>
-            </label>
-          </div>
-          
-          <div class="form-control">
-            <label class="floating-label">
-              <span>排序方式</span>
-              <select v-model="filters.sortBy" class="select select-bordered w-full" @change="handleFilter">
-                <option value="created_at">赞助时间</option>
-                <option value="amount">赞助金额</option>
-                <option value="status">状态</option>
-                <option value="sponsor_name">赞助者</option>
-              </select>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
+        <h2 class="card-title text-lg mb-4  font-normal">赞助商级别管理</h2>
 
-    <!-- 赞助列表 -->
-    <div class="card bg-base-100 shadow">
-      <div class="card-body p-0">
-        <div class="overflow-x-auto">
-          <table class="table table-zebra">
-            <thead>
-              <tr>
-                <th class="w-12">
-                  <label>
-                    <input type="checkbox" class="checkbox" v-model="selectAll" @change="toggleSelectAll" />
-                  </label>
-                </th>
-                <th class="w-1/4 min-w-[200px]">赞助者信息</th>
-                <th class="w-32 min-w-[120px]">赞助金额</th>
-                <th class="w-1/3 min-w-[200px]">留言</th>
-                <th class="w-24 min-w-[80px]">状态</th>
-                <th class="w-32 min-w-[120px] hidden sm:table-cell">赞助时间</th>
-                <th class="w-20 min-w-[80px]">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="sponsor in sponsors" :key="sponsor.id">
-                <td>
-                  <label>
-                    <input type="checkbox" class="checkbox" v-model="selectedSponsors" :value="sponsor.id" />
-                  </label>
-                </td>
-                <td>
-                  <div class="flex items-center gap-3">
-                    <div class="avatar placeholder">
-                      <div class="bg-neutral text-neutral-content rounded-full w-12">
-                        <span class="text-xl">{{ sponsor.sponsorName.charAt(0) }}</span>
-                      </div>
+        <div class="space-y-4">
+          <div v-for="(level, levelKey) in sponsorsData.sponsors" :key="levelKey" class="border border-gray-200 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-md font-semibold text-gray-700">{{ getLevelName(levelKey) }}</h3>
+              <div class="flex gap-2">
+                <button
+                  @click="addSponsorToLevel(levelKey)"
+                  class="btn btn-outline btn-xs"
+                >
+                  添加赞助商
+                </button>
+              </div>
+            </div>
+
+            <draggable
+              v-model="sponsorsData.sponsors[levelKey]"
+              group="sponsors"
+              item-key="name"
+              class="space-y-2"
+            >
+              <template #item="{ element: sponsor, index }">
+                <div class="bg-gray-50 p-3 rounded border flex items-center justify-between hover:bg-gray-100 transition-colors">
+                  <div class="flex items-center space-x-3">
+                    <div class="cursor-move text-gray-400">
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                      </svg>
+                    </div>
+                    <img v-if="sponsor.logo" :src="sponsor.logo" :alt="sponsor.name" class="w-8 h-8 rounded object-cover">
+                    <div class="w-8 h-8 bg-gray-300 rounded flex items-center justify-center" v-else>
+                      <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                      </svg>
                     </div>
                     <div>
-                      <div class="font-normal">{{ sponsor.sponsorName }}</div>
-                      <div class="text-sm text-base-content/70">{{ sponsor.contact || '未提供联系方式' }}</div>
-                      <div class="text-xs text-base-content/50">ID: {{ sponsor.id }}</div>
+                      <div class="font-medium text-gray-900">{{ sponsor.name || '未命名' }}</div>
+                      <div class="text-sm text-gray-500">{{ sponsor.info || '暂无描述' }}</div>
+                      <div class="flex flex-wrap gap-1 mt-1">
+                        <span v-for="tag in sponsor.tag" :key="tag" class="badge badge-outline badge-xs">{{ tag }}</span>
+                      </div>
                     </div>
                   </div>
-                </td>
-                <td>
-                  <div class="font-normal text-lg" :class="getAmountColor(sponsor.amount)">
-                    ¥{{ sponsor.amount.toLocaleString() }}
+                  <div class="flex items-center space-x-2">
+                    <button
+                      @click="editSponsor(levelKey, index)"
+                      class="btn btn-ghost btn-xs"
+                    >
+                      编辑
+                    </button>
+                    <button
+                      @click="deleteSponsor(levelKey, index)"
+                      class="btn btn-ghost btn-error btn-xs"
+                    >
+                      删除
+                    </button>
                   </div>
-                  <div class="text-xs text-base-content/70">{{ sponsor.paymentMethod }}</div>
-                </td>
-                <td>
-                  <div class="max-w-xs min-w-0">
-                    <div class="text-sm break-words" :title="sponsor.message">
-                      <span class="block sm:hidden">{{ sponsor.message ? (sponsor.message.length > 30 ? sponsor.message.substring(0, 30) + '...' : sponsor.message) : '无留言' }}</span>
-                      <span class="hidden sm:block">{{ sponsor.message ? (sponsor.message.length > 80 ? sponsor.message.substring(0, 80) + '...' : sponsor.message) : '无留言' }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div class="badge badge-sm whitespace-nowrap" :class="getStatusBadgeClass(sponsor.status)">
-                    {{ getStatusText(sponsor.status) }}
-                  </div>
-                </td>
-                <td class="text-sm whitespace-nowrap hidden sm:table-cell">{{ formatDate(sponsor.createdAt) }}</td>
-                <td>
-                  <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-ghost btn-xs">
-                      <EllipsisVerticalIcon class="w-4 h-4" />
-                    </div>
-                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                      <li><a @click="viewSponsor(sponsor)">查看详情</a></li>
-                      <li><a @click="editSponsor(sponsor)">编辑</a></li>
-                      <li v-if="sponsor.status === 'pending'"><a @click="confirmSponsor(sponsor)">确认赞助</a></li>
-                      <li v-if="sponsor.status === 'confirmed'"><a @click="displaySponsor(sponsor)">设为展示</a></li>
-                      <li v-if="sponsor.status === 'displayed'"><a @click="hideSponsor(sponsor)">隐藏展示</a></li>
-                      <li><a @click="deleteSponsor(sponsor)" class="text-error">删除</a></li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <!-- 批量操作 -->
-        <div v-if="selectedSponsors.length > 0" class="flex items-center gap-2 p-4 border-t border-base-300">
-          <span class="text-sm text-base-content/70">已选择 {{ selectedSponsors.length }} 项</span>
-          <div class="flex gap-2 ml-4">
-            <button class="btn btn-sm btn-outline" @click="batchConfirm">批量确认</button>
-            <button class="btn btn-sm btn-outline" @click="batchDisplay">批量展示</button>
-            <button class="btn btn-sm btn-outline" @click="batchHide">批量隐藏</button>
-            <button class="btn btn-sm btn-error" @click="batchDelete">批量删除</button>
-          </div>
-        </div>
-        
-        <!-- 分页 -->
-        <div class="flex justify-between items-center p-4 border-t border-base-300">
-          <div class="text-sm text-base-content/70">
-            显示 {{ (pagination.page - 1) * pagination.pageSize + 1 }} - 
-            {{ Math.min(pagination.page * pagination.pageSize, pagination.total) }} 
-            共 {{ pagination.total }} 条
-          </div>
-          <div class="join">
-            <button 
-              class="join-item btn btn-sm" 
-              :disabled="pagination.page <= 1"
-              @click="changePage(pagination.page - 1)"
-            >
-              上一页
-            </button>
-            <button 
-              v-for="page in visiblePages" 
-              :key="page"
-              class="join-item btn btn-sm"
-              :class="{ 'btn-active': page === pagination.page }"
-              @click="changePage(page)"
-            >
-              {{ page }}
-            </button>
-            <button 
-              class="join-item btn btn-sm" 
-              :disabled="pagination.page >= totalPages"
-              @click="changePage(pagination.page + 1)"
-            >
-              下一页
-            </button>
+                </div>
+              </template>
+            </draggable>
+
+            <div v-if="level.length === 0" class="text-center py-3 text-gray-500">
+              暂无赞助商，点击上方按钮添加
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 创建/编辑赞助模态框 -->
-    <dialog ref="sponsorModal" class="modal">
-      <div class="modal-box w-full max-w-2xl">
-        <form method="dialog">
-          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-        </form>
-        
-        <h3 class="font-normal text-lg mb-4">
-          {{ editingSponsor ? '编辑赞助信息' : '添加赞助记录' }}
-        </h3>
-        
-        <div class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="form-control">
-              <label class="floating-label" :class="{ 'input-error': errors.sponsorName }">
-                <span>赞助者姓名 *</span>
-                <input 
-                  v-model="sponsorForm.sponsorName" 
-                  type="text" 
-                  class="input input-bordered w-full" 
-                  placeholder="请输入赞助者姓名"
-                />
-              </label>
-              <div class="label" v-if="errors.sponsorName">
-                <span class="label-text-alt text-error">{{ errors.sponsorName }}</span>
-              </div>
-            </div>
-            
-            <div class="form-control">
-              <label class="floating-label" :class="{ 'input-error': errors.amount }">
-                <span>赞助金额 *</span>
-                <input 
-                  v-model.number="sponsorForm.amount" 
-                  type="number" 
-                  class="input input-bordered w-full"
-                  placeholder="请输入赞助金额"
-                  min="0"
-                  step="0.01"
-                />
-              </label>
-              <div class="label" v-if="errors.amount">
-                <span class="label-text-alt text-error">{{ errors.amount }}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="form-control">
-              <label class="floating-label">
-                <span>联系方式</span>
-                <input 
-                  v-model="sponsorForm.contact" 
-                  type="text" 
-                  class="input input-bordered w-full"
-                  placeholder="邮箱、电话等"
-                />
-              </label>
-            </div>
-            
-            <div class="form-control">
-              <label class="floating-label">
-                <span>支付方式</span>
-                <select v-model="sponsorForm.paymentMethod" class="select select-bordered w-full">
-                  <option value="alipay">支付宝</option>
-                  <option value="wechat">微信支付</option>
-                  <option value="bank">银行转账</option>
-                  <option value="paypal">PayPal</option>
-                  <option value="other">其他</option>
-                </select>
-              </label>
-            </div>
-          </div>
-          
-          <div class="form-control">
-            <label class="floating-label">
-              <span>赞助留言</span>
-              <textarea 
-                v-model="sponsorForm.message" 
-                class="textarea textarea-bordered w-full" 
-                placeholder="赞助者的留言或祝福"
-                rows="3"
-              ></textarea>
-            </label>
-          </div>
-          
-          <div class="form-control">
-            <label class="floating-label">
-              <span>状态</span>
-              <select v-model="sponsorForm.status" class="select select-bordered w-full">
-                <option value="pending">待确认</option>
-                <option value="confirmed">已确认</option>
-                <option value="displayed">已展示</option>
-                <option value="hidden">已隐藏</option>
-              </select>
-            </label>
-          </div>
-        </div>
-        
-        <div class="modal-action">
-          <button type="button" class="btn btn-ghost" @click="closeModal">取消</button>
-          <button type="button" class="btn btn-primary" @click="saveSponsor" :disabled="saving">
-            <span v-if="saving" class="loading loading-spinner loading-sm"></span>
-            {{ saving ? '保存中...' : '保存' }}
-          </button>
-        </div>
-      </div>
-    </dialog>
+    <!-- 用户赞助管理 -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h2 class="card-title text-lg mb-4">用户赞助管理</h2>
 
-    <!-- 赞助设置模态框 -->
-    <dialog ref="settingsModal" class="modal">
-      <div class="modal-box w-full max-w-2xl">
-        <form method="dialog">
-          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-        </form>
-        
-        <h3 class="font-normal text-lg mb-4">赞助设置</h3>
-        
-        <div class="space-y-4">
-          <div class="form-control">
-            <label class="cursor-pointer label">
-              <span class="label-text">启用赞助功能</span>
-              <input 
-                v-model="settings.enabled" 
-                type="checkbox" 
-                class="toggle toggle-primary"
-              />
-            </label>
-          </div>
-          
-          <div class="form-control">
-            <label class="floating-label">
-              <span>赞助页面标题</span>
-              <input 
-                v-model="settings.title" 
-                type="text" 
-                placeholder="支持我们" 
-                class="input input-bordered w-full"
-              />
-            </label>
-          </div>
-          
-          <div class="form-control">
-            <label class="floating-label">
-              <span>赞助页面描述</span>
-              <textarea 
-                v-model="settings.description" 
-                class="textarea textarea-bordered w-full" 
-                placeholder="感谢您的支持..."
-                rows="3"
-              ></textarea>
-            </label>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-              <label class="floating-label">
-                <span>最小赞助金额</span>
-                <input 
-                  v-model.number="settings.minAmount" 
-                  type="number" 
-                  placeholder="1.00" 
-                  class="input input-bordered w-full"
-                  min="0"
-                  step="0.01"
-                />
-              </label>
+        <draggable
+          v-model="sponsorsData.users"
+          group="users"
+          item-key="name"
+          class="space-y-2"
+        >
+          <template #item="{ element: user, index }">
+            <div class="bg-gray-50 p-3 rounded border flex items-center justify-between hover:bg-gray-100 transition-colors">
+              <div class="flex items-center space-x-3">
+                <div class="cursor-move text-gray-400">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                  </svg>
+                </div>
+                <img v-if="user.icon" :src="user.icon" :alt="user.name" class="w-8 h-8 rounded-full object-cover">
+                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center" v-else>
+                  <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-medium text-gray-900">{{ user.name || '匿名用户' }}</div>
+                  <div class="text-sm text-gray-500">赞助金额: {{ user.amount || '0' }} | 时间: {{ user.time || '未知' }}</div>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button
+                  @click="editUserSponsor(index)"
+                  class="btn btn-ghost btn-xs"
+                >
+                  编辑
+                </button>
+                <button
+                  @click="deleteUserSponsor(index)"
+                  class="btn btn-ghost btn-error btn-xs"
+                >
+                  删除
+                </button>
+              </div>
             </div>
-            
-            <div class="form-control">
-              <label class="floating-label">
-                <span>推荐赞助金额</span>
-                <input 
-                  v-model="settings.suggestedAmounts" 
-                  type="text" 
-                  placeholder="10,50,100,500" 
-                  class="input input-bordered w-full"
-                />
-              </label>
-            </div>
-          </div>
-          
-          <div class="form-control">
-            <label class="cursor-pointer label">
-              <span class="label-text">自动展示赞助信息</span>
-              <input 
-                v-model="settings.autoDisplay" 
-                type="checkbox" 
-                class="toggle toggle-primary"
-              />
-            </label>
-          </div>
-          
-          <div class="form-control">
-            <label class="cursor-pointer label">
-              <span class="label-text">允许匿名赞助</span>
-              <input 
-                v-model="settings.allowAnonymous" 
-                type="checkbox" 
-                class="toggle toggle-primary"
-              />
-            </label>
-          </div>
-        </div>
-        
-        <div class="modal-action">
-          <button type="button" class="btn btn-ghost" @click="closeSettingsModal">取消</button>
-          <button type="button" class="btn btn-primary" @click="saveSettings" :disabled="savingSettings">
-            <span v-if="savingSettings" class="loading loading-spinner loading-sm"></span>
-            {{ savingSettings ? '保存中...' : '保存设置' }}
-          </button>
+          </template>
+        </draggable>
+
+        <div v-if="sponsorsData.users.length === 0" class="text-center py-8 text-gray-500">
+          暂无用户赞助记录，点击上方按钮添加
         </div>
       </div>
-    </dialog>
+    </div>
+
+    <!-- 编辑赞助商模态框 -->
+    <div class="modal" :class="{ 'modal-open': showSponsorModal }">
+      <div class="modal-box w-11/12 max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">{{ editingSponsorIndex === -1 ? '添加' : '编辑' }}赞助商</h3>
+
+        <div class="space-y-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">赞助商名称 *</span>
+            </label>
+            <input
+              v-model="currentSponsor.name"
+              type="text"
+              placeholder="请输入赞助商名称"
+              class="input input-bordered w-full"
+            >
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Logo</span>
+            </label>
+            <div class="flex gap-2">
+              <input
+                v-model="currentSponsor.logo"
+                type="text"
+                placeholder="请输入Logo URL或上传图片"
+                class="input input-bordered flex-1"
+              >
+              <input
+                ref="logoFileInput"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="handleLogoUpload"
+              >
+              <button
+                type="button"
+                class="btn btn-outline btn-sm"
+                @click="logoFileInput?.click()"
+                :disabled="uploading"
+              >
+                {{ uploading ? '上传中...' : '上传' }}
+              </button>
+            </div>
+            <div v-if="currentSponsor.logo" class="mt-2">
+              <img :src="currentSponsor.logo" alt="Logo预览" class="w-16 h-16 object-cover rounded" />
+            </div>
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">描述信息</span>
+            </label>
+            <textarea
+              v-model="currentSponsor.info"
+              placeholder="请输入赞助商描述"
+              class="textarea textarea-bordered w-full"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">官网链接</span>
+            </label>
+            <input
+              v-model="currentSponsor.url"
+              type="text"
+              placeholder="请输入官网链接"
+              class="input input-bordered w-full"
+            >
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">标签 (用逗号分隔)</span>
+            </label>
+            <input
+              v-model="tagInput"
+              type="text"
+              placeholder="例如: 技术,开源,云服务"
+              class="input input-bordered w-full"
+            >
+          </div>
+        </div>
+
+        <div class="modal-action">
+          <button @click="closeSponsorModal" class="btn btn-ghost">取消</button>
+          <button @click="saveSponsor" class="btn btn-primary">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 编辑用户赞助模态框 -->
+    <div class="modal" :class="{ 'modal-open': showUserModal }">
+      <div class="modal-box w-11/12 max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">{{ editingUserIndex === -1 ? '添加' : '编辑' }}用户赞助</h3>
+
+        <div class="space-y-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">用户名称 *</span>
+            </label>
+            <input
+              v-model="currentUser.name"
+              type="text"
+              placeholder="请输入用户名称"
+              class="input input-bordered w-full"
+            >
+          </div>
+
+          <div class="form-control">
+              <label class="label">
+                <span class="label-text">Logo</span>
+              </label>
+              <div class="flex gap-2">
+                <input
+                  v-model="currentUser.logo"
+                  type="text"
+                  placeholder="请输入Logo URL或上传图片"
+                  class="input input-bordered flex-1"
+                >
+                <input
+                  ref="userLogoFileInput"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="handleUserLogoUpload"
+                >
+                <button
+                  type="button"
+                  class="btn btn-outline btn-sm"
+                  @click="userLogoFileInput?.click()"
+                  :disabled="uploading"
+                >
+                  {{ uploading ? '上传中...' : '上传' }}
+                </button>
+              </div>
+              <div v-if="currentUser.logo" class="mt-2">
+                 <img :src="currentUser.logo" alt="Logo预览" class="w-16 h-16 object-cover rounded" />
+               </div>
+            </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">赞助金额</span>
+            </label>
+            <input
+              v-model="currentUser.amount"
+              type="text"
+              placeholder="请输入赞助金额"
+              class="input input-bordered w-full"
+            >
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">赞助时间</span>
+            </label>
+            <input
+              v-model="currentUser.time"
+              type="date"
+              class="input input-bordered w-full"
+            >
+          </div>
+        </div>
+
+        <div class="modal-action">
+          <button @click="closeUserModal" class="btn btn-ghost">取消</button>
+          <button @click="saveUserSponsor" class="btn btn-primary">保存</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
-import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  EllipsisVerticalIcon,
-  CogIcon,
-  CurrencyDollarIcon,
-  UserGroupIcon,
-  CalendarIcon,
-  ChartBarIcon
-} from '@heroicons/vue/24/outline'
-import { api } from '../utils/axiosInstance'
-
-// 数据类型定义
-interface Sponsor {
-  id: number
-  sponsorName: string
-  amount: number
-  contact?: string
-  paymentMethod: string
-  message?: string
-  status: 'pending' | 'confirmed' | 'displayed' | 'hidden'
-  createdAt: string
-}
-
-interface SponsorStats {
-  totalAmount: number
-  totalSponsors: number
-  monthlyAmount: number
-  monthlyCount: number
-  averageAmount: number
-}
-
-interface SponsorSettings {
-  enabled: boolean
-  title: string
-  description: string
-  minAmount: number
-  suggestedAmounts: string
-  autoDisplay: boolean
-  allowAnonymous: boolean
-}
+import { onMounted, reactive, ref } from 'vue'
+import draggable from 'vuedraggable'
+import { getSponsors, saveSponsors } from '../utils/adminService'
+import type { SponsorsConfig, SponsorItem, UserSponsor } from '../utils/adminInterfaces'
 
 // 响应式数据
-const sponsors = ref<Sponsor[]>([])
-const stats = ref<SponsorStats>({
-  totalAmount: 0,
-  totalSponsors: 0,
-  monthlyAmount: 0,
-  monthlyCount: 0,
-  averageAmount: 0
+const sponsorsData = reactive<SponsorsConfig>({
+  sponsors: {
+    level0: [],
+    level1: [],
+    level2: [],
+    level3: []
+  },
+  users: []
 })
-const loading = ref(false)
+
 const saving = ref(false)
-const savingSettings = ref(false)
-const searchQuery = ref('')
-const editingSponsor = ref<Sponsor | null>(null)
-const sponsorModal = ref<HTMLDialogElement>()
-const settingsModal = ref<HTMLDialogElement>()
-const selectAll = ref(false)
-const selectedSponsors = ref<number[]>([])
+const showSponsorModal = ref(false)
+const showUserModal = ref(false)
+const editingSponsorLevel = ref('')
+const editingSponsorIndex = ref(-1)
+const editingUserIndex = ref(-1)
 
-// 筛选条件
-const filters = reactive({
-  status: '',
-  amountRange: '',
-  sortBy: 'created_at'
+const currentSponsor = reactive<SponsorItem>({
+  name: '',
+  logo: '',
+  info: '',
+  url: '',
+  tag: []
 })
 
-// 分页
-const pagination = reactive({
-  page: 1,
-  pageSize: 10,
-  total: 0
+const currentUser = reactive<UserSponsor>({
+  name: '',
+  logo: '',
+  amount: '',
+  time: ''
 })
 
-// 表单数据
-const sponsorForm = reactive({
-  sponsorName: '',
-  amount: 0,
-  contact: '',
-  paymentMethod: 'alipay',
-  message: '',
-  status: 'pending' as 'pending' | 'confirmed' | 'displayed' | 'hidden'
-})
-
-// 设置数据
-const settings = reactive<SponsorSettings>({
-  enabled: true,
-  title: '支持我们',
-  description: '感谢您的支持，您的赞助将帮助我们更好地维护和发展这个平台。',
-  minAmount: 1,
-  suggestedAmounts: '10,50,100,500',
-  autoDisplay: false,
-  allowAnonymous: true
-})
-
-// 表单验证错误
-const errors = reactive({
-  sponsorName: '',
-  amount: ''
-})
-
-// 计算属性
-const totalPages = computed(() => {
-  return Math.ceil(pagination.total / pagination.pageSize)
-})
-
-const visiblePages = computed(() => {
-  const current = pagination.page
-  const total = totalPages.value
-  const pages = []
-  
-  let start = Math.max(1, current - 2)
-  let end = Math.min(total, current + 2)
-  
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  
-  return pages
-})
+const tagInput = ref('')
+const uploading = ref(false)
+const logoFileInput = ref<HTMLInputElement>()
+const userLogoFileInput = ref<HTMLInputElement>()
 
 // 方法
-const fetchSponsors = async () => {
-  loading.value = true
+const loadSponsors = async () => {
   try {
-    const params = {
-      page: pagination.page,
-      pageSize: pagination.pageSize,
-      search: searchQuery.value,
-      ...filters
+    const response = await getSponsors()
+    if (response.code === 0) {
+      Object.assign(sponsorsData, response.result)
     }
-    
-    const response = await api.get('/api/admin/sponsors', params)
-    sponsors.value = response.data.data.sponsors
-    pagination.total = response.data.data.total
   } catch (error) {
-    console.error('获取赞助列表失败:', error)
-    // 使用模拟数据
-    sponsors.value = generateMockSponsors()
-    pagination.total = 45
-  } finally {
-    loading.value = false
+    console.error('加载赞助商数据失败:', error)
   }
 }
 
-const fetchStats = async () => {
-  try {
-    const response = await api.get('/api/admin/sponsors/stats')
-    stats.value = response.data.data
-  } catch (error) {
-    console.error('获取赞助统计失败:', error)
-    // 使用模拟数据
-    stats.value = {
-      totalAmount: 12580,
-      totalSponsors: 156,
-      monthlyAmount: 2340,
-      monthlyCount: 23,
-      averageAmount: 80.6
-    }
-  }
-}
-
-const fetchSettings = async () => {
-  try {
-    // 赞助设置接口暂未实现，使用默认设置
-    console.warn('赞助设置接口暂未实现')
-  } catch (error) {
-    console.error('获取赞助设置失败:', error)
-  }
-}
-
-// 生成模拟数据
-const generateMockSponsors = (): Sponsor[] => {
-  const paymentMethods = ['alipay', 'wechat', 'bank', 'paypal', 'other']
-  const statuses: ('pending' | 'confirmed' | 'displayed' | 'hidden')[] = ['pending', 'confirmed', 'displayed', 'hidden']
-  const mockSponsors: Sponsor[] = []
-  
-  for (let i = 1; i <= pagination.pageSize; i++) {
-    const sponsorId = (pagination.page - 1) * pagination.pageSize + i
-    const amount = Math.floor(Math.random() * 500) + 10
-    mockSponsors.push({
-      id: sponsorId,
-      sponsorName: `赞助者${sponsorId}`,
-      amount,
-      contact: Math.random() > 0.5 ? `sponsor${sponsorId}@example.com` : undefined,
-      paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
-      message: Math.random() > 0.3 ? `感谢提供这么好的平台，希望越来越好！` : undefined,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-    })
-  }
-  
-  return mockSponsors
-}
-
-const handleSearch = () => {
-  pagination.page = 1
-  fetchSponsors()
-}
-
-const handleFilter = () => {
-  pagination.page = 1
-  fetchSponsors()
-}
-
-const changePage = (page: number) => {
-  pagination.page = page
-  fetchSponsors()
-}
-
-const toggleSelectAll = () => {
-  if (selectAll.value) {
-    selectedSponsors.value = sponsors.value.map(s => s.id)
-  } else {
-    selectedSponsors.value = []
-  }
-}
-
-const openCreateModal = () => {
-  editingSponsor.value = null
-  resetForm()
-  sponsorModal.value?.showModal()
-}
-
-const editSponsor = (sponsor: Sponsor) => {
-  editingSponsor.value = sponsor
-  Object.assign(sponsorForm, {
-    sponsorName: sponsor.sponsorName,
-    amount: sponsor.amount,
-    contact: sponsor.contact || '',
-    paymentMethod: sponsor.paymentMethod,
-    message: sponsor.message || '',
-    status: sponsor.status
-  })
-  sponsorModal.value?.showModal()
-}
-
-const viewSponsor = (sponsor: Sponsor) => {
-  // 实现查看详情逻辑
-  alert(`赞助者: ${sponsor.sponsorName}\n金额: ¥${sponsor.amount}\n留言: ${sponsor.message || '无'}\n时间: ${formatDate(sponsor.createdAt)}`)
-}
-
-const closeModal = () => {
-  sponsorModal.value?.close()
-  resetForm()
-}
-
-const openSettingsModal = () => {
-  settingsModal.value?.showModal()
-}
-
-const closeSettingsModal = () => {
-  settingsModal.value?.close()
-}
-
-const resetForm = () => {
-  Object.assign(sponsorForm, {
-    sponsorName: '',
-    amount: 0,
-    contact: '',
-    paymentMethod: 'alipay',
-    message: '',
-    status: 'pending'
-  })
-  Object.assign(errors, {
-    sponsorName: '',
-    amount: ''
-  })
-}
-
-const validateForm = () => {
-  errors.sponsorName = ''
-  errors.amount = ''
-  
-  if (!sponsorForm.sponsorName.trim()) {
-    errors.sponsorName = '赞助者姓名不能为空'
-    return false
-  }
-  
-  if (sponsorForm.amount <= 0) {
-    errors.amount = '赞助金额必须大于0'
-    return false
-  }
-  
-  return true
-}
-
-const saveSponsor = async () => {
-  if (!validateForm()) {
-    return
-  }
-  
+const saveSponsorsData = async () => {
   saving.value = true
   try {
-    const data = { ...sponsorForm }
-    
-    if (editingSponsor.value) {
-      // 编辑赞助
-      await api.put(`/api/admin/sponsors/${editingSponsor.value.id}`, data)
-    } else {
-      // 创建赞助
-      await api.post('/api/admin/sponsors', data)
+    const response = await saveSponsors(sponsorsData)
+    if (response.code === 0) {
+      // 可以添加成功提示
+      console.log('保存成功')
     }
-    
-    closeModal()
-    fetchSponsors()
-    fetchStats()
   } catch (error) {
-    console.error('保存赞助失败:', error)
-    // 模拟保存成功
-    closeModal()
-    fetchSponsors()
-    fetchStats()
+    console.error('保存失败:', error)
   } finally {
     saving.value = false
   }
 }
 
-const saveSettings = async () => {
-  savingSettings.value = true
+const getLevelName = (levelKey: string) => {
+  const levelNames: Record<string, string> = {
+    level0: '特别赞助商 (Level 0)',
+    level1: '金牌赞助商 (Level 1)',
+    level2: '银牌赞助商 (Level 2)',
+    level3: '铜牌赞助商 (Level 3)'
+  }
+  return levelNames[levelKey] || levelKey
+}
+
+
+
+const addSponsorToLevel = (levelKey: string) => {
+  editingSponsorLevel.value = levelKey
+  editingSponsorIndex.value = -1
+  resetCurrentSponsor()
+  showSponsorModal.value = true
+}
+
+const editSponsor = (levelKey: string, index: number) => {
+  editingSponsorLevel.value = levelKey
+  editingSponsorIndex.value = index
+  const sponsor = sponsorsData.sponsors[levelKey as keyof typeof sponsorsData.sponsors][index]
+  Object.assign(currentSponsor, sponsor)
+  tagInput.value = sponsor.tag.join(', ')
+  showSponsorModal.value = true
+}
+
+const deleteSponsor = (levelKey: string, index: number) => {
+  if (confirm('确定要删除这个赞助商吗？')) {
+    sponsorsData.sponsors[levelKey as keyof typeof sponsorsData.sponsors].splice(index, 1)
+  }
+}
+
+const resetCurrentSponsor = () => {
+  currentSponsor.name = ''
+  currentSponsor.logo = ''
+  currentSponsor.info = ''
+  currentSponsor.url = ''
+  currentSponsor.tag = []
+  tagInput.value = ''
+}
+
+const closeSponsorModal = () => {
+  showSponsorModal.value = false
+  resetCurrentSponsor()
+}
+
+const saveSponsor = () => {
+  if (!currentSponsor.name.trim()) {
+    alert('请输入赞助商名称')
+    return
+  }
+
+  // 处理标签
+  currentSponsor.tag = tagInput.value.split(',').map(tag => tag.trim()).filter(tag => tag)
+
+  if (editingSponsorIndex.value === -1) {
+    // 添加新赞助商
+    sponsorsData.sponsors[editingSponsorLevel.value as keyof typeof sponsorsData.sponsors].push({ ...currentSponsor })
+  } else {
+    // 编辑现有赞助商
+    Object.assign(
+      sponsorsData.sponsors[editingSponsorLevel.value as keyof typeof sponsorsData.sponsors][editingSponsorIndex.value],
+      currentSponsor
+    )
+  }
+
+  closeSponsorModal()
+}
+
+const addUserSponsor = () => {
+  editingUserIndex.value = -1
+  resetCurrentUser()
+  showUserModal.value = true
+}
+
+const editUserSponsor = (index: number) => {
+  editingUserIndex.value = index
+  Object.assign(currentUser, sponsorsData.users[index])
+  showUserModal.value = true
+}
+
+const deleteUserSponsor = (index: number) => {
+  if (confirm('确定要删除这个用户赞助记录吗？')) {
+    sponsorsData.users.splice(index, 1)
+  }
+}
+
+const resetCurrentUser = () => {
+  currentUser.name = ''
+  currentUser.logo = ''
+  currentUser.amount = ''
+  currentUser.time = ''
+}
+
+const closeUserModal = () => {
+  showUserModal.value = false
+  resetCurrentUser()
+}
+
+const saveUserSponsor = () => {
+  if (!currentUser.name.trim()) {
+    alert('请输入用户名称')
+    return
+  }
+
+  if (editingUserIndex.value === -1) {
+    // 添加新用户赞助
+    sponsorsData.users.push({ ...currentUser })
+  } else {
+    // 编辑现有用户赞助
+    Object.assign(sponsorsData.users[editingUserIndex.value], currentUser)
+  }
+
+  closeUserModal()
+}
+
+// 文件上传处理
+const handleLogoUpload = async (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+
+  uploading.value = true
   try {
-    await api.put('/api/admin/sponsors/settings', settings)
-    closeSettingsModal()
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await fetch('/file/img-upload', {
+       method: 'POST',
+       body: formData,
+       credentials: 'include'
+     })
+
+    const result = await response.json()
+     if (result.code === 0) {
+       currentSponsor.logo = result.result.url
+     } else {
+       alert('上传失败: ' + (result.msg || result.message))
+     }
   } catch (error) {
-    console.error('保存设置失败:', error)
-    // 模拟保存成功
-    closeSettingsModal()
+    console.error('上传失败:', error)
+    alert('上传失败，请重试')
   } finally {
-    savingSettings.value = false
+    uploading.value = false
   }
 }
 
-const confirmSponsor = async (sponsor: Sponsor) => {
-  try {
-    await api.post(`/api/admin/sponsors/${sponsor.id}/confirm`)
-    sponsor.status = 'confirmed'
-    fetchStats()
-  } catch (error) {
-    console.error('确认赞助失败:', error)
-    // 模拟确认成功
-    sponsor.status = 'confirmed'
-    fetchStats()
-  }
-}
+const handleUserLogoUpload = async (event: Event) => {
+   const file = (event.target as HTMLInputElement).files?.[0]
+   if (!file) return
 
-const displaySponsor = async (sponsor: Sponsor) => {
-  try {
-    await api.post(`/api/admin/sponsors/${sponsor.id}/display`)
-    sponsor.status = 'displayed'
-  } catch (error) {
-    console.error('设置展示失败:', error)
-    // 模拟设置成功
-    sponsor.status = 'displayed'
-  }
-}
+   uploading.value = true
+   try {
+     const formData = new FormData()
+     formData.append('file', file)
 
-const hideSponsor = async (sponsor: Sponsor) => {
-  try {
-    await api.post(`/api/admin/sponsors/${sponsor.id}/hide`)
-    sponsor.status = 'hidden'
-  } catch (error) {
-    console.error('隐藏展示失败:', error)
-    // 模拟隐藏成功
-    sponsor.status = 'hidden'
-  }
-}
+     const response = await fetch('/file/img-upload', {
+       method: 'POST',
+       body: formData,
+       credentials: 'include'
+     })
 
-const deleteSponsor = async (sponsor: Sponsor) => {
-  if (confirm(`确定要删除赞助者「${sponsor.sponsorName}」的记录吗？此操作不可恢复！`)) {
-    try {
-      await api.delete(`/api/admin/sponsors/${sponsor.id}`)
-      fetchSponsors()
-      fetchStats()
-    } catch (error) {
-      console.error('删除赞助失败:', error)
-    }
-  }
-}
+     const result = await response.json()
+     if (result.code === 0) {
+       currentUser.logo = result.result.url
+     } else {
+       alert('上传失败: ' + (result.msg || result.message))
+     }
+   } catch (error) {
+     console.error('上传失败:', error)
+     alert('上传失败，请重试')
+   } finally {
+     uploading.value = false
+   }
+ }
 
-// 批量操作
-const batchConfirm = async () => {
-  if (selectedSponsors.value.length === 0) return
-  
-  try {
-    await api.post('/api/admin/sponsors/batch-confirm', {
-      ids: selectedSponsors.value
-    })
-    fetchSponsors()
-    fetchStats()
-    selectedSponsors.value = []
-    selectAll.value = false
-  } catch (error) {
-    console.error('批量确认失败:', error)
-  }
-}
-
-const batchDisplay = async () => {
-  if (selectedSponsors.value.length === 0) return
-  
-  try {
-    await api.post('/api/admin/sponsors/batch-display', {
-      ids: selectedSponsors.value
-    })
-    fetchSponsors()
-    selectedSponsors.value = []
-    selectAll.value = false
-  } catch (error) {
-    console.error('批量展示失败:', error)
-  }
-}
-
-const batchHide = async () => {
-  if (selectedSponsors.value.length === 0) return
-  
-  try {
-    await api.post('/api/admin/sponsors/batch-hide', {
-      ids: selectedSponsors.value
-    })
-    fetchSponsors()
-    selectedSponsors.value = []
-    selectAll.value = false
-  } catch (error) {
-    console.error('批量隐藏失败:', error)
-  }
-}
-
-const batchDelete = async () => {
-  if (selectedSponsors.value.length === 0) return
-  
-  if (confirm(`确定要删除选中的 ${selectedSponsors.value.length} 条赞助记录吗？此操作不可恢复！`)) {
-    try {
-      await api.post('/api/admin/sponsors/batch-delete', {
-        ids: selectedSponsors.value
-      })
-      fetchSponsors()
-      fetchStats()
-      selectedSponsors.value = []
-      selectAll.value = false
-    } catch (error) {
-      console.error('批量删除失败:', error)
-    }
-  }
-}
-
-// 工具函数
-const getStatusText = (status: string) => {
-  const statusMap = {
-    pending: '待确认',
-    confirmed: '已确认',
-    displayed: '已展示',
-    hidden: '已隐藏'
-  }
-  return statusMap[status as keyof typeof statusMap] || status
-}
-
-const getStatusBadgeClass = (status: string) => {
-  const classMap = {
-    pending: 'badge-warning',
-    confirmed: 'badge-info',
-    displayed: 'badge-success',
-    hidden: 'badge-error'
-  }
-  return classMap[status as keyof typeof classMap] || 'badge-outline'
-}
-
-const getAmountColor = (amount: number) => {
-  if (amount >= 500) return 'text-error'
-  if (amount >= 100) return 'text-warning'
-  if (amount >= 50) return 'text-info'
-  return 'text-success'
-}
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-// 组件挂载时获取数据
+// 生命周期
 onMounted(() => {
-  fetchSponsors()
-  fetchStats()
-  fetchSettings()
+  loadSponsors()
 })
 </script>
-
-<style scoped>
-.table th {
-  background-color: hsl(var(--b2));
-  font-weight: 600;
-}
-
-/* 统计卡片样式 */
-.stat {
-  padding: 1.5rem;
-}
-
-.stat-figure {
-  opacity: 0.8;
-}
-
-/* 金额颜色 */
-.text-success {
-  color: hsl(var(--su));
-}
-
-.text-info {
-  color: hsl(var(--in));
-}
-
-.text-warning {
-  color: hsl(var(--wa));
-}
-
-.text-error {
-  color: hsl(var(--er));
-}
-</style>

@@ -225,7 +225,7 @@ const menuItems = ref<MenuItem[]>([
   },
   {
     key: 'sponsors',
-    label: '赞助管理-todo',
+    label: '赞助管理',
     path: '/admin/sponsors',
     icon: GiftIcon
   },
