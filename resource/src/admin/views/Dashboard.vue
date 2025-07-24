@@ -17,7 +17,7 @@
       <div class="lg:col-span-9">
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title">访问统计</h2>
+            <h2 class="card-title font-normal">访问统计</h2>
             <div class="h-64 flex items-center justify-center border border-base-300 rounded">
               <div class="text-center">
                 <ChartBarIcon class="w-16 h-16 mx-auto text-base-300 mb-4" />
@@ -32,7 +32,7 @@
       <div class="lg:col-span-3">
         <div class="card bg-base-100 shadow">
           <div class="card-body">
-            <h2 class="card-title">系统统计</h2>
+            <h2 class="card-title font-normal">系统统计</h2>
             <div class="space-y-2 h-64">
               <!-- 用户统计 -->
               <div class="flex items-center justify-between p-2 border border-base-300 rounded">
@@ -90,7 +90,7 @@
       <!-- 快捷操作 -->
       <div class="card bg-base-100 shadow lg:col-span-4">
         <div class="card-body">
-          <h2 class="card-title">快捷操作</h2>
+          <h2 class="card-title font-normal">快捷操作</h2>
           <div class="grid grid-cols-2 gap-4">
             <router-link to="/admin/posts" class="btn btn-outline btn-primary">
               <DocumentTextIcon class="w-4 h-4" />
@@ -116,7 +116,7 @@
       <div class="card bg-base-100 shadow lg:col-span-8">
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="card-title flex items-center gap-2">
+            <h2 class="card-title flex items-center gap-2 font-normal">
               <CodeBracketIcon class="w-5 h-5" />
               项目版本
             </h2>
