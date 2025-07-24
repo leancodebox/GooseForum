@@ -7,7 +7,7 @@ import (
 )
 
 func TestCache_GetOrLoad(t *testing.T) {
-	c := Cache[string, string]{}
+	c := Cache[string]{}
 	a, _ := c.GetOrLoadE("", func() (string, error) {
 		return "a", nil
 	}, time.Minute)

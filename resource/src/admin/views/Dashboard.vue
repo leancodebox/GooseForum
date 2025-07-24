@@ -86,9 +86,9 @@
     </div>
 
     <!-- 系统状态和快捷操作 -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       <!-- 快捷操作 -->
-      <div class="card bg-base-100 shadow lg:col-span-4">
+      <div class="card bg-base-100 shadow lg:col-span-4 h-fit">
         <div class="card-body">
           <h2 class="card-title font-normal">快捷操作</h2>
           <div class="grid grid-cols-2 gap-4">
