@@ -21,9 +21,9 @@
                         <!-- 主标题区域 -->
                         <div class="lg:col-span-5 text-center lg:text-left">
                             <h1 class="text-4xl font-bold mb-2">
-                                <span class="text-primary font-bold drop-shadow-lg hover:drop-shadow-xl transition-all duration-300 relative hover:text-primary-focus">
-                                    <span class="absolute inset-0 bg-primary/20 blur-md rounded-lg -z-10 opacity-0 hover:opacity-100 transition-opacity duration-500 scale-110"></span>
-                                    <span class="relative z-10">{{.GooseForumInfo.Title}}</span>
+                                <span class="text-primary font-bold drop-shadow-lg hover:drop-shadow-xl transition-all duration-300 relative hover:text-primary-focus block cursor-pointer">
+                                    <span class="absolute inset-0 bg-primary/20 blur-md rounded-lg -z-10 opacity-0 hover:opacity-100 transition-opacity duration-500 scale-110 pointer-events-none"></span>
+                                    <span class="relative">{{.GooseForumInfo.Title}}</span>
                                 </span>
                             </h1>
                             <p class="text-sm lg:text-base text-base-content/70 mb-4 max-w-md mx-auto lg:mx-0">
@@ -46,7 +46,7 @@
                                 <div class="bg-base-100 rounded-xl p-3 border border-base-300 shadow-sm relative overflow-hidden">
                                     <!-- 装饰性背景元素 -->
                                     <div class="absolute top-0 right-0 w-12 h-12 bg-primary/10 rounded-full -translate-y-6 translate-x-6"></div>
-                                    
+
                                     <div class="relative z-10">
                                         <div class="flex items-center gap-2 mb-2">
                                             <div class="w-6 h-6 bg-primary rounded-md flex items-center justify-center">
@@ -55,7 +55,7 @@
                                             <h3 class="text-sm font-medium text-base-content">社区公告</h3>
                                             <div class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse ml-auto"></div>
                                         </div>
-                                        
+
                                         <div class="space-y-2">
                                             <div class="bg-success/10 border border-success/20 rounded-lg p-2">
                                                 <div class="flex items-start gap-2">
@@ -74,7 +74,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="text-xs text-base-content/70 space-y-1">
                                                 <p class="flex items-center gap-1.5">
                                                     <span class="w-1 h-1 bg-primary rounded-full"></span>

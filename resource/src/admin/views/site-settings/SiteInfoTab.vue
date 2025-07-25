@@ -14,67 +14,64 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="floating-label">
+        <span>站点名称</span>
         <input
             v-model="settings.siteName"
 
             type="text"
             id="siteName"
-            placeholder=""
+            placeholder="站点名称"
             class="input input-bordered w-full peer"
         />
-        <span>站点名称</span>
       </div>
 
       <div class="floating-label">
+        <span>站点URL</span>
         <input
             v-model="settings.siteUrl"
 
             type="url"
             id="siteUrl"
-            placeholder=""
+            placeholder="站点URL"
             class="input input-bordered w-full peer"
         />
-        <span>站点URL</span>
       </div>
     </div>
 
     <div class="floating-label">
+      <span>站点描述</span>
           <textarea
               v-model="settings.siteDescription"
-
               id="siteDescription"
-              placeholder=""
+              placeholder="站点描述"
               class="textarea textarea-bordered peer w-full"
               rows="3"
           ></textarea>
-      <span>站点描述</span>
     </div>
 
     <div class="floating-label">
+      <span>关键词（用逗号分隔）</span>
       <input
           v-model="settings.siteKeywords"
-
           type="text"
           id="siteKeywords"
-          placeholder=""
+          placeholder="关键词（用逗号分隔）"
           class="input input-bordered w-full peer"
       />
-      <span>关键词（用逗号分隔）</span>
     </div>
 
     <div class="form-control">
       <div class="flex gap-4 items-start">
         <div class="flex-1">
           <div class="floating-label">
+            <span>Logo URL</span>
             <input
                 v-model="settings.siteLogo"
-
                 type="url"
                 id="siteLogo"
-                placeholder=""
+                placeholder="Logo URL"
                 class="input input-bordered w-full peer"
             />
-            <span>Logo URL</span>
           </div>
         </div>
         <div class="flex flex-col items-center gap-2">
