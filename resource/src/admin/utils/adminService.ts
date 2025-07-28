@@ -206,7 +206,7 @@ export interface MailSettingsConfig {
     enableMail: boolean;
     smtpHost: string;
     smtpPort: number;
-    smtpEncryption: string;
+    useSSL: boolean;
     smtpUsername: string;
     smtpPassword: string;
     fromName: string;

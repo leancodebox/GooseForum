@@ -635,7 +635,7 @@ func TestMailConnection(req component.BetterRequest[TestMailConnectionReq]) comp
 		return component.FailResponse("请输入测试邮箱地址")
 	}
 
-	err := testMailWithConfig(req.Params.Settings, req.Params.TestEmail)
+	err := mailservice.SendTestEmailWithConfig(req.Params.Settings, req.Params.TestEmail)
 	if err != nil {
 		return component.SuccessResponse(TestMailConnectionResp{
 			Success: false,
@@ -647,25 +647,4 @@ func TestMailConnection(req component.BetterRequest[TestMailConnectionReq]) comp
 		Success: true,
 		Message: "邮件配置测试成功！测试邮件已发送到 " + req.Params.TestEmail,
 	})
-}
-
-// testMailWithConfig 使用指定配置测试邮件发送
-func testMailWithConfig(config pageConfig.MailSettingsConfig, testEmail string) error {
-	// 创建邮件配置
-	emailConfig := mailservice.EmailConfig{
-		Host:      config.SmtpHost,
-		Port:      config.SmtpPort,
-		Username:  config.SmtpUsername,
-		Password:  config.SmtpPassword,
-		FromName:  config.FromName,
-		FromEmail: config.FromEmail,
-	}
-
-	// 使用邮件配置创建客户端并发送测试邮件
-	err := mailservice.SendTestEmailWithConfig(emailConfig, testEmail)
-	if err != nil {
-		return fmt.Errorf("发送测试邮件失败: %v", err)
-	}
-
-	return nil
 }

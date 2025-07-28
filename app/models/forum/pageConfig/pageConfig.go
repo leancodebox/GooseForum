@@ -132,12 +132,12 @@ type SiteSettingsConfig struct {
 // 邮件设置配置
 type MailSettingsConfig struct {
 	// SMTP服务器设置
-	EnableMail     bool   `json:"enableMail"`
-	SmtpHost       string `json:"smtpHost"`
-	SmtpPort       int    `json:"smtpPort"`
-	SmtpEncryption string `json:"smtpEncryption"` // none, tls, ssl
-	SmtpUsername   string `json:"smtpUsername"`
-	SmtpPassword   string `json:"smtpPassword"`
-	FromName       string `json:"fromName"`
-	FromEmail      string `json:"fromEmail"`
+	EnableMail   bool   `json:"enableMail"`
+	SmtpHost     string `json:"smtpHost"`
+	SmtpPort     int    `json:"smtpPort"`
+	UseSSL       bool   `json:"useSSL"`
+	SmtpUsername string `json:"smtpUsername"`
+	SmtpPassword string `json:"smtpPassword"`
+	FromName     string `json:"fromName"`
+	FromEmail    string `json:"fromEmail"`
 }

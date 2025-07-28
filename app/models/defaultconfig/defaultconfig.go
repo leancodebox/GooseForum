@@ -55,14 +55,14 @@ func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {
 }
 
 var defaultEmailSettingsConfig = pageConfig.MailSettingsConfig{
-	EnableMail:     false,
-	SmtpHost:       "",
-	SmtpPort:       587,
-	SmtpEncryption: "tls",
-	SmtpUsername:   "",
-	SmtpPassword:   "",
-	FromName:       "GooseForum",
-	FromEmail:      "",
+	EnableMail:   false,
+	SmtpHost:     "",
+	SmtpPort:     587,
+	UseSSL:       false,
+	SmtpUsername: "",
+	SmtpPassword: "",
+	FromName:     "GooseForum",
+	FromEmail:    "",
 }
 
 func GetDefaultEmailSettingsConfig() pageConfig.MailSettingsConfig {

@@ -2,7 +2,9 @@ package mailservice
 
 import (
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/wneessen/go-mail"
+	"time"
 )
 
 func SendV2(to, username, token string) error {
@@ -42,7 +44,7 @@ func SendV2(to, username, token string) error {
 }
 
 // SendTestEmailWithConfig 使用指定配置发送测试邮件
-func SendTestEmailWithConfig(config EmailConfig, testEmail string) error {
+func SendTestEmailWithConfig(config pageConfig.MailSettingsConfig, testEmail string) error {
 	// 使用 go-mail 库直接发送测试邮件
 	message := mail.NewMsg()
 	if err := message.FromFormat(config.FromName, config.FromEmail); err != nil {
@@ -52,22 +54,23 @@ func SendTestEmailWithConfig(config EmailConfig, testEmail string) error {
 		return fmt.Errorf("failed to set To address: %s", err)
 	}
 	message.Subject("邮件配置测试")
-	message.SetBodyString(mail.TypeTextPlain, "这是一封测试邮件，用于验证邮件配置是否正确。")
+	message.SetBodyString(mail.TypeTextPlain,
+		fmt.Sprintf("这是一封测试邮件，发送于%v,用于验证邮件配置是否正确。", time.Now().Format(time.DateTime)))
 
 	// 创建邮件客户端
 	optionList := []mail.Option{
 		mail.WithSMTPAuth(mail.SMTPAuthPlain),
-		mail.WithUsername(config.Username),
-		mail.WithPassword(config.Password),
-		mail.WithPort(config.Port),
+		mail.WithUsername(config.SmtpUsername),
+		mail.WithPassword(config.SmtpPassword),
+		mail.WithPort(config.SmtpPort),
 	}
 
 	// 根据加密方式添加选项
-	if config.Host != "" {
+	if config.UseSSL {
 		optionList = append(optionList, mail.WithSSL())
 	}
 
-	client, err := mail.NewClient(config.Host, optionList...)
+	client, err := mail.NewClient(config.SmtpHost, optionList...)
 	if err != nil {
 		return fmt.Errorf("failed to create mail client: %s", err)
 	}

@@ -70,19 +70,6 @@
             />
           </label>
 
-          <!-- 加密方式 -->
-          <label class="floating-label">
-            <span>加密方式</span>
-            <select
-              v-model="settings.smtpEncryption" :disabled="!settings.enableMail"
-              class="select select-bordered w-full peer"
-              id="smtpEncryption"
-            >
-              <option value="none">无加密</option>
-              <option value="tls">TLS</option>
-              <option value="ssl">SSL</option>
-            </select>
-          </label>
 
           <!-- 用户名 -->
           <label class="floating-label">
@@ -107,6 +94,15 @@
               placeholder="密码/授权码"
             />
           </label>
+
+          <!-- 是否使用SSL -->
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text">使用SSL加密</span>
+              <input v-model="settings.useSSL" :disabled="!settings.enableMail" type="checkbox" class="toggle toggle-primary" />
+            </label>
+          </div>
+          
           <label class="floating-label">
           </label>
 
@@ -171,11 +167,12 @@
           <div class="space-y-2">
             <h3 class="font-medium text-base-content">常见邮箱配置</h3>
             <div class="text-sm text-base-content/70 space-y-1">
-              <div><strong>Gmail:</strong> smtp.gmail.com:587 (TLS)</div>
-              <div><strong>QQ邮箱:</strong> smtp.qq.com:587 (TLS)</div>
-              <div><strong>163邮箱:</strong> smtp.163.com:25 (无加密)</div>
-              <div><strong>126邮箱:</strong> smtp.126.com:25 (无加密)</div>
-              <div><strong>Outlook:</strong> smtp-mail.outlook.com:587 (TLS)</div>
+              <div><strong>Gmail:</strong> smtp.gmail.com:587 (不使用SSL)</div>
+              <div><strong>QQ邮箱:</strong> smtp.qq.com:587 (不使用SSL)</div>
+              <div><strong>163邮箱:</strong> smtp.163.com:25 (不使用SSL)</div>
+              <div><strong>126邮箱:</strong> smtp.126.com:25 (不使用SSL)</div>
+              <div><strong>Outlook:</strong> smtp-mail.outlook.com:587 (不使用SSL)</div>
+              <div><strong>Gmail SSL:</strong> smtp.gmail.com:465 (使用SSL)</div>
             </div>
           </div>
         </div>
@@ -203,7 +200,7 @@ const settings = ref({
   enableMail: true,
   smtpHost: 'smtp.gmail.com',
   smtpPort: 587,
-  smtpEncryption: 'tls',
+  useSSL: false,
   smtpUsername: 'noreply@example.com',
   smtpPassword: '',
   fromName: 'GooseForum',
