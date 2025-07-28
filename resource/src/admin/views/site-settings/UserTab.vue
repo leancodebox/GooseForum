@@ -78,7 +78,7 @@
               max="20"
               class="input input-bordered w-full peer"
               id="minUsernameLength"
-              placeholder=" "
+              placeholder="用户名最小长度"
             />
           </label>
 
@@ -92,7 +92,7 @@
               max="50"
               class="input input-bordered w-full peer"
               id="maxUsernameLength"
-              placeholder=" "
+              placeholder="用户名最大长度"
             />
           </label>
         </div>
@@ -135,7 +135,7 @@
               max="10"
               class="input input-bordered w-full peer"
               id="maxLoginAttempts"
-              placeholder=" "
+              placeholder="最大登录失败次数"
             />
           </label>
 
@@ -149,7 +149,7 @@
               max="1440"
               class="input input-bordered w-full peer"
               id="lockoutDuration"
-              placeholder=" "
+              placeholder="锁定时间（分钟）"
             />
           </label>
 
@@ -163,7 +163,7 @@
               max="10080"
               class="input input-bordered w-full peer"
               id="sessionTimeout"
-              placeholder=" "
+              placeholder="会话超时时间（分钟）"
             />
           </label>
         </div>
@@ -214,6 +214,7 @@
 
           <!-- 帖子编辑时间限制 -->
           <label class="floating-label">
+            <span>帖子编辑时间限制（分钟，0为无限制）</span>
             <input
               v-model="settings.postEditTimeLimit"
               type="number"
@@ -221,9 +222,8 @@
               max="1440"
               class="input input-bordered w-full peer"
               id="postEditTimeLimit"
-              placeholder=" "
+              placeholder="帖子编辑时间限制（分钟，0为无限制）"
             />
-            <label for="postEditTimeLimit" class="floating-label-text">帖子编辑时间限制（分钟，0为无限制）</label>
           </label>
         </div>
       </div>
@@ -257,7 +257,7 @@
               max="100"
               class="input input-bordered w-full peer"
               id="pointsForPost"
-              placeholder=" "
+              placeholder="发帖获得积分"
             />
           </label>
 
@@ -271,7 +271,7 @@
               max="50"
               class="input input-bordered w-full peer"
               id="pointsForReply"
-              placeholder=" "
+              placeholder="回复获得积分"
             />
           </label>
 
@@ -285,7 +285,7 @@
               max="20"
               class="input input-bordered w-full peer"
               id="pointsForDailyLogin"
-              placeholder=" "
+              placeholder="每日登录获得积分"
             />
           </label>
 
@@ -299,7 +299,7 @@
               max="1000"
               class="input input-bordered w-full peer"
               id="initialPoints"
-              placeholder=" "
+              placeholder="新用户初始积分"
             />
           </label>
         </div>

@@ -273,51 +273,51 @@
 
           <!-- 标题 -->
           <div>
-            <div class="relative">
+            <label class="floating-label">
+              <span >标题 *</span>
               <input
                   v-model="formData.title"
                   type="text"
-                  placeholder=" "
+                  placeholder="标题 *"
                   class="input input-bordered w-full"
                   maxlength="200"
                   required
               />
-              <span class="absolute -top-2 left-3 bg-base-200 px-1 text-xs text-base-content/70 z-10">标题 *</span>
-            </div>
+            </label>
           </div>
 
           <!-- Slug -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
             <!-- Slug -->
             <div class="flex-1">
-              <div class="relative">
+              <label class="floating-label">
+                <span>URL标识 *</span>
                 <input
                     v-model="formData.slug"
                     type="text"
-                    placeholder=" "
+                    placeholder="URL标识 *"
                     class="input input-bordered w-full"
                     pattern="[a-zA-Z0-9-]+"
                     maxlength="100"
                     required
                 />
-                <span class="absolute -top-2 left-3 bg-base-200 px-1 text-xs text-base-content/70 z-10">URL标识 *</span>
-              </div>
+              </label>
               <div class="text-xs text-base-content/60 mt-1">用于生成URL，只能包含字母、数字、连字符</div>
             </div>
 
             <!-- 排序权重 -->
             <div class="w-full sm:w-32">
-              <div class="relative">
+              <label class="floating-label">
+                <span >排序权重</span>
                 <input
                     v-model.number="formData.sortOrder"
                     type="number"
-                    placeholder=" "
+                    placeholder="排序权重"
                     class="input input-bordered w-full"
                     min="0"
                     max="9999"
                 />
-                <span class="absolute -top-2 left-3 bg-base-200 px-1 text-xs text-base-content/70 z-10">排序权重</span>
-              </div>
+              </label>
               <div class="text-xs text-base-content/60 mt-1">数值越小排序越靠前</div>
             </div>
           </div>

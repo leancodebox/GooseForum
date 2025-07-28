@@ -64,7 +64,7 @@
         </div>
 
         <!-- 无数据状态 -->
-        <div v-else-if="!applySheets.length" class="text-center py-12">
+        <div v-else-if="!applySheets.length" class="text-center py-12 bg-base-100">
           <div class="text-base-content/50 mb-2">
             <DocumentTextIcon class="w-16 h-16 mx-auto mb-4 opacity-50"/>
           </div>

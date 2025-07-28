@@ -13,13 +13,6 @@ port = 99
 signingKey="{{.SigningKey}}"
 validTime = 604800
 
-[mail]
-host = "smtp.example.com"
-port = 587
-username = "noreply@example.com"
-password = "your-password"
-from_name = "GooseForum"
-
 [db]
 migration = "on" # on,off
 backupSqlite = true

@@ -39,7 +39,7 @@
               max="100"
               class="input input-bordered w-full peer"
               id="articlesPerPage"
-              placeholder=" "
+              placeholder="每页文章数量"
             />
           </label>
 
@@ -53,7 +53,7 @@
               max="500"
               class="input input-bordered w-full peer"
               id="excerptLength"
-              placeholder=" "
+              placeholder="文章摘要长度（字符）"
             />
           </label>
 
@@ -147,7 +147,7 @@
                 v-model="settings.bannedWords"
                 class="textarea textarea-bordered w-full peer h-32"
                 id="bannedWords"
-                placeholder=" "
+                placeholder="敏感词列表"
               ></textarea>
             </label>
             <div class="text-sm text-base-content/60">
@@ -173,7 +173,7 @@
                 maxlength="5"
                 class="input input-bordered w-full peer"
                 id="replacementChar"
-                placeholder=" "
+                placeholder="替换字符"
               />
             </label>
           </div>
