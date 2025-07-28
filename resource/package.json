@@ -13,7 +13,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.8",
     "axios": "^1.9.0",
-    "daisyui": "^5.0.43",
+    "daisyui": "^5.0.48",
     "dompurify": "^3.2.6",
     "heroicons": "^2.2.0",
     "markdown-it": "^14.1.0",
