@@ -1,6 +1,7 @@
 package pageConfig
 
 import (
+	"errors"
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
@@ -41,5 +42,14 @@ func GetConfigByPageType[T any](pageType string, defaultValue T) T {
 		return jsonopt.Decode[T](entity.Config)
 	} else {
 		return defaultValue
+	}
+}
+func GetConfigByPageTypeE[T any](pageType string, defaultValue T) (T, error) {
+	var entity Entity
+	builder().Where(queryopt.Eq(filedPageType, pageType)).First(&entity)
+	if entity.Id > 0 {
+		return jsonopt.Decode[T](entity.Config), nil
+	} else {
+		return defaultValue, errors.New("no data")
 	}
 }

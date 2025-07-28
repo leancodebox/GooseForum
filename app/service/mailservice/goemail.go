@@ -1,37 +1,50 @@
 package mailservice
 
 import (
+	"errors"
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/wneessen/go-mail"
 	"time"
 )
 
-func SendV2(to, username, token string) error {
-	config := getEmailConfig()
-	message := mail.NewMsg()
-	if err := message.FromFormat(config.FromName, config.Username); err != nil {
-		return fmt.Errorf("failed to set From address: %s", err)
+func buildClientByConfig(config pageConfig.MailSettingsConfig) (*mail.Client, error) {
+	optionList := []mail.Option{
+		mail.WithSMTPAuth(mail.SMTPAuthPlain),
+		mail.WithUsername(config.SmtpUsername),
+		mail.WithPassword(config.SmtpPassword),
+		mail.WithPort(config.SmtpPort),
 	}
+
+	// 根据加密方式添加选项
+	if config.UseSSL {
+		optionList = append(optionList, mail.WithSSL())
+	}
+
+	return mail.NewClient(config.SmtpHost, optionList...)
+}
+
+func SendActivationEmail(to, username, token string) error {
+	config := hotdataserve.GetMailSettingsConfigCache()
+	if !config.EnableMail {
+		return errors.New("Mail settings config is disabled")
+	}
+	message := mail.NewMsg()
 	if err := message.To(to); err != nil {
 		return fmt.Errorf("failed to set To address: %s", err)
 	}
 	message.Subject("activation-email")
+	if err := message.FromFormat(config.FromName, config.FromEmail); err != nil {
+		return fmt.Errorf("failed to set From address: %s", err)
+	}
 	body, err := generateActivationEmailBody(username, token)
 	if err != nil {
 		return fmt.Errorf("生成邮件内容失败: %v", err)
 	}
 	message.SetBodyString(mail.TypeTextHTML, body)
-	optionList := []mail.Option{
-		mail.WithSMTPAuth(mail.SMTPAuthPlain),
-		mail.WithUsername(config.Username),
-		mail.WithPassword(config.Password),
-		mail.WithPort(config.Port),
-		mail.WithSSL(),
-	}
-	client, err := mail.NewClient(config.Host,
-		optionList...,
-	)
+
+	client, err := buildClientByConfig(config)
 	if err != nil {
 		return fmt.Errorf("failed to create mail client: %s", err)
 
@@ -55,22 +68,9 @@ func SendTestEmailWithConfig(config pageConfig.MailSettingsConfig, testEmail str
 	}
 	message.Subject("邮件配置测试")
 	message.SetBodyString(mail.TypeTextPlain,
-		fmt.Sprintf("这是一封测试邮件，发送于%v,用于验证邮件配置是否正确。", time.Now().Format(time.DateTime)))
+		fmt.Sprintf("[%v]这是一封测试邮件,用于验证邮件配置是否正确。", time.Now().Format(time.DateTime)))
 
-	// 创建邮件客户端
-	optionList := []mail.Option{
-		mail.WithSMTPAuth(mail.SMTPAuthPlain),
-		mail.WithUsername(config.SmtpUsername),
-		mail.WithPassword(config.SmtpPassword),
-		mail.WithPort(config.SmtpPort),
-	}
-
-	// 根据加密方式添加选项
-	if config.UseSSL {
-		optionList = append(optionList, mail.WithSSL())
-	}
-
-	client, err := mail.NewClient(config.SmtpHost, optionList...)
+	client, err := buildClientByConfig(config)
 	if err != nil {
 		return fmt.Errorf("failed to create mail client: %s", err)
 	}
