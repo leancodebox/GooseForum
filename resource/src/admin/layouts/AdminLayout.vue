@@ -183,7 +183,7 @@ const isParentActive = (parentItem: MenuItem) => {
 const menuItems = ref<MenuItem[]>([
   {
     key: 'dashboard',
-    label: '仪表盘-todo',
+    label: '仪表盘',
     path: '/admin',
     icon: HomeIcon
   },

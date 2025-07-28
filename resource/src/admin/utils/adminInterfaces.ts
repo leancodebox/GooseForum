@@ -1,7 +1,7 @@
 export interface Result<T> {
     code: 0 | 1;
     result: T;
-    message: string;
+    msg: string;
 }
 export interface PageData<T> {
     list: T[];

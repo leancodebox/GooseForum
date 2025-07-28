@@ -47,7 +47,7 @@
           <label class="floating-label">
             <span>SMTP主机</span>
             <input
-              v-model="settings.smtpHost"
+              v-model="settings.smtpHost" :disabled="!settings.enableMail"
               type="text"
               class="input input-bordered w-full peer"
               id="smtpHost"
@@ -60,7 +60,7 @@
 
             <span>SMTP端口</span>
             <input
-              v-model="settings.smtpPort"
+              v-model="settings.smtpPort" :disabled="!settings.enableMail"
               type="number"
               min="1"
               max="65535"
@@ -74,7 +74,7 @@
           <label class="floating-label">
             <span>加密方式</span>
             <select
-              v-model="settings.smtpEncryption"
+              v-model="settings.smtpEncryption" :disabled="!settings.enableMail"
               class="select select-bordered w-full peer"
               id="smtpEncryption"
             >
@@ -88,7 +88,7 @@
           <label class="floating-label">
             <span>用户名（邮箱）</span>
             <input
-              v-model="settings.smtpUsername"
+              v-model="settings.smtpUsername" :disabled="!settings.enableMail"
               type="email"
               class="input input-bordered w-full peer"
               id="smtpUsername"
@@ -100,19 +100,21 @@
           <label class="floating-label">
             <span>密码/授权码</span>
             <input
-              v-model="settings.smtpPassword"
+              v-model="settings.smtpPassword" :disabled="!settings.enableMail"
               type="password"
               class="input input-bordered w-full peer"
               id="smtpPassword"
               placeholder="密码/授权码"
             />
           </label>
+          <label class="floating-label">
+          </label>
 
           <!-- 发件人名称 -->
           <label class="floating-label">
             <span>发件人名称</span>
             <input
-              v-model="settings.fromName"
+              v-model="settings.fromName" :disabled="!settings.enableMail"
               type="text"
               class="input input-bordered w-full peer"
               id="fromName"
@@ -124,110 +126,13 @@
           <label class="floating-label">
             <span>发件人邮箱</span>
             <input
-              v-model="settings.fromEmail"
+              v-model="settings.fromEmail" :disabled="!settings.enableMail"
               type="email"
               class="input input-bordered w-full peer"
               id="fromEmail"
               placeholder="发件人邮箱"
             />
           </label>
-        </div>
-      </div>
-
-      <!-- 分割线 -->
-      <div class="divider"></div>
-
-      <!-- 通知设置 -->
-      <div>
-        <h2 class="flex items-center gap-2 mb-6 text-lg font-medium text-base-content">
-          <BellIcon class="w-5 h-5" />
-          通知设置
-        </h2>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="space-y-4">
-            <h3 class="font-medium text-base-content">用户通知</h3>
-
-            <!-- 新用户注册通知管理员 -->
-            <div class="form-control">
-              <label class="label cursor-pointer">
-                <span class="label-text">新用户注册通知管理员</span>
-                <input v-model="settings.notifyAdminOnRegistration" type="checkbox" class="toggle toggle-primary" />
-              </label>
-            </div>
-
-            <!-- 新帖子通知管理员 -->
-            <div class="form-control">
-              <label class="label cursor-pointer">
-                <span class="label-text">新帖子通知管理员</span>
-                <input v-model="settings.notifyAdminOnNewPost" type="checkbox" class="toggle toggle-primary" />
-              </label>
-            </div>
-
-            <!-- 新评论通知作者 -->
-            <div class="form-control">
-              <label class="label cursor-pointer">
-                <span class="label-text">新评论通知作者</span>
-                <input v-model="settings.notifyAuthorOnComment" type="checkbox" class="toggle toggle-primary" />
-              </label>
-            </div>
-
-            <!-- 私信通知 -->
-            <div class="form-control">
-              <label class="label cursor-pointer">
-                <span class="label-text">私信通知</span>
-                <input v-model="settings.notifyOnPrivateMessage" type="checkbox" class="toggle toggle-primary" />
-              </label>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <h3 class="font-medium text-base-content">系统通知</h3>
-
-            <!-- 系统维护通知 -->
-            <div class="form-control">
-              <label class="label cursor-pointer">
-                <span class="label-text">系统维护通知</span>
-                <input v-model="settings.notifyOnMaintenance" type="checkbox" class="toggle toggle-primary" />
-              </label>
-            </div>
-
-            <!-- 安全警告通知 -->
-            <div class="form-control">
-              <label class="label cursor-pointer">
-                <span class="label-text">安全警告通知</span>
-                <input v-model="settings.notifyOnSecurityAlert" type="checkbox" class="toggle toggle-primary" />
-              </label>
-            </div>
-
-            <!-- 管理员邮箱 -->
-            <label class="floating-label">
-              <span >管理员邮箱</span>
-              <input
-                v-model="settings.adminEmail"
-                type="email"
-                class="input input-bordered w-full peer"
-                id="adminEmail"
-                placeholder=" "
-              />
-            </label>
-
-            <!-- 邮件发送频率限制 -->
-            <label class="floating-label">
-              <span>邮件发送频率限制</span>
-              <select
-                v-model="settings.emailRateLimit"
-                class="select select-bordered w-full peer"
-                id="emailRateLimit"
-              >
-                <option value="none">无限制</option>
-                <option value="1min">每分钟1封</option>
-                <option value="5min">每5分钟1封</option>
-                <option value="15min">每15分钟1封</option>
-                <option value="1hour">每小时1封</option>
-              </select>
-            </label>
-          </div>
         </div>
       </div>
 
@@ -256,7 +161,7 @@
             </label>
 
             <!-- 发送测试邮件按钮 -->
-            <button @click="sendTestEmail" class="btn btn-outline btn-primary" :disabled="sendingTest || !testEmail">
+            <button @click="sendTestEmail" class="btn btn-sm btn-outline btn-primary" :disabled="sendingTest || !testEmail">
               <span v-if="sendingTest" class="loading loading-spinner loading-sm"></span>
               <PaperAirplaneIcon v-else class="w-4 h-4" />
               发送测试邮件
@@ -290,6 +195,7 @@ import {
   BellIcon,
   PaperAirplaneIcon
 } from '@heroicons/vue/24/outline'
+import { getMailSettings, saveMailSettings, testMailConnection, type MailSettingsConfig } from '../../utils/adminService'
 
 // 设置数据
 const settings = ref({
@@ -309,15 +215,6 @@ const settings = ref({
   resetPasswordSubject: '重置您的密码 - {site_name}',
   resetPasswordContent: '亲爱的 {username}，\n\n我们收到了重置您密码的请求。请点击以下链接重置密码：\n\n{reset_link}\n\n如果您没有请求重置密码，请忽略此邮件。\n\n祝好！\n{site_name} 团队',
 
-  // 通知设置
-  notifyAdminOnRegistration: true,
-  notifyAdminOnNewPost: false,
-  notifyAuthorOnComment: true,
-  notifyOnPrivateMessage: true,
-  notifyOnMaintenance: true,
-  notifyOnSecurityAlert: true,
-  adminEmail: 'admin@example.com',
-  emailRateLimit: '5min'
 })
 
 // 状态变量
@@ -332,9 +229,13 @@ const testEmail = ref('')
 const handleSave = async () => {
   saving.value = true
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    showSuccess()
+    const response = await saveMailSettings(settings.value as MailSettingsConfig)
+
+    if (response.code === 0) {
+      showSuccess('邮件设置保存成功！')
+    } else {
+      showError(response.msg || '保存设置失败')
+    }
   } catch (error) {
     console.error('保存邮件设置失败:', error)
     showError('保存设置失败，请重试')
@@ -352,9 +253,13 @@ const sendTestEmail = async () => {
 
   sendingTest.value = true
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    showSuccess('测试邮件发送成功！请检查您的邮箱。')
+    const response = await testMailConnection(settings.value as MailSettingsConfig, testEmail.value)
+
+    if (response.code === 0) {
+      showSuccess(response.msg || '测试邮件发送成功')
+    } else {
+      showError(response.msg || '测试邮件发送失败')
+    }
   } catch (error) {
     console.error('发送测试邮件失败:', error)
     showError('发送测试邮件失败，请检查SMTP配置')
@@ -380,10 +285,23 @@ const showError = (message: string) => {
   }, 5000)
 }
 
+// 加载邮件设置
+const loadMailSettings = async () => {
+  try {
+    const response = await getMailSettings()
+    if (response.code === 0) {
+      Object.assign(settings.value, response.result)
+    } else {
+      console.error('加载邮件设置失败:', response.msg)
+    }
+  } catch (error) {
+    console.error('加载邮件设置失败:', error)
+  }
+}
+
 // 组件挂载时加载设置
 onMounted(() => {
-  // 这里可以加载实际的设置数据
-  console.log('邮件设置页面已加载')
+  loadMailSettings()
 })
 </script>
 

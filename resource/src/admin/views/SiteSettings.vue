@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-normal text-base-content">站点设置</h1>
-        <p class="text-base-content/70 mt-1">配置站点基本信息、SEO设置和其他选项</p>
+        <p class="text-base-content/70 mt-1">配置站点基本信息、邮箱设置和其他选项</p>
       </div>
     </div>
 
@@ -14,15 +14,10 @@
       <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
         <SiteInfoTab/>
       </div>
-      
-      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="SEO设置"/>
-      <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
-        <SeoTab/>
-      </div>
 
-      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="其他设置"/>
+      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="邮件设置"/>
       <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
-        <OtherTab/>
+        <MailTab/>
       </div>
 
       <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="内容设置"/>
@@ -35,16 +30,16 @@
         <UserTab/>
       </div>
 
-      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="邮件设置"/>
+      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="其他设置"/>
       <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
-        <MailTab/>
+        <OtherTab/>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ContentTab, MailTab, OtherTab, SeoTab, SiteInfoTab, UserTab} from './site-settings/index'
+import {ContentTab, MailTab, OtherTab,  SiteInfoTab, UserTab} from './site-settings/index'
 </script>
 
 <style scoped>

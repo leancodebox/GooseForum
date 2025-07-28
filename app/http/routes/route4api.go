@@ -155,6 +155,9 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("save-web-settings", UpButterReq(controllers.SaveWebSettings)).
 		GET("site-settings", UpButterReq(controllers.GetSiteSettings)).
 		POST("save-site-settings", UpButterReq(controllers.SaveSiteSettings)).
+		GET("mail-settings", UpButterReq(controllers.GetMailSettings)).
+		POST("save-mail-settings", UpButterReq(controllers.SaveMailSettings)).
+		POST("test-mail-connection", UpButterReq(controllers.TestMailConnection)).
 		GET("footer-links", UpButterReq(controllers.GetFooterLinks)).
 		POST("save-footer-links", UpButterReq(controllers.SaveFooterLinks)).
 		GET("sponsors", UpButterReq(controllers.GetSponsors)).

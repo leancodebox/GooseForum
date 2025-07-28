@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
+	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"slices"
 	"time"
 
@@ -595,4 +596,76 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 	configEntity.Config = jsonopt.Encode(req.Params.Settings)
 	pageConfig.CreateOrSave(&configEntity)
 	return component.SuccessResponse("success")
+}
+
+// GetMailSettings 获取邮件设置
+func GetMailSettings(req component.BetterRequest[null]) component.Response {
+	// 获取当前站点设置
+	defaultSettings := defaultconfig.GetDefaultEmailSettingsConfig()
+	emailSettings := pageConfig.GetConfigByPageType(pageConfig.EmailSettings, defaultSettings)
+	return component.SuccessResponse(emailSettings)
+}
+
+type SaveMailSettingsReq struct {
+	Settings pageConfig.MailSettingsConfig `json:"settings" validate:"required"`
+}
+
+// SaveMailSettings 保存邮件设置
+func SaveMailSettings(req component.BetterRequest[SaveMailSettingsReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(pageConfig.EmailSettings)
+	configEntity.PageType = pageConfig.EmailSettings
+	configEntity.Config = jsonopt.Encode(req.Params.Settings)
+	pageConfig.CreateOrSave(&configEntity)
+	return component.SuccessResponse("success")
+}
+
+type TestMailConnectionReq struct {
+	Settings  pageConfig.MailSettingsConfig `json:"settings" validate:"required"`
+	TestEmail string                        `json:"testEmail" validate:"required,email"`
+}
+
+type TestMailConnectionResp struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+// TestMailConnection 测试邮件连接
+func TestMailConnection(req component.BetterRequest[TestMailConnectionReq]) component.Response {
+	if req.Params.TestEmail == "" {
+		return component.FailResponse("请输入测试邮箱地址")
+	}
+
+	err := testMailWithConfig(req.Params.Settings, req.Params.TestEmail)
+	if err != nil {
+		return component.SuccessResponse(TestMailConnectionResp{
+			Success: false,
+			Message: fmt.Sprintf("邮件测试失败: %v", err),
+		})
+	}
+
+	return component.SuccessResponse(TestMailConnectionResp{
+		Success: true,
+		Message: "邮件配置测试成功！测试邮件已发送到 " + req.Params.TestEmail,
+	})
+}
+
+// testMailWithConfig 使用指定配置测试邮件发送
+func testMailWithConfig(config pageConfig.MailSettingsConfig, testEmail string) error {
+	// 创建邮件配置
+	emailConfig := mailservice.EmailConfig{
+		Host:      config.SmtpHost,
+		Port:      config.SmtpPort,
+		Username:  config.SmtpUsername,
+		Password:  config.SmtpPassword,
+		FromName:  config.FromName,
+		FromEmail: config.FromEmail,
+	}
+
+	// 使用邮件配置创建客户端并发送测试邮件
+	err := mailservice.SendTestEmailWithConfig(emailConfig, testEmail)
+	if err != nil {
+		return fmt.Errorf("发送测试邮件失败: %v", err)
+	}
+
+	return nil
 }

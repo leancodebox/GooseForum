@@ -38,14 +38,12 @@ func GetDefaultFooter() pageConfig.FooterConfig {
 }
 
 var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
-	SiteName:           "GooseForum",
-	SiteLogo:           "",
-	SiteDescription:    "一个现代化的论坛系统",
-	SiteKeywords:       "forum,discussion,community",
-	SiteUrl:            "https://localhost:3000",
-	TitleTemplate:      "{title} - {siteName}",
-	DefaultDescription: "一个现代化的论坛系统，提供优质的讨论体验",
-	IcpNumber:          "",
+	SiteName:        "GooseForum",
+	SiteLogo:        "",
+	SiteDescription: "一个现代化的论坛系统",
+	SiteKeywords:    "forum,discussion,community",
+	SiteUrl:         "https://localhost:3000",
+
 	Timezone:           "Asia/Shanghai",
 	DefaultLanguage:    "zh-CN",
 	MaintenanceMode:    false,
@@ -54,4 +52,19 @@ var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
 
 func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {
 	return defaultSiteSettingsConfig
+}
+
+var defaultEmailSettingsConfig = pageConfig.MailSettingsConfig{
+	EnableMail:     false,
+	SmtpHost:       "",
+	SmtpPort:       587,
+	SmtpEncryption: "tls",
+	SmtpUsername:   "",
+	SmtpPassword:   "",
+	FromName:       "GooseForum",
+	FromEmail:      "",
+}
+
+func GetDefaultEmailSettingsConfig() pageConfig.MailSettingsConfig {
+	return defaultEmailSettingsConfig
 }

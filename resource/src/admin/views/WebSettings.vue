@@ -16,9 +16,7 @@ import { getWebSettings, saveWebSettings, type WebSettingsConfig } from '../util
 // 设置数据
 const settings = ref({
   // 外部资源链接
-  externalLinks: '',
-  // 网站图标
-  favicon: '',
+  externalLinks: ''
 })
 
 // 状态变量
@@ -66,7 +64,6 @@ const resetToDefaults = () => {
   if (confirm('确定要重置为默认设置吗？这将清空当前所有自定义内容。')) {
     Object.assign(settings.value, {
       externalLinks: '',
-      favicon: '',
     })
   }
 }
@@ -152,25 +149,6 @@ onMounted(() => {
                 </label>
                 <div class="label">
                   <span class="label-text-alt text-base-content/60">外部CSS和JS资源链接，每行一个链接</span>
-                </div>
-              </div>
-
-
-              <!-- 网站图标设置 -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="form-control">
-                  <label class="floating-label">
-                    <span>网站图标(Favicon)</span>
-                    <input 
-                      v-model="settings.favicon" 
-                      type="url" 
-                      placeholder="https://example.com/favicon.ico" 
-                      class="input input-bordered w-full" 
-                    />
-                  </label>
-                  <div class="label">
-                    <span class="label-text-alt text-base-content/60">网站图标URL，支持.ico、.png格式</span>
-                  </div>
                 </div>
               </div>
             </div>

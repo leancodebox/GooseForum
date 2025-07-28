@@ -3,106 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>账号激活` + status + ` - Goose Forum</title>
+    <title>账号激活{{.Status}} - Goose Forum</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background-color: #f0f2f5;
-            color: #333;
+            background: #fafafa;
+            color: #1f1f1f;
+            padding: 1rem;
         }
 
         .container {
             text-align: center;
-            padding: 2.5rem;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 90%;
-            width: 420px;
+            padding: 3rem 2rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            max-width: 480px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
         }
 
         .icon {
-            font-size: 48px;
-            margin-bottom: 1rem;
+            font-size: 32px;
+            line-height: 1;
         }
 
         .title {
             font-size: 24px;
-            font-weight: 600;
-            margin: 1rem 0;
-            color: #1a1a1a;
+            font-weight: 700;
+            margin: 0;
+            color: #0f0f0f;
+            letter-spacing: -0.02em;
         }
 
         .message {
-            margin: 1rem 0;
-            line-height: 1.6;
-            color: {{if .Success}} #4caf50 {{ else }} #f44336{{end}};
+            margin: 0 0 1.25rem 0;
+            line-height: 1.5;
+            color: {{if .Success}} #16a34a {{ else }} #dc2626{{end}};
             font-size: 16px;
+            font-weight: 500;
         }
 
         .description {
-            color: #666;
-            margin: 1rem 0;
+            color: #525252;
+            margin: 0 0 2rem 0;
             font-size: 14px;
             line-height: 1.6;
         }
 
         .button-group {
-            margin-top: 1.5rem;
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .home-link {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: #1890ff;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.875rem 1.75rem;
+            background: #0f0f0f;
             color: white;
             text-decoration: none;
             border-radius: 6px;
             font-weight: 500;
-            transition: all 0.3s ease;
+            font-size: 15px;
+            transition: background 0.2s ease;
+            border: none;
         }
 
         .home-link:hover {
-            background-color: #096dd9;
-            transform: translateY(-1px);
+            background: #262626;
         }
 
         .login-link {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: #f0f0f0;
-            color: #333;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.875rem 1.75rem;
+            background: transparent;
+            color: #0f0f0f;
             text-decoration: none;
             border-radius: 6px;
             font-weight: 500;
-            transition: all 0.3s ease;
+            font-size: 15px;
+            border: 1px solid #d4d4d4;
+            transition: all 0.2s ease;
         }
 
         .login-link:hover {
-            background-color: #d9d9d9;
-            transform: translateY(-1px);
+            background: #f5f5f5;
+            border-color: #a3a3a3;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .home-link,
+            .login-link {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="icon">{{if .Success}}✅{{else}}❌{{end}}</div>
-    <h2 class="title">账号激活 {{.Status}}</h2>
+    <div class="header">
+        <div class="icon">{{if .Success}}✅{{else}}❌{{end}}</div>
+        <h2 class="title">账号激活 {{.Status}}</h2>
+    </div>
     <p class="message">{{.Message}}</p>
     <p class="description">
-        {{if .Success}}
-            您的账号已成功激活！现在您可以使用完整的论坛功能，包括发帖、回复、个人中心等服务。
-        {{else}}
-            激活失败，请检查您的激活链接是否正确或联系管理员。
-        {{end}}
+        {{.Description}}
     </p>
     <div class="button-group">
         <a href="/" class="home-link">返回首页</a>

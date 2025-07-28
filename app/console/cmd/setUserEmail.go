@@ -34,9 +34,13 @@ func runUserEmail(cmd *cobra.Command, _ []string) {
 		fmt.Println(err)
 		return
 	}
-
-	// 发送激活邮件
-	err = mailservice.SendActivationEmail(userEntity.Email, userEntity.Username, token)
+	//// 发送激活邮件
+	//err = mailservice.SendActivationEmail(userEntity.Email, userEntity.Username, token)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	slog.Error("发送激活邮件失败", "error", err)
+	//}
+	err = mailservice.SendV2(userEntity.Email, userEntity.Username, token)
 	if err != nil {
 		fmt.Println(err)
 		slog.Error("发送激活邮件失败", "error", err)

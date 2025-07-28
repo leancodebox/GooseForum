@@ -1,34 +1,14 @@
 package mailservice
 
 import (
-	"bytes"
 	"crypto/tls"
+	_ "embed"
 	"encoding/base64"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"html/template"
 	"mime"
 	"net/smtp"
 	"time"
 )
-
-type EmailConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	FromName string
-}
-
-func getEmailConfig() EmailConfig {
-	return EmailConfig{
-		Host:     preferences.GetString("mail.host"),
-		Port:     preferences.GetInt("mail.port"),
-		Username: preferences.GetString("mail.username"),
-		Password: preferences.GetString("mail.password"),
-		FromName: preferences.GetString("mail.from_name"),
-	}
-}
 
 // 添加一个用于发送邮件的客户端结构体
 type emailClient struct {
@@ -142,76 +122,4 @@ func SendActivationEmail(to, username, token string) error {
 
 	// 发送邮件
 	return client.send(to, "账号激活", body)
-}
-
-func generateActivationEmailBody(username, token string) (string, error) {
-	// 邮件模板
-	const emailTemplate = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>账号激活</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .container {
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 3px;
-            margin: 20px 0;
-        }
-        .note {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>欢迎加入 GooseForum</h2>
-        <p>亲爱的 {{.Username}}:</p>
-        <p>请点击以下按钮激活您的账号:</p>
-        <a href="{{.ActivationLink}}" class="button">激活账号</a>
-        <p class="note">如果按钮无法点击，请复制以下链接到浏览器打开：</p>
-        <p>{{.ActivationLink}}</p>
-        <p class="note">此链接24小时内有效</p>
-    </div>
-</body>
-</html>
-`
-
-	// 解析并执行模板
-	tmpl, err := template.New("activation").Parse(emailTemplate)
-	if err != nil {
-		return "", err
-	}
-
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, map[string]any{
-		"Username": username,
-		"ActivationLink": fmt.Sprintf("%s/api/activate?token=%s",
-			preferences.GetString("server.url"), token),
-	})
-	if err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
 }

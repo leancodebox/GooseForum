@@ -36,6 +36,7 @@ const (
 	FooterLinks     = `footerLinks`
 	SponsorsPage    = `sponsors`
 	SiteSettings    = `siteSettings`
+	EmailSettings   = `emailSetting`
 )
 
 var PageTypeList = []string{
@@ -44,6 +45,7 @@ var PageTypeList = []string{
 	FooterLinks,
 	SponsorsPage,
 	SiteSettings,
+	EmailSettings,
 }
 
 type WebSettingsConfig struct {
@@ -116,15 +118,26 @@ type SiteSettingsConfig struct {
 	SiteDescription string `json:"siteDescription"`
 	SiteKeywords    string `json:"siteKeywords"`
 	SiteUrl         string `json:"siteUrl"`
-	
-	// SEO设置
-	TitleTemplate      string `json:"titleTemplate"`
-	DefaultDescription string `json:"defaultDescription"`
-	IcpNumber          string `json:"icpNumber"`
-	
+
 	// 其他设置
 	Timezone           string `json:"timezone"`
 	DefaultLanguage    string `json:"defaultLanguage"`
 	MaintenanceMode    bool   `json:"maintenanceMode"`
 	MaintenanceMessage string `json:"maintenanceMessage"`
+
+	// 邮件设置
+	MailSettings MailSettingsConfig `json:"mailSettings"`
+}
+
+// 邮件设置配置
+type MailSettingsConfig struct {
+	// SMTP服务器设置
+	EnableMail     bool   `json:"enableMail"`
+	SmtpHost       string `json:"smtpHost"`
+	SmtpPort       int    `json:"smtpPort"`
+	SmtpEncryption string `json:"smtpEncryption"` // none, tls, ssl
+	SmtpUsername   string `json:"smtpUsername"`
+	SmtpPassword   string `json:"smtpPassword"`
+	FromName       string `json:"fromName"`
+	FromEmail      string `json:"fromEmail"`
 }

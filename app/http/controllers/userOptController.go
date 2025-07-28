@@ -1,13 +1,14 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 )
 
-// 添加激活处理函数
+// ActivateAccount 激活处理函数
 func ActivateAccount(c *gin.Context) {
 	token := c.Query("token")
 	if token == "" {
@@ -48,12 +49,16 @@ func ActivateAccount(c *gin.Context) {
 // 添加新的辅助函数
 func renderActivationPage(c *gin.Context, success bool, message string) {
 	status := "失败"
+	description := "激活失败，请检查您的激活链接是否正确或联系管理员。"
 	if success {
 		status = "成功"
+		description = "您的账号已成功激活！现在您可以使用完整的论坛功能，包括发帖、回复、个人中心等服务。"
 	}
 	viewrender.Render(c, "activate.gohtml", map[string]any{
-		"Status":  status,
-		"Message": message,
-		"Success": success,
+		"Title":       fmt.Sprintf("账号激活%v - Goose Forum", status),
+		"Status":      status,
+		"Message":     message,
+		"Success":     success,
+		"Description": description,
 	})
 }

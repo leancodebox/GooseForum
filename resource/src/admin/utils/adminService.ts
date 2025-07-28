@@ -121,8 +121,7 @@ export const getArticleEnum = async (): Promise<Result<Record<string,Label[]>>> 
 
 // 网页设置相关接口
 export interface WebSettingsConfig {
-    externalLinks: string;
-    favicon: string;
+    externalLinks: string
 }
 
 export const getWebSettings = (): Promise<Result<WebSettingsConfig>> => {
@@ -199,5 +198,34 @@ export const getSponsors = (): Promise<Result<SponsorsConfig>> => {
 export const saveSponsors = (sponsorsInfo: SponsorsConfig): Promise<Result<any>> => {
     return axiosInstance.post('api/admin/save-sponsors', {
         sponsorsInfo: sponsorsInfo
+    });
+}
+
+// 邮件设置相关接口
+export interface MailSettingsConfig {
+    enableMail: boolean;
+    smtpHost: string;
+    smtpPort: number;
+    smtpEncryption: string;
+    smtpUsername: string;
+    smtpPassword: string;
+    fromName: string;
+    fromEmail: string;
+}
+
+export const getMailSettings = (): Promise<Result<MailSettingsConfig>> => {
+    return axiosInstance.get('api/admin/mail-settings');
+}
+
+export const saveMailSettings = (settings: MailSettingsConfig): Promise<Result<any>> => {
+    return axiosInstance.post('api/admin/save-mail-settings', {
+        settings: settings
+    });
+}
+
+export const testMailConnection = (settings: MailSettingsConfig, testEmail: string): Promise<Result<any>> => {
+    return axiosInstance.post('api/admin/test-mail-connection', {
+        settings: settings,
+        testEmail: testEmail
     });
 }
