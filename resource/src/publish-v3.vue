@@ -51,7 +51,7 @@ const md = new MarkdownIt({
   html: true,        // 启用 HTML 标签
   linkify: true,     // 自动转换 URL 为链接
   typographer: true, // 启用排版替换
-  breaks: true,     // 
+  breaks: true,     //
 })
   .use(markdownItTaskLists, { enabled: false }) // 启用任务列表支持
 
@@ -61,11 +61,11 @@ md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
   const token = tokens[idx]
   const info = token.info ? token.info.trim() : ''
   const langName = info ? info.split(/\s+/g)[0] : ''
-  
+
   if (langName === 'mermaid') {
     const id = 'mermaid-' + Math.random().toString(36).substr(2, 9)
     const code = token.content.trim()
-    
+
     // 异步渲染 Mermaid 图表
     setTimeout(() => {
       try {
@@ -89,10 +89,10 @@ md.renderer.rules.fence = function (tokens, idx, options, env, slf) {
         }
       }
     }, 0)
-    
+
     return `<div id="${id}" class="mermaid">${code}</div>`
   }
-  
+
   // 使用默认的 fence 渲染器处理其他代码块
   return defaultFence(tokens, idx, options, env, slf)
 }
@@ -322,18 +322,18 @@ const uploadImage = async (file: File): Promise<string> => {
       method: 'POST',
       body: formData
     })
-    
+
     let result
     try {
       result = await response.json()
     } catch {
       throw new Error('服务器响应格式错误')
     }
-    
+
     if (!response.ok) {
       throw new Error(`上传失败: ${response.status} - ${result?.msg || '服务器错误'}`)
     }
-    
+
     if (result?.code === 0 && result?.result?.url) {
       return result.result.url
     } else {
@@ -357,10 +357,10 @@ const insertImageToContent = (imageUrl: string, altText: string = '') => {
   const cursorPos = textarea.selectionStart
   const textBefore = articleData.content.substring(0, cursorPos)
   const textAfter = articleData.content.substring(textarea.selectionEnd)
-  
+
   const imageMarkdown = `![${altText}](${imageUrl})\n`
   articleData.content = textBefore + imageMarkdown + textAfter
-  
+
   // 设置光标位置到插入的图片后面
   setTimeout(() => {
     const newPos = cursorPos + imageMarkdown.length
@@ -564,12 +564,12 @@ onMounted(async () => {
               </div>
 
               <!-- 隐藏的文件输入框 -->
-              <input 
-                id="imageUpload" 
-                type="file" 
-                accept="image/*" 
-                multiple 
-                @change="handleFileSelect" 
+              <input
+                id="imageUpload"
+                type="file"
+                accept="image/*"
+                multiple
+                @change="handleFileSelect"
                 class="hidden"
               />
 
@@ -578,25 +578,25 @@ onMounted(async () => {
                 <label class="floating-label pb-2">
                   <span class="font-normal text-base-content">✍️ 文章内容-支持 Markdown 语法</span>
                   <div class="relative flex-1">
-                    
 
-                    
+
+
                     <!-- 文本编辑区域 -->
-                    <div 
+                    <div
                       class="relative"
                       @dragover="handleDragOver"
                       @dragleave="handleDragLeave"
                       @drop="handleDrop"
                     >
-                      <textarea 
+                      <textarea
                         v-model="articleData.content"
                         @paste="handlePaste"
                         class="textarea textarea-bordered w-full h-full min-h-96 resize-none focus:textarea-primary font-mono text-sm leading-relaxed"
-                        placeholder="开启你的创作...\n\n💡 提示：\n• 直接粘贴图片即可上传\n• 拖拽图片到此区域上传\n• 点击上方按钮选择图片"
+                        placeholder="开启你的创作...&#10;&#10;💡 提示：&#10;• 直接粘贴图片即可上传&#10;• 拖拽图片到此区域上传&#10;• 点击上方按钮选择图片"
                       ></textarea>
-                      
+
                       <!-- 拖拽提示层 -->
-                       <div 
+                       <div
                          class="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary rounded-lg flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200"
                          :class="{ 'opacity-100': isDragOver || isUploading }"
                        >
@@ -609,7 +609,7 @@ onMounted(async () => {
                            </p>
                          </div>
                       </div>
-                      
+
                       <!-- 字数统计 -->
                       <div class="absolute bottom-2 right-4 text-xs text-base-content/50 bg-base-100 px-2 py-1 rounded">
                         <span>{{ charCount }}</span> 字符

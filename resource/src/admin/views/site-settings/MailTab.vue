@@ -102,7 +102,7 @@
               <input v-model="settings.useSSL" :disabled="!settings.enableMail" type="checkbox" class="toggle toggle-primary" />
             </label>
           </div>
-          
+
           <label class="floating-label">
           </label>
 
@@ -205,12 +205,6 @@ const settings = ref({
   smtpPassword: '',
   fromName: 'GooseForum',
   fromEmail: 'noreply@example.com',
-
-  // 邮件模板设置
-  verificationSubject: '请验证您的邮箱 - {site_name}',
-  verificationContent: '亲爱的 {username}，\n\n感谢您注册 {site_name}！请点击以下链接验证您的邮箱：\n\n{verification_link}\n\n如果您没有注册账户，请忽略此邮件。\n\n祝好！\n{site_name} 团队',
-  resetPasswordSubject: '重置您的密码 - {site_name}',
-  resetPasswordContent: '亲爱的 {username}，\n\n我们收到了重置您密码的请求。请点击以下链接重置密码：\n\n{reset_link}\n\n如果您没有请求重置密码，请忽略此邮件。\n\n祝好！\n{site_name} 团队',
 
 })
 

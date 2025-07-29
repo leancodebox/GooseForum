@@ -28,12 +28,11 @@ var webSettingsCache = &datacache.Cache[pageConfig.WebSettingsConfig]{}
 func GlobalFunc() template.FuncMap {
 	return template.FuncMap{
 		"WebPageSettings": func() pageConfig.WebSettingsConfig {
-			data, _ := webSettingsCache.GetOrLoadE("websetcache", func() (pageConfig.WebSettingsConfig, error) {
+			return webSettingsCache.GetOrLoad("websetcache", func() (pageConfig.WebSettingsConfig, error) {
 				return pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{}), nil
 			},
 				time.Second*5,
 			)
-			return data
 		},
 	}
 }
@@ -46,6 +45,28 @@ func Render(c *gin.Context, name string, templateData map[string]any) {
 	templateData["Theme"] = GetTheme(c)
 	templateData["Footer"] = hotdataserve.GetFooterConfigCache()
 	templateData["SiteSetting"] = hotdataserve.GetSiteSettingsConfigCache()
+	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, templateData); err != nil {
+		slog.Error("render template err", "err", err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+	}
+}
+
+type TmplData struct {
+	IsProduction bool
+	Theme        string
+	Footer       pageConfig.FooterConfig
+	SiteSetting  pageConfig.SiteSettingsConfig
+	Data         map[string]any
+}
+
+func SafeRender(c *gin.Context, name string, data map[string]any) {
+	templateData := TmplData{
+		IsProduction: setting.IsProduction(),
+		Theme:        GetTheme(c),
+		Footer:       hotdataserve.GetFooterConfigCache(),
+		SiteSetting:  hotdataserve.GetSiteSettingsConfigCache(),
+		Data:         data,
+	}
 	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, templateData); err != nil {
 		slog.Error("render template err", "err", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)

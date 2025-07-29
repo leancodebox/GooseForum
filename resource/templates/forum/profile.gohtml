@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN" {{if .Theme}}data-theme="{{.Theme}}"{{end}}>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{template "commonhead.gohtml" .}}
-    {{GetImportInfoPath `src/notifications.js`}}
+    {{template "common-head.gohtml" .}}
+    {{GetImportInfoPath `src/profile.js`}}
 </head>
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">

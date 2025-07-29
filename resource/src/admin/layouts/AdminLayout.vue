@@ -71,7 +71,7 @@
 
       <!-- 主内容区 -->
       <div class="drawer-content flex flex-col lg:ml-48">
-        <main class="flex-1 p-6 min-h-screen">
+        <main class="flex-1 p-3 min-h-screen">
           <router-view/>
         </main>
       </div>
@@ -142,7 +142,9 @@ import {
   ShieldCheckIcon,
   TagIcon,
   TicketIcon,
-  UsersIcon
+  UsersIcon,
+  DocumentMinusIcon,
+  Cog6ToothIcon,
 } from '@heroicons/vue/24/outline'
 
 // 菜单项类型定义
@@ -221,7 +223,7 @@ const menuItems = ref<MenuItem[]>([
     key: 'footer-links',
     label: '页脚管理',
     path: '/admin/footer-links',
-    icon: LinkIcon
+    icon: DocumentMinusIcon
   },
   {
     key: 'sponsors',
@@ -270,7 +272,7 @@ const menuItems = ref<MenuItem[]>([
     key: 'site-settings',
     label: '站点设置 - todo',
     path: '/admin/site-settings',
-    icon: CogIcon
+    icon: Cog6ToothIcon
   },
 ])
 

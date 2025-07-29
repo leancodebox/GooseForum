@@ -1,3 +1,5 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{.Title}}</title>
 <meta name="description" content="{{.Description}}">
 <meta name="keywords"
@@ -11,3 +13,8 @@
 <meta property="og:url" content="{{.CanonicalHref}}"/>{{end}}
 <link rel="icon" type="image/png" href="/static/pic/icon.webp">
 {{with WebPageSettings}}{{SafeHTML .ExternalLinks}}{{end}}
+{{if .ArticleJSONLD}}
+<script type="application/ld+json">
+{{.ArticleJSONLD}}
+</script>
+{{end}}

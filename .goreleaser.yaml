@@ -7,7 +7,7 @@
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 
 version: 2
-
+project_name: GooseForum
 before:
   hooks:
     # You may remove this if you don't use go modules.

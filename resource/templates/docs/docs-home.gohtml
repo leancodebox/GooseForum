@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="{{.Theme}}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{template "commonhead.gohtml" .}}
+    {{template "common-head.gohtml" .}}
     {{GetImportInfoPath `src/docs.js`}}
 </head>
 <body>
@@ -11,7 +9,7 @@
     <header class="sticky top-0 z-50">
         {{template "nav.gohtml" .}}
     </header>
-    
+
     <!-- Compact Header -->
     <section class="bg-gradient-to-r from-primary/10 via-secondary/5 to-accent/10 py-8">
         <div class="container mx-auto px-4">
@@ -32,7 +30,7 @@
             </div>
         </div>
     </section>
-    
+
     <main class="flex-1 container mx-auto px-4 py-8">
         <div class="max-w-6xl mx-auto">
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -56,16 +54,16 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- 项目描述 -->
                         <p class="text-base-content/70 mb-4 leading-relaxed text-sm line-clamp-3">{{.Description}}</p>
-                        
+
                         <!-- 元数据 -->
                         <div class="flex items-center justify-between text-xs text-base-content/50 mb-4">
                             <span>创建: {{.CreatedAt.Format "2006-01-02"}}</span>
                             <span class="badge badge-primary badge-xs">最新</span>
                         </div>
-                        
+
                         <!-- 操作按钮 -->
                         <div class="card-actions justify-end">
                             <a href="/docs/{{.Slug}}" class="btn btn-primary btn-sm rounded-lg px-4 group-hover:scale-105 transition-transform duration-300">

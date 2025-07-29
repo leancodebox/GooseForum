@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" {{if .Theme}}data-theme="{{.Theme}}"{{end}}>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{template "commonhead.gohtml" .}}
+    {{template "common-head.gohtml" .}}
     <meta property="profile:username" content="{{.Author.Username}}" />
     {{GetImportInfoPath `src/main.js`}}
 </head>
@@ -398,17 +396,17 @@
     async function toggleUserFollow(userId, buttonElement) {
         const followText = buttonElement.querySelector('.follow-text');
         const followLoading = buttonElement.querySelector('.follow-loading');
-        
+
         if (!buttonElement) return;
-        
+
         const isFollowing = buttonElement.getAttribute('data-following') === 'true';
         const action = isFollowing ? 2 : 1; // 1: 关注, 2: 取消关注
-        
+
         // 显示加载状态
         followText.style.display = 'none';
         followLoading.style.display = 'inline-block';
         buttonElement.disabled = true;
-        
+
         try {
             const response = await fetch('/api/forum/follow-user', {
                 method: 'POST',
@@ -420,9 +418,9 @@
                     action: action
                 })
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok && result.code === 0) {
                 // 更新按钮状态
                 if (action === 1) {
