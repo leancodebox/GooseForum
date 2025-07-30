@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"net/http"
 	"time"
@@ -54,14 +53,15 @@ func RenderErrorPage(c *gin.Context, data ErrorPageData) {
 
 	c.Status(data.StatusCode)
 	viewrender.Render(c, "error.gohtml", map[string]any{
-		"IsProduction": setting.IsProduction(),
-		"User":         GetLoginUser(c),
-		"Title":        data.Title + " - GooseForum",
-		"title":        data.Title,
-		"message":      data.Message,
-		"errorCode":    data.ErrorCode,
-		"timestamp":    time.Now().Format("2006-01-02 15:04:05"),
-		"requestId":    c.GetHeader("X-Request-ID"),
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(data.Title).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
+		"message":   data.Message,
+		"errorCode": data.ErrorCode,
+		"timestamp": time.Now().Format("2006-01-02 15:04:05"),
+		"requestId": c.GetHeader("X-Request-ID"),
 	})
 }
 

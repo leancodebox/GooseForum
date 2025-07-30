@@ -3,13 +3,14 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"math/rand"
 	"regexp"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
-	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
@@ -18,7 +19,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 
@@ -29,18 +29,10 @@ import (
 
 var (
 	usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{6,32}$`)
-	// 简单的Email正则表达式
-	// 匹配格式：username@domain.tld
-	emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 )
 
 func ValidateUsername(username string) bool {
 	return usernameRegex.MatchString(username)
-}
-
-func IsValidEmail(email string) bool {
-	// 检查是否匹配
-	return emailRegex.MatchString(email)
 }
 
 func Logout(c *gin.Context) {
@@ -229,49 +221,27 @@ func Login(c *gin.Context) {
 		"登录成功",
 	))
 }
-func GetLoginUser(c *gin.Context) UserInfoShow {
+func GetLoginUser(c *gin.Context) *vo.UserInfoShow {
 	userId := c.GetUint64("userId")
 	return GetUserShowByUserId(userId)
 }
 
-func GetUserShowByUserId(userId uint64) UserInfoShow {
+func GetUserShowByUserId(userId uint64) *vo.UserInfoShow {
 	if userId == 0 {
-		return UserInfoShow{}
+		return &vo.UserInfoShow{}
 	}
-	return hotdataserve.GetOrLoad(fmt.Sprintf("user:%v", userId), func() (UserInfoShow, error) {
+	return hotdataserve.GetOrLoad(fmt.Sprintf("user:%v", userId), func() (*vo.UserInfoShow, error) {
 		user, _ := users.Get(userId)
 		if user.Id == 0 {
-			return UserInfoShow{}, errors.New("no found")
+			return &vo.UserInfoShow{}, errors.New("no found")
 		}
-		return user2userShow(user), nil
+		return transform.User2userShow(user), nil
 	})
 }
 
 type PageButton struct {
 	Index int
 	Page  int
-}
-
-func articleCategoryMapList(articleIds []uint64) map[uint64][]string {
-	categoryRs := articleCategoryRs.GetByArticleIdsEffective(articleIds)
-	categoryMap := articleCategoryMap()
-	// 获取文章的分类和标签
-	categoriesGroup := array.GroupBy(categoryRs, func(rs *articleCategoryRs.Entity) uint64 {
-		return rs.ArticleId
-	})
-	res := make(map[uint64][]string, len(categoriesGroup))
-	for aId, ids := range categoriesGroup {
-		res[aId] = array.Map(array.Map(ids, func(rs *articleCategoryRs.Entity) uint64 {
-			return rs.ArticleCategoryId
-		}), func(item uint64) string {
-			if cateItem, ok := categoryMap[item]; ok {
-				return cateItem.Category
-			} else {
-				return ""
-			}
-		})
-	}
-	return res
 }
 
 func buildCanonicalHref(c *gin.Context) string {

@@ -1,20 +1,51 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{{with .PageMeta}}
+<!-- 基础 SEO 标签 -->
 <title>{{.Title}}</title>
-<meta name="description" content="{{.Description}}">
-<meta name="keywords"
-      content="{{if .Keywords}}{{.Keywords}}{{else}}GooseForum{{end}}">
-<meta property="og:site_name" content="GooseForum">
-<meta property="og:title" content="{{.Title}}">
-<meta property="og:description" content="{{.Description}}">
-<meta property="og:type" content="{{if .OgType}}{{.OgType}}{{else}}website{{end}}">
-<link rel="alternate" type="application/rss+xml" title="GooseForum RSS Feed" href="/rss.xml"/>{{if .CanonicalHref}}
-<link rel="canonical" href="{{.CanonicalHref}}">
-<meta property="og:url" content="{{.CanonicalHref}}"/>{{end}}
-<link rel="icon" type="image/png" href="/static/pic/icon.webp">
-{{with WebPageSettings}}{{SafeHTML .ExternalLinks}}{{end}}
-{{if .ArticleJSONLD}}
+{{if .Description}}<meta name="description" content="{{.Description}}">{{end}}
+{{if .Keywords}}<meta name="keywords" content="{{.Keywords}}">{{end}}
+{{if .Author}}<meta name="author" content="{{.Author}}">{{end}}
+<!-- URL 相关 -->
+{{if .CanonicalURL}}<link rel="canonical" href="{{.CanonicalURL}}">{{end}}
+{{if .AlternateURL}}<link rel="alternate" href="{{.AlternateURL}}">{{end}}
+<!-- Open Graph 标签 -->
+{{with .OG}}
+{{if .Type}}<meta property="og:type" content="{{.Type}}">{{end}}
+{{if .Title}}<meta property="og:title" content="{{.Title}}">{{end}}
+{{if .Description}}<meta property="og:description" content="{{.Description}}">{{end}}
+{{if .Image}}<meta property="og:image" content="{{.Image}}">{{end}}
+{{if .ImageAlt}}<meta property="og:image:alt" content="{{.ImageAlt}}">{{end}}
+{{if .URL}}<meta property="og:url" content="{{.URL}}">{{end}}
+{{if .SiteName}}<meta property="og:site_name" content="{{.SiteName}}">{{end}}
+<!-- 文章特定的 Open Graph 标签 -->
+{{if .ArticleAuthor}}<meta property="article:author" content="{{.ArticleAuthor}}">{{end}}
+{{if .ArticleSection}}<meta property="article:section" content="{{.ArticleSection}}">{{end}}
+{{range .ArticleTag}}<meta property="article:tag" content="{{.}}">{{end}}
+{{if .ArticlePublishedTime}}<meta property="article:published_time" content="{{.ArticlePublishedTime.Format "2006-01-02T15:04:05Z07:00"}}">{{end}}
+{{if .ArticleModifiedTime}}<meta property="article:modified_time" content="{{.ArticleModifiedTime.Format "2006-01-02T15:04:05Z07:00"}}">{{end}}
+{{end}}
+<!-- Twitter Card 标签 -->
+{{with .Twitter}}
+{{if .Card}}<meta name="twitter:card" content="{{.Card}}">{{end}}
+{{if .Site}}<meta name="twitter:site" content="{{.Site}}">{{end}}
+{{if .Creator}}<meta name="twitter:creator" content="{{.Creator}}">{{end}}
+{{if .Title}}<meta name="twitter:title" content="{{.Title}}">{{end}}
+{{if .Description}}<meta name="twitter:description" content="{{.Description}}">{{end}}
+{{if .Image}}<meta name="twitter:image" content="{{.Image}}">{{end}}
+{{if .ImageAlt}}<meta name="twitter:image:alt" content="{{.ImageAlt}}">{{end}}
+{{end}}
+<!-- 页面配置 -->
+{{if .Favicon}}<link rel="icon" href="{{.Favicon}}">{{end}}
+{{if .ThemeColor}}<meta name="theme-color" content="{{.ThemeColor}}">{{end}}
+<!-- 结构化数据 -->
+{{if .SchemaOrgJSON}}
 <script type="application/ld+json">
-{{.ArticleJSONLD}}
+{{.SchemaOrgJSON}}
 </script>
 {{end}}
+{{end}}
+<!-- RSS 订阅 -->
+<link rel="alternate" type="application/rss+xml" title="GooseForum RSS Feed" href="/rss.xml"/>
+<!-- 外部链接配置 -->
+{{with WebPageSettings}}{{SafeHTML .ExternalLinks}}{{end}}

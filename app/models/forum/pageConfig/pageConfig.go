@@ -120,13 +120,8 @@ type SiteSettingsConfig struct {
 	SiteUrl         string `json:"siteUrl"`
 
 	// 其他设置
-	Timezone           string `json:"timezone"`
-	DefaultLanguage    string `json:"defaultLanguage"`
-	MaintenanceMode    bool   `json:"maintenanceMode"`
-	MaintenanceMessage string `json:"maintenanceMessage"`
-
-	// 邮件设置
-	MailSettings MailSettingsConfig `json:"mailSettings"`
+	Timezone        string `json:"timezone"`
+	DefaultLanguage string `json:"defaultLanguage"`
 }
 
 // 邮件设置配置

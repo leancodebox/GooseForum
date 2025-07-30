@@ -39,15 +39,13 @@ func GetDefaultFooter() pageConfig.FooterConfig {
 
 var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
 	SiteName:        "GooseForum",
-	SiteLogo:        "",
+	SiteLogo:        "/static/pic/icon.webp",
 	SiteDescription: "一个现代化的论坛系统",
 	SiteKeywords:    "forum,discussion,community",
-	SiteUrl:         "https://localhost:3000",
+	SiteUrl:         "",
 
-	Timezone:           "Asia/Shanghai",
-	DefaultLanguage:    "zh-CN",
-	MaintenanceMode:    false,
-	MaintenanceMessage: "站点正在维护中，请稍后再试。",
+	Timezone:        "Asia/Shanghai",
+	DefaultLanguage: "zh-CN",
 }
 
 func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {

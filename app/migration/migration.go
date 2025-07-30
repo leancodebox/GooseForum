@@ -87,7 +87,7 @@ func migration(migration bool) {
 	} else {
 		slog.Info("db4fileconnect migration end")
 	}
-	
+
 }
 
 func initData() {

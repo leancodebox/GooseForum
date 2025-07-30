@@ -28,7 +28,13 @@ func Home(c *gin.Context) {
 	latestArticles := articleSimpleDtoCache.GetOrLoad("home:getLatestArticles", func() ([]ArticlesSimpleDto, error) {
 		return articlesSmallEntity2Dto(getLatestArticles()), nil
 	}, time.Second*10)
+	pageMeta := viewrender.NewPageMetaBuilder().
+		SetTitle("GooseForum - 自由漫谈的江湖茶馆").
+		SetDescription("GooseForum's home").
+		SetCanonicalURL(buildCanonicalHref(c)).
+		Build()
 	viewrender.Render(c, "index.gohtml", map[string]any{
+		"PageMeta":            pageMeta,
 		"CanonicalHref":       buildCanonicalHref(c),
 		"User":                GetLoginUser(c),
 		"Title":               "GooseForum - 自由漫谈的江湖茶馆",
@@ -43,8 +49,10 @@ func Home(c *gin.Context) {
 
 func LoginView(c *gin.Context) {
 	viewrender.Render(c, "login-vue.gohtml", map[string]any{
-		"User":  GetLoginUser(c),
-		"Title": "登录/注册 - GooseForum",
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle("登录/注册").
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 	})
 }
 
@@ -146,6 +154,18 @@ func PostDetail(c *gin.Context) {
 	}
 	// 构建模板数据
 	viewrender.Render(c, "detail.gohtml", map[string]any{
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetArticle(
+				entity.Title,
+				entity.Description,
+				author,
+				articleCategory,
+				&entity.CreatedAt,
+				&entity.UpdatedAt,
+			).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			SetSchemaOrg(generateArticleJSONLD(c, entity, author)).
+			Build(),
 		"ArticleId":            id,
 		"AuthorId":             authorId,
 		"Title":                entity.Title + " - GooseForum",
@@ -304,8 +324,11 @@ func Post(c *gin.Context) {
 	}
 
 	viewrender.Render(c, "list.gohtml", map[string]any{
-		"Title":               title,
-		"Description":         description,
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(title).
+			SetDescription(description).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 		"Year":                time.Now().Year(),
 		"ArticleList":         articleList,
 		"Page":                pageData.Page,
@@ -398,6 +421,10 @@ func User(c *gin.Context) {
 	}
 
 	viewrender.Render(c, "user.gohtml", map[string]any{
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetUserProfile(showUser.Username, showUser.Bio).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 		"Articles":             articlesSmallEntity2Dto(last),
 		"ArticlesCount":        articles.GetUserCount(showUser.UserId),
 		"Author":               showUser,
@@ -411,24 +438,29 @@ func User(c *gin.Context) {
 		"User":                 currentUser,
 		"Title":                showUser.Username + " - GooseForum",
 		"Description":          showUser.Username + " 的个人简介 ",
-		"OgType":               "profile",
 	})
 }
 
 func About(c *gin.Context) {
 	viewrender.Render(c, "about.gohtml", map[string]any{
-		"User":        GetLoginUser(c),
-		"Title":       "关于 - GooseForum",
-		"Description": "GooseForum's about",
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`关于`).
+			SetDescription(`GooseForum's about`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 	})
 }
 
 func SponsorsView(c *gin.Context) {
 	sponsorsInfo := hotdataserve.SponsorsConfigCache()
 	viewrender.Render(c, "sponsors.gohtml", map[string]any{
-		"User":         GetLoginUser(c),
-		"Title":        "赞助商 - GooseForum",
-		"Description":  "GooseForum's sponsors",
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`赞助商`).
+			SetDescription(`GooseForum's sponsors`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 		"SponsorsInfo": sponsorsInfo,
 	})
 }
@@ -443,7 +475,12 @@ var privacyPolicyMD string
 func TermsOfService(c *gin.Context) {
 	htmlContent := markdown2html.MarkdownToHTML(termsOfServiceMD)
 	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
-		"User":        GetLoginUser(c),
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`用户协议`).
+			SetDescription(`GooseForum 用户服务协议`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 		"Title":       "用户协议 - GooseForum",
 		"Subtitle":    "Terms of Service",
 		"Description": "GooseForum 用户服务协议",
@@ -455,7 +492,12 @@ func TermsOfService(c *gin.Context) {
 func PrivacyPolicy(c *gin.Context) {
 	htmlContent := markdown2html.MarkdownToHTML(privacyPolicyMD)
 	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
-		"User":        GetLoginUser(c),
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`隐私政策`).
+			SetDescription(`GooseForum 隐私保护政策`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 		"Title":       "隐私政策 - GooseForum",
 		"Subtitle":    "Privacy Policy",
 		"Description": "GooseForum 隐私保护政策",
@@ -500,10 +542,13 @@ func LinksView(c *gin.Context) {
 		}
 	}
 	viewrender.Render(c, "links.gohtml", map[string]any{
-		"User":                GetLoginUser(c),
-		"Title":               "友情链接 - GooseForum",
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`友情链接`).
+			SetDescription(`GooseForum's links`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 		"FriendLinksGroup":    res,
-		"Description":         "GooseForum's links",
 		"TotalCounter":        totalCounter,
 		"RecommendedArticles": getRecommendedArticles(),
 		"LinkStatisticsInfo":  linkStatisticsInfo,
@@ -512,28 +557,39 @@ func LinksView(c *gin.Context) {
 
 func Profile(c *gin.Context) {
 	viewrender.Render(c, "profile.gohtml", map[string]any{
-		"User":  GetLoginUser(c),
-		"Title": "个人中心 - GooseForum",
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`个人中心`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 	})
 }
 func PublishV3(c *gin.Context) {
 	viewrender.Render(c, "publish-v3.gohtml", map[string]any{
-		"User":  GetLoginUser(c),
-		"Title": "发布中心 - GooseForum",
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`发布中心`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 	})
 }
 
 func Notifications(c *gin.Context) {
 	viewrender.Render(c, "notifications.gohtml", map[string]any{
-		"User":  GetLoginUser(c),
-		"Title": "通知中心 - GooseForum",
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`通知中心`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 	})
 }
 
 func Admin(c *gin.Context) {
 	viewrender.Render(c, "admin.gohtml", map[string]any{
-		"User":        GetLoginUser(c),
-		"Title":       "管理 - GooseForum",
-		"Description": "GooseForum's Admin",
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`管理`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 	})
 }

@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 )
@@ -70,10 +69,12 @@ func DocsHome(c *gin.Context) {
 	})
 
 	viewrender.Render(c, "docs-home.gohtml", map[string]any{
-		"IsProduction":  setting.IsProduction(),
-		"User":          GetLoginUser(c),
-		"Title":         "文档中心 - GooseForum",
-		"Description":   "GooseForum 文档中心，包含完整的使用指南和API参考",
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`文档中心`).
+			SetDescription(`GooseForum 文档中心，包含完整的使用指南和API参考`).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 		"Projects":      projects,
 		"CanonicalHref": buildCanonicalHref(c),
 	})
@@ -171,10 +172,12 @@ func DocsVersion(c *gin.Context) {
 	}
 
 	viewrender.Render(c, "docs-version.gohtml", map[string]any{
-		"IsProduction":    setting.IsProduction(),
-		"User":            GetLoginUser(c),
-		"Title":           fmt.Sprintf("%s %s - %s - GooseForum", project.Name, version.Name, "文档中心"),
-		"Description":     fmt.Sprintf("%s - %s", project.Description, version.Description),
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(fmt.Sprintf("%s %s - %s - GooseForum", project.Name, version.Name, "文档中心")).
+			SetDescription(fmt.Sprintf("%s - %s", project.Description, version.Description)).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 		"Project":         project,
 		"Version":         version,
 		"Directory":       resDirectory,
@@ -300,10 +303,12 @@ func DocsContent(c *gin.Context) {
 	htmlContent := template.HTML(markdown2html.MarkdownToHTML(content.Content))
 
 	viewrender.Render(c, "docs-content.gohtml", map[string]any{
-		"IsProduction":    setting.IsProduction(),
-		"User":            GetLoginUser(c),
-		"Title":           fmt.Sprintf("%s - %s - %s", content.Title, project.Name, "GooseForum"),
-		"Description":     fmt.Sprintf("%s - %s", content.Title, project.Description),
+		"User": GetLoginUser(c),
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(fmt.Sprintf("%s - %s - %s", content.Title, project.Name, "GooseForum")).
+			SetDescription(fmt.Sprintf("%s - %s", content.Title, project.Description)).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 		"Project":         project,
 		"Version":         version,
 		"Content":         content,

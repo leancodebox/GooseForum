@@ -1,9 +1,12 @@
-package controllers
+package transform
 
-import "github.com/leancodebox/GooseForum/app/models/forum/users"
+import (
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
+)
 
-func user2userShow(user users.EntityComplete) UserInfoShow {
-	return UserInfoShow{
+func User2userShow(user users.EntityComplete) *vo.UserInfoShow {
+	return &vo.UserInfoShow{
 		UserId:              user.Id,
 		Username:            user.Username,
 		Bio:                 user.Bio,

@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -186,8 +186,6 @@ func Invitation(req component.BetterRequest[null]) component.Response {
 	})
 }
 
-type UserInfoShow vo.UserInfoShow
-
 // UploadAvatar 头像上传处理函数
 func UploadAvatar(c *gin.Context) {
 	// 从 context 中获取用户 ID
@@ -278,7 +276,7 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 func SaveUser(userEntity *users.EntityComplete) error {
 	err := users.Save(userEntity)
 	if err == nil {
-		if cacheErr := hotdataserve.Reload(fmt.Sprintf("user:%v", userEntity.Id), user2userShow(*userEntity)); cacheErr != nil {
+		if cacheErr := hotdataserve.Reload(fmt.Sprintf("user:%v", userEntity.Id), transform.User2userShow(*userEntity)); cacheErr != nil {
 			slog.Error(cacheErr.Error())
 		}
 	}

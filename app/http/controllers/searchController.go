@@ -169,7 +169,12 @@ func SearchPage(c *gin.Context) {
 		}
 	}
 
-	fmt.Println(templateData["Query"])
+	templateData["PageMeta"] = viewrender.NewPageMetaBuilder().
+		SetTitle(fmt.Sprintf("%v 的搜索结果", query)).
+		SetCanonicalURL(buildCanonicalHref(c)).
+		Build()
 	// 渲染模板
-	viewrender.Render(c, "search.gohtml", templateData)
+	viewrender.Render(c, "search.gohtml",
+		templateData,
+	)
 }

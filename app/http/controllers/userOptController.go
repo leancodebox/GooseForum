@@ -55,10 +55,15 @@ func renderActivationPage(c *gin.Context, success bool, message string) {
 		description = "您的账号已成功激活！现在您可以使用完整的论坛功能，包括发帖、回复、个人中心等服务。"
 	}
 	viewrender.Render(c, "activate.gohtml", map[string]any{
-		"Title":       fmt.Sprintf("账号激活%v - Goose Forum", status),
+		"Title":       fmt.Sprintf("账号激活%v", status),
 		"Status":      status,
 		"Message":     message,
 		"Success":     success,
 		"Description": description,
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(fmt.Sprintf("账号激活%v", status)).
+			SetDescription(description).
+			SetCanonicalURL(buildCanonicalHref(c)).
+			Build(),
 	})
 }

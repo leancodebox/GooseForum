@@ -2,13 +2,7 @@
 <html lang="zh-CN" {{if .Theme}}data-theme="{{.Theme}}"{{end}}>
 <head>
     {{template "common-head.gohtml" .}}
-    <meta property="article:published_time" content="{{.PublishedTime}}" />
-    <meta property="article:modified_time" content="{{.ModifiedTime}}" />
-    <meta property="article:author" content="{{.Username}}" />
-    <meta property="article:section" content="{{.Keywords}}" />
     {{GetImportInfoPath `src/detail.js`}}
-
-
 </head>
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
