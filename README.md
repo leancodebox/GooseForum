@@ -120,11 +120,6 @@ url = "http://localhost"     # 站点URL
 connection = "sqlite"        # 数据库类型 (sqlite/mysql)
 path = "./storage/database/sqlite.db"  # SQLite 数据库路径
 
-[mail]
-host = "smtp.example.com"    # SMTP 服务器
-port = 587                   # SMTP 端口
-username = "your@email.com"  # 邮箱用户名
-password = "your-password"   # 邮箱密码
 ```
 
 📖 **详细配置说明**: [配置文档](docs/configuration.md)
@@ -244,7 +239,6 @@ CMD ["./GooseForum", "serve"]
 ## 📚 相关文档
 
 - [配置文档](docs/configuration.md) - 详细的配置选项说明
-- [开发指南](docs/development.md) - 开发环境搭建和贡献指南
 
 ## 🙏 致谢
 

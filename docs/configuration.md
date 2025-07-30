@@ -8,9 +8,7 @@
 
 - [app] - 应用基础配置
 - [server] - 服务器配置
-- [footer] - 页脚配置
 - [jwtopt] - JWT 认证配置
-- [mail] - 邮件服务配置
 - [db] - 数据库配置
 - [log] - 日志配置
 - [site] - 站点元数据配置
@@ -44,18 +42,6 @@ port = 99                       # 监听端口
 - `url`: 影响 RSS、Sitemap 等功能返回的 URL 地址
 - `port`: 服务监听端口，默认 99
 
-### [footer] 页脚配置
-
-```toml
-[footer]
-url = "https://github.com/leanCodeBox/GooseForum"  # 项目链接
-text = "Powered by GooseForum"                      # 页脚文本
-```
-
-**配置说明：**
-- `url`: 页脚显示的项目链接地址
-- `text`: 页脚显示的文本内容
-
 ### [jwtopt] JWT 认证配置
 
 ```toml
@@ -68,43 +54,6 @@ validTime = 604800                      # Token 有效期（秒）
 - `signingKey`: JWT 签名密钥，系统会自动生成随机密钥。**注意：修改此值会导致所有已登录用户退出登录**
 - `validTime`: Token 有效期，默认 604800 秒（7天）
 
-### [mail] 邮件服务配置
-
-```toml
-[mail]
-host = "smtp.example.com"       # SMTP 服务器地址
-port = 587                      # SMTP 端口
-username = "noreply@example.com" # 邮箱用户名
-password = "your-password"      # 邮箱密码
-from_name = "GooseForum"        # 发件人名称
-```
-
-**配置说明：**
-- 用于用户邮箱激活、密码重置等功能
-- 支持常见的 SMTP 服务提供商（Gmail、QQ邮箱、163邮箱等）
-- `port`: 常用端口 587（STARTTLS）或 465（SSL）
-
-**常见邮箱配置示例：**
-
-#### Gmail
-```toml
-[mail]
-host = "smtp.gmail.com"
-port = 587
-username = "your-email@gmail.com"
-password = "your-app-password"  # 使用应用专用密码
-from_name = "GooseForum"
-```
-
-#### QQ邮箱
-```toml
-[mail]
-host = "smtp.qq.com"
-port = 587
-username = "your-email@qq.com"
-password = "your-authorization-code"  # 使用授权码
-from_name = "GooseForum"
-```
 
 ### [db] 数据库配置
 
