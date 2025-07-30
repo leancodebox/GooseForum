@@ -43,9 +43,6 @@ var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
 	SiteDescription: "一个现代化的论坛系统",
 	SiteKeywords:    "forum,discussion,community",
 	SiteUrl:         "",
-
-	Timezone:        "Asia/Shanghai",
-	DefaultLanguage: "zh-CN",
 }
 
 func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {

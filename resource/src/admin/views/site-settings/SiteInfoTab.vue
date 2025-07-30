@@ -112,13 +112,6 @@ const settings = ref<SiteSettingsConfig>({
   siteDescription: '',
   siteKeywords: '',
   siteUrl: '',
-  titleTemplate: '',
-  defaultDescription: '',
-  icpNumber: '',
-  timezone: '',
-  defaultLanguage: '',
-  maintenanceMode: false,
-  maintenanceMessage: ''
 })
 
 const uploading = ref(false)

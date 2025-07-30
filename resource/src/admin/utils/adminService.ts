@@ -141,13 +141,6 @@ export interface SiteSettingsConfig {
     siteDescription: string;
     siteKeywords: string;
     siteUrl: string;
-    titleTemplate: string;
-    defaultDescription: string;
-    icpNumber: string;
-    timezone: string;
-    defaultLanguage: string;
-    maintenanceMode: boolean;
-    maintenanceMessage: string;
 }
 
 export const getSiteSettings = (): Promise<Result<SiteSettingsConfig>> => {

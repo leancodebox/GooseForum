@@ -29,17 +29,12 @@
       <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
         <UserTab/>
       </div>
-
-      <input type="radio" name="site_settings_tabs" role="tab" class="tab" aria-label="其他设置"/>
-      <div role="tabpanel" class="tab-content bg-base-100 border-base-300  p-6">
-        <OtherTab/>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ContentTab, MailTab, OtherTab,  SiteInfoTab, UserTab} from './site-settings/index'
+import {ContentTab, MailTab, SiteInfoTab, UserTab} from './site-settings/index'
 </script>
 
 <style scoped>

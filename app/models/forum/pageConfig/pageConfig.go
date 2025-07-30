@@ -118,10 +118,6 @@ type SiteSettingsConfig struct {
 	SiteDescription string `json:"siteDescription"`
 	SiteKeywords    string `json:"siteKeywords"`
 	SiteUrl         string `json:"siteUrl"`
-
-	// 其他设置
-	Timezone        string `json:"timezone"`
-	DefaultLanguage string `json:"defaultLanguage"`
 }
 
 // 邮件设置配置
