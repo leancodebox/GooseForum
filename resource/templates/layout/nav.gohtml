@@ -28,7 +28,7 @@
 
             <!-- 主题切换按钮 -->
             {{template "theme-toggle.gohtml" .}}
-            {{if and .User (gt .User.UserId 0)}}
+            {{if .CurrentUserId}}
             <!-- 文章发布按钮 -->
             <a href="/publish" class="btn btn-ghost btn-sm btn-circle" aria-label="发布文章">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
@@ -110,7 +110,7 @@
                     <li><a href="/links">友情链接</a></li>
                     <li><a href="/sponsors">赞助商</a></li>
                     <li><a href="/about">关于</a></li>
-                    {{if and .User (gt .User.UserId 0)}}
+                    {{if .CurrentUserId}}
                     <li><a href="/publish">发布文章</a></li>
                     <li><a href="/notifications">消息通知</a></li>
                     {{else}}
@@ -225,9 +225,8 @@
 
     // 页面加载时检查未读消息
     document.addEventListener('DOMContentLoaded', function() {
-        {{if and .User (gt .User.UserId 0)}}
+        {{if .CurrentUserId}}
         checkUnreadNotifications();
-
         // 每30秒检查一次未读消息
         setInterval(checkUnreadNotifications, 30000);
         {{end}}

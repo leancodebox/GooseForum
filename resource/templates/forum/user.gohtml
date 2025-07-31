@@ -131,7 +131,7 @@
                             </div>
 
                             <div class="card-actions justify-center">
-                                {{if and .User (gt .User.UserId 0) (ne .User.UserId .Author.UserId)}}
+                                {{if and .CurrentUserId (ne .CurrentUserId .Author.UserId)}}
                                     <button id="follow-btn"
                                             class="btn btn-sm btn-block {{if .IsFollowingAuthor}}btn-outline{{else}}btn-secondary{{end}}"
                                             onclick="toggleFollow({{.Author.UserId}})"
@@ -139,7 +139,7 @@
                                         <span id="follow-text">{{if .IsFollowingAuthor}}已关注{{else}}关注作者{{end}}</span>
                                         <span id="follow-loading" class="loading loading-spinner loading-xs" style="display: none;"></span>
                                     </button>
-                                {{else if not (and .User (gt .User.UserId 0))}}
+                                {{else if .CurrentUserId }}
                                     <a href="/login" class="btn btn-outline btn-sm btn-block">登录后关注</a>
                                 {{end}}
                                 <button class="btn btn-ghost btn-sm btn-block">私信</button>

@@ -40,9 +40,11 @@ func GlobalFunc() template.FuncMap {
 
 func Render(c *gin.Context, name string, templateData map[string]any) {
 	if templateData == nil {
-		templateData = make(map[string]any, 4)
+		templateData = make(map[string]any, 7)
 	}
-	templateData["User"] = component.GetLoginUser(c)
+	user := component.GetLoginUser(c)
+	templateData["User"] = user
+	templateData["CurrentUserId"] = user.UserId
 	templateData["IsProduction"] = setting.IsProduction()
 	templateData["Theme"] = GetTheme(c)
 	templateData["Footer"] = hotdataserve.GetFooterConfigCache()

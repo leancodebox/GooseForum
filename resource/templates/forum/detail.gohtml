@@ -34,7 +34,7 @@
                             </a>
                             <a  href="/user/{{.AuthorId}}" class="ml-2 mr-4 flex-shrink-0">{{.Username}}</a>
                             <span class="mr-4 flex-shrink-0">{{.CreateTime}}</span>
-                            {{if and .User (eq .User.UserId .AuthorId)}}
+                            {{if eq .CurrentUserId .AuthorId}}
                                 <a href="/publish?id={{.ArticleId}}" class="mr-4 text-primary flex-shrink-0">编辑</a>
                             {{end}}
                             <div class="flex items-center">
@@ -86,7 +86,7 @@
                     <div class="card-body overflow-hidden">
                         <h2 class="card-title mb-4">评论</h2>
                         <!-- 发表评论 -->
-                        {{if and .User (gt .User.UserId 0)}}
+                        {{if .CurrentUserId}}
                             <div role="alert" class="alert alert-success alert-dash">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                      class="h-6 w-6 shrink-0 stroke-current">
@@ -328,7 +328,7 @@
 
                             <div class="card-actions justify-center">
                                 <a href="/user/{{.AuthorId}}" class="btn btn-primary btn-sm btn-block">查看主页</a>
-                                {{if and .User (gt .User.UserId 0) (not .IsOwnArticle)}}
+                                {{if and .CurrentUserId (not .IsOwnArticle)}}
                                     <button id="follow-btn"
                                             class="btn btn-sm btn-block {{if .IsFollowing}}btn-outline{{else}}btn-secondary{{end}}"
                                             onclick="toggleFollow({{.AuthorId}})"
@@ -336,7 +336,7 @@
                                         <span id="follow-text">{{if .IsFollowing}}已关注{{else}}关注作者{{end}}</span>
                                         <span id="follow-loading" class="loading loading-spinner loading-xs" style="display: none;"></span>
                                     </button>
-                                {{else if not (and .User (gt .User.UserId 0))}}
+                                {{else if not .CurrentUserId }}
                                     <a href="/login" class="btn btn-outline btn-sm btn-block">登录后关注</a>
                                 {{end}}
                             </div>
