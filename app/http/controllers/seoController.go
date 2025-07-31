@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/spf13/cast"
 	"html"
 	"net/http"
@@ -17,7 +18,7 @@ import (
 
 // RenderRobotsTxt 渲染 robots.txt
 func RenderRobotsTxt(c *gin.Context) {
-	host := getHost(c)
+	host := component.GetHost(c)
 	robotsTxt := fmt.Sprintf(`User-agent: *
 Allow: /
 Allow: /post
@@ -39,7 +40,7 @@ Disallow: /app/
 
 // RenderSitemapXml 渲染 sitemap.xml
 func RenderSitemapXml(c *gin.Context) {
-	host := getHost(c)
+	host := component.GetHost(c)
 	sb := strings.Builder{}
 	list, _ := articles.GetLatestArticles(160)
 	for _, item := range list {
@@ -75,7 +76,7 @@ func RenderSitemapXml(c *gin.Context) {
 var formatRFC822WithZone = "02 Jan 06 15:04 -0700"
 
 func RenderRssV2(c *gin.Context) {
-	host := getHost(c)
+	host := component.GetHost(c)
 	articleList, err := articles.GetLatestArticles(100)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error generating RSS feed")

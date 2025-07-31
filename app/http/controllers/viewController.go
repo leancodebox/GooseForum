@@ -1,18 +1,13 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
-	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
-	"math/rand"
 	"regexp"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 
@@ -24,21 +19,12 @@ import (
 
 	"log/slog"
 	"net/http"
-	"time"
 )
-
-var (
-	usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{6,32}$`)
-)
-
-func ValidateUsername(username string) bool {
-	return usernameRegex.MatchString(username)
-}
 
 func Logout(c *gin.Context) {
 	jwt.TokenClean(c)
 	c.JSON(http.StatusOK, component.SuccessData(
-		"再见",
+		"👋",
 	))
 }
 
@@ -65,7 +51,7 @@ func ValidatePassword(password string) error {
 
 // Register 注册
 func Register(c *gin.Context) {
-	var r RegReq
+	var r vo.RegReq
 	if err := c.ShouldBindJSON(&r); err != nil {
 		c.JSON(200, component.FailData("请求参数格式错误"))
 		return
@@ -79,7 +65,7 @@ func Register(c *gin.Context) {
 	r.Username = strings.TrimSpace(r.Username)
 	r.Email = strings.TrimSpace(strings.ToLower(r.Email))
 
-	if !ValidateUsername(r.Username) {
+	if !component.ValidateUsername(r.Username) {
 		c.JSON(200, component.FailData("用户名仅允许字母、数字、下划线、连字符，长度6-32"))
 		return
 	}
@@ -109,7 +95,7 @@ func Register(c *gin.Context) {
 	}
 
 	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
-	userEntity.Nickname = generateGooseNickname()
+	userEntity.Nickname = component.GenerateGooseNickname()
 	err := users.Create(userEntity)
 	if err != nil {
 		c.JSON(200, component.FailData("注册失败"))
@@ -117,7 +103,7 @@ func Register(c *gin.Context) {
 	userSt := userStatistics.Entity{UserId: userEntity.Id}
 	userStatistics.SaveOrCreateById(&userSt)
 
-	if err = SendAEmail4User(userEntity); err != nil {
+	if err = component.SendAEmail4User(userEntity); err != nil {
 		slog.Error("添加邮件任务到队列失败", "error", err)
 	}
 
@@ -220,63 +206,4 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, component.SuccessData(
 		"登录成功",
 	))
-}
-func GetLoginUser(c *gin.Context) *vo.UserInfoShow {
-	userId := c.GetUint64("userId")
-	return GetUserShowByUserId(userId)
-}
-
-func GetUserShowByUserId(userId uint64) *vo.UserInfoShow {
-	if userId == 0 {
-		return &vo.UserInfoShow{}
-	}
-	return hotdataserve.GetOrLoad(fmt.Sprintf("user:%v", userId), func() (*vo.UserInfoShow, error) {
-		user, _ := users.Get(userId)
-		if user.Id == 0 {
-			return &vo.UserInfoShow{}, errors.New("no found")
-		}
-		return transform.User2userShow(user), nil
-	})
-}
-
-type PageButton struct {
-	Index int
-	Page  int
-}
-
-func buildCanonicalHref(c *gin.Context) string {
-	return getBaseUri(c) + c.Request.URL.String()
-}
-
-func getBaseUri(c *gin.Context) string {
-	scheme := "https"
-	if strings.HasPrefix(c.Request.Host, "localhost") {
-		scheme = "http"
-	}
-	host := fmt.Sprintf("%s://%s", scheme, c.Request.Host)
-	return preferences.Get("server.url", host)
-}
-
-func getHost(c *gin.Context) string {
-	scheme := "https"
-	if strings.HasPrefix(c.Request.Host, "localhost") {
-		scheme = "http"
-	}
-	host := fmt.Sprintf("%s://%s", scheme, c.Request.Host)
-	return preferences.Get("server.url", host)
-}
-
-// 新增生成鹅相关昵称的函数
-func generateGooseNickname() string {
-	prefixes := []string{
-		"鹅", "大白鹅", "灰鹅", "小鹅", "鹅宝",
-		"Goose", "Gander", "Gosling", "Honker",
-	}
-	prefix := prefixes[rand.Intn(len(prefixes))]
-	// 使用纳秒级时间戳+随机数确保唯一性
-	now := time.Now()
-	timestamp := now.UnixNano()
-	randomPart := rand.Intn(1000)
-	// 组合成16进制字符串
-	return fmt.Sprintf("%s%x%03d", prefix, timestamp, randomPart)
 }

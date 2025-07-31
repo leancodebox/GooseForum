@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/docs/docContents"
 	"github.com/leancodebox/GooseForum/app/models/docs/docProjects"
 	"github.com/leancodebox/GooseForum/app/models/docs/docVersions"
@@ -69,14 +70,14 @@ func DocsHome(c *gin.Context) {
 	})
 
 	viewrender.Render(c, "docs-home.gohtml", map[string]any{
-		"User": GetLoginUser(c),
+
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`文档中心`).
 			SetDescription(`GooseForum 文档中心，包含完整的使用指南和API参考`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 		"Projects":      projects,
-		"CanonicalHref": buildCanonicalHref(c),
+		"CanonicalHref": component.BuildCanonicalHref(c),
 	})
 }
 
@@ -172,18 +173,18 @@ func DocsVersion(c *gin.Context) {
 	}
 
 	viewrender.Render(c, "docs-version.gohtml", map[string]any{
-		"User": GetLoginUser(c),
+
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(fmt.Sprintf("%s %s - %s - GooseForum", project.Name, version.Name, "文档中心")).
 			SetDescription(fmt.Sprintf("%s - %s", project.Description, version.Description)).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 		"Project":         project,
 		"Version":         version,
 		"Directory":       resDirectory,
 		"ProjectVersions": projectVersions,
 		"Breadcrumbs":     breadcrumbs,
-		"CanonicalHref":   buildCanonicalHref(c),
+		"CanonicalHref":   component.BuildCanonicalHref(c),
 	})
 }
 
@@ -303,11 +304,11 @@ func DocsContent(c *gin.Context) {
 	htmlContent := template.HTML(markdown2html.MarkdownToHTML(content.Content))
 
 	viewrender.Render(c, "docs-content.gohtml", map[string]any{
-		"User": GetLoginUser(c),
+
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(fmt.Sprintf("%s - %s - %s", content.Title, project.Name, "GooseForum")).
 			SetDescription(fmt.Sprintf("%s - %s", content.Title, project.Description)).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 		"Project":         project,
 		"Version":         version,
@@ -317,7 +318,7 @@ func DocsContent(c *gin.Context) {
 		"VersionContents": versionContents,
 		"ProjectVersions": projectVersions,
 		"Breadcrumbs":     breadcrumbs,
-		"CanonicalHref":   buildCanonicalHref(c),
+		"CanonicalHref":   component.BuildCanonicalHref(c),
 		"CurrentSlug":     contentSlug,
 	})
 }

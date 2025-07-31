@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
@@ -63,7 +64,7 @@ func renderActivationPage(c *gin.Context, success bool, message string) {
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(fmt.Sprintf("账号激活%v", status)).
 			SetDescription(description).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 	})
 }

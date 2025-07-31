@@ -1,4 +1,4 @@
-package controllers
+package api
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"

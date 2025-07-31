@@ -1,10 +1,11 @@
-package controllers
+package hotdataserve
 
 import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/datacache"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
-	"github.com/leancodebox/GooseForum/app/http/controllers/datacache"
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -16,9 +17,9 @@ import (
 
 // 初始化缓存
 var (
-	siteStatisticsDataCache = &datacache.Cache[SiteStats]{}
+	siteStatisticsDataCache = &datacache.Cache[vo.SiteStats]{}
 	articleCache            = &datacache.Cache[[]articles.SmallEntity]{}
-	articleSimpleDtoCache   = &datacache.Cache[[]ArticlesSimpleDto]{}
+	articleSimpleDtoCache   = &datacache.Cache[[]vo.ArticlesSimpleDto]{}
 	articleCategoryCache    = &datacache.Cache[[]*articleCategory.Entity]{}
 	articleCategoryMapCache = &datacache.Cache[map[uint64]*articleCategory.Entity]{}
 )
@@ -32,24 +33,29 @@ var articlesTypeMap = array.Slice2Map(articlesType, func(v datastruct.Option[str
 	return v.Value
 })
 
-type SiteStats struct {
-	UserCount         int64 `json:"userCount"`
-	UserMonthCount    int64 `json:"userMonthCount"`
-	ArticleCount      int64 `json:"articleCount"`
-	ArticleMonthCount int64 `json:"articleMonthCount"`
-	Reply             int64 `json:"reply"`
-	LinksCount        int   `json:"linksCount"`
+func GetArticlesType() *[]datastruct.Option[string, int] {
+	return &articlesType
 }
 
-func GetSiteStatisticsData() SiteStats {
-	data, _ := siteStatisticsDataCache.GetOrLoadE("", func() (SiteStats, error) {
+func GetArticlesTypeName(iType int) string {
+	return articlesTypeMap[iType].Name
+}
+
+func GetLatestArticleSimpleDto() []vo.ArticlesSimpleDto {
+	return articleSimpleDtoCache.GetOrLoad("home:GetLatestArticles", func() ([]vo.ArticlesSimpleDto, error) {
+		return ArticlesSmallEntity2Dto(GetLatestArticles()), nil
+	}, time.Second*10)
+}
+
+func GetSiteStatisticsData() vo.SiteStats {
+	data, _ := siteStatisticsDataCache.GetOrLoadE("", func() (vo.SiteStats, error) {
 		configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
 		res := jsonopt.Decode[[]pageConfig.FriendLinksGroup](configEntity.Config)
 		linksCount := 0
 		for _, group := range res {
 			linksCount += len(group.Links)
 		}
-		return SiteStats{
+		return vo.SiteStats{
 			UserCount:         users.GetCount(),
 			UserMonthCount:    users.GetMonthCount(),
 			ArticleCount:      articles.GetCount(),
@@ -61,9 +67,9 @@ func GetSiteStatisticsData() SiteStats {
 	return data
 }
 
-func getRecommendedArticles() []articles.SmallEntity {
+func GetRecommendedArticles() []articles.SmallEntity {
 	data, _ := articleCache.GetOrLoadE(
-		"getRecommendedArticles",
+		"GetRecommendedArticles",
 		func() ([]articles.SmallEntity, error) {
 			return articles.GetRecommendedArticles(4)
 		},
@@ -72,9 +78,9 @@ func getRecommendedArticles() []articles.SmallEntity {
 	return data
 }
 
-func getLatestArticles() []articles.SmallEntity {
+func GetLatestArticles() []articles.SmallEntity {
 	data, _ := articleCache.GetOrLoadE(
-		"getLatestArticles",
+		"GetLatestArticles",
 		func() ([]articles.SmallEntity, error) {
 			return articles.GetLatestArticles(20)
 
@@ -84,9 +90,9 @@ func getLatestArticles() []articles.SmallEntity {
 	return data
 }
 
-func getArticleCategory() []*articleCategory.Entity {
+func GetArticleCategory() []*articleCategory.Entity {
 	data, _ := articleCategoryCache.GetOrLoadE(
-		"getArticleCategory",
+		"GetArticleCategory",
 		func() ([]*articleCategory.Entity, error) {
 			return articleCategory.All(), nil
 
@@ -96,8 +102,8 @@ func getArticleCategory() []*articleCategory.Entity {
 	return data
 }
 
-func articleCategoryLabel() []datastruct.Option[string, uint64] {
-	return array.Map(getArticleCategory(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
+func ArticleCategoryLabel() []datastruct.Option[string, uint64] {
+	return array.Map(GetArticleCategory(), func(t *articleCategory.Entity) datastruct.Option[string, uint64] {
 		return datastruct.Option[string, uint64]{
 			Name:  t.Category,
 			Value: t.Id,
@@ -106,9 +112,9 @@ func articleCategoryLabel() []datastruct.Option[string, uint64] {
 }
 
 // GetMapByIds 根据ID列表获取分类Map
-func articleCategoryMap() map[uint64]*articleCategory.Entity {
+func ArticleCategoryMap() map[uint64]*articleCategory.Entity {
 	data, _ := articleCategoryMapCache.GetOrLoadE(
-		"getArticleCategory",
+		"GetArticleCategory",
 		func() (map[uint64]*articleCategory.Entity, error) {
 			return array.Slice2Map(articleCategory.All(), func(v *articleCategory.Entity) uint64 {
 				return v.Id
@@ -119,16 +125,16 @@ func articleCategoryMap() map[uint64]*articleCategory.Entity {
 	return data
 }
 
-func articlesSmallEntity2Dto(data []articles.SmallEntity) []ArticlesSimpleDto {
+func ArticlesSmallEntity2Dto(data []articles.SmallEntity) []vo.ArticlesSimpleDto {
 	userIds := array.Map(data, func(t articles.SmallEntity) uint64 {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
-	return articlesSmallEntityWithUser2Dto(data, userMap)
+	return ArticlesSmallEntityWithUser2Dto(data, userMap)
 }
-func articlesSmallEntityWithUser2Dto(data []articles.SmallEntity, userMap map[uint64]*users.EntityComplete) []ArticlesSimpleDto {
-	categoryMap := articleCategoryMap()
-	return array.Map(data, func(t articles.SmallEntity) ArticlesSimpleDto {
+func ArticlesSmallEntityWithUser2Dto(data []articles.SmallEntity, userMap map[uint64]*users.EntityComplete) []vo.ArticlesSimpleDto {
+	categoryMap := ArticleCategoryMap()
+	return array.Map(data, func(t articles.SmallEntity) vo.ArticlesSimpleDto {
 		categoryNames := array.Map(t.CategoryId, func(item uint64) string {
 			if category, ok := categoryMap[item]; ok {
 				return category.Category
@@ -141,7 +147,7 @@ func articlesSmallEntityWithUser2Dto(data []articles.SmallEntity, userMap map[ui
 			username = user.Username
 			avatarUrl = user.GetWebAvatarUrl()
 		}
-		return ArticlesSimpleDto{
+		return vo.ArticlesSimpleDto{
 			Id:             t.Id,
 			Title:          t.Title,
 			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
@@ -158,4 +164,11 @@ func articlesSmallEntityWithUser2Dto(data []articles.SmallEntity, userMap map[ui
 			TypeStr:        articlesTypeMap[int(t.Type)].Name,
 		}
 	})
+}
+
+func FirstOr[T any](d []T, defaultValue T) T {
+	if len(d) > 1 {
+		return d[0]
+	}
+	return defaultValue
 }

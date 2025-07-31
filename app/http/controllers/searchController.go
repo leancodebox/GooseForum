@@ -3,8 +3,10 @@ package controllers
 import (
 	"fmt"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"math"
 	"time"
@@ -115,9 +117,9 @@ func SearchPage(c *gin.Context) {
 			})
 			userMap := users.GetMapByIds(userIds)
 
-			categoryMap := articleCategoryMap()
+			categoryMap := hotdataserve.ArticleCategoryMap()
 
-			articleList := array.Map(articleEntityList, func(t *articles.SmallEntity) ArticlesSimpleDto {
+			articleList := array.Map(articleEntityList, func(t *articles.SmallEntity) vo.ArticlesSimpleDto {
 				categoryNames := array.Map(t.CategoryId, func(item uint64) string {
 					if category, ok := categoryMap[item]; ok {
 						return category.Category
@@ -130,7 +132,7 @@ func SearchPage(c *gin.Context) {
 					username = user.Username
 					avatarUrl = user.GetWebAvatarUrl()
 				}
-				return ArticlesSimpleDto{
+				return vo.ArticlesSimpleDto{
 					Id:             t.Id,
 					Title:          t.Title,
 					LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
@@ -143,7 +145,7 @@ func SearchPage(c *gin.Context) {
 					Categories:     categoryNames,
 					CategoriesId:   t.CategoryId,
 					Type:           t.Type,
-					TypeStr:        articlesTypeMap[int(t.Type)].Name,
+					TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
 				}
 			})
 
@@ -171,7 +173,7 @@ func SearchPage(c *gin.Context) {
 
 	templateData["PageMeta"] = viewrender.NewPageMetaBuilder().
 		SetTitle(fmt.Sprintf("%v 的搜索结果", query)).
-		SetCanonicalURL(buildCanonicalHref(c)).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
 		Build()
 	// 渲染模板
 	viewrender.Render(c, "search.gohtml",

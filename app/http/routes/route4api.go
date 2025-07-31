@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/leancodebox/GooseForum/app/http/controllers/api"
 	"net/http"
 	"time"
 
@@ -65,27 +66,27 @@ func apiRoute(ginApp *gin.Engine) {
 	// 非登陆下的用户操作
 	baseApi := ginApp.Group("api")
 	// 验证码
-	baseApi.GET("get-captcha", ginUpNP(controllers.GetCaptcha))
+	baseApi.GET("get-captcha", ginUpNP(api.GetCaptcha))
 	// 添加激活路由
 	baseApi.GET("activate", controllers.ActivateAccount)
 
 	// 登陆状态下的用户操作
 	loginApi := ginApp.Group("api").Use(middleware.JWTAuthCheck)
 	// 用户信息
-	loginApi.GET("get-user-info", UpButterReq(controllers.UserInfo))
+	loginApi.GET("get-user-info", UpButterReq(api.UserInfo))
 	// 设置用户信息
-	loginApi.POST("set-user-info", UpButterReq(controllers.EditUserInfo))
-	loginApi.POST("set-user-email", UpButterReq(controllers.EditUserEmail))
-	loginApi.POST("set-user-name", UpButterReq(controllers.EditUsername))
+	loginApi.POST("set-user-info", UpButterReq(api.EditUserInfo))
+	loginApi.POST("set-user-email", UpButterReq(api.EditUserEmail))
+	loginApi.POST("set-user-name", UpButterReq(api.EditUsername))
 	// 邀请码
-	loginApi.POST("invitation", UpButterReq(controllers.Invitation))
+	loginApi.POST("invitation", UpButterReq(api.Invitation))
 	// 上传头像
-	loginApi.POST("upload-avatar", controllers.UploadAvatar)
+	loginApi.POST("upload-avatar", api.UploadAvatar)
 	// 修改密码
-	loginApi.POST("change-password", UpButterReq(controllers.ChangePassword))
+	loginApi.POST("change-password", UpButterReq(api.ChangePassword))
 
 	forumApi := baseApi.Group("forum")
-	forumApi.POST("apply-link-add", UpButterReq(controllers.ApplyAddLink))
+	forumApi.POST("apply-link-add", UpButterReq(api.ApplyAddLink))
 	// 站点统计
 	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	// 分类列表
@@ -95,14 +96,14 @@ func apiRoute(ginApp *gin.Engine) {
 
 	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
 	// 通知相关接口
-	forumLoginApi.POST("notification/list", UpButterReq(controllers.GetNotificationList))
-	forumLoginApi.POST("notification/query", UpButterReq(controllers.QueryNotificationList))
-	forumLoginApi.GET("notification/unread-count", UpButterReq(controllers.GetUnreadCount))
-	forumLoginApi.GET("notification/last-unread", middleware.NoUpdateUserActivity, UpButterReq(controllers.GetLastUnread))
-	forumLoginApi.POST("notification/mark-read", UpButterReq(controllers.MarkAsRead))
-	forumLoginApi.POST("notification/mark-all-read", UpButterReq(controllers.MarkAllAsRead))
-	forumLoginApi.POST("notification/delete", UpButterReq(controllers.DeleteNotification))
-	forumLoginApi.GET("notification/types", UpButterReq(controllers.GetNotificationTypes))
+	forumLoginApi.POST("notification/list", UpButterReq(api.GetNotificationList))
+	forumLoginApi.POST("notification/query", UpButterReq(api.QueryNotificationList))
+	forumLoginApi.GET("notification/unread-count", UpButterReq(api.GetUnreadCount))
+	forumLoginApi.GET("notification/last-unread", middleware.NoUpdateUserActivity, UpButterReq(api.GetLastUnread))
+	forumLoginApi.POST("notification/mark-read", UpButterReq(api.MarkAsRead))
+	forumLoginApi.POST("notification/mark-all-read", UpButterReq(api.MarkAllAsRead))
+	forumLoginApi.POST("notification/delete", UpButterReq(api.DeleteNotification))
+	forumLoginApi.GET("notification/types", UpButterReq(api.GetNotificationTypes))
 	// 编辑文章时原始文章内容
 	forumLoginApi.POST("get-articles-origin", middleware.CheckLogin, UpButterReq(controllers.WriteArticlesOrigin))
 	// 发布文章
@@ -123,75 +124,75 @@ func apiRoute(ginApp *gin.Engine) {
 	// 用户管理
 	adminApi.
 		Group("", middleware.CheckPermission(permission.UserManager)).
-		POST("user-list", UpButterReq(controllers.UserList)).
-		POST("user-edit", UpButterReq(controllers.EditUser)).
-		POST("get-all-role-item", UpButterReq(controllers.GetAllRoleItem))
+		POST("user-list", UpButterReq(api.UserList)).
+		POST("user-edit", UpButterReq(api.EditUser)).
+		POST("get-all-role-item", UpButterReq(api.GetAllRoleItem))
 
 	// 文章管理 &  分类管理
 	adminApi.Group("", middleware.CheckPermission(permission.ArticlesManager)).
-		POST("articles-list", UpButterReq(controllers.ArticlesList)).
-		POST("article-edit", UpButterReq(controllers.EditArticle)).
-		POST("category-list", UpButterReq(controllers.GetCategoryList)).
-		POST("category-save", UpButterReq(controllers.SaveCategory)).
-		POST("category-delete", UpButterReq(controllers.DeleteCategory))
+		POST("articles-list", UpButterReq(api.ArticlesList)).
+		POST("article-edit", UpButterReq(api.EditArticle)).
+		POST("category-list", UpButterReq(api.GetCategoryList)).
+		POST("category-save", UpButterReq(api.SaveCategory)).
+		POST("category-delete", UpButterReq(api.DeleteCategory))
 
 	// 权限管理
 	adminApi.Group("", middleware.CheckPermission(permission.RoleManager)).
-		POST("get-permission-list", UpButterReq(controllers.GetPermissionList)).
-		POST("role-list", UpButterReq(controllers.RoleList)).
-		POST("role-save", UpButterReq(controllers.RoleSave)).
-		POST("role-delete", UpButterReq(controllers.RoleDel))
+		POST("get-permission-list", UpButterReq(api.GetPermissionList)).
+		POST("role-list", UpButterReq(api.RoleList)).
+		POST("role-save", UpButterReq(api.RoleSave)).
+		POST("role-delete", UpButterReq(api.RoleDel))
 
 	// 操作日志
 	adminApi.Group("", middleware.CheckPermission(permission.Admin)).
-		POST("opt-record-page", UpButterReq(controllers.OptRecordPage))
+		POST("opt-record-page", UpButterReq(api.OptRecordPage))
 
 	// 站点管理
 	adminApi.Group("", middleware.CheckPermission(permission.SiteManager)).
-		POST("apply-sheet-list", UpButterReq(controllers.ApplySheet)).
-		GET("friend-links", UpButterReq(controllers.GetFriendLinks)).
-		POST("save-friend-links", UpButterReq(controllers.SaveFriendLinks)).
-		GET("web-settings", UpButterReq(controllers.GetWebSettings)).
-		POST("save-web-settings", UpButterReq(controllers.SaveWebSettings)).
-		GET("site-settings", UpButterReq(controllers.GetSiteSettings)).
-		POST("save-site-settings", UpButterReq(controllers.SaveSiteSettings)).
-		GET("mail-settings", UpButterReq(controllers.GetMailSettings)).
-		POST("save-mail-settings", UpButterReq(controllers.SaveMailSettings)).
-		POST("test-mail-connection", UpButterReq(controllers.TestMailConnection)).
-		GET("footer-links", UpButterReq(controllers.GetFooterLinks)).
-		POST("save-footer-links", UpButterReq(controllers.SaveFooterLinks)).
-		GET("sponsors", UpButterReq(controllers.GetSponsors)).
-		POST("save-sponsors", UpButterReq(controllers.SaveSponsors))
+		POST("apply-sheet-list", UpButterReq(api.ApplySheet)).
+		GET("friend-links", UpButterReq(api.GetFriendLinks)).
+		POST("save-friend-links", UpButterReq(api.SaveFriendLinks)).
+		GET("web-settings", UpButterReq(api.GetWebSettings)).
+		POST("save-web-settings", UpButterReq(api.SaveWebSettings)).
+		GET("site-settings", UpButterReq(api.GetSiteSettings)).
+		POST("save-site-settings", UpButterReq(api.SaveSiteSettings)).
+		GET("mail-settings", UpButterReq(api.GetMailSettings)).
+		POST("save-mail-settings", UpButterReq(api.SaveMailSettings)).
+		POST("test-mail-connection", UpButterReq(api.TestMailConnection)).
+		GET("footer-links", UpButterReq(api.GetFooterLinks)).
+		POST("save-footer-links", UpButterReq(api.SaveFooterLinks)).
+		GET("sponsors", UpButterReq(api.GetSponsors)).
+		POST("save-sponsors", UpButterReq(api.SaveSponsors))
 
 	// 文档管理
 	adminApi.Group("", middleware.CheckPermission(permission.Admin)).
-		POST("docs/projects/list", UpButterReq(controllers.AdminDocsProjectList)).
-		GET("docs/projects/:id", UpButterReq(controllers.AdminDocsProjectDetail)).
-		POST("docs/projects", UpButterReq(controllers.AdminDocsProjectCreate)).
-		PUT("docs/projects/:id", UpButterReq(controllers.AdminDocsProjectUpdate)).
-		DELETE("docs/projects/:id", UpButterReq(controllers.AdminDocsProjectDelete)).
-		POST("docs/versions/list", UpButterReq(controllers.AdminDocsVersionList)).
-		GET("docs/versions/:id", UpButterReq(controllers.AdminDocsVersionDetail)).
-		POST("docs/versions", UpButterReq(controllers.AdminDocsVersionCreate)).
-		PUT("docs/versions/:id", UpButterReq(controllers.AdminDocsVersionUpdate)).
-		DELETE("docs/versions/:id", UpButterReq(controllers.AdminDocsVersionDelete)).
-		PUT("docs/versions/:id/set-default", UpButterReq(controllers.AdminDocsVersionSetDefault)).
-		PUT("docs/versions/:id/directory", UpButterReq(controllers.AdminDocsVersionDirectoryUpdate)).
-		POST("docs/contents/list", UpButterReq(controllers.AdminDocsContentList)).
-		GET("docs/contents/:id", UpButterReq(controllers.AdminDocsContentDetail)).
-		POST("docs/contents", UpButterReq(controllers.AdminDocsContentCreate)).
-		PUT("docs/contents/:id", UpButterReq(controllers.AdminDocsContentUpdate)).
-		DELETE("docs/contents/:id", UpButterReq(controllers.AdminDocsContentDelete)).
-		POST("docs/contents/:id/publish", UpButterReq(controllers.AdminDocsContentPublish)).
-		POST("docs/contents/:id/draft", UpButterReq(controllers.AdminDocsContentDraft)).
-		POST("docs/contents/preview", UpButterReq(controllers.AdminDocsContentPreview))
+		POST("docs/projects/list", UpButterReq(api.AdminDocsProjectList)).
+		GET("docs/projects/:id", UpButterReq(api.AdminDocsProjectDetail)).
+		POST("docs/projects", UpButterReq(api.AdminDocsProjectCreate)).
+		PUT("docs/projects/:id", UpButterReq(api.AdminDocsProjectUpdate)).
+		DELETE("docs/projects/:id", UpButterReq(api.AdminDocsProjectDelete)).
+		POST("docs/versions/list", UpButterReq(api.AdminDocsVersionList)).
+		GET("docs/versions/:id", UpButterReq(api.AdminDocsVersionDetail)).
+		POST("docs/versions", UpButterReq(api.AdminDocsVersionCreate)).
+		PUT("docs/versions/:id", UpButterReq(api.AdminDocsVersionUpdate)).
+		DELETE("docs/versions/:id", UpButterReq(api.AdminDocsVersionDelete)).
+		PUT("docs/versions/:id/set-default", UpButterReq(api.AdminDocsVersionSetDefault)).
+		PUT("docs/versions/:id/directory", UpButterReq(api.AdminDocsVersionDirectoryUpdate)).
+		POST("docs/contents/list", UpButterReq(api.AdminDocsContentList)).
+		GET("docs/contents/:id", UpButterReq(api.AdminDocsContentDetail)).
+		POST("docs/contents", UpButterReq(api.AdminDocsContentCreate)).
+		PUT("docs/contents/:id", UpButterReq(api.AdminDocsContentUpdate)).
+		DELETE("docs/contents/:id", UpButterReq(api.AdminDocsContentDelete)).
+		POST("docs/contents/:id/publish", UpButterReq(api.AdminDocsContentPublish)).
+		POST("docs/contents/:id/draft", UpButterReq(api.AdminDocsContentDraft)).
+		POST("docs/contents/preview", UpButterReq(api.AdminDocsContentPreview))
 
 }
 
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
 	// 文件上传接口 - 每日最多上传n张图片
-	r.POST("/img-upload", middleware.JWTAuthCheck, middleware.FileUploadRateLimit(33, 24*time.Hour), controllers.SaveImgByGinContext)
+	r.POST("/img-upload", middleware.JWTAuthCheck, middleware.FileUploadRateLimit(33, 24*time.Hour), api.SaveImgByGinContext)
 	// 文件获取接口 - 通过路径
-	r.GET("/img/*filename", middleware.BrowserCache, controllers.GetFileByFileName)
+	r.GET("/img/*filename", middleware.BrowserCache, api.GetFileByFileName)
 }

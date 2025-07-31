@@ -27,7 +27,7 @@ func NewPageMetaBuilder() *PageMetaBuilder {
 			},
 			Twitter: TwitterCardMeta{
 				Card: "summary_large_image",
-				Site: "@GooseForum",
+				Site: "@" + siteConfig.SiteName,
 			},
 		},
 		siteConfig: &siteConfig,

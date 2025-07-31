@@ -1,4 +1,4 @@
-package controllers
+package api
 
 import (
 	"fmt"
@@ -11,43 +11,12 @@ import (
 	"log/slog"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/leancodebox/GooseForum/app/service/mailservice"
-	"github.com/leancodebox/GooseForum/app/service/tokenservice"
-
-	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
-
-type RegReq struct {
-	Email          string `json:"email" validate:"required,email"`
-	Username       string `json:"userName"  validate:"required"`
-	Password       string `json:"passWord"  validate:"required"`
-	InvitationCode string `json:"invitationCode,omitempty"`
-	CaptchaId      string `json:"captchaId" validate:"required"`
-	CaptchaCode    string `json:"captchaCode" validate:"required"`
-}
-
-func SendAEmail4User(userEntity *users.EntityComplete) error {
-	token, err := tokenservice.GenerateActivationTokenByUser(*userEntity)
-	if err != nil {
-		return err
-	}
-
-	// 将邮件任务加入队列
-	err = mailservice.AddToQueue(mailservice.EmailTask{
-		To:       userEntity.Email,
-		Username: userEntity.Username,
-		Token:    token,
-		Type:     "activation",
-	})
-	if err != nil {
-		return nil
-	}
-	return nil
-}
 
 func GetCaptcha() component.Response {
 	captchaId, captchaImg := captchaOpt.GenerateCaptcha()
@@ -55,9 +24,6 @@ func GetCaptcha() component.Response {
 		"captchaId":  captchaId,
 		"captchaImg": captchaImg,
 	})
-}
-
-type null struct {
 }
 
 // UserInfo 获取登录用户信息
@@ -111,7 +77,7 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 		return component.FailResponse("更新用户信息失败")
 	}
 
-	if err = SendAEmail4User(&userEntity); err == nil {
+	if err = component.SendAEmail4User(&userEntity); err == nil {
 		slog.Info("验证邮件发送失败", "error", err)
 	}
 
@@ -129,7 +95,7 @@ func EditUsername(req component.BetterRequest[EditUsernameReq]) component.Respon
 		return component.FailResponse("获取用户信息失败")
 	}
 	newUsername := req.GetParams().Username
-	if !ValidateUsername(newUsername) {
+	if !component.ValidateUsername(newUsername) {
 		return component.FailResponse("用户名仅允许字母、数字、下划线、连字符，长度6-32")
 	}
 	// 检查用户名是否已存在

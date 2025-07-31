@@ -5,6 +5,7 @@ import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -12,6 +13,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
@@ -20,14 +22,14 @@ import (
 )
 
 func GetSiteStatistics() component.Response {
-	return component.SuccessResponse(GetSiteStatisticsData())
+	return component.SuccessResponse(hotdataserve.GetSiteStatisticsData())
 }
 
 func GetArticlesEnum() component.Response {
-	res := articleCategoryLabel()
+	res := hotdataserve.ArticleCategoryLabel()
 	return component.SuccessResponse(map[string]any{
 		"category": res,
-		"type":     articlesType,
+		"type":     hotdataserve.GetArticlesType(),
 	})
 }
 
@@ -36,24 +38,6 @@ type GetArticlesPageRequest struct {
 	PageSize   int    `form:"pageSize"`
 	Search     string `form:"search"`
 	Categories []int  `form:"categories"`
-}
-
-type ArticlesSimpleDto struct {
-	Id             uint64   `json:"id"`
-	Title          string   `json:"title,omitempty"`
-	Content        string   `json:"content,omitempty"`
-	CreateTime     string   `json:"createTime,omitempty"`
-	LastUpdateTime string   `json:"lastUpdateTime,omitempty"`
-	Username       string   `json:"username,omitempty"`
-	AuthorId       uint64   `json:"authorId,omitempty"`
-	ViewCount      uint64   `json:"viewCount,omitempty"`
-	CommentCount   uint64   `json:"commentCount"`
-	Type           int8     `json:"type,omitempty"`
-	TypeStr        string   `json:"typeStr,omitempty"`
-	Category       string   `json:"category,omitempty"`
-	Categories     []string `json:"categories,omitempty"`
-	CategoriesId   []uint64 `json:"categoriesId,omitempty"`
-	AvatarUrl      string   `json:"avatarUrl,omitempty"`
 }
 
 type GetArticlesDetailRequest struct {
@@ -250,9 +234,9 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		UserId:       req.UserId,
 		FilterStatus: true,
 	})
-	categoryMap := articleCategoryMap()
+	categoryMap := hotdataserve.ArticleCategoryMap()
 	return component.SuccessPage(
-		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
+		array.Map(pageData.Data, func(t articles.SmallEntity) vo.ArticlesSimpleDto {
 
 			categoryNames := array.Map(t.CategoryId, func(t uint64) string {
 				if category, ok := categoryMap[t]; ok {
@@ -260,7 +244,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				}
 				return ""
 			})
-			return ArticlesSimpleDto{
+			return vo.ArticlesSimpleDto{
 				Id:             t.Id,
 				Title:          t.Title,
 				CreateTime:     t.CreatedAt.Format(time.DateTime),
@@ -270,7 +254,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				CommentCount:   t.ReplyCount,
 				Category:       FirstOr(categoryNames, "未分类"),
 				Categories:     categoryNames,
-				TypeStr:        articlesTypeMap[int(t.Type)].Name,
+				TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
 			}
 		}),
 		pageData.Page,

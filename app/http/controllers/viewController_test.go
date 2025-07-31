@@ -1,12 +1,15 @@
 package controllers
 
-import "testing"
+import (
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"testing"
+)
 
 func TestGName(t *testing.T) {
-	println(generateGooseNickname())
-	println(generateGooseNickname())
-	println(generateGooseNickname())
-	println(generateGooseNickname())
-	println(generateGooseNickname())
-	println(generateGooseNickname())
+	println(component.GenerateGooseNickname())
+	println(component.GenerateGooseNickname())
+	println(component.GenerateGooseNickname())
+	println(component.GenerateGooseNickname())
+	println(component.GenerateGooseNickname())
+	println(component.GenerateGooseNickname())
 }

@@ -3,6 +3,8 @@ package controllers
 import (
 	_ "embed"
 	"fmt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"html/template"
 	"strings"
@@ -24,25 +26,26 @@ import (
 	"github.com/spf13/cast"
 )
 
+type PageButton struct {
+	Index int
+	Page  int
+}
+
 func Home(c *gin.Context) {
-	latestArticles := articleSimpleDtoCache.GetOrLoad("home:getLatestArticles", func() ([]ArticlesSimpleDto, error) {
-		return articlesSmallEntity2Dto(getLatestArticles()), nil
-	}, time.Second*10)
 	pageMeta := viewrender.NewPageMetaBuilder().
 		SetTitle("GooseForum - 自由漫谈的江湖茶馆").
 		SetDescription("GooseForum's home").
-		SetCanonicalURL(buildCanonicalHref(c)).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
 		Build()
 	viewrender.Render(c, "index.gohtml", map[string]any{
 		"PageMeta":            pageMeta,
-		"CanonicalHref":       buildCanonicalHref(c),
-		"User":                GetLoginUser(c),
+		"CanonicalHref":       component.BuildCanonicalHref(c),
 		"Title":               "GooseForum - 自由漫谈的江湖茶馆",
-		"ArticleCategoryList": articleCategoryLabel(),
+		"ArticleCategoryList": hotdataserve.ArticleCategoryLabel(),
 		"Description":         "GooseForum's home",
-		"LatestArticles":      latestArticles, // 最新的文章
-		"Stats":               GetSiteStatisticsData(),
-		"RecommendedArticles": getRecommendedArticles(),
+		"LatestArticles":      hotdataserve.GetLatestArticleSimpleDto(), // 最新的文章
+		"Stats":               hotdataserve.GetSiteStatisticsData(),
+		"RecommendedArticles": hotdataserve.GetRecommendedArticles(),
 		"GooseForumInfo":      GetGooseForumInfo(),
 	})
 }
@@ -51,7 +54,7 @@ func LoginView(c *gin.Context) {
 	viewrender.Render(c, "login-vue.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle("登录/注册").
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 	})
 }
@@ -132,7 +135,7 @@ func PostDetail(c *gin.Context) {
 		return articles.GetRecommendedArticlesByAuthorId(cast.ToUint64(authorId), 5)
 	})
 
-	categoryMap := articleCategoryMap()
+	categoryMap := hotdataserve.ArticleCategoryMap()
 	articleCategory := array.Map(entity.CategoryId, func(item uint64) string {
 		if cateItem, ok := categoryMap[item]; ok {
 			return cateItem.Category
@@ -140,15 +143,14 @@ func PostDetail(c *gin.Context) {
 			return ""
 		}
 	})
-
 	iLike := false
 	isFollowing := false
-	loginUser := GetLoginUser(c)
-	if loginUser.UserId != 0 {
-		iLike = articleLike.GetByArticleId(loginUser.UserId, entity.Id).Status == 1
+	currentUserId := component.LoginUserId(c)
+	if currentUserId != 0 {
+		iLike = articleLike.GetByArticleId(currentUserId, entity.Id).Status == 1
 		// 检查是否已关注作者
-		if loginUser.UserId != entity.UserId {
-			followEntity := userFollow.GetByUserId(loginUser.UserId, entity.UserId)
+		if currentUserId != entity.UserId {
+			followEntity := userFollow.GetByUserId(currentUserId, entity.UserId)
 			isFollowing = followEntity.Status == 1
 		}
 	}
@@ -163,7 +165,7 @@ func PostDetail(c *gin.Context) {
 				&entity.CreatedAt,
 				&entity.UpdatedAt,
 			).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			SetSchemaOrg(generateArticleJSONLD(c, entity, author)).
 			Build(),
 		"ArticleId":            id,
@@ -181,8 +183,7 @@ func PostDetail(c *gin.Context) {
 		"Username":             author,
 		"CommentList":          replyList,
 		"AvatarUrl":            avatarUrl,
-		"User":                 loginUser,
-		"CanonicalHref":        buildCanonicalHref(c),
+		"CanonicalHref":        component.BuildCanonicalHref(c),
 		"AuthorArticles":       authorArticles,
 		"ArticleCategory":      articleCategory,
 		"Keywords":             strings.Join(articleCategory, ","),
@@ -193,8 +194,8 @@ func PostDetail(c *gin.Context) {
 		"Signature":            authorUserInfo.Signature,
 		"AuthorInfoStatistics": authorInfoStatistics,
 		"IsFollowing":          isFollowing,
-		"IsOwnArticle":         loginUser.UserId == entity.UserId,
-		"ArticleCategoryList":  articleCategoryLabel(),
+		"IsOwnArticle":         currentUserId == entity.UserId,
+		"ArticleCategoryList":  hotdataserve.ArticleCategoryLabel(),
 		"ArticleJSONLD":        generateArticleJSONLD(c, entity, author),
 		"PublishedTime":        entity.CreatedAt.Format(time.RFC3339),
 		"ModifiedTime":         entity.UpdatedAt.Format(time.RFC3339),
@@ -225,15 +226,15 @@ func generateArticleJSONLD(c *gin.Context, entity articles.Entity, author string
 		"author": map[string]any{
 			"@type": "Person",
 			"name":  author,
-			"url":   fmt.Sprintf("%s/user/%d", getBaseUri(c), entity.UserId),
+			"url":   fmt.Sprintf("%s/user/%d", component.GetBaseUri(c), entity.UserId),
 		},
 		"publisher": map[string]any{
 			"@type": "Organization",
 			"name":  "GooseForum",
-			"url":   getBaseUri(c),
+			"url":   component.GetBaseUri(c),
 		},
 		"datePublished": entity.CreatedAt.Format(time.RFC3339),
-		"url":           buildCanonicalHref(c),
+		"url":           component.BuildCanonicalHref(c),
 		"interactionStatistic": map[string]any{
 			"@type":                "InteractionCounter",
 			"interactionType":      "https://schema.org/ViewAction",
@@ -266,9 +267,9 @@ func Post(c *gin.Context) {
 	})
 	userMap := users.GetMapByIds(userIds)
 
-	categoryMap := articleCategoryMap()
+	categoryMap := hotdataserve.ArticleCategoryMap()
 
-	articleList := array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesSimpleDto {
+	articleList := array.Map(pageData.Data, func(t articles.SmallEntity) vo.ArticlesSimpleDto {
 		categoryNames := array.Map(t.CategoryId, func(item uint64) string {
 			if category, ok := categoryMap[item]; ok {
 				return category.Category
@@ -281,7 +282,7 @@ func Post(c *gin.Context) {
 			username = user.Username
 			avatarUrl = user.GetWebAvatarUrl()
 		}
-		return ArticlesSimpleDto{
+		return vo.ArticlesSimpleDto{
 			Id:             t.Id,
 			Title:          t.Title,
 			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
@@ -294,12 +295,12 @@ func Post(c *gin.Context) {
 			Categories:     categoryNames,
 			CategoriesId:   t.CategoryId,
 			Type:           t.Type,
-			TypeStr:        articlesTypeMap[int(t.Type)].Name,
+			TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
 		}
 	})
 	// 计算总页数
 	totalPages := (cast.ToInt(pageData.Total) + pageSize - 1) / pageSize
-	articleCategoryList := articleCategoryLabel()
+	articleCategoryList := hotdataserve.ArticleCategoryLabel()
 	var pagination []PageButton
 	start := max(pageData.Page-3, 1)
 	for i := 1; i <= 7; i++ {
@@ -327,7 +328,7 @@ func Post(c *gin.Context) {
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(title).
 			SetDescription(description).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 		"Year":                time.Now().Year(),
 		"ArticleList":         articleList,
@@ -337,22 +338,21 @@ func Post(c *gin.Context) {
 		"TotalPages":          totalPages,
 		"PrevPage":            max(pageData.Page-1, 1),
 		"NextPage":            min(max(pageData.Page, 1)+1, totalPages),
-		"User":                GetLoginUser(c),
 		"ArticleCategoryList": articleCategoryList,
-		"RecommendedArticles": getRecommendedArticles(),
-		"CanonicalHref":       buildCanonicalHref(c),
+		"RecommendedArticles": hotdataserve.GetRecommendedArticles(),
+		"CanonicalHref":       component.BuildCanonicalHref(c),
 		"Filters":             filters,
 		"FilterIds":           categories,
 		"NoFilter":            len(categories) == 0,
 		"Pagination":          pagination,
-		"Stats":               GetSiteStatisticsData(),
+		"Stats":               hotdataserve.GetSiteStatisticsData(),
 		"ForumInfo":           forumInfo,
 	})
 }
 
 func User(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
-	showUser := GetUserShowByUserId(id)
+	showUser := component.GetUserShowByUserId(id)
 	if showUser.UserId == 0 {
 		errorPage(c, "用户不存在", "用户不存在")
 		return
@@ -365,48 +365,49 @@ func User(c *gin.Context) {
 	followerList, _ := userFollow.GetFollowerList(id, 1, 10)
 
 	// 获取当前登录用户信息
-	currentUser := GetLoginUser(c)
+	currentUser := component.GetLoginUser(c)
+	currentUserId := component.LoginUserId(c)
 
 	// 检查当前用户是否关注了列表中的用户
 	var followingStatusMap map[uint64]bool
 	var followerStatusMap map[uint64]bool
 	var isFollowingAuthor bool
 
-	if currentUser.UserId > 0 {
+	if currentUserId > 0 {
 		// 收集所有需要查询关注状态的用户ID
 		var targetUserIds []uint64
 
 		// 添加页面作者ID（如果不是自己）
-		if currentUser.UserId != id {
+		if currentUserId != id {
 			targetUserIds = append(targetUserIds, id)
 		}
 
 		// 添加关注列表中的用户ID（排除自己）
 		for _, user := range followingList {
-			if user.Id != currentUser.UserId {
+			if user.Id != currentUserId {
 				targetUserIds = append(targetUserIds, user.Id)
 			}
 		}
 
 		// 添加粉丝列表中的用户ID（排除自己）
 		for _, user := range followerList {
-			if user.Id != currentUser.UserId {
+			if user.Id != currentUserId {
 				targetUserIds = append(targetUserIds, user.Id)
 			}
 		}
 
 		// 一次性批量查询所有关注状态
-		allFollowStatusMap := userFollow.GetFollowStatusMap(currentUser.UserId, targetUserIds)
+		allFollowStatusMap := userFollow.GetFollowStatusMap(currentUserId, targetUserIds)
 
 		// 设置页面作者的关注状态
-		if currentUser.UserId != id {
+		if currentUserId != id {
 			isFollowingAuthor = allFollowStatusMap[id]
 		}
 
 		// 构建关注列表的状态映射
 		followingStatusMap = make(map[uint64]bool)
 		for _, user := range followingList {
-			if user.Id != currentUser.UserId {
+			if user.Id != currentUserId {
 				followingStatusMap[user.Id] = allFollowStatusMap[user.Id]
 			}
 		}
@@ -414,7 +415,7 @@ func User(c *gin.Context) {
 		// 构建粉丝列表的状态映射
 		followerStatusMap = make(map[uint64]bool)
 		for _, user := range followerList {
-			if user.Id != currentUser.UserId {
+			if user.Id != currentUserId {
 				followerStatusMap[user.Id] = allFollowStatusMap[user.Id]
 			}
 		}
@@ -423,9 +424,9 @@ func User(c *gin.Context) {
 	viewrender.Render(c, "user.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetUserProfile(showUser.Username, showUser.Bio).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
-		"Articles":             articlesSmallEntity2Dto(last),
+		"Articles":             hotdataserve.ArticlesSmallEntity2Dto(last),
 		"ArticlesCount":        articles.GetUserCount(showUser.UserId),
 		"Author":               showUser,
 		"AuthorInfoStatistics": authorInfoStatistics,
@@ -443,11 +444,10 @@ func User(c *gin.Context) {
 
 func About(c *gin.Context) {
 	viewrender.Render(c, "about.gohtml", map[string]any{
-		"User": GetLoginUser(c),
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`关于`).
 			SetDescription(`GooseForum's about`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 	})
 }
@@ -455,11 +455,10 @@ func About(c *gin.Context) {
 func SponsorsView(c *gin.Context) {
 	sponsorsInfo := hotdataserve.SponsorsConfigCache()
 	viewrender.Render(c, "sponsors.gohtml", map[string]any{
-		"User": GetLoginUser(c),
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`赞助商`).
 			SetDescription(`GooseForum's sponsors`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 		"SponsorsInfo": sponsorsInfo,
 	})
@@ -475,11 +474,10 @@ var privacyPolicyMD string
 func TermsOfService(c *gin.Context) {
 	htmlContent := markdown2html.MarkdownToHTML(termsOfServiceMD)
 	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
-		"User": GetLoginUser(c),
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`用户协议`).
 			SetDescription(`GooseForum 用户服务协议`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 		"Title":       "用户协议 - GooseForum",
 		"Subtitle":    "Terms of Service",
@@ -492,11 +490,10 @@ func TermsOfService(c *gin.Context) {
 func PrivacyPolicy(c *gin.Context) {
 	htmlContent := markdown2html.MarkdownToHTML(privacyPolicyMD)
 	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
-		"User": GetLoginUser(c),
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`隐私政策`).
 			SetDescription(`GooseForum 隐私保护政策`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 		"Title":       "隐私政策 - GooseForum",
 		"Subtitle":    "Privacy Policy",
@@ -542,54 +539,49 @@ func LinksView(c *gin.Context) {
 		}
 	}
 	viewrender.Render(c, "links.gohtml", map[string]any{
-		"User": GetLoginUser(c),
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`友情链接`).
 			SetDescription(`GooseForum's links`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 		"FriendLinksGroup":    res,
 		"TotalCounter":        totalCounter,
-		"RecommendedArticles": getRecommendedArticles(),
+		"RecommendedArticles": hotdataserve.GetRecommendedArticles(),
 		"LinkStatisticsInfo":  linkStatisticsInfo,
 	})
 }
 
 func Profile(c *gin.Context) {
 	viewrender.Render(c, "profile.gohtml", map[string]any{
-		"User": GetLoginUser(c),
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`个人中心`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 	})
 }
 func PublishV3(c *gin.Context) {
 	viewrender.Render(c, "publish-v3.gohtml", map[string]any{
-		"User": GetLoginUser(c),
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`发布中心`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 	})
 }
 
 func Notifications(c *gin.Context) {
 	viewrender.Render(c, "notifications.gohtml", map[string]any{
-		"User": GetLoginUser(c),
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`通知中心`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 	})
 }
 
 func Admin(c *gin.Context) {
 	viewrender.Render(c, "admin.gohtml", map[string]any{
-		"User": GetLoginUser(c),
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`管理`).
-			SetCanonicalURL(buildCanonicalHref(c)).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 	})
 }

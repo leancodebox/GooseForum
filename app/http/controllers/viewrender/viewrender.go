@@ -1,15 +1,11 @@
 package viewrender
 
 import (
-	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/datacache"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"github.com/leancodebox/GooseForum/app/http/controllers/datacache"
-	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
-	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/resource"
 	"html/template"
@@ -46,7 +42,7 @@ func Render(c *gin.Context, name string, templateData map[string]any) {
 	if templateData == nil {
 		templateData = make(map[string]any, 4)
 	}
-	templateData["User"] = GetLoginUser(c)
+	templateData["User"] = component.GetLoginUser(c)
 	templateData["IsProduction"] = setting.IsProduction()
 	templateData["Theme"] = GetTheme(c)
 	templateData["Footer"] = hotdataserve.GetFooterConfigCache()
@@ -58,24 +54,6 @@ func Render(c *gin.Context, name string, templateData map[string]any) {
 		slog.Error("render template err", "err", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
-}
-
-func GetLoginUser(c *gin.Context) *vo.UserInfoShow {
-	userId := c.GetUint64("userId")
-	return GetUserShowByUserId(userId)
-}
-
-func GetUserShowByUserId(userId uint64) *vo.UserInfoShow {
-	if userId == 0 {
-		return &vo.UserInfoShow{}
-	}
-	return hotdataserve.GetOrLoad(fmt.Sprintf("user:%v", userId), func() (*vo.UserInfoShow, error) {
-		user, _ := users.Get(userId)
-		if user.Id == 0 {
-			return &vo.UserInfoShow{}, errors.New("no found")
-		}
-		return transform.User2userShow(user), nil
-	})
 }
 
 type TmplData struct {
