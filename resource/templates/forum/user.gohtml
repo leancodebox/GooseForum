@@ -139,7 +139,7 @@
                                         <span id="follow-text">{{if .IsFollowingAuthor}}已关注{{else}}关注作者{{end}}</span>
                                         <span id="follow-loading" class="loading loading-spinner loading-xs" style="display: none;"></span>
                                     </button>
-                                {{else if .CurrentUserId }}
+                                {{else if not .CurrentUserId }}
                                     <a href="/login" class="btn btn-outline btn-sm btn-block">登录后关注</a>
                                 {{end}}
                                 <button class="btn btn-ghost btn-sm btn-block">私信</button>
@@ -264,7 +264,7 @@
                                                 <p class="text-sm text-base-content/60 mt-1">{{.Bio}}</p>
                                                 {{end}}
                                             </div>
-                                            {{if and (gt $.User.UserId 0) (ne $.User.UserId .Id)}}
+                                            {{if and $.CurrentUserId (ne $.CurrentUserId .Id)}}
                                                 {{$isFollowing := index $.FollowingStatusMap .Id}}
                                                 <button class="btn btn-sm {{if $isFollowing}}btn-outline{{else}}btn-primary{{end}} follow-btn"
                                                         onclick="toggleUserFollow({{.Id}}, this)"
@@ -305,7 +305,7 @@
                                                 <p class="text-sm text-base-content/60 mt-1">{{.Bio}}</p>
                                                 {{end}}
                                             </div>
-                                            {{if and (gt $.User.UserId 0) (ne $.User.UserId .Id)}}
+                                            {{if and $.CurrentUserId (ne $.CurrentUserId .Id)}}
                                                 {{$isFollowing := index $.FollowerStatusMap .Id}}
                                                 <button class="btn btn-sm {{if $isFollowing}}btn-outline{{else}}btn-primary{{end}} follow-btn"
                                                         onclick="toggleUserFollow({{.Id}}, this)"

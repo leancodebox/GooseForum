@@ -365,7 +365,6 @@ func User(c *gin.Context) {
 	followerList, _ := userFollow.GetFollowerList(id, 1, 10)
 
 	// 获取当前登录用户信息
-	currentUser := component.GetLoginUser(c)
 	currentUserId := component.LoginUserId(c)
 
 	// 检查当前用户是否关注了列表中的用户
@@ -427,7 +426,6 @@ func User(c *gin.Context) {
 			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
 		"Articles":             hotdataserve.ArticlesSmallEntity2Dto(last),
-		"ArticlesCount":        articles.GetUserCount(showUser.UserId),
 		"Author":               showUser,
 		"AuthorInfoStatistics": authorInfoStatistics,
 		"FollowingList":        followingList,
@@ -436,9 +434,6 @@ func User(c *gin.Context) {
 		"FollowerStatusMap":    followerStatusMap,
 		"IsFollowingAuthor":    isFollowingAuthor,
 		"ExternalInformation":  showUser.ExternalInformation,
-		"User":                 currentUser,
-		"Title":                showUser.Username + " - GooseForum",
-		"Description":          showUser.Username + " 的个人简介 ",
 	})
 }
 
