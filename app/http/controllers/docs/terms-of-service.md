@@ -96,7 +96,7 @@ GooseForum 是一个技术交流社区平台，为用户提供：
 ## 11. 联系我们
 
 如果您对本协议有任何疑问，请通过以下方式联系我们：
-- 邮箱：abandoncoding@outlokc.com
+- 邮箱：abandoncoding@outlook.com
 - 网站：https://gooseforum.online
 
 ---

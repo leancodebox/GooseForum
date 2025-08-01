@@ -1,25 +1,5 @@
 package collectionopt
 
-//type Collection[T any] struct {
-//	value []T // 数组
-//}
-//
-//func NewCollection[T any](slice []T) *Collection[T] {
-//	return &Collection[T]{value: []T{}}
-//}
-//
-//func (c *Collection[T]) Map[R any](action func(T) R) *Collection[R] {
-//	var res []R
-//	for _, item := range c.value {
-//		res = append(res, Map[T, R](item, action))
-//	}
-//	return NewCollection(res)
-//}
-//
-//func Map[T, R any](item T, action func(T) R) R {
-//	return action(item)
-//}
-
 func IsEmpty[T []any | map[any]any](col T) bool {
 	return col == nil || len(col) == 0
 }
@@ -110,4 +90,10 @@ func RemoveDuplicates[T comparable](slice []T) []T {
 	}
 
 	return result
+}
+func FirstOr[T any](d []T, defaultValue T) T {
+	if len(d) > 1 {
+		return d[0]
+	}
+	return defaultValue
 }

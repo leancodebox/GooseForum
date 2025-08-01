@@ -141,7 +141,7 @@ func SearchPage(c *gin.Context) {
 					AvatarUrl:      avatarUrl,
 					ViewCount:      t.ViewCount,
 					CommentCount:   t.ReplyCount,
-					Category:       FirstOr(categoryNames, "未分类"),
+					Category:       array.FirstOr(categoryNames, "未分类"),
 					Categories:     categoryNames,
 					CategoriesId:   t.CategoryId,
 					Type:           t.Type,

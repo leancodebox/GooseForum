@@ -38,6 +38,20 @@
       </div>
     </div>
 
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="floating-label">
+        <span>站点邮箱</span>
+        <input
+            v-model="settings.siteEmail"
+            type="text"
+            id="siteEmail"
+            placeholder="站点邮箱"
+            class="input input-bordered w-full peer"
+        />
+      </div>
+
+    </div>
+
     <div class="floating-label">
       <span>站点描述</span>
           <textarea
@@ -112,6 +126,7 @@ const settings = ref<SiteSettingsConfig>({
   siteDescription: '',
   siteKeywords: '',
   siteUrl: '',
+  siteEmail:'',
 })
 
 const uploading = ref(false)

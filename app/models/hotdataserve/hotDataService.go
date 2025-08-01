@@ -60,7 +60,7 @@ var siteSettingsConfigCache = &datacache.Cache[pageConfig.SiteSettingsConfig]{}
 func GetSiteSettingsConfigCache() pageConfig.SiteSettingsConfig {
 	data, _ := siteSettingsConfigCache.GetOrLoadE("", func() (pageConfig.SiteSettingsConfig, error) {
 		return pageConfig.GetConfigByPageType(pageConfig.SiteSettings, defaultconfig.GetDefaultSiteSettingsConfig()), nil
-	}, time.Minute)
+	}, time.Second*5)
 	return data
 }
 

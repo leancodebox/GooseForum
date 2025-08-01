@@ -157,18 +157,11 @@ func ArticlesSmallEntityWithUser2Dto(data []articles.SmallEntity, userMap map[ui
 			AvatarUrl:      avatarUrl,
 			ViewCount:      t.ViewCount,
 			CommentCount:   t.ReplyCount,
-			Category:       FirstOr(categoryNames, "未分类"),
+			Category:       array.FirstOr(categoryNames, "未分类"),
 			Categories:     categoryNames,
 			CategoriesId:   t.CategoryId,
 			Type:           t.Type,
 			TypeStr:        articlesTypeMap[int(t.Type)].Name,
 		}
 	})
-}
-
-func FirstOr[T any](d []T, defaultValue T) T {
-	if len(d) > 1 {
-		return d[0]
-	}
-	return defaultValue
 }

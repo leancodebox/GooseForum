@@ -252,7 +252,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				Username:       "", // 这里不需要用户名，因为是自己的文章
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,
-				Category:       FirstOr(categoryNames, "未分类"),
+				Category:       array.FirstOr(categoryNames, "未分类"),
 				Categories:     categoryNames,
 				TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
 			}
@@ -261,12 +261,6 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		pageData.PageSize,
 		pageData.Total,
 	)
-}
-func FirstOr[T any](d []T, defaultValue T) T {
-	if len(d) > 1 {
-		return d[0]
-	}
-	return defaultValue
 }
 
 type LikeArticleReq struct {

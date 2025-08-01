@@ -43,6 +43,7 @@ var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
 	SiteDescription: "一个现代化的论坛系统",
 	SiteKeywords:    "forum,discussion,community",
 	SiteUrl:         "",
+	SiteEmail:       "example@example.example",
 }
 
 func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {

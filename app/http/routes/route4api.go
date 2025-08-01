@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/api"
+	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"net/http"
 	"time"
 
@@ -25,6 +27,14 @@ func assertRouter(ginApp *gin.Engine) {
 }
 
 func viewRoute(ginApp *gin.Engine) {
+	ginApp.GET("/reload", func(c *gin.Context) {
+		if setting.IsProduction() {
+			c.String(http.StatusNotFound, "404")
+			return
+		}
+		viewrender.Reload()
+		c.String(200, "模板已刷新")
+	})
 	ginApp.POST("/login", controllers.Login)
 	ginApp.POST("/register", controllers.Register)
 	ginApp.POST("/logout", controllers.Logout)

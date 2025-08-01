@@ -30,7 +30,7 @@
                                 <div>
                                     <h3 class="font-normal">成为赞助商</h3>
                                     <div class="text-sm mt-1">
-                                        如果您希望成为我们的赞助商，请联系我们：abandoncodding@outlook.com
+                                        如果您希望成为我们的赞助商，请联系我们：{{.SiteSetting.SiteEmail}}
                                     </div>
                                 </div>
                             </div>
@@ -444,7 +444,7 @@
                                 </div>
                             </div>
                             <div class="card-actions justify-center mt-4">
-                                <a href="mailto:abandoncoding@outlook.com" class="btn btn-primary btn-sm btn-block">
+                                <a href="mailto:{{.SiteSetting.SiteEmail}}" class="btn btn-primary btn-sm btn-block">
                                     联系我们
                                 </a>
                             </div>

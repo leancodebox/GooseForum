@@ -15,8 +15,7 @@ const (
 )
 
 func NotFound(c *gin.Context) {
-	acceptString := c.GetHeader("Accept")
-	if strings.Contains(acceptString, contentTypeHTML) {
+	if strings.Contains(c.GetHeader("Accept"), contentTypeHTML) {
 		c.Redirect(http.StatusTemporaryRedirect, "/")
 		return
 	}

@@ -141,6 +141,7 @@ export interface SiteSettingsConfig {
     siteDescription: string;
     siteKeywords: string;
     siteUrl: string;
+    siteEmail: string;
 }
 
 export const getSiteSettings = (): Promise<Result<SiteSettingsConfig>> => {

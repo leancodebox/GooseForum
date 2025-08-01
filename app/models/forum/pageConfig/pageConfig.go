@@ -118,6 +118,7 @@ type SiteSettingsConfig struct {
 	SiteDescription string `json:"siteDescription"`
 	SiteKeywords    string `json:"siteKeywords"`
 	SiteUrl         string `json:"siteUrl"`
+	SiteEmail       string `json:"siteEmail"`
 }
 
 // 邮件设置配置
