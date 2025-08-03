@@ -16,6 +16,7 @@ require (
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/feeds v1.2.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jkboxomine/goldmark-headingid v0.0.0-20200109122657-8b6c16c18388
 	github.com/json-iterator/go v1.1.12
@@ -51,7 +52,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/gorilla/feeds v1.2.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
