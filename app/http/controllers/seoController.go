@@ -3,18 +3,16 @@ package controllers
 import (
 	"bytes"
 	_ "embed"
-	"encoding/xml"
 	"fmt"
-	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/spf13/cast"
-	"html"
 	"net/http"
 	"text/template"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/feeds"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 )
 
@@ -84,8 +82,6 @@ func RenderSitemapXml(c *gin.Context) {
 	c.String(http.StatusOK, buf.String())
 }
 
-var formatRFC822WithZone = "02 Jan 06 15:04 -0700"
-
 func RenderRssV2(c *gin.Context) {
 	settingConfig := hotdataserve.GetSiteSettingsConfigCache()
 	host := component.GetHost(c)
@@ -95,89 +91,35 @@ func RenderRssV2(c *gin.Context) {
 		return
 	}
 
-	articlesList := array.Map(articleList, func(item articles.SmallEntity) Item {
-		return Item{
-			Title:       item.Title,
-			Link:        html.EscapeString(fmt.Sprintf("%s/post/%d", host, item.Id)),
-			Description: CDATA(item.Description),
-			PubDate:     item.CreatedAt.Format(formatRFC822WithZone),
-			GUID:        cast.ToString(item.Id),
-		}
-	})
+	// 创建Feed对象
+	feed := &feeds.Feed{
+		Title:       settingConfig.SiteName,
+		Link:        &feeds.Link{Href: host},
+		Description: settingConfig.SiteDescription,
+		Author:      &feeds.Author{Name: settingConfig.SiteName, Email: settingConfig.SiteEmail},
+		Created:     time.Now(),
+	}
 
-	rss, err := GenerateRSS(
-		settingConfig.SiteName,
-		host+"/rss.xml",
-		settingConfig.SiteDescription,
-		articlesList,
-	)
+	// 添加文章项
+	for _, item := range articleList {
+		// 使用RenderedHTML作为内容，如果为空则使用Description
+
+		feed.Items = append(feed.Items, &feeds.Item{
+			Title:       item.Title,
+			Link:        &feeds.Link{Href: fmt.Sprintf("%s/post/%d", host, item.Id)},
+			Description: item.Description,
+			Id:          cast.ToString(item.Id),
+			Created:     item.CreatedAt,
+		})
+	}
+
+	// 生成RSS XML
+	rssString, err := feed.ToRss()
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error generating RSS feed")
 		return
 	}
+
 	c.Header("Content-Type", "application/xml; charset=utf-8")
-	c.String(http.StatusOK, rss)
-}
-
-// RSS 2.0规范核心结构体
-type RSS struct {
-	XMLName xml.Name `xml:"rss"`
-	Version string   `xml:"version,attr"`
-	Channel Channel  `xml:"channel"`
-}
-
-type Channel struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	Description string `xml:"description"`
-	PubDate     string `xml:"pubDate"`
-	Items       []Item `xml:"item"`
-}
-
-type Item struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	Description CDATA  `xml:"description"`
-	PubDate     string `xml:"pubDate"`
-	GUID        string `xml:"guid"` // 可选唯一标识符
-}
-
-type CDATA string
-
-func (c CDATA) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	return e.EncodeElement(struct {
-		string `xml:",cdata"`
-	}{string(c)}, start)
-}
-
-// GenerateRSS 生成符合RSS 2.0规范的XML字符串
-func GenerateRSS(title, link, description string, items []Item) (string, error) {
-	// 构建Channel结构
-	channel := Channel{
-		Title:       title,
-		Link:        link,
-		Description: description,
-		PubDate:     time.Now().Format(formatRFC822WithZone),
-	}
-
-	// 转换Items
-	for _, item := range items {
-		channel.Items = append(channel.Items, item)
-	}
-
-	// 组装完整RSS结构
-	rss := RSS{
-		Version: "2.0",
-		Channel: channel,
-	}
-
-	// 生成XML
-	var buf bytes.Buffer
-	buf.WriteString(xml.Header)
-	encoder := xml.NewEncoder(&buf)
-	encoder.Indent("", "  ")
-	if err := encoder.Encode(rss); err != nil {
-		return "", err
-	}
-	return buf.String(), nil
+	c.String(http.StatusOK, rssString)
 }
