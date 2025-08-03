@@ -3,12 +3,7 @@ package randopt
 import (
 	"math/rand"
 	"sync/atomic"
-	"time"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 func RandTrue(Molecular int, Denominator int) bool {
 	return rand.Intn(Denominator) < Molecular

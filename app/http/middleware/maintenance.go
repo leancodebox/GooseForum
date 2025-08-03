@@ -1,55 +1,15 @@
 package middleware
 
 import (
+	_ "embed"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-var maintenanceHTML []byte = []byte(`
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-	<meta charset="UTF-8">
-	<title>维护中</title>
-	<style>
-		body {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			height: 100vh;
-			margin: 0;
-			background: linear-gradient(135deg, #ff6f61, #6ab04c);
-		}
-		h1 {
-			color: #333333;
-			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-			text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-		}
-		p {
-			color: #333333;
-			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-			text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-			margin-top: 10px;
-		}
-		.container {
-			text-align: center;
-			background-color: rgba(255, 255, 255, 0.8);
-			padding: 40px;
-			border-radius: 10px;
-			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		}
-	</style>
-</head>
-<body>
-	<div class="container">
-		<h1>网站维护中</h1>
-		<p>我们正在进行系统升级，请稍后再试。感谢您的耐心等待与支持！</p>
-	</div>
-</body>
-</html>
-`)
+//go:embed maintenance.html
+var maintenanceHTML []byte
 
 // SiteMaintenance 中间件用于检查站点是否处于维护状态
 func SiteMaintenance(c *gin.Context) {
