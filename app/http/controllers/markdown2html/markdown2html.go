@@ -69,10 +69,10 @@ func ExtractDescription(content string, maxLength int) string {
 			switch node := n.(type) {
 			case *ast.Text:
 				// 提取文本节点内容
-				text := string(node.Segment.Value(reader.Source()))
-				text = strings.TrimSpace(text)
-				if text != "" && len(text) > 3 {
-					textParts = append(textParts, text)
+				textContent := string(node.Segment.Value(reader.Source()))
+				textContent = strings.TrimSpace(textContent)
+				if textContent != "" && len(textContent) > 3 {
+					textParts = append(textParts, textContent)
 				}
 			case *ast.CodeBlock, *ast.FencedCodeBlock:
 				// 跳过代码块
@@ -169,7 +169,7 @@ func ExtractSearchContent(content string) string {
 	var searchBuf strings.Builder
 	stack := make([]ast.Node, 0, 8) // 节点栈用于上下文感知
 
-	ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		// 上下行关系处理
 		if entering {
 			// 识别上下文分隔点（标题/分隔线）

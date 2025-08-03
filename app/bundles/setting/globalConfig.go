@@ -1,4 +1,4 @@
-// Package app 应用信息
+// Package setting Package app 应用信息
 package setting
 
 import (

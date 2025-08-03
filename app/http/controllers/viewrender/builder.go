@@ -34,7 +34,7 @@ func NewPageMetaBuilder() *PageMetaBuilder {
 	}
 }
 
-// 基础信息设置
+// SetTitle 基础信息设置
 func (b *PageMetaBuilder) SetTitle(title string) *PageMetaBuilder {
 	b.meta.Title = title
 	if b.meta.OG.Title == "" {
@@ -71,13 +71,13 @@ func (b *PageMetaBuilder) SetCanonicalURL(url string) *PageMetaBuilder {
 	return b
 }
 
-// 页面类型设置
+// SetPageType 页面类型设置
 func (b *PageMetaBuilder) SetPageType(pageType string) *PageMetaBuilder {
 	b.meta.OG.Type = pageType
 	return b
 }
 
-// 文章特定设置
+// SetArticle 文章特定设置
 func (b *PageMetaBuilder) SetArticle(title, desc, author string, categories []string, publishTime, modifyTime *time.Time) *PageMetaBuilder {
 	// 应用站点默认配置
 	if title != "" && !strings.HasSuffix(title, b.siteConfig.SiteName) {
@@ -103,7 +103,7 @@ func (b *PageMetaBuilder) SetArticle(title, desc, author string, categories []st
 	return b
 }
 
-// 用户页面设置
+// SetUserProfile 用户页面设置
 func (b *PageMetaBuilder) SetUserProfile(username, bio string) *PageMetaBuilder {
 	b.SetTitle(fmt.Sprintf("%s 的个人主页 - %s", username, b.siteConfig.SiteName))
 	b.SetDescription(bio)
@@ -111,7 +111,7 @@ func (b *PageMetaBuilder) SetUserProfile(username, bio string) *PageMetaBuilder 
 	return b
 }
 
-// 图片设置
+// SetImage 图片设置
 func (b *PageMetaBuilder) SetImage(imageURL, imageAlt string) *PageMetaBuilder {
 	b.meta.OG.Image = imageURL
 	b.meta.OG.ImageAlt = imageAlt
@@ -120,13 +120,13 @@ func (b *PageMetaBuilder) SetImage(imageURL, imageAlt string) *PageMetaBuilder {
 	return b
 }
 
-// 结构化数据设置
+// SetSchemaOrg 结构化数据设置
 func (b *PageMetaBuilder) SetSchemaOrg(jsonLD template.JS) *PageMetaBuilder {
 	b.meta.SchemaOrgJSON = jsonLD
 	return b
 }
 
-// 构建最终的 PageMeta
+// Build 构建最终的 PageMeta
 func (b *PageMetaBuilder) Build() *PageMeta {
 
 	if b.meta.Description == "" {

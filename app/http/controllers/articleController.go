@@ -220,7 +220,7 @@ func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response 
 	return component.SuccessResponse(true)
 }
 
-// 添加新的请求结构体
+// GetUserArticlesRequest 添加新的请求结构体
 type GetUserArticlesRequest struct {
 	Page     int `json:"page"`
 	PageSize int `json:"pageSize"`

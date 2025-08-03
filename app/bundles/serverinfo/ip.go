@@ -15,7 +15,7 @@ func GetLocalIp() (string, error) {
 
 }
 
-// 获取ip
+// ExternalIP 获取ip
 func ExternalIP() (net.IP, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {

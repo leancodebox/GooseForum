@@ -111,7 +111,7 @@ func ArticleCategoryLabel() []datastruct.Option[string, uint64] {
 	})
 }
 
-// GetMapByIds 根据ID列表获取分类Map
+// ArticleCategoryMap GetMapByIds 根据ID列表获取分类Map
 func ArticleCategoryMap() map[uint64]*articleCategory.Entity {
 	data, _ := articleCategoryMapCache.GetOrLoadE(
 		"GetArticleCategory",

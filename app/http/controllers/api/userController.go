@@ -210,13 +210,13 @@ func UploadAvatar(c *gin.Context) {
 	}))
 }
 
-// 添加新的请求结构体
+// ChangePasswordReq 添加新的请求结构体
 type ChangePasswordReq struct {
 	OldPassword string `json:"oldPassword" validate:"required"`
 	NewPassword string `json:"newPassword" validate:"required"`
 }
 
-// 添加修改密码的处理函数
+// ChangePassword 添加修改密码的处理函数
 func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {

@@ -1,8 +1,6 @@
 package eventNotification
 
 import (
-	"database/sql/driver"
-	"encoding/json"
 	"time"
 )
 
@@ -32,23 +30,10 @@ type NotificationPayload struct {
 	Extra map[string]interface{} `json:"metadata,omitempty"`
 }
 
-// Value 实现 driver.Valuer 接口
-func (p NotificationPayload) Value() (driver.Value, error) {
-	return json.Marshal(p)
-}
-
-// Scan 实现 sql.Scanner 接口
-func (p *NotificationPayload) Scan(value interface{}) error {
-	if value == nil {
-		return nil
-	}
-	return json.Unmarshal(value.([]byte), p)
-}
-
 type Entity struct {
 	Id        uint64              `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`
 	UserId    uint64              `gorm:"column:user_id;type:bigint;index;" json:"userId"`                    // 接收通知的用户ID
-	Payload   NotificationPayload `gorm:"column:payload;type:json;" json:"payload"`                           // 通知内容(JSON)
+	Payload   NotificationPayload `gorm:"column:payload;type:json;serializer:json" json:"payload"`            // 通知内容(JSON)
 	EventType string              `gorm:"column:event_type;type:varchar(50);index;" json:"eventType"`         // 通知类型
 	IsRead    bool                `gorm:"column:is_read;type:boolean;default:false;index;" json:"isRead"`     // 是否已读
 	ReadAt    *time.Time          `gorm:"column:read_at;type:timestamp;null;" json:"readAt"`                  // 读取时间

@@ -1,4 +1,4 @@
-// Package str 字符串辅助方法
+// Package stropt Package str 字符串辅助方法
 package stropt
 
 import (

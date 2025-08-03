@@ -84,7 +84,7 @@ type FooterConfig struct {
 	List    []FooterGroup `json:"list"`
 }
 
-// 赞助商相关数据结构
+// SponsorItem 赞助商相关数据结构
 type SponsorItem struct {
 	Name string   `json:"name"`
 	Logo string   `json:"logo"`
@@ -110,7 +110,7 @@ type SponsorsConfig struct {
 	Users    []UserSponsor `json:"users"`
 }
 
-// 站点设置配置
+// SiteSettingsConfig 站点设置配置
 type SiteSettingsConfig struct {
 	// 站点基本信息
 	SiteName        string `json:"siteName"`
@@ -121,7 +121,7 @@ type SiteSettingsConfig struct {
 	SiteEmail       string `json:"siteEmail"`
 }
 
-// 邮件设置配置
+// MailSettingsConfig 邮件设置配置
 type MailSettingsConfig struct {
 	// SMTP服务器设置
 	EnableMail   bool   `json:"enableMail"`

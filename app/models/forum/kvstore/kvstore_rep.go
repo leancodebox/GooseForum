@@ -2,7 +2,7 @@ package kvstore
 
 import (
 	"errors"
-	queryopt "github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/spf13/cast"
 	"gorm.io/gorm"
 	"sync"
@@ -52,7 +52,7 @@ func Exists(key string) (bool, error) {
 	return count > 0, err
 }
 
-// TTL 获取剩余生存时间(秒)
+// GetTTL TTL 获取剩余生存时间(秒)
 func GetTTL(key string) (int64, error) {
 	var kv Entity
 	err := builder().Where("key = ?", key).First(&kv).Error

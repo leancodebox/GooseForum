@@ -28,7 +28,7 @@ func VerifyEncryptPassword(secretPassword, inputPassword string) error {
 	return VerifyPassword(passwordStore[0], passwordStore[1], inputPassword)
 }
 
-// 加密函数，接收原始密码字符串，返回加密后的密码和盐值
+// EncryptPassword 加密函数，接收原始密码字符串，返回加密后的密码和盐值
 func EncryptPassword(password string) (string, string, error) {
 	// 生成随机盐
 	salt := make([]byte, saltLength)
@@ -45,7 +45,7 @@ func EncryptPassword(password string) (string, string, error) {
 	return encodedHash, encodedSalt, nil
 }
 
-// 验证函数，接收密文、原始密码和盐值，返回验证结果
+// VerifyPassword 验证函数，接收密文、原始密码和盐值，返回验证结果
 func VerifyPassword(encodedHash, encodedSalt, inputPassword string) error {
 	// 解码密文和盐值
 	hash, err := base64.StdEncoding.DecodeString(encodedHash)

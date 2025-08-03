@@ -86,8 +86,9 @@ func (receiver TargetTypeEnum) Name() string {
 		return "文档版本"
 	case DocContent:
 		return "文档内容"
+	default:
+		return ""
 	}
-	return ""
 }
 
 func (receiver TargetTypeEnum) toInt() int {
