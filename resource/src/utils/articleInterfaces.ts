@@ -26,20 +26,16 @@ export interface ArticleInfo {
 export interface ArticleListItem {
     id: number,
     title: string,
+    username: string,
     createTime: string,
     lastUpdateTime: string,
     viewCount: number,
     commentCount: number
     category: string,
     categories: string[]
-    typeStr?:string
+    typeStr?: string
 }
 
-export interface ArticleResponse {
-    code: number;
-    result: ArticleInfo;
-    message: string;
-}
 
 export interface EnumInfoResponse {
     code: number;
@@ -89,14 +85,14 @@ export interface ExternalInformation {
 }
 
 export interface AuthorInfoStatistics {
-    userId:number,
-    articleCount:number,
-    replyCount:number,
-    followerCount:number,
-    followingCount:number,
-    likeReceivedCount:number,
-    likeGivenCount:number,
-    collectionCount:number,
+    userId: number,
+    articleCount: number,
+    replyCount: number,
+    followerCount: number,
+    followingCount: number,
+    likeReceivedCount: number,
+    likeGivenCount: number,
+    collectionCount: number,
 }
 
 // 定义用户表单接口
@@ -111,5 +107,5 @@ export interface UserInfo {
     websiteName: string
     signature: string,
     externalInformation: ExternalInformation
-    authorInfoStatistics ?: AuthorInfoStatistics
+    authorInfoStatistics?: AuthorInfoStatistics
 }

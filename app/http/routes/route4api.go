@@ -1,11 +1,12 @@
 package routes
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/api"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
-	"net/http"
-	"time"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -124,8 +125,11 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
 	// 用户文章列表
 	forumLoginApi.POST("get-user-articles", UpButterReq(controllers.GetUserArticles))
+	forumLoginApi.POST("get-user-bookmarked-articles", UpButterReq(controllers.GetUserBookmarkedArticles))
 	// 文章点赞
 	forumLoginApi.POST("like-articles", UpButterReq(controllers.LikeArticle))
+	// 文章收藏
+	forumLoginApi.POST("bookmark-article", UpButterReq(controllers.BookmarkArticle))
 	// 关注
 	forumLoginApi.POST("follow-user", UpButterReq(controllers.FollowUser))
 

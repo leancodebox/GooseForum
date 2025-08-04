@@ -6,6 +6,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -263,6 +264,74 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 	)
 }
 
+// GetUserBookmarkedArticlesRequest 获取用户收藏文章列表请求结构体
+type GetUserBookmarkedArticlesRequest struct {
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+}
+
+// GetUserBookmarkedArticles 获取用户收藏文章列表
+func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArticlesRequest]) component.Response {
+	// 获取收藏的文章ID列表
+	articleIds, total := articleBookmark.GetUserBookmarkedArticleIds(req.UserId, max(req.Params.Page, 1), req.Params.PageSize)
+	
+	if len(articleIds) == 0 {
+		return component.SuccessPage(
+			[]vo.ArticlesSimpleDto{},
+			max(req.Params.Page, 1),
+			req.Params.PageSize,
+			total,
+		)
+	}
+	
+	// 根据文章ID获取文章详情
+	articleList := articles.GetByIds(articleIds)
+	
+	// 获取作者信息
+	userIds := array.Map(articleList, func(t *articles.SmallEntity) uint64 {
+		return t.UserId
+	})
+	userMap := users.GetMapByIds(userIds)
+	
+	categoryMap := hotdataserve.ArticleCategoryMap()
+	
+	// 构建返回数据
+	articleDto := array.Map(articleList, func(t *articles.SmallEntity) vo.ArticlesSimpleDto {
+		categoryNames := array.Map(t.CategoryId, func(item uint64) string {
+			if category, ok := categoryMap[item]; ok {
+				return category.Category
+			}
+			return ""
+		})
+		
+		username := ""
+		if user, ok := userMap[t.UserId]; ok {
+			username = user.Username
+		}
+		
+		return vo.ArticlesSimpleDto{
+			Id:             t.Id,
+			Title:          t.Title,
+			CreateTime:     t.CreatedAt.Format(time.DateTime),
+			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
+			Username:       username,
+			AuthorId:       t.UserId,
+			ViewCount:      t.ViewCount,
+			CommentCount:   t.ReplyCount,
+			Category:       array.FirstOr(categoryNames, "未分类"),
+			Categories:     categoryNames,
+			TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
+		}
+	})
+	
+	return component.SuccessPage(
+		articleDto,
+		max(req.Params.Page, 1),
+		req.Params.PageSize,
+		total,
+	)
+}
+
 type LikeArticleReq struct {
 	Id     uint64 `json:"id"`
 	Action int    `json:"action" validate:"min=1,max=2"` // 1 like 2 cancel
@@ -302,6 +371,38 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 			userStatistics.CancelGivenLike(req.UserId)
 		}
 	}
+	return component.SuccessResponse(true)
+}
+
+type BookmarkArticleReq struct {
+	Id     uint64 `json:"id"`
+	Action int    `json:"action" validate:"min=1,max=2"` // 1 Bookmark 2 cancel
+}
+
+func BookmarkArticle(req component.BetterRequest[LikeArticleReq]) component.Response {
+	articleEntity := articles.Get(req.Params.Id)
+	if articleEntity.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+	oldBookMark := articleBookmark.GetByArticleId(req.UserId, articleEntity.Id)
+	targetStatus := 0
+	if req.Params.Action == 1 {
+		if oldBookMark.Id == 0 {
+			oldBookMark.UserId = req.UserId
+			oldBookMark.ArticleId = articleEntity.Id
+		}
+		targetStatus = 1
+	} else {
+		if oldBookMark.Id == 0 {
+			return component.SuccessResponse(true)
+		}
+		targetStatus = 0
+	}
+	if oldBookMark.Status == targetStatus {
+		return component.SuccessResponse(true)
+	}
+	oldBookMark.Status = targetStatus
+	articleBookmark.SaveOrCreateById(&oldBookMark)
 	return component.SuccessResponse(true)
 }
 

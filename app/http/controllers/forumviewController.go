@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"html/template"
 	"strings"
@@ -145,6 +146,7 @@ func PostDetail(c *gin.Context) {
 	})
 	iLike := false
 	isFollowing := false
+	isBookmarked := false
 	currentUserId := component.LoginUserId(c)
 	if currentUserId != 0 {
 		iLike = articleLike.GetByArticleId(currentUserId, entity.Id).Status == 1
@@ -153,6 +155,7 @@ func PostDetail(c *gin.Context) {
 			followEntity := userFollow.GetByUserId(currentUserId, entity.UserId)
 			isFollowing = followEntity.Status == 1
 		}
+		isBookmarked = articleBookmark.GetByArticleId(currentUserId, entity.Id).Status == 1
 	}
 	// 构建模板数据
 	viewrender.Render(c, "detail.gohtml", map[string]any{
@@ -196,9 +199,7 @@ func PostDetail(c *gin.Context) {
 		"IsFollowing":          isFollowing,
 		"IsOwnArticle":         currentUserId == entity.UserId,
 		"ArticleCategoryList":  hotdataserve.ArticleCategoryLabel(),
-		"ArticleJSONLD":        generateArticleJSONLD(c, entity, author),
-		"PublishedTime":        entity.CreatedAt.Format(time.RFC3339),
-		"ModifiedTime":         entity.UpdatedAt.Format(time.RFC3339),
+		"IsBookmarked":         isBookmarked,
 	})
 	articles.IncrementView(entity)
 }

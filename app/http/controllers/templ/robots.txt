@@ -8,3 +8,4 @@ Sitemap: %s/sitemap.xml
 Disallow: /api/
 Disallow: /admin/
 Disallow: /login
+Disallow: /publish

@@ -144,6 +144,14 @@ export function getUserArticles(page: number,
     })
 }
 
+// 获取用户收藏文章列表
+export const getUserBookmarkedArticles = (page: number, pageSize: number):Promise<Result<PageData<ArticleListItem>>> =>  {
+  return axiosInstance.post('forum/get-user-bookmarked-articles', {
+    page,
+    pageSize
+  });
+};
+
 export function changePassword(oldPassword: string,
                                newPassword: string): Promise<Result<any>> {
     return axiosInstance.post('change-password', {

@@ -2,6 +2,7 @@
 import { onMounted, reactive, ref, nextTick } from 'vue'
 import AccountSettings from "./components/AccountSettings.vue";
 import MyArticles from "./components/MyArticles.vue";
+import MyBookmarks from "./components/MyBookmarks.vue";
 import { getUserInfo } from "@/utils/articleService.ts";
 import type { UserInfo } from "@/utils/articleInterfaces.ts";
 
@@ -11,7 +12,6 @@ const isLoading = ref(true)
 // 标签页 refs
 const articlesTabRef = ref<HTMLInputElement>()
 const collectionsTabRef = ref<HTMLInputElement>()
-const commentsTabRef = ref<HTMLInputElement>()
 const settingsTabRef = ref<HTMLInputElement>()
 
 // 用户信息 - 根据UserInfo接口定义
@@ -121,10 +121,10 @@ const editProfile = async () => {
 <template>
   <div class="container mx-auto px-4 py-4">
     <div class="max-w-6xl mx-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
         <!-- 左侧用户信息卡片 -->
         <div class="lg:col-span-1">
-          <div class="card bg-base-100 shadow-xl sticky top-24">
+          <div class="card bg-base-100 shadow-xl lg:sticky lg:top-24">
             <div class="card-body text-center">
               <!-- 加载状态 -->
               <div v-if="isLoading" class="flex justify-center items-center py-8">
@@ -192,24 +192,7 @@ const editProfile = async () => {
 
               <input ref="collectionsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的收藏" />
               <div class="tab-content space-y-4 mt-3">
-                <div class="space-y-3">
-                  <div class="card bg-base-100 shadow-sm w-full">
-                    <div class="card-body">
-                      <p>开发中开发中开发中ing</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <input ref="commentsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的评论" />
-              <div class="tab-content space-y-4 mt-3">
-                <div class="space-y-3">
-                  <div class="card bg-base-100 shadow-sm w-full">
-                    <div class="card-body">
-                      <p>寻找中寻找中寻找中ing</p>
-                    </div>
-                  </div>
-                </div>
+                <MyBookmarks></MyBookmarks>
               </div>
 
               <input ref="settingsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="账户设置" />

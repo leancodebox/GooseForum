@@ -13,6 +13,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/docs/docVersions"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCollection"
@@ -63,6 +64,7 @@ func migration(migration bool) {
 		&users.EntityComplete{},
 		&taskQueue.Entity{},
 		&articleLike.Entity{},
+		&articleBookmark.Entity{},
 		&applySheet.Entity{},
 		&pageConfig.Entity{},
 		&userStatistics.Entity{},
