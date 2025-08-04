@@ -11,105 +11,21 @@
     </header>
     <main class="flex-1 container mx-auto px-4 py-1">
         <div class="container mx-auto px-2 py-1 space-y-2">
-{{/*            <!-- 通知模块 -->*/}}
-{{/*            <div class="alert alert-info shadow-sm rounded-xl bg-info/10 border border-info/20">*/}}
-{{/*                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 text-info">*/}}
-{{/*                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />*/}}
-{{/*                 </svg>*/}}
-{{/*                <div class="flex-1">*/}}
-{{/*                     <div class="text-sm font-medium text-base-content">系统通知</div>*/}}
-{{/*                     <div class="text-xs text-base-content mt-0.5">欢迎来到 GooseForum 社区！这里是一个开源、现代化的论坛平台。</div>*/}}
-{{/*                 </div>*/}}
-{{/*                <button class="btn btn-ghost btn-xs ml-auto text-base-content/60 hover:text-base-content" onclick="this.parentElement.style.display='none'">*/}}
-{{/*                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">*/}}
-{{/*                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />*/}}
-{{/*                     </svg>*/}}
-{{/*                 </button>*/}}
-{{/*            </div>*/}}
-{{/*            */}}
-            <!-- 超紧凑解构式Hero区域 -->
-            <div class="relative overflow-hidden rounded-2xl">
-                <div class="relative0 p-4 lg:p-6">
-                    <!-- 解构式布局 -->
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-                        <!-- 主标题区域 -->
-                        <div class="lg:col-span-5 text-center lg:text-left">
-                            <h1 class="text-4xl font-bold mb-2">
-                                <span class="text-primary font-bold drop-shadow-lg hover:drop-shadow-xl transition-all duration-300 relative hover:text-primary-focus block cursor-pointer">
-                                    <span class="absolute inset-0 bg-primary/20 blur-md rounded-lg -z-10 opacity-0 hover:opacity-100 transition-opacity duration-500 scale-110 pointer-events-none"></span>
-                                    <span class="relative">{{.GooseForumInfo.Title}}</span>
-                                </span>
-                            </h1>
-                            <p class="text-sm lg:text-base text-base-content/70 mb-4 max-w-md mx-auto lg:mx-0">
-                                {{.GooseForumInfo.Desc}}
-                            </p>
-                            <div class="flex gap-2 justify-center lg:justify-start flex-wrap">
-                                <a href="/post" class="btn btn-primary btn-sm">浏览文章</a>
-                                <a href="/publish" class="btn btn-primary btn-outline btn-sm">发布内容</a>
-                                <a href="/about" class="btn btn-primary btn-dash btn-sm">了解更多</a>
-                                <a href="https://github.com/leancodebox/GooseForum"
-                                   class="btn btn-ghost btn-sm btn-primary" target="_blank">
-                                    不要点我
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- 社区公告区域 -->
-                        <div class="lg:col-span-7 flex items-center justify-center lg:justify-end">
-                            <div class="max-w-md w-full">
-                                <div class="bg-base-100 rounded-xl p-3 border border-base-300 shadow-sm relative overflow-hidden">
-                                    <!-- 装饰性背景元素 -->
-                                    <div class="absolute top-0 right-0 w-12 h-12 bg-primary/10 rounded-full -translate-y-6 translate-x-6"></div>
-
-                                    <div class="relative z-10">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            📢 <span class="text-sm font-normal text-base-content">社区公告</span>
-                                        </div>
-
-                                        <div class="space-y-2">
-                                            <div class="bg-success/10 border border-success/20 rounded-lg p-2">
-                                                <div class="flex items-start gap-2">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-4 w-4 text-success mt-0.5"
-                                                         fill="none" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                    <div>
-                                                        <h4 class="font-medium text-xs text-base-content">开源项目</h4>
-                                                        <div class="text-xs text-base-content/70">在<a
-                                                                class="text-xs hover:text-primary cursor-pointer underline"
-                                                                href="https://github.com/leancodebox/GooseForum"
-                                                                target="_blank">Github</a>查看源码
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="text-xs text-base-content/70 space-y-1">
-                                                <p class="flex items-center gap-1.5">
-                                                    <span class="w-1 h-1 bg-primary rounded-full"></span>
-                                                    <a class="hover:text-primary cursor-pointer transition-colors"
-                                                       href="https://github.com/leancodebox/GooseForum"
-                                                       target="_blank">源码地址</a>
-                                                </p>
-                                                <p class="flex items-center gap-1.5">
-                                                    <span class="w-1 h-1 bg-secondary rounded-full"></span>
-                                                    <span>超低依赖，部署友好</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- 通知模块 -->
+            <div class="alert alert-info shadow-sm rounded-xl bg-info/10 border border-info/20">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 text-info">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                </svg>
+                <div class="flex-1 min-w-0 pr-2">
+                    <div class="text-sm font-medium text-base-content">系统通知</div>
+                    <div class="text-xs opacity-70 mt-0.5 text-base-content">欢迎来到 GooseForum 社区！这里是一个开源、现代化的论坛平台。项目<a href="https://github.com/leancodebox/GooseForum" target="_blank">源码</a></div>
                 </div>
-
-                <!-- 背景装饰 -->
-                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/5 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-                <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-secondary/5 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+                <button class="btn btn-ghost btn-xs flex-shrink-0 ml-auto text-base-content/60 hover:text-base-content" onclick="this.parentElement.style.display='none'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
-
             <!-- 主要内容区域 -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- 最新文章 -->
@@ -198,7 +114,7 @@
                 </div>
 
                 <!-- 侧边栏 -->
-                <div class="space-y-6">
+                <div class="space-y-3">
                     <div class=" border-t border-base-300/30">
                         <a href="/publish"
                            class="btn btn-primary btn-sm w-full gap-2 hover:shadow-lg transition-all duration-200">
