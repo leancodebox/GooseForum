@@ -37,6 +37,7 @@ const (
 	SponsorsPage    = `sponsors`
 	SiteSettings    = `siteSettings`
 	EmailSettings   = `emailSetting`
+	Announcement    = `announcement`
 )
 
 var PageTypeList = []string{
@@ -46,6 +47,7 @@ var PageTypeList = []string{
 	SponsorsPage,
 	SiteSettings,
 	EmailSettings,
+	Announcement,
 }
 
 type WebSettingsConfig struct {
@@ -132,4 +134,12 @@ type MailSettingsConfig struct {
 	SmtpPassword string `json:"smtpPassword"`
 	FromName     string `json:"fromName"`
 	FromEmail    string `json:"fromEmail"`
+}
+
+// AnnouncementConfig 公告设置配置
+type AnnouncementConfig struct {
+	Enabled bool   `json:"enabled"`        // 是否启用公告
+	Title   string `json:"title"`          // 公告标题
+	Content string `json:"content"`        // 公告内容
+	Link    string `json:"link,omitempty"` // 公告链接
 }

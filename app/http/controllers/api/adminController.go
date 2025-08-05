@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"slices"
 	"time"
@@ -39,16 +40,17 @@ type UserListReq struct {
 }
 
 type UserItem struct {
-	UserId     uint64                              `json:"userId"`
-	Username   string                              `json:"username"`
-	AvatarUrl  string                              `json:"avatarUrl"`
-	Email      string                              `json:"email"`
-	Status     int8                                `json:"status"`
-	Validate   int8                                `json:"validate"`
-	Prestige   int64                               `json:"prestige"`
-	RoleList   []datastruct.Option[string, uint64] `json:"roleList"`
-	RoleId     uint64                              `json:"roleId,omitempty"`
-	CreateTime string                              `json:"createTime"`
+	UserId         uint64                              `json:"userId"`
+	Username       string                              `json:"username"`
+	AvatarUrl      string                              `json:"avatarUrl"`
+	Email          string                              `json:"email"`
+	Status         int8                                `json:"status"`
+	Validate       int8                                `json:"validate"`
+	Prestige       int64                               `json:"prestige"`
+	RoleList       []datastruct.Option[string, uint64] `json:"roleList"`
+	RoleId         uint64                              `json:"roleId,omitempty"`
+	CreateTime     string                              `json:"createTime"`
+	LastActiveTime string                              `json:"lastActiveTime"`
 }
 
 func UserList(req component.BetterRequest[UserListReq]) component.Response {
@@ -60,31 +62,41 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 		Email:    req.Params.Email,
 	})
 
+	userIds := array.Map(pageData.Data, func(item users.EntityComplete) uint64 {
+		return item.Id
+	})
+	usList := userStatistics.GetByUserIds(userIds)
+	usMap := array.Slice2Map(usList, func(v *userStatistics.Entity) uint64 {
+		return v.UserId
+	})
 	roleEntityList := role.AllEffective()
 	roleMap := array.Slice2Map(roleEntityList, func(v *role.Entity) uint64 {
 		return v.Id
 	})
 	list := array.Map(pageData.Data, func(t users.EntityComplete) UserItem {
-		roleEntity := roleMap[t.RoleId]
 		var roleList []datastruct.Option[string, uint64]
-		if roleEntity != nil {
+		if roleEntity, ok := roleMap[t.RoleId]; ok {
 			roleList = append(roleList, datastruct.Option[string, uint64]{
 				Name:  roleEntity.RoleName,
 				Value: roleEntity.Id,
 			})
 		}
-
+		LastActiveTime := t.CreatedAt.Format(time.DateTime)
+		if usItem, ok := usMap[t.Id]; ok {
+			LastActiveTime = usItem.LastActiveTime.Format(time.DateTime)
+		}
 		return UserItem{
-			UserId:     t.Id,
-			AvatarUrl:  t.GetWebAvatarUrl(),
-			Username:   t.Username,
-			Email:      t.Email,
-			Status:     t.Status,
-			Validate:   t.Validate,
-			Prestige:   t.Prestige,
-			RoleList:   roleList,
-			RoleId:     t.RoleId,
-			CreateTime: t.CreatedAt.Format(time.DateTime),
+			UserId:         t.Id,
+			AvatarUrl:      t.GetWebAvatarUrl(),
+			Username:       t.Username,
+			Email:          t.Email,
+			Status:         t.Status,
+			Validate:       t.Validate,
+			Prestige:       t.Prestige,
+			RoleList:       roleList,
+			RoleId:         t.RoleId,
+			CreateTime:     t.CreatedAt.Format(time.DateTime),
+			LastActiveTime: LastActiveTime,
 		}
 	})
 	return component.SuccessPage(
@@ -647,4 +659,23 @@ func TestMailConnection(req component.BetterRequest[TestMailConnectionReq]) comp
 		Success: true,
 		Message: "邮件配置测试成功！测试邮件已发送到 " + req.Params.TestEmail,
 	})
+}
+
+// GetAnnouncement 获取公告设置
+func GetAnnouncement(req component.BetterRequest[null]) component.Response {
+	config := pageConfig.GetConfigByPageType(pageConfig.Announcement, pageConfig.AnnouncementConfig{})
+	return component.SuccessResponse(config)
+}
+
+type SaveAnnouncementReq struct {
+	Settings pageConfig.AnnouncementConfig `json:"settings" validate:"required"`
+}
+
+// SaveAnnouncement 保存公告设置
+func SaveAnnouncement(req component.BetterRequest[SaveAnnouncementReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(pageConfig.Announcement)
+	configEntity.PageType = pageConfig.Announcement
+	configEntity.Config = jsonopt.Encode(req.Params.Settings)
+	pageConfig.CreateOrSave(&configEntity)
+	return component.SuccessResponse("success")
 }

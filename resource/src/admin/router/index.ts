@@ -120,7 +120,8 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../views/SiteSettings.vue'),
         meta: {
           title: '站点设置',
-          requiresAuth: true
+          requiresAuth: true,
+          requiresAdmin: true
         }
       },
       {

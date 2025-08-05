@@ -9,16 +9,21 @@
     <header class="sticky top-0 z-50">
         {{template "nav.gohtml" .}}
     </header>
-    <main class="flex-1 container mx-auto px-4 py-1">
-        <div class="container mx-auto px-2 py-1 space-y-2">
+    <main class="flex-1 container mx-auto px-4 py-4">
+        <div class="container mx-auto px-2 space-y-4">
             <!-- 通知模块 -->
+            {{if .Announcement.Enabled}}
             <div class="alert alert-info shadow-sm rounded-xl bg-info/10 border border-info/20">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 text-info">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                 </svg>
                 <div class="flex-1 min-w-0 pr-2">
-                    <div class="text-sm font-medium text-base-content">系统通知</div>
-                    <div class="text-xs opacity-70 mt-0.5 text-base-content">欢迎来到 GooseForum 社区！这里是一个开源、现代化的论坛平台。项目<a href="https://github.com/leancodebox/GooseForum" target="_blank">源码</a></div>
+                    <div class="text-sm font-medium text-base-content">{{.Announcement.Title}}</div>
+                    {{if .Announcement.Link}}
+                        <a href="{{.Announcement.Link}}" target="_blank" class="text-xs opacity-70 mt-0.5 text-base-content">{{.Announcement.Content}}</a>
+                    {{else}}
+                        <div class="text-xs opacity-70 mt-0.5 text-base-content">{{.Announcement.Content}}</div>
+                    {{end}}
                 </div>
                 <button class="btn btn-ghost btn-xs flex-shrink-0 ml-auto text-base-content/60 hover:text-base-content" onclick="this.parentElement.style.display='none'">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -26,6 +31,7 @@
                     </svg>
                 </button>
             </div>
+            {{end}}
             <!-- 主要内容区域 -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- 最新文章 -->

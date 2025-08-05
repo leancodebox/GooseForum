@@ -91,7 +91,7 @@
                   </div>
                 </td>
                 <td class="whitespace-nowrap">{{ formatDate(user.createTime) }}</td>
-                <td class="whitespace-nowrap">{{ user.createTime ? formatDate(user.createTime) : '从未登录' }}</td>
+                <td class="whitespace-nowrap">{{ user.lastActiveTime ? formatDate(user.lastActiveTime) : '从未登录' }}</td>
                 <td class="min-w-[140px]">
                   <div class="flex items-center gap-0">
                     <button @click="editUserItem(user)" class="btn btn-ghost btn-xs p-1" title="编辑">
@@ -177,8 +177,8 @@
             <label class="label pr-4 p-2">
               <span class="label-text">封禁:</span>
             </label>
-            <input v-model="userForm.status" type="checkbox" class="toggle toggle-error" 
-             :true-value="1" 
+            <input v-model="userForm.status" type="checkbox" class="toggle toggle-error"
+             :true-value="1"
             :false-value="0"/>
           </div>
 
@@ -194,7 +194,7 @@
               <span class="label">角色</span>
               <select v-model="userForm.roleId">
                 <option >无</option>
-                
+
                 <option :value="item.value" v-for="item in roleOption">{{item.name}}</option>
               </select>
             </label>

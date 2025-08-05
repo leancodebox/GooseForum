@@ -1,6 +1,9 @@
 package userStatistics
 
-import "time"
+import (
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"time"
+)
 
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
@@ -85,6 +88,11 @@ func CancelFollower(userId uint64) int64 {
 func UpdateUserActivity(userId uint64, lastActiveTime time.Time) int64 {
 	result := builder().Updates(Entity{UserId: userId, LastActiveTime: lastActiveTime})
 	return result.RowsAffected
+}
+
+func GetByUserIds(userIds []uint64) (entities []*Entity) {
+	builder().Where(queryopt.In(pid, userIds)).Find(&entities)
+	return
 }
 
 //func saveAll(entities []*Entity) int64 {

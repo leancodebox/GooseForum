@@ -3,6 +3,7 @@ export interface Result<T> {
     result: T;
     msg: string;
 }
+
 export interface PageData<T> {
     list: T[];
     page: number
@@ -33,6 +34,7 @@ export interface User {
     prestige: number;
     roleList: Role[];
     createTime: string;
+    lastActiveTime: string;
 }
 
 export interface Articles {
@@ -121,10 +123,10 @@ export interface SponsorItem {
 }
 
 export interface UserSponsor {
-  name: string
-  logo: string
-  amount: string
-  time: string
+    name: string
+    logo: string
+    amount: string
+    time: string
 }
 
 export interface SponsorsConfig {

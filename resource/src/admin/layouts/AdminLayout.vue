@@ -270,7 +270,7 @@ const menuItems = ref<MenuItem[]>([
   },
   {
     key: 'site-settings',
-    label: '站点设置 - todo',
+    label: '站点设置',
     path: '/admin/site-settings',
     icon: Cog6ToothIcon
   },

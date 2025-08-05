@@ -47,6 +47,7 @@ func Home(c *gin.Context) {
 		"LatestArticles":      hotdataserve.GetLatestArticleSimpleDto(), // 最新的文章
 		"Stats":               hotdataserve.GetSiteStatisticsData(),
 		"RecommendedArticles": hotdataserve.GetRecommendedArticles(),
+		"Announcement":        hotdataserve.GetAnnouncementConfigCache(),
 		"GooseForumInfo":      GetGooseForumInfo(),
 	})
 }

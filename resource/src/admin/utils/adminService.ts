@@ -223,3 +223,21 @@ export const testMailConnection = (settings: MailSettingsConfig, testEmail: stri
         testEmail: testEmail
     });
 }
+
+// 公告管理相关接口
+export interface AnnouncementConfig {
+    enabled: boolean;
+    title: string;
+    content: string;
+    link?: string;
+}
+
+export const getAnnouncement = (): Promise<Result<AnnouncementConfig>> => {
+    return axiosInstance.get('api/admin/announcement');
+}
+
+export const saveAnnouncement = (settings: AnnouncementConfig): Promise<Result<any>> => {
+    return axiosInstance.post('api/admin/save-announcement', {
+        settings: settings
+    });
+}
