@@ -11,9 +11,6 @@ import (
 	"log/slog"
 )
 
-// ArticleSearchDocument 文章搜索文档结构
-type ArticleSearchDocument meilisearchmodel.Doc
-
 // IndexBuildResult 索引构建结果
 type IndexBuildResult struct {
 	ProcessedCount int    `json:"processedCount"`
@@ -43,7 +40,7 @@ func convertToSearchDocument(article *articles.Entity) ArticleSearchDocument {
 func BuildSingleArticleSearchDocument(article *articles.Entity) (*meilisearch.TaskInfo, error) {
 	// 获取 Meilisearch 客户端
 	client := meiliconnect.GetClient()
-	indexName := meilisearchmodel.Index
+	indexName := Index
 	index := client.Index(indexName)
 	var task *meilisearch.TaskInfo
 	var err error
@@ -68,7 +65,7 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 
 	// 获取 Meilisearch 客户端
 	client := meiliconnect.GetClient()
-	indexName := meilisearchmodel.Index
+	indexName := Index
 	index := client.Index(indexName)
 
 	// 配置索引设置

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
-	"github.com/leancodebox/GooseForum/app/models/meilisearchmodel"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/spf13/cast"
 )
@@ -34,7 +33,7 @@ type SearchResponse struct {
 func SearchArticles(req SearchRequest) (*SearchResponse, error) {
 	// 获取 Meilisearch 客户端
 	client := meiliconnect.GetClient()
-	index := client.Index(meilisearchmodel.Index)
+	index := client.Index(Index)
 
 	// 构建搜索请求
 	searchReq := &meilisearch.SearchRequest{

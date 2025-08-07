@@ -274,7 +274,7 @@ type GetUserBookmarkedArticlesRequest struct {
 func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArticlesRequest]) component.Response {
 	// 获取收藏的文章ID列表
 	articleIds, total := articleBookmark.GetUserBookmarkedArticleIds(req.UserId, max(req.Params.Page, 1), req.Params.PageSize)
-	
+
 	if len(articleIds) == 0 {
 		return component.SuccessPage(
 			[]vo.ArticlesSimpleDto{},
@@ -283,18 +283,18 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 			total,
 		)
 	}
-	
+
 	// 根据文章ID获取文章详情
 	articleList := articles.GetByIds(articleIds)
-	
+
 	// 获取作者信息
 	userIds := array.Map(articleList, func(t *articles.SmallEntity) uint64 {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
-	
+
 	categoryMap := hotdataserve.ArticleCategoryMap()
-	
+
 	// 构建返回数据
 	articleDto := array.Map(articleList, func(t *articles.SmallEntity) vo.ArticlesSimpleDto {
 		categoryNames := array.Map(t.CategoryId, func(item uint64) string {
@@ -303,12 +303,12 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 			}
 			return ""
 		})
-		
+
 		username := ""
 		if user, ok := userMap[t.UserId]; ok {
 			username = user.Username
 		}
-		
+
 		return vo.ArticlesSimpleDto{
 			Id:             t.Id,
 			Title:          t.Title,
@@ -323,7 +323,7 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 			TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
 		}
 	})
-	
+
 	return component.SuccessPage(
 		articleDto,
 		max(req.Params.Page, 1),

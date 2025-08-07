@@ -1,6 +1,9 @@
-package meilisearchmodel
+package searchservice
 
-type Doc struct {
+const Index = "articles"
+
+// ArticleSearchDocument 文章搜索文档结构
+type ArticleSearchDocument struct {
 	ID            uint64   `json:"id"`
 	Title         string   `json:"title"`         // 主要搜索字段
 	SearchContent string   `json:"searchContent"` // 优化后的搜索文本
@@ -11,5 +14,3 @@ type Doc struct {
 	CreatedAt     int64    `json:"createdAt"` // 时间戳(Unix)
 	UpdatedAt     int64    `json:"updatedAt"` // 时间戳(Unix)
 }
-
-const Index = "articles"

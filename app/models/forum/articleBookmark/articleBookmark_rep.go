@@ -46,10 +46,10 @@ func GetLikeReceivedCount(userId uint64) int64 {
 func GetUserBookmarkedArticleIds(userId uint64, page, pageSize int) ([]uint64, int64) {
 	var articleIds []uint64
 	var total int64
-	
+
 	// 计算总数
 	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&total)
-	
+
 	// 获取分页数据
 	offset := (page - 1) * pageSize
 	builder().
@@ -59,7 +59,7 @@ func GetUserBookmarkedArticleIds(userId uint64, page, pageSize int) ([]uint64, i
 		Offset(offset).
 		Limit(pageSize).
 		Pluck(fieldArticleId, &articleIds)
-	
+
 	return articleIds, total
 }
 

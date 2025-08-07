@@ -43,5 +43,4 @@ func FirstUserInit(adminUser *users.EntityComplete) {
 
 	adminUser.RoleId = roleEntity.Id
 	users.Save(adminUser)
-
 }
