@@ -5,7 +5,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/GooseForum/app/models/meilisearchmodel"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/spf13/cast"
 	"log/slog"
