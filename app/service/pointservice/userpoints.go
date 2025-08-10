@@ -1,10 +1,11 @@
 package pointservice
 
 import (
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"time"
 )
 
 type RewardPointsType int

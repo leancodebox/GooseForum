@@ -4,14 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
-	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
+	"github.com/leancodebox/GooseForum/app/service/oauthservice"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/routes"
@@ -52,6 +54,9 @@ func runWeb(_ *cobra.Command, _ []string) {
 }
 
 func ginServe() {
+	// 初始化OAuth配置
+	oauthservice.InitOAuth()
+
 	defer userservice.CloseUpdateUserLastActiveTime()
 	RunJob()
 	defer StopJob()

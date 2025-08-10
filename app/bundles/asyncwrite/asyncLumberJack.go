@@ -4,8 +4,9 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"gopkg.in/natefinch/lumberjack.v2"
 	"time"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type AsyncW struct {

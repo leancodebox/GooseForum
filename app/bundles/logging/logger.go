@@ -3,11 +3,6 @@ package logging
 import (
 	"context"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/asyncwrite"
-	"github.com/leancodebox/GooseForum/app/bundles/fileopt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"log/slog"
 	"os"
@@ -16,6 +11,12 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/asyncwrite"
+	"github.com/leancodebox/GooseForum/app/bundles/fileopt"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 const (

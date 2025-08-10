@@ -3,6 +3,7 @@ package userservice
 import (
 	_ "embed"
 	"fmt"
+
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"

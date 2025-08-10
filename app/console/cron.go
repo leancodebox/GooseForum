@@ -1,12 +1,13 @@
 package console
 
 import (
+	"log/slog"
+
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/robfig/cron/v3"
-	"log/slog"
 )
 
 var c = cron.New(

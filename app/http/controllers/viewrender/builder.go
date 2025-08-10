@@ -2,11 +2,12 @@ package viewrender
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
-	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"html/template"
 	"strings"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
 type PageMetaBuilder struct {

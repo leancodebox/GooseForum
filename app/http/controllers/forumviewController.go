@@ -3,13 +3,14 @@ package controllers
 import (
 	_ "embed"
 	"fmt"
+	"html/template"
+	"strings"
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
-	"html/template"
-	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"

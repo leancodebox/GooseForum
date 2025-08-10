@@ -146,5 +146,22 @@
       {"field": "user_agent", "type": "text", "key": "", "desc": "用户代理", "null": "YES", "default": null},
       {"field": "created_at", "type": "datetime", "key": "", "desc": "操作时间", "null": "NO", "default": "CURRENT_TIMESTAMP"}
     ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "UserOAuth",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "id", "null": "NO", "default": null},
+      {"field": "user_id", "type": "bigint unsigned", "key": "", "desc": "关联用户id", "null": "NO", "default": ""},
+      {"field": "provider", "type": "varchar(32)", "key": "", "desc": "平台标识(github/twitter)", "null": "", "default": "0"},
+      {"field": "provider_uid", "type": "varchar(255)", "key": "", "desc": "第三方用户唯一ID", "null": "NO", "default": ""},
+      {"field": "access_token", "type": "varchar(1024)", "key": "", "desc": "访问令牌", "null": "NO", "default": ""},
+      {"field": "refresh_token", "type": "varchar(1024)", "key": "", "desc": "刷新令牌", "null": "NO", "default": ""},
+      {"field": "token_expiry", "type": "datetime", "key": "", "desc": "令牌过期时间", "null": "NO", "default": ""},
+      {"field": "scopes", "type": "text", "key": "", "desc": "授权范围", "null": "YES", "default": null},
+      {"field": "raw_user_data", "type": "text", "key": "", "desc": "平台返回的原始用户数据", "null": "YES", "default": null},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
+    ]
   }
 ]

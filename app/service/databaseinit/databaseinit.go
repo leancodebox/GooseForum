@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	_ "embed"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"log/slog"
 	"strings"
+
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
 //go:embed dbinit/init.sql

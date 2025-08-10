@@ -2,12 +2,13 @@ package users
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
-	"math/rand"
-	"time"
 )
 
 func Get(id any) (entity EntityComplete, err error) {

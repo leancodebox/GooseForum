@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"net/http"
 	"strings"
+
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 
 	"github.com/gin-gonic/gin"
 )

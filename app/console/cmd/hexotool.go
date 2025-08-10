@@ -3,16 +3,17 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
+
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	timeopt "github.com/leancodebox/GooseForum/app/bundles/timopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"gopkg.in/yaml.v3"
-	"os"
-	"path/filepath"
-	"slices"
-	"strings"
 
 	"github.com/spf13/cobra"
 )

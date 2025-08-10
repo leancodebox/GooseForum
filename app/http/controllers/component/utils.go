@@ -3,11 +3,12 @@ package component
 import (
 	"cmp"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
 var (

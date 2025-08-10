@@ -2,6 +2,9 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
@@ -18,8 +21,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
-	"strings"
-	"time"
 )
 
 func GetSiteStatistics() component.Response {
@@ -134,7 +135,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 			}
 		}
 		// 插入新的条目
-		for id, _ := range categoryIDMap {
+		for id := range categoryIDMap {
 			rs := &articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: id, Effective: 1}
 			fmt.Println(*rs)
 			articleCategoryRs.SaveOrCreateById(rs)

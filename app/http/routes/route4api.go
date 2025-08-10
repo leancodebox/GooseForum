@@ -80,6 +80,10 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.GET("get-captcha", ginUpNP(api.GetCaptcha))
 	// 添加激活路由
 	baseApi.GET("activate", controllers.ActivateAccount)
+	// GitHub OAuth 路由
+	baseApi.GET("auth/:provider", controllers.ProviderLogin)
+	baseApi.GET("auth/:provider/callback", controllers.ProviderCallback)
+	baseApi.POST("auth/:provider/logout", controllers.ProviderLogout)
 
 	// 登陆状态下的用户操作
 	loginApi := ginApp.Group("api").Use(middleware.JWTAuthCheck)

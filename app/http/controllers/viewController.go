@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"regexp"
 	"strings"
+
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"

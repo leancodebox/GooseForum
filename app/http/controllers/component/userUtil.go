@@ -3,6 +3,8 @@ package component
 import (
 	"errors"
 	"fmt"
+	"regexp"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
@@ -10,7 +12,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
-	"regexp"
 )
 
 var (

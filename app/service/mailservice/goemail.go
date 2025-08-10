@@ -3,10 +3,11 @@ package mailservice
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/wneessen/go-mail"
-	"time"
 )
 
 func buildClientByConfig(config pageConfig.MailSettingsConfig) (*mail.Client, error) {

@@ -1,8 +1,9 @@
 package filedata
 
 import (
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
 
 const tableName = "file_data"

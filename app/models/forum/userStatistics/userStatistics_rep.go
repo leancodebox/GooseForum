@@ -1,8 +1,9 @@
 package userStatistics
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 )
 
 func create(entity *Entity) int64 {

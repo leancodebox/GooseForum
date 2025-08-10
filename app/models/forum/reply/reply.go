@@ -1,8 +1,9 @@
 package reply
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const tableName = "reply"

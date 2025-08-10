@@ -5,11 +5,12 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
-	"github.com/leancodebox/GooseForum/app/bundles/fileopt"
 	"log/slog"
 	"sync"
 	"text/template"
+
+	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
+	"github.com/leancodebox/GooseForum/app/bundles/fileopt"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cast"
@@ -27,7 +28,8 @@ func GenerateConfig() []byte {
 	t := template.New("config.templ.toml")
 	t = template.Must(t.Parse(string(configTempl)))
 	err := t.Execute(&b, map[string]any{
-		"SigningKey": algorithm.SafeGenerateSigningKey(32),
+		"AppSigningKey": algorithm.SafeGenerateSigningKey(32),
+		"SigningKey":    algorithm.SafeGenerateSigningKey(32),
 	})
 
 	if err != nil {

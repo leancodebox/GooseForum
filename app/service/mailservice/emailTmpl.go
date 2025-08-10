@@ -4,8 +4,9 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"html/template"
+
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
 //go:embed activation-email.gohtml

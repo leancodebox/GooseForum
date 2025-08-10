@@ -1,8 +1,9 @@
 package vo
 
 import (
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
 type UserInfoShow struct {

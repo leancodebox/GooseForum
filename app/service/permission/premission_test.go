@@ -2,8 +2,9 @@ package permission
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/datastruct"
 	"testing"
+
+	"github.com/leancodebox/GooseForum/app/datastruct"
 )
 
 func TestEnum(t *testing.T) {

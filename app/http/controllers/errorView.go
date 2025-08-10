@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
-	"net/http"
-	"time"
 )
 
 // ErrorPageData 错误页面数据结构

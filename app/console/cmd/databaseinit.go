@@ -2,6 +2,7 @@ package cmd
 
 import (
 	_ "embed"
+
 	"github.com/leancodebox/GooseForum/app/service/databaseinit"
 	"github.com/spf13/cobra"
 )

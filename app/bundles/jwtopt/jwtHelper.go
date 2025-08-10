@@ -1,18 +1,19 @@
 package jwtopt
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"github.com/spf13/cast"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/spf13/cast"
 )
 
 var (
 	once       sync.Once
 	std        *JWT
-	signingKey = preferences.Get("jwtopt.signingKey", "mq+ZeGafL+b1xdC0u9vSVg==")
+	signingKey = preferences.Get("app.signingKey", "mq+ZeGafL+b1xdC0u9vSVg==")
 	validTime  = time.Duration(preferences.GetInt64("jwtopt.validTime", 86400*7)) * time.Second
 )
 

@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
+
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/spf13/cobra"
-	"log/slog"
 )
 
 func init() {

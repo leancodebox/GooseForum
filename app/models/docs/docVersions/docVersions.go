@@ -1,8 +1,9 @@
 package docVersions
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const tableName = "doc_versions"

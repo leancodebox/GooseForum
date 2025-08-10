@@ -2,8 +2,9 @@ package middleware
 
 import (
 	_ "embed"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"net/http"
+
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 
 	"github.com/gin-gonic/gin"
 )

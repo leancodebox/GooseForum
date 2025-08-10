@@ -1,9 +1,10 @@
 package tokenservice
 
 import (
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )

@@ -1,8 +1,9 @@
 package controllers
 
 import (
-	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"testing"
+
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 )
 
 func TestGName(t *testing.T) {

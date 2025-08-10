@@ -1,8 +1,9 @@
 package docProjects
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const tableName = "doc_projects"

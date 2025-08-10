@@ -3,6 +3,8 @@ package migration
 import (
 	_ "embed"
 	"fmt"
+	"log/slog"
+
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
@@ -29,10 +31,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
+	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"log/slog"
 )
 
 func M() {
@@ -61,6 +63,7 @@ func migration(migration bool) {
 		&rolePermissionRs.Entity{},
 		&userFollow.Entity{},
 		&userPoints.Entity{},
+		&userOAuth.Entity{},
 		&users.EntityComplete{},
 		&taskQueue.Entity{},
 		&articleLike.Entity{},

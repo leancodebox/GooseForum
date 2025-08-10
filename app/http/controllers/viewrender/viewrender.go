@@ -1,6 +1,11 @@
 package viewrender
 
 import (
+	"html/template"
+	"log/slog"
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/datacache"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
@@ -8,10 +13,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/resource"
-	"html/template"
-	"log/slog"
-	"net/http"
-	"time"
 )
 
 var ht4gooseforum *template.Template

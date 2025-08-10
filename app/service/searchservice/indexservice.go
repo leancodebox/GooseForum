@@ -2,12 +2,13 @@ package searchservice
 
 import (
 	"fmt"
+	"log/slog"
+
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/spf13/cast"
-	"log/slog"
 )
 
 // IndexBuildResult 索引构建结果

@@ -1,10 +1,11 @@
 package permission
 
 import (
+	"slices"
+
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
-	"slices"
 )
 
 type Enum int

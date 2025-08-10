@@ -2,9 +2,10 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"log/slog"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 
 	"github.com/gin-gonic/gin"
 )

@@ -2,11 +2,12 @@ package api
 
 import (
 	"fmt"
+	"slices"
+	"time"
+
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
-	"slices"
-	"time"
 
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"

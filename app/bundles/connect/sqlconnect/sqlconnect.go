@@ -2,12 +2,13 @@ package sqlconnect
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/GooseForum/app/bundles/logging"

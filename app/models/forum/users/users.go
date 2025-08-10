@@ -1,9 +1,10 @@
 package users
 
 import (
-	"gorm.io/gorm"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 

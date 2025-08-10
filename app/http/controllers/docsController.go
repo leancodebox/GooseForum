@@ -2,14 +2,15 @@ package controllers
 
 import (
 	"fmt"
+	"html/template"
+	"time"
+
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/docs/docContents"
 	"github.com/leancodebox/GooseForum/app/models/docs/docProjects"
 	"github.com/leancodebox/GooseForum/app/models/docs/docVersions"
 	"github.com/spf13/cast"
-	"html/template"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"

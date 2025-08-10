@@ -2,8 +2,9 @@ package api
 
 import (
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 
 	"github.com/spf13/cast"
 

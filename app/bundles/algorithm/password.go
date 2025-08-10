@@ -5,8 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
-	"golang.org/x/crypto/pbkdf2"
 	"strings"
+
+	"golang.org/x/crypto/pbkdf2"
 )
 
 const (
