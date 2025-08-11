@@ -1,6 +1,7 @@
 package oauthservice
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -311,8 +312,19 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 		return "", nil
 	}
 
+	// 设置下载超时时间（30秒）
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// 创建带超时的请求
+	req, err := http.NewRequestWithContext(ctx, "GET", avatarURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("创建请求失败: %v", err)
+	}
+
 	// 下载头像
-	resp, err := http.Get(avatarURL)
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("下载头像失败: %v", err)
 	}
@@ -322,10 +334,19 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 		return "", fmt.Errorf("下载头像失败，状态码: %d", resp.StatusCode)
 	}
 
+	// 限制文件大小（最大5MB）
+	const maxFileSize = 2 * 1024 * 1024 // 5MB
+	limitedReader := io.LimitReader(resp.Body, maxFileSize+1)
+
 	// 读取头像数据
-	avatarData, err := io.ReadAll(resp.Body)
+	avatarData, err := io.ReadAll(limitedReader)
 	if err != nil {
 		return "", fmt.Errorf("读取头像数据失败: %v", err)
+	}
+
+	// 检查文件大小是否超过限制
+	if len(avatarData) > maxFileSize {
+		return "", fmt.Errorf("头像文件过大，最大允许5MB")
 	}
 
 	// 从URL中提取文件扩展名
