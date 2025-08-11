@@ -256,7 +256,42 @@ func UnbindOAuth(userID uint64, provider string) error {
 		return errors.New("OAuth绑定不存在")
 	}
 
+	// 安全检查：确保用户解绑后仍有登录方式
+	if err := checkUnbindSafety(userID, provider); err != nil {
+		return err
+	}
+
 	return userOAuth.Delete(oauthEntity.Id)
+}
+
+// checkUnbindSafety 检查解绑安全性
+func checkUnbindSafety(userID uint64, providerToUnbind string) error {
+	// 获取用户信息
+	user, err := users.Get(userID)
+	if err != nil {
+		return fmt.Errorf("获取用户信息失败: %v", err)
+	}
+
+	// 检查用户是否有邮箱
+	hasEmail := user.Email != ""
+
+	// 获取用户的所有OAuth绑定
+	bindings := GetUserOAuthBindings(userID)
+
+	// 计算解绑后剩余的OAuth绑定数量
+	remainingBindings := 0
+	for provider := range bindings {
+		if provider != providerToUnbind {
+			remainingBindings++
+		}
+	}
+
+	// 如果用户既没有邮箱，解绑后也没有其他OAuth绑定，则禁止解绑
+	if !hasEmail && remainingBindings == 0 {
+		return errors.New("解绑失败：您必须至少保留一种登录方式（邮箱或其他OAuth绑定）")
+	}
+
+	return nil
 }
 
 // ProcessOAuthBind 处理OAuth绑定（用于已登录用户）
