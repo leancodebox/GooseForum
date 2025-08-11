@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance';
 
 import axios from 'axios';
-import type {ArticleListItem, Notifications, PageData, QueryList, Result, UserInfo} from "./articleInterfaces.ts";
+import type {ArticleListItem, Notifications, PageData, QueryList, Result, UserInfo, OAuthBindings} from "./articleInterfaces.ts";
 
 // 获取文章枚举
 export const getArticleEnum = async (): Promise<any> => {
@@ -158,4 +158,16 @@ export function changePassword(oldPassword: string,
         oldPassword: oldPassword,
         newPassword: newPassword,
     })
+}
+
+// OAuth相关API函数
+
+// 获取OAuth绑定状态
+export function getOAuthBindings(): Promise<Result<OAuthBindings>> {
+    return axiosInstance.get('oauth/bindings');
+}
+
+// 解绑OAuth
+export function unbindOAuth(provider: string): Promise<Result<any>> {
+    return axiosInstance.post(`auth/${provider}/unbind`);
 }

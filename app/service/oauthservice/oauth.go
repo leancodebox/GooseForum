@@ -3,10 +3,18 @@ package oauthservice
 import (
 	"errors"
 	"fmt"
-	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
-	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"io"
 	"log/slog"
+	"net/http"
+	"path"
+	"strings"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
+	"github.com/leancodebox/GooseForum/app/bundles/randopt"
+	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 
 	"github.com/gorilla/sessions"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
@@ -98,7 +106,7 @@ type OAuthUserInfo struct {
 }
 
 // ProcessOAuthCallback 处理OAuth回调
-func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, bool, error) {
+func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, error) {
 	// 解析用户信息
 	userInfo := parseOAuthUserInfo(gothUser)
 
@@ -108,41 +116,26 @@ func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, bool, erro
 		// 已存在OAuth记录，直接登录
 		user, err := users.Get(existingOAuth.UserId)
 		if err != nil {
-			return nil, false, fmt.Errorf("获取用户信息失败: %v", err)
+			return nil, fmt.Errorf("获取用户信息失败: %v", err)
 		}
-
 		// 更新OAuth信息
 		updateOAuthRecord(existingOAuth, gothUser)
-		return &user, false, nil
-	}
-
-	// 检查邮箱是否已被注册
-	if gothUser.Email != "" && users.ExistEmail(gothUser.Email) {
-		// 邮箱已存在，需要绑定到现有账户
-		existingUser, err := users.GetByEmail(gothUser.Email)
-		if err == nil {
-			// 创建OAuth关联
-			err := createOAuthRecord(existingUser.Id, gothUser, userInfo)
-			if err != nil {
-				return nil, false, err
-			}
-			return &existingUser, false, nil
-		}
+		return &user, nil
 	}
 
 	// 创建新用户
 	newUser, err := createUserFromOAuth(gothUser, userInfo)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
 	// 创建OAuth记录
 	err = createOAuthRecord(newUser.Id, gothUser, userInfo)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
-	return newUser, true, nil
+	return newUser, nil
 }
 
 // parseOAuthUserInfo 解析OAuth用户信息
@@ -187,32 +180,29 @@ func createUserFromOAuth(gothUser goth.User, userInfo OAuthUserInfo) (*users.Ent
 		counter++
 	}
 
-	// 创建用户实体
-	userEntity := &users.EntityComplete{
-		Username: username,
-		Email:    gothUser.Email,
-		Password: "", // OAuth用户无密码
-		Nickname: userInfo.Name,
-		Bio:      userInfo.Bio,
-		Website:  userInfo.Blog,
-		Status:   0, // 正常状态
-		Validate: 1, // GitHub用户默认已验证
-	}
-
-	// 如果有头像URL，设置头像
-	if userInfo.AvatarURL != "" {
-		userEntity.AvatarUrl = userInfo.AvatarURL
-	}
-
-	// 设置激活时间
-	now := time.Now()
-	userEntity.ActivatedAt = &now
-
-	// 保存用户
-	err := users.Create(userEntity)
+	userEntity, err := userservice.CreateUser(username, randopt.RandomString(32), "", false)
 	if err != nil {
 		return nil, fmt.Errorf("创建用户失败: %v", err)
 	}
+
+	// 下载并保存头像到本地
+	if userInfo.AvatarURL != "" {
+		localAvatarPath, err := downloadAndSaveAvatar(userEntity.Id, userInfo.AvatarURL)
+		if err != nil {
+			slog.Warn("下载头像失败，使用默认头像", "error", err, "avatarURL", userInfo.AvatarURL)
+			// 如果下载失败，使用默认头像
+			userEntity.AvatarUrl = users.RandAvatarUrl()
+		} else {
+			userEntity.AvatarUrl = localAvatarPath
+		}
+	} else {
+		userEntity.AvatarUrl = users.RandAvatarUrl()
+	}
+
+	userEntity.Nickname = username
+	userEntity.Bio = userInfo.Bio
+	userEntity.Website = userInfo.Blog
+	users.Save(userEntity)
 
 	return userEntity, nil
 }
@@ -268,7 +258,105 @@ func UnbindOAuth(userID uint64, provider string) error {
 	return userOAuth.Delete(oauthEntity.Id)
 }
 
+// ProcessOAuthBind 处理OAuth绑定（用于已登录用户）
+func ProcessOAuthBind(userID uint64, gothUser goth.User) error {
+	// 解析用户信息
+	userInfo := parseOAuthUserInfo(gothUser)
+
+	// 检查该OAuth账户是否已被其他用户绑定
+	existingOAuth := userOAuth.GetByProviderAndUID(userInfo.Provider, userInfo.ID)
+	if existingOAuth != nil {
+		if existingOAuth.UserId != userID {
+			return errors.New("该OAuth账户已被其他用户绑定")
+		}
+		// 如果是同一用户，更新OAuth信息
+		updateOAuthRecord(existingOAuth, gothUser)
+		return nil
+	}
+
+	// 检查用户是否已绑定该提供商
+	existingUserOAuth := userOAuth.GetByUserIDAndProvider(userID, userInfo.Provider)
+	if existingUserOAuth != nil {
+		return errors.New("您已绑定该平台账户")
+	}
+
+	// 创建新的OAuth绑定记录
+	return createOAuthRecord(userID, gothUser, userInfo)
+}
+
+// GetUserOAuthBindings 获取用户的所有OAuth绑定
+func GetUserOAuthBindings(userID uint64) map[string]*userOAuth.Entity {
+	bindings := make(map[string]*userOAuth.Entity)
+
+	// 检查各个提供商的绑定状态
+	providers := []string{ProviderGitHub, ProviderGoogle}
+	for _, provider := range providers {
+		oauth := userOAuth.GetByUserIDAndProvider(userID, provider)
+		if oauth != nil {
+			bindings[provider] = oauth
+		}
+	}
+
+	return bindings
+}
+
 // GetSessionStore 获取session store
 func GetSessionStore() *sessions.CookieStore {
 	return store
+}
+
+// downloadAndSaveAvatar 下载外部头像并保存到本地
+func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
+	if avatarURL == "" {
+		return "", nil
+	}
+
+	// 下载头像
+	resp, err := http.Get(avatarURL)
+	if err != nil {
+		return "", fmt.Errorf("下载头像失败: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("下载头像失败，状态码: %d", resp.StatusCode)
+	}
+
+	// 读取头像数据
+	avatarData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("读取头像数据失败: %v", err)
+	}
+
+	// 从URL中提取文件扩展名
+	filename := "avatar"
+	if urlPath := resp.Request.URL.Path; urlPath != "" {
+		ext := path.Ext(urlPath)
+		if ext != "" {
+			filename = "avatar" + ext
+		} else {
+			// 如果没有扩展名，根据Content-Type推断
+			contentType := resp.Header.Get("Content-Type")
+			switch {
+			case strings.Contains(contentType, "jpeg"):
+				filename = "avatar.jpg"
+			case strings.Contains(contentType, "png"):
+				filename = "avatar.png"
+			case strings.Contains(contentType, "gif"):
+				filename = "avatar.gif"
+			case strings.Contains(contentType, "webp"):
+				filename = "avatar.webp"
+			default:
+				filename = "avatar.jpg" // 默认为jpg
+			}
+		}
+	}
+
+	// 保存头像到本地
+	fileEntity, err := filedata.SaveAvatar(userID, avatarData, filename)
+	if err != nil {
+		return "", fmt.Errorf("保存头像失败: %v", err)
+	}
+
+	return fileEntity.Name, nil
 }

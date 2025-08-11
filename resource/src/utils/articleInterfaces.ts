@@ -109,3 +109,17 @@ export interface UserInfo {
     externalInformation: ExternalInformation
     authorInfoStatistics?: AuthorInfoStatistics
 }
+
+// OAuth相关接口
+export interface OAuthBinding {
+    bound: boolean
+    provider?: string
+    createdAt?: string
+    updatedAt?: string
+}
+
+export interface OAuthBindings {
+    github?: OAuthBinding
+    google?: OAuthBinding
+    [key: string]: OAuthBinding | undefined
+}

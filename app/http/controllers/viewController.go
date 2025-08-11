@@ -5,21 +5,18 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
-
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
-	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
+
+	"log/slog"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/leancodebox/GooseForum/app/service/pointservice"
-
-	"log/slog"
-	"net/http"
 )
 
 func Logout(c *gin.Context) {
@@ -34,8 +31,8 @@ func ValidatePassword(password string) error {
 	if len(password) < 8 {
 		return fmt.Errorf("密码长度不能少于8位")
 	}
-	if len(password) > 128 {
-		return fmt.Errorf("密码长度不能超过128位")
+	if len(password) > 64 {
+		return fmt.Errorf("密码长度不能超过64位")
 	}
 
 	// 检查是否包含数字
@@ -95,25 +92,17 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	userEntity := users.MakeUser(r.Username, r.Password, r.Email)
-	userEntity.Nickname = component.GenerateGooseNickname()
-	err := users.Create(userEntity)
-	if err != nil {
+	userEntity, err := userservice.CreateUser(r.Username, r.Password, r.Email, true)
+	if userEntity == nil || err != nil {
 		c.JSON(200, component.FailData("注册失败"))
+		return
 	}
-	userSt := userStatistics.Entity{UserId: userEntity.Id}
-	userStatistics.SaveOrCreateById(&userSt)
 
 	if err = component.SendAEmail4User(userEntity); err != nil {
 		slog.Error("添加邮件任务到队列失败", "error", err)
 	}
 
-	// 初始化用户积分
-	pointservice.InitUserPoints(userEntity.Id, 100)
-
 	if userEntity.Id == 1 {
-		// For the first user registered, elevate it to admin group.
-		userservice.FirstUserInit(userEntity)
 		WriteArticles(component.BetterRequest[WriteArticleReq]{
 			Params: WriteArticleReq{
 				Id:         0,

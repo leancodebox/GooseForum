@@ -82,8 +82,7 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.GET("activate", controllers.ActivateAccount)
 	// GitHub OAuth 路由
 	baseApi.GET("auth/:provider", controllers.ProviderLogin)
-	baseApi.GET("auth/:provider/callback", controllers.ProviderCallback)
-	baseApi.POST("auth/:provider/logout", controllers.ProviderLogout)
+	baseApi.GET("auth/:provider/callback", middleware.JWTAuthCheck, controllers.ProviderCallback)
 
 	// 登陆状态下的用户操作
 	loginApi := ginApp.Group("api").Use(middleware.JWTAuthCheck)
@@ -99,6 +98,9 @@ func apiRoute(ginApp *gin.Engine) {
 	loginApi.POST("upload-avatar", api.UploadAvatar)
 	// 修改密码
 	loginApi.POST("change-password", UpButterReq(api.ChangePassword))
+	// OAuth解绑和绑定状态查询
+	loginApi.POST("auth/:provider/unbind", UpButterReq(controllers.UnbindOAuth))
+	loginApi.GET("oauth/bindings", UpButterReq(controllers.GetOAuthBindings))
 
 	forumApi := baseApi.Group("forum")
 	forumApi.POST("apply-link-add", UpButterReq(api.ApplyAddLink))
