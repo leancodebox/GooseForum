@@ -43,11 +43,11 @@ func ProviderCallback(c *gin.Context) {
 		// 绑定模式：处理OAuth绑定
 		err = oauthservice.ProcessOAuthBind(currentUserId, gothUser)
 		if err != nil {
-			c.Redirect(http.StatusTemporaryRedirect, "/profile?tab=settings&setting-tab=account&error="+err.Error())
+			c.Redirect(http.StatusTemporaryRedirect, "/profile/settings?setting-tab=account&error="+err.Error())
 			return
 		}
 		// 绑定成功，重定向到账户设置页面
-		c.Redirect(http.StatusTemporaryRedirect, "/profile?tab=settings&setting-tab=account&success=bind_success")
+		c.Redirect(http.StatusTemporaryRedirect, "/profile/settings?setting-tab=account&success=bind_success")
 	} else {
 		// 登录模式：处理OAuth登录
 		user, err := oauthservice.ProcessOAuthCallback(gothUser)

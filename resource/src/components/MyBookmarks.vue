@@ -99,7 +99,17 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { getUserBookmarkedArticles } from '../utils/articleService';
-import type {ArticleListItem} from "@/utils/articleInterfaces.ts";
+import type {ArticleListItem, UserInfo} from "@/utils/articleInterfaces.ts";
+
+// 定义props（即使不使用也要定义，避免Vue警告）
+const props = defineProps<{
+  userInfo?: UserInfo
+}>()
+
+// 定义emits
+const emit = defineEmits<{
+  'user-info-updated': []
+}>()
 
 
 

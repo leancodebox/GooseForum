@@ -10,6 +10,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/mailservice"
+	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 
 	"github.com/gin-gonic/gin"
@@ -248,4 +250,76 @@ func SaveUser(userEntity *users.EntityComplete) error {
 		}
 	}
 	return err
+}
+
+// ForgotPasswordReq 忘记密码请求结构体
+type ForgotPasswordReq struct {
+	Email       string `json:"email" validate:"required,email"`
+	CaptchaId   string `json:"captchaId" validate:"required"`
+	CaptchaCode string `json:"captchaCode" validate:"required"`
+}
+
+// ForgotPassword 忘记密码 - 发送重置邮件
+func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Response {
+	// 验证验证码
+	if !captchaOpt.VerifyCaptcha(req.Params.CaptchaId, req.Params.CaptchaCode) {
+		return component.FailResponse("验证码错误或已过期")
+	}
+
+	// 查找用户
+	userEntity, err := users.GetByEmail(req.Params.Email)
+	if err != nil {
+		// 为了安全考虑，即使邮箱不存在也返回成功消息
+		return component.SuccessResponse("如果该邮箱已注册，您将收到密码重置邮件")
+	}
+
+	// 生成密码重置token
+	token, err := tokenservice.GeneratePasswordResetToken(userEntity.Id, userEntity.Email)
+	if err != nil {
+		return component.FailResponse("生成重置令牌失败")
+	}
+
+	// 发送密码重置邮件
+	err = mailservice.SendPasswordResetEmail(userEntity.Email, userEntity.Username, token)
+	if err != nil {
+		slog.Error("发送密码重置邮件失败", "error", err)
+		return component.FailResponse("发送重置邮件失败")
+	}
+
+	return component.SuccessResponse("密码重置邮件已发送，请查收")
+}
+
+// ResetPasswordReq 重置密码请求结构体
+type ResetPasswordReq struct {
+	Token       string `json:"token" validate:"required"`
+	NewPassword string `json:"newPassword" validate:"required"`
+}
+
+// ResetPassword 重置密码
+func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Response {
+	// 解析重置令牌
+	claims, err := tokenservice.ParsePasswordResetToken(req.Params.Token)
+	if err != nil {
+		return component.FailResponse("重置链接已过期或无效")
+	}
+
+	// 获取用户信息
+	userEntity, err := users.Get(claims.UserId)
+	if err != nil {
+		return component.FailResponse("用户不存在")
+	}
+
+	// 检查邮箱是否匹配
+	if userEntity.Email != claims.Email {
+		return component.FailResponse("重置链接无效")
+	}
+
+	// 更新密码
+	userEntity.SetPassword(req.Params.NewPassword)
+	err = SaveUser(&userEntity)
+	if err != nil {
+		return component.FailResponse("重置密码失败")
+	}
+
+	return component.SuccessResponse("密码重置成功")
 }

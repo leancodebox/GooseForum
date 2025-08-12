@@ -75,8 +75,8 @@
                     <li class="menu-title" role="presentation">
                         <span aria-hidden="true">{{.User.Username}}</span>
                     </li>
-                    <li><a href="/profile">个人中心</a></li>
-                    <li><a href="/profile?tab=settings">账户设置</a></li>
+                    <li><a href="/profile/articles">个人中心</a></li>
+                    <li><a href="/profile/settings">账户设置</a></li>
                     {{if .User.IsAdmin}}
                     <li><a href="/admin/">管理后台</a></li>
                     {{end}}

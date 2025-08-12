@@ -57,6 +57,37 @@ func SendActivationEmail(to, username, token string) error {
 	return nil
 }
 
+// SendPasswordResetEmail 发送密码重置邮件
+func SendPasswordResetEmail(to, username, token string) error {
+	config := hotdataserve.GetMailSettingsConfigCache()
+	if !config.EnableMail {
+		return errors.New("Mail settings config is disabled")
+	}
+	message := mail.NewMsg()
+	if err := message.To(to); err != nil {
+		return fmt.Errorf("failed to set To address: %s", err)
+	}
+	message.Subject("密码重置请求")
+	if err := message.FromFormat(config.FromName, config.FromEmail); err != nil {
+		return fmt.Errorf("failed to set From address: %s", err)
+	}
+	body, err := generatePasswordResetEmailBody(username, token)
+	if err != nil {
+		return fmt.Errorf("生成邮件内容失败: %v", err)
+	}
+	message.SetBodyString(mail.TypeTextHTML, body)
+
+	client, err := buildClientByConfig(config)
+	if err != nil {
+		return fmt.Errorf("failed to create mail client: %s", err)
+	}
+	defer client.Close()
+	if err = client.DialAndSend(message); err != nil {
+		return fmt.Errorf("failed to send mail: %s", err)
+	}
+	return nil
+}
+
 // SendTestEmailWithConfig 使用指定配置发送测试邮件
 func SendTestEmailWithConfig(config pageConfig.MailSettingsConfig, testEmail string) error {
 	// 使用 go-mail 库直接发送测试邮件

@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, nextTick } from 'vue'
-import AccountSettings from "./components/AccountSettings.vue";
-import MyArticles from "./components/MyArticles.vue";
-import MyBookmarks from "./components/MyBookmarks.vue";
+import { useRouter, useRoute } from 'vue-router'
 import { getUserInfo } from "@/utils/articleService.ts";
 import type { UserInfo } from "@/utils/articleInterfaces.ts";
 
+// 路由相关
+const router = useRouter()
+const route = useRoute()
+
 // 加载状态
 const isLoading = ref(true)
-
-// 标签页 refs
-const articlesTabRef = ref<HTMLInputElement>()
-const collectionsTabRef = ref<HTMLInputElement>()
-const settingsTabRef = ref<HTMLInputElement>()
 
 // 用户信息 - 根据UserInfo接口定义
 const userInfo = reactive<UserInfo>({
@@ -71,29 +68,9 @@ const handleUserInfoUpdated = () => {
   loadUserInfo();
 }
 
-// 检查URL参数并切换到对应标签页
-const checkUrlParams = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const tab = urlParams.get('tab');
-
-  if (tab === 'settings') {
-    if (settingsTabRef.value) {
-      settingsTabRef.value.checked = true;
-    }
-  } else {
-    // 默认选中"我的文章"标签页
-    if (articlesTabRef.value) {
-      articlesTabRef.value.checked = true;
-    }
-  }
-}
-
 onMounted(async () => {
   await loadUserInfo();
-  await nextTick();
-  checkUrlParams();
 })
-
 
 // 个人资料表单
 const profileForm = reactive({
@@ -107,14 +84,9 @@ const profileForm = reactive({
   avatarUrl: userInfo.avatarUrl
 })
 
-
 // 编辑资料
-const editProfile = async () => {
-  // 等待DOM渲染完成后切换到账户设置tab
-  await nextTick();
-  if (settingsTabRef.value) {
-    settingsTabRef.value.checked = true;
-  }
+const editProfile = () => {
+  router.push('/settings')
 }
 
 </script>
@@ -184,23 +156,43 @@ const editProfile = async () => {
 
           <!-- 主要内容 -->
           <div v-else>
-            <div class="tabs">
-              <input ref="articlesTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的文章" />
-              <div class="tab-content space-y-4 mt-3">
-                <MyArticles :user-info="userInfo"></MyArticles>
-              </div>
-
-              <input ref="collectionsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="我的收藏" />
-              <div class="tab-content space-y-4 mt-3">
-                <MyBookmarks></MyBookmarks>
-              </div>
-
-              <input ref="settingsTabRef" type="radio" name="my_tabs_3" class="tab" aria-label="账户设置" />
-              <div class="tab-content space-y-4 mt-2">
-                <AccountSettings :user-info="userInfo" @user-info-updated="handleUserInfoUpdated" />
-              </div>
+            <!-- 导航标签 -->
+            <div class="tabs tabs-boxed mb-1">
+              <router-link
+                to="/articles"
+                class="tab"
+                :class="{ 'tab-active': route.name === 'articles' }"
+              >
+                我的文章
+              </router-link>
+              <router-link
+                to="/bookmarks"
+                class="tab"
+                :class="{ 'tab-active': route.name === 'bookmarks' }"
+              >
+                我的收藏
+              </router-link>
+              <router-link
+                to="/settings"
+                class="tab"
+                :class="{ 'tab-active': route.name === 'settings' }"
+              >
+                账户设置
+              </router-link>
             </div>
 
+            <!-- 路由内容区域 -->
+            <div class="space-y-4">
+              <router-view
+                v-slot="{ Component }"
+              >
+                <component
+                  :is="Component"
+                  :user-info="userInfo"
+                  @user-info-updated="handleUserInfoUpdated"
+                />
+              </router-view>
+            </div>
           </div>
         </div>
       </div>

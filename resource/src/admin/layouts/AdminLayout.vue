@@ -58,6 +58,8 @@
           </div>
           <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
             <li><a class="justify-between">{{ userStore.user?.username }}<span class="badge">管理员</span></a></li>
+            <li><a href="/profile/articles">个人中心</a></li>
+            <li><a href="/profile/settings">账户设置</a></li>
             <li><a @click="logout">退出登录</a></li>
           </ul>
         </div>

@@ -62,6 +62,15 @@ func LoginView(c *gin.Context) {
 	})
 }
 
+func ResetPasswordView(c *gin.Context) {
+	viewrender.Render(c, "reset-password.gohtml", map[string]any{
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle("重置密码").
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
+			Build(),
+	})
+}
+
 func PostDetail(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
 	if id == 0 {

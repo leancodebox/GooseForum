@@ -45,6 +45,7 @@ func viewRoute(ginApp *gin.Engine) {
 		Use(gzip.Gzip(gzip.DefaultCompression))
 	viewRouteApp.GET("", controllers.Home)
 	viewRouteApp.GET("/login", middleware.CheckNeedLogin, controllers.LoginView)
+	viewRouteApp.GET("/reset-password", controllers.ResetPasswordView)
 	viewRouteApp.GET("/user/:id", controllers.User)
 	viewRouteApp.GET("/post", controllers.Post)
 	viewRouteApp.GET("/post/:id", controllers.PostDetail)
@@ -53,7 +54,7 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/links", controllers.LinksView)
 	viewRouteApp.GET("/terms-of-service", controllers.TermsOfService)
 	viewRouteApp.GET("/privacy-policy", controllers.PrivacyPolicy)
-	viewRouteApp.GET("/profile", middleware.CheckLogin, controllers.Profile)
+	viewRouteApp.GET("/profile/*path", middleware.CheckLogin, controllers.Profile)
 	viewRouteApp.GET("/publish", middleware.CheckLogin, controllers.PublishV3)
 	viewRouteApp.GET("/notifications", middleware.CheckLogin, controllers.Notifications)
 	viewRouteApp.GET("/search", controllers.SearchPage)
@@ -80,6 +81,9 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.GET("get-captcha", ginUpNP(api.GetCaptcha))
 	// 添加激活路由
 	baseApi.GET("activate", controllers.ActivateAccount)
+	// 忘记密码和重置密码路由
+	baseApi.POST("forgot-password", UpButterReq(api.ForgotPassword))
+	baseApi.POST("reset-password", UpButterReq(api.ResetPassword))
 	// GitHub OAuth 路由
 	baseApi.GET("auth/:provider", controllers.ProviderLogin)
 	baseApi.GET("auth/:provider/callback", middleware.JWTAuthCheck, controllers.ProviderCallback)
