@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getOAuthBindings, unbindOAuth } from '@/utils/articleService.ts'
+import { getOAuthBindings, unbindOAuth } from '@/utils/gooseForumService.ts'
 import type { OAuthBindings } from "@/utils/articleInterfaces";
 
 // 提示消息状态
@@ -18,7 +18,7 @@ const checkUrlMessages = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const success = urlParams.get('success');
   const error = urlParams.get('error');
-  
+
   if (success === 'bind_success') {
     successMessage.value = 'OAuth账户绑定成功！'
     showSuccessMessage.value = true
@@ -89,7 +89,7 @@ const unbindOAuthAccount = async (provider: string) => {
       await fetchOAuthBindings() // 重新获取绑定状态
     } else {
       showErrorMessage.value = true
-      errorMessage.value = response.message || '解绑失败，请重试'
+      errorMessage.value = response.msg || '解绑失败，请重试'
       setTimeout(() => {
         showErrorMessage.value = false
       }, 5000)

@@ -36,9 +36,6 @@ func viewRoute(ginApp *gin.Engine) {
 		viewrender.Reload()
 		c.String(200, "模板已刷新")
 	})
-	ginApp.POST("/login", controllers.Login)
-	ginApp.POST("/register", controllers.Register)
-	ginApp.POST("/logout", controllers.Logout)
 
 	viewRouteApp := ginApp.Group("")
 	viewRouteApp.Use(middleware.JWTAuth).
@@ -77,6 +74,11 @@ func siteInfoRoute(ginApp *gin.Engine) {
 func apiRoute(ginApp *gin.Engine) {
 	// 非登陆下的用户操作
 	baseApi := ginApp.Group("api")
+
+	baseApi.POST("login", controllers.Login)
+	baseApi.POST("register", controllers.Register)
+	baseApi.POST("logout", controllers.Logout)
+
 	// 验证码
 	baseApi.GET("get-captcha", ginUpNP(api.GetCaptcha))
 	// 添加激活路由

@@ -106,6 +106,8 @@ func processEmailTask(task EmailTask) error {
 	switch task.Type {
 	case "activation":
 		return SendActivationEmail(task.To, task.Username, task.Token)
+	case "reset_password":
+		return SendPasswordResetEmail(task.To, task.Username, task.Token)
 	default:
 		return fmt.Errorf("未知的邮件类型: %s", task.Type)
 	}

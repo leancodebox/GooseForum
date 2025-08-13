@@ -1,7 +1,7 @@
 export interface Result<T> {
     code: 0 | 1; // 0 成功 1 失败
     result: T;
-    message: string;
+    msg: string;
 }
 
 export interface PageData<T> {
@@ -15,12 +15,13 @@ export interface QueryList<T> {
     list: T[];
 }
 
-export interface ArticleInfo {
-    id: number;
-    articleContent: string;
-    articleTitle: string;
-    categoryId: number[];
-    type: number;
+// 类型定义
+export interface ArticleData {
+    id: number
+    content: string
+    title: string
+    categoryId: number[]
+    type: number
 }
 
 export interface ArticleListItem {
@@ -65,7 +66,7 @@ export interface Notifications {
     userId: number,
     payload: Payload,
     eventType: string,
-    isRead: false,
+    isRead: boolean,
     readAt: string | null,
     createdAt: string,
     updatedAt: string

@@ -225,7 +225,9 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 	if err != nil {
 		return component.FailResponse("获取用户信息失败")
 	}
-
+	if err = component.ValidatePassword(req.Params.NewPassword); err != nil {
+		return component.FailResponse(err.Error())
+	}
 	// 验证旧密码
 	err = algorithm.VerifyEncryptPassword(userEntity.Password, req.Params.OldPassword)
 	if err != nil {
@@ -270,7 +272,7 @@ func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Re
 	userEntity, err := users.GetByEmail(req.Params.Email)
 	if err != nil {
 		// 为了安全考虑，即使邮箱不存在也返回成功消息
-		return component.SuccessResponse("如果该邮箱已注册，您将收到密码重置邮件")
+		return component.SuccessResponse("操作成功：如果该邮箱已注册，您将收到密码重置邮件")
 	}
 
 	// 生成密码重置token
@@ -279,14 +281,19 @@ func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Re
 		return component.FailResponse("生成重置令牌失败")
 	}
 
-	// 发送密码重置邮件
-	err = mailservice.SendPasswordResetEmail(userEntity.Email, userEntity.Username, token)
+	// 将密码重置邮件任务加入队列
+	err = mailservice.AddToQueue(mailservice.EmailTask{
+		To:       userEntity.Email,
+		Username: userEntity.Username,
+		Token:    token,
+		Type:     "reset_password",
+	})
 	if err != nil {
-		slog.Error("发送密码重置邮件失败", "error", err)
+		slog.Error("添加密码重置邮件任务到队列失败", "error", err)
 		return component.FailResponse("发送重置邮件失败")
 	}
 
-	return component.SuccessResponse("密码重置邮件已发送，请查收")
+	return component.SuccessResponse("操作成功：如果该邮箱已注册，您将收到密码重置邮件")
 }
 
 // ResetPasswordReq 重置密码请求结构体
@@ -312,6 +319,10 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 	// 检查邮箱是否匹配
 	if userEntity.Email != claims.Email {
 		return component.FailResponse("重置链接无效")
+	}
+
+	if err = component.ValidatePassword(req.Params.NewPassword); err != nil {
+		return component.FailResponse(err.Error())
 	}
 
 	// 更新密码

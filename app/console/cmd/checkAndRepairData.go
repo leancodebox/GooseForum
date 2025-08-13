@@ -121,13 +121,13 @@ func repairArticleDescriptions() {
 			})
 			article.CategoryId = cateIds
 			article.LikeCount = cast.ToUint64(articleLike.GetArticleLikeByArticleId(article.Id))
-			articles.Save(article)
+			articles.SaveNoUpdate(article)
 			// 如果描述为空或者很短，重新生成
 			if article.Description == "" || len(strings.TrimSpace(article.Description)) < 10 {
 				newDescription := markdown2html.ExtractDescription(article.Content, 200)
 				if newDescription != "" && newDescription != article.Description {
 					article.Description = newDescription
-					err := articles.Save(article)
+					err := articles.SaveNoUpdate(article)
 					if err != nil {
 						fmt.Printf("更新文章 %d 描述失败: %v\n", article.Id, err)
 					} else {

@@ -433,7 +433,7 @@ import type {
 } from '../../utils/docsInterfaces';
 import { CONTENT_STATUS_OPTIONS } from '../../utils/docsInterfaces';
 import { formatDate } from '../../utils/dateUtils';
-import { showToast } from '../../utils/toast';
+import { notification } from '../../../utils/notification';
 
 // 响应式数据
 const loading = ref(false);
@@ -504,7 +504,7 @@ const loadProjects = async () => {
     projects.value = response.list || [];
   } catch (error) {
     console.error('加载项目列表失败:', error);
-    showToast('加载项目列表失败', 'error');
+    notification.error('加载项目列表失败');
     // 确保在错误情况下projects仍然是空数组
     projects.value = [];
   }
@@ -517,7 +517,7 @@ const loadVersions = async () => {
     versions.value = response.list || [];
   } catch (error) {
     console.error('加载版本列表失败:', error);
-    showToast('加载版本列表失败', 'error');
+    notification.error('加载版本列表失败');
     // 确保在错误情况下versions仍然是空数组
     versions.value = [];
   }
@@ -549,7 +549,7 @@ const loadContents = async () => {
     total.value = response.total || 0;
   } catch (error) {
     console.error('加载内容列表失败:', error);
-    showToast('加载内容列表失败', 'error');
+    notification.error('加载内容列表失败');
     // 确保在错误情况下contents仍然是空数组
     contents.value = [];
     total.value = 0;
@@ -602,7 +602,7 @@ const editContent = async (content: DocsContentItem) => {
     (document.getElementById('content_modal') as HTMLDialogElement)?.showModal();
   } catch (error) {
     console.error('加载内容详情失败:', error);
-    showToast('加载内容详情失败', 'error');
+    notification.error('加载内容详情失败');
   }
 };
 
@@ -614,7 +614,7 @@ const viewContent = async (content: DocsContentItem) => {
     (document.getElementById('view_content_modal') as HTMLDialogElement)?.showModal();
   } catch (error) {
     console.error('加载内容详情失败:', error);
-    showToast('加载内容详情失败', 'error');
+    notification.error('加载内容详情失败');
   }
 };
 
@@ -632,14 +632,14 @@ const previewContent = async () => {
     editorTab.value = 'preview';
   } catch (error) {
     console.error('预览内容失败:', error);
-    showToast('预览内容失败', 'error');
+    notification.error('预览内容失败');
   }
 };
 
 // 保存内容
 const saveContent = async () => {
   if (!formData.versionId || !formData.title.trim() || !formData.slug.trim()) {
-    showToast('请填写必填字段', 'warning');
+    notification.warning('请填写必填字段');
     return;
   }
 
@@ -654,7 +654,7 @@ const saveContent = async () => {
         content: formData.content,
         sortOrder: formData.sortOrder
       });
-      showToast('内容更新成功', 'success');
+      notification.success('内容更新成功');
     } else {
       await DocsContentService.createContent({
         versionId: formData.versionId,
@@ -663,13 +663,13 @@ const saveContent = async () => {
         content: formData.content,
         sortOrder: formData.sortOrder
       });
-      showToast('内容创建成功', 'success');
+      notification.success('内容创建成功');
     }
     closeModal();
     loadContents();
   } catch (error) {
     console.error('保存内容失败:', error);
-    showToast('保存内容失败', 'error');
+    notification.error('保存内容失败');
   } finally {
     saving.value = false;
   }
@@ -679,11 +679,11 @@ const saveContent = async () => {
 const publishContent = async (content: DocsContentItem) => {
   try {
     await DocsContentService.publishContent({ id: content.id });
-    showToast('内容发布成功', 'success');
+    notification.success('内容发布成功');
     loadContents();
   } catch (error) {
     console.error('发布内容失败:', error);
-    showToast('发布内容失败', 'error');
+    notification.error('发布内容失败');
   }
 };
 
@@ -691,11 +691,11 @@ const publishContent = async (content: DocsContentItem) => {
 const draftContent = async (content: DocsContentItem) => {
   try {
     await DocsContentService.draftContent({ id: content.id });
-    showToast('内容已设为草稿', 'success');
+    notification.success('内容已设为草稿');
     loadContents();
   } catch (error) {
     console.error('设为草稿失败:', error);
-    showToast('设为草稿失败', 'error');
+    notification.error('设为草稿失败');
   }
 };
 
@@ -707,11 +707,11 @@ const deleteContent = async (content: DocsContentItem) => {
 
   try {
     await DocsContentService.deleteContent({ id: content.id });
-    showToast('内容删除成功', 'success');
+    notification.success('内容删除成功');
     loadContents();
   } catch (error) {
     console.error('删除内容失败:', error);
-    showToast('删除内容失败', 'error');
+    notification.error('删除内容失败');
   }
 };
 

@@ -336,7 +336,7 @@ import { onMounted, reactive, ref } from 'vue'
 import draggable from 'vuedraggable'
 import { getSponsors, saveSponsors } from '../utils/adminService'
 import type { SponsorsConfig, SponsorItem, UserSponsor } from '../utils/adminInterfaces'
-
+import {uploadImage as uploadImageApi} from "@/utils/gooseForumService.ts";
 // 响应式数据
 const sponsorsData = reactive<SponsorsConfig>({
   sponsors: {
@@ -529,18 +529,11 @@ const handleLogoUpload = async (event: Event) => {
   try {
     const formData = new FormData()
     formData.append('file', file)
-
-    const response = await fetch('/file/img-upload', {
-       method: 'POST',
-       body: formData,
-       credentials: 'include'
-     })
-
-    const result = await response.json()
+    const result = await uploadImageApi(formData)
      if (result.code === 0) {
        currentSponsor.logo = result.result.url
      } else {
-       alert('上传失败: ' + (result.msg || result.message))
+       alert('上传失败: ' + (result.msg))
      }
   } catch (error) {
     console.error('上传失败:', error)
@@ -558,18 +551,11 @@ const handleUserLogoUpload = async (event: Event) => {
    try {
      const formData = new FormData()
      formData.append('file', file)
-
-     const response = await fetch('/file/img-upload', {
-       method: 'POST',
-       body: formData,
-       credentials: 'include'
-     })
-
-     const result = await response.json()
+     const result = await uploadImageApi(formData)
      if (result.code === 0) {
        currentUser.logo = result.result.url
      } else {
-       alert('上传失败: ' + (result.msg || result.message))
+       alert('上传失败: ' + (result.msg))
      }
    } catch (error) {
      console.error('上传失败:', error)

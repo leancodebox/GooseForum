@@ -400,7 +400,7 @@
             commentSubmit.addEventListener('click', async function () {
                 const content = commentInput.value.trim();
                 if (!content) {
-                    alert('请输入评论内容');
+                    window.notification.warning('请输入评论内容');
                     return;
                 }
                 // 禁用提交按钮，显示加载状态
@@ -439,7 +439,7 @@
         const content = textarea.value.trim();
 
         if (!content) {
-            alert('请输入回复内容');
+            window.notification.warning('请输入回复内容');
             return;
         }
 
@@ -470,11 +470,11 @@
             if (response.ok) {
                 location.reload();
             } else {
-                alert(result.msg || '回复发表失败，请稍后重试');
+                window.notification.warning(result.msg || '回复发表失败，请稍后重试');
             }
         } catch (error) {
             console.error('回复发表失败:', error);
-            alert('回复发表失败，请稍后重试');
+            window.notification.error('回复发表失败，请稍后重试'+error);
         }
     }
 
@@ -510,11 +510,11 @@
                     likeCountSpan.textContent = currentCount - 1;
                 }
             } else {
-                alert(result.msg || '操作失败，请稍后重试');
+                window.notification.warning(result.msg || '操作失败，请稍后重试');
             }
         } catch (error) {
             console.error('操作失败:', error);
-            alert('操作失败，请稍后重试');
+            window.notification.error('操作失败，请稍后重试'+error);
         }
     }
 
@@ -564,11 +564,11 @@
                     followBtn.setAttribute('data-following', 'false');
                 }
             } else {
-                alert(result.msg || '操作失败，请稍后重试');
+                window.notification.warning(result.msg || '操作失败，请稍后重试');
             }
         } catch (error) {
             console.error('关注操作失败:', error);
-            alert('操作失败，请稍后重试');
+            window.notification.error('操作失败，请稍后重试' + error);
         } finally {
             // 恢复按钮状态
             followText.style.display = 'inline-block';
@@ -611,11 +611,11 @@
                     bookmarkText.textContent = '收藏';
                 }
             } else {
-                alert(result.msg || '操作失败，请稍后重试');
+                window.notification.warning(result.msg || '操作失败，请稍后重试');
             }
         } catch (error) {
             console.error('收藏操作失败:', error);
-            alert('操作失败，请稍后重试');
+            window.notification.error('操作失败，请稍后重试');
         }
     }
 </script>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import AvatarUpload from '../AvatarUpload.vue'
-import { saveUserInfo, saveUserName, saveUserEmail } from '@/utils/articleService.ts'
+import { saveUserInfo, saveUserName, saveUserEmail } from '@/utils/gooseForumService.ts'
 import type { UserInfo } from "@/utils/articleInterfaces";
 
 // 定义props
@@ -72,7 +72,7 @@ const updateProfile = async () => {
       // 通知父组件重新获取用户信息
       emit('user-info-updated');
     } else {
-      alert(`更新失败: ${response.message || '请重试'}`)
+      alert(`更新失败: ${response.msg || '请重试'}`)
     }
   } catch (error) {
     console.error('更新失败:', error)
@@ -111,7 +111,7 @@ const saveUsername = async () => {
       usernameEditing.value = false
       emit('user-info-updated')
     } else {
-      alert(`更新失败: ${response.message || '请重试'}`)
+      alert(`更新失败: ${response.msg || '请重试'}`)
     }
   } catch (error) {
     console.error('更新用户名失败:', error)
@@ -152,7 +152,7 @@ const saveEmail = async () => {
       emailEditing.value = false
       emit('user-info-updated')
     } else {
-      alert(`更新失败: ${response.message || '请重试'}`)
+      alert(`更新失败: ${response.msg || '请重试'}`)
     }
   } catch (error) {
     console.error('更新邮箱失败:', error)

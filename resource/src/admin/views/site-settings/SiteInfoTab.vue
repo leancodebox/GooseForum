@@ -118,6 +118,7 @@
 import {onMounted, ref} from 'vue'
 import {PhotoIcon} from '@heroicons/vue/24/outline'
 import {getSiteSettings, saveSiteSettings, type SiteSettingsConfig} from '../../utils/adminService'
+import {uploadImage as uploadImageApi} from "@/utils/gooseForumService.ts";
 
 // 本地数据状态
 const settings = ref<SiteSettingsConfig>({
@@ -180,20 +181,13 @@ const handleLogoUpload = async (event: Event) => {
   try {
     const formData = new FormData()
     formData.append('file', file)
-
-    const response = await fetch('/file/img-upload', {
-      method: 'POST',
-      body: formData,
-      credentials: 'include'
-    })
-
-    const result = await response.json()
+    const result = await uploadImageApi(formData)
     if (result.code === 0) {
       settings.value.siteLogo = result.result.url
       // 图片上传成功后自动保存
       await saveSettings()
     } else {
-      alert(result.msg || result.message || 'Logo上传失败')
+      alert(result.msg || 'Logo上传失败')
     }
   } catch (error) {
     console.error('Logo上传失败:', error)

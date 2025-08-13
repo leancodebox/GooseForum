@@ -10,16 +10,16 @@ import (
 
 func init() {
 	cmd := &cobra.Command{
-		Use:   "rebuildMarkdonw2Html",
+		Use:   "rebuildMarkdown2Html",
 		Short: "",
-		Run:   runRebuildMarkdonw2Html,
+		Run:   runRebuildMarkdown2Html,
 		// Args:  cobra.ExactArgs(1), // 只允许且必须传 1 个参数
 	}
 	// cmd.Flags().StringP("param", "p", "value", "--param=x | -p x")
 	appendCommand(cmd)
 }
 
-func runRebuildMarkdonw2Html(cmd *cobra.Command, args []string) {
+func runRebuildMarkdown2Html(cmd *cobra.Command, args []string) {
 	var articleStartId uint64 = 0
 	limit := 100
 	for {

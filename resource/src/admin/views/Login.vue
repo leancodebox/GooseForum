@@ -7,7 +7,7 @@
           <h1 class="text-3xl font-normal text-primary mb-2">GooseForum</h1>
           <p class="text-base-content/70">管理后台登录</p>
         </div>
-        
+
         <!-- 登录表单 -->
         <form @submit.prevent="handleLogin" class="space-y-4">
           <!-- 用户名输入 -->
@@ -17,18 +17,18 @@
             </div>
             <label class="input input-bordered flex items-center gap-2 w-full">
               <UserIcon class="h-4 w-4 opacity-70" />
-              <input 
+              <input
                 v-model="form.username"
-                type="text" 
-                class="grow" 
-                placeholder="请输入用户名" 
+                type="text"
+                class="grow"
+                placeholder="请输入用户名"
                 required
                 minlength="3"
                 @blur="handleRememberChange"
               />
             </label>
           </div>
-          
+
           <!-- 密码输入 -->
           <div class="form-control">
             <div class="label">
@@ -36,15 +36,15 @@
             </div>
             <label class="input input-bordered flex items-center gap-2 w-full">
               <LockClosedIcon class="h-4 w-4 opacity-70" />
-              <input 
+              <input
                 v-model="form.password"
-                :type="showPassword ? 'text' : 'password'" 
-                class="grow" 
-                placeholder="请输入密码" 
+                :type="showPassword ? 'text' : 'password'"
+                class="grow"
+                placeholder="请输入密码"
                 required
                 minlength="6"
               />
-              <button 
+              <button
                 type="button"
                 @click="showPassword = !showPassword"
                 class="opacity-70 hover:opacity-100 transition-opacity"
@@ -54,7 +54,7 @@
               </button>
             </label>
           </div>
-          
+
           <!-- 验证码输入 -->
           <div class="form-control">
             <div class="label">
@@ -63,11 +63,11 @@
             <div class="flex gap-3 items-stretch w-full">
               <label class="input input-bordered flex items-center gap-2 flex-1">
                 <ExclamationTriangleIcon class="h-4 w-4 opacity-70" />
-                <input 
+                <input
                   v-model="form.captcha"
-                  type="text" 
-                  class="grow" 
-                  placeholder="请输入验证码" 
+                  type="text"
+                  class="grow"
+                  placeholder="请输入验证码"
                   maxlength="6"
                   required
                 />
@@ -87,29 +87,29 @@
               </div>
             </div>
           </div>
-          
+
           <!-- 记住我 -->
           <div class="form-control">
             <label class="label cursor-pointer justify-start gap-3">
-              <input 
-                v-model="form.remember" 
-                type="checkbox" 
-                class="checkbox checkbox-primary checkbox-sm" 
+              <input
+                v-model="form.remember"
+                type="checkbox"
+                class="checkbox checkbox-primary checkbox-sm"
               />
               <span class="label-text">记住我</span>
             </label>
           </div>
-          
+
           <!-- 错误信息 -->
           <div v-if="authStore.error" class="alert alert-error">
             <ExclamationTriangleIcon class="w-5 h-5" />
             <span>{{ authStore.error }}</span>
           </div>
-          
+
           <!-- 登录按钮 -->
           <div class="form-control mt-6">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               class="btn btn-primary w-full"
               :class="{ 'loading': authStore.loading }"
               :disabled="authStore.loading"
@@ -119,7 +119,7 @@
             </button>
           </div>
         </form>
-        
+
         <!-- 底部信息 -->
         <div class="text-center mt-6 pt-6 border-t border-base-300">
           <p class="text-sm text-base-content/60">
@@ -142,6 +142,7 @@ import {
   EyeSlashIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
+import { getCaptcha as getCaptchaApi} from '@/utils/gooseForumService.ts'
 
 const router = useRouter()
 const route = useRoute()
@@ -167,8 +168,7 @@ const showPassword = ref(false)
 // 获取验证码
 const getCaptcha = async () => {
   try {
-    const response = await fetch('/api/get-captcha')
-    const data = await response.json()
+    const data = await getCaptchaApi()
     if (data.code === 0) {
       captchaImg.value = data.result.captchaImg
       captchaId.value = data.result.captchaId
@@ -194,7 +194,7 @@ const handleLogin = async () => {
     captchaId: captchaId.value,
     captchaCode: form.captcha
   })
-  
+
   if (result.success) {
     // 登录成功，跳转到目标页面或仪表盘
     const redirect = route.query.redirect as string || '/admin'
@@ -211,14 +211,14 @@ onMounted(() => {
   if (authStore.isAuthenticated) {
     router.push('/admin')
   }
-  
+
   // 从 localStorage 恢复用户名
   const savedUsername = localStorage.getItem('admin_username')
   if (savedUsername) {
     form.username = savedUsername
     form.remember = true
   }
-  
+
   // 获取验证码
   getCaptcha()
 })

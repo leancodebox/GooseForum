@@ -75,6 +75,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { resetPassword } from '@/utils/gooseForumService.ts'
 
 
 // 重置表单数据
@@ -130,18 +131,7 @@ const handleResetPassword = async () => {
   resetLoading.value = true
 
   try {
-    const response = await fetch('/api/reset-password', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        token: resetToken.value,
-        newPassword: resetForm.password
-      })
-    })
-
-    const data = await response.json()
+    const data = await resetPassword(resetToken.value, resetForm.password)
 
     if (data.code === 0) {
       resetSuccess.value = '密码重置成功！您现在可以使用新密码登录了'

@@ -222,9 +222,10 @@ type ForumInfo struct {
 }
 
 func GetGooseForumInfo() ForumInfo {
+	siteData := hotdataserve.GetSiteSettingsConfigCache()
 	return ForumInfo{
-		Title:        "GooseForum",
-		Desc:         "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆",
+		Title:        siteData.SiteName,
+		Desc:         siteData.SiteDescription,
 		Independence: false,
 	}
 }

@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import ResetPassword from './reset-password.vue'
 import './style.css'
+import './utils/notification.ts'
 
 // 创建应用实例
 const app = createApp(ResetPassword)

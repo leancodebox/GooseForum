@@ -1,7 +1,16 @@
 import axiosInstance from './axiosInstance';
 
 import axios from 'axios';
-import type {ArticleListItem, Notifications, PageData, QueryList, Result, UserInfo, OAuthBindings} from "./articleInterfaces.ts";
+import type {
+    ArticleData,
+    ArticleListItem,
+    Notifications,
+    OAuthBindings,
+    PageData,
+    QueryList,
+    Result,
+    UserInfo
+} from "./gooseForumInterfaces.ts";
 
 // 获取文章枚举
 export const getArticleEnum = async (): Promise<any> => {
@@ -13,7 +22,7 @@ export const getArticleEnum = async (): Promise<any> => {
 }
 
 // 获取文章原始数据
-export const getArticlesOrigin = async (id: any): Promise<any> => {
+export const getArticlesOrigin = async (id: any): Promise<Result<any>> => {
     try {
         return await axiosInstance.post('/forum/get-articles-origin', {
             id: parseInt(id)
@@ -24,12 +33,12 @@ export const getArticlesOrigin = async (id: any): Promise<any> => {
 }
 
 // 提交文章的函数
-export const submitArticle = async <T>(article: any): Promise<T> => {
+export const submitArticle = async (article: ArticleData): Promise<Result<any>> => {
     try {
         return await axiosInstance.post('/forum/write-articles', {
             id: article.id,
-            content: article.articleContent,
-            title: article.articleTitle,
+            content: article.content,
+            title: article.title,
             type: article.type,
             categoryId: article.categoryId,
         });
@@ -47,7 +56,7 @@ export const submitArticle = async <T>(article: any): Promise<T> => {
 };
 
 // Mock 获取用户信息
-export const getUserInfo = async (): Promise<Result<UserInfo>>  => {
+export const getUserInfo = async (): Promise<Result<UserInfo>> => {
     return axiosInstance.get("/get-user-info")
 }
 
@@ -145,11 +154,11 @@ export function getUserArticles(page: number,
 }
 
 // 获取用户收藏文章列表
-export const getUserBookmarkedArticles = (page: number, pageSize: number):Promise<Result<PageData<ArticleListItem>>> =>  {
-  return axiosInstance.post('forum/get-user-bookmarked-articles', {
-    page,
-    pageSize
-  });
+export const getUserBookmarkedArticles = (page: number, pageSize: number): Promise<Result<PageData<ArticleListItem>>> => {
+    return axiosInstance.post('forum/get-user-bookmarked-articles', {
+        page,
+        pageSize
+    });
 };
 
 export function changePassword(oldPassword: string,
@@ -170,4 +179,57 @@ export function getOAuthBindings(): Promise<Result<OAuthBindings>> {
 // 解绑OAuth
 export function unbindOAuth(provider: string): Promise<Result<any>> {
     return axiosInstance.post(`auth/${provider}/unbind`);
+}
+
+// 获取验证码
+export function getCaptcha(): Promise<Result<any>> {
+    return axiosInstance.get('/get-captcha');
+}
+
+// 用户登录
+export function login(username: string, password: string, captchaId: string, captchaCode: string): Promise<Result<any>> {
+    return axiosInstance.post('/login', {
+        username,
+        password,
+        captchaId,
+        captchaCode
+    });
+}
+
+// 用户注册
+export function register(username: string, email: string, password: string, captchaId: string, captchaCode: string): Promise<Result<any>> {
+    return axiosInstance.post('/register', {
+        username,
+        email,
+        password,
+        captchaId,
+        captchaCode
+    });
+}
+
+// 忘记密码
+export function forgotPassword(email: string, captchaId: string, captchaCode: string): Promise<Result<string>> {
+    return axiosInstance.post('/forgot-password', {
+        email,
+        captchaId,
+        captchaCode
+    });
+}
+
+// 重置密码
+export function resetPassword(token: string, newPassword: string): Promise<Result<any>> {
+    return axiosInstance.post('/reset-password', {
+        token,
+        newPassword
+    });
+}
+
+// 图片上传
+export function uploadImage(formData: FormData): Promise<Result<any>> {
+    return axiosInstance.post('/file/img-upload', formData, {
+        baseURL: '',
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
 }

@@ -1,4 +1,5 @@
 import './style.css'
+import './utils/notification.ts'
 import { initMermaidRenderer } from './utils/mermaidRenderer'
 import './anchor-links.css'
 
@@ -9,7 +10,7 @@ initMermaidRenderer()
 function initAnchorLinks() {
     // 为所有带有 id 的标题添加锚点链接
     const headings = document.querySelectorAll('.prose h1[id], .prose h2[id], .prose h3[id], .prose h4[id], .prose h5[id], .prose h6[id]')
-    
+
     headings.forEach(heading => {
         // 创建锚点链接元素
         const anchor = document.createElement('a')
@@ -17,7 +18,7 @@ function initAnchorLinks() {
         anchor.className = 'anchor-link'
         anchor.innerHTML = '#'
         anchor.setAttribute('aria-label', `链接到 ${heading.textContent}`)
-        
+
         // 添加点击事件处理平滑滚动
         anchor.addEventListener('click', (e) => {
             e.preventDefault()
@@ -34,7 +35,7 @@ function initAnchorLinks() {
                 history.pushState(null, null, `#${heading.id}`)
             }
         })
-        
+
         // 将锚点链接添加到标题中
         heading.appendChild(anchor)
     })
@@ -46,7 +47,7 @@ window.deleteReply = async function(replyId) {
     if (!confirm('确定要删除这条评论吗？')) {
         return;
     }
-    
+
     try {
         const response = await fetch('/api/forum/articles-reply-delete', {
             method: 'POST',
@@ -57,7 +58,7 @@ window.deleteReply = async function(replyId) {
                 replyId: replyId
             })
         });
-        
+
         if (response.ok) {
             // 删除成功，移除DOM元素
             const replyElement = document.getElementById(`reply_${replyId}`);

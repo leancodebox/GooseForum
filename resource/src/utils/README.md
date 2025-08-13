@@ -1,6 +1,76 @@
-# Mermaid 渲染工具使用指南
+# 工具函数库使用指南
 
 ## 概述
+
+这个目录包含了项目中使用的各种工具函数和服务，包括网络请求、通知系统、图片处理和图表渲染等功能。
+
+## 📁 文件说明
+
+### 📡 网络请求相关
+- **`axiosInstance.ts`** - Axios实例配置，统一处理HTTP请求
+- **`gooseForumService.ts`** - 文章相关的API服务函数
+- **`gooseForumInterfaces.ts`** - 文章相关的TypeScript接口定义
+
+### 🔔 通知系统
+- **`notification.ts`** - 全局通知函数，支持Vue组件和HTML页面使用
+- **`notification-example.md`** - 通知系统的详细使用指南和示例
+
+### 🖼️ 图片处理
+- **`imageUtils.ts`** - 图片处理相关的工具函数
+
+### 📊 图表渲染
+- **`mermaidRenderer.ts`** - Mermaid图表渲染工具
+
+---
+
+## 🔔 全局通知系统
+
+全局通知系统提供了统一的消息提示功能，支持在Vue组件和HTML页面中使用。
+
+### 快速开始
+
+#### 在Vue组件中使用：
+```typescript
+import { notification } from '@/utils/notification'
+
+// 显示不同类型的通知
+notification.success('操作成功！')
+notification.error('操作失败，请重试')
+notification.warning('请注意检查输入')
+notification.info('这是提示信息')
+
+// 高级配置
+notification.show({
+  message: '自定义通知',
+  type: NotificationType.SUCCESS,
+  duration: 5000,
+  position: 'top-center',
+  showClose: true
+})
+```
+
+#### 在HTML页面中使用：
+```javascript
+// 直接使用全局对象
+window.notification.success('操作成功！')
+window.notification.error('操作失败')
+window.notification.closeAll() // 关闭所有通知
+```
+
+### 功能特性
+- 🎨 支持4种通知类型：成功、错误、警告、信息
+- 📍 支持6种显示位置：上右、上左、下右、下左、上中、下中
+- ⏰ 可配置自动关闭时间
+- 🎭 优雅的动画效果
+- 🔘 可选的手动关闭按钮
+- 📱 响应式设计
+- 🌐 全局可用（Vue组件和HTML页面）
+
+详细使用方法请参考 `notification-example.md`。
+
+---
+
+## 📊 Mermaid 渲染工具
 
 `mermaidRenderer.ts` 提供了可复用的 Mermaid 图表渲染功能，支持按需加载和多页面使用。
 
@@ -90,7 +160,7 @@ import { initMermaidRenderer } from './utils/mermaidRenderer'
 initMermaidRenderer()
 ```
 
-### 发布页面 (publish-v3.js)
+### 发布页面 (publish.js)
 
 ```javascript
 import { initMermaidRenderer } from './utils/mermaidRenderer'

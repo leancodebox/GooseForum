@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { axiosInstance } from '../utils/axiosInstance'
-import {getUserInfo, type PageData} from '../utils/adminService'
+import {getUserInfo} from '../utils/adminService'
 import type {AdminArticlesItem, Result} from "@/admin/utils/adminInterfaces.ts";
 
 export interface User {
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(true) // 初始状态为加载中
   const error = ref<string | null>(null)
   const initialized = ref(false)
-  
+
   // 获取用户信息
   const fetchUserInfo = async () => {
     loading.value = true
@@ -43,14 +43,14 @@ export const useAuthStore = defineStore('auth', () => {
       initialized.value = true
     }
   }
-  
+
   // 初始化认证状态
   const initAuth = async () => {
     if (!initialized.value) {
       await fetchUserInfo()
     }
   }
-  
+
   // 立即初始化
   initAuth()
   // 计算属性
@@ -74,7 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
         await fetchUserInfo()
         return { success: true }
       } else {
-        return { success: false, error: response.message }
+        return { success: false, error: response.msg }
       }
     } catch (err: any) {
       console.error(err)
@@ -88,7 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 退出登录
   const logout = async () => {
     try {
-      await axiosInstance.post('/logout')
+      await axiosInstance.post('/api/logout')
     } catch (err) {
       console.warn('退出登录请求失败:', err)
     } finally {

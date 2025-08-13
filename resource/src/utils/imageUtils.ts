@@ -1,7 +1,31 @@
 /**
  * 图片处理工具函数
- * 提供WebP转换、浏览器兼容性检测等功能
+ * 基于 compressorjs 提供 WebP 压缩功能
  */
+
+import Compressor from 'compressorjs'
+
+/**
+ * 图片处理结果接口
+ */
+export interface ImageProcessResult {
+  file: File
+  converted: boolean
+  originalSize: number
+  newSize: number
+}
+
+/**
+ * 图片信息接口
+ */
+export interface ImageInfo {
+  width: number
+  height: number
+  size: number
+  type: string
+  name: string
+}
+
 
 /**
  * 检查浏览器是否支持WebP格式
@@ -22,65 +46,27 @@ export const supportsWebP = (): boolean => {
  */
 export const convertToWebP = async (file: File, quality: number = 0.85): Promise<File> => {
   return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    const img = new Image()
-    
-    img.onload = () => {
-      canvas.width = img.width
-      canvas.height = img.height
-      
-      if (ctx) {
-        ctx.drawImage(img, 0, 0)
-        
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const webpFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webp'), {
-              type: 'image/webp',
-              lastModified: Date.now()
-            })
-            resolve(webpFile)
-          } else {
-            reject(new Error('WebP转换失败'))
-          }
-        }, 'image/webp', quality)
-      } else {
-        reject(new Error('Canvas上下文获取失败'))
+    new Compressor(file, {
+      quality,
+      mimeType: 'image/webp',
+      checkOrientation: true,
+      success: (result) => {
+        // 确保返回的是 File 对象而不是 Blob
+        if (result instanceof File) {
+          resolve(result)
+        } else {
+          // 如果返回的是 Blob，转换为 File
+          const webpFile = new File([result], file.name.replace(/\.[^/.]+$/, '.webp'), {
+            type: 'image/webp',
+            lastModified: Date.now()
+          })
+          resolve(webpFile)
+        }
+      },
+      error: (error) => {
+        reject(new Error(`WebP转换失败: ${error.message}`))
       }
-    }
-    
-    img.onerror = () => {
-      reject(new Error('图片加载失败'))
-    }
-    
-    // 创建对象URL并设置给图片
-    const objectUrl = URL.createObjectURL(file)
-    img.src = objectUrl
-    
-    // 清理对象URL以避免内存泄漏
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl)
-      canvas.width = img.width
-      canvas.height = img.height
-      
-      if (ctx) {
-        ctx.drawImage(img, 0, 0)
-        
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const webpFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webp'), {
-              type: 'image/webp',
-              lastModified: Date.now()
-            })
-            resolve(webpFile)
-          } else {
-            reject(new Error('WebP转换失败'))
-          }
-        }, 'image/webp', quality)
-      } else {
-        reject(new Error('Canvas上下文获取失败'))
-      }
-    }
+    })
   })
 }
 
@@ -89,27 +75,25 @@ export const convertToWebP = async (file: File, quality: number = 0.85): Promise
  * @param {File} file - 原始图片文件
  * @param {number} quality - WebP压缩质量 (0-1之间，默认0.85)
  * @param {(message: string) => void} onProgress - 进度回调函数
- * @returns {Promise<{file: File, converted: boolean, originalSize: number, newSize: number}>}
+ * @returns {Promise<ImageProcessResult>} 处理结果
  */
 export const processImageFile = async (
   file: File, 
   quality: number = 0.85,
   onProgress?: (message: string) => void
-): Promise<{
-  file: File
-  converted: boolean
-  originalSize: number
-  newSize: number
-}> => {
+): Promise<ImageProcessResult> => {
   const originalSize = file.size
   
-  // 如果浏览器支持WebP且文件不是WebP格式，则转换为WebP
-  if (supportsWebP() && !file.type.includes('webp')) {
+  // 检查是否需要转换为WebP
+  const shouldConvert = supportsWebP() && !file.type.includes('webp')
+  
+  if (shouldConvert) {
     try {
       onProgress?.('正在优化图片格式...')
       const convertedFile = await convertToWebP(file, quality)
       
-      console.log(`图片已转换为WebP格式，原大小: ${(originalSize / 1024).toFixed(1)}KB，转换后: ${(convertedFile.size / 1024).toFixed(1)}KB`)
+      const compressionRatio = ((originalSize - convertedFile.size) / originalSize * 100).toFixed(1)
+       console.log(`图片已转换为WebP格式，原大小: ${(originalSize / 1024).toFixed(1)}KB，转换后: ${(convertedFile.size / 1024).toFixed(1)}KB，压缩率: ${compressionRatio}%`)
       
       return {
         file: convertedFile,
@@ -119,17 +103,10 @@ export const processImageFile = async (
       }
     } catch (error) {
       console.warn('WebP转换失败，使用原始文件:', error)
-      // 转换失败时使用原始文件
-      return {
-        file,
-        converted: false,
-        originalSize,
-        newSize: originalSize
-      }
     }
   }
   
-  // 不需要转换或不支持WebP
+  // 不需要转换、不支持WebP或转换失败时返回原始文件
   return {
     file,
     converted: false,

@@ -1,6 +1,9 @@
 import axios from 'axios';
 
 
+const success = 0
+const fail = 1
+
 // 创建一个 Axios 实例
 const axiosInstance = axios.create({
     baseURL: '/api', // 替换为您的 API 基础 URL
@@ -26,9 +29,6 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-
-const success = 0
-const fail = 1
 
 // 添加响应拦截器
 axiosInstance.interceptors.response.use(

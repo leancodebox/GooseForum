@@ -1,14 +1,10 @@
-export interface Result<T> {
-    code: 0 | 1;
-    result: T;
-    msg: string;
+import type {PageData as GooseForumPageData, Result as GooseForumResult} from '@/utils/gooseForumInterfaces'
+
+export interface Result<T> extends GooseForumResult<T> {
+
 }
 
-export interface PageData<T> {
-    list: T[];
-    page: number
-    size: number
-    total: number
+export interface PageData<T> extends GooseForumPageData<T> {
 }
 
 
@@ -139,16 +135,3 @@ export interface SponsorsConfig {
     users: UserSponsor[]
 }
 
-export interface FooterItem {
-    id: number
-    title: string
-    url: string
-    sort: number
-    status: number
-    createTime: string
-}
-
-export interface FooterGroup {
-    name: string
-    items: FooterItem[]
-}

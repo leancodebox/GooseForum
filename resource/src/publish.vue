@@ -4,15 +4,11 @@ import MarkdownIt from 'markdown-it'
 import markdownItTaskLists from 'markdown-it-task-lists'
 import mermaid from 'mermaid'
 import CategorySelector from './components/CategorySelector.vue'
+import type {ArticleData} from "@/utils/gooseForumInterfaces.ts";
 
-// 类型定义
-interface ArticleData {
-  id: number
-  content: string
-  title: string
-  categoryId: number[]
-  type: number
-}
+// 导入图片处理工具函数
+import {processImageFile, validateImageFile} from './utils/imageUtils'
+import {getArticlesOrigin, submitArticle as submitArticleRequst, getArticleEnum as getArticleEnumApi, uploadImage as uploadImageApi} from "@/utils/gooseForumService.ts";
 
 interface Category {
   id: number
@@ -104,8 +100,7 @@ const previewContent = computed(() => {
 
   try {
     // 使用 markdown-it 解析 Markdown 内容
-    const htmlContent = md.render(articleData.content)
-    return htmlContent
+    return md.render(articleData.content)
   } catch (error) {
     console.error('Markdown解析错误:', error)
     return '<p class="text-error">Markdown解析出错，请检查语法</p>'
@@ -153,15 +148,7 @@ const removeMessage = (messageId: number) => {
 
 const getArticleEnum = async () => {
   try {
-    const response = await fetch('/api/forum/get-articles-enum', {
-      method: 'GET'
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const result = await response.json()
+    const result = await getArticleEnumApi()
 
     if (result.code === 0) {
       // 填充类型选项
@@ -185,22 +172,7 @@ const getArticleEnum = async () => {
 }
 
 const getOriginData = async (articleId: string) => {
-  const response = await fetch('/api/forum/get-articles-origin', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      id: parseInt(articleId)
-    })
-  })
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
-  }
-
-  const result = await response.json()
-
+  const result = await getArticlesOrigin(articleId)
   if (result.code === 0 && result.result) {
     const data = result.result
     // 更新文章数据
@@ -245,20 +217,7 @@ const submitArticle = async () => {
   isSubmitting.value = true
 
   try {
-    const response = await fetch('/api/forum/write-articles', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(articleData)
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const result = await response.json()
-
+    const result = await submitArticleRequst(articleData)
     if (result.code === 0) {
       showMessage(result.result ? '文章更新成功！' : '文章发布成功！', 'success')
 
@@ -295,8 +254,6 @@ const clearContent = () => {
   }
 }
 
-// 导入图片处理工具函数
-import { processImageFile, validateImageFile } from './utils/imageUtils'
 
 // 图片上传相关方法
 const uploadImage = async (file: File): Promise<string> => {
@@ -318,21 +275,7 @@ const uploadImage = async (file: File): Promise<string> => {
   uploadProgress.value = 0
 
   try {
-    const response = await fetch('/file/img-upload', {
-      method: 'POST',
-      body: formData
-    })
-
-    let result
-    try {
-      result = await response.json()
-    } catch {
-      throw new Error('服务器响应格式错误')
-    }
-
-    if (!response.ok) {
-      throw new Error(`上传失败: ${response.status} - ${result?.msg || '服务器错误'}`)
-    }
+    const result = await uploadImageApi(formData)
 
     if (result?.code === 0 && result?.result?.url) {
       return result.result.url

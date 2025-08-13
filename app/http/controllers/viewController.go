@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
@@ -24,27 +22,6 @@ func Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, component.SuccessData(
 		"👋",
 	))
-}
-
-// ValidatePassword 验证密码复杂度
-func ValidatePassword(password string) error {
-	if len(password) < 8 {
-		return fmt.Errorf("密码长度不能少于8位")
-	}
-	if len(password) > 64 {
-		return fmt.Errorf("密码长度不能超过64位")
-	}
-
-	// 检查是否包含数字
-	hasDigit := regexp.MustCompile(`[0-9]`).MatchString(password)
-	// 检查是否包含字母
-	hasLetter := regexp.MustCompile(`[a-zA-Z]`).MatchString(password)
-
-	if !hasDigit || !hasLetter {
-		return fmt.Errorf("密码必须包含字母和数字")
-	}
-
-	return nil
 }
 
 // Register 注册
@@ -69,7 +46,7 @@ func Register(c *gin.Context) {
 	}
 
 	// 验证密码复杂度
-	if err := ValidatePassword(r.Password); err != nil {
+	if err := component.ValidatePassword(r.Password); err != nil {
 		c.JSON(200, component.FailData(err.Error()))
 		return
 	}

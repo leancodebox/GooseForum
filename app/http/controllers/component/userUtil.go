@@ -22,6 +22,27 @@ func ValidateUsername(username string) bool {
 	return usernameRegex.MatchString(username)
 }
 
+// ValidatePassword 验证密码复杂度
+func ValidatePassword(password string) error {
+	if len(password) < 8 {
+		return fmt.Errorf("密码长度不能少于8位")
+	}
+	if len(password) > 64 {
+		return fmt.Errorf("密码长度不能超过64位")
+	}
+
+	// 检查是否包含数字
+	hasDigit := regexp.MustCompile(`[0-9]`).MatchString(password)
+	// 检查是否包含字母
+	hasLetter := regexp.MustCompile(`[a-zA-Z]`).MatchString(password)
+
+	if !hasDigit || !hasLetter {
+		return fmt.Errorf("密码必须包含字母和数字")
+	}
+
+	return nil
+}
+
 func LoginUserId(c *gin.Context) uint64 {
 	return c.GetUint64("userId")
 }

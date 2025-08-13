@@ -9,19 +9,19 @@
         <div class="loading loading-spinner loading-lg text-primary"></div>
         <p class="mt-4 text-base-content/60">正在加载收藏文章...</p>
       </div>
-      
+
       <!-- 空状态 -->
       <div v-else-if="!loading && articles.length === 0" class="p-8 text-center">
         <div class="text-6xl mb-4">📚</div>
         <p class="text-lg font-normal text-base-content/80 mb-2">还没有收藏任何文章</p>
         <p class="text-base-content/60">快去发现感兴趣的内容吧！</p>
       </div>
-      
+
       <!-- 文章列表 -->
       <ul class="list" v-else>
         <li class="list-row hover:bg-base-200 flex items-center gap-3 px-4 py-2"
-            :class="{ 'opacity-50': loading }" 
-            v-for="article in articles" 
+            :class="{ 'opacity-50': loading }"
+            v-for="article in articles"
             :key="article.id">
           <!-- 右侧内容 -->
           <div class="flex-1">
@@ -69,7 +69,7 @@
           </div>
         </li>
       </ul>
-      
+
       <!-- 分页 -->
       <div v-if="totalPages > 1" class="flex justify-center items-center gap-4 p-4 border-t border-base-300">
         <button
@@ -98,8 +98,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { getUserBookmarkedArticles } from '../utils/articleService';
-import type {ArticleListItem, UserInfo} from "@/utils/articleInterfaces.ts";
+import { getUserBookmarkedArticles } from '../utils/gooseForumService';
+import type {ArticleListItem, UserInfo} from "@/utils/gooseForumInterfaces.ts";
 
 // 定义props（即使不使用也要定义，避免Vue警告）
 const props = defineProps<{
@@ -144,18 +144,18 @@ const goToPage = (page: number) => {
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
   const now = new Date()
-  
+
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   const hour = String(date.getHours()).padStart(2, '0')
   const minute = String(date.getMinutes()).padStart(2, '0')
-  
+
   // 如果是今年，不显示年份
   if (year === now.getFullYear()) {
     return `${month}-${day} ${hour}:${minute}`
   }
-  
+
   return `${year}-${month}-${day} ${hour}:${minute}`
 }
 

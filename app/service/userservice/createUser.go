@@ -3,6 +3,7 @@ package userservice
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
@@ -32,17 +33,28 @@ func CreateUser(username, password, email string, needValid bool) (*users.Entity
 	return userEntity, nil
 }
 
-// GenerateGooseNickname 新增生成鹅相关昵称的函数
+// GenerateGooseNickname 生成鹅相关昵称（优化长度版）
 func GenerateGooseNickname() string {
 	prefixes := []string{
 		"鹅", "大白鹅", "灰鹅", "小鹅", "鹅宝",
 		"Goose", "Gander", "Gosling", "Honker",
 	}
 	prefix := prefixes[rand.Intn(len(prefixes))]
-	// 使用纳秒级时间戳+随机数确保唯一性
+
+	// 使用毫秒级时间戳+随机数确保唯一性
 	now := time.Now()
-	timestamp := now.UnixNano()
-	randomPart := rand.Intn(1000)
-	// 组合成16进制字符串
-	return fmt.Sprintf("%s%x%03d", prefix, timestamp, randomPart)
+	timestamp := now.UnixMilli()  // 毫秒级时间戳
+	randomPart := rand.Intn(1296) // 0-1295 (36^2范围)
+
+	// 转换为36进制（0-9a-z）
+	timestamp36 := strconv.FormatInt(timestamp, 36)
+	random36 := strconv.FormatInt(int64(randomPart), 36)
+
+	// 确保随机数部分固定2位（补零）
+	if len(random36) < 2 {
+		random36 = "0" + random36
+	}
+
+	// 组合成更紧凑的字符串
+	return fmt.Sprintf("%s%s%s", prefix, timestamp36, random36)
 }

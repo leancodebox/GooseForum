@@ -5,6 +5,7 @@ import MyArticles from './components/MyArticles.vue'
 import MyBookmarks from './components/MyBookmarks.vue'
 import AccountSettings from './components/AccountSettings.vue'
 import './style.css'
+import './utils/notification.ts'
 
 // 定义路由
 const routes = [
@@ -22,7 +23,7 @@ const routes = [
       },
       {
         path: 'bookmarks',
-        name: 'bookmarks', 
+        name: 'bookmarks',
         component: MyBookmarks
       },
       {

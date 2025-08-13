@@ -282,15 +282,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert('申请提交成功！我们会在24小时内处理您的申请。');
+                window.notification.show({message: '申请提交成功！我们会在24小时内处理您的申请。'})
                 form.reset();
             } else {
                 const error = await response.json();
-                alert('提交失败：' + (error.message || '请稍后重试'));
+                window.notification.error( '提交失败：' + (error.message || '请稍后重试'))
             }
         } catch (error) {
             console.error('提交错误:', error);
-            alert('网络错误，请稍后重试');
+            window.notification.error( '提交错误:'+ error)
         } finally {
             // 恢复提交按钮
             submitBtn.disabled = false;

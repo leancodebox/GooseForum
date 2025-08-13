@@ -276,6 +276,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { getCaptcha as getCaptchaApi, login, register, forgotPassword } from '@/utils/gooseForumService.ts'
 
 // 当前激活的标签页
 const activeTab = ref('login')
@@ -323,8 +324,7 @@ const forgotSuccess = ref('')
 // 获取验证码
 const getCaptcha = async () => {
   try {
-    const response = await fetch('/api/get-captcha')
-    const data = await response.json()
+    const data = await getCaptchaApi()
     if (data.code === 0) {
       captchaImg.value = data.result.captchaImg
       captchaId.value = data.result.captchaId
@@ -402,20 +402,7 @@ const handleLogin = async () => {
   loginLoading.value = true
 
   try {
-    const response = await fetch('/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: loginForm.username,
-        password: loginForm.password,
-        captchaId: captchaId.value,
-        captchaCode: loginForm.captcha
-      })
-    })
-
-    const data = await response.json()
+    const data = await login(loginForm.username, loginForm.password, captchaId.value, loginForm.captcha)
 
     if (data.code === 0) {
       // 获取重定向参数，如果存在则跳转到原始页面，否则跳转到首页
@@ -428,7 +415,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('登录请求失败:', error)
-    loginErrors.general = '登录失败，请稍后重试'
+    loginErrors.general = '登录失败，请稍后重试'+error
     refreshCaptcha()
   } finally {
     loginLoading.value = false
@@ -447,21 +434,7 @@ const handleRegister = async () => {
   registerLoading.value = true
 
   try {
-    const response = await fetch('/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: registerForm.username,
-        email: registerForm.email,
-        password: registerForm.password,
-        captchaId: captchaId.value,
-        captchaCode: registerForm.captcha
-      })
-    })
-
-    const data = await response.json()
+    const data = await register(registerForm.username, registerForm.email, registerForm.password, captchaId.value, registerForm.captcha)
 
     if (data.code === 0) {
       // 获取重定向参数，如果存在则跳转到原始页面，否则跳转到首页
@@ -474,7 +447,7 @@ const handleRegister = async () => {
     }
   } catch (error) {
     console.error('注册请求失败:', error)
-    registerErrors.general = '注册失败，请稍后重试'
+    registerErrors.general = '注册失败，请稍后重试'+error
     refreshCaptcha()
   } finally {
     registerLoading.value = false
@@ -507,32 +480,19 @@ const handleForgotPassword = async () => {
   forgotLoading.value = true
 
   try {
-    const response = await fetch('/api/forgot-password', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: forgotForm.email,
-        captchaId: captchaId.value,
-        captchaCode: forgotForm.captcha
-      })
-    })
-
-    const data = await response.json()
+    const data = await forgotPassword(forgotForm.email, captchaId.value, forgotForm.captcha)
 
     if (data.code === 0) {
-      forgotSuccess.value = '密码重置邮件已发送，请检查您的邮箱'
+      forgotSuccess.value = data.result
       // 清空表单
-      forgotForm.email = ''
       forgotForm.captcha = ''
     } else {
-      forgotErrors.general = data.message || '发送失败，请稍后重试'
+      forgotErrors.general = data.msg || '发送失败，请稍后重试'
     }
     refreshCaptcha()
   } catch (error) {
     console.error('忘记密码请求失败:', error)
-    forgotErrors.general = '发送失败，请稍后重试'
+    forgotErrors.general = '发送失败，请稍后重试'+error
     refreshCaptcha()
   } finally {
     forgotLoading.value = false

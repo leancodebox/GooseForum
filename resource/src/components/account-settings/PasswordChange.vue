@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { changePassword } from '@/utils/articleService.ts'
+import { changePassword } from '@/utils/gooseForumService.ts'
 
 // 密码修改表单
 const passwordForm = reactive({
@@ -41,11 +41,11 @@ const updatePassword = async () => {
         confirmPassword: ''
       })
     } else {
-      alert(`密码修改失败: ${response.message || '请重试'}`)
+      alert(`密码修改失败: ${response.msg || '请重试'}`)
     }
   } catch (error) {
     console.error('修改密码失败:', error)
-    alert('密码修改失败，请重试')
+    alert('密码修改失败，请重试'+error)
   } finally {
     changingPassword.value = false
   }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from 'vue'
-import {markAllAsRead as markAllAsReadReq, markAsReadById, queryNotificationList} from "@/utils/articleService.ts";
-import type {Notifications} from "@/utils/articleInterfaces.ts";
+import {markAllAsRead as markAllAsReadReq, markAsReadById, queryNotificationList} from "@/utils/gooseForumService.ts";
+import type {Notifications} from "@/utils/gooseForumInterfaces.ts";
 
 const notificationList = ref<Notifications[]>([])
 
@@ -59,12 +59,6 @@ const markAsRead = (notification: Notifications) => {
   markAsReadById(notification.id)
 }
 
-const markAsUnread = (id) => {
-  const notification = notifications.value.find(n => n.id === id)
-  if (notification) {
-    notification.isRead = false
-  }
-}
 
 const markAllAsRead = () => {
   markAllAsReadReq()
@@ -75,12 +69,6 @@ const markAllAsRead = () => {
 
 const deleteNotification = (notification: Notifications) => {
   // todo
-}
-
-const clearAll = () => {
-  if (confirm('确定要清空所有消息吗？此操作不可恢复。')) {
-    notifications.value = []
-  }
 }
 
 const loadMore = () => {
@@ -127,7 +115,7 @@ const formatTime = (time) => {
 const formatDateStr = (timeStr: string) => {
   const time = new Date(timeStr);
   const now = new Date()
-  const diff = now - time
+  const diff = now.getTime() - time.getTime();
   const minutes = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
@@ -176,9 +164,6 @@ const getEmptyMessage = () => {
         <div class="flex gap-2">
           <button class="btn btn-outline btn-sm" @click="markAllAsRead">
             全部标记为已读
-          </button>
-          <button class="btn btn-ghost btn-sm" @click="clearAll">
-            清空消息
           </button>
         </div>
       </div>

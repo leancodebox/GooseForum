@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { VueCropper } from 'vue-cropper'
 import 'vue-cropper/dist/index.css'
-import { uploadAvatar } from '../utils/articleService.ts'
+import { uploadAvatar } from '../utils/gooseForumService.ts'
 import { processImageFile, validateImageFile } from '../utils/imageUtils'
 
 const props = defineProps({
@@ -114,10 +114,10 @@ const compressImage = (base64Data, maxWidth = 160) => {
       if (supportsWebP) {
         // 使用WebP格式
         canvas.toBlob(
-          (blob) => resolve({ 
-            blob: blob || new Blob(), 
-            format: 'webp', 
-            filename: 'avatar.webp' 
+          (blob) => resolve({
+            blob: blob || new Blob(),
+            format: 'webp',
+            filename: 'avatar.webp'
           }),
           'image/webp',
           0.85  // WebP质量
@@ -125,10 +125,10 @@ const compressImage = (base64Data, maxWidth = 160) => {
       } else {
         // 降级到JPEG格式
         canvas.toBlob(
-          (blob) => resolve({ 
-            blob: blob || new Blob(), 
-            format: 'jpeg', 
-            filename: 'avatar.jpg' 
+          (blob) => resolve({
+            blob: blob || new Blob(),
+            format: 'jpeg',
+            filename: 'avatar.jpg'
           }),
           'image/jpeg',
           0.8  // JPEG质量
@@ -166,17 +166,17 @@ const handleCropFinish = async () => {
         if (response.code === 0) {
           emit('avatar-updated', response.result.avatarUrl || response.data?.avatarUrl)
           alert('头像上传成功')
-          
+
           // 清理blob URL资源（如果有的话）
           if (previewUrl.value && previewUrl.value.startsWith('blob:')) {
             URL.revokeObjectURL(previewUrl.value)
           }
-          
+
           // 重置状态
           showCropModal.value = false
           previewUrl.value = ''
           cropImg.value = ''
-          
+
           // 重置文件输入框
           if (fileInputRef.value) {
             fileInputRef.value.value = ''
@@ -222,16 +222,16 @@ const checkScreenSize = () => {
 // 关闭模态框
 const closeCropModal = () => {
   showCropModal.value = false
-  
+
   // 清理blob URL资源（如果有的话）
   if (previewUrl.value && previewUrl.value.startsWith('blob:')) {
     URL.revokeObjectURL(previewUrl.value)
   }
-  
+
   // 重置状态
   previewUrl.value = ''
   cropImg.value = ''
-  
+
   // 重置文件输入框
   if (fileInputRef.value) {
     fileInputRef.value.value = ''
@@ -259,23 +259,23 @@ onUnmounted(() => {
     <!-- 头像上传区域 -->
     <div class="grid grid-cols-1 gap-2">
       <!-- 隐藏的文件输入框 -->
-      <input 
-        ref="fileInputRef" 
-        type="file" 
-        class="hidden" 
+      <input
+        ref="fileInputRef"
+        type="file"
+        class="hidden"
         accept="image/*"
-        @change="handleFileSelect" 
+        @change="handleFileSelect"
         :disabled="uploading"
       />
-      
+
       <!-- 可点击的头像区域 -->
        <div class="avatar">
-         <div 
+         <div
            @click="triggerFileSelect"
            class="mask mask-squircle w-20 h-20 relative cursor-pointer hover:opacity-80 transition-opacity duration-200 group"
            :class="{ 'cursor-not-allowed opacity-50': uploading }"
          >
-           <img 
+           <img
              :src="currentAvatar || '/default-avatar.webp'"
              alt="点击更换头像"
              class="w-full h-full object-cover"
@@ -289,7 +289,7 @@ onUnmounted(() => {
            </div>
          </div>
        </div>
-      
+
       <div class="text-sm text-base-content/60">
         点击头像更换 • 支持 JPG、PNG、GIF 格式，文件大小不超过 2MB
       </div>
@@ -302,7 +302,7 @@ onUnmounted(() => {
     <div class="modal" :class="{ 'modal-open': showCropModal }">
       <div class="modal-box max-w-4xl w-full max-h-[90vh] overflow-y-auto scrollbar-thin">
         <h3 class="text-lg font-normal mb-4">裁切头像</h3>
-        
+
         <div class="flex gap-6">
           <!-- 裁切区域 -->
           <div class="flex-1">
@@ -331,7 +331,7 @@ onUnmounted(() => {
                style="width: 100%; height: 300px; background: #f5f5f5;"
              />
           </div>
-          
+
           <!-- 预览区域 -->
           <div class="w-1/3">
             <h4 class="text-sm font-normal mb-2">预览效果</h4>
@@ -347,19 +347,19 @@ onUnmounted(() => {
             </div>
           </div>
         </div>
-        
+
         <!-- 操作按钮 -->
         <div class="modal-action">
-          <button 
+          <button
             type="button"
-            @click="closeCropModal" 
+            @click="closeCropModal"
             class="btn btn-outline"
           >
             取消
           </button>
-          <button 
+          <button
             type="button"
-            @click="handleCropFinish" 
+            @click="handleCropFinish"
             class="btn btn-primary"
             :disabled="uploading"
           >

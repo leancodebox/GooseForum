@@ -3,8 +3,8 @@
     <!-- 页面标题和操作 -->
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-normal text-base-content">页脚管理</h1>
-      <button 
-        @click="saveFooterConfig" 
+      <button
+        @click="saveFooterConfig"
         class="btn btn-primary btn-sm"
         :disabled="loading"
       >
@@ -26,7 +26,7 @@
               添加HTML项
             </button>
           </div>
-          
+
           <div class="space-y-3 max-h-96 overflow-y-auto">
             <draggable
               v-model="footerConfig.primary"
@@ -44,12 +44,12 @@
                            <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
                          </svg>
                        </div>
-                       <input 
+                       <input
                          v-model="htmlItem.content"
                          placeholder="请输入HTML项内容"
                          class="input input-bordered input-sm flex-1"
                        />
-                       <button 
+                       <button
                          @click="removePItem(htmlIndex)"
                          class="btn btn-error btn-xs"
                        >
@@ -60,7 +60,7 @@
                  </div>
                </template>
             </draggable>
-            
+
             <div v-if="footerConfig.primary.length === 0" class="text-center py-8 text-base-content/60">
               暂无HTML项，点击上方按钮添加
             </div>
@@ -80,7 +80,7 @@
               添加分组
             </button>
           </div>
-          
+
           <div class="space-y-3">
             <draggable
               v-model="footerConfig.list"
@@ -99,20 +99,20 @@
                             <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
                           </svg>
                         </div>
-                        <input 
-                          v-model="group.name" 
+                        <input
+                          v-model="group.name"
                           placeholder="分组名称"
                           class="input input-bordered input-sm flex-1"
                         />
                       </div>
-                      <button 
-                        @click="removeGroup(groupIndex)" 
+                      <button
+                        @click="removeGroup(groupIndex)"
                         class="btn btn-error btn-xs"
                       >
                         删除
                       </button>
                     </div>
-                 
+
                     <div class="space-y-2">
                       <draggable
                         v-model="group.children"
@@ -128,18 +128,18 @@
                                 <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
                               </svg>
                             </div>
-                            <input 
-                              v-model="child.name" 
+                            <input
+                              v-model="child.name"
                               placeholder="链接名称"
                               class="input input-bordered input-xs flex-1"
                             />
-                            <input 
-                              v-model="child.url" 
+                            <input
+                              v-model="child.url"
                               placeholder="链接地址"
                               class="input input-bordered input-xs flex-1"
                             />
-                            <button 
-                              @click="removeChild(groupIndex, childIndex)" 
+                            <button
+                              @click="removeChild(groupIndex, childIndex)"
                               class="btn btn-error btn-xs"
                             >
                               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,8 +149,8 @@
                           </div>
                         </template>
                       </draggable>
-                      <button 
-                        @click="addChild(groupIndex)" 
+                      <button
+                        @click="addChild(groupIndex)"
                         class="btn btn-success btn-xs w-full"
                       >
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,7 +163,7 @@
                 </div>
               </template>
             </draggable>
-            
+
             <div v-if="footerConfig.list.length === 0" class="text-center py-8 text-base-content/60">
               暂无分组，点击上方按钮添加
             </div>
@@ -176,7 +176,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getFooterLinks, saveFooterLinks, type FooterConfig, type FooterGroup, type FooterItem, type HtmlItem } from '../utils/adminService'
+import { getFooterLinks, saveFooterLinks, type FooterConfig } from '../utils/adminService'
 import draggable from 'vuedraggable'
 
 const loading = ref(false)

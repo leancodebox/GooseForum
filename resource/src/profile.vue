@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getUserInfo } from "@/utils/articleService.ts";
-import type { UserInfo } from "@/utils/articleInterfaces.ts";
+import { getUserInfo } from "@/utils/gooseForumService.ts";
+import type { UserInfo } from "@/utils/gooseForumInterfaces.ts";
 
 // 路由相关
 const router = useRouter()
@@ -50,9 +50,8 @@ const loadUserInfo = async () => {
         websiteName: res.result.websiteName,
         avatarUrl: res.result.avatarUrl
       });
-      console.log('用户信息加载成功:', res.result);
     } else {
-      console.error('获取用户信息失败:', res.message);
+      console.error('获取用户信息失败:', res.msg);
     }
   } catch (error) {
     console.error('获取用户信息出错:', error);
