@@ -10,120 +10,249 @@
             <li><a href="/about" class="py-1 px-3 text-base">关于</a></li>
         </ul>
     </div>
-
     <!-- 右侧操作按钮区域 -->
-    <div class="navbar-end" role="toolbar" aria-label="用户操作工具栏">
-        <!-- PC端操作按钮组 -->
-        <div class="hidden lg:flex items-center gap-2">
-            <!-- 搜索框 -->
-            <label class="input input-bordered input-sm flex items-center gap-2">
-                <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.3-4.3"></path>
-                    </g>
-                </svg>
-                <input type="search" id="search-input" required placeholder="Search" class="grow" />
-            </label>
+    <div class="navbar-end gap-2" role="toolbar" aria-label="用户操作工具栏">
+        <!-- 搜索框 - 仅PC端显示 -->
+        <label class="input input-bordered input-sm items-center gap-2 hidden lg:flex">
+            <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </g>
+            </svg>
+            <input type="search" id="search-input" required placeholder="Search" class="grow" />
+        </label>
 
-            <!-- 主题切换按钮 -->
-            {{template "theme-toggle.gohtml" .}}
-            {{if .CurrentUserId}}
-            <!-- 文章发布按钮 -->
-            <a href="/publish" class="btn btn-ghost btn-sm btn-circle" aria-label="发布文章">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+        <!-- 主题切换按钮 - 所有设备显示 -->
+        <div class="dropdown dropdown-end" role="presentation" aria-label="主题切换器">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle" id="theme-toggle" aria-label="切换主题" aria-haspopup="menu" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" role="img" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
                 </svg>
-            </a>
-            <!-- 消息通知按钮 -->
-            <div class="dropdown dropdown-end dropdown-hover" role="group" aria-label="消息通知">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle" aria-label="消息通知" aria-haspopup="menu" aria-expanded="false">
-                    <div class="indicator">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                        </svg>
-                        <!-- 消息通知按钮角标 -->
-                        <span id="notification-badge" class="badge badge-xs badge-primary indicator-item" style="display: none;" aria-hidden="true"></span>
-                    </div>
-                </div>
-                <div tabindex="0" class="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-base-100" role="menu" aria-label="消息通知菜单">
-                    <div class="card-body p-2">
-                        <h3 class="font-normal text-sm" role="heading" aria-level="3">消息通知</h3>
-                        <div class="text-sm text-base-content/70" role="region" aria-label="消息内容">
-                            <div id="notification-content">
-                                <div class="py-1">暂无新消息</div>
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <a href="/notifications" class="btn btn-primary btn-block btn-sm" role="button">查看全部</a>
-                        </div>
-                    </div>
-                </div>
             </div>
-            <!-- 用户头像下拉菜单 -->
-            <div class="dropdown dropdown-end dropdown-hover" role="group" aria-label="用户菜单">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar" aria-label="用户菜单" aria-haspopup="menu" aria-expanded="false">
-                    <div class="w-8 rounded-full">
-                        <img
-                                src="{{.User.AvatarUrl}}"
-                                alt="{{.User.Username}}的头像"
-                                class="rounded-full"
-                        />
-                    </div>
-                </div>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52" role="menu" aria-label="用户操作菜单">
-                    <li class="menu-title" role="presentation">
-                        <span aria-hidden="true">{{.User.Username}}</span>
-                    </li>
-                    <li><a href="/profile/articles">个人中心</a></li>
-                    <li><a href="/profile/settings">账户设置</a></li>
-                    {{if .User.IsAdmin}}
-                    <li><a href="/admin/">管理后台</a></li>
-                    {{end}}
-                    <hr class="my-2" role="separator"/>
-                    <li><a onclick="handleLogout()">退出登录</a></li>
-                </ul>
-            </div>
-            {{else}}
-            <!-- 登录按钮 -->
-            <a href="/login" class="btn btn-outline btn-sm" role="button" aria-label="登录">登录</a>
-            {{end}}
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-48">
+                <li class="menu-title">
+                    <span>选择主题</span>
+                </li>
+                <li><button onclick="changeTheme('light')"><span class="mr-2">☀️</span>浅色</button></li>
+                <li><button onclick="changeTheme('dark')"><span class="mr-2">🌙</span>深色</button></li>
+                <li><button onclick="changeTheme('retro')"><span class="mr-2">🎨</span>复古</button></li>
+                <li><button onclick="changeTheme('garden')"><span class="mr-2">🌸</span>花园</button></li>
+                <li><button onclick="changeTheme('forest')"><span class="mr-2">🌲</span>森林</button></li>
+                <li><button onclick="changeTheme('luxury')"><span class="mr-2">💎</span>奢华</button></li>
+                <li><button onclick="changeTheme('dracula')"><span class="mr-2">🧛</span>拖拽</button></li>
+            </ul>
         </div>
 
-        <!-- 移动端操作按钮组 -->
-        <div class="flex items-center gap-2 lg:hidden" role="toolbar" aria-label="移动端操作工具栏">
-            <!-- 移动端主题切换按钮 -->
-            {{template "theme-toggle.gohtml" .}}
-            <!-- 移动端汉堡菜单 -->
-            <div class="dropdown dropdown-end" role="group" aria-label="移动端菜单">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-sm" aria-label="打开菜单" aria-haspopup="menu" aria-expanded="false">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 6h16M4 12h8m-8 6h16"/>
+        {{if .CurrentUserId}}
+        <!-- 文章发布按钮 - 仅PC端显示 -->
+        <a href="/publish" class="btn btn-ghost btn-sm btn-circle hidden lg:flex" aria-label="发布文章">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+            </svg>
+        </a>
+
+        <!-- 消息通知按钮 - 仅PC端显示 -->
+        <div class="dropdown dropdown-end dropdown-hover hidden lg:flex" role="group" aria-label="消息通知">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-sm btn-circle" aria-label="消息通知" aria-haspopup="menu" aria-expanded="false">
+                <div class="indicator">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
                     </svg>
+                    <!-- 消息通知按钮角标 -->
+                    <span id="notification-badge" class="badge badge-xs badge-primary indicator-item" style="display: none;" aria-hidden="true"></span>
                 </div>
-                <ul tabindex="0"
-                    class="menu menu-sm dropdown-content mt-2 z-[1] p-2 shadow bg-base-100 rounded-box w-52" aria-label="移动端导航菜单">
-                    <li><a href="/post">社区</a></li>
-                    <li><a href="/docs">文档</a></li>
-                    <li><a href="/links">友情链接</a></li>
-                    <li><a href="/sponsors">赞助商</a></li>
-                    <li><a href="/about">关于</a></li>
-                    {{if .CurrentUserId}}
-                    <li><a href="/publish">发布文章</a></li>
-                    <li><a href="/notifications">消息通知</a></li>
-                    {{else}}
-                    <li><a href="/login">登录/注册</a></li>
-                    {{end}}
-                </ul>
             </div>
+            <div tabindex="0" class="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-base-100" role="menu" aria-label="消息通知菜单">
+                <div class="card-body p-2">
+                    <h3 class="font-normal text-sm" role="heading" aria-level="3">消息通知</h3>
+                    <div class="text-sm text-base-content/70" role="region" aria-label="消息内容">
+                        <div id="notification-content">
+                            <div class="py-1">暂无新消息</div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="/notifications" class="btn btn-primary btn-block btn-sm" role="button">查看全部</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户头像下拉菜单 - 仅PC端显示 -->
+        <div class="dropdown dropdown-end dropdown-hover hidden lg:flex" role="group" aria-label="用户菜单">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar" aria-label="用户菜单" aria-haspopup="menu" aria-expanded="false">
+                <div class="w-8 rounded-full">
+                    <img
+                            src="{{.User.AvatarUrl}}"
+                            alt="{{.User.Username}}的头像"
+                            class="rounded-full"
+                    />
+                </div>
+            </div>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52" role="menu" aria-label="用户操作菜单">
+                <li class="menu-title" role="presentation">
+                    <span aria-hidden="true">{{.User.Username}}</span>
+                </li>
+                <li><a href="/profile/articles">个人中心</a></li>
+                <li><a href="/profile/settings">账户设置</a></li>
+                {{if .User.IsAdmin}}
+                <li><a href="/admin/">管理后台</a></li>
+                {{end}}
+                <hr class="my-2" role="separator"/>
+                <li><a onclick="handleLogout()">退出登录</a></li>
+            </ul>
+        </div>
+        {{else}}
+        <!-- 登录按钮 - 仅PC端显示 -->
+        <a href="/login" class="btn btn-outline btn-sm hidden lg:flex" role="button" aria-label="登录">登录</a>
+        {{end}}
+
+        <!-- 移动端汉堡菜单 - 仅移动端显示 -->
+        <div class="dropdown dropdown-end lg:hidden" role="group" aria-label="移动端菜单">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-sm" aria-label="打开菜单" aria-haspopup="menu" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 6h16M4 12h8m-8 6h16"/>
+                </svg>
+            </div>
+            <ul tabindex="0"
+                class="menu dropdown-content mt-2 z-[1] p-2 shadow bg-base-100 rounded-box w-52" aria-label="移动端导航菜单">
+                <!-- 导航链接 -->
+                <li><a href="/post">社区</a></li>
+                <li><a href="/docs">文档</a></li>
+                <li><a href="/links">友情链接</a></li>
+                <li><a href="/sponsors">赞助商</a></li>
+                <li><a href="/about">关于</a></li>
+
+                {{if .CurrentUserId}}
+                <!-- 已登录用户的移动端菜单 -->
+                <hr class="my-2" role="separator"/>
+                <li>
+                    <span aria-hidden="true">
+                        <div class="w-4 rounded-full"><img src="{{.User.AvatarUrl}}" alt="{{.User.Username}}的头像" class="rounded-full"/></div>
+                        {{.User.Username}}
+                    </span>
+                </li>
+                <li><a href="/publish">发布文章</a></li>
+                <li><a href="/notifications">消息通知</a></li>
+                <li><a href="/profile/articles">个人中心</a></li>
+                <li><a href="/profile/settings">账户设置</a></li>
+                {{if .User.IsAdmin}}
+                <li><a href="/admin/">管理后台</a></li>
+                {{end}}
+                <hr class="my-2" role="separator"/>
+                <li><a onclick="handleLogout()">退出登录</a></li>
+                {{else}}
+                <!-- 未登录用户的移动端菜单 -->
+                <hr class="my-2" role="separator"/>
+                <li><a href="/login">登录/注册</a></li>
+                {{end}}
+            </ul>
         </div>
     </div>
 </nav>
-{{template "theme-toggle-script.gohtml" .}}
 
 <script>
+    // 主题切换功能
+    window.changeTheme = function (theme) {
+        try {
+            // 设置 HTML 元素的 data-theme 属性
+            document.documentElement.setAttribute('data-theme', theme);
+
+            // 保存到 localStorage
+            localStorage.setItem('theme', theme);
+
+            // 保存到 cookie，方便服务端读取
+            // 设置过期时间为1年
+            const expires = new Date();
+            expires.setFullYear(expires.getFullYear() + 1);
+            document.cookie = `theme=${theme}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+
+            // 更新所有 theme-controller 输入框的状态
+            updateThemeControllers(theme);
+
+
+            // 关闭下拉菜单 - 更好的方式
+            const dropdown = document.querySelector('.dropdown');
+            if (dropdown) {
+                dropdown.removeAttribute('open');
+                const details = dropdown.querySelector('details');
+                if (details) {
+                    details.removeAttribute('open');
+                }
+            }
+
+            // 移除焦点
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+        } catch (error) {
+            console.error('主题切换失败:', error);
+        }
+    };
+
+    // 更新主题控制器状态
+    function updateThemeControllers(currentTheme) {
+        try {
+            // 更新所有 theme-controller 输入框
+            const controllers = document.querySelectorAll('.theme-controller');
+            controllers.forEach(controller => {
+                controller.checked = controller.value === currentTheme;
+            });
+        } catch (error) {
+            console.error('更新主题控制器失败:', error);
+        }
+    }
+
+
+    // 监听 theme-controller 变化
+    function setupThemeControllers() {
+        try {
+            const controllers = document.querySelectorAll('.theme-controller');
+            controllers.forEach(controller => {
+                controller.addEventListener('change', function () {
+                    if (this.checked && this.value) {
+                        window.changeTheme(this.value);
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('设置主题控制器失败:', error);
+        }
+    }
+
+    // 页面加载时初始化主题
+    function initializeTheme() {
+        try {
+            // 从 localStorage 获取保存的主题，默认为 light
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            // 应用主题
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
+            // 确保cookie也设置了当前主题
+            const expires = new Date();
+            expires.setFullYear(expires.getFullYear() + 1);
+            document.cookie = `theme=${savedTheme}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+
+            // 更新主题控制器状态
+            updateThemeControllers(savedTheme);
+            // 设置主题控制器监听
+            setupThemeControllers();
+        } catch (error) {
+            console.error('主题初始化失败:', error);
+            // 降级到默认主题
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    }
+    // DOM 加载完成后初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeTheme);
+    } else {
+        initializeTheme();
+    }
+
     async function handleLogout() {
         try {
             const response = await fetch('/api/logout', {
@@ -142,7 +271,7 @@
     // 未读消息检查功能
     async function checkUnreadNotifications() {
         const CACHE_KEY = 'unread_notifications';
-        const CACHE_DURATION = 15 * 1000; // 15秒
+        const CACHE_DURATION = 10 * 1000; // 15秒
 
         try {
             // 检查localStorage缓存
