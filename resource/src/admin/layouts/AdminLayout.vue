@@ -130,7 +130,7 @@
 import type {Component} from 'vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {useAuthStore} from '../stores/auth'
+import {useAuthStore} from '../stores/auth.ts'
 import {
   BookOpenIcon,
   CogIcon,

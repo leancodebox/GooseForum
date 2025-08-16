@@ -15,10 +15,9 @@ const authStore = useAuthStore()
 onMounted(async () => {
   // 等待认证状态初始化完成
   await authStore.initAuth()
-  
   // 检查认证状态
   if (!authStore.isAuthenticated && router.currentRoute.value.path !== '/admin/login') {
-    router.push('/admin/login')
+    await router.push('/admin/login')
   }
 })
 </script>
