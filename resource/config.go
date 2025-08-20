@@ -32,7 +32,7 @@ func GetTemplates(globalFunc template.FuncMap) *template.Template {
 				return template.HTML(s)
 			},
 			"FormatTime": func(t time.Time) string {
-				return t.Format("2006-01-02 15:04:05")
+				return t.Format(time.DateTime)
 			},
 			"Nl2br": func(text string) template.HTML {
 				// 将换行符转换为HTML的<br>标签

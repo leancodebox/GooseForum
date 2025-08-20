@@ -62,7 +62,7 @@
                     v-if="captchaImg"
                     :src="captchaImg"
                     alt="验证码"
-                    class="h-12 cursor-pointer border border-base-300 rounded"
+                    class="h-10 cursor-pointer border border-base-300 rounded bg-white"
                     @click="refreshCaptcha"
                 />
               </div>

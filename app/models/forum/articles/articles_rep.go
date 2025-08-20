@@ -116,13 +116,13 @@ func Page[ResType SmallEntity](q PageQuery) struct {
 		b.Where(queryopt.Eq(fieldProcessStatus, 0))
 	}
 	if len(q.Categories) > 0 {
-		b.Joins("left join article_category_rs on articles.id = article_category_rs.article_id")
-		b.Where("article_category_rs.article_category_id IN (?)", q.Categories)
-		b.Where("article_category_rs.effective = ? ", 1)
-		b.Group("articles.id")
+		b.Joins("inner join article_category_rs on articles.id = article_category_rs.article_id")
+		b.Where(`EXISTS (SELECT 1 FROM article_category_rs rs 
+WHERE rs.article_id = articles.id AND rs.article_category_id IN (?) AND rs.effective = ? )`,
+			q.Categories, 1)
 	}
 	//b.Count(&total)
-	b.Select(" articles.id, articles.title,articles.description, articles.type, articles.category_id, articles.user_id, articles.article_status, articles.process_status," +
+	b.Select("articles.id, articles.title,articles.description, articles.type, articles.category_id, articles.user_id, articles.article_status, articles.process_status," +
 		" articles.view_count, articles.reply_count, articles.like_count, articles.created_at, articles.updated_at, articles.deleted_at")
 	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order(" articles.updated_at desc").Find(&list)
 	var total int64

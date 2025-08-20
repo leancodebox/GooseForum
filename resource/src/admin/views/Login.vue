@@ -77,7 +77,7 @@
                   v-if="captchaImg"
                   :src="captchaImg"
                   alt="验证码"
-                  class="w-full h-full object-cover rounded cursor-pointer border border-base-300 hover:border-primary transition-colors"
+                  class="w-full h-full object-cover rounded cursor-pointer border border-base-300 hover:border-primary transition-colors bg-white"
                   @click="refreshCaptcha"
                   title="点击刷新验证码"
                 />
@@ -234,17 +234,6 @@ const handleRememberChange = () => {
 </script>
 
 <style scoped>
-/* 自定义样式 */
-.card {
-  backdrop-filter: blur(10px);
-  border: 1px solid hsl(var(--bc) / 0.1);
-}
-
-/* 登录按钮动画 */
-.btn:not(:disabled):hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px hsl(var(--p) / 0.3);
-}
 
 /* 背景动画 */
 @keyframes float {

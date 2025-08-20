@@ -1,15 +1,9 @@
 package jsonopt
 
 import (
-	jsoniter "github.com/json-iterator/go"
-	"github.com/json-iterator/go/extra"
+	"encoding/json"
 )
 
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
-
-func init() {
-	extra.RegisterFuzzyDecoders()
-}
 func EncodeE(obj any) (string, error) {
 	marshal, err := json.Marshal(obj)
 	if err != nil {

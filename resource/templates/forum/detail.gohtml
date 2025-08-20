@@ -9,14 +9,14 @@
     <header class="sticky top-0 z-50">
         {{template "nav.gohtml" .}}
     </header>
-    <main class="flex-1 container mx-auto px-4 py-4">
+    <main class="flex-1 container mx-auto px-4 py-4 ">
         <div class="flex flex-col md:flex-row gap-6">
             <section class="flex-1 space-y-6 min-w-0">
                 <!-- 文章详情卡片 -->
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body overflow-hidden">
                         <h1 class="card-title text-3xl font-normal text-base-content mb-4">
-                            {{.ArticleTitle}}
+                            {{.Article.Title}}
                         </h1>
                         {{if false}}
                             <div class="flex items-center gap-2 mb-4">
@@ -27,15 +27,15 @@
                             </div>
                         {{end}}
                         <div class="flex items-center text-base-content/70 mb-6 border-b border-b-gray-200 pb-2">
-                            <a class="avatar" href="/user/{{.AuthorId}}">
+                            <a class="avatar" href="/user/{{.Article.UserId}}">
                                 <div class="mask mask-squircle w-8 h-8">
                                     <img src="{{.AvatarUrl}}" alt="{{.Username}}的头像"/>
                                 </div>
                             </a>
-                            <a  href="/user/{{.AuthorId}}" class="ml-2 mr-4 flex-shrink-0">{{.Username}}</a>
-                            <span class="mr-4 flex-shrink-0">{{.CreateTime}}</span>
-                            {{if eq .CurrentUserId .AuthorId}}
-                                <a href="/publish?id={{.ArticleId}}" class="mr-4 text-primary flex-shrink-0">编辑</a>
+                            <a  href="/user/{{.Article.UserId}}" class="ml-2 mr-4 flex-shrink-0">{{.Username}}</a>
+                            <span class="mr-4 flex-shrink-0">{{FormatTime .Article.CreatedAt}}</span>
+                            {{if eq .CurrentUserId .Article.UserId}}
+                                <a href="/publish?id={{.Article.Id}}" class="mr-4 text-primary flex-shrink-0">编辑</a>
                             {{end}}
                             <div class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
@@ -46,14 +46,14 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                 </svg>
-                                <span class="mr-4">{{.ViewCount}}</span>
+                                <span class="mr-4">{{.Article.ViewCount}}</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
                                      viewBox="0 0 24 24"
                                      stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                                 </svg>
-                                <span>{{.LikeCount}}</span>
+                                <span>{{.Article.LikeCount}}</span>
                             </div>
                         </div>
                         <div class="prose lg:prose-base md:prose-lg
@@ -62,7 +62,7 @@
                          prose-pre:bg-base-200
                          prose-code:text-base-content
                          max-w-none text-base-content overflow-hidden min-w-0">
-                             {{.ArticleContent}}
+                             {{ SafeHTML .Article.RenderedHTML}}
                         </div>
 
                         <!-- 点赞和收藏按钮 -->
@@ -75,7 +75,7 @@
                                     <path fill="currentColor"
                                           d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                 </svg>
-                                <span id="like-count">{{.LikeCount}}</span>
+                                <span id="like-count">{{.Article.LikeCount}}</span>
                             </button>
                             <button id="bookmark-btn"
                                     class="{{if .IsBookmarked}}bg-warning text-warning-content{{else}}bg-base-200 text-base-content{{end}} px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none"
@@ -209,14 +209,15 @@
                         <div class="card-body">
                             <h2 class="card-title mb-3 font-normal">作者信息</h2>
                             <div class="flex items-center gap-3 mb-4">
-                                <a  href="/user/{{.AuthorId}}" class="avatar">
+                                <a  href="/user/{{.Article.UserId}}" class="avatar">
                                     <div class="mask mask-squircle w-16 h-16">
                                         <img src="{{.AvatarUrl}}" alt="{{.Username}}的头像"/>
                                     </div>
                                 </a>
                                 <div class="flex-1">
-                                    <a href="/user/{{.AuthorId}}" class="font-normal text-base-content">{{.Username}}</a>
-                                    <p class="text-sm text-base-content/70">{{.Signature}}</p>
+                                    <a href="/user/{{.Article.UserId}}" class="font-normal text-base-content">{{.Username}}</a>
+                                    {{if .AuthorUserInfo.RoleId}}<div class="badge badge-sm badge-warning">管理</div>{{end}}
+                                    <p class="text-sm text-base-content/70">{{.AuthorUserInfo.Signature}}</p>
                                     <div class="flex items-center gap-2 mt-1">
                                         {{if IsOnline .AuthorInfoStatistics.LastActiveTime }}
                                         <div class="status status-success status-lg"></div>
@@ -228,9 +229,9 @@
                                     </div>
                                 </div>
                             </div>
-                            {{if .Bio}}
+                            {{if .AuthorUserInfo.Bio}}
                             <p class="text-sm text-base-content/70 mb-2">
-                                {{.Bio}}
+                                {{.AuthorUserInfo.Bio}}
                             </p>
                             {{end}}
 
@@ -254,8 +255,8 @@
                             <div class="mb-2">
                                 <div class="grid grid-cols-6 gap-2 place-items-center">
                                     <!-- GitHub -->
-                                    {{if .ExternalInformation.Github.Link}}
-                                        <a href="{{.ExternalInformation.Github.Link}}" target="_blank"
+                                    {{if .AuthorUserInfo.ExternalInformation.Github.Link}}
+                                        <a href="{{.AuthorUserInfo.ExternalInformation.Github.Link}}" target="_blank"
                                            class="btn btn-ghost btn-sm btn-square tooltip"
                                            data-tip="GitHub">
                                             <span class="sr-only">GitHub</span>
@@ -267,8 +268,8 @@
                                         </a>
                                     {{end}}
                                     <!-- Twitter/X -->
-                                    {{if .ExternalInformation.Twitter.Link}}
-                                        <a href="{{.ExternalInformation.Twitter.Link}}" target="_blank"
+                                    {{if .AuthorUserInfo.ExternalInformation.Twitter.Link}}
+                                        <a href="{{.AuthorUserInfo.ExternalInformation.Twitter.Link}}" target="_blank"
                                            class="btn btn-ghost btn-sm btn-square tooltip"
                                            data-tip="Twitter">
                                             <span class="sr-only">Twitter</span>
@@ -279,9 +280,9 @@
                                             </svg>
                                         </a>
                                     {{end}}
-                                    {{if .ExternalInformation.LinkedIn.Link}}
+                                    {{if .AuthorUserInfo.ExternalInformation.LinkedIn.Link}}
                                         <!-- LinkedIn -->
-                                        <a href="{{.ExternalInformation.LinkedIn.Link}}" target="_blank"
+                                        <a href="{{.AuthorUserInfo.ExternalInformation.LinkedIn.Link}}" target="_blank"
                                            class="btn btn-ghost btn-sm btn-square tooltip" data-tip="LinkedIn">
                                             <span class="sr-only">LinkedIn</span>
                                             <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30"
@@ -292,8 +293,8 @@
                                         </a>
                                     {{end}}
                                     <!-- 微博 -->
-                                    {{if .ExternalInformation.Weibo.Link}}
-                                        <a href="{{.ExternalInformation.Weibo.Link}}" target="_blank"
+                                    {{if .AuthorUserInfo.ExternalInformation.Weibo.Link}}
+                                        <a href="{{.AuthorUserInfo.ExternalInformation.Weibo.Link}}" target="_blank"
                                            class="btn btn-ghost btn-sm btn-square tooltip"
                                            data-tip="微博">
                                             <span class="sr-only">微博</span>
@@ -303,8 +304,8 @@
                                         </a>
                                     {{end}}
                                     <!-- 知乎 -->
-                                    {{if .ExternalInformation.Zhihu.Link}}
-                                        <a href="{{.ExternalInformation.Zhihu.Link}}" target="_blank"
+                                    {{if .AuthorUserInfo.ExternalInformation.Zhihu.Link}}
+                                        <a href="{{.AuthorUserInfo.ExternalInformation.Zhihu.Link}}" target="_blank"
                                            class="btn btn-ghost btn-sm btn-square tooltip" data-tip="知乎">
                                             <span class="sr-only">知乎</span>
                                             <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30"
@@ -315,8 +316,8 @@
                                         </a>
                                     {{end}}
                                     <!-- bilibili -->
-                                    {{if .ExternalInformation.Bilibili.Link}}
-                                        <a href="{{.ExternalInformation.Bilibili.Link}}" target="_blank"
+                                    {{if .AuthorUserInfo.ExternalInformation.Bilibili.Link}}
+                                        <a href="{{.AuthorUserInfo.ExternalInformation.Bilibili.Link}}" target="_blank"
                                            class="btn btn-ghost btn-sm btn-square tooltip" data-tip="bilibili">
                                             <span class="sr-only">bilibili</span>
                                             <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30"
@@ -337,11 +338,11 @@
                             </div>
 
                             <div class="card-actions justify-center">
-                                <a href="/user/{{.AuthorId}}" class="btn btn-primary btn-sm btn-block">查看主页</a>
+                                <a href="/user/{{.Article.UserId}}" class="btn btn-primary btn-sm btn-block">查看主页</a>
                                 {{if and .CurrentUserId (not .IsOwnArticle)}}
                                     <button id="follow-btn"
                                             class="btn btn-sm btn-block {{if .IsFollowing}}btn-outline{{else}}btn-secondary{{end}}"
-                                            onclick="toggleFollow({{.AuthorId}})"
+                                            onclick="toggleFollow({{.Article.UserId}})"
                                             data-following="{{.IsFollowing}}">
                                         <span id="follow-text">{{if .IsFollowing}}已关注{{else}}关注作者{{end}}</span>
                                         <span id="follow-loading" class="loading loading-spinner loading-xs" style="display: none;"></span>
@@ -459,7 +460,7 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    articleId: {{.ArticleId}},
+                    articleId: {{.Article.Id}},
                     content: content,
                     replyId: replyId
                 })
@@ -492,7 +493,7 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    id: {{.ArticleId}},
+                    id: {{.Article.Id}},
                     action: action
                 })
             });
@@ -591,7 +592,7 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    id: {{.ArticleId}},
+                    id: {{.Article.Id}},
                     action: action
                 })
             });

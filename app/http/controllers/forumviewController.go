@@ -41,10 +41,7 @@ func Home(c *gin.Context) {
 		Build()
 	viewrender.Render(c, "index.gohtml", map[string]any{
 		"PageMeta":            pageMeta,
-		"CanonicalHref":       component.BuildCanonicalHref(c),
-		"Title":               "GooseForum - 自由漫谈的江湖茶馆",
 		"ArticleCategoryList": hotdataserve.ArticleCategoryLabel(),
-		"Description":         "GooseForum's home",
 		"LatestArticles":      hotdataserve.GetLatestArticleSimpleDto(), // 最新的文章
 		"Stats":               hotdataserve.GetSiteStatisticsData(),
 		"RecommendedArticles": hotdataserve.GetRecommendedArticles(),
@@ -54,7 +51,7 @@ func Home(c *gin.Context) {
 }
 
 func LoginView(c *gin.Context) {
-	viewrender.Render(c, "login-vue.gohtml", map[string]any{
+	viewrender.Render(c, "login.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle("登录/注册").
 			SetCanonicalURL(component.BuildCanonicalHref(c)).
@@ -102,6 +99,9 @@ func PostDetail(c *gin.Context) {
 		avatarUrl = user.GetWebAvatarUrl()
 		authorUserInfo = *user
 	}
+	replyMap := array.Slice2Map(replyEntities, func(item *reply.Entity) uint64 {
+		return item.Id
+	})
 	replyList := array.Map(replyEntities, func(item *reply.Entity) ReplyDto {
 		username := "陶渊明"
 		userAvatarUrl := urlconfig.GetDefaultAvatar()
@@ -113,7 +113,7 @@ func PostDetail(c *gin.Context) {
 		replyToUsername := ""
 		var replyToUserId uint64 = 0
 		if item.ReplyId > 0 {
-			if replyTo := reply.Get(item.ReplyId); replyTo.Id > 0 {
+			if replyTo, ok := replyMap[item.ReplyId]; ok {
 				if replyUser, ok := userMap[replyTo.UserId]; ok {
 					replyToUsername = replyUser.Username
 					replyToUserId = replyTo.UserId
@@ -182,35 +182,21 @@ func PostDetail(c *gin.Context) {
 			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			SetSchemaOrg(generateArticleJSONLD(c, entity, author)).
 			Build(),
-		"ArticleId":            id,
-		"AuthorId":             authorId,
-		"Title":                entity.Title + " - GooseForum",
-		"Description":          entity.Description,
-		"OgType":               "article",
-		"Year":                 time.Now().Year(),
-		"ArticleTitle":         entity.Title,
-		"ArticleContent":       template.HTML(entity.RenderedHTML),
-		"LikeCount":            entity.LikeCount,
-		"ViewCount":            entity.ViewCount,
-		"CreateTime":           entity.CreatedAt.Format(time.DateTime),
-		"ILike":                iLike,
+
+		"Article":              entity,
 		"Username":             author,
 		"CommentList":          replyList,
 		"AvatarUrl":            avatarUrl,
-		"CanonicalHref":        component.BuildCanonicalHref(c),
 		"AuthorArticles":       authorArticles,
 		"ArticleCategory":      articleCategory,
-		"Keywords":             strings.Join(articleCategory, ","),
-		"Website":              authorUserInfo.Website,
-		"WebsiteName":          authorUserInfo.WebsiteName,
-		"ExternalInformation":  authorUserInfo.ExternalInformation,
-		"Bio":                  authorUserInfo.Bio,
-		"Signature":            authorUserInfo.Signature,
+		"AuthorUserInfo":       authorUserInfo,
 		"AuthorInfoStatistics": authorInfoStatistics,
-		"IsFollowing":          isFollowing,
-		"IsOwnArticle":         currentUserId == entity.UserId,
-		"ArticleCategoryList":  hotdataserve.ArticleCategoryLabel(),
-		"IsBookmarked":         isBookmarked,
+
+		"IsOwnArticle":        currentUserId == entity.UserId,
+		"ArticleCategoryList": hotdataserve.ArticleCategoryLabel(),
+		"ILike":               iLike,
+		"IsFollowing":         isFollowing,
+		"IsBookmarked":        isBookmarked,
 	})
 	articles.IncrementView(entity)
 }
@@ -323,9 +309,9 @@ func Post(c *gin.Context) {
 		pagination = append(pagination, PageButton{Index: i, Page: start})
 		start += 1
 	}
-
-	title := "GooseForum - 自由漫谈的江湖茶馆"
-	description := "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆"
+	defaultForumInfo := GetGooseForumInfo()
+	title := defaultForumInfo.Title
+	description := defaultForumInfo.Desc
 	if len(categories) == 1 {
 		if category, ok := categoryMap[cast.ToUint64(categories[0])]; ok {
 			forumInfo.Independence = true

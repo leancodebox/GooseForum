@@ -56,7 +56,7 @@
         <span class="font-medium">{{ item.title }}</span>
         <code class="text-xs bg-base-200 px-1 rounded">{{ item.slug }}</code>
         <span v-if="item.description" class="text-sm text-base-content/60">{{ item.description }}</span>
-        
+
         <!-- 操作按钮 -->
         <div class="ml-auto flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button class="btn btn-xs btn-ghost" @click="startEdit" title="编辑">
@@ -142,7 +142,7 @@ function startEdit() {
   editData.slug = props.item.slug
   editData.description = props.item.description
   isEditing.value = true
-  
+
   nextTick(() => {
     titleInput.value?.focus()
   })
@@ -153,7 +153,7 @@ function saveEdit() {
   if (!editData.title.trim()) {
     return
   }
-  
+
   // 如果slug为空，自动生成
   if (!editData.slug.trim()) {
     editData.slug = editData.title.toLowerCase()
@@ -161,13 +161,13 @@ function saveEdit() {
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '')
   }
-  
+
   emit('update', props.item.id, {
     title: editData.title.trim(),
     slug: editData.slug.trim(),
     description: editData.description.trim()
   })
-  
+
   isEditing.value = false
 }
 
@@ -190,7 +190,5 @@ function deleteItem() {
 </script>
 
 <style scoped>
-.directory-tree-item {
-  @apply select-none;
-}
+
 </style>

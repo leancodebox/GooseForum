@@ -7,6 +7,7 @@ import (
 	"html/template"
 
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
 //go:embed activation-email.gohtml
@@ -28,6 +29,7 @@ func generateActivationEmailBody(username, token string) (string, error) {
 	}
 	var buf bytes.Buffer
 	err := emailTmpl.Execute(&buf, map[string]any{
+		"SiteName": hotdataserve.GetSiteSettingsConfigCache().SiteName,
 		"Username": username,
 		"ActivationLink": fmt.Sprintf("%s/api/activate?token=%s",
 			preferences.GetString("server.url"), token),

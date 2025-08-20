@@ -5,7 +5,6 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	"github.com/meilisearch/meilisearch-go"
-	"github.com/spf13/cast"
 )
 
 // SearchRequest 搜索请求结构
@@ -64,16 +63,10 @@ func SearchArticles(req SearchRequest) (*SearchResponse, error) {
 	// 直接从搜索结果中提取ID和标题
 	results := make([]SearchResult, 0, len(searchResp.Hits))
 	for _, hit := range searchResp.Hits {
-		if hitMap, ok := hit.(map[string]interface{}); ok {
-			id := cast.ToUint64(hitMap["id"])
-			title := cast.ToString(hitMap["title"])
-
-			if id > 0 {
-				results = append(results, SearchResult{
-					ID:    id,
-					Title: title,
-				})
-			}
+		itemResult := SearchResult{}
+		hit.Decode(&itemResult)
+		if itemResult.ID > 0 {
+			results = append(results, itemResult)
 		}
 	}
 

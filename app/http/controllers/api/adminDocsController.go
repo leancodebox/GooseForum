@@ -4,17 +4,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-
-	"github.com/spf13/cast"
-
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/docs/docContents"
 	"github.com/leancodebox/GooseForum/app/models/docs/docProjects"
 	"github.com/leancodebox/GooseForum/app/models/docs/docVersions"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
+	"github.com/spf13/cast"
 )
 
 // DocsProjectListReq 项目列表请求

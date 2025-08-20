@@ -11,13 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
+	"github.com/leancodebox/GooseForum/app/bundles/sessionstore"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 
-	"github.com/gorilla/sessions"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -35,16 +34,10 @@ const (
 	ProviderTwitter  = "twitter"
 )
 
-var store *sessions.CookieStore
-
 // InitOAuth 初始化OAuth配置
 func InitOAuth() {
-	// 初始化session store
-	secretKey := preferences.GetString("app.signingKey", algorithm.SafeGenerateSigningKey(32))
-	store = sessions.NewCookieStore([]byte(secretKey))
-
 	// 设置goth的session store
-	gothic.Store = store
+	gothic.Store = sessionstore.GetSession()
 
 	// 初始化所有配置的OAuth提供商
 	var providers []goth.Provider
@@ -337,11 +330,6 @@ func GetUserOAuthBindings(userID uint64) map[string]*userOAuth.Entity {
 	return bindings
 }
 
-// GetSessionStore 获取session store
-func GetSessionStore() *sessions.CookieStore {
-	return store
-}
-
 // downloadAndSaveAvatar 下载外部头像并保存到本地
 func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 	if avatarURL == "" {
@@ -370,8 +358,8 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 		return "", fmt.Errorf("下载头像失败，状态码: %d", resp.StatusCode)
 	}
 
-	// 限制文件大小（最大5MB）
-	const maxFileSize = 2 * 1024 * 1024 // 5MB
+	// 限制文件大小（最大2MB）
+	const maxFileSize = 2 * 1024 * 1024 // 2MB
 	limitedReader := io.LimitReader(resp.Body, maxFileSize+1)
 
 	// 读取头像数据
@@ -382,7 +370,7 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 
 	// 检查文件大小是否超过限制
 	if len(avatarData) > maxFileSize {
-		return "", fmt.Errorf("头像文件过大，最大允许5MB")
+		return "", fmt.Errorf("头像文件过大，最大允许2MB")
 	}
 
 	// 从URL中提取文件扩展名

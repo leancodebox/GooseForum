@@ -43,11 +43,7 @@ axiosInstance.interceptors.response.use(
       if (data.code === 0) {
         return data
       } else {
-        // 业务错误
-        const error = new Error(data.msg || '请求失败') as any
-        error.code = data.code
-        error.response = response
-        return Promise.reject(error)
+          throw new Error(data?.msg??'请求异常')
       }
     }
     return data

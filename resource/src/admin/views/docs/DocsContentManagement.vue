@@ -740,26 +740,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.prose {
-  color: hsl(var(--bc));
-}
-
-.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-  color: hsl(var(--bc));
-}
-
-.prose code {
-  background-color: hsl(var(--b2));
-  color: hsl(var(--bc));
-}
-
-.prose pre {
-  background-color: hsl(var(--b2));
-  color: hsl(var(--bc));
-}
-
-.prose blockquote {
-  border-left-color: hsl(var(--p));
-  color: hsl(var(--bc) / 0.8);
-}
 </style>

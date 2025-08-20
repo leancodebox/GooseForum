@@ -25,11 +25,7 @@ func Std() *JWT {
 }
 
 func CreateNewTokenDefault(userId uint64) (string, error) {
-	cc := CustomClaims{
-		UserId:           userId,
-		RegisteredClaims: GetBaseRegisteredClaims(validTime),
-	}
-	return Std().CreateToken(cc)
+	return CreateNewToken(userId, validTime)
 }
 
 func CreateNewToken(userId uint64, expireTime time.Duration) (string, error) {

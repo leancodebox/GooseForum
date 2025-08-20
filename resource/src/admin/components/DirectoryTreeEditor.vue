@@ -12,12 +12,12 @@
     </div>
 
     <!-- 树形结构 -->
-    <div class="border border-base-300 rounded-lg p-4 bg-base-50 min-h-[300px]">
+    <div class="border border-base-300 rounded-lg p-4 bg-base-200 min-h-[300px]">
       <div v-if="treeData.length === 0" class="text-center text-base-content/50 py-8">
         <FolderIcon class="w-12 h-12 mx-auto mb-2 opacity-50"/>
         <p>暂无目录结构，点击"添加根目录"开始创建</p>
       </div>
-      
+
       <draggable
         v-model="treeData"
         group="directory"
@@ -232,11 +232,5 @@ function copyToClipboard() {
 </script>
 
 <style scoped>
-.directory-tree-editor {
-  @apply w-full;
-}
 
-.bg-base-50 {
-  background-color: rgb(248 250 252);
-}
 </style>

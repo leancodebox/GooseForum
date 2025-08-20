@@ -44,10 +44,11 @@ func BuildSingleArticleSearchDocument(article *articles.Entity) (*meilisearch.Ta
 	index := client.Index(indexName)
 	var task *meilisearch.TaskInfo
 	var err error
+	pk := "id"
 	// 只索引已发布且正常状态的文章
 	if article.ArticleStatus == 1 && article.ProcessStatus == 0 {
 		doc := convertToSearchDocument(article)
-		task, err = index.AddDocuments(doc, "id")
+		task, err = index.AddDocuments(doc, &pk)
 		slog.Info(fmt.Sprintf("处理文章 ID:%v, TaskUID: %v, Error: %v\n", doc.ID, getTaskUID(task), err))
 	} else {
 		// 删除不符合条件的文章
@@ -135,7 +136,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 	}
 
 	// 设置可过滤字段
-	filterableAttributes := []string{
+	filterableAttributes := []any{
 		"type",
 		"userId",
 		"category",
