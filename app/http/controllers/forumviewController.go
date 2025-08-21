@@ -251,7 +251,7 @@ func Post(c *gin.Context) {
 	}), func(i int) bool {
 		return i > 0
 	})
-	page := cast.ToInt(c.DefaultQuery("page", "1"))
+	page := min(60, cast.ToInt(c.DefaultQuery("page", "1")))
 	pageSize := cast.ToInt(c.DefaultQuery("pageSize", "20"))
 	var forumInfo ForumInfo = GetGooseForumInfo()
 	pageData := articles.Page[articles.SmallEntity](
@@ -329,7 +329,6 @@ func Post(c *gin.Context) {
 			SetDescription(description).
 			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
-		"Year":                time.Now().Year(),
 		"ArticleList":         articleList,
 		"Page":                pageData.Page,
 		"PageSize":            pageSize,

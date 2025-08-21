@@ -75,7 +75,7 @@ goreleaser build --snapshot --clean --single-target
 
 
 
-3. 访问 `http://localhost:99` 开始使用
+3. 访问 `http://localhost:5234` 开始使用
 
 > 💡 **提示**: 首次启动后，第一个注册的账号将自动成为管理员
 
@@ -113,7 +113,7 @@ GooseForum 启动时会自动创建 `config.toml` 配置文件，主要配置项
 
 ```toml
 [server]
-port = 99                    # 服务端口
+port = 5234                    # 服务端口
 url = "http://localhost"     # 站点URL
 
 [db.default]

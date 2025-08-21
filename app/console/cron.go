@@ -2,6 +2,7 @@ package console
 
 import (
 	"log/slog"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
@@ -32,7 +33,13 @@ func StopJob() {
 		return
 	}
 	ctx := c.Stop()
-	<-ctx.Done()
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(10 * time.Second):
+		slog.Error("timed out waiting for job to stop")
+		return
+	}
 }
 
 func upCmd(cmd func()) func() {

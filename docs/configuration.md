@@ -35,12 +35,12 @@ maintenance = false             # 维护模式，开启后显示维护页面
 ```toml
 [server]
 url = "http://localhost"        # 站点基础URL
-port = 99                       # 监听端口
+port = 5234                       # 监听端口
 ```
 
 **配置说明：**
 - `url`: 影响 RSS、Sitemap 等功能返回的 URL 地址
-- `port`: 服务监听端口，默认 99
+- `port`: 服务监听端口，默认 5234
 
 ### [jwtopt] JWT 认证配置
 

@@ -38,25 +38,26 @@ func runWeb(_ *cobra.Command, _ []string) {
 	slog.Info(fmt.Sprintf("GooseForum:useMem %d KB", m.Alloc/1024/8))
 
 	if setting.IsDebug() {
-		go func() {
-			// go tool pprof http://localhost:7071/debug/pprof/profile
-			// go tool pprof -http=:9001 http://localhost:7071/debug/pprof/heap
-			// http://127.0.0.1:7071/debug/pprof/
-			err := http.ListenAndServe("0.0.0.0:7071", nil)
-			if err != nil {
-				slog.Error("debug listen ", "err", err)
-			}
-		}()
+		go pprofServe()
 	}
 
 	// 启动主服务
 	ginServe()
 }
 
+func pprofServe() {
+	// go tool pprof http://localhost:19070/debug/pprof/profile
+	// go tool pprof -http=:9001 http://localhost:19070/debug/pprof/heap
+	// http://127.0.0.1:19070/debug/pprof/
+	err := http.ListenAndServe("127.0.0.1:19070", nil)
+	if err != nil {
+		slog.Error("debug listen ", "err", err)
+	}
+}
+
 func ginServe() {
 	// 初始化OAuth配置
 	oauthservice.InitOAuth()
-
 	defer userservice.CloseUpdateUserLastActiveTime()
 	RunJob()
 	defer StopJob()
@@ -73,9 +74,13 @@ func ginServe() {
 	}
 
 	routes.RegisterByGin(engine)
-
+	host := ``
+	if setting.IsLocal() {
+		host = `127.0.0.1`
+	}
+	address := fmt.Sprintf("%v:%v", host, port)
 	srv := &http.Server{
-		Addr:           ":" + port,
+		Addr:           address,
 		Handler:        engine,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
@@ -87,6 +92,7 @@ func ginServe() {
 	go func() {
 		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("http serve ", "err", err)
+			fmt.Println("http serve ", "err", err)
 			quit <- os.Interrupt
 		}
 	}()

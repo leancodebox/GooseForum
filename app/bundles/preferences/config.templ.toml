@@ -1,13 +1,19 @@
 [app]
-name = "app"
-env = "production" # APP_ENV in local,production
+# 运行环境配置 (local/production/staging等)
+# 当设置为 'local' 时会自动绑定到 127.0.0.1，其他值则监听所有接口
+env = "production"
+# 调试模式开关
+# local 环境下建议设为 true，生产环境建议设为 false
 debug = false
+# 维护模式开关
+# 为 true 时所有请求返回503维护页面
 maintenance = false
+# 安全签名密钥
 signingKey = "{{.SigningKey}}"
 
 [server]
 url = "http://localhost"
-port = 99
+port = 5234
 
 [jwtopt]
 validTime = 604800
@@ -53,4 +59,6 @@ maxBackUps = 30 # 最大保留文件数量
 [github]
 client_id = ""
 client_secret = ""
+
+# end #
 

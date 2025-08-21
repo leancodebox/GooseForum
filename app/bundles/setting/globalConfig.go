@@ -17,6 +17,10 @@ func IsProduction() bool {
 	return preferences.Get("app.env", "production") == "production"
 }
 
+func IsLocal() bool {
+	return preferences.Get("app.env", "production") == "local"
+}
+
 func IsDebug() bool {
 	return preferences.GetBool("app.debug", true)
 }
