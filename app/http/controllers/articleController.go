@@ -254,7 +254,6 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				Username:       "", // 这里不需要用户名，因为是自己的文章
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,
-				Category:       array.FirstOr(categoryNames, "未分类"),
 				Categories:     categoryNames,
 				TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
 			}
@@ -319,7 +318,6 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 			AuthorId:       t.UserId,
 			ViewCount:      t.ViewCount,
 			CommentCount:   t.ReplyCount,
-			Category:       array.FirstOr(categoryNames, "未分类"),
 			Categories:     categoryNames,
 			TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
 		}

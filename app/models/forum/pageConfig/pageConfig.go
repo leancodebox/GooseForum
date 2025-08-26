@@ -60,6 +60,7 @@ type LinkItem struct {
 	Desc    string `json:"desc"`
 	Url     string `json:"url"`
 	LogoUrl string `json:"logoUrl"`
+	Status  int    `json:"status"`
 }
 
 type FriendLinksGroup struct {

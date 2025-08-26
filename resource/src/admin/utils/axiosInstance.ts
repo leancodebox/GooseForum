@@ -75,8 +75,8 @@ axiosInstance.interceptors.response.use(
       }
 
       // 如果后端返回了错误信息，使用后端的错误信息
-      if (data && typeof data === 'object' && 'message' in data) {
-        error.message = (data as any).message
+      if (data && typeof data === 'object' && 'msg' in data) {
+        error.message = (data as any).msg
       }
     } else if (error.request) {
       // 网络错误

@@ -158,7 +158,6 @@ func ArticlesSmallEntityWithUser2Dto(data []articles.SmallEntity, userMap map[ui
 			AvatarUrl:      avatarUrl,
 			ViewCount:      t.ViewCount,
 			CommentCount:   t.ReplyCount,
-			Category:       array.FirstOr(categoryNames, "未分类"),
 			Categories:     categoryNames,
 			CategoriesId:   t.CategoryId,
 			Type:           t.Type,

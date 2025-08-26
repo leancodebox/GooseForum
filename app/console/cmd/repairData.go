@@ -14,49 +14,26 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	cmd := &cobra.Command{
-		Use:   "checkAndRepairData",
-		Short: "检查和修复数据",
-		Run:   runCheckAndRepairData,
+		Use:   "repairData",
+		Short: "数据修复",
+		Run:   repairData,
 		// Args:  cobra.ExactArgs(1), // 只允许且必须传 1 个参数
 	}
-	cmd.Flags().BoolP("meilisearch", "m", false, "构建 Meilisearch 文章索引")
-	cmd.Flags().BoolP("repair", "r", false, "修复用户和文章数据")
 	appendCommand(cmd)
 }
 
-func runCheckAndRepairData(cmd *cobra.Command, args []string) {
-	meilisearchFlag, _ := cmd.Flags().GetBool("meilisearch")
-	repairFlag, _ := cmd.Flags().GetBool("repair")
+func repairData(cmd *cobra.Command, args []string) {
 
-	// 如果没有指定任何标志，默认执行修复操作
-	if !meilisearchFlag && !repairFlag {
-		repairFlag = true
-	}
-
-	if meilisearchFlag {
-		fmt.Println("=== 开始构建 Meilisearch 索引 ===")
-		result, err := searchservice.BuildMeilisearchIndex()
-		if err != nil {
-			fmt.Printf("构建索引失败: %v\n", err)
-		} else {
-			fmt.Printf("索引构建成功: 处理了 %d 篇文章\n", result.ProcessedCount)
-		}
-		fmt.Println("=== Meilisearch 索引构建完成 ===")
-	}
-
-	if repairFlag {
-		fmt.Println("=== 开始数据修复 ===")
-		repairUserData()
-		repairArticleDescriptions()
-		fmt.Println("=== 数据修复完成 ===")
-	}
+	fmt.Println("=== 开始数据修复 ===")
+	repairUserData()
+	repairArticleDescriptions()
+	fmt.Println("=== 数据修复完成 ===")
 }
 
 // repairUserData 修复用户数据

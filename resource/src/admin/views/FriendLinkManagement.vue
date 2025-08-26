@@ -47,12 +47,13 @@ const loadFriendLinks = async () => {
 const saveFriendLinksData = async () => {
   saving.value = true
   try {
+    console.log(friendLinksGroups.value)
     const response = await saveFriendLinks(friendLinksGroups.value)
     if (response.code === 0) {
       // 显示成功提示
       alert('保存成功！')
     } else {
-      alert('保存失败：' + response.message)
+      alert('保存失败：' + response.msg)
     }
   } catch (error) {
     console.error('保存友情链接失败:', error)
@@ -264,45 +265,58 @@ onMounted(() => {
               >
                 <template #item="{ element: link, index: linkIndex }">
                   <div class="group relative">
-                    <!-- 悬停时显示的操作按钮 -->
-                    <div
-                        class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex gap-1">
-                      <button
-                          class="btn btn-xs btn-ghost bg-base-100/80 backdrop-blur-sm"
-                          @click="openEditLinkModal(groupIndex, linkIndex)"
-                          title="编辑"
-                      >
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                      </button>
-                      <button
-                          class="btn btn-xs btn-error bg-base-100/80 backdrop-blur-sm"
-                          @click="deleteLink(groupIndex, linkIndex)"
-                          title="删除"
-                      >
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                      </button>
-                    </div>
+                    <!-- 顶部操作栏 -->
+                    <div class="absolute top-1 left-1 right-1 flex justify-between items-center z-10">
+                      <!-- 左侧：拖拽手柄和状态切换 -->
+                      <div class="flex items-center gap-1">
+                        <div class="cursor-move text-base-content/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center w-4 h-4">
+                          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
+                          </svg>
+                        </div>
+                        <div class="form-control">
+                          <label class="cursor-pointer">
+                            <input
+                                type="checkbox"
+                                class="toggle toggle-xs toggle-success"
+                                :checked="link.status === 1"
+                                @change="toggleLinkStatus(groupIndex, linkIndex)"
+                            >
+                          </label>
+                        </div>
+                      </div>
 
-                    <!-- 拖拽手柄 -->
-                    <div
-                        class="absolute top-1 left-1 cursor-move text-base-content/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
-                      </svg>
+                      <!-- 右侧：编辑和删除按钮 -->
+                      <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                            class="btn btn-xs btn-ghost bg-base-100/80 backdrop-blur-sm"
+                            @click="openEditLinkModal(groupIndex, linkIndex)"
+                            title="编辑"
+                        >
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                          </svg>
+                        </button>
+                        <button
+                            class="btn btn-xs btn-error bg-base-100/80 backdrop-blur-sm"
+                            @click="deleteLink(groupIndex, linkIndex)"
+                            title="删除"
+                        >
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
 
 
                     <!-- 链接内容 -->
                     <div
-                        class="bg-base-100 hover:bg-base-200 transition-colors rounded-lg p-3 border border-base-300 hover:border-primary/30">
-                      <div class="flex flex-col items-center text-center space-y-2">
+                        class="bg-base-100 hover:bg-base-200 transition-colors rounded-lg p-3 border border-base-300 hover:border-primary/30 h-32">
+                      <div class="flex flex-col items-center text-center space-y-2 h-full justify-center">
                         <img
                             v-if="link.logoUrl"
                             :src="link.logoUrl"
@@ -324,17 +338,6 @@ onMounted(() => {
                             {{ link.desc }}</p>
                         </div>
 
-                        <!-- 状态切换 -->
-                        <div class="form-control">
-                          <label class="cursor-pointer">
-                            <input
-                                type="checkbox"
-                                class="toggle toggle-xs toggle-success"
-                                :checked="link.status === 1"
-                                @change="toggleLinkStatus(groupIndex, linkIndex)"
-                            >
-                          </label>
-                        </div>
                       </div>
                     </div>
                   </div>

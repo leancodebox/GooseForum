@@ -224,13 +224,6 @@ CMD ["./GooseForum", "serve"]
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 创建 Pull Request
 
-## 📋 开发计划
-
-- [ ] 多语言支持
-- [ ] 私信功能
-- [ ] 更多主题选择
-- [ ] 插件系统
-- [ ] API 文档
 
 ## 📄 许可证
 

@@ -290,7 +290,6 @@ func Post(c *gin.Context) {
 			AvatarUrl:      avatarUrl,
 			ViewCount:      t.ViewCount,
 			CommentCount:   t.ReplyCount,
-			Category:       array.FirstOr(categoryNames, "未分类"),
 			Categories:     categoryNames,
 			CategoriesId:   t.CategoryId,
 			Type:           t.Type,
@@ -552,8 +551,8 @@ func Profile(c *gin.Context) {
 			Build(),
 	})
 }
-func PublishV3(c *gin.Context) {
-	viewrender.Render(c, "publish-v3.gohtml", map[string]any{
+func Publish(c *gin.Context) {
+	viewrender.Render(c, "publish.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`发布中心`).
 			SetCanonicalURL(component.BuildCanonicalHref(c)).

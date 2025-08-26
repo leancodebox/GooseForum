@@ -12,7 +12,6 @@ type ArticlesSimpleDto struct {
 	CommentCount   uint64   `json:"commentCount"`
 	Type           int8     `json:"type,omitempty"`
 	TypeStr        string   `json:"typeStr,omitempty"`
-	Category       string   `json:"category,omitempty"`
 	Categories     []string `json:"categories,omitempty"`
 	CategoriesId   []uint64 `json:"categoriesId,omitempty"`
 	AvatarUrl      string   `json:"avatarUrl,omitempty"`

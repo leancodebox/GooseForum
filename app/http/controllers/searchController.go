@@ -107,7 +107,6 @@ func SearchPage(c *gin.Context) {
 		// 执行搜索
 		result, err := searchservice.SearchArticles(searchReq)
 		if err == nil {
-
 			templateData["SearchResponse"] = result
 			ids := array.Map(result.Results, func(t searchservice.SearchResult) uint64 {
 				return t.ID
@@ -117,9 +116,7 @@ func SearchPage(c *gin.Context) {
 				return t.UserId
 			})
 			userMap := users.GetMapByIds(userIds)
-
 			categoryMap := hotdataserve.ArticleCategoryMap()
-
 			articleList := array.Map(articleEntityList, func(t *articles.SmallEntity) vo.ArticlesSimpleDto {
 				categoryNames := array.Map(t.CategoryId, func(item uint64) string {
 					if category, ok := categoryMap[item]; ok {
@@ -142,7 +139,6 @@ func SearchPage(c *gin.Context) {
 					AvatarUrl:      avatarUrl,
 					ViewCount:      t.ViewCount,
 					CommentCount:   t.ReplyCount,
-					Category:       array.FirstOr(categoryNames, "未分类"),
 					Categories:     categoryNames,
 					CategoriesId:   t.CategoryId,
 					Type:           t.Type,
@@ -154,17 +150,10 @@ func SearchPage(c *gin.Context) {
 			// 计算分页信息
 			totalPages := int(math.Ceil(float64(result.Total) / float64(pageSize)))
 			templateData["TotalPages"] = totalPages
-
 			// 生成页码列表（显示当前页前后2页）
 			var pageNumbers []int
-			start := page - 2
-			if start < 1 {
-				start = 1
-			}
-			end := page + 2
-			if end > totalPages {
-				end = totalPages
-			}
+			start := max(page-2, 1)
+			end := min(page+2, totalPages)
 			for i := start; i <= end; i++ {
 				pageNumbers = append(pageNumbers, i)
 			}

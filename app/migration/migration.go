@@ -109,6 +109,7 @@ func initData() {
 		Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
 		Url:     "https://gooseforum.online",
 		LogoUrl: "/static/pic/default-avatar.webp",
+		Status:  1,
 	}
 	res := []pageConfig.FriendLinksGroup{
 		{

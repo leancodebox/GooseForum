@@ -51,7 +51,7 @@ func FileUploadRateLimit(maxUploads int, window time.Duration) gin.HandlerFunc {
 			return
 		}
 		// 检查用户注册时间是否超过3天
-		isEligible, err := checkUserRegistrationTime(userId, 3)
+		isEligible, err := checkUserRegistrationTime(userId, 2)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, component.FailData("获取用户信息失败"))
 			c.Abort()
@@ -59,7 +59,7 @@ func FileUploadRateLimit(maxUploads int, window time.Duration) gin.HandlerFunc {
 		}
 
 		if !isEligible {
-			c.JSON(http.StatusForbidden, component.FailData("注册未满3天的用户暂时无法上传图片"))
+			c.JSON(http.StatusForbidden, component.FailData("未验证用户&注册未满2天暂时无法上传图片"))
 			c.Abort()
 			return
 		}
