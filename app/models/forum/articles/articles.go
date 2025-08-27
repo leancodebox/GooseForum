@@ -56,7 +56,7 @@ type Entity struct {
 	ProcessStatus   int8           `gorm:"column:process_status;type:tinyint;not null;default:0;index:idx_user_status;index:idx_updated_at_status;" json:"processStatus"` // 管理状态：0 正常 1 封禁
 	LikeCount       uint64         `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`                                                   // 喜欢数量
 	ViewCount       uint64         `gorm:"column:view_count;index;type:bigint unsigned;not null;default:0;" json:"viewCount"`                                             // 访问数量
-	ReplyCount      uint64         `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"`                                                 // 评论数量
+	ReplyCount      uint64         `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;index;" json:"replyCount"`                                           // 评论数量
 	CreatedAt       time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                                                                  //
 	UpdatedAt       time.Time      `gorm:"column:updated_at;autoUpdateTime;index:idx_updated_at_status,priority:1;" json:"updatedAt"`
 	DeletedAt       gorm.DeletedAt //
