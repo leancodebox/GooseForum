@@ -73,7 +73,7 @@ var (
 		data: make(map[string]captchaInfo),
 	}
 	customCaptchaStore = &customStore{store}
-	captchaExpiration  = time.Minute * 5 // 验证码5分钟过期
+	captchaExpiration  = time.Minute * 3 // 验证码3分钟过期
 )
 
 // 定期清理过期验证码

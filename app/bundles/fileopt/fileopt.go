@@ -45,14 +45,8 @@ func FilePutContents[DType string | []byte](filename string, data DType, isAppen
 }
 
 func IsExist(path string) bool {
-	_, err := os.Stat(path) //os.Stat获取文件信息
-	if err == nil {
-		return true
-	}
-	if os.IsExist(err) {
-		return true
-	}
-	return false
+	_, err := os.Stat(path)
+	return err == nil
 }
 
 func IsExistOrCreate[T string | []byte](path string, init ...T) error {

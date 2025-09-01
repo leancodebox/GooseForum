@@ -74,7 +74,7 @@ func GetRecommendedArticles() []articles.SmallEntity {
 		func() ([]articles.SmallEntity, error) {
 			return articles.GetRecommendedArticles(4)
 		},
-		5*time.Minute, // 缓存5分钟
+		5*time.Minute,
 	)
 	return data
 }
@@ -86,7 +86,7 @@ func GetLatestArticles() []articles.SmallEntity {
 			return articles.GetLatestArticles(20)
 
 		},
-		10*time.Second, // 缓存5s
+		10*time.Second,
 	)
 	return data
 }
@@ -98,7 +98,7 @@ func GetArticleCategory() []*articleCategory.Entity {
 			return articleCategory.All(), nil
 
 		},
-		1*time.Minute, // 缓存5分钟
+		1*time.Minute,
 	)
 	return data
 }

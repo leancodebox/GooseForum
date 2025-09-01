@@ -1,7 +1,7 @@
 <div align="center">
   <img src="resource/static/pic/icon_300.webp" width="140"/>
   <h1>GooseForum</h1>
-  <p>🚀 现代化的 Go + Vue 3 + TailwindCSS 论坛系统</p>
+  <p>🚀 Modern Go + Vue 3 + TailwindCSS Forum System</p>
   
   <p>
     <a href="https://github.com/leancodebox/GooseForum/releases"><img src="https://img.shields.io/github/release/leancodebox/GooseForum.svg" alt="GitHub release"></a>
@@ -12,203 +12,204 @@
   </p>
 </div>
 
-## 📖 项目简介
+## 🌐 Language / 语言
 
-GooseForum 是一个现代化的技术交流社区平台，采用 Go + Vue 3 + TailwindCSS 技术栈开发。提供极简的部署方式和丰富的社区功能，专为技术开发者打造的轻量级论坛系统。
+[🇨🇳 中文](README_ZH.md) | [🇺🇸 English](README.md)
 
-🌐 **在线体验**: [GooseForum](https://gooseforum.online/)
+## 📖 Project Overview
 
-## ✨ 核心特性
+GooseForum is a modern technical community platform built with Go + Vue 3 + TailwindCSS technology stack. It provides simple deployment and rich community features, designed as a lightweight forum system specifically for technical developers.
 
-### 🎯 用户体系
-- **用户注册/登录** - 支持邮箱激活
-- **权限管理** - 基于角色的权限控制系统
-- **用户中心** - 个人资料管理、头像上传
-- **积分系统** - 签到、发帖、回复积分奖励
-- **管理后台** - 完整的后台管理功能
+🌐 **Live Demo**: [GooseForum](https://gooseforum.online/)
 
-### 📝 内容管理
-- **文章发布** - 支持 Markdown 编辑器
-- **评论系统** - 多级评论回复
-- **文章分类** - 灵活的分类管理
-- **标签系统** - 文章标签化管理
-- **内容审核** - 管理员内容审核功能
+## ✨ Core Features
 
-### 🛠 技术特性
-- **单文件部署** - 编译后单个可执行文件
-- **SQLite 支持** - 默认使用 SQLite，支持 MySQL
-- **自动备份** - 定时数据库备份
-- **响应式设计** - 完美支持移动端
-- **主题切换** - 支持明暗主题
-- **SEO 友好** - 完整的 SEO 优化
+### 🎯 User System
+- **User Registration/Login** - Email activation support
+- **Permission Management** - Role-based access control system
+- **User Center** - Profile management, avatar upload
+- **Points System** - Check-in, posting, reply point rewards
+- **Admin Panel** - Complete backend management functionality
 
-## 🚀 快速开始
+### 📝 Content Management
+- **Article Publishing** - Markdown editor support
+- **Comment System** - Multi-level comment replies
+- **Article Categories** - Flexible category management
+- **Tag System** - Article tagging management
+- **Content Moderation** - Admin content review functionality
 
-### 方式一：下载预编译版本（推荐）
+### 🛠 Technical Features
+- **Single File Deployment** - Single executable file after compilation
+- **SQLite Support** - Default SQLite, MySQL support
+- **Auto Backup** - Scheduled database backup
+- **Responsive Design** - Perfect mobile support
+- **Theme Switching** - Light/dark theme support
+- **SEO Friendly** - Complete SEO optimization
 
-1. 从 [GitHub Releases](https://github.com/leancodebox/GooseForum/releases) 下载对应系统的预编译版本
-2. 解压并启动：
+## 🚀 Quick Start
+
+### Method 1: Download Pre-compiled Version (Recommended)
+
+1. Download the pre-compiled version for your system from [GitHub Releases](https://github.com/leancodebox/GooseForum/releases)
+2. Extract and start:
 
 ```bash
-# 解压下载的文件
+# Extract the downloaded file
 tar -zxvf GooseForum_Linux_x86_64.tar.gz
 
-# 赋予执行权限
+# Grant execute permission
 chmod +x ./GooseForum
 
-# 启动服务
+# Start service
 ./GooseForum serve
 ```
 
-### 使用 GoReleaser 快速构建
+### Quick Build with GoReleaser
 
 ```bash
-# 安装 GoReleaser
+# Install GoReleaser
 go install github.com/goreleaser/goreleaser@latest
 
-# 构建所有平台
+# Build for all platforms
 goreleaser build --snapshot --clean
 
-# 构建当前平台
+# Build for current platform
 goreleaser build --snapshot --clean --single-target
 ```
 
+3. Visit `http://localhost:5234` to start using
 
+> 💡 **Tip**: After first startup, the first registered account will automatically become an administrator
 
-3. 访问 `http://localhost:5234` 开始使用
+### Method 2: Build from Source
 
-> 💡 **提示**: 首次启动后，第一个注册的账号将自动成为管理员
-
-### 方式二：从源码构建
-
-#### 环境要求
+#### Requirements
 - Go 1.23+
 - Node.js 18+
-- npm 或 yarn
+- npm or yarn
 
-#### 构建步骤
+#### Build Steps
 
 ```bash
-# 克隆项目
+# Clone project
 git clone https://github.com/leancodebox/GooseForum.git
 cd GooseForum
 
-# 构建前端资源
+# Build frontend resources
 cd resource
 npm install
 npm run build
 cd ..
 
-# 构建后端
+# Build backend
 go mod tidy
 go build -ldflags="-w -s" .
 
-# 启动服务
+# Start service
 ./GooseForum serve
 ```
 
-## 🔧 配置说明
+## 🔧 Configuration
 
-GooseForum 启动时会自动创建 `config.toml` 配置文件，主要配置项：
+GooseForum will automatically create a `config.toml` configuration file on startup. Main configuration items:
 
 ```toml
 [server]
-port = 5234                    # 服务端口
-url = "http://localhost"     # 站点URL
+port = 5234                    # Service port
+url = "http://localhost"     # Site URL
 
 [db.default]
-connection = "sqlite"        # 数据库类型 (sqlite/mysql)
-path = "./storage/database/sqlite.db"  # SQLite 数据库路径
-
+connection = "sqlite"        # Database type (sqlite/mysql)
+path = "./storage/database/sqlite.db"  # SQLite database path
 ```
 
-📖 **详细配置说明**: [配置文档](docs/configuration.md)
+📖 **Detailed Configuration**: [Configuration Documentation](docs/configuration.md)
 
-## 🏗 技术架构
+## 🏗 Technical Architecture
 
-### 后端技术栈
-- **Go 1.23+** - 主要开发语言
-- **Gin** - Web 框架
-- **GORM** - ORM 框架
-- **SQLite/MySQL** - 数据库支持
-- **JWT** - 身份认证
-- **Viper** - 配置管理
-- **Cobra** - 命令行工具
+### Backend Tech Stack
+- **Go 1.23+** - Main development language
+- **Gin** - Web framework
+- **GORM** - ORM framework
+- **SQLite/MySQL** - Database support
+- **JWT** - Authentication
+- **Viper** - Configuration management
+- **Cobra** - Command line tool
 
-### 前端技术栈
-- **Vue 3** - 前端框架 (Composition API)
-- **Vite** - 构建工具
-- **TailwindCSS 4** - CSS 框架
-- **DaisyUI** - UI 组件库
-- **TypeScript** - 类型支持
-- **Pinia** - 状态管理
-- **Vue Router** - 路由管理
+### Frontend Tech Stack
+- **Vue 3** - Frontend framework (Composition API)
+- **Vite** - Build tool
+- **TailwindCSS 4** - CSS framework
+- **DaisyUI** - UI component library
+- **TypeScript** - Type support
+- **Pinia** - State management
+- **Vue Router** - Route management
 
-### 开发工具
-- **Air** - 热重载开发
-- **GoReleaser** - 自动化构建发布
-- **Vitest** - 前端测试
+### Development Tools
+- **Air** - Hot reload development
+- **GoReleaser** - Automated build and release
+- **Vitest** - Frontend testing
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 GooseForum/
-├── app/                    # 后端应用代码
-│   ├── bundles/           # 工具包
-│   ├── console/           # 命令行工具
-│   ├── http/              # HTTP 控制器和路由
-│   ├── models/            # 数据模型
-│   └── service/           # 业务服务
-├── resource/              # 前端资源
-│   ├── src/               # Vue 源码
-│   ├── static/            # 静态资源
-│   └── templates/         # Go 模板
-├── docs/                  # 项目文档
-├── main.go               # 程序入口
-└── config.toml           # 配置文件
+├── app/                    # Backend application code
+│   ├── bundles/           # Utility packages
+│   ├── console/           # Command line tools
+│   ├── http/              # HTTP controllers and routes
+│   ├── models/            # Data models
+│   └── service/           # Business services
+├── resource/              # Frontend resources
+│   ├── src/               # Vue source code
+│   ├── static/            # Static assets
+│   └── templates/         # Go templates
+├── docs/                  # Project documentation
+├── main.go               # Program entry point
+└── config.toml           # Configuration file
 ```
 
-## 🛡 管理功能
+## 🛡 Admin Features
 
-### 用户管理
+### User Management
 ```bash
-# 重置管理员密码
+# Reset admin password
 ./GooseForum user:manage
 
-# 设置用户邮箱
+# Set user email
 ./GooseForum user:set-email
 ```
 
-### 数据备份
-- 自动定时备份 SQLite 数据库
-- 可配置备份频率和保留数量
-- 备份文件存储在 `./storage/databasebackup/` 目录
+### Data Backup
+- Automatic scheduled SQLite database backup
+- Configurable backup frequency and retention count
+- Backup files stored in `./storage/databasebackup/` directory
 
-## 🔄 开发模式
+## 🔄 Development Mode
 
 ```bash
-# 安装 Air 热重载工具
+# Install Air hot reload tool
 go install github.com/cosmtrek/air@latest
 
-# 启动开发模式
+# Start development mode
 air
 
-# 前端开发模式
+# Frontend development mode
 cd resource
 npm run dev
 ```
 
-## 📦 部署建议
+## 📦 Deployment Recommendations
 
-### 生产环境部署
-1. 使用反向代理 (Nginx/Apache)
-2. 配置 HTTPS 证书
-3. 设置定时备份
-4. 监控日志文件
+### Production Environment Deployment
+1. Use reverse proxy (Nginx/Apache)
+2. Configure HTTPS certificates
+3. Set up scheduled backups
+4. Monitor log files
 
-### Docker 部署
+### Docker Deployment
 ```dockerfile
-# Dockerfile 示例
+# Dockerfile example
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
@@ -216,30 +217,29 @@ COPY GooseForum .
 CMD ["./GooseForum", "serve"]
 ```
 
-## 🤝 贡献指南
+## 🤝 Contributing
 
-1. Fork 本项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
+1. Fork this project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Create a Pull Request
 
+## 📄 License
 
-## 📄 许可证
+This project is open source under the [MIT License](LICENSE).
 
-本项目基于 [MIT License](LICENSE) 开源协议。
+## 📚 Related Documentation
 
-## 📚 相关文档
+- [Configuration Documentation](docs/configuration.md) - Detailed configuration options
 
-- [配置文档](docs/configuration.md) - 详细的配置选项说明
+## 🙏 Acknowledgments
 
-## 🙏 致谢
-
-感谢所有为 GooseForum 项目做出贡献的开发者！
+Thanks to all developers who have contributed to the GooseForum project!
 
 ---
 
 <div align="center">
-  <p>如果这个项目对你有帮助，请给我们一个 ⭐️</p>
+  <p>If this project helps you, please give us a ⭐️</p>
   <p>Made with ❤️ by <a href="https://github.com/leancodebox">LeanCodeBox</a></p>
 </div>
