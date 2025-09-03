@@ -2,6 +2,14 @@
 import {computed, onMounted, ref} from 'vue'
 import {markAllAsRead as markAllAsReadReq, markAsReadById, queryNotificationList} from "@/utils/gooseForumService.ts";
 import type {Notifications} from "@/utils/gooseForumInterfaces.ts";
+import {
+  ChatBubbleLeftRightIcon,
+  HeartIcon,
+  UserIcon,
+  InformationCircleIcon,
+  EllipsisVerticalIcon,
+  ChevronDownIcon
+} from '@heroicons/vue/24/outline'
 
 const notificationList = ref<Notifications[]>([])
 
@@ -97,20 +105,6 @@ const setFilter = (filterKey) => {
   }
 }
 
-const formatTime = (time) => {
-  const now = new Date()
-  const diff = now - time
-  const minutes = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days = Math.floor(diff / 86400000)
-
-  if (minutes < 1) return '刚刚'
-  if (minutes < 60) return `${minutes}分钟前`
-  if (hours < 24) return `${hours}小时前`
-  if (days < 7) return `${days}天前`
-
-  return time.toLocaleDateString('zh-CN')
-}
 
 const formatDateStr = (timeStr: string) => {
   const time = new Date(timeStr);
@@ -120,12 +114,16 @@ const formatDateStr = (timeStr: string) => {
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
 
-  if (minutes < 1) return '刚刚'
-  if (minutes < 60) return `${minutes}分钟前`
-  if (hours < 24) return `${hours}小时前`
-  if (days < 7) return `${days}天前`
+  if (minutes < 1) return '刚刚　　'
+  if (minutes < 60) return `${minutes.toString().padStart(2, '0')}分钟前`
+  if (hours < 24) return `${hours.toString().padStart(2, '0')}小时前`
+  if (days < 7) return `${days.toString().padStart(2, '0')}天前　`
 
-  return time.toLocaleDateString('zh-CN')
+  // 对于日期格式，确保固定长度
+  const year = time.getFullYear()
+  const month = (time.getMonth() + 1).toString().padStart(2, '0')
+  const day = time.getDate().toString().padStart(2, '0')
+  return `${year}/${month}/${day}`
 }
 
 const getTypeLabel = (type) => {
@@ -198,80 +196,55 @@ const getEmptyMessage = () => {
         <li
             v-for="notification in notificationList"
             :key="notification.id"
-            class="w-full hover:bg-base-300 transition-colors"
+            class="w-full hover:bg-base-300 transition-colors border-l-4"
             :class="{
-            'bg-primary/10 border-l-4 border-l-primary': !notification.isRead
+            'bg-primary/10 border-l-primary': !notification.isRead,
+            'border-l-transparent': notification.isRead
           }"
         >
           <div class="flex items-center gap-3 p-3 cursor-pointer w-full">
             <!-- 消息图标 -->
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 rounded-full bg-neutral text-neutral-content flex items-center justify-center">
-                <svg v-if="notification.eventType === 'comment'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                </svg>
-                <svg v-else-if="notification.eventType === 'like'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                </svg>
-                <svg v-else-if="notification.eventType === 'follow'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+              <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                <ChatBubbleLeftRightIcon v-if="notification.eventType === 'comment'" class="h-4 w-4" />
+                <HeartIcon v-else-if="notification.eventType === 'like'" class="h-4 w-4" />
+                <UserIcon v-else-if="notification.eventType === 'follow'" class="h-4 w-4" />
+                <InformationCircleIcon v-else class="h-4 w-4" />
               </div>
             </div>
             <!-- 消息内容 -->
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between">
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2">
-                    <h4 class="font-normal text-sm truncate" v-if="notification.eventType==='comment'">
+                  <div class="flex items-center gap-2 mb-1">
+                    <h4 class="font-normal text-sm truncate flex-1" v-if="notification.eventType==='comment'">
                       {{ notification.payload.actorName }} 评论了你的文章 {{ notification.payload.title }} :
                       {{ notification.payload.content }}
                     </h4>
-                    <h4 class="font-normal text-sm truncate" v-else>
+                    <h4 class="font-normal text-sm truncate flex-1" v-else>
                       {{ notification.payload.content }}
                     </h4>
-                    <div class="badge badge-outline badge-xs flex-shrink-0">{{
-                        getTypeLabel(notification.eventType)
-                      }}
-                    </div>
+                    <div class="badge badge-soft badge-primary badge-xs flex-shrink-0">{{getTypeLabel(notification.eventType)}}</div>
+                    <div class="text-xs text-base-content/60 flex-shrink-0">{{ formatDateStr(notification.createdAt) }}</div>
                     <div v-if="!notification.isRead" class="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
                   </div>
 
                   <a v-if="notification.payload.articleTitle && notification.payload.articleId>0"
-                     class="text-xs text-primary hover:underline cursor-pointer mt-1 truncate"
+                     class="text-xs text-primary hover:underline cursor-pointer truncate block"
                      :href="'/post/'+notification.payload.articleId"
                   >
                     {{ notification.payload.articleTitle }}
                   </a>
                   <div v-else-if="notification.payload.articleTitle"
-                       class="text-xs text-primary hover:underline cursor-pointer mt-1 truncate">
+                       class="text-xs text-primary hover:underline cursor-pointer truncate">
                     {{ notification.payload.articleTitle }}
-                  </div>
-
-                  <div class="text-xs text-base-content/60 mt-1">
-                    {{ formatDateStr(notification.createdAt) }}
                   </div>
                 </div>
 
                 <!-- 操作按钮 -->
                 <div class="dropdown dropdown-end flex-shrink-0">
                   <div tabindex="0" role="button" class="btn btn-ghost btn-xs btn-circle" @click.stop>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                    </svg>
+                    <EllipsisVerticalIcon class="h-3 w-3" />
                   </div>
                   <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
                     <li v-if="!notification.isRead"><a @click="markAsRead(notification)">标记已读</a></li>
@@ -294,10 +267,7 @@ const getEmptyMessage = () => {
       <!-- 加载更多按钮 -->
       <div v-else class="flex justify-center mt-6">
         <button class="btn btn-sm btn-outline" @click="loadMore">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-               stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-          </svg>
+          <ChevronDownIcon class="h-4 w-4 mr-2" />
           加载更多消息
         </button>
       </div>
