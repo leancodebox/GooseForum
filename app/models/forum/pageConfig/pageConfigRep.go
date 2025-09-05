@@ -3,6 +3,7 @@ package pageConfig
 import (
 	"errors"
 	"fmt"
+	"github.com/spf13/cast"
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
@@ -53,4 +54,18 @@ func GetConfigByPageTypeE[T any](pageType string, defaultValue T) (T, error) {
 	} else {
 		return defaultValue, errors.New("no data")
 	}
+}
+
+const GooseForumVersion = 0
+
+func CheckVersion() bool {
+	configEntity := GetByPageType(Version)
+	return cast.ToInt(configEntity.Config) >= GooseForumVersion
+}
+
+func SyncVersion() {
+	configEntity := GetByPageType(Version)
+	configEntity.PageType = Version
+	configEntity.Config = cast.ToString(GooseForumVersion)
+	CreateOrSave(&configEntity)
 }

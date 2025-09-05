@@ -38,6 +38,7 @@ const (
 	SiteSettings    = `siteSettings`
 	EmailSettings   = `emailSetting`
 	Announcement    = `announcement`
+	Version         = `version`
 )
 
 var PageTypeList = []string{
@@ -48,6 +49,7 @@ var PageTypeList = []string{
 	SiteSettings,
 	EmailSettings,
 	Announcement,
+	Version,
 }
 
 type WebSettingsConfig struct {
