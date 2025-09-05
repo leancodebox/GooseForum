@@ -3,7 +3,6 @@
 ```sql
 CREATE TABLE user_unread_counts (
     user_id INTEGER PRIMARY KEY,
-    total_count INTEGER DEFAULT 0,
     mention_count INTEGER DEFAULT 0,
     reply_count INTEGER DEFAULT 0,
     like_count INTEGER DEFAULT 0,
