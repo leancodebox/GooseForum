@@ -59,6 +59,7 @@ export interface Payload {
     actorName: string,
     articleId: number,
     articleTitle: string
+    commentId?: number
 }
 
 export interface Notifications {
@@ -122,5 +123,6 @@ export interface OAuthBinding {
 export interface OAuthBindings {
     github?: OAuthBinding
     google?: OAuthBinding
+
     [key: string]: OAuthBinding | undefined
 }

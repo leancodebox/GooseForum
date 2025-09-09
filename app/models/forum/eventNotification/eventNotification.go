@@ -12,6 +12,7 @@ const (
 	EventTypeReply   = "reply"   // 回复通知
 	EventTypeSystem  = "system"  // 系统通知
 	EventTypeFollow  = "follow"  // 关注通知
+	EventTypeLike    = "like"    // 关注通知
 )
 
 // NotificationPayload 通知内容的基础结构
@@ -27,18 +28,22 @@ type NotificationPayload struct {
 	// 评论相关
 	CommentId uint64 `json:"commentId,omitempty"` // 评论ID
 	// 其他元数据
-	Extra map[string]interface{} `json:"metadata,omitempty"`
+	Extra Extra `json:"metadata,omitempty"`
+}
+
+type Extra struct {
+	FollowerName string `json:"followerName"`
 }
 
 type Entity struct {
 	Id        uint64              `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`
-	UserId    uint64              `gorm:"column:user_id;type:bigint;index;" json:"userId"`                    // 接收通知的用户ID
-	Payload   NotificationPayload `gorm:"column:payload;type:json;serializer:json" json:"payload"`            // 通知内容(JSON)
-	EventType string              `gorm:"column:event_type;type:varchar(50);index;" json:"eventType"`         // 通知类型
-	IsRead    bool                `gorm:"column:is_read;type:boolean;default:false;index;" json:"isRead"`     // 是否已读
-	ReadAt    *time.Time          `gorm:"column:read_at;type:timestamp;null;" json:"readAt"`                  // 读取时间
-	CreatedAt time.Time           `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` // 创建时间
-	UpdatedAt time.Time           `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                 // 更新时间
+	UserId    uint64              `gorm:"column:user_id;type:bigint;index:idx_user_id_event_type_read;index:idx_user_read" json:"userId"`                // 接收通知的用户ID
+	Payload   NotificationPayload `gorm:"column:payload;type:json;serializer:json" json:"payload"`                                                       // 通知内容(JSON)
+	EventType string              `gorm:"column:event_type;type:varchar(16);index:idx_user_id_event_type_read;" json:"eventType"`                        // 通知类型
+	IsRead    bool                `gorm:"column:is_read;type:boolean;default:false;index:idx_user_id_event_type_read;index:idx_user_read" json:"isRead"` // 是否已读
+	ReadAt    *time.Time          `gorm:"column:read_at;type:timestamp;null;" json:"readAt"`                                                             // 读取时间
+	CreatedAt time.Time           `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`                                            // 创建时间
+	UpdatedAt time.Time           `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`                                                            // 更新时间
 }
 
 func (itself *Entity) TableName() string {

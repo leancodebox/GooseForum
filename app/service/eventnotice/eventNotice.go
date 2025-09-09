@@ -5,12 +5,13 @@ import (
 )
 
 // SendCommentNotification 发送评论通知
-func SendCommentNotification(userId uint64, articleId uint64, commentContent string, commenterId uint64) error {
+func SendCommentNotification(userId uint64, articleId uint64, commentContent string, commenterId uint64, replyId uint64) error {
 	payload := eventNotification.NotificationPayload{
 		Title:     "收到新评论",
 		Content:   commentContent,
 		ActorId:   commenterId,
 		ArticleId: articleId,
+		CommentId: replyId,
 	}
 
 	notification := &eventNotification.Entity{
@@ -46,7 +47,7 @@ func SendSystemNotification(userId uint64, title string, content string, extra m
 	payload := eventNotification.NotificationPayload{
 		Title:   title,
 		Content: content,
-		Extra:   extra,
+		Extra:   eventNotification.Extra{},
 	}
 
 	notification := &eventNotification.Entity{
@@ -63,9 +64,7 @@ func SendFollowNotification(userId uint64, followerName string) error {
 	payload := eventNotification.NotificationPayload{
 		Title:   "新增关注者",
 		Content: followerName + " 关注了你",
-		Extra: map[string]interface{}{
-			"followerName": followerName,
-		},
+		Extra:   eventNotification.Extra{FollowerName: followerName},
 	}
 
 	notification := &eventNotification.Entity{

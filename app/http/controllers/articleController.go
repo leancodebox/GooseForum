@@ -189,7 +189,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	pointservice.RewardPoints(req.UserId, 2, pointservice.RewardPoints4Reply)
 	if articleEntity.UserId != req.UserId {
 		eventnotice.SendCommentNotification(articleEntity.UserId, articleEntity.Id,
-			TakeUpTo64Chars(req.Params.Content), req.UserId)
+			TakeUpTo64Chars(req.Params.Content), req.UserId, replyEntity.Id)
 	}
 	return component.SuccessResponse(true)
 }

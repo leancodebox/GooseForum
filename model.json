@@ -163,5 +163,15 @@
       {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
       {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
     ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "user_unread_counts",
+    "keyList": [
+      {"field": "user_id", "type": "bigint unsigned", "key": "PRI", "desc": "id", "null": "NO", "default": null},
+      {"field": "reply_count", "type": "int", "key": "", "desc": "回复消息", "null": "NO", "default": "0"},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
+    ]
   }
 ]

@@ -218,8 +218,8 @@ const getEmptyMessage = () => {
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 mb-1">
                     <h4 class="font-normal text-sm truncate flex-1" v-if="notification.eventType==='comment'">
-                      {{ notification.payload.actorName }} 评论了你的文章 {{ notification.payload.title }} :
-                      {{ notification.payload.content }}
+                      <a :href="'/user/'+notification.payload.actorId">{{ notification.payload.actorName }}</a> 评论了你的文章 {{ notification.payload.title }} :
+                      <a :href="'/post/'+notification.payload.articleId + (notification.payload.commentId ? '#reply_'+notification.payload.commentId :'')">{{ notification.payload.content }}</a>
                     </h4>
                     <h4 class="font-normal text-sm truncate flex-1" v-else>
                       {{ notification.payload.content }}
@@ -231,7 +231,7 @@ const getEmptyMessage = () => {
 
                   <a v-if="notification.payload.articleTitle && notification.payload.articleId>0"
                      class="text-xs text-primary hover:underline cursor-pointer truncate block"
-                     :href="'/post/'+notification.payload.articleId"
+                     :href="'/post/'+notification.payload.articleId + (notification.payload.commentId ? '#reply_'+notification.payload.commentId :'')"
                   >
                     {{ notification.payload.articleTitle }}
                   </a>

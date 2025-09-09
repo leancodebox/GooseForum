@@ -8,8 +8,6 @@ CREATE TABLE user_unread_counts (
     like_count INTEGER DEFAULT 0,
     system_count INTEGER DEFAULT 0,
     pm_count INTEGER DEFAULT 0,
-    last_updated INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 ```
 user_unread_counts 的目的是为了小红点的设计。

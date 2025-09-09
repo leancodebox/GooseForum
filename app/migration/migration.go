@@ -34,6 +34,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
+	"github.com/leancodebox/GooseForum/app/models/forum/userUnreadCounts"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
@@ -56,6 +57,7 @@ func migration(migration bool) {
 		&articleCategoryRs.Entity{},
 		&articles.Entity{},
 		&eventNotification.Entity{},
+		&userUnreadCounts.Entity{},
 		&optRecord.Entity{},
 		&pointsRecord.Entity{},
 		&reply.Entity{},
