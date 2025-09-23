@@ -132,8 +132,6 @@ type ManifestItem struct {
 var manifestItemMap = map[string]ManifestItem{}
 
 func init() {
-	fmt.Println(path.Join("static", "dist", ".vite", "manifest.json"))
-	fmt.Println(viewAssert.Open(path.Join("static", "dist")))
 	content, err := viewAssert.ReadFile(path.Join("static", "dist", ".vite", "manifest.json"))
 	if err != nil {
 		slog.Error("ManifestGetError")
