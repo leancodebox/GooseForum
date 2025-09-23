@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -25,7 +26,7 @@ func (itself *Connect) GenerateBackupPath(backupDir string) string {
 	sourcePath := itself.Config.DbPath
 	// 处理内存数据库的特殊标识
 	if sourcePath == ":memory:" {
-		return filepath.Join(backupDir, fmt.Sprintf("memory_%s.db", time.Now().Format("20060102_150405")))
+		return path.Join(backupDir, fmt.Sprintf("memory_%s.db", time.Now().Format("20060102_150405")))
 	}
 
 	// 提取源文件名（不含扩展名）
@@ -35,7 +36,7 @@ func (itself *Connect) GenerateBackupPath(backupDir string) string {
 
 	// 生成带时间戳的备份文件名
 	timestamp := time.Now().Format("20060102_150405")
-	return filepath.Join(backupDir, fmt.Sprintf("%s_%s.db", timestamp, nameWithoutExt))
+	return path.Join(backupDir, fmt.Sprintf("%s_%s.db", timestamp, nameWithoutExt))
 }
 
 func (itself *Connect) BackupSQLiteHandle() {
@@ -75,7 +76,7 @@ func cleanOldBackups(sourcePath string, keep int) {
 	baseName := filepath.Base(sourcePath)
 	ext := filepath.Ext(baseName)
 	nameWithoutExt := strings.TrimSuffix(baseName, ext)
-	searchFileName := filepath.Join(getBackUpDir(), fmt.Sprintf("*%s*.db", nameWithoutExt))
+	searchFileName := path.Join(getBackUpDir(), fmt.Sprintf("*%s*.db", nameWithoutExt))
 	files, err := filepath.Glob(searchFileName)
 	if err != nil {
 		slog.Error("cleanOldBackups err", "err", err)

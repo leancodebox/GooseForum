@@ -2,6 +2,7 @@ package fileopt
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -68,15 +69,15 @@ func DirExistOrCreate(dirPath string) error {
 	}
 }
 
-func AbsPath(path string) (string, error) {
-	if strings.HasPrefix(path, "~/") || path == "~" {
+func AbsPath(p string) (string, error) {
+	if strings.HasPrefix(p, "~/") || p == "~" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			return path, err
+			return p, err
 		}
-		path = filepath.Join(homeDir, path[2:])
+		p = path.Join(homeDir, p[2:])
 	}
-	return path, nil
+	return p, nil
 }
 
 func Filename(fileName string) string {

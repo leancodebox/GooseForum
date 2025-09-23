@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"path/filepath"
+	"path"
 	"slices"
 	"strings"
 
@@ -85,17 +85,17 @@ func runHexoTool(_ *cobra.Command, _ []string) {
 	fmt.Println(array.RemoveDuplicates(categories))
 }
 
-func traverse(path string) ([]Blog, error) {
+func traverse(p string) ([]Blog, error) {
 	blogs := make([]Blog, 0)
 
-	files, err := os.ReadDir(path)
+	files, err := os.ReadDir(p)
 	if err != nil {
 		return blogs, err
 	}
 
 	for _, file := range files {
 		if file.IsDir() {
-			subPath := filepath.Join(path, file.Name())
+			subPath := path.Join(p, file.Name())
 			subBlogs, err := traverse(subPath)
 			if err != nil {
 				return blogs, err
@@ -103,7 +103,7 @@ func traverse(path string) ([]Blog, error) {
 			blogs = append(blogs, subBlogs...)
 		} else {
 			if strings.HasSuffix(file.Name(), ".md") {
-				filePath := filepath.Join(path, file.Name())
+				filePath := path.Join(p, file.Name())
 				data, err := os.ReadFile(filePath)
 				if err != nil {
 					fmt.Println("Error reading file:", err)

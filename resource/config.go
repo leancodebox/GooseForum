@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -69,8 +70,8 @@ func GetTemplates(globalFunc template.FuncMap) *template.Template {
 		slog.Info("GetTemplates not running in production mode")
 		// 开发模式下直接从目录读取模板
 		return template.Must(template.Must(
-			tmpl.ParseGlob(filepath.Join("resource", "templates", "*.gohtml"))).
-			ParseGlob(filepath.Join("resource", "templates", "*", "*.gohtml")))
+			tmpl.ParseGlob(path.Join("resource", "templates", "*.gohtml"))).
+			ParseGlob(path.Join("resource", "templates", "*", "*.gohtml")))
 	}
 	return template.Must(tmpl.ParseFS(templates,
 		"templates/*.gohtml",
@@ -95,9 +96,9 @@ func GetViewAssert() *embed.FS {
 // GetAssetsFS 返回静态文件的文件系统
 func GetAssetsFS() (fs.FS, error) {
 	if !setting.IsProduction() {
-		return os.DirFS(filepath.Join("resource", "static", "dist", "assets")), nil
+		return os.DirFS(path.Join("resource", "static", "dist", "assets")), nil
 	}
-	static, err := fs.Sub(GetViewAssert(), filepath.Join("static", "dist", "assets"))
+	static, err := fs.Sub(GetViewAssert(), path.Join("static", "dist", "assets"))
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +108,7 @@ func GetAssetsFS() (fs.FS, error) {
 // GetStaticFS 返回静态文件的文件系统
 func GetStaticFS() (fs.FS, error) {
 	if !setting.IsProduction() {
-		return os.DirFS(filepath.Join("resource", "static")), nil
+		return os.DirFS(path.Join("resource", "static")), nil
 	}
 	static, err := fs.Sub(GetViewAssert(), "static")
 	if err != nil {
@@ -131,7 +132,9 @@ type ManifestItem struct {
 var manifestItemMap = map[string]ManifestItem{}
 
 func init() {
-	content, err := viewAssert.ReadFile(filepath.Join("static", "dist", ".vite", "manifest.json"))
+	fmt.Println(path.Join("static", "dist", ".vite", "manifest.json"))
+	fmt.Println(viewAssert.Open(path.Join("static", "dist")))
+	content, err := viewAssert.ReadFile(path.Join("static", "dist", ".vite", "manifest.json"))
 	if err != nil {
 		slog.Error("ManifestGetError")
 		return
