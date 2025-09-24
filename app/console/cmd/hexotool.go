@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -95,7 +95,7 @@ func traverse(p string) ([]Blog, error) {
 
 	for _, file := range files {
 		if file.IsDir() {
-			subPath := path.Join(p, file.Name())
+			subPath := filepath.Join(p, file.Name())
 			subBlogs, err := traverse(subPath)
 			if err != nil {
 				return blogs, err
@@ -103,7 +103,7 @@ func traverse(p string) ([]Blog, error) {
 			blogs = append(blogs, subBlogs...)
 		} else {
 			if strings.HasSuffix(file.Name(), ".md") {
-				filePath := path.Join(p, file.Name())
+				filePath := filepath.Join(p, file.Name())
 				data, err := os.ReadFile(filePath)
 				if err != nil {
 					fmt.Println("Error reading file:", err)

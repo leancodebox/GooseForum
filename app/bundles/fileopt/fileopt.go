@@ -2,7 +2,6 @@ package fileopt
 
 import (
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -75,7 +74,7 @@ func AbsPath(p string) (string, error) {
 		if err != nil {
 			return p, err
 		}
-		p = path.Join(homeDir, p[2:])
+		p = filepath.Join(homeDir, p[2:])
 	}
 	return p, nil
 }
