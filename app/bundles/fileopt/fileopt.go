@@ -3,7 +3,6 @@ package fileopt
 import (
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 func GetContents(filename string) ([]byte, error) {
@@ -66,19 +65,4 @@ func DirExistOrCreate(dirPath string) error {
 	} else {
 		return os.MkdirAll(dirPath, 0755)
 	}
-}
-
-func AbsPath(p string) (string, error) {
-	if strings.HasPrefix(p, "~/") || p == "~" {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return p, err
-		}
-		p = filepath.Join(homeDir, p[2:])
-	}
-	return p, nil
-}
-
-func Filename(fileName string) string {
-	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }
