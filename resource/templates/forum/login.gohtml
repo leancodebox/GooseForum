@@ -3,7 +3,6 @@
 <head>
     {{template "common-head.gohtml" .}}
     {{GetImportInfoPath `src/main.js`}}
-    <title>登录 - GooseForum</title>
 </head>
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
@@ -47,9 +46,9 @@
                             <label class="label">
                                 <span class="label-text">验证码</span>
                             </label>
-                            <div class="flex gap-2">
-                                <input type="text" name="captcha" placeholder="请输入验证码" class="input input-bordered flex-1" required />
-                                <img src="" alt="验证码" class="captcha-img h-12 w-32 cursor-pointer border border-base-300 rounded bg-white object-cover" onclick="refreshCaptcha()" />
+                            <div class="flex gap-2 h-12">
+                                <input type="text" name="captcha" placeholder="请输入验证码" class="input input-bordered flex-1 h-full" required />
+                                <img src="" alt="验证码" class="captcha-img w-32 h-full cursor-pointer border border-base-300 rounded bg-white object-cover" onclick="refreshCaptcha()" />
                             </div>
                             <label class="label hidden error-label" data-field="captcha">
                                 <span class="label-text-alt text-error"></span>
@@ -113,9 +112,9 @@
                             <label class="label">
                                 <span class="label-text">验证码</span>
                             </label>
-                            <div class="flex gap-2">
-                                <input type="text" name="captcha" placeholder="请输入验证码" class="input input-bordered flex-1" required />
-                                <img src="" alt="验证码" class="captcha-img h-12 w-32 cursor-pointer border border-base-300 rounded bg-white object-cover" onclick="refreshCaptcha()" />
+                            <div class="flex gap-2 h-12">
+                                <input type="text" name="captcha" placeholder="请输入验证码" class="input input-bordered flex-1 h-full" required />
+                                <img src="" alt="验证码" class="captcha-img w-32 h-full cursor-pointer border border-base-300 rounded bg-white object-cover" onclick="refreshCaptcha()" />
                             </div>
                             <label class="label hidden error-label" data-field="captcha">
                                 <span class="label-text-alt text-error"></span>
@@ -155,9 +154,9 @@
                             <label class="label">
                                 <span class="label-text">验证码</span>
                             </label>
-                            <div class="flex gap-2">
-                                <input type="text" name="captcha" placeholder="请输入验证码" class="input input-bordered flex-1" required />
-                                <img src="" alt="验证码" class="captcha-img h-12 w-32 cursor-pointer border border-base-300 rounded bg-white object-cover" onclick="refreshCaptcha()" />
+                            <div class="flex gap-2 h-12">
+                                <input type="text" name="captcha" placeholder="请输入验证码" class="input input-bordered flex-1 h-full" required />
+                                <img src="" alt="验证码" class="captcha-img w-32 h-full cursor-pointer border border-base-300 rounded bg-white object-cover" onclick="refreshCaptcha()" />
                             </div>
                             <label class="label hidden error-label" data-field="captcha">
                                 <span class="label-text-alt text-error"></span>
@@ -346,7 +345,16 @@
         document.getElementById('register-error').classList.add('hidden');
 
         if (!data.username) { showError('view-register', 'username', '请输入用户名'); hasError = true; }
-        if (!data.email) { showError('view-register', 'email', '请输入邮箱'); hasError = true; }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!data.email) { 
+            showError('view-register', 'email', '请输入邮箱'); 
+            hasError = true; 
+        } else if (!emailRegex.test(data.email)) {
+            showError('view-register', 'email', '请输入有效的邮箱地址'); 
+            hasError = true;
+        }
+
         if (!data.password) { showError('view-register', 'password', '请输入密码'); hasError = true; }
         if (data.password !== data.confirmPassword) { showError('view-register', 'confirmPassword', '两次输入的密码不一致'); hasError = true; }
         if (!data.captcha) { showError('view-register', 'captcha', '请输入验证码'); hasError = true; }
@@ -397,13 +405,22 @@
         document.getElementById('forgot-error').classList.add('hidden');
         document.getElementById('forgot-success').classList.add('hidden');
 
-        if (!data.email) { showError('view-forgot', 'email', '请输入邮箱'); hasError = true; }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!data.email) { 
+            showError('view-forgot', 'email', '请输入邮箱'); 
+            hasError = true; 
+        } else if (!emailRegex.test(data.email)) {
+            showError('view-forgot', 'email', '请输入有效的邮箱地址'); 
+            hasError = true;
+        }
+
         if (!data.captcha) { showError('view-forgot', 'captcha', '请输入验证码'); hasError = true; }
 
         if (hasError) return;
 
         setLoading('btn-forgot', true, '发送中...');
 
+        // 模拟发送重置邮件
         fetch('/api/forgot-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -416,13 +433,12 @@
         .then(response => response.json())
         .then(res => {
             if (res.code === 0) {
-                document.getElementById('forgot-success').querySelector('span').textContent = res.result || '重置邮件已发送';
                 document.getElementById('forgot-success').classList.remove('hidden');
-                form.reset();
+                document.querySelector('#forgot-success span').textContent = '重置邮件已发送，请查收';
             } else {
                 showError('view-forgot', 'general', res.msg || '发送失败');
+                refreshCaptcha();
             }
-            refreshCaptcha();
         })
         .catch(err => {
             showError('view-forgot', 'general', '请求失败: ' + err);
@@ -437,10 +453,12 @@
     function handleGitHubLogin() {
         const urlParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlParams.get('redirect');
+        
         let githubLoginUrl = '/api/auth/github';
         if (redirectUrl) {
             githubLoginUrl += '?redirect=' + encodeURIComponent(redirectUrl);
         }
+        
         window.location.href = githubLoginUrl;
     }
 </script>
