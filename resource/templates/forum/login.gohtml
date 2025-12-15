@@ -2,18 +2,447 @@
 <html lang="zh-CN" data-theme="{{.Theme}}">
 <head>
     {{template "common-head.gohtml" .}}
-    {{GetImportInfoPath `src/login.js`}}
+    {{GetImportInfoPath `src/main.js`}}
+    <title>登录 - GooseForum</title>
 </head>
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
     <header class="sticky top-0 z-50">
         {{template "nav.gohtml" .}}
     </header>
-    <main class="flex-1 container mx-auto px-4 py-4">
-        <div id="login">
+
+    <main class="flex-1 flex items-center justify-center py-8 px-4">
+        <div class="card w-full max-w-md bg-base-100 shadow-xl">
+            <div class="card-body">
+                <!-- Tab 切换 -->
+                <div class="tabs tabs-boxed mb-6">
+                    <a class="tab" id="tab-login" onclick="switchTab('login')">登录</a>
+                    <a class="tab" id="tab-register" onclick="switchTab('register')">注册</a>
+                    <a class="tab" id="tab-forgot" onclick="switchTab('forgot')">忘记密码</a>
+                </div>
+
+                <!-- 登录表单 -->
+                <div id="view-login" class="block">
+                    <h2 class="text-2xl font-normal text-base-content mb-6 text-center">欢迎回来</h2>
+                    <form onsubmit="handleLogin(event)" class="space-y-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">用户名</span>
+                            </label>
+                            <input type="text" name="username" placeholder="请输入用户名" class="input input-bordered w-full" required />
+                            <label class="label hidden error-label" data-field="username">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">密码</span>
+                            </label>
+                            <input type="password" name="password" placeholder="请输入密码" class="input input-bordered w-full" required />
+                            <label class="label hidden error-label" data-field="password">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">验证码</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" name="captcha" placeholder="请输入验证码" class="input input-bordered flex-1" required />
+                                <img src="" alt="验证码" class="captcha-img h-12 w-32 cursor-pointer border border-base-300 rounded bg-white object-cover" onclick="refreshCaptcha()" />
+                            </div>
+                            <label class="label hidden error-label" data-field="captcha">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="alert alert-error mb-4 hidden" id="login-error">
+                            <span></span>
+                        </div>
+                        <div class="form-control mt-6">
+                            <button type="submit" class="btn btn-primary w-full" id="btn-login">
+                                登录
+                            </button>
+                        </div>
+                        <div class="text-center mt-4">
+                            <a href="#" class="link link-primary text-sm" onclick="switchTab('forgot'); return false;">忘记密码？</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 注册表单 -->
+                <div id="view-register" class="hidden">
+                    <h2 class="text-2xl font-normal text-base-content mb-6 text-center">创建账户</h2>
+                    <form onsubmit="handleRegister(event)" class="space-y-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">用户名</span>
+                            </label>
+                            <input type="text" name="username" placeholder="请输入用户名" class="input input-bordered w-full" required />
+                            <label class="label hidden error-label" data-field="username">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">邮箱</span>
+                            </label>
+                            <input type="email" name="email" placeholder="请输入邮箱地址" class="input input-bordered w-full" required />
+                            <label class="label hidden error-label" data-field="email">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">密码</span>
+                            </label>
+                            <input type="password" name="password" placeholder="请输入密码（至少6位）" class="input input-bordered w-full" required />
+                            <label class="label hidden error-label" data-field="password">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">确认密码</span>
+                            </label>
+                            <input type="password" name="confirmPassword" placeholder="请再次输入密码" class="input input-bordered w-full" required />
+                            <label class="label hidden error-label" data-field="confirmPassword">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">验证码</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" name="captcha" placeholder="请输入验证码" class="input input-bordered flex-1" required />
+                                <img src="" alt="验证码" class="captcha-img h-12 w-32 cursor-pointer border border-base-300 rounded bg-white object-cover" onclick="refreshCaptcha()" />
+                            </div>
+                            <label class="label hidden error-label" data-field="captcha">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="form-control">
+                            <label class="cursor-pointer label justify-start">
+                                <input type="checkbox" name="agree" class="checkbox checkbox-primary" required />
+                                <span class="label-text ml-2">我同意 <a href="/terms-of-service" target="_blank" class="link link-primary">用户协议</a> 和 <a href="/privacy-policy" target="_blank" class="link link-primary">隐私政策</a></span>
+                            </label>
+                        </div>
+                        <div class="alert alert-error mb-4 hidden" id="register-error">
+                            <span></span>
+                        </div>
+                        <div class="form-control mt-6">
+                            <button type="submit" class="btn btn-primary w-full" id="btn-register">
+                                注册
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 忘记密码表单 -->
+                <div id="view-forgot" class="hidden">
+                    <h2 class="text-2xl font-normal text-base-content mb-6 text-center">重置密码</h2>
+                    <form onsubmit="handleForgot(event)" class="space-y-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">邮箱</span>
+                            </label>
+                            <input type="email" name="email" placeholder="请输入邮箱地址" class="input input-bordered w-full" required />
+                            <label class="label hidden error-label" data-field="email">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">验证码</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" name="captcha" placeholder="请输入验证码" class="input input-bordered flex-1" required />
+                                <img src="" alt="验证码" class="captcha-img h-12 w-32 cursor-pointer border border-base-300 rounded bg-white object-cover" onclick="refreshCaptcha()" />
+                            </div>
+                            <label class="label hidden error-label" data-field="captcha">
+                                <span class="label-text-alt text-error"></span>
+                            </label>
+                        </div>
+                        <div class="alert alert-error mb-4 hidden" id="forgot-error">
+                            <span></span>
+                        </div>
+                        <div class="alert alert-success mb-4 hidden" id="forgot-success">
+                            <span></span>
+                        </div>
+                        <div class="form-control mt-6">
+                            <button type="submit" class="btn btn-primary w-full" id="btn-forgot">
+                                发送重置邮件
+                            </button>
+                        </div>
+                        <div class="text-center mt-4">
+                            <a href="#" class="link link-primary text-sm" onclick="switchTab('login'); return false;">返回登录</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 第三方登录 -->
+                <div id="divider-social" class="divider">或</div>
+                <div id="social-login" class="space-y-2">
+                    <button onclick="handleGitHubLogin()" class="btn btn-outline w-full">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        使用 GitHub 登录
+                    </button>
+                </div>
+            </div>
         </div>
     </main>
-    {{template "footer.gohtml" .}}
 </div>
+
+<script>
+    let currentCaptchaId = '';
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        refreshCaptcha();
+        
+        // 检查 URL 参数 model
+        const urlParams = new URLSearchParams(window.location.search);
+        const model = urlParams.get('model');
+        if (model === 'register') {
+            switchTab('register');
+        } else {
+            switchTab('login');
+        }
+    });
+
+    // 切换标签页
+    function switchTab(tabName) {
+        // 更新 Tab 样式
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('tab-active'));
+        document.getElementById('tab-' + tabName).classList.add('tab-active');
+
+        // 切换视图
+        document.getElementById('view-login').classList.add('hidden');
+        document.getElementById('view-register').classList.add('hidden');
+        document.getElementById('view-forgot').classList.add('hidden');
+        
+        document.getElementById('view-' + tabName).classList.remove('hidden');
+
+        // 处理第三方登录显示
+        const socialDivider = document.getElementById('divider-social');
+        const socialLogin = document.getElementById('social-login');
+        if (tabName === 'forgot') {
+            socialDivider.style.display = 'none';
+            socialLogin.style.display = 'none';
+        } else {
+            socialDivider.style.display = 'flex';
+            socialLogin.style.display = 'block';
+        }
+
+        // 清除错误信息
+        document.querySelectorAll('.error-label').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.alert-error').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.alert-success').forEach(el => el.classList.add('hidden'));
+    }
+
+    // 刷新验证码
+    function refreshCaptcha() {
+        fetch('/api/get-captcha')
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 0) {
+                    currentCaptchaId = data.result.captchaId;
+                    document.querySelectorAll('.captcha-img').forEach(img => {
+                        img.src = data.result.captchaImg;
+                    });
+                }
+            })
+            .catch(error => console.error('获取验证码失败:', error));
+    }
+
+    // 显示加载状态
+    function setLoading(btnId, loading, text) {
+        const btn = document.getElementById(btnId);
+        if (loading) {
+            btn.disabled = true;
+            btn.innerHTML = `<span class="loading loading-spinner loading-sm"></span> ${text}`;
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = text;
+        }
+    }
+
+    // 显示错误
+    function showError(formId, field, message) {
+        if (field === 'general') {
+            const alert = document.querySelector(`#${formId} .alert-error`);
+            alert.querySelector('span').textContent = message;
+            alert.classList.remove('hidden');
+        } else {
+            const label = document.querySelector(`#${formId} .error-label[data-field="${field}"]`);
+            if (label) {
+                label.querySelector('span').textContent = message;
+                label.classList.remove('hidden');
+            }
+        }
+    }
+
+    // 登录
+    function handleLogin(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        // 简单验证
+        let hasError = false;
+        document.querySelectorAll('#view-login .error-label').forEach(el => el.classList.add('hidden'));
+        document.getElementById('login-error').classList.add('hidden');
+
+        if (!data.username) { showError('view-login', 'username', '请输入用户名'); hasError = true; }
+        if (!data.password) { showError('view-login', 'password', '请输入密码'); hasError = true; }
+        if (!data.captcha) { showError('view-login', 'captcha', '请输入验证码'); hasError = true; }
+
+        if (hasError) return;
+
+        setLoading('btn-login', true, '登录中...');
+
+        fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: data.username,
+                password: data.password,
+                captchaId: currentCaptchaId,
+                captchaCode: data.captcha
+            })
+        })
+        .then(response => response.json())
+        .then(res => {
+            if (res.code === 0) {
+                const urlParams = new URLSearchParams(window.location.search);
+                window.location.href = urlParams.get('redirect') || '/';
+            } else {
+                showError('view-login', 'general', res.msg || '登录失败');
+                refreshCaptcha();
+            }
+        })
+        .catch(err => {
+            showError('view-login', 'general', '登录请求失败: ' + err);
+            refreshCaptcha();
+        })
+        .finally(() => {
+            setLoading('btn-login', false, '登录');
+        });
+    }
+
+    // 注册
+    function handleRegister(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // 验证
+        let hasError = false;
+        document.querySelectorAll('#view-register .error-label').forEach(el => el.classList.add('hidden'));
+        document.getElementById('register-error').classList.add('hidden');
+
+        if (!data.username) { showError('view-register', 'username', '请输入用户名'); hasError = true; }
+        if (!data.email) { showError('view-register', 'email', '请输入邮箱'); hasError = true; }
+        if (!data.password) { showError('view-register', 'password', '请输入密码'); hasError = true; }
+        if (data.password !== data.confirmPassword) { showError('view-register', 'confirmPassword', '两次输入的密码不一致'); hasError = true; }
+        if (!data.captcha) { showError('view-register', 'captcha', '请输入验证码'); hasError = true; }
+
+        if (hasError) return;
+
+        setLoading('btn-register', true, '注册中...');
+
+        fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: data.username,
+                email: data.email,
+                password: data.password,
+                captchaId: currentCaptchaId,
+                captchaCode: data.captcha
+            })
+        })
+        .then(response => response.json())
+        .then(res => {
+            if (res.code === 0) {
+                const urlParams = new URLSearchParams(window.location.search);
+                window.location.href = urlParams.get('redirect') || '/';
+            } else {
+                showError('view-register', 'general', res.msg || '注册失败');
+                refreshCaptcha();
+            }
+        })
+        .catch(err => {
+            showError('view-register', 'general', '注册请求失败: ' + err);
+            refreshCaptcha();
+        })
+        .finally(() => {
+            setLoading('btn-register', false, '注册');
+        });
+    }
+
+    // 忘记密码
+    function handleForgot(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        let hasError = false;
+        document.querySelectorAll('#view-forgot .error-label').forEach(el => el.classList.add('hidden'));
+        document.getElementById('forgot-error').classList.add('hidden');
+        document.getElementById('forgot-success').classList.add('hidden');
+
+        if (!data.email) { showError('view-forgot', 'email', '请输入邮箱'); hasError = true; }
+        if (!data.captcha) { showError('view-forgot', 'captcha', '请输入验证码'); hasError = true; }
+
+        if (hasError) return;
+
+        setLoading('btn-forgot', true, '发送中...');
+
+        fetch('/api/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: data.email,
+                captchaId: currentCaptchaId,
+                captchaCode: data.captcha
+            })
+        })
+        .then(response => response.json())
+        .then(res => {
+            if (res.code === 0) {
+                document.getElementById('forgot-success').querySelector('span').textContent = res.result || '重置邮件已发送';
+                document.getElementById('forgot-success').classList.remove('hidden');
+                form.reset();
+            } else {
+                showError('view-forgot', 'general', res.msg || '发送失败');
+            }
+            refreshCaptcha();
+        })
+        .catch(err => {
+            showError('view-forgot', 'general', '请求失败: ' + err);
+            refreshCaptcha();
+        })
+        .finally(() => {
+            setLoading('btn-forgot', false, '发送重置邮件');
+        });
+    }
+
+    // GitHub 登录
+    function handleGitHubLogin() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect');
+        let githubLoginUrl = '/api/auth/github';
+        if (redirectUrl) {
+            githubLoginUrl += '?redirect=' + encodeURIComponent(redirectUrl);
+        }
+        window.location.href = githubLoginUrl;
+    }
+</script>
 </body>
 </html>
