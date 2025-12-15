@@ -96,6 +96,13 @@ export function markAllAsRead(): Promise<Result<any>> {
     return axiosInstance.post('/forum/notification/mark-all-read')
 }
 
+// 删除通知
+export function deleteNotification(notificationId: any): Promise<Result<any>> {
+    return axiosInstance.post('/forum/notification/delete', {
+        notificationId: notificationId
+    })
+}
+
 export function uploadAvatar(formData: FormData): Promise<Result<any>> {
     // 直接使用传入的FormData，不再重新创建
     // 确保请求头设置正确
