@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"bytes"
+
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/datacache"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
@@ -35,6 +37,12 @@ func GlobalFunc() template.FuncMap {
 			},
 				time.Second*5,
 			)
+		},
+		"render": func(name string, data any) (template.HTML, error) {
+			var buf bytes.Buffer
+			// 动态执行名为 name 的模板
+			err := ht4gooseforum.ExecuteTemplate(&buf, name, data)
+			return template.HTML(buf.String()), err
 		},
 	}
 }
