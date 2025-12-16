@@ -1,202 +1,214 @@
 {{define "detail_content"}}
-        <div class="flex flex-col md:flex-row gap-6">
-            <section class="flex-1 space-y-6 min-w-0">
-                <!-- 文章详情卡片 -->
-                <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body overflow-hidden">
-                        <h1 class="card-title text-3xl font-normal text-base-content mb-4">
-                            {{.Article.Title}}
-                        </h1>
-                        {{if false}}
-                            <div class="flex items-center gap-2 mb-4">
-                                {{range .ArticleCategory}}
-                                    <div class="badge badge-primary">{{.}}</div>
-                                    <div class="badge badge-outline">{{.}}</div>
-                                {{end}}
-                            </div>
+<div class="flex flex-col md:flex-row gap-6" x-data="articleDetailHandler({
+    articleId: {{.Article.Id}},
+    isLiked: {{.ILike}},
+    likeCount: {{.Article.LikeCount}},
+    isBookmarked: {{.IsBookmarked}},
+    isFollowing: {{.IsFollowing}}
+})">
+    <section class="flex-1 space-y-6 min-w-0">
+        <!-- 文章详情卡片 -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body overflow-hidden">
+                <h1 class="card-title text-3xl font-normal text-base-content mb-4">
+                    {{.Article.Title}}
+                </h1>
+                {{if false}}
+                    <div class="flex items-center gap-2 mb-4">
+                        {{range .ArticleCategory}}
+                            <div class="badge badge-primary">{{.}}</div>
+                            <div class="badge badge-outline">{{.}}</div>
                         {{end}}
-                        <div class="flex items-center text-base-content/70 mb-6 border-b border-b-gray-200 pb-2">
-                            <a class="avatar" href="/user/{{.Article.UserId}}">
-                                <div class="mask mask-squircle w-8 h-8">
-                                    <img src="{{.AvatarUrl}}" alt="{{.Username}}的头像"/>
+                    </div>
+                {{end}}
+                <div class="flex items-center text-base-content/70 mb-6 border-b border-b-gray-200 pb-2">
+                    <a class="avatar" href="/user/{{.Article.UserId}}">
+                        <div class="mask mask-squircle w-8 h-8">
+                            <img src="{{.AvatarUrl}}" alt="{{.Username}}的头像"/>
+                        </div>
+                    </a>
+                    <a  href="/user/{{.Article.UserId}}" class="ml-2 mr-4 flex-shrink-0">{{.Username}}</a>
+                    <span class="mr-4 flex-shrink-0">{{FormatTime .Article.CreatedAt}}</span>
+                    {{if eq .CurrentUserId .Article.UserId}}
+                        <a href="/publish?id={{.Article.Id}}" class="mr-4 text-primary flex-shrink-0">编辑</a>
+                    {{end}}
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        <span class="mr-4">{{.Article.ViewCount}}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        <span x-text="likeCount">{{.Article.LikeCount}}</span>
+                    </div>
+                </div>
+                <div class="prose lg:prose-base md:prose-lg
+                 prose-h1:font-normal prose-h2:font-normal prose-h3:font-normal
+                 prose-a:no-underline
+                 prose-pre:bg-base-200
+                 prose-code:text-base-content
+                 max-w-none text-base-content overflow-hidden min-w-0">
+                     {{ SafeHTML .Article.RenderedHTML}}
+                </div>
+
+                <!-- 点赞和收藏按钮 -->
+                <div class="flex gap-2 mt-6">
+                    <button class="px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none"
+                            :class="isLiked ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content'"
+                            @click="toggleLike"
+                            aria-label="点赞文章">
+                        <svg class="w-4 h-4 transition-all duration-300" viewBox="0 0 24 24">
+                            <path fill="currentColor"
+                                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                        <span x-text="likeCount">{{.Article.LikeCount}}</span>
+                    </button>
+                    <button class="px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none"
+                            :class="isBookmarked ? 'bg-warning text-warning-content' : 'bg-base-200 text-base-content'"
+                            @click="toggleBookmark"
+                            aria-label="收藏文章">
+                        <svg class="w-4 h-4 transition-all duration-300" viewBox="0 0 24 24">
+                            <path fill="currentColor"
+                                  d="M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z"/>
+                        </svg>
+                        <span x-text="isBookmarked ? '已收藏' : '收藏'">{{if .IsBookmarked}}已收藏{{else}}收藏{{end}}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 评论区域 -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body overflow-hidden">
+                <h2 class="card-title mb-4">评论</h2>
+                <!-- 发表评论 -->
+                {{if .CurrentUserId}}
+                    <div role="alert" class="alert alert-success alert-dash">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                             class="h-6 w-6 shrink-0 stroke-current">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-base-content">讨论应以学习和精进为目的。请勿发布不友善或者负能量的内容，与人为善，比聪明更重要！</span>
+                    </div>
+                    <div class="mb-6">
+                    <textarea class="textarea textarea-bordered w-full"
+                              placeholder="写下你的评论..."
+                              rows="3"
+                              x-model="commentContent"></textarea>
+                        <div class="flex justify-between items-center mt-2">
+                            <div class="flex items-center gap-2">
+                                <button class="btn btn-ghost btn-sm" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                         viewBox="0 0 24 24"
+                                         stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 110-2h4z"/>
+                                    </svg>
+                                    表情
+                                </button>
+                                <button class="btn btn-ghost btn-sm" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                         viewBox="0 0 24 24"
+                                         stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.586-6.586a2 2 0 00-2.828-2.828z"/>
+                                    </svg>
+                                    图片
+                                </button>
+                            </div>
+                            <button class="btn btn-primary btn-sm"
+                                    @click="submitComment(0)"
+                                    :disabled="submitting || !commentContent.trim()">
+                                <span x-show="submitting && currentReplyId === 0" class="loading loading-spinner loading-xs"></span>
+                                <span x-text="submitting && currentReplyId === 0 ? '提交中...' : '发表评论'">发表评论</span>
+                            </button>
+                        </div>
+                    </div>
+                {{else}}
+                    <div class="mt-6 text-center">
+                        <a href="/login" class="btn btn-primary btn-sm">登录后发表评论</a>
+                    </div>
+                {{end}}
+
+                <!-- 评论列表 -->
+                <div class="space-y-4">
+                    {{$LoginUser := .User}}
+                    {{range .CommentList}}
+                        <div class="flex gap-3" id="reply_{{.Id}}">
+                            <a class="avatar" href="/user/{{.UserId}}">
+                                <div class="mask mask-squircle w-10 h-10">
+                                    <img src="{{.UserAvatarUrl}}" alt="{{.Username}}"/>
                                 </div>
                             </a>
-                            <a  href="/user/{{.Article.UserId}}" class="ml-2 mr-4 flex-shrink-0">{{.Username}}</a>
-                            <span class="mr-4 flex-shrink-0">{{FormatTime .Article.CreatedAt}}</span>
-                            {{if eq .CurrentUserId .Article.UserId}}
-                                <a href="/publish?id={{.Article.Id}}" class="mr-4 text-primary flex-shrink-0">编辑</a>
-                            {{end}}
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                     viewBox="0 0 24 24"
-                                     stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                <span class="mr-4">{{.Article.ViewCount}}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                     viewBox="0 0 24 24"
-                                     stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                                </svg>
-                                <span>{{.Article.LikeCount}}</span>
-                            </div>
-                        </div>
-                        <div class="prose lg:prose-base md:prose-lg
-                         prose-h1:font-normal prose-h2:font-normal prose-h3:font-normal
-                         prose-a:no-underline
-                         prose-pre:bg-base-200
-                         prose-code:text-base-content
-                         max-w-none text-base-content overflow-hidden min-w-0">
-                             {{ SafeHTML .Article.RenderedHTML}}
-                        </div>
-
-                        <!-- 点赞和收藏按钮 -->
-                        <div class="flex gap-2 mt-6">
-                            <button id="like-btn"
-                                    class="{{if .ILike}}bg-primary text-primary-content{{else}}bg-base-200 text-base-content{{end}} px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none"
-                                    onclick="toggleLike()"
-                                    aria-label="点赞文章">
-                                <svg class="w-4 h-4 transition-all duration-300" viewBox="0 0 24 24">
-                                    <path fill="currentColor"
-                                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                </svg>
-                                <span id="like-count">{{.Article.LikeCount}}</span>
-                            </button>
-                            <button id="bookmark-btn"
-                                    class="{{if .IsBookmarked}}bg-warning text-warning-content{{else}}bg-base-200 text-base-content{{end}} px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none"
-                                    onclick="toggleBookmark()"
-                                    aria-label="收藏文章">
-                                <svg class="w-4 h-4 transition-all duration-300" viewBox="0 0 24 24">
-                                    <path fill="currentColor"
-                                          d="M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z"/>
-                                </svg>
-                                <span>{{if .IsBookmarked}}已收藏{{else}}收藏{{end}}</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 评论区域 -->
-                <div class="card bg-base-100 shadow-xl">
-                    <div class="card-body overflow-hidden">
-                        <h2 class="card-title mb-4">评论</h2>
-                        <!-- 发表评论 -->
-                        {{if .CurrentUserId}}
-                            <div role="alert" class="alert alert-success alert-dash">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                     class="h-6 w-6 shrink-0 stroke-current">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span class="text-base-content">讨论应以学习和精进为目的。请勿发布不友善或者负能量的内容，与人为善，比聪明更重要！</span>
-                            </div>
-                            <div class="mb-6">
-                            <textarea id="comment-input" class="textarea textarea-bordered w-full"
-                                      placeholder="写下你的评论..."
-                                      rows="3"></textarea>
-                                <div class="flex justify-between items-center mt-2">
-                                    <div class="flex items-center gap-2">
-                                        <button class="btn btn-ghost btn-sm" disabled>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                                 viewBox="0 0 24 24"
-                                                 stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 110-2h4z"/>
-                                            </svg>
-                                            表情
-                                        </button>
-                                        <button class="btn btn-ghost btn-sm" disabled>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                                 viewBox="0 0 24 24"
-                                                 stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.586-6.586a2 2 0 00-2.828-2.828z"/>
-                                            </svg>
-                                            图片
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <a class="font-normal text-base-content" href="/user/{{.UserId}}">{{.Username}}</a>
+                                    <span class="text-sm text-base-content/60">{{.CreateTime}}</span>
+                                </div>
+                                <p class="text-base-content mb-2">
+                                    {{if .ReplyToUsername}}
+                                    <a href="/user/{{.ReplyToUserId}}" class="text-primary" class="mr-1">@{{.ReplyToUsername}}</a>
+                                    {{end}}
+                                    {{Nl2br .Content}}
+                                </p>
+                                <div class="flex items-center gap-4 text-sm text-base-content/60">
+                                    <button class="hover:text-primary flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                             viewBox="0 0 24 24"
+                                             stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  stroke-width="2"
+                                                  d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                                        </svg>
+                                        赞
+                                    </button>
+                                    <button class="hover:text-primary" @click="toggleReplyForm({{.Id}})">回复</button>
+                                    <button class="hover:text-primary">举报</button>
+                                    {{if and $LoginUser (eq $LoginUser.UserId .UserId)}}
+                                    <button class="hover:text-primary" @click="deleteReply({{.Id}})">删除</button>
+                                    {{end}}
+                                </div>
+                                <!-- 回复表单 -->
+                                <div x-show="replyForms[{{.Id}}]" class="mt-3" style="display: none;" x-transition>
+                                <textarea class="textarea textarea-bordered w-full comment-input"
+                                          placeholder="写下你的回复..."
+                                          rows="2"
+                                          x-model="replyContents[{{.Id}}]"></textarea>
+                                    <div class="flex justify-end gap-2 mt-2">
+                                        <button class="btn btn-outline btn-sm" @click="toggleReplyForm({{.Id}})">取消</button>
+                                        <button class="btn btn-primary btn-sm"
+                                                @click="submitComment({{.Id}})"
+                                                :disabled="submitting || !replyContents[{{.Id}}]">
+                                            <span x-show="submitting && currentReplyId === {{.Id}}" class="loading loading-spinner loading-xs"></span>
+                                            <span x-text="submitting && currentReplyId === {{.Id}} ? '提交中...' : '发表回复'">发表回复</span>
                                         </button>
                                     </div>
-                                    <button id="main-comment-submit" class="btn btn-primary btn-sm">发表评论</button>
                                 </div>
                             </div>
-                        {{else}}
-                            <div class="mt-6 text-center">
-                                <a href="/login" class="btn btn-primary btn-sm">登录后发表评论</a>
-                            </div>
-                        {{end}}
-
-                        <!-- 评论列表 -->
-                        <div class="space-y-4">
-                            {{$LoginUser := .User}}
-                            {{range .CommentList}}
-                                <div class="flex gap-3" id="reply_{{.Id}}">
-                                    <a class="avatar" href="/user/{{.UserId}}">
-                                        <div class="mask mask-squircle w-10 h-10">
-                                            <img src="{{.UserAvatarUrl}}" alt="{{.Username}}"/>
-                                        </div>
-                                    </a>
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <a class="font-normal text-base-content" href="/user/{{.UserId}}">{{.Username}}</a>
-                                            <span class="text-sm text-base-content/60">{{.CreateTime}}</span>
-                                        </div>
-                                        <p class="text-base-content mb-2">
-                                            {{if .ReplyToUsername}}
-                                            <a href="/user/{{.ReplyToUserId}}" class="text-primary" class="mr-1">@{{.ReplyToUsername}}</a>
-                                            {{end}}
-                                            {{Nl2br .Content}}
-                                        </p>
-                                        <div class="flex items-center gap-4 text-sm text-base-content/60">
-                                            <button class="hover:text-primary flex items-center gap-1">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                                     viewBox="0 0 24 24"
-                                                     stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
-                                                </svg>
-                                                赞
-                                            </button>
-                                            <button class="hover:text-primary" onclick="showReplyForm({{.Id}})">回复
-                                            </button>
-                                            <button class="hover:text-primary">举报</button>
-                                            {{if and $LoginUser (eq $LoginUser.UserId .UserId)}}
-                                            <button class="hover:text-primary" onclick="deleteReply({{.Id}})">删除</button>
-                                            {{end}}
-                                        </div>
-                                        <!-- 回复表单 -->
-                                        <div id="reply-form-{{.Id}}" class="reply-form mt-3" style="display: none;">
-                                        <textarea class="textarea textarea-bordered w-full comment-input"
-                                                  placeholder="写下你的回复..." rows="2"></textarea>
-                                            <div class="flex justify-end gap-2 mt-2">
-                                                <button class="btn btn-outline btn-sm" onclick="cancelReplyForm()">取消
-                                                </button>
-                                                <button class="btn btn-primary btn-sm comment-submit"
-                                                        onclick="submitReply({{.Id}})">发表回复
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {{end}}
                         </div>
-
-                        <!--
-                        <div class="text-center mt-6"><button class="btn btn-outline btn-sm">加载更多评论</button></div>
-                         加载更多评论 -->
-                    </div>
+                    {{end}}
                 </div>
-            </section>
+            </div>
+        </div>
+    </section>
 
-            <aside class="w-full md:w-80 flex-shrink-0">
-                <div class="sticky top-18 space-y-3">
-                    <!-- 作者信息卡片 -->
-                    <div class="card bg-base-100 shadow-xl">
-                        <div class="card-body">
-                            <h2 class="card-title mb-3 font-normal">作者信息</h2>
+    <aside class="w-full md:w-80 flex-shrink-0">
+        <div class="sticky top-18 space-y-3">
+            <!-- 作者信息卡片 -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title mb-3 font-normal">作者信息</h2>
+
                             <div class="flex items-center gap-3 mb-4">
                                 <a  href="/user/{{.Article.UserId}}" class="avatar">
                                     <div class="mask mask-squircle w-16 h-16">
@@ -329,12 +341,10 @@
                             <div class="card-actions justify-center">
                                 <a href="/user/{{.Article.UserId}}" class="btn btn-primary btn-sm btn-block">查看主页</a>
                                 {{if and .CurrentUserId (not .IsOwnArticle)}}
-                                    <button id="follow-btn"
-                                            class="btn btn-sm btn-block {{if .IsFollowing}}btn-outline{{else}}btn-secondary{{end}}"
-                                            onclick="toggleFollow({{.Article.UserId}})"
-                                            data-following="{{.IsFollowing}}">
-                                        <span id="follow-text">{{if .IsFollowing}}已关注{{else}}关注作者{{end}}</span>
-                                        <span id="follow-loading" class="loading loading-spinner loading-xs" style="display: none;"></span>
+                                    <button class="btn btn-sm btn-block"
+                                            :class="isFollowing ? 'btn-outline' : 'btn-secondary'"
+                                            @click="toggleFollow({{.Article.UserId}})">
+                                        <span x-text="isFollowing ? '已关注' : '关注作者'">{{if .IsFollowing}}已关注{{else}}关注作者{{end}}</span>
                                     </button>
                                 {{else if not .CurrentUserId }}
                                     <a href="/login" class="btn btn-outline btn-sm btn-block">登录后关注</a>
@@ -344,6 +354,7 @@
                     </div>
 
                     <!-- 相关推荐 -->
+
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
                             <h2 class="card-title">相关推荐</h2>
@@ -379,233 +390,141 @@
 
 {{define "detail_script"}}
 <script>
-    // 页面加载完成后绑定事件
-    document.addEventListener('DOMContentLoaded', function () {
-        const commentInput = document.getElementById('comment-input');
-        const commentSubmit = document.getElementById('main-comment-submit');
+    function articleDetailHandler(initialData) {
+        return {
+            articleId: initialData.articleId,
+            isLiked: initialData.isLiked,
+            likeCount: initialData.likeCount,
+            isBookmarked: initialData.isBookmarked,
+            isFollowing: initialData.isFollowing,
+            commentContent: '',
+            replyForms: {},
+            replyContents: {},
+            submitting: false,
+            init() {
+                // Initialize Mermaid
+                if (window.MermaidUtils) {
+                    window.MermaidUtils.renderMermaidDiagrams('.prose');
+                }
+            },
 
-        if (commentSubmit && commentInput) {
-            commentSubmit.addEventListener('click', async function () {
-                const content = commentInput.value.trim();
-                if (!content) {
-                    window.notification.warning('请输入评论内容');
+            async toggleLike() {
+                const action = this.isLiked ? 2 : 1;
+                try {
+                    const response = await axios.post('/api/forum/like-articles', {
+                        id: this.articleId,
+                        action: action
+                    });
+                    if (response.status === 200) {
+                        this.isLiked = !this.isLiked;
+                        this.likeCount = this.isLiked ? this.likeCount + 1 : this.likeCount - 1;
+                    }
+                } catch (error) {
+                    console.error('Like failed', error);
+                    alert('操作失败');
+                }
+            },
+
+            async toggleBookmark() {
+                try {
+                    const response = await axios.post('/api/forum/articles-collection', {
+                        id: this.articleId
+                    });
+                    if (response.data.code === 0) {
+                        this.isBookmarked = !this.isBookmarked;
+                        if(this.isBookmarked) {
+                            alert('收藏成功');
+                        } else {
+                            alert('取消收藏成功');
+                        }
+                    } else {
+                         alert(response.data.msg || '操作失败');
+                    }
+                } catch (error) {
+                    console.error('Bookmark failed', error);
+                    alert('操作失败');
+                }
+            },
+
+            async toggleFollow(userId) {
+                try {
+                    const response = await axios.post('/api/forum/user-follow', {
+                        userId: userId
+                    });
+                     if (response.data.code === 0) {
+                        this.isFollowing = !this.isFollowing;
+                    } else {
+                        alert(response.data.msg || '操作失败');
+                    }
+                } catch (error) {
+                    console.error('Follow failed', error);
+                    alert('操作失败');
+                }
+            },
+
+            toggleReplyForm(id) {
+                if (this.replyForms[id]) {
+                    this.replyForms[id] = false;
+                } else {
+                    // Close others if needed, or just open this one
+                    // this.replyForms = {}; // Uncomment to close others
+                    this.replyForms[id] = true;
+                    // Initialize content if undefined
+                    if (this.replyContents[id] === undefined) {
+                        this.replyContents[id] = '';
+                    }
+                }
+            },
+
+            async submitComment(replyId) {
+                const content = replyId === 0 ? this.commentContent : this.replyContents[replyId];
+                if (!content || !content.trim()) {
+                    alert('请输入内容');
                     return;
                 }
-                // 禁用提交按钮，显示加载状态
-                commentSubmit.disabled = true;
-                commentSubmit.textContent = '提交中...';
-                await submitComment(content, 0);
-                // 重置按钮状态
-                commentSubmit.disabled = false;
-                commentSubmit.textContent = '发表评论';
-            });
-        }
-    });
 
-    function cancelReplyForm() {
-        // 隐藏所有回复表单
-        document.querySelectorAll('.reply-form').forEach(form => {
-            form.style.display = 'none';
-        });
-    }
+                this.submitting = true;
+                this.currentReplyId = replyId;
 
-    function showReplyForm(commentId) {
-        cancelReplyForm()
+                try {
+                    const response = await axios.post('/api/forum/articles-reply', {
+                        articleId: this.articleId,
+                        content: content,
+                        replyId: replyId
+                    });
 
-        // 显示当前评论的回复表单
-        const replyForm = document.getElementById(`reply-form-${commentId}`);
-        if (replyForm) {
-            replyForm.style.display = 'block';
-            const textarea = replyForm.querySelector('.comment-input');
-            textarea.focus();
-        }
-    }
-
-    async function submitReply(replyId) {
-        const replyForm = document.getElementById(`reply-form-${replyId}`);
-        const textarea = replyForm.querySelector('.comment-input');
-        const content = textarea.value.trim();
-
-        if (!content) {
-            window.notification.warning('请输入回复内容');
-            return;
-        }
-
-        const submitBtn = replyForm.querySelector('.comment-submit');
-        submitBtn.disabled = true;
-        submitBtn.textContent = '提交中...';
-        await submitComment(content, replyId);
-        submitBtn.disabled = false;
-        submitBtn.textContent = '发表回复';
-    }
-
-    async function submitComment(content, replyId) {
-        try {
-            const response = await fetch('/api/forum/articles-reply', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    articleId: {{.Article.Id}},
-                    content: content,
-                    replyId: replyId
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                location.reload();
-            } else {
-                window.notification.warning(result.msg || '回复发表失败，请稍后重试');
-            }
-        } catch (error) {
-            console.error('回复发表失败:', error);
-            window.notification.error('回复发表失败，请稍后重试'+error);
-        }
-    }
-
-    async function toggleLike() {
-        const likeBtn = document.getElementById('like-btn');
-        const likeCountSpan = document.getElementById('like-count');
-        const currentCount = parseInt(likeCountSpan.textContent);
-        const isLiked = likeBtn.classList.contains('bg-primary');
-        const action = isLiked ? 2 : 1;
-
-        try {
-            const response = await fetch('/api/forum/like-articles', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id: {{.Article.Id}},
-                    action: action
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                if (action === 1) {
-                    likeBtn.classList.remove('bg-base-200', 'text-base-content');
-                    likeBtn.classList.add('bg-primary', 'text-primary-content');
-                    likeCountSpan.textContent = currentCount + 1;
-                } else {
-                    likeBtn.classList.remove('bg-primary', 'text-primary-content');
-                    likeBtn.classList.add('bg-base-200', 'text-base-content');
-                    likeCountSpan.textContent = currentCount - 1;
+                    if (response.status === 200 || response.data.code === 0) {
+                        location.reload();
+                    } else {
+                         alert(response.data.msg || '评论失败');
+                    }
+                } catch (error) {
+                    console.error('Comment failed', error);
+                    alert('评论失败');
+                } finally {
+                    this.submitting = false;
+                    this.currentReplyId = 0;
                 }
-            } else {
-                window.notification.warning(result.msg || '操作失败，请稍后重试');
-            }
-        } catch (error) {
-            console.error('操作失败:', error);
-            window.notification.error('操作失败，请稍后重试'+error);
-        }
-    }
+            },
 
-    // 关注/取消关注功能
-    async function toggleFollow(authorId) {
-        const followBtn = document.getElementById('follow-btn');
-        const followText = document.getElementById('follow-text');
-        const followLoading = document.getElementById('follow-loading');
-
-        if (!followBtn) return;
-
-        const isFollowing = followBtn.getAttribute('data-following') === 'true';
-        const action = isFollowing ? 2 : 1; // 1: 关注, 2: 取消关注
-
-        // 显示加载状态
-        followText.style.display = 'none';
-        followLoading.style.display = 'inline-block';
-        followBtn.disabled = true;
-
-        try {
-            const response = await fetch('/api/forum/follow-user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id: authorId,
-                    action: action
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.code === 0) {
-                // 更新按钮状态
-                if (action === 1) {
-                    // 关注成功
-                    followBtn.classList.remove('btn-secondary');
-                    followBtn.classList.add('btn-outline');
-                    followText.textContent = '已关注';
-                    followBtn.setAttribute('data-following', 'true');
-                } else {
-                    // 取消关注成功
-                    followBtn.classList.remove('btn-outline');
-                    followBtn.classList.add('btn-secondary');
-                    followText.textContent = '关注作者';
-                    followBtn.setAttribute('data-following', 'false');
+            async deleteReply(replyId) {
+                if (!confirm('确定要删除这条评论吗？')) return;
+                try {
+                    const response = await axios.post('/api/forum/articles-reply-delete', {
+                        replyId: replyId
+                    });
+                    if (response.status === 200 || response.data.code === 0) {
+                        location.reload(); // Or remove element from DOM for better UX
+                    } else {
+                        alert(response.data.msg || '删除失败');
+                    }
+                } catch (error) {
+                    console.error('Delete failed', error);
+                    alert('删除失败');
                 }
-            } else {
-                window.notification.warning(result.msg || '操作失败，请稍后重试');
             }
-        } catch (error) {
-            console.error('关注操作失败:', error);
-            window.notification.error('操作失败，请稍后重试' + error);
-        } finally {
-            // 恢复按钮状态
-            followText.style.display = 'inline-block';
-            followLoading.style.display = 'none';
-            followBtn.disabled = false;
-        }
-    }
-
-    // 收藏/取消收藏功能
-    async function toggleBookmark() {
-        const bookmarkBtn = document.getElementById('bookmark-btn');
-        const bookmarkText = bookmarkBtn.querySelector('span');
-        const isBookmarked = bookmarkBtn.classList.contains('bg-warning');
-        const action = isBookmarked ? 2 : 1; // 1: 收藏, 2: 取消收藏
-
-        try {
-            const response = await fetch('/api/forum/bookmark-article', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id: {{.Article.Id}},
-                    action: action
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.code === 0) {
-                if (action === 1) {
-                    // 收藏成功
-                    bookmarkBtn.classList.remove('bg-base-200', 'text-base-content');
-                    bookmarkBtn.classList.add('bg-warning', 'text-warning-content');
-                    bookmarkText.textContent = '已收藏';
-                } else {
-                    // 取消收藏成功
-                    bookmarkBtn.classList.remove('bg-warning', 'text-warning-content');
-                    bookmarkBtn.classList.add('bg-base-200', 'text-base-content');
-                    bookmarkText.textContent = '收藏';
-                }
-            } else {
-                window.notification.warning(result.msg || '操作失败，请稍后重试');
-            }
-        } catch (error) {
-            console.error('收藏操作失败:', error);
-            window.notification.error('操作失败，请稍后重试');
         }
     }
 </script>
 {{end}}
-{{template "layout/main.gohtml" dict "Body" "detail_content" "Script" "detail_script" "Data" . "Entry" "src/detail.js"}}
+{{template "layout/main.gohtml" dict "Body" "detail_content" "Script" "detail_script" "Data" . "Entry" "src/main.js"}}

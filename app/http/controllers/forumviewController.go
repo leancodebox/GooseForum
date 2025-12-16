@@ -544,11 +544,24 @@ func LinksView(c *gin.Context) {
 }
 
 func Profile(c *gin.Context) {
+	userId := component.LoginUserId(c)
+	if userId == 0 {
+		c.Redirect(302, "/login")
+		return
+	}
+	user, err := users.Get(userId)
+	if err != nil {
+		errorPage(c, "用户不存在", "用户不存在")
+		return
+	}
+	stats := userStatistics.Get(userId)
 	viewrender.Render(c, "profile.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`个人中心`).
 			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
+		"User":  user,
+		"Stats": stats,
 	})
 }
 func Publish(c *gin.Context) {

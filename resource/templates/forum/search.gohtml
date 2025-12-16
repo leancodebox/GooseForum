@@ -1,5 +1,13 @@
 {{define "search_content"}}
-<div class="space-y-4">
+<div class="space-y-4" x-data="{
+    query: '{{.Query}}',
+    performSearch() {
+        const q = this.query.trim();
+        if (q) {
+            window.location.href = '/search?q=' + encodeURIComponent(q);
+        }
+    }
+}">
     <!-- 搜索头部 -->
     <div class="mb-4">
         <h1 class="text-3xl font-normal mb-4">搜索结果{{.Query}}</h1>
@@ -8,9 +16,9 @@
         <div class="max-w-2xl">
             <div class="form-control">
                 <div class="input-group">
-                    <input type="text" id="search-query" placeholder="搜索文章..."
-                           class="input input-bordered flex-1" value="{{.Query}}"/>
-                    <button class="btn btn-primary" onclick="performSearch()">
+                    <input type="text" x-model="query" @keydown.enter="performSearch" placeholder="搜索文章..."
+                           class="input input-bordered flex-1" />
+                    <button class="btn btn-primary" @click="performSearch">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

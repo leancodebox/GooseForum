@@ -3,7 +3,10 @@
 {{end}}
 
 {{define "user_content"}}
-        <div class="flex flex-col lg:flex-row gap-6">
+        <div class="flex flex-col lg:flex-row gap-6" x-data="userPageHandler({
+            authorId: {{.Author.UserId}},
+            isFollowingAuthor: {{.IsFollowingAuthor}}
+        })">
             <!-- 左侧用户信息 -->
             <aside class="w-full lg:w-80 flex-shrink-0">
                 <div class="sticky top-18 space-y-3">
@@ -132,13 +135,12 @@
 
                             <div class="card-actions justify-center">
                                 {{if and .CurrentUserId (ne .CurrentUserId .Author.UserId)}}
-                                    <button id="follow-btn"
-                                            class="btn btn-sm btn-block {{if .IsFollowingAuthor}}btn-outline{{else}}btn-secondary{{end}}"
-                                            onclick="toggleFollow({{.Author.UserId}})"
-                                            data-following="{{.IsFollowingAuthor}}">
-                                        <span id="follow-text">{{if .IsFollowingAuthor}}已关注{{else}}关注作者{{end}}</span>
-                                        <span id="follow-loading" class="loading loading-spinner loading-xs"
-                                              style="display: none;"></span>
+                                    <button class="btn btn-sm btn-block"
+                                            :class="isFollowingAuthor ? 'btn-outline' : 'btn-secondary'"
+                                            @click="toggleAuthorFollow()"
+                                            :disabled="loadingAuthorFollow">
+                                        <span x-show="!loadingAuthorFollow" x-text="isFollowingAuthor ? '已关注' : '关注作者'">{{if .IsFollowingAuthor}}已关注{{else}}关注作者{{end}}</span>
+                                        <span x-show="loadingAuthorFollow" class="loading loading-spinner loading-xs"></span>
                                     </button>
                                 {{else if not .CurrentUserId }}
                                     <a href="/login" class="btn btn-outline btn-sm btn-block">登录后关注</a>
@@ -180,65 +182,50 @@
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="发布的文章" checked="checked"/>
                         <div class="tab-content border-base-300 bg-base-100 {{if not .Articles}} p-10 {{end}}">
                             {{if .Articles}}
-                                <ul class="list">
+                                <div class="space-y-4 py-4">
                                     {{range .Articles}}
-                                        <li class="list-row hover:bg-base-300 flex items-center gap-3 px-4 py-2 ">
-                                            <!-- 左侧头像 -->
-                                            <a class="avatar" href="/user/{{.AuthorId}}">
-                                                <div class="w-10 rounded-full">
-                                                    <img src="{{.AvatarUrl}}" alt="{{.Username}}"/>
-                                                </div>
-                                            </a>
-                                            <!-- 右侧内容 -->
-                                            <div class="flex-1">
-                                                <!-- 标题行 -->
-                                                <div class="flex items-center gap-2 mb-1">
-                                                    <div class="badge badge-sm badge-primary flex-shrink-0 px-1.5">{{.TypeStr}}</div>
-                                                    <a href="/post/{{.Id}}"
-                                                       class="text-lg font-normal text-base-content hover:text-primary hover:underline flex-1 min-w-0">{{.Title}}</a>
-                                                </div>
-                                                <!-- 用户信息行和统计信息合并为一行 -->
-                                                <div class="flex items-center justify-between text-sm text-base-content/60">
-                                                    <div class="flex items-center flex-wrap">
-                                                        <a href="/user/{{.AuthorId}}" class="mr-1">{{.Username}}</a>
-                                                        <span class="mr-1">{{.LastUpdateTime}}</span>
-                                                        {{range .Categories}}
-                                                            <span class="badge badge-sm badge-ghost mr-1 px-1.5">{{.}}</span>
-                                                        {{end}}
-                                                    </div>
-                                                    <div class="flex items-center">
-                                                        <div class="flex items-center mr-4">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                                                 fill="none"
-                                                                 viewBox="0 0 24 24"
-                                                                 stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                      stroke-width="2"
-                                                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                      stroke-width="2"
-                                                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                            </svg>
-                                                            <span class="flex-shrink-0">{{.ViewCount}}</span>
+                                        <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-200">
+                                            <div class="card-body p-5">
+                                                <div class="flex items-start gap-4">
+                                                    <!-- 左侧内容 -->
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="flex items-center gap-2 mb-2">
+                                                            <div class="badge badge-sm badge-primary badge-outline">{{.TypeStr}}</div>
+                                                            {{range .Categories}}
+                                                                <span class="badge badge-sm badge-ghost text-base-content/70">{{.}}</span>
+                                                            {{end}}
                                                         </div>
-                                                        <div class="flex items-center">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                                                 fill="none"
-                                                                 viewBox="0 0 24 24"
-                                                                 stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                      stroke-width="2"
-                                                                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                                                            </svg>
-                                                            <span class="flex-shrink-0"> {{.CommentCount}}</span>
+                                                        <h3 class="text-lg font-normal mb-2 leading-relaxed">
+                                                            <a href="/post/{{.Id}}" class="hover:text-primary transition-colors line-clamp-2 text-base-content">{{.Title}}</a>
+                                                        </h3>
+                                                        <div class="flex items-center flex-wrap gap-4 text-sm text-base-content/60">
+                                                            <div class="flex items-center gap-1">
+                                                                <div class="avatar flex-shrink-0">
+                                                                    <div class="w-5 h-5 rounded-full">
+                                                                        <img src="{{.AvatarUrl}}" alt="{{.Username}}"/>
+                                                                    </div>
+                                                                </div>
+                                                                <span>{{.Username}}</span>
+                                                            </div>
+                                                            <span class="hidden sm:inline">·</span>
+                                                            <span>{{.LastUpdateTime}}</span>
+                                                            <div class="flex items-center gap-3 ml-auto sm:ml-0">
+                                                                <div class="flex items-center gap-1" title="阅读数">
+                                                                    {{template "icon_view"}}
+                                                                    <span>{{.ViewCount}}</span>
+                                                                </div>
+                                                                <div class="flex items-center gap-1" title="评论数">
+                                                                    {{template "icon_comment"}}
+                                                                    <span>{{.CommentCount}}</span>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </li>
+                                        </div>
                                     {{end}}
-                                </ul>
-
+                                </div>
                             {{else}}
                                 假以时日一飞冲天
                             {{end}}
@@ -268,13 +255,13 @@
                                                     </div>
                                                     {{if and $.CurrentUserId (ne $.CurrentUserId .Id)}}
                                                         {{$isFollowing := index $.FollowingStatusMap .Id}}
-                                                        <button class="btn btn-sm {{if $isFollowing}}btn-outline{{else}}btn-primary{{end}} follow-btn"
-                                                                onclick="toggleUserFollow({{.Id}}, this)"
-                                                                data-following="{{$isFollowing}}"
-                                                                data-user-id="{{.Id}}">
-                                                            <span class="follow-text">{{if $isFollowing}}已关注{{else}}关注{{end}}</span>
-                                                            <span class="follow-loading loading loading-spinner loading-xs"
-                                                                  style="display: none;"></span>
+                                                        <button class="btn btn-sm"
+                                                                x-data="followUserHandler({{.Id}}, {{$isFollowing}})"
+                                                                :class="isFollowing ? 'btn-outline' : 'btn-primary'"
+                                                                @click="toggleFollow()"
+                                                                :disabled="loading">
+                                                            <span x-show="!loading" x-text="isFollowing ? '已关注' : '关注'">{{if $isFollowing}}已关注{{else}}关注{{end}}</span>
+                                                            <span x-show="loading" class="loading loading-spinner loading-xs"></span>
                                                         </button>
                                                     {{end}}
                                                 </div>
@@ -311,13 +298,13 @@
                                                     </div>
                                                     {{if and $.CurrentUserId (ne $.CurrentUserId .Id)}}
                                                         {{$isFollowing := index $.FollowerStatusMap .Id}}
-                                                        <button class="btn btn-sm {{if $isFollowing}}btn-outline{{else}}btn-primary{{end}} follow-btn"
-                                                                onclick="toggleUserFollow({{.Id}}, this)"
-                                                                data-following="{{$isFollowing}}"
-                                                                data-user-id="{{.Id}}">
-                                                            <span class="follow-text">{{if $isFollowing}}已关注{{else}}关注{{end}}</span>
-                                                            <span class="follow-loading loading loading-spinner loading-xs"
-                                                                  style="display: none;"></span>
+                                                        <button class="btn btn-sm"
+                                                                x-data="followUserHandler({{.Id}}, {{$isFollowing}})"
+                                                                :class="isFollowing ? 'btn-outline' : 'btn-primary'"
+                                                                @click="toggleFollow()"
+                                                                :disabled="loading">
+                                                            <span x-show="!loading" x-text="isFollowing ? '已关注' : '关注'">{{if $isFollowing}}已关注{{else}}关注{{end}}</span>
+                                                            <span x-show="loading" class="loading loading-spinner loading-xs"></span>
                                                         </button>
                                                     {{end}}
                                                 </div>
@@ -337,120 +324,65 @@
 
 {{define "user_script"}}
 <script>
-    // 关注/取消关注功能 - 用于左侧用户卡片
-    async function toggleFollow(authorId) {
-        const followBtn = document.getElementById('follow-btn');
-        const followText = document.getElementById('follow-text');
-        const followLoading = document.getElementById('follow-loading');
+    function userPageHandler(initialData) {
+        return {
+            authorId: initialData.authorId,
+            isFollowingAuthor: initialData.isFollowingAuthor,
+            loadingAuthorFollow: false,
 
-        if (!followBtn) return;
+            async toggleAuthorFollow() {
+                if (this.loadingAuthorFollow) return;
+                this.loadingAuthorFollow = true;
+                const action = this.isFollowingAuthor ? 2 : 1;
 
-        const isFollowing = followBtn.getAttribute('data-following') === 'true';
-        const action = isFollowing ? 2 : 1; // 1: 关注, 2: 取消关注
-
-        // 显示加载状态
-        followText.style.display = 'none';
-        followLoading.style.display = 'inline-block';
-        followBtn.disabled = true;
-
-        try {
-            const response = await fetch('/api/forum/follow-user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id: authorId,
-                    action: action
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.code === 0) {
-                // 更新按钮状态
-                if (action === 1) {
-                    // 关注成功
-                    followBtn.classList.remove('btn-secondary');
-                    followBtn.classList.add('btn-outline');
-                    followText.textContent = '已关注';
-                    followBtn.setAttribute('data-following', 'true');
-                } else {
-                    // 取消关注成功
-                    followBtn.classList.remove('btn-outline');
-                    followBtn.classList.add('btn-secondary');
-                    followText.textContent = '关注作者';
-                    followBtn.setAttribute('data-following', 'false');
+                try {
+                    const response = await axios.post('/api/forum/follow-user', {
+                        id: this.authorId,
+                        action: action
+                    });
+                    if (response.status === 200 && response.data.code === 0) {
+                        this.isFollowingAuthor = !this.isFollowingAuthor;
+                    } else {
+                        window.notification.error(response.data.msg || '操作失败');
+                    }
+                } catch (error) {
+                    console.error('关注操作失败:', error);
+                    window.notification.error('操作失败: ' + (error.response?.data?.msg || error.message));
+                } finally {
+                    this.loadingAuthorFollow = false;
                 }
-            } else {
-                window.notification.error(result.msg || '操作失败，请稍后重试')
             }
-        } catch (error) {
-            console.error('关注操作失败:', error);
-            window.notification.error('关注操作失败:' + error)
-        } finally {
-            // 恢复按钮状态
-            followText.style.display = 'inline-block';
-            followLoading.style.display = 'none';
-            followBtn.disabled = false;
         }
     }
 
-    // 关注/取消关注功能 - 用于关注列表和粉丝列表
-    async function toggleUserFollow(userId, buttonElement) {
-        const followText = buttonElement.querySelector('.follow-text');
-        const followLoading = buttonElement.querySelector('.follow-loading');
+    function followUserHandler(userId, isFollowing) {
+        return {
+            userId: userId,
+            isFollowing: isFollowing,
+            loading: false,
 
-        if (!buttonElement) return;
+            async toggleFollow() {
+                if (this.loading) return;
+                this.loading = true;
+                const action = this.isFollowing ? 2 : 1;
 
-        const isFollowing = buttonElement.getAttribute('data-following') === 'true';
-        const action = isFollowing ? 2 : 1; // 1: 关注, 2: 取消关注
-
-        // 显示加载状态
-        followText.style.display = 'none';
-        followLoading.style.display = 'inline-block';
-        buttonElement.disabled = true;
-
-        try {
-            const response = await fetch('/api/forum/follow-user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id: userId,
-                    action: action
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.code === 0) {
-                // 更新按钮状态
-                if (action === 1) {
-                    // 关注成功
-                    buttonElement.classList.remove('btn-primary');
-                    buttonElement.classList.add('btn-outline');
-                    followText.textContent = '已关注';
-                    buttonElement.setAttribute('data-following', 'true');
-                } else {
-                    // 取消关注成功
-                    buttonElement.classList.remove('btn-outline');
-                    buttonElement.classList.add('btn-primary');
-                    followText.textContent = '关注';
-                    buttonElement.setAttribute('data-following', 'false');
+                try {
+                    const response = await axios.post('/api/forum/follow-user', {
+                        id: this.userId,
+                        action: action
+                    });
+                    if (response.status === 200 && response.data.code === 0) {
+                        this.isFollowing = !this.isFollowing;
+                    } else {
+                        window.notification.error(response.data.msg || '操作失败');
+                    }
+                } catch (error) {
+                    console.error('关注操作失败:', error);
+                    window.notification.error('操作失败: ' + (error.response?.data?.msg || error.message));
+                } finally {
+                    this.loading = false;
                 }
-            } else {
-                window.notification.warning(result.msg || '操作失败，请稍后重试');
             }
-        } catch (error) {
-            console.error('关注操作失败:', error);
-            window.notification.error('操作失败，请稍后重试'+error);
-        } finally {
-            // 恢复按钮状态
-            followText.style.display = 'inline-block';
-            followLoading.style.display = 'none';
-            buttonElement.disabled = false;
         }
     }
 </script>

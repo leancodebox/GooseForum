@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/datacache"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -43,6 +44,9 @@ func GlobalFunc() template.FuncMap {
 			// 动态执行名为 name 的模板
 			err := ht4gooseforum.ExecuteTemplate(&buf, name, data)
 			return template.HTML(buf.String()), err
+		},
+		"json": func(v any) template.JS {
+			return template.JS(jsonopt.Encode(v))
 		},
 	}
 }

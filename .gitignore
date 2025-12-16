@@ -32,3 +32,4 @@ config.toml
 dist/
 .trae/rules/project_rules.md
 .vercel
+**/node_modules/

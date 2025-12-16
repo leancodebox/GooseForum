@@ -2,10 +2,10 @@
 <html lang="zh-CN" data-theme="{{.Theme}}">
 <head>
     {{template "common-head.gohtml" .}}
-    {{GetImportInfoPath `src/docs.js`}}
+    {{GetImportInfoPath `src/main.js`}}
 </head>
 <body>
-<div class="h-screen bg-base-200 flex flex-col">
+<div class="h-screen bg-base-200 flex flex-col" x-data="{ sidebarOpen: false }" x-effect="document.body.style.overflow = sidebarOpen ? 'hidden' : ''" @keydown.escape.window="sidebarOpen = false" @resize.window="if (window.innerWidth >= 768) sidebarOpen = false">
     <header class="flex-shrink-0">
         {{template "nav.gohtml" .}}
     </header>
@@ -14,13 +14,13 @@
         <div class="container px-3 py-2 flex items-center space-x-1">
             <!-- 移动端菜单按钮和面包屑 -->
             <!-- 移动端菜单按钮 -->
-            <button id="mobile-menu-toggle"
-                    class="btn btn-ghost btn-sm md:hidden w-8 h-8 min-h-8 p-0">
-                <svg id="menu-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button class="btn btn-ghost btn-sm md:hidden w-8 h-8 min-h-8 p-0"
+                    @click="sidebarOpen = !sidebarOpen">
+                <svg class="w-4 h-4" x-show="!sidebarOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
-                <svg id="close-icon" class="w-4 h-4 hidden" fill="none" stroke="currentColor"
+                <svg class="w-4 h-4" x-show="sidebarOpen" style="display: none;" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M6 18L18 6M6 6l12 12"></path>
@@ -48,7 +48,10 @@
 
         <!-- 侧边栏 -->
         <aside id="docs-sidebar"
-               class="w-80 max-w-[85vw] md:w-60 bg-base-100 border-r border-base-300 md:flex-shrink-0 h-full overflow-y-auto md:block fixed md:relative top-0 left-0 z-50 md:z-auto shadow-2xl md:shadow-none transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out">
+               class="w-80 max-w-[85vw] md:w-60 bg-base-100 border-r border-base-300 md:flex-shrink-0 h-full overflow-y-auto md:block fixed md:relative top-0 left-0 z-50 md:z-auto shadow-2xl md:shadow-none transform md:translate-x-0 transition-all duration-300 ease-in-out"
+               x-cloak
+               :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }"
+               @click="if (window.innerWidth < 768 && $event.target.closest('a')) sidebarOpen = false">
             <div class="p-2">
                 <!-- 项目信息 -->
                 <div class="min-w-0 flex-1 p-2">
@@ -224,96 +227,5 @@
         </div>
     </main>
 </div>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-        const mobileSidebar = document.getElementById('docs-sidebar');
-        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-        const menuIcon = document.getElementById('menu-icon');
-        const closeIcon = document.getElementById('close-icon');
-
-        let isSidebarOpen = false;
-
-        function toggleMobileSidebar() {
-            isSidebarOpen = !isSidebarOpen;
-
-            if (isSidebarOpen) {
-                // 显示移动端侧边栏
-                mobileSidebar.classList.remove('-translate-x-full');
-                mobileSidebar.classList.add('translate-x-0');
-
-                // 显示遮罩层
-                sidebarBackdrop.classList.remove('opacity-0', 'pointer-events-none');
-                sidebarBackdrop.classList.add('opacity-100', 'pointer-events-auto');
-
-                document.body.style.overflow = 'hidden';
-
-                // 切换图标
-                menuIcon.classList.add('hidden');
-                closeIcon.classList.remove('hidden');
-            } else {
-                // 隐藏移动端侧边栏
-                mobileSidebar.classList.remove('translate-x-0');
-                mobileSidebar.classList.add('-translate-x-full');
-
-                // 隐藏遮罩层
-                sidebarBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
-                sidebarBackdrop.classList.add('opacity-0', 'pointer-events-none');
-
-                document.body.style.overflow = '';
-
-                // 切换图标
-                menuIcon.classList.remove('hidden');
-                closeIcon.classList.add('hidden');
-            }
-        }
-
-        // 移动端菜单按钮点击事件
-        if (mobileMenuToggle) {
-            mobileMenuToggle.addEventListener('click', toggleMobileSidebar);
-        }
-
-        // 背景遮罩点击事件
-        if (sidebarBackdrop) {
-            sidebarBackdrop.addEventListener('click', function () {
-                if (isSidebarOpen) {
-                    toggleMobileSidebar();
-                }
-            });
-        }
-
-        // ESC键关闭侧边栏
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && isSidebarOpen) {
-                toggleMobileSidebar();
-            }
-        });
-
-        // 窗口大小改变时的处理
-        window.addEventListener('resize', function () {
-            if (window.innerWidth >= 768) { // md断点
-                if (isSidebarOpen) {
-                    toggleMobileSidebar();
-                }
-            }
-        });
-
-        // 侧边栏内的链接点击后自动关闭侧边栏（仅移动端）
-        if (mobileSidebar) {
-            const sidebarLinks = mobileSidebar.querySelectorAll('a');
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', function () {
-                    if (isSidebarOpen && window.innerWidth < 768) {
-                        setTimeout(() => {
-                            toggleMobileSidebar();
-                        }, 150); // 延迟关闭，让用户看到点击效果
-                    }
-                });
-            });
-        }
-    });
-</script>
 </body>
 </html>

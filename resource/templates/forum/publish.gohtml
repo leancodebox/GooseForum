@@ -1,4 +1,313 @@
 {{define "publish_content"}}
-<div id="app"></div>
+<div class="min-h-screen bg-base-200 p-4" x-data="publishHandler()">
+    <!-- Toast Notification -->
+    <div x-show="message.text" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         class="toast toast-top toast-end z-[100]">
+        <div class="alert shadow-lg" :class="{'alert-success': message.type === 'success', 'alert-error': message.type === 'error', 'alert-info': message.type === 'info'}">
+            <span x-text="message.text"></span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto max-w-5xl">
+         <!-- Tabs -->
+         <div class="tabs tabs-lifted mb-0">
+             <a class="tab tab-lg" :class="{'tab-active': ui.activeTab === 'edit'}" @click="ui.activeTab = 'edit'">编辑</a>
+             <a class="tab tab-lg" :class="{'tab-active': ui.activeTab === 'preview'}" @click="ui.activeTab = 'preview'">预览</a>
+             <div class="tab tab-lg flex-1 cursor-default"></div>
+         </div>
+
+         <div class="bg-base-100 p-6 rounded-b-box rounded-tr-box shadow-lg min-h-[70vh] flex flex-col">
+             <!-- Edit Mode -->
+             <div x-show="ui.activeTab === 'edit'" class="flex-1 flex flex-col gap-4">
+                 <!-- Title -->
+                 <div class="form-control">
+                    <input type="text" x-model="article.title" placeholder="文章标题" class="input input-bordered w-full text-lg font-bold" />
+                 </div>
+
+                 <!-- Type & Category -->
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <select x-model.number="article.type" class="select select-bordered w-full">
+                         <option value="0" disabled>选择文章类型</option>
+                         <template x-for="t in options.types" :key="t.value">
+                             <option :value="t.value" x-text="t.name"></option>
+                         </template>
+                     </select>
+                     
+                     <!-- Category Selector (Custom Dropdown) -->
+                     <div class="dropdown w-full" :class="{'dropdown-open': ui.catOpen}" @click.outside="ui.catOpen = false">
+                         <div tabindex="0" role="button" class="select select-bordered w-full flex items-center justify-between" @click="ui.catOpen = !ui.catOpen">
+                             <span x-text="article.categoryId.length ? `已选 ${article.categoryId.length} 个分类` : '选择分类'"></span>
+                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                         </div>
+                         <ul tabindex="0" class="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto block border border-base-200 mt-1">
+                            <template x-for="c in options.categories" :key="c.value">
+                                <li>
+                                    <label class="label cursor-pointer justify-start hover:bg-base-200 rounded-lg p-2">
+                                        <input type="checkbox" class="checkbox checkbox-sm mr-3" :value="c.value" x-model.number="article.categoryId" />
+                                        <span x-text="c.name" class="flex-1"></span>
+                                    </label>
+                                </li>
+                            </template>
+                         </ul>
+                     </div>
+                 </div>
+
+                 <!-- Toolbar -->
+                 <div class="flex gap-2 p-2 bg-base-200 rounded-lg items-center">
+                     <button class="btn btn-sm btn-ghost gap-2" @click="$refs.fileInput.click()" :disabled="ui.uploading">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                         上传图片
+                     </button>
+                     <span class="text-xs text-base-content/50 ml-2 hidden sm:inline">支持拖拽、粘贴上传图片</span>
+                     <input type="file" x-ref="fileInput" class="hidden" accept="image/*" @change="handleFileSelect" multiple />
+                     
+                     <div x-show="ui.uploading" class="ml-auto flex items-center text-sm text-primary">
+                        <span class="loading loading-spinner loading-xs mr-2"></span>
+                        上传中...
+                     </div>
+                 </div>
+
+                 <!-- Editor -->
+                 <div class="flex-1 relative group">
+                     <textarea 
+                        x-model="article.content" 
+                        class="textarea textarea-bordered w-full h-full min-h-[400px] font-mono leading-relaxed p-4 resize-none focus:outline-none focus:border-primary" 
+                        placeholder="在此输入 Markdown 内容..."
+                        @paste="handlePaste"
+                        @drop.prevent="handleDrop"
+                        @dragover.prevent="ui.dragOver = true"
+                        @dragleave.prevent="ui.dragOver = false"
+                        :class="{'border-primary border-2 border-dashed bg-base-200': ui.dragOver}"
+                     ></textarea>
+                     
+                     <!-- Drag Overlay -->
+                     <div x-show="ui.dragOver" class="absolute inset-0 flex items-center justify-center pointer-events-none bg-base-100/50 backdrop-blur-sm rounded-lg border-2 border-primary border-dashed">
+                        <div class="text-primary font-bold text-xl">释放以上传图片</div>
+                     </div>
+                 </div>
+             </div>
+
+             <!-- Preview Mode -->
+             <div x-show="ui.activeTab === 'preview'" class="flex-1 overflow-y-auto border border-base-200 rounded-lg p-8 bg-base-100">
+                 <article class="prose max-w-none" x-html="renderMarkdown()"></article>
+             </div>
+             
+             <!-- Actions -->
+             <div class="flex justify-end mt-6 gap-3 pt-4 border-t border-base-200">
+                 <a href="/" class="btn btn-ghost">取消</a>
+                 <button class="btn btn-primary min-w-[120px]" @click="submit" :disabled="ui.submitting">
+                     <span x-show="ui.submitting" class="loading loading-spinner loading-sm"></span>
+                     <span x-text="ui.submitting ? '发布中...' : '发布文章'"></span>
+                 </button>
+             </div>
+         </div>
+    </div>
+</div>
 {{end}}
-{{template "layout/main.gohtml" dict "Body" "publish_content" "Data" . "Entry" "src/publish.js"}}
+
+{{define "publish_script"}}
+<script src="/static/js/markdown-it.min.js"></script>
+<script>
+    function publishHandler() {
+        return {
+            article: {
+                id: 0,
+                title: '',
+                content: '',
+                type: 0,
+                categoryId: []
+            },
+            options: {
+                types: [],
+                categories: []
+            },
+            ui: {
+                activeTab: 'edit',
+                catOpen: false,
+                submitting: false,
+                uploading: false,
+                dragOver: false
+            },
+            message: { text: '', type: '' },
+            md: null,
+
+            init() {
+                // Init MarkdownIt
+                if (window.markdownit) {
+                    this.md = window.markdownit({ html: true, linkify: true, breaks: true });
+                }
+
+                // Fetch enums
+                fetch('/api/forum/get-articles-enum')
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.code === 0) {
+                            this.options.types = res.result.type || [];
+                            // Map category array to simplified structure if needed, 
+                            // but usually it's {name, value} which works with x-text/value
+                            this.options.categories = res.result.category || [];
+                        }
+                    });
+
+                // Check for ID (Edit mode)
+                const params = new URLSearchParams(window.location.search);
+                const id = params.get('id');
+                if (id) {
+                    this.article.id = parseInt(id);
+                    this.loadArticle(id);
+                }
+            },
+
+            loadArticle(id) {
+                fetch('/forum/get-articles-origin', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id: parseInt(id)})
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.code === 0) {
+                        const data = res.result;
+                        this.article.title = data.articleTitle;
+                        this.article.content = data.articleContent;
+                        this.article.type = data.type;
+                        this.article.categoryId = data.categoryId || [];
+                    }
+                });
+            },
+
+            renderMarkdown() {
+                if (!this.md) return '<p>Loading renderer...</p>';
+                if (!this.article.content) return '<p class="text-gray-400 italic">暂无内容...</p>';
+                return this.md.render(this.article.content);
+            },
+
+            showMsg(text, type = 'info') {
+                this.message = { text, type };
+                setTimeout(() => this.message.text = '', 3000);
+            },
+
+            async submit() {
+                if (!this.article.title) return this.showMsg('请输入标题', 'error');
+                if (!this.article.content) return this.showMsg('请输入内容', 'error');
+                if (!this.article.type) return this.showMsg('请选择类型', 'error');
+                if (this.article.categoryId.length === 0) return this.showMsg('请选择分类', 'error');
+
+                this.ui.submitting = true;
+                try {
+                    const res = await fetch('/api/forum/write-articles', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(this.article)
+                    }).then(r => r.json());
+
+                    if (res.code === 0) {
+                        this.showMsg(res.result ? '更新成功' : '发布成功', 'success');
+                        setTimeout(() => window.location.href = '/post/' + (res.result || this.article.id), 1000);
+                    } else {
+                        this.showMsg(res.msg || '发布失败', 'error');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    this.showMsg('请求失败', 'error');
+                } finally {
+                    this.ui.submitting = false;
+                }
+            },
+
+            async uploadImage(file) {
+                 // Try to compress/convert to WebP
+                 let fileToUpload = file;
+                 if (window.ImageUtils) {
+                     try {
+                         const result = await window.ImageUtils.processImageFile(file);
+                         fileToUpload = result.file;
+                     } catch (e) {
+                         console.warn('Image processing failed, using original file', e);
+                     }
+                 }
+
+                 const formData = new FormData();
+                 formData.append('file', fileToUpload);
+                 this.ui.uploading = true;
+                 this.showMsg('正在上传图片...', 'info');
+                 
+                 try {
+                     const res = await fetch('/file/img-upload', {
+                         method: 'POST',
+                         body: formData
+                     }).then(r => r.json());
+                     
+                     if (res.code === 0 && res.result.url) {
+                         this.insertContent(`![${file.name.split('.')[0]}](${res.result.url})`);
+                         this.showMsg('图片上传成功', 'success');
+                     } else {
+                         this.showMsg(res.msg || '上传失败', 'error');
+                     }
+                 } catch (e) {
+                     console.error(e);
+                     this.showMsg('上传出错', 'error');
+                 } finally {
+                     this.ui.uploading = false;
+                 }
+            },
+
+            insertContent(text) {
+                // Append to end for simplicity, or we could try to insert at cursor if we tracked it
+                // Tracking cursor in textarea with Alpine is tricky without a custom directive or refs usage
+                // Let's try to append to end first
+                
+                const textarea = this.$el.querySelector('textarea');
+                if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const textBefore = this.article.content.substring(0, start);
+                    const textAfter = this.article.content.substring(end);
+                    this.article.content = textBefore + '\n' + text + '\n' + textAfter;
+                    
+                    // Restore cursor logic would go here but x-model might reset it
+                } else {
+                    this.article.content += '\n' + text + '\n';
+                }
+            },
+
+            handleFileSelect(e) {
+                if (e.target.files.length) {
+                    Array.from(e.target.files).forEach(f => this.uploadImage(f));
+                }
+                e.target.value = ''; // Reset input
+            },
+
+            handlePaste(e) {
+                const items = e.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        const file = items[i].getAsFile();
+                        this.uploadImage(file);
+                        e.preventDefault(); // Prevent pasting the binary data string if that happens
+                    }
+                }
+            },
+
+            handleDrop(e) {
+                this.ui.dragOver = false;
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    Array.from(files).forEach(f => {
+                         if (f.type.startsWith('image/')) this.uploadImage(f);
+                    });
+                }
+            }
+        }
+    }
+</script>
+{{end}}
+
+{{template "layout/main.gohtml" dict "Body" "publish_content" "Script" "publish_script" "Data" . "Entry" "src/main.js"}}

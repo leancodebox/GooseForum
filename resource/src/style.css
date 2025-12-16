@@ -1,9 +1,10 @@
 @import "tailwindcss";
 @source not "admin";
-@source not "../templates/docs";
+@source "../templates/docs";
 @plugin "@tailwindcss/typography"{
 
 }
+[x-cloak] { display: none !important; }
 
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, retro, garden, forest, luxury, dracula;

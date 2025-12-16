@@ -1,4 +1,613 @@
 {{define "profile_content"}}
-<div id="app"></div>
+<div class="container mx-auto px-4 py-8 max-w-6xl" x-data="profileHandler()" x-cloak>
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- 左侧侧边栏：用户信息与导航 -->
+        <aside class="w-full lg:w-80 flex-shrink-0 space-y-6">
+            <!-- 用户卡片 -->
+            <div class="card bg-base-100 shadow-xl sticky top-20">
+                <div class="card-body text-center p-6">
+                    <!-- 头像区域 -->
+                    <div class="avatar mb-4 mx-auto relative group">
+                        <div class="mask mask-squircle w-24 h-24 cursor-pointer overflow-hidden ring ring-primary ring-offset-base-100 ring-offset-2">
+                            <img :src="user.avatarUrl || '/static/pic/default-avatar.webp'" alt="Avatar" class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"/>
+                            <!-- 上传遮罩 -->
+                            <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300" @click="$refs.avatarInput.click()">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <input type="file" x-ref="avatarInput" class="hidden" accept="image/*" @change="handleAvatarUpload">
+                    </div>
+
+                    <h2 class="text-xl font-bold text-base-content" x-text="user.nickname || user.username"></h2>
+                    <p class="text-sm text-base-content/60 mt-1" x-text="'@' + user.username"></p>
+                    <p class="text-sm text-base-content/70 mt-3 line-clamp-2" x-text="user.signature || '这个人很懒，什么都没有写'"></p>
+
+                    <!-- 数据统计 -->
+                    <div class="grid grid-cols-3 gap-2 mt-6 py-4 border-t border-b border-base-200">
+                        <div class="text-center">
+                            <div class="text-lg font-bold text-primary" x-text="stats.articleCount || 0"></div>
+                            <div class="text-xs text-base-content/60">文章</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-bold text-secondary" x-text="stats.likeReceivedCount || 0"></div>
+                            <div class="text-xs text-base-content/60">获赞</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-bold text-accent" x-text="stats.followerCount || 0"></div>
+                            <div class="text-xs text-base-content/60">粉丝</div>
+                        </div>
+                    </div>
+
+                    <!-- 导航菜单 -->
+                    <ul class="menu bg-base-100 w-full p-0 mt-4 text-left gap-1">
+                        <li>
+                            <a :class="{'active': tab === 'articles'}" @click.prevent="tab = 'articles'" class="gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                                </svg>
+                                我的文章
+                            </a>
+                        </li>
+                        <li>
+                            <a :class="{'active': tab === 'bookmarks'}" @click.prevent="tab = 'bookmarks'" class="gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                                我的收藏
+                            </a>
+                        </li>
+                        <li>
+                            <a :class="{'active': tab === 'settings'}" @click.prevent="tab = 'settings'" class="gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                账号设置
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 右侧内容区域 -->
+        <main class="flex-1 min-w-0">
+            <!-- 标题栏 -->
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-bold" x-text="tabName"></h1>
+                <a x-show="tab === 'articles'" href="/publish" class="btn btn-primary btn-sm gap-2 shadow-lg hover:shadow-primary/30 transition-shadow">
+                    {{template "icon_publish"}} 写文章
+                </a>
+            </div>
+
+            <!-- 我的文章 -->
+            <div x-show="tab === 'articles'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+                <div x-data="contentListHandler('articles')">
+                     <!-- Loading & Empty States -->
+                     <template x-if="loading && list.length === 0">
+                         <div class="flex justify-center py-20"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+                     </template>
+                     <template x-if="!loading && list.length === 0">
+                         <div class="card bg-base-100 shadow-xl py-20 text-center">
+                             <div class="text-6xl mb-4">📝</div>
+                             <h3 class="text-lg font-bold text-base-content/70">还没有发布过文章</h3>
+                             <p class="text-sm text-base-content/50 mt-2">分享你的知识和见解，从第一篇文章开始</p>
+                             <div class="mt-6">
+                                 <a href="/publish" class="btn btn-primary btn-sm">去创作</a>
+                             </div>
+                         </div>
+                     </template>
+
+                     <!-- Article List -->
+                     <div class="space-y-4">
+                         <template x-for="item in list" :key="item.id">
+                             <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 border border-base-200">
+                                 <div class="card-body p-5">
+                                     <div class="flex justify-between items-start gap-4">
+                                         <div class="flex-1 min-w-0">
+                                             <h3 class="card-title text-lg font-normal mb-2">
+                                                <a :href="'/article/' + item.id" class="hover:text-primary transition-colors line-clamp-1" x-text="item.title"></a>
+                                                <span x-show="item.status === 2" class="badge badge-warning badge-sm">草稿</span>
+                                            </h3>
+                                             <p class="text-base-content/70 text-sm line-clamp-2 mb-3" x-text="item.summary || '暂无摘要'"></p>
+                                             <div class="flex items-center gap-4 text-xs text-base-content/50">
+                                                 <span class="flex items-center gap-1">
+                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                     <span x-text="formatDate(item.created_at)"></span>
+                                                 </span>
+                                                 <span class="flex items-center gap-1">
+                                                     {{template "icon_view"}}
+                                                     <span x-text="item.view_count || 0"></span>
+                                                 </span>
+                                                 <span class="flex items-center gap-1">
+                                                     {{template "icon_comment"}}
+                                                     <span x-text="item.comment_count || 0"></span>
+                                                 </span>
+                                             </div>
+                                         </div>
+                                         <div class="flex gap-2 shrink-0">
+                                             <a :href="'/publish?id=' + item.id" class="btn btn-ghost btn-xs tooltip" data-tip="编辑">
+                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                 </svg>
+                                             </a>
+                                             <button @click="deleteArticle(item.id)" class="btn btn-ghost btn-xs text-error tooltip" data-tip="删除">
+                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                 </svg>
+                                             </button>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
+                         </template>
+                     </div>
+
+                     <!-- Pagination -->
+                     <div class="flex justify-center mt-8" x-show="total > 0">
+                         <div class="join">
+                             <button class="join-item btn btn-sm" :disabled="page <= 1" @click="changePage(page - 1)">«</button>
+                             <button class="join-item btn btn-sm">Page <span x-text="page"></span></button>
+                             <button class="join-item btn btn-sm" :disabled="page * size >= total" @click="changePage(page + 1)">»</button>
+                         </div>
+                     </div>
+                </div>
+            </div>
+
+            <!-- 我的收藏 -->
+            <div x-show="tab === 'bookmarks'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+                 <div x-data="contentListHandler('bookmarks')">
+                     <!-- Loading & Empty States -->
+                     <template x-if="loading && list.length === 0">
+                         <div class="flex justify-center py-20"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+                     </template>
+                     <template x-if="!loading && list.length === 0">
+                         <div class="card bg-base-100 shadow-xl py-20 text-center">
+                             <div class="text-6xl mb-4">⭐</div>
+                             <h3 class="text-lg font-bold text-base-content/70">还没有收藏内容</h3>
+                             <p class="text-sm text-base-content/50 mt-2">遇到喜欢的内容，记得收藏哦</p>
+                         </div>
+                     </template>
+
+                     <!-- Bookmark List -->
+                     <div class="space-y-4">
+                         <template x-for="item in list" :key="item.id">
+                             <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 border border-base-200">
+                                 <div class="card-body p-5">
+                                     <h3 class="card-title text-lg font-bold mb-2">
+                                         <a :href="'/article/' + item.id" class="hover:text-primary transition-colors" x-text="item.title"></a>
+                                     </h3>
+                                     <p class="text-base-content/70 text-sm line-clamp-2 mb-3" x-text="item.summary || '暂无摘要'"></p>
+                                     <div class="flex items-center gap-4 text-xs text-base-content/50">
+                                         <div class="flex items-center gap-2">
+                                             <div class="avatar placeholder">
+                                                 <div class="bg-neutral text-neutral-content rounded-full w-5">
+                                                     <img :src="item.user_avatar || '/static/pic/default-avatar.webp'" alt="Author">
+                                                 </div>
+                                             </div>
+                                             <span x-text="item.user_nickname || item.username"></span>
+                                         </div>
+                                         <span x-text="formatDate(item.created_at)"></span>
+                                         <span class="flex items-center gap-1">
+                                              {{template "icon_view"}}
+                                              <span x-text="item.view_count || 0"></span>
+                                         </span>
+                                     </div>
+                                 </div>
+                             </div>
+                         </template>
+                     </div>
+                      <!-- Pagination -->
+                      <div class="flex justify-center mt-8" x-show="total > 0">
+                         <div class="join">
+                             <button class="join-item btn btn-sm" :disabled="page <= 1" @click="changePage(page - 1)">«</button>
+                             <button class="join-item btn btn-sm">Page <span x-text="page"></span></button>
+                             <button class="join-item btn btn-sm" :disabled="page * size >= total" @click="changePage(page + 1)">»</button>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- 账号设置 -->
+            <div x-show="tab === 'settings'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+                 <div class="card bg-base-100 shadow-xl" x-data="settingsHandler()">
+                     <div class="card-body">
+                         <!-- Settings Tabs -->
+                         <div class="tabs tabs-boxed mb-6 bg-base-200/50">
+                             <a class="tab" :class="{'tab-active': subTab === 'basic'}" @click.prevent="subTab = 'basic'">基本信息</a>
+                            <a class="tab" :class="{'tab-active': subTab === 'password'}" @click.prevent="subTab = 'password'">修改密码</a>
+                            <a class="tab" :class="{'tab-active': subTab === 'binding'}" @click.prevent="subTab = 'binding'">账号绑定</a>
+                            <a class="tab" :class="{'tab-active': subTab === 'privacy'}" @click.prevent="subTab = 'privacy'">隐私设置</a>
+                        </div>
+
+                        <!-- Basic Info Form -->
+                         <div x-show="subTab === 'basic'">
+                             <form @submit.prevent="saveBasicInfo" class="space-y-4 max-w-2xl mx-auto">
+                                 <div class="form-control">
+                                     <label class="label"><span class="label-text">昵称</span></label>
+                                     <input type="text" x-model="form.nickname" class="input input-bordered w-full" required />
+                                 </div>
+                                 <div class="form-control">
+                                     <label class="label"><span class="label-text">个性签名</span></label>
+                                     <input type="text" x-model="form.signature" class="input input-bordered w-full" />
+                                 </div>
+                                 <div class="form-control">
+                                     <label class="label"><span class="label-text">个人简介</span></label>
+                                     <textarea x-model="form.bio" class="textarea textarea-bordered h-24"></textarea>
+                                 </div>
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     <div class="form-control">
+                                         <label class="label"><span class="label-text">个人网站名称</span></label>
+                                         <input type="text" x-model="form.websiteName" class="input input-bordered w-full" />
+                                     </div>
+                                     <div class="form-control">
+                                         <label class="label"><span class="label-text">个人网站链接</span></label>
+                                         <input type="url" x-model="form.website" class="input input-bordered w-full" placeholder="https://" />
+                                     </div>
+                                 </div>
+                                 
+                                 <div class="divider">社交链接</div>
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     <div class="form-control">
+                                         <label class="label"><span class="label-text">GitHub</span></label>
+                                         <input type="text" x-model="form.externalInformation.github.link" class="input input-bordered w-full" />
+                                     </div>
+                                      <div class="form-control">
+                                         <label class="label"><span class="label-text">Twitter / X</span></label>
+                                         <input type="text" x-model="form.externalInformation.twitter.link" class="input input-bordered w-full" />
+                                     </div>
+                                      <div class="form-control">
+                                         <label class="label"><span class="label-text">LinkedIn</span></label>
+                                         <input type="text" x-model="form.externalInformation.linkedIn.link" class="input input-bordered w-full" />
+                                     </div>
+                                      <div class="form-control">
+                                         <label class="label"><span class="label-text">微博</span></label>
+                                         <input type="text" x-model="form.externalInformation.weibo.link" class="input input-bordered w-full" />
+                                     </div>
+                                      <div class="form-control">
+                                         <label class="label"><span class="label-text">知乎</span></label>
+                                         <input type="text" x-model="form.externalInformation.zhihu.link" class="input input-bordered w-full" />
+                                     </div>
+                                 </div>
+
+                                 <div class="form-control mt-6">
+                                     <button type="submit" class="btn btn-primary" :disabled="saving">
+                                         <span x-show="saving" class="loading loading-spinner"></span>
+                                         保存更改
+                                     </button>
+                                 </div>
+                             </form>
+                         </div>
+
+                         <!-- Password Form -->
+                        <div x-show="subTab === 'password'" x-cloak>
+                             <form @submit.prevent="changePassword" class="space-y-4 max-w-md mx-auto mt-4">
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text">旧密码</span></label>
+                                    <input type="password" x-model="pwdForm.oldPassword" class="input input-bordered w-full" required />
+                                </div>
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text">新密码</span></label>
+                                    <input type="password" x-model="pwdForm.newPassword" class="input input-bordered w-full" required />
+                                </div>
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text">确认新密码</span></label>
+                                    <input type="password" x-model="pwdForm.confirmPassword" class="input input-bordered w-full" required />
+                                </div>
+                                 <div class="form-control mt-6">
+                                    <button type="submit" class="btn btn-primary" :disabled="saving">
+                                        <span x-show="saving" class="loading loading-spinner"></span>
+                                        修改密码
+                                    </button>
+                                </div>
+                             </form>
+                        </div>
+
+                        <!-- Account Binding -->
+                        <div x-show="subTab === 'binding'" x-cloak>
+                            <div class="space-y-4 mt-4">
+                                <template x-if="loadingBindings">
+                                    <div class="flex justify-center py-10"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+                                </template>
+                                <template x-if="!loadingBindings">
+                                    <div class="grid grid-cols-1 gap-4">
+                                        <template x-for="(binding, provider) in oauthBindings" :key="provider">
+                                            <div class="flex items-center justify-between p-4 bg-base-100 border border-base-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-xl shrink-0">
+                                                        <!-- Icons based on provider -->
+                                                        <template x-if="provider === 'github'">
+                                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                                        </template>
+                                                        <template x-if="provider === 'google'">
+                                                            <svg class="w-6 h-6" viewBox="0 0 24 24"><path fill="#EA4335" d="M24 12.276c0-.852-.076-1.671-.219-2.456H12v4.646h6.73c-.29 1.556-1.171 2.873-2.496 3.76v3.128h4.043c2.365-2.179 3.73-5.392 3.73-9.078z"/><path fill="#34A853" d="M12 24c3.24 0 5.957-1.074 7.942-2.908l-4.043-3.128c-1.075.72-2.451 1.146-3.899 1.146-3.126 0-5.772-2.112-6.72-4.952H1.206v3.111C3.177 21.087 7.288 24 12 24z"/><path fill="#FBBC05" d="M5.28 15.158c-.247-.738-.389-1.528-.389-2.342 0-.814.142-1.604.389-2.342V7.363H1.206C.437 8.894 0 10.612 0 12.184c0 1.572.437 3.289 1.206 4.821l4.074-3.847z"/><path fill="#4285F4" d="M12 4.77c1.762 0 3.344.606 4.59 1.796l3.443-3.443C17.954 1.218 15.238 0 12 0 7.288 0 3.177 2.913 1.206 7.363l4.074 3.847c.948-2.84 3.594-4.952 6.72-4.952z"/></svg>
+                                                        </template>
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-bold capitalize" x-text="provider"></div>
+                                                        <div class="text-sm opacity-70" x-text="binding.bound ? '已绑定' : '未绑定'"></div>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-sm" :class="binding.bound ? 'btn-outline btn-error' : 'btn-outline btn-primary'" @click="binding.bound ? unbindOAuth(provider) : bindOAuth(provider)">
+                                                    <span x-text="binding.bound ? '解绑' : '绑定'"></span>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Privacy Settings -->
+                        <div x-show="subTab === 'privacy'" x-cloak>
+                             <div class="space-y-4 mt-4">
+                                <div class="form-control">
+                                    <label class="label cursor-pointer">
+                                        <span class="label-text">公开我的文章列表</span>
+                                        <input type="checkbox" class="toggle toggle-primary" x-model="privacy.showArticles" @change="savePrivacy" />
+                                    </label>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label cursor-pointer">
+                                        <span class="label-text">公开我的关注列表</span>
+                                        <input type="checkbox" class="toggle toggle-primary" x-model="privacy.showFollowing" @change="savePrivacy" />
+                                    </label>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label cursor-pointer">
+                                        <span class="label-text">接收邮件通知</span>
+                                        <input type="checkbox" class="toggle toggle-primary" x-model="privacy.emailNotifications" @change="savePrivacy" />
+                                    </label>
+                                </div>
+                                <div class="alert alert-info text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>隐私设置功能目前仅为预览，更改将保存在本地缓存中。</span>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+                 </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    function profileHandler() {
+        return {
+            tab: 'articles',
+            user: {{json .User}},
+            stats: {{json .Stats}},
+            get tabName() {
+                switch(this.tab) {
+                    case 'articles': return '我的文章';
+                    case 'bookmarks': return '我的收藏';
+                    case 'settings': return '账号设置';
+                    default: return '';
+                }
+            },
+            init() {
+                const path = window.location.pathname;
+                if (path.includes('/settings')) {
+                    this.tab = 'settings';
+                }
+            },
+            async handleAvatarUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('图片大小不能超过 2MB');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const res = await axios.post('/api/upload-avatar', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    if (res.data.code === 0) {
+                        this.user.avatarUrl = res.data.result;
+                        // Trigger a global update or just local
+                        alert('头像上传成功');
+                    } else {
+                        alert(res.data.msg || '上传失败');
+                    }
+                } catch (error) {
+                    console.error('Upload failed', error);
+                    alert('上传出错，请重试');
+                }
+            }
+        }
+    }
+
+    function contentListHandler(type) {
+        return {
+            type: type, // 'articles' or 'bookmarks'
+            list: [],
+            page: 1,
+            size: 10,
+            total: 0,
+            loading: false,
+            init() {
+                this.fetchData();
+            },
+            async fetchData() {
+                this.loading = true;
+                try {
+                    const url = this.type === 'articles' ? '/api/forum/get-user-articles' : '/api/forum/get-user-bookmarked-articles';
+                    // API expects post with page, size
+                    const res = await axios.post(url, {
+                        page: this.page,
+                        size: this.size
+                    });
+                    if (res.data.code === 0) {
+                        this.list = res.data.result.list || [];
+                        this.total = res.data.result.total || 0;
+                    }
+                } catch (e) {
+                    console.error('Fetch failed', e);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            changePage(p) {
+                if (p < 1 || (p > 1 && (p - 1) * this.size >= this.total)) return;
+                this.page = p;
+                this.fetchData();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+            async deleteArticle(id) {
+                if (!confirm('确定要删除这篇文章吗？此操作不可恢复。')) return;
+                try {
+                    const res = await axios.post('/article/delete', { id: id });
+                    if (res.data.code === 0) {
+                        this.fetchData();
+                        // Update stats locally
+                        // This requires access to parent scope. Alpine supports $data or custom events.
+                        // Ideally emit event.
+                    } else {
+                        alert(res.data.msg || '删除失败');
+                    }
+                } catch (e) {
+                    alert('删除请求失败');
+                }
+            },
+            formatDate(dateStr) {
+                if (!dateStr) return '';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString().slice(0, 5);
+            }
+        }
+    }
+
+    function settingsHandler() {
+        return {
+            subTab: 'basic',
+            form: JSON.parse(JSON.stringify({{json .User}})), // Clone
+            pwdForm: { oldPassword: '', newPassword: '', confirmPassword: '' },
+            saving: false,
+            oauthBindings: {},
+            loadingBindings: false,
+            privacy: {
+                showArticles: true,
+                showFollowing: true,
+                emailNotifications: true
+            },
+            init() {
+                // Ensure externalInformation exists
+                if (!this.form.externalInformation) this.form.externalInformation = {};
+                ['github', 'twitter', 'linkedIn', 'weibo', 'zhihu'].forEach(key => {
+                    if (!this.form.externalInformation[key]) this.form.externalInformation[key] = { link: '' };
+                });
+
+                // Check URL params for tab selection and messages
+                const urlParams = new URLSearchParams(window.location.search);
+                const settingTab = urlParams.get('setting-tab');
+                if (settingTab === 'account') {
+                    this.subTab = 'binding';
+                }
+
+                const error = urlParams.get('error');
+                const success = urlParams.get('success');
+                if (error) alert('操作失败: ' + error);
+                if (success === 'bind_success') alert('绑定成功');
+
+                // Load bindings if on binding tab
+                this.$watch('subTab', (val) => {
+                    if (val === 'binding') this.fetchBindings();
+                });
+                if (this.subTab === 'binding') this.fetchBindings();
+
+                // Load privacy settings from local storage if available (mock)
+                const savedPrivacy = localStorage.getItem('privacySettings');
+                if (savedPrivacy) {
+                    this.privacy = JSON.parse(savedPrivacy);
+                }
+            },
+            async fetchBindings() {
+                this.loadingBindings = true;
+                try {
+                    const res = await axios.get('/api/oauth/bindings');
+                    if (res.data.code === 0) {
+                        this.oauthBindings = res.data.result;
+                    }
+                } catch (e) {
+                    console.error('Fetch bindings failed', e);
+                } finally {
+                    this.loadingBindings = false;
+                }
+            },
+            bindOAuth(provider) {
+                window.location.href = '/api/auth/' + provider;
+            },
+            async unbindOAuth(provider) {
+                if (!confirm(`确定要解绑 ${provider} 账户吗？`)) return;
+                try {
+                    const res = await axios.post(`/api/auth/${provider}/unbind`);
+                    if (res.data.code === 0) {
+                        alert('解绑成功');
+                        this.fetchBindings();
+                    } else {
+                        alert(res.data.msg || '解绑失败');
+                    }
+                } catch (e) {
+                    alert('请求失败');
+                }
+            },
+            savePrivacy() {
+                // Mock save
+                localStorage.setItem('privacySettings', JSON.stringify(this.privacy));
+                console.log('Privacy settings saved', this.privacy);
+            },
+            async saveBasicInfo() {
+                this.saving = true;
+                try {
+                    const res = await axios.post('/api/set-user-info', this.form);
+                    if (res.data.code === 0) {
+                        alert('保存成功');
+                        // Update global user object?
+                        // Reload page is easiest to sync everything
+                        location.reload(); 
+                    } else {
+                        alert(res.data.msg || '保存失败');
+                    }
+                } catch (e) {
+                    alert('请求失败');
+                } finally {
+                    this.saving = false;
+                }
+            },
+            async changePassword() {
+                if (this.pwdForm.newPassword !== this.pwdForm.confirmPassword) {
+                    alert('两次输入的密码不一致');
+                    return;
+                }
+                this.saving = true;
+                try {
+                    const res = await axios.post('/api/change-password', {
+                        oldPassword: this.pwdForm.oldPassword,
+                        newPassword: this.pwdForm.newPassword
+                    });
+                    if (res.data.code === 0) {
+                        alert('密码修改成功，请重新登录');
+                        location.href = '/login';
+                    } else {
+                        alert(res.data.msg || '修改失败');
+                    }
+                } catch (e) {
+                    alert('请求失败');
+                } finally {
+                    this.saving = false;
+                }
+            }
+        }
+    }
+</script>
 {{end}}
-{{template "layout/main.gohtml" dict "Body" "profile_content" "Data" . "Entry" "src/profile.js"}}
+{{template "layout/main.gohtml" dict "Body" "profile_content" "Data" . "Entry" "src/main.js"}}
