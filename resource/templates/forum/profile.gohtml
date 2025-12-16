@@ -332,7 +332,7 @@
                          <!-- Password -->
                          <input type="radio" name="settings_tabs" class="tab" aria-label="修改密码" :checked="subTab === 'password'" @click="subTab = 'password'" />
                          <div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
-                             <form @submit.prevent="changePassword" class="space-y-6 max-w-lg mx-auto py-8">
+                             <form @submit.prevent="changePassword" class="space-y-6 max-w-xl py-4">
                                 <div class="form-control">
                                     <label class="mb-2 text-sm font-medium text-base-content/80">旧密码</label>
                                     <input type="password" x-model="pwdForm.oldPassword" class="input input-bordered w-full focus:input-primary" required />
