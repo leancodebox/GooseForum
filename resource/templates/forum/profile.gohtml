@@ -1,18 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-CN" data-theme="{{.Theme}}">
-<head>
-    {{template "common-head.gohtml" .}}
-    {{GetImportInfoPath `src/profile.js`}}
-</head>
-<body>
-<div class="min-h-screen flex flex-col bg-base-200">
-    <header class="sticky top-0 z-50">
-        {{template "nav.gohtml" .}}
-    </header>
-    <main class="flex-1 container mx-auto px-4 py-4">
-        <div id="app"></div>
-    </main>
-    {{template "footer.gohtml" .}}
-</div>
-</body>
-</html>
+{{define "profile_content"}}
+<div id="app"></div>
+{{end}}
+{{template "layout/main.gohtml" dict "Body" "profile_content" "Data" . "Entry" "src/profile.js"}}

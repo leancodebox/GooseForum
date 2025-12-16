@@ -1,0 +1,27 @@
+{{define "pagination"}}
+<div class="px-6 py-4 border-t border-base-200 bg-base-50">
+    <div class="flex justify-center">
+        <div class="join">
+            {{if ge .Page 2 }}
+            <a href="/post?page={{.PrevPage}}{{if .Filters}}&filters={{.Filters}}{{end}}"
+               aria-label="Previous">
+                <button class="join-item btn btn-sm">«</button>
+            </a>
+            {{end}}
+            {{ $NowPage := .Page }}
+            {{range .Pagination}}
+            <a href="/post?page={{.Page}}{{if $.Filters}}&filters={{$.Filters}}{{end}}"
+               class="join-item btn btn-sm" {{if eq $NowPage .Page}}disabled{{end}}>
+                {{.Page}}
+            </a>
+            {{end}}
+            {{if lt .Page .TotalPages}}
+            <a href="/post?page={{.NextPage}}{{if .Filters}}&filters={{.Filters}}{{end}}"
+               aria-label="Next">
+                <button class="join-item btn btn-sm">»</button>
+            </a>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}

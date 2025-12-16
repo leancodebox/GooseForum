@@ -109,8 +109,8 @@
         {{end}}
 
         <!-- 移动端汉堡菜单 - 仅移动端显示 -->
-        <div class="dropdown dropdown-end lg:hidden" role="group" aria-label="移动端菜单">
-            <div tabindex="0" role="button" class="btn btn-ghost btn-sm" aria-label="打开菜单" aria-haspopup="menu" aria-expanded="false">
+        <div class="dropdown dropdown-end lg:hidden" role="group" aria-label="移动端菜单" x-data="{ open: false }" @click.away="open = false">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-sm" aria-label="打开菜单" :aria-expanded="open.toString()" @click="open = !open">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -118,7 +118,16 @@
                 </svg>
             </div>
             <ul tabindex="0"
-                class="menu dropdown-content mt-2 z-[1] p-2 shadow bg-base-100 rounded-box w-52" aria-label="移动端导航菜单">
+                class="menu dropdown-content mt-2 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+                aria-label="移动端导航菜单"
+                x-show="open"
+                x-transition:enter="transition ease-out duration-100"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-75"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                style="display: none;">
                 <!-- 导航链接 -->
                 <li><a href="/post">社区</a></li>
                 <li><a href="/docs">文档</a></li>

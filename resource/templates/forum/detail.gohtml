@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-CN" data-theme="{{.Theme}}">
-<head>
-    {{template "common-head.gohtml" .}}
-    {{GetImportInfoPath `src/detail.js`}}
-</head>
-<body>
-<div class="min-h-screen flex flex-col bg-base-200">
-    <header class="sticky top-0 z-50">
-        {{template "nav.gohtml" .}}
-    </header>
-    <main class="flex-1 container mx-auto px-4 py-4 ">
+{{define "detail_content"}}
         <div class="flex flex-col md:flex-row gap-6">
             <section class="flex-1 space-y-6 min-w-0">
                 <!-- 文章详情卡片 -->
@@ -386,11 +375,9 @@
                 </div>
             </aside>
         </div>
-    </main>
-    {{template "footer.gohtml" .}}
-</div>
+{{end}}
 
-
+{{define "detail_script"}}
 <script>
     // 页面加载完成后绑定事件
     document.addEventListener('DOMContentLoaded', function () {
@@ -620,6 +607,5 @@
         }
     }
 </script>
-
-</body>
-</html>
+{{end}}
+{{template "layout/main.gohtml" dict "Body" "detail_content" "Script" "detail_script" "Data" . "Entry" "src/detail.js"}}

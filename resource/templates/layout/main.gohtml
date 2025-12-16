@@ -3,6 +3,9 @@
 <html lang="zh-CN" data-theme="{{.Data.Theme}}">
 <head>
     {{template "common-head.gohtml" .Data}}
+    {{if .Head}}
+        {{render .Head .Data}}
+    {{end}}
     <!-- 动态注入 JS 入口 -->
     {{GetImportInfoPath .Entry}}
 </head>
@@ -17,6 +20,9 @@
     </main>
     {{template "footer.gohtml" .Data}}
 </div>
+{{if .Script}}
+    {{render .Script .Data}}
+{{end}}
 </body>
 </html>
 {{end}}
