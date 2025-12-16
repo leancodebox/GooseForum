@@ -102,49 +102,42 @@
                      </template>
 
                      <!-- Article List -->
-                     <div class="space-y-4">
+                     <ul class="list bg-base-100 rounded-box shadow-sm">
+                         <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">已发布文章</li>
                          <template x-for="item in list" :key="item.id">
-                             <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-200">
-                                 <div class="card-body p-5">
-                                     <div class="flex justify-between items-start gap-4">
-                                         <div class="flex-1 min-w-0">
-                                             <h3 class="card-title text-lg font-normal mb-2">
-                                                <a :href="'/post/' + item.id" class="hover:text-primary transition-colors line-clamp-1" x-text="item.title"></a>
-                                                <span x-show="item.status === 2" class="badge badge-warning badge-sm">草稿</span>
-                                            </h3>
-                                             <p class="text-base-content/70 text-sm line-clamp-2 mb-3" x-text="item.summary || '暂无摘要'"></p>
-                                             <div class="flex items-center gap-4 text-xs text-base-content/50">
-                                                 <span class="flex items-center gap-1">
-                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                     <span x-text="formatDate(item.created_at)"></span>
-                                                 </span>
-                                                 <span class="flex items-center gap-1">
-                                                     {{template "icon_view"}}
-                                                     <span x-text="item.view_count || 0"></span>
-                                                 </span>
-                                                 <span class="flex items-center gap-1">
-                                                     {{template "icon_comment"}}
-                                                     <span x-text="item.comment_count || 0"></span>
-                                                 </span>
-                                             </div>
-                                         </div>
-                                         <div class="flex gap-2 shrink-0">
-                                             <a :href="'/publish?id=' + item.id" class="btn btn-ghost btn-xs tooltip" data-tip="编辑">
-                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                 </svg>
-                                             </a>
-                                             <button @click="deleteArticle(item.id)" class="btn btn-ghost btn-xs text-error tooltip" data-tip="删除">
-                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                 </svg>
-                                             </button>
-                                         </div>
+                             <li class="list-row hover:bg-base-200 group transition-colors duration-200 p-4 border-b border-base-200 last:border-b-0">
+                                 <div class="text-4xl font-thin opacity-30 tabular-nums flex items-center justify-center w-12 h-12 bg-base-300 rounded-box">📄</div>
+                                 <div class="list-col-grow">
+                                     <div>
+                                         <a :href="'/post/' + item.id" class="font-bold hover:text-primary transition-colors" x-text="item.title"></a>
+                                         <span x-show="item.status === 2" class="badge badge-warning badge-xs ml-2">草稿</span>
+                                     </div>
+                                     <div class="text-xs font-semibold opacity-60 line-clamp-1" x-text="item.summary || '暂无摘要'"></div>
+                                     <div class="flex items-center gap-4 text-xs opacity-50 mt-1">
+                                         <span x-text="formatDate(item.created_at)"></span>
+                                         <span class="flex items-center gap-1">
+                                             {{template "icon_view"}}
+                                             <span x-text="item.view_count || 0"></span>
+                                         </span>
+                                         <span class="flex items-center gap-1">
+                                             {{template "icon_comment"}}
+                                             <span x-text="item.comment_count || 0"></span>
+                                         </span>
                                      </div>
                                  </div>
-                             </div>
+                                 <a :href="'/publish?id=' + item.id" class="btn btn-square btn-ghost btn-sm tooltip" data-tip="编辑">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                     </svg>
+                                 </a>
+                                 <button @click="deleteArticle(item.id)" class="btn btn-square btn-ghost btn-sm text-error tooltip" data-tip="删除">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                     </svg>
+                                 </button>
+                             </li>
                          </template>
-                     </div>
+                     </ul>
 
                      <!-- Pagination -->
                      <div class="flex justify-center mt-8" x-show="total > 0">
