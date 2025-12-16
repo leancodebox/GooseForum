@@ -427,8 +427,9 @@
 
             async toggleBookmark() {
                 try {
-                    const response = await axios.post('/api/forum/articles-collection', {
-                        id: this.articleId
+                    const response = await axios.post('/api/forum/bookmark-article', {
+                        id: this.articleId,
+                        action: this.isBookmarked?2:1
                     });
                     if (response.data.code === 0) {
                         this.isBookmarked = !this.isBookmarked;

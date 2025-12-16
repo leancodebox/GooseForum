@@ -4,7 +4,7 @@
         <!-- 左侧侧边栏：用户信息与导航 -->
         <aside class="w-full lg:w-80 flex-shrink-0 space-y-6">
             <!-- 用户卡片 -->
-            <div class="card bg-base-100 shadow-xl sticky top-20">
+            <div class="card bg-base-100 shadow-sm sticky top-20">
                 <div class="card-body text-center p-6">
                     <!-- 头像区域 -->
                     <div class="avatar mb-4 mx-auto relative group">
@@ -21,22 +21,22 @@
                         <input type="file" x-ref="avatarInput" class="hidden" accept="image/*" @change="handleAvatarUpload">
                     </div>
 
-                    <h2 class="text-xl font-bold text-base-content" x-text="user.nickname || user.username"></h2>
+                    <h2 class="text-xl font-normal text-base-content" x-text="user.nickname || user.username"></h2>
                     <p class="text-sm text-base-content/60 mt-1" x-text="'@' + user.username"></p>
                     <p class="text-sm text-base-content/70 mt-3 line-clamp-2" x-text="user.signature || '这个人很懒，什么都没有写'"></p>
 
                     <!-- 数据统计 -->
-                    <div class="grid grid-cols-3 gap-2 mt-6 py-4 border-t border-b border-base-200">
+                    <div class="grid grid-cols-3 gap-2 mt-6 py-4">
                         <div class="text-center">
-                            <div class="text-lg font-bold text-primary" x-text="stats.articleCount || 0"></div>
+                            <div class="text-lg font-normal text-primary" x-text="stats.articleCount || 0"></div>
                             <div class="text-xs text-base-content/60">文章</div>
                         </div>
                         <div class="text-center">
-                            <div class="text-lg font-bold text-secondary" x-text="stats.likeReceivedCount || 0"></div>
+                            <div class="text-lg font-normal text-secondary" x-text="stats.likeReceivedCount || 0"></div>
                             <div class="text-xs text-base-content/60">获赞</div>
                         </div>
                         <div class="text-center">
-                            <div class="text-lg font-bold text-accent" x-text="stats.followerCount || 0"></div>
+                            <div class="text-lg font-normal text-accent" x-text="stats.followerCount || 0"></div>
                             <div class="text-xs text-base-content/60">粉丝</div>
                         </div>
                     </div>
@@ -77,8 +77,8 @@
         <main class="flex-1 min-w-0">
             <!-- 标题栏 -->
             <div class="flex items-center justify-between mb-6">
-                <h1 class="text-2xl font-bold" x-text="tabName"></h1>
-                <a x-show="tab === 'articles'" href="/publish" class="btn btn-primary btn-sm gap-2 shadow-lg hover:shadow-primary/30 transition-shadow">
+                <h1 class="text-2xl font-normal" x-text="tabName"></h1>
+                <a x-show="tab === 'articles'" href="/publish" class="btn btn-primary btn-sm gap-2 shadow-sm hover:shadow-primary/30 transition-shadow">
                     {{template "icon_publish"}} 写文章
                 </a>
             </div>
@@ -91,9 +91,9 @@
                          <div class="flex justify-center py-20"><span class="loading loading-spinner loading-lg text-primary"></span></div>
                      </template>
                      <template x-if="!loading && list.length === 0">
-                         <div class="card bg-base-100 shadow-xl py-20 text-center">
+                         <div class="card bg-base-100 shadow-sm py-20 text-center">
                              <div class="text-6xl mb-4">📝</div>
-                             <h3 class="text-lg font-bold text-base-content/70">还没有发布过文章</h3>
+                             <h3 class="text-lg font-normal text-base-content/70">还没有发布过文章</h3>
                              <p class="text-sm text-base-content/50 mt-2">分享你的知识和见解，从第一篇文章开始</p>
                              <div class="mt-6">
                                  <a href="/publish" class="btn btn-primary btn-sm">去创作</a>
@@ -104,12 +104,12 @@
                      <!-- Article List -->
                      <div class="space-y-4">
                          <template x-for="item in list" :key="item.id">
-                             <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 border border-base-200">
+                             <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-200">
                                  <div class="card-body p-5">
                                      <div class="flex justify-between items-start gap-4">
                                          <div class="flex-1 min-w-0">
                                              <h3 class="card-title text-lg font-normal mb-2">
-                                                <a :href="'/article/' + item.id" class="hover:text-primary transition-colors line-clamp-1" x-text="item.title"></a>
+                                                <a :href="'/post/' + item.id" class="hover:text-primary transition-colors line-clamp-1" x-text="item.title"></a>
                                                 <span x-show="item.status === 2" class="badge badge-warning badge-sm">草稿</span>
                                             </h3>
                                              <p class="text-base-content/70 text-sm line-clamp-2 mb-3" x-text="item.summary || '暂无摘要'"></p>
@@ -165,9 +165,9 @@
                          <div class="flex justify-center py-20"><span class="loading loading-spinner loading-lg text-primary"></span></div>
                      </template>
                      <template x-if="!loading && list.length === 0">
-                         <div class="card bg-base-100 shadow-xl py-20 text-center">
+                         <div class="card bg-base-100 shadow-sm py-20 text-center">
                              <div class="text-6xl mb-4">⭐</div>
-                             <h3 class="text-lg font-bold text-base-content/70">还没有收藏内容</h3>
+                             <h3 class="text-lg font-normal text-base-content/70">还没有收藏内容</h3>
                              <p class="text-sm text-base-content/50 mt-2">遇到喜欢的内容，记得收藏哦</p>
                          </div>
                      </template>
@@ -175,10 +175,10 @@
                      <!-- Bookmark List -->
                      <div class="space-y-4">
                          <template x-for="item in list" :key="item.id">
-                             <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 border border-base-200">
+                             <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-200">
                                  <div class="card-body p-5">
-                                     <h3 class="card-title text-lg font-bold mb-2">
-                                         <a :href="'/article/' + item.id" class="hover:text-primary transition-colors" x-text="item.title"></a>
+                                     <h3 class="card-title text-lg font-normal mb-2">
+                                         <a :href="'/post/' + item.id" class="hover:text-primary transition-colors" x-text="item.title"></a>
                                      </h3>
                                      <p class="text-base-content/70 text-sm line-clamp-2 mb-3" x-text="item.summary || '暂无摘要'"></p>
                                      <div class="flex items-center gap-4 text-xs text-base-content/50">
@@ -212,102 +212,151 @@
             </div>
 
             <!-- 账号设置 -->
-            <div x-show="tab === 'settings'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-                 <div class="card bg-base-100 shadow-xl" x-data="settingsHandler()">
-                     <div class="card-body">
-                         <!-- Settings Tabs -->
-                         <div class="tabs tabs-boxed mb-6 bg-base-200/50">
-                             <a class="tab" :class="{'tab-active': subTab === 'basic'}" @click.prevent="subTab = 'basic'">基本信息</a>
-                            <a class="tab" :class="{'tab-active': subTab === 'password'}" @click.prevent="subTab = 'password'">修改密码</a>
-                            <a class="tab" :class="{'tab-active': subTab === 'binding'}" @click.prevent="subTab = 'binding'">账号绑定</a>
-                            <a class="tab" :class="{'tab-active': subTab === 'privacy'}" @click.prevent="subTab = 'privacy'">隐私设置</a>
-                        </div>
-
-                        <!-- Basic Info Form -->
-                         <div x-show="subTab === 'basic'">
-                             <form @submit.prevent="saveBasicInfo" class="space-y-4 max-w-2xl mx-auto">
-                                 <div class="form-control">
-                                     <label class="label"><span class="label-text">昵称</span></label>
-                                     <input type="text" x-model="form.nickname" class="input input-bordered w-full" required />
-                                 </div>
-                                 <div class="form-control">
-                                     <label class="label"><span class="label-text">个性签名</span></label>
-                                     <input type="text" x-model="form.signature" class="input input-bordered w-full" />
-                                 </div>
-                                 <div class="form-control">
-                                     <label class="label"><span class="label-text">个人简介</span></label>
-                                     <textarea x-model="form.bio" class="textarea textarea-bordered h-24"></textarea>
-                                 </div>
-                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div x-show="tab === 'settings'" x-data="settingsHandler()" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+                 <!-- Settings Tabs -->
+                <div class="tabs tabs-lift">
+                            <input type="radio" name="settings_tabs" class="tab" aria-label="基本信息" :checked="subTab === 'basic'" @click="subTab = 'basic'" />
+                            <div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                             <form @submit.prevent="saveBasicInfo" class="space-y-6 max-w-4xl mx-auto py-4">
+                                 <!-- 基本信息 -->
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                      <div class="form-control">
-                                         <label class="label"><span class="label-text">个人网站名称</span></label>
-                                         <input type="text" x-model="form.websiteName" class="input input-bordered w-full" />
+                                         <label class="mb-2 text-sm font-medium text-base-content/80">昵称 <span class="text-error">*</span></label>
+                                         <input type="text" x-model="form.nickname" class="input input-bordered w-full focus:input-primary" required placeholder="你的昵称" />
                                      </div>
                                      <div class="form-control">
-                                         <label class="label"><span class="label-text">个人网站链接</span></label>
-                                         <input type="url" x-model="form.website" class="input input-bordered w-full" placeholder="https://" />
+                                         <label class="mb-2 text-sm font-medium text-base-content/80">个性签名</label>
+                                         <input type="text" x-model="form.signature" class="input input-bordered w-full focus:input-primary" placeholder="一句话介绍自己" />
                                      </div>
-                                 </div>
-                                 
-                                 <div class="divider">社交链接</div>
-                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                     <div class="form-control">
-                                         <label class="label"><span class="label-text">GitHub</span></label>
-                                         <input type="text" x-model="form.externalInformation.github.link" class="input input-bordered w-full" />
-                                     </div>
-                                      <div class="form-control">
-                                         <label class="label"><span class="label-text">Twitter / X</span></label>
-                                         <input type="text" x-model="form.externalInformation.twitter.link" class="input input-bordered w-full" />
-                                     </div>
-                                      <div class="form-control">
-                                         <label class="label"><span class="label-text">LinkedIn</span></label>
-                                         <input type="text" x-model="form.externalInformation.linkedIn.link" class="input input-bordered w-full" />
-                                     </div>
-                                      <div class="form-control">
-                                         <label class="label"><span class="label-text">微博</span></label>
-                                         <input type="text" x-model="form.externalInformation.weibo.link" class="input input-bordered w-full" />
-                                     </div>
-                                      <div class="form-control">
-                                         <label class="label"><span class="label-text">知乎</span></label>
-                                         <input type="text" x-model="form.externalInformation.zhihu.link" class="input input-bordered w-full" />
+                                     <div class="form-control md:col-span-2">
+                                         <label class="mb-2 text-sm font-medium text-base-content/80">个人简介</label>
+                                         <textarea x-model="form.bio" class="textarea textarea-bordered h-24 w-full focus:textarea-primary leading-relaxed resize-none" placeholder="详细介绍一下你自己..."></textarea>
                                      </div>
                                  </div>
 
-                                 <div class="form-control mt-6">
-                                     <button type="submit" class="btn btn-primary" :disabled="saving">
+                                 <!-- 个人网站 -->
+                                 <div>
+                                     <div class="divider text-sm text-base-content/50 font-normal">个人网站</div>
+                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                         <div class="form-control">
+                                             <label class="mb-2 text-sm font-medium text-base-content/80">网站名称</label>
+                                             <input type="text" x-model="form.websiteName" class="input input-bordered w-full focus:input-primary" placeholder="例如：我的博客" />
+                                         </div>
+                                         <div class="form-control">
+                                             <label class="mb-2 text-sm font-medium text-base-content/80">网站链接</label>
+                                             <input type="url" x-model="form.website" class="input input-bordered w-full focus:input-primary" placeholder="https://" />
+                                         </div>
+                                     </div>
+                                 </div>
+
+                                 <!-- 社交链接 -->
+                                 <div>
+                                     <div class="divider text-sm text-base-content/50 font-normal">社交账号</div>
+                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                         <!-- GitHub -->
+                                         <div class="form-control">
+                                            <label class="mb-2 text-sm font-medium text-base-content/80">GitHub</label>
+                                            <div class="relative">
+                                                <input type="text" x-model="form.externalInformation.github.link" class="input input-bordered w-full pl-10 focus:input-primary font-mono text-sm" placeholder="GitHub Profile URL" />
+                                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
+                                                    <svg class="w-5 h-5" viewBox="0 0 50 50" fill="currentColor">
+                                                        <path d="M17.791,46.836C18.502,46.53,19,45.823,19,45v-5.4c0-0.197,0.016-0.402,0.041-0.61C19.027,38.994,19.014,38.997,19,39 c0,0-3,0-3.6,0c-1.5,0-2.8-0.6-3.4-1.8c-0.7-1.3-1-3.5-2.8-4.7C8.9,32.3,9.1,32,9.7,32c0.6,0.1,1.9,0.9,2.7,2c0.9,1.1,1.8,2,3.4,2 c2.487,0,3.82-0.125,4.622-0.555C21.356,34.056,22.649,33,24,33v-0.025c-5.668-0.182-9.289-2.066-10.975-4.975 c-3.665,0.042-6.856,0.405-8.677,0.707c-0.058-0.327-0.108-0.656-0.151-0.987c1.797-0.296,4.843-0.647,8.345-0.714 c-0.112-0.276-0.209-0.559-0.291-0.849c-3.511-0.178-6.541-0.039-8.187,0.097c-0.02-0.332-0.047-0.663-0.051-0.999 c1.649-0.135,4.597-0.27,8.018-0.111c-0.079-0.5-0.13-1.011-0.13-1.543c0-1.7,0.6-3.5,1.7-5c-0.5-1.7-1.2-5.3,0.2-6.6 c2.7,0,4.6,1.3,5.5,2.1C21,13.4,22.9,13,25,13s4,0.4,5.6,1.1c0.9-0.8,2.8-2.1,5.5-2.1c1.5,1.4,0.7,5,0.2,6.6c1.1,1.5,1.7,3.2,1.6,5 c0,0.484-0.045,0.951-0.11,1.409c3.499-0.172,6.527-0.034,8.204,0.102c-0.002,0.337-0.033,0.666-0.051,0.999 c-1.671-0.138-4.775-0.28-8.359-0.089c-0.089,0.336-0.197,0.663-0.325,0.98c3.546,0.046,6.665,0.389,8.548,0.689 c-0.043,0.332-0.093,0.661-0.151,0.987c-1.912-0.306-5.171-0.664-8.879-0.682C35.112,30.873,31.557,32.75,26,32.969V33 c2.6,0,5,3.9,5,6.6V45c0,0.823,0.498,1.53,1.209,1.836C41.37,43.804,48,35.164,48,25C48,12.318,37.683,2,25,2S2,12.318,2,25 C2,35.164,8.63,43.804,17.791,46.836z"></path>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                         <!-- Twitter / X -->
+                                        <div class="form-control">
+                                            <label class="mb-2 text-sm font-medium text-base-content/80">Twitter / X</label>
+                                            <div class="relative">
+                                                <input type="text" x-model="form.externalInformation.twitter.link" class="input input-bordered w-full pl-10 focus:input-primary font-mono text-sm" placeholder="Twitter Profile URL" />
+                                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
+                                                    <svg class="w-5 h-5" viewBox="0 0 50 50" fill="currentColor">
+                                                        <path d="M 11 4 C 7.134 4 4 7.134 4 11 L 4 39 C 4 42.866 7.134 46 11 46 L 39 46 C 42.866 46 46 42.866 46 39 L 46 11 C 46 7.134 42.866 4 39 4 L 11 4 z M 13.085938 13 L 21.023438 13 L 26.660156 21.009766 L 33.5 13 L 36 13 L 27.789062 22.613281 L 37.914062 37 L 29.978516 37 L 23.4375 27.707031 L 15.5 37 L 13 37 L 22.308594 26.103516 L 13.085938 13 z M 16.914062 15 L 31.021484 35 L 34.085938 35 L 19.978516 15 L 16.914062 15 z"></path>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                         <!-- LinkedIn -->
+                                        <div class="form-control">
+                                            <label class="mb-2 text-sm font-medium text-base-content/80">LinkedIn</label>
+                                            <div class="relative">
+                                                <input type="text" x-model="form.externalInformation.linkedIn.link" class="input input-bordered w-full pl-10 focus:input-primary font-mono text-sm" placeholder="LinkedIn Profile URL" />
+                                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
+                                                    <svg class="w-5 h-5" viewBox="0 0 50 50" fill="currentColor">
+                                                        <path d="M41,4H9C6.24,4,4,6.24,4,9v32c0,2.76,2.24,5,5,5h32c2.76,0,5-2.24,5-5V9C46,6.24,43.76,4,41,4z M17,20v19h-6V20H17z M11,14.47c0-1.4,1.2-2.47,3-2.47s2.93,1.07,3,2.47c0,1.4-1.12,2.53-3,2.53C12.2,17,11,15.87,11,14.47z M39,39h-6c0,0,0-9.26,0-10 c0-2-1-4-3.5-4.04h-0.08C27,24.96,26,27.02,26,29c0,0.91,0,10,0,10h-6V20h6v2.56c0,0,1.93-2.56,5.81-2.56 c3.97,0,7.19,2.73,7.19,8.26V39z"></path>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                         <!-- 微博 -->
+                                         <div class="form-control">
+                                             <label class="mb-2 text-sm font-medium text-base-content/80">微博</label>
+                                             <div class="relative">
+                                                <input type="text" x-model="form.externalInformation.weibo.link" class="input input-bordered w-full pl-10 focus:input-primary font-mono text-sm" placeholder="Weibo Profile URL" />
+                                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
+                                                    <svg class="w-5 h-5" viewBox="0 0 50 50" fill="currentColor">
+                                                        <path d="M 35 6 C 34.222656 6 33.472656 6.078125 32.75 6.207031 C 32.207031 6.300781 31.84375 6.820313 31.9375 7.363281 C 32.03125 7.910156 32.550781 8.273438 33.09375 8.179688 C 33.726563 8.066406 34.359375 8 35 8 C 41.085938 8 46 12.914063 46 19 C 46 20.316406 45.757813 21.574219 45.328125 22.753906 C 45.195313 23.09375 45.253906 23.476563 45.484375 23.757813 C 45.71875 24.039063 46.082031 24.171875 46.441406 24.105469 C 46.800781 24.039063 47.09375 23.78125 47.207031 23.4375 C 47.710938 22.054688 48 20.566406 48 19 C 48 11.832031 42.167969 6 35 6 Z M 35 12 C 34.574219 12 34.171875 12.042969 33.789063 12.109375 C 33.246094 12.207031 32.878906 12.722656 32.976563 13.269531 C 33.070313 13.8125 33.589844 14.175781 34.132813 14.082031 C 34.425781 14.03125 34.714844 14 35 14 C 37.773438 14 40 16.226563 40 19 C 40 19.597656 39.890625 20.167969 39.691406 20.707031 C 39.503906 21.226563 39.773438 21.800781 40.292969 21.988281 C 40.8125 22.175781 41.386719 21.910156 41.574219 21.390625 C 41.84375 20.648438 42 19.84375 42 19 C 42 15.144531 38.855469 12 35 12 Z M 21.175781 12.40625 C 17.964844 12.34375 13.121094 14.878906 8.804688 19.113281 C 4.511719 23.40625 2 27.90625 2 31.78125 C 2 39.3125 11.628906 43.8125 21.152344 43.8125 C 33.5 43.8125 41.765625 36.699219 41.765625 31.046875 C 41.765625 27.59375 38.835938 25.707031 36.21875 24.871094 C 35.59375 24.660156 35.175781 24.558594 35.488281 23.71875 C 35.695313 23.21875 36 22.265625 36 21 C 36 19.5625 35 18.316406 33 18.09375 C 32.007813 17.984375 28 18 25.339844 19.113281 C 25.339844 19.113281 23.871094 19.746094 24.289063 18.59375 C 25.023438 16.292969 24.917969 14.40625 23.765625 13.359375 C 23.140625 12.730469 22.25 12.425781 21.175781 12.40625 Z M 20.3125 23.933594 C 28.117188 23.933594 34.441406 27.914063 34.441406 32.828125 C 34.441406 37.738281 28.117188 41.71875 20.3125 41.71875 C 12.511719 41.71875 6.1875 37.738281 6.1875 32.828125 C 6.1875 27.914063 12.511719 23.933594 20.3125 23.933594 Z"></path>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                         </div>
+
+                                         <!-- 知乎 -->
+                                         <div class="form-control">
+                                             <label class="mb-2 text-sm font-medium text-base-content/80">知乎</label>
+                                             <div class="relative">
+                                                <input type="text" x-model="form.externalInformation.zhihu.link" class="input input-bordered w-full pl-10 focus:input-primary font-mono text-sm" placeholder="Zhihu Profile URL" />
+                                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
+                                                    <svg class="w-5 h-5" viewBox="0 0 32 32" fill="currentColor">
+                                                        <path d="M 30.628906 8.9882812 C 30.263281 9.0304687 29.699219 9.1992188 29.699219 9.1992188 C 29.699219 9.1992188 21.499609 10.099219 18.099609 10.199219 C 18.199609 10.699219 18.500391 11.099219 18.900391 11.199219 C 19.600391 11.299219 20.100391 11.199219 21.400391 11.199219 C 22.600391 11.099219 23.599219 11.099609 24.199219 11.099609 L 24.199219 16 L 18 16 C 18 16 18.099219 17.199219 19.199219 17.199219 L 24.199219 17.199219 L 24.199219 20.599609 C 24.199219 21.299609 23.7 21.699219 23 21.699219 C 22.3 21.699219 21.8 21.599609 21 21.599609 C 21.1 21.799609 21.200391 22.299219 21.900391 22.699219 C 22.400391 22.899219 22.699219 23 23.199219 23 C 24.699219 23 25.5 22.099219 25.5 20.699219 L 25.5 17.199219 L 31.599609 17.199219 C 31.999609 17.199219 32.000391 15.999609 31.900391 16.099609 L 25.400391 16.099609 L 25.400391 11.199219 C 25.600391 11.199219 26 11.099609 26.5 11.099609 C 28.6 10.999609 30.000391 10.699219 30.900391 10.699219 C 30.900391 10.699219 31.500391 9.3 30.900391 9 C 30.850391 8.975 30.750781 8.9742188 30.628906 8.9882812 z M 3.3007812 9 C 3.3007813 9 2.0992188 8.9996094 1.6992188 10.099609 C 1.5992187 10.499609 0.9 12.100391 0 13.900391 C 0.3 13.900391 1.2007812 13.800781 1.8007812 12.800781 C 1.9007813 12.500781 2.2007812 12.300391 2.3007812 11.900391 L 3.8007812 11.900391 C 3.8007813 12.400391 3.6992188 15.500781 3.6992188 15.800781 L 1.0996094 15.800781 C 0.49960937 15.800781 0.30078125 17 0.30078125 17 L 3.5 17 C 3.3 19.4 2.1 21.100781 0 22.800781 C 1 23.100781 1.9996094 22.800391 2.5996094 22.400391 C 2.5996094 22.400391 3.8003906 21.499609 4.4003906 19.099609 L 6.9003906 22 C 6.9003906 22 7.3007812 20.6 6.8007812 20 C 6.4007813 19.5 5.5996094 18.599219 5.0996094 18.199219 L 4.4003906 18.800781 C 4.6003906 18.100781 4.8007812 17.7 4.8007812 17 L 8 17 C 8 17 7.9996094 15.800781 7.5996094 15.800781 L 4.9003906 15.800781 C 5.0003906 14.500781 5 13.000391 5 11.900391 L 7.4003906 11.900391 C 7.4003906 11.900391 7.6003906 10.6 7.1003906 10 C 6.7003906 9.5 5.9003906 9.4007813 5.4003906 9.3007812 C 4.6003906 9.1007813 3.3007812 9 3.3007812 9 z"></path>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                         </div>
+                                     </div>
+                                 </div>
+
+                                 <div class="flex justify-end mt-8 pt-6 border-t border-base-200">
+                                     <button type="submit" class="btn btn-primary px-8" :disabled="saving">
+                                         <span x-show="!saving">保存更改</span>
                                          <span x-show="saving" class="loading loading-spinner"></span>
-                                         保存更改
                                      </button>
                                  </div>
                              </form>
                          </div>
 
-                         <!-- Password Form -->
-                        <div x-show="subTab === 'password'" x-cloak>
-                             <form @submit.prevent="changePassword" class="space-y-4 max-w-md mx-auto mt-4">
+                         <!-- Password -->
+                         <input type="radio" name="settings_tabs" class="tab" aria-label="修改密码" :checked="subTab === 'password'" @click="subTab = 'password'" />
+                         <div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                             <form @submit.prevent="changePassword" class="space-y-6 max-w-lg mx-auto py-8">
                                 <div class="form-control">
-                                    <label class="label"><span class="label-text">旧密码</span></label>
-                                    <input type="password" x-model="pwdForm.oldPassword" class="input input-bordered w-full" required />
+                                    <label class="mb-2 text-sm font-medium text-base-content/80">旧密码</label>
+                                    <input type="password" x-model="pwdForm.oldPassword" class="input input-bordered w-full focus:input-primary" required />
                                 </div>
                                 <div class="form-control">
-                                    <label class="label"><span class="label-text">新密码</span></label>
-                                    <input type="password" x-model="pwdForm.newPassword" class="input input-bordered w-full" required />
+                                    <label class="mb-2 text-sm font-medium text-base-content/80">新密码</label>
+                                    <input type="password" x-model="pwdForm.newPassword" class="input input-bordered w-full focus:input-primary" required />
                                 </div>
                                 <div class="form-control">
-                                    <label class="label"><span class="label-text">确认新密码</span></label>
-                                    <input type="password" x-model="pwdForm.confirmPassword" class="input input-bordered w-full" required />
+                                    <label class="mb-2 text-sm font-medium text-base-content/80">确认新密码</label>
+                                    <input type="password" x-model="pwdForm.confirmPassword" class="input input-bordered w-full focus:input-primary" required />
                                 </div>
-                                 <div class="form-control mt-6">
-                                    <button type="submit" class="btn btn-primary" :disabled="saving">
+                                 <div class="flex justify-end mt-8 pt-6 border-t border-base-200">
+                                    <button type="submit" class="btn btn-primary px-8" :disabled="saving">
+                                        <span x-show="!saving">修改密码</span>
                                         <span x-show="saving" class="loading loading-spinner"></span>
-                                        修改密码
                                     </button>
                                 </div>
                              </form>
                         </div>
 
                         <!-- Account Binding -->
-                        <div x-show="subTab === 'binding'" x-cloak>
+                        <input type="radio" name="settings_tabs" class="tab" aria-label="账号绑定" :checked="subTab === 'binding'" @click="subTab = 'binding'" />
+                        <div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
                             <div class="space-y-4 mt-4">
                                 <template x-if="loadingBindings">
                                     <div class="flex justify-center py-10"><span class="loading loading-spinner loading-lg text-primary"></span></div>
@@ -327,7 +376,7 @@
                                                         </template>
                                                     </div>
                                                     <div>
-                                                        <div class="font-bold capitalize" x-text="provider"></div>
+                                                        <div class="font-medium capitalize" x-text="provider"></div>
                                                         <div class="text-sm opacity-70" x-text="binding.bound ? '已绑定' : '未绑定'"></div>
                                                     </div>
                                                 </div>
@@ -342,7 +391,8 @@
                         </div>
 
                         <!-- Privacy Settings -->
-                        <div x-show="subTab === 'privacy'" x-cloak>
+                        <input type="radio" name="settings_tabs" class="tab" aria-label="隐私设置" :checked="subTab === 'privacy'" @click="subTab = 'privacy'" />
+                        <div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
                              <div class="space-y-4 mt-4">
                                 <div class="form-control">
                                     <label class="label cursor-pointer">
@@ -368,8 +418,7 @@
                                 </div>
                             </div>
                         </div>
-                     </div>
-                 </div>
+                    </div>
             </div>
         </main>
     </div>
@@ -465,7 +514,7 @@
             async deleteArticle(id) {
                 if (!confirm('确定要删除这篇文章吗？此操作不可恢复。')) return;
                 try {
-                    const res = await axios.post('/article/delete', { id: id });
+                    const res = await axios.post('/post/delete', { id: id });
                     if (res.data.code === 0) {
                         this.fetchData();
                         // Update stats locally

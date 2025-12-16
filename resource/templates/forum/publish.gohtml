@@ -28,7 +28,7 @@
              <div x-show="ui.activeTab === 'edit'" class="flex-1 flex flex-col gap-4">
                  <!-- Title -->
                  <div class="form-control">
-                    <input type="text" x-model="article.title" placeholder="文章标题" class="input input-bordered w-full text-lg font-bold" />
+                    <input type="text" x-model="article.title" placeholder="文章标题" class="input input-bordered w-full text-lg font-normal" />
                  </div>
 
                  <!-- Type & Category -->
@@ -166,7 +166,7 @@
             },
 
             loadArticle(id) {
-                fetch('/forum/get-articles-origin', {
+                fetch('/api/forum/get-articles-origin', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({id: parseInt(id)})
