@@ -9,7 +9,7 @@
 
                 <!-- 导航菜单 -->
                 <div class="card bg-base-100 shadow-sm">
-                    <div class="card-body p-4">
+                    <div class="card-body p-2">
                         <ul class="menu bg-base-100 w-full p-0 text-left gap-1">
                             <li>
                                 <a href="/profile" :class="{'active': tab === 'articles'}" @click.prevent="switchTab('articles')" class="gap-3">
@@ -27,6 +27,12 @@
                                     我的收藏
                                 </a>
                             </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body p-2">
+                        <ul class="menu bg-base-100 w-full p-0 text-left gap-1">
                             <li>
                                 <a href="/settings" class="gap-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
