@@ -21,6 +21,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/spf13/cast"
 )
 
 func GetSiteStatistics() component.Response {
@@ -253,6 +254,8 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		UserId:       req.UserId,
 		FilterStatus: true,
 	})
+	authorInfoStatistics := userStatistics.Get(req.UserId)
+	user, _ := req.GetUser()
 	categoryMap := hotdataserve.ArticleCategoryMap()
 	return component.SuccessPage(
 		array.Map(pageData.Data, func(t articles.SmallEntity) vo.ArticlesSimpleDto {
@@ -263,12 +266,19 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				}
 				return ""
 			})
+
+			// 获取作者信息（虽然是当前用户，为了前端统一处理，也返回完整信息）
+			username := user.Username
+			avatarUrl := user.GetWebAvatarUrl()
+
 			return vo.ArticlesSimpleDto{
 				Id:             t.Id,
 				Title:          t.Title,
 				CreateTime:     t.CreatedAt.Format(time.DateTime),
 				LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
-				Username:       "", // 这里不需要用户名，因为是自己的文章
+				Username:       username,
+				AuthorId:       t.UserId,
+				AvatarUrl:      avatarUrl,
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,
 				Categories:     categoryNames,
@@ -277,7 +287,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		}),
 		pageData.Page,
 		pageData.PageSize,
-		pageData.Total,
+		cast.ToInt64(authorInfoStatistics.ArticleCount),
 	)
 }
 
@@ -291,7 +301,6 @@ type GetUserBookmarkedArticlesRequest struct {
 func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArticlesRequest]) component.Response {
 	// 获取收藏的文章ID列表
 	articleIds, total := articleBookmark.GetUserBookmarkedArticleIds(req.UserId, max(req.Params.Page, 1), req.Params.PageSize)
-
 	if len(articleIds) == 0 {
 		return component.SuccessPage(
 			[]vo.ArticlesSimpleDto{},
@@ -300,6 +309,7 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 			total,
 		)
 	}
+	authorInfoStatistics := userStatistics.Get(req.UserId)
 
 	// 根据文章ID获取文章详情
 	articleList := articles.GetByIds(articleIds)
@@ -322,8 +332,10 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 		})
 
 		username := ""
+		avatarUrl := ""
 		if user, ok := userMap[t.UserId]; ok {
 			username = user.Username
+			avatarUrl = user.GetWebAvatarUrl()
 		}
 
 		return vo.ArticlesSimpleDto{
@@ -333,6 +345,7 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
 			Username:       username,
 			AuthorId:       t.UserId,
+			AvatarUrl:      avatarUrl,
 			ViewCount:      t.ViewCount,
 			CommentCount:   t.ReplyCount,
 			Categories:     categoryNames,
@@ -344,7 +357,7 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 		articleDto,
 		max(req.Params.Page, 1),
 		req.Params.PageSize,
-		total,
+		cast.ToInt64(authorInfoStatistics.CollectionCount),
 	)
 }
 

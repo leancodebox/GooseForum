@@ -59,8 +59,8 @@
                      <template x-if="loading && list.length === 0">
                          <div class="flex justify-center py-20"><span class="loading loading-spinner loading-lg text-primary"></span></div>
                      </template>
-                     <template x-if="!loading && list.length === 0">
-                         <div class="card bg-base-100 shadow-sm py-20 text-center">
+                     <template x-if="!loading && list.length === 0 && page === 1">
+                        <div class="card bg-base-100 shadow-sm py-20 text-center">
                              <div class="text-6xl mb-4">📝</div>
                              <h3 class="text-lg font-normal text-base-content/70">还没有发布过文章</h3>
                              <p class="text-sm text-base-content/50 mt-2">分享你的知识和见解，从第一篇文章开始</p>
@@ -71,49 +71,79 @@
                      </template>
 
                      <!-- Article List -->
-                     <ul class="list bg-base-100 rounded-box shadow-sm">
-                         <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">已发布文章</li>
+                    <ul class="list bg-base-100 rounded-box shadow-sm" x-show="list.length > 0">
+                        <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">已发布文章</li>
                          <template x-for="item in list" :key="item.id">
-                             <li class="list-row hover:bg-base-200 group transition-colors duration-200 p-4 border-b border-base-200 last:border-b-0">
-                                 <div class="text-4xl font-thin opacity-30 tabular-nums flex items-center justify-center w-12 h-12 bg-base-300 rounded-box">📄</div>
-                                 <div class="list-col-grow">
-                                     <div>
-                                         <a :href="'/post/' + item.id" class="font-bold hover:text-primary transition-colors" x-text="item.title"></a>
-                                         <span x-show="item.status === 2" class="badge badge-warning badge-xs ml-2">草稿</span>
+                             <li class="list-row hover:bg-base-300 group transition-colors duration-200 px-4 py-2 border-b border-base-200 last:border-b-0 flex items-center gap-3">
+                                 <!-- Avatar -->
+                                 <a class="avatar" :href="'/user/' + item.authorId">
+                                     <div class="w-10 rounded-full">
+                                         <img :src="item.avatarUrl" :alt="item.username"/>
                                      </div>
-                                     <div class="text-xs font-semibold opacity-60 line-clamp-1" x-text="item.summary || '暂无摘要'"></div>
-                                     <div class="flex items-center gap-4 text-xs opacity-50 mt-1">
-                                         <span x-text="formatDate(item.created_at)"></span>
-                                         <span class="flex items-center gap-1">
-                                             {{template "icon_view"}}
-                                             <span x-text="item.view_count || 0"></span>
-                                         </span>
-                                         <span class="flex items-center gap-1">
-                                             {{template "icon_comment"}}
-                                             <span x-text="item.comment_count || 0"></span>
-                                         </span>
+                                 </a>
+                                 <!-- Content -->
+                                 <div class="flex-1 min-w-0">
+                                     <!-- Title Row -->
+                                     <div class="flex items-center gap-2 mb-1">
+                                         <div class="badge badge-sm badge-primary flex-shrink-0 px-1.5" x-text="item.typeStr"></div>
+                                         <a :href="'/post/' + item.id"
+                                            class="line-clamp-1 text-lg font-normal text-base-content hover:text-primary hover:underline flex-1 min-w-0" x-text="item.title"></a>
+                                         <span x-show="item.status === 2" class="badge badge-warning badge-xs ml-2">草稿</span>
+                                         
+                                         <!-- Actions -->
+                                         <div class="flex items-center gap-1 ml-auto">
+                                            <a :href="'/publish?id=' + item.id" class="btn btn-square btn-ghost btn-sm tooltip" data-tip="编辑">
+                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                 </svg>
+                                            </a>
+                                            <button @click="deleteArticle(item.id)" class="btn btn-square btn-ghost btn-sm text-error tooltip" data-tip="删除">
+                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                 </svg>
+                                            </button>
+                                         </div>
+                                     </div>
+                                     
+                                     <!-- Info Row -->
+                                     <div class="flex items-center justify-between text-sm text-base-content/60">
+                                         <div class="flex items-center flex-wrap gap-1">
+                                             <a :href="'/user/' + item.authorId" x-text="item.username"></a>
+                                             <span x-text="item.lastUpdateTime"></span>
+                                             <template x-for="cat in item.categories">
+                                                 <span class="badge badge-sm badge-ghost px-1.5" x-text="cat"></span>
+                                             </template>
+                                         </div>
+                                         <div class="flex items-center">
+                                             <div class="flex items-center mr-4 gap-1">
+                                                 {{template "icon_view"}}
+                                                 <span class="flex-shrink-0" x-text="item.viewCount"></span>
+                                             </div>
+                                             <div class="flex items-center gap-1">
+                                                 {{template "icon_comment"}}
+                                                 <span class="flex-shrink-0" x-text="item.commentCount"></span>
+                                             </div>
+                                         </div>
                                      </div>
                                  </div>
-                                 <a :href="'/publish?id=' + item.id" class="btn btn-square btn-ghost btn-sm tooltip" data-tip="编辑">
-                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                     </svg>
-                                 </a>
-                                 <button @click="deleteArticle(item.id)" class="btn btn-square btn-ghost btn-sm text-error tooltip" data-tip="删除">
-                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                     </svg>
-                                 </button>
                              </li>
                          </template>
                      </ul>
 
                      <!-- Pagination -->
-                     <div class="flex justify-center mt-8" x-show="total > 0">
+                     <div class="flex justify-center mt-8" x-show="total > 0 && totalPages > 1">
                          <div class="join">
-                             <button class="join-item btn btn-sm" :disabled="page <= 1" @click="changePage(page - 1)">«</button>
-                             <button class="join-item btn btn-sm">Page <span x-text="page"></span></button>
-                             <button class="join-item btn btn-sm" :disabled="page * size >= total" @click="changePage(page + 1)">»</button>
+                             <button class="join-item btn btn-sm" x-show="!(page <= 1)" @click="changePage(page - 1)">«</button>
+                             
+                             <template x-for="(p, i) in pagination" :key="i">
+                                <button class="join-item btn btn-sm" 
+                                    :class="{'btn-active': p === page, 'btn-disabled': p === '...'}" 
+                                    :disabled="p === '...'"
+                                    @click="changePage(p)" 
+                                    x-text="p"></button>
+                            </template>
+
+                             <button class="join-item btn btn-sm" x-show="!(page >= totalPages)" @click="changePage(page + 1)">»</button>
                          </div>
                      </div>
                 </div>
@@ -126,8 +156,8 @@
                      <template x-if="loading && list.length === 0">
                          <div class="flex justify-center py-20"><span class="loading loading-spinner loading-lg text-primary"></span></div>
                      </template>
-                     <template x-if="!loading && list.length === 0">
-                         <div class="card bg-base-100 shadow-sm py-20 text-center">
+                     <template x-if="!loading && list.length === 0 && page === 1">
+                        <div class="card bg-base-100 shadow-sm py-20 text-center">
                              <div class="text-6xl mb-4">⭐</div>
                              <h3 class="text-lg font-normal text-base-content/70">还没有收藏内容</h3>
                              <p class="text-sm text-base-content/50 mt-2">遇到喜欢的内容，记得收藏哦</p>
@@ -135,39 +165,61 @@
                      </template>
 
                      <!-- Bookmark List -->
-                     <div class="space-y-4">
-                         <template x-for="item in list" :key="item.id">
-                             <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-200">
-                                 <div class="card-body p-5">
-                                     <h3 class="card-title text-lg font-normal mb-2">
-                                         <a :href="'/post/' + item.id" class="hover:text-primary transition-colors" x-text="item.title"></a>
-                                     </h3>
-                                     <p class="text-base-content/70 text-sm line-clamp-2 mb-3" x-text="item.summary || '暂无摘要'"></p>
-                                     <div class="flex items-center gap-4 text-xs text-base-content/50">
-                                         <div class="flex items-center gap-2">
-                                             <div class="avatar placeholder">
-                                                 <div class="bg-neutral text-neutral-content rounded-full w-5">
-                                                     <img :src="item.user_avatar || '/static/pic/default-avatar.webp'" alt="Author">
-                                                 </div>
-                                             </div>
-                                             <span x-text="item.user_nickname || item.username"></span>
+                    <ul class="list bg-base-100 rounded-box shadow-sm" x-show="list.length > 0">
+                        <template x-for="item in list" :key="item.id">
+                             <li class="list-row hover:bg-base-300 group transition-colors duration-200 px-4 py-2 border-b border-base-200 last:border-b-0 flex items-center gap-3">
+                                 <!-- Avatar -->
+                                 <a class="avatar" :href="'/user/' + item.authorId">
+                                     <div class="w-10 rounded-full">
+                                         <img :src="item.avatarUrl" :alt="item.username"/>
+                                     </div>
+                                 </a>
+                                 <!-- Content -->
+                                 <div class="flex-1 min-w-0">
+                                     <!-- Title Row -->
+                                     <div class="flex items-center gap-2 mb-1">
+                                         <div class="badge badge-sm badge-primary flex-shrink-0 px-1.5" x-text="item.typeStr"></div>
+                                         <a :href="'/post/' + item.id"
+                                            class="line-clamp-1 text-lg font-normal text-base-content hover:text-primary hover:underline flex-1 min-w-0" x-text="item.title"></a>
+                                     </div>
+                                     <!-- Info Row -->
+                                     <div class="flex items-center justify-between text-sm text-base-content/60">
+                                         <div class="flex items-center flex-wrap gap-1">
+                                             <a :href="'/user/' + item.authorId" x-text="item.username"></a>
+                                             <span x-text="item.lastUpdateTime"></span>
+                                             <template x-for="cat in item.categories">
+                                                 <span class="badge badge-sm badge-ghost px-1.5" x-text="cat"></span>
+                                             </template>
                                          </div>
-                                         <span x-text="formatDate(item.created_at)"></span>
-                                         <span class="flex items-center gap-1">
-                                              {{template "icon_view"}}
-                                              <span x-text="item.view_count || 0"></span>
-                                         </span>
+                                         <div class="flex items-center">
+                                             <div class="flex items-center mr-4 gap-1">
+                                                 {{template "icon_view"}}
+                                                 <span class="flex-shrink-0" x-text="item.viewCount"></span>
+                                             </div>
+                                             <div class="flex items-center gap-1">
+                                                 {{template "icon_comment"}}
+                                                 <span class="flex-shrink-0" x-text="item.commentCount"></span>
+                                             </div>
+                                         </div>
                                      </div>
                                  </div>
-                             </div>
+                             </li>
                          </template>
-                     </div>
+                     </ul>
                       <!-- Pagination -->
-                      <div class="flex justify-center mt-8" x-show="total > 0">
+                      <div class="flex justify-center mt-8" x-show="total > 0 && totalPages > 1">
                          <div class="join">
-                             <button class="join-item btn btn-sm" :disabled="page <= 1" @click="changePage(page - 1)">«</button>
-                             <button class="join-item btn btn-sm">Page <span x-text="page"></span></button>
-                             <button class="join-item btn btn-sm" :disabled="page * size >= total" @click="changePage(page + 1)">»</button>
+                             <button class="join-item btn btn-sm" x-show="!(page <= 1)" @click="changePage(page - 1)">«</button>
+                             
+                             <template x-for="(p, i) in pagination" :key="i">
+                                <button class="join-item btn btn-sm" 
+                                    :class="{'btn-active': p === page, 'btn-disabled': p === '...'}" 
+                                    :disabled="p === '...'"
+                                    @click="changePage(p)" 
+                                    x-text="p"></button>
+                            </template>
+
+                             <button class="join-item btn btn-sm" x-show="!(page >= totalPages)" @click="changePage(page + 1)">»</button>
                          </div>
                      </div>
                  </div>
@@ -232,6 +284,13 @@
                     if (res.data.code === 0) {
                         this.list = res.data.result.list || [];
                         this.total = res.data.result.total || 0;
+
+                        // Auto-correct page if out of bounds
+                        const maxPage = Math.max(1, Math.ceil(this.total / this.size));
+                        if (this.page > maxPage) {
+                            this.page = maxPage;
+                            await this.fetchData();
+                        }
                     }
                 } catch (e) {
                     console.error('Fetch failed', e);
@@ -239,8 +298,41 @@
                     this.loading = false;
                 }
             },
+            get totalPages() {
+                return Math.ceil(this.total / this.size);
+            },
+            get pagination() {
+                const total = this.totalPages;
+                if (total <= 1) return [];
+                
+                const current = this.page;
+                const delta = 2;
+                const range = [];
+                const rangeWithDots = [];
+                let l;
+
+                for (let i = 1; i <= total; i++) {
+                    if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
+                        range.push(i);
+                    }
+                }
+
+                for (let i of range) {
+                    if (l) {
+                        if (i - l === 2) {
+                            rangeWithDots.push(l + 1);
+                        } else if (i - l !== 1) {
+                            rangeWithDots.push('...');
+                        }
+                    }
+                    rangeWithDots.push(i);
+                    l = i;
+                }
+
+                return rangeWithDots;
+            },
             changePage(p) {
-                if (p < 1 || (p > 1 && (p - 1) * this.size >= this.total)) return;
+                if (typeof p !== 'number' || p < 1 || p > this.totalPages) return;
                 this.page = p;
                 this.fetchData();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
