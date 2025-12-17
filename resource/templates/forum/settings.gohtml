@@ -1,0 +1,611 @@
+{{define "profile_content"}}
+<div class="container mx-auto px-4 py-8 max-w-6xl" x-data="profileHandler()" x-cloak>
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- 左侧侧边栏：用户信息与导航 -->
+        <aside class="w-full lg:w-80 flex-shrink-0 space-y-6">
+            <div class="sticky top-20 space-y-4">
+                <!-- 用户卡片 -->
+                {{template "forum/user-card.gohtml" .UserCard}}
+
+                <!-- 导航菜单 -->
+                <div class="card bg-base-100 shadow-sm">
+                    <div class="card-body p-4">
+                        <ul class="menu bg-base-100 w-full p-0 text-left gap-1">
+                            <li>
+                                <a :class="{'active': tab === 'articles'}" @click.prevent="tab = 'articles'" class="gap-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                                    </svg>
+                                    我的文章
+                                </a>
+                            </li>
+                            <li>
+                                <a :class="{'active': tab === 'bookmarks'}" @click.prevent="tab = 'bookmarks'" class="gap-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                    </svg>
+                                    我的收藏
+                                </a>
+                            </li>
+                            <li>
+                                <a :class="{'active': tab === 'settings'}" @click.prevent="tab = 'settings'" class="gap-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    账号设置
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 右侧内容区域 -->
+        <main class="flex-1 min-w-0">
+            <!-- 标题栏 -->
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-normal" x-text="tabName"></h1>
+                <a x-show="tab === 'articles'" href="/publish" class="btn btn-primary btn-sm gap-2 shadow-sm hover:shadow-primary/30 transition-shadow">
+                    {{template "icon_publish"}} 写文章
+                </a>
+            </div>
+
+            <!-- 账号设置 -->
+            <div x-data="settingsHandler()" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+                 <!-- Settings Tabs -->
+                <div class="tabs tabs-lift">
+                            <input type="radio" name="settings_tabs" class="tab" aria-label="基本信息" :checked="subTab === 'basic'" @click="subTab = 'basic'" />
+                            <div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                             <form @submit.prevent="saveBasicInfo" class="space-y-6 max-w-4xl mx-auto py-4">
+                                 <!-- 基本信息 -->
+                                <!-- 头像设置 -->
+                                <div class="flex items-center gap-6 mb-8">
+                                    <div class="avatar">
+                                        <div class="w-20 h-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                                            <img :src="user.avatarUrl || '/static/pic/default-avatar.webp'" alt="Avatar" class="object-cover w-full h-full" />
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <button type="button" class="btn btn-outline btn-primary btn-sm w-fit" @click="$refs.settingsAvatarInput.click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                            </svg>
+                                            更换头像
+                                        </button>
+                                        <span class="text-xs text-base-content/50">支持 JPG, PNG, GIF, WEBP，最大 2MB</span>
+                                        <input type="file" x-ref="settingsAvatarInput" class="hidden" accept="image/*" @change="handleAvatarUpload">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="join w-full">
+                                        <label class="floating-label join-item w-full">
+                                            <span>用户名</span>
+                                            <input type="text" x-model="form.username" class="input input-bordered join-item w-full" readonly />
+                                        </label>
+                                        <button type="button" class="btn btn-primary join-item">更改</button>
+                                    </div>
+                                    <div class="join w-full">
+                                        <label class="floating-label join-item w-full">
+                                            <span>邮箱</span>
+                                            <input type="email" x-model="form.email" class="input input-bordered join-item w-full" readonly />
+                                        </label>
+                                        <button type="button" class="btn btn-primary join-item">更改</button>
+                                    </div>
+                                    <label class="floating-label w-full">
+                                        <span>昵称 <span class="text-error">*</span></span>
+                                        <input type="text" x-model="form.nickname" class="input input-bordered w-full focus:input-primary" required placeholder="你的昵称" />
+                                    </label>
+                                    <label class="floating-label w-full">
+                                        <span>个性签名</span>
+                                        <input type="text" x-model="form.signature" class="input input-bordered w-full focus:input-primary" placeholder="一句话介绍自己" />
+                                    </label>
+                                    <label class="floating-label w-full md:col-span-2">
+                                        <span>个人简介</span>
+                                        <textarea x-model="form.bio" class="textarea textarea-bordered h-24 w-full focus:textarea-primary leading-relaxed resize-none" placeholder="详细介绍一下你自己..."></textarea>
+                                    </label>
+                                </div>
+
+                                <!-- 个人网站 -->
+                                <div>
+                                    <div class="divider text-sm text-base-content/50 font-normal">个人网站</div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <label class="floating-label w-full">
+                                            <span>网站名称</span>
+                                            <input type="text" x-model="form.websiteName" class="input input-bordered w-full focus:input-primary" placeholder="例如：我的博客" />
+                                        </label>
+                                        <label class="floating-label w-full">
+                                            <span>网站链接</span>
+                                            <input type="url" x-model="form.website" class="input input-bordered w-full focus:input-primary" placeholder="https://" />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                 <!-- 社交链接 -->
+                                 <div>
+                                     <div class="divider text-sm text-base-content/50 font-normal">社交账号</div>
+                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                         <!-- GitHub -->
+                                         <label class="floating-label w-full">
+                                            <span class="flex items-center gap-2">
+                                                {{template "icon_github"}}
+                                                GitHub
+                                            </span>
+                                            <input type="text" x-model="form.externalInformation.github.link" class="input input-bordered w-full focus:input-primary font-mono text-sm" placeholder="GitHub Profile URL" />
+                                         </label>
+
+                                         <!-- BiliBili -->
+                                         <label class="floating-label w-full">
+                                            <span class="flex items-center gap-2">
+                                                {{template "icon_bilibili"}}
+                                                BiliBili
+                                            </span>
+                                            <input type="text" x-model="form.externalInformation.bilibili.link" class="input input-bordered w-full focus:input-primary font-mono text-sm" placeholder="GitHub Profile URL" />
+                                         </label>
+
+                                         <!-- Twitter / X -->
+                                        <label class="floating-label w-full">
+                                            <span class="flex items-center gap-2">
+                                                {{template "icon_twitter"}}
+                                                Twitter / X
+                                            </span>
+                                            <input type="text" x-model="form.externalInformation.twitter.link" class="input input-bordered w-full focus:input-primary font-mono text-sm" placeholder="Twitter Profile URL" />
+                                        </label>
+
+                                         <!-- LinkedIn -->
+                                        <label class="floating-label w-full">
+                                            <span class="flex items-center gap-2">
+                                                {{template "icon_linkedin"}}
+                                                LinkedIn
+                                            </span>
+                                            <input type="text" x-model="form.externalInformation.linkedIn.link" class="input input-bordered w-full focus:input-primary font-mono text-sm" placeholder="LinkedIn Profile URL" />
+                                        </label>
+
+                                         <!-- 微博 -->
+                                         <label class="floating-label w-full">
+                                            <span class="flex items-center gap-2">
+                                                {{template "icon_weibo"}}
+                                                微博
+                                            </span>
+                                            <input type="text" x-model="form.externalInformation.weibo.link" class="input input-bordered w-full focus:input-primary font-mono text-sm" placeholder="Weibo Profile URL" />
+                                         </label>
+
+                                         <!-- 知乎 -->
+                                         <label class="floating-label w-full">
+                                            <span class="flex items-center gap-2">
+                                                {{template "icon_zhihu"}}
+                                                知乎
+                                            </span>
+                                            <input type="text" x-model="form.externalInformation.zhihu.link" class="input input-bordered w-full focus:input-primary font-mono text-sm" placeholder="Zhihu Profile URL" />
+                                         </label>
+                                     </div>
+                                 </div>
+
+                                 <div class="flex justify-end mt-8 pt-6 border-t border-base-200">
+                                     <button type="submit" class="btn btn-primary px-8" :disabled="saving">
+                                         <span x-show="!saving">保存更改</span>
+                                         <span x-show="saving" class="loading loading-spinner"></span>
+                                     </button>
+                                 </div>
+                             </form>
+                         </div>
+
+                         <!-- Password -->
+                         <input type="radio" name="settings_tabs" class="tab" aria-label="修改密码" :checked="subTab === 'password'" @click="subTab = 'password'" />
+                         <div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                 <!-- 左侧表单区域 -->
+                                 <div class="lg:col-span-2">
+                                     <form @submit.prevent="changePassword" class="space-y-6 py-4">
+                                        <label class="floating-label w-full">
+                                            <span>旧密码</span>
+                                            <input type="password" x-model="pwdForm.oldPassword" class="input input-bordered w-full focus:input-primary" required placeholder="请输入当前密码" />
+                                        </label>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <label class="floating-label w-full">
+                                                <span>新密码</span>
+                                                <input type="password" x-model="pwdForm.newPassword" class="input input-bordered w-full focus:input-primary" required placeholder="请输入新密码" />
+                                            </label>
+                                            <label class="floating-label w-full">
+                                                <span>确认新密码</span>
+                                                <input type="password" x-model="pwdForm.confirmPassword" class="input input-bordered w-full focus:input-primary" required placeholder="请再次输入新密码" />
+                                            </label>
+                                        </div>
+                                         <div class="flex justify-end mt-8 pt-6 border-t border-base-200">
+                                            <button type="submit" class="btn btn-primary px-8" :disabled="saving">
+                                                <span x-show="!saving">修改密码</span>
+                                                <span x-show="saving" class="loading loading-spinner"></span>
+                                            </button>
+                                        </div>
+                                     </form>
+                                 </div>
+                                 
+                                 <!-- 右侧安全提示 -->
+                                 <div class="lg:col-span-1">
+                                     <div class="card bg-base-200/50 compact mt-4 lg:mt-0">
+                                         <div class="card-body">
+                                             <h3 class="card-title text-base flex items-center gap-2">
+                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                 </svg>
+                                                 安全提示
+                                             </h3>
+                                             <ul class="text-sm text-base-content/70 space-y-3 mt-2">
+                                                 <li class="flex gap-2">
+                                                     <span class="text-success">•</span>
+                                                     <span>密码长度至少需要 6 个字符。</span>
+                                                 </li>
+                                                 <li class="flex gap-2">
+                                                     <span class="text-success">•</span>
+                                                     <span>建议使用字母、数字和符号的组合以提高安全性。</span>
+                                                 </li>
+                                                 <li class="flex gap-2">
+                                                     <span class="text-success">•</span>
+                                                     <span>请勿使用与其他网站相同的密码。</span>
+                                                 </li>
+                                                 <li class="flex gap-2">
+                                                     <span class="text-success">•</span>
+                                                     <span>定期修改密码可以有效保护您的账号安全。</span>
+                                                 </li>
+                                             </ul>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
+                        </div>
+
+                        <!-- Account Binding -->
+                        <input type="radio" name="settings_tabs" class="tab" aria-label="账号绑定" :checked="subTab === 'binding'" @click="subTab = 'binding'" />
+                        <div class="tab-content bg-base-100 border-base-300 rounded-box p-6">
+                            <div class="space-y-4 mt-4">
+                                <template x-if="loadingBindings">
+                                    <div class="flex justify-center py-10"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+                                </template>
+                                <template x-if="!loadingBindings">
+                                    <div class="grid grid-cols-1 gap-4">
+                                        <template x-for="(binding, provider) in oauthBindings" :key="provider">
+                                            <div class="flex items-center justify-between p-4 bg-base-100 border border-base-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-xl shrink-0">
+                                                        <!-- Icons based on provider -->
+                                                        <template x-if="provider === 'github'">
+                                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                                        </template>
+                                                        <template x-if="provider === 'google'">
+                                                            <svg class="w-6 h-6" viewBox="0 0 24 24"><path fill="#EA4335" d="M24 12.276c0-.852-.076-1.671-.219-2.456H12v4.646h6.73c-.29 1.556-1.171 2.873-2.496 3.76v3.128h4.043c2.365-2.179 3.73-5.392 3.73-9.078z"/><path fill="#34A853" d="M12 24c3.24 0 5.957-1.074 7.942-2.908l-4.043-3.128c-1.075.72-2.451 1.146-3.899 1.146-3.126 0-5.772-2.112-6.72-4.952H1.206v3.111C3.177 21.087 7.288 24 12 24z"/><path fill="#FBBC05" d="M5.28 15.158c-.247-.738-.389-1.528-.389-2.342 0-.814.142-1.604.389-2.342V7.363H1.206C.437 8.894 0 10.612 0 12.184c0 1.572.437 3.289 1.206 4.821l4.074-3.847z"/><path fill="#4285F4" d="M12 4.77c1.762 0 3.344.606 4.59 1.796l3.443-3.443C17.954 1.218 15.238 0 12 0 7.288 0 3.177 2.913 1.206 7.363l4.074 3.847c.948-2.84 3.594-4.952 6.72-4.952z"/></svg>
+                                                        </template>
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-medium capitalize" x-text="provider"></div>
+                                                        <div class="text-sm opacity-70" x-text="binding.bound ? '已绑定' : '未绑定'"></div>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-sm" :class="binding.bound ? 'btn-outline btn-error' : 'btn-outline btn-primary'" @click="binding.bound ? unbindOAuth(provider) : bindOAuth(provider)">
+                                                    <span x-text="binding.bound ? '解绑' : '绑定'"></span>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </main>
+
+        <!-- Avatar Crop Modal -->
+        <div x-show="cropping" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" x-transition.opacity style="display: none;">
+            <div class="bg-base-100 rounded-box shadow-xl max-w-2xl w-full flex flex-col max-h-[90vh]">
+                <div class="p-4 border-b border-base-200 flex justify-between items-center">
+                    <h3 class="text-lg font-bold">裁切头像</h3>
+                    <button @click="cancelCrop" class="btn btn-ghost btn-sm btn-circle">✕</button>
+                </div>
+                <div class="p-4 flex-1 overflow-hidden bg-base-200 flex justify-center items-center relative" style="min-height: 300px;">
+                     <img x-ref="cropImage" :src="cropImage" class="max-w-full max-h-[60vh] block" style="display: block; max-width: 100%;">
+                </div>
+                <div class="p-4 border-t border-base-200 flex justify-end gap-3">
+                    <button @click="cancelCrop" class="btn btn-ghost">取消</button>
+                    <button @click="saveCrop" class="btn btn-primary">裁切并上传</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function profileHandler() {
+        return {
+            tab: 'articles',
+            user: {{json .User}},
+            stats: {{json .Stats}},
+            get tabName() {
+                switch(this.tab) {
+                    case 'articles': return '我的文章';
+                    case 'bookmarks': return '我的收藏';
+                    case 'settings': return '账号设置';
+                    default: return '';
+                }
+            },
+            init() {
+                const path = window.location.pathname;
+                if (path.includes('/settings')) {
+                    this.tab = 'settings';
+                }
+            },
+            cropping: false,
+            cropImage: '',
+            cropper: null,
+            handleAvatarUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('图片大小不能超过 5MB');
+                    return;
+                }
+                
+                // Clear input to allow re-selecting same file
+                e.target.value = '';
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.cropImage = e.target.result;
+                    this.cropping = true;
+                    this.$nextTick(() => {
+                        this.initCropper();
+                    });
+                };
+                reader.readAsDataURL(file);
+            },
+            initCropper() {
+                if (this.cropper) {
+                    this.cropper.destroy();
+                }
+                const image = this.$refs.cropImage;
+                this.cropper = new window.Cropper(image, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    responsive: true
+                });
+            },
+            cancelCrop() {
+                this.cropping = false;
+                if (this.cropper) {
+                    this.cropper.destroy();
+                    this.cropper = null;
+                }
+            },
+            saveCrop() {
+                if (!this.cropper) return;
+                
+                // Get cropped canvas
+                const canvas = this.cropper.getCroppedCanvas({
+                    width: 400,
+                    height: 400,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                });
+                
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        alert('裁切失败');
+                        return;
+                    }
+                    
+                    // Convert blob to file
+                    const file = new File([blob], 'avatar.webp', { type: 'image/webp' });
+                    
+                    // Use processImageFile for consistent handling (though we already have webp)
+                    // Or just upload directly. Since we forced webp in toBlob, we can just upload.
+                    
+                    const formData = new FormData();
+                    formData.append('avatar', file);
+
+                    try {
+                        const res = await axios.post('/api/upload-avatar', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        if (res.data.code === 0) {
+                            this.user.avatarUrl = res.data.result.avatarUrl || res.data.result;
+                            alert('头像上传成功');
+                            location.reload();
+                        } else {
+                            alert(res.data.msg || '上传失败');
+                        }
+                    } catch (error) {
+                        console.error('Upload failed', error);
+                        alert('上传出错，请重试');
+                    }
+                }, 'image/webp', 0.85);
+            }
+        }
+    }
+
+    function contentListHandler(type) {
+        return {
+            type: type, // 'articles' or 'bookmarks'
+            list: [],
+            page: 1,
+            size: 10,
+            total: 0,
+            loading: false,
+            init() {
+                this.fetchData();
+            },
+            async fetchData() {
+                this.loading = true;
+                try {
+                    const url = this.type === 'articles' ? '/api/forum/get-user-articles' : '/api/forum/get-user-bookmarked-articles';
+                    // API expects post with page, size
+                    const res = await axios.post(url, {
+                        page: this.page,
+                        pageSize: this.size
+                    });
+                    if (res.data.code === 0) {
+                        this.list = res.data.result.list || [];
+                        this.total = res.data.result.total || 0;
+                    }
+                } catch (e) {
+                    console.error('Fetch failed', e);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            changePage(p) {
+                if (p < 1 || (p > 1 && (p - 1) * this.size >= this.total)) return;
+                this.page = p;
+                this.fetchData();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+            async deleteArticle(id) {
+                if (!confirm('确定要删除这篇文章吗？此操作不可恢复。')) return;
+                try {
+                    const res = await axios.post('/post/delete', { id: id });
+                    if (res.data.code === 0) {
+                        this.fetchData();
+                        // Update stats locally
+                        // This requires access to parent scope. Alpine supports $data or custom events.
+                        // Ideally emit event.
+                    } else {
+                        alert(res.data.msg || '删除失败');
+                    }
+                } catch (e) {
+                    alert('删除请求失败');
+                }
+            },
+            formatDate(dateStr) {
+                if (!dateStr) return '';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString().slice(0, 5);
+            }
+        }
+    }
+
+    function settingsHandler() {
+        return {
+            subTab: 'basic',
+            form: JSON.parse(JSON.stringify({{json .FullUser}})), // Clone
+            pwdForm: { oldPassword: '', newPassword: '', confirmPassword: '' },
+            saving: false,
+            oauthBindings: {},
+            loadingBindings: false,
+            privacy: {
+                showArticles: true,
+                showFollowing: true,
+                emailNotifications: true
+            },
+            init() {
+                // Ensure externalInformation exists
+                if (!this.form.externalInformation) this.form.externalInformation = {};
+                ['github', 'twitter', 'linkedIn', 'weibo', 'zhihu'].forEach(key => {
+                    if (!this.form.externalInformation[key]) this.form.externalInformation[key] = { link: '' };
+                });
+
+                // Check URL params for tab selection and messages
+                const urlParams = new URLSearchParams(window.location.search);
+                const settingTab = urlParams.get('setting-tab');
+                if (settingTab === 'account') {
+                    this.subTab = 'binding';
+                }
+
+                const error = urlParams.get('error');
+                const success = urlParams.get('success');
+                if (error) alert('操作失败: ' + error);
+                if (success === 'bind_success') alert('绑定成功');
+
+                // Load bindings if on binding tab
+                this.$watch('subTab', (val) => {
+                    if (val === 'binding') this.fetchBindings();
+                });
+                if (this.subTab === 'binding') this.fetchBindings();
+
+                // Load privacy settings from local storage if available (mock)
+                const savedPrivacy = localStorage.getItem('privacySettings');
+                if (savedPrivacy) {
+                    this.privacy = JSON.parse(savedPrivacy);
+                }
+            },
+            async fetchBindings() {
+                this.loadingBindings = true;
+                try {
+                    const res = await axios.get('/api/oauth/bindings');
+                    if (res.data.code === 0) {
+                        this.oauthBindings = res.data.result;
+                    }
+                } catch (e) {
+                    console.error('Fetch bindings failed', e);
+                } finally {
+                    this.loadingBindings = false;
+                }
+            },
+            bindOAuth(provider) {
+                window.location.href = '/api/auth/' + provider;
+            },
+            async unbindOAuth(provider) {
+                if (!confirm(`确定要解绑 ${provider} 账户吗？`)) return;
+                try {
+                    const res = await axios.post(`/api/auth/${provider}/unbind`);
+                    if (res.data.code === 0) {
+                        alert('解绑成功');
+                        this.fetchBindings();
+                    } else {
+                        alert(res.data.msg || '解绑失败');
+                    }
+                } catch (e) {
+                    alert('请求失败');
+                }
+            },
+            savePrivacy() {
+                // Mock save
+                localStorage.setItem('privacySettings', JSON.stringify(this.privacy));
+                console.log('Privacy settings saved', this.privacy);
+            },
+            async saveBasicInfo() {
+                this.saving = true;
+                try {
+                    const res = await axios.post('/api/set-user-info', this.form);
+                    if (res.data.code === 0) {
+                        alert('保存成功');
+                        // Update global user object?
+                        // Reload page is easiest to sync everything
+                        location.reload(); 
+                    } else {
+                        alert(res.data.msg || '保存失败');
+                    }
+                } catch (e) {
+                    alert('请求失败');
+                } finally {
+                    this.saving = false;
+                }
+            },
+            async changePassword() {
+                if (this.pwdForm.newPassword !== this.pwdForm.confirmPassword) {
+                    alert('两次输入的密码不一致');
+                    return;
+                }
+                this.saving = true;
+                try {
+                    const res = await axios.post('/api/change-password', {
+                        oldPassword: this.pwdForm.oldPassword,
+                        newPassword: this.pwdForm.newPassword
+                    });
+                    if (res.data.code === 0) {
+                        alert('密码修改成功，请重新登录');
+                        location.href = '/login';
+                    } else {
+                        alert(res.data.msg || '修改失败');
+                    }
+                } catch (e) {
+                    alert('请求失败');
+                } finally {
+                    this.saving = false;
+                }
+            }
+        }
+    }
+</script>
+{{end}}
+{{template "layout/main.gohtml" dict "Body" "profile_content" "Data" . "Entry" "src/main.js"}}

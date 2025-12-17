@@ -572,6 +572,30 @@ func Profile(c *gin.Context) {
 		"Stats":    stats,
 	})
 }
+func UserSetting(c *gin.Context) {
+	userId := component.LoginUserId(c)
+	if userId == 0 {
+		c.Redirect(302, "/login")
+		return
+	}
+	user, err := users.Get(userId)
+	if err != nil {
+		errorPage(c, "用户不存在", "用户不存在")
+		return
+	}
+	stats := userStatistics.Get(userId)
+	userCard := transform.User2UserCard(user, stats, false, true, true, true)
+
+	viewrender.Render(c, "settings.gohtml", map[string]any{
+		"PageMeta": viewrender.NewPageMetaBuilder().
+			SetTitle(`个人中心`).
+			SetCanonicalURL(component.BuildCanonicalHref(c)).
+			Build(),
+		"UserCard": userCard,
+		"FullUser": user,
+		"Stats":    stats,
+	})
+}
 func Publish(c *gin.Context) {
 	viewrender.Render(c, "publish.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
