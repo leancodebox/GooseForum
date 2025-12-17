@@ -10,7 +10,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	// 基础中间件
 	ginApp.Use(middleware.SiteMaintenance)
 	ginApp.Use(middleware.SiteInfo)
-	ginApp.Use(middleware.GinCors)
+	//ginApp.Use(middleware.GinCors)
 
 	// 访问日志中间件
 	ginApp.Use(middleware.AccessLog)

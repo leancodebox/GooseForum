@@ -63,13 +63,13 @@
                 <li class="menu-title">
                     <span>选择主题</span>
                 </li>
-                <li><button @click="changeTheme('light')"><span class="mr-2">☀️</span>浅色</button></li>
-                <li><button @click="changeTheme('dark')"><span class="mr-2">🌙</span>深色</button></li>
-                <li><button @click="changeTheme('retro')"><span class="mr-2">🎨</span>复古</button></li>
-                <li><button @click="changeTheme('garden')"><span class="mr-2">🌸</span>花园</button></li>
-                <li><button @click="changeTheme('forest')"><span class="mr-2">🌲</span>森林</button></li>
-                <li><button @click="changeTheme('luxury')"><span class="mr-2">💎</span>奢华</button></li>
-                <li><button @click="changeTheme('dracula')"><span class="mr-2">🧛</span>拖拽</button></li>
+                <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="☀️ 浅色" value="light" x-model="currentTheme"/></li>
+                <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="🌙 深色" value="dark" x-model="currentTheme"/></li>
+                <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="🎨 复古" value="retro" x-model="currentTheme"/></li>
+                <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="🌸 花园" value="garden" x-model="currentTheme"/></li>
+                <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="🌲 森林" value="forest" x-model="currentTheme"/></li>
+                <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="💎 奢华" value="luxury" x-model="currentTheme"/></li>
+                <li><input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-block btn-ghost justify-start" aria-label="🧛 拖拽" value="dracula" x-model="currentTheme"/></li>
             </ul>
         </div>
 
@@ -201,6 +201,7 @@
             searchQuery: '',
             hasUnread: false,
             notificationHtml: '<div class="py-1">暂无新消息</div>',
+            currentTheme: localStorage.getItem('theme') || 'light',
 
             init() {
                 if (this.isLoggedIn) {
@@ -208,10 +209,17 @@
                     // Check every 30 seconds
                     setInterval(() => this.checkUnreadNotifications(), 30000);
                 }
+
+                // Watch for theme changes to persist them
+                this.$watch('currentTheme', (theme) => {
+                    this.saveTheme(theme);
+                });
             },
 
-            changeTheme(theme) {
+            saveTheme(theme) {
                 try {
+                    // Note: DaisyUI theme-controller handles the visual switch automatically via CSS
+                    // We just need to persist it and sync the html attribute for consistency
                     document.documentElement.setAttribute('data-theme', theme);
                     localStorage.setItem('theme', theme);
                     
@@ -219,11 +227,12 @@
                     expires.setFullYear(expires.getFullYear() + 1);
                     document.cookie = `theme=${theme}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
                     
-                    if (document.activeElement) {
-                        document.activeElement.blur();
+                    // Close dropdown if focused (optional, behavior similar to before)
+                    if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+                         document.activeElement.blur();
                     }
                 } catch (error) {
-                    console.error('Change theme failed', error);
+                    console.error('Save theme failed', error);
                 }
             },
 

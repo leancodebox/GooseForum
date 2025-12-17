@@ -47,7 +47,7 @@
 
     <div class="card bg-base-100 shadow-xl">
     {{if .ArticleList}}
-    {{template "articleListRender" .ArticleList}}
+    {{template "article_list" .ArticleList}}
     <!-- 分页 -->
     {{if gt .SearchResponse.Total 10}}
     <div class="py-8 border-t border-base-200 flex justify-center">
