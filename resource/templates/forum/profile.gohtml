@@ -564,7 +564,7 @@
                     // API expects post with page, size
                     const res = await axios.post(url, {
                         page: this.page,
-                        size: this.size
+                        pageSize: this.size
                     });
                     if (res.data.code === 0) {
                         this.list = res.data.result.list || [];
