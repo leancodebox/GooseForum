@@ -306,3 +306,13 @@ export function applyLinkAdd(
         contact
     });
 }
+
+// 退出登录
+export function logout(): Promise<any> {
+    return axiosInstance.post('/logout');
+}
+
+// 获取最新未读消息
+export function getLastUnreadNotification(): Promise<Result<any>> {
+    return axiosInstance.get('/forum/notification/last-unread');
+}
