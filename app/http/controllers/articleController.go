@@ -153,6 +153,23 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	return component.SuccessResponse(article.Id)
 }
 
+type DeleteArticleReq struct {
+	Id uint64 `json:"id"`
+}
+
+func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Response {
+	articleEntity := articles.Get(req.Params.Id)
+	if articleEntity.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+	if articleEntity.UserId != req.UserId {
+		return component.FailResponse("不可操作")
+	}
+	articles.Delete(&articleEntity)
+	articleCategoryRs.DeleteByArticleId(articleEntity.Id)
+	return component.SuccessResponse(true)
+}
+
 type ArticleReplyId struct {
 	ArticleId uint64 `json:"articleId"`
 	Content   string `json:"content"`

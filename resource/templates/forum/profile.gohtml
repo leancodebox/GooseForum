@@ -12,7 +12,7 @@
                     <div class="card-body p-4">
                         <ul class="menu bg-base-100 w-full p-0 text-left gap-1">
                             <li>
-                                <a :class="{'active': tab === 'articles'}" @click.prevent="tab = 'articles'" class="gap-3">
+                                <a href="/profile" :class="{'active': tab === 'articles'}" @click.prevent="switchTab('articles')" class="gap-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                                     </svg>
@@ -20,7 +20,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a :class="{'active': tab === 'bookmarks'}" @click.prevent="tab = 'bookmarks'" class="gap-3">
+                                <a href="/profile?tab=bookmarks" :class="{'active': tab === 'bookmarks'}" @click.prevent="switchTab('bookmarks')" class="gap-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                     </svg>
@@ -28,7 +28,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a :class="{'active': tab === 'settings'}" @click.prevent="tab = 'settings'" class="gap-3">
+                                <a href="/settings" class="gap-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -173,23 +173,6 @@
                  </div>
             </div>
         </main>
-
-        <!-- Avatar Crop Modal -->
-        <div x-show="cropping" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" x-transition.opacity style="display: none;">
-            <div class="bg-base-100 rounded-box shadow-xl max-w-2xl w-full flex flex-col max-h-[90vh]">
-                <div class="p-4 border-b border-base-200 flex justify-between items-center">
-                    <h3 class="text-lg font-bold">裁切头像</h3>
-                    <button @click="cancelCrop" class="btn btn-ghost btn-sm btn-circle">✕</button>
-                </div>
-                <div class="p-4 flex-1 overflow-hidden bg-base-200 flex justify-center items-center relative" style="min-height: 300px;">
-                     <img x-ref="cropImage" :src="cropImage" class="max-w-full max-h-[60vh] block" style="display: block; max-width: 100%;">
-                </div>
-                <div class="p-4 border-t border-base-200 flex justify-end gap-3">
-                    <button @click="cancelCrop" class="btn btn-ghost">取消</button>
-                    <button @click="saveCrop" class="btn btn-primary">裁切并上传</button>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -203,98 +186,25 @@
                 switch(this.tab) {
                     case 'articles': return '我的文章';
                     case 'bookmarks': return '我的收藏';
-                    case 'settings': return '账号设置';
                     default: return '';
                 }
             },
             init() {
-            },
-            cropping: false,
-            cropImage: '',
-            cropper: null,
-            handleAvatarUpload(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('图片大小不能超过 5MB');
-                    return;
-                }
-                
-                // Clear input to allow re-selecting same file
-                e.target.value = '';
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.cropImage = e.target.result;
-                    this.cropping = true;
-                    this.$nextTick(() => {
-                        this.initCropper();
-                    });
-                };
-                reader.readAsDataURL(file);
-            },
-            initCropper() {
-                if (this.cropper) {
-                    this.cropper.destroy();
-                }
-                const image = this.$refs.cropImage;
-                this.cropper = new window.Cropper(image, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    autoCropArea: 1,
-                    responsive: true
-                });
-            },
-            cancelCrop() {
-                this.cropping = false;
-                if (this.cropper) {
-                    this.cropper.destroy();
-                    this.cropper = null;
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('tab') === 'bookmarks') {
+                    this.tab = 'bookmarks';
                 }
             },
-            saveCrop() {
-                if (!this.cropper) return;
-                
-                // Get cropped canvas
-                const canvas = this.cropper.getCroppedCanvas({
-                    width: 400,
-                    height: 400,
-                    imageSmoothingEnabled: true,
-                    imageSmoothingQuality: 'high',
-                });
-                
-                canvas.toBlob(async (blob) => {
-                    if (!blob) {
-                        alert('裁切失败');
-                        return;
-                    }
-                    
-                    // Convert blob to file
-                    const file = new File([blob], 'avatar.webp', { type: 'image/webp' });
-                    
-                    // Use processImageFile for consistent handling (though we already have webp)
-                    // Or just upload directly. Since we forced webp in toBlob, we can just upload.
-                    
-                    const formData = new FormData();
-                    formData.append('avatar', file);
-
-                    try {
-                        const res = await axios.post('/api/upload-avatar', formData, {
-                            headers: { 'Content-Type': 'multipart/form-data' }
-                        });
-                        if (res.data.code === 0) {
-                            this.user.avatarUrl = res.data.result.avatarUrl || res.data.result;
-                            alert('头像上传成功');
-                            location.reload();
-                        } else {
-                            alert(res.data.msg || '上传失败');
-                        }
-                    } catch (error) {
-                        console.error('Upload failed', error);
-                        alert('上传出错，请重试');
-                    }
-                }, 'image/webp', 0.85);
+            switchTab(newTab) {
+                this.tab = newTab;
+                // Update URL without reload
+                const url = new URL(window.location);
+                if (newTab === 'articles') {
+                    url.searchParams.delete('tab');
+                } else {
+                    url.searchParams.set('tab', newTab);
+                }
+                window.history.pushState({}, '', url);
             }
         }
     }
@@ -338,7 +248,7 @@
             async deleteArticle(id) {
                 if (!confirm('确定要删除这篇文章吗？此操作不可恢复。')) return;
                 try {
-                    const res = await axios.post('/post/delete', { id: id });
+                    const res = await axios.post('/api/forum/article-delete', { id: id });
                     if (res.data.code === 0) {
                         this.fetchData();
                         // Update stats locally
@@ -355,129 +265,6 @@
                 if (!dateStr) return '';
                 const date = new Date(dateStr);
                 return date.toLocaleDateString() + ' ' + date.toLocaleTimeString().slice(0, 5);
-            }
-        }
-    }
-
-    function settingsHandler() {
-        return {
-            subTab: 'basic',
-            form: JSON.parse(JSON.stringify({{json .FullUser}})), // Clone
-            pwdForm: { oldPassword: '', newPassword: '', confirmPassword: '' },
-            saving: false,
-            oauthBindings: {},
-            loadingBindings: false,
-            privacy: {
-                showArticles: true,
-                showFollowing: true,
-                emailNotifications: true
-            },
-            init() {
-                // Ensure externalInformation exists
-                if (!this.form.externalInformation) this.form.externalInformation = {};
-                ['github', 'twitter', 'linkedIn', 'weibo', 'zhihu'].forEach(key => {
-                    if (!this.form.externalInformation[key]) this.form.externalInformation[key] = { link: '' };
-                });
-
-                // Check URL params for tab selection and messages
-                const urlParams = new URLSearchParams(window.location.search);
-                const settingTab = urlParams.get('setting-tab');
-                if (settingTab === 'account') {
-                    this.subTab = 'binding';
-                }
-
-                const error = urlParams.get('error');
-                const success = urlParams.get('success');
-                if (error) alert('操作失败: ' + error);
-                if (success === 'bind_success') alert('绑定成功');
-
-                // Load bindings if on binding tab
-                this.$watch('subTab', (val) => {
-                    if (val === 'binding') this.fetchBindings();
-                });
-                if (this.subTab === 'binding') this.fetchBindings();
-
-                // Load privacy settings from local storage if available (mock)
-                const savedPrivacy = localStorage.getItem('privacySettings');
-                if (savedPrivacy) {
-                    this.privacy = JSON.parse(savedPrivacy);
-                }
-            },
-            async fetchBindings() {
-                this.loadingBindings = true;
-                try {
-                    const res = await axios.get('/api/oauth/bindings');
-                    if (res.data.code === 0) {
-                        this.oauthBindings = res.data.result;
-                    }
-                } catch (e) {
-                    console.error('Fetch bindings failed', e);
-                } finally {
-                    this.loadingBindings = false;
-                }
-            },
-            bindOAuth(provider) {
-                window.location.href = '/api/auth/' + provider;
-            },
-            async unbindOAuth(provider) {
-                if (!confirm(`确定要解绑 ${provider} 账户吗？`)) return;
-                try {
-                    const res = await axios.post(`/api/auth/${provider}/unbind`);
-                    if (res.data.code === 0) {
-                        alert('解绑成功');
-                        this.fetchBindings();
-                    } else {
-                        alert(res.data.msg || '解绑失败');
-                    }
-                } catch (e) {
-                    alert('请求失败');
-                }
-            },
-            savePrivacy() {
-                // Mock save
-                localStorage.setItem('privacySettings', JSON.stringify(this.privacy));
-                console.log('Privacy settings saved', this.privacy);
-            },
-            async saveBasicInfo() {
-                this.saving = true;
-                try {
-                    const res = await axios.post('/api/set-user-info', this.form);
-                    if (res.data.code === 0) {
-                        alert('保存成功');
-                        // Update global user object?
-                        // Reload page is easiest to sync everything
-                        location.reload(); 
-                    } else {
-                        alert(res.data.msg || '保存失败');
-                    }
-                } catch (e) {
-                    alert('请求失败');
-                } finally {
-                    this.saving = false;
-                }
-            },
-            async changePassword() {
-                if (this.pwdForm.newPassword !== this.pwdForm.confirmPassword) {
-                    alert('两次输入的密码不一致');
-                    return;
-                }
-                this.saving = true;
-                try {
-                    const res = await axios.post('/api/change-password', {
-                        oldPassword: this.pwdForm.oldPassword,
-                        newPassword: this.pwdForm.newPassword
-                    });
-                    if (res.data.code === 0) {
-                        alert('密码修改成功，请重新登录');
-                        location.href = '/login';
-                    } else {
-                        alert(res.data.msg || '修改失败');
-                    }
-                } catch (e) {
-                    alert('请求失败');
-                } finally {
-                    this.saving = false;
-                }
             }
         }
     }

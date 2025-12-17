@@ -132,6 +132,8 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("get-articles-origin", middleware.CheckLogin, UpButterReq(controllers.WriteArticlesOrigin))
 	// 发布文章
 	forumLoginApi.POST("write-articles", UpButterReq(controllers.WriteArticles))
+	// 删除文章
+	forumLoginApi.POST("article-delete", UpButterReq(controllers.DeleteArticle))
 	// 回复文章
 	forumLoginApi.POST("articles-reply", UpButterReq(controllers.ArticleReply))
 	// 回复评论
