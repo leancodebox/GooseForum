@@ -27,18 +27,24 @@
              <!-- Edit Mode -->
              <div x-show="ui.activeTab === 'edit'" class="flex-1 flex flex-col gap-4">
                  <!-- Title -->
-                 <div class="form-control">
-                    <input type="text" x-model="article.title" placeholder="文章标题" class="input input-bordered w-full text-lg font-normal" />
+                 <div>
+                    <label class="floating-label w-full">
+                        <span>文章标题</span>
+                        <input type="text" x-model="article.title" placeholder="文章标题" class="input input-bordered w-full text-lg font-normal" />
+                    </label>
                  </div>
 
                  <!-- Type & Category -->
                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <select x-model.number="article.type" class="select select-bordered w-full">
-                         <option value="0" disabled>选择文章类型</option>
-                         <template x-for="t in options.types" :key="t.value">
-                             <option :value="t.value" x-text="t.name"></option>
-                         </template>
-                     </select>
+                    <label class="floating-label w-full">
+                        <span>文章类型</span>
+                        <select x-model.number="article.type" class="select select-bordered w-full">
+                            <option value="0" disabled>选择文章类型</option>
+                            <template x-for="t in options.types" :key="t.value">
+                                <option :value="t.value" x-text="t.name"></option>
+                            </template>
+                        </select>
+                    </label>
                      
                      <!-- Category Selector (Custom Dropdown) -->
                      <div class="dropdown w-full" :class="{'dropdown-open': ui.catOpen}" @click.outside="ui.catOpen = false">

@@ -2,7 +2,8 @@ root = "."
 tmp_dir = "storage/tmp"
 
 [build]
-bin = "./storage/tmp/GooseForum serve"
+bin = "./storage/tmp/GooseForum"
+args_bin = ["serve"]# 最新版配置
 cmd = "go build -o ./storage/tmp/ ."
 delay = 1000
 exclude_dir = [".git", ".idea", "assets", "tmp", "vendor", "actor", "actor", "web", "storage", "dist", "resource/node_modules","resource/static/dist"]

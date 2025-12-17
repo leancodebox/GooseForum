@@ -13,30 +13,30 @@
             <div x-show="activeTab === 'login'" class="block" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
                 <h2 class="text-2xl font-normal text-base-content mb-6 text-center">欢迎回来</h2>
                 <form @submit.prevent="handleLogin" class="space-y-4">
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">用户名</span>
+                    <div>
+                        <label class="floating-label w-full">
+                            <span>用户名</span>
+                            <input type="text" x-model="loginForm.username" placeholder="请输入用户名" class="input input-bordered w-full" :class="{ 'input-error': errors.login.username }" required />
                         </label>
-                        <input type="text" x-model="loginForm.username" placeholder="请输入用户名" class="input input-bordered w-full" :class="{ 'input-error': errors.login.username }" required />
                         <label class="label" x-show="errors.login.username">
                             <span class="label-text-alt text-error" x-text="errors.login.username"></span>
                         </label>
                     </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">密码</span>
+                    <div>
+                        <label class="floating-label w-full">
+                            <span>密码</span>
+                            <input type="password" x-model="loginForm.password" placeholder="请输入密码" class="input input-bordered w-full" :class="{ 'input-error': errors.login.password }" required />
                         </label>
-                        <input type="password" x-model="loginForm.password" placeholder="请输入密码" class="input input-bordered w-full" :class="{ 'input-error': errors.login.password }" required />
                         <label class="label" x-show="errors.login.password">
                             <span class="label-text-alt text-error" x-text="errors.login.password"></span>
                         </label>
                     </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">验证码</span>
-                        </label>
+                    <div>
                         <div class="flex gap-2 h-12">
-                            <input type="text" x-model="loginForm.captcha" placeholder="请输入验证码" class="input input-bordered flex-1 h-full" :class="{ 'input-error': errors.login.captcha }" required />
+                            <label class="floating-label flex-1 h-full">
+                                <span>验证码</span>
+                                <input type="text" x-model="loginForm.captcha" placeholder="请输入验证码" class="input input-bordered w-full h-full" :class="{ 'input-error': errors.login.captcha }" required />
+                            </label>
                             <img :src="captchaImg" alt="验证码" class="w-32 h-full cursor-pointer border border-base-300 rounded bg-white object-cover" @click="refreshCaptcha" />
                         </div>
                         <label class="label" x-show="errors.login.captcha">
@@ -62,48 +62,48 @@
             <div x-show="activeTab === 'register'" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
                 <h2 class="text-2xl font-normal text-base-content mb-6 text-center">创建账户</h2>
                 <form @submit.prevent="handleRegister" class="space-y-4">
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">用户名</span>
+                    <div>
+                        <label class="floating-label w-full">
+                            <span>用户名</span>
+                            <input type="text" x-model="registerForm.username" placeholder="请输入用户名" class="input input-bordered w-full" :class="{ 'input-error': errors.register.username }" required />
                         </label>
-                        <input type="text" x-model="registerForm.username" placeholder="请输入用户名" class="input input-bordered w-full" :class="{ 'input-error': errors.register.username }" required />
                         <label class="label" x-show="errors.register.username">
                             <span class="label-text-alt text-error" x-text="errors.register.username"></span>
                         </label>
                     </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">邮箱</span>
+                    <div>
+                        <label class="floating-label w-full">
+                            <span>邮箱</span>
+                            <input type="email" x-model="registerForm.email" placeholder="请输入邮箱地址" class="input input-bordered w-full" :class="{ 'input-error': errors.register.email }" required />
                         </label>
-                        <input type="email" x-model="registerForm.email" placeholder="请输入邮箱地址" class="input input-bordered w-full" :class="{ 'input-error': errors.register.email }" required />
                         <label class="label" x-show="errors.register.email">
                             <span class="label-text-alt text-error" x-text="errors.register.email"></span>
                         </label>
                     </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">密码</span>
+                    <div>
+                        <label class="floating-label w-full">
+                            <span>密码</span>
+                            <input type="password" x-model="registerForm.password" placeholder="请输入密码（至少6位）" class="input input-bordered w-full" :class="{ 'input-error': errors.register.password }" required />
                         </label>
-                        <input type="password" x-model="registerForm.password" placeholder="请输入密码（至少6位）" class="input input-bordered w-full" :class="{ 'input-error': errors.register.password }" required />
                         <label class="label" x-show="errors.register.password">
                             <span class="label-text-alt text-error" x-text="errors.register.password"></span>
                         </label>
                     </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">确认密码</span>
+                    <div>
+                        <label class="floating-label w-full">
+                            <span>确认密码</span>
+                            <input type="password" x-model="registerForm.confirmPassword" placeholder="请再次输入密码" class="input input-bordered w-full" :class="{ 'input-error': errors.register.confirmPassword }" required />
                         </label>
-                        <input type="password" x-model="registerForm.confirmPassword" placeholder="请再次输入密码" class="input input-bordered w-full" :class="{ 'input-error': errors.register.confirmPassword }" required />
                         <label class="label" x-show="errors.register.confirmPassword">
                             <span class="label-text-alt text-error" x-text="errors.register.confirmPassword"></span>
                         </label>
                     </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">验证码</span>
-                        </label>
+                    <div>
                         <div class="flex gap-2 h-12">
-                            <input type="text" x-model="registerForm.captcha" placeholder="请输入验证码" class="input input-bordered flex-1 h-full" :class="{ 'input-error': errors.register.captcha }" required />
+                            <label class="floating-label flex-1 h-full">
+                                <span>验证码</span>
+                                <input type="text" x-model="registerForm.captcha" placeholder="请输入验证码" class="input input-bordered w-full h-full" :class="{ 'input-error': errors.register.captcha }" required />
+                            </label>
                             <img :src="captchaImg" alt="验证码" class="w-32 h-full cursor-pointer border border-base-300 rounded bg-white object-cover" @click="refreshCaptcha" />
                         </div>
                         <label class="label" x-show="errors.register.captcha">
@@ -132,21 +132,21 @@
             <div x-show="activeTab === 'forgot'" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
                 <h2 class="text-2xl font-normal text-base-content mb-6 text-center">重置密码</h2>
                 <form @submit.prevent="handleForgot" class="space-y-4">
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">邮箱地址</span>
+                    <div>
+                        <label class="floating-label w-full">
+                            <span>邮箱地址</span>
+                            <input type="email" x-model="forgotForm.email" placeholder="请输入注册时使用的邮箱地址" class="input input-bordered w-full" :class="{ 'input-error': errors.forgot.email }" required />
                         </label>
-                        <input type="email" x-model="forgotForm.email" placeholder="请输入注册时使用的邮箱地址" class="input input-bordered w-full" :class="{ 'input-error': errors.forgot.email }" required />
                         <label class="label" x-show="errors.forgot.email">
                             <span class="label-text-alt text-error" x-text="errors.forgot.email"></span>
                         </label>
                     </div>
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">验证码</span>
-                        </label>
+                    <div>
                         <div class="flex gap-2 h-12">
-                            <input type="text" x-model="forgotForm.captcha" placeholder="请输入验证码" class="input input-bordered flex-1 h-full" :class="{ 'input-error': errors.forgot.captcha }" required />
+                            <label class="floating-label flex-1 h-full">
+                                <span>验证码</span>
+                                <input type="text" x-model="forgotForm.captcha" placeholder="请输入验证码" class="input input-bordered w-full h-full" :class="{ 'input-error': errors.forgot.captcha }" required />
+                            </label>
                             <img :src="captchaImg" alt="验证码" class="w-32 h-full cursor-pointer border border-base-300 rounded bg-white object-cover" @click="refreshCaptcha" />
                         </div>
                         <label class="label" x-show="errors.forgot.captcha">

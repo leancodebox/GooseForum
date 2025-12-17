@@ -9,6 +9,8 @@ import (
 type UserInfoShow struct {
 	UserId              uint64                    `json:"userId,omitempty"`
 	Username            string                    `json:"username"`
+	Email               string                    `json:"email"`
+	Nickname            string                    `json:"nickname"`
 	Bio                 string                    `json:"bio"`
 	Signature           string                    `json:"Signature"`
 	Prestige            int64                     `json:"prestige"`

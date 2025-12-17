@@ -9,7 +9,7 @@
             <!-- Filter Tabs -->
             <div role="tablist" class="tabs tabs-boxed tabs-sm bg-base-200 p-1">
                 <template x-for="filter in filters" :key="filter.key">
-                    <a role="tab" 
+                    <a role="tab"
                        class="tab h-7 min-h-0 px-3 transition-all duration-200"
                        :class="{'tab-active bg-primary text-primary-content shadow-sm rounded-btn': activeFilter === filter.key}"
                        @click="setFilter(filter.key)"
@@ -17,10 +17,10 @@
                     </a>
                 </template>
             </div>
-            
-            <button 
+
+            <button
                 x-show="notificationList.some(n => !n.isRead)"
-                class="btn btn-ghost btn-xs text-primary" 
+                class="btn btn-ghost btn-xs text-primary"
                 @click="markAllAsRead"
                 :disabled="isLoading"
             >
@@ -34,7 +34,7 @@
 
     <!-- Notification List -->
     <div class="bg-base-100 rounded-lg shadow-sm border border-base-200 min-h-[300px] flex flex-col relative">
-        
+
         <!-- Loading Skeleton -->
         <div x-show="isLoading && notificationList.length === 0" class="p-3 space-y-3">
             <template x-for="i in 5">
@@ -58,7 +58,7 @@
                         <div class="flex-shrink-0 mt-0.5">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
                                  :class="{'bg-primary/10 text-primary': !notification.isRead, 'bg-base-200 text-base-content/50': notification.isRead}">
-                                
+
                                 <template x-if="['comment', 'reply'].includes(notification.eventType)">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                       <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
@@ -90,7 +90,7 @@
                                 <span x-text="formatDate(notification.createdAt)"></span>
                                 <span x-show="!notification.isRead" class="w-1.5 h-1.5 bg-primary rounded-full ml-0.5"></span>
                             </div>
-                            
+
                             <div class="text-sm text-base-content break-words leading-snug">
                                 <!-- Comment/Reply -->
                                 <template x-if="['comment', 'reply'].includes(notification.eventType)">
@@ -100,11 +100,11 @@
                                         </span>
                                         <span class="mx-1 text-base-content/80" x-text="notification.eventType === 'reply' ? '回复了你在' : '评论了你的文章'"></span>
                                         <a v-if="notification.payload.articleTitle"
-                                           :href="'/post/'+notification.payload.articleId" 
+                                           :href="'/post/'+notification.payload.articleId"
                                            class="font-medium hover:text-primary transition-colors"
                                            x-text="'《'+notification.payload.articleTitle+'》'">
                                         </a>
-                                        
+
                                         <a :href="'/post/'+notification.payload.articleId + (notification.payload.commentId ? '#reply_'+notification.payload.commentId :'')"
                                            class="block mt-1.5 p-2 bg-base-200/40 rounded text-base-content/70 hover:bg-base-200 transition-colors text-xs border-l-2 border-primary/20 hover:border-primary"
                                            x-text="notification.payload.content">
@@ -129,7 +129,7 @@
                                             <a :href="'/user/'+notification.payload.actorId" class="hover:underline" x-text="notification.payload.actorName"></a>
                                         </span>
                                         <span class="mx-1 text-base-content/80">点赞了你的文章</span>
-                                        <a :href="'/post/'+notification.payload.articleId" 
+                                        <a :href="'/post/'+notification.payload.articleId"
                                            class="font-medium hover:text-primary transition-colors"
                                            x-text="'《'+notification.payload.articleTitle+'》'">
                                         </a>
@@ -146,14 +146,14 @@
                         <!-- Actions -->
                         <div class="flex-shrink-0 flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity items-center self-center">
                             <button x-show="!notification.isRead"
-                                    @click.stop="markAsRead(notification)" 
+                                    @click.stop="markAsRead(notification)"
                                     class="btn btn-ghost btn-xs btn-square hover:bg-primary/10 hover:text-primary tooltip tooltip-left"
                                     data-tip="标记已读">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                 </svg>
                             </button>
-                            <button @click.stop="deleteNotification(notification)" 
+                            <button @click.stop="deleteNotification(notification)"
                                     class="btn btn-ghost btn-xs btn-square hover:bg-error/10 hover:text-error tooltip tooltip-left"
                                     data-tip="删除">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
@@ -178,8 +178,8 @@
 
         <!-- Load More -->
         <div x-show="notificationList.length > 0" class="py-2 text-center border-t border-base-200 bg-base-50/50 rounded-b-lg">
-            <button x-show="hasMore" 
-                    class="btn btn-ghost btn-xs gap-1 text-base-content/60 font-normal" 
+            <button x-show="hasMore"
+                    class="btn btn-ghost btn-xs gap-1 text-base-content/60 font-normal"
                     @click="queryNotification"
                     :disabled="isLoading">
                 <span x-show="isLoading" class="loading loading-spinner loading-xs"></span>
@@ -225,7 +225,7 @@
                 this.isLoading = true;
 
                 try {
-                    const res = await fetch('/forum/notification/query', {
+                    const res = await fetch('/api/forum/notification/query', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
@@ -240,14 +240,14 @@
                         if (list.length < this.queryParams.pageSize) {
                             this.hasMore = false;
                         }
-                        
+
                         // Update startId for next page
                         list.forEach(item => {
                             if (this.queryParams.startId > item.id) {
                                 this.queryParams.startId = item.id;
                             }
                         });
-                        
+
                         this.notificationList.push(...list);
                     }
                 } catch (e) {
@@ -263,7 +263,7 @@
                 this.notificationList = [];
                 this.queryParams.startId = Number.MAX_SAFE_INTEGER;
                 this.hasMore = true;
-                
+
                 if (key === 'unread') {
                     this.queryParams.unread = true;
                 } else {
@@ -275,9 +275,9 @@
             async markAllAsRead() {
                 // Optimistic update
                 this.notificationList.forEach(n => n.isRead = true);
-                
+
                 try {
-                    await fetch('/forum/notification/mark-all-read', {method: 'POST'});
+                    await fetch('/api/forum/notification/mark-all-read', {method: 'POST'});
                 } catch (e) {
                     console.error(e);
                 }
@@ -287,7 +287,7 @@
                 if (notification.isRead) return;
                 notification.isRead = true;
                 try {
-                     await fetch('/forum/notification/mark-read', {
+                     await fetch('/api/forum/notification/mark-read', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({notificationId: notification.id})
@@ -296,13 +296,13 @@
                     notification.isRead = false;
                 }
             },
-            
+
             async deleteNotification(notification) {
                 const index = this.notificationList.indexOf(notification);
                 if (index > -1) this.notificationList.splice(index, 1);
-                
+
                 try {
-                    await fetch('/forum/notification/delete', {
+                    await fetch('/api/forum/notification/delete', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({notificationId: notification.id})
@@ -328,7 +328,7 @@
                 const date = new Date(str);
                 const now = new Date();
                 const diff = now - date;
-                
+
                 const minutes = Math.floor(diff / 60000);
                 const hours = Math.floor(diff / 3600000);
                 const days = Math.floor(diff / 86400000);
@@ -339,7 +339,7 @@
                 if (days < 30) return `${days}天前`;
                 return `${date.getFullYear()}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getDate().toString().padStart(2,'0')}`;
             },
-            
+
             getEmptyMessage() {
                  return this.activeFilter === 'unread' ? '暂无未读消息' : '暂时没有任何消息';
             }

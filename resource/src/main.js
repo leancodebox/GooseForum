@@ -1,15 +1,18 @@
 import './style.css'
 import './utils/notification.ts'
 import './anchor-links.css'
+import 'cropperjs/dist/cropper.css'
 
 import Alpine from 'alpinejs'
 import axios from 'axios'
+import Cropper from 'cropperjs'
 import { renderMermaidDiagrams } from './utils/mermaidRenderer'
 import { processImageFile } from './utils/imageUtils'
 
 // Expose libraries and utils to window
 window.Alpine = Alpine
 window.axios = axios
+window.Cropper = Cropper
 window.MermaidUtils = { renderMermaidDiagrams }
 window.ImageUtils = { processImageFile }
 

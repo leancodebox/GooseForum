@@ -16,6 +16,7 @@ import (
 	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
+	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -168,6 +169,9 @@ func PostDetail(c *gin.Context) {
 		}
 		isBookmarked = articleBookmark.GetByArticleId(currentUserId, entity.Id).Status == 1
 	}
+
+	authorCard := transform.User2UserCard(authorUserInfo, authorInfoStatistics, isFollowing, currentUserId == entity.UserId, currentUserId > 0, false)
+
 	// 构建模板数据
 	viewrender.Render(c, "detail.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
@@ -191,6 +195,7 @@ func PostDetail(c *gin.Context) {
 		"ArticleCategory":      articleCategory,
 		"AuthorUserInfo":       authorUserInfo,
 		"AuthorInfoStatistics": authorInfoStatistics,
+		"AuthorCard":           authorCard,
 
 		"IsOwnArticle":        currentUserId == entity.UserId,
 		"ArticleCategoryList": hotdataserve.ArticleCategoryLabel(),
@@ -555,13 +560,16 @@ func Profile(c *gin.Context) {
 		return
 	}
 	stats := userStatistics.Get(userId)
+	userCard := transform.User2UserCard(user, stats, false, true, true, true)
+
 	viewrender.Render(c, "profile.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetTitle(`个人中心`).
 			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
-		"User":  user,
-		"Stats": stats,
+		"UserCard": userCard,
+		"FullUser": user,
+		"Stats":    stats,
 	})
 }
 func Publish(c *gin.Context) {
