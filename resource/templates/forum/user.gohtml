@@ -11,107 +11,21 @@
             <aside class="w-full lg:w-80 flex-shrink-0">
                 <div class="sticky top-18 space-y-3">
                     <!-- 用户基本信息 -->
-                    <div class="card bg-base-100 shadow-sm">
-                        <div class="card-body text-center">
-                            <div class="avatar mb-4 mx-auto">
-                                <div class="mask mask-squircle w-24 h-24">
-                                    <img src="{{.Author.AvatarUrl}}" alt="用户头像"/>
-                                </div>
-                            </div>
-                            <h1 class="card-title justify-center text-xl font-normal">{{.Author.Username}}</h1>
-                            <p class="text-base-content/70 mb-2">{{.Author.Signature}}</p>
-
-{{/*                            <div class="flex justify-center gap-2 mb-2">*/}}
-{{/*                                <div class="badge badge-primary">VIP</div>*/}}
-{{/*                                <div class="badge badge-success">已认证</div>*/}}
-{{/*                                <div class="badge badge-warning">版主</div>*/}}
-{{/*                            </div>*/}}
-
-                            <!-- 数据统计 - 一行展示 -->
-                            <div class="grid grid-cols-3 gap-4 mb-1">
-                                <div class="text-center">
-                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.ArticleCount}}</div>
-                                    <div class="text-xs text-base-content/60">文章数</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.LikeReceivedCount}}</div>
-                                    <div class="text-xs text-base-content/60">获赞数</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-lg font-normal text-base-content">{{.AuthorInfoStatistics.FollowerCount}}</div>
-                                    <div class="text-xs text-base-content/60">粉丝数</div>
-                                </div>
-                            </div>
-
-                            <hr class="my-1 border-gray-200">
-
-                            <!-- 外站链接 -->
-                            <div class="mb-2">
-                                <div class="grid grid-cols-4 gap-2 place-items-center">
-                                    <!-- GitHub -->
-                                    {{if .ExternalInformation.Github.Link}}
-                                        <a href="{{.ExternalInformation.Github.Link}}" target="_blank"
-                                           class="btn btn-ghost btn-sm btn-square tooltip"
-                                           data-tip="GitHub">
-                                            {{template "icon_github"}}
-                                        </a>
-                                    {{end}}
-                                    <!-- Twitter/X -->
-                                    {{if .ExternalInformation.Twitter.Link}}
-                                        <a href="{{.ExternalInformation.Twitter.Link}}" target="_blank"
-                                           class="btn btn-ghost btn-sm btn-square tooltip"
-                                           data-tip="Twitter">
-                                            {{template "icon_twitter"}}
-                                        </a>
-                                    {{end}}
-                                    {{if .ExternalInformation.LinkedIn.Link}}
-                                        <!-- LinkedIn -->
-                                        <a href="{{.ExternalInformation.LinkedIn.Link}}" target="_blank"
-                                           class="btn btn-ghost btn-sm btn-square tooltip" data-tip="LinkedIn">
-                                            {{template "icon_linkedin"}}
-                                        </a>
-                                    {{end}}
-                                    <!-- 微博 -->
-                                    {{if .ExternalInformation.Weibo.Link}}
-                                        <a href="{{.ExternalInformation.Weibo.Link}}" target="_blank"
-                                           class="btn btn-ghost btn-sm btn-square tooltip"
-                                           data-tip="微博">
-                                            {{template "icon_weibo"}}
-                                        </a>
-                                    {{end}}
-                                    <!-- 知乎 -->
-                                    {{if .ExternalInformation.Zhihu.Link}}
-                                        <a href="{{.ExternalInformation.Zhihu.Link}}" target="_blank"
-                                           class="btn btn-ghost btn-sm btn-square tooltip" data-tip="知乎">
-                                            {{template "icon_zhihu"}}
-                                        </a>
-                                    {{end}}
-                                    <!-- bilibili -->
-                                    {{if .ExternalInformation.Bilibili.Link}}
-                                        <a href="{{.ExternalInformation.Bilibili.Link}}" target="_blank"
-                                           class="btn btn-ghost btn-sm btn-square tooltip" data-tip="bilibili">
-                                            {{template "icon_bilibili"}}
-                                        </a>
-                                    {{end}}
-                                </div>
-                            </div>
-
-                            <div class="card-actions justify-center">
-                                {{if and .CurrentUserId (ne .CurrentUserId .Author.UserId)}}
-                                    <button class="btn btn-sm btn-block"
-                                            :class="isFollowingAuthor ? 'btn-outline' : 'btn-secondary'"
-                                            @click="toggleAuthorFollow()"
-                                            :disabled="loadingAuthorFollow">
-                                        <span x-show="!loadingAuthorFollow" x-text="isFollowingAuthor ? '已关注' : '关注作者'">{{if .IsFollowingAuthor}}已关注{{else}}关注作者{{end}}</span>
-                                        <span x-show="loadingAuthorFollow" class="loading loading-spinner loading-xs"></span>
-                                    </button>
-                                {{else if not .CurrentUserId }}
-                                    <a href="/login" class="btn btn-outline btn-sm btn-block">登录后关注</a>
-                                {{end}}
-                                <button class="btn btn-ghost btn-sm btn-block">私信</button>
-                            </div>
-                        </div>
-                    </div>
+                    {{template "forum/user-card.gohtml" dict 
+                        "AvatarUrl" .Author.AvatarUrl 
+                        "Username" .Author.Username 
+                        "UserId" .Author.UserId 
+                        "Signature" .Author.Signature 
+                        "Bio" .Author.Bio 
+                        "ArticleCount" .AuthorInfoStatistics.ArticleCount 
+                        "LikeReceivedCount" .AuthorInfoStatistics.LikeReceivedCount 
+                        "FollowerCount" .AuthorInfoStatistics.FollowerCount 
+                        "ExternalInfo" .ExternalInformation 
+                        "HasLogin" .CurrentUserId 
+                        "IsSelf" (eq .CurrentUserId .Author.UserId) 
+                        "IsFollowing" .IsFollowingAuthor 
+                        "AllowAvatarUpload" false
+                    }}
 
                     <!-- 用户详细信息 -->
                     <div class="card bg-base-100 shadow-sm">
@@ -145,49 +59,8 @@
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="发布的文章" checked="checked"/>
                         <div class="tab-content border-base-300 bg-base-100 {{if not .Articles}} p-10 {{end}}">
                             {{if .Articles}}
-                                <div class="space-y-4 py-4">
-                                    {{range .Articles}}
-                                        <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-200">
-                                            <div class="card-body p-5">
-                                                <div class="flex items-start gap-4">
-                                                    <!-- 左侧内容 -->
-                                                    <div class="flex-1 min-w-0">
-                                                        <div class="flex items-center gap-2 mb-2">
-                                                            <div class="badge badge-sm badge-primary badge-outline">{{.TypeStr}}</div>
-                                                            {{range .Categories}}
-                                                                <span class="badge badge-sm badge-ghost text-base-content/70">{{.}}</span>
-                                                            {{end}}
-                                                        </div>
-                                                        <h3 class="text-lg font-normal mb-2 leading-relaxed">
-                                                            <a href="/post/{{.Id}}" class="hover:text-primary transition-colors line-clamp-2 text-base-content">{{.Title}}</a>
-                                                        </h3>
-                                                        <div class="flex items-center flex-wrap gap-4 text-sm text-base-content/60">
-                                                            <div class="flex items-center gap-1">
-                                                                <div class="avatar flex-shrink-0">
-                                                                    <div class="w-5 h-5 rounded-full">
-                                                                        <img src="{{.AvatarUrl}}" alt="{{.Username}}"/>
-                                                                    </div>
-                                                                </div>
-                                                                <span>{{.Username}}</span>
-                                                            </div>
-                                                            <span class="hidden sm:inline">·</span>
-                                                            <span>{{.LastUpdateTime}}</span>
-                                                            <div class="flex items-center gap-3 ml-auto sm:ml-0">
-                                                                <div class="flex items-center gap-1" title="阅读数">
-                                                                    {{template "icon_view"}}
-                                                                    <span>{{.ViewCount}}</span>
-                                                                </div>
-                                                                <div class="flex items-center gap-1" title="评论数">
-                                                                    {{template "icon_comment"}}
-                                                                    <span>{{.CommentCount}}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {{end}}
+                                <div class="py-4">
+                                    {{template "article_list" .Articles}}
                                 </div>
                             {{else}}
                                 假以时日一飞冲天
@@ -290,29 +163,26 @@
     function userPageHandler(initialData) {
         return {
             authorId: initialData.authorId,
-            isFollowingAuthor: initialData.isFollowingAuthor,
-            loadingAuthorFollow: false,
+            isFollowing: initialData.isFollowingAuthor,
+            loading: false,
 
-            async toggleAuthorFollow() {
-                if (this.loadingAuthorFollow) return;
-                this.loadingAuthorFollow = true;
-                const action = this.isFollowingAuthor ? 2 : 1;
-
+            async toggleFollow() {
+                if (this.loading) return;
+                this.loading = true;
+                const action = this.isFollowing ? 2 : 1;
                 try {
-                    const response = await axios.post('/api/forum/follow-user', {
+                    const res = await axios.post('/api/forum/follow-user', {
                         id: this.authorId,
                         action: action
                     });
-                    if (response.status === 200 && response.data.code === 0) {
-                        this.isFollowingAuthor = !this.isFollowingAuthor;
-                    } else {
-                        window.notification.error(response.data.msg || '操作失败');
+                    if (res.data.code === 0) {
+                        this.isFollowing = !this.isFollowing;
                     }
-                } catch (error) {
-                    console.error('关注操作失败:', error);
-                    window.notification.error('操作失败: ' + (error.response?.data?.msg || error.message));
+                } catch (e) {
+                    console.error(e);
+                    // window.toast.error('操作失败，请重试');
                 } finally {
-                    this.loadingAuthorFollow = false;
+                    this.loading = false;
                 }
             }
         }
