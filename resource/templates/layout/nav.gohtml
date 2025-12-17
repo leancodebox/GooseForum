@@ -94,8 +94,8 @@
                 <li class="menu-title" role="presentation">
                     <span aria-hidden="true">{{.User.Username}}</span>
                 </li>
-                <li><a href="/profile/articles">个人中心</a></li>
-                <li><a href="/profile/settings">账户设置</a></li>
+                <li><a href="/profile">个人中心</a></li>
+                <li><a href="/settings">账户设置</a></li>
                 {{if .User.IsAdmin}}
                 <li><a href="/admin/">管理后台</a></li>
                 {{end}}
@@ -146,8 +146,8 @@
                 </li>
                 <li><a href="/publish">发布文章</a></li>
                 <li><a href="/notifications">消息通知</a></li>
-                <li><a href="/profile/articles">个人中心</a></li>
-                <li><a href="/profile/settings">账户设置</a></li>
+                <li><a href="/profile">个人中心</a></li>
+                <li><a href="/settings">账户设置</a></li>
                 {{if .User.IsAdmin}}
                 <li><a href="/admin/">管理后台</a></li>
                 {{end}}

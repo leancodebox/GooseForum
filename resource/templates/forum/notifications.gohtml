@@ -225,31 +225,25 @@
                 this.isLoading = true;
 
                 try {
-                    const res = await fetch('/api/forum/notification/query', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            startId: this.queryParams.startId,
-                            pageSize: this.queryParams.pageSize,
-                            unreadOnly: this.queryParams.unread
-                        })
-                    }).then(r => r.json());
+                    const res = await window.api.queryNotificationList(
+                        this.queryParams.startId,
+                        this.queryParams.pageSize,
+                        this.queryParams.unread
+                    );
 
-                    if (res.code === 0) {
-                        const list = res.result.list || [];
-                        if (list.length < this.queryParams.pageSize) {
-                            this.hasMore = false;
-                        }
-
-                        // Update startId for next page
-                        list.forEach(item => {
-                            if (this.queryParams.startId > item.id) {
-                                this.queryParams.startId = item.id;
-                            }
-                        });
-
-                        this.notificationList.push(...list);
+                    const list = res.result.list || [];
+                    if (list.length < this.queryParams.pageSize) {
+                        this.hasMore = false;
                     }
+
+                    // Update startId for next page
+                    list.forEach(item => {
+                        if (this.queryParams.startId > item.id) {
+                            this.queryParams.startId = item.id;
+                        }
+                    });
+
+                    this.notificationList.push(...list);
                 } catch (e) {
                     console.error('Fetch error:', e);
                 } finally {
@@ -277,7 +271,7 @@
                 this.notificationList.forEach(n => n.isRead = true);
 
                 try {
-                    await fetch('/api/forum/notification/mark-all-read', {method: 'POST'});
+                    await window.api.markAllAsRead();
                 } catch (e) {
                     console.error(e);
                 }
@@ -287,11 +281,7 @@
                 if (notification.isRead) return;
                 notification.isRead = true;
                 try {
-                     await fetch('/api/forum/notification/mark-read', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({notificationId: notification.id})
-                    });
+                     await window.api.markAsReadById(notification.id);
                 } catch (e) {
                     notification.isRead = false;
                 }
@@ -302,11 +292,7 @@
                 if (index > -1) this.notificationList.splice(index, 1);
 
                 try {
-                    await fetch('/api/forum/notification/delete', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({notificationId: notification.id})
-                    });
+                    await window.api.deleteNotification(notification.id);
                 } catch (e) {
                     console.error(e);
                 }

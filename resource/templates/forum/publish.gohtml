@@ -151,15 +151,12 @@
                 }
 
                 // Fetch enums
-                fetch('/api/forum/get-articles-enum')
-                    .then(res => res.json())
+                window.api.getArticleEnum()
                     .then(res => {
-                        if (res.code === 0) {
-                            this.options.types = res.result.type || [];
-                            // Map category array to simplified structure if needed, 
-                            // but usually it's {name, value} which works with x-text/value
-                            this.options.categories = res.result.category || [];
-                        }
+                        this.options.types = res.result.type || [];
+                        // Map category array to simplified structure if needed, 
+                        // but usually it's {name, value} which works with x-text/value
+                        this.options.categories = res.result.category || [];
                     });
 
                 // Check for ID (Edit mode)
@@ -172,20 +169,13 @@
             },
 
             loadArticle(id) {
-                fetch('/api/forum/get-articles-origin', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({id: parseInt(id)})
-                })
-                .then(res => res.json())
+                window.api.getArticlesOrigin(id)
                 .then(res => {
-                    if (res.code === 0) {
-                        const data = res.result;
-                        this.article.title = data.articleTitle;
-                        this.article.content = data.articleContent;
-                        this.article.type = data.type;
-                        this.article.categoryId = data.categoryId || [];
-                    }
+                    const data = res.result;
+                    this.article.title = data.articleTitle;
+                    this.article.content = data.articleContent;
+                    this.article.type = data.type;
+                    this.article.categoryId = data.categoryId || [];
                 });
             },
 
@@ -208,21 +198,13 @@
 
                 this.ui.submitting = true;
                 try {
-                    const res = await fetch('/api/forum/write-articles', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(this.article)
-                    }).then(r => r.json());
+                    const res = await window.api.submitArticle(this.article);
 
-                    if (res.code === 0) {
-                        this.showMsg(res.result ? '更新成功' : '发布成功', 'success');
-                        setTimeout(() => window.location.href = '/post/' + (res.result || this.article.id), 1000);
-                    } else {
-                        this.showMsg(res.msg || '发布失败', 'error');
-                    }
+                    this.showMsg(res.result ? '更新成功' : '发布成功', 'success');
+                    setTimeout(() => window.location.href = '/post/' + (res.result || this.article.id), 1000);
                 } catch (e) {
                     console.error(e);
-                    this.showMsg('请求失败', 'error');
+                    this.showMsg(e.message || '请求失败', 'error');
                 } finally {
                     this.ui.submitting = false;
                 }
@@ -246,12 +228,9 @@
                  this.showMsg('正在上传图片...', 'info');
                  
                  try {
-                     const res = await fetch('/file/img-upload', {
-                         method: 'POST',
-                         body: formData
-                     }).then(r => r.json());
+                     const res = await window.api.uploadImage(formData);
                      
-                     if (res.code === 0 && res.result.url) {
+                     if (res.result && res.result.url) {
                          this.insertContent(`![${file.name.split('.')[0]}](${res.result.url})`);
                          this.showMsg('图片上传成功', 'success');
                      } else {
@@ -259,7 +238,7 @@
                      }
                  } catch (e) {
                      console.error(e);
-                     this.showMsg('上传出错', 'error');
+                     this.showMsg(e.message || '上传出错', 'error');
                  } finally {
                      this.ui.uploading = false;
                  }

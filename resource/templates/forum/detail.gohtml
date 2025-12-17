@@ -276,14 +276,10 @@
             async toggleLike() {
                 const action = this.isLiked ? 2 : 1;
                 try {
-                    const response = await axios.post('/api/forum/like-articles', {
-                        id: this.articleId,
-                        action: action
-                    });
-                    if (response.status === 200) {
-                        this.isLiked = !this.isLiked;
-                        this.likeCount = this.isLiked ? this.likeCount + 1 : this.likeCount - 1;
-                    }
+                    const response = await window.api.likeArticle(this.articleId, action);
+                    // Standard Result wrapper
+                    this.isLiked = !this.isLiked;
+                    this.likeCount = this.isLiked ? this.likeCount + 1 : this.likeCount - 1;
                 } catch (error) {
                     console.error('Like failed', error);
                     alert('操作失败');
@@ -292,19 +288,12 @@
 
             async toggleBookmark() {
                 try {
-                    const response = await axios.post('/api/forum/bookmark-article', {
-                        id: this.articleId,
-                        action: this.isBookmarked ? 2 : 1
-                    });
-                    if (response.data.code === 0) {
-                        this.isBookmarked = !this.isBookmarked;
-                        if (this.isBookmarked) {
-                            alert('收藏成功');
-                        } else {
-                            alert('取消收藏成功');
-                        }
+                    const response = await window.api.bookmarkArticle(this.articleId, this.isBookmarked ? 2 : 1);
+                    this.isBookmarked = !this.isBookmarked;
+                    if (this.isBookmarked) {
+                        alert('收藏成功');
                     } else {
-                        alert(response.data.msg || '操作失败');
+                        alert('取消收藏成功');
                     }
                 } catch (error) {
                     console.error('Bookmark failed', error);
@@ -315,15 +304,8 @@
             async toggleFollow(userId) {
                 try {
                     const action = this.isFollowing ? 2 : 1;
-                    const response = await axios.post('/api/forum/follow-user', {
-                        id: userId,
-                        action: action
-                    });
-                    if (response.data.code === 0) {
-                        this.isFollowing = !this.isFollowing;
-                    } else {
-                        alert(response.data.msg || '操作失败');
-                    }
+                    await window.api.followUser(userId, action);
+                    this.isFollowing = !this.isFollowing;
                 } catch (error) {
                     console.error('Follow failed', error);
                     alert('操作失败');
@@ -355,17 +337,8 @@
                 this.currentReplyId = replyId;
 
                 try {
-                    const response = await axios.post('/api/forum/articles-reply', {
-                        articleId: this.articleId,
-                        content: content,
-                        replyId: replyId
-                    });
-
-                    if (response.status === 200 || response.data.code === 0) {
-                        location.reload();
-                    } else {
-                        alert(response.data.msg || '评论失败');
-                    }
+                    await window.api.submitComment(this.articleId, content, replyId);
+                    location.reload();
                 } catch (error) {
                     console.error('Comment failed', error);
                     alert('评论失败');
@@ -378,14 +351,8 @@
             async deleteReply(replyId) {
                 if (!confirm('确定要删除这条评论吗？')) return;
                 try {
-                    const response = await axios.post('/api/forum/articles-reply-delete', {
-                        replyId: replyId
-                    });
-                    if (response.status === 200 || response.data.code === 0) {
-                        location.reload(); // Or remove element from DOM for better UX
-                    } else {
-                        alert(response.data.msg || '删除失败');
-                    }
+                    await window.api.deleteComment(replyId);
+                    location.reload(); // Or remove element from DOM for better UX
                 } catch (error) {
                     console.error('Delete failed', error);
                     alert('删除失败');

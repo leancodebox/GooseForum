@@ -240,3 +240,69 @@ export function uploadImage(formData: FormData): Promise<Result<any>> {
         }
     });
 }
+
+// 关注用户
+export function followUser(id: number, action: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/follow-user', {
+        id,
+        action
+    });
+}
+
+// 点赞文章
+export function likeArticle(id: number, action: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/like-articles', {
+        id,
+        action
+    });
+}
+
+// 收藏文章
+export function bookmarkArticle(id: number, action: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/bookmark-article', {
+        id,
+        action
+    });
+}
+
+// 提交评论/回复
+export function submitComment(articleId: number, content: string, replyId: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/articles-reply', {
+        articleId,
+        content,
+        replyId
+    });
+}
+
+// 删除评论
+export function deleteComment(replyId: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/articles-reply-delete', {
+        replyId
+    });
+}
+
+// 删除文章
+export function deleteArticle(id: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/article-delete', {
+        id
+    });
+}
+
+// 申请友情链接
+export function applyLinkAdd(
+    siteName: string,
+    siteDesc: string,
+    siteLogo: string,
+    siteUrl: string,
+    email: string,
+    contact: string
+): Promise<Result<any>> {
+    return axiosInstance.post('/forum/apply-link-add', {
+        siteName,
+        siteDesc,
+        siteLogo,
+        siteUrl,
+        email,
+        contact
+    });
+}

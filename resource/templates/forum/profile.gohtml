@@ -281,22 +281,23 @@
             async fetchData() {
                 this.loading = true;
                 try {
-                    const url = this.type === 'articles' ? '/api/forum/get-user-articles' : '/api/forum/get-user-bookmarked-articles';
                     // API expects post with page, size
-                    const res = await axios.post(url, {
-                        page: this.page,
-                        pageSize: this.size
-                    });
-                    if (res.data.code === 0) {
-                        this.list = res.data.result.list || [];
-                        this.total = res.data.result.total || 0;
+                    let res;
+                    if (this.type === 'articles') {
+                        res = await window.api.getUserArticles(this.page, this.size);
+                    } else {
+                        res = await window.api.getUserBookmarkedArticles(this.page, this.size);
+                    }
+                    
+                    const list = res.result.list || [];
+                    this.list = list;
+                    this.total = res.result.total || 0;
 
-                        // Auto-correct page if out of bounds
-                        const maxPage = Math.max(1, Math.ceil(this.total / this.size));
-                        if (this.page > maxPage) {
-                            this.page = maxPage;
-                            await this.fetchData();
-                        }
+                    // Auto-correct page if out of bounds
+                    const maxPage = Math.max(1, Math.ceil(this.total / this.size));
+                    if (this.page > maxPage) {
+                        this.page = maxPage;
+                        await this.fetchData();
                     }
                 } catch (e) {
                     console.error('Fetch failed', e);
@@ -346,15 +347,8 @@
             async deleteArticle(id) {
                 if (!confirm('确定要删除这篇文章吗？此操作不可恢复。')) return;
                 try {
-                    const res = await axios.post('/api/forum/article-delete', { id: id });
-                    if (res.data.code === 0) {
-                        this.fetchData();
-                        // Update stats locally
-                        // This requires access to parent scope. Alpine supports $data or custom events.
-                        // Ideally emit event.
-                    } else {
-                        alert(res.data.msg || '删除失败');
-                    }
+                    await window.api.deleteArticle(id);
+                    this.fetchData();
                 } catch (e) {
                     alert('删除请求失败');
                 }

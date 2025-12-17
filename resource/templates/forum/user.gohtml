@@ -171,13 +171,8 @@
                 this.loading = true;
                 const action = this.isFollowing ? 2 : 1;
                 try {
-                    const res = await axios.post('/api/forum/follow-user', {
-                        id: this.authorId,
-                        action: action
-                    });
-                    if (res.data.code === 0) {
-                        this.isFollowing = !this.isFollowing;
-                    }
+                    await window.api.followUser(this.authorId, action);
+                    this.isFollowing = !this.isFollowing;
                 } catch (e) {
                     console.error(e);
                     // window.toast.error('操作失败，请重试');
@@ -200,18 +195,11 @@
                 const action = this.isFollowing ? 2 : 1;
 
                 try {
-                    const response = await axios.post('/api/forum/follow-user', {
-                        id: this.userId,
-                        action: action
-                    });
-                    if (response.status === 200 && response.data.code === 0) {
-                        this.isFollowing = !this.isFollowing;
-                    } else {
-                        window.notification.error(response.data.msg || '操作失败');
-                    }
+                    await window.api.followUser(this.userId, action);
+                    this.isFollowing = !this.isFollowing;
                 } catch (error) {
                     console.error('关注操作失败:', error);
-                    window.notification.error('操作失败: ' + (error.response?.data?.msg || error.message));
+                    window.notification.error('操作失败: ' + error.message);
                 } finally {
                     this.loading = false;
                 }

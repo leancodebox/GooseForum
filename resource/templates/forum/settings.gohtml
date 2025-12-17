@@ -441,19 +441,13 @@
                     formData.append('avatar', file);
 
                     try {
-                        const res = await axios.post('/api/upload-avatar', formData, {
-                            headers: { 'Content-Type': 'multipart/form-data' }
-                        });
-                        if (res.data.code === 0) {
-                            this.user.avatarUrl = res.data.result.avatarUrl || res.data.result;
-                            alert('头像上传成功');
-                            location.reload();
-                        } else {
-                            alert(res.data.msg || '上传失败');
-                        }
+                        const res = await window.api.uploadAvatar(formData);
+                        this.user.avatarUrl = res.result.avatarUrl || res.result;
+                        alert('头像上传成功');
+                        location.reload();
                     } catch (error) {
                         console.error('Upload failed', error);
-                        alert('上传出错，请重试');
+                        alert(error.message || '上传出错，请重试');
                     }
                 }, 'image/webp', 0.85);
             },
@@ -461,10 +455,8 @@
             async fetchBindings() {
                 this.loadingBindings = true;
                 try {
-                    const res = await axios.get('/api/oauth/bindings');
-                    if (res.data.code === 0) {
-                        this.oauthBindings = res.data.result;
-                    }
+                    const res = await window.api.getOAuthBindings();
+                    this.oauthBindings = res.result;
                 } catch (e) {
                     console.error('Fetch bindings failed', e);
                 } finally {
@@ -477,15 +469,11 @@
             async unbindOAuth(provider) {
                 if (!confirm(`确定要解绑 ${provider} 账户吗？`)) return;
                 try {
-                    const res = await axios.post(`/api/auth/${provider}/unbind`);
-                    if (res.data.code === 0) {
-                        alert('解绑成功');
-                        this.fetchBindings();
-                    } else {
-                        alert(res.data.msg || '解绑失败');
-                    }
+                    await window.api.unbindOAuth(provider);
+                    alert('解绑成功');
+                    this.fetchBindings();
                 } catch (e) {
-                    alert('请求失败');
+                    alert(e.message || '请求失败');
                 }
             },
             savePrivacy() {
@@ -496,17 +484,15 @@
             async saveBasicInfo() {
                 this.saving = true;
                 try {
-                    const res = await axios.post('/api/set-user-info', this.form);
-                    if (res.data.code === 0) {
-                        alert('保存成功');
-                        // Update global user object?
-                        // Reload page is easiest to sync everything
-                        location.reload(); 
-                    } else {
-                        alert(res.data.msg || '保存失败');
-                    }
+                    const f = this.form;
+                    // saveUserInfo(nickname, email, bio, signature, website, websiteName, externalInformation)
+                    await window.api.saveUserInfo(
+                        f.nickname, f.email, f.bio, f.signature, f.website, f.websiteName, f.externalInformation
+                    );
+                    alert('保存成功');
+                    location.reload(); 
                 } catch (e) {
-                    alert('请求失败');
+                    alert(e.message || '请求失败');
                 } finally {
                     this.saving = false;
                 }
@@ -518,18 +504,14 @@
                 }
                 this.saving = true;
                 try {
-                    const res = await axios.post('/api/change-password', {
-                        oldPassword: this.pwdForm.oldPassword,
-                        newPassword: this.pwdForm.newPassword
-                    });
-                    if (res.data.code === 0) {
-                        alert('密码修改成功，请重新登录');
-                        location.href = '/login';
-                    } else {
-                        alert(res.data.msg || '修改失败');
-                    }
+                    await window.api.changePassword(
+                        this.pwdForm.oldPassword,
+                        this.pwdForm.newPassword
+                    );
+                    alert('密码修改成功，请重新登录');
+                    location.href = '/login';
                 } catch (e) {
-                    alert('请求失败');
+                    alert(e.message || '请求失败');
                 } finally {
                     this.saving = false;
                 }

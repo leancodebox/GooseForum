@@ -226,13 +226,10 @@
             },
 
             refreshCaptcha() {
-                fetch('/api/get-captcha')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.code === 0) {
-                            this.captchaId = data.result.captchaId;
-                            this.captchaImg = data.result.captchaImg;
-                        }
+                window.api.getCaptcha()
+                    .then(res => {
+                        this.captchaId = res.result.captchaId;
+                        this.captchaImg = res.result.captchaImg;
                     })
                     .catch(err => console.error('Captcha error:', err));
             },
@@ -247,26 +244,16 @@
 
                 this.loading.login = true;
                 try {
-                    const res = await fetch('/api/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            username: this.loginForm.username,
-                            password: this.loginForm.password,
-                            captchaId: this.captchaId,
-                            captchaCode: this.loginForm.captcha
-                        })
-                    }).then(r => r.json());
-
-                    if (res.code === 0) {
-                        const urlParams = new URLSearchParams(window.location.search);
-                        window.location.href = urlParams.get('redirect') || '/';
-                    } else {
-                        this.errors.login.general = res.msg || '登录失败';
-                        this.refreshCaptcha();
-                    }
+                    await window.api.login(
+                        this.loginForm.username,
+                        this.loginForm.password,
+                        this.captchaId,
+                        this.loginForm.captcha
+                    );
+                    const urlParams = new URLSearchParams(window.location.search);
+                    window.location.href = urlParams.get('redirect') || '/';
                 } catch (e) {
-                    this.errors.login.general = '请求失败: ' + e;
+                    this.errors.login.general = e.message || '登录失败';
                     this.refreshCaptcha();
                 } finally {
                     this.loading.login = false;
@@ -287,27 +274,17 @@
 
                 this.loading.register = true;
                 try {
-                    const res = await fetch('/api/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            username: this.registerForm.username,
-                            email: this.registerForm.email,
-                            password: this.registerForm.password,
-                            captchaId: this.captchaId,
-                            captchaCode: this.registerForm.captcha
-                        })
-                    }).then(r => r.json());
-
-                    if (res.code === 0) {
-                        const urlParams = new URLSearchParams(window.location.search);
-                        window.location.href = urlParams.get('redirect') || '/';
-                    } else {
-                        this.errors.register.general = res.msg || '注册失败';
-                        this.refreshCaptcha();
-                    }
+                    await window.api.register(
+                        this.registerForm.username,
+                        this.registerForm.email,
+                        this.registerForm.password,
+                        this.captchaId,
+                        this.registerForm.captcha
+                    );
+                    const urlParams = new URLSearchParams(window.location.search);
+                    window.location.href = urlParams.get('redirect') || '/';
                 } catch (e) {
-                    this.errors.register.general = '请求失败: ' + e;
+                    this.errors.register.general = e.message || '注册失败';
                     this.refreshCaptcha();
                 } finally {
                     this.loading.register = false;
@@ -324,24 +301,14 @@
 
                 this.loading.forgot = true;
                 try {
-                    const res = await fetch('/api/forgot-password', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            email: this.forgotForm.email,
-                            captchaId: this.captchaId,
-                            captchaCode: this.forgotForm.captcha
-                        })
-                    }).then(r => r.json());
-
-                    if (res.code === 0) {
-                        this.success.forgot = '重置邮件已发送，请查收';
-                    } else {
-                        this.errors.forgot.general = res.msg || '发送失败';
-                        this.refreshCaptcha();
-                    }
+                    const res = await window.api.forgotPassword(
+                        this.forgotForm.email,
+                        this.captchaId,
+                        this.forgotForm.captcha
+                    );
+                    this.success.forgot = '重置邮件已发送，请查收';
                 } catch (e) {
-                    this.errors.forgot.general = '请求失败: ' + e;
+                    this.errors.forgot.general = e.message || '发送失败';
                     this.refreshCaptcha();
                 } finally {
                     this.loading.forgot = false;

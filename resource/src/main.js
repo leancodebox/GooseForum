@@ -8,6 +8,7 @@ import axios from 'axios'
 import Cropper from 'cropperjs'
 import { renderMermaidDiagrams } from './utils/mermaidRenderer'
 import { processImageFile } from './utils/imageUtils'
+import * as api from './utils/gooseForumService'
 
 // Expose libraries and utils to window
 window.Alpine = Alpine
@@ -15,6 +16,7 @@ window.axios = axios
 window.Cropper = Cropper
 window.MermaidUtils = { renderMermaidDiagrams }
 window.ImageUtils = { processImageFile }
+window.api = api
 
 // Initialize Anchor Links
 function initAnchorLinks() {
