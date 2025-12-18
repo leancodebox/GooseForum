@@ -45,6 +45,20 @@ func GetByUserId(userId, followUserId uint64) (entity Entity) {
 	return
 }
 
+// IsFollowing 判断用户是否关注了某个用户
+func IsFollowing(userId, followUserId uint64) bool {
+	var count int64
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldFollowUserId, followUserId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&count)
+	return count > 0
+}
+
+// GetAllFollowingIds 获取用户所有关注的用户ID列表
+func GetAllFollowingIds(userId uint64) []uint64 {
+	var followUserIds []uint64
+	builder().Select(fieldFollowUserId).Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Pluck(fieldFollowUserId, &followUserIds)
+	return followUserIds
+}
+
 // GetFollowStatusMap 批量获取用户对指定用户列表的关注状态
 func GetFollowStatusMap(userId uint64, targetUserIds []uint64) map[uint64]bool {
 	if len(targetUserIds) == 0 {

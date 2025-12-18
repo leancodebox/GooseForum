@@ -353,7 +353,7 @@ func Post(c *gin.Context) {
 }
 
 func User(c *gin.Context) {
-	id := cast.ToUint64(c.Param("id"))
+	id := cast.ToUint64(c.Param("userId"))
 	showUser := component.GetUserShowByUserId(id)
 	if showUser.UserId == 0 {
 		errorPage(c, "用户不存在", "用户不存在")
@@ -369,72 +369,30 @@ func User(c *gin.Context) {
 	currentUserId := component.LoginUserId(c)
 
 	// 检查当前用户是否关注了列表中的用户
-	var followingStatusMap map[uint64]bool
-	var followerStatusMap map[uint64]bool
 	var isFollowingAuthor bool
 
-	if currentUserId > 0 {
-		// 收集所有需要查询关注状态的用户ID
-		var targetUserIds []uint64
-
-		// 添加页面作者ID（如果不是自己）
-		if currentUserId != id {
-			targetUserIds = append(targetUserIds, id)
-		}
-
-		// 添加关注列表中的用户ID（排除自己）
-		for _, user := range followingList {
-			if user.Id != currentUserId {
-				targetUserIds = append(targetUserIds, user.Id)
-			}
-		}
-
-		// 添加粉丝列表中的用户ID（排除自己）
-		for _, user := range followerList {
-			if user.Id != currentUserId {
-				targetUserIds = append(targetUserIds, user.Id)
-			}
-		}
-
-		// 一次性批量查询所有关注状态
-		allFollowStatusMap := userFollow.GetFollowStatusMap(currentUserId, targetUserIds)
-
-		// 设置页面作者的关注状态
-		if currentUserId != id {
-			isFollowingAuthor = allFollowStatusMap[id]
-		}
-
-		// 构建关注列表的状态映射
-		followingStatusMap = make(map[uint64]bool)
-		for _, user := range followingList {
-			if user.Id != currentUserId {
-				followingStatusMap[user.Id] = allFollowStatusMap[user.Id]
-			}
-		}
-
-		// 构建粉丝列表的状态映射
-		followerStatusMap = make(map[uint64]bool)
-		for _, user := range followerList {
-			if user.Id != currentUserId {
-				followerStatusMap[user.Id] = allFollowStatusMap[user.Id]
-			}
-		}
+	if currentUserId > 0 && currentUserId != id {
+		isFollowingAuthor = userFollow.IsFollowing(currentUserId, id)
 	}
 	user, _ := users.Get(id)
 	stats := userStatistics.Get(id)
 	userCard := transform.User2UserCard(user, stats, isFollowingAuthor, currentUserId == id, true, true)
+
+	var myFollowingIds []uint64
+	if currentUserId > 0 {
+		myFollowingIds = userFollow.GetAllFollowingIds(currentUserId)
+	}
 
 	viewrender.Render(c, "user.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetUserProfile(showUser.Username, showUser.Bio).
 			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
-		"Articles":           hotdataserve.ArticlesSmallEntity2Dto(last),
-		"UserCard":           userCard,
-		"FollowingList":      followingList,
-		"FollowerList":       followerList,
-		"FollowingStatusMap": followingStatusMap,
-		"FollowerStatusMap":  followerStatusMap,
+		"Articles":       hotdataserve.ArticlesSmallEntity2Dto(last),
+		"UserCard":       userCard,
+		"FollowingList":  followingList,
+		"FollowerList":   followerList,
+		"MyFollowingIds": myFollowingIds,
 	})
 }
 

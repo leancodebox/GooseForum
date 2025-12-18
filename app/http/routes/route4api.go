@@ -43,7 +43,7 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("", controllers.Home)
 	viewRouteApp.GET("/login", middleware.CheckNeedLogin, controllers.LoginView)
 	viewRouteApp.GET("/reset-password", controllers.ResetPasswordView)
-	viewRouteApp.GET("/user/:id", controllers.User)
+	viewRouteApp.GET("/user/:userId", controllers.User)
 	viewRouteApp.GET("/post", controllers.Post)
 	viewRouteApp.GET("/post/:id", controllers.PostDetail)
 	viewRouteApp.GET("/about", controllers.About)

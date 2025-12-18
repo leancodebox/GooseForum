@@ -73,13 +73,13 @@
                                                         {{end}}
                                                     </div>
                                                     {{if and $.CurrentUserId (ne $.CurrentUserId .Id)}}
-                                                        {{$isFollowing := index $.FollowingStatusMap .Id}}
                                                         <button class="btn btn-sm"
-                                                                x-data="followUserHandler({{.Id}}, {{$isFollowing}})"
+                                                                x-data="followUserHandler({{.Id}})"
+                                                                x-init="checkStatus()"
                                                                 :class="isFollowing ? 'btn-outline' : 'btn-primary'"
                                                                 @click="toggleFollow()"
                                                                 :disabled="loading">
-                                                            <span x-show="!loading" x-text="isFollowing ? '已关注' : '关注'">{{if $isFollowing}}已关注{{else}}关注{{end}}</span>
+                                                            <span x-show="!loading" x-text="isFollowing ? '已关注' : '关注'">关注</span>
                                                             <span x-show="loading" class="loading loading-spinner loading-xs"></span>
                                                         </button>
                                                     {{end}}
@@ -116,13 +116,13 @@
                                                         {{end}}
                                                     </div>
                                                     {{if and $.CurrentUserId (ne $.CurrentUserId .Id)}}
-                                                        {{$isFollowing := index $.FollowerStatusMap .Id}}
                                                         <button class="btn btn-sm"
-                                                                x-data="followUserHandler({{.Id}}, {{$isFollowing}})"
+                                                                x-data="followUserHandler({{.Id}})"
+                                                                x-init="checkStatus()"
                                                                 :class="isFollowing ? 'btn-outline' : 'btn-primary'"
                                                                 @click="toggleFollow()"
                                                                 :disabled="loading">
-                                                            <span x-show="!loading" x-text="isFollowing ? '已关注' : '关注'">{{if $isFollowing}}已关注{{else}}关注{{end}}</span>
+                                                            <span x-show="!loading" x-text="isFollowing ? '已关注' : '关注'">关注</span>
                                                             <span x-show="loading" class="loading loading-spinner loading-xs"></span>
                                                         </button>
                                                     {{end}}
@@ -143,11 +143,19 @@
 
 {{define "user_script"}}
 <script>
-    function followUserHandler(userId, isFollowing) {
+    // 注入当前用户的关注列表ID
+    window.myFollowingIds = {{if .MyFollowingIds}}{{.MyFollowingIds}}{{else}}[]{{end}};
+
+    function followUserHandler(userId) {
         return {
             userId: userId,
-            isFollowing: isFollowing,
+            isFollowing: false,
             loading: false,
+
+            checkStatus() {
+                // 使用本地数据判断关注状态，避免API请求
+                this.isFollowing = window.myFollowingIds.includes(this.userId);
+            },
 
             async toggleFollow() {
                 if (this.loading) return;
@@ -157,6 +165,18 @@
                 try {
                     await window.api.followUser(this.userId, action);
                     this.isFollowing = !this.isFollowing;
+                    
+                    // 更新本地列表，以便其他组件也能感知（虽然本页面不刷新的话其他组件可能感知不到，但保持一致性是个好习惯）
+                    if (this.isFollowing) {
+                        if (!window.myFollowingIds.includes(this.userId)) {
+                            window.myFollowingIds.push(this.userId);
+                        }
+                    } else {
+                         const index = window.myFollowingIds.indexOf(this.userId);
+                         if (index > -1) {
+                             window.myFollowingIds.splice(index, 1);
+                         }
+                    }
                 } catch (error) {
                     console.error('关注操作失败:', error);
                     window.notification.error('操作失败: ' + error.message);
