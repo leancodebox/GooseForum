@@ -282,7 +282,7 @@
                     this.likeCount = this.isLiked ? this.likeCount + 1 : this.likeCount - 1;
                 } catch (error) {
                     console.error('Like failed', error);
-                    alert('操作失败');
+                    window.notification.error('操作失败');
                 }
             },
 
@@ -291,13 +291,13 @@
                     const response = await window.api.bookmarkArticle(this.articleId, this.isBookmarked ? 2 : 1);
                     this.isBookmarked = !this.isBookmarked;
                     if (this.isBookmarked) {
-                        alert('收藏成功');
+                        window.notification.success('收藏成功');
                     } else {
-                        alert('取消收藏成功');
+                        window.notification.success('取消收藏成功');
                     }
                 } catch (error) {
                     console.error('Bookmark failed', error);
-                    alert('操作失败');
+                    window.notification.error('操作失败');
                 }
             },
 
@@ -318,7 +318,7 @@
             async submitComment(replyId) {
                 const content = replyId === 0 ? this.commentContent : this.replyContents[replyId];
                 if (!content || !content.trim()) {
-                    alert('请输入内容');
+                    window.notification.warning('请输入内容');
                     return;
                 }
 
@@ -330,7 +330,7 @@
                     location.reload();
                 } catch (error) {
                     console.error('Comment failed', error);
-                    alert('评论失败');
+                    window.notification.error('评论失败');
                 } finally {
                     this.submitting = false;
                     this.currentReplyId = 0;
@@ -344,7 +344,7 @@
                     location.reload(); // Or remove element from DOM for better UX
                 } catch (error) {
                     console.error('Delete failed', error);
-                    alert('删除失败');
+                    window.notification.error('删除失败');
                 }
             }
         }

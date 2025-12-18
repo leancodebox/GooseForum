@@ -373,8 +373,8 @@
 
                 const error = urlParams.get('error');
                 const success = urlParams.get('success');
-                if (error) alert('操作失败: ' + error);
-                if (success === 'bind_success') alert('绑定成功');
+                if (error) window.notification.error('操作失败: ' + error);
+                if (success === 'bind_success') window.notification.success('绑定成功');
 
                 // Load bindings if on binding tab
                 this.$watch('subTab', (val) => {
@@ -407,9 +407,9 @@
                     await window.api.saveUserName(this.form.username);
                     this.editingUsername = false;
                     this.originalUsername = this.form.username;
-                    alert('用户名修改成功');
+                    window.notification.success('用户名修改成功');
                 } catch (e) {
-                    alert(e.message || '修改失败');
+                    window.notification.error(e.message || '修改失败');
                 }
             },
             startEditEmail() {
@@ -429,9 +429,9 @@
                     await window.api.saveUserEmail(this.form.email);
                     this.editingEmail = false;
                     this.originalEmail = this.form.email;
-                    alert('邮箱修改成功，请查收验证邮件');
+                    window.notification.success('邮箱修改成功，请查收验证邮件');
                 } catch (e) {
-                    alert(e.message || '修改失败');
+                    window.notification.error(e.message || '修改失败');
                 }
             },
 
@@ -441,7 +441,7 @@
                 if (!file) return;
 
                 if (file.size > 5 * 1024 * 1024) {
-                    alert('图片大小不能超过 5MB');
+                    window.notification.warning('图片大小不能超过 5MB');
                     return;
                 }
                 
@@ -490,7 +490,7 @@
                 
                 canvas.toBlob(async (blob) => {
                     if (!blob) {
-                        alert('裁切失败');
+                        window.notification.error('裁切失败');
                         return;
                     }
                     
@@ -503,11 +503,11 @@
                     try {
                         const res = await window.api.uploadAvatar(formData);
                         this.user.avatarUrl = res.result.avatarUrl || res.result;
-                        alert('头像上传成功');
+                        window.notification.success('头像上传成功');
                         location.reload();
                     } catch (error) {
                         console.error('Upload failed', error);
-                        alert(error.message || '上传出错，请重试');
+                        window.notification.error(error.message || '上传出错，请重试');
                     }
                 }, 'image/webp', 0.85);
             },
@@ -530,10 +530,10 @@
                 if (!confirm(`确定要解绑 ${provider} 账户吗？`)) return;
                 try {
                     await window.api.unbindOAuth(provider);
-                    alert('解绑成功');
+                    window.notification.success('解绑成功');
                     this.fetchBindings();
                 } catch (e) {
-                    alert(e.message || '请求失败');
+                    window.notification.error(e.message || '请求失败');
                 }
             },
             savePrivacy() {
@@ -549,17 +549,17 @@
                     await window.api.saveUserInfo(
                         f.nickname, f.email, f.bio, f.signature, f.website, f.websiteName, f.externalInformation
                     );
-                    alert('保存成功');
+                    window.notification.success('保存成功');
                     location.reload(); 
                 } catch (e) {
-                    alert(e.message || '请求失败');
+                    window.notification.error(e.message || '请求失败');
                 } finally {
                     this.saving = false;
                 }
             },
             async changePassword() {
                 if (this.pwdForm.newPassword !== this.pwdForm.confirmPassword) {
-                    alert('两次输入的密码不一致');
+                    window.notification.warning('两次输入的密码不一致');
                     return;
                 }
                 this.saving = true;
@@ -568,10 +568,10 @@
                         this.pwdForm.oldPassword,
                         this.pwdForm.newPassword
                     );
-                    alert('密码修改成功，请重新登录');
+                    window.notification.success('密码修改成功，请重新登录');
                     location.href = '/login';
                 } catch (e) {
-                    alert(e.message || '请求失败');
+                    window.notification.error(e.message || '请求失败');
                 } finally {
                     this.saving = false;
                 }

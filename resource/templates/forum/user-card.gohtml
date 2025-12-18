@@ -11,7 +11,7 @@
             this.isFollowing = !this.isFollowing;
         } catch (error) {
             console.error('Follow failed', error);
-            alert('操作失败');
+            window.notification.error('操作失败');
         } finally {
             this.loading = false;
         }

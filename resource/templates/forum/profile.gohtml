@@ -350,7 +350,7 @@
                     await window.api.deleteArticle(id);
                     this.fetchData();
                 } catch (e) {
-                    alert('删除请求失败');
+                    window.notification.error('删除请求失败');
                 }
             },
             formatDate(dateStr) {
