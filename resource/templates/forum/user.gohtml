@@ -8,21 +8,7 @@
             <aside class="w-full lg:w-80 shrink-0">
                 <div class="sticky top-18 space-y-3">
                     <!-- 用户基本信息 -->
-                    {{template "forum/user-card.gohtml" dict
-                        "AvatarUrl" .Author.AvatarUrl
-                        "Username" .Author.Username
-                        "UserId" .Author.UserId
-                        "Signature" .Author.Signature
-                        "Bio" .Author.Bio
-                        "ArticleCount" .AuthorInfoStatistics.ArticleCount
-                        "LikeReceivedCount" .AuthorInfoStatistics.LikeReceivedCount
-                        "FollowerCount" .AuthorInfoStatistics.FollowerCount
-                        "ExternalInfo" .ExternalInformation
-                        "HasLogin" .CurrentUserId
-                        "IsSelf" (eq .CurrentUserId .Author.UserId)
-                        "IsFollowing" .IsFollowingAuthor
-                        "AllowAvatarUpload" false
-                    }}
+                    {{template "forum/user-card.gohtml" .UserCard }}
 
                     <!-- 用户详细信息 -->
                     <div class="card bg-base-100 shadow-sm">

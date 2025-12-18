@@ -360,7 +360,6 @@ func User(c *gin.Context) {
 		return
 	}
 	last, _ := articles.GetLatestArticlesByUserId(id, 5)
-	authorInfoStatistics := userStatistics.Get(id)
 
 	// 获取关注和粉丝列表（默认显示前10个）
 	followingList, _ := userFollow.GetFollowingList(id, 1, 10)
@@ -421,21 +420,21 @@ func User(c *gin.Context) {
 			}
 		}
 	}
+	user, _ := users.Get(id)
+	stats := userStatistics.Get(id)
+	userCard := transform.User2UserCard(user, stats, isFollowingAuthor, currentUserId == id, true, true)
 
 	viewrender.Render(c, "user.gohtml", map[string]any{
 		"PageMeta": viewrender.NewPageMetaBuilder().
 			SetUserProfile(showUser.Username, showUser.Bio).
 			SetCanonicalURL(component.BuildCanonicalHref(c)).
 			Build(),
-		"Articles":             hotdataserve.ArticlesSmallEntity2Dto(last),
-		"Author":               showUser,
-		"AuthorInfoStatistics": authorInfoStatistics,
-		"FollowingList":        followingList,
-		"FollowerList":         followerList,
-		"FollowingStatusMap":   followingStatusMap,
-		"FollowerStatusMap":    followerStatusMap,
-		"IsFollowingAuthor":    isFollowingAuthor,
-		"ExternalInformation":  showUser.ExternalInformation,
+		"Articles":           hotdataserve.ArticlesSmallEntity2Dto(last),
+		"UserCard":           userCard,
+		"FollowingList":      followingList,
+		"FollowerList":       followerList,
+		"FollowingStatusMap": followingStatusMap,
+		"FollowerStatusMap":  followerStatusMap,
 	})
 }
 
