@@ -301,17 +301,6 @@
                 }
             },
 
-            async toggleFollow(userId) {
-                try {
-                    const action = this.isFollowing ? 2 : 1;
-                    await window.api.followUser(userId, action);
-                    this.isFollowing = !this.isFollowing;
-                } catch (error) {
-                    console.error('Follow failed', error);
-                    alert('操作失败');
-                }
-            },
-
             toggleReplyForm(id) {
                 if (this.replyForms[id]) {
                     this.replyForms[id] = false;

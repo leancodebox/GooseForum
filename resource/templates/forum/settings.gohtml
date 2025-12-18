@@ -86,16 +86,20 @@
                                     <div class="join w-full">
                                         <label class="floating-label join-item w-full">
                                             <span>用户名</span>
-                                            <input type="text" x-model="form.username" class="input input-bordered join-item w-full" readonly />
+                                            <input type="text" x-model="form.username" class="input join-item w-full" :class="editingUsername ? 'input-primary' : 'input-bordered'" :disabled="!editingUsername" />
                                         </label>
-                                        <button type="button" class="btn btn-primary join-item">更改</button>
+                                        <button type="button" class="btn btn-primary join-item" x-show="!editingUsername" @click="startEditUsername">更改</button>
+                                        <button type="button" class="btn btn-success join-item" x-show="editingUsername" @click="saveUsername">保存</button>
+                                        <button type="button" class="btn btn-warning join-item" x-show="editingUsername" @click="cancelEditUsername">取消</button>
                                     </div>
                                     <div class="join w-full">
                                         <label class="floating-label join-item w-full">
                                             <span>邮箱</span>
-                                            <input type="email" x-model="form.email" class="input input-bordered join-item w-full" readonly />
+                                            <input type="email" x-model="form.email" class="input join-item w-full" :class="editingEmail ? 'input-primary' : 'input-bordered'" :disabled="!editingEmail" />
                                         </label>
-                                        <button type="button" class="btn btn-primary join-item">更改</button>
+                                        <button type="button" class="btn btn-primary join-item" x-show="!editingEmail" @click="startEditEmail">更改</button>
+                                        <button type="button" class="btn btn-success join-item" x-show="editingEmail" @click="saveEmail">保存</button>
+                                        <button type="button" class="btn btn-warning join-item" x-show="editingEmail" @click="cancelEditEmail">取消</button>
                                     </div>
                                     <label class="floating-label w-full">
                                         <span>昵称 <span class="text-error">*</span></span>
@@ -330,6 +334,12 @@
             form: JSON.parse(JSON.stringify({{json .FullUser}})), // Clone
             pwdForm: { oldPassword: '', newPassword: '', confirmPassword: '' },
             saving: false,
+            
+            // Edit states
+            editingUsername: false,
+            editingEmail: false,
+            originalUsername: '',
+            originalEmail: '',
             oauthBindings: {},
             loadingBindings: false,
             privacy: {
@@ -344,6 +354,10 @@
             cropper: null,
 
             init() {
+                // Init originals
+                this.originalUsername = this.form.username;
+                this.originalEmail = this.form.email;
+
                 // Ensure externalInformation exists
                 if (!this.form.externalInformation) this.form.externalInformation = {};
                 ['github', 'twitter', 'linkedIn', 'weibo', 'zhihu'].forEach(key => {
@@ -375,6 +389,52 @@
                 }
             },
             
+            // Username & Email Edit Methods
+            startEditUsername() {
+                this.editingUsername = true;
+                this.originalUsername = this.form.username;
+            },
+            cancelEditUsername() {
+                this.editingUsername = false;
+                this.form.username = this.originalUsername;
+            },
+            async saveUsername() {
+                if (this.form.username === this.originalUsername) {
+                    this.editingUsername = false;
+                    return;
+                }
+                try {
+                    await window.api.saveUserName(this.form.username);
+                    this.editingUsername = false;
+                    this.originalUsername = this.form.username;
+                    alert('用户名修改成功');
+                } catch (e) {
+                    alert(e.message || '修改失败');
+                }
+            },
+            startEditEmail() {
+                this.editingEmail = true;
+                this.originalEmail = this.form.email;
+            },
+            cancelEditEmail() {
+                this.editingEmail = false;
+                this.form.email = this.originalEmail;
+            },
+            async saveEmail() {
+                if (this.form.email === this.originalEmail) {
+                    this.editingEmail = false;
+                    return;
+                }
+                try {
+                    await window.api.saveUserEmail(this.form.email);
+                    this.editingEmail = false;
+                    this.originalEmail = this.form.email;
+                    alert('邮箱修改成功，请查收验证邮件');
+                } catch (e) {
+                    alert(e.message || '修改失败');
+                }
+            },
+
             // Avatar Handling Methods
             handleAvatarUpload(e) {
                 const file = e.target.files[0];

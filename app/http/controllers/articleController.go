@@ -166,8 +166,8 @@ func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Resp
 	if articleEntity.UserId != req.UserId {
 		return component.FailResponse("不可操作")
 	}
-	articles.Delete(&articleEntity)
-	articleCategoryRs.DeleteByArticleId(articleEntity.Id)
+	//articles.Delete(&articleEntity)
+	//articleCategoryRs.DeleteByArticleId(articleEntity.Id)
 	return component.SuccessResponse(true)
 }
 

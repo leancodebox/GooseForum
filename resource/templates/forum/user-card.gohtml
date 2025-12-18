@@ -1,5 +1,22 @@
 {{define "forum/user-card.gohtml"}}
-<div class="card bg-base-100 shadow-xl">
+<div class="card bg-base-100 shadow-xl" x-data="{
+    isFollowing: {{.IsFollowing}},
+    loading: false,
+    async toggleFollow(userId) {
+        if (this.loading) return;
+        this.loading = true;
+        const action = this.isFollowing ? 2 : 1;
+        try {
+            await window.api.followUser(userId, action);
+            this.isFollowing = !this.isFollowing;
+        } catch (error) {
+            console.error('Follow failed', error);
+            alert('操作失败');
+        } finally {
+            this.loading = false;
+        }
+    }
+}">
     <div class="card-body">
         <h2 class="card-title mb-3 font-normal">作者信息</h2>
 

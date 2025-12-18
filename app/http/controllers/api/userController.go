@@ -21,7 +21,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
-func GetCaptcha() component.Response {
+func GetCaptcha(req component.BetterRequest[component.Null]) component.Response {
 	captchaId, captchaImg := captchaOpt.GenerateCaptcha()
 	return component.SuccessResponse(map[string]any{
 		"captchaId":  captchaId,

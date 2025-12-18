@@ -3,27 +3,24 @@
 {{end}}
 
 {{define "user_content"}}
-        <div class="flex flex-col lg:flex-row gap-6" x-data="userPageHandler({
-            authorId: {{.Author.UserId}},
-            isFollowingAuthor: {{.IsFollowingAuthor}}
-        })">
+        <div class="flex flex-col lg:flex-row gap-6">
             <!-- 左侧用户信息 -->
-            <aside class="w-full lg:w-80 flex-shrink-0">
+            <aside class="w-full lg:w-80 shrink-0">
                 <div class="sticky top-18 space-y-3">
                     <!-- 用户基本信息 -->
-                    {{template "forum/user-card.gohtml" dict 
-                        "AvatarUrl" .Author.AvatarUrl 
-                        "Username" .Author.Username 
-                        "UserId" .Author.UserId 
-                        "Signature" .Author.Signature 
-                        "Bio" .Author.Bio 
-                        "ArticleCount" .AuthorInfoStatistics.ArticleCount 
-                        "LikeReceivedCount" .AuthorInfoStatistics.LikeReceivedCount 
-                        "FollowerCount" .AuthorInfoStatistics.FollowerCount 
-                        "ExternalInfo" .ExternalInformation 
-                        "HasLogin" .CurrentUserId 
-                        "IsSelf" (eq .CurrentUserId .Author.UserId) 
-                        "IsFollowing" .IsFollowingAuthor 
+                    {{template "forum/user-card.gohtml" dict
+                        "AvatarUrl" .Author.AvatarUrl
+                        "Username" .Author.Username
+                        "UserId" .Author.UserId
+                        "Signature" .Author.Signature
+                        "Bio" .Author.Bio
+                        "ArticleCount" .AuthorInfoStatistics.ArticleCount
+                        "LikeReceivedCount" .AuthorInfoStatistics.LikeReceivedCount
+                        "FollowerCount" .AuthorInfoStatistics.FollowerCount
+                        "ExternalInfo" .ExternalInformation
+                        "HasLogin" .CurrentUserId
+                        "IsSelf" (eq .CurrentUserId .Author.UserId)
+                        "IsFollowing" .IsFollowingAuthor
                         "AllowAvatarUpload" false
                     }}
 
@@ -160,29 +157,6 @@
 
 {{define "user_script"}}
 <script>
-    function userPageHandler(initialData) {
-        return {
-            authorId: initialData.authorId,
-            isFollowing: initialData.isFollowingAuthor,
-            loading: false,
-
-            async toggleFollow() {
-                if (this.loading) return;
-                this.loading = true;
-                const action = this.isFollowing ? 2 : 1;
-                try {
-                    await window.api.followUser(this.authorId, action);
-                    this.isFollowing = !this.isFollowing;
-                } catch (e) {
-                    console.error(e);
-                    // window.toast.error('操作失败，请重试');
-                } finally {
-                    this.loading = false;
-                }
-            }
-        }
-    }
-
     function followUserHandler(userId, isFollowing) {
         return {
             userId: userId,

@@ -81,7 +81,7 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.POST("logout", controllers.Logout)
 
 	// 验证码
-	baseApi.GET("get-captcha", ginUpNP(api.GetCaptcha))
+	baseApi.GET("get-captcha", UpQueryReq(api.GetCaptcha))
 	// 添加激活路由
 	baseApi.GET("activate", controllers.ActivateAccount)
 	// 忘记密码和重置密码路由
