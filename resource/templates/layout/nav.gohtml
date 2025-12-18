@@ -20,7 +20,7 @@
 <nav class="navbar bg-base-100 shadow-sm border-b border-base-300 min-h-14" 
      aria-label="主导航"
      x-data="navHandler({
-        isLoggedIn: {{if .CurrentUserId}}true{{else}}false{{end}}
+        isLoggedIn: {{.CurrentUserId}}
      })">
     <!-- PC端导航链接靠左 -->
     <div class="navbar-start">
@@ -197,7 +197,7 @@
 <script>
     function navHandler(initialData) {
         return {
-            isLoggedIn: initialData.isLoggedIn,
+            isLoggedIn: initialData.isLoggedIn>0,
             searchQuery: '',
             hasUnread: false,
             notificationHtml: '<div class="py-1">暂无新消息</div>',

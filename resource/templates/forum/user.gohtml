@@ -9,28 +9,6 @@
                 <div class="sticky top-18 space-y-3">
                     <!-- 用户基本信息 -->
                     {{template "forum/user-card.gohtml" .UserCard }}
-
-                    <!-- 用户详细信息 -->
-                    <div class="card bg-base-100 shadow-sm">
-                        <div class="card-body">
-                            <h2 class="card-title font-normal">详细信息</h2>
-                            <div class="space-y-3 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-base-content/70">注册时间：</span>
-                                    <span>{{.Author.CreateTime.Format "2006-01-02"}}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-base-content/70">最后活跃：</span>
-                                    <span>{{.AuthorInfoStatistics.LastActiveTime.Format "2006-01-02"}}</span>
-                                </div>
-                                <div>
-                                    <div class="text-base-content/70 mb-1">个人简介：</div>
-                                    <div class="text-base-content">{{.Author.Bio}}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </aside>
 
@@ -165,7 +143,7 @@
                 try {
                     await window.api.followUser(this.userId, action);
                     this.isFollowing = !this.isFollowing;
-                    
+
                     // 更新本地列表，以便其他组件也能感知（虽然本页面不刷新的话其他组件可能感知不到，但保持一致性是个好习惯）
                     if (this.isFollowing) {
                         if (!window.myFollowingIds.includes(this.userId)) {
