@@ -191,17 +191,6 @@ onMounted(() => {
                     <div class="text-xs text-base-content/70 line-clamp-1 mt-1">
                       {{ post.description || '暂无摘要' }}
                     </div>
-                    <div class="flex items-center gap-2 mt-1">
-                      <div class="badge badge-xs" v-if="true">
-                        置顶
-                      </div>
-                      <div class="badge badge-xs badge-accent" v-if="true">
-                        热门
-                      </div>
-                      <div class="badge badge-xs badge-info" v-if="true">
-                        推荐
-                      </div>
-                    </div>
                   </div>
                 </div>
               </td>
