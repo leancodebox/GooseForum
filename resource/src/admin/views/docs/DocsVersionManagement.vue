@@ -130,7 +130,7 @@
                   <span class="ml-1">设为默认</span>
                 </button>
                 <button class="btn btn-xs btn-warning" @click="editVersion(version)" title="编辑">
-                  <PencilIcon class="w-3 h-3"/>
+                  <PencilSquareIcon class="w-3 h-3"/>
                   <span class="ml-1">编辑</span>
                 </button>
                 <button class="btn btn-xs btn-error" @click="deleteVersion(version)" title="删除">
@@ -156,7 +156,7 @@
                   <StarIcon class="w-3 h-3"/>
                 </button>
                 <button class="btn btn-xs btn-warning" @click="editVersion(version)" title="编辑">
-                  <PencilIcon class="w-3 h-3"/>
+                  <PencilSquareIcon class="w-3 h-3"/>
                 </button>
                 <button class="btn btn-xs btn-error" @click="deleteVersion(version)" title="删除">
                   <TrashIcon class="w-3 h-3"/>
@@ -369,7 +369,7 @@ import {
   FolderIcon,
   InformationCircleIcon,
   MagnifyingGlassIcon,
-  PencilIcon,
+  PencilSquareIcon,
   PlusIcon,
   StarIcon,
   TrashIcon

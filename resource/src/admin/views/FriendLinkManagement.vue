@@ -3,7 +3,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {getFriendLinks, saveFriendLinks} from "@/admin/utils/adminService.ts";
 import type {FriendLinksGroup} from "@/admin/utils/adminInterfaces.ts";
 import draggable from 'vuedraggable'
-import { Bars3Icon, PencilIcon, TrashIcon, PhotoIcon } from '@heroicons/vue/24/outline'
+import { Bars3Icon, PencilSquareIcon, TrashIcon, PhotoIcon } from '@heroicons/vue/24/outline'
 
 // 响应式数据
 const friendLinksGroups = ref<FriendLinksGroup[]>([])
@@ -289,7 +289,7 @@ onMounted(() => {
                             @click="openEditLinkModal(groupIndex, linkIndex)"
                             title="编辑"
                         >
-                          <PencilIcon class="w-3 h-3" />
+                          <PencilSquareIcon class="w-3 h-3" />
                         </button>
                         <button
                             class="btn btn-xs btn-error bg-base-100/80 backdrop-blur-sm"

@@ -119,7 +119,7 @@
                       <span class="ml-1">查看</span>
                     </button>
                     <button class="btn btn-xs btn-warning" @click="editContent(content)" title="编辑">
-                      <PencilIcon class="w-3 h-3"/>
+                      <PencilSquareIcon class="w-3 h-3"/>
                       <span class="ml-1">编辑</span>
                     </button>
                     <button
@@ -152,7 +152,7 @@
                       <EyeIcon class="w-3 h-3"/>
                     </button>
                     <button class="btn btn-xs btn-warning" @click="editContent(content)" title="编辑">
-                      <PencilIcon class="w-3 h-3"/>
+                      <PencilSquareIcon class="w-3 h-3"/>
                     </button>
                     <button
                         v-if="content.isPublished === 0"
@@ -184,7 +184,7 @@
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
                       <li><a @click="viewContent(content)"><EyeIcon class="w-3 h-3"/>查看</a></li>
-                      <li><a @click="editContent(content)"><PencilIcon class="w-3 h-3"/>编辑</a></li>
+                      <li><a @click="editContent(content)"><PencilSquareIcon class="w-3 h-3"/>编辑</a></li>
                       <li v-if="content.isPublished === 0"><a @click="publishContent(content)"><CheckIcon class="w-3 h-3"/>发布</a></li>
                       <li v-else><a @click="draftContent(content)"><ArchiveBoxIcon class="w-3 h-3"/>草稿</a></li>
                       <li><a @click="deleteContent(content)"><TrashIcon class="w-3 h-3"/>删除</a></li>
@@ -414,7 +414,7 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
   EyeIcon,
-  PencilIcon,
+  PencilSquareIcon,
   TrashIcon,
   CheckIcon,
   ArchiveBoxIcon,

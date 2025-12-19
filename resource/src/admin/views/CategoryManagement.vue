@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {onMounted, ref, reactive} from 'vue'
-import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/outline'
+import {PlusIcon, PencilSquareIcon, TrashIcon} from '@heroicons/vue/24/outline'
 import {getCategoryList,saveCategory,deleteCategory} from "@/admin/utils/adminService.ts";
 import type {Category, Label} from "@/admin/utils/adminInterfaces.ts";
 
@@ -190,7 +190,7 @@ const getStatusClass = (status: number) => {
                   class="btn btn-sm btn-outline btn-primary"
                   title="编辑分类"
                 >
-                  <PencilIcon class="w-4 h-4"/>
+                  <PencilSquareIcon class="w-4 h-4"/>
                 </button>
                 <button 
                   @click="openDeleteModal(category)"

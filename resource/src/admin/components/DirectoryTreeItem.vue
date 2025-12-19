@@ -60,7 +60,7 @@
         <!-- 操作按钮 -->
         <div class="ml-auto flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button class="btn btn-xs btn-ghost" @click="startEdit" title="编辑">
-            <PencilIcon class="w-3 h-3"/>
+            <PencilSquareIcon class="w-3 h-3"/>
           </button>
           <button class="btn btn-xs btn-ghost" @click="addChild" title="添加子项">
             <PlusIcon class="w-3 h-3"/>
@@ -102,7 +102,7 @@ import {
   ChevronDownIcon,
   FolderIcon,
   DocumentIcon,
-  PencilIcon,
+  PencilSquareIcon,
   PlusIcon,
   TrashIcon,
   CheckIcon,

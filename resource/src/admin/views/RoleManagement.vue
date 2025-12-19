@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {onMounted, reactive, ref} from 'vue'
-import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/outline'
+import {PlusIcon, PencilSquareIcon, TrashIcon} from '@heroicons/vue/24/outline'
 import {getPermissionList, getRoleDel, getRoleList, getRoleSave} from '@admin/utils/adminService'
 import type {UserRole, Permissions, Label} from '@admin/utils/adminInterfaces'
 
@@ -207,7 +207,7 @@ const getStatusClass = (effective: number) => {
                 <td>
                   <div class="flex gap-1">
                     <button class="btn btn-ghost btn-xs" @click="openEditModal(role)" title="编辑">
-                      <PencilIcon class="w-3 h-3"/>
+                      <PencilSquareIcon class="w-3 h-3"/>
                     </button>
                     <button class="btn btn-ghost btn-xs text-error" @click="openDeleteModal(role)" title="删除">
                       <TrashIcon class="w-3 h-3"/>

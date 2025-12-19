@@ -95,7 +95,7 @@
                 <td class="min-w-[140px]">
                   <div class="flex items-center gap-0">
                     <button @click="editUserItem(user)" class="btn btn-ghost btn-xs p-1" title="编辑">
-                      <PencilIcon class="w-4 h-4" />
+                      <PencilSquareIcon class="w-4 h-4" />
                     </button>
                     <button @click="resetPassword(user)" class="btn btn-ghost btn-xs p-1" title="重置密码">
                       <KeyIcon class="w-4 h-4" />
@@ -219,7 +219,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import {
   PlusIcon,
   MagnifyingGlassIcon,
-  PencilIcon,
+  PencilSquareIcon,
   KeyIcon,
   NoSymbolIcon,
   CheckCircleIcon,

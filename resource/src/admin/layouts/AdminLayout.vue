@@ -5,7 +5,7 @@
     <!-- Drawer Content -->
     <div class="drawer-content flex flex-col min-h-screen bg-base-200">
       <!-- Navbar -->
-      <div class="navbar bg-base-100 sticky top-0 z-30 shadow-sm px-4 sm:px-6">
+      <div class="navbar bg-base-100 sticky top-0 z-30 shadow-sm px-4 sm:px-6 min-h-[3rem] h-14">
         <div class="flex-none lg:hidden mr-2">
           <label for="admin-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
             <component :is="Bars3Icon" class="w-6 h-6" />
@@ -13,14 +13,15 @@
         </div>
         
         <div class="flex-1 flex justify-between items-center gap-4">
-          <!-- Search Bar (Visual Only) -->
-          <div class="form-control hidden sm:block w-full max-w-md">
-            <div class="relative">
-              <input type="text" placeholder="Search" class="input input-bordered w-full pl-10 bg-base-200 focus:bg-base-100 transition-colors" />
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon class="h-5 w-5 text-base-content/50" />
-              </div>
-            </div>
+           <div class="breadcrumbs text-sm text-base-content/60">
+            <ul>
+              <li v-for="(crumb, index) in breadcrumbs" :key="index">
+                <router-link v-if="crumb.path && index < breadcrumbs.length - 1" :to="crumb.path" class="hover:text-primary transition-colors">
+                  {{ crumb.name }}
+                </router-link>
+                <span v-else>{{ crumb.name }}</span>
+              </li>
+            </ul>
           </div>
           
           <!-- Breadcrumbs for Mobile/Small Screens -->
@@ -78,7 +79,7 @@
       <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
       <aside class="bg-base-100 min-h-screen w-64 flex flex-col border-r border-base-200">
         <!-- Logo -->
-        <div class="h-16 flex items-center px-6 border-b border-base-200">
+        <div class="h-14 flex items-center px-6 border-b border-base-200">
           <a href="/" class="flex items-center gap-3 text-xl font-normal text-primary tracking-wide">
             <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
               <ChatBubbleLeftRightIcon class="w-5 h-5" />

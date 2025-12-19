@@ -122,7 +122,7 @@
                       <span class="ml-1">查看</span>
                     </button>
                     <button class="btn btn-xs btn-warning" @click="editProject(project)" title="编辑">
-                      <PencilIcon class="w-3 h-3"/>
+                      <PencilSquareIcon class="w-3 h-3"/>
                       <span class="ml-1">编辑</span>
                     </button>
                     <button class="btn btn-xs btn-error" @click="deleteProject(project)" title="删除">
@@ -137,7 +137,7 @@
                       <EyeIcon class="w-3 h-3"/>
                     </button>
                     <button class="btn btn-xs btn-warning" @click="editProject(project)" title="编辑">
-                      <PencilIcon class="w-3 h-3"/>
+                      <PencilSquareIcon class="w-3 h-3"/>
                     </button>
                     <button class="btn btn-xs btn-error" @click="deleteProject(project)" title="删除">
                       <TrashIcon class="w-3 h-3"/>
@@ -153,7 +153,7 @@
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
                       <li><a @click="viewProject(project)"><EyeIcon class="w-3 h-3"/>查看</a></li>
-                      <li><a @click="editProject(project)"><PencilIcon class="w-3 h-3"/>编辑</a></li>
+                      <li><a @click="editProject(project)"><PencilSquareIcon class="w-3 h-3"/>编辑</a></li>
                       <li><a @click="deleteProject(project)"><TrashIcon class="w-3 h-3"/>删除</a></li>
                     </ul>
                   </div>
@@ -326,7 +326,7 @@ import {
   EyeIcon,
   FolderOpenIcon,
   MagnifyingGlassIcon,
-  PencilIcon,
+  PencilSquareIcon,
   PlusIcon,
   TrashIcon,
   EllipsisVerticalIcon
