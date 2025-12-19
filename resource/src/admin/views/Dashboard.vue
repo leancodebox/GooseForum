@@ -40,7 +40,7 @@
                   <UsersIcon class="w-4 h-4 text-primary" />
                   <div>
                     <p class="text-xs text-base-content/70">用户</p>
-                    <p class="text-sm font-bold text-base-content">{{ formatNumber(stats.userCount) }}</p>
+                    <p class="text-sm font-normal text-base-content">{{ formatNumber(stats.userCount) }}</p>
                   </div>
                 </div>
                 <p class="text-xs text-base-content/50">+{{ stats.userMonthCount }}</p>
@@ -52,7 +52,7 @@
                   <DocumentTextIcon class="w-4 h-4 text-secondary" />
                   <div>
                     <p class="text-xs text-base-content/70">帖子</p>
-                    <p class="text-sm font-bold text-base-content">{{ formatNumber(stats.articleCount) }}</p>
+                    <p class="text-sm font-normal text-base-content">{{ formatNumber(stats.articleCount) }}</p>
                   </div>
                 </div>
                 <p class="text-xs text-base-content/50">+{{ stats.articleMonthCount }}</p>
@@ -64,7 +64,7 @@
                   <ChatBubbleLeftRightIcon class="w-4 h-4 text-accent" />
                   <div>
                     <p class="text-xs text-base-content/70">评论</p>
-                    <p class="text-sm font-bold text-base-content">{{ formatNumber(stats.reply) }}</p>
+                    <p class="text-sm font-normal text-base-content">{{ formatNumber(stats.reply) }}</p>
                   </div>
                 </div>
               </div>
@@ -75,7 +75,7 @@
                   <EyeIcon class="w-4 h-4 text-info" />
                   <div>
                     <p class="text-xs text-base-content/70">访问</p>
-                    <p class="text-sm font-bold text-base-content">x</p>
+                    <p class="text-sm font-normal text-base-content">x</p>
                   </div>
                 </div>
               </div>
@@ -87,33 +87,9 @@
 
     <!-- 系统状态和快捷操作 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      <!-- 快捷操作 -->
-      <div class="card bg-base-100 shadow lg:col-span-4 h-fit">
-        <div class="card-body">
-          <h2 class="card-title font-normal">快捷操作</h2>
-          <div class="grid grid-cols-2 gap-4">
-            <router-link to="/admin/posts" class="btn btn-outline btn-primary">
-              <DocumentTextIcon class="w-4 h-4" />
-              管理帖子
-            </router-link>
-            <router-link to="/admin/users" class="btn btn-outline btn-secondary">
-              <UsersIcon class="w-4 h-4" />
-              管理用户
-            </router-link>
-            <router-link to="/admin/categories" class="btn btn-outline btn-accent">
-              <TagIcon class="w-4 h-4" />
-              管理分类
-            </router-link>
-            <router-link to="/admin/settings" class="btn btn-outline btn-info">
-              <CogIcon class="w-4 h-4" />
-              系统设置
-            </router-link>
-          </div>
-        </div>
-      </div>
 
       <!-- 项目版本信息 -->
-      <div class="card bg-base-100 shadow lg:col-span-8">
+      <div class="card bg-base-100 shadow lg:col-span-12">
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <h2 class="card-title flex items-center gap-2 font-normal">
@@ -196,7 +172,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useAuthStore } from '../stores/auth.ts'
+import { useAuthStore } from '@admin/stores/auth.ts'
 import {
   UsersIcon,
   DocumentTextIcon,
@@ -208,8 +184,8 @@ import {
   CodeBracketIcon,
   ArrowTopRightOnSquareIcon
 } from '@heroicons/vue/24/outline'
-import { api } from '../utils/axiosInstance'
-import { getSiteStatistics } from '../utils/adminService'
+import { api } from '@admin/utils/axiosInstance'
+import { getSiteStatistics } from '@admin/utils/adminService'
 
 const authStore = useAuthStore()
 

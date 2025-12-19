@@ -350,7 +350,7 @@
 
 <script setup lang="ts">
 import {computed, onMounted, reactive, ref} from 'vue';
-import {DocsProjectService} from '../../utils/docsService';
+import {DocsProjectService} from '@admin/utils/docsService';
 import type {
   DirectoryNode,
   DocsProjectItem,
@@ -358,8 +358,8 @@ import type {
   DocsVersionItem,
   DocsVersionListReq,
   DocsVersionUpdateReq
-} from '../../utils/docsInterfaces';
-import {DEFAULT_STATUS_OPTIONS, DefaultStatus, VERSION_STATUS_OPTIONS, VersionStatus} from '../../utils/docsInterfaces';
+} from '@admin/utils/docsInterfaces';
+import {DEFAULT_STATUS_OPTIONS, DefaultStatus, VERSION_STATUS_OPTIONS, VersionStatus} from '@admin/utils/docsInterfaces';
 import {
   ArrowPathIcon,
   ChevronLeftIcon,
@@ -374,7 +374,7 @@ import {
   StarIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline';
-import DirectoryTreeEditor from '../../components/DirectoryTreeEditor.vue';
+import DirectoryTreeEditor from '@admin/components/DirectoryTreeEditor.vue';
 
 // 响应式数据
 const loading = ref(false);

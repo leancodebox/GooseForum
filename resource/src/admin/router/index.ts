@@ -1,14 +1,14 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { watch } from 'vue'
-import { useAuthStore } from '../stores/auth.ts'
-import AdminLayout from '../layouts/AdminLayout.vue'
+import { useAuthStore } from '@admin/stores/auth.ts'
+import AdminLayout from '@admin/layouts/AdminLayout.vue'
 
 // 路由配置
 const routes: RouteRecordRaw[] = [
   {
     path: '/admin/login',
     name: 'AdminLogin',
-    component: () => import('../views/Login.vue'),
+    component: () => import('@admin/views/Login.vue'),
     meta: {
       title: '管理员登录',
       requiresAuth: false,
@@ -25,7 +25,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'AdminDashboard',
-        component: () => import('../views/Dashboard.vue'),
+        component: () => import('@admin/views/Dashboard.vue'),
         meta: {
           title: '仪表盘',
           requiresAuth: true
@@ -34,7 +34,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'users',
         name: 'AdminUsers',
-        component: () => import('../views/UserManagement.vue'),
+        component: () => import('@admin/views/UserManagement.vue'),
         meta: {
           title: '用户管理',
           requiresAuth: true
@@ -43,7 +43,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'roles',
         name: 'AdminRoles',
-        component: () => import('../views/RoleManagement.vue'),
+        component: () => import('@admin/views/RoleManagement.vue'),
         meta: {
           title: '角色管理',
           requiresAuth: true,
@@ -53,7 +53,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'posts',
         name: 'AdminPosts',
-        component: () => import('../views/PostManagement.vue'),
+        component: () => import('@admin/views/PostManagement.vue'),
         meta: {
           title: '帖子管理',
           requiresAuth: true
@@ -62,7 +62,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'categories',
         name: 'AdminCategories',
-        component: () => import('../views/CategoryManagement.vue'),
+        component: () => import('@admin/views/CategoryManagement.vue'),
         meta: {
           title: '分类管理',
           requiresAuth: true
@@ -71,7 +71,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'friend-links',
         name: 'AdminFriendLinks',
-        component: () => import('../views/FriendLinkManagement.vue'),
+        component: () => import('@admin/views/FriendLinkManagement.vue'),
         meta: {
           title: '友情链接管理',
           requiresAuth: true
@@ -80,7 +80,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'footer-links',
         name: 'AdminFooterLinks',
-        component: () => import('../views/FooterManagement.vue'),
+        component: () => import('@admin/views/FooterManagement.vue'),
         meta: {
           title: '页脚管理',
           requiresAuth: true
@@ -89,7 +89,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'sponsors',
         name: 'AdminSponsors',
-        component: () => import('../views/SponsorManagement.vue'),
+        component: () => import('@admin/views/SponsorManagement.vue'),
         meta: {
           title: '赞助管理',
           requiresAuth: true
@@ -98,7 +98,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'tickets/view',
         name: 'AdminTicketsView',
-        component: () => import('../views/TicketView.vue'),
+        component: () => import('@admin/views/TicketView.vue'),
         meta: {
           title: '工单查看',
           requiresAuth: true
@@ -107,7 +107,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'web-settings',
         name: 'AdminWebSettings',
-        component: () => import('../views/WebSettings.vue'),
+        component: () => import('@admin/views/WebSettings.vue'),
         meta: {
           title: '网页设置',
           requiresAuth: true,
@@ -117,7 +117,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'site-settings',
         name: 'SiteSettings',
-        component: () => import('../views/SiteSettings.vue'),
+        component: () => import('@admin/views/SiteSettings.vue'),
         meta: {
           title: '站点设置',
           requiresAuth: true,
@@ -127,7 +127,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'docs/projects',
         name: 'AdminDocsProjects',
-        component: () => import('../views/docs/DocsProjectManagement.vue'),
+        component: () => import('@admin/views/docs/DocsProjectManagement.vue'),
         meta: {
           title: '文档项目管理',
           requiresAuth: true,
@@ -137,7 +137,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'docs/versions',
         name: 'AdminDocsVersions',
-        component: () => import('../views/docs/DocsVersionManagement.vue'),
+        component: () => import('@admin/views/docs/DocsVersionManagement.vue'),
         meta: {
           title: '文档版本管理',
           requiresAuth: true,
@@ -147,7 +147,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'docs/contents',
         name: 'AdminDocsContents',
-        component: () => import('../views/docs/DocsContentManagement.vue'),
+        component: () => import('@admin/views/docs/DocsContentManagement.vue'),
         meta: {
           title: '文档内容管理',
           requiresAuth: true,
@@ -159,7 +159,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/admin/:pathMatch(.*)*',
     name: 'AdminNotFound',
-    component: () => import('../views/NotFound.vue'),
+    component: () => import('@admin/views/NotFound.vue'),
     meta: {
       title: '页面不存在',
       hideInMenu: true

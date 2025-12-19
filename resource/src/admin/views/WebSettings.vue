@@ -11,7 +11,7 @@ import {
   CheckCircleIcon,
   XCircleIcon
 } from '@heroicons/vue/24/outline'
-import { getWebSettings, saveWebSettings, type WebSettingsConfig } from '../utils/adminService'
+import { getWebSettings, saveWebSettings, type WebSettingsConfig } from '@admin/utils/adminService'
 
 // 设置数据
 const settings = ref({
@@ -33,7 +33,7 @@ const loadSettings = async () => {
     if (response.code === 0) {
       Object.assign(settings.value, response.result)
     } else {
-      showError(response.message || '加载设置失败')
+      showError(response.msg || '加载设置失败')
     }
   } catch (error) {
     console.error('加载网页设置失败:', error)
@@ -49,7 +49,7 @@ const saveSettings = async () => {
     if (response.code === 0) {
       showSuccess()
     } else {
-      showError(response.message || '保存设置失败')
+      showError(response.msg || '保存设置失败')
     }
   } catch (error) {
     console.error('保存网页设置失败:', error)

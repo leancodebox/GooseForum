@@ -1,286 +1,149 @@
 <template>
-  <div class="min-h-screen ">
-    <!-- 顶部导航栏 - 100%宽度 -->
-    <header
-        class="navbar bg-base-100 shadow-sm border-b border-base-300 fixed top-0 left-0 right-0 z-50 rounded-bl-lg rounded-br-lg min-h-14">
-      <div class="flex-none">
-        <!-- 移动端菜单按钮 -->
-        <label for="drawer-toggle" class="btn btn-square btn-ghost lg:hidden">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </label>
-      </div>
-
-      <!-- Logo 区域 - 独立容器 -->
-      <div class="flex-none hidden lg:flex items-center mr-4">
-        <div class="transition-all duration-300 ease-in-out overflow-hidden">
-          <a href="/" class="font-normal text-lg mr-4 hover:text-primary">GooseForum</a>
+  <div class="drawer lg:drawer-open font-sans text-base-content">
+    <input id="admin-drawer" type="checkbox" class="drawer-toggle" ref="drawerToggle" />
+    
+    <!-- Drawer Content -->
+    <div class="drawer-content flex flex-col min-h-screen bg-base-200">
+      <!-- Navbar -->
+      <div class="navbar bg-base-100 sticky top-0 z-30 shadow-sm px-4 sm:px-6">
+        <div class="flex-none lg:hidden mr-2">
+          <label for="admin-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
+            <component :is="Bars3Icon" class="w-6 h-6" />
+          </label>
         </div>
-      </div>
-
-      <div class="flex-1">
-        <div class="breadcrumbs text-sm" v-if="breadcrumbs.length > 0">
-          <ul>
-            <li v-for="(crumb, index) in breadcrumbs" :key="index">
-              <router-link v-if="crumb.path && index < breadcrumbs.length - 1" :to="crumb.path"
-                           class="link link-hover">
-                {{ crumb.name }}
-              </router-link>
-              <span v-else>{{ crumb.name }}</span>
-            </li>
-          </ul>
-        </div>
-        <span v-else class="text-lg font-normal">{{ pageTitle }}</span>
-      </div>
-
-      <div class="flex-none gap-2">
-        <!-- 主题切换 -->
-        <label class="swap swap-rotate btn btn-ghost btn-circle">
-          <input type="checkbox" class="theme-controller" value="dark" @change="toggleTheme"/>
-          <svg class="swap-off fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path
-                d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
-          </svg>
-          <svg class="swap-on fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path
-                d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
-          </svg>
-        </label>
-
-        <!-- 用户菜单 -->
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-            <div class="w-8 rounded-full">
-              <img :src="userStore.user?.avatar || '/static/pic/default-avatar.webp'"
-                   :alt="userStore.user?.username"/>
+        
+        <div class="flex-1 flex justify-between items-center gap-4">
+          <!-- Search Bar (Visual Only) -->
+          <div class="form-control hidden sm:block w-full max-w-md">
+            <div class="relative">
+              <input type="text" placeholder="Search" class="input input-bordered w-full pl-10 bg-base-200 focus:bg-base-100 transition-colors" />
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon class="h-5 w-5 text-base-content/50" />
+              </div>
             </div>
           </div>
-          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-            <li><a class="justify-between">{{ userStore.user?.username }}<span class="badge">管理员</span></a></li>
-            <li><a href="/profile/articles">个人中心</a></li>
-            <li><a href="/profile/settings">账户设置</a></li>
-            <li><a @click="logout">退出登录</a></li>
-          </ul>
+          
+          <!-- Breadcrumbs for Mobile/Small Screens -->
+          <div class="text-sm breadcrumbs sm:hidden">
+            <ul>
+              <li>{{ pageTitle }}</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="flex-none gap-2">
+          <!-- Theme Toggle -->
+          <label class="swap swap-rotate btn btn-ghost btn-circle">
+            <input type="checkbox" class="theme-controller" value="dark" @change="toggleTheme"/>
+            <!-- sun icon -->
+            <SunIcon class="swap-off w-5 h-5" />
+            <!-- moon icon -->
+            <MoonIcon class="swap-on w-5 h-5" />
+          </label>
+          
         </div>
       </div>
-    </header>
 
-    <!-- 主体布局 -->
-    <div class="drawer lg:drawer-open pt-16">
-      <!-- 移动端抽屉切换 -->
-      <input id="drawer-toggle" type="checkbox" class="drawer-toggle"/>
-
-      <!-- 主内容区 -->
-      <div class="drawer-content flex flex-col lg:ml-48">
-        <main class="flex-1 p-3 min-h-screen">
-          <router-view/>
-        </main>
-      </div>
-
-      <!-- 侧边栏 -->
-      <div class="drawer-side z-30">
-        <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay lg:hidden"></label>
-        <aside class="w-46 min-h-full bg-base-100 border-r border-base-300 fixed top-0 left-0 bottom-0 z-40">
-          <!-- 菜单 -->
-          <nav class="flex-1 scrollbar-ultra-thin pt-16">
-            <ul class="menu bg-base-100 w-full h-full">
-              <template v-for="item in menuItems" :key="item.key">
-                <!-- 普通菜单项 -->
-                <li v-if="!item.children">
-                  <router-link :to="item.path" :class="{
-                    'bg-primary text-primary-content': isPathActive(item.path)
-                  }">
-                    <component :is="item.icon" class="w-5 h-5"/>
-                    <span>{{ item.label }}</span>
-                  </router-link>
-                </li>
-
-                <!-- 带子菜单的菜单项 -->
-                <li v-else>
-                  <details :open="isParentActive(item)">
-                    <summary>
-                      <component :is="item.icon" class="w-5 h-5"/>
-                      <span>{{ item.label }}</span>
-                    </summary>
-                    <ul>
-                      <li v-for="child in item.children" :key="child.key">
-                        <router-link :to="child.path" :class="[
-                          {
-                            'bg-primary text-primary-content': isPathActive(child.path)
-                          }
-                        ]">
-                          <component :is="child.icon" class="w-4 h-4"/>
-                          <span>{{ child.label }}</span>
-                        </router-link>
-                      </li>
-                    </ul>
-                  </details>
-                </li>
-              </template>
+      <!-- Main Content Area -->
+      <main class="flex-1 p-4 lg:p-6 max-w-[1600px] w-full mx-auto">
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2" v-if="false">
+          <h1 class="text-2xl font-normal">{{ pageTitle }}</h1>
+          <div class="breadcrumbs text-sm text-base-content/60">
+            <ul>
+              <li v-for="(crumb, index) in breadcrumbs" :key="index">
+                <router-link v-if="crumb.path && index < breadcrumbs.length - 1" :to="crumb.path" class="hover:text-primary transition-colors">
+                  {{ crumb.name }}
+                </router-link>
+                <span v-else>{{ crumb.name }}</span>
+              </li>
             </ul>
-          </nav>
-        </aside>
-      </div>
+          </div>
+          <!-- Right side actions can go here -->
+        </div>
+
+        <!-- Content -->
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <div :key="$route.path" class="w-full">
+              <component :is="Component" />
+            </div>
+          </transition>
+        </router-view>
+      </main>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="drawer-side z-40">
+      <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+      <aside class="bg-base-100 min-h-screen w-64 flex flex-col border-r border-base-200">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-base-200">
+          <a href="/" class="flex items-center gap-3 text-xl font-normal text-primary tracking-wide">
+            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <ChatBubbleLeftRightIcon class="w-5 h-5" />
+            </div>
+            GooseForum
+          </a>
+        </div>
+        
+        <!-- Menu -->
+        <div class="flex-1 overflow-y-auto py-4 px-3">
+          <SidebarMenu :menu-items="menuItems" />
+        </div>
+        
+        <!-- User Profile -->
+        <div class="p-4 border-t border-base-200 bg-base-100">
+          <div class="dropdown dropdown-top w-full">
+            <div tabindex="0" role="button" class="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors w-full">
+              <div class="avatar">
+                <div class="w-10 h-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                  <img :src="userStore.user?.avatar || '/static/pic/default-avatar.webp'" :alt="userStore.user?.username" />
+                </div>
+              </div>
+              <div class="flex-1 text-left overflow-hidden">
+                <div class="font-normal truncate">{{ userStore.user?.username || 'User' }}</div>
+                <div class="text-xs text-base-content/60 truncate">Administrator</div>
+              </div>
+              <ChevronDownIcon class="h-4 w-4 opacity-50" />
+            </div>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-full mb-2 border border-base-200">
+              <li><a href="/profile/articles">个人中心</a></li>
+              <li><a href="/profile/settings">账户设置</a></li>
+              <li class="mt-1 border-t border-base-200"></li>
+              <li><a @click="logout" class="text-error">退出登录</a></li>
+            </ul>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type {Component} from 'vue'
-import {computed, onMounted, ref} from 'vue'
-import {useRoute, useRouter} from 'vue-router'
-import {useAuthStore} from '../stores/auth.ts'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@admin/stores/auth.ts'
 import {
-  BookOpenIcon,
-  CogIcon,
-  DocumentDuplicateIcon,
-  DocumentTextIcon,
-  FolderIcon,
-  GiftIcon,
-  GlobeAltIcon,
-  HomeIcon,
-  LinkIcon,
-  ShieldCheckIcon,
-  TagIcon,
-  TicketIcon,
-  UsersIcon,
-  DocumentMinusIcon,
-  Cog6ToothIcon,
+  Bars3Icon,
+  MagnifyingGlassIcon,
+  SunIcon,
+  MoonIcon,
+  ChevronDownIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/vue/24/outline'
-
-// 菜单项类型定义
-interface MenuItem {
-  key: string
-  label: string
-  path?: string
-  icon: Component
-  children?: MenuItem[]
-}
-
-interface MenuItemResult {
-  item: MenuItem
-  parent: MenuItem | null
-}
+import SidebarMenu from './components/SidebarMenu.vue'
+import { menuItems, type MenuItemResult } from '@/admin/utils/menuConfig'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useAuthStore()
 
-
-// 路径匹配函数 - 精确匹配
-const isPathActive = (itemPath: string) => {
-  if (!itemPath) return false
-  const currentPath = route.path.replace(/\/$/, '') || '/'
-  const targetPath = itemPath.replace(/\/$/, '') || '/'
-  return currentPath === targetPath
-}
-
-// 判断父级菜单是否激活（子菜单中有激活项）
-const isParentActive = (parentItem: MenuItem) => {
-  if (!parentItem.children) return false
-  return parentItem.children.some((child: MenuItem) => child.path && isPathActive(child.path))
-}
-
-
-// 菜单项
-const menuItems = ref<MenuItem[]>([
-  {
-    key: 'dashboard',
-    label: '仪表盘',
-    path: '/admin',
-    icon: HomeIcon
-  },
-  {
-    key: 'users',
-    label: '用户管理',
-    path: '/admin/users',
-    icon: UsersIcon
-  },
-  {
-    key: 'roles',
-    label: '角色管理',
-    path: '/admin/roles',
-    icon: ShieldCheckIcon
-  },
-  {
-    key: 'posts',
-    label: '帖子管理',
-    path: '/admin/posts',
-    icon: DocumentTextIcon
-  },
-  {
-    key: 'categories',
-    label: '分类管理',
-    path: '/admin/categories',
-    icon: TagIcon
-  },
-  {
-    key: 'friend-links',
-    label: '友情链接',
-    path: '/admin/friend-links',
-    icon: LinkIcon
-  },
-  {
-    key: 'footer-links',
-    label: '页脚管理',
-    path: '/admin/footer-links',
-    icon: DocumentMinusIcon
-  },
-  {
-    key: 'sponsors',
-    label: '赞助管理',
-    path: '/admin/sponsors',
-    icon: GiftIcon
-  },
-  {
-    key: 'tickets',
-    label: '工单管理',
-    icon: TicketIcon,
-    path: '/admin/tickets/view',
-  },
-  {
-    key: 'docs',
-    label: '文档管理',
-    icon: FolderIcon,
-    children: [
-      {
-        key: 'docs-projects',
-        label: '项目管理',
-        path: '/admin/docs/projects',
-        icon: BookOpenIcon
-      },
-      {
-        key: 'docs-versions',
-        label: '版本管理',
-        path: '/admin/docs/versions',
-        icon: DocumentDuplicateIcon
-      },
-      {
-        key: 'docs-contents',
-        label: '内容管理',
-        path: '/admin/docs/contents',
-        icon: DocumentTextIcon
-      }
-    ]
-  },
-  {
-    key: 'web-settings',
-    label: '网页设置',
-    path: '/admin/web-settings',
-    icon: GlobeAltIcon
-  },
-  {
-    key: 'site-settings',
-    label: '站点设置',
-    path: '/admin/site-settings',
-    icon: Cog6ToothIcon
-  },
-])
+const drawerToggle = ref<HTMLInputElement | null>(null)
 
 // 查找当前菜单项（支持嵌套菜单）
 const findCurrentMenuItem = (path: string): MenuItemResult | null => {
-  for (const item of menuItems.value) {
+  for (const item of menuItems) {
     if (item.path === path) {
       return {item, parent: null}
     }
@@ -334,6 +197,15 @@ const logout = async () => {
   router.push('/admin/login')
 }
 
+// 监听路由变化，移动端自动关闭抽屉
+watch(
+  () => route.path,
+  () => {
+    if (drawerToggle.value && window.innerWidth < 1024) {
+      drawerToggle.value.checked = false
+    }
+  }
+)
 
 // 组件挂载时初始化
 onMounted(() => {
@@ -347,5 +219,7 @@ onMounted(() => {
     }
   }
 })
-
 </script>
+
+<style scoped>
+</style>

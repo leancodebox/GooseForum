@@ -20,9 +20,7 @@
           <div class="flex justify-between items-center mb-3">
             <h2 class="card-title text-lg font-normal">HTML内容列表</h2>
             <button @click="addPItem" class="btn btn-success btn-xs">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
+              <PlusIcon class="w-3 h-3" />
               添加HTML项
             </button>
           </div>
@@ -40,9 +38,7 @@
                    <div class="card-body p-3">
                      <div class="flex justify-between items-center gap-2">
                        <div class="cursor-move text-base-content/60">
-                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                           <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
-                         </svg>
+                         <Bars3Icon class="w-4 h-4" />
                        </div>
                        <input
                          v-model="htmlItem.content"
@@ -74,9 +70,7 @@
           <div class="flex justify-between items-center mb-3">
             <h2 class="card-title text-lg font-normal">链接分组</h2>
             <button @click="addGroup" class="btn btn-success btn-xs">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
+              <PlusIcon class="w-3 h-3" />
               添加分组
             </button>
           </div>
@@ -94,11 +88,9 @@
                   <div class="card-body p-3">
                     <div class="flex justify-between items-center mb-2">
                       <div class="flex items-center gap-2 flex-1">
-                        <div class="cursor-move text-base-content/60">
-                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
-                          </svg>
-                        </div>
+                      <div class="cursor-move text-base-content/60">
+                        <Bars3Icon class="w-4 h-4" />
+                      </div>
                         <input
                           v-model="group.name"
                           placeholder="分组名称"
@@ -124,9 +116,7 @@
                         <template #item="{ element: child, index: childIndex }">
                           <div class="flex gap-2 items-center">
                             <div class="cursor-move text-base-content/40">
-                              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 14a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>
-                              </svg>
+                              <Bars3Icon class="w-3 h-3" />
                             </div>
                             <input
                               v-model="child.name"
@@ -139,13 +129,11 @@
                               class="input input-bordered input-xs flex-1"
                             />
                             <button
-                              @click="removeChild(groupIndex, childIndex)"
-                              class="btn btn-error btn-xs"
-                            >
-                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                              </svg>
-                            </button>
+                            @click="removeChild(groupIndex, childIndex)"
+                            class="btn btn-error btn-xs"
+                          >
+                            <XMarkIcon class="w-3 h-3" />
+                          </button>
                           </div>
                         </template>
                       </draggable>
@@ -153,9 +141,7 @@
                         @click="addChild(groupIndex)"
                         class="btn btn-success btn-xs w-full"
                       >
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
+                        <PlusIcon class="w-3 h-3" />
                         添加链接
                       </button>
                     </div>
@@ -176,8 +162,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getFooterLinks, saveFooterLinks, type FooterConfig } from '../utils/adminService'
+import { getFooterLinks, saveFooterLinks, type FooterConfig } from '@admin/utils/adminService'
 import draggable from 'vuedraggable'
+import { PlusIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
 
 const loading = ref(false)
 const footerConfig = ref<FooterConfig>({

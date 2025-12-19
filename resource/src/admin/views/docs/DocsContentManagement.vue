@@ -241,7 +241,7 @@
         <form method="dialog">
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
-        <h3 class="font-bold text-lg mb-4">{{ isEditing ? '编辑内容' : '新建内容' }}</h3>
+        <h3 class="font-normal text-lg mb-4">{{ isEditing ? '编辑内容' : '新建内容' }}</h3>
 
         <div class="space-y-4">
           <!-- 项目选择 -->
@@ -382,7 +382,7 @@
         </form>
         <div v-if="viewingContent">
           <div class="flex items-center gap-2 mb-4">
-            <h3 class="font-bold text-lg">{{ viewingContent.title }}</h3>
+            <h3 class="font-normal text-lg">{{ viewingContent.title }}</h3>
             <span class="badge badge-sm" :class="getStatusClass(viewingContent.isPublished)">
               {{ getStatusText(viewingContent.isPublished) }}
             </span>
@@ -422,7 +422,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon
 } from '@heroicons/vue/24/outline';
-import { DocsContentService, DocsProjectService } from '../../utils/docsService';
+import { DocsContentService, DocsProjectService } from '@admin/utils/docsService';
 import type {
   DocsContentItem,
   DocsContentListReq,
@@ -430,10 +430,10 @@ import type {
   DocsContentUpdateReq,
   DocsVersionItem,
   DocsProjectItem
-} from '../../utils/docsInterfaces';
-import { CONTENT_STATUS_OPTIONS } from '../../utils/docsInterfaces';
-import { formatDate } from '../../utils/dateUtils';
-import { notification } from '../../../utils/notification';
+} from '@admin/utils/docsInterfaces';
+import { CONTENT_STATUS_OPTIONS } from '@admin/utils/docsInterfaces';
+import { formatDate } from '@admin/utils/dateUtils';
+import { notification } from '@admin/utils/notification.ts';
 
 // 响应式数据
 const loading = ref(false);

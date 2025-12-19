@@ -1,0 +1,56 @@
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "@tailwindcss/typography";
+@plugin "@iconify/tailwind4";
+
+@layer components {
+  /* 自定义滚动条样式 */
+  .scrollbar-ultra-thin {
+    scrollbar-width: thin;
+    &::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: oklch(var(--b3));
+      border-radius: 20px;
+    }
+  }
+
+  /* 侧边栏展开/折叠样式 */
+  .is-drawer-open {
+    width: 20rem; /* w-80 */
+  }
+
+  .is-drawer-close {
+    width: 5rem; /* w-20 */
+    
+    /* 隐藏文本 */
+    .menu-text, 
+    summary::after { /* 隐藏 details 默认箭头 */
+      display: none;
+      opacity: 0;
+    }
+
+    /* 菜单项居中 */
+    .menu li > a, 
+    .menu li > details > summary {
+      padding-left: 0;
+      padding-right: 0;
+      justify-content: center;
+    }
+
+    /* 隐藏子菜单 */
+    .menu li > details[open] > ul {
+      display: none;
+    }
+    
+    /* 折叠状态下 details 箭头处理 (DaisyUI 默认用伪元素) */
+    .menu li > details > summary::after {
+      display: none;
+    }
+  }
+}

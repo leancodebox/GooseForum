@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {onMounted, reactive, ref} from 'vue'
 import {PlusIcon, PencilIcon, TrashIcon} from '@heroicons/vue/24/outline'
-import {getPermissionList, getRoleDel, getRoleList, getRoleSave} from '../utils/adminService'
-import type {UserRole, Permissions, Label} from '../utils/adminInterfaces'
+import {getPermissionList, getRoleDel, getRoleList, getRoleSave} from '@admin/utils/adminService'
+import type {UserRole, Permissions, Label} from '@admin/utils/adminInterfaces'
 
 // 响应式数据
 const roles = ref<UserRole[]>([])

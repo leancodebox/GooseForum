@@ -309,14 +309,14 @@
 
 <script setup lang="ts">
 import {computed, onMounted, reactive, ref} from 'vue';
-import DocsProjectService from '../../utils/docsService';
+import DocsProjectService from '@admin/utils/docsService';
 import type {
   DocsProjectCreateReq,
   DocsProjectItem,
   DocsProjectListReq,
   DocsProjectUpdateReq
-} from '../../utils/docsInterfaces';
-import {PROJECT_STATUS_OPTIONS, ProjectStatus, PUBLIC_STATUS_OPTIONS, PublicStatus} from '../../utils/docsInterfaces';
+} from '@admin/utils/docsInterfaces';
+import {PROJECT_STATUS_OPTIONS, ProjectStatus, PUBLIC_STATUS_OPTIONS, PublicStatus} from '@admin/utils/docsInterfaces';
 import {
   ArrowPathIcon,
   Bars3Icon,
@@ -328,7 +328,8 @@ import {
   MagnifyingGlassIcon,
   PencilIcon,
   PlusIcon,
-  TrashIcon
+  TrashIcon,
+  EllipsisVerticalIcon
 } from '@heroicons/vue/24/outline';
 
 // 响应式数据

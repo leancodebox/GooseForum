@@ -100,6 +100,22 @@ export function applySheetList(page = 1, pageSize = 10): Promise<Result<PageData
     })
 }
 
+// 获取验证码
+export function getCaptcha(): Promise<Result<any>> {
+    return axiosInstance.get('/api/get-captcha');
+}
+
+// 图片上传
+export function uploadImage(formData: FormData): Promise<Result<any>> {
+    return axiosInstance.post('/file/img-upload', formData, {
+        baseURL: '/',
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+}
+
+
 
 export function getFriendLinks(): Promise<Result<FriendLinksGroup[]>> {
     return axiosInstance.get('api/admin/friend-links')

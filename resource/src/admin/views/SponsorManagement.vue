@@ -6,11 +6,9 @@
       <div class="flex gap-3">
         <button
           @click="addUserSponsor"
-          class="btn btn-secondary btn-sm"
+          class="btn btn-primary btn-sm"
         >
-          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-          </svg>
+          <PlusIcon class="w-4 h-4 mr-1" />
           添加用户赞助
         </button>
         <button
@@ -19,9 +17,7 @@
           :class="{ 'loading': saving }"
           :disabled="saving"
         >
-          <svg v-if="!saving" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
+          <CheckIcon v-if="!saving" class="w-4 h-4 mr-1" />
           {{ saving ? '保存中...' : '保存' }}
         </button>
       </div>
@@ -35,7 +31,7 @@
         <div class="space-y-4">
           <div v-for="(level, levelKey) in sponsorsData.sponsors" :key="levelKey" class="border border-gray-200 rounded-lg p-4">
             <div class="flex justify-between items-center mb-3">
-              <h3 class="text-md font-semibold text-gray-700">{{ getLevelName(levelKey) }}</h3>
+              <h3 class="text-md font-normal text-base-content">{{ getLevelName(levelKey) }}</h3>
               <div class="flex gap-2">
                 <button
                   @click="addSponsorToLevel(levelKey)"
@@ -53,22 +49,18 @@
               class="space-y-2"
             >
               <template #item="{ element: sponsor, index }">
-                <div class="bg-gray-50 p-3 rounded border flex items-center justify-between hover:bg-gray-100 transition-colors">
+                <div class="bg-base-200/50 p-3 rounded border border-base-300 flex items-center justify-between hover:bg-base-200 transition-colors">
                   <div class="flex items-center space-x-3">
-                    <div class="cursor-move text-gray-400">
-                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
-                      </svg>
+                    <div class="cursor-move text-base-content/40">
+                      <Bars3Icon class="w-4 h-4" />
                     </div>
                     <img v-if="sponsor.logo" :src="sponsor.logo" :alt="sponsor.name" class="w-8 h-8 rounded object-cover">
-                    <div class="w-8 h-8 bg-gray-300 rounded flex items-center justify-center" v-else>
-                      <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                      </svg>
+                    <div class="w-8 h-8 bg-base-300 rounded flex items-center justify-center" v-else>
+                      <PhotoIcon class="w-4 h-4 text-base-content/50" />
                     </div>
                     <div>
-                      <div class="font-medium text-gray-900">{{ sponsor.name || '未命名' }}</div>
-                      <div class="text-sm text-gray-500">{{ sponsor.info || '暂无描述' }}</div>
+                      <div class="font-medium text-base-content">{{ sponsor.name || '未命名' }}</div>
+                      <div class="text-sm text-base-content/60">{{ sponsor.info || '暂无描述' }}</div>
                       <div class="flex flex-wrap gap-1 mt-1">
                         <span v-for="tag in sponsor.tag" :key="tag" class="badge badge-outline badge-xs">{{ tag }}</span>
                       </div>
@@ -115,15 +107,11 @@
             <div class="bg-gray-50 p-3 rounded border flex items-center justify-between hover:bg-gray-100 transition-colors">
               <div class="flex items-center space-x-3">
                 <div class="cursor-move text-gray-400">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
-                  </svg>
+                  <Bars3Icon class="w-4 h-4" />
                 </div>
                 <img v-if="user.icon" :src="user.icon" :alt="user.name" class="w-8 h-8 rounded-full object-cover">
                 <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center" v-else>
-                  <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                  </svg>
+                  <UserIcon class="w-4 h-4 text-gray-500" />
                 </div>
                 <div>
                   <div class="font-medium text-gray-900">{{ user.name || '匿名用户' }}</div>
@@ -148,7 +136,7 @@
           </template>
         </draggable>
 
-        <div v-if="sponsorsData.users.length === 0" class="text-center py-8 text-gray-500">
+        <div v-if="sponsorsData.users.length === 0" class="text-center py-8 text-base-content/60">
           暂无用户赞助记录，点击上方按钮添加
         </div>
       </div>
@@ -157,7 +145,7 @@
     <!-- 编辑赞助商模态框 -->
     <div class="modal" :class="{ 'modal-open': showSponsorModal }">
       <div class="modal-box w-11/12 max-w-2xl">
-        <h3 class="font-bold text-lg mb-4">{{ editingSponsorIndex === -1 ? '添加' : '编辑' }}赞助商</h3>
+        <h3 class="font-normal text-lg mb-4">{{ editingSponsorIndex === -1 ? '添加' : '编辑' }}赞助商</h3>
 
         <div class="space-y-4">
           <div class="form-control">
@@ -251,7 +239,7 @@
     <!-- 编辑用户赞助模态框 -->
     <div class="modal" :class="{ 'modal-open': showUserModal }">
       <div class="modal-box w-11/12 max-w-2xl">
-        <h3 class="font-bold text-lg mb-4">{{ editingUserIndex === -1 ? '添加' : '编辑' }}用户赞助</h3>
+        <h3 class="font-normal text-lg mb-4">{{ editingUserIndex === -1 ? '添加' : '编辑' }}用户赞助</h3>
 
         <div class="space-y-4">
           <div class="form-control">
@@ -334,9 +322,10 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import draggable from 'vuedraggable'
-import { getSponsors, saveSponsors } from '../utils/adminService'
-import type { SponsorsConfig, SponsorItem, UserSponsor } from '../utils/adminInterfaces'
-import {uploadImage as uploadImageApi} from "@/utils/gooseForumService.ts";
+import { PlusIcon, CheckIcon, Bars3Icon, PhotoIcon, UserIcon } from '@heroicons/vue/24/outline'
+import { getSponsors, saveSponsors } from '@admin/utils/adminService'
+import type { SponsorsConfig, SponsorItem, UserSponsor } from '@admin/utils/adminInterfaces'
+import {uploadImage as uploadImageApi} from "@admin/utils/adminService";
 // 响应式数据
 const sponsorsData = reactive<SponsorsConfig>({
   sponsors: {

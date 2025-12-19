@@ -131,10 +131,7 @@
                 <!-- 小屏幕显示下拉菜单 -->
                 <div class="dropdown dropdown-end md:hidden">
                   <div tabindex="0" role="button" class="btn btn-xs btn-ghost">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 5v.01M12 12v.01M12 19v.01"></path>
-                    </svg>
+                    <EllipsisVerticalIcon class="w-3 h-3" />
                   </div>
                   <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32">
                     <li><a @click="viewSheet(sheet)">查看详情</a></li>
@@ -306,8 +303,8 @@ import {
   DocumentTextIcon,
   EyeIcon
 } from '@heroicons/vue/24/outline'
-import {applySheetList} from '../utils/adminService'
-import type {ApplySheet, PageData, Result} from '../utils/adminInterfaces'
+import {applySheetList} from '@admin/utils/adminService'
+import type {ApplySheet, PageData, Result} from '@admin/utils/adminInterfaces'
 
 // 响应式数据
 const loading = ref(false)
@@ -339,7 +336,7 @@ const loadApplySheets = async () => {
       applySheets.value = response.result.list
       total.value = response.result.total
     } else {
-      console.error('加载工单列表失败:', response.message)
+      console.error('加载工单列表失败:', response.msg)
     }
   } catch (error) {
     console.error('加载工单列表出错:', error)

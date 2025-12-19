@@ -192,7 +192,7 @@ import {
   BellIcon,
   PaperAirplaneIcon
 } from '@heroicons/vue/24/outline'
-import { getMailSettings, saveMailSettings, testMailConnection, type MailSettingsConfig } from '../../utils/adminService'
+import { getMailSettings, saveMailSettings, testMailConnection, type MailSettingsConfig } from '@admin/utils/adminService'
 
 // 设置数据
 const settings = ref({

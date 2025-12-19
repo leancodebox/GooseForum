@@ -113,7 +113,7 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
 import {ArrowPathIcon, BellIcon, CheckCircleIcon, CheckIcon, XCircleIcon} from '@heroicons/vue/24/outline'
-import {type AnnouncementConfig, getAnnouncement, saveAnnouncement} from '../../utils/adminService'
+import {type AnnouncementConfig, getAnnouncement, saveAnnouncement} from '@admin/utils/adminService'
 
 // 设置数据
 const settings = ref({

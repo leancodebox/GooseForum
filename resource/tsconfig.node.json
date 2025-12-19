@@ -6,10 +6,12 @@
     "cypress.config.*",
     "nightwatch.conf.*",
     "playwright.config.*",
-    "eslint.config.*"
+    "eslint.config.*",
+    "tailwind.admin-v2.config.ts"
   ],
   "compilerOptions": {
     "noEmit": true,
+    "allowJs": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
 
     "module": "ESNext",

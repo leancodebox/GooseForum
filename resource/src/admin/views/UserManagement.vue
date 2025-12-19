@@ -141,79 +141,77 @@
       </div>
     </div>
 
+    <!-- 用户编辑/创建模态框 -->
+    <dialog ref="userModal" class="modal">
+      <div class="modal-box w-11/12 max-w-2xl">
+        <h3 class="font-normal text-lg mb-4">{{ isEditing ? '编辑用户' : '添加用户' }}</h3>
 
-  </div>
+        <form @submit.prevent="saveUser" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="floating-label">
+                <span class="label">用户名</span>
+                <input v-model="userForm.username" placeholder="username" type="text" class="input" required disabled />
+              </label>
+            </div>
 
-  <!-- 用户编辑/创建模态框 -->
-  <dialog ref="userModal" class="modal">
-    <div class="modal-box w-11/12 max-w-2xl">
-      <h3 class="font-normal text-lg mb-4">{{ isEditing ? '编辑用户' : '添加用户' }}</h3>
+            <div class="form-control">
+              <label class="floating-label">
+                <span class="label">邮箱</span>
+                <input v-model="userForm.email" placeholder="email@example.com" type="text" class="input" required
+                  disabled />
+              </label>
+            </div>
 
-      <form @submit.prevent="saveUser" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="form-control">
-            <label class="floating-label">
-              <span class="label">用户名</span>
-              <input v-model="userForm.username" placeholder="username" type="text" class="input" required disabled />
-            </label>
+            <div class="form-control" v-if="!isEditing">
+              <label class="label">
+                <span class="label-text">密码 *</span>
+              </label>
+              <input v-model="userForm.password" type="password" class="input input-bordered" :required="!isEditing" />
+            </div>
+
+            <div class="form-control">
+              <label class="label pr-4 p-2">
+                <span class="label-text">封禁:</span>
+              </label>
+              <input v-model="userForm.status" type="checkbox" class="toggle toggle-error"
+               :true-value="1"
+              :false-value="0"/>
+            </div>
+
+            <div class="form-control">
+              <label class="label pr-4 p-2">
+                <span class="label-text">验证:</span>
+              </label>
+              <input v-model="userForm.validate" type="checkbox" class="toggle toggle-success" :true-value="1"
+              :false-value="0"/>
+            </div>
+            <div class="form-control">
+              <label class="select">
+                <span class="label">角色</span>
+                <select v-model="userForm.roleId">
+                  <option >无</option>
+
+                  <option :value="item.value" v-for="item in roleOption">{{item.name}}</option>
+                </select>
+              </label>
+            </div>
+
           </div>
 
-          <div class="form-control">
-            <label class="floating-label">
-              <span class="label">邮箱</span>
-              <input v-model="userForm.email" placeholder="email@example.com" type="text" class="input" required
-                disabled />
-            </label>
+          <div class="modal-action">
+            <button type="button" class="btn" @click="closeModal">取消</button>
+            <button type="submit" class="btn btn-primary" :disabled="loading">
+              {{ loading ? '保存中...' : '保存' }}
+            </button>
           </div>
-
-          <div class="form-control" v-if="!isEditing">
-            <label class="label">
-              <span class="label-text">密码 *</span>
-            </label>
-            <input v-model="userForm.password" type="password" class="input input-bordered" :required="!isEditing" />
-          </div>
-
-          <div class="form-control">
-            <label class="label pr-4 p-2">
-              <span class="label-text">封禁:</span>
-            </label>
-            <input v-model="userForm.status" type="checkbox" class="toggle toggle-error"
-             :true-value="1"
-            :false-value="0"/>
-          </div>
-
-          <div class="form-control">
-            <label class="label pr-4 p-2">
-              <span class="label-text">验证:</span>
-            </label>
-            <input v-model="userForm.validate" type="checkbox" class="toggle toggle-success" :true-value="1"
-            :false-value="0"/>
-          </div>
-          <div class="form-control">
-            <label class="select">
-              <span class="label">角色</span>
-              <select v-model="userForm.roleId">
-                <option >无</option>
-
-                <option :value="item.value" v-for="item in roleOption">{{item.name}}</option>
-              </select>
-            </label>
-          </div>
-
-        </div>
-
-        <div class="modal-action">
-          <button type="button" class="btn" @click="closeModal">取消</button>
-          <button type="submit" class="btn btn-primary" :disabled="loading">
-            {{ loading ? '保存中...' : '保存' }}
-          </button>
-        </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="closeModal">close</button>
       </form>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-      <button @click="closeModal">close</button>
-    </form>
-  </dialog>
+    </dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -227,12 +225,12 @@ import {
   CheckCircleIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline'
-import { api } from '../utils/axiosInstance'
-import { editUser, getAllRoleItem, getUserList } from '../utils/adminService.ts'
+import { api } from '@admin/utils/axiosInstance'
+import { editUser, getAllRoleItem, getUserList } from '@admin/utils/adminService.ts'
 import type {
   Label,
   User,
-} from '../utils/adminInterfaces.ts';
+} from '@admin/utils/adminInterfaces.ts';
 
 // 响应式数据
 const users = ref<User[]>([])

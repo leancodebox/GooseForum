@@ -554,7 +554,7 @@ import {
   CheckCircleIcon,
   XCircleIcon
 } from '@heroicons/vue/24/outline'
-import { api } from '../utils/axiosInstance'
+import { api } from '@admin/utils/axiosInstance'
 
 // 设置数据
 const settings = ref({

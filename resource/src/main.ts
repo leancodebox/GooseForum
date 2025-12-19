@@ -11,18 +11,18 @@ import { processImageFile } from './utils/imageUtils'
 import * as api from './utils/gooseForumService'
 
 // Expose libraries and utils to window
-window.Alpine = Alpine
-window.axios = axios
-window.Cropper = Cropper
-window.MermaidUtils = { renderMermaidDiagrams }
-window.ImageUtils = { processImageFile }
-window.api = api
+(window as any).Alpine = Alpine;
+(window as any).axios = axios;
+(window as any).Cropper = Cropper;
+(window as any).MermaidUtils = { renderMermaidDiagrams };
+(window as any).ImageUtils = { processImageFile };
+(window as any).api = api;
 
 // Initialize Anchor Links
 function initAnchorLinks() {
     const headings = document.querySelectorAll('.prose h1[id], .prose h2[id], .prose h3[id], .prose h4[id], .prose h5[id], .prose h6[id]')
     
-    headings.forEach(heading => {
+    headings.forEach((heading: any) => {
         if (heading.querySelector('.anchor-link')) return; // Avoid duplicates
 
         const anchor = document.createElement('a')
@@ -49,7 +49,7 @@ function initAnchorLinks() {
 }
 
 // Expose initAnchorLinks if needed, or run on load
-window.initAnchorLinks = initAnchorLinks
+(window as any).initAnchorLinks = initAnchorLinks
 
 // Start Alpine
 Alpine.start()

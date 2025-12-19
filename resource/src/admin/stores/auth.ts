@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia'
 import {computed, ref} from 'vue'
-import {axiosInstance} from '../utils/axiosInstance'
-import {getUserInfo} from '../utils/adminService'
+import {axiosInstance} from '@admin/utils/axiosInstance'
+import {getUserInfo} from '@admin/utils/adminService'
 import type {Result} from "@/admin/utils/adminInterfaces.ts";
 
 export interface User {

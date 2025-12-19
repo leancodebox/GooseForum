@@ -117,8 +117,8 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
 import {PhotoIcon} from '@heroicons/vue/24/outline'
-import {getSiteSettings, saveSiteSettings, type SiteSettingsConfig} from '../../utils/adminService'
-import {uploadImage as uploadImageApi} from "@/utils/gooseForumService.ts";
+import {getSiteSettings, saveSiteSettings, type SiteSettingsConfig} from '@admin/utils/adminService'
+import {uploadImage as uploadImageApi} from "../../utils/adminService";
 
 // 本地数据状态
 const settings = ref<SiteSettingsConfig>({

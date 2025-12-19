@@ -134,7 +134,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '../stores/auth.ts'
+import { useAuthStore } from '@admin/stores/auth.ts'
 import {
   UserIcon,
   LockClosedIcon,
@@ -142,7 +142,7 @@ import {
   EyeSlashIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
-import { getCaptcha as getCaptchaApi} from '@/utils/gooseForumService.ts'
+import { getCaptcha as getCaptchaApi} from '@admin/utils/adminService'
 
 const router = useRouter()
 const route = useRoute()

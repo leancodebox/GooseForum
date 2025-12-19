@@ -1,10 +1,16 @@
-import type {PageData as GooseForumPageData, Result as GooseForumResult} from '@/utils/gooseForumInterfaces'
 
-export interface Result<T> extends GooseForumResult<T> {
 
+export interface Result<T>  {
+    code: 0 | 1; // 0 成功 1 失败
+    result: T;
+    msg: string;
 }
 
-export interface PageData<T> extends GooseForumPageData<T> {
+export interface PageData<T>  {
+    list: T[];
+    page: number
+    size: number
+    total: number
 }
 
 
