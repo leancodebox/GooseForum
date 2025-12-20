@@ -86,7 +86,7 @@
               <template #item="{ element: group, index: groupIndex }">
                 <div class="card bg-base-200 border border-base-300">
                   <div class="card-body p-3">
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="flex justify-between items-center mb-2 gap-2">
                       <div class="flex items-center gap-2 flex-1">
                       <div class="cursor-move text-base-content/60">
                         <Bars3Icon class="w-4 h-4" />

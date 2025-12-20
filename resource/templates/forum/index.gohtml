@@ -98,7 +98,7 @@
                     <h2 class="card-title font-normal">推荐文章</h2>
                     <div class="space-y-2">
                         {{range .RecommendedArticles}}
-                        <p><a href="/post/{{.Id}}"
+                        <p><a href="{{Url.PostDetail .Id}}"
                               class="text-sm hover:text-primary cursor-pointer">
                             • {{.Title}}</a></p>
                         {{end}}
@@ -111,9 +111,9 @@
                 <div class="card-body">
                     <h3 class="card-title text-lg mb-4 font-normal">🔗 快速链接</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <a href="/links" class="font-normal btn btn-outline btn-sm">友情链接</a>
-                        <a href="/sponsors" class="font-normal btn btn-outline btn-sm">赞助商</a>
-                        <a href="/about" class="font-normal btn btn-outline btn-sm">关于我们</a>
+                        <a href="{{Url.Links}}" class="font-normal btn btn-outline btn-sm">友情链接</a>
+                        <a href="{{Url.Sponsors}}" class="font-normal btn btn-outline btn-sm">赞助商</a>
+                        <a href="{{Url.About}}" class="font-normal btn btn-outline btn-sm">关于我们</a>
                     </div>
                 </div>
             </div>

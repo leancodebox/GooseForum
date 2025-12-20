@@ -62,6 +62,7 @@ func Render(c *gin.Context, name string, templateData map[string]any) {
 	templateData["Theme"] = GetTheme(c)
 	templateData["Footer"] = hotdataserve.GetFooterConfigCache()
 	templateData["SiteSetting"] = hotdataserve.GetSiteSettingsConfigCache()
+	templateData["Url"] = resource.URLHelper{}
 	if _, ok := templateData["PageMeta"]; !ok {
 		templateData["PageMeta"] = NewPageMetaBuilder().Build()
 	}
@@ -77,6 +78,7 @@ type TmplData struct {
 	Footer       pageConfig.FooterConfig
 	SiteSetting  pageConfig.SiteSettingsConfig
 	Data         map[string]any
+	Url          resource.URLHelper
 }
 
 func SafeRender(c *gin.Context, name string, data map[string]any) {
@@ -86,6 +88,7 @@ func SafeRender(c *gin.Context, name string, data map[string]any) {
 		Footer:       hotdataserve.GetFooterConfigCache(),
 		SiteSetting:  hotdataserve.GetSiteSettingsConfigCache(),
 		Data:         data,
+		Url:          resource.URLHelper{},
 	}
 	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, templateData); err != nil {
 		slog.Error("render template err", "err", err.Error())

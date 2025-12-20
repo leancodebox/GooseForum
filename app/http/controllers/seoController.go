@@ -10,6 +10,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
@@ -50,22 +51,22 @@ func RenderSitemapXml(c *gin.Context) {
 	var sitemaps []SitemapURL
 	for _, article := range list {
 		sitemaps = append(sitemaps, SitemapURL{
-			Loc:      fmt.Sprintf("%s/post/%d", host, article.Id),
+			Loc:      host + urlconfig.PostDetail(article.Id),
 			Lastmod:  article.UpdatedAt.Format(time.RFC3339),
 			Priority: 0.7,
 		})
 	}
 	sitemaps = append(sitemaps, []SitemapURL{
 		{
-			Loc:      host + "/post",
+			Loc:      host + urlconfig.Post(),
 			Priority: 0.8,
 		},
 		{
-			Loc:      host + "/links",
+			Loc:      host + urlconfig.Links(),
 			Priority: 0.8,
 		},
 		{
-			Loc:      host + "/",
+			Loc:      host + urlconfig.Home(),
 			Priority: 1,
 		}}...)
 

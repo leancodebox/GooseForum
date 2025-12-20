@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ const (
 
 func NotFound(c *gin.Context) {
 	if strings.Contains(c.GetHeader("Accept"), contentTypeHTML) {
-		c.Redirect(http.StatusTemporaryRedirect, "/")
+		c.Redirect(http.StatusTemporaryRedirect, urlconfig.Home())
 		return
 	}
 	c.JSON(http.StatusNotFound, component.DataMap{

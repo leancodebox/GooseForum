@@ -4,7 +4,7 @@
     performSearch() {
         const q = this.query.trim();
         if (q) {
-            window.location.href = '/search?q=' + encodeURIComponent(q);
+            window.location.href = '{{Url.Search}}?q=' + encodeURIComponent(q);
         }
     }
 }">
@@ -57,19 +57,19 @@
             {{$query := .Query}}
 
             {{if gt $currentPage 1}}
-            <a href="/search?q={{$query}}&page={{sub $currentPage 1}}" class="join-item btn btn-sm">«</a>
+            <a href="{{Url.Search}}?q={{$query}}&page={{sub $currentPage 1}}" class="join-item btn btn-sm">«</a>
             {{end}}
 
             {{range $page := .PageNumbers}}
             {{if eq $page $currentPage}}
             <button class="join-item btn btn-sm btn-active">{{$page}}</button>
             {{else}}
-            <a href="/search?q={{$query}}&page={{$page}}" class="join-item btn btn-sm">{{$page}}</a>
+            <a href="{{Url.Search}}?q={{$query}}&page={{$page}}" class="join-item btn btn-sm">{{$page}}</a>
             {{end}}
             {{end}}
 
             {{if lt $currentPage $totalPages}}
-            <a href="/search?q={{$query}}&page={{add $currentPage 1}}" class="join-item btn btn-sm">»</a>
+            <a href="{{Url.Search}}?q={{$query}}&page={{add $currentPage 1}}" class="join-item btn btn-sm">»</a>
             {{end}}
         </div>
     </div>
@@ -111,7 +111,7 @@
         const query = searchInput.value.trim();
 
         if (query) {
-            window.location.href = `/search?q=${encodeURIComponent(query)}`;
+            window.location.href = `{{Url.Search}}?q=${encodeURIComponent(query)}`;
         }
     }
 

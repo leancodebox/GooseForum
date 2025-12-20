@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/docs/docContents"
 	"github.com/leancodebox/GooseForum/app/models/docs/docProjects"
 	"github.com/leancodebox/GooseForum/app/models/docs/docVersions"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
@@ -284,8 +285,8 @@ func DocsContent(c *gin.Context) {
 
 	// 构建面包屑导航
 	breadcrumbs := []map[string]string{
-		{"title": "文档中心", "url": "/docs"},
-		{"title": project.Name, "url": fmt.Sprintf("/docs/%s", project.Slug)},
+		{"title": "文档中心", "url": urlconfig.Docs()},
+		{"title": project.Name, "url": urlconfig.DocsProject(project.Slug)},
 		{"title": content.Title, "url": ""},
 	}
 

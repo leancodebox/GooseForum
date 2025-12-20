@@ -16,6 +16,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
 )
 
@@ -25,6 +26,9 @@ var templates embed.FS
 func GetTemplates(globalFunc template.FuncMap) *template.Template {
 	tmpl := template.New("resource_v2").
 		Funcs(template.FuncMap{
+			"Url": func() URLHelper {
+				return URLHelper{}
+			},
 			"ContainsInt": func(s []int, v any) bool {
 				return slices.Contains(s, cast.ToInt(v))
 			},
@@ -390,3 +394,21 @@ func addAssetPreloadTag(sb *strings.Builder, assetFile string) {
 		// 其他资源类型暂不处理，避免不必要的预加载
 	}
 }
+
+type URLHelper struct{}
+
+func (u URLHelper) Home() string                   { return urlconfig.Home() }
+func (u URLHelper) Post() string                   { return urlconfig.Post() }
+func (u URLHelper) Docs() string                   { return urlconfig.Docs() }
+func (u URLHelper) Links() string                  { return urlconfig.Links() }
+func (u URLHelper) Sponsors() string               { return urlconfig.Sponsors() }
+func (u URLHelper) About() string                  { return urlconfig.About() }
+func (u URLHelper) Publish() string                { return urlconfig.Publish() }
+func (u URLHelper) Search() string                 { return urlconfig.Search() }
+func (u URLHelper) Register() string               { return urlconfig.Register() }
+func (u URLHelper) Login() string                  { return urlconfig.Login() }
+func (u URLHelper) PostDetail(id any) string       { return urlconfig.PostDetail(id) }
+func (u URLHelper) User(id any) string             { return urlconfig.User(id) }
+func (u URLHelper) DocsProject(slug any) string    { return urlconfig.DocsProject(slug) }
+func (u URLHelper) DocsContent(p, v, c any) string { return urlconfig.DocsContent(p, v, c) }
+func (u URLHelper) Rss() string                    { return urlconfig.Rss() }
