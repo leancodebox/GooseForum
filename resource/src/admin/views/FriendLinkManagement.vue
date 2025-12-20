@@ -3,7 +3,7 @@ import {onMounted, reactive, ref} from 'vue'
 import {getFriendLinks, saveFriendLinks} from "@/admin/utils/adminService.ts";
 import type {FriendLinksGroup} from "@/admin/utils/adminInterfaces.ts";
 import draggable from 'vuedraggable'
-import { Bars3Icon, PencilSquareIcon, TrashIcon, PhotoIcon } from '@heroicons/vue/24/outline'
+import { Bars3Icon, PencilSquareIcon, TrashIcon, LinkIcon } from '@heroicons/vue/24/outline'
 
 // 响应式数据
 const friendLinksGroups = ref<FriendLinksGroup[]>([])

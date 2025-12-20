@@ -109,8 +109,8 @@
               <ChevronDownIcon class="h-4 w-4 opacity-50" />
             </div>
             <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-full mb-2 border border-base-200">
-              <li><a href="/profile/articles">个人中心</a></li>
-              <li><a href="/profile/settings">账户设置</a></li>
+              <li><a href="/profile">个人中心</a></li>
+              <li><a href="/settings">账户设置</a></li>
               <li class="mt-1 border-t border-base-200"></li>
               <li><a @click="logout" class="text-error">退出登录</a></li>
             </ul>
