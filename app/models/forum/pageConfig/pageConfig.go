@@ -124,6 +124,7 @@ type SiteSettingsConfig struct {
 	SiteKeywords    string `json:"siteKeywords"`
 	SiteUrl         string `json:"siteUrl"`
 	SiteEmail       string `json:"siteEmail"`
+	ExternalLinks   string `json:"externalLinks,omitempty"`
 }
 
 // MailSettingsConfig 邮件设置配置

@@ -152,12 +152,13 @@ export const saveWebSettings = (settings: WebSettingsConfig): Promise<Result<any
 
 // 站点设置相关接口
 export interface SiteSettingsConfig {
-    siteName: string;
-    siteLogo: string;
-    siteDescription: string;
-    siteKeywords: string;
-    siteUrl: string;
-    siteEmail: string;
+    siteName?: string;
+    siteLogo?: string;
+    siteDescription?: string;
+    siteKeywords?: string;
+    siteUrl?: string;
+    siteEmail?: string;
+    externalLinks?: string
 }
 
 export const getSiteSettings = (): Promise<Result<SiteSettingsConfig>> => {
