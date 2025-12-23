@@ -1,4 +1,5 @@
-{{define "list_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="flex flex-col md:flex-row gap-6">
     <section class="flex-1">
         <h2 class="sr-only">文章列表</h2>
@@ -32,8 +33,7 @@
                             {{template "icon_filter_all"}}
                             全部
                         </span>
-                        {{$all := .FilterIds}}
-                        {{range .ArticleCategoryList}}
+                        {{range .Data.ArticleCategoryList}}
                         <span class="px-2 tab gap-1 cursor-pointer filter-tag" :class="{ 'tab-active': currentFilters.includes('{{.Value}}') }" @click="toggleFilter('{{.Value}}')">
                             <div class="status" :class="{ 'status-primary': currentFilters.includes('{{.Value}}') }"></div>
                             {{.Name}}
@@ -50,7 +50,7 @@
 
 
                 <!-- 文章列表 -->
-                {{template "article_list" .ArticleList}}
+                {{template "article_list" .Data.ArticleList}}
 
                 {{template "pagination" .}}
             </div>
@@ -65,20 +65,20 @@
                     <!-- 第一层水印 -->
                     <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-10">
                         <div class="text-7xl font-black text-gray-800 whitespace-nowrap animate-pulse">
-                            {{.ForumInfo.Title}}
+                            {{.Data.ForumInfo.Title}}
                         </div>
                     </div>
                     <!-- 第二层水印 -->
                     <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-5 translate-y-16">
                         <div class="text-5xl font-bold text-gray-500 whitespace-nowrap">
-                            {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}} ◆ {{.ForumInfo.Title}}
+                            {{.Data.ForumInfo.Title}} ◆ {{.Data.ForumInfo.Title}} ◆ {{.Data.ForumInfo.Title}}
                         </div>
                     </div>
 
                     <!-- 第三层水印 -->
                     <div class="absolute inset-0 flex items-center justify-center -rotate-12 opacity-3 -translate-y-16">
                         <div class="text-9xl font-black text-gray-700 whitespace-nowrap">
-                            {{.ForumInfo.Title}} ★ {{.ForumInfo.Title}}
+                            {{.Data.ForumInfo.Title}} ★ {{.Data.ForumInfo.Title}}
                         </div>
                     </div>
                 </div>
@@ -88,14 +88,14 @@
                     <div class="text-start mb-4">
                         <!-- 标题样式选项 1: 简约现代 -->
                         <h1 class="text-2xl font-medium text-primary mb-3 group cursor-pointer">
-                            {{.ForumInfo.Title}}
+                            {{.Data.ForumInfo.Title}}
                             <div class="h-0.5 bg-primary w-12 mt-2 transition-all duration-300 group-hover:w-20"></div>
                         </h1>
                         <p class="text-sm text-base-content/70 mb-3">
-                            {{.ForumInfo.Desc}}
+                            {{.Data.ForumInfo.Desc}}
                         </p>
                     </div>
-                    {{if not .ForumInfo.Independence}}
+                    {{if not .Data.ForumInfo.Independence}}
                     <!-- 社区统计 -->
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-2">
@@ -107,19 +107,19 @@
                     <div class="space-y-2 mb-1">
                         <div class="flex items-center justify-between">
                             <span class="text-xs text-base-content/70">注册用户</span>
-                            <span class="text-xs font-semibold text-primary">{{.Stats.UserCount}}</span>
+                            <span class="text-xs font-semibold text-primary">{{.Data.Stats.UserCount}}</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-xs text-base-content/70">文章总数</span>
-                            <span class="text-xs font-semibold text-secondary">{{.Stats.ArticleCount}}</span>
+                            <span class="text-xs font-semibold text-secondary">{{.Data.Stats.ArticleCount}}</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-xs text-base-content/70">评论总数</span>
-                            <span class="text-xs font-semibold text-accent">{{.Stats.Reply}}</span>
+                            <span class="text-xs font-semibold text-accent">{{.Data.Stats.Reply}}</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-xs text-base-content/70">友情链接</span>
-                            <span class="text-xs font-semibold text-info">{{.Stats.LinksCount}}</span>
+                            <span class="text-xs font-semibold text-info">{{.Data.Stats.LinksCount}}</span>
                         </div>
                     </div>
                     {{end}}
@@ -150,12 +150,12 @@
                         在我的后园，可以看见墙外有两株树，一株是枣树，还有一株也是枣树。</p>
                 </div>
             </div>
-            {{if .RecommendedArticles}}
+            {{if .Data.RecommendedArticles}}
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <h2 class="card-title font-normal">推荐文章</h2>
                     <div class="space-y-2">
-                        {{range .RecommendedArticles}}
+                        {{range .Data.RecommendedArticles}}
                         <div class="space-y-1">
                             <a href="/post/{{.Id}}" class="text-sm hover:text-primary cursor-pointer">
                                 • {{.Title}}
@@ -181,10 +181,7 @@
     </aside>
 </div>
 {{end}}
-{{define "list_script"}}
-<script>
-    // Alpine.js is now handling the filter logic via x-data in the HTML above.
-    // No additional script needed for filters.
-</script>
+
+{{define "script"}}
 {{end}}
-{{template "layout/main.gohtml" dict "Body" "list_content" "Script" "list_script" "Data" . "Entry" "src/main.js"}}
+

@@ -1,4 +1,5 @@
-{{define "links_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="flex flex-col md:flex-row gap-6">
     <!-- 左侧友情链接列表 -->
     <section class="flex-1">
@@ -23,7 +24,7 @@
                 </div>
 
                 <!-- 社区论坛 -->
-                {{range .FriendLinksGroup}}
+                {{range .Data.FriendLinksGroup}}
                 <div class="space-y-2">
                     <h2 class="text-2xl font-normal border-b border-base-300 pb-3 flex items-center">
                         {{if eq .Name `community`}}
@@ -171,7 +172,7 @@
                     <h2 class="card-title font-normal">链接统计</h2>
                     <div class="flex justify-between items-center">
                             <span class="text-sm text-base-content/70">总链接数</span>
-                            <span class="font-medium">{{.TotalCounter}}</span>
+                            <span class="font-medium">{{.Data.TotalCounter}}</span>
                     </div>
 
                     <!-- 分类统计 -->
@@ -182,12 +183,12 @@
                                 <span class="text-sm">社区论坛</span>
                             </div>
                             <div class="text-right">
-                                <div class="text-sm font-medium">{{.LinkStatisticsInfo.Community.Counter}}</div>
-                                <div class="text-xs text-base-content/60">{{.LinkStatisticsInfo.Community.Proportion}}%</div>
+                                <div class="text-sm font-medium">{{.Data.LinkStatisticsInfo.Community.Counter}}</div>
+                                <div class="text-xs text-base-content/60">{{.Data.LinkStatisticsInfo.Community.Proportion}}%</div>
                             </div>
                         </div>
                         <div class="w-full bg-base-300 rounded-full h-2">
-                            <div class="bg-blue-500 h-2 rounded-full" style="width: {{.LinkStatisticsInfo.Community.Proportion}}%"></div>
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: {{.Data.LinkStatisticsInfo.Community.Proportion}}%"></div>
                         </div>
 
                         <div class="flex items-center justify-between">
@@ -196,12 +197,12 @@
                                 <span class="text-sm">开发工具</span>
                             </div>
                             <div class="text-right">
-                                <div class="text-sm font-medium">{{.LinkStatisticsInfo.Tool.Counter}}</div>
-                                <div class="text-xs text-base-content/60">{{.LinkStatisticsInfo.Tool.Proportion}}%</div>
+                                <div class="text-sm font-medium">{{.Data.LinkStatisticsInfo.Tool.Counter}}</div>
+                                <div class="text-xs text-base-content/60">{{.Data.LinkStatisticsInfo.Tool.Proportion}}%</div>
                             </div>
                         </div>
                         <div class="w-full bg-base-300 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full" style="width: {{.LinkStatisticsInfo.Tool.Proportion}}%"></div>
+                            <div class="bg-green-500 h-2 rounded-full" style="width: {{.Data.LinkStatisticsInfo.Tool.Proportion}}%"></div>
                         </div>
 
                         <div class="flex items-center justify-between">
@@ -210,22 +211,22 @@
                                 <span class="text-sm">个人博客</span>
                             </div>
                             <div class="text-right">
-                                <div class="text-sm font-medium">{{.LinkStatisticsInfo.Blog.Counter}}</div>
-                                <div class="text-xs text-base-content/60">{{.LinkStatisticsInfo.Blog.Proportion}}%</div>
+                                <div class="text-sm font-medium">{{.Data.LinkStatisticsInfo.Blog.Counter}}</div>
+                                <div class="text-xs text-base-content/60">{{.Data.LinkStatisticsInfo.Blog.Proportion}}%</div>
                             </div>
                         </div>
                         <div class="w-full bg-base-300 rounded-full h-2">
-                            <div class="bg-purple-500 h-2 rounded-full" style="width: {{.LinkStatisticsInfo.Blog.Proportion}}%"></div>
+                            <div class="bg-purple-500 h-2 rounded-full" style="width: {{.Data.LinkStatisticsInfo.Blog.Proportion}}%"></div>
                         </div>
                     </div>
                 </div>
             </div>
-            {{if .RecommendedArticles}}
+            {{if .Data.RecommendedArticles}}
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <h2 class="card-title font-normal">推荐文章</h2>
                     <div class="space-y-2">
-                        {{range .RecommendedArticles}}
+                        {{range .Data.RecommendedArticles}}
                         <div class="space-y-1">
                             <a href="/post/{{.Id}}" class="text-sm hover:text-primary cursor-pointer">
                                 • {{.Title}}
@@ -241,7 +242,7 @@
 </div>
 {{end}}
 
-{{define "links_script"}}
+{{define "script"}}
 <script>
     function linkApplyHandler() {
         return {
@@ -288,5 +289,3 @@
     }
 </script>
 {{end}}
-
-{{template "layout/main.gohtml" dict "Body" "links_content" "Script" "links_script" "Data" . "Entry" "src/main.js"}}

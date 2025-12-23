@@ -29,7 +29,7 @@
             <!-- 面包屑导航 -->
             <div class="breadcrumbs flex-1 text-sm">
                 <ul>
-                    {{range $index, $breadcrumb := .Breadcrumbs}}
+                    {{range $index, $breadcrumb := .Data.Breadcrumbs}}
                     <li>
                         {{if .url}}
                         <a href="{{.url}}"
@@ -55,9 +55,9 @@
             <div class="p-2">
                 <!-- 项目信息 -->
                 <div class="min-w-0 flex-1 p-2">
-                    <h2 class="text-lg font-bold text-base-content mb-1 truncate">{{.Project.Name}}</h2>
-                    <p class="text-sm text-base-content/70 mb-2 line-clamp-2">{{.Project.Description}}</p>
-                    <div class="badge badge-primary badge-outline text-xs">{{.Version.Version}}</div>
+                    <h2 class="text-lg font-bold text-base-content mb-1 truncate">{{.Data.Project.Name}}</h2>
+                    <p class="text-sm text-base-content/70 mb-2 line-clamp-2">{{.Data.Project.Description}}</p>
+                    <div class="badge badge-primary badge-outline text-xs">{{.Data.Version.Version}}</div>
                 </div>
                 <hr class="my-2 border-gray-200">
                 <!-- 目录导航 -->
@@ -66,7 +66,7 @@
                         📋 目录
                     </h3>
                     <ul class="menu bg-base-100 rounded-box w-full p-0">
-                        {{template "renderDirectory" dict "Items" .Directory "Project" .Project "Version" .Version}}
+                        {{template "renderDirectory" dict "Items" .Data.Directory "Project" .Data.Project "Version" .Data.Version}}
                     </ul>
                 </div>
 
@@ -78,7 +78,7 @@
                     <div class="dropdown dropdown-top w-full">
                         <label tabindex="0"
                                class="flex items-center justify-between w-full px-3 py-2 bg-base-100 border border-base-300 rounded-lg text-sm font-medium hover:border-primary hover:text-primary transition-all duration-200 cursor-pointer">
-                            <span>{{.Version.Version}}</span>
+                            <span>{{.Data.Version.Version}}</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                       d="M19 9l-7 7-7-7"></path>
@@ -86,18 +86,18 @@
                         </label>
                         <ul tabindex="0"
                             class="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-lg border border-base-200 w-full mt-1">
-                            {{if .ProjectVersions}}
-                            {{range .ProjectVersions}}
-                            {{if eq .Version $.Version.Version}}
-                            <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}} (当前)</a>
+                            {{if .Data.ProjectVersions}}
+                            {{range .Data.ProjectVersions}}
+                            {{if eq .Version $.Data.Version.Version}}
+                            <li><a href="/docs/{{$.Data.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}} (当前)</a>
                             </li>
                             {{else}}
-                            <li><a href="/docs/{{$.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}}</a></li>
+                            <li><a href="/docs/{{$.Data.Project.Slug}}/{{.Version}}" class="text-sm">{{.Version}}</a></li>
                             {{end}}
                             {{end}}
                             {{else}}
-                            <li><a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
-                                   class="text-sm">{{.Version.Version}} (当前)</a></li>
+                            <li><a href="/docs/{{.Data.Project.Slug}}/{{.Data.Version.Version}}"
+                                   class="text-sm">{{.Data.Version.Version}} (当前)</a></li>
                             {{end}}
                         </ul>
                     </div>
@@ -109,7 +109,7 @@
                         🧭 快速导航
                     </h3>
                     <div class="space-y-2">
-                        <a href="/docs/{{.Project.Slug}}/{{.Version.Version}}"
+                        <a href="/docs/{{.Data.Project.Slug}}/{{.Data.Version.Version}}"
                            class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -117,7 +117,7 @@
                             </svg>
                             <span>返回版本目录</span>
                         </a>
-                        <a href="/docs/{{.Project.Slug}}"
+                        <a href="/docs/{{.Data.Project.Slug}}"
                            class="inline-flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-base-100 rounded-lg transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -151,7 +151,7 @@
             <div class="px-6 lg:px-8 xl:px-12 py-6 lg:py-8">
                 <!-- 文档标题 -->
                 <header class="mb-8">
-                    <h1 class="text-2xl lg:text-3xl xl:text-4xl font-bold text-base-content mb-4 leading-tight">{{.Content.Title}}</h1>
+                    <h1 class="text-2xl lg:text-3xl xl:text-4xl font-bold text-base-content mb-4 leading-tight">{{.Data.Content.Title}}</h1>
                     <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/60">
                         <div class="flex items-center gap-2 px-3 py-1.5 bg-base-100 border border-base-200 rounded-lg">
                             <svg class="w-4 h-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,16 +159,16 @@
                                       d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                             <span class="font-medium">创建时间</span>
-                            <span>{{.Content.CreatedAt.Format "2006-01-02 15:04"}}</span>
+                            <span>{{.Data.Content.CreatedAt.Format "2006-01-02 15:04"}}</span>
                         </div>
-                        {{if ne .Content.CreatedAt .Content.UpdatedAt}}
+                        {{if ne .Data.Content.CreatedAt .Data.Content.UpdatedAt}}
                         <div class="flex items-center gap-2 px-3 py-1.5 bg-base-100 border border-base-200 rounded-lg">
                             <svg class="w-4 h-4 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
                             <span class="font-medium">更新时间</span>
-                            <span>{{.Content.UpdatedAt.Format "2006-01-02 15:04"}}</span>
+                            <span>{{.Data.Content.UpdatedAt.Format "2006-01-02 15:04"}}</span>
                         </div>
                         {{end}}
                     </div>
@@ -176,7 +176,7 @@
 
                 <!-- 文档内容 -->
                 <article class="prose prose-lg max-w-none mb-12">
-                    {{.HTMLContent}}
+                    {{.Data.HTMLContent}}
                 </article>
 
                 <!-- 页面导航 -->

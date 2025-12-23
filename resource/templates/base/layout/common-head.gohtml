@@ -36,7 +36,7 @@
 {{if .ImageAlt}}<meta name="twitter:image:alt" content="{{.ImageAlt}}">{{end}}
 {{end}}
 <!-- 页面配置 -->
-{{if .Favicon}}<link rel="icon" href="{{.Favicon}}">{{end}}
+{{if .Favicon}}<link rel="icon" href="{{Asset .Favicon}}">{{end}}
 {{if .ThemeColor}}<meta name="theme-color" content="{{.ThemeColor}}">{{end}}
 <!-- 结构化数据 -->
 {{if .SchemaOrgJSON}}
@@ -46,6 +46,6 @@
 {{end}}
 {{end}}
 <!-- RSS 订阅 -->
-<link rel="alternate" type="application/rss+xml" title="GooseForum RSS Feed" href="{{Url.Rss}}"/>
+<link rel="alternate" type="application/rss+xml" title="GooseForum RSS Feed" href="{{.Url.Rss}}"/>
 <!-- 外部链接配置 -->
 {{if .SiteSetting.ExternalLinks}}{{SafeHTML .SiteSetting.ExternalLinks}}{{end}}

@@ -1,4 +1,5 @@
-{{define "error_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="hero min-h-[60vh]">
     <div class="hero-content text-center">
         <div class="max-w-md">
@@ -6,7 +7,7 @@
             <div class="mb-8 relative inline-block">
                 <!-- 背景装饰光晕 -->
                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
-                
+
                 <!-- 主图标：带表情的文件/页面 -->
                 <svg class="w-40 h-40 text-base-content/20 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -19,19 +20,19 @@
                 <!-- 悬浮状态码徽章 -->
                 <div class="absolute -bottom-2 -right-4 bg-base-100/80 backdrop-blur-sm shadow-lg border border-base-200 rounded-xl px-4 py-2 transform rotate-6 hover:rotate-0 transition-transform duration-300">
                     <span class="text-3xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-mono">
-                        {{if .code}}{{.code}}{{else}}!{{end}}
+                        {{if .Data.ErrorCode}}{{.Data.ErrorCode}}{{else}}!{{end}}
                     </span>
                 </div>
             </div>
 
             <!-- 错误标题 -->
             <h1 class="text-3xl font-bold text-base-content mb-4">
-                {{if .title}}{{.title}}{{else}}哎呀，出错了{{end}}
+                {{if .Data.Title}}{{.Data.Title}}{{else}}哎呀，出错了{{end}}
             </h1>
 
             <!-- 错误信息 -->
             <p class="py-6 text-base-content/70">
-                {{if .message}}{{.message}}{{else}}抱歉，您访问的页面暂时无法显示。可能已被删除、更名或暂时不可用。{{end}}
+                {{if .Data.Message}}{{.Data.Message}}{{else}}抱歉，您访问的页面暂时无法显示。可能已被删除、更名或暂时不可用。{{end}}
             </p>
 
             <!-- 操作按钮 -->
@@ -59,4 +60,4 @@
 </div>
 {{end}}
 
-{{template "layout/main.gohtml" dict "Body" "error_content" "Data" . "Entry" "src/main.js"}}
+

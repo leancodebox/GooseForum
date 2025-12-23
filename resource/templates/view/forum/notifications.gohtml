@@ -1,4 +1,5 @@
-{{define "notifications_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="container mx-auto px-4 py-4 max-w-3xl" x-data="notificationsHandler()">
     <!-- Header -->
     <div class="flex flex-row justify-between items-center mb-4 gap-4">
@@ -198,7 +199,7 @@
 </div>
 {{end}}
 
-{{define "notifications_script"}}
+{{define "script"}}
 <script>
     function notificationsHandler() {
         return {
@@ -334,4 +335,4 @@
 </script>
 {{end}}
 
-{{template "layout/main.gohtml" dict "Body" "notifications_content" "Script" "notifications_script" "Data" . "Entry" "src/main.js"}}
+

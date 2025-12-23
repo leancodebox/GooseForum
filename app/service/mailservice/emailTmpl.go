@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html/template"
 
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
@@ -18,21 +17,19 @@ var emailTmpl *template.Template
 var passwordResetTemplate string
 var passwordResetTmpl *template.Template
 
+func init() {
+	emailTmpl = template.Must(template.New("activation").Parse(emailTemplate))
+	passwordResetTmpl = template.Must(template.New("passwordReset").Parse(passwordResetTemplate))
+}
+
 func generateActivationEmailBody(username, token string) (string, error) {
-	if emailTmpl == nil {
-		// 解析并执行模板
-		tmpl, err := template.New("activation").Parse(emailTemplate)
-		if err != nil {
-			return "", err
-		}
-		emailTmpl = tmpl
-	}
+	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
 	var buf bytes.Buffer
 	err := emailTmpl.Execute(&buf, map[string]any{
 		"SiteName": hotdataserve.GetSiteSettingsConfigCache().SiteName,
 		"Username": username,
-		"ActivationLink": fmt.Sprintf("%s/api/activate?token=%s",
-			preferences.GetString("server.url"), token),
+		"ActivationLink": fmt.Sprintf("%s/activate?token=%s",
+			siteConfig.SiteUrl, token),
 	})
 	if err != nil {
 		return "", err
@@ -41,19 +38,12 @@ func generateActivationEmailBody(username, token string) (string, error) {
 }
 
 func generatePasswordResetEmailBody(username, token string) (string, error) {
-	if passwordResetTmpl == nil {
-		// 解析并执行模板
-		tmpl, err := template.New("passwordReset").Parse(passwordResetTemplate)
-		if err != nil {
-			return "", err
-		}
-		passwordResetTmpl = tmpl
-	}
+	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
 	var buf bytes.Buffer
 	err := passwordResetTmpl.Execute(&buf, map[string]any{
 		"Username": username,
 		"ResetLink": fmt.Sprintf("%s/reset-password?token=%s",
-			preferences.GetString("server.url"), token),
+			siteConfig.SiteUrl, token),
 	})
 	if err != nil {
 		return "", err

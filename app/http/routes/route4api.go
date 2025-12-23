@@ -58,6 +58,9 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/search", controllers.SearchPage)
 	viewRouteApp.GET("/admin/*path", middleware.CheckPermissionOrNoUser(permission.Admin), controllers.Admin)
 
+	// 添加激活路由
+	viewRouteApp.GET("activate", controllers.ActivateAccount)
+
 	// 文档相关路由
 	viewRouteApp.GET("/docs", controllers.DocsHome)
 	viewRouteApp.GET("/docs/:project", controllers.DocsVersion)
@@ -82,8 +85,6 @@ func apiRoute(ginApp *gin.Engine) {
 
 	// 验证码
 	baseApi.GET("get-captcha", UpQueryReq(api.GetCaptcha))
-	// 添加激活路由
-	baseApi.GET("activate", controllers.ActivateAccount)
 	// 忘记密码和重置密码路由
 	baseApi.POST("forgot-password", UpButterReq(api.ForgotPassword))
 	baseApi.POST("reset-password", UpButterReq(api.ResetPassword))
@@ -181,8 +182,6 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("apply-sheet-list", UpButterReq(api.ApplySheet)).
 		GET("friend-links", UpButterReq(api.GetFriendLinks)).
 		POST("save-friend-links", UpButterReq(api.SaveFriendLinks)).
-		GET("web-settings", UpButterReq(api.GetWebSettings)).
-		POST("save-web-settings", UpButterReq(api.SaveWebSettings)).
 		GET("site-settings", UpButterReq(api.GetSiteSettings)).
 		POST("save-site-settings", UpButterReq(api.SaveSiteSettings)).
 		GET("mail-settings", UpButterReq(api.GetMailSettings)).

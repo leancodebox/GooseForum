@@ -1,0 +1,6 @@
+{
+  "name": "GooseForum Default Theme",
+  "description": "The default theme for GooseForum",
+  "version": "1.0.0",
+  "manifest": "static/dist/.vite/manifest.json"
+}

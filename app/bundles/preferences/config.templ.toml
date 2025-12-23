@@ -10,6 +10,9 @@ debug = false
 maintenance = false
 # 安全签名密钥
 signingKey = "{{.SigningKey}}"
+# CDN URL (可选，留空则使用本地资源)
+# 例如: https://cdn.example.com
+cdn_url = ""
 
 [server]
 url = "http://localhost"

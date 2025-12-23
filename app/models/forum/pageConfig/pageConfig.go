@@ -32,7 +32,6 @@ func (itself *Entity) TableName() string {
 
 const (
 	FriendShipLinks = `friendShipLinks`
-	WebSettings     = `webSettings`
 	FooterLinks     = `footerLinks`
 	SponsorsPage    = `sponsors`
 	SiteSettings    = `siteSettings`
@@ -43,18 +42,12 @@ const (
 
 var PageTypeList = []string{
 	FriendShipLinks,
-	WebSettings,
 	FooterLinks,
 	SponsorsPage,
 	SiteSettings,
 	EmailSettings,
 	Announcement,
 	Version,
-}
-
-type WebSettingsConfig struct {
-	ExternalLinks string `json:"externalLinks,omitempty"`
-	Favicon       string `json:"favicon,omitempty"`
 }
 
 type LinkItem struct {

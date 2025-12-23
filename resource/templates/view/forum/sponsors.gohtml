@@ -1,4 +1,5 @@
-{{define "sponsors_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="flex flex-col md:flex-row gap-6">
     <!-- 左侧赞助商列表 -->
     <section class="flex-1">
@@ -26,7 +27,7 @@
                 </div>
 
                 <!-- 特别赞助商 (Level 0) -->
-                {{if .SponsorsInfo.Sponsors.Level0}}
+                {{if .Data.SponsorsInfo.Sponsors.Level0}}
                 <div class="space-y-6">
                     <h2 class="text-2xl font-normal border-b border-base-300 pb-3 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-yellow-500"
@@ -37,7 +38,7 @@
                     </h2>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {{range .SponsorsInfo.Sponsors.Level0}}
+                        {{range .Data.SponsorsInfo.Sponsors.Level0}}
                         <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden border border-base-300">
                             <!-- 背景装饰圆形 -->
                             <div class="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-amber-400/10 to-yellow-500/10 rounded-full"></div>
@@ -100,7 +101,7 @@
                 {{end}}
 
                 <!-- 金牌赞助商 (Level 1) -->
-                {{if .SponsorsInfo.Sponsors.Level1}}
+                {{if .Data.SponsorsInfo.Sponsors.Level1}}
                 <div class="space-y-6">
                     <h2 class="text-xl font-normal border-b border-base-300 pb-3 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-yellow-400"
@@ -111,7 +112,7 @@
                     </h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {{range .SponsorsInfo.Sponsors.Level1}}
+                        {{range .Data.SponsorsInfo.Sponsors.Level1}}
                         <div class="card bg-base-100 shadow-md hover:shadow-lg transition-all duration-300 border border-base-300 relative overflow-hidden">
                             <!-- 背景装饰圆形 - 金牌级别 -->
                             <div class="absolute -top-4 -right-4 w-12 h-12 bg-gradient-to-br from-yellow-400/8 to-amber-500/8 rounded-full"></div>
@@ -162,7 +163,7 @@
                 {{end}}
 
                 <!-- 银牌赞助商 (Level 2) -->
-                {{if .SponsorsInfo.Sponsors.Level2}}
+                {{if .Data.SponsorsInfo.Sponsors.Level2}}
                 <div class="space-y-6">
                     <h2 class="text-xl font-normal border-b border-base-300 pb-3 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400"
@@ -173,7 +174,7 @@
                     </h2>
 
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {{range .SponsorsInfo.Sponsors.Level2}}
+                        {{range .Data.SponsorsInfo.Sponsors.Level2}}
                         <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-300 relative overflow-hidden">
                             <!-- 背景装饰圆形 - 银牌级别 -->
                             <div class="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-gray-400/6 to-slate-500/6 rounded-full"></div>
@@ -223,7 +224,7 @@
                 {{end}}
 
                 <!-- 铜牌赞助商 (Level 3) -->
-                {{if .SponsorsInfo.Sponsors.Level3}}
+                {{if .Data.SponsorsInfo.Sponsors.Level3}}
                 <div class="space-y-6">
                     <h2 class="text-xl font-normal border-b border-base-300 pb-3 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-orange-500"
@@ -234,7 +235,7 @@
                     </h2>
 
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {{range .SponsorsInfo.Sponsors.Level3}}
+                        {{range .Data.SponsorsInfo.Sponsors.Level3}}
                         <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-300 relative overflow-hidden">
                             <!-- 背景装饰圆形 - 铜牌级别 -->
                             <div class="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-orange-400/4 to-amber-600/4 rounded-full"></div>
@@ -297,37 +298,37 @@
                             <div class="avatar-group -space-x-4">
                                 <div class="avatar">
                                     <div class="w-12">
-                                        <img src="/static/pic/1.webp" />
+                                        <img src="{{Asset "/static/pic/1.webp"}}" />
                                     </div>
                                 </div>
                                 <div class="avatar">
                                     <div class="w-12">
-                                        <img src="/static/pic/2.webp" />
+                                        <img src="{{Asset "/static/pic/2.webp"}}" />
                                     </div>
                                 </div>
                                 <div class="avatar">
                                     <div class="w-12">
-                                        <img src="/static/pic/3.webp" />
+                                        <img src="{{Asset "/static/pic/3.webp"}}" />
                                     </div>
                                 </div>
                                 <div class="avatar">
                                     <div class="w-12">
-                                        <img src="/static/pic/4.webp" />
+                                        <img src="{{Asset "/static/pic/4.webp"}}" />
                                     </div>
                                 </div>
                                 <div class="avatar">
                                     <div class="w-12">
-                                        <img src="/static/pic/5.webp" />
+                                        <img src="{{Asset "/static/pic/5.webp"}}" />
                                     </div>
                                 </div>
                                 <div class="avatar">
                                     <div class="w-12">
-                                        <img src="/static/pic/7.webp" />
+                                        <img src="{{Asset "/static/pic/7.webp"}}" />
                                     </div>
                                 </div>
                                 <div class="avatar">
                                     <div class="w-12">
-                                        <img src="/static/pic/8.webp" />
+                                        <img src="{{Asset "/static/pic/8.webp"}}" />
                                     </div>
                                 </div>
                             </div>
@@ -445,4 +446,3 @@
 </div>
 {{end}}
 
-{{template "layout/main.gohtml" dict "Body" "sponsors_content" "Data" . "Entry" "src/main.js"}}

@@ -110,12 +110,6 @@ export const menuItems: MenuItem[] = [
     ]
   },
   {
-    key: 'web-settings',
-    label: '网页设置',
-    path: '/admin/web-settings',
-    icon: GlobeAltIcon
-  },
-  {
     key: 'site-settings',
     label: '站点设置',
     path: '/admin/site-settings',

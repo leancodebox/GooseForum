@@ -70,7 +70,7 @@ type EntityComplete struct {
 	Id          uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      //
 	Username    string     `gorm:"column:username;index;type:varchar(64);not null;default:'';" json:"username"` //
 	Email       string     `gorm:"column:email;index;type:varchar(128);not null;default:'';" json:"email"`      //
-	Password    string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"password"`      //
+	Password    string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"-"`             //
 	Status      int8       `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`                // 状态：0正常 1冻结
 	Validate    int8       `gorm:"column:validate;type:tinyint;not null;default:0;" json:"validate"`            // 是否验证通过: 0未通过/未验证 1 验证通过
 	ActivatedAt *time.Time `gorm:"column:activated_at;type:datetime;" json:"activatedAt"`                       // 激活时间

@@ -1,11 +1,12 @@
-{{define "settings_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="container mx-auto px-4 py-8 max-w-6xl" x-data="settingsHandler()" x-cloak>
     <div class="flex flex-col lg:flex-row gap-6">
         <!-- 左侧侧边栏：用户信息与导航 -->
         <aside class="w-full lg:w-80 flex-shrink-0 space-y-6">
             <div class="sticky top-20 space-y-4">
                 <!-- 用户卡片 -->
-                {{template "forum/user-card.gohtml" .UserCard}}
+                {{template "components/user-card.gohtml" .Data.UserCard}}
 
                 <!-- 导航菜单 -->
                 <div class="card bg-base-100 shadow-sm">
@@ -67,7 +68,7 @@
                                 <div class="flex items-center gap-6 mb-8">
                                     <div class="avatar">
                                         <div class="w-20 h-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                                            <img :src="user.avatarUrl || '/static/pic/default-avatar.webp'" alt="Avatar" class="object-cover w-full h-full" />
+                                            <img :src="'/file/img/'+user.avatarUrl || '{{Asset "/static/pic/default-avatar.webp"}}'" alt="Avatar" class="object-cover w-full h-full" />
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-2">
@@ -228,7 +229,7 @@
                                         </div>
                                      </form>
                                  </div>
-                                 
+
                                  <!-- 右侧安全提示 -->
                                  <div class="lg:col-span-1">
                                      <div class="card bg-base-200/50 compact mt-4 lg:mt-0">
@@ -325,16 +326,18 @@
     </div>
 </div>
 
+{{end}}
+{{define "script"}}
 <script>
     function settingsHandler() {
         return {
-            user: {{json .User}},
-            stats: {{json .Stats}},
+            user: {{json .Data.FullUser}},
+            stats: {{json .Data.Stats}},
             subTab: 'basic',
-            form: JSON.parse(JSON.stringify({{json .FullUser}})), // Clone
+            form: JSON.parse(JSON.stringify({{json .Data.FullUser}})), // Clone
             pwdForm: { oldPassword: '', newPassword: '', confirmPassword: '' },
             saving: false,
-            
+
             // Edit states
             editingUsername: false,
             editingEmail: false,
@@ -347,7 +350,7 @@
                 showFollowing: true,
                 emailNotifications: true
             },
-            
+
             // Avatar Cropping State
             cropping: false,
             cropImage: '',
@@ -360,7 +363,7 @@
 
                 // Ensure externalInformation exists
                 if (!this.form.externalInformation) this.form.externalInformation = {};
-                ['github', 'twitter', 'linkedIn', 'weibo', 'zhihu'].forEach(key => {
+                ['github', 'twitter', 'linkedIn', 'weibo','bilibili', 'zhihu'].forEach(key => {
                     if (!this.form.externalInformation[key]) this.form.externalInformation[key] = { link: '' };
                 });
 
@@ -388,7 +391,7 @@
                     this.privacy = JSON.parse(savedPrivacy);
                 }
             },
-            
+
             // Username & Email Edit Methods
             startEditUsername() {
                 this.editingUsername = true;
@@ -444,7 +447,7 @@
                     window.notification.warning('图片大小不能超过 5MB');
                     return;
                 }
-                
+
                 // Clear input to allow re-selecting same file
                 e.target.value = '';
 
@@ -479,7 +482,7 @@
             },
             saveCrop() {
                 if (!this.cropper) return;
-                
+
                 // Get cropped canvas
                 const canvas = this.cropper.getCroppedCanvas({
                     width: 400,
@@ -487,16 +490,16 @@
                     imageSmoothingEnabled: true,
                     imageSmoothingQuality: 'high',
                 });
-                
+
                 canvas.toBlob(async (blob) => {
                     if (!blob) {
                         window.notification.error('裁切失败');
                         return;
                     }
-                    
+
                     // Convert blob to file
                     const file = new File([blob], 'avatar.webp', { type: 'image/webp' });
-                    
+
                     const formData = new FormData();
                     formData.append('avatar', file);
 
@@ -550,7 +553,7 @@
                         f.nickname, f.email, f.bio, f.signature, f.website, f.websiteName, f.externalInformation
                     );
                     window.notification.success('保存成功');
-                    location.reload(); 
+                    location.reload();
                 } catch (e) {
                     window.notification.error(e.message || '请求失败');
                 } finally {
@@ -580,4 +583,3 @@
     }
 </script>
 {{end}}
-{{template "layout/main.gohtml" dict "Body" "settings_content" "Data" . "Entry" "src/main.js"}}

@@ -518,27 +518,6 @@ func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.
 	return component.SuccessResponse("success")
 }
 
-// WebSettings 网页设置相关结构
-
-// GetWebSettings 获取网页设置
-func GetWebSettings(req component.BetterRequest[null]) component.Response {
-	settings := pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{})
-	return component.SuccessResponse(settings)
-}
-
-type SaveWebSettingsReq struct {
-	Settings pageConfig.WebSettingsConfig `json:"settings"`
-}
-
-// SaveWebSettings 保存网页设置
-func SaveWebSettings(req component.BetterRequest[SaveWebSettingsReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.WebSettings)
-	configEntity.PageType = pageConfig.WebSettings
-	configEntity.Config = jsonopt.Encode(req.Params.Settings)
-	pageConfig.CreateOrSave(&configEntity)
-	return component.SuccessResponse("success")
-}
-
 // GetFooterLinks 获取页脚配置
 func GetFooterLinks(req component.BetterRequest[null]) component.Response {
 	res := pageConfig.GetConfigByPageType(pageConfig.FooterLinks, defaultconfig.GetDefaultFooter())

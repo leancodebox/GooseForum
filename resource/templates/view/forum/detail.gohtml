@@ -1,36 +1,37 @@
-{{define "detail_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="flex flex-col md:flex-row gap-6" x-data="articleDetailHandler({
-    articleId: {{.Article.Id}},
-    isLiked: {{.ILike}},
-    likeCount: {{.Article.LikeCount}},
-    isBookmarked: {{.IsBookmarked}},
-    isFollowing: {{.IsFollowing}}
+    articleId: {{.Data.Article.Id}},
+    isLiked: {{.Data.ILike}},
+    likeCount: {{.Data.Article.LikeCount}},
+    isBookmarked: {{.Data.IsBookmarked}},
+    isFollowing: {{.Data.IsFollowing}}
 })">
     <section class="flex-1 space-y-6 min-w-0">
         <!-- 文章详情卡片 -->
         <div class="card bg-base-100 shadow-xl">
             <div class="card-body overflow-hidden">
                 <h1 class="card-title text-3xl font-normal text-base-content mb-4">
-                    {{.Article.Title}}
+                    {{.Data.Article.Title}}
                 </h1>
                 {{if false}}
                 <div class="flex items-center gap-2 mb-4">
-                    {{range .ArticleCategory}}
+                    {{range .Data.ArticleCategory}}
                     <div class="badge badge-primary">{{.}}</div>
                     <div class="badge badge-outline">{{.}}</div>
                     {{end}}
                 </div>
                 {{end}}
                 <div class="flex items-center text-base-content/70 mb-6 border-b border-b-gray-200 pb-2">
-                    <a class="avatar" href="/user/{{.Article.UserId}}">
+                    <a class="avatar" href="/user/{{.Data.Article.UserId}}">
                         <div class="mask mask-squircle w-8 h-8">
-                            <img src="{{.AvatarUrl}}" alt="{{.Username}}的头像"/>
+                            <img src="{{.Data.AvatarUrl}}" alt="{{.Data.Username}}的头像"/>
                         </div>
                     </a>
-                    <a href="/user/{{.Article.UserId}}" class="ml-2 mr-4 flex-shrink-0">{{.Username}}</a>
-                    <span class="mr-4 flex-shrink-0">{{FormatTime .Article.CreatedAt}}</span>
-                    {{if eq .CurrentUserId .Article.UserId}}
-                    <a href="/publish?id={{.Article.Id}}" class="mr-4 text-primary flex-shrink-0">编辑</a>
+                    <a href="/user/{{.Data.Article.UserId}}" class="ml-2 mr-4 flex-shrink-0">{{.Data.Username}}</a>
+                    <span class="mr-4 flex-shrink-0">{{FormatTime .Data.Article.CreatedAt}}</span>
+                    {{if eq .CurrentUserId .Data.Article.UserId}}
+                    <a href="/publish?id={{.Data.Article.Id}}" class="mr-4 text-primary flex-shrink-0">编辑</a>
                     {{end}}
                     <div class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
@@ -41,14 +42,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                         </svg>
-                        <span class="mr-4">{{.Article.ViewCount}}</span>
+                        <span class="mr-4">{{.Data.Article.ViewCount}}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
                              viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                         </svg>
-                        <span x-text="likeCount">{{.Article.LikeCount}}</span>
+                        <span x-text="likeCount">{{.Data.Article.LikeCount}}</span>
                     </div>
                 </div>
                 <div class="prose lg:prose-base md:prose-lg
@@ -57,7 +58,7 @@
                  prose-pre:bg-base-200
                  prose-code:text-base-content
                  max-w-none text-base-content overflow-hidden min-w-0">
-                    {{ SafeHTML .Article.RenderedHTML}}
+                    {{ SafeHTML .Data.Article.RenderedHTML}}
                 </div>
 
                 <!-- 点赞和收藏按钮 -->
@@ -70,7 +71,7 @@
                             <path fill="currentColor"
                                   d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                         </svg>
-                        <span x-text="likeCount">{{.Article.LikeCount}}</span>
+                        <span x-text="likeCount">{{.Data.Article.LikeCount}}</span>
                     </button>
                     <button class="px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none"
                             :class="isBookmarked ? 'bg-warning text-warning-content' : 'bg-base-200 text-base-content'"
@@ -80,7 +81,7 @@
                             <path fill="currentColor"
                                   d="M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z"/>
                         </svg>
-                        <span x-text="isBookmarked ? '已收藏' : '收藏'">{{if .IsBookmarked}}已收藏{{else}}收藏{{end}}</span>
+                        <span x-text="isBookmarked ? '已收藏' : '收藏'">{{if .Data.IsBookmarked}}已收藏{{else}}收藏{{end}}</span>
                     </button>
                 </div>
             </div>
@@ -147,7 +148,7 @@
                 <!-- 评论列表 -->
                 <div class="space-y-4">
                     {{$LoginUser := .User}}
-                    {{range .CommentList}}
+            {{range .Data.CommentList}}
                     <div class="flex gap-3" id="reply_{{.Id}}">
                         <a class="avatar" href="/user/{{.UserId}}">
                             <div class="mask mask-squircle w-10 h-10">
@@ -215,14 +216,14 @@
     <aside class="w-full md:w-80 flex-shrink-0">
         <div class="sticky top-18 space-y-3">
             <!-- 作者信息卡片 -->
-            {{template "forum/user-card.gohtml" .AuthorCard}}
+            {{template "components/user-card.gohtml" .Data.AuthorCard}}
 
             <!-- 相关推荐 -->
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <h2 class="card-title">相关推荐</h2>
                     <div class="space-y-1">
-                        {{range .AuthorArticles}}
+                        {{range .Data.AuthorArticles}}
                         <div class="hover:bg-base-300 p-2 rounded cursor-pointer">
                             <a class="text-sm font-normal text-base-content hover:text-primary"
                                href="/post/{{.Id}}">{{.Title}}</a>
@@ -241,7 +242,7 @@
                 <div class="card-body">
                     <h2 class="card-title">热门话题</h2>
                     <div class="flex flex-wrap gap-2">
-                        {{range .ArticleCategoryList}}
+                        {{range .Data.ArticleCategoryList}}
                         <a class="badge badge-outline hover:badge-primary cursor-pointer"
                            href="/post?filters={{.Value}}">#{{.Name}}</a>
                         {{end}}
@@ -253,7 +254,7 @@
 </div>
 {{end}}
 
-{{define "detail_script"}}
+{{define "script"}}
 <script>
     function articleDetailHandler(initialData) {
         return {
@@ -351,4 +352,3 @@
     }
 </script>
 {{end}}
-{{template "layout/main.gohtml" dict "Body" "detail_content" "Script" "detail_script" "Data" . "Entry" "src/main.js"}}

@@ -1,15 +1,16 @@
-{{define "index_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="space-y-4">
     <!-- 通知模块 -->
-    {{if .Announcement.Enabled}}
+    {{if .Data.Announcement.Enabled}}
     <div class="alert alert-info shadow-sm rounded-xl bg-info/10 border border-info/20">
         {{template "icon_info"}}
         <div class="flex-1 min-w-0 pr-2">
-            <div class="text-sm font-medium text-base-content">{{.Announcement.Title}}</div>
-            {{if .Announcement.Link}}
-                <a href="{{.Announcement.Link}}" target="_blank" class="text-xs opacity-70 mt-0.5 text-base-content">{{.Announcement.Content}}</a>
+            <div class="text-sm font-medium text-base-content">{{.Data.Announcement.Title}}</div>
+            {{if .Data.Announcement.Link}}
+                <a href="{{.Data.Announcement.Link}}" target="_blank" class="text-xs opacity-70 mt-0.5 text-base-content">{{.Data.Announcement.Content}}</a>
             {{else}}
-                <div class="text-xs opacity-70 mt-0.5 text-base-content">{{.Announcement.Content}}</div>
+                <div class="text-xs opacity-70 mt-0.5 text-base-content">{{.Data.Announcement.Content}}</div>
             {{end}}
         </div>
         <button class="btn btn-ghost btn-xs flex-shrink-0 ml-auto text-base-content/60 hover:text-base-content" onclick="this.parentElement.style.display='none'">
@@ -35,7 +36,7 @@
                             </div>
                         </div>
                     </div>
-                    {{template "article_list" .LatestArticles}}
+                    {{template "article_list" .Data.LatestArticles}}
                 </div>
             </div>
         </div>
@@ -55,7 +56,7 @@
                 <div class="card-body">
                     <h3 class="card-title text-lg mb-4 font-normal">🔥 热门话题</h3>
                     <div class="flex flex-wrap gap-2">
-                        {{range .ArticleCategoryList}}
+                        {{range .Data.ArticleCategoryList}}
                         <a class="badge badge-outline hover:badge-primary cursor-pointer"
                            href="/post?filters={{.Value}}">#{{.Name}}</a>
                         {{end}}
@@ -70,35 +71,35 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-base-content/70">注册用户</span>
-                            <span class="font-medium">{{.Stats.UserCount}}</span>
+                            <span class="font-medium">{{.Data.Stats.UserCount}}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-base-content/70">文章总数</span>
-                            <span class="font-medium">{{.Stats.ArticleCount}}</span>
+                            <span class="font-medium">{{.Data.Stats.ArticleCount}}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-base-content/70">评论总数</span>
-                            <span class="font-medium">{{.Stats.Reply}}</span>
+                            <span class="font-medium">{{.Data.Stats.Reply}}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-base-content/70">友情链接</span>
-                            <span class="font-medium">{{.Stats.LinksCount}}</span>
+                            <span class="font-medium">{{.Data.Stats.LinksCount}}</span>
                         </div>
                         <div class="text-xs text-base-content/50 mt-2 pt-2 border-t border-base-200">
-                            本月新增用户 {{.Stats.UserMonthCount}} 人，文章 {{.Stats.ArticleMonthCount}} 篇
+                            本月新增用户 {{.Data.Stats.UserMonthCount}} 人，文章 {{.Data.Stats.ArticleMonthCount}} 篇
                         </div>
                     </div>
                 </div>
             </div>
 
 
-            {{if .RecommendedArticles}}
+            {{if .Data.RecommendedArticles}}
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <h2 class="card-title font-normal">推荐文章</h2>
                     <div class="space-y-2">
-                        {{range .RecommendedArticles}}
-                        <p><a href="{{Url.PostDetail .Id}}"
+                        {{range .Data.RecommendedArticles}}
+                        <p><a href="{{$.Url.PostDetail .Id}}"
                               class="text-sm hover:text-primary cursor-pointer">
                             • {{.Title}}</a></p>
                         {{end}}
@@ -111,9 +112,9 @@
                 <div class="card-body">
                     <h3 class="card-title text-lg mb-4 font-normal">🔗 快速链接</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <a href="{{Url.Links}}" class="font-normal btn btn-outline btn-sm">友情链接</a>
-                        <a href="{{Url.Sponsors}}" class="font-normal btn btn-outline btn-sm">赞助商</a>
-                        <a href="{{Url.About}}" class="font-normal btn btn-outline btn-sm">关于我们</a>
+                        <a href="{{.Url.Links}}" class="font-normal btn btn-outline btn-sm">友情链接</a>
+                        <a href="{{.Url.Sponsors}}" class="font-normal btn btn-outline btn-sm">赞助商</a>
+                        <a href="{{.Url.About}}" class="font-normal btn btn-outline btn-sm">关于我们</a>
                     </div>
                 </div>
             </div>
@@ -121,5 +122,3 @@
     </div>
 </div>
 {{end}}
-
-{{template "layout/main.gohtml" dict "Body" "index_content" "Data" . "Entry" "src/main.js"}}

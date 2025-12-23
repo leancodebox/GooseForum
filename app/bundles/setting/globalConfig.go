@@ -25,6 +25,10 @@ func IsDebug() bool {
 	return preferences.GetBool("app.debug", true)
 }
 
+func GetCDNURL() string {
+	return preferences.GetString("app.cdn_url", "")
+}
+
 // URL 传参 path 拼接站点的 URL
 func URL(path string) string {
 	return preferences.Get("server.url") + path

@@ -105,16 +105,6 @@ const routes: RouteRecordRaw[] = [
         }
       },
       {
-        path: 'web-settings',
-        name: 'AdminWebSettings',
-        component: () => import('@admin/views/WebSettings.vue'),
-        meta: {
-          title: '网页设置',
-          requiresAuth: true,
-          requiresAdmin: true
-        }
-      },
-      {
         path: 'site-settings',
         name: 'SiteSettings',
         component: () => import('@admin/views/SiteSettings.vue'),

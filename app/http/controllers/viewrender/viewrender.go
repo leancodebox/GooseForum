@@ -1,96 +1,74 @@
 package viewrender
 
 import (
-	"html/template"
 	"log/slog"
 	"net/http"
-	"time"
-
-	"bytes"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/datacache"
-	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/resource"
 )
 
-var ht4gooseforum *template.Template
+var (
+	CurrentRegistry *TemplateRegistry
+)
 
 func Reload() {
-	ht4gooseforum = resource.GetTemplates(GlobalFunc())
+	var err error
+	CurrentRegistry, err = NewRegistry(resource.GetTemplateFS())
+	if err != nil {
+		slog.Error("Failed to reload templates", "err", err)
+	}
 }
 
 func init() {
 	Reload()
 }
 
-var webSettingsCache = &datacache.Cache[pageConfig.WebSettingsConfig]{}
-
-func GlobalFunc() template.FuncMap {
-	return template.FuncMap{
-		"WebPageSettings": func() pageConfig.WebSettingsConfig {
-			return webSettingsCache.GetOrLoad("websetcache", func() (pageConfig.WebSettingsConfig, error) {
-				return pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{}), nil
-			},
-				time.Second*5,
-			)
-		},
-		"render": func(name string, data any) (template.HTML, error) {
-			var buf bytes.Buffer
-			// 动态执行名为 name 的模板
-			err := ht4gooseforum.ExecuteTemplate(&buf, name, data)
-			return template.HTML(buf.String()), err
-		},
-		"json": func(v any) template.JS {
-			return template.JS(jsonopt.Encode(v))
-		},
-	}
+type TmplData[T any] struct {
+	IsProduction  bool
+	Theme         string
+	Footer        pageConfig.FooterConfig
+	SiteSetting   pageConfig.SiteSettingsConfig
+	Data          T
+	Url           resource.URLHelper
+	User          *vo.UserInfoShow
+	CurrentUserId uint64
+	PageMeta      *PageMeta
 }
 
-func Render(c *gin.Context, name string, templateData map[string]any) {
-	if templateData == nil {
-		templateData = make(map[string]any, 7)
-	}
+func SafeRender[T any](c *gin.Context, name string, data T, pageMeta ...*PageMeta) {
 	user := component.GetLoginUser(c)
-	templateData["User"] = user
-	templateData["CurrentUserId"] = user.UserId
-	templateData["IsProduction"] = setting.IsProduction()
-	templateData["Theme"] = GetTheme(c)
-	templateData["Footer"] = hotdataserve.GetFooterConfigCache()
-	templateData["SiteSetting"] = hotdataserve.GetSiteSettingsConfigCache()
-	templateData["Url"] = resource.URLHelper{}
-	if _, ok := templateData["PageMeta"]; !ok {
-		templateData["PageMeta"] = NewPageMetaBuilder().Build()
+	var meta *PageMeta
+	if len(pageMeta) > 0 && pageMeta[0] != nil {
+		meta = pageMeta[0]
+	} else {
+		meta = NewPageMetaBuilder().Build()
 	}
-	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, templateData); err != nil {
-		slog.Error("render template err", "err", err.Error())
+
+	templateData := TmplData[T]{
+		IsProduction:  setting.IsProduction(),
+		Theme:         GetTheme(c),
+		Footer:        hotdataserve.GetFooterConfigCache(),
+		SiteSetting:   hotdataserve.GetSiteSettingsConfigCache(),
+		Data:          data,
+		Url:           resource.URLHelper{},
+		User:          user,
+		CurrentUserId: user.UserId,
+		PageMeta:      meta,
+	}
+
+	if CurrentRegistry == nil {
+		slog.Error("CurrentRegistry is nil")
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
-}
 
-type TmplData struct {
-	IsProduction bool
-	Theme        string
-	Footer       pageConfig.FooterConfig
-	SiteSetting  pageConfig.SiteSettingsConfig
-	Data         map[string]any
-	Url          resource.URLHelper
-}
-
-func SafeRender(c *gin.Context, name string, data map[string]any) {
-	templateData := TmplData{
-		IsProduction: setting.IsProduction(),
-		Theme:        GetTheme(c),
-		Footer:       hotdataserve.GetFooterConfigCache(),
-		SiteSetting:  hotdataserve.GetSiteSettingsConfigCache(),
-		Data:         data,
-		Url:          resource.URLHelper{},
-	}
-	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, templateData); err != nil {
+	if err := CurrentRegistry.Render(c.Writer, name, templateData); err != nil {
 		slog.Error("render template err", "err", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}

@@ -1,14 +1,11 @@
-{{define "user_head"}}
-    <meta property="profile:username" content="{{.UserCard.Username}}"/>
-{{end}}
-
-{{define "user_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
         <div class="flex flex-col lg:flex-row gap-6">
             <!-- 左侧用户信息 -->
             <aside class="w-full lg:w-80 shrink-0">
                 <div class="sticky top-18 space-y-3">
                     <!-- 用户基本信息 -->
-                    {{template "forum/user-card.gohtml" .UserCard }}
+                    {{template "components/user-card.gohtml" .Data.UserCard }}
                 </div>
             </aside>
 
@@ -18,10 +15,10 @@
                 <div class="space-y-4">
                     <div role="tablist" class="tabs tabs-lift">
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="发布的文章" checked="checked"/>
-                        <div class="tab-content border-base-300 bg-base-100 {{if not .Articles}} p-10 {{end}}">
-                            {{if .Articles}}
+                        <div class="tab-content border-base-300 bg-base-100 {{if not .Data.Articles}} p-10 {{end}}">
+                            {{if .Data.Articles}}
                                 <div class="py-4">
-                                    {{template "article_list" .Articles}}
+                                    {{template "article_list" .Data.Articles}}
                                 </div>
                             {{else}}
                                 假以时日一飞冲天
@@ -29,10 +26,10 @@
                         </div>
 
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="关注"/>
-                        <div class="tab-content border-base-300 bg-base-100 {{if not .FollowingList}} p-10 {{end}}">
-                            {{if .FollowingList}}
+                        <div class="tab-content border-base-300 bg-base-100 {{if not .Data.FollowingList}} p-10 {{end}}">
+                            {{if .Data.FollowingList}}
                                 <ul class="list">
-                                    {{range .FollowingList}}
+                                    {{range .Data.FollowingList}}
                                         <li class="list-row hover:bg-base-300 flex items-center gap-3 px-4 py-2">
                                             <!-- 左侧头像 -->
                                             <a class="avatar" href="/user/{{.Id}}">
@@ -72,10 +69,10 @@
                         </div>
 
                         <input type="radio" name="my_tabs_2" class="tab" aria-label="粉丝"/>
-                        <div class="tab-content border-base-300 bg-base-100 {{if not .FollowerList}} p-10 {{end}}">
-                            {{if .FollowerList}}
+                        <div class="tab-content border-base-300 bg-base-100 {{if not .Data.FollowerList}} p-10 {{end}}">
+                            {{if .Data.FollowerList}}
                                 <ul class="list">
-                                    {{range .FollowerList}}
+                                    {{range .Data.FollowerList}}
                                         <li class="list-row hover:bg-base-300 flex items-center gap-3 px-4 py-2">
                                             <!-- 左侧头像 -->
                                             <a class="avatar" href="/user/{{.Id}}">
@@ -119,10 +116,10 @@
         </div>
 {{end}}
 
-{{define "user_script"}}
+{{define "script"}}
 <script>
     // 注入当前用户的关注列表ID
-    window.myFollowingIds = {{if .MyFollowingIds}}{{.MyFollowingIds}}{{else}}[]{{end}};
+    window.myFollowingIds = {{if .Data.MyFollowingIds}}{{.Data.MyFollowingIds}}{{else}}[]{{end}};
 
     function followUserHandler(userId) {
         return {
@@ -166,5 +163,3 @@
     }
 </script>
 {{end}}
-
-{{template "layout/main.gohtml" dict "Head" "user_head" "Body" "user_content" "Script" "user_script" "Data" . "Entry" "src/main.js"}}

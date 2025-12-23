@@ -135,21 +135,6 @@ export const getArticleEnum = async (): Promise<Result<Record<string,Label[]>>> 
     return axiosInstance.get('api/forum/get-articles-enum');
 }
 
-// 网页设置相关接口
-export interface WebSettingsConfig {
-    externalLinks: string
-}
-
-export const getWebSettings = (): Promise<Result<WebSettingsConfig>> => {
-    return axiosInstance.get('api/admin/web-settings');
-}
-
-export const saveWebSettings = (settings: WebSettingsConfig): Promise<Result<any>> => {
-    return axiosInstance.post('api/admin/save-web-settings', {
-        settings: settings
-    });
-}
-
 // 站点设置相关接口
 export interface SiteSettingsConfig {
     siteName?: string;

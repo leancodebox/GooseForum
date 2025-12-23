@@ -79,6 +79,17 @@ func SearchArticles(req component.BetterRequest[SearchArticlesRequest]) componen
 	return component.SuccessResponse(responseData)
 }
 
+// SearchPageData 搜索页面数据
+type SearchPageData struct {
+	Query          string
+	CurrentPage    int
+	ShowSearch     bool
+	SearchResponse *searchservice.SearchResponse
+	ArticleList    []vo.ArticlesSimpleDto
+	TotalPages     int
+	PageNumbers    []int
+}
+
 // SearchPage 搜索页面
 func SearchPage(c *gin.Context) {
 	query := c.Query("q")
@@ -86,10 +97,10 @@ func SearchPage(c *gin.Context) {
 	pageSize := 10 // 页面显示固定每页10条
 
 	// 构建模板数据
-	templateData := map[string]any{
-		"Query":       query,
-		"CurrentPage": page,
-		"ShowSearch":  true, // 控制导航栏搜索框显示
+	data := SearchPageData{
+		Query:       query,
+		CurrentPage: page,
+		ShowSearch:  true, // 控制导航栏搜索框显示
 	}
 
 	// 如果有搜索关键词，执行搜索
@@ -107,7 +118,7 @@ func SearchPage(c *gin.Context) {
 		// 执行搜索
 		result, err := searchservice.SearchArticles(searchReq)
 		if err == nil {
-			templateData["SearchResponse"] = result
+			data.SearchResponse = result
 			ids := array.Map(result.Results, func(t searchservice.SearchResult) uint64 {
 				return t.ID
 			})
@@ -146,10 +157,10 @@ func SearchPage(c *gin.Context) {
 				}
 			})
 
-			templateData["ArticleList"] = articleList
+			data.ArticleList = articleList
 			// 计算分页信息
 			totalPages := int(math.Ceil(float64(result.Total) / float64(pageSize)))
-			templateData["TotalPages"] = totalPages
+			data.TotalPages = totalPages
 			// 生成页码列表（显示当前页前后2页）
 			var pageNumbers []int
 			start := max(page-2, 1)
@@ -157,16 +168,15 @@ func SearchPage(c *gin.Context) {
 			for i := start; i <= end; i++ {
 				pageNumbers = append(pageNumbers, i)
 			}
-			templateData["PageNumbers"] = pageNumbers
+			data.PageNumbers = pageNumbers
 		}
 	}
 
-	templateData["PageMeta"] = viewrender.NewPageMetaBuilder().
+	pageMeta := viewrender.NewPageMetaBuilder().
 		SetTitle(fmt.Sprintf("%v 的搜索结果", query)).
 		SetCanonicalURL(component.BuildCanonicalHref(c)).
 		Build()
+
 	// 渲染模板
-	viewrender.Render(c, "search.gohtml",
-		templateData,
-	)
+	viewrender.SafeRender(c, "search.gohtml", data, pageMeta)
 }

@@ -1,11 +1,12 @@
-{{define "profile_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="container mx-auto px-4 py-8 max-w-6xl" x-data="profileHandler()" x-cloak>
     <div class="flex flex-col lg:flex-row gap-6">
         <!-- 左侧侧边栏：用户信息与导航 -->
         <aside class="w-full lg:w-80 flex-shrink-0 space-y-6">
             <div class="sticky top-20 space-y-4">
                 <!-- 用户卡片 -->
-                {{template "forum/user-card.gohtml" .UserCard}}
+                {{template "components/user-card.gohtml" .Data.UserCard}}
 
                 <!-- 导航菜单 -->
                 <div class="card bg-base-100 shadow-sm">
@@ -95,7 +96,7 @@
                                          <a :href="'/post/' + item.id"
                                             class="line-clamp-1 text-lg font-normal text-base-content hover:text-primary hover:underline flex-1 min-w-0" x-text="item.title"></a>
                                          <span x-show="item.status === 2" class="badge badge-warning badge-xs ml-2">草稿</span>
-                                         
+
                                          <!-- Actions -->
                                          <div class="flex items-center gap-1 ml-auto">
                                             <a :href="'/publish?id=' + item.id" class="btn btn-square btn-ghost btn-sm tooltip" data-tip="编辑">
@@ -110,7 +111,7 @@
                                             </button>
                                          </div>
                                      </div>
-                                     
+
                                      <!-- Info Row -->
                                      <div class="flex items-center justify-between text-sm text-base-content/60">
                                          <div class="flex items-center flex-wrap gap-1">
@@ -140,12 +141,12 @@
                      <div class="flex justify-center mt-8" x-show="total > 0 && totalPages > 1">
                          <div class="join">
                              <button class="join-item btn btn-sm" x-show="!(page <= 1)" @click="changePage(page - 1)">«</button>
-                             
+
                              <template x-for="(p, i) in pagination" :key="i">
-                                <button class="join-item btn btn-sm" 
-                                    :class="{'btn-active': p === page, 'btn-disabled': p === '...'}" 
+                                <button class="join-item btn btn-sm"
+                                    :class="{'btn-active': p === page, 'btn-disabled': p === '...'}"
                                     :disabled="p === '...'"
-                                    @click="changePage(p)" 
+                                    @click="changePage(p)"
                                     x-text="p"></button>
                             </template>
 
@@ -216,12 +217,12 @@
                       <div class="flex justify-center mt-8" x-show="total > 0 && totalPages > 1">
                          <div class="join">
                              <button class="join-item btn btn-sm" x-show="!(page <= 1)" @click="changePage(page - 1)">«</button>
-                             
+
                              <template x-for="(p, i) in pagination" :key="i">
-                                <button class="join-item btn btn-sm" 
-                                    :class="{'btn-active': p === page, 'btn-disabled': p === '...'}" 
+                                <button class="join-item btn btn-sm"
+                                    :class="{'btn-active': p === page, 'btn-disabled': p === '...'}"
                                     :disabled="p === '...'"
-                                    @click="changePage(p)" 
+                                    @click="changePage(p)"
                                     x-text="p"></button>
                             </template>
 
@@ -234,12 +235,14 @@
     </div>
 </div>
 
+{{end}}
+{{define "script"}}
 <script>
     function profileHandler() {
         return {
             tab: 'articles',
-            user: {{json .User}},
-            stats: {{json .Stats}},
+            user: {{json .Data.FullUser}},
+            stats: {{json .Data.Stats}},
             get tabName() {
                 switch(this.tab) {
                     case 'articles': return '我的文章';
@@ -288,7 +291,7 @@
                     } else {
                         res = await window.api.getUserBookmarkedArticles(this.page, this.size);
                     }
-                    
+
                     const list = res.result.list || [];
                     this.list = list;
                     this.total = res.result.total || 0;
@@ -311,7 +314,7 @@
             get pagination() {
                 const total = this.totalPages;
                 if (total <= 1) return [];
-                
+
                 const current = this.page;
                 const delta = 2;
                 const range = [];
@@ -362,4 +365,3 @@
     }
 </script>
 {{end}}
-{{template "layout/main.gohtml" dict "Body" "profile_content" "Data" . "Entry" "src/main.js"}}

@@ -1,6 +1,7 @@
-{{define "search_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="space-y-4" x-data="{
-    query: '{{.Query}}',
+    query: '{{.Data.Query}}',
     performSearch() {
         const q = this.query.trim();
         if (q) {
@@ -10,7 +11,7 @@
 }">
     <!-- 搜索头部 -->
     <div class="mb-4">
-        <h1 class="text-3xl font-normal mb-4">搜索结果{{.Query}}</h1>
+        <h1 class="text-3xl font-normal mb-4">搜索结果{{.Data.Query}}</h1>
 
         <!-- 搜索框 -->
         <div class="max-w-2xl">
@@ -31,36 +32,36 @@
             </div>
         </div>
         <!-- 搜索统计信息 -->
-        {{if .Query}}
+        {{if .Data.Query}}
         <div class="mt-4 text-sm text-base-content/70">
-            {{if .SearchResponse}}
-            搜索 "{{.Query}}" 找到 {{.SearchResponse.Total}} 个结果
+            {{if .Data.SearchResponse}}
+            搜索 "{{.Data.Query}}" 找到 {{.Data.SearchResponse.Total}} 个结果
             {{else}}
-            搜索 "{{.Query}}" 没有找到相关结果
+            搜索 "{{.Data.Query}}" 没有找到相关结果
             {{end}}
         </div>
         {{end}}
     </div>
 
     <!-- 搜索结果 -->
-    {{if .SearchResponse}}
+    {{if .Data.SearchResponse}}
 
     <div class="card bg-base-100 shadow-xl">
-    {{if .ArticleList}}
-    {{template "article_list" .ArticleList}}
+    {{if .Data.ArticleList}}
+    {{template "article_list" .Data.ArticleList}}
     <!-- 分页 -->
-    {{if gt .SearchResponse.Total 10}}
+    {{if gt .Data.SearchResponse.Total 10}}
     <div class="py-8 border-t border-base-200 flex justify-center">
         <div class="join">
-            {{$currentPage := .CurrentPage}}
-            {{$totalPages := .TotalPages}}
-            {{$query := .Query}}
+            {{$currentPage := .Data.CurrentPage}}
+            {{$totalPages := .Data.TotalPages}}
+            {{$query := .Data.Query}}
 
             {{if gt $currentPage 1}}
             <a href="{{Url.Search}}?q={{$query}}&page={{sub $currentPage 1}}" class="join-item btn btn-sm">«</a>
             {{end}}
 
-            {{range $page := .PageNumbers}}
+            {{range $page := .Data.PageNumbers}}
             {{if eq $page $currentPage}}
             <button class="join-item btn btn-sm btn-active">{{$page}}</button>
             {{else}}
@@ -88,7 +89,7 @@
         </div>
     </div>
     {{end}}
-    {{else if .Query}}
+    {{else if .Data.Query}}
     <!-- 搜索错误 -->
     <div class="text-center py-12">
         <div class="text-6xl mb-4">⚠️</div>
@@ -105,6 +106,8 @@
     {{end}}
 </div>
 
+{{end}}
+{{define "script"}}
 <script>
     function performSearch() {
         const searchInput = document.getElementById('search-query');
@@ -131,5 +134,3 @@
     });
 </script>
 {{end}}
-
-{{template "layout/main.gohtml" dict "Body" "search_content" "Data" . "Entry" "src/main.js"}}

@@ -13,7 +13,7 @@
     <main class="flex-1 container mx-auto px-4 py-6">
         <div class="max-w-6xl mx-auto">
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {{range .Projects}}
+                {{range .Data.Projects}}
                 <div class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow duration-300 border border-base-200 group">
                     <div class="card-body p-4">
                         <!-- 项目头部 -->
@@ -53,9 +53,9 @@
                 </div>
                 {{end}}
             </div>
-
-            {{if not .Projects}}
-            <!-- 空状态 -->
+ 
+             {{if not .Data.Projects}}
+             <!-- 空状态 -->
             <div class="text-center py-16 bg-base-100 rounded-2xl border border-base-200">
                 <div class="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8 text-base-content/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">

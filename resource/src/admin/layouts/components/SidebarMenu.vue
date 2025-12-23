@@ -3,8 +3,8 @@
     <template v-for="item in menuItems" :key="item.key">
       <!-- Leaf Item -->
       <li v-if="!item.children">
-        <router-link 
-          :to="item.path || '#'" 
+        <router-link
+          :to="item.path || '#'"
           :class="{ 'active': isPathActive(item.path!) }"
           class="rounded-lg"
         >
@@ -12,7 +12,7 @@
           {{ item.label }}
         </router-link>
       </li>
-      
+
       <!-- Parent Item -->
       <li v-else>
         <details :open="isParentActive(item)">
@@ -22,7 +22,7 @@
           </summary>
           <ul>
             <li v-for="child in item.children" :key="child.key">
-              <router-link 
+              <router-link
                 :to="child.path || '#'"
                 :class="{ 'active': isPathActive(child.path!) }"
                 class="rounded-lg"

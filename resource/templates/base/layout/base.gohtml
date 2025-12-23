@@ -1,0 +1,31 @@
+{{define "layout/base.gohtml"}}
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{.Theme}}">
+<head>
+    {{template "common-head.gohtml" .}}
+    {{block "head_script" .}}{{end}}
+    <!-- 动态注入 JS 入口 -->
+    {{ ViteEntry "src/main.js" }}
+</head>
+{{if not .IsProduction}}
+    <div class="bg-base-300 p-4 m-4 rounded-lg overflow-auto max-h-96 text-xs font-mono">
+        <details>
+            <summary class="cursor-pointer font-bold text-primary">🛠️ Debug Data (Development Mode)</summary>
+            <pre class="mt-2">{{ToJson .}}</pre>
+        </details>
+    </div>
+{{end}}
+<body>
+<div class="min-h-screen flex flex-col bg-base-200">
+    <header class="sticky top-0 z-50">
+        {{template "nav.gohtml" .}}
+    </header>
+    <main class="flex-1 container mx-auto px-4 py-4">
+        {{block "main" .}}{{end}}
+    </main>
+    {{template "footer.gohtml" .}}
+</div>
+{{block "script" .}}{{end}}
+</body>
+</html>
+{{end}}

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
@@ -29,9 +30,24 @@ import (
 	"github.com/spf13/cast"
 )
 
+//go:embed docs/terms-of-service.md
+var termsOfServiceMD string
+
+//go:embed docs/privacy-policy.md
+var privacyPolicyMD string
+
 type PageButton struct {
 	Index int
 	Page  int
+}
+
+type HomeData struct {
+	ArticleCategoryList []datastruct.Option[string, uint64]
+	LatestArticles      []vo.ArticlesSimpleDto
+	Stats               vo.SiteStats
+	RecommendedArticles []articles.SmallEntity
+	Announcement        pageConfig.AnnouncementConfig
+	GooseForumInfo      ForumInfo
 }
 
 func Home(c *gin.Context) {
@@ -40,33 +56,46 @@ func Home(c *gin.Context) {
 		SetDescription("GooseForum's home").
 		SetCanonicalURL(component.BuildCanonicalHref(c)).
 		Build()
-	viewrender.Render(c, "index.gohtml", map[string]any{
-		"PageMeta":            pageMeta,
-		"ArticleCategoryList": hotdataserve.ArticleCategoryLabel(),
-		"LatestArticles":      hotdataserve.GetLatestArticleSimpleDto(), // 最新的文章
-		"Stats":               hotdataserve.GetSiteStatisticsData(),
-		"RecommendedArticles": hotdataserve.GetRecommendedArticles(),
-		"Announcement":        hotdataserve.GetAnnouncementConfigCache(),
-		"GooseForumInfo":      GetGooseForumInfo(),
-	})
+
+	viewrender.SafeRender(c, "index.gohtml", HomeData{
+		ArticleCategoryList: hotdataserve.ArticleCategoryLabel(),
+		LatestArticles:      hotdataserve.GetLatestArticleSimpleDto(),
+		Stats:               hotdataserve.GetSiteStatisticsData(),
+		RecommendedArticles: hotdataserve.GetRecommendedArticles(),
+		Announcement:        hotdataserve.GetAnnouncementConfigCache(),
+		GooseForumInfo:      GetGooseForumInfo(),
+	}, pageMeta)
 }
 
 func LoginView(c *gin.Context) {
-	viewrender.Render(c, "login.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle("登录/注册").
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-	})
+	viewrender.SafeRender[any](c, "login.gohtml", nil, viewrender.NewPageMetaBuilder().
+		SetTitle("登录/注册").
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }
 
 func ResetPasswordView(c *gin.Context) {
-	viewrender.Render(c, "reset-password.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle("重置密码").
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-	})
+	viewrender.SafeRender[any](c, "reset-password.gohtml", nil, viewrender.NewPageMetaBuilder().
+		SetTitle("重置密码").
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
+}
+
+type PostDetailData struct {
+	Article              articles.Entity
+	Username             string
+	CommentList          []ReplyDto
+	AvatarUrl            string
+	AuthorArticles       []articles.SmallEntity
+	ArticleCategory      []string
+	AuthorUserInfo       users.EntityComplete
+	AuthorInfoStatistics userStatistics.Entity
+	AuthorCard           *vo.UserCard
+	IsOwnArticle         bool
+	ArticleCategoryList  []datastruct.Option[string, uint64]
+	ILike                bool
+	IsFollowing          bool
+	IsBookmarked         bool
 }
 
 func PostDetail(c *gin.Context) {
@@ -173,36 +202,34 @@ func PostDetail(c *gin.Context) {
 	authorCard := transform.User2UserCard(authorUserInfo, authorInfoStatistics, isFollowing, currentUserId == entity.UserId, currentUserId > 0, false)
 
 	// 构建模板数据
-	viewrender.Render(c, "detail.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetArticle(
-				entity.Title,
-				entity.Description,
-				author,
-				articleCategory,
-				&entity.CreatedAt,
-				&entity.UpdatedAt,
-			).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			SetSchemaOrg(generateArticleJSONLD(c, entity, author)).
-			Build(),
+	viewrender.SafeRender(c, "detail.gohtml", PostDetailData{
+		Article:              entity,
+		Username:             author,
+		CommentList:          replyList,
+		AvatarUrl:            avatarUrl,
+		AuthorArticles:       authorArticles,
+		ArticleCategory:      articleCategory,
+		AuthorUserInfo:       authorUserInfo,
+		AuthorInfoStatistics: authorInfoStatistics,
+		AuthorCard:           authorCard,
+		IsOwnArticle:         currentUserId == entity.UserId,
+		ArticleCategoryList:  hotdataserve.ArticleCategoryLabel(),
+		ILike:                iLike,
+		IsFollowing:          isFollowing,
+		IsBookmarked:         isBookmarked,
+	}, viewrender.NewPageMetaBuilder().
+		SetArticle(
+			entity.Title,
+			entity.Description,
+			author,
+			articleCategory,
+			&entity.CreatedAt,
+			&entity.UpdatedAt,
+		).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		SetSchemaOrg(generateArticleJSONLD(c, entity, author)).
+		Build())
 
-		"Article":              entity,
-		"Username":             author,
-		"CommentList":          replyList,
-		"AvatarUrl":            avatarUrl,
-		"AuthorArticles":       authorArticles,
-		"ArticleCategory":      articleCategory,
-		"AuthorUserInfo":       authorUserInfo,
-		"AuthorInfoStatistics": authorInfoStatistics,
-		"AuthorCard":           authorCard,
-
-		"IsOwnArticle":        currentUserId == entity.UserId,
-		"ArticleCategoryList": hotdataserve.ArticleCategoryLabel(),
-		"ILike":               iLike,
-		"IsFollowing":         isFollowing,
-		"IsBookmarked":        isBookmarked,
-	})
 	articles.IncrementView(entity)
 }
 
@@ -247,6 +274,25 @@ func generateArticleJSONLD(c *gin.Context, entity articles.Entity, author string
 	}
 	jsonString := jsonopt.EncodeFormat(jsonLD)
 	return template.JS(jsonString)
+}
+
+type PostListData struct {
+	ArticleList         []vo.ArticlesSimpleDto
+	Page                int
+	PageSize            int
+	Total               int64
+	TotalPages          int
+	PrevPage            int
+	NextPage            int
+	ArticleCategoryList []datastruct.Option[string, uint64]
+	RecommendedArticles []articles.SmallEntity
+	CanonicalHref       string
+	Filters             string
+	FilterIds           []int
+	NoFilter            bool
+	Pagination          []PageButton
+	Stats               vo.SiteStats
+	ForumInfo           ForumInfo
 }
 
 func Post(c *gin.Context) {
@@ -327,29 +373,36 @@ func Post(c *gin.Context) {
 		}
 	}
 
-	viewrender.Render(c, "list.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(title).
-			SetDescription(description).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"ArticleList":         articleList,
-		"Page":                pageData.Page,
-		"PageSize":            pageSize,
-		"Total":               pageData.Total,
-		"TotalPages":          totalPages,
-		"PrevPage":            max(pageData.Page-1, 1),
-		"NextPage":            min(max(pageData.Page, 1)+1, totalPages),
-		"ArticleCategoryList": articleCategoryList,
-		"RecommendedArticles": hotdataserve.GetRecommendedArticles(),
-		"CanonicalHref":       component.BuildCanonicalHref(c),
-		"Filters":             filters,
-		"FilterIds":           categories,
-		"NoFilter":            len(categories) == 0,
-		"Pagination":          pagination,
-		"Stats":               hotdataserve.GetSiteStatisticsData(),
-		"ForumInfo":           forumInfo,
-	})
+	viewrender.SafeRender(c, "list.gohtml", PostListData{
+		ArticleList:         articleList,
+		Page:                pageData.Page,
+		PageSize:            pageSize,
+		Total:               pageData.Total,
+		TotalPages:          totalPages,
+		PrevPage:            max(pageData.Page-1, 1),
+		NextPage:            min(max(pageData.Page, 1)+1, totalPages),
+		ArticleCategoryList: articleCategoryList,
+		RecommendedArticles: hotdataserve.GetRecommendedArticles(),
+		CanonicalHref:       component.BuildCanonicalHref(c),
+		Filters:             filters,
+		FilterIds:           categories,
+		NoFilter:            len(categories) == 0,
+		Pagination:          pagination,
+		Stats:               hotdataserve.GetSiteStatisticsData(),
+		ForumInfo:           forumInfo,
+	}, viewrender.NewPageMetaBuilder().
+		SetTitle(title).
+		SetDescription(description).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
+}
+
+type UserData struct {
+	Articles       []vo.ArticlesSimpleDto
+	UserCard       *vo.UserCard
+	FollowingList  []*users.EntityComplete
+	FollowerList   []*users.EntityComplete
+	MyFollowingIds []uint64
 }
 
 func User(c *gin.Context) {
@@ -383,77 +436,76 @@ func User(c *gin.Context) {
 		myFollowingIds = userFollow.GetAllFollowingIds(currentUserId)
 	}
 
-	viewrender.Render(c, "user.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetUserProfile(showUser.Username, showUser.Bio).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"Articles":       hotdataserve.ArticlesSmallEntity2Dto(last),
-		"UserCard":       userCard,
-		"FollowingList":  followingList,
-		"FollowerList":   followerList,
-		"MyFollowingIds": myFollowingIds,
-	})
+	viewrender.SafeRender(c, "user.gohtml", UserData{
+		Articles:       hotdataserve.ArticlesSmallEntity2Dto(last),
+		UserCard:       userCard,
+		FollowingList:  followingList,
+		FollowerList:   followerList,
+		MyFollowingIds: myFollowingIds,
+	}, viewrender.NewPageMetaBuilder().
+		SetUserProfile(showUser.Username, showUser.Bio).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }
 
 func About(c *gin.Context) {
-	viewrender.Render(c, "about.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`关于`).
-			SetDescription(`GooseForum's about`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-	})
+	viewrender.SafeRender[any](c, "about.gohtml", nil, viewrender.NewPageMetaBuilder().
+		SetTitle(`关于`).
+		SetDescription(`GooseForum's about`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
+}
+
+type SponsorsData struct {
+	SponsorsInfo pageConfig.SponsorsConfig
 }
 
 func SponsorsView(c *gin.Context) {
 	sponsorsInfo := hotdataserve.SponsorsConfigCache()
-	viewrender.Render(c, "sponsors.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`赞助商`).
-			SetDescription(`GooseForum's sponsors`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"SponsorsInfo": sponsorsInfo,
-	})
+	viewrender.SafeRender(c, "sponsors.gohtml", SponsorsData{
+		SponsorsInfo: sponsorsInfo,
+	}, viewrender.NewPageMetaBuilder().
+		SetTitle(`赞助商`).
+		SetDescription(`GooseForum's sponsors`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }
 
-//go:embed docs/terms-of-service.md
-var termsOfServiceMD string
-
-//go:embed docs/privacy-policy.md
-var privacyPolicyMD string
+type MarkdownPageData struct {
+	Title       string
+	Subtitle    string
+	Description string
+	Content     template.HTML
+}
 
 // TermsOfService 用户协议页面
 func TermsOfService(c *gin.Context) {
 	htmlContent := markdown2html.MarkdownToHTML(termsOfServiceMD)
-	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`用户协议`).
-			SetDescription(`GooseForum 用户服务协议`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"Title":       "用户协议 - GooseForum",
-		"Subtitle":    "Terms of Service",
-		"Description": "GooseForum 用户服务协议",
-		"Content":     template.HTML(htmlContent),
-	})
+	viewrender.SafeRender(c, "markdown-page.gohtml", MarkdownPageData{
+		Title:       "用户协议 - GooseForum",
+		Subtitle:    "Terms of Service",
+		Description: "GooseForum 用户服务协议",
+		Content:     template.HTML(htmlContent),
+	}, viewrender.NewPageMetaBuilder().
+		SetTitle(`用户协议`).
+		SetDescription(`GooseForum 用户服务协议`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }
 
 // PrivacyPolicy 隐私政策页面
 func PrivacyPolicy(c *gin.Context) {
 	htmlContent := markdown2html.MarkdownToHTML(privacyPolicyMD)
-	viewrender.Render(c, "markdown-page.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`隐私政策`).
-			SetDescription(`GooseForum 隐私保护政策`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"Title":       "隐私政策 - GooseForum",
-		"Subtitle":    "Privacy Policy",
-		"Description": "GooseForum 隐私保护政策",
-		"Content":     template.HTML(htmlContent),
-	})
+	viewrender.SafeRender(c, "markdown-page.gohtml", MarkdownPageData{
+		Title:       "隐私政策 - GooseForum",
+		Subtitle:    "Privacy Policy",
+		Description: "GooseForum 隐私保护政策",
+		Content:     template.HTML(htmlContent),
+	}, viewrender.NewPageMetaBuilder().
+		SetTitle(`隐私政策`).
+		SetDescription(`GooseForum 隐私保护政策`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }
 
 type LinkStatistics struct {
@@ -461,10 +513,18 @@ type LinkStatistics struct {
 	Counter    int
 	Proportion int
 }
+
 type LinkStatisticsInfo struct {
-	Community LinkStatistics
-	Blog      LinkStatistics
 	Tool      LinkStatistics
+	Blog      LinkStatistics
+	Community LinkStatistics
+}
+
+type LinksData struct {
+	FriendLinksGroup    []pageConfig.FriendLinksGroup
+	TotalCounter        int
+	RecommendedArticles []articles.SmallEntity
+	LinkStatisticsInfo  LinkStatisticsInfo
 }
 
 func LinksView(c *gin.Context) {
@@ -492,17 +552,22 @@ func LinksView(c *gin.Context) {
 			linkStatisticsInfo.Community = statistics[i]
 		}
 	}
-	viewrender.Render(c, "links.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`友情链接`).
-			SetDescription(`GooseForum's links`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"FriendLinksGroup":    res,
-		"TotalCounter":        totalCounter,
-		"RecommendedArticles": hotdataserve.GetRecommendedArticles(),
-		"LinkStatisticsInfo":  linkStatisticsInfo,
-	})
+	viewrender.SafeRender(c, "links.gohtml", LinksData{
+		FriendLinksGroup:    res,
+		TotalCounter:        totalCounter,
+		RecommendedArticles: hotdataserve.GetRecommendedArticles(),
+		LinkStatisticsInfo:  linkStatisticsInfo,
+	}, viewrender.NewPageMetaBuilder().
+		SetTitle(`友情链接`).
+		SetDescription(`GooseForum's links`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
+}
+
+type ProfileData struct {
+	UserCard *vo.UserCard
+	FullUser *users.EntityComplete
+	Stats    userStatistics.Entity
 }
 
 func Profile(c *gin.Context) {
@@ -519,16 +584,16 @@ func Profile(c *gin.Context) {
 	stats := userStatistics.Get(userId)
 	userCard := transform.User2UserCard(user, stats, false, true, true, true)
 
-	viewrender.Render(c, "profile.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`个人中心`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"UserCard": userCard,
-		"FullUser": user,
-		"Stats":    stats,
-	})
+	viewrender.SafeRender(c, "profile.gohtml", ProfileData{
+		UserCard: userCard,
+		FullUser: &user,
+		Stats:    stats,
+	}, viewrender.NewPageMetaBuilder().
+		SetTitle(`个人中心`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }
+
 func UserSetting(c *gin.Context) {
 	userId := component.LoginUserId(c)
 	if userId == 0 {
@@ -543,39 +608,33 @@ func UserSetting(c *gin.Context) {
 	stats := userStatistics.Get(userId)
 	userCard := transform.User2UserCard(user, stats, false, true, true, true)
 
-	viewrender.Render(c, "settings.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`个人中心`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"UserCard": userCard,
-		"FullUser": user,
-		"Stats":    stats,
-	})
+	viewrender.SafeRender(c, "settings.gohtml", ProfileData{
+		UserCard: userCard,
+		FullUser: &user,
+		Stats:    stats,
+	}, viewrender.NewPageMetaBuilder().
+		SetTitle(`个人中心`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }
+
 func Publish(c *gin.Context) {
-	viewrender.Render(c, "publish.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`发布中心`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-	})
+	viewrender.SafeRender[any](c, "publish.gohtml", nil, viewrender.NewPageMetaBuilder().
+		SetTitle(`发布中心`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }
 
 func Notifications(c *gin.Context) {
-	viewrender.Render(c, "notifications.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`通知中心`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-	})
+	viewrender.SafeRender[any](c, "notifications.gohtml", nil, viewrender.NewPageMetaBuilder().
+		SetTitle(`通知中心`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }
 
 func Admin(c *gin.Context) {
-	viewrender.Render(c, "admin.gohtml", map[string]any{
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`管理`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-	})
+	viewrender.SafeRender[any](c, "admin.gohtml", nil, viewrender.NewPageMetaBuilder().
+		SetTitle(`管理`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build())
 }

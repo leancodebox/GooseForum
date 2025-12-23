@@ -56,6 +56,11 @@ type DocContent struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// DocsHomeData 文档首页数据
+type DocsHomeData struct {
+	Projects []DocProject
+}
+
 // DocsHome 文档首页 - 显示所有项目列表
 func DocsHome(c *gin.Context) {
 	docProjectsList := docProjects.GetAllActive()
@@ -71,16 +76,24 @@ func DocsHome(c *gin.Context) {
 		}
 	})
 
-	viewrender.Render(c, "docs-home.gohtml", map[string]any{
+	pageMeta := viewrender.NewPageMetaBuilder().
+		SetTitle(`文档中心`).
+		SetDescription(`GooseForum 文档中心，包含完整的使用指南和API参考`).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build()
 
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(`文档中心`).
-			SetDescription(`GooseForum 文档中心，包含完整的使用指南和API参考`).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"Projects":      projects,
-		"CanonicalHref": component.BuildCanonicalHref(c),
-	})
+	viewrender.SafeRender(c, "docs-home.gohtml", DocsHomeData{
+		Projects: projects,
+	}, pageMeta)
+}
+
+// DocsVersionData 文档版本数据
+type DocsVersionData struct {
+	Project         *DocProject
+	Version         *DocVersion
+	Directory       []docVersions.DirectoryItem
+	ProjectVersions []DocVersion
+	Breadcrumbs     []map[string]string
 }
 
 // DocsVersion 版本首页 - 显示版本的第一个文档
@@ -174,20 +187,32 @@ func DocsVersion(c *gin.Context) {
 		{"title": project.Name, "url": ""},
 	}
 
-	viewrender.Render(c, "docs-version.gohtml", map[string]any{
+	pageMeta := viewrender.NewPageMetaBuilder().
+		SetTitle(fmt.Sprintf("%s %s - %s - GooseForum", project.Name, version.Name, "文档中心")).
+		SetDescription(fmt.Sprintf("%s - %s", project.Description, version.Description)).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build()
 
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(fmt.Sprintf("%s %s - %s - GooseForum", project.Name, version.Name, "文档中心")).
-			SetDescription(fmt.Sprintf("%s - %s", project.Description, version.Description)).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"Project":         project,
-		"Version":         version,
-		"Directory":       resDirectory,
-		"ProjectVersions": projectVersions,
-		"Breadcrumbs":     breadcrumbs,
-		"CanonicalHref":   component.BuildCanonicalHref(c),
-	})
+	viewrender.SafeRender(c, "docs-version.gohtml", DocsVersionData{
+		Project:         project,
+		Version:         version,
+		Directory:       resDirectory,
+		ProjectVersions: projectVersions,
+		Breadcrumbs:     breadcrumbs,
+	}, pageMeta)
+}
+
+// DocsContentData 文档内容数据
+type DocsContentData struct {
+	Project         *DocProject
+	Version         *DocVersion
+	Content         *DocContent
+	HTMLContent     template.HTML
+	Directory       []docVersions.DirectoryItem
+	VersionContents []DocContent
+	ProjectVersions []DocVersion
+	Breadcrumbs     []map[string]string
+	CurrentSlug     string
 }
 
 // DocsContent 文档内容页面
@@ -305,22 +330,21 @@ func DocsContent(c *gin.Context) {
 	// 渲染Markdown内容为HTML
 	htmlContent := template.HTML(markdown2html.MarkdownToHTML(content.Content))
 
-	viewrender.Render(c, "docs-content.gohtml", map[string]any{
+	pageMeta := viewrender.NewPageMetaBuilder().
+		SetTitle(fmt.Sprintf("%s - %s - %s", content.Title, project.Name, "GooseForum")).
+		SetDescription(fmt.Sprintf("%s - %s", content.Title, project.Description)).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build()
 
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(fmt.Sprintf("%s - %s - %s", content.Title, project.Name, "GooseForum")).
-			SetDescription(fmt.Sprintf("%s - %s", content.Title, project.Description)).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"Project":         project,
-		"Version":         version,
-		"Content":         content,
-		"HTMLContent":     htmlContent,
-		"Directory":       resDirectory,
-		"VersionContents": versionContents,
-		"ProjectVersions": projectVersions,
-		"Breadcrumbs":     breadcrumbs,
-		"CanonicalHref":   component.BuildCanonicalHref(c),
-		"CurrentSlug":     contentSlug,
-	})
+	viewrender.SafeRender(c, "docs-content.gohtml", DocsContentData{
+		Project:         project,
+		Version:         version,
+		Content:         content,
+		HTMLContent:     htmlContent,
+		Directory:       resDirectory,
+		VersionContents: versionContents,
+		ProjectVersions: projectVersions,
+		Breadcrumbs:     breadcrumbs,
+		CurrentSlug:     contentSlug,
+	}, pageMeta)
 }

@@ -3,9 +3,15 @@ package urlconfig
 import (
 	"fmt"
 	"path"
+
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
 
 func GetDefaultAvatar() string {
+	cdnURL := setting.GetCDNURL()
+	if cdnURL != "" {
+		return cdnURL + `/static/pic/default-avatar.webp`
+	}
 	return `/static/pic/default-avatar.webp`
 }
 

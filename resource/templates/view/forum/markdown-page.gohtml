@@ -1,21 +1,11 @@
-<!DOCTYPE html>
-<html lang="zh-CN" data-theme="{{.Theme}}">
-<head>
-    {{template "common-head.gohtml" .}}
-    {{GetImportInfoPath `src/main.js`}}
-</head>
-<body>
-<div class="min-h-screen flex flex-col bg-base-200">
-    <header class="sticky top-0 z-50">
-        {{template "nav.gohtml" .}}
-    </header>
-    <main class="flex-1 container mx-auto px-4 py-4">
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
         <div class="max-w-4xl mx-auto">
             <!-- 页面标题 -->
             <div class="text-center mb-8">
-                <h1 class="text-4xl font-normal text-base-content mb-4">{{.Title}}</h1>
-                {{if .Subtitle}}
-                <p class="text-lg text-base-content/70">{{.Subtitle}}</p>
+                <h1 class="text-4xl font-normal text-base-content mb-4">{{.Data.Title}}</h1>
+                {{if .Data.Subtitle}}
+                <p class="text-lg text-base-content/70">{{.Data.Subtitle}}</p>
                 {{end}}
             </div>
 
@@ -23,7 +13,7 @@
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
                     <article class="prose lg:prose-base md:prose-lg max-w-none text-base-content overflow-hidden min-w-0">
-                            {{.Content}}
+                            {{.Data.Content}}
                     </article>
                 </div>
             </div>
@@ -40,8 +30,4 @@
                 </a>
             </div>
         </div>
-    </main>
-    {{template "footer.gohtml" .}}
-</div>
-</body>
-</html>
+{{end}}

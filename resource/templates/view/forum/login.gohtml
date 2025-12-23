@@ -1,4 +1,5 @@
-{{define "login_content"}}
+{{template "layout/base.gohtml" .}}
+{{define "main"}}
 <div class="flex items-center justify-center h-full w-full" x-data="loginHandler()">
     <div class="card w-full max-w-md bg-base-100 shadow-xl">
         <div class="card-body">
@@ -186,7 +187,7 @@
 </div>
 {{end}}
 
-{{define "login_script"}}
+{{define "script"}}
 <script>
     function loginHandler() {
         return {
@@ -239,7 +240,7 @@
                 if (!this.loginForm.username) this.errors.login.username = '请输入用户名';
                 if (!this.loginForm.password) this.errors.login.password = '请输入密码';
                 if (!this.loginForm.captcha) this.errors.login.captcha = '请输入验证码';
-                
+
                 if (Object.keys(this.errors.login).length > 0) return;
 
                 this.loading.login = true;
@@ -326,5 +327,3 @@
     }
 </script>
 {{end}}
-
-{{template "layout/main.gohtml" dict "Body" "login_content" "Script" "login_script" "Data" . "Entry" "src/main.js"}}

@@ -15,7 +15,7 @@
             <!-- 面包屑导航 -->
             <div class="breadcrumbs max-w-xs text-sm">
                 <ul>
-                    {{range $index, $breadcrumb := .Breadcrumbs}}
+                    {{range $index, $breadcrumb := .Data.Breadcrumbs}}
                         <li>
                             {{if .url}}
                                 <a href="{{.url}}"
@@ -40,17 +40,17 @@
                         <div class="text-3xl">🏷️</div>
                         <div class="flex-1">
                             <div class="flex items-center gap-3 mb-3">
-                                <h1 class="text-2xl font-bold text-base-content">{{.Project.Name}}</h1>
-                                <div class="badge badge-primary badge-outline">{{.Version.Version}}</div>
+                                <h1 class="text-2xl font-bold text-base-content">{{.Data.Project.Name}}</h1>
+                                <div class="badge badge-primary badge-outline">{{.Data.Version.Version}}</div>
                             </div>
-                            <h2 class="text-lg font-semibold text-base-content mb-2">{{.Version.Name}}</h2>
-                            <p class="text-base text-base-content/70 mb-4 leading-relaxed">{{.Version.Description}}</p>
+                            <h2 class="text-lg font-semibold text-base-content mb-2">{{.Data.Version.Name}}</h2>
+                            <p class="text-base text-base-content/70 mb-4 leading-relaxed">{{.Data.Version.Description}}</p>
                             <div class="flex items-center gap-6 text-sm text-base-content/60 mb-4">
                                 <div class="flex items-center gap-2">
-                                    📅 发布: {{.Version.CreatedAt.Format "2006-01-02"}}
+                                    📅 发布: {{.Data.Version.CreatedAt.Format "2006-01-02"}}
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    🔄 更新: {{.Version.UpdatedAt.Format "2006-01-02"}}
+                                    🔄 更新: {{.Data.Version.UpdatedAt.Format "2006-01-02"}}
                                 </div>
                             </div>
 
@@ -58,13 +58,13 @@
                             <div class="border-t border-base-200 pt-4">
                                 <h3 class="text-sm font-semibold text-base-content/80 mb-3">🔄 版本切换</h3>
                                 <div class="flex flex-wrap gap-2">
-                                    {{range .ProjectVersions}}
-                                        {{if eq .Version $.Version.Version}}
+                                    {{range .Data.ProjectVersions}}
+                                        {{if eq .Version $.Data.Version.Version}}
                                             <div class="px-3 py-1 bg-primary text-primary-content text-xs font-medium rounded-md border border-primary">{{.Version}}
                                                 (当前)
                                             </div>
                                         {{else}}
-                                            <a href="/docs/{{$.Project.Slug}}/{{.Version}}"
+                                            <a href="/docs/{{$.Data.Project.Slug}}/{{.Version}}"
                                                class="px-3 py-1 bg-base-100 border border-base-300 text-base-content text-xs font-medium rounded-md hover:border-primary hover:text-primary transition-all duration-200">{{.Version}}</a>
                                         {{end}}
                                     {{end}}
@@ -78,9 +78,9 @@
                         <h2 class="text-xl font-bold text-base-content flex items-center gap-2 mb-4">
                             📋 文档目录
                         </h2>
-                        {{if .Directory}}
+                        {{if .Data.Directory}}
                             <ul class="menu bg-base-100 rounded-box w-full">
-                                {{template "renderDirectory" dict "Items" .Directory "Project" .Project "Version" .Version}}
+                                {{template "renderDirectory" dict "Items" .Data.Directory "Project" .Data.Project "Version" .Data.Version}}
                             </ul>
                         {{else}}
                             <!-- 空状态 -->
@@ -96,7 +96,7 @@
 
             <!-- 操作按钮 -->
             <div class="flex justify-between items-center">
-                <a href="/docs/{{.Project.Slug}}"
+                <a href="/docs/{{.Data.Project.Slug}}"
                    class="inline-flex items-center gap-2 px-4 py-2 border border-base-300 text-base-content text-sm font-medium rounded-lg hover:border-primary hover:text-primary transition-all duration-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

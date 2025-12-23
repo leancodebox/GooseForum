@@ -1,7 +1,7 @@
 <template>
   <div class="drawer lg:drawer-open font-sans text-base-content">
     <input id="admin-drawer" type="checkbox" class="drawer-toggle" ref="drawerToggle" />
-    
+
     <!-- Drawer Content -->
     <div class="drawer-content flex flex-col min-h-screen bg-base-200">
       <!-- Navbar -->
@@ -11,7 +11,7 @@
             <component :is="Bars3Icon" class="w-6 h-6" />
           </label>
         </div>
-        
+
         <div class="flex-1 flex justify-between items-center gap-4">
            <div class="breadcrumbs text-sm text-base-content/60">
             <ul>
@@ -23,7 +23,7 @@
               </li>
             </ul>
           </div>
-          
+
           <!-- Breadcrumbs for Mobile/Small Screens -->
           <div class="text-sm breadcrumbs sm:hidden">
             <ul>
@@ -31,7 +31,7 @@
             </ul>
           </div>
         </div>
-        
+
         <div class="flex-none gap-2">
           <!-- Theme Toggle -->
           <label class="swap swap-rotate btn btn-ghost btn-circle">
@@ -41,7 +41,7 @@
             <!-- moon icon -->
             <MoonIcon class="swap-on w-5 h-5" />
           </label>
-          
+
         </div>
       </div>
 
@@ -77,7 +77,7 @@
     <!-- Sidebar -->
     <div class="drawer-side z-40">
       <label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-      <aside class="bg-base-100 min-h-screen w-64 flex flex-col border-r border-base-200">
+      <aside class="bg-base-100 min-h-screen w-56 flex flex-col border-r border-base-200">
         <!-- Logo -->
         <div class="h-14 flex items-center px-6 border-b border-base-200">
           <a href="/" class="flex items-center gap-3 text-xl font-normal text-primary tracking-wide">
@@ -87,12 +87,12 @@
             GooseForum
           </a>
         </div>
-        
+
         <!-- Menu -->
         <div class="flex-1 overflow-y-auto py-4 px-3">
           <SidebarMenu :menu-items="menuItems" />
         </div>
-        
+
         <!-- User Profile -->
         <div class="p-4 border-t border-base-200 bg-base-100">
           <div class="dropdown dropdown-top w-full">

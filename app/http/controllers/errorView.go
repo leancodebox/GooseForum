@@ -15,6 +15,8 @@ type ErrorPageData struct {
 	Message    string
 	ErrorCode  string
 	StatusCode int
+	Timestamp  string
+	RequestId  string
 }
 
 // RenderErrorPage 渲染错误页面的通用函数
@@ -53,18 +55,21 @@ func RenderErrorPage(c *gin.Context, data ErrorPageData) {
 		}
 	}
 
-	c.Status(data.StatusCode)
-	viewrender.Render(c, "error.gohtml", map[string]any{
+	if data.Timestamp == "" {
+		data.Timestamp = time.Now().Format("2006-01-02 15:04:05")
+	}
+	if data.RequestId == "" {
+		data.RequestId = c.GetHeader("X-Request-ID")
+	}
 
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(data.Title).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-		"message":   data.Message,
-		"errorCode": data.ErrorCode,
-		"timestamp": time.Now().Format("2006-01-02 15:04:05"),
-		"requestId": c.GetHeader("X-Request-ID"),
-	})
+	c.Status(data.StatusCode)
+
+	pageMeta := viewrender.NewPageMetaBuilder().
+		SetTitle(data.Title).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build()
+
+	viewrender.SafeRender(c, "error.gohtml", data, pageMeta)
 }
 
 // NotFoundPage 404页面
