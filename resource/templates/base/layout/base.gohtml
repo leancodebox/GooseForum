@@ -7,14 +7,6 @@
     <!-- 动态注入 JS 入口 -->
     {{ ViteEntry "src/main.js" }}
 </head>
-{{if not .IsProduction}}
-    <div class="bg-base-300 p-4 m-4 rounded-lg overflow-auto max-h-96 text-xs font-mono">
-        <details>
-            <summary class="cursor-pointer font-bold text-primary">🛠️ Debug Data (Development Mode)</summary>
-            <pre class="mt-2">{{ToJson .}}</pre>
-        </details>
-    </div>
-{{end}}
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
     <header class="sticky top-0 z-50">
@@ -25,6 +17,24 @@
     </main>
     {{template "footer.gohtml" .}}
 </div>
+
+{{if not .IsProduction}}
+    <div class="fixed bottom-6 right-6 z-[9999] group">
+        <details class="dropdown dropdown-top dropdown-end">
+            <summary class="btn btn-circle btn-primary shadow-xl text-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl border-none text-primary-content list-none after:hidden" title="Debug Data">
+                <span class="group-open:hidden">🛠️</span>
+                <span class="hidden group-open:block">✕</span>
+            </summary>
+            <div class="dropdown-content z-[1] p-0 shadow-2xl bg-base-100/95 backdrop-blur-sm rounded-box w-[90vw] max-w-3xl max-h-[80vh] overflow-hidden border border-base-300 mb-4 flex flex-col transform origin-bottom-right transition-all">
+                 
+                 <div class="overflow-auto p-4 custom-scrollbar mockup-code">
+                    <pre class="">{{ToJson .}}</pre>
+                 </div>
+            </div>
+        </details>
+    </div>
+{{end}}
+
 {{block "script" .}}{{end}}
 </body>
 </html>

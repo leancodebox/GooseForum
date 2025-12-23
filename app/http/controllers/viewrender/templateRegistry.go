@@ -27,10 +27,7 @@ func NewRegistry(fileSystem fs.FS) (*TemplateRegistry, error) {
 		Funcs(sprig.FuncMap())
 
 	// Load Base Templates (Layouts and Components)
-	baseTmpl := template.Must(tmpl.ParseFS(fileSystem,
-		"templates/base/layout/*.gohtml",
-		"templates/base/components/*.gohtml",
-	))
+	baseTmpl := template.Must(tmpl.ParseFS(fileSystem, "templates/base/**/*.gohtml"))
 
 	// 2. Walk and Load Views
 	err := fs.WalkDir(fileSystem, "templates", func(path string, d fs.DirEntry, err error) error {
