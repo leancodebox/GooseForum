@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-theme="{{.Theme}}">
 <head>
     {{template "common-head.gohtml" .}}
-    {{GetImportInfoPath `src/main.js`}}
+    {{ViteEntry `src/main.js`}}
 </head>
 <body>
 <div class="h-screen bg-base-200 flex flex-col" x-data="{ sidebarOpen: false }" x-effect="document.body.style.overflow = sidebarOpen ? 'hidden' : ''" @keydown.escape.window="sidebarOpen = false" @resize.window="if (window.innerWidth >= 768) sidebarOpen = false">

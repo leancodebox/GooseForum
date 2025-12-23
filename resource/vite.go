@@ -39,10 +39,15 @@ var (
 	htmlHeaderCache sync.Map
 	// ViteDevServerURL is the URL of the Vite dev server
 	ViteDevServerURL = "http://localhost:3009"
-
-	//go:embed goose.theme.json
-	themeConfig []byte
 )
+
+type Theme struct {
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	Version          string `json:"version"`
+	ViteDevServerURL string `json:"ViteDevServerURL"`
+	Manifest         string `json:"manifest"`
+}
 
 func init() {
 	// Try to load manifest if available

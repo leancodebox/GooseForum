@@ -36,10 +36,9 @@ var TemplateFuncs = template.FuncMap{
 	"ContainsInt": func(s []int, v any) bool {
 		return slices.Contains(s, cast.ToInt(v))
 	},
-	"GetImportInfoPath": GetImportInfoPath, // Deprecated: Use ViteEntry instead
-	"ViteEntry":         ViteEntry,
-	"VitePath":          VitePath,
-	"Asset":             Asset,
+	"ViteEntry": ViteEntry,
+	"VitePath":  VitePath,
+	"Asset":     Asset,
 	"SafeHTML": func(s string) template.HTML {
 		return template.HTML(s)
 	},
@@ -97,15 +96,11 @@ func Asset(path string) string {
 	return cdnURL + "/" + path
 }
 
-//go:embed static/pic/default-avatar.webp
-var defaultAvatar []byte
-
-func GetDefaultAvatar() []byte {
-	return defaultAvatar
-}
-
 //go:embed all:static/**
 var viewAssert embed.FS
+
+//go:embed templates/goose.theme.json
+var themeConfig []byte
 
 func GetViewAssert() *embed.FS {
 	return &viewAssert
@@ -133,12 +128,6 @@ func GetStaticFS() (fs.FS, error) {
 		return nil, err
 	}
 	return static, nil
-}
-
-// GetImportInfoPath 生成资源导入的 HTML 标签
-// Deprecated: Use ViteEntry instead
-func GetImportInfoPath(origin string) template.HTML {
-	return ViteEntry(origin)
 }
 
 type URLHelper struct{}
