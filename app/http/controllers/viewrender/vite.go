@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log/slog"
 	"path/filepath"
 	"strings"
@@ -52,7 +53,7 @@ func init() {
 	isProduction := setting.IsProduction()
 	var manifestItemMap map[string]ManifestItem
 
-	content, err := resource.GetViewAssert().ReadFile(manifestPath)
+	content, err := fs.ReadFile(resource.GetTemplateFS(), manifestPath)
 	if err != nil {
 		// Only log error in production if we expect it to exist
 		if isProduction {
