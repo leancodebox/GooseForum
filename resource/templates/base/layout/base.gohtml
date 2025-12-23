@@ -15,7 +15,9 @@
     <main class="flex-1 container mx-auto px-4 py-4">
         {{block "main" .}}{{end}}
     </main>
+    {{block "footer" .}}
     {{template "footer.gohtml" .}}
+    {{end}}
 </div>
 
 {{if not .IsProduction}}
