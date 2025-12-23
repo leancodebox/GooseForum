@@ -1,4 +1,4 @@
-package resource
+package viewrender
 
 import (
 	_ "embed"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/resource"
 )
 
 // ManifestItem represents an entry in the manifest.json
@@ -26,130 +27,139 @@ type ManifestItem struct {
 	Assets         []string `json:"assets"`
 }
 
-// ThemeConfig represents the theme configuration
-type ThemeConfig struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Version     string `json:"version"`
-	Manifest    string `json:"manifest"`
+type ViteHandler struct {
+	manifestItemMap  map[string]ManifestItem
+	htmlHeaderCache  sync.Map
+	viteDevServerURL string
+	isProduction     bool
 }
 
 var (
-	manifestItemMap = map[string]ManifestItem{}
-	htmlHeaderCache sync.Map
-	// ViteDevServerURL is the URL of the Vite dev server
-	ViteDevServerURL = "http://localhost:3009"
+	// DefaultViteHandler is the default instance of ViteHandler
+	DefaultViteHandler *ViteHandler
 )
-
-type Theme struct {
-	Name             string `json:"name"`
-	Description      string `json:"description"`
-	Version          string `json:"version"`
-	ViteDevServerURL string `json:"ViteDevServerURL"`
-	Manifest         string `json:"manifest"`
-}
 
 func init() {
 	// Try to load manifest if available
 	manifestPath := "static/dist/.vite/manifest.json"
 
 	// Parse theme.json if available
-	if len(themeConfig) > 0 {
-		theme := jsonopt.Decode[ThemeConfig](themeConfig)
-		if theme.Manifest != "" {
-			manifestPath = theme.Manifest
-		}
+	theme, _ := resource.GetThemeConfig()
+	if theme != nil && theme.Manifest != "" {
+		manifestPath = theme.Manifest
 	}
 
-	content, err := viewAssert.ReadFile(manifestPath)
+	isProduction := setting.IsProduction()
+	var manifestItemMap map[string]ManifestItem
+
+	content, err := resource.GetViewAssert().ReadFile(manifestPath)
 	if err != nil {
 		// Only log error in production if we expect it to exist
-		if setting.IsProduction() {
+		if isProduction {
 			slog.Error("ManifestGetError", "error", err, "path", manifestPath)
 		}
-		return
+	} else {
+		manifestItemMap = jsonopt.Decode[map[string]ManifestItem](content)
 	}
-	info := jsonopt.Decode[map[string]ManifestItem](content)
-	manifestItemMap = info
+
+	DefaultViteHandler = NewViteHandler(
+		"http://localhost:3009",
+		isProduction,
+		manifestItemMap,
+	)
+}
+
+// NewViteHandler creates a new ViteHandler
+func NewViteHandler(viteDevServerURL string, isProduction bool, manifestItemMap map[string]ManifestItem) *ViteHandler {
+	if manifestItemMap == nil {
+		manifestItemMap = make(map[string]ManifestItem)
+	}
+	handler := &ViteHandler{
+		manifestItemMap:  manifestItemMap,
+		viteDevServerURL: viteDevServerURL,
+		isProduction:     isProduction,
+	}
 
 	// Prebuild cache in production
-	if setting.IsProduction() {
-		prebuildProductionCache()
+	if isProduction {
+		handler.prebuildProductionCache()
 	}
+
+	return handler
 }
 
 // prebuildProductionCache builds HTML cache for all entries in production
-func prebuildProductionCache() {
-	for key, item := range manifestItemMap {
+func (v *ViteHandler) prebuildProductionCache() {
+	for key, item := range v.manifestItemMap {
 		if item.IsEntry {
 			cacheKey := fmt.Sprintf("%s_%v", key, true)
-			html := generateProductionHTML(key)
-			htmlHeaderCache.Store(cacheKey, template.HTML(html))
+			html := v.generateProductionHTML(key)
+			v.htmlHeaderCache.Store(cacheKey, template.HTML(html))
 		}
 	}
-	slog.Info("Production HTML cache prebuilt successfully", "cached_items", getCacheSize())
+	slog.Info("Production HTML cache prebuilt successfully", "cached_items", v.getCacheSize())
 }
 
-func getCacheSize() int {
+func (v *ViteHandler) getCacheSize() int {
 	count := 0
-	htmlHeaderCache.Range(func(_, _ any) bool {
+	v.htmlHeaderCache.Range(func(_, _ any) bool {
 		count++
 		return true
 	})
 	return count
 }
 
-func collectAllCSSFiles(entryKey string, visited map[string]bool) []string {
+func (v *ViteHandler) collectAllCSSFiles(entryKey string, visited map[string]bool) []string {
 	if visited[entryKey] {
 		return nil
 	}
 	visited[entryKey] = true
 
 	var cssFiles []string
-	if item, ok := manifestItemMap[entryKey]; ok {
+	if item, ok := v.manifestItemMap[entryKey]; ok {
 		cssFiles = append(cssFiles, item.Css...)
 		for _, importKey := range item.Imports {
-			cssFiles = append(cssFiles, collectAllCSSFiles(importKey, visited)...)
+			cssFiles = append(cssFiles, v.collectAllCSSFiles(importKey, visited)...)
 		}
 		for _, dynamicImportKey := range item.DynamicImports {
-			cssFiles = append(cssFiles, collectAllCSSFiles(dynamicImportKey, visited)...)
+			cssFiles = append(cssFiles, v.collectAllCSSFiles(dynamicImportKey, visited)...)
 		}
 	}
 	return cssFiles
 }
 
-func collectAllModulePreloads(entryKey string, visited map[string]bool) []string {
+func (v *ViteHandler) collectAllModulePreloads(entryKey string, visited map[string]bool) []string {
 	if visited[entryKey] {
 		return nil
 	}
 	visited[entryKey] = true
 
 	var moduleFiles []string
-	if item, ok := manifestItemMap[entryKey]; ok {
+	if item, ok := v.manifestItemMap[entryKey]; ok {
 		for _, importKey := range item.Imports {
-			if importedItem, exists := manifestItemMap[importKey]; exists {
+			if importedItem, exists := v.manifestItemMap[importKey]; exists {
 				moduleFiles = append(moduleFiles, importedItem.File)
-				moduleFiles = append(moduleFiles, collectAllModulePreloads(importKey, visited)...)
+				moduleFiles = append(moduleFiles, v.collectAllModulePreloads(importKey, visited)...)
 			}
 		}
 	}
 	return moduleFiles
 }
 
-func collectAllAssets(entryKey string, visited map[string]bool) []string {
+func (v *ViteHandler) collectAllAssets(entryKey string, visited map[string]bool) []string {
 	if visited[entryKey] {
 		return nil
 	}
 	visited[entryKey] = true
 
 	var assetFiles []string
-	if item, ok := manifestItemMap[entryKey]; ok {
+	if item, ok := v.manifestItemMap[entryKey]; ok {
 		assetFiles = append(assetFiles, item.Assets...)
 		for _, importKey := range item.Imports {
-			assetFiles = append(assetFiles, collectAllAssets(importKey, visited)...)
+			assetFiles = append(assetFiles, v.collectAllAssets(importKey, visited)...)
 		}
 		for _, dynamicImportKey := range item.DynamicImports {
-			assetFiles = append(assetFiles, collectAllAssets(dynamicImportKey, visited)...)
+			assetFiles = append(assetFiles, v.collectAllAssets(dynamicImportKey, visited)...)
 		}
 	}
 	return assetFiles
@@ -157,46 +167,56 @@ func collectAllAssets(entryKey string, visited map[string]bool) []string {
 
 // ViteEntry generates HTML tags for an entry point
 func ViteEntry(origin string) template.HTML {
-	cacheKey := fmt.Sprintf("%s_%v", origin, setting.IsProduction())
-	if val, cached := htmlHeaderCache.Load(cacheKey); cached {
+	return DefaultViteHandler.ViteEntry(origin)
+}
+
+// ViteEntry generates HTML tags for an entry point
+func (v *ViteHandler) ViteEntry(origin string) template.HTML {
+	cacheKey := fmt.Sprintf("%s_%v", origin, v.isProduction)
+	if val, cached := v.htmlHeaderCache.Load(cacheKey); cached {
 		return val.(template.HTML)
 	}
 
 	var html string
-	if setting.IsProduction() {
-		html = generateProductionHTML(origin)
+	if v.isProduction {
+		html = v.generateProductionHTML(origin)
 	} else {
-		html = generateDevelopmentHTML(origin)
+		html = v.generateDevelopmentHTML(origin)
 	}
 
 	res := template.HTML(html)
-	htmlHeaderCache.Store(cacheKey, res)
+	v.htmlHeaderCache.Store(cacheKey, res)
 	return res
 }
 
 // VitePath returns the resolved URL for an asset
 func VitePath(path string) string {
-	if setting.IsProduction() {
-		if item, ok := manifestItemMap[path]; ok {
+	return DefaultViteHandler.VitePath(path)
+}
+
+// VitePath returns the resolved URL for an asset
+func (v *ViteHandler) VitePath(path string) string {
+	if v.isProduction {
+		if item, ok := v.manifestItemMap[path]; ok {
 			return Asset(item.File)
 		}
 		// If not found in manifest, assume it's a direct asset
 		return Asset(path)
 	}
 	// Development: proxy to vite server
-	return fmt.Sprintf("%s/%s", strings.TrimSuffix(ViteDevServerURL, "/"), strings.TrimPrefix(path, "/"))
+	return fmt.Sprintf("%s/%s", strings.TrimSuffix(v.viteDevServerURL, "/"), strings.TrimPrefix(path, "/"))
 }
 
-func generateDevelopmentHTML(origin string) string {
-	return generateFileTag(origin, ViteDevServerURL)
+func (v *ViteHandler) generateDevelopmentHTML(origin string) string {
+	return generateFileTag(origin, v.viteDevServerURL)
 }
 
-func generateProductionHTML(origin string) string {
-	item, exists := manifestItemMap[origin]
+func (v *ViteHandler) generateProductionHTML(origin string) string {
+	item, exists := v.manifestItemMap[origin]
 	if !exists {
 		return generateFileTag(origin, "")
 	}
-	return buildResourceTags(origin, item)
+	return v.buildResourceTags(origin, item)
 }
 
 func generateFileTag(filename, baseURL string) string {
@@ -217,16 +237,16 @@ func generateFileTag(filename, baseURL string) string {
 	}
 }
 
-func buildResourceTags(origin string, item ManifestItem) string {
+func (v *ViteHandler) buildResourceTags(origin string, item ManifestItem) string {
 	sb := &strings.Builder{}
 
 	visitedCSS := make(map[string]bool)
 	visitedModules := make(map[string]bool)
 	visitedAssets := make(map[string]bool)
 
-	cssFiles := collectAllCSSFiles(origin, visitedCSS)
-	moduleFiles := collectAllModulePreloads(origin, visitedModules)
-	assets := collectAllAssets(origin, visitedAssets)
+	cssFiles := v.collectAllCSSFiles(origin, visitedCSS)
+	moduleFiles := v.collectAllModulePreloads(origin, visitedModules)
+	assets := v.collectAllAssets(origin, visitedAssets)
 
 	cssSet := make(map[string]bool)
 	for _, css := range cssFiles {

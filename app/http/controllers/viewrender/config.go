@@ -1,11 +1,7 @@
-package resource
+package viewrender
 
 import (
-	"embed"
 	"html/template"
-	"io/fs"
-	"os"
-	"path"
 	"slices"
 	"strings"
 	"time"
@@ -15,18 +11,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
 )
-
-//go:embed  all:templates/**
-var templates embed.FS
-
-// GetTemplateFS returns the filesystem for templates
-func GetTemplateFS() fs.FS {
-	if !setting.IsProduction() {
-		// In development mode, use the local file system
-		return os.DirFS("resource")
-	}
-	return templates
-}
 
 // TemplateFuncs defines the available functions for templates
 var TemplateFuncs = template.FuncMap{
@@ -94,40 +78,6 @@ func Asset(path string) string {
 	cdnURL = strings.TrimSuffix(cdnURL, "/")
 
 	return cdnURL + "/" + path
-}
-
-//go:embed all:static/**
-var viewAssert embed.FS
-
-//go:embed templates/goose.theme.json
-var themeConfig []byte
-
-func GetViewAssert() *embed.FS {
-	return &viewAssert
-}
-
-// GetAssetsFS 返回静态文件的文件系统
-func GetAssetsFS() (fs.FS, error) {
-	if !setting.IsProduction() {
-		return os.DirFS(path.Join("resource", "static", "dist", "assets")), nil
-	}
-	static, err := fs.Sub(GetViewAssert(), path.Join("static", "dist", "assets"))
-	if err != nil {
-		return nil, err
-	}
-	return static, nil
-}
-
-// GetStaticFS 返回静态文件的文件系统
-func GetStaticFS() (fs.FS, error) {
-	if !setting.IsProduction() {
-		return os.DirFS(path.Join("resource", "static")), nil
-	}
-	static, err := fs.Sub(GetViewAssert(), "static")
-	if err != nil {
-		return nil, err
-	}
-	return static, nil
 }
 
 type URLHelper struct{}

@@ -35,7 +35,7 @@ type TmplData[T any] struct {
 	Footer        pageConfig.FooterConfig
 	SiteSetting   pageConfig.SiteSettingsConfig
 	Data          T
-	Url           resource.URLHelper
+	Url           URLHelper
 	User          *vo.UserInfoShow
 	CurrentUserId uint64
 	PageMeta      *PageMeta
@@ -56,7 +56,7 @@ func SafeRender[T any](c *gin.Context, name string, data T, pageMeta ...*PageMet
 		Footer:        hotdataserve.GetFooterConfigCache(),
 		SiteSetting:   hotdataserve.GetSiteSettingsConfigCache(),
 		Data:          data,
-		Url:           resource.URLHelper{},
+		Url:           URLHelper{},
 		User:          user,
 		CurrentUserId: user.UserId,
 		PageMeta:      meta,

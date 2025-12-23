@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/leancodebox/GooseForum/resource"
 )
 
 type TemplateRegistry struct {
@@ -24,7 +23,7 @@ func NewRegistry(fileSystem fs.FS) (*TemplateRegistry, error) {
 	// 1. Get Base Template (Layouts + Components)
 	// Create base template with functions
 	tmpl := template.New("resource_v2").
-		Funcs(resource.TemplateFuncs).
+		Funcs(TemplateFuncs).
 		Funcs(sprig.FuncMap())
 
 	// Load Base Templates (Layouts and Components)
@@ -67,10 +66,6 @@ func NewRegistry(fileSystem fs.FS) (*TemplateRegistry, error) {
 
 	if err != nil {
 		return nil, err
-	}
-
-	for key, _ := range r.templates {
-		fmt.Println(key)
 	}
 
 	return r, nil
