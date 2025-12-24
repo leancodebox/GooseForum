@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-theme="{{.Theme}}">
 <head>
     {{template "common-head.gohtml" .}}
-    {{ViteEntry `src/main.js`}}
+    {{ViteEntry `src/main.ts`}}
 </head>
 <body>
 <div class="min-h-screen flex flex-col bg-base-200">
@@ -53,7 +53,7 @@
                 </div>
                 {{end}}
             </div>
- 
+
              {{if not .Data.Projects}}
              <!-- 空状态 -->
             <div class="text-center py-16 bg-base-100 rounded-2xl border border-base-200">

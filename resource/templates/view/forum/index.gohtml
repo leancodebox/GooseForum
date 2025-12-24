@@ -1,4 +1,4 @@
-{{template "layout/base.gohtml" .}}
+{{template "base.gohtml" .}}
 {{define "main"}}
 <div class="space-y-4">
     <!-- 通知模块 -->
@@ -36,7 +36,7 @@
                             </div>
                         </div>
                     </div>
-                    {{template "article_list" .Data.LatestArticles}}
+                    {{template "article-list" .Data.LatestArticles}}
                 </div>
             </div>
         </div>

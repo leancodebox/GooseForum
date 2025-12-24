@@ -1,4 +1,4 @@
-{{template "layout/base.gohtml" .}}
+{{template "base.gohtml" .}}
 {{define "main"}}
 <div class="space-y-4" x-data="{
     query: '{{.Data.Query}}',
@@ -48,7 +48,7 @@
 
     <div class="card bg-base-100 shadow-xl">
     {{if .Data.ArticleList}}
-    {{template "article_list" .Data.ArticleList}}
+    {{template "article-list" .Data.ArticleList}}
     <!-- 分页 -->
     {{if gt .Data.SearchResponse.Total 10}}
     <div class="py-8 border-t border-base-200 flex justify-center">

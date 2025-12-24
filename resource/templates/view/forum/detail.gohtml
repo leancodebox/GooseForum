@@ -1,4 +1,4 @@
-{{template "layout/base.gohtml" .}}
+{{template "base.gohtml" .}}
 {{define "main"}}
 <div class="flex flex-col md:flex-row gap-6" x-data="articleDetailHandler({
     articleId: {{.Data.Article.Id}},
@@ -216,7 +216,7 @@
     <aside class="w-full md:w-80 flex-shrink-0">
         <div class="sticky top-18 space-y-3">
             <!-- 作者信息卡片 -->
-            {{template "components/user-card.gohtml" .Data.AuthorCard}}
+            {{template "user-card.gohtml" .Data.AuthorCard}}
 
             <!-- 相关推荐 -->
             <div class="card bg-base-100 shadow-xl">

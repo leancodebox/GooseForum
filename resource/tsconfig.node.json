@@ -6,8 +6,7 @@
     "cypress.config.*",
     "nightwatch.conf.*",
     "playwright.config.*",
-    "eslint.config.*",
-    "tailwind.admin-v2.config.ts"
+    "eslint.config.*"
   ],
   "compilerOptions": {
     "noEmit": true,

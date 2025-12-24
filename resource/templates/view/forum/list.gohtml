@@ -1,4 +1,4 @@
-{{template "layout/base.gohtml" .}}
+{{template "base.gohtml" .}}
 {{define "main"}}
 <div class="flex flex-col md:flex-row gap-6">
     <section class="flex-1">
@@ -50,7 +50,7 @@
 
 
                 <!-- 文章列表 -->
-                {{template "article_list" .Data.ArticleList}}
+                {{template "article-list" .Data.ArticleList}}
 
                 {{template "pagination" .}}
             </div>

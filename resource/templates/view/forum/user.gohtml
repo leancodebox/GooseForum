@@ -1,11 +1,11 @@
-{{template "layout/base.gohtml" .}}
+{{template "base.gohtml" .}}
 {{define "main"}}
         <div class="flex flex-col lg:flex-row gap-6">
             <!-- 左侧用户信息 -->
             <aside class="w-full lg:w-80 shrink-0">
                 <div class="sticky top-18 space-y-3">
                     <!-- 用户基本信息 -->
-                    {{template "components/user-card.gohtml" .Data.UserCard }}
+                    {{template "user-card.gohtml" .Data.UserCard }}
                 </div>
             </aside>
 
@@ -18,7 +18,7 @@
                         <div class="tab-content border-base-300 bg-base-100 {{if not .Data.Articles}} p-10 {{end}}">
                             {{if .Data.Articles}}
                                 <div class="py-4">
-                                    {{template "article_list" .Data.Articles}}
+                                    {{template "article-list" .Data.Articles}}
                                 </div>
                             {{else}}
                                 假以时日一飞冲天
