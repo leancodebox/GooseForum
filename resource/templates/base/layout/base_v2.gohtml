@@ -1,0 +1,128 @@
+{{define "base_v2.gohtml"}}
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{.Theme}}">
+<head>
+    {{template "common-head.gohtml" .}}
+    <!-- V2 Styles & Scripts -->
+    {{ViteEntry `src/main-v2.ts`}}
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased selection:bg-blue-100 selection:text-blue-900">
+<div class="min-h-screen flex flex-col" x-data="{ mobileMenuOpen: false, userMenuOpen: false }">
+    
+    <!-- New Minimalist Navigation -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <!-- Logo -->
+                <div class="flex items-center gap-8">
+                    <a href="/v2" class="text-2xl font-black tracking-tighter text-blue-600 hover:text-blue-700 transition-colors">
+                        Goose<span class="text-gray-900">Forum</span>
+                    </a>
+                    
+                    <!-- Desktop Nav -->
+                    <nav class="hidden md:flex items-center gap-6">
+                        <a href="/v2" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Home</a>
+                        <a href="/post" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Explore</a>
+                        <a href="/links" class="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">Resources</a>
+                    </nav>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center gap-4">
+                    <!-- Search Trigger (Placeholder) -->
+                    <button class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-50 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+
+                    {{if .CurrentUserId}}
+                        <!-- User Menu -->
+                        <div class="relative" @click.away="userMenuOpen = false">
+                             <button @click="userMenuOpen = !userMenuOpen" class="flex items-center gap-2 focus:outline-none">
+                                <img src="{{.User.AvatarUrl}}" alt="Avatar" class="w-9 h-9 rounded-full ring-2 ring-transparent group-hover:ring-blue-100 transition-all object-cover">
+                             </button>
+                             <div x-show="userMenuOpen" 
+                                  x-transition:enter="transition ease-out duration-100"
+                                  x-transition:enter-start="transform opacity-0 scale-95"
+                                  x-transition:enter-end="transform opacity-100 scale-100"
+                                  x-transition:leave="transition ease-in duration-75"
+                                  x-transition:leave-start="transform opacity-100 scale-100"
+                                  x-transition:leave-end="transform opacity-0 scale-95"
+                                  class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 py-1" 
+                                  style="display: none;">
+                                <div class="px-4 py-3 border-b border-gray-50">
+                                    <p class="text-sm font-semibold text-gray-900">{{.User.Username}}</p>
+                                </div>
+                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600">Profile</a>
+                                <a href="/settings" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600">Settings</a>
+                                {{if .User.IsAdmin}}
+                                    <a href="/admin/" class="block px-4 py-2 text-sm text-amber-600 hover:bg-amber-50">Admin</a>
+                                {{end}}
+                                <div class="border-t border-gray-50 my-1"></div>
+                                <form action="/api/logout" method="POST" class="block">
+                                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <a href="/publish" class="hidden sm:inline-flex items-center justify-center h-9 px-4 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all shadow-sm shadow-blue-200">
+                            Post
+                        </a>
+                    {{else}}
+                        <a href="/login" class="text-sm font-medium text-gray-600 hover:text-blue-600 px-3 py-2">Login</a>
+                        <a href="/login?register=true" class="hidden sm:inline-flex items-center justify-center h-9 px-4 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-all">
+                            Sign Up
+                        </a>
+                    {{end}}
+
+                    <!-- Mobile Menu Button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-gray-500 hover:text-gray-900">
+                        <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="mobileMenuOpen" class="md:hidden border-t border-gray-100 bg-white" style="display: none;">
+            <div class="px-4 pt-2 pb-6 space-y-1">
+                <a href="/v2" class="block px-3 py-2 text-base font-medium text-gray-900 bg-gray-50 rounded-lg">Home</a>
+                <a href="/post" class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">Explore</a>
+                <a href="/links" class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">Resources</a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {{block "main" .}}{{end}}
+    </main>
+
+    <!-- New Minimalist Footer -->
+    <footer class="bg-white border-t border-gray-100 py-12 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-bold text-gray-900">GooseForum</span>
+                    <span class="text-sm text-gray-400">© 2024</span>
+                </div>
+                <div class="flex flex-wrap justify-center gap-8">
+                    <a href="/about" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">About</a>
+                    <a href="/privacy-policy" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Privacy</a>
+                    <a href="/terms-of-service" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Terms</a>
+                    <a href="https://github.com/leancodebox/GooseForum" target="_blank" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+{{block "script" .}}{{end}}
+</body>
+</html>
+{{end}}
