@@ -1,78 +1,11 @@
 {{template "base_v3.gohtml" .}}
 {{define "main"}}
-<div class="flex h-full gap-6">
+<div class="flex gap-6 relative items-start">
     
-    <!-- Left Sidebar: Discourse Style Navigation -->
-    <div class="hidden lg:flex flex-col w-[260px] xl:w-[280px] flex-shrink-0 h-full overflow-y-auto py-4 pl-4 sm:pl-6 lg:pl-8 pr-2 no-scrollbar">
-        <div class="space-y-4 pr-2">
-            <!-- Main Menu -->
-            <nav class="space-y-0.5">
-                <a href="/v3" class="flex items-center gap-3 px-3 py-2 text-[15px] font-bold text-gray-900 bg-white rounded-lg shadow-[0_1px_4px_rgb(0,0,0,0.04)] border border-gray-100 transition-all group hover:-translate-y-0.5 hover:shadow-sm">
-                    <span class="text-lg group-hover:scale-110 transition-transform">💬</span>
-                    <span>Topics</span>
-                </a>
-                <a href="/post?sort=latest" class="flex items-center gap-3 px-3 py-2 text-[15px] font-medium text-gray-600 hover:text-gray-900 hover:bg-white hover:shadow-[0_1px_4px_rgb(0,0,0,0.02)] hover:border-gray-100 rounded-lg border border-transparent transition-all group">
-                    <span class="text-lg opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform">📅</span>
-                    <span>Recent Activity</span>
-                </a>
-                <a href="/post?sort=popular" class="flex items-center gap-3 px-3 py-2 text-[15px] font-medium text-gray-600 hover:text-gray-900 hover:bg-white hover:shadow-[0_1px_4px_rgb(0,0,0,0.02)] hover:border-gray-100 rounded-lg border border-transparent transition-all group">
-                    <span class="text-lg opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform">🔥</span>
-                    <span>More</span>
-                </a>
-            </nav>
-
-            <!-- Resources / Links -->
-            <div class="space-y-1.5 pt-2">
-                <div class="px-2 flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest">
-                    <span>Resources</span>
-                </div>
-                <nav class="space-y-0.5">
-                    <a href="/links" class="flex items-center gap-3 px-3 py-1.5 text-[14px] font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50/50 rounded-md transition-colors group">
-                        <span class="text-base opacity-60 group-hover:opacity-100">🔗</span>
-                        Connect
-                    </a>
-                    <a href="/about" class="flex items-center gap-3 px-3 py-1.5 text-[14px] font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50/50 rounded-md transition-colors group">
-                        <span class="text-base opacity-60 group-hover:opacity-100">📘</span>
-                        Docs
-                    </a>
-                </nav>
-            </div>
-
-            <!-- Categories List -->
-            <div class="space-y-1.5 pt-2">
-                <div class="px-2 flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest">
-                    <span>Categories</span>
-                </div>
-                <div class="space-y-0.5">
-                    {{range .Data.ArticleCategoryList}}
-                    <a href="/post?filters={{.Value}}" class="flex items-center gap-3 px-3 py-1.5 text-[14px] text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 rounded-md transition-all group hover:translate-x-1">
-                        <span class="w-2.5 h-2.5 rounded-[3px] bg-gray-300 group-hover:bg-blue-500 transition-colors shadow-sm"></span>
-                        <span class="truncate font-medium">{{.Name}}</span>
-                    </a>
-                    {{end}}
-                </div>
-            </div>
-        </div>
-
-        <!-- Sidebar Footer -->
-        <div class="mt-auto pt-6 pr-2">
-            <div class="border-t border-gray-100 pt-4">
-                <div class="flex flex-wrap gap-x-3 gap-y-1.5 mb-3">
-                    <a href="/about" class="text-[11px] text-gray-500 hover:text-gray-900 transition-colors">About</a>
-                    <a href="/privacy-policy" class="text-[11px] text-gray-500 hover:text-gray-900 transition-colors">Privacy</a>
-                    <a href="/terms-of-service" class="text-[11px] text-gray-500 hover:text-gray-900 transition-colors">Terms</a>
-                    <a href="https://github.com/leancodebox/GooseForum" target="_blank" class="text-[11px] text-gray-500 hover:text-gray-900 transition-colors">GitHub</a>
-                </div>
-                <div class="flex items-center gap-2 text-[11px] text-gray-400">
-                    <span class="font-bold">GooseForum</span>
-                    <span>© 2024</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{template "sidebar_v3.gohtml" .}}
 
     <!-- Main Content: The List -->
-    <div class="flex-1 h-full overflow-y-auto py-4 pr-4 sm:pr-6 lg:pr-8 pl-2 custom-scrollbar">
+    <div class="flex-1 min-w-0 py-4 pr-4 sm:pr-6 lg:pr-8 pl-2">
         <div class="space-y-4 pb-12">
         
         <!-- Top Banner / Announcement -->

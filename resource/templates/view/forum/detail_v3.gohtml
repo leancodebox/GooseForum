@@ -1,0 +1,324 @@
+{{template "base_v3.gohtml" .}}
+{{define "main"}}
+<div class="flex gap-6 relative items-start">
+    {{template "sidebar_v3.gohtml" .}}
+    
+    <div class="flex-1 min-w-0 py-6 pr-4 sm:pr-6 lg:pr-8">
+        <div class="flex flex-col xl:flex-row gap-6" x-data="articleDetailHandler({
+            articleId: {{.Data.Article.Id}},
+            isLiked: {{.Data.ILike}},
+            likeCount: {{.Data.Article.LikeCount}},
+            isBookmarked: {{.Data.IsBookmarked}},
+            isFollowing: {{.Data.IsFollowing}}
+        })">
+            <section class="flex-1 space-y-6 min-w-0">
+                <!-- Article Card -->
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body overflow-hidden">
+                        <h1 class="card-title text-3xl font-normal text-base-content mb-4">
+                            {{.Data.Article.Title}}
+                        </h1>
+                        <div class="flex items-center text-base-content/70 mb-6 border-b border-b-gray-200 pb-2">
+                            <a class="avatar" href="/user/{{.Data.Article.UserId}}">
+                                <div class="mask mask-squircle w-8 h-8">
+                                    <img src="{{.Data.AvatarUrl}}" alt="{{.Data.Username}}的头像"/>
+                                </div>
+                            </a>
+                            <a href="/user/{{.Data.Article.UserId}}" class="ml-2 mr-4 flex-shrink-0">{{.Data.Username}}</a>
+                            <span class="mr-4 flex-shrink-0">{{FormatTime .Data.Article.CreatedAt}}</span>
+                            {{if eq .CurrentUserId .Data.Article.UserId}}
+                            <a href="/publish?id={{.Data.Article.Id}}" class="mr-4 text-primary flex-shrink-0">编辑</a>
+                            {{end}}
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                <span class="mr-4">{{.Data.Article.ViewCount}}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                                <span x-text="likeCount">{{.Data.Article.LikeCount}}</span>
+                            </div>
+                        </div>
+                        <div class="prose lg:prose-base md:prose-lg
+                         prose-h1:font-normal prose-h2:font-normal prose-h3:font-normal
+                         prose-a:no-underline
+                         prose-pre:bg-base-200
+                         prose-code:text-base-content
+                         max-w-none text-base-content overflow-hidden min-w-0">
+                            {{ SafeHTML .Data.Article.RenderedHTML}}
+                        </div>
+
+                        <!-- Like & Bookmark Buttons -->
+                        <div class="flex gap-2 mt-6">
+                            <button class="px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none"
+                                    :class="isLiked ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content'"
+                                    @click="toggleLike"
+                                    aria-label="点赞文章">
+                                <svg class="w-4 h-4 transition-all duration-300" viewBox="0 0 24 24">
+                                    <path fill="currentColor"
+                                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                                <span x-text="likeCount">{{.Data.Article.LikeCount}}</span>
+                            </button>
+                            <button class="px-4 py-2 rounded-full text-sm flex items-center gap-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-none"
+                                    :class="isBookmarked ? 'bg-warning text-warning-content' : 'bg-base-200 text-base-content'"
+                                    @click="toggleBookmark"
+                                    aria-label="收藏文章">
+                                <svg class="w-4 h-4 transition-all duration-300" viewBox="0 0 24 24">
+                                    <path fill="currentColor"
+                                          d="M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z"/>
+                                </svg>
+                                <span x-text="isBookmarked ? '已收藏' : '收藏'">{{if .Data.IsBookmarked}}已收藏{{else}}收藏{{end}}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body overflow-hidden">
+                        <h2 class="card-title mb-4">评论</h2>
+                        {{if .CurrentUserId}}
+                        <div class="mb-6">
+                            <label class="floating-label w-full">
+                                <span>评论</span>
+                                <textarea class="textarea textarea-bordered w-full"
+                                          placeholder="写下你的评论..."
+                                          rows="3"
+                                          x-model="commentContent"></textarea>
+                            </label>
+                            <div class="flex justify-between items-center mt-2">
+                                <div class="flex items-center gap-2">
+                                </div>
+                                <button class="btn btn-primary btn-sm"
+                                        @click="submitComment(0)"
+                                        :disabled="submitting || !commentContent.trim()">
+                                    <span x-show="submitting && currentReplyId === 0"
+                                          class="loading loading-spinner loading-xs"></span>
+                                    <span x-text="submitting && currentReplyId === 0 ? '提交中...' : '发表评论'">发表评论</span>
+                                </button>
+                            </div>
+                        </div>
+                        {{else}}
+                        <div class="mt-6 text-center">
+                            <a href="/login" class="btn btn-primary btn-sm">登录后发表评论</a>
+                        </div>
+                        {{end}}
+
+                        <!-- Comment List -->
+                        <div class="space-y-4">
+                            {{$LoginUser := .User}}
+                            {{range .Data.CommentList}}
+                            <div class="flex gap-3" id="reply_{{.Id}}">
+                                <a class="avatar" href="/user/{{.UserId}}">
+                                    <div class="mask mask-squircle w-10 h-10">
+                                        <img src="{{.UserAvatarUrl}}" alt="{{.Username}}"/>
+                                    </div>
+                                </a>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <a class="font-normal text-base-content" href="/user/{{.UserId}}">{{.Username}}</a>
+                                        <span class="text-sm text-base-content/60">{{.CreateTime}}</span>
+                                    </div>
+                                    <p class="text-base-content mb-2">
+                                        {{if .ReplyToUsername}}
+                                        <a href="/user/{{.ReplyToUserId}}" class="text-primary"
+                                           class="mr-1">@{{.ReplyToUsername}}</a>
+                                        {{end}}
+                                        {{Nl2br .Content}}
+                                    </p>
+                                    <div class="flex items-center gap-4 text-sm text-base-content/60">
+                                        <button class="hover:text-primary flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                                 viewBox="0 0 24 24"
+                                                 stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      stroke-width="2"
+                                                      d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                                            </svg>
+                                            赞
+                                        </button>
+                                        <button class="hover:text-primary" @click="toggleReplyForm({{.Id}})">回复</button>
+                                        <button class="hover:text-primary">举报</button>
+                                        {{if and $LoginUser (eq $LoginUser.UserId .UserId)}}
+                                        <button class="hover:text-primary" @click="deleteReply({{.Id}})">删除</button>
+                                        {{end}}
+                                    </div>
+                                    <!-- Reply Form -->
+                                    <div x-show="replyForms[{{.Id}}]" class="mt-3" style="display: none;" x-transition>
+                                        <label class="floating-label w-full">
+                                            <span>回复</span>
+                                            <textarea class="textarea textarea-bordered w-full comment-input"
+                                                      placeholder="写下你的回复..."
+                                                      rows="2"
+                                                      x-model="replyContents[{{.Id}}]"></textarea>
+                                        </label>
+                                        <div class="flex justify-end gap-2 mt-2">
+                                            <button class="btn btn-outline btn-sm" @click="toggleReplyForm({{.Id}})">取消
+                                            </button>
+                                            <button class="btn btn-primary btn-sm"
+                                                    @click="submitComment({{.Id}})"
+                                                    :disabled="submitting || !replyContents[{{.Id}}]">
+                                                <span x-show="submitting && currentReplyId === {{.Id}}"
+                                                      class="loading loading-spinner loading-xs"></span>
+                                                <span x-text="submitting && currentReplyId === {{.Id}} ? '提交中...' : '发表回复'">发表回复</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Sidebar -->
+            <aside class="w-full xl:w-80 flex-shrink-0">
+                <div class="sticky top-[80px] space-y-3">
+                    <!-- Author Card -->
+                    {{template "user-card.gohtml" .Data.AuthorCard}}
+
+                    <!-- Recommended -->
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body">
+                            <h2 class="card-title">相关推荐</h2>
+                            <div class="space-y-1">
+                                {{range .Data.AuthorArticles}}
+                                <div class="hover:bg-base-300 p-2 rounded cursor-pointer">
+                                    <a class="text-sm font-normal text-base-content hover:text-primary"
+                                       href="/post/{{.Id}}">{{.Title}}</a>
+                                    <div class="flex justify-between items-center text-xs text-base-content/60 mt-1">
+                                        <span>{{.ViewCount}} 阅读</span>
+                                        <span>{{.PubDate}}</span>
+                                    </div>
+                                </div>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topics -->
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body">
+                            <h2 class="card-title">热门话题</h2>
+                            <div class="flex flex-wrap gap-2">
+                                {{range .Data.ArticleCategoryList}}
+                                <a class="badge badge-outline hover:badge-primary cursor-pointer"
+                                   href="/post?filters={{.Value}}">#{{.Name}}</a>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "script"}}
+<script>
+    function articleDetailHandler(initialData) {
+        return {
+            articleId: initialData.articleId,
+            isLiked: initialData.isLiked,
+            likeCount: initialData.likeCount,
+            isBookmarked: initialData.isBookmarked,
+            isFollowing: initialData.isFollowing,
+            commentContent: '',
+            replyForms: {},
+            replyContents: {},
+            submitting: false,
+            currentReplyId: 0,
+            init() {
+                // Initialize Mermaid
+                if (window.MermaidUtils) {
+                    window.MermaidUtils.renderMermaidDiagrams('.prose');
+                }
+            },
+
+            async toggleLike() {
+                const action = this.isLiked ? 2 : 1;
+                try {
+                    const response = await window.api.likeArticle(this.articleId, action);
+                    // Standard Result wrapper
+                    this.isLiked = !this.isLiked;
+                    this.likeCount = this.isLiked ? this.likeCount + 1 : this.likeCount - 1;
+                } catch (error) {
+                    console.error('Like failed', error);
+                    window.notification.error('操作失败');
+                }
+            },
+
+            async toggleBookmark() {
+                try {
+                    const response = await window.api.bookmarkArticle(this.articleId, this.isBookmarked ? 2 : 1);
+                    this.isBookmarked = !this.isBookmarked;
+                    if (this.isBookmarked) {
+                        window.notification.success('收藏成功');
+                    } else {
+                        window.notification.success('取消收藏成功');
+                    }
+                } catch (error) {
+                    console.error('Bookmark failed', error);
+                    window.notification.error('操作失败');
+                }
+            },
+
+            toggleReplyForm(id) {
+                if (this.replyForms[id]) {
+                    this.replyForms[id] = false;
+                } else {
+                    this.replyForms[id] = true;
+                    if (this.replyContents[id] === undefined) {
+                        this.replyContents[id] = '';
+                    }
+                }
+            },
+
+            async submitComment(replyId) {
+                const content = replyId === 0 ? this.commentContent : this.replyContents[replyId];
+                if (!content || !content.trim()) {
+                    window.notification.warning('请输入内容');
+                    return;
+                }
+
+                this.submitting = true;
+                this.currentReplyId = replyId;
+
+                try {
+                    await window.api.submitComment(this.articleId, content, replyId);
+                    location.reload();
+                } catch (error) {
+                    console.error('Comment failed', error);
+                    window.notification.error('评论失败');
+                } finally {
+                    this.submitting = false;
+                    this.currentReplyId = 0;
+                }
+            },
+
+            async deleteReply(replyId) {
+                if (!confirm('确定要删除这条评论吗？')) return;
+                try {
+                    await window.api.deleteComment(replyId);
+                    location.reload();
+                } catch (error) {
+                    console.error('Delete failed', error);
+                    window.notification.error('删除失败');
+                }
+            }
+        }
+    }
+</script>
+{{end}}

@@ -6,8 +6,8 @@
     <!-- V2 Styles & Scripts -->
     {{ViteEntry `src/main-v2.ts`}}
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans antialiased selection:bg-blue-100 selection:text-blue-900 h-screen overflow-hidden">
-<div class="h-full flex flex-col" x-data="{ mobileMenuOpen: false, userMenuOpen: false }">
+<body class="bg-gray-50 text-gray-900 font-sans antialiased selection:bg-blue-100 selection:text-blue-900">
+<div class="min-h-screen flex flex-col" x-data="{ mobileMenuOpen: false, userMenuOpen: false }">
     
     <!-- New Minimalist Navigation -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
@@ -193,7 +193,7 @@
     
     
     <!-- Main Content -->
-    <main class="flex-1 flex overflow-hidden w-full max-w-[1600px] mx-auto">
+    <main class="flex-1 w-full max-w-[1600px] mx-auto">
         {{block "main" .}}{{end}}
     </main>
 </div>
