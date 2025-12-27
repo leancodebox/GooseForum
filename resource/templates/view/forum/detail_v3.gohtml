@@ -9,7 +9,8 @@
             isLiked: {{.Data.ILike}},
             likeCount: {{.Data.Article.LikeCount}},
             isBookmarked: {{.Data.IsBookmarked}},
-            isFollowing: {{.Data.IsFollowing}}
+            isFollowing: {{.Data.IsFollowing}},
+            title: '{{.Data.Article.Title}}'
         })">
             
             <!-- Main Thread Content -->
@@ -17,7 +18,7 @@
                 
                 <!-- Topic Title Header -->
                 <div class="mb-6 px-1">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">
+                    <h1 x-ref="pageTitle" class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">
                         {{.Data.Article.Title}}
                     </h1>
                     <div class="flex items-center gap-2 flex-wrap">
@@ -363,6 +364,7 @@
             likeCount: initialData.likeCount,
             isBookmarked: initialData.isBookmarked,
             isFollowing: initialData.isFollowing,
+            articleTitle: initialData.title,
             commentContent: '',
             replyForms: {},
             replyContents: {},
@@ -373,6 +375,21 @@
                 if (window.MermaidUtils) {
                     window.MermaidUtils.renderMermaidDiagrams('.prose');
                 }
+
+                // Header Title Logic
+                this.$dispatch('set-header-title', this.articleTitle);
+                
+                // Use $nextTick to ensure DOM is ready
+                this.$nextTick(() => {
+                    const titleEl = document.querySelector('h1.text-2xl'); // Use a more specific selector or ref if possible
+                    if (titleEl) {
+                        const observer = new IntersectionObserver((entries) => {
+                            // If title is NOT intersecting (scrolled out of view), show header title
+                            this.$dispatch('toggle-header-title', !entries[0].isIntersecting);
+                        }, { threshold: 0, rootMargin: '-80px 0px 0px 0px' });
+                        observer.observe(titleEl);
+                    }
+                });
             },
 
             async toggleLike() {
