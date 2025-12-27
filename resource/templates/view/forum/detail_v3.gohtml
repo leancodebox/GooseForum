@@ -38,12 +38,12 @@
                 </div>
 
                 <!-- Post Stream Container -->
-                <div class="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
+                <div class="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
                     
                     <!-- OP (Original Post) -->
                     <div class="flex gap-4 sm:gap-6 p-5 sm:p-6 group">
                         <!-- Left: Avatar -->
-                        <div class="flex-shrink-0 pt-1">
+                        <div class="flex-shrink-0 sticky top-[80px] self-start z-10 pt-1">
                             <a href="/user/{{.Data.Article.UserId}}" class="block relative">
                                 <img src="{{.Data.AvatarUrl}}" alt="{{.Data.Username}}" class="w-11 h-11 rounded-full object-cover border border-gray-100 shadow-sm hover:shadow-md transition-all">
                                 {{if IsOnline .Data.Article.UpdatedAt}}
@@ -127,7 +127,7 @@
                     {{range .Data.CommentList}}
                     <div class="flex gap-4 sm:gap-6 p-5 sm:p-6 border-t border-gray-100 group transition-colors hover:bg-gray-50/50" id="reply_{{.Id}}">
                         <!-- Left: Avatar -->
-                        <div class="flex-shrink-0 pt-1">
+                        <div class="flex-shrink-0 sticky top-[80px] self-start z-10 pt-1">
                             <a href="/user/{{.UserId}}" class="block relative">
                                 <img src="{{.UserAvatarUrl}}" alt="{{.Username}}" class="w-11 h-11 rounded-full object-cover border border-gray-100 shadow-sm group-hover:shadow-md transition-all">
                             </a>
@@ -236,32 +236,13 @@
                     {{end}}
                 </div>
 
-                <!-- Suggested Topics (Moved to bottom) -->
-                {{if .Data.AuthorArticles}}
-                <div class="mt-12">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 px-1">Suggested Topics</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {{range .Data.AuthorArticles}}
-                        <a href="/post/{{.Id}}" class="block p-4 bg-white rounded-xl border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all group">
-                            <h4 class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 mb-2">{{.Title}}</h4>
-                            <div class="flex items-center gap-4 text-xs text-gray-400">
-                                <span class="flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                    {{.ViewCount}}
-                                </span>
-                                <span>{{.PubDate}}</span>
-                            </div>
-                        </a>
-                        {{end}}
-                    </div>
-                </div>
-                {{end}}
+
             </section>
 
             <!-- Right Sidebar: Topic Info & Timeline -->
             <aside class="hidden xl:block w-80 flex-shrink-0">
-                <div class="sticky top-[80px] space-y-6">
-                    <!-- Topic Info Widget -->
+                <div class="sticky top-[80px] space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto [&::-webkit-scrollbar]:w-0">
+                    <!-- Topic Map Widget -->
                     <div class="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
                         <div class="p-4 border-b border-gray-50 bg-gray-50/50">
                             <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">Topic Map</h3>
@@ -274,11 +255,11 @@
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-medium text-gray-500">Last Reply</span>
-                                    <span class="text-sm font-bold text-gray-900">{{.Data.Article.LastUpdateTime}}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{FormatTime .Data.Article.UpdatedAt}}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-medium text-gray-500">Replies</span>
-                                    <span class="text-sm font-bold text-gray-900">{{.Data.Article.CommentCount}}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{.Data.Article.ReplyCount}}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-medium text-gray-500">Views</span>
@@ -286,7 +267,7 @@
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-medium text-gray-500">Participants</span>
-                                    <span class="text-sm font-bold text-gray-900">{{add .Data.Article.CommentCount 1}}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{add .Data.Article.ReplyCount 1}}</span>
                                 </div>
                             </div>
                             
@@ -306,11 +287,34 @@
                         </div>
                     </div>
 
+                    <!-- Suggested Topics -->
+                    {{if .Data.AuthorArticles}}
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
+                        <div class="p-4 border-b border-gray-50 bg-gray-50/50">
+                            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">Suggested</h3>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            {{range .Data.AuthorArticles}}
+                            <a href="/post/{{.Id}}" class="block p-4 hover:bg-gray-50 transition-colors group">
+                                <h4 class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-1.5 leading-snug">{{.Title}}</h4>
+                                <div class="flex items-center gap-3 text-[10px] text-gray-400 font-medium uppercase tracking-wide">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        {{.ViewCount}}
+                                    </span>
+                                    <span>{{.PubDate}}</span>
+                                </div>
+                            </a>
+                            {{end}}
+                        </div>
+                    </div>
+                    {{end}}
+
                     <!-- Timeline Widget (Static Mockup) -->
                     <div class="relative pl-4 border-l-2 border-gray-100 py-2 ml-4">
                         <div class="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-white"></div>
                         <div class="space-y-8">
-                            <div class="text-xs text-gray-400 font-medium">{{.Data.Article.LastUpdateTime}}</div>
+                            <div class="text-xs text-gray-400 font-medium">{{FormatTime .Data.Article.UpdatedAt}}</div>
                             <div class="text-xs text-gray-400 font-medium">...</div>
                             <div class="text-xs text-gray-400 font-medium">{{FormatTime .Data.Article.CreatedAt}}</div>
                         </div>
