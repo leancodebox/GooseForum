@@ -8,15 +8,15 @@
             <div class="space-y-2">
                  <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider pl-3">Menu</h3>
                  <nav class="flex flex-col space-y-1">
-                    <a href="/v2" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg transition-colors">
+                    <a href="/v2" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-xl transition-colors">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         Feed
                     </a>
-                    <a href="/post?sort=popular" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                    <a href="/post?sort=popular" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-xl transition-all">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                         Popular
                     </a>
-                    <a href="/post?sort=latest" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                    <a href="/post?sort=latest" class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-xl transition-all">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         Latest
                     </a>
@@ -27,79 +27,77 @@
                 <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider pl-3">Topics</h3>
                 <div class="flex flex-wrap gap-2 px-1">
                     {{range .Data.ArticleCategoryList}}
-                    <a href="/post?filters={{.Value}}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors">
+                    <a href="/post?filters={{.Value}}" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-500 hover:bg-blue-600 hover:text-white transition-all duration-200">
                         {{.Name}}
                     </a>
                     {{end}}
                 </div>
             </div>
             
-            <div class="p-4 bg-blue-50 rounded-2xl">
+            <div class="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100/50">
                 <h4 class="text-blue-900 font-bold mb-1">Go Premium</h4>
                 <p class="text-blue-700 text-xs mb-3">Get access to exclusive content and features.</p>
-                <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">Upgrade Now</button>
+                <button class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm shadow-blue-200">Upgrade Now</button>
             </div>
         </div>
     </div>
 
     <!-- Center: Feed -->
-    <div class="lg:col-span-6 space-y-6">
+    <div class="lg:col-span-6">
         
-        <!-- Welcome Banner (If enabled) -->
+        <!-- Welcome Banner (Subtle Style) -->
         {{if .Data.Announcement.Enabled}}
-        <div class="relative overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-8 text-white shadow-xl shadow-indigo-100" x-data="{show: true}" x-show="show">
-            <button @click="show = false" class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        <div class="mb-8 p-5 bg-blue-50 border border-blue-100 rounded-xl relative overflow-hidden group" x-data="{show: true}" x-show="show">
+            <button @click="show = false" class="absolute top-3 right-3 text-blue-400 hover:text-blue-600 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
-            <div class="relative z-10">
-                <span class="inline-block py-1 px-3 rounded-full bg-white/20 backdrop-blur-sm text-xs font-bold mb-4">Announcement</span>
-                <h2 class="text-2xl font-bold mb-2">{{.Data.Announcement.Title}}</h2>
-                <p class="text-indigo-100 mb-6 max-w-lg">{{.Data.Announcement.Content}}</p>
-                <a href="{{if .Data.Announcement.Link}}{{.Data.Announcement.Link}}{{else}}#{{end}}" class="inline-flex items-center justify-center px-5 py-2.5 bg-white text-indigo-600 font-bold rounded-xl hover:bg-indigo-50 transition-colors shadow-lg shadow-black/5">
-                    Read More
-                </a>
+            <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-200">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-blue-900 leading-tight">{{.Data.Announcement.Title}}</h2>
+                    <p class="text-xs text-blue-700 mt-0.5 opacity-80">{{.Data.Announcement.Content}}</p>
+                </div>
             </div>
-            <!-- Decorative circles -->
-            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white/10 blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-indigo-400/20 blur-2xl"></div>
         </div>
         {{end}}
 
-        <!-- Posts Feed -->
-        <div class="space-y-4">
+        <!-- Flat & Compact Posts Feed -->
+        <div class="space-y-1">
             {{range .Data.LatestArticles}}
-            <article class="group bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] border border-gray-100 transition-all duration-300 cursor-pointer" onclick="window.location.href='/post/{{.Id}}'">
+            <article class="group relative py-4 px-4 rounded-2xl hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer border border-transparent hover:border-gray-100" onclick="window.location.href='/post/{{.Id}}'">
                 <div class="flex items-start gap-4">
-                    <img src="{{.AvatarUrl}}" alt="{{.Username}}" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-50 flex-shrink-0">
+                    <div class="relative flex-shrink-0">
+                        <img src="{{.AvatarUrl}}" alt="{{.Username}}" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-50 group-hover:ring-blue-100 transition-all duration-300">
+                        <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between gap-2 mb-2">
-                             <div>
-                                <h3 class="font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">{{.Username}}</h3>
-                                <div class="text-xs text-gray-400">{{.LastUpdateTime}}</div>
-                             </div>
-                             {{if .Categories}}
-                             <div class="flex gap-1 flex-shrink-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-gray-900 text-[13px] leading-none group-hover:text-blue-600 transition-colors">{{.Username}}</h3>
+                                <span class="text-[10px] text-gray-400 font-medium tracking-tight">{{.LastUpdateTime}}</span>
+                            </div>
+                            {{if .Categories}}
+                            <div class="flex gap-1">
                                 {{range .Categories}}
-                                <span class="px-2 py-1 rounded-md bg-gray-50 text-xs font-medium text-gray-500 border border-gray-100">{{.}}</span>
+                                <span class="text-[9px] font-bold uppercase tracking-wider text-blue-600/80 bg-blue-50/50 px-2 py-0.5 rounded-lg border border-blue-100/30">{{.}}</span>
                                 {{end}}
-                             </div>
-                             {{end}}
+                            </div>
+                            {{end}}
                         </div>
                         
-                        <h2 class="text-lg font-bold text-gray-900 mb-2 leading-snug group-hover:text-blue-600 transition-colors">{{.Title}}</h2>
-                        <!-- We could show excerpt here if available -->
+                        <h2 class="text-[15px] font-bold text-gray-800 group-hover:text-blue-600 transition-colors leading-snug mb-2 pr-4">{{.Title}}</h2>
                         
-                        <div class="flex items-center gap-6 mt-4 pt-4 border-t border-gray-50">
-                            <button class="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors group/btn">
-                                <span class="p-1.5 rounded-full bg-gray-50 group-hover/btn:bg-blue-50 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.697 8-8.25 8-2.967 0-5.316-1.506-6.721-3.791C4.38 17.514 2 15.518 2 12c0-4.418 3.697-8 8.25-8s8.25 3.582 8.25 8z"/></svg>
-                                </span>
-                                {{.CommentCount}} <span class="hidden sm:inline">Comments</span>
-                            </button>
-                            <div class="flex items-center gap-2 text-sm text-gray-400">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <div class="flex items-center gap-5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                            <span class="flex items-center gap-1.5 group-hover:text-blue-500 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.697 8-8.25 8-2.967 0-5.316-1.506-6.721-3.791C4.38 17.514 2 15.518 2 12c0-4.418 3.697-8 8.25-8s8.25 3.582 8.25 8z"/></svg>
+                                {{.CommentCount}}
+                            </span>
+                            <span class="flex items-center gap-1.5 group-hover:text-indigo-500 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 {{.ViewCount}}
-                            </div>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -108,48 +106,49 @@
         </div>
     </div>
 
-    <!-- Right: Stats & Trending -->
-    <div class="hidden lg:block lg:col-span-3 space-y-6 sticky top-24">
+    <!-- Right: Integrated Sidebar -->
+    <div class="hidden lg:block lg:col-span-3 space-y-12 sticky top-24 pl-4 border-l border-gray-100">
         
-        <!-- Stats Card -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-bold text-gray-900 mb-4">Community Stats</h3>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="text-center p-3 rounded-xl bg-gray-50">
-                    <div class="text-xl font-black text-gray-900">{{.Data.Stats.UserCount}}</div>
-                    <div class="text-xs text-gray-500 font-medium uppercase tracking-wide">Users</div>
+        <!-- Stats Section -->
+        <div class="space-y-6">
+            <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Platform Stats</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-end border-b border-gray-50 pb-2 group hover:border-blue-100 transition-colors">
+                    <span class="text-xs font-bold text-gray-500 group-hover:text-blue-500 transition-colors">Members</span>
+                    <span class="text-base font-black text-gray-900 group-hover:text-blue-600 transition-colors">{{.Data.Stats.UserCount}}</span>
                 </div>
-                <div class="text-center p-3 rounded-xl bg-gray-50">
-                    <div class="text-xl font-black text-gray-900">{{.Data.Stats.ArticleCount}}</div>
-                    <div class="text-xs text-gray-500 font-medium uppercase tracking-wide">Posts</div>
+                <div class="flex justify-between items-end border-b border-gray-50 pb-2 group hover:border-blue-100 transition-colors">
+                    <span class="text-xs font-bold text-gray-500 group-hover:text-blue-500 transition-colors">Total Posts</span>
+                    <span class="text-base font-black text-gray-900 group-hover:text-blue-600 transition-colors">{{.Data.Stats.ArticleCount}}</span>
                 </div>
             </div>
         </div>
 
-        <!-- Trending -->
+        <!-- Trending Section -->
         {{if .Data.RecommendedArticles}}
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 class="font-bold text-gray-900 mb-4">Trending Today</h3>
-            <div class="space-y-4">
+        <div class="space-y-6">
+            <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Trending</h3>
+            <div class="space-y-5">
                 {{range .Data.RecommendedArticles}}
                 <div class="group cursor-pointer" onclick="window.location.href='/post/{{.Id}}'">
-                    <div class="text-sm font-semibold text-gray-700 leading-snug group-hover:text-blue-600 transition-colors mb-1">
+                    <div class="text-xs font-bold text-gray-700 leading-snug group-hover:text-blue-600 transition-colors">
                         {{.Title}}
                     </div>
-                    <!-- <div class="text-xs text-gray-400">2h ago · 15 likes</div> -->
+                    <div class="mt-1 text-[9px] font-black text-blue-500/50 uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
+                        Read Discussion →
+                    </div>
                 </div>
                 {{end}}
             </div>
-             <a href="/post?sort=popular" class="block mt-4 text-xs font-bold text-center text-blue-600 hover:text-blue-700 uppercase tracking-wide">View All</a>
         </div>
         {{end}}
 
         <!-- Footer Mini -->
-        <div class="flex flex-wrap gap-x-4 gap-y-2 text-xs text-gray-400 px-2">
-            <a href="/about" class="hover:text-gray-600">About</a>
-            <a href="/privacy-policy" class="hover:text-gray-600">Privacy</a>
-            <a href="/terms-of-service" class="hover:text-gray-600">Terms</a>
-            <span class="w-full mt-2">© 2024 GooseForum</span>
+        <div class="pt-8 flex flex-wrap gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-gray-300">
+            <a href="/about" class="hover:text-blue-500 transition-colors">About</a>
+            <a href="/privacy-policy" class="hover:text-blue-500 transition-colors">Privacy</a>
+            <a href="/terms-of-service" class="hover:text-blue-500 transition-colors">Terms</a>
+            <div class="w-full mt-4 text-gray-200">© 2024 GooseForum</div>
         </div>
     </div>
 </div>

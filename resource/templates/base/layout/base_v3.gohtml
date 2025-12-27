@@ -1,4 +1,4 @@
-{{define "base_v2.gohtml"}}
+{{define "base_v3.gohtml"}}
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="{{.Theme}}">
 <head>
@@ -11,7 +11,7 @@
     
     <!-- New Minimalist Navigation -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <!-- Logo -->
                 <div class="flex items-center gap-8">
@@ -100,13 +100,13 @@
     </header>
     
     <!-- Main Content -->
-    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {{block "main" .}}{{end}}
     </main>
 
     <!-- New Minimalist Footer -->
     <footer class="bg-white border-t border-gray-100 py-12 mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center gap-2">
                     <span class="text-xl font-bold text-gray-900">GooseForum</span>
