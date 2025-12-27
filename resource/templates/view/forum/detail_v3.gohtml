@@ -3,7 +3,7 @@
 <div class="flex gap-2 relative items-start">
     {{template "sidebar_v3.gohtml" .}}
     
-    <div class="flex-1 min-w-0 py-6 pr-4 sm:pr-6 lg:pr-8 pl-2">
+    <div class="flex-1 min-w-0 py-3 pr-4 sm:pr-6 lg:pr-8 pl-2">
         <div class="flex flex-col xl:flex-row gap-6" x-data="articleDetailHandler({
             articleId: {{.Data.Article.Id}},
             isLiked: {{.Data.ILike}},
@@ -17,7 +17,7 @@
             <section class="flex-1 min-w-0">
                 
                 <!-- Topic Title Header -->
-                <div class="mb-6 px-1">
+                <div class="mb-3 px-1">
                     <h1 x-ref="pageTitle" class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">
                         {{.Data.Article.Title}}
                     </h1>
@@ -70,9 +70,11 @@
 
                             <!-- Post Body -->
                             <div class="prose prose-slate max-w-none 
-                                prose-headings:font-semibold prose-headings:tracking-tight prose-headings:mb-3 prose-headings:mt-6
-                                prose-p:my-3 prose-p:leading-relaxed
-                                prose-li:my-1
+                                prose-headings:font-medium prose-headings:text-gray-900 prose-headings:mb-3 prose-headings:mt-6
+                                prose-h1:font-bold prose-h1:text-3xl
+                                prose-h2:text-2xl prose-h2:border-b prose-h2:border-gray-100 
+                                prose-p:my-3 prose-p:leading-7 prose-p:text-gray-600
+                                prose-li:my-1 prose-li:text-gray-600
                                 prose-ul:my-3 prose-ol:my-3
                                 prose-a:text-blue-600 prose-a:no-underline prose-a:px-1 prose-a:py-0.5 prose-a:rounded prose-a:transition-colors prose-a:font-medium
                                 [&_a:hover]:text-blue-700 [&_a:hover]:bg-blue-50
