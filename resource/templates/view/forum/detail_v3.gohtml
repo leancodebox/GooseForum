@@ -240,8 +240,27 @@
             </section>
 
             <!-- Right Sidebar: Topic Info & Timeline -->
-            <aside class="hidden xl:block w-80 flex-shrink-0">
-                <div class="sticky top-[80px] space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto [&::-webkit-scrollbar]:w-0">
+            <aside class="hidden xl:block w-80 flex-shrink-0 self-stretch">
+                <div class="sticky space-y-6"
+                     x-data="{
+                         updateSticky() {
+                             const el = $el;
+                             const viewportHeight = window.innerHeight;
+                             const contentHeight = el.offsetHeight;
+                             // 80px (header) + 40px (bottom gap)
+                             if (contentHeight + 120 < viewportHeight) {
+                                 el.style.top = '80px';
+                             } else {
+                                 el.style.top = `${viewportHeight - contentHeight - 40}px`;
+                             }
+                         }
+                     }"
+                     x-init="
+                         $nextTick(() => updateSticky());
+                         const observer = new ResizeObserver(() => updateSticky());
+                         observer.observe($el);
+                         window.addEventListener('resize', updateSticky);
+                     ">
                     <!-- Topic Map Widget -->
                     <div class="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
                         <div class="p-4 border-b border-gray-50 bg-gray-50/50">
