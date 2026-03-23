@@ -29,9 +29,10 @@ create_topic_title: 发布新话题
 topic_title_label: 标题
 topic_title_placeholder: 这个话题关于什么？
 topic_title_help: 标题应具有描述性（至少 15 个字符）
-select_type_label: 选择类型
-select_category_label: 选择分类
+select_type_label: 类型
+select_category_label: 分类
 selected_count_label: 已选
+topic_content_label: 内容
 
 # Settings
 settings_title: 设置

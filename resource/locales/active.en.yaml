@@ -29,9 +29,10 @@ create_topic_title: Create a New Topic
 topic_title_label: Title
 topic_title_placeholder: What is this discussion about?
 topic_title_help: Title should be descriptive (at least 15 characters)
-select_type_label: Select Type
-select_category_label: Select Categories
+select_type_label: Type
+select_category_label: Category
 selected_count_label: Selected
+topic_content_label: Content
 
 # Settings
 settings_title: Settings
