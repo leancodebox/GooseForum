@@ -72,11 +72,6 @@ const allNavGroups = [
         icon: Heart,
       },
       {
-        title: '工单管理',
-        url: '/ticket-management',
-        icon: LifeBuoy,
-      },
-      {
         title: '站点设置',
         icon: Settings,
         items: [

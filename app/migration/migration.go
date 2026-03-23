@@ -13,7 +13,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/chat/messages"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
-	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
@@ -54,7 +53,6 @@ func migration(migration bool) {
 
 	db := dbconnect.Connect()
 	if err = db.AutoMigrate(
-		&applySheet.Entity{},
 		&articleBookmark.Entity{},
 		&articleCategory.Entity{},
 		&articleCategoryRs.Entity{},

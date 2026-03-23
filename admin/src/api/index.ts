@@ -94,14 +94,6 @@ export function getSiteStatistics() {
   return request.get<any>('/api/forum/get-site-statistics')
 }
 
-export function getApplySheetList(params: any) {
-  return request.post<any>('/api/admin/apply-sheet-list', params)
-}
-
-export function updateApplySheet(data: any) {
-  return request.post<any>('/api/admin/apply-sheet-update', data)
-}
-
 export function getMailSettings() {
   return request.post<MailSettings>('/api/admin/mail-settings')
 }

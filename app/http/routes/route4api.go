@@ -119,7 +119,6 @@ func apiRoute(ginApp *gin.Engine) {
 	loginApi.GET("oauth/bindings", UpButterReq(controllers.GetOAuthBindings))
 
 	forumApi := baseApi.Group("forum")
-	forumApi.POST("apply-link-add", UpButterReq(api.ApplyAddLink))
 	// 站点统计
 	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	// 分类列表
@@ -198,8 +197,6 @@ func apiRoute(ginApp *gin.Engine) {
 
 	// 站点管理
 	adminApi.Group("", middleware.CheckPermission(permission.SiteManager)).
-		POST("apply-sheet-list", UpButterReq(api.ApplySheet)).
-		POST("apply-sheet-update", UpButterReq(api.UpdateApplySheet)).
 		GET("friend-links", UpButterReq(api.GetFriendLinks)).
 		POST("save-friend-links", UpButterReq(api.SaveFriendLinks)).
 		GET("site-settings", UpButterReq(api.GetSiteSettings)).

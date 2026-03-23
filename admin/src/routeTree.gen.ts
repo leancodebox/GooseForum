@@ -24,7 +24,6 @@ import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-p
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedUsersManagementIndexRouteImport } from './routes/_authenticated/users-management/index'
-import { Route as AuthenticatedTicketManagementIndexRouteImport } from './routes/_authenticated/ticket-management/index'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks/index'
 import { Route as AuthenticatedSponsorshipManagementIndexRouteImport } from './routes/_authenticated/sponsorship-management/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
@@ -121,12 +120,6 @@ const AuthenticatedUsersManagementIndexRoute =
   AuthenticatedUsersManagementIndexRouteImport.update({
     id: '/users-management/',
     path: '/users-management/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedTicketManagementIndexRoute =
-  AuthenticatedTicketManagementIndexRouteImport.update({
-    id: '/ticket-management/',
-    path: '/ticket-management/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
@@ -282,7 +275,6 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/sponsorship-management': typeof AuthenticatedSponsorshipManagementIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
-  '/ticket-management': typeof AuthenticatedTicketManagementIndexRoute
   '/users-management': typeof AuthenticatedUsersManagementIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/site-settings/footer-management': typeof AuthenticatedSiteSettingsFooterManagementIndexRoute
@@ -319,7 +311,6 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/sponsorship-management': typeof AuthenticatedSponsorshipManagementIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
-  '/ticket-management': typeof AuthenticatedTicketManagementIndexRoute
   '/users-management': typeof AuthenticatedUsersManagementIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/site-settings/footer-management': typeof AuthenticatedSiteSettingsFooterManagementIndexRoute
@@ -359,7 +350,6 @@ export interface FileRoutesById {
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/sponsorship-management/': typeof AuthenticatedSponsorshipManagementIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
-  '/_authenticated/ticket-management/': typeof AuthenticatedTicketManagementIndexRoute
   '/_authenticated/users-management/': typeof AuthenticatedUsersManagementIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
   '/_authenticated/site-settings/footer-management/': typeof AuthenticatedSiteSettingsFooterManagementIndexRoute
@@ -399,7 +389,6 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/sponsorship-management'
     | '/tasks'
-    | '/ticket-management'
     | '/users-management'
     | '/users'
     | '/site-settings/footer-management'
@@ -436,7 +425,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sponsorship-management'
     | '/tasks'
-    | '/ticket-management'
     | '/users-management'
     | '/users'
     | '/site-settings/footer-management'
@@ -475,7 +463,6 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/'
     | '/_authenticated/sponsorship-management/'
     | '/_authenticated/tasks/'
-    | '/_authenticated/ticket-management/'
     | '/_authenticated/users-management/'
     | '/_authenticated/users/'
     | '/_authenticated/site-settings/footer-management/'
@@ -604,13 +591,6 @@ declare module '@tanstack/react-router' {
       path: '/users-management'
       fullPath: '/users-management'
       preLoaderRoute: typeof AuthenticatedUsersManagementIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/ticket-management/': {
-      id: '/_authenticated/ticket-management/'
-      path: '/ticket-management'
-      fullPath: '/ticket-management'
-      preLoaderRoute: typeof AuthenticatedTicketManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/tasks/': {
@@ -800,7 +780,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRolesManagementIndexRoute: typeof AuthenticatedRolesManagementIndexRoute
   AuthenticatedSponsorshipManagementIndexRoute: typeof AuthenticatedSponsorshipManagementIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
-  AuthenticatedTicketManagementIndexRoute: typeof AuthenticatedTicketManagementIndexRoute
   AuthenticatedUsersManagementIndexRoute: typeof AuthenticatedUsersManagementIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
   AuthenticatedSiteSettingsFooterManagementIndexRoute: typeof AuthenticatedSiteSettingsFooterManagementIndexRoute
@@ -829,8 +808,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSponsorshipManagementIndexRoute:
     AuthenticatedSponsorshipManagementIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
-  AuthenticatedTicketManagementIndexRoute:
-    AuthenticatedTicketManagementIndexRoute,
   AuthenticatedUsersManagementIndexRoute:
     AuthenticatedUsersManagementIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,

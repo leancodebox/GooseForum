@@ -48,66 +48,48 @@
 
             <!-- Right: Sidebar (Apply & Stats) -->
             <div class="w-full xl:w-80 space-y-6 shrink-0">
-                <!-- Apply Form -->
+                <!-- Apply Guide -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">{{call .T "apply_link_title"}}</h3>
-                    <div class="space-y-2 text-sm text-gray-600 mb-6 bg-blue-50 p-3 rounded-lg border border-blue-100">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span>{{call .T "apply_rule_healthy"}}</span>
+                    <div class="space-y-4 text-sm text-gray-600">
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 space-y-3">
+                            <p class="font-medium text-blue-900">如何申请友情链接？</p>
+                            <p>请前往论坛发帖申请，标题格式建议为：<br/><span class="font-mono text-blue-700">[友链申请] 您的网站名称</span></p>
+                            <div class="pt-2">
+                                <p class="text-xs text-blue-800 mb-1">帖子内请提供以下信息：</p>
+                                <ul class="list-disc list-inside pl-4 text-xs text-blue-700 space-y-1">
+                                    <li>网站名称</li>
+                                    <li>网站描述</li>
+                                    <li>网站地址</li>
+                                    <li>Logo 地址</li>
+                                </ul>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span>{{call .T "apply_rule_tech"}}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span>{{call .T "apply_rule_stable"}}</span>
-                        </div>
-                    </div>
-
-                    <form x-data="linkApplyHandler()" @submit.prevent="submitApply" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "label_site_name"}}</label>
-                            <input type="text" x-model="form.siteName" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2" required maxlength="50" placeholder="{{call .T "placeholder_site_name"}}">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "label_description"}}</label>
-                            <input type="text" x-model="form.siteDesc" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2" required maxlength="100" placeholder="{{call .T "placeholder_description"}}">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "label_logo_url"}}</label>
-                            <input type="url" x-model="form.siteLogo" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2" required placeholder="{{call .T "placeholder_logo_url"}}">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "label_site_url"}}</label>
-                            <input type="url" x-model="form.siteUrl" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2" required placeholder="{{call .T "placeholder_site_url"}}">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "label_contact_email"}}</label>
-                            <input type="email" x-model="form.email" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2" required placeholder="{{call .T "placeholder_contact_email"}}">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "label_reciprocal_link"}}</label>
-                            <input type="text" x-model="form.contact" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2" required placeholder="{{call .T "placeholder_reciprocal_link"}}">
-                        </div>
-                        <button type="submit" :disabled="submitting" class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors flex justify-center">
-                            <span x-show="!submitting">{{call .T "btn_submit_application"}}</span>
-                            <span x-show="submitting" class="flex items-center gap-2">
-                                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <div class="space-y-2">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-4 h-4 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                {{call .T "btn_sending"}}
-                            </span>
-                        </button>
-                    </form>
+                                <span>{{call .T "apply_rule_healthy"}}</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <svg class="w-4 h-4 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span>{{call .T "apply_rule_tech"}}</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <svg class="w-4 h-4 text-green-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span>{{call .T "apply_rule_stable"}}</span>
+                            </div>
+                        </div>
+                        <a href="/publish" class="mt-4 w-full bg-blue-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            去发帖申请
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Statistics -->
@@ -140,45 +122,4 @@
         </div>
     </div>
 </div>
-{{end}}
-
-{{define "script"}}
-<script>
-    function linkApplyHandler() {
-        return {
-            form: {
-                siteName: '',
-                siteDesc: '',
-                siteLogo: '',
-                siteUrl: '',
-                email: '',
-                contact: ''
-            },
-            submitting: false,
-
-            async submitApply() {
-                if (this.submitting) return;
-                this.submitting = true;
-
-                try {
-                    const response = await axiosInstance.post('/api/forum/apply-link-add', this.form);
-                    alert('{{call .T "submit_success"}}');
-                    this.form = {
-                        siteName: '',
-                        siteDesc: '',
-                        siteLogo: '',
-                        siteUrl: '',
-                        email: '',
-                        contact: ''
-                    };
-                } catch (error) {
-                    console.error('Submission error:', error);
-                    alert('{{call .T "submit_error"}}');
-                } finally {
-                    this.submitting = false;
-                }
-            }
-        }
-    }
-</script>
 {{end}}

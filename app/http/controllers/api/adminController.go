@@ -9,7 +9,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
-	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -545,53 +544,6 @@ func DeleteCategory(req component.BetterRequest[struct {
 	}
 	articleCategory.DeleteEntity(&entity)
 	return component.SuccessResponse(true)
-}
-
-type ApplySheetListReq struct {
-	Page     int    `json:"page"`
-	PageSize int    `json:"pageSize"`
-	Title    string `json:"title"`
-	Type     int    `json:"type"`
-	Status   int    `json:"status"`
-	UserId   uint64 `json:"userId"`
-}
-
-func ApplySheet(req component.BetterRequest[ApplySheetListReq]) component.Response {
-	pageData := applySheet.Page[applySheet.Entity](applySheet.PageQuery{
-		Page:     req.Params.Page,
-		PageSize: req.Params.PageSize,
-		Title:    req.Params.Title,
-		Type:     int8(req.Params.Type),
-		Status:   int8(req.Params.Status),
-		UserId:   req.Params.UserId,
-	})
-
-	return component.SuccessPage(lo.Map(pageData.Data, func(item applySheet.Entity, _ int) applySheet.Entity {
-		return item
-	}),
-		pageData.Page,
-		pageData.PageSize,
-		pageData.Total,
-	)
-}
-
-type UpdateApplySheetReq struct {
-	Id     uint64 `json:"id" validate:"required"`
-	Status int8   `json:"status"`
-	Reply  string `json:"reply"`
-}
-
-func UpdateApplySheet(req component.BetterRequest[UpdateApplySheetReq]) component.Response {
-	entity := applySheet.Get(req.Params.Id)
-	if entity.Id == 0 {
-		return component.FailResponse("工单不存在")
-	}
-
-	entity.Status = req.Params.Status
-	entity.Reply = req.Params.Reply
-	applySheet.SaveOrCreateById(&entity)
-
-	return component.SuccessResponse("success")
 }
 
 func GetFriendLinks(req component.BetterRequest[null]) component.Response {
