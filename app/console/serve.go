@@ -11,12 +11,10 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
-	"github.com/leancodebox/GooseForum/app/service/oauthservice"
-	"github.com/leancodebox/GooseForum/app/service/userservice"
-
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
 	"github.com/leancodebox/GooseForum/app/http/routes"
+	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
@@ -58,9 +56,7 @@ func pprofServe() {
 func ginServe() {
 	// 初始化OAuth配置
 	oauthservice.InitOAuth()
-	defer userservice.CloseUpdateUserLastActiveTime()
 	RunJob()
-	defer StopJob()
 
 	port := preferences.GetString("server.port", 8080)
 	var engine *gin.Engine
@@ -104,10 +100,11 @@ func ginServe() {
 
 	data := <-quit
 	slog.Info("Shutdown Server ...", "signal", data)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		slog.Info("Server Shutdown:", err)
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		slog.Info("Server Shutdown", "err", err)
 	}
+
 	slog.Info("Server exiting")
 }

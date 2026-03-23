@@ -10,25 +10,18 @@ func save(entity *Entity) int64 {
 	return result.RowsAffected
 }
 
-
-
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.UserId == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
-
-
-
 
 func Get(id any) (entity Entity) {
 	builder().First(&entity, id)
 	return
 }
-
-
 
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
@@ -39,7 +32,6 @@ func Get(id any) (entity Entity) {
 //	result := builder().Delete(entity)
 //	return result.RowsAffected
 //}
-
 
 //func all() (entities []*Entity) {
 //	builder().Find(&entities)

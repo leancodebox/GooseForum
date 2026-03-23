@@ -38,6 +38,7 @@ type Entity struct {
 	Status        int8      `gorm:"column:status;type:tinyint;not null;default:1;" json:"status"`          // 状态
 	Title         string    `gorm:"column:title;type:varchar(255);not null;default:'';" json:"title"`      // 标题
 	Content       string    `gorm:"column:content;type:text;" json:"content"`                              // 具体内容
+	Reply         string    `gorm:"column:reply;type:text;" json:"reply"`                                  // 答复内容
 	CreatedAt     time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`          //
 	UpdatedAt     time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
@@ -46,6 +47,18 @@ type SheetType int8
 
 const (
 	ApplyAddLink SheetType = iota + 1
+	BugFeedback
+	FeatureRequest
+	TechnicalSupport
+	AccountIssue
+	Other
+)
+
+const (
+	StatusPending    int8 = 1
+	StatusProcessing int8 = 2
+	StatusResolved   int8 = 3
+	StatusClosed     int8 = 4
 )
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

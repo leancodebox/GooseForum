@@ -3,14 +3,21 @@ package articles
 import (
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/samber/lo"
 	"github.com/spf13/cast"
+	"gorm.io/gorm"
 )
 
 func Create(entity *Entity) int64 {
 	result := builder().Create(entity)
+	return result.RowsAffected
+}
+
+func Delete(entity *Entity) int64 {
+	result := builder().Delete(entity)
 	return result.RowsAffected
 }
 
@@ -23,43 +30,20 @@ func SaveNoUpdate(entity *Entity) error {
 	return result.Error
 }
 
-func SaveAll(entities *[]Entity) int64 {
-	result := builder().Save(entities)
-	return result.RowsAffected
-}
-
-func Delete(entity *Entity) int64 {
-	result := builder().Delete(entity)
-	return result.RowsAffected
-}
-
 func Get(id any) (entity Entity) {
 	builder().Where(queryopt.Eq(pid, id)).First(&entity)
 	return
 }
 
-func GetCount() int64 {
-	var count int64
-	builder().Count(&count)
-	return count
-}
-func GetMonthCount() int64 {
-	now := time.Now()
-	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-	var count int64
-	builder().Where(queryopt.Ge(fieldCreatedAt, firstOfMonth)).Count(&count)
-	return count
+func GetSimple(id any) (entity SmallEntity) {
+	builder().Where(queryopt.Eq(pid, id)).First(&entity)
+	return
 }
 
 func GetMaxId() uint64 {
 	var entity Entity
 	builder().Order(queryopt.Desc(pid)).Limit(1).First(&entity)
 	return entity.Id
-}
-
-func GetByUserAndTitle(userId, title any) (entity Entity) {
-	builder().Where(queryopt.Eq(fieldTitle, title)).Where(queryopt.Eq(fieldUserId, userId)).First(&entity)
-	return
 }
 
 func GetByIds(ids []uint64) (entities []*SmallEntity) {
@@ -70,15 +54,38 @@ func GetByIds(ids []uint64) (entities []*SmallEntity) {
 	return
 }
 
+// GetAllSimple 用于全量导出/修复数据，支持分页查询
+func GetAllSimple(offset, limit int) ([]*SmallEntity, error) {
+	var entities []*SmallEntity
+	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
+	return entities, err
+}
+
+// GetCountGroupByDay 按天统计发帖数
+func GetCountGroupByDay() ([]map[string]any, error) {
+	var results []map[string]any
+	err := builder().Select("DATE(created_at) as date, count(*) as count").Group("date").Order("date ASC").Find(&results).Error
+	return results, err
+}
+
 func GetMapByIds(ids []uint64) map[uint64]*SmallEntity {
-	return collectionopt.Slice2Map(GetByIds(ids), func(v *SmallEntity) uint64 {
+	return lo.KeyBy(GetByIds(ids), func(v *SmallEntity) uint64 {
 		return v.Id
 	})
 }
 
-func All() (entities []*Entity) {
-	builder().Find(&entities)
+func GetLast(limit int) (entities []*Entity) {
+	builder().Order(queryopt.Desc(pid)).Limit(limit).Find(&entities)
 	return
+}
+
+func GetBatch(minId uint64, limit int) (entities []*Entity) {
+	builder().Where(queryopt.Gt(pid, minId)).Order(queryopt.Asc(pid)).Limit(limit).Find(&entities)
+	return
+}
+
+func UpdatePosters(id uint64, posters []Poster) error {
+	return builder().Where(pid, id).Select("Posters").Updates(Entity{Posters: posters}).Error
 }
 
 func CantWriteNew(userId uint64, maxCount int64) bool {
@@ -93,6 +100,7 @@ type PageQuery struct {
 	UserId         uint64
 	FilterStatus   bool
 	Categories     []int
+	Sort           string
 }
 
 func Page[ResType SmallEntity](q PageQuery) struct {
@@ -116,11 +124,27 @@ func Page[ResType SmallEntity](q PageQuery) struct {
 		b.Where(queryopt.Eq(fieldProcessStatus, 0))
 	}
 	if len(q.Categories) > 0 {
-		b.Where(`EXISTS (SELECT 1 FROM article_category_rs rs 
+		if len(q.Categories) == 1 {
+			b.Where(`EXISTS (SELECT 1 FROM article_category_rs rs 
+WHERE rs.article_id = articles.id AND rs.article_category_id = ?  AND rs.effective = ? )`,
+				q.Categories[0], 1)
+		} else {
+			b.Where(`EXISTS (SELECT 1 FROM article_category_rs rs 
 WHERE rs.article_id = articles.id AND rs.article_category_id IN (?) AND rs.effective = ? )`,
-			q.Categories, 1)
+				q.Categories, 1)
+		}
 	}
-	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Order(queryopt.Desc(fieldUpdatedAt)).Find(&list)
+
+	// 处理排序
+	if q.Sort == "new" {
+		// 按照ID倒序（即创建时间倒序）
+		b.Order(queryopt.Desc(pid))
+	} else {
+		// 默认按照更新时间倒序 (latest)
+		b.Order(queryopt.Desc(fieldUpdatedAt))
+	}
+
+	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Find(&list)
 	var total int64
 	total = 1200
 	if len(list) < q.PageSize {
@@ -134,16 +158,6 @@ WHERE rs.article_id = articles.id AND rs.article_category_id IN (?) AND rs.effec
 	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, Total: total}
 }
 
-func IncrementView(entity Entity) int64 {
-	result := builder().Exec("UPDATE articles SET view_count = view_count+1 where id = ?", entity.Id)
-	return result.RowsAffected
-}
-
-func IncrementReply(entity Entity) int64 {
-	result := builder().Exec("UPDATE articles SET reply_count = reply_count+1 where id = ?", entity.Id)
-	return result.RowsAffected
-}
-
 func IncrementLike(entity Entity) int64 {
 	result := builder().Exec("UPDATE articles SET like_count = like_count+1 where id = ?", entity.Id)
 	return result.RowsAffected
@@ -154,9 +168,46 @@ func DecrementLike(entity Entity) int64 {
 	return result.RowsAffected
 }
 
+func IncrementView(entity Entity) int64 {
+	result := builder().Exec("UPDATE articles SET view_count = view_count+1 where id = ?", entity.Id)
+	return result.RowsAffected
+}
+
+func IncrementReplyFast(articleId uint64, posters []Poster) error {
+	return builder().Where("id = ?", articleId).Updates(map[string]any{
+		"reply_count": gorm.Expr("reply_count + 1"),
+		"posters":     jsonopt.Encode(posters),
+		"updated_at":  time.Now(),
+	}).Error
+}
+
+func DecrementReplyFast(articleId uint64, posters []Poster) error {
+	return builder().Where("id = ?", articleId).Updates(map[string]any{
+		"reply_count": gorm.Expr("reply_count - 1"),
+		"posters":     jsonopt.Encode(posters),
+	}).Error
+}
+
+func IncrementReply(entity Entity) int64 {
+	result := builder().Exec("UPDATE articles SET reply_count = reply_count+1 where id = ?", entity.Id)
+	return result.RowsAffected
+}
+
 // GetLatestArticles 获取最新的n篇文章
 func GetLatestArticles(limit int) ([]SmallEntity, error) {
 	var articles []SmallEntity
+	b := builder()
+	b.Where(queryopt.Eq(fieldArticleStatus, 1))
+	b.Where(queryopt.Eq(fieldProcessStatus, 0))
+	err := b.
+		Order(queryopt.Desc(pid)).
+		Limit(limit).
+		Find(&articles).Error
+	return articles, err
+}
+
+func GetLatestArticlesWithContent(limit int) ([]Entity, error) {
+	var articles []Entity
 	b := builder()
 	b.Where(queryopt.Eq(fieldArticleStatus, 1))
 	b.Where(queryopt.Eq(fieldProcessStatus, 0))
@@ -179,8 +230,8 @@ func GetRecommendedArticles(limit int) ([]SmallEntity, error) {
 	return articles, err
 }
 
-func GetRecommendedArticlesByAuthorId(authorId uint64, limit int) ([]SmallEntity, error) {
-	var articles []SmallEntity
+func GetRecommendedArticlesByAuthorId(authorId uint64, limit int) ([]*SmallEntity, error) {
+	var articles []*SmallEntity
 	b := builder()
 	b.Where(queryopt.Eq(fieldUserId, authorId))
 	b.Where(queryopt.Eq(fieldArticleStatus, 1))
@@ -192,8 +243,8 @@ func GetRecommendedArticlesByAuthorId(authorId uint64, limit int) ([]SmallEntity
 	return articles, err
 }
 
-func GetLatestArticlesByUserId(userId uint64, limit int) ([]SmallEntity, error) {
-	var articles []SmallEntity
+func GetLatestArticlesByUserId(userId uint64, limit int) ([]*SmallEntity, error) {
+	var articles []*SmallEntity
 	b := builder()
 	b.Where(queryopt.Eq(fieldArticleStatus, 1))
 	b.Where(queryopt.Eq(fieldProcessStatus, 0))
@@ -207,7 +258,7 @@ func GetLatestArticlesByUserId(userId uint64, limit int) ([]SmallEntity, error) 
 
 func GetUserCount(userId uint64) int64 {
 	var count int64
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Count(&count)
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Where("deleted_at IS NULL").Count(&count)
 	return count
 }
 

@@ -1,0 +1,638 @@
+{{template "baseof.gohtml" .}}
+{{define "main"}}
+<div class="flex gap-2 relative items-start">
+    
+    <!-- Sidebar -->
+    {{template "sidebar.gohtml" .}}
+
+    <!-- Main Content -->
+    <div class="flex-1 min-w-0 py-4 pr-4 sm:pr-6 lg:pr-8 pl-2">
+        <main class="w-full" x-data="settingsData()" x-cloak>
+            <div class="bg-white rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden">
+                
+                <!-- Header -->
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h1 class="text-xl font-bold text-gray-900">{{call .T "settings_title"}}</h1>
+                    <div x-show="saved" x-transition.opacity class="flex items-center gap-2 text-green-600 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        {{call .T "saved_success"}}
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="border-b border-gray-100 overflow-x-auto">
+                    <nav class="flex px-6 gap-6" aria-label="Tabs">
+                        <button @click="activeTab = 'profile'" 
+                                :class="activeTab === 'profile' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                            {{call .T "tab_profile"}}
+                        </button>
+                        <button @click="activeTab = 'account'" 
+                                :class="activeTab === 'account' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                            {{call .T "tab_password"}}
+                        </button>
+                        <button @click="activeTab = 'privacy'" 
+                                :class="activeTab === 'privacy' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                            {{call .T "tab_privacy"}}
+                        </button>
+                         <button @click="activeTab = 'binding'" 
+                                :class="activeTab === 'binding' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                            {{call .T "tab_binding"}}
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Profile Tab -->
+                <div x-show="activeTab === 'profile'" class="p-6">
+                    <div class="space-y-8 max-w-3xl">
+                        
+                        <!-- Avatar Section -->
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-6 border-b border-gray-100">
+                            <div class="relative group">
+                                <img :src="form.avatarUrl || '/static/pic/default-avatar.webp'" alt="Avatar" class="w-24 h-24 rounded-full object-cover ring-4 ring-gray-50 bg-gray-200">
+                                <div class="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center cursor-pointer" @click="$refs.avatarInput.click()">
+                                    <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-sm font-medium text-gray-900">{{call .T "profile_picture_label"}}</h3>
+                                <p class="text-xs text-gray-500 mt-1 mb-3">{{call .T "profile_picture_help"}}</p>
+                                <button type="button" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="$refs.avatarInput.click()">
+                                    {{call .T "upload_picture_btn"}}
+                                </button>
+                                <input type="file" x-ref="avatarInput" class="hidden" accept="image/*" @change="handleAvatarUpload">
+                            </div>
+                        </div>
+
+                         <!-- Login Info (Moved from Account) -->
+                        <div class="pb-6 border-b border-gray-100">
+                             <h3 class="text-sm font-medium text-gray-900 mb-4">{{call .T "account_info_title"}}</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "username_label"}}</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" x-model="form.username" 
+                                               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" 
+                                               :class="editingUsername ? 'border-blue-500 ring-1 ring-blue-500' : 'bg-gray-50'" 
+                                               :readonly="!editingUsername">
+                                        <button type="button" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap shrink-0" x-show="!editingUsername" @click="startEditUsername">{{call .T "edit_btn"}}</button>
+                                        <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 whitespace-nowrap shrink-0" x-show="editingUsername" @click="saveUsername">{{call .T "save_btn"}}</button>
+                                        <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-700 bg-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 whitespace-nowrap shrink-0" x-show="editingUsername" @click="cancelEditUsername">{{call .T "cancel_btn"}}</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "email_label"}}</label>
+                                     <div class="flex gap-2">
+                                        <input type="email" x-model="form.email" 
+                                               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" 
+                                               :class="editingEmail ? 'border-blue-500 ring-1 ring-blue-500' : 'bg-gray-50'" 
+                                               :readonly="!editingEmail">
+                                        <button type="button" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap shrink-0" x-show="!editingEmail" @click="startEditEmail">{{call .T "edit_btn"}}</button>
+                                        <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 whitespace-nowrap shrink-0" x-show="editingEmail" @click="saveEmail">{{call .T "save_btn"}}</button>
+                                        <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-700 bg-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 whitespace-nowrap shrink-0" x-show="editingEmail" @click="cancelEditEmail">{{call .T "cancel_btn"}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Basic Info Form -->
+                        <form @submit.prevent="saveProfile" class="space-y-8">
+                            <div class="grid grid-cols-1 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                                    <input type="text" x-model="form.nickname" 
+                                           class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm max-w-lg" 
+                                           placeholder="Your Name">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                    <textarea x-model="form.bio" 
+                                              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm max-w-lg h-24" 
+                                              placeholder="Tell us a little bit about yourself..."></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Signature</label>
+                                    <textarea x-model="form.signature" 
+                                              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm max-w-lg h-20" 
+                                              placeholder="Your forum signature..."></textarea>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Website Name</label>
+                                        <input type="text" x-model="form.websiteName" 
+                                               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+                                               placeholder="My Blog">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
+                                        <input type="text" x-model="form.website" 
+                                               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+                                               placeholder="https://example.com">
+                                    </div>
+                                </div>
+
+                                <!-- Social Profiles -->
+                                <div class="pt-4 border-t border-gray-100">
+                                    <h3 class="text-sm font-medium text-gray-900 mb-4">Social Profiles</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">GitHub</label>
+                                            <input type="text" x-model="form.externalInformation.github.link" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">Twitter / X</label>
+                                            <input type="text" x-model="form.externalInformation.twitter.link" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        </div>
+                                         <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">LinkedIn</label>
+                                            <input type="text" x-model="form.externalInformation.linkedIn.link" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        </div>
+                                         <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">Weibo</label>
+                                            <input type="text" x-model="form.externalInformation.weibo.link" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        </div>
+                                         <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">Bilibili</label>
+                                            <input type="text" x-model="form.externalInformation.bilibili.link" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        </div>
+                                         <div>
+                                            <label class="block text-xs font-medium text-gray-500 mb-1">Zhihu</label>
+                                            <input type="text" x-model="form.externalInformation.zhihu.link" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-6 border-t border-gray-100">
+                                <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" :disabled="saving">
+                                    <span x-show="!saving">Save Changes</span>
+                                    <span x-show="saving" class="flex items-center">
+                                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Saving...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Account Tab (Password Only) -->
+                <div x-show="activeTab === 'account'" class="p-6">
+                    <div class="max-w-3xl space-y-8">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+                            <form @submit.prevent="changePassword" class="space-y-4 max-w-lg">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                    <input type="password" x-model="pwdForm.oldPassword" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                    <input type="password" x-model="pwdForm.newPassword" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                    <p class="text-xs text-gray-500 mt-1">Minimum 6 characters.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                    <input type="password" x-model="pwdForm.confirmPassword" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                </div>
+                                <div class="pt-2">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" :disabled="saving">
+                                        <span x-show="!saving">Update Password</span>
+                                        <span x-show="saving" class="flex items-center">
+                                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Updating...
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacy Tab -->
+                <div x-show="activeTab === 'privacy'" class="p-6">
+                    <div class="max-w-2xl space-y-6">
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                            <div>
+                                <h3 class="text-base font-medium text-gray-900">Show My Articles</h3>
+                                <p class="text-sm text-gray-500">Allow others to see your article list on your profile.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" x-model="privacy.showArticles" @change="savePrivacy" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                         <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                            <div>
+                                <h3 class="text-base font-medium text-gray-900">Show Who I Follow</h3>
+                                <p class="text-sm text-gray-500">Allow others to see your following and followers list.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" x-model="privacy.showFollowing" @change="savePrivacy" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                         <div class="flex items-center justify-between py-4">
+                            <div>
+                                <h3 class="text-base font-medium text-gray-900">Email Notifications</h3>
+                                <p class="text-sm text-gray-500">Receive emails about activity on your account.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" x-model="privacy.emailNotifications" @change="savePrivacy" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Binding Tab -->
+                <div x-show="activeTab === 'binding'" class="p-6">
+                     <div class="max-w-2xl space-y-4">
+                         <h3 class="text-lg font-medium text-gray-900 mb-4">Connected Accounts</h3>
+                         
+                         <template x-if="loadingBindings">
+                             <div class="flex justify-center py-8">
+                                <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                             </div>
+                         </template>
+
+                         <div x-show="!loadingBindings" class="space-y-3">
+                             <!-- GitHub -->
+                             <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                                 <div class="flex items-center gap-3">
+                                     <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                         <svg class="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                     </div>
+                                     <div>
+                                         <h4 class="font-medium text-gray-900">GitHub</h4>
+                                         <p class="text-sm text-gray-500" x-text="getBindingStatus('github')"></p>
+                                     </div>
+                                 </div>
+                                 <button @click="toggleBinding('github')" 
+                                         class="inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
+                                         :class="isBound('github') ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500'">
+                                     <span x-text="isBound('github') ? 'Disconnect' : 'Connect'"></span>
+                                 </button>
+                             </div>
+
+                             <!-- Google -->
+                             <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                                 <div class="flex items-center gap-3">
+                                     <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                         <svg class="w-6 h-6" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                                     </div>
+                                      <div>
+                                         <h4 class="font-medium text-gray-900">Google</h4>
+                                         <p class="text-sm text-gray-500" x-text="getBindingStatus('google')"></p>
+                                     </div>
+                                 </div>
+                                  <button @click="toggleBinding('google')" 
+                                         class="inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
+                                         :class="isBound('google') ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500'">
+                                     <span x-text="isBound('google') ? 'Disconnect' : 'Connect'"></span>
+                                 </button>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+            </div>
+            <!-- Avatar Crop Modal -->
+            <div x-show="showCropModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="absolute inset-0 transition-opacity" aria-hidden="true">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                    </div>
+
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                    <div class="relative z-10 inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                    Crop Image
+                                </h3>
+                                <div class="mt-2 w-full h-96 bg-gray-100 rounded-lg overflow-hidden relative flex items-center justify-center transition-opacity duration-300" :class="{'opacity-0': !cropperReady, 'opacity-100': cropperReady}">
+                                    <img x-ref="cropperImage" class="max-w-full max-h-full block" style="display: block; max-width: 100%;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm" @click="cropAndUpload">
+                                Crop & Upload
+                            </button>
+                            <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" @click="cancelCrop">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function settingsData() {
+    const userData = {{json .Data.User}};
+    return {
+        activeTab: 'profile',
+        saving: false,
+        saved: false,
+        editingUsername: false,
+        editingEmail: false,
+        showCropModal: false,
+        cropperReady: false,
+        cropper: null,
+        loadingBindings: true,
+        bindings: [],
+        form: JSON.parse(JSON.stringify(userData)),
+        pwdForm: {
+            oldPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        },
+        privacy: {
+            showArticles: true, // TODO: Load from backend
+            showFollowing: true,
+            emailNotifications: true
+        },
+        
+        init() {
+            // Load privacy settings from local storage or API
+            const savedPrivacy = localStorage.getItem('user_privacy_settings');
+            if (savedPrivacy) {
+                this.privacy = JSON.parse(savedPrivacy);
+            }
+            this.fetchBindings();
+        },
+
+        startEditUsername() { this.editingUsername = true; },
+        cancelEditUsername() { 
+            this.editingUsername = false; 
+            this.form.username = {{.Data.User.Username}}; // Reset
+        },
+        async saveUsername() {
+            if (!this.form.username) return;
+            this.saving = true;
+            try {
+                if (window.api && window.api.saveUserName) {
+                    const res = await window.api.saveUserName(this.form.username);
+                    if (res.code === 0) {
+                        this.editingUsername = false;
+                        this.saved = true;
+                        setTimeout(() => this.saved = false, 3000);
+                        // Optionally update local cache or reload
+                    } else {
+                        alert(res.message || 'Failed to update username');
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error updating username');
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        startEditEmail() { this.editingEmail = true; },
+        cancelEditEmail() { 
+            this.editingEmail = false; 
+            this.form.email = {{.Data.User.Email}}; // Reset
+        },
+        async saveEmail() {
+            if (!this.form.email) return;
+            this.saving = true;
+            try {
+                if (window.api && window.api.saveUserEmail) {
+                    const res = await window.api.saveUserEmail(this.form.email);
+                    if (res.code === 0) {
+                        this.editingEmail = false;
+                        this.saved = true;
+                        setTimeout(() => this.saved = false, 3000);
+                    } else {
+                        alert(res.message || 'Failed to update email');
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error updating email');
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        handleAvatarUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image size must be less than 5MB');
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                return;
+            }
+
+            // Clear input to allow re-selecting same file
+            e.target.value = '';
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (this.cropper) {
+                    this.cropper.destroy();
+                    this.cropper = null;
+                }
+
+                const img = this.$refs.cropperImage;
+                img.src = e.target.result;
+                this.showCropModal = true;
+                this.cropperReady = false;
+                
+                // Initialize Cropper (lazy loaded)
+                const initCropper = async () => {
+                    if (window.loadCropper) {
+                        await window.loadCropper();
+                    }
+                    
+                    this.$nextTick(() => {
+                        requestAnimationFrame(() => {
+                            const self = this;
+                            const CropperClass = window.Cropper || Cropper;
+                            this.cropper = new CropperClass(img, {
+                                aspectRatio: 1,
+                                viewMode: 1,
+                                autoCropArea: 1,
+                                responsive: true,
+                                ready() {
+                                    self.cropperReady = true;
+                                }
+                            });
+                        });
+                    });
+                };
+
+                if (img.complete) {
+                    initCropper();
+                } else {
+                    img.onload = initCropper;
+                }
+            };
+            reader.readAsDataURL(file);
+        },
+
+        cancelCrop() {
+            this.showCropModal = false;
+            if (this.cropper) {
+                this.cropper.destroy();
+                this.cropper = null;
+            }
+            this.$refs.avatarInput.value = '';
+        },
+
+        cropAndUpload() {
+            if (!this.cropper) return;
+
+            this.cropper.getCroppedCanvas({
+                width: 400,
+                height: 400,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            }).toBlob((blob) => {
+                if (!blob) {
+                    alert('Crop failed');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('avatar', blob, 'avatar.webp');
+
+                // Use existing API if available
+                if (window.api && window.api.uploadAvatar) {
+                     window.api.uploadAvatar(formData).then(res => {
+                        // Match response structure from settings.gohtml
+                        if (res && (res.result || res.data)) {
+                             const url = (res.result && res.result.avatarUrl) || res.result || (res.data && res.data.url);
+                             this.form.avatarUrl = url;
+                             alert('Avatar uploaded successfully');
+                             location.reload(); 
+                        } else {
+                             alert("Upload succeeded but response format is unexpected");
+                             location.reload();
+                        }
+                    }).catch(err => {
+                        console.error("Avatar upload failed", err);
+                        alert("Failed to upload avatar: " + (err.message || 'Unknown error'));
+                        this.cancelCrop();
+                    });
+                } else {
+                     // Fallback/Mock
+                    console.log("Mock upload");
+                    this.form.avatarUrl = URL.createObjectURL(blob);
+                    this.cancelCrop();
+                }
+            }, 'image/webp', 0.85);
+        },
+
+        async saveProfile() {
+            this.saving = true;
+            try {
+                // Construct payload matching backend expectations
+                // This is a simplified example. You might need to map fields correctly.
+                const payload = {
+                    ...this.form,
+                    // external_information needs to be handled if backend expects a specific format
+                };
+
+                const f = this.form;
+                // Use window.api.saveUserInfo if available
+                if (window.api && window.api.saveUserInfo) {
+                    await window.api.saveUserInfo(
+                        f.nickname, f.email, f.bio, f.signature, f.website, f.websiteName, f.externalInformation
+                    );
+                    this.saved = true;
+                    setTimeout(() => this.saved = false, 3000);
+                } else {
+                     // Mock delay
+                    await new Promise(r => setTimeout(r, 800));
+                    this.saved = true;
+                    setTimeout(() => this.saved = false, 3000);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Failed to save changes.');
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        savePrivacy() {
+            localStorage.setItem('user_privacy_settings', JSON.stringify(this.privacy));
+            // Also sync with backend if API exists
+        },
+
+        async changePassword() {
+            if (this.pwdForm.newPassword !== this.pwdForm.confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+            this.saving = true;
+             try {
+                 // Call backend API
+                await new Promise(r => setTimeout(r, 1000));
+                this.pwdForm = { oldPassword: '', newPassword: '', confirmPassword: '' };
+                alert("Password updated successfully!");
+            } catch (error) {
+                alert('Failed to update password.');
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        async fetchBindings() {
+            // Mock fetching bindings
+            this.loadingBindings = true;
+            setTimeout(() => {
+                this.bindings = [
+                    // { provider: 'github', connected: true, username: 'user123' } 
+                ];
+                this.loadingBindings = false;
+            }, 500);
+        },
+        
+        getBindingStatus(provider) {
+             const binding = this.bindings.find(b => b.provider === provider);
+             return binding && binding.connected ? 'Connected as ' + binding.username : 'Not connected';
+        },
+
+        isBound(provider) {
+             return this.bindings.some(b => b.provider === provider && b.connected);
+        },
+
+        async toggleBinding(provider) {
+            // Implement OAuth flow or disconnect logic
+            alert(`Toggle ${provider} binding - Implementation required`);
+        }
+    }
+}
+</script>
+{{end}}

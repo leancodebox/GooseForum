@@ -43,9 +43,9 @@ func save(entity *Entity) int64 {
 func CreateOrSave(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {
@@ -97,7 +97,7 @@ func GetFileByName(name string) (*Entity, error) {
 func SaveFileFromUpload(userId uint64, fileData []byte, filename string, customPath string) (*Entity, error) {
 	// 验证文件大小
 	if len(fileData) > MaxFileSize {
-		return nil, fmt.Errorf("file size exceeds maximum limit of 2MB")
+		return nil, fmt.Errorf("file size exceeds maximum limit of %dMB", MaxFileSize/(1024*1024))
 	}
 
 	// 检查文件类型

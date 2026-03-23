@@ -1,81 +1,117 @@
 package viewrender
 
 import (
-	"html/template"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/bundles/datacache"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	appI18n "github.com/leancodebox/GooseForum/app/service/i18n"
 	"github.com/leancodebox/GooseForum/resource"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
-var ht4gooseforum *template.Template
+var (
+	CurrentRegistry *TemplateRegistry
+)
 
 func Reload() {
-	ht4gooseforum = resource.GetTemplates(GlobalFunc())
+	// Initialize i18n bundle
+	appI18n.Init(resource.GetTemplateFS())
+
+	var err error
+	CurrentRegistry, err = NewRegistry(resource.GetTemplateFS())
+	if err != nil {
+		slog.Error("Failed to reload templates", "err", err)
+	}
 }
 
 func init() {
 	Reload()
 }
 
-var webSettingsCache = &datacache.Cache[pageConfig.WebSettingsConfig]{}
-
-func GlobalFunc() template.FuncMap {
-	return template.FuncMap{
-		"WebPageSettings": func() pageConfig.WebSettingsConfig {
-			return webSettingsCache.GetOrLoad("websetcache", func() (pageConfig.WebSettingsConfig, error) {
-				return pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{}), nil
-			},
-				time.Second*5,
-			)
-		},
-	}
+type TmplData[T any] struct {
+	IsProduction  bool
+	Theme         string
+	Footer        pageConfig.FooterConfig
+	SiteSetting   pageConfig.SiteSettingsConfig
+	Data          T
+	Url           URLHelper
+	User          *vo.UserInfoShow
+	CurrentUserId uint64
+	PageMeta      *PageMeta
+	Lang          string
+	T             func(string, ...any) string
 }
 
-func Render(c *gin.Context, name string, templateData map[string]any) {
-	if templateData == nil {
-		templateData = make(map[string]any, 7)
-	}
+func SafeRender[T any](c *gin.Context, name string, data T, pageMeta ...*PageMeta) {
 	user := component.GetLoginUser(c)
-	templateData["User"] = user
-	templateData["CurrentUserId"] = user.UserId
-	templateData["IsProduction"] = setting.IsProduction()
-	templateData["Theme"] = GetTheme(c)
-	templateData["Footer"] = hotdataserve.GetFooterConfigCache()
-	templateData["SiteSetting"] = hotdataserve.GetSiteSettingsConfigCache()
-	if _, ok := templateData["PageMeta"]; !ok {
-		templateData["PageMeta"] = NewPageMetaBuilder().Build()
+	var meta *PageMeta
+	if len(pageMeta) > 0 && pageMeta[0] != nil {
+		meta = pageMeta[0]
+	} else {
+		meta = NewPageMetaBuilder().Build()
 	}
-	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, templateData); err != nil {
-		slog.Error("render template err", "err", err.Error())
+
+	// Determine language
+	lang := c.Query("lang")
+	if lang == "" {
+		if cookie, err := c.Cookie("lang"); err == nil && cookie != "" {
+			lang = cookie
+		} else {
+			lang = c.GetHeader("Accept-Language")
+		}
+	}
+	if lang == "" {
+		lang = "zh" // Default fallback
+	}
+
+	localizer := appI18n.GetLocalizer(lang)
+	tFunc := func(key string, args ...any) string {
+		if localizer == nil {
+			return key
+		}
+
+		config := &i18n.LocalizeConfig{
+			MessageID: key,
+		}
+		if len(args) > 0 {
+			config.TemplateData = args[0]
+		}
+
+		msg, err := localizer.Localize(config)
+		if err != nil {
+			// fallback to key or log error
+			return key
+		}
+		return msg
+	}
+
+	templateData := TmplData[T]{
+		IsProduction:  setting.IsProduction(),
+		Theme:         GetTheme(c),
+		Footer:        hotdataserve.GetFooterConfigCache(),
+		SiteSetting:   hotdataserve.GetSiteSettingsConfigCache(),
+		Data:          data,
+		Url:           URLHelper{},
+		User:          user,
+		Lang:          lang,
+		CurrentUserId: component.LoginUserId(c),
+		PageMeta:      meta,
+		T:             tFunc,
+	}
+
+	if CurrentRegistry == nil {
+		slog.Error("CurrentRegistry is nil")
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
-}
 
-type TmplData struct {
-	IsProduction bool
-	Theme        string
-	Footer       pageConfig.FooterConfig
-	SiteSetting  pageConfig.SiteSettingsConfig
-	Data         map[string]any
-}
-
-func SafeRender(c *gin.Context, name string, data map[string]any) {
-	templateData := TmplData{
-		IsProduction: setting.IsProduction(),
-		Theme:        GetTheme(c),
-		Footer:       hotdataserve.GetFooterConfigCache(),
-		SiteSetting:  hotdataserve.GetSiteSettingsConfigCache(),
-		Data:         data,
-	}
-	if err := ht4gooseforum.ExecuteTemplate(c.Writer, name, templateData); err != nil {
+	if err := CurrentRegistry.Render(c.Writer, name, templateData); err != nil {
 		slog.Error("render template err", "err", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}

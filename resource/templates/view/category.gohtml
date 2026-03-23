@@ -1,0 +1,344 @@
+{{template "baseof.gohtml" .}}
+{{define "main"}}
+<div class="flex gap-2 relative items-start">
+
+    {{template "sidebar.gohtml" .}}
+
+    <!-- Main Content: The List -->
+    <div class="flex-1 min-w-0 py-4 pr-4 sm:pr-6 lg:pr-8 pl-2">
+        <div class="space-y-4 pb-12">
+
+        <!-- Category Header -->
+        {{if .Data.Category}}
+        <div class="relative overflow-hidden p-6 bg-white border border-gray-100 rounded-xl flex items-center gap-6 shadow-sm">
+            {{if .Data.Category.Icon}}
+            <div class="w-12 h-12 rounded-lg bg-gray-50 flex-shrink-0 flex items-center justify-center text-3xl shadow-sm border border-gray-100" style="color: {{.Data.Category.Color}}">
+                {{.Data.Category.Icon}}
+            </div>
+            {{else}}
+            <div class="w-12 h-12 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-2xl font-bold shadow-lg" style="background-color: {{.Data.Category.Color}}">
+                {{.Data.CategoryFirstChar}}
+            </div>
+            {{end}}
+            <div class="relative flex-1">
+                <div class="flex items-center gap-3 mb-1">
+                    <h1 class="text-xl font-black text-gray-900 tracking-tight">{{.Data.Category.Category}}</h1>
+                    <span class="px-2 py-0.5 rounded-md bg-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{call .T "category_label"}}</span>
+                </div>
+                <p class="text-sm text-gray-500 leading-relaxed">{{.Data.Category.Desc}}</p>
+            </div>
+        </div>
+        {{end}}
+
+        <!-- Main Content Card -->
+        <div class="bg-white rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden" x-data="categoryList()">
+            <!-- Navigation Tabs & Actions -->
+            <div class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
+                <div class="flex items-center gap-6">
+                     <div class="flex items-center gap-1 bg-gray-100/80 p-1 rounded-lg">
+                         <a href="/c/{{.Data.Category.Category}}/{{.Data.Category.Id}}/l/latest"
+                            class="px-4 py-1.5 text-sm font-medium rounded-md transition-all {{if eq .Data.Sort "latest"}}bg-white text-gray-900 shadow-sm{{else}}text-gray-500 hover:text-gray-900{{end}}">
+                            {{call .T "nav_latest"}}
+                         </a>
+                         <a href="/c/{{.Data.Category.Category}}/{{.Data.Category.Id}}/l/new"
+                            class="px-4 py-1.5 text-sm font-medium rounded-md transition-all {{if eq .Data.Sort "new"}}bg-white text-gray-900 shadow-sm{{else}}text-gray-500 hover:text-gray-900{{end}}">
+                            {{call .T "nav_new"}}
+                         </a>
+                     </div>
+                </div>
+
+                <a href="/publish" class="inline-flex items-center gap-2 px-5 py-2 bg-gray-900 text-white text-sm font-bold rounded-lg hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 hover:shadow-gray-300 active:scale-95">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    {{call .T "new_topic"}}
+                </a>
+            </div>
+
+            <!-- Table Layout -->
+            <div class="w-full overflow-x-auto">
+                <table class="w-full text-left border-separate border-spacing-y-2 table-fixed">
+                    <thead>
+                        <tr class="text-[12px] font-semibold uppercase tracking-wider text-gray-400">
+                            <th class="px-4 sm:px-6 py-1 text-gray-400/80">{{call .T "table_header_topic"}}</th>
+                            <th class="hidden lg:table-cell px-4 py-1 text-center text-gray-400/80 w-[120px]">{{call .T "table_header_users"}}</th>
+                            <th class="hidden md:table-cell px-4 py-1 text-center text-gray-400/80 w-[80px]">{{call .T "table_header_replies"}}</th>
+                            <th class="hidden md:table-cell px-4 py-1 text-center text-gray-400/80 w-[80px]">{{call .T "table_header_views"}}</th>
+                            <th class="hidden sm:table-cell px-6 py-1 text-right text-gray-400/80 w-[110px]">{{call .T "table_header_activity"}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Data.Articles}}
+                        <tr class="group transition-all duration-200 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-0.5">
+                            <!-- Topic Column -->
+                            <td class="px-4 sm:px-6 py-4 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
+                                <div class="flex items-center gap-3">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center flex-wrap gap-x-3 gap-y-2 mb-1.5">
+                                            <a href="/p/post/{{.Id}}" class="text-[15px] sm:text-[16px] font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 leading-normal tracking-tight">{{.Title}}</a>
+
+                                            <div class="flex items-center gap-2 flex-shrink-0">
+                                                {{if .Categories}}
+                                                    {{range .Categories}}
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-medium bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">{{.}}</span>
+                                                    {{end}}
+                                                {{end}}
+
+                                                {{if gt .ViewCount 100}}
+                                                <span class="text-[11px] text-orange-400 font-bold opacity-80">{{call $.T "hot_tag"}}</span>
+                                                {{end}}
+                                            </div>
+                                        </div>
+                                        <!-- Summary Text -->
+                                        <p class="text-[13px] text-gray-500 line-clamp-1 group-hover:text-gray-900 transition-colors">
+                                            {{if .Description}}{{.Description}}{{else}}{{call $.T "no_summary"}}{{end}}
+                                        </p>
+
+
+                                        <!-- Mobile Meta Info -->
+                                        <div class="flex sm:hidden items-center gap-4 mt-2 text-xs text-gray-400 font-medium">
+                                            <span class="time-ago" data-time="{{.LastUpdateTime}}">{{.LastUpdateTime}}</span>
+                                            <div class="flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                                <span class="format-number" data-number="{{.CommentCount}}">{{.CommentCount}}</span>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                <span class="format-number" data-number="{{.ViewCount}}">{{.ViewCount}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Users Column -->
+                            <td class="hidden lg:table-cell px-4 py-4 text-center align-middle">
+                                <div class="flex items-center justify-center -space-x-3">
+                                    {{range .Posters}}
+                                    <img src="{{.AvatarUrl}}"
+                                         loading="lazy"
+                                         class="relative z-30 inline-block h-9 w-9 rounded-full ring-2 ring-white shadow-sm object-cover hover:z-40 hover:scale-110 transition-transform cursor-pointer"
+                                         title="{{.Username}}"
+                                         @click.stop="$dispatch('show-user-card', { userId: {{.Id}}, username: '{{.Username}}', avatarUrl: '{{.AvatarUrl}}', target: $el, event: $event })">
+                                    {{end}}
+                                </div>
+                            </td>
+
+                            <!-- Replies Column -->
+                            <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                                <div class="inline-flex items-center justify-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                                    <span class="text-[15px] font-medium tabular-nums format-number {{if gt .CommentCount 10}}text-orange-500 font-bold{{else}}text-gray-900{{end}}" data-number="{{.CommentCount}}">{{.CommentCount}}</span>
+                                </div>
+                            </td>
+
+                            <!-- Views Column -->
+                            <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                                <div class="inline-flex items-center justify-center gap-1.5 transition-opacity duration-300">
+                                    <span class="text-[15px] font-medium format-number {{if gt .ViewCount 500}}text-orange-400 font-bold{{else}}text-gray-900 opacity-60 group-hover:opacity-100{{end}} tabular-nums" data-number="{{.ViewCount}}">{{.ViewCount}}</span>
+                                </div>
+                            </td>
+
+                            <!-- Activity Column -->
+                            <td class="hidden sm:table-cell px-6 py-4 text-right align-middle rounded-r-2xl">
+                                <span class="text-[13px] font-medium text-gray-400/80 whitespace-nowrap time-ago tabular-nums group-hover:text-gray-500 transition-colors" data-time="{{.LastUpdateTime}}">{{.LastUpdateTime}}</span>
+                            </td>
+                        </tr>
+                        {{end}}
+                        <template x-for="article in articles" :key="article.id">
+                            <tr class="group transition-all duration-200 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-0.5">
+                                <!-- Topic Column -->
+                                <td class="px-4 sm:px-6 py-4 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
+                                    <div class="flex items-center gap-3">
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center flex-wrap gap-x-3 gap-y-2 mb-1.5">
+                                                <a :href="'/p/post/' + article.id" class="text-[15px] sm:text-[16px] font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 leading-normal tracking-tight" x-text="article.title"></a>
+
+                                                <div class="flex items-center gap-2 flex-shrink-0">
+                                                    <template x-if="article.categories">
+                                                        <template x-for="cat in article.categories">
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-medium bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors" x-text="cat"></span>
+                                                        </template>
+                                                    </template>
+
+                                                    <template x-if="article.viewCount > 100">
+                                                        <span class="text-[11px] text-orange-400 font-bold opacity-80">{{call .T "hot_tag"}}</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            <!-- Summary Text -->
+                                            <p class="text-[13px] text-gray-500 line-clamp-1 group-hover:text-gray-900 transition-colors" x-text="article.description ? article.description : '{{call .T "no_summary"}}'">
+                                            </p>
+
+                                            <!-- Mobile Meta Info -->
+                                            <div class="flex sm:hidden items-center gap-4 mt-2 text-xs text-gray-400 font-medium">
+                                                <span class="time-ago" x-text="formatTimeAgo(article.lastUpdateTime)"></span>
+                                                <div class="flex items-center gap-1">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                                    <span class="format-number" x-text="formatNum(article.commentCount)"></span>
+                                                </div>
+                                                <div class="flex items-center gap-1">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                    <span class="format-number" x-text="formatNum(article.viewCount)"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Users Column -->
+                                <td class="hidden lg:table-cell px-4 py-4 text-center align-middle">
+                                    <div class="flex items-center justify-center -space-x-3">
+                                        <template x-for="poster in article.posters" :key="poster.id">
+                                            <img :src="poster.avatarUrl"
+                                                 loading="lazy"
+                                                 class="relative z-30 inline-block h-9 w-9 rounded-full ring-2 ring-white shadow-sm object-cover hover:z-40 hover:scale-110 transition-transform cursor-pointer"
+                                                 :title="poster.username"
+                                                 @click.stop="$dispatch('show-user-card', { userId: poster.id, username: poster.username, avatarUrl: poster.avatarUrl, target: $el, event: $event })">
+                                        </template>
+                                    </div>
+                                </td>
+
+                                <!-- Replies Column -->
+                                <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                                    <div class="inline-flex items-center justify-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                                        <span class="text-[15px] font-medium tabular-nums" :class="article.commentCount > 10 ? 'text-orange-500 font-bold' : 'text-gray-900'" x-text="formatNum(article.commentCount)"></span>
+                                    </div>
+                                </td>
+
+                                <!-- Views Column -->
+                                <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                                    <div class="inline-flex items-center justify-center gap-1.5 transition-opacity duration-300">
+                                        <span class="text-[15px] font-medium tabular-nums" :class="article.viewCount > 500 ? 'text-orange-400 font-bold' : 'text-gray-900 opacity-60 group-hover:opacity-100'" x-text="formatNum(article.viewCount)"></span>
+                                    </div>
+                                </td>
+
+                                <!-- Activity Column -->
+                                <td class="hidden sm:table-cell px-6 py-4 text-right align-middle rounded-r-2xl">
+                                    <span class="text-[13px] font-medium text-gray-400/80 whitespace-nowrap tabular-nums group-hover:text-gray-500 transition-colors" x-text="formatTimeAgo(article.lastUpdateTime)"></span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="p-4 bg-gray-50/50 border-t border-gray-100 text-center" x-show="hasMore">
+                 <button class="w-full py-2 flex items-center justify-center gap-2 text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors" @click="loadMore()" :disabled="loading">
+                     <span x-show="!loading">{{call .T "load_more_category" .Data.Category}}</span>
+                     <span x-show="loading" class="flex items-center gap-2">
+                        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {{call .T "loading"}}
+                     </span>
+                 </button>
+            </div>
+            <div class="p-3 bg-gray-50/50 border-t border-gray-100 text-center" x-show="!hasMore && articles.length > 0" style="display: none;">
+                <span class="text-sm text-gray-400">{{call .T "no_more_topics"}}</span>
+            </div>
+            <!-- SEO Hidden Link -->
+            {{if gt .Data.NextPage 0}}
+            <a href="?page={{.Data.NextPage}}" rel="next" style="display:none" x-ref="nextPageLink">{{call .T "next_page"}}</a>
+            {{end}}
+        </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+        // SSR elements handling
+        document.querySelectorAll('.time-ago').forEach(el => {
+            const originalTime = el.getAttribute('data-time');
+            if (originalTime) {
+                el.textContent = window.formatTimeAgoStr(originalTime);
+            }
+        });
+
+        document.querySelectorAll('.format-number').forEach(el => {
+            const numStr = el.getAttribute('data-number');
+            const num = parseInt(numStr);
+            if (!isNaN(num)) {
+                el.textContent = window.formatNumberStr(num);
+                el.title = parseInt(numStr).toLocaleString();
+            }
+        });
+    });
+
+    function categoryList() {
+    return {
+        articles: [],
+        page: 1,
+        loading: false,
+        hasMore: {{if gt .Data.NextPage 0}}true{{else}}false{{end}},
+
+        init() {
+            // 初始化页码：从 URL 参数中获取当前页码，如果没有则默认为 1
+            const urlParams = new URLSearchParams(window.location.search);
+            const pageParam = parseInt(urlParams.get('page'));
+            if (!isNaN(pageParam) && pageParam > 1) {
+                this.page = pageParam;
+            }
+
+            window.addEventListener('scroll', () => {
+                // 当滚动距离底部不足 50px 时才触发加载，避免过早请求
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
+                    this.loadMore();
+                }
+            });
+        },
+
+        async loadMore() {
+            if (this.loading || !this.hasMore) return;
+            this.loading = true;
+
+            try {
+                const nextPage = this.page + 1;
+                const url = new URL(window.location.href);
+                url.searchParams.set('page', nextPage);
+                url.searchParams.set('format', 'json');
+
+                // Use window.api.fetchNextPage instead of direct fetch
+                const data = await window.api.fetchNextPage(url.toString());
+
+                if (data && data.length > 0) {
+                    this.articles.push(...data);
+                    this.page = nextPage;
+
+                    // Update SEO Link
+                    if (this.$refs.nextPageLink) {
+                         this.$refs.nextPageLink.href = '?page=' + (nextPage + 1);
+                    }
+
+                    // 只有当原始 URL 中已经存在 page 参数时，才同步更新 URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.has('page')) {
+                        const displayUrl = new URL(window.location.href);
+                        displayUrl.searchParams.set('page', nextPage);
+                        history.replaceState(null, '', displayUrl.toString());
+                    }
+                } else {
+                    this.hasMore = false;
+                    // Remove next page link for SEO
+                    if (this.$refs.nextPageLink) {
+                         this.$refs.nextPageLink.remove();
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load more articles:', e);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        formatTimeAgo(dateStr) {
+            return formatTimeAgoStr(dateStr);
+        },
+
+        formatNum(num) {
+            return formatNumberStr(num);
+        }
+    }
+}
+</script>
+{{end}}

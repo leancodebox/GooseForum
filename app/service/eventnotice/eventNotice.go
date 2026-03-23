@@ -43,7 +43,7 @@ func SendReplyNotification(userId uint64, commentId uint64, articleId uint64, re
 }
 
 // SendSystemNotification 发送系统通知
-func SendSystemNotification(userId uint64, title string, content string, extra map[string]interface{}) error {
+func SendSystemNotification(userId uint64, title string, content string, extra map[string]any) error {
 	payload := eventNotification.NotificationPayload{
 		Title:   title,
 		Content: content,

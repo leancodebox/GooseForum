@@ -11,23 +11,26 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/bundles/sessionstore"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/google"
+	"github.com/samber/lo"
 )
 
+// 支持的 OAuth 提供商
 const (
-	// 支持的OAuth提供商
 	ProviderGitHub   = "github"
 	ProviderGoogle   = "google"
 	ProviderFacebook = "facebook"
@@ -123,6 +126,12 @@ func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// 发布注册事件
+	eventbus.Publish(context.Background(), &eventhandlers.UserSignUpEvent{
+		UserId:   newUser.Id,
+		Username: newUser.Username,
+	})
 
 	// 创建OAuth记录
 	err = createOAuthRecord(newUser.Id, gothUser, userInfo)
@@ -273,12 +282,9 @@ func checkUnbindSafety(userID uint64, providerToUnbind string) error {
 	bindings := GetUserOAuthBindings(userID)
 
 	// 计算解绑后剩余的OAuth绑定数量
-	remainingBindings := 0
-	for provider := range bindings {
-		if provider != providerToUnbind {
-			remainingBindings++
-		}
-	}
+	remainingBindings := lo.CountBy(lo.Keys(bindings), func(p string) bool {
+		return p != providerToUnbind
+	})
 
 	// 如果用户既没有邮箱，解绑后也没有其他OAuth绑定，则禁止解绑
 	if !hasEmail && remainingBindings == 0 {
@@ -316,18 +322,13 @@ func ProcessOAuthBind(userID uint64, gothUser goth.User) error {
 
 // GetUserOAuthBindings 获取用户的所有OAuth绑定
 func GetUserOAuthBindings(userID uint64) map[string]*userOAuth.Entity {
-	bindings := make(map[string]*userOAuth.Entity)
-
 	// 检查各个提供商的绑定状态
 	providers := []string{ProviderGitHub, ProviderGoogle}
-	for _, provider := range providers {
-		oauth := userOAuth.GetByUserIDAndProvider(userID, provider)
-		if oauth != nil {
-			bindings[provider] = oauth
-		}
-	}
-
-	return bindings
+	return lo.PickBy(lo.Associate(providers, func(p string) (string, *userOAuth.Entity) {
+		return p, userOAuth.GetByUserIDAndProvider(userID, p)
+	}), func(_ string, v *userOAuth.Entity) bool {
+		return v != nil
+	})
 }
 
 // downloadAndSaveAvatar 下载外部头像并保存到本地

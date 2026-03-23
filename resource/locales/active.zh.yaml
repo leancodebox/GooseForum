@@ -1,0 +1,229 @@
+announcement: 公告
+latest: 最新
+hot: 热门
+top: 精选
+categories: 分类
+tags: 标签
+new_topic: 发布话题
+table_topic: 话题
+table_users: 用户
+table_replies: 回复
+table_views: 浏览
+table_activity: 动态
+
+# Login
+welcome_back: 欢迎回来！
+create_account: 创建您的账户
+reset_password: 重置您的密码
+login_btn: 登录
+register_btn: 注册
+username_placeholder: 用户名
+password_placeholder: 密码
+captcha_placeholder: 验证码
+click_to_refresh: 点击刷新
+forgot_password: 忘记密码？
+logging_in: 登录中...
+
+# Publish
+create_topic_title: 发布新话题
+topic_title_label: 标题
+topic_title_placeholder: 这个话题关于什么？
+topic_title_help: 标题应具有描述性（至少 15 个字符）
+select_type_label: 选择类型
+select_category_label: 选择分类
+selected_count_label: 已选
+
+# Settings
+settings_title: 设置
+saved_success: 保存成功
+tab_profile: 个人资料
+tab_password: 密码
+tab_privacy: 隐私
+tab_binding: 账号绑定
+profile_picture_label: 头像
+profile_picture_help: 支持 JPG, GIF 或 PNG。最大 5MB。
+upload_picture_btn: 上传新头像
+account_info_title: 账号信息
+username_label: 用户名
+email_label: 邮箱
+edit_btn: 编辑
+save_btn: 保存
+cancel_btn: 取消
+
+# User Profile
+admin_badge: 管理员
+location_shanghai: 上海
+message_btn: 发私信
+edit_profile_btn: 编辑资料
+follow_btn: 关注
+following_btn: 已关注
+no_bio: 暂无简介。
+joined_label: 加入于
+last_post_label: 最后发布
+seen_label: 最近访问
+online_status: 在线
+
+# Category
+no_summary: 暂无摘要信息...
+hot_tag: "#热门"
+load_more: 加载更多
+load_more_category: "加载更多 {{.Category}}..."
+loading: 加载中...
+no_more_topics: 没有更多话题了
+no_more_activities: 没有更多动态了
+next_page: 下一页
+nav_latest: 最新
+nav_new: 新帖
+category_label: 分类
+table_header_topic: 话题
+table_header_users: 用户
+table_header_replies: 回复
+table_header_views: 浏览
+table_header_activity: 动态
+
+# Detail
+btn_like: 点赞
+btn_save: 收藏
+btn_saved: 已收藏
+btn_edit: 编辑
+btn_reply: 回复
+btn_cancel: 取消
+badge_op: 楼主
+replying_to: 回复给
+btn_delete: 删除
+placeholder_reply: 写下你的回复...
+placeholder_comment: 你有什么想法？
+btn_post_reply: 发布回复
+join_discussion_title: 加入讨论
+join_discussion_desc: 登录或注册以发表评论
+btn_login: 登录
+btn_signup: 注册
+
+# Links
+links_title: 友情链接
+links_desc: 与其他优质网站交换友链
+links_cat_communities: 社区
+links_cat_tools: 工具
+links_cat_blogs: 博客
+apply_link_title: 申请友链
+apply_rule_healthy: 内容健康
+apply_rule_tech: 技术相关
+apply_rule_stable: 访问稳定
+label_site_name: 网站名称
+label_description: 描述
+label_logo_url: Logo 链接
+label_site_url: 网站地址
+label_contact_email: 联系邮箱
+label_reciprocal_link: 友链地址
+placeholder_site_name: 我的博客
+placeholder_description: 一句话描述
+placeholder_logo_url: https://...
+placeholder_site_url: https://...
+placeholder_contact_email: you@example.com
+placeholder_reciprocal_link: 您添加本站的链接地址
+btn_submit_application: 提交申请
+btn_sending: 发送中...
+stats_title: 统计信息
+stats_total_links: 链接总数
+stats_communities: 社区
+stats_tools: 工具
+stats_blogs: 博客
+
+# Detail Sidebar
+topic_map_title: 话题概览
+topic_map_created: 创建于
+topic_map_last_reply: 最后回复
+topic_map_replies: 回复数
+topic_map_views: 阅读数
+topic_map_participants: 参与者
+topic_map_frequent_posters: 活跃参与者
+topic_map_suggested: 推荐话题
+btn_share_topic: 分享话题
+
+# Global Sidebar
+sidebar_resources: 资源
+sidebar_categories: 分类
+sidebar_about: 关于
+sidebar_privacy: 隐私
+sidebar_terms: 条款
+sidebar_github: GitHub
+
+# Script Alerts
+op_failed: 操作失败
+bookmark_success: 收藏成功
+bookmark_cancel_success: 取消收藏成功
+input_content_required: 请输入内容
+comment_success: 发表成功
+confirm_delete_reply: 确定要删除这条评论吗？
+delete_success: 删除成功
+delete_failed: 删除失败
+submit_success: 提交成功
+submit_error: 提交失败
+
+# Error Page
+back_home: 返回首页
+back_page: 返回上页
+error_request_id: 请求 ID
+error_time: 时间
+
+# Chat Page
+messages_title: 消息
+search_messages: 搜索消息...
+type_message: 输入消息...
+send_hint: 按 Enter 发送，Shift + Enter 换行
+select_conversation: 选择一个会话
+select_conversation_desc: 从列表中选择一人开始聊天
+start_new_chat: 发起新聊天
+new_message_title: 新消息
+search_people: 搜索用户...
+suggested_people: 推荐
+status_online: 在线
+status_offline: 离线
+date_today: 今天
+
+# Notification Types
+type_comment: 评论
+type_reply: 回复
+type_like: 点赞
+type_follow: 关注
+type_system: 系统
+type_notification: 通知
+
+# Time format
+time_just_now: 刚刚
+time_m_ago: 分钟前
+time_h_ago: 小时前
+time_d_ago: 天前
+
+# Notifications Page
+notifications_title: 通知
+filter_all: 全部
+filter_unread: 未读
+mark_all_read: 全部已读
+no_notifications: 暂无通知
+no_notifications_desc: 你已读完所有通知！稍后再来查看。
+text_commented_on: 评论了
+text_liked_post: 点赞了你的话题
+text_started_following: 关注了你
+confirm_mark_all: 确定要将所有通知标记为已读吗？
+confirm_delete_notification: 确定要删除这条通知吗？
+
+# Navigation
+nav_home: 首页
+nav_explore: 发现
+nav_resources: 资源
+nav_topics: 话题
+nav_messages: 私信
+nav_notifications: 通知
+nav_recent: 最新动态
+nav_more: 更多
+nav_links: 友情链接
+nav_sponsors: 赞助商
+nav_docs: 文档
+nav_new_topic: 发起话题
+
+# User Menu
+menu_profile: 个人主页
+menu_settings: 设置
+menu_admin: 管理后台
+menu_logout: 退出登录

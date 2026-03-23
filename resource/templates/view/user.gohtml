@@ -1,0 +1,493 @@
+{{template "baseof.gohtml" .}}
+{{define "main"}}
+<div class="flex gap-2 relative items-start">
+    {{template "sidebar.gohtml" .}}
+
+    <!-- Main Content -->
+    <div class="flex-1 min-w-0 py-4 pr-4 sm:pr-6 lg:pr-8 pl-2" x-data="{ activeTab: 'summary' }">
+        <!-- Profile Header (Discourse Style) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+            <!-- Banner -->
+            <div class="h-48 bg-gradient-to-r from-blue-500 to-indigo-600 relative">
+                 <div class="absolute inset-0 bg-black/10"></div>
+                 <!-- Decorative elements -->
+                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                 <div class="absolute bottom-0 left-0 w-56 h-56 bg-white/10 rounded-full blur-2xl"></div>
+            </div>
+
+            <div class="px-6 pb-6">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Avatar (Overlapping Banner) -->
+                    <div class="relative -mt-16 shrink-0">
+                        <div class="relative group">
+                            <img src="{{.Data.UserDetail.AvatarUrl}}" alt="{{.Data.UserDetail.Username}}"
+                                 class="w-32 h-32 rounded-2xl border-4 border-white shadow-md object-cover bg-white">
+                            {{if .Data.UserDetail.IsOnline}}
+                            <div class="absolute bottom-2 right-2 w-5 h-5 bg-green-500 border-4 border-white rounded-full" title="Online"></div>
+                            {{end}}
+                        </div>
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="flex-1 pt-4 md:pt-2 min-w-0">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div>
+                                <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
+                                    {{.Data.UserDetail.Nickname}}
+                                    {{if .Data.UserDetail.IsAdmin}}
+                                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-700 uppercase tracking-wide">{{call .T "admin_badge"}}</span>
+                                    {{end}}
+                                </h1>
+                                <div class="text-gray-500 font-medium mt-1">@{{.Data.UserDetail.Username}}</div>
+                                <div class="flex items-center gap-1.5 text-sm text-gray-500 mt-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    Earth
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex items-center gap-3">
+                                <a href="/messages?userId={{.Data.UserDetail.UserId}}&username={{.Data.UserDetail.Nickname | urlquery}}&avatar={{.Data.UserDetail.AvatarUrl | urlquery}}" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                    {{call .T "message_btn"}}
+                                </a>
+                                {{if .Data.IsOwnProfile}}
+                                <a href="/settings" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    {{call .T "edit_profile_btn"}}
+                                </a>
+                                {{end}}
+                                {{if not .Data.IsOwnProfile}}
+                                <button class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2"
+                                        x-data="followUserHandler({{.Data.UserDetail.UserId}}, {{.Data.UserDetail.IsFollowing}})"
+                                        x-init="checkStatus()"
+                                        :class="isFollowing ? 'bg-gray-100 text-gray-800' : 'bg-white text-gray-700'"
+                                        @click="toggleFollow()"
+                                        :disabled="loading">
+                                    <svg x-show="loading" class="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span x-show="!loading && !isFollowing">{{call .T "follow_btn"}}</span>
+                                    <span x-show="!loading && isFollowing">{{call .T "following_btn"}}</span>
+                                </button>
+                                {{end}}
+                            </div>
+                        </div>
+
+                        <!-- Bio -->
+                        <div class="mt-4 max-w-2xl">
+                            <p class="text-gray-600 leading-relaxed text-sm">{{if .Data.UserDetail.Bio}}{{.Data.UserDetail.Bio}}{{else}}{{call .T "no_bio"}}{{end}}</p>
+                        </div>
+
+                        <!-- Meta Row -->
+                        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                            <div class="flex items-center gap-1.5" title="Joined">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                {{call .T "joined_label"}} {{.Data.UserDetail.CreatedAt.Format "Jan 02, 2006"}}
+                            </div>
+                            {{if .Data.Articles}}
+                            <div class="flex items-center gap-1.5" title="Last Post">
+                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                 {{call .T "last_post_label"}}: {{ (index .Data.Articles 0).LastUpdateTime }}
+                            </div>
+                            {{end}}
+                             <div class="flex items-center gap-1.5" title="Seen">
+                                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                 {{call .T "seen_label"}}: {{.Data.UserDetail.LastActiveTime.Format "Jan 02, 2006"}}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="px-6 border-t border-gray-100 bg-gray-50/50">
+                <nav class="flex gap-8 -mb-px overflow-x-auto" aria-label="Tabs">
+                    <button @click="activeTab = 'summary'"
+                            :class="activeTab === 'summary' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"/></svg>
+                        Summary
+                    </button>
+                    <button @click="activeTab = 'activity'"
+                            :class="activeTab === 'activity' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Activity
+                    </button>
+                     <button @click="activeTab = 'following'"
+                            :class="activeTab === 'following' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        Following
+                    </button>
+                     <button @click="activeTab = 'followers'"
+                            :class="activeTab === 'followers' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        Followers
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="space-y-6">
+
+            <!-- Summary Tab -->
+            <div x-show="activeTab === 'summary'" class="space-y-6">
+                <!-- Stats Section (Big Numbers) -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Stats</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900">{{.Data.UserDetail.ArticleCount}}</div>
+                            <div class="text-xs font-medium text-gray-500 mt-1 uppercase tracking-wide">Topics</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900">{{.Data.UserDetail.ReplyCount}}</div>
+                            <div class="text-xs font-medium text-gray-500 mt-1 uppercase tracking-wide">Replies</div>
+                        </div>
+                         <div>
+                            <div class="text-2xl font-bold text-gray-900">{{.Data.UserDetail.LikeGivenCount}}</div>
+                            <div class="text-xs font-medium text-gray-500 mt-1 uppercase tracking-wide">Likes Given</div>
+                        </div>
+                         <div>
+                            <div class="text-2xl font-bold text-gray-900">{{.Data.UserDetail.LikeReceivedCount}}</div>
+                            <div class="text-xs font-medium text-gray-500 mt-1 uppercase tracking-wide">Likes Received</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900">{{.Data.UserDetail.FollowerCount}}</div>
+                            <div class="text-xs font-medium text-gray-500 mt-1 uppercase tracking-wide">Followers</div>
+                        </div>
+                         <div>
+                            <div class="text-2xl font-bold text-gray-900">{{.Data.UserDetail.FollowingCount}}</div>
+                            <div class="text-xs font-medium text-gray-500 mt-1 uppercase tracking-wide">Following</div>
+                        </div>
+                        {{if .Data.UserDetail.CollectionCount}}
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900">{{.Data.UserDetail.CollectionCount}}</div>
+                            <div class="text-xs font-medium text-gray-500 mt-1 uppercase tracking-wide">Collections</div>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+
+                <!-- Top Topics / Latest Topics -->
+                <div class="grid grid-cols-1 gap-6">
+
+                     <!-- Latest Topics -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-gray-900">Latest Topics</h3>
+                            <a href="#" class="text-sm text-gray-500 hover:text-blue-600">View all</a>
+                        </div>
+                         <div class="space-y-0">
+                            {{range .Data.Articles}}
+                            <div class="flex gap-4 items-center group py-3 border-b border-gray-50 last:border-0">
+                                 <div class="flex-1 min-w-0">
+                                     <div class="flex items-center gap-2 flex-wrap">
+                                         <a href="/p/post/{{.Id}}" class="text-[15px] font-medium text-gray-900 group-hover:text-blue-600 line-clamp-1">{{.Title}}</a>
+                                         {{range .Categories}}
+                                         <span class="bg-gray-100 px-2 py-0.5 rounded text-xs font-medium text-gray-600 whitespace-nowrap">{{.}}</span>
+                                         {{end}}
+                                     </div>
+                                     <div class="flex items-center gap-4 mt-1.5 text-xs text-gray-500">
+                                         <span class="flex items-center gap-1" title="Views">
+                                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                            {{.ViewCount}}
+                                         </span>
+                                         <span class="flex items-center gap-1" title="Replies">
+                                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                            {{.CommentCount}}
+                                         </span>
+                                         <span class="text-gray-400">{{.LastUpdateTime}}</span>
+                                     </div>
+                                 </div>
+                            </div>
+                            {{end}}
+                             {{if not .Data.Articles}}
+                            <p class="text-gray-500 text-sm">No topics yet.</p>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div x-show="activeTab === 'activity'" style="display: none;"
+                 x-data="userActivityList({{.Data.UserDetail.UserId}}, {{.Data.Activities | json}})">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                     <h3 class="text-lg font-bold text-gray-900 mb-6">Activity</h3>
+
+                     <div class="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:h-full before:w-0.5 before:bg-gray-200">
+                        <template x-for="activity in activities" :key="activity.id">
+                            <div class="relative flex gap-6 group">
+                                <!-- Icon -->
+                                <template x-if="activity.action === 1">
+                                    <div class="absolute left-0 ml-5 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-blue-100 text-blue-600 shadow-sm">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                        </svg>
+                                    </div>
+                                </template>
+                                <template x-if="activity.action === 2">
+                                    <div class="absolute left-0 ml-5 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-blue-100 text-blue-600 shadow-sm">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </div>
+                                </template>
+                                <template x-if="activity.action === 3">
+                                    <div class="absolute left-0 ml-5 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-rose-100 text-rose-600 shadow-sm">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </div>
+                                </template>
+                                <template x-if="activity.action === 4">
+                                    <div class="absolute left-0 ml-5 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-indigo-100 text-indigo-600 shadow-sm">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                        </svg>
+                                    </div>
+                                </template>
+                                <template x-if="activity.action === 5">
+                                    <div class="absolute left-0 ml-5 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-emerald-100 text-emerald-600 shadow-sm">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                    </div>
+                                </template>
+
+                                <!-- Card -->
+                                <div class="flex-1 ml-14 bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="text-sm text-gray-900">
+                                            <template x-if="activity.action === 1">
+                                                <span class="font-bold">Joined the forum</span>
+                                            </template>
+                                            <template x-if="activity.action === 2">
+                                                <span>
+                                                    <span class="font-bold">Created a topic</span>
+                                                    <a :href="'/p/post/' + activity.subjectId" class="font-medium text-blue-600 hover:text-blue-700" x-text="'&quot;' + activity.contentPreview + '&quot;'"></a>
+                                                </span>
+                                            </template>
+                                            <template x-if="activity.action === 3">
+                                                <span>
+                                                    <span class="font-bold">Liked a post</span>
+                                                    <a :href="'/p/post/' + activity.subjectId" class="font-medium text-blue-600 hover:text-blue-700" x-text="'&quot;' + activity.contentPreview + '&quot;'"></a>
+                                                </span>
+                                            </template>
+                                            <template x-if="activity.action === 4">
+                                                <span>
+                                                    <span class="font-bold">Followed</span>
+                                                    <a :href="'/u/' + activity.subjectId" class="font-medium text-blue-600 hover:text-blue-700" x-text="'&quot;' + activity.contentPreview + '&quot;'"></a>
+                                                </span>
+                                            </template>
+                                            <template x-if="activity.action === 5">
+                                                <span>
+                                                    <span class="font-bold">Replied to</span>
+                                                    <a :href="'/p/post/' + activity.subjectId" class="font-medium text-blue-600 hover:text-blue-700" x-text="'&quot;' + activity.contentPreview + '&quot;'"></a>
+                                                </span>
+                                            </template>
+                                        </div>
+                                        <time class="text-xs font-medium text-gray-400" x-text="formatDate(activity.createdAt)"></time>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div class="text-center py-8" x-show="activities.length === 0">
+                            <p class="text-gray-500">No activity recorded yet.</p>
+                        </div>
+                     </div>
+
+                    <div class="mt-8">
+                        <button class="w-full py-2 flex items-center justify-center gap-2 text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors"
+                                @click="loadMore()"
+                                :disabled="loading"
+                                x-show="hasMore">
+                             <span x-show="!loading">{{call .T "load_more"}}</span>
+                             <span x-show="loading" class="flex items-center gap-2">
+                                <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {{call .T "loading"}}
+                             </span>
+                        </button>
+                        <div class="text-center py-4" x-show="!hasMore && activities.length > 0" style="display: none;">
+                            <span class="text-sm text-gray-400">{{call .T "no_more_activities"}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Following Tab -->
+            <div x-show="activeTab === 'following'" style="display: none;">
+                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                     {{if .Data.FollowingList}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {{range .Data.FollowingList}}
+                            <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all bg-white group">
+                                <a href="/u/{{.Id}}" class="shrink-0">
+                                    <img src="{{.GetWebAvatarUrl}}" alt="{{.Username}}" class="w-10 h-10 rounded-full bg-gray-100 object-cover">
+                                </a>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <a href="/u/{{.Id}}" class="text-[13px] font-semibold text-gray-900 hover:text-blue-600 truncate">{{.Username}}</a>
+                                         {{if and $.CurrentUserId (ne $.CurrentUserId .Id)}}
+                                            <button class="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 shrink-0 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all"
+                                                    x-data="followUserHandler({{.Id}})"
+                                                    x-init="checkStatus()"
+                                                    @click="toggleFollow()"
+                                                    :title="isFollowing ? 'Unfollow' : 'Follow'">
+                                                 <svg x-show="!loading && !isFollowing" class="w-4 h-4 text-gray-400 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                 <svg x-show="!loading && isFollowing" class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            </button>
+                                         {{end}}
+                                    </div>
+                                    <p class="text-xs text-gray-500 truncate">{{if .Bio}}{{.Bio}}{{else}}No bio{{end}}</p>
+                                </div>
+                            </div>
+                            {{end}}
+                        </div>
+                    {{else}}
+                        <div class="text-center py-12">
+                             <div class="text-4xl mb-4">👥</div>
+                            <h3 class="text-lg font-medium text-gray-900">Not following anyone</h3>
+                            <p class="text-gray-500 mt-1">This user isn't following anyone yet.</p>
+                        </div>
+                    {{end}}
+                </div>
+            </div>
+
+            <!-- Followers Tab -->
+            <div x-show="activeTab === 'followers'" style="display: none;">
+                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                     {{if .Data.FollowerList}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {{range .Data.FollowerList}}
+                            <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all bg-white group">
+                                <a href="/u/{{.Id}}" class="shrink-0">
+                                    <img src="{{.GetWebAvatarUrl}}" alt="{{.Username}}" class="w-10 h-10 rounded-full bg-gray-100 object-cover">
+                                </a>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <a href="/u/{{.Id}}" class="text-[13px] font-semibold text-gray-900 hover:text-blue-600 truncate">{{.Username}}</a>
+                                         {{if and $.CurrentUserId (ne $.CurrentUserId .Id)}}
+                                            <button class="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 shrink-0 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all"
+                                                    x-data="followUserHandler({{.Id}})"
+                                                    x-init="checkStatus()"
+                                                    @click="toggleFollow()"
+                                                    :title="isFollowing ? 'Unfollow' : 'Follow'">
+                                                 <svg x-show="!loading && !isFollowing" class="w-4 h-4 text-gray-400 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                 <svg x-show="!loading && isFollowing" class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            </button>
+                                         {{end}}
+                                    </div>
+                                    <p class="text-xs text-gray-500 truncate">{{if .Bio}}{{.Bio}}{{else}}No bio{{end}}</p>
+                                </div>
+                            </div>
+                            {{end}}
+                        </div>
+                    {{else}}
+                        <div class="text-center py-12">
+                             <div class="text-4xl mb-4">🌟</div>
+                            <h3 class="text-lg font-medium text-gray-900">No followers yet</h3>
+                            <p class="text-gray-500 mt-1">This user has no followers yet.</p>
+                        </div>
+                    {{end}}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function userActivityList(userId, initialActivities) {
+        return {
+            userId: userId,
+            lastId: 0,
+            activities: initialActivities || [],
+            loading: false,
+            hasMore: (initialActivities || []).length >= 20,
+            scrollHandler: null,
+
+            init() {
+                if (this.activities.length > 0) {
+                    this.lastId = this.activities[this.activities.length - 1].id;
+                }
+
+                let throttleTimer;
+                this.scrollHandler = () => {
+                    if (throttleTimer) return;
+                    throttleTimer = setTimeout(() => {
+                        if (this.$el.offsetParent !== null && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+                            this.loadMore();
+                        }
+                        throttleTimer = null;
+                    }, 200);
+                };
+                window.addEventListener('scroll', this.scrollHandler);
+            },
+
+            destroy() {
+                if (this.scrollHandler) {
+                    window.removeEventListener('scroll', this.scrollHandler);
+                }
+            },
+
+            async loadMore() {
+                if (this.loading || !this.hasMore) return;
+                this.loading = true;
+
+                try {
+                    const response = await fetch(`/api/user-activities?userId=${this.userId}&lastId=${this.lastId}&limit=20`);
+                    const res = await response.json();
+
+                    if (res.code === 0 && res.result) {
+                        if (res.result.length > 0) {
+                            this.activities.push(...res.result);
+                            this.lastId = res.result[res.result.length - 1].id;
+                            if (res.result.length < 20) {
+                                this.hasMore = false;
+                            }
+                        } else {
+                            this.hasMore = false;
+                        }
+                    } else {
+                        this.hasMore = false;
+                    }
+                } catch (e) {
+                    console.error('Failed to load more activities:', e);
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            formatDate(dateStr) {
+                if (!dateStr) return '';
+                const date = new Date(dateStr);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffSec = Math.round(diffMs / 1000);
+                const diffMin = Math.round(diffSec / 60);
+                const diffHr = Math.round(diffMin / 60);
+                const diffDay = Math.round(diffHr / 24);
+
+                if (diffSec < 60) return '{{call .T "time_just_now"}}';
+                if (diffMin < 60) return `${diffMin}{{call .T "time_m_ago"}}`;
+                if (diffHr < 24) return `${diffHr}{{call .T "time_h_ago"}}`;
+                if (diffDay < 7) return `${diffDay}{{call .T "time_d_ago"}}`;
+                
+                return date.toLocaleDateString();
+            }
+        }
+    }
+</script>
+{{end}}

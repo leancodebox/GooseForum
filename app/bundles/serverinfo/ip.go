@@ -40,7 +40,7 @@ func ExternalIP() (net.IP, error) {
 			return ip, nil
 		}
 	}
-	return nil, errors.New("connected to the network?")
+	return nil, errors.New("connected to the network")
 }
 
 // 获取ip

@@ -17,9 +17,9 @@ func save(entity *Entity) int64 {
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {
@@ -54,6 +54,12 @@ func GetByArticleIdsEffective(articleIds []uint64) (entities []*Entity) {
 // DeleteByArticleId 删除文章的所有分类关系
 func DeleteByArticleId(articleId uint64) int64 {
 	result := builder().Where("article_id = ?", articleId).Delete(&Entity{})
+	return result.RowsAffected
+}
+
+// DisableByArticleId 逻辑删除文章的所有分类关系
+func DisableByArticleId(articleId uint64) int64 {
+	result := builder().Where("article_id = ?", articleId).Update("effective", 0)
 	return result.RowsAffected
 }
 

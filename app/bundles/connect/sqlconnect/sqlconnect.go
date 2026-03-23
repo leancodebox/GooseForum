@@ -152,15 +152,15 @@ func buildSQLiteDSN(filepath string, config map[string]string) string {
 	// 如果 filepath 已经包含参数，则拆分路径和参数
 	basePath := filepath
 	existingParams := make(map[string]string)
-	if idx := strings.Index(filepath, "?"); idx != -1 {
-		basePath = filepath[:idx]
-		paramStr := filepath[idx+1:]
+	if before, after, ok := strings.Cut(filepath, "?"); ok {
+		basePath = before
+		paramStr := after
 
 		// 解析已有的参数
-		for _, param := range strings.Split(paramStr, "&") {
-			if strings.HasPrefix(param, "_pragma=") {
+		for param := range strings.SplitSeq(paramStr, "&") {
+			if after, ok := strings.CutPrefix(param, "_pragma="); ok {
 				// 提取 _pragma 的值
-				pragmaValue := strings.TrimPrefix(param, "_pragma=")
+				pragmaValue := after
 				// 拆分 key 和 value
 				if pidx := strings.Index(pragmaValue, "("); pidx != -1 {
 					key := pragmaValue[:pidx]

@@ -15,8 +15,10 @@ func CreateUser(username, password, email string, needValid bool) (*users.Entity
 	userEntity := users.MakeUser(username, password, email)
 	userEntity.Nickname = GenerateGooseNickname()
 	if !needValid {
-		userEntity.Validate = 1
+		userEntity.IsActivated = users.ActivationSuccess
 	}
+	// 默认状态为正常
+	userEntity.IsFrozen = users.StatusNormal
 	// 初始化用户积分
 	pointservice.InitUserPoints(userEntity.Id, 100)
 	err := users.Create(userEntity)

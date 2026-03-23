@@ -29,7 +29,7 @@ func buildClientByConfig(config pageConfig.MailSettingsConfig) (*mail.Client, er
 func SendActivationEmail(to, username, token string) error {
 	config := hotdataserve.GetMailSettingsConfigCache()
 	if !config.EnableMail {
-		return errors.New("Mail settings config is disabled")
+		return errors.New("mail settings config is disabled")
 	}
 	message := mail.NewMsg()
 	if err := message.To(to); err != nil {
@@ -61,7 +61,7 @@ func SendActivationEmail(to, username, token string) error {
 func SendPasswordResetEmail(to, username, token string) error {
 	config := hotdataserve.GetMailSettingsConfigCache()
 	if !config.EnableMail {
-		return errors.New("Mail settings config is disabled")
+		return errors.New("mail settings config is disabled")
 	}
 	message := mail.NewMsg()
 	if err := message.To(to); err != nil {

@@ -2,11 +2,9 @@ package api
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 	"time"
 
-	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -15,17 +13,92 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/samber/lo"
 )
+
+type TrafficOverviewReq struct {
+	StartDate string `json:"startDate"` // YYYY-MM-DD
+	EndDate   string `json:"endDate"`   // YYYY-MM-DD
+}
+
+type DailyTraffic struct {
+	Date         string `json:"date"`
+	RegCount     int64  `json:"regCount"`
+	ArticleCount int64  `json:"articleCount"`
+	ReplyCount   int64  `json:"replyCount"`
+}
+
+func GetTrafficOverview(req component.BetterRequest[TrafficOverviewReq]) component.Response {
+	startDate := req.Params.StartDate
+	endDate := req.Params.EndDate
+
+	if startDate == "" {
+		startDate = time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	}
+	if endDate == "" {
+		endDate = time.Now().Format("2006-01-02")
+	}
+
+	keys := []dailyStats.StatType{
+		dailyStats.StatTypeRegCount,
+		dailyStats.StatTypeArticleCount,
+		dailyStats.StatTypeReplyCount,
+	}
+
+	stats, err := dailyStats.GetStatsInRange(keys, startDate, endDate)
+	if err != nil {
+		return component.FailResponse("获取统计数据失败")
+	}
+
+	// 按日期分组
+	dailyMap := make(map[string]*DailyTraffic)
+
+	// 初始化日期范围内的每一天
+	curr, _ := time.Parse("2006-01-02", startDate)
+	end, _ := time.Parse("2006-01-02", endDate)
+	for !curr.After(end) {
+		d := curr.Format("2006-01-02")
+		dailyMap[d] = &DailyTraffic{Date: d}
+		curr = curr.AddDate(0, 0, 1)
+	}
+
+	for _, s := range stats {
+		dateStr := s.StatDate.Format("2006-01-02")
+		if item, ok := dailyMap[dateStr]; ok {
+			switch dailyStats.StatType(s.StatKey) {
+			case dailyStats.StatTypeRegCount:
+				item.RegCount = s.StatValue
+			case dailyStats.StatTypeArticleCount:
+				item.ArticleCount = s.StatValue
+			case dailyStats.StatTypeReplyCount:
+				item.ReplyCount = s.StatValue
+			}
+		}
+	}
+
+	// 转换为数组并排序
+	var result []*DailyTraffic
+	curr, _ = time.Parse("2006-01-02", startDate)
+	for !curr.After(end) {
+		d := curr.Format("2006-01-02")
+		result = append(result, dailyMap[d])
+		curr = curr.AddDate(0, 0, 1)
+	}
+
+	return component.SuccessResponse(result)
+}
 
 type UserListReq struct {
 	Username string `json:"username"`
@@ -58,18 +131,18 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 		Email:    req.Params.Email,
 	})
 
-	userIds := array.Map(pageData.Data, func(item users.EntityComplete) uint64 {
+	userIds := lo.Map(pageData.Data, func(item users.EntityComplete, _ int) uint64 {
 		return item.Id
 	})
 	usList := userStatistics.GetByUserIds(userIds)
-	usMap := array.Slice2Map(usList, func(v *userStatistics.Entity) uint64 {
+	usMap := lo.KeyBy(usList, func(v *userStatistics.Entity) uint64 {
 		return v.UserId
 	})
 	roleEntityList := role.AllEffective()
-	roleMap := array.Slice2Map(roleEntityList, func(v *role.Entity) uint64 {
+	roleMap := lo.KeyBy(roleEntityList, func(v *role.Entity) uint64 {
 		return v.Id
 	})
-	list := array.Map(pageData.Data, func(t users.EntityComplete) UserItem {
+	list := lo.Map(pageData.Data, func(t users.EntityComplete, _ int) UserItem {
 		var roleList []datastruct.Option[string, uint64]
 		if roleEntity, ok := roleMap[t.RoleId]; ok {
 			roleList = append(roleList, datastruct.Option[string, uint64]{
@@ -86,8 +159,8 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			AvatarUrl:      t.GetWebAvatarUrl(),
 			Username:       t.Username,
 			Email:          t.Email,
-			Status:         t.Status,
-			Validate:       t.Validate,
+			Status:         t.IsFrozen,
+			Validate:       t.IsActivated,
 			Prestige:       t.Prestige,
 			RoleList:       roleList,
 			RoleId:         t.RoleId,
@@ -118,14 +191,14 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 	}
 	opt := false
 	msg := "用户编辑"
-	if user.Status != params.Status {
-		msg = msg + fmt.Sprintf("[用户状态调整:%v->%v]", user.Status, params.Status)
-		user.Status = params.Status
+	if user.IsFrozen != params.Status {
+		msg = msg + fmt.Sprintf("[用户状态调整:%v->%v]", user.IsFrozen, params.Status)
+		user.IsFrozen = params.Status
 		opt = true
 	}
-	if user.Validate != params.Validate {
-		msg = msg + fmt.Sprintf("[用户验证状态:%v->%v]", user.Status, params.Status)
-		user.Validate = params.Validate
+	if user.IsActivated != params.Validate {
+		msg = msg + fmt.Sprintf("[用户验证状态:%v->%v]", user.IsActivated, params.Validate)
+		user.IsActivated = params.Validate
 		opt = true
 	}
 	if user.RoleId != params.RoleId {
@@ -147,7 +220,7 @@ type ArticlesListReq struct {
 	UserId   uint64 `form:"userId"`
 }
 
-type ArticlesInfoDto struct {
+type ArticlesInfoVo struct {
 	Id            uint64 `json:"id"`
 	Title         string `json:"title"`
 	Type          int8   `json:"type"`   // 文章类型：0 博文，1教程，2问答，3分享
@@ -159,7 +232,7 @@ type ArticlesInfoDto struct {
 	UpdatedAt     string `json:"updatedAt"`     // 改为 string 类型
 }
 
-type ArticlesInfoAdminDto struct {
+type ArticlesInfoAdminVo struct {
 	Id            uint64 `json:"id"`
 	Title         string `json:"title"`
 	Description   string `json:"description"`
@@ -179,19 +252,19 @@ type ArticlesInfoAdminDto struct {
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
 	param := req.Params
 	pageData := articles.Page[articles.SmallEntity](articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
-	userIds := array.Map(pageData.Data, func(t articles.SmallEntity) uint64 {
+	userIds := lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) uint64 {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
 	return component.SuccessPage(
-		array.Map(pageData.Data, func(t articles.SmallEntity) ArticlesInfoAdminDto {
+		lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) ArticlesInfoAdminVo {
 			username := ""
 			userAvatarUrl := ""
 			if user, _ := userMap[t.UserId]; user != nil {
 				username = user.Username
 				userAvatarUrl = user.GetWebAvatarUrl()
 			}
-			return ArticlesInfoAdminDto{
+			return ArticlesInfoAdminVo{
 				Id:            t.Id,
 				Title:         t.Title,
 				Description:   t.Description,
@@ -256,7 +329,7 @@ type GetAllRoleItemReq struct {
 }
 
 func GetAllRoleItem(req component.BetterRequest[GetAllRoleItemReq]) component.Response {
-	res := array.Map(role.AllEffective(), func(t *role.Entity) datastruct.Option[string, uint64] {
+	res := lo.Map(role.AllEffective(), func(t *role.Entity, _ int) datastruct.Option[string, uint64] {
 		return datastruct.Option[string, uint64]{Name: t.RoleName, Label: t.RoleName, Value: t.Id}
 	})
 	return component.SuccessResponse(res)
@@ -280,18 +353,18 @@ type PermissionItem struct {
 
 func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 	pageData := role.Page(role.PageQuery{})
-	roleIds := array.Map(pageData.Data, func(t role.Entity) uint64 {
+	roleIds := lo.Map(pageData.Data, func(t role.Entity, _ int) uint64 {
 		return t.Id
 	})
 	rpGroup := make(map[uint64][]uint64)
 	if len(roleIds) > 0 {
 		rpGroup = rolePermissionRs.GetRsGroupByRoleIds(roleIds)
 	}
-	list := array.Map(pageData.Data, func(t role.Entity) RoleItem {
+	list := lo.Map(pageData.Data, func(t role.Entity, _ int) RoleItem {
 		pList, ok := rpGroup[t.Id]
 		permissionItemList := make([]PermissionItem, 0)
 		if ok {
-			permissionItemList = array.Map(pList, func(t uint64) PermissionItem {
+			permissionItemList = lo.Map(pList, func(t uint64, _ int) PermissionItem {
 				p := permission.Enum(t)
 				return PermissionItem{Id: p.Id(), Name: p.Name()}
 			})
@@ -332,26 +405,28 @@ func RoleSave(req component.BetterRequest[RoleSaveReq]) component.Response {
 	role.SaveOrCreateById(&roleEntity)
 
 	rsList := rolePermissionRs.GetRsByRoleId(roleEntity.Id)
-	var canUpdate []uint64
+	canUpdateMap := lo.SliceToMap(req.Params.Permissions, func(id uint64) (uint64, bool) {
+		return id, true
+	})
+
 	// 更新数据
 	for _, item := range rsList {
 		item.Effective = 0
-		if slices.Contains(req.Params.Permissions, item.PermissionId) {
+		if _, ok := canUpdateMap[item.PermissionId]; ok {
 			item.Effective = 1
-			canUpdate = append(canUpdate, item.PermissionId)
+			// 如果已经存在，从 map 中删除，避免重复插入
+			delete(canUpdateMap, item.PermissionId)
 		}
 		rolePermissionRs.SaveOrCreateById(item)
 	}
-	// 删除数据
-	for _, item := range req.Params.Permissions {
-		if !slices.Contains(canUpdate, item) {
-			rsItem := rolePermissionRs.Entity{
-				RoleId:       roleEntity.Id,
-				PermissionId: item,
-				Effective:    1,
-			}
-			rolePermissionRs.SaveOrCreateById(&rsItem)
+	// 插入新的条目
+	for id := range canUpdateMap {
+		rsItem := rolePermissionRs.Entity{
+			RoleId:       roleEntity.Id,
+			PermissionId: id,
+			Effective:    1,
 		}
+		rolePermissionRs.SaveOrCreateById(&rsItem)
 	}
 
 	return component.SuccessResponse(true)
@@ -368,9 +443,9 @@ func RoleDel(req component.BetterRequest[RoleSaveDel]) component.Response {
 	}
 	rsList := rolePermissionRs.GetRsByRoleId(roleEntity.Id)
 	// 删除
-	for _, item := range rsList {
+	lo.ForEach(rsList, func(item *rolePermissionRs.Entity, _ int) {
 		rolePermissionRs.DeleteEntity(item)
-	}
+	})
 	role.DeleteEntity(&roleEntity)
 	return component.SuccessResponse(true)
 }
@@ -381,7 +456,7 @@ type OptRecordPageReq struct {
 func OptRecordPage(req component.BetterRequest[OptRecordPageReq]) component.Response {
 	pageData := optRecord.Page(optRecord.PageQuery{})
 	return component.SuccessPage(
-		array.Map(pageData.Data, func(item optRecord.Entity) optRecord.Entity {
+		lo.Map(pageData.Data, func(item optRecord.Entity, _ int) optRecord.Entity {
 			return item
 		}),
 		pageData.Page,
@@ -399,6 +474,9 @@ type CategoryItem struct {
 	Id       uint64 `json:"id"`
 	Category string `json:"category"`
 	Desc     string `json:"desc"`
+	Icon     string `json:"icon"`
+	Color    string `json:"color"`
+	Slug     string `json:"slug"`
 	Sort     int    `json:"sort"`
 	Status   int8   `json:"status"`
 }
@@ -406,11 +484,14 @@ type CategoryItem struct {
 // GetCategoryList 获取分类列表
 func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Response {
 	categories := articleCategory.All()
-	return component.SuccessResponse(array.Map(categories, func(t *articleCategory.Entity) CategoryItem {
+	return component.SuccessResponse(lo.Map(categories, func(t *articleCategory.Entity, _ int) CategoryItem {
 		return CategoryItem{
 			Id:       t.Id,
 			Category: t.Category,
 			Desc:     t.Desc,
+			Icon:     t.Icon,
+			Color:    t.Color,
+			Slug:     t.Slug,
 			//Sort:     t.Sort,
 			//Status:   t.Status,
 		}
@@ -421,6 +502,9 @@ type CategorySaveReq struct {
 	Id       uint64 `json:"id"`
 	Category string `json:"category" validate:"required"`
 	Desc     string `json:"desc"`
+	Icon     string `json:"icon"`
+	Color    string `json:"color"`
+	Slug     string `json:"slug"`
 	Sort     int    `json:"sort"`
 	Status   int8   `json:"status"`
 }
@@ -437,6 +521,9 @@ func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Respon
 	}
 	entity.Category = req.Params.Category
 	entity.Desc = req.Params.Desc
+	entity.Icon = req.Params.Icon
+	entity.Color = req.Params.Color
+	entity.Slug = req.Params.Slug
 
 	articleCategory.SaveOrCreateById(&entity)
 	return component.SuccessResponse(true)
@@ -461,25 +548,50 @@ func DeleteCategory(req component.BetterRequest[struct {
 }
 
 type ApplySheetListReq struct {
-	Page     int    `form:"page"`
-	PageSize int    `form:"pageSize"`
-	Search   string `form:"search"`
-	UserId   uint64 `form:"userId"`
+	Page     int    `json:"page"`
+	PageSize int    `json:"pageSize"`
+	Title    string `json:"title"`
+	Type     int    `json:"type"`
+	Status   int    `json:"status"`
+	UserId   uint64 `json:"userId"`
 }
 
 func ApplySheet(req component.BetterRequest[ApplySheetListReq]) component.Response {
 	pageData := applySheet.Page[applySheet.Entity](applySheet.PageQuery{
 		Page:     req.Params.Page,
 		PageSize: req.Params.PageSize,
+		Title:    req.Params.Title,
+		Type:     int8(req.Params.Type),
+		Status:   int8(req.Params.Status),
+		UserId:   req.Params.UserId,
 	})
 
-	return component.SuccessPage(array.Map(pageData.Data, func(item applySheet.Entity) applySheet.Entity {
+	return component.SuccessPage(lo.Map(pageData.Data, func(item applySheet.Entity, _ int) applySheet.Entity {
 		return item
 	}),
 		pageData.Page,
 		pageData.PageSize,
 		pageData.Total,
 	)
+}
+
+type UpdateApplySheetReq struct {
+	Id     uint64 `json:"id" validate:"required"`
+	Status int8   `json:"status"`
+	Reply  string `json:"reply"`
+}
+
+func UpdateApplySheet(req component.BetterRequest[UpdateApplySheetReq]) component.Response {
+	entity := applySheet.Get(req.Params.Id)
+	if entity.Id == 0 {
+		return component.FailResponse("工单不存在")
+	}
+
+	entity.Status = req.Params.Status
+	entity.Reply = req.Params.Reply
+	applySheet.SaveOrCreateById(&entity)
+
+	return component.SuccessResponse("success")
 }
 
 func GetFriendLinks(req component.BetterRequest[null]) component.Response {
@@ -492,14 +604,20 @@ func GetFriendLinks(req component.BetterRequest[null]) component.Response {
 	res := pageConfig.GetConfigByPageType(pageConfig.FriendShipLinks, []pageConfig.FriendLinksGroup{
 		{
 			Name:  "community",
+			Emoji: "👥",
+			Color: "#3b82f6",
 			Links: []pageConfig.LinkItem{lItem},
 		},
 		{
 			Name:  "blog",
+			Emoji: "✍️",
+			Color: "#22c55e",
 			Links: []pageConfig.LinkItem{lItem},
 		},
 		{
 			Name:  "tool",
+			Emoji: "🛠️",
+			Color: "#a855f7",
 			Links: []pageConfig.LinkItem{lItem},
 		},
 	})
@@ -510,32 +628,13 @@ type SaveFriendLinksReq struct {
 	LinksInfo []pageConfig.FriendLinksGroup `json:"linksInfo"`
 }
 
+// SaveFriendLinks 保存友情链接
 func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.Response {
 	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
 	configEntity.PageType = pageConfig.FriendShipLinks
 	configEntity.Config = jsonopt.Encode(req.Params.LinksInfo)
 	pageConfig.CreateOrSave(&configEntity)
-	return component.SuccessResponse("success")
-}
-
-// WebSettings 网页设置相关结构
-
-// GetWebSettings 获取网页设置
-func GetWebSettings(req component.BetterRequest[null]) component.Response {
-	settings := pageConfig.GetConfigByPageType(pageConfig.WebSettings, pageConfig.WebSettingsConfig{})
-	return component.SuccessResponse(settings)
-}
-
-type SaveWebSettingsReq struct {
-	Settings pageConfig.WebSettingsConfig `json:"settings"`
-}
-
-// SaveWebSettings 保存网页设置
-func SaveWebSettings(req component.BetterRequest[SaveWebSettingsReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.WebSettings)
-	configEntity.PageType = pageConfig.WebSettings
-	configEntity.Config = jsonopt.Encode(req.Params.Settings)
-	pageConfig.CreateOrSave(&configEntity)
+	hotdataserve.ClearFriendLinksConfigCache()
 	return component.SuccessResponse("success")
 }
 
@@ -555,6 +654,7 @@ func SaveFooterLinks(req component.BetterRequest[SaveFooterLinksReq]) component.
 	configEntity.PageType = pageConfig.FooterLinks
 	configEntity.Config = jsonopt.Encode(req.Params.FooterConfig)
 	pageConfig.CreateOrSave(&configEntity)
+	hotdataserve.ClearFooterConfigCache()
 	return component.SuccessResponse("success")
 }
 
@@ -583,6 +683,7 @@ func SaveSponsors(req component.BetterRequest[SaveSponsorsReq]) component.Respon
 	configEntity.PageType = pageConfig.SponsorsPage
 	configEntity.Config = jsonopt.Encode(req.Params.SponsorsInfo)
 	pageConfig.CreateOrSave(&configEntity)
+	hotdataserve.ClearSponsorsConfigCache()
 	return component.SuccessResponse("success")
 }
 
@@ -603,6 +704,7 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 	configEntity.PageType = pageConfig.SiteSettings
 	configEntity.Config = jsonopt.Encode(req.Params.Settings)
 	pageConfig.CreateOrSave(&configEntity)
+	hotdataserve.ClearSiteSettingsConfigCache()
 	return component.SuccessResponse("success")
 }
 
@@ -624,6 +726,7 @@ func SaveMailSettings(req component.BetterRequest[SaveMailSettingsReq]) componen
 	configEntity.PageType = pageConfig.EmailSettings
 	configEntity.Config = jsonopt.Encode(req.Params.Settings)
 	pageConfig.CreateOrSave(&configEntity)
+	hotdataserve.ClearMailSettingsConfigCache()
 	return component.SuccessResponse("success")
 }
 
@@ -673,5 +776,48 @@ func SaveAnnouncement(req component.BetterRequest[SaveAnnouncementReq]) componen
 	configEntity.PageType = pageConfig.Announcement
 	configEntity.Config = jsonopt.Encode(req.Params.Settings)
 	pageConfig.CreateOrSave(&configEntity)
+	hotdataserve.ClearAnnouncementConfigCache()
+	return component.SuccessResponse("success")
+}
+
+// GetSecuritySettings 获取安全与注册设置
+func GetSecuritySettings(req component.BetterRequest[null]) component.Response {
+	defaultSettings := defaultconfig.GetDefaultSecuritySettingsConfig()
+	res := pageConfig.GetConfigByPageType(pageConfig.SecuritySettings, defaultSettings)
+	return component.SuccessResponse(res)
+}
+
+type SaveSecuritySettingsReq struct {
+	Settings pageConfig.SecurityAndRegistration `json:"settings" validate:"required"`
+}
+
+// SaveSecuritySettings 保存安全与注册设置
+func SaveSecuritySettings(req component.BetterRequest[SaveSecuritySettingsReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(pageConfig.SecuritySettings)
+	configEntity.PageType = pageConfig.SecuritySettings
+	configEntity.Config = jsonopt.Encode(req.Params.Settings)
+	pageConfig.CreateOrSave(&configEntity)
+	hotdataserve.ClearSecuritySettingsConfigCache()
+	return component.SuccessResponse("success")
+}
+
+// GetPostingSettings 获取发布内容设置
+func GetPostingSettings(req component.BetterRequest[null]) component.Response {
+	defaultSettings := defaultconfig.GetDefaultPostingSettingsConfig()
+	res := pageConfig.GetConfigByPageType(pageConfig.PostingSettings, defaultSettings)
+	return component.SuccessResponse(res)
+}
+
+type SavePostingSettingsReq struct {
+	Settings pageConfig.PostingContent `json:"settings" validate:"required"`
+}
+
+// SavePostingSettings 保存发布内容设置
+func SavePostingSettings(req component.BetterRequest[SavePostingSettingsReq]) component.Response {
+	configEntity := pageConfig.GetByPageType(pageConfig.PostingSettings)
+	configEntity.PageType = pageConfig.PostingSettings
+	configEntity.Config = jsonopt.Encode(req.Params.Settings)
+	pageConfig.CreateOrSave(&configEntity)
+	hotdataserve.ClearPostingSettingsConfigCache()
 	return component.SuccessResponse("success")
 }

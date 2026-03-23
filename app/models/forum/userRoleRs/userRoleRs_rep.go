@@ -1,9 +1,9 @@
 package userRoleRs
 
 import (
-	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
+	"github.com/samber/lo"
 )
 
 func create(entity *Entity) error {
@@ -19,9 +19,9 @@ func save(entity *Entity) error {
 func SaveOrCreateById(entity *Entity) error {
 	if entity.Id == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {
@@ -54,24 +54,17 @@ func GetRoleGroupByUserIds(userIds []uint64) map[uint64][]role.Entity {
 	if len(rs) == 0 {
 		return map[uint64][]role.Entity{}
 	}
-	roleIds := array.Map(rs, func(t *Entity) uint64 {
+	roleIds := lo.Map(rs, func(t *Entity, _ int) uint64 {
 		return t.RoleId
 	})
 	roleEntityList := role.GetByRoleIds(roleIds)
-	roleMap := array.Slice2Map(roleEntityList, func(v *role.Entity) uint64 {
+	roleMap := lo.KeyBy(roleEntityList, func(v *role.Entity) uint64 {
 		return v.Id
 	})
-	res := make(map[uint64][]role.Entity, len(userIds))
-	for _, item := range rs {
+	return lo.Reduce(rs, func(res map[uint64][]role.Entity, item *Entity, _ int) map[uint64][]role.Entity {
 		if roleItem, ok := roleMap[item.RoleId]; ok {
-			userRoleList, urOk := res[item.UserId]
-			if urOk {
-				userRoleList = append(userRoleList, *roleItem)
-			} else {
-				userRoleList = []role.Entity{*roleItem}
-			}
-			res[item.UserId] = userRoleList
+			res[item.UserId] = append(res[item.UserId], *roleItem)
 		}
-	}
-	return res
+		return res
+	}, make(map[uint64][]role.Entity, len(userIds)))
 }

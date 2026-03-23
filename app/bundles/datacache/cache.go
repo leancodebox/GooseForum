@@ -15,7 +15,7 @@ type Cache[V any] struct {
 
 type cacheItem[V any] struct {
 	value      V
-	expiration int64 // 毫秒时间戳
+	expiration int64 // 秒时间戳
 }
 
 func (c *Cache[V]) GetOrLoad(
@@ -41,7 +41,7 @@ func (c *Cache[V]) GetOrLoadE(
 	// 使用 singleflight 确保同一个 key 只有一个 goroutine 执行加载
 	// 将 key 转换为字符串作为 singleflight 的 key
 
-	result, err, _ := c.group.Do(key, func() (interface{}, error) {
+	result, err, _ := c.group.Do(key, func() (any, error) {
 		// 在 singleflight 内部再次检查缓存，防止在等待期间其他 goroutine 已加载
 		if val, ok := c.get(key); ok {
 			return val, nil
@@ -67,6 +67,13 @@ func (c *Cache[V]) GetOrLoadE(
 	}
 
 	return result.(V), nil
+}
+
+func (c *Cache[V]) Clear() {
+	c.items.Range(func(key, value any) bool {
+		c.items.Delete(key)
+		return true
+	})
 }
 
 // 私有方法：带过期检查的读取

@@ -120,7 +120,7 @@ func (itself *FileQueue) Vacuum() error {
 		if lastN < mDataLen {
 			// 如果获取的数据小于一个数据块儿，说明是最后一块。单独处理
 			lastData := make([]byte, lastN)
-			for di := 0; di < lastN; di++ {
+			for di := range lastN {
 				lastData[di] = blockData[di]
 			}
 			if _, err = tmpQueueHandle.WriteAt(lastData, HeadLen+i*int64(mDataLen)); err != nil {

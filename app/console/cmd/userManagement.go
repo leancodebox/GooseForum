@@ -154,7 +154,7 @@ func showUserInfo(userID uint64) {
 	fmt.Printf("用户名: %s\n", userEntity.Username)
 	fmt.Printf("邮箱: %s\n", userEntity.Email)
 	fmt.Printf("角色ID: %d\n", userEntity.RoleId)
-	fmt.Printf("状态: %d\n", userEntity.Status)
+	fmt.Printf("状态: %d\n", userEntity.IsFrozen)
 	fmt.Println()
 }
 

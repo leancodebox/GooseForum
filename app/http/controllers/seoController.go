@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
@@ -39,7 +41,7 @@ type SitemapURL struct {
 // RenderSitemapXml 渲染 sitemap.xml
 func RenderSitemapXml(c *gin.Context) {
 	host := component.GetHost(c)
-	list, _ := articles.GetLatestArticles(160)
+	list, _ := articles.GetLatestArticles(5000)
 
 	tpl, err := template.New("sitemap").Parse(sitemapTpl)
 	if err != nil {
@@ -50,22 +52,32 @@ func RenderSitemapXml(c *gin.Context) {
 	var sitemaps []SitemapURL
 	for _, article := range list {
 		sitemaps = append(sitemaps, SitemapURL{
-			Loc:      fmt.Sprintf("%s/post/%d", host, article.Id),
+			Loc:      host + urlconfig.PostDetail(article.Id),
 			Lastmod:  article.UpdatedAt.Format(time.RFC3339),
 			Priority: 0.7,
 		})
 	}
+	// Add Categories
+	categories := hotdataserve.GetArticleCategory()
+	for _, cat := range categories {
+		sitemaps = append(sitemaps, SitemapURL{
+			Loc:      host + fmt.Sprintf("/c/%s/%d", cat.Category, cat.Id),
+			Lastmod:  cat.UpdatedAt.Format(time.RFC3339),
+			Priority: 0.8,
+		})
+	}
+
 	sitemaps = append(sitemaps, []SitemapURL{
 		{
-			Loc:      host + "/post",
+			Loc:      host + urlconfig.Post(),
 			Priority: 0.8,
 		},
 		{
-			Loc:      host + "/links",
+			Loc:      host + urlconfig.Links(),
 			Priority: 0.8,
 		},
 		{
-			Loc:      host + "/",
+			Loc:      host + urlconfig.Home(),
 			Priority: 1,
 		}}...)
 
@@ -86,7 +98,7 @@ func RenderSitemapXml(c *gin.Context) {
 func RenderRssV2(c *gin.Context) {
 	settingConfig := hotdataserve.GetSiteSettingsConfigCache()
 	host := component.GetHost(c)
-	articleList, err := articles.GetLatestArticles(100)
+	articleList, err := articles.GetLatestArticlesWithContent(100)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error generating RSS feed")
 		return
@@ -104,11 +116,16 @@ func RenderRssV2(c *gin.Context) {
 	// 添加文章项
 	for _, item := range articleList {
 		// 使用RenderedHTML作为内容，如果为空则使用Description
+		content := item.RenderedHTML
+		if content == "" {
+			content = markdown2html.MarkdownToHTML(item.Content)
+		}
 
 		feed.Items = append(feed.Items, &feeds.Item{
 			Title:       item.Title,
-			Link:        &feeds.Link{Href: fmt.Sprintf("%s/post/%d", host, item.Id)},
+			Link:        &feeds.Link{Href: fmt.Sprintf("%s/p/post/%d", host, item.Id)},
 			Description: item.Description,
+			Content:     content,
 			Id:          cast.ToString(item.Id),
 			Created:     item.CreatedAt,
 		})

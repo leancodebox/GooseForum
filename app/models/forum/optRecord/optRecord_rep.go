@@ -17,9 +17,9 @@ func save(entity *Entity) int64 {
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return Create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {

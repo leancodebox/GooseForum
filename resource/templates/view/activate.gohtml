@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账号激活{{.Data.Status}} - Goose Forum</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #fafafa;
+            color: #1f1f1f;
+            padding: 1rem;
+        }
+
+        .container {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            max-width: 480px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .icon {
+            font-size: 32px;
+            line-height: 1;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: #0f0f0f;
+            letter-spacing: -0.02em;
+        }
+
+        .message {
+            margin: 0 0 1.25rem 0;
+            line-height: 1.5;
+            color: {{if .Data.Success}} #16a34a {{ else }} #dc2626{{end}};
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .description {
+            color: #525252;
+            margin: 0 0 2rem 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.875rem 1.75rem;
+            background: #0f0f0f;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 15px;
+            transition: background 0.2s ease;
+            border: none;
+        }
+
+        .home-link:hover {
+            background: #262626;
+        }
+
+        .login-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.875rem 1.75rem;
+            background: transparent;
+            color: #0f0f0f;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 15px;
+            border: 1px solid #d4d4d4;
+            transition: all 0.2s ease;
+        }
+
+        .login-link:hover {
+            background: #f5f5f5;
+            border-color: #a3a3a3;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .home-link,
+            .login-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <span class="icon">{{if .Data.Success}} ✅ {{else}} ❌ {{end}}</span>
+        <h1 class="title">{{.Data.Title}}</h1>
+    </div>
+    <p class="message">{{.Data.Message}}</p>
+    <p class="description">{{.Data.Description}}</p>
+    <div class="button-group">
+        <a href="/" class="home-link">返回首页</a>
+        {{if not .Data.Success}}
+        <a href="mailto:support@gooseforum.com" class="login-link">联系支持</a>
+        {{else}}
+        <a href="/login" class="login-link">立即登录</a>
+        {{end}}
+    </div>
+</div>
+</body>
+</html>

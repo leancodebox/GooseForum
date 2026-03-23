@@ -1,11 +1,9 @@
 package applySheet
 
 import (
-	"math"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
-	"github.com/spf13/cast"
 )
 
 func create(entity *Entity) int64 {
@@ -21,9 +19,9 @@ func save(entity *Entity) int64 {
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {
@@ -41,6 +39,10 @@ func CantWriteNew(applyType SheetType, maxCount int64) bool {
 
 type PageQuery struct {
 	Page, PageSize int
+	Title          string
+	Type           int8
+	Status         int8
+	UserId         uint64
 }
 
 func Page[ResType Entity](q PageQuery) struct {
@@ -50,23 +52,31 @@ func Page[ResType Entity](q PageQuery) struct {
 	Data     []ResType
 } {
 	var list []ResType
-	if q.Page > 0 {
-		q.Page -= 1
-	} else {
-		q.Page = 0
+	if q.Page < 1 {
+		q.Page = 1
 	}
 	if q.PageSize < 1 {
-		q.PageSize = 1
+		q.PageSize = 10
 	}
+
+	db := builder()
+	if q.Title != "" {
+		db = db.Where(queryopt.Like(fieldTitle, "%"+q.Title+"%"))
+	}
+	if q.Type > 0 {
+		db = db.Where(queryopt.Eq(fieldType, q.Type))
+	}
+	if q.Status > 0 {
+		db = db.Where(queryopt.Eq(fieldStatus, q.Status))
+	}
+	if q.UserId > 0 {
+		db = db.Where(queryopt.Eq(fieldUserId, q.UserId))
+	}
+
 	var total int64
-	var bigEntity Entity
-	builder().Limit(1).Order(queryopt.Desc(pid)).Find(&bigEntity)
-	total = cast.ToInt64(bigEntity.Id)
-	lastId := math.MaxInt
-	if q.Page > 0 {
-		lastId = cast.ToInt(total) - cast.ToInt(q.PageSize*q.Page)
-	}
-	builder().Where(queryopt.Le(pid, lastId)).Limit(q.PageSize).Order("id desc").Find(&list)
+	db.Model(&Entity{}).Count(&total)
+
+	db.Offset((q.Page - 1) * q.PageSize).Limit(q.PageSize).Order("id desc").Find(&list)
 
 	return struct {
 		Page     int

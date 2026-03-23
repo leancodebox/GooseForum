@@ -75,7 +75,7 @@ func equalHashes(a, b []byte) bool {
 		return false
 	}
 	var diff byte
-	for i := 0; i < len(a); i++ {
+	for i := range a {
 		diff |= a[i] ^ b[i]
 	}
 	return diff == 0

@@ -68,7 +68,7 @@ func MarkAsRead(notificationId uint64, userId uint64) error {
 	return builder().
 		Where(queryopt.Eq("id", notificationId)).
 		Where(queryopt.Eq("user_id", userId)). // 确保只能标记自己的通知
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"is_read": true,
 			"read_at": now,
 		}).Error
@@ -80,7 +80,7 @@ func MarkAllAsRead(userId uint64) error {
 	return builder().
 		Where(queryopt.Eq("user_id", userId)).
 		Where(queryopt.Eq("is_read", false)).
-		Updates(map[string]interface{}{
+		Updates(map[string]any{
 			"is_read": true,
 			"read_at": now,
 		}).Error

@@ -1,0 +1,66 @@
+{{define "sidebar.gohtml"}}
+    <!-- Left Sidebar: Discourse Style Navigation -->
+    <div class="hidden lg:flex flex-col w-[260px] xl:w-[280px] flex-shrink-0 sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto py-4 pl-4 sm:pl-6 lg:pl-8 pr-2 no-scrollbar overscroll-contain">
+        <div class="space-y-2 pr-2">
+            <!-- Main Menu -->
+            <nav class="space-y-0.5">
+                {{range .Data.Sidebar.MainMenu}}
+                <a href="{{.Url}}" class="flex items-center gap-3 px-3 py-2 text-[15px] {{if .Active}}font-bold text-gray-900 bg-white shadow-[0_1px_4px_rgb(0,0,0,0.04)] border-gray-100{{else}}font-medium text-gray-600 border-transparent hover:bg-gray-100/80{{end}} rounded-lg border transition-all group hover:-translate-y-0.5">
+                    <span class="text-lg group-hover:scale-110 transition-transform {{if not .Active}}opacity-80 group-hover:opacity-100{{end}}">{{.Icon}}</span>
+                    <span>{{call $.T .Label}}</span>
+                </a>
+                {{end}}
+            </nav>
+
+            <!-- Resources / Links -->
+            <div class="space-y-1.5 pt-2">
+                <div class="px-2 flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest">
+                    <span>{{call .T "sidebar_resources"}}</span>
+                </div>
+                <nav class="space-y-0.5">
+                    {{range .Data.Sidebar.ResourceItems}}
+                    <a href="{{.Url}}" class="flex items-center gap-3 px-3 py-1.5 text-[14px] font-medium {{if .Active}}text-blue-600 bg-blue-50/50 font-bold{{else}}text-gray-500 hover:text-blue-600 hover:bg-blue-50/50{{end}} rounded-md transition-colors group">
+                        <span class="text-base {{if not .Active}}opacity-60 group-hover:opacity-100{{end}}">{{.Icon}}</span>
+                        {{call $.T .Label}}
+                    </a>
+                    {{end}}
+                </nav>
+            </div>
+
+            <!-- Categories List -->
+            <div class="space-y-1.5 pt-2">
+                <div class="px-2 flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest">
+                    <span>{{call .T "sidebar_categories"}}</span>
+                </div>
+                <div class="space-y-0.5">
+                    {{range .Data.Sidebar.CategoryItems}}
+                    <a href="{{.Url}}" class="flex items-center gap-3 px-3 py-1.5 text-[14px] {{if .Active}}text-blue-600 bg-blue-50/50 font-bold{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-100/80{{end}} rounded-md transition-all group {{if not .Active}}hover:translate-x-1{{end}}">
+                        {{if .Icon}}
+                        <span class="text-base {{if not .Active}}opacity-60 group-hover:opacity-100{{end}}" style="color: {{.Color}}">{{.Icon}}</span>
+                        {{else}}
+                        <span class="category-color-indicator w-2.5 h-2.5 rounded-[3px] transition-colors shadow-sm" style="background-color: {{.Color}}"></span>
+                        {{end}}
+                        <span class="truncate">{{.Label}}</span>
+                    </a>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="mt-auto pt-6 pr-2">
+            <div class="border-t border-gray-100 pt-4">
+                <div class="flex flex-wrap gap-x-3 gap-y-1.5 mb-3">
+                    <a href="/rss.xml" class="text-xs font-medium text-gray-500 hover:text-gray-900">Rss</a>
+                    <a href="/sitemap.xml" class="text-xs font-medium text-gray-500 hover:text-gray-900">Site Map</a>
+                    <a href="/links" class="text-[11px] text-gray-500 hover:text-gray-900 transition-colors">Links</a>
+                    <a href="https://github.com/leancodebox/GooseForum" target="_blank" class="text-[11px] text-gray-500 hover:text-gray-900 transition-colors">{{call .T "sidebar_github"}}</a>
+                </div>
+                <div class="flex items-center gap-2 text-[11px] text-gray-400">
+                    <span class="font-bold">GooseForum</span>
+                    <span>© 2024</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}

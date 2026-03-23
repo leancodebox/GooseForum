@@ -11,7 +11,8 @@ import (
 //
 // -- go:generate npm run --prefix actor build --emptyOutDir
 //
-//go:generate npm run --prefix resource build -- --emptyOutDir
+//go:generate npm run --prefix resource build
+//go:generate npm run --prefix admin build
 func main() {
 	// 注册静态资源
 	console.Execute()

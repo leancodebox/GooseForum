@@ -1,0 +1,269 @@
+{{define "user-popover-card"}}
+
+<style>
+    .social-icon-link svg {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+    }
+</style>
+
+<!-- Global User Card Popover -->
+<div x-data="userCardPopover()"
+     @show-user-card.window="show($event.detail)"
+     @click.away="hide()"
+     @scroll.window="hide()"
+     x-show="visible"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+     x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+     style="display: none;"
+     class="fixed z-[100] w-[380px] max-w-[94vw] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden font-sans text-left"
+     :style="positionStyle">
+
+    <!-- Loading State -->
+    <div x-show="loading" class="p-8 flex justify-center items-center">
+        <span class="loading loading-spinner loading-md text-blue-600"></span>
+    </div>
+
+    <!-- Content State -->
+    <div x-show="!loading" class="relative">
+        <!-- Background Header -->
+        <div class="h-20 bg-gradient-to-r from-blue-500 to-indigo-600 relative overflow-hidden">
+             <div class="absolute inset-0 bg-black/10"></div>
+             <!-- Decorative Circles -->
+             <div class="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+             <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+        </div>
+
+        <!-- Avatar & Main Info -->
+        <div class="px-5 pb-5 -mt-10 relative">
+            <div class="flex justify-between items-end mb-3">
+                <div class="relative">
+                    <a :href="'/u/' + user.id" class="block group">
+                        <img :src="user.avatarUrl" class="w-20 h-20 rounded-full border-4 border-white shadow-md object-cover bg-white group-hover:brightness-95 transition-all">
+                    </a>
+                    <div x-show="user.isOnline" class="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full pointer-events-none" title="Online"></div>
+                </div>
+
+                <div class="flex gap-2 pb-1">
+                     <a :href="'/messages?userId=' + user.id + '&username=' + encodeURIComponent(user.nickname) + '&avatar=' + encodeURIComponent(user.avatarUrl)" class="btn btn-sm btn-primary rounded-lg shadow-sm shadow-blue-200 h-9 min-h-0 px-4 font-bold flex items-center flex-nowrap whitespace-nowrap">
+                        <svg class="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                        Message
+                     </a>
+                     <button class="btn btn-sm btn-outline bg-white hover:bg-gray-50 border-gray-300 text-gray-700 rounded-lg h-9 min-h-0 px-4 font-medium flex items-center flex-nowrap whitespace-nowrap">
+                        <svg class="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Follow
+                     </button>
+                </div>
+            </div>
+
+            <div class="mt-1">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <a :href="'/u/' + user.id" x-text="user.nickname" class="hover:text-blue-600 transition-colors"></a>
+                    <span x-show="user.isAdmin" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wide">Admin</span>
+                </h3>
+                <a :href="'/u/' + user.id" class="text-sm text-gray-500 font-medium mt-0.5 hover:text-blue-600 block w-fit" x-text="'@' + user.username"></a>
+            </div>
+
+            <!-- Bio -->
+            <div class="mt-3 text-sm text-gray-600 leading-relaxed line-clamp-3" x-text="user.bio || 'No bio provided yet.'"></div>
+
+            <!-- Meta Info -->
+            <div class="mt-3 flex flex-wrap gap-y-2 gap-x-4 text-xs text-gray-500 font-medium">
+                <div class="flex items-center gap-1.5" title="Location">
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span x-text="user.location || 'Earth'"></span>
+                </div>
+                <div class="flex items-center gap-1.5" title="Joined Date">
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span x-text="'Joined ' + user.joinedAt"></span>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="mt-4 pt-3 border-t border-gray-100 grid grid-cols-3 gap-2">
+                <div class="text-center p-1.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div class="text-lg font-bold text-gray-900" x-text="user.stats.posts"></div>
+                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Posts</div>
+                </div>
+                <div class="text-center p-1.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div class="text-lg font-bold text-gray-900" x-text="user.stats.likes"></div>
+                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Likes</div>
+                </div>
+                <div class="text-center p-1.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div class="text-lg font-bold text-gray-900" x-text="user.stats.solutions"></div>
+                    <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Solutions</div>
+                </div>
+            </div>
+
+            <!-- External Info -->
+            <div class="mt-3 flex gap-2 justify-center" x-show="user.externalInformation">
+                <template x-if="user.externalInformation.github && user.externalInformation.github.link">
+                    <a :href="user.externalInformation.github.link" target="_blank" class="social-icon-link p-2 text-gray-400 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100">
+                        <span class="social-icon-link sr-only">GitHub</span>
+                        {{template "icon_github" .}}
+                    </a>
+                </template>
+                <template x-if="user.externalInformation.twitter && user.externalInformation.twitter.link">
+                    <a :href="user.externalInformation.twitter.link" target="_blank" class="social-icon-link p-2 text-gray-400 hover:text-blue-400 transition-colors rounded-full hover:bg-blue-50">
+                        <span class="social-icon-link sr-only">Twitter</span>
+                        {{template "icon_twitter" .}}
+                    </a>
+                </template>
+                <template x-if="user.externalInformation.weibo && user.externalInformation.weibo.link">
+                    <a :href="user.externalInformation.weibo.link" target="_blank" class="social-icon-link p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50">
+                        <span class="social-icon-link sr-only">Weibo</span>
+                        {{template "icon_weibo" .}}
+                    </a>
+                </template>
+                <template x-if="user.externalInformation.bilibili && user.externalInformation.bilibili.link">
+                    <a :href="user.externalInformation.bilibili.link" target="_blank" class="social-icon-link p-2 text-gray-400 hover:text-pink-400 transition-colors rounded-full hover:bg-pink-50">
+                        <span class="social-icon-link sr-only">Bilibili</span>
+                        {{template "icon_bilibili" .}}
+                    </a>
+                </template>
+                 <template x-if="user.externalInformation.linkedIn && user.externalInformation.linkedIn.link">
+                    <a :href="user.externalInformation.linkedIn.link" target="_blank" class="social-icon-link p-2 text-gray-400 hover:text-blue-700 transition-colors rounded-full hover:bg-blue-50">
+                        <span class="social-icon-link sr-only">LinkedIn</span>
+                        {{template "icon_linkedin" .}}
+                    </a>
+                </template>
+                 <template x-if="user.externalInformation.zhihu && user.externalInformation.zhihu.link">
+                    <a :href="user.externalInformation.zhihu.link" target="_blank" class="social-icon-link p-2 text-gray-400 hover:text-blue-500 transition-colors rounded-full hover:bg-blue-50">
+                        <span class="social-icon-link sr-only">Zhihu</span>
+                         {{template "icon_zhihu" .}}
+                    </a>
+                </template>
+            </div>
+            
+             <!-- Badges (Mock) -->
+            <div class="mt-2 flex gap-1 overflow-hidden" x-show="user.badges && user.badges.length > 0">
+                 <template x-for="badge in user.badges">
+                     <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs" :title="badge.name">
+                        <span x-text="badge.icon"></span>
+                     </div>
+                 </template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function userCardPopover() {
+    return {
+        visible: false,
+        loading: false,
+        positionStyle: '',
+        user: {
+            id: 0,
+            username: '',
+            avatarUrl: '',
+            bio: '',
+            location: '',
+            joinedAt: '',
+            isAdmin: false,
+            isOnline: false,
+            stats: { posts: 0, likes: 0, solutions: 0 },
+            externalInformation: {},
+            badges: []
+        },
+        
+        async show(detail) {
+            // Prevent showing if clicking the same trigger? Maybe not needed.
+            // But we should hide first if it is visible to force a re-render or position update
+            // this.visible = false; 
+            
+            const { userId, nickname, username, avatarUrl, target, event } = detail;
+            
+            // Initial render with passed data to feel instant
+            this.user = {
+                id: userId,
+                nickname: nickname,
+                username: username || 'User',
+                avatarUrl: avatarUrl || '/static/pic/default-avatar.webp',
+                bio: 'Loading...',
+                location: '...',
+                joinedAt: '...',
+                isAdmin: false,
+                isOnline: false,
+                stats: { posts: '-', likes: '-', solutions: '-' },
+                externalInformation: {},
+                badges: []
+            };
+            
+            this.updatePosition(target);
+            this.visible = true;
+            this.loading = true;
+
+            this.fetchData(userId);
+        },
+        
+        hide() {
+            this.visible = false;
+        },
+        
+        updatePosition(target) {
+            const rect = target.getBoundingClientRect();
+            const cardWidth = 340;
+            const cardHeight = 300; // Approximate
+            const margin = 10;
+            
+            let top = rect.bottom + margin;
+            let left = rect.left; // Align left by default
+
+            // Check right edge
+            if (left + cardWidth > window.innerWidth - margin) {
+                // If overflows right, align right with target or shift left
+                left = Math.max(margin, window.innerWidth - cardWidth - margin);
+            }
+            
+            // Check bottom edge (optional: flip to top if not enough space)
+            if (top + cardHeight > window.innerHeight && rect.top > cardHeight + margin) {
+                 top = rect.top - cardHeight - margin; // TODO: height is dynamic, might need nextTick
+            }
+
+            this.positionStyle = `top: ${top}px; left: ${left}px;`;
+        },
+
+        async fetchData(userId) {
+            try {
+                const response = await fetch(`/api/user-card?userId=${userId}`);
+                const result = await response.json();
+                if (result.code === 0 && result.result) {
+                    const data = result.result;
+                    this.user = {
+                        id: data.userId,
+                        nickname: data.nickname?data.nickname:data.username,
+                        username: data.username,
+                        avatarUrl: data.avatarUrl,
+                        bio: data.bio || 'No bio provided.',
+                        location: '', // Backend does not support location yet
+                        joinedAt: new Date(data.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short' }),
+                        isAdmin: data.isAdmin,
+                        isOnline: data.isOnline,
+                        stats: { 
+                            posts: data.articleCount || 0, 
+                            likes: data.likeReceivedCount || 0, 
+                            solutions: 0 // Backend does not support solutions count yet
+                        },
+                        externalInformation: data.externalInformation || {},
+                        badges: []
+                    };
+                } else {
+                    console.error('Failed to fetch user data:', result.msg);
+                    this.user.bio = 'Failed to load info.';
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                this.user.bio = 'Error loading info.';
+            } finally {
+                this.loading = false;
+            }
+        }
+    }
+}
+</script>
+{{end}}

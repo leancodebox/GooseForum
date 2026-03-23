@@ -173,5 +173,79 @@
       {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
       {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
     ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "articles_user_stat",
+    "keyList": [
+      {"field": "article_id", "type": "bigint unsigned", "key": "PRI", "desc": "id", "null": "NO", "default": null},
+      {"field": "user_id", "type": "bigint unsigned", "key": "", "desc": "用户id", "null": "NO", "default": "0"},
+      {"field": "replay_count", "type": "datetime", "key": "", "desc": "回复量", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "im_conversations",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "主键", "null": "NO", "default": null},
+      {"field": "type", "type": "tinyint(1)", "key": "", "desc": "1 单聊 (C2C)", "null": "NO", "default": "1"},
+      {"field": "last_msg_content", "type": "varchar(255)", "key": "", "desc": "最后一条消息预览", "null": "YES", "default": ""},
+      {"field": "last_msg_time", "type": "datetime", "key": "", "desc": "用于排序", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "im_user_chat_configs",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "主键", "null": "NO", "default": null},
+      {"field": "user_id", "type": "bigint unsigned", "key": "MUL", "desc": "当前所属用户", "null": "NO", "default": "0"},
+      {"field": "peer_id", "type": "bigint unsigned", "key": "MUL", "desc": "对话对方用户", "null": "NO", "default": "0"},
+      {"field": "conv_id", "type": "bigint unsigned", "key": "MUL", "desc": "关联的conv_id", "null": "NO", "default": "0"},
+      {"field": "unread_count", "type": "int unsigned", "key": "", "desc": "该用户在该对话下的未读数", "null": "NO", "default": "0"},
+      {"field": "is_pinned", "type": "tinyint(1)", "key": "", "desc": "是否置顶", "null": "NO", "default": "0"},
+      {"field": "is_muted", "type": "tinyint(1)", "key": "", "desc": "是否免打扰", "null": "NO", "default": "0"},
+      {"field": "is_deleted", "type": "tinyint(1)", "key": "", "desc": "用户是否在本地删除了该对话", "null": "NO", "default": "0"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "messages",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "主键", "null": "NO", "default": null},
+      {"field": "conv_id", "type": "bigint unsigned", "key": "MUL", "desc": "所属对话ID", "null": "NO", "default": "0"},
+      {"field": "sender_id", "type": "bigint unsigned", "key": "", "desc": "发送者ID", "null": "NO", "default": "0"},
+      {"field": "content", "type": "text", "key": "", "desc": "消息文本", "null": "NO", "default": null},
+      {"field": "msg_type", "type": "tinyint", "key": "", "desc": "消息类型: 1文本, 2图片, 3语音等", "null": "NO", "default": "1"},
+      {"field": "is_read", "type": "tinyint(1)", "key": "", "desc": "该消息是否被对方读取", "null": "NO", "default": "0"},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "user_activities",
+    "keyList": [
+      {"field": "id", "type": "bigint unsigned", "key": "PRI", "desc": "主键", "null": "NO", "default": null},
+      {"field": "user_id", "type": "bigint unsigned", "key": "MUL", "desc": "发起者 ID，建立索引以便快速查询用户动态", "null": "NO", "default": "0"},
+      {"field": "action", "type": "int", "key": "", "desc": "行为类型（如 1:发帖, 2:点赞）", "null": "NO", "default": "0"},
+      {"field": "subject_type", "type": "varchar(32)", "key": "", "desc": "目标类型（Topic, Post, User等）", "null": "NO", "default": ""},
+      {"field": "subject_id", "type": "bigint unsigned", "key": "", "desc": "目标 ID", "null": "NO", "default": "0"},
+      {"field": "content_preview", "type": "text", "desc": "内容摘要（冗余存储以提高列表查询速度）", "null": "YES", "default": null},
+      {"field": "created_at", "type": "datetime", "key": "MUL", "desc": "发生时间，建立索引用于排序", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
+    ]
+  },
+  {
+    "tool": "dbhelper",
+    "modelName": "daily_stats",
+    "keyList": [
+      {"field": "stat_date", "type": "date", "key": "PRI", "desc": "日期，格式 YYYY-MM-DD", "null": "NO", "default": null},
+      {"field": "stat_key", "type": "varchar(128)", "key": "PRI", "desc": "统计项的 Key (带前缀)", "null": "NO", "default": ""},
+      {"field": "stat_value", "type": "bigint", "key": "", "desc": "统计数值", "null": "NO", "default": "0"},
+      {"field": "created_at", "type": "datetime", "key": "", "desc": "创建时间", "null": "NO", "default": "CURRENT_TIMESTAMP"},
+      {"field": "updated_at", "type": "datetime", "key": "", "desc": "更新时间", "null": "NO", "default": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"}
+    ]
   }
 ]

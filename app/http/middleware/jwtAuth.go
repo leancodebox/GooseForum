@@ -1,47 +1,63 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
-
-	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/service/userservice"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 )
 
+const SkipUpdateUserActivity = "SkipUpdateUserActivity"
+
 func JWTAuthCheck(c *gin.Context) {
-	JWTAuth(c)
-	if c.GetUint64("userId") == 0 {
+	userId := JWTAuthGetUserId(c)
+	if userId == 0 {
 		c.JSON(http.StatusUnauthorized, component.FailData("not authorized"))
 		c.Abort()
 		return
 	}
+	c.Set("userId", userId)
 	c.Next()
+	if !c.GetBool(SkipUpdateUserActivity) {
+		eventbus.Publish(context.Background(), &eventhandlers.UserLastActiveUpdatedEvent{
+			UserId:     userId,
+			ActiveTime: time.Now(),
+		})
+	}
 }
 
-const SkipUpdateUserActivity = "SkipUpdateUserActivity"
-
 func JWTAuth(c *gin.Context) {
+	userId := JWTAuthGetUserId(c)
+	if userId != 0 {
+		c.Set("userId", userId)
+	}
+	c.Next()
+	if userId != 0 && !c.GetBool(SkipUpdateUserActivity) {
+		eventbus.Publish(context.Background(), &eventhandlers.UserLastActiveUpdatedEvent{
+			UserId:     userId,
+			ActiveTime: time.Now(),
+		})
+	}
+}
+
+func JWTAuthGetUserId(c *gin.Context) uint64 {
 	token := jwt.GetGinAccessToken(c)
 	if token == "" {
-		c.Next()
-		return
+		return 0
 	}
 	userId, newToken, err := jwt.VerifyTokenWithFresh(token)
 	if err != nil {
-		c.Next()
-		return
+		return 0
 	}
 	if token != newToken {
 		jwt.TokenSetting(c, newToken)
 	}
-	c.Set("userId", userId)
-	c.Next()
-	if c.GetBool(SkipUpdateUserActivity) {
-		return
-	}
-	userservice.UpdateUserActivity(userId)
+	return userId
 }
 
 func NoUpdateUserActivity(c *gin.Context) {
@@ -55,17 +71,6 @@ func CheckLogin(c *gin.Context) {
 		// 获取当前请求的完整URL作为重定向参数
 		redirectURL := c.Request.URL.String()
 		c.Redirect(http.StatusFound, "/login?redirect="+redirectURL)
-		c.Abort()
-		return
-	}
-	c.Next()
-}
-
-func CheckNeedLogin(c *gin.Context) {
-	userId := c.GetUint64("userId")
-	if userId != 0 {
-		// 获取当前请求的完整URL作为重定向参数
-		c.Redirect(http.StatusFound, `/`)
 		c.Abort()
 		return
 	}

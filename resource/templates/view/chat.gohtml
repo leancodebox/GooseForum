@@ -1,0 +1,489 @@
+{{template "baseof.gohtml" .}}
+{{define "main"}}
+<div class="flex gap-2 relative items-stretch h-[calc(100dvh-64px)] sm:h-[calc(100vh-80px)]">
+
+    {{template "sidebar.gohtml" .}}
+
+    <!-- Main Chat Area -->
+    <div class="flex-1 min-w-0 h-full p-0 sm:py-4 sm:pr-4 sm:pl-2">
+        <div class="bg-white sm:rounded-xl sm:shadow-sm sm:border border-gray-100 h-full flex overflow-hidden relative" x-data="chatApp()">
+
+            <!-- Left: Conversation List -->
+            <div class="w-80 border-r border-gray-100 flex flex-col bg-gray-50/50 hidden md:flex">
+                <!-- Header -->
+                <div class="px-4 h-16 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+                    <h2 class="font-bold text-gray-900 text-lg">{{call .T "messages_title"}}</h2>
+                    <button @click="showNewMessageModal = true" class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors" title="{{call .T "new_message_title"}}">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </button>
+                </div>
+
+                <!-- Search -->
+                <div class="p-3">
+                    <div class="relative">
+                        <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input type="text" placeholder="{{call .T "search_messages"}}" class="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                    </div>
+                </div>
+
+                <!-- List -->
+                <div class="flex-1 overflow-y-auto">
+                    <template x-for="chat in conversations" :key="chat.id || 'new-' + chat.peerId">
+                        <div @click="selectChat(chat)"
+                             class="p-4 cursor-pointer hover:bg-white border-b border-gray-50 transition-colors flex gap-3 relative"
+                             :class="{'bg-white border-l-4 border-l-blue-500 shadow-sm z-10': activeChat && activeChat.id === chat.id, 'border-l-4 border-l-transparent': !activeChat || activeChat.id !== chat.id}">
+                            <div class="relative shrink-0">
+                                <img :src="chat.avatar" class="w-10 h-10 rounded-full bg-gray-200 object-cover">
+                                <div x-show="chat.online" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-baseline mb-0.5">
+                                    <h3 class="text-sm font-semibold text-gray-900 truncate" x-text="chat.name"></h3>
+                                    <span class="text-xs text-gray-400 shrink-0" x-text="chat.time"></span>
+                                </div>
+                                <p class="text-sm text-gray-500 truncate" x-text="chat.lastMessage" :class="{'font-medium text-gray-900': chat.unread}"></p>
+                            </div>
+                            <div x-show="chat.unread" class="absolute top-4 right-4 w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Right: Chat Window / Mobile Main -->
+            <div class="flex-1 flex flex-col bg-white min-w-0 relative">
+                <template x-if="activeChat">
+                    <div class="flex flex-col h-full w-full absolute inset-0 bg-white z-20 md:static">
+                        <!-- Header -->
+                        <div class="px-4 h-16 border-b border-gray-100 flex items-center justify-between shrink-0 bg-white z-10">
+                            <div class="flex items-center gap-3">
+                                <button @click="activeChat = null" class="md:hidden p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg -ml-2 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+                                <img :src="activeChat.avatar" class="w-9 h-9 rounded-full bg-gray-100 object-cover">
+                                <div>
+                                    <h3 class="font-bold text-gray-900 text-sm" x-text="activeChat.name"></h3>
+                                    <p class="text-xs text-gray-500 flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full" :class="activeChat.online ? 'bg-green-500' : 'bg-gray-300'"></span>
+                                        <span x-text="activeChat.online ? '{{call .T "status_online"}}' : '{{call .T "status_offline"}}'"></span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                </button>
+                                <button class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Messages -->
+                        <div class="flex-1 overflow-y-auto p-4 space-y-6 bg-white" id="chat-messages">
+                            <!-- Date Divider -->
+                            <div class="flex justify-center">
+                                <span class="text-xs font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-full">{{call .T "date_today"}}</span>
+                            </div>
+
+                            <template x-for="msg in activeChat.messages" :key="msg.id">
+                                <div class="flex gap-3 max-w-[85%]" :class="msg.isMe ? 'ml-auto flex-row-reverse' : ''">
+                                    <img x-show="!msg.isMe" :src="activeChat.avatar" class="w-8 h-8 rounded-full bg-gray-100 self-end mb-1">
+
+                                    <div class="group relative">
+                                        <div class="px-4 py-2 rounded-2xl text-sm leading-relaxed shadow-sm"
+                                             :class="msg.isMe ? 'bg-blue-600 text-white rounded-br-none' : 'bg-gray-100 text-gray-900 rounded-bl-none'">
+                                            <p x-text="msg.text" class="whitespace-pre-wrap"></p>
+                                        </div>
+                                        <span class="text-[10px] text-gray-400 mt-1 block opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-0 whitespace-nowrap"
+                                              :class="msg.isMe ? 'right-full mr-2' : 'left-full ml-2'"
+                                              x-text="msg.time"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Input -->
+                        <div class="p-4 border-t border-gray-100 bg-white shrink-0">
+                            <div class="relative bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100/30 transition-all p-1.5">
+                                <!-- Input Area -->
+                                <div class="flex items-end gap-1">
+                                    <!-- Emoji Button -->
+                                    <div class="relative">
+                                        <button @click="showEmojiPicker = !showEmojiPicker" 
+                                                class="p-2 text-gray-400 hover:text-blue-500 rounded-xl hover:bg-blue-50 transition-all active:scale-95">
+                                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </button>
+                                        
+                                        <!-- Emoji Picker -->
+                                        <div x-show="showEmojiPicker" 
+                                             @click.outside="showEmojiPicker = false"
+                                             class="absolute bottom-full left-0 mb-3 p-3 bg-white rounded-2xl shadow-xl border border-gray-100 grid grid-cols-4 gap-2 z-30 w-48"
+                                             x-transition:enter="transition ease-out duration-200"
+                                             x-transition:enter-start="opacity-0 translate-y-2"
+                                             x-transition:enter-end="opacity-100 translate-y-0">
+                                            <template x-for="emoji in emojis" :key="emoji">
+                                                <button @click="newMessage += emoji; showEmojiPicker = false" 
+                                                        class="text-2xl p-1.5 hover:bg-gray-50 rounded-lg transition-colors active:scale-90" 
+                                                        x-text="emoji"></button>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <textarea x-model="newMessage"
+                                              @keydown.enter.prevent="handleEnter($event)"
+                                              rows="1"
+                                              class="flex-1 bg-transparent border-0 focus:ring-0 text-[15px] text-gray-900 placeholder-gray-400 resize-none py-2.5 px-3 max-h-32 leading-relaxed"
+                                              placeholder="{{call .T "type_message"}}"></textarea>
+                                    
+                                    <button @click="sendMessage()"
+                                            class="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed group"
+                                            :disabled="!newMessage.trim()">
+                                        <svg class="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <!-- Bottom Hint (Combined) -->
+                                <div class="flex items-center justify-between px-3 pb-1">
+                                     <span class="text-[10px] text-gray-400 font-medium">{{call .T "send_hint"}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Empty State (Desktop) -->
+                <template x-if="!activeChat">
+                    <div class="hidden md:flex flex-1 flex-col items-center justify-center text-center p-8 text-gray-400">
+                        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">{{call .T "select_conversation"}}</h3>
+                        <p class="mt-1">{{call .T "select_conversation_desc"}}</p>
+                        <button @click="showNewMessageModal = true" class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm">{{call .T "start_new_chat"}}</button>
+                    </div>
+                </template>
+
+                <!-- Mobile List View (When no active chat) -->
+                 <div class="md:hidden flex-1 flex flex-col bg-white overflow-hidden" x-show="!activeChat">
+                    <!-- Mobile Header -->
+                     <div class="px-4 h-16 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+                        <h2 class="font-bold text-gray-900 text-lg">{{call .T "messages_title"}}</h2>
+                        <button @click="showNewMessageModal = true" class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-full transition-colors" title="{{call .T "new_message_title"}}">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Mobile Search -->
+                    <div class="p-3 bg-gray-50/50 shrink-0">
+                        <div class="relative">
+                            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <input type="text" placeholder="{{call .T "search_messages"}}" class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto">
+                        <!-- Conversations List -->
+                        <template x-if="conversations.length > 0">
+                            <div class="divide-y divide-gray-50">
+                                <template x-for="chat in conversations" :key="chat.id || 'new-' + chat.peerId">
+                                    <div @click="selectChat(chat)"
+                                         class="p-4 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors flex gap-3 relative bg-white">
+                                        <div class="relative shrink-0">
+                                            <img :src="chat.avatar" class="w-12 h-12 rounded-full bg-gray-200 object-cover border border-gray-100 shadow-sm">
+                                            <div x-show="chat.online" class="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                                        </div>
+                                        <div class="flex-1 min-w-0 py-0.5">
+                                            <div class="flex justify-between items-baseline mb-1">
+                                                <h3 class="text-base font-bold text-gray-900 truncate" x-text="chat.name"></h3>
+                                                <span class="text-xs text-gray-400 shrink-0 font-medium" x-text="chat.time"></span>
+                                            </div>
+                                            <p class="text-sm text-gray-500 truncate line-clamp-1" x-text="chat.lastMessage" :class="{'font-bold text-gray-900': chat.unread}"></p>
+                                        </div>
+                                        <div x-show="chat.unread" class="absolute top-1/2 -translate-y-1/2 right-4 w-2.5 h-2.5 bg-blue-500 rounded-full ring-4 ring-blue-50"></div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Empty State for Mobile List -->
+                        <template x-if="conversations.length === 0">
+                            <div class="flex flex-col items-center justify-center py-20 px-8 text-center">
+                                <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 text-gray-300">
+                                    <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-2">{{call .T "no_messages_yet"}}</h3>
+                                <p class="text-sm text-gray-500 mb-8 max-w-xs mx-auto">{{call .T "no_messages_desc"}}</p>
+                                <button @click="showNewMessageModal = true" class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all shadow-md active:scale-[0.98]">
+                                    {{call .T "start_new_chat"}}
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- New Message Modal -->
+            <div x-show="showNewMessageModal"
+                 class="absolute inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm"
+                 x-transition.opacity>
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden flex flex-col max-h-[80vh]" @click.outside="showNewMessageModal = false">
+                    <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                        <h3 class="font-bold text-gray-900">{{call .T "new_message_title"}}</h3>
+                        <button @click="showNewMessageModal = false" class="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="p-3 border-b border-gray-100">
+                         <input type="text" placeholder="{{call .T "search_people"}}" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                    </div>
+                    <div class="overflow-y-auto p-2">
+                        <p class="px-4 py-2 text-xs font-bold text-gray-400 uppercase">{{call .T "suggested_people"}}</p>
+                        <template x-for="user in suggestedUsers" :key="user.id">
+                            <button @click="startChat(user)" class="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors text-left">
+                                <img :src="user.avatar" class="w-10 h-10 rounded-full bg-gray-200">
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm" x-text="user.name"></p>
+                                    <p class="text-xs text-gray-500" x-text="'@' + user.username"></p>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+function chatApp() {
+    return {
+        activeChat: null,
+        showNewMessageModal: false,
+        showEmojiPicker: false,
+        emojis: ['😀', '😂', '😍', '😊', '😭', '👍', '🙏', '🔥', '✨', '🎉', '🤔', '👀', '❤️', '🙌', '👏', '✅'],
+        newMessage: '',
+        conversations: [],
+        suggestedUsers: [],
+
+        async init() {
+            await this.fetchConversations();
+            await this.fetchSuggestedUsers();
+
+            // Check URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetUserId = urlParams.get('userId');
+
+            if (targetUserId) {
+                const existing = this.conversations.find(c => c.peerId == targetUserId);
+                if (existing) {
+                    this.selectChat(existing);
+                } else {
+                    // Create temp chat if we have details
+                    const username = urlParams.get('username');
+                    const avatar = urlParams.get('avatar');
+                    if (username) {
+                         const newChat = {
+                            id: 0,
+                            peerId: parseInt(targetUserId),
+                            name: username,
+                            avatar: avatar || '/static/images/avatar.png',
+                            online: false,
+                            time: '',
+                            lastMessage: '',
+                            unread: false,
+                            messages: []
+                        };
+                        this.conversations.unshift(newChat);
+                        this.selectChat(newChat);
+                    }
+                }
+            } else if(window.innerWidth >= 768 && this.conversations.length > 0) {
+                this.selectChat(this.conversations[0]);
+            }
+        },
+
+        async fetchConversations() {
+            try {
+                const response = await window.api.post('/forum/chat/list');
+                if (response.code === 0) {
+                    this.conversations = response.result.list.map(c => ({
+                        id: c.convId,
+                        peerId: c.peerId,
+                        name: c.peerUsername,
+                        avatar: c.peerAvatar || '/static/images/avatar.png',
+                        online: false,
+                        time: c.lastMsgTime,
+                        lastMessage: c.lastMsg,
+                        unread: c.unreadCount > 0,
+                        messages: []
+                    }));
+                }
+            } catch (e) {
+                console.error("Failed to fetch conversations", e);
+            }
+        },
+
+        async fetchSuggestedUsers() {
+            try {
+                const response = await window.api.post('/forum/chat/suggested-users');
+                if (response.code === 0) {
+                    this.suggestedUsers = response.result.list;
+                }
+            } catch (e) {
+                console.error("Failed to fetch suggested users", e);
+            }
+        },
+
+        async selectChat(chat) {
+            this.activeChat = chat;
+            // Fetch messages if not empty (new chat has no id yet if created via startChat but not sent)
+            if (chat.id) {
+                await this.fetchMessages(chat);
+
+                // Mark read
+                if (chat.unread) {
+                    try {
+                        await window.api.post('/forum/chat/mark-read', { convId: chat.id });
+                        chat.unread = false;
+                    } catch (e) {
+                        console.error("Failed to mark read", e);
+                    }
+                }
+            }
+
+            this.$nextTick(() => {
+                const container = document.getElementById('chat-messages');
+                if(container) container.scrollTop = container.scrollHeight;
+            });
+        },
+
+        async fetchMessages(chat) {
+            try {
+                const response = await window.api.post('/forum/chat/messages', {
+                    convId: chat.id,
+                    page: 1,
+                    pageSize: 50
+                });
+                if (response.code === 0) {
+                    // API returns newest first (DESC), reverse for display
+                    if (response.result.list) {
+                         chat.messages = response.result.list.map(m => ({
+                            id: m.id,
+                            text: m.content,
+                            time: m.createdAt,
+                            isMe: m.isSelf
+                        })).reverse();
+                    } else {
+                        chat.messages = [];
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to fetch messages", e);
+            }
+        },
+
+        async sendMessage() {
+            if (!this.newMessage.trim() || !this.activeChat) return;
+
+            const content = this.newMessage;
+            const peerId = this.activeChat.peerId;
+
+            try {
+                const response = await window.api.post('/forum/chat/send', {
+                    peerId: peerId,
+                    content: content,
+                    msgType: 1
+                });
+
+                if (response.code === 0) {
+                    // If this was a new chat (id=0), update it
+                    if (this.activeChat.id === 0) {
+                        this.activeChat.id = response.result.convId;
+                        // Also might need to refresh conversation list or add to it if it wasn't there
+                        // But we already added it to `conversations` array in `startChat`
+                    }
+
+                    this.activeChat.messages.push({
+                        id: Date.now(),
+                        text: content,
+                        time: 'Just now',
+                        isMe: true
+                    });
+                    this.activeChat.lastMessage = content;
+                    this.activeChat.time = 'Just now';
+                    this.newMessage = '';
+
+                    this.$nextTick(() => {
+                        const container = document.getElementById('chat-messages');
+                        if(container) container.scrollTop = container.scrollHeight;
+                    });
+                } else {
+                     alert(response.msg || "Failed to send message");
+                }
+            } catch (e) {
+                console.error("Failed to send message", e);
+                alert("Failed to send message");
+            }
+        },
+
+        async deleteChat() {
+            if (!this.activeChat || !this.activeChat.id) return;
+            if (!confirm("确认删除该对话吗？")) return;
+
+            try {
+                const response = await window.api.post('/forum/chat/delete', {
+                    convId: this.activeChat.id
+                });
+                if (response.code === 0) {
+                    // Remove from list
+                    this.conversations = this.conversations.filter(c => c.id !== this.activeChat.id);
+                    this.activeChat = null;
+                } else {
+                    alert(response.msg || "Failed to delete chat");
+                }
+            } catch (e) {
+                console.error("Failed to delete chat", e);
+                alert("Failed to delete chat");
+            }
+        },
+
+        handleEnter(e) {
+            if (!e.shiftKey) {
+                this.sendMessage();
+            }
+        },
+
+        startChat(user) {
+            // Check if chat already exists
+            const existing = this.conversations.find(c => c.peerId === user.id);
+            if (existing) {
+                this.selectChat(existing);
+            } else {
+                // Create new chat object
+                const newChat = {
+                    id: 0, // No convId yet
+                    peerId: user.id,
+                    name: user.name,
+                    avatar: user.avatar,
+                    online: false,
+                    time: '',
+                    lastMessage: '',
+                    unread: false,
+                    messages: []
+                };
+                this.conversations.unshift(newChat);
+                this.selectChat(newChat);
+            }
+            this.showNewMessageModal = false;
+        }
+    }
+}
+</script>
+{{end}}

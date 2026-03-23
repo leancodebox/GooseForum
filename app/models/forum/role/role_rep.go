@@ -17,9 +17,9 @@ func save(entity *Entity) error {
 func SaveOrCreateById(entity *Entity) error {
 	if entity.Id == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {

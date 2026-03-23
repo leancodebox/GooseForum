@@ -1,8 +1,8 @@
 package rolePermissionRs
 
 import (
-	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/samber/lo"
 )
 
 func create(entity *Entity) int64 {
@@ -18,9 +18,9 @@ func save(entity *Entity) int64 {
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {
@@ -57,21 +57,18 @@ func GetRsByRoleIds(roleIds []uint64) (entities []*Entity) {
 }
 
 func GetPermissionIdsByRoleIds(roleIds []uint64) (permissionIds []uint64) {
-	return array.Map(GetRsByRoleIds(roleIds), func(t *Entity) uint64 {
+	return lo.Map(GetRsByRoleIds(roleIds), func(t *Entity, _ int) uint64 {
 		return t.PermissionId
 	})
 }
 
-func GetRsGroupByRoleIds(roleIds []uint64) (result map[uint64][]uint64) {
+func GetRsGroupByRoleIds(roleIds []uint64) map[uint64][]uint64 {
 	entityList := GetRsByRoleIds(roleIds)
-	result = make(map[uint64][]uint64)
-	for _, entity := range entityList {
-		pIds, ok := result[entity.RoleId]
-		if ok {
-			result[entity.RoleId] = append(pIds, entity.PermissionId)
-		} else {
-			result[entity.RoleId] = []uint64{entity.PermissionId}
-		}
-	}
-	return
+	return lo.MapValues(lo.GroupBy(entityList, func(e *Entity) uint64 {
+		return e.RoleId
+	}), func(items []*Entity, _ uint64) []uint64 {
+		return lo.Map(items, func(e *Entity, _ int) uint64 {
+			return e.PermissionId
+		})
+	})
 }

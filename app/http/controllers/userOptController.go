@@ -48,6 +48,15 @@ func ActivateAccount(c *gin.Context) {
 	renderActivationPage(c, true, "账号激活成功")
 }
 
+// ActivateAccountData 激活页面数据
+type ActivateAccountData struct {
+	Title       string
+	Status      string
+	Message     string
+	Success     bool
+	Description string
+}
+
 // 添加新的辅助函数
 func renderActivationPage(c *gin.Context, success bool, message string) {
 	status := "失败"
@@ -56,16 +65,18 @@ func renderActivationPage(c *gin.Context, success bool, message string) {
 		status = "成功"
 		description = "您的账号已成功激活！现在您可以使用完整的论坛功能，包括发帖、回复、个人中心等服务。"
 	}
-	viewrender.Render(c, "activate.gohtml", map[string]any{
-		"Title":       fmt.Sprintf("账号激活%v", status),
-		"Status":      status,
-		"Message":     message,
-		"Success":     success,
-		"Description": description,
-		"PageMeta": viewrender.NewPageMetaBuilder().
-			SetTitle(fmt.Sprintf("账号激活%v", status)).
-			SetDescription(description).
-			SetCanonicalURL(component.BuildCanonicalHref(c)).
-			Build(),
-	})
+
+	pageMeta := viewrender.NewPageMetaBuilder().
+		SetTitle(fmt.Sprintf("账号激活%v", status)).
+		SetDescription(description).
+		SetCanonicalURL(component.BuildCanonicalHref(c)).
+		Build()
+
+	viewrender.SafeRender(c, "activate.gohtml", ActivateAccountData{
+		Title:       fmt.Sprintf("账号激活%v", status),
+		Status:      status,
+		Message:     message,
+		Success:     success,
+		Description: description,
+	}, pageMeta)
 }

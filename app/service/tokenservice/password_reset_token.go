@@ -29,7 +29,7 @@ func GeneratePasswordResetToken(userId uint64, email string) (string, error) {
 }
 
 func ParsePasswordResetToken(tokenString string) (*PasswordResetClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &PasswordResetClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &PasswordResetClaims{}, func(token *jwt.Token) (any, error) {
 		return []byte(preferences.Get("jwtopt.key")), nil
 	})
 

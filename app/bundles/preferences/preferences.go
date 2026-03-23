@@ -145,6 +145,6 @@ func GetIntSlice(path string) []int {
 	return v.GetIntSlice(path)
 }
 
-func All() map[string]interface{} {
+func All() map[string]any {
 	return v.AllSettings()
 }

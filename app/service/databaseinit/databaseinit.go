@@ -31,8 +31,8 @@ func DBInit() {
 	}
 	defer db.Close()
 
-	sqlItem := strings.Split(dataAllSql, ";")
-	for _, s := range sqlItem {
+	sqlItem := strings.SplitSeq(dataAllSql, ";")
+	for s := range sqlItem {
 		_, err := db.Exec(s)
 		if err != nil {
 			fmt.Println(s)

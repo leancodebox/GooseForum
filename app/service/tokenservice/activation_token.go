@@ -34,7 +34,7 @@ func GenerateActivationToken(userId uint64, email string) (string, error) {
 }
 
 func ParseActivationToken(tokenString string) (*ActivationClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &ActivationClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &ActivationClaims{}, func(token *jwt.Token) (any, error) {
 		return []byte(preferences.Get("jwtopt.key")), nil
 	})
 

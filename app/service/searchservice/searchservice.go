@@ -2,9 +2,11 @@ package searchservice
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	"github.com/meilisearch/meilisearch-go"
+	"github.com/samber/lo"
 )
 
 // SearchRequest 搜索请求结构
@@ -30,6 +32,14 @@ type SearchResponse struct {
 // SearchArticles 通过名字和类别搜索文章
 // 直接从Meilisearch搜索结果中返回ID和标题，无需查询数据库
 func SearchArticles(req SearchRequest) (*SearchResponse, error) {
+	// 检查 Meilisearch 是否可用
+	if !meiliconnect.IsAvailable() {
+		return &SearchResponse{
+			Results: []SearchResult{},
+			Total:   0,
+		}, nil
+	}
+
 	// 获取 Meilisearch 客户端
 	client := meiliconnect.GetClient()
 	index := client.Index(Index)
@@ -43,11 +53,10 @@ func SearchArticles(req SearchRequest) (*SearchResponse, error) {
 
 	// 如果指定了分类，添加过滤条件
 	if len(req.Categories) > 0 {
-		filters := make([]string, len(req.Categories))
-		for i, categoryID := range req.Categories {
-			filters[i] = fmt.Sprintf("category = %d", categoryID)
-		}
-		filterStr := fmt.Sprintf("(%s)", joinFilters(filters, " OR "))
+		filters := lo.Map(req.Categories, func(categoryID uint64, _ int) string {
+			return fmt.Sprintf("category = %d", categoryID)
+		})
+		filterStr := fmt.Sprintf("(%s)", strings.Join(filters, " OR "))
 		searchReq.Filter = filterStr
 	}
 
@@ -61,33 +70,14 @@ func SearchArticles(req SearchRequest) (*SearchResponse, error) {
 	}
 
 	// 直接从搜索结果中提取ID和标题
-	results := make([]SearchResult, 0, len(searchResp.Hits))
-	for _, hit := range searchResp.Hits {
+	results := lo.FilterMap(searchResp.Hits, func(hit meilisearch.Hit, _ int) (SearchResult, bool) {
 		itemResult := SearchResult{}
 		hit.Decode(&itemResult)
-		if itemResult.ID > 0 {
-			results = append(results, itemResult)
-		}
-	}
+		return itemResult, itemResult.ID > 0
+	})
 
 	return &SearchResponse{
 		Results: results,
 		Total:   searchResp.EstimatedTotalHits,
 	}, nil
-}
-
-// joinFilters 连接过滤条件
-func joinFilters(filters []string, separator string) string {
-	if len(filters) == 0 {
-		return ""
-	}
-	if len(filters) == 1 {
-		return filters[0]
-	}
-
-	result := filters[0]
-	for i := 1; i < len(filters); i++ {
-		result += separator + filters[i]
-	}
-	return result
 }

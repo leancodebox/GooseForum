@@ -3,6 +3,7 @@ package db4fileconnect
 import (
 	"sync"
 
+	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/sqlconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 
@@ -23,6 +24,11 @@ func Connect() *gorm.DB {
 	once.Do(func() {
 		dbConfig := preferences.GetExclusivePreferences("db.file")
 		dbConnect = sqlconnect.GetConnectByPreferences(dbConfig)
+		// 注册到全局关闭管理器
+		closer.Register(func() error {
+			dbConnect.Close()
+			return nil
+		})
 	})
 	return dbConnect.Connect
 }

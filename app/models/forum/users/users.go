@@ -16,6 +16,9 @@ const tableName = "users"
 // pid
 const pid = "id"
 
+// fieldRoleId
+const fieldRoleId = "role_id"
+
 // fieldUsername
 const fieldUsername = "username"
 
@@ -34,11 +37,21 @@ const fieldMobileAreaCode = "mobile_area_code"
 // fieldMobilePhoneNumber
 const fieldMobilePhoneNumber = "mobile_phone_number"
 
-// fieldStatus 状态：0正常 1冻结
-const fieldStatus = "status"
+// fieldIsFrozen 状态：0正常 1冻结
+const fieldIsFrozen = "is_frozen"
 
-// fieldValidate 是否验证通过: 0未通过/未验证 1 验证通过
-const fieldValidate = "validate"
+// fieldIsActivated 是否验证通过: 0未激活 1 已激活
+const fieldIsActivated = "is_activated"
+
+const (
+	StatusNormal = 0
+	StatusFrozen = 1
+)
+
+const (
+	ActivationPending = 0
+	ActivationSuccess = 1
+)
 
 // fieldPrestige 声望
 const fieldPrestige = "prestige"
@@ -70,9 +83,9 @@ type EntityComplete struct {
 	Id          uint64     `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                      //
 	Username    string     `gorm:"column:username;index;type:varchar(64);not null;default:'';" json:"username"` //
 	Email       string     `gorm:"column:email;index;type:varchar(128);not null;default:'';" json:"email"`      //
-	Password    string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"password"`      //
-	Status      int8       `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`                // 状态：0正常 1冻结
-	Validate    int8       `gorm:"column:validate;type:tinyint;not null;default:0;" json:"validate"`            // 是否验证通过: 0未通过/未验证 1 验证通过
+	Password    string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"-"`             //
+	IsFrozen    int8       `gorm:"column:is_frozen;type:tinyint;not null;default:0;" json:"isFrozen"`           // 状态：0正常 1冻结
+	IsActivated int8       `gorm:"column:is_activated;type:tinyint;not null;default:0;" json:"isActivated"`     // 是否验证通过: 0未激活 1 已激活
 	ActivatedAt *time.Time `gorm:"column:activated_at;type:datetime;" json:"activatedAt"`                       // 激活时间
 
 	// info
@@ -112,7 +125,7 @@ func (itself *EntityComplete) SetPassword(password string) *EntityComplete {
 }
 
 func (itself *EntityComplete) Activate() error {
-	itself.Validate = 1
+	itself.IsActivated = ActivationSuccess
 	activatedAt := time.Now()
 	itself.ActivatedAt = &activatedAt
 	return Save(itself)

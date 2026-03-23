@@ -31,7 +31,7 @@ func SafeGenerateSigningKey(keyLength int) string {
 		fmt.Println("随机数生成失败，使用备用随机数生成器生成随机数")
 		bytes := make([]byte, keyLength)
 		fallbackSource := mRand.New(mRand.NewSource(time.Now().UnixNano()))
-		for i := 0; i < keyLength; i++ {
+		for i := range keyLength {
 			bytes[i] = byte(fallbackSource.Intn(256))
 		}
 		return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(bytes)

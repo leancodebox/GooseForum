@@ -1,11 +1,15 @@
 package controllers
 
 import (
+	"context"
+	"slices"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
+	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 
 	"log/slog"
@@ -15,6 +19,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/validate"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
 func Logout(c *gin.Context) {
@@ -36,9 +41,37 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	// 获取安全设置
+	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
+
+	// 检查是否允许注册
+	if !securityConfig.EnableSignup {
+		c.JSON(200, component.FailData("目前已关闭注册功能"))
+		return
+	}
+
 	// 清理输入数据
 	r.Username = strings.TrimSpace(r.Username)
 	r.Email = strings.TrimSpace(strings.ToLower(r.Email))
+
+	// 检查邮箱域名限制
+	emailParts := strings.Split(r.Email, "@")
+	if len(emailParts) == 2 {
+		domain := emailParts[1]
+		// 检查白名单
+		if len(securityConfig.Restrictions.AllowedDomains) > 0 {
+			allowed := slices.Contains(securityConfig.Restrictions.AllowedDomains, domain)
+			if !allowed {
+				c.JSON(200, component.FailData("该邮箱域名不在允许注册的白名单中"))
+				return
+			}
+		}
+		// 检查黑名单
+		if slices.Contains(securityConfig.Restrictions.BlockedDomains, domain) {
+			c.JSON(200, component.FailData("该邮箱域名已被禁止注册"))
+			return
+		}
+	}
 
 	if !component.ValidateUsername(r.Username) {
 		c.JSON(200, component.FailData("用户名仅允许字母、数字、下划线、连字符，长度6-32"))
@@ -46,7 +79,7 @@ func Register(c *gin.Context) {
 	}
 
 	// 验证密码复杂度
-	if err := component.ValidatePassword(r.Password); err != nil {
+	if err := component.ValidatePassword(r.Password, securityConfig.MinPasswordLength); err != nil {
 		c.JSON(200, component.FailData(err.Error()))
 		return
 	}
@@ -69,7 +102,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	userEntity, err := userservice.CreateUser(r.Username, r.Password, r.Email, true)
+	userEntity, err := userservice.CreateUser(r.Username, r.Password, r.Email, securityConfig.EnableEmailVerification)
 	if userEntity == nil || err != nil {
 		c.JSON(200, component.FailData("注册失败"))
 		return
@@ -78,6 +111,12 @@ func Register(c *gin.Context) {
 	if err = component.SendAEmail4User(userEntity); err != nil {
 		slog.Error("添加邮件任务到队列失败", "error", err)
 	}
+
+	// 发布注册事件
+	eventbus.Publish(context.Background(), &eventhandlers.UserSignUpEvent{
+		UserId:   userEntity.Id,
+		Username: userEntity.Username,
+	})
 
 	if userEntity.Id == 1 {
 		WriteArticles(component.BetterRequest[WriteArticleReq]{
@@ -90,6 +129,14 @@ func Register(c *gin.Context) {
 			},
 			UserId: userEntity.Id,
 		})
+	}
+
+	// 如果开启了邮件验证，不自动登录
+	if securityConfig.EnableEmailVerification {
+		c.JSON(http.StatusOK, component.SuccessData(
+			"注册成功，请前往邮箱验证您的账号",
+		))
+		return
 	}
 
 	// 生成 token
@@ -157,14 +204,21 @@ func Login(c *gin.Context) {
 	}
 
 	// 检查用户状态
-	if userEntity.Status != 0 {
+	if userEntity.IsFrozen == users.StatusFrozen {
 		c.JSON(200, component.FailData("账户已被冻结，请联系管理员"))
+		return
+	}
+
+	// 检查是否通过验证
+	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
+	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
+		c.JSON(200, component.FailData("账户邮箱未验证，请先验证您的邮箱"))
 		return
 	}
 
 	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
 	if err != nil {
-		slog.Error("生成token失败", "userId", userEntity.Id, "error", err)
+		slog.Error("生成 token 失败", "userId", userEntity.Id, "error", err)
 		c.JSON(200, component.FailData("登录异常，请稍后重试"))
 		return
 	}

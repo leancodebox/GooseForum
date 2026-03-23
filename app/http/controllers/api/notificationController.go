@@ -5,6 +5,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/samber/lo"
 )
 
 // QueryNotificationListReq 获取通知列表请求
@@ -19,28 +20,24 @@ func QueryNotificationList(req component.BetterRequest[QueryNotificationListReq]
 	if err != nil {
 		return component.FailResponse("获取通知列表失败")
 	}
-	var userIds []uint64
-	var actorIds []uint64
-	for _, notification := range notifications {
-		if notification.Payload.ActorId != 0 {
-			userIds = append(userIds, notification.Payload.ActorId)
-		}
-		if notification.Payload.ArticleId != 0 {
-			actorIds = append(actorIds, notification.Payload.ArticleId)
-		}
-	}
+	userIds := lo.FilterMap(notifications, func(n *eventNotification.Entity, _ int) (uint64, bool) {
+		return n.Payload.ActorId, n.Payload.ActorId != 0
+	})
+	articleIds := lo.FilterMap(notifications, func(n *eventNotification.Entity, _ int) (uint64, bool) {
+		return n.Payload.ArticleId, n.Payload.ArticleId != 0
+	})
 	userMap := users.GetMapByIds(userIds)
-	articleMap := articles.GetMapByIds(actorIds)
+	articleMap := articles.GetMapByIds(articleIds)
 
 	// 转换数据
-	for _, notification := range notifications {
+	lo.ForEach(notifications, func(notification *eventNotification.Entity, _ int) {
 		if userInfo, ok := userMap[notification.Payload.ActorId]; ok {
 			notification.Payload.ActorName = userInfo.Username
 		}
 		if articleInfo, ok := articleMap[notification.Payload.ArticleId]; ok {
 			notification.Payload.ArticleTitle = articleInfo.Title
 		}
-	}
+	})
 
 	return component.SuccessResponse(component.DataMap{
 		"list": notifications,
@@ -61,28 +58,24 @@ func GetNotificationList(req component.BetterRequest[GetNotificationListReq]) co
 	if err != nil {
 		return component.FailResponse("获取通知列表失败")
 	}
-	var userIds []uint64
-	var actorIds []uint64
-	for _, notification := range notifications {
-		if notification.Payload.ActorId != 0 {
-			userIds = append(userIds, notification.Payload.ActorId)
-		}
-		if notification.Payload.ArticleId != 0 {
-			actorIds = append(actorIds, notification.Payload.ArticleId)
-		}
-	}
+	userIds := lo.FilterMap(notifications, func(n *eventNotification.Entity, _ int) (uint64, bool) {
+		return n.Payload.ActorId, n.Payload.ActorId != 0
+	})
+	articleIds := lo.FilterMap(notifications, func(n *eventNotification.Entity, _ int) (uint64, bool) {
+		return n.Payload.ArticleId, n.Payload.ArticleId != 0
+	})
 	userMap := users.GetMapByIds(userIds)
-	articleMap := articles.GetMapByIds(actorIds)
+	articleMap := articles.GetMapByIds(articleIds)
 
 	// 转换数据
-	for _, notification := range notifications {
+	lo.ForEach(notifications, func(notification *eventNotification.Entity, _ int) {
 		if userInfo, ok := userMap[notification.Payload.ActorId]; ok {
 			notification.Payload.ActorName = userInfo.Username
 		}
 		if articleInfo, ok := articleMap[notification.Payload.ArticleId]; ok {
 			notification.Payload.ArticleTitle = articleInfo.Title
 		}
-	}
+	})
 
 	return component.SuccessResponse(component.DataMap{
 		"list":  notifications,

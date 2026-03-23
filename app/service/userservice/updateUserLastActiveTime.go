@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 )
 
@@ -37,9 +38,10 @@ func GetUserActivityManager() *UserActivityManager {
 			tasks:     make(map[uint64]*UserActivityTask),
 			ticker:    time.NewTicker(5 * time.Second), // 每5秒检查一次
 			closeCh:   make(chan struct{}),
-			requestCh: make(chan uint64, 1000), // 1000缓冲区
+			requestCh: make(chan uint64, 1024), // 1000缓冲区
 		}
 		manager.start()
+		closer.Register(CloseUpdateUserLastActiveTime)
 	})
 	return manager
 }
@@ -187,8 +189,9 @@ func UpdateUserActivity(userID uint64) {
 }
 
 // CloseUpdateUserLastActiveTime 关闭用户活跃时间更新服务
-func CloseUpdateUserLastActiveTime() {
+func CloseUpdateUserLastActiveTime() error {
 	if manager != nil {
 		manager.Close()
 	}
+	return nil
 }

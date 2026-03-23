@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
-	"github.com/leancodebox/GooseForum/resource"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
 
 func GetFileByFileName(c *gin.Context) {
@@ -24,9 +26,7 @@ func GetFileByFileName(c *gin.Context) {
 
 	entity, err := filedata.GetFileByName(filename)
 	if err != nil {
-		c.Header("Content-Disposition", "inline")
-		c.Data(http.StatusOK, "image/png", resource.GetDefaultAvatar())
-		//c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		c.Redirect(http.StatusFound, urlconfig.GetDefaultAvatar())
 		return
 	}
 	c.Header("Content-Disposition", "inline")
@@ -36,6 +36,15 @@ func GetFileByFileName(c *gin.Context) {
 // SaveImgByGinContext 处理图片上传请求
 // 包含文件大小限制、格式验证、内容检查等安全措施
 func SaveImgByGinContext(c *gin.Context) {
+	// 获取发布设置
+	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
+
+	// 检查是否允许附件上传
+	if !postingConfig.UploadControl.AllowAttachments {
+		c.JSON(http.StatusForbidden, component.FailData("目前已关闭附件上传功能"))
+		return
+	}
+
 	// 获取用户ID
 	userId := c.GetUint64(`userId`)
 	if userId == 0 {
@@ -57,16 +66,38 @@ func SaveImgByGinContext(c *gin.Context) {
 	}
 
 	// 预检查文件大小（基于Header中的大小）
-	if file.Size > filedata.MaxFileSize {
-		c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("文件大小超过限制，最大允许%dMB", filedata.MaxFileSize/(1024*1024))))
+	configMaxSize := int64(postingConfig.UploadControl.MaxAttachmentSizeKb) * 1024
+	maxSize := int64(filedata.MaxFileSize)
+	if configMaxSize > 0 && configMaxSize < maxSize {
+		maxSize = configMaxSize
+	}
+
+	if file.Size > maxSize {
+		c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("文件大小超过限制，最大允许%dKB", maxSize/1024)))
 		return
 	}
 
 	// 预检查文件扩展名
-	_, err = filedata.CheckImageType(file.Filename)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, component.FailData("不支持的图片格式，仅支持 JPG、PNG、GIF、WebP、BMP 格式"))
-		return
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowedExts := postingConfig.UploadControl.AuthorizedExtensions
+	if len(allowedExts) > 0 {
+		allowed := false
+		for _, e := range allowedExts {
+			if strings.ToLower(e) == ext {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("不支持的文件格式，允许的格式为: %s", strings.Join(allowedExts, ", "))))
+			return
+		}
+	} else {
+		// 如果没配置，使用默认图片检查
+		if _, err = filedata.CheckImageType(file.Filename); err != nil {
+			c.JSON(http.StatusBadRequest, component.FailData("不支持的图片格式，仅支持 JPG、PNG、GIF、WebP、BMP 格式"))
+			return
+		}
 	}
 
 	// 打开上传的文件
@@ -77,22 +108,30 @@ func SaveImgByGinContext(c *gin.Context) {
 	}
 	defer src.Close()
 
-	// 读取文件内容
-	fileData, err := io.ReadAll(src)
+	// 优化：先读取前 512 字节进行内容校验，避免读取大文件后才发现格式不对
+	header := make([]byte, 512)
+	n, _ := io.ReadFull(src, header)
+	if n > 0 {
+		if !isValidImageContent(header[:n]) {
+			c.JSON(http.StatusBadRequest, component.FailData("文件内容不是有效的图片格式"))
+			return
+		}
+	}
+
+	// 重置读取位置或合并数据
+	// 由于 MultipartFile 的 Open() 返回的是文件句柄，我们需要处理已经读取的 header
+	// 方案：将 header 和剩余部分拼接
+	remainingData, err := io.ReadAll(io.LimitReader(src, maxSize-int64(n)))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, component.FailData("文件内容读取失败"))
 		return
 	}
 
-	// 二次验证文件大小（基于实际读取的数据）
-	if len(fileData) > filedata.MaxFileSize {
-		c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("文件大小超过限制，最大允许%dMB", filedata.MaxFileSize/(1024*1024))))
-		return
-	}
+	fileData := append(header[:n], remainingData...)
 
-	// 验证文件内容是否为有效图片（检查文件头）
-	if !isValidImageContent(fileData) {
-		c.JSON(http.StatusBadRequest, component.FailData("文件内容不是有效的图片格式"))
+	// 二次验证文件大小（基于实际读取的数据）
+	if int64(len(fileData)) > maxSize {
+		c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("文件大小超过限制，最大允许%dKB", maxSize/1024)))
 		return
 	}
 
@@ -106,7 +145,7 @@ func SaveImgByGinContext(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, component.SuccessData(map[string]interface{}{
+	c.JSON(http.StatusOK, component.SuccessData(map[string]any{
 		"url":      entity.GetAccessPath(),
 		"filename": file.Filename,
 		"size":     len(fileData),

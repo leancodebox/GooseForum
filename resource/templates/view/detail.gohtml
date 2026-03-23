@@ -1,0 +1,490 @@
+{{template "baseof.gohtml" .}}
+{{define "main"}}
+<div class="flex gap-2 relative items-start">
+    {{template "sidebar.gohtml" .}}
+
+    <div class="flex-1 min-w-0 py-3 pr-4 sm:pr-6 lg:pr-8 pl-2">
+        <div class="flex flex-col xl:flex-row gap-6" x-data="articleDetailHandler({
+            articleId: {{.Data.Article.Id}},
+            isLiked: {{.Data.ILike}},
+            likeCount: {{.Data.Article.LikeCount}},
+            isBookmarked: {{.Data.IsBookmarked}},
+            isFollowing: {{.Data.IsFollowing}},
+            title: '{{.Data.Article.Title}}'
+        })">
+
+            <!-- Main Thread Content -->
+            <section class="flex-1 min-w-0">
+
+                <!-- Topic Title Header -->
+                <div class="mb-3 px-1">
+                    <h1 x-ref="pageTitle" class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">
+                        {{.Data.Article.Title}}
+                    </h1>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        {{range .Data.ArticleCategory}}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
+                            <span class="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
+                            {{.}}
+                        </span>
+                        {{end}}
+                    </div>
+                </div>
+
+                <!-- Post Stream Container -->
+                <div class="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+
+                    <!-- OP (Original Post) -->
+                    <div class="flex gap-4 sm:gap-6 p-5 sm:p-6 group">
+                        <!-- Left: Avatar -->
+                        <div class="flex-shrink-0 sticky top-[80px] self-start z-10 pt-1">
+                            <a href="/u/{{.Data.Article.UserId}}" class="block relative">
+                                <img src="{{.Data.AvatarUrl}}"
+                                     alt="{{.Data.Username}}"
+                                     class="w-11 h-11 rounded-full object-cover border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                                     @click.prevent.stop="$dispatch('show-user-card', { userId: {{.Data.Article.UserId}}, username: '{{.Data.Username}}', avatarUrl: '{{.Data.AvatarUrl}}', target: $el, event: $event })">
+                                {{if IsOnline .Data.Article.UpdatedAt}}
+                                <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-green-400"></span>
+                                {{end}}
+                            </a>
+                        </div>
+
+                        <!-- Right: Content -->
+                        <div class="flex-1 min-w-0">
+                            <!-- Meta Header -->
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <a href="/u/{{.Data.Article.UserId}}" class="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors">{{.Data.Username}}</a>
+                                    {{if .Data.IsOwnArticle}}
+                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 uppercase tracking-wide">{{call .T "badge_op"}}</span>
+                                    {{end}}
+                                </div>
+                                <div class="text-sm text-gray-400 font-medium" title="{{.Data.Article.CreatedAt}}">
+                                    {{FormatTime .Data.Article.CreatedAt}}
+                                </div>
+                            </div>
+
+                            <!-- Post Body -->
+                            <div class="prose prose-slate max-w-none
+                                prose-headings:font-medium prose-headings:text-gray-900 prose-headings:mb-3 prose-headings:mt-6
+                                prose-h1:font-bold prose-h1:text-3xl
+                                prose-h2:text-2xl prose-h2:border-b prose-h2:border-gray-100
+                                prose-p:my-3 prose-p:leading-7 prose-p:text-gray-600
+                                prose-li:my-1 prose-li:text-gray-600
+                                prose-ul:my-3 prose-ol:my-3
+                                prose-a:text-blue-600 prose-a:no-underline prose-a:px-1 prose-a:py-0.5 prose-a:rounded prose-a:transition-colors prose-a:font-medium
+                                [&_a:hover]:text-blue-700 [&_a:hover]:bg-blue-50
+                                prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-100 prose-pre:text-gray-800 prose-pre:my-4
+                                prose-code:text-pink-600 prose-code:bg-gray-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:font-mono
+                                prose-img:rounded-lg prose-img:my-4 prose-img:shadow-sm">
+                                {{ SafeHTML .Data.Article.RenderedHTML}}
+                            </div>
+
+                            <!-- Post Footer Actions -->
+                            <div class="flex items-center gap-4 mt-6 pt-4 border-t border-gray-50">
+                                <button @click="toggleLike"
+                                        class="flex items-center gap-1.5 text-sm font-medium transition-colors"
+                                        :class="isLiked ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'">
+                                    <svg class="w-4 h-4" :fill="isLiked ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                    </svg>
+                                    <span x-text="likeCount || '{{call .T "btn_like"}}'"></span>
+                                </button>
+
+                                <button @click="toggleBookmark"
+                                        class="flex items-center gap-1.5 text-sm font-medium transition-colors"
+                                        :class="isBookmarked ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'">
+                                    <svg class="w-4 h-4" :fill="isBookmarked ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                                    </svg>
+                                    <span x-text="isBookmarked ? '{{call .T "btn_saved"}}' : '{{call .T "btn_save"}}'"></span>
+                                </button>
+
+                                {{if .Data.IsOwnArticle}}
+                                <a href="/publish?id={{.Data.Article.Id}}" class="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors ml-auto">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                    </svg>
+                                    {{call .T "btn_edit"}}
+                                </a>
+                                {{end}}
+
+                                <button class="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors {{if not .Data.IsOwnArticle}}ml-auto{{end}}">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                                    </svg>
+                                    {{call .T "btn_reply"}}
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Comments Stream -->
+                    {{$ArticleAuthorId := .Data.Article.UserId}}
+
+                    {{range .Data.CommentList}}
+                    <div class="flex gap-4 sm:gap-6 p-5 sm:p-6 border-t border-gray-100 group transition-colors hover:bg-gray-50/50" id="reply_{{.Id}}">
+                        <!-- Left: Avatar -->
+                        <div class="flex-shrink-0 sticky top-[80px] self-start z-10 pt-1">
+                            <a href="/u/{{.UserId}}" class="block relative">
+                                <img src="{{.UserAvatarUrl}}"
+                                     alt="{{.Username}}"
+                                     class="w-11 h-11 rounded-full object-cover border border-gray-100 shadow-sm group-hover:shadow-md transition-all cursor-pointer"
+                                     @click.prevent.stop="$dispatch('show-user-card', { userId: {{.UserId}}, username: '{{.Username}}', avatarUrl: '{{.UserAvatarUrl}}', target: $el, event: $event })">
+                            </a>
+                        </div>
+
+                        <!-- Right: Content -->
+                        <div class="flex-1 min-w-0">
+                            <!-- Meta Header -->
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <a href="/u/{{.UserId}}" class="text-base font-bold text-gray-900 hover:text-blue-600 transition-colors">{{.Username}}</a>
+                                    {{if eq .UserId $ArticleAuthorId}}
+                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 uppercase tracking-wide">{{call $.T "badge_op"}}</span>
+                                    {{end}}
+                                </div>
+                                <div class="text-sm text-gray-400 font-medium">
+                                    {{.CreateTime}}
+                                </div>
+                            </div>
+
+                            <!-- Comment Body -->
+                            <div class="text-gray-800 leading-relaxed space-y-2">
+                                {{if .ReplyToUsername}}
+                                <div class="flex items-center gap-2 mb-2 text-sm text-gray-500 bg-gray-50 w-fit px-2 py-1 rounded">
+                                    <svg class="w-3.5 h-3.5 transform scale-x-[-1]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                                    </svg>
+                                    <span>{{call $.T "replying_to"}} <a href="/u/{{.ReplyToUserId}}" class="font-medium text-gray-700 hover:text-blue-600">@{{.ReplyToUsername}}</a></span>
+                                </div>
+                                {{end}}
+                                <p>{{Nl2br .Content}}</p>
+                            </div>
+
+                            <!-- Comment Actions -->
+                            <div class="flex items-center gap-4 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                    </svg>
+                                    {{call $.T "btn_like"}}
+                                </button>
+                                <button class="flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors" @click="toggleReplyForm({{.Id}})">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                                    </svg>
+                                    {{call $.T "btn_reply"}}
+                                </button>
+                                {{if .IsOwnReply}}
+                                <button class="flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-red-600 transition-colors ml-auto" @click="deleteReply({{.Id}})">
+                                    {{call $.T "btn_delete"}}
+                                </button>
+                                {{end}}
+                            </div>
+
+                            <!-- Inline Reply Form -->
+                            <template x-if="replyForms[{{.Id}}]">
+                                <div class="mt-4 pl-4 border-l-2 border-gray-100" x-transition>
+                                    <textarea class="w-full p-3 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-y min-h-[80px]"
+                                              placeholder="{{call $.T "placeholder_reply"}}"
+                                              x-model="replyContents[{{.Id}}]"></textarea>
+                                    <div class="flex justify-end gap-2 mt-2">
+                                        <button class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-md transition-colors" @click="toggleReplyForm({{.Id}})">{{call $.T "btn_cancel"}}</button>
+                                        <button class="px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none rounded-md shadow-sm transition-colors flex items-center gap-1.5"
+                                                @click="submitComment({{.Id}})"
+                                                :disabled="submitting || !replyContents[{{.Id}}] || !replyContents[{{.Id}}].trim()">
+                                            <svg x-show="submitting && currentReplyId === {{.Id}}" class="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <span>{{call $.T "btn_reply"}}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+
+                        </div>
+                    </div>
+                    {{end}}
+
+                </div>
+
+                <!-- Bottom Reply Area -->
+                <div class="mt-8 bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] p-5 sm:p-6">
+                    {{if .CurrentUserId}}
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0">
+                            <img src="{{.User.AvatarUrl}}" class="w-10 h-10 rounded-full border border-gray-100">
+                        </div>
+                        <div class="flex-1">
+                            <textarea class="w-full p-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-y min-h-[120px]"
+                                      placeholder="{{call .T "placeholder_comment"}}"
+                                      x-model="commentContent"></textarea>
+                            <div class="flex justify-end mt-3">
+                                <button class="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none rounded-lg shadow-lg shadow-blue-200 hover:shadow-blue-300 transition-all active:scale-95 flex items-center gap-2"
+                                        @click="submitComment(0)"
+                                        :disabled="submitting || !commentContent.trim()">
+                                    <svg x-show="submitting && currentReplyId === 0" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>{{call .T "btn_post_reply"}}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {{else}}
+                    <div class="text-center py-8">
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">{{call .T "join_discussion_title"}}</h3>
+                        <p class="text-gray-500 mb-6">{{call .T "join_discussion_desc"}}</p>
+                        <div class="flex items-center justify-center gap-4">
+                            <a href="/login" class="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg shadow-blue-200 transition-all">{{call .T "btn_login"}}</a>
+                            <a href="/login?register=true" class="px-6 py-2.5 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all">{{call .T "btn_signup"}}</a>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+
+
+            </section>
+
+            <!-- Right Sidebar: Topic Info & Timeline -->
+            <aside class="hidden xl:block w-80 flex-shrink-0 self-stretch">
+                <div class="sticky space-y-6"
+                     x-data="{
+                         updateSticky() {
+                             const el = $el;
+                             const viewportHeight = window.innerHeight;
+                             const contentHeight = el.offsetHeight;
+                             // 80px (header) + 40px (bottom gap)
+                             if (contentHeight + 120 < viewportHeight) {
+                                 el.style.top = '80px';
+                             } else {
+                                 el.style.top = `${viewportHeight - contentHeight - 40}px`;
+                             }
+                         }
+                     }"
+                     x-init="
+                         $nextTick(() => updateSticky());
+                         const observer = new ResizeObserver(() => updateSticky());
+                         observer.observe($el);
+                         window.addEventListener('resize', updateSticky);
+                     ">
+                    <!-- Topic Map Widget -->
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
+                        <div class="p-4 border-b border-gray-50 bg-gray-50/50">
+                            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">{{call .T "topic_map_title"}}</h3>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-4">
+
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-500">{{call .T "topic_map_created"}}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{FormatTime .Data.Article.CreatedAt}}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-500">{{call .T "topic_map_last_reply"}}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{FormatTime .Data.Article.UpdatedAt}}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-500">{{call .T "topic_map_replies"}}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{.Data.Article.ReplyCount}}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-500">{{call .T "topic_map_views"}}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{.Data.Article.ViewCount}}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-gray-500">{{call .T "topic_map_participants"}}</span>
+                                    <span class="text-sm font-bold text-gray-900">{{add .Data.Article.ReplyCount 1}}</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 pt-4 border-t border-gray-100">
+                                <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">{{call .T "topic_map_frequent_posters"}}</h4>
+                                <div class="flex -space-x-2 overflow-hidden py-1">
+                                    {{range .Data.Posters}}
+                                        <img class="inline-block h-8 w-8 rounded-full ring-2 ring-white cursor-pointer hover:shadow-md transition-all" 
+                                             src="{{.AvatarUrl}}" alt="{{.Username}}" title="{{.Username}}"
+                                             @click.prevent.stop="$dispatch('show-user-card', { userId: {{.Id}}, username: '{{.Username}}', avatarUrl: '{{.AvatarUrl}}', target: $el, event: $event })">
+                                    {{end}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Suggested Topics -->
+                    {{if .Data.AuthorArticles}}
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
+                        <div class="p-4 border-b border-gray-50 bg-gray-50/50">
+                            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">{{call .T "topic_map_suggested"}}</h3>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            {{range .Data.AuthorArticles}}
+                            <a href="/post/{{.Id}}" class="block p-4 hover:bg-gray-50 transition-colors group">
+                                <h4 class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-1.5 leading-snug">{{.Title}}</h4>
+                                <div class="flex items-center gap-3 text-[10px] text-gray-400 font-medium uppercase tracking-wide">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        {{.ViewCount}}
+                                    </span>
+                                    <span>{{.PubDate}}</span>
+                                </div>
+                            </a>
+                            {{end}}
+                        </div>
+                    </div>
+                    {{end}}
+
+                    <!-- Timeline Widget (Static Mockup) -->
+                    <div class="relative pl-4 border-l-2 border-gray-100 py-2 ml-4">
+                        <div class="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-white"></div>
+                        <div class="space-y-8">
+                            <div class="text-xs text-gray-400 font-medium">{{FormatTime .Data.Article.UpdatedAt}}</div>
+                            <div class="text-xs text-gray-400 font-medium">...</div>
+                            <div class="text-xs text-gray-400 font-medium">{{FormatTime .Data.Article.CreatedAt}}</div>
+                        </div>
+                        <div class="absolute -left-[5px] bottom-0 w-2.5 h-2.5 rounded-full bg-gray-300 ring-4 ring-white"></div>
+                    </div>
+
+                    <!-- Share / Actions -->
+                    <div class="flex flex-col gap-2">
+                         <button class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm">
+                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                             {{call .T "btn_share_topic"}}
+                         </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "script"}}
+<script>
+    function articleDetailHandler(initialData) {
+        return {
+            articleId: initialData.articleId,
+            isLiked: initialData.isLiked,
+            likeCount: initialData.likeCount,
+            isBookmarked: initialData.isBookmarked,
+            isFollowing: initialData.isFollowing,
+            articleTitle: initialData.title,
+            commentContent: '',
+            replyForms: {},
+            replyContents: {},
+            submitting: false,
+            currentReplyId: 0,
+            init() {
+                // Initialize Mermaid
+                if (window.MermaidUtils) {
+                    window.MermaidUtils.renderMermaidDiagrams('.prose');
+                }
+
+                // Header Title Logic
+                this.$dispatch('set-header-title', this.articleTitle);
+
+                // Use $nextTick to ensure DOM is ready
+                this.$nextTick(() => {
+                    const titleEl = document.querySelector('h1.text-2xl'); // Use a more specific selector or ref if possible
+                    if (titleEl) {
+                        const observer = new IntersectionObserver((entries) => {
+                            // If title is NOT intersecting (scrolled out of view), show header title
+                            this.$dispatch('toggle-header-title', !entries[0].isIntersecting);
+                        }, { threshold: 0, rootMargin: '-80px 0px 0px 0px' });
+                        observer.observe(titleEl);
+                    }
+                });
+            },
+
+            async toggleLike() {
+                const action = this.isLiked ? 2 : 1;
+                try {
+                    const response = await window.api.likeArticle(this.articleId, action);
+                    // Standard Result wrapper
+                    this.isLiked = !this.isLiked;
+                    this.likeCount = this.isLiked ? this.likeCount + 1 : this.likeCount - 1;
+                } catch (error) {
+                    console.error('Like failed', error);
+                    window.notification.error('{{call .T "op_failed"}}');
+                }
+            },
+
+            async toggleBookmark() {
+                try {
+                    const response = await window.api.bookmarkArticle(this.articleId, this.isBookmarked ? 2 : 1);
+                    this.isBookmarked = !this.isBookmarked;
+                    if (this.isBookmarked) {
+                        window.notification.success('{{call .T "bookmark_success"}}');
+                    } else {
+                        window.notification.success('{{call .T "bookmark_cancel_success"}}');
+                    }
+                } catch (error) {
+                    console.error('Bookmark failed', error);
+                    window.notification.error('{{call .T "op_failed"}}');
+                }
+            },
+
+            toggleReplyForm(id) {
+                if (this.replyForms[id]) {
+                    this.replyForms[id] = false;
+                } else {
+                    this.replyForms[id] = true;
+                    if (this.replyContents[id] === undefined) {
+                        this.replyContents[id] = '';
+                    }
+                }
+            },
+
+            async submitComment(replyId) {
+                const content = replyId === 0 ? this.commentContent : this.replyContents[replyId];
+                if (!content || !content.trim()) {
+                    window.notification.warning('{{call .T "input_content_required"}}');
+                    return;
+                }
+
+                if (this.submitting) return;
+
+                this.submitting = true;
+                this.currentReplyId = replyId;
+
+                try {
+                    await window.api.submitComment(this.articleId, content, replyId);
+
+                    // Clear content
+                    if (replyId === 0) {
+                        this.commentContent = '';
+                    } else {
+                        this.replyContents[replyId] = '';
+                    }
+
+                    window.notification.success('{{call .T "comment_success"}}');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } catch (error) {
+                    console.error('Comment failed', error);
+                    window.notification.error(error.msg || '{{call .T "op_failed"}}');
+                    this.submitting = false;
+                    this.currentReplyId = 0;
+                }
+            },
+
+            async deleteReply(id) {
+                if (!confirm('{{call .T "confirm_delete_reply"}}')) return;
+                try {
+                    await window.api.deleteReply(id);
+                    window.notification.success('{{call .T "delete_success"}}');
+                    document.getElementById('reply_' + id).remove();
+                } catch (error) {
+                    console.error('Delete reply failed', error);
+                    window.notification.error('{{call .T "delete_failed"}}');
+                }
+            }
+        }
+    }
+</script>
+{{end}}

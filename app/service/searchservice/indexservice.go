@@ -8,6 +8,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/meilisearch/meilisearch-go"
+	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
 
@@ -38,6 +39,11 @@ func convertToSearchDocument(article *articles.Entity) ArticleSearchDocument {
 }
 
 func BuildSingleArticleSearchDocument(article *articles.Entity) (*meilisearch.TaskInfo, error) {
+	// 检查 Meilisearch 是否可用
+	if !meiliconnect.IsAvailable() {
+		return nil, nil
+	}
+
 	// 获取 Meilisearch 客户端
 	client := meiliconnect.GetClient()
 	indexName := Index
@@ -49,19 +55,29 @@ func BuildSingleArticleSearchDocument(article *articles.Entity) (*meilisearch.Ta
 	if article.ArticleStatus == 1 && article.ProcessStatus == 0 {
 		doc := convertToSearchDocument(article)
 		task, err = index.AddDocuments(doc, &pk)
-		slog.Info(fmt.Sprintf("处理文章 ID:%v, TaskUID: %v, Error: %v\n", doc.ID, getTaskUID(task), err))
+		if err != nil {
+			slog.Warn(fmt.Sprintf("Meilisearch 处理文章 ID:%v 失败: %v\n", doc.ID, err))
+			return nil, nil // 内部消化错误，不向外抛出
+		}
+		slog.Info(fmt.Sprintf("处理文章 ID:%v, TaskUID: %v\n", doc.ID, getTaskUID(task)))
 	} else {
 		// 删除不符合条件的文章
 		_, err = index.Delete(cast.ToString(article.Id))
 		if err != nil {
-			slog.Info(fmt.Sprintf("删除文档失败: %v, Error: %v\n", article.Id, err))
+			slog.Warn(fmt.Sprintf("Meilisearch 删除文档失败: %v, Error: %v\n", article.Id, err))
+			return nil, nil // 内部消化错误
 		}
 	}
-	return task, err
+	return task, nil
 }
 
 // BuildMeilisearchIndex 构建Meilisearch索引
 func BuildMeilisearchIndex() (*IndexBuildResult, error) {
+	// 检查 Meilisearch 是否可用
+	if !meiliconnect.IsAvailable() {
+		return nil, fmt.Errorf("Meilisearch 服务不可用，请检查配置或连接状态")
+	}
+
 	fmt.Println("开始构建 Meilisearch 文章索引...")
 
 	// 获取 Meilisearch 客户端
@@ -87,19 +103,12 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 			break
 		}
 		// 转换为搜索文档
-		for _, article := range articleList {
-			if articleStartId < article.Id {
-				articleStartId = article.Id
-			}
-			task, err := BuildSingleArticleSearchDocument(article)
-			fmt.Printf("处理文章 ID:%v, TaskUID: %v, Error: %v\n", article.Id, getTaskUID(task), err)
-			if err != nil {
-				fmt.Printf("更新文档失败: %v %v\n", article.Id, err)
-				failedCount++
-			} else {
-				processedCount++
-			}
-		}
+		lo.ForEach(articleList, func(article *articles.Entity, _ int) {
+			task, _ := BuildSingleArticleSearchDocument(article)
+			fmt.Printf("处理文章 ID:%v, TaskUID: %v\n", article.Id, getTaskUID(task))
+			processedCount++
+		})
+		articleStartId = articleList[len(articleList)-1].Id
 
 		totalBatches++
 		if len(articleList) < limit {
@@ -172,7 +181,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 }
 
 // getTaskUID 安全获取TaskUID
-func getTaskUID(task *meilisearch.TaskInfo) interface{} {
+func getTaskUID(task *meilisearch.TaskInfo) any {
 	if task == nil {
 		return nil
 	}

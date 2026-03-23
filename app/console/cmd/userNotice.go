@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
-	"github.com/leancodebox/GooseForum/app/models/forum/kvstore"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/kvstore"
 	"github.com/spf13/cobra"
 )
 
@@ -126,12 +126,10 @@ func shouldSendNotification(userId uint64) bool {
 
 	lastSendTimeStr, err := kvstore.Get(key)
 	if err != nil {
-		fmt.Printf("  ⚠️ 查询上次发送时间失败: %v\n", err)
-		return true // 如果查询失败，允许发送
-	}
-
-	if lastSendTimeStr == "" {
-		return true // 从未发送过，允许发送
+		if err != kvstore.ErrNotFound {
+			fmt.Printf("  ⚠️ 查询上次发送时间失败: %v\n", err)
+		}
+		return true // 如果查询失败或不存在，允许发送
 	}
 
 	// 解析上次发送时间
@@ -147,7 +145,7 @@ func shouldSendNotification(userId uint64) bool {
 }
 
 // 构建邮件内容
-func buildEmailContent(user *users.EntityComplete, notifications []*eventNotification.Entity) map[string]interface{} {
+func buildEmailContent(user *users.EntityComplete, notifications []*eventNotification.Entity) map[string]any {
 	// 统计不同类型的通知数量
 	notificationStats := make(map[string]int)
 	for _, notification := range notifications {
@@ -155,7 +153,7 @@ func buildEmailContent(user *users.EntityComplete, notifications []*eventNotific
 	}
 
 	// 构建邮件内容
-	emailContent := map[string]interface{}{
+	emailContent := map[string]any{
 		"to":       user.Email,
 		"username": user.Username,
 		"subject":  "GooseForum - 您有新的未读通知",
@@ -168,7 +166,7 @@ func buildEmailContent(user *users.EntityComplete, notifications []*eventNotific
 }
 
 // 打印邮件内容（模拟发送）
-func printEmailContent(user *users.EntityComplete, emailContent map[string]interface{}) {
+func printEmailContent(user *users.EntityComplete, emailContent map[string]any) {
 	fmt.Printf("  ✅ 准备发送邮件通知\n")
 	fmt.Printf("  📧 收件人: %s <%s>\n", emailContent["username"], emailContent["to"])
 	fmt.Printf("  📋 主题: %s\n", emailContent["subject"])

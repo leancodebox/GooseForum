@@ -55,7 +55,7 @@ func NewGormLogger(config *GormLoggerConfig) *GormLogger {
 		logger: config.Logger,
 		config: gormLogger.Config{
 			LogLevel:                  config.LogLevel,
-			IgnoreRecordNotFoundError: config.IgnoreRecordNotFoundError,
+			IgnoreRecordNotFoundError: true, // config.IgnoreRecordNotFoundError,
 			ParameterizedQueries:      config.ParameterizedQueries,
 			Colorful:                  config.Colorful,
 		},

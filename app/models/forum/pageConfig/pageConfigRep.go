@@ -3,6 +3,7 @@ package pageConfig
 import (
 	"errors"
 	"fmt"
+
 	"github.com/spf13/cast"
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
@@ -22,9 +23,9 @@ func save(entity *Entity) int64 {
 func CreateOrSave(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {
@@ -42,18 +43,18 @@ func GetConfigByPageType[T any](pageType string, defaultValue T) T {
 	builder().Where(queryopt.Eq(filedPageType, pageType)).First(&entity)
 	if entity.Id > 0 {
 		return jsonopt.Decode[T](entity.Config)
-	} else {
-		return defaultValue
 	}
+
+	return defaultValue
 }
 func GetConfigByPageTypeE[T any](pageType string, defaultValue T) (T, error) {
 	var entity Entity
 	builder().Where(queryopt.Eq(filedPageType, pageType)).First(&entity)
 	if entity.Id > 0 {
 		return jsonopt.Decode[T](entity.Config), nil
-	} else {
-		return defaultValue, errors.New("no data")
 	}
+
+	return defaultValue, errors.New("no data")
 }
 
 const GooseForumVersion = 0

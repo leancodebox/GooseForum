@@ -28,9 +28,9 @@ func Delete(id uint64) error {
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 // GetByProviderAndUID 根据提供商和UID获取OAuth记录

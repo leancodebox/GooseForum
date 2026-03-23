@@ -8,6 +8,8 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
+	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
+	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
@@ -21,12 +23,43 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
-func GetCaptcha() component.Response {
+func GetCaptcha(req component.BetterRequest[component.Null]) component.Response {
 	captchaId, captchaImg := captchaOpt.GenerateCaptcha()
 	return component.SuccessResponse(map[string]any{
 		"captchaId":  captchaId,
 		"captchaImg": captchaImg,
 	})
+}
+
+type GetUserCardReq struct {
+	UserId uint64 `form:"userId" json:"userId" binding:"required"`
+}
+
+func GetUserCard(req component.BetterRequest[GetUserCardReq]) component.Response {
+	userId := req.Params.UserId
+	userEntity, err := users.Get(userId)
+	if err != nil || userEntity.Id == 0 {
+		return component.FailResponse("User not found")
+	}
+
+	userStats := userStatistics.Get(userId)
+
+	// 获取当前登录用户信息
+	currentUserId := req.UserId
+
+	// 检查当前用户是否关注了列表中的用户
+	var isFollowingAuthor bool
+
+	if currentUserId > 0 && currentUserId != userId {
+		isFollowingAuthor = userFollow.IsFollowing(currentUserId, userId)
+	}
+	// Since this is a public API without mandatory auth, we assume currentUserId is 0 (guest)
+	// If we want to support isFollowing, we would need to check the token optionally.
+	// For now, we return the card as seen by a guest.
+
+	card := transform.User2UserCard(userEntity, userStats, isFollowingAuthor, currentUserId)
+
+	return component.SuccessResponse(card)
 }
 
 // UserInfo 获取登录用户信息
@@ -74,6 +107,9 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 		return component.FailResponse("邮箱已被使用")
 	}
 	userEntity.Email = newEmail
+	// 修改邮箱后需要重新激活
+	userEntity.IsActivated = users.ActivationPending
+	userEntity.ActivatedAt = nil
 
 	err = SaveUser(&userEntity)
 	if err != nil {
@@ -85,6 +121,27 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 	}
 
 	return component.SuccessResponse("更新成功")
+}
+
+type GetUserActivitiesReq struct {
+	UserId uint64 `form:"userId" validate:"required"`
+	LastId uint64 `form:"lastId"`
+	Limit  int    `form:"limit" validate:"max=50"`
+}
+
+// GetUserActivities 获取用户活动记录
+func GetUserActivities(req component.BetterRequest[GetUserActivitiesReq]) component.Response {
+	limit := req.Params.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+
+	activities, err := userActivities.GetUserTimeline(req.Params.UserId, req.Params.LastId, limit)
+	if err != nil {
+		return component.FailResponse("获取活动记录失败")
+	}
+
+	return component.SuccessResponse(activities)
 }
 
 type EditUsernameReq struct {
@@ -175,6 +232,7 @@ func UploadAvatar(c *gin.Context) {
 	// 获取上传的文件
 	file, err := c.FormFile("avatar")
 	if err != nil {
+		slog.Error(err.Error())
 		c.JSON(200, component.FailData("获取上传文件失败"))
 		return
 	}
@@ -225,7 +283,7 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 	if err != nil {
 		return component.FailResponse("获取用户信息失败")
 	}
-	if err = component.ValidatePassword(req.Params.NewPassword); err != nil {
+	if err = component.ValidatePassword(req.Params.NewPassword, hotdataserve.GetSecuritySettingsConfigCache().MinPasswordLength); err != nil {
 		return component.FailResponse(err.Error())
 	}
 	// 验证旧密码
@@ -321,7 +379,8 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 		return component.FailResponse("重置链接无效")
 	}
 
-	if err = component.ValidatePassword(req.Params.NewPassword); err != nil {
+	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
+	if err = component.ValidatePassword(req.Params.NewPassword, securityConfig.MinPasswordLength); err != nil {
 		return component.FailResponse(err.Error())
 	}
 

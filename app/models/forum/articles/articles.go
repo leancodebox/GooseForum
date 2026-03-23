@@ -43,15 +43,16 @@ const fieldUpdatedAt = "updated_at"
 const fieldDeletedAt = "deleted_at"
 
 type Entity struct {
-	Id              uint64         `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                                        //
-	Title           string         `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`                                                              //
-	Content         string         `gorm:"column:content;type:text;" json:"content"`                                                                                      //
-	Description     string         `gorm:"column:description;type:varchar(255);not null;default:'';" json:"description"`                                                  // 文章描述，用于SEO
-	RenderedHTML    string         `gorm:"column:rendered_html;type:text;" json:"renderedHTML"`                                                                           //md 渲染后数据
-	RenderedVersion uint32         `gorm:"column:rendered_version;type:bigint unsigned;not null;default:0;" json:"renderedVersion"`                                       //md 的渲染器版本
-	Type            int8           `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`                                                                      // 文章类型：0 博文，1教程，2问答，3分享
-	CategoryId      []uint64       `gorm:"column:category_id;type:varchar(255);not null;default:'[]';serializer:json" json:"categoryId"`                                  // 分类
-	UserId          uint64         `gorm:"column:user_id;type:bigint unsigned;not null;default:0;index:idx_user_status;" json:"userId"`                                   //
+	Id              uint64         `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                       //
+	Title           string         `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`                             //
+	Content         string         `gorm:"column:content;type:text;" json:"content"`                                                     //
+	Description     string         `gorm:"column:description;type:varchar(255);not null;default:'';" json:"description"`                 // 文章描述，用于SEO
+	RenderedHTML    string         `gorm:"column:rendered_html;type:text;" json:"renderedHTML"`                                          //md 渲染后数据
+	RenderedVersion uint32         `gorm:"column:rendered_version;type:bigint unsigned;not null;default:0;" json:"renderedVersion"`      //md 的渲染器版本
+	Type            int8           `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`                                     // 文章类型：0 博文，1教程，2问答，3分享
+	CategoryId      []uint64       `gorm:"column:category_id;type:varchar(255);not null;default:'[]';serializer:json" json:"categoryId"` // 分类
+	UserId          uint64         `gorm:"column:user_id;type:bigint unsigned;not null;default:0;index:idx_user_status;" json:"userId"`  //
+	Posters         []Poster       `gorm:"column:posters;type:text;serializer:json" json:"posters"`
 	ArticleStatus   int8           `gorm:"column:article_status;type:tinyint;not null;default:0;index:idx_user_status;index:idx_updated_at_status" json:"articleStatus"`  // 文章状态：0 草稿 1 发布
 	ProcessStatus   int8           `gorm:"column:process_status;type:tinyint;not null;default:0;index:idx_user_status;index:idx_updated_at_status;" json:"processStatus"` // 管理状态：0 正常 1 封禁
 	LikeCount       uint64         `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`                                                   // 喜欢数量
@@ -60,6 +61,19 @@ type Entity struct {
 	CreatedAt       time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                                                                  //
 	UpdatedAt       time.Time      `gorm:"column:updated_at;autoUpdateTime;index:idx_updated_at_status,priority:1;" json:"updatedAt"`
 	DeletedAt       gorm.DeletedAt //
+}
+
+type Type int
+
+const (
+	Share Type = iota + 1
+	Help
+)
+
+// Poster 定义单个头像条目的信息
+type Poster struct {
+	UserID      uint64 `json:"user_id"`
+	Description string `json:"description"`
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}
@@ -83,12 +97,13 @@ type SmallEntity struct {
 	Type          int8           `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`                                     // 文章类型：0 博文，1教程，2问答，3分享
 	CategoryId    []uint64       `gorm:"column:category_id;type:varchar(255);not null;default:'[]';serializer:json" json:"categoryId"` // 分类
 	UserId        uint64         `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`                        //
-	ArticleStatus int8           `gorm:"column:article_status;type:tinyint;not null;default:0;" json:"articleStatus"`                  // 文章状态：0 草稿 1 发布
-	ProcessStatus int8           `gorm:"column:process_status;type:tinyint;not null;default:0;" json:"processStatus"`                  // 管理状态：0 正常 1 封禁
-	ViewCount     uint64         `gorm:"column:view_count;type:bigint unsigned;not null;default:0;" json:"viewCount"`                  // 访问数量
-	ReplyCount    uint64         `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"`                // 评论
-	LikeCount     uint64         `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`                  // 被喜欢
-	CreatedAt     time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                                 //
+	Posters       []Poster       `gorm:"column:posters;type:text;serializer:json" json:"posters"`
+	ArticleStatus int8           `gorm:"column:article_status;type:tinyint;not null;default:0;" json:"articleStatus"`   // 文章状态：0 草稿 1 发布
+	ProcessStatus int8           `gorm:"column:process_status;type:tinyint;not null;default:0;" json:"processStatus"`   // 管理状态：0 正常 1 封禁
+	ViewCount     uint64         `gorm:"column:view_count;type:bigint unsigned;not null;default:0;" json:"viewCount"`   // 访问数量
+	ReplyCount    uint64         `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"` // 评论
+	LikeCount     uint64         `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`   // 被喜欢
+	CreatedAt     time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                  //
 	UpdatedAt     time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 	DeletedAt     gorm.DeletedAt //
 }
@@ -115,8 +130,15 @@ func (itself *SmallEntity) PubDate() string {
 	} else if seconds < 604800 { // 7 * 24 * 60 * 60
 		days := seconds / 86400
 		return fmt.Sprintf("%d天前", days)
-	} else {
-		// 超过7天显示具体日期
-		return itself.CreatedAt.Format("2006-01-02")
 	}
+
+	// 超过7天显示具体日期
+	return itself.CreatedAt.Format("2006-01-02")
+}
+
+func (itself *SmallEntity) GetPosters() []Poster {
+	if len(itself.Posters) == 0 {
+		return []Poster{{UserID: itself.UserId}}
+	}
+	return itself.Posters
 }

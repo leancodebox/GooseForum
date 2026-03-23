@@ -17,9 +17,9 @@ func save(entity *Entity) int64 {
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.Id == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {
@@ -52,6 +52,13 @@ func GetArticleLikeByArticleId(articleId uint64) int64 {
 	var count int64
 	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Count(&count)
 	return count
+}
+
+// GetAll 用于全量导出/修复数据，支持分页查询
+func GetAll(offset, limit int) ([]*Entity, error) {
+	var entities []*Entity
+	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
+	return entities, err
 }
 
 //func saveAll(entities []*Entity) int64 {

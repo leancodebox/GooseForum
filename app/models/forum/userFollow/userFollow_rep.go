@@ -18,9 +18,9 @@ func save(entity *Entity) int64 {
 func SaveOrCreateById(entity *Entity) int64 {
 	if entity.UserId == 0 {
 		return create(entity)
-	} else {
-		return save(entity)
 	}
+
+	return save(entity)
 }
 
 func Get(id any) (entity Entity) {
@@ -45,31 +45,40 @@ func GetByUserId(userId, followUserId uint64) (entity Entity) {
 	return
 }
 
-// GetFollowStatusMap 批量获取用户对指定用户列表的关注状态
-func GetFollowStatusMap(userId uint64, targetUserIds []uint64) map[uint64]bool {
-	if len(targetUserIds) == 0 {
-		return make(map[uint64]bool)
+// IsFollowing 判断用户是否关注了某个用户
+func IsFollowing(userId, followUserId uint64) bool {
+	if userId == 0 || followUserId == 0 {
+		return false
 	}
+	var count int64
+	builder().Where(queryopt.Eq(fieldUserId, userId)).
+		Where(queryopt.Eq(fieldFollowUserId, followUserId)).
+		Where(queryopt.Eq(fieldStatus, 1)).
+		Count(&count)
+	return count > 0
+}
 
-	var followEntities []Entity
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.In(fieldFollowUserId, targetUserIds)).Where(queryopt.Eq(fieldStatus, 1)).Find(&followEntities)
+// GetAll 用于全量导出/修复数据，支持分页查询
+func GetAll(offset, limit int) ([]*Entity, error) {
+	var entities []*Entity
+	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
+	return entities, err
+}
 
-	statusMap := make(map[uint64]bool)
-	for _, entity := range followEntities {
-		statusMap[entity.FollowUserId] = true
+// GetAllFollowingIds 获取用户所有关注的用户ID列表
+func GetAllFollowingIds(userId uint64) []uint64 {
+	if userId == 0 {
+		return make([]uint64, 0)
 	}
-
-	return statusMap
+	var followUserIds []uint64
+	builder().Select(fieldFollowUserId).Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Pluck(fieldFollowUserId, &followUserIds)
+	return followUserIds
 }
 
 // GetFollowingList 获取用户关注列表
-func GetFollowingList(userId uint64, page, pageSize int) ([]*users.EntityComplete, int64) {
+func GetFollowingList(userId uint64, page, pageSize int) []*users.EntityComplete {
 	offset := (page - 1) * pageSize
 	var userList []*users.EntityComplete
-	var total int64
-
-	// 获取总数
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&total)
 
 	// 获取关注的用户ID列表
 	var followUserIds []uint64
@@ -80,17 +89,13 @@ func GetFollowingList(userId uint64, page, pageSize int) ([]*users.EntityComplet
 		userList = users.GetByIds(followUserIds)
 	}
 
-	return userList, total
+	return userList
 }
 
 // GetFollowerList 获取用户粉丝列表
-func GetFollowerList(userId uint64, page, pageSize int) ([]*users.EntityComplete, int64) {
+func GetFollowerList(userId uint64, page, pageSize int) []*users.EntityComplete {
 	offset := (page - 1) * pageSize
 	var userList []*users.EntityComplete
-	var total int64
-
-	// 获取总数
-	builder().Where(queryopt.Eq(fieldFollowUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&total)
 
 	// 获取粉丝的用户ID列表
 	var followerUserIds []uint64
@@ -101,5 +106,5 @@ func GetFollowerList(userId uint64, page, pageSize int) ([]*users.EntityComplete
 		userList = users.GetByIds(followerUserIds)
 	}
 
-	return userList, total
+	return userList
 }

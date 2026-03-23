@@ -1,0 +1,7 @@
+{
+  "name": "GooseForum Default Theme",
+  "description": "The default theme for GooseForum",
+  "version": "1.0.0",
+  "ViteDevServerURL": "http://localhost:3009",
+  "manifest": "static/dist/.vite/manifest.json"
+}

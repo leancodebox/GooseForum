@@ -22,7 +22,7 @@ func ApplyAddLink(req component.BetterRequest[ApplyAddLinkReq]) component.Respon
 	entity := applySheet.Entity{
 		UserId: req.UserId,
 		ApplyUserInfo: jsonopt.Encode(map[string]any{
-			"ip": "127.0.0.1",
+			"ip": req.GinContext.ClientIP(),
 		}),
 		Type:    applySheet.ApplyAddLink,
 		Title:   "友情链接申请",

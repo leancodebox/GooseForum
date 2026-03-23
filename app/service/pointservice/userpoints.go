@@ -29,9 +29,7 @@ func (r RewardPointsType) String() string {
 }
 
 func RewardPoints(userId uint64, points int64, reason RewardPointsType) {
-	userPoint := userPoints.Get(userId)
-	userPoint.CurrentPoints += points
-	userPoints.Save(&userPoint)
+	_ = userPoints.Increment(userId, points)
 
 	users.IncrementPrestige(points, userId)
 

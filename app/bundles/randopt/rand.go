@@ -3,6 +3,8 @@ package randopt
 import (
 	"math/rand"
 	"sync/atomic"
+
+	"github.com/samber/lo"
 )
 
 func RandTrue(Molecular int, Denominator int) bool {
@@ -14,11 +16,7 @@ const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 var lettersLen = len(letters)
 
 func RandomString(length int) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = letters[rand.Intn(lettersLen)]
-	}
-	return string(b)
+	return lo.RandomString(length, []rune(letters))
 }
 
 type Counter struct {

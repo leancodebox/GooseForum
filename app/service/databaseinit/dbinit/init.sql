@@ -226,3 +226,19 @@ CREATE TABLE opt_record
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci COMMENT '操作记录表';
+
+CREATE TABLE `user_activities`
+(
+    `id`              bigint unsigned NOT NULL AUTO_INCREMENT,
+    `user_id`         bigint unsigned NOT NULL DEFAULT '0' COMMENT '发起者 ID',
+    `action`          int             NOT NULL DEFAULT '0' COMMENT '行为类型',
+    `subject_type`    varchar(32)     NOT NULL DEFAULT '' COMMENT '目标类型',
+    `subject_id`      bigint unsigned NOT NULL DEFAULT '0' COMMENT '目标 ID',
+    `content_preview` text COMMENT '内容摘要',
+    `created_at`      datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发生时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci COMMENT '用户活动记录表';

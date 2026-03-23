@@ -31,31 +31,16 @@ func (itself *Entity) TableName() string {
 }
 
 const (
-	FriendShipLinks = `friendShipLinks`
-	WebSettings     = `webSettings`
-	FooterLinks     = `footerLinks`
-	SponsorsPage    = `sponsors`
-	SiteSettings    = `siteSettings`
-	EmailSettings   = `emailSetting`
-	Announcement    = `announcement`
-	Version         = `version`
+	FriendShipLinks  = `friendShipLinks`
+	FooterLinks      = `footerLinks`
+	SponsorsPage     = `sponsors`
+	SiteSettings     = `siteSettings`
+	EmailSettings    = `emailSetting`
+	Announcement     = `announcement`
+	SecuritySettings = `securitySettings`
+	PostingSettings  = `postingSettings`
+	Version          = `version`
 )
-
-var PageTypeList = []string{
-	FriendShipLinks,
-	WebSettings,
-	FooterLinks,
-	SponsorsPage,
-	SiteSettings,
-	EmailSettings,
-	Announcement,
-	Version,
-}
-
-type WebSettingsConfig struct {
-	ExternalLinks string `json:"externalLinks,omitempty"`
-	Favicon       string `json:"favicon,omitempty"`
-}
 
 type LinkItem struct {
 	Name    string `json:"name"`
@@ -67,6 +52,8 @@ type LinkItem struct {
 
 type FriendLinksGroup struct {
 	Name  string     `json:"name,omitempty"`
+	Emoji string     `json:"emoji,omitempty"`
+	Color string     `json:"color,omitempty"`
 	Links []LinkItem `json:"links,omitempty"`
 }
 
@@ -124,6 +111,7 @@ type SiteSettingsConfig struct {
 	SiteKeywords    string `json:"siteKeywords"`
 	SiteUrl         string `json:"siteUrl"`
 	SiteEmail       string `json:"siteEmail"`
+	ExternalLinks   string `json:"externalLinks,omitempty"`
 }
 
 // MailSettingsConfig 邮件设置配置
@@ -145,4 +133,38 @@ type AnnouncementConfig struct {
 	Title   string `json:"title"`          // 公告标题
 	Content string `json:"content"`        // 公告内容
 	Link    string `json:"link,omitempty"` // 公告链接
+}
+
+type SecurityAndRegistration struct {
+	EnableSignup            bool `json:"enableSignup"`
+	EnableEmailVerification bool `json:"enableEmailVerification"`
+	MustApproveUsers        bool `json:"mustApproveUsers"`
+	MinPasswordLength       int  `json:"minPasswordLength"`
+	InviteOnly              bool `json:"inviteOnly"`
+	Restrictions            struct {
+		AllowedDomains        []string `json:"allowedDomains"`
+		BlockedDomains        []string `json:"blockedDomains"`
+		MaxRegistrationsPerIp int      `json:"maxRegistrationsPerIp"`
+	} `json:"restrictions"`
+}
+
+type PostingContent struct {
+	TextControl struct {
+		MinPostLength       int  `json:"minPostLength"`
+		MaxPostLength       int  `json:"maxPostLength"`
+		MinTitleLength      int  `json:"minTitleLength"`
+		MaxTitleLength      int  `json:"maxTitleLength"`
+		AllowUppercasePosts bool `json:"allowUppercasePosts"`
+	} `json:"textControl"`
+	UploadControl struct {
+		AllowAttachments      bool     `json:"allowAttachments"`
+		AuthorizedExtensions  []string `json:"authorizedExtensions"`
+		MaxAttachmentSizeKb   int      `json:"maxAttachmentSizeKb"`
+		MaxAttachmentsPerPost int      `json:"maxAttachmentsPerPost"`
+	} `json:"uploadControl"`
+	EditControl struct {
+		EditingGracePeriod      int  `json:"editingGracePeriod"`
+		PostEditTimeLimit       int  `json:"postEditTimeLimit"`
+		AllowUsersToDeletePosts bool `json:"allowUsersToDeletePosts"`
+	} `json:"editControl"`
 }

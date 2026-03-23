@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCollection"
@@ -14,6 +13,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
@@ -43,10 +43,14 @@ func repairUserData() {
 	limit := 333
 	for {
 		userList := users.QueryById(userStartId, limit)
+		if len(userList) == 0 {
+			break
+		}
+		userStartId = lo.MaxBy(userList, func(a *users.EntityComplete, b *users.EntityComplete) bool {
+			return a.Id > b.Id
+		}).Id
+
 		for _, userItem := range userList {
-			if userStartId < userItem.Id {
-				userStartId = userItem.Id
-			}
 			if userItem.AvatarUrl == "" {
 				userItem.AvatarUrl = users.RandAvatarUrl()
 				users.Save(userItem)
@@ -89,11 +93,15 @@ func repairArticleDescriptions() {
 
 	for {
 		articleList := articles.QueryById(articleStartId, limit)
+		if len(articleList) == 0 {
+			break
+		}
+		articleStartId = lo.MaxBy(articleList, func(a *articles.Entity, b *articles.Entity) bool {
+			return a.Id > b.Id
+		}).Id
+
 		for _, article := range articleList {
-			if articleStartId < article.Id {
-				articleStartId = article.Id
-			}
-			cateIds := array.Map(articleCategoryRs.GetByArticleId(article.Id), func(t *articleCategoryRs.Entity) uint64 {
+			cateIds := lo.Map(articleCategoryRs.GetByArticleId(article.Id), func(t *articleCategoryRs.Entity, _ int) uint64 {
 				return t.ArticleCategoryId
 			})
 			article.CategoryId = cateIds

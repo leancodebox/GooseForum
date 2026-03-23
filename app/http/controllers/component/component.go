@@ -50,7 +50,7 @@ type ResultStruct struct {
 	Code   Status `json:"code"`
 }
 
-type DataMap map[string]interface{}
+type DataMap map[string]any
 
 func BuildResponse(code int, data ResultStruct) Response {
 	return Response{code, data}

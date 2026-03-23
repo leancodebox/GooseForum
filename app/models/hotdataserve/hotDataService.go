@@ -82,3 +82,64 @@ func GetAnnouncementConfigCache() pageConfig.AnnouncementConfig {
 	}, time.Second*5)
 	return data
 }
+
+var securitySettingsConfigCache = &datacache.Cache[pageConfig.SecurityAndRegistration]{}
+
+func GetSecuritySettingsConfigCache() pageConfig.SecurityAndRegistration {
+	data, _ := securitySettingsConfigCache.GetOrLoadE("", func() (pageConfig.SecurityAndRegistration, error) {
+		return pageConfig.GetConfigByPageType(pageConfig.SecuritySettings, defaultconfig.GetDefaultSecuritySettingsConfig()), nil
+	}, time.Second*5)
+	return data
+}
+
+var postingSettingsConfigCache = &datacache.Cache[pageConfig.PostingContent]{}
+
+func GetPostingSettingsConfigCache() pageConfig.PostingContent {
+	data, _ := postingSettingsConfigCache.GetOrLoadE("", func() (pageConfig.PostingContent, error) {
+		return pageConfig.GetConfigByPageType(pageConfig.PostingSettings, defaultconfig.GetDefaultPostingSettingsConfig()), nil
+	}, time.Second*5)
+	return data
+}
+
+func ClearSecuritySettingsConfigCache() {
+	securitySettingsConfigCache.Clear()
+}
+
+func ClearPostingSettingsConfigCache() {
+	postingSettingsConfigCache.Clear()
+}
+
+func ClearSiteSettingsConfigCache() {
+	siteSettingsConfigCache.Clear()
+}
+
+func ClearMailSettingsConfigCache() {
+	mailSettingsConfigCache.Clear()
+}
+
+func ClearAnnouncementConfigCache() {
+	announcementConfigCache.Clear()
+}
+
+func ClearFooterConfigCache() {
+	footerConfigCache.Clear()
+}
+
+func ClearSponsorsConfigCache() {
+	sponsorsConfigCache.Clear()
+}
+
+var friendLinksConfigCache = &datacache.Cache[[]pageConfig.FriendLinksGroup]{}
+
+func GetFriendLinksConfigCache() []pageConfig.FriendLinksGroup {
+	data, _ := friendLinksConfigCache.GetOrLoadE("", func() ([]pageConfig.FriendLinksGroup, error) {
+		configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
+		res := jsonopt.Decode[[]pageConfig.FriendLinksGroup](configEntity.Config)
+		return res, nil
+	}, time.Minute)
+	return data
+}
+
+func ClearFriendLinksConfigCache() {
+	friendLinksConfigCache.Clear()
+}

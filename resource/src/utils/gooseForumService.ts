@@ -96,6 +96,13 @@ export function markAllAsRead(): Promise<Result<any>> {
     return axiosInstance.post('/forum/notification/mark-all-read')
 }
 
+// 删除通知
+export function deleteNotification(notificationId: any): Promise<Result<any>> {
+    return axiosInstance.post('/forum/notification/delete', {
+        notificationId: notificationId
+    })
+}
+
 export function uploadAvatar(formData: FormData): Promise<Result<any>> {
     // 直接使用传入的FormData，不再重新创建
     // 确保请求头设置正确
@@ -232,4 +239,101 @@ export function uploadImage(formData: FormData): Promise<Result<any>> {
             'Content-Type': 'multipart/form-data'
         }
     });
+}
+
+// 关注用户
+export function followUser(id: number, action: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/follow-user', {
+        id,
+        action
+    });
+}
+
+// 点赞文章
+export function likeArticle(id: number, action: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/like-articles', {
+        id,
+        action
+    });
+}
+
+// 收藏文章
+export function bookmarkArticle(id: number, action: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/bookmark-article', {
+        id,
+        action
+    });
+}
+
+// 提交评论/回复
+export function submitComment(articleId: number, content: string, replyId: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/articles-reply', {
+        articleId,
+        content,
+        replyId
+    });
+}
+
+// 删除评论
+export function deleteComment(replyId: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/articles-reply-delete', {
+        replyId
+    });
+}
+
+// 删除文章
+export function deleteArticle(id: number): Promise<Result<any>> {
+    return axiosInstance.post('/forum/article-delete', {
+        id
+    });
+}
+
+// 申请友情链接
+export function applyLinkAdd(
+    siteName: string,
+    siteDesc: string,
+    siteLogo: string,
+    siteUrl: string,
+    email: string,
+    contact: string
+): Promise<Result<any>> {
+    return axiosInstance.post('/forum/apply-link-add', {
+        siteName,
+        siteDesc,
+        siteLogo,
+        siteUrl,
+        email,
+        contact
+    });
+}
+
+// 退出登录
+export function logout(): Promise<any> {
+    return axiosInstance.post('/logout');
+}
+
+// 获取最新未读消息
+export function getLastUnreadNotification(): Promise<Result<any>> {
+    return axiosInstance.get('/forum/notification/last-unread');
+}
+
+// 加载分页数据（用于无限滚动等）
+export function fetchNextPage(url: string): Promise<any> {
+    return axiosInstance.get(url, {
+        baseURL: '', // 覆盖默认的 /api，因为这里传入的是完整路径（如 /c/Coding/4?page=2）
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    });
+}
+
+// 通用 POST 请求
+export function post(url: string, data?: any, config?: any): Promise<any> {
+    return axiosInstance.post(url, data, config);
+}
+
+// 通用 GET 请求
+export function get(url: string, config?: any): Promise<any> {
+    return axiosInstance.get(url, config);
 }

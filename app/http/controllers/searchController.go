@@ -5,12 +5,12 @@ import (
 	"math"
 	"time"
 
-	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
+	"github.com/samber/lo"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -64,7 +64,7 @@ func SearchArticles(req component.BetterRequest[SearchArticlesRequest]) componen
 	}
 
 	// 构建响应数据
-	responseData := map[string]interface{}{
+	responseData := map[string]any{
 		"results":  result.Results,
 		"total":    result.Total,
 		"page":     req.Params.Page,
@@ -79,17 +79,17 @@ func SearchArticles(req component.BetterRequest[SearchArticlesRequest]) componen
 	return component.SuccessResponse(responseData)
 }
 
-// SearchPage 搜索页面
+// SearchPage 搜索页面 V3
 func SearchPage(c *gin.Context) {
 	query := c.Query("q")
 	page := cast.ToInt(c.DefaultQuery("page", "1"))
 	pageSize := 10 // 页面显示固定每页10条
 
 	// 构建模板数据
-	templateData := map[string]any{
-		"Query":       query,
-		"CurrentPage": page,
-		"ShowSearch":  true, // 控制导航栏搜索框显示
+	data := SearchData{
+		CommonDataVo: GetCommonData(c),
+		Query:        query,
+		CurrentPage:  page,
 	}
 
 	// 如果有搜索关键词，执行搜索
@@ -107,18 +107,23 @@ func SearchPage(c *gin.Context) {
 		// 执行搜索
 		result, err := searchservice.SearchArticles(searchReq)
 		if err == nil {
-			templateData["SearchResponse"] = result
-			ids := array.Map(result.Results, func(t searchservice.SearchResult) uint64 {
+			data.SearchResponse = result
+			ids := lo.Map(result.Results, func(t searchservice.SearchResult, _ int) uint64 {
 				return t.ID
 			})
 			articleEntityList := articles.GetByIds(ids)
-			userIds := array.Map(articleEntityList, func(t *articles.SmallEntity) uint64 {
-				return t.UserId
+			// 收集所有需要查询的用户ID (作者 + 回复者)
+			userIds := lo.FlatMap(articleEntityList, func(t *articles.SmallEntity, _ int) []uint64 {
+				return append([]uint64{t.UserId}, lo.Map(t.GetPosters(), func(p articles.Poster, _ int) uint64 {
+					return p.UserID
+				})...)
 			})
+			userIds = lo.Uniq(userIds)
+
 			userMap := users.GetMapByIds(userIds)
 			categoryMap := hotdataserve.ArticleCategoryMap()
-			articleList := array.Map(articleEntityList, func(t *articles.SmallEntity) vo.ArticlesSimpleDto {
-				categoryNames := array.Map(t.CategoryId, func(item uint64) string {
+			articleList := lo.Map(articleEntityList, func(t *articles.SmallEntity, _ int) *vo.ArticlesSimpleVo {
+				categoryNames := lo.Map(t.CategoryId, func(item uint64, _ int) string {
 					if category, ok := categoryMap[item]; ok {
 						return category.Category
 					}
@@ -130,9 +135,23 @@ func SearchPage(c *gin.Context) {
 					username = user.Username
 					avatarUrl = user.GetWebAvatarUrl()
 				}
-				return vo.ArticlesSimpleDto{
+
+				// 构建 Posters 列表
+				posters := lo.FilterMap(t.GetPosters(), func(p articles.Poster, _ int) (vo.PosterVo, bool) {
+					if u, ok := userMap[p.UserID]; ok {
+						return vo.PosterVo{
+							Id:        u.Id,
+							Username:  u.Username,
+							AvatarUrl: u.GetWebAvatarUrl(),
+						}, true
+					}
+					return vo.PosterVo{}, false
+				})
+
+				return &vo.ArticlesSimpleVo{
 					Id:             t.Id,
 					Title:          t.Title,
+					Description:    t.Description,
 					LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
 					Username:       username,
 					AuthorId:       t.UserId,
@@ -143,30 +162,24 @@ func SearchPage(c *gin.Context) {
 					CategoriesId:   t.CategoryId,
 					Type:           t.Type,
 					TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
+					Posters:        posters,
 				}
 			})
 
-			templateData["ArticleList"] = articleList
+			data.ArticleList = articleList
 			// 计算分页信息
 			totalPages := int(math.Ceil(float64(result.Total) / float64(pageSize)))
-			templateData["TotalPages"] = totalPages
+			data.TotalPages = totalPages
 			// 生成页码列表（显示当前页前后2页）
-			var pageNumbers []int
-			start := max(page-2, 1)
-			end := min(page+2, totalPages)
-			for i := start; i <= end; i++ {
-				pageNumbers = append(pageNumbers, i)
-			}
-			templateData["PageNumbers"] = pageNumbers
+			data.PageNumbers = lo.RangeFrom(max(page-2, 1), min(page+2, totalPages)-max(page-2, 1)+1)
 		}
 	}
 
-	templateData["PageMeta"] = viewrender.NewPageMetaBuilder().
-		SetTitle(fmt.Sprintf("%v 的搜索结果", query)).
+	pageMeta := viewrender.NewPageMetaBuilder().
+		SetTitle(fmt.Sprintf("%v - Search Results - GooseForum", query)).
 		SetCanonicalURL(component.BuildCanonicalHref(c)).
 		Build()
+
 	// 渲染模板
-	viewrender.Render(c, "search.gohtml",
-		templateData,
-	)
+	viewrender.SafeRender(c, "search.gohtml", data, pageMeta)
 }

@@ -14,6 +14,20 @@ func Get(id any) (entity Entity) {
 	return
 }
 
+// GetAll 用于全量导出/修复数据，支持分页查询
+func GetAll(offset, limit int) ([]*Entity, error) {
+	var entities []*Entity
+	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
+	return entities, err
+}
+
+// GetCountGroupByDay 按天统计回复数
+func GetCountGroupByDay() ([]map[string]any, error) {
+	var results []map[string]any
+	err := builder().Select("DATE(created_at) as date, count(*) as count").Group("date").Order("date ASC").Find(&results).Error
+	return results, err
+}
+
 func GetCount() int64 {
 	var count int64
 	builder().Count(&count)
@@ -56,8 +70,13 @@ func GetByArticleId(articleId uint64) (entities []*Entity) {
 	return
 }
 
+func GetAllByArticleId(articleId uint64) (entities []*Entity) {
+	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Find(&entities)
+	return
+}
+
 func GetUserCount(userId uint64) int64 {
 	var count int64
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Count(&count)
+	builder().Where(queryopt.Eq(fieldUserId, userId)).Where("deleted_at IS NULL").Count(&count)
 	return count
 }

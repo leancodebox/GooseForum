@@ -18,14 +18,26 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		user, err := users.Get(userId)
-		if err != nil {
-			c.JSON(http.StatusForbidden, component.FailData("操作异常"))
-			c.Abort()
-			return
+
+		var roleId uint64
+		// 尝试从 Context 获取 RoleId
+		if val, exists := c.Get("roleId"); exists {
+			roleId = val.(uint64)
 		}
-		if permission.CheckRole(user.RoleId, permissionType) == false {
-			msg := fmt.Sprintf("%s-不可操作-%s", user.Username, permissionType.Name())
+
+		// 如果 roleId 为 0，回退到查库
+		if roleId == 0 {
+			var err error
+			roleId, err = users.GetRoleId(userId)
+			if err != nil {
+				c.JSON(http.StatusForbidden, component.FailData("操作异常"))
+				c.Abort()
+				return
+			}
+		}
+
+		if permission.CheckRole(roleId, permissionType) == false {
+			msg := fmt.Sprintf("User(%d)-不可操作-%s", userId, permissionType.Name())
 			c.JSON(http.StatusForbidden, component.FailData(msg))
 			c.Abort()
 			return
@@ -40,13 +52,23 @@ func CheckPermissionOrNoUser(permissionType permission.Enum) gin.HandlerFunc {
 		if userId == 0 {
 			return
 		}
-		user, err := users.Get(userId)
-		if err != nil {
-			c.JSON(http.StatusForbidden, component.FailData("操作异常"))
-			c.Abort()
-			return
+
+		var roleId uint64
+		if val, exists := c.Get("roleId"); exists {
+			roleId = val.(uint64)
 		}
-		if permission.CheckRole(user.RoleId, permissionType) == false {
+
+		if roleId == 0 {
+			var err error
+			roleId, err = users.GetRoleId(userId)
+			if err != nil {
+				c.JSON(http.StatusForbidden, component.FailData("操作异常"))
+				c.Abort()
+				return
+			}
+		}
+
+		if permission.CheckRole(roleId, permissionType) == false {
 			c.Redirect(http.StatusFound, "/")
 			c.Abort()
 			return

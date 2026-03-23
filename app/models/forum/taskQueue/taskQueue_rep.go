@@ -25,7 +25,7 @@ func GetPendingTasks(limit int) (tasks []*Entity) {
 
 // UpdateStatus 更新任务状态
 func UpdateStatus(id uint64, status uint8, err error) error {
-	updates := map[string]interface{}{
+	updates := map[string]any{
 		"status":       status,
 		"processed_at": time.Now(),
 	}

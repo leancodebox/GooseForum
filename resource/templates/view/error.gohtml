@@ -1,0 +1,33 @@
+{{template "baseof.gohtml" .}}
+{{define "main"}}
+<div class="min-h-[70vh] flex items-center justify-center p-4">
+    <div class="text-center max-w-lg">
+        <div class="mb-8 relative inline-block">
+             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
+             <h1 class="relative text-9xl font-black text-gray-900/5 select-none">{{.Data.ErrorCode}}</h1>
+             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <svg class="w-24 h-24 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+             </div>
+        </div>
+        
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">{{.Data.Title}}</h2>
+        <p class="text-gray-500 mb-8 text-lg">{{.Data.Message}}</p>
+        
+        <div class="flex items-center justify-center gap-4">
+            <a href="/" class="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                {{call .T "back_home"}}
+            </a>
+            <button onclick="history.back()" class="px-6 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+                {{call .T "back_page"}}
+            </button>
+        </div>
+        
+        <div class="mt-12 text-xs text-gray-400 font-mono">
+            {{call .T "error_request_id"}}: {{.Data.RequestId}}<br>
+            {{call .T "error_time"}}: {{.Data.Timestamp}}
+        </div>
+    </div>
+</div>
+{{end}}

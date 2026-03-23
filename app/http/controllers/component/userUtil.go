@@ -23,9 +23,12 @@ func ValidateUsername(username string) bool {
 }
 
 // ValidatePassword 验证密码复杂度
-func ValidatePassword(password string) error {
-	if len(password) < 8 {
-		return fmt.Errorf("密码长度不能少于8位")
+func ValidatePassword(password string, minLength int) error {
+	if minLength <= 0 {
+		minLength = 8
+	}
+	if len(password) < minLength {
+		return fmt.Errorf("密码长度不能少于%d位", minLength)
 	}
 	if len(password) > 64 {
 		return fmt.Errorf("密码长度不能超过64位")

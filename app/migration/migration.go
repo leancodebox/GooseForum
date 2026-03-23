@@ -9,10 +9,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
-	"github.com/leancodebox/GooseForum/app/models/docs/docContents"
-	"github.com/leancodebox/GooseForum/app/models/docs/docOperationLogs"
-	"github.com/leancodebox/GooseForum/app/models/docs/docProjects"
-	"github.com/leancodebox/GooseForum/app/models/docs/docVersions"
+	"github.com/leancodebox/GooseForum/app/models/chat/imConversations"
+	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
+	"github.com/leancodebox/GooseForum/app/models/chat/messages"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/applySheet"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
@@ -21,8 +20,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCollection"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/articlesUserStat"
+	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
-	"github.com/leancodebox/GooseForum/app/models/forum/kvstore"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
@@ -30,6 +30,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
+	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
@@ -53,32 +54,33 @@ func migration(migration bool) {
 
 	db := dbconnect.Connect()
 	if err = db.AutoMigrate(
+		&applySheet.Entity{},
+		&articleBookmark.Entity{},
 		&articleCategory.Entity{},
 		&articleCategoryRs.Entity{},
+		&articleCollection.Entity{},
+		&articleLike.Entity{},
 		&articles.Entity{},
+		&articlesUserStat.Entity{},
 		&eventNotification.Entity{},
-		&userUnreadCounts.Entity{},
 		&optRecord.Entity{},
+		&pageConfig.Entity{},
 		&pointsRecord.Entity{},
 		&reply.Entity{},
 		&role.Entity{},
 		&rolePermissionRs.Entity{},
-		&userFollow.Entity{},
-		&userPoints.Entity{},
-		&userOAuth.Entity{},
-		&users.EntityComplete{},
 		&taskQueue.Entity{},
-		&articleLike.Entity{},
-		&articleBookmark.Entity{},
-		&applySheet.Entity{},
-		&pageConfig.Entity{},
+		&userFollow.Entity{},
+		&userOAuth.Entity{},
+		&userPoints.Entity{},
+		&users.EntityComplete{},
 		&userStatistics.Entity{},
-		&articleCollection.Entity{},
-		&kvstore.Entity{},
-		&docProjects.Entity{},
-		&docVersions.Entity{},
-		&docContents.Entity{},
-		&docOperationLogs.Entity{},
+		&userUnreadCounts.Entity{},
+		&imConversations.Entity{},
+		&imUserChatConfigs.Entity{},
+		&messages.Entity{},
+		&dailyStats.Entity{},
+		&userActivities.Entity{},
 	); err != nil {
 		slog.Error("dbconnect migration err", "err", err)
 	} else {

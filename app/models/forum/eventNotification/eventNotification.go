@@ -28,7 +28,7 @@ type NotificationPayload struct {
 	// 评论相关
 	CommentId uint64 `json:"commentId,omitempty"` // 评论ID
 	// 其他元数据
-	Extra Extra `json:"metadata,omitempty"`
+	Extra Extra `json:"metadata"`
 }
 
 type Extra struct {

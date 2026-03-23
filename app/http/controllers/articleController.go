@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
-	array "github.com/leancodebox/GooseForum/app/bundles/collectionopt"
+	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
@@ -13,14 +14,15 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/articlesUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
-	"github.com/leancodebox/GooseForum/app/service/eventnotice"
-	"github.com/leancodebox/GooseForum/app/service/pointservice"
-	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
+	"github.com/samber/lo"
+	"github.com/spf13/cast"
 )
 
 func GetSiteStatistics() component.Response {
@@ -48,7 +50,7 @@ type GetArticlesDetailRequest struct {
 	PageSize     int    `json:"pageSize"`
 }
 
-type ReplyDto struct {
+type ReplyVo struct {
 	Id              uint64 `json:"id"`
 	ArticleId       uint64 `json:"articleId"`
 	UserId          uint64 `json:"userId"`
@@ -59,6 +61,7 @@ type ReplyDto struct {
 	ReplyToId       uint64 `json:"replyToId,omitempty"`
 	ReplyToUsername string `json:"replyToUsername,omitempty"`
 	ReplyToUserId   uint64 `json:"replyToUserId,omitempty"`
+	IsOwnReply      bool   `json:"isOwnReply"`
 }
 
 type WriteArticlesOriginReq struct {
@@ -94,6 +97,17 @@ type WriteArticleReq struct {
 
 // WriteArticles 写文章
 func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Response {
+	// 获取发布设置
+	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
+
+	if len(req.Params.Title) < postingConfig.TextControl.MinTitleLength {
+		return component.FailResponse(fmt.Sprintf("标题长度不能少于%d位", postingConfig.TextControl.MinTitleLength))
+	}
+
+	if len(req.Params.Content) < postingConfig.TextControl.MinPostLength {
+		return component.FailResponse(fmt.Sprintf("正文长度不能少于%d位", postingConfig.TextControl.MinPostLength))
+	}
+
 	if articles.CantWriteNew(req.UserId, 10) {
 		return component.FailResponse("您当天已发布较多，为保证质量，请明天再发布新文章")
 	}
@@ -117,10 +131,9 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	article.RenderedHTML = "" // 用户提交后不用渲染，避免提交时间过长。
 	if article.Id > 0 {
 		articles.Save(&article)
-		categoryIDMap := make(map[uint64]bool)
-		for _, id := range req.Params.CategoryId {
-			categoryIDMap[id] = true
-		}
+		categoryIDMap := lo.SliceToMap(req.Params.CategoryId, func(id uint64) (uint64, bool) {
+			return id, true
+		})
 
 		// 遍历 rsList，更新或删除无效的条目
 		for _, item := range articleCategoryRs.GetByArticleId(article.Id) {
@@ -140,17 +153,34 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 			fmt.Println(*rs)
 			articleCategoryRs.SaveOrCreateById(rs)
 		}
+		eventbus.Publish(context.Background(), &eventhandlers.ArticleUpdatedEvent{Article: &article})
 	} else {
 		articles.Create(&article)
 		userStatistics.WriteArticle(req.UserId)
-		for _, item := range req.Params.CategoryId {
+		lo.ForEach(req.Params.CategoryId, func(item uint64, _ int) {
 			rs := articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: item, Effective: 1}
 			articleCategoryRs.SaveOrCreateById(&rs)
-		}
-		pointservice.RewardPoints(req.UserId, 10, pointservice.RewardPoints4WriteArticles)
+		})
+		eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Article: &article})
 	}
-	searchservice.BuildSingleArticleSearchDocument(&article)
 	return component.SuccessResponse(article.Id)
+}
+
+type DeleteArticleReq struct {
+	Id uint64 `json:"id"`
+}
+
+func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Response {
+	articleEntity := articles.Get(req.Params.Id)
+	if articleEntity.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+	if articleEntity.UserId != req.UserId {
+		return component.FailResponse("不可操作")
+	}
+	articles.Delete(&articleEntity)
+	articleCategoryRs.DisableByArticleId(articleEntity.Id)
+	return component.SuccessResponse(true)
 }
 
 type ArticleReplyId struct {
@@ -160,11 +190,14 @@ type ArticleReplyId struct {
 }
 
 func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Response {
-	if len(strings.TrimSpace(req.Params.Content)) == 0 {
-		return component.FailResponse("评论内容不能为空")
+	// 获取发布设置
+	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
+
+	if len(strings.TrimSpace(req.Params.Content)) < postingConfig.TextControl.MinPostLength {
+		return component.FailResponse(fmt.Sprintf("评论内容长度不能少于%d位", postingConfig.TextControl.MinPostLength))
 	}
 
-	articleEntity := articles.Get(req.Params.ArticleId)
+	articleEntity := articles.GetSimple(req.Params.ArticleId)
 	if articleEntity.Id == 0 {
 		return component.FailResponse("文章不存在")
 	}
@@ -184,26 +217,28 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	if err != nil {
 		return component.FailResponse("评论失败:" + err.Error())
 	}
-	articles.IncrementReply(articleEntity)
 	userStatistics.WriteComment(req.UserId)
-	pointservice.RewardPoints(req.UserId, 2, pointservice.RewardPoints4Reply)
-	if articleEntity.UserId != req.UserId {
-		eventnotice.SendCommentNotification(articleEntity.UserId, articleEntity.Id,
-			TakeUpTo64Chars(req.Params.Content), req.UserId, replyEntity.Id)
-	}
-	return component.SuccessResponse(true)
-}
+	updateArticleStat(articleEntity, req.UserId, false)
 
-// TakeUpTo64Chars 按字符数截取字符串，最多取 64 个字符
-func TakeUpTo64Chars(s string) string {
-	// 将字符串转换为 rune 切片
-	runes := []rune(s)
-	// 如果 rune 切片的长度超过 64 个字符，截取前 64 个字符
-	if len(runes) > 64 {
-		return string(runes[:64])
+	// 获取父评论作者ID
+	var parentReplyAuthorId uint64
+	if req.Params.ReplyId > 0 {
+		parentReply := reply.Get(req.Params.ReplyId)
+		parentReplyAuthorId = parentReply.UserId
 	}
-	// 否则返回整个字符串
-	return s
+
+	// 发布统一的评论创建事件
+	eventbus.Publish(context.Background(), &eventhandlers.CommentCreatedEvent{
+		ArticleId:           articleEntity.Id,
+		CommentId:           replyEntity.Id,
+		UserId:              req.UserId,
+		Content:             req.Params.Content,
+		ArticleAuthorId:     articleEntity.UserId,
+		ParentReplyId:       req.Params.ReplyId,
+		ParentReplyAuthorId: parentReplyAuthorId,
+	})
+
+	return component.SuccessResponse(true)
 }
 
 type DeleteReplyId struct {
@@ -219,7 +254,39 @@ func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response 
 		return component.FailResponse("不可操作")
 	}
 	reply.DeleteEntity(&replyEntity)
+	articleEntity := articles.GetSimple(replyEntity.ArticleId)
+	if articleEntity.Id > 0 {
+		updateArticleStat(articleEntity, req.UserId, true)
+	}
 	return component.SuccessResponse(true)
+}
+
+func updateArticleStat(article articles.SmallEntity, userId uint64, isDelete bool) {
+	if isDelete {
+		articlesUserStat.DecrementUserReply(article.Id, userId)
+	} else {
+		articlesUserStat.IncrementUserReply(article.Id, userId)
+	}
+	list := articlesUserStat.SyncArticlePosters(article.Id)
+
+	// 过滤掉作者ID，避免重复
+	filteredList := lo.Filter(list, func(t uint64, _ int) bool {
+		return t != article.UserId
+	})
+
+	// 将作者ID放到第一位
+	finalList := append([]uint64{article.UserId}, filteredList...)
+
+	pList := lo.Map(finalList, func(t uint64, _ int) articles.Poster {
+		return articles.Poster{
+			UserID: t,
+		}
+	})
+	if isDelete {
+		articles.DecrementReplyFast(article.Id, pList)
+	} else {
+		articles.IncrementReplyFast(article.Id, pList)
+	}
 }
 
 // GetUserArticlesRequest 添加新的请求结构体
@@ -236,22 +303,31 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		UserId:       req.UserId,
 		FilterStatus: true,
 	})
+	authorInfoStatistics := userStatistics.Get(req.UserId)
+	user, _ := req.GetUser()
 	categoryMap := hotdataserve.ArticleCategoryMap()
 	return component.SuccessPage(
-		array.Map(pageData.Data, func(t articles.SmallEntity) vo.ArticlesSimpleDto {
+		lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) vo.ArticlesSimpleVo {
 
-			categoryNames := array.Map(t.CategoryId, func(t uint64) string {
+			categoryNames := lo.Map(t.CategoryId, func(t uint64, _ int) string {
 				if category, ok := categoryMap[t]; ok {
 					return category.Category
 				}
 				return ""
 			})
-			return vo.ArticlesSimpleDto{
+
+			// 获取作者信息（虽然是当前用户，为了前端统一处理，也返回完整信息）
+			username := user.Username
+			avatarUrl := user.GetWebAvatarUrl()
+
+			return vo.ArticlesSimpleVo{
 				Id:             t.Id,
 				Title:          t.Title,
 				CreateTime:     t.CreatedAt.Format(time.DateTime),
 				LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
-				Username:       "", // 这里不需要用户名，因为是自己的文章
+				Username:       username,
+				AuthorId:       t.UserId,
+				AvatarUrl:      avatarUrl,
 				ViewCount:      t.ViewCount,
 				CommentCount:   t.ReplyCount,
 				Categories:     categoryNames,
@@ -260,7 +336,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		}),
 		pageData.Page,
 		pageData.PageSize,
-		pageData.Total,
+		cast.ToInt64(authorInfoStatistics.ArticleCount),
 	)
 }
 
@@ -274,21 +350,21 @@ type GetUserBookmarkedArticlesRequest struct {
 func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArticlesRequest]) component.Response {
 	// 获取收藏的文章ID列表
 	articleIds, total := articleBookmark.GetUserBookmarkedArticleIds(req.UserId, max(req.Params.Page, 1), req.Params.PageSize)
-
 	if len(articleIds) == 0 {
 		return component.SuccessPage(
-			[]vo.ArticlesSimpleDto{},
+			[]vo.ArticlesSimpleVo{},
 			max(req.Params.Page, 1),
 			req.Params.PageSize,
 			total,
 		)
 	}
+	authorInfoStatistics := userStatistics.Get(req.UserId)
 
 	// 根据文章ID获取文章详情
 	articleList := articles.GetByIds(articleIds)
 
 	// 获取作者信息
-	userIds := array.Map(articleList, func(t *articles.SmallEntity) uint64 {
+	userIds := lo.Map(articleList, func(t *articles.SmallEntity, _ int) uint64 {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
@@ -296,8 +372,8 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 	categoryMap := hotdataserve.ArticleCategoryMap()
 
 	// 构建返回数据
-	articleDto := array.Map(articleList, func(t *articles.SmallEntity) vo.ArticlesSimpleDto {
-		categoryNames := array.Map(t.CategoryId, func(item uint64) string {
+	articleVos := lo.Map(articleList, func(t *articles.SmallEntity, _ int) vo.ArticlesSimpleVo {
+		categoryNames := lo.Map(t.CategoryId, func(item uint64, _ int) string {
 			if category, ok := categoryMap[item]; ok {
 				return category.Category
 			}
@@ -305,17 +381,20 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 		})
 
 		username := ""
+		avatarUrl := ""
 		if user, ok := userMap[t.UserId]; ok {
 			username = user.Username
+			avatarUrl = user.GetWebAvatarUrl()
 		}
 
-		return vo.ArticlesSimpleDto{
+		return vo.ArticlesSimpleVo{
 			Id:             t.Id,
 			Title:          t.Title,
 			CreateTime:     t.CreatedAt.Format(time.DateTime),
 			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
 			Username:       username,
 			AuthorId:       t.UserId,
+			AvatarUrl:      avatarUrl,
 			ViewCount:      t.ViewCount,
 			CommentCount:   t.ReplyCount,
 			Categories:     categoryNames,
@@ -324,10 +403,10 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 	})
 
 	return component.SuccessPage(
-		articleDto,
+		articleVos,
 		max(req.Params.Page, 1),
 		req.Params.PageSize,
-		total,
+		cast.ToInt64(authorInfoStatistics.CollectionCount),
 	)
 }
 
@@ -364,6 +443,14 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 			articles.IncrementLike(articleEntity)
 			userStatistics.LikeArticle(articleEntity.UserId)
 			userStatistics.GivenLike(req.UserId)
+
+			// 发送点赞事件
+			eventbus.Publish(context.Background(), &eventhandlers.ArticleLikedEvent{
+				UserId:    articleEntity.UserId,
+				ArticleId: articleEntity.Id,
+				Title:     articleEntity.Title,
+				LikierId:  req.UserId,
+			})
 		} else {
 			articles.DecrementLike(articleEntity)
 			userStatistics.CancelLikeArticle(articleEntity.UserId)
@@ -378,7 +465,7 @@ type BookmarkArticleReq struct {
 	Action int    `json:"action" validate:"min=1,max=2"` // 1 Bookmark 2 cancel
 }
 
-func BookmarkArticle(req component.BetterRequest[LikeArticleReq]) component.Response {
+func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.Response {
 	articleEntity := articles.Get(req.Params.Id)
 	if articleEntity.Id == 0 {
 		return component.FailResponse("文章不存在")
@@ -435,6 +522,14 @@ func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {
 		if req.Params.Action == 1 {
 			userStatistics.Following(req.UserId)
 			userStatistics.Follower(req.Params.Id)
+
+			// 发送关注通知
+			followerUser, _ := req.GetUser()
+			eventbus.Publish(context.Background(), &eventhandlers.UserFollowedEvent{
+				UserId:       req.Params.Id,
+				FollowerId:   req.UserId,
+				FollowerName: followerUser.Username,
+			})
 		} else {
 			userStatistics.CancelFollowing(req.UserId)
 			userStatistics.CancelFollower(req.Params.Id)
