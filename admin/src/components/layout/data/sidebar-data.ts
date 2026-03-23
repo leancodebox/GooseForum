@@ -25,7 +25,6 @@ import {
   Mail,
   PanelBottom,
   Heart,
-  LifeBuoy,
   AudioWaveform,
   Command,
   GalleryVerticalEnd,
