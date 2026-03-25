@@ -10,39 +10,35 @@
 
         <!-- Top Banner / Announcement -->
         {{if .Data.Announcement.Enabled}}
-        <div class="relative overflow-hidden rounded-xl border border-blue-100/60 bg-gradient-to-r from-blue-50/40 via-white to-indigo-50/40 shadow-sm transition-all hover:shadow-md">
-            <!-- Decorative Background Elements (Subtle) -->
-            <div class="absolute top-0 right-0 -mr-8 -mt-8 h-32 w-32 rounded-full bg-blue-500/5 blur-2xl"></div>
-            <div class="absolute bottom-0 left-0 -ml-8 -mb-8 h-24 w-24 rounded-full bg-indigo-500/5 blur-2xl"></div>
-
-            <div class="relative flex items-start gap-4 p-5">
-                <!-- Icon Container -->
-                <div class="flex-shrink-0 relative">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm border border-blue-100">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div class="relative overflow-hidden rounded-lg border border-blue-200 bg-blue-50/80 shadow-sm transition-all group mb-2">
+            <div class="flex items-center gap-3 px-4 py-3">
+                <!-- Icon -->
+                <div class="flex-shrink-0">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-md">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                     </div>
                 </div>
 
                 <!-- Content -->
-                <div class="flex-1 pt-0.5 min-w-0">
-                    <div class="flex items-center justify-between gap-4">
-                        <h3 class="flex items-center gap-2 text-sm font-bold text-gray-900">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
+                            {{call .T "announcement"}}
+                        </span>
+                        <h3 class="text-sm font-bold text-blue-900 truncate">
                             {{.Data.Announcement.Title}}
-                            <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-inset ring-blue-600/10">
-                                {{call .T "announcement"}}
-                            </span>
                         </h3>
                     </div>
-                    <p class="mt-1 text-sm leading-relaxed text-gray-600">
+                    <p class="mt-0.5 text-[13px] text-blue-800/80 line-clamp-1 font-medium">
                         {{.Data.Announcement.Content}}
                     </p>
                 </div>
 
-                <!-- Close/Action Button (Visual) -->
-                <button class="flex-shrink-0 -mt-1 -mr-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-1.5 transition-all" title="Dismiss">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <!-- Close Button -->
+                <button class="flex-shrink-0 text-blue-400 hover:text-blue-600 hover:bg-blue-100 rounded-md p-1 transition-colors" title="Dismiss">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
