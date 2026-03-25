@@ -10,11 +10,11 @@
 
         <!-- Top Banner / Announcement -->
         {{if .Data.Announcement.Enabled}}
-        <div class="relative overflow-hidden rounded-lg border border-blue-200 bg-blue-50/80 shadow-sm transition-all group mb-2">
+        <div class="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50 shadow-sm transition-all group mb-2">
             <div class="flex items-center gap-3 px-4 py-3">
                 <!-- Icon -->
                 <div class="flex-shrink-0">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-md">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 text-white shadow-md">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
@@ -24,20 +24,20 @@
                 <!-- Content -->
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
-                        <span class="inline-flex items-center rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
+                        <span class="inline-flex items-center rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold text-gray-700 uppercase tracking-wider shadow-sm">
                             {{call .T "announcement"}}
                         </span>
-                        <h3 class="text-sm font-bold text-blue-900 truncate">
+                        <h3 class="text-sm font-bold text-gray-900 truncate">
                             {{.Data.Announcement.Title}}
                         </h3>
                     </div>
-                    <p class="mt-0.5 text-[13px] text-blue-800/80 line-clamp-1 font-medium">
+                    <p class="mt-0.5 text-[13px] text-gray-800 line-clamp-1 font-medium">
                         {{.Data.Announcement.Content}}
                     </p>
                 </div>
 
                 <!-- Close Button -->
-                <button class="flex-shrink-0 text-blue-400 hover:text-blue-600 hover:bg-blue-100 rounded-md p-1 transition-colors" title="Dismiss">
+                <button class="flex-shrink-0 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-md p-1 transition-colors" title="Dismiss">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -49,7 +49,7 @@
         <!-- Main Content Card -->
         <div class="bg-white rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden" x-data="categoryList()">
             <!-- Navigation Tabs & Actions -->
-            <div class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
+            <div class="px-5 py-2 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
                 <div class="flex items-center gap-6">
                      <div class="flex items-center gap-1 bg-gray-100/80 p-1 rounded-lg">
                          <a href="/" class="px-4 py-1.5 text-sm font-bold {{if or (eq .Data.Sort "latest") (eq .Data.Sort "")}}bg-white text-gray-900 shadow-sm{{else}}text-gray-500 hover:text-gray-900{{end}} rounded-md transition-all">{{"latest" | call .T}}</a>
@@ -80,7 +80,7 @@
                         {{range .Data.LatestArticles}}
                         <tr class="group transition-all duration-200 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-0.5">
                             <!-- Topic Column -->
-                            <td class="px-4 sm:px-6 py-4 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
+                            <td class="px-4 sm:px-6 py-2 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
                                 <div class="flex items-center gap-3">
                                     <div class="min-w-0 flex-1">
                                         <div class="flex items-center flex-wrap gap-x-3 gap-y-2 mb-1.5">
@@ -116,7 +116,7 @@
                             </td>
 
                             <!-- Users Column (Mocked Stack) -->
-                            <td class="hidden lg:table-cell px-4 py-4 text-center align-middle">
+                            <td class="hidden lg:table-cell px-4 py-2 text-center align-middle">
                                 <div class="flex items-center justify-center -space-x-3">
                                     {{range .Posters}}
                                     <img src="{{.AvatarUrl}}"
@@ -128,21 +128,21 @@
                             </td>
 
                             <!-- Replies Column -->
-                            <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                            <td class="hidden md:table-cell px-4 py-2 text-center align-middle">
                                 <div class="inline-flex items-center justify-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
                                     <span class="text-[15px] font-medium tabular-nums format-number {{if gt .CommentCount 10}}text-orange-500 font-bold{{else}}text-gray-900{{end}}" data-number="{{.CommentCount}}">{{.CommentCount}}</span>
                                 </div>
                             </td>
 
                             <!-- Views Column -->
-                            <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                            <td class="hidden md:table-cell px-4 py-2 text-center align-middle">
                                 <div class="inline-flex items-center justify-center gap-1.5 transition-opacity duration-300">
                                     <span class="text-[15px] font-medium format-number {{if gt .ViewCount 500}}text-orange-400 font-bold{{else}}text-gray-900 opacity-60 group-hover:opacity-100{{end}} tabular-nums" data-number="{{.ViewCount}}">{{.ViewCount}}</span>
                                 </div>
                             </td>
 
                             <!-- Activity Column -->
-                            <td class="hidden sm:table-cell px-6 py-4 text-right align-middle rounded-r-2xl">
+                            <td class="hidden sm:table-cell px-6 py-2 text-right align-middle rounded-r-2xl">
                                 <span class="text-[13px] font-medium text-gray-400/80 whitespace-nowrap time-ago tabular-nums group-hover:text-gray-500 transition-colors" data-time="{{.LastUpdateTime}}">{{.LastUpdateTime}}</span>
                             </td>
                         </tr>
@@ -150,7 +150,7 @@
                         <template x-for="article in articles" :key="article.id">
                             <tr class="group transition-all duration-200 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-0.5">
                                 <!-- Topic Column -->
-                                <td class="px-4 sm:px-6 py-4 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
+                                <td class="px-4 sm:px-6 py-2 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
                                     <div class="flex items-center gap-3">
                                         <div class="min-w-0 flex-1">
                                             <div class="flex items-center flex-wrap gap-x-3 gap-y-2 mb-1.5">
@@ -189,7 +189,7 @@
                                 </td>
 
                                 <!-- Users Column -->
-                                <td class="hidden lg:table-cell px-4 py-4 text-center align-middle">
+                                <td class="hidden lg:table-cell px-4 py-2 text-center align-middle">
                                     <div class="flex items-center justify-center -space-x-3">
                                         <template x-for="poster in article.posters" :key="poster.id">
                                             <img :src="poster.avatarUrl"
@@ -202,21 +202,21 @@
                                 </td>
 
                                 <!-- Replies Column -->
-                                <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                                <td class="hidden md:table-cell px-4 py-2 text-center align-middle">
                                     <div class="inline-flex items-center justify-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
                                         <span class="text-[15px] font-medium tabular-nums" :class="article.commentCount > 10 ? 'text-orange-500 font-bold' : 'text-gray-900'" x-text="formatNum(article.commentCount)"></span>
                                     </div>
                                 </td>
 
                                 <!-- Views Column -->
-                                <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                                <td class="hidden md:table-cell px-4 py-2 text-center align-middle">
                                     <div class="inline-flex items-center justify-center gap-1.5 transition-opacity duration-300">
                                         <span class="text-[15px] font-medium tabular-nums" :class="article.viewCount > 500 ? 'text-orange-400 font-bold' : 'text-gray-900 opacity-60 group-hover:opacity-100'" x-text="formatNum(article.viewCount)"></span>
                                     </div>
                                 </td>
 
                                 <!-- Activity Column -->
-                                <td class="hidden sm:table-cell px-6 py-4 text-right align-middle rounded-r-2xl">
+                                <td class="hidden sm:table-cell px-6 py-2 text-right align-middle rounded-r-2xl">
                                     <span class="text-[13px] font-medium text-gray-400/80 whitespace-nowrap tabular-nums group-hover:text-gray-500 transition-colors" x-text="formatTimeAgo(article.lastUpdateTime)"></span>
                                 </td>
                             </tr>

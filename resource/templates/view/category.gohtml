@@ -33,7 +33,7 @@
         <!-- Main Content Card -->
         <div class="bg-white rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden" x-data="categoryList()">
             <!-- Navigation Tabs & Actions -->
-            <div class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
+            <div class="px-5 py-2 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
                 <div class="flex items-center gap-6">
                      <div class="flex items-center gap-1 bg-gray-100/80 p-1 rounded-lg">
                          <a href="/c/{{.Data.Category.Category}}/{{.Data.Category.Id}}/l/latest"
@@ -69,7 +69,7 @@
                         {{range .Data.Articles}}
                         <tr class="group transition-all duration-200 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-0.5">
                             <!-- Topic Column -->
-                            <td class="px-4 sm:px-6 py-4 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
+                            <td class="px-4 sm:px-6 py-2 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
                                 <div class="flex items-center gap-3">
                                     <div class="min-w-0 flex-1">
                                         <div class="flex items-center flex-wrap gap-x-3 gap-y-2 mb-1.5">
@@ -110,7 +110,7 @@
                             </td>
 
                             <!-- Users Column -->
-                            <td class="hidden lg:table-cell px-4 py-4 text-center align-middle">
+                            <td class="hidden lg:table-cell px-4 py-2 text-center align-middle">
                                 <div class="flex items-center justify-center -space-x-3">
                                     {{range .Posters}}
                                     <img src="{{.AvatarUrl}}"
@@ -123,21 +123,21 @@
                             </td>
 
                             <!-- Replies Column -->
-                            <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                            <td class="hidden md:table-cell px-4 py-2 text-center align-middle">
                                 <div class="inline-flex items-center justify-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
                                     <span class="text-[15px] font-medium tabular-nums format-number {{if gt .CommentCount 10}}text-orange-500 font-bold{{else}}text-gray-900{{end}}" data-number="{{.CommentCount}}">{{.CommentCount}}</span>
                                 </div>
                             </td>
 
                             <!-- Views Column -->
-                            <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                            <td class="hidden md:table-cell px-4 py-2 text-center align-middle">
                                 <div class="inline-flex items-center justify-center gap-1.5 transition-opacity duration-300">
                                     <span class="text-[15px] font-medium format-number {{if gt .ViewCount 500}}text-orange-400 font-bold{{else}}text-gray-900 opacity-60 group-hover:opacity-100{{end}} tabular-nums" data-number="{{.ViewCount}}">{{.ViewCount}}</span>
                                 </div>
                             </td>
 
                             <!-- Activity Column -->
-                            <td class="hidden sm:table-cell px-6 py-4 text-right align-middle rounded-r-2xl">
+                            <td class="hidden sm:table-cell px-6 py-2 text-right align-middle rounded-r-2xl">
                                 <span class="text-[13px] font-medium text-gray-400/80 whitespace-nowrap time-ago tabular-nums group-hover:text-gray-500 transition-colors" data-time="{{.LastUpdateTime}}">{{.LastUpdateTime}}</span>
                             </td>
                         </tr>
@@ -145,7 +145,7 @@
                         <template x-for="article in articles" :key="article.id">
                             <tr class="group transition-all duration-200 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-0.5">
                                 <!-- Topic Column -->
-                                <td class="px-4 sm:px-6 py-4 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
+                                <td class="px-4 sm:px-6 py-2 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
                                     <div class="flex items-center gap-3">
                                         <div class="min-w-0 flex-1">
                                             <div class="flex items-center flex-wrap gap-x-3 gap-y-2 mb-1.5">
@@ -184,7 +184,7 @@
                                 </td>
 
                                 <!-- Users Column -->
-                                <td class="hidden lg:table-cell px-4 py-4 text-center align-middle">
+                                <td class="hidden lg:table-cell px-4 py-2 text-center align-middle">
                                     <div class="flex items-center justify-center -space-x-3">
                                         <template x-for="poster in article.posters" :key="poster.id">
                                             <img :src="poster.avatarUrl"
@@ -197,21 +197,21 @@
                                 </td>
 
                                 <!-- Replies Column -->
-                                <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                                <td class="hidden md:table-cell px-4 py-2 text-center align-middle">
                                     <div class="inline-flex items-center justify-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
                                         <span class="text-[15px] font-medium tabular-nums" :class="article.commentCount > 10 ? 'text-orange-500 font-bold' : 'text-gray-900'" x-text="formatNum(article.commentCount)"></span>
                                     </div>
                                 </td>
 
                                 <!-- Views Column -->
-                                <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
+                                <td class="hidden md:table-cell px-4 py-2 text-center align-middle">
                                     <div class="inline-flex items-center justify-center gap-1.5 transition-opacity duration-300">
                                         <span class="text-[15px] font-medium tabular-nums" :class="article.viewCount > 500 ? 'text-orange-400 font-bold' : 'text-gray-900 opacity-60 group-hover:opacity-100'" x-text="formatNum(article.viewCount)"></span>
                                     </div>
                                 </td>
 
                                 <!-- Activity Column -->
-                                <td class="hidden sm:table-cell px-6 py-4 text-right align-middle rounded-r-2xl">
+                                <td class="hidden sm:table-cell px-6 py-2 text-right align-middle rounded-r-2xl">
                                     <span class="text-[13px] font-medium text-gray-400/80 whitespace-nowrap tabular-nums group-hover:text-gray-500 transition-colors" x-text="formatTimeAgo(article.lastUpdateTime)"></span>
                                 </td>
                             </tr>
