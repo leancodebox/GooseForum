@@ -3,9 +3,9 @@
     <div class="hidden lg:flex flex-col w-[260px] xl:w-[280px] flex-shrink-0 sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto py-4 pl-4 sm:pl-6 lg:pl-8 pr-2 no-scrollbar overscroll-contain">
         <div class="space-y-2 pr-2">
             <!-- Main Menu -->
-            <nav class="space-y-0.5">
+            <nav class="space-y-0">
                 {{range .Data.Sidebar.MainMenu}}
-                <a href="{{.Url}}" class="flex items-center gap-3 px-3 py-2 text-[15px] {{if .Active}}font-bold text-gray-900 bg-white shadow-[0_1px_4px_rgb(0,0,0,0.04)] border-gray-100{{else}}font-medium text-gray-600 border-transparent hover:bg-gray-100/80{{end}} rounded-lg border transition-all group hover:-translate-y-0.5">
+                <a href="{{.Url}}" class="flex items-center gap-3 px-3 py-1 text-[15px] {{if .Active}}font-bold text-gray-900 bg-white shadow-[0_1px_4px_rgb(0,0,0,0.04)] border-gray-100{{else}}font-medium text-gray-600 border-transparent hover:bg-gray-100/80{{end}} rounded-lg border transition-all group hover:-translate-y-0.5">
                     <span class="text-lg group-hover:scale-110 transition-transform {{if not .Active}}opacity-80 group-hover:opacity-100{{end}}">{{.Icon}}</span>
                     <span>{{call $.T .Label}}</span>
                 </a>
@@ -13,13 +13,13 @@
             </nav>
 
             <!-- Resources / Links -->
-            <div class="space-y-1.5 pt-2">
-                <div class="px-2 flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest">
+            <div class="space-y-1 pt-2">
+                <div class="px-2 flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">
                     <span>{{call .T "sidebar_resources"}}</span>
                 </div>
-                <nav class="space-y-0.5">
+                <nav class="space-y-0">
                     {{range .Data.Sidebar.ResourceItems}}
-                    <a href="{{.Url}}" class="flex items-center gap-3 px-3 py-1.5 text-[14px] font-medium {{if .Active}}text-blue-600 bg-blue-50/50 font-bold{{else}}text-gray-500 hover:text-blue-600 hover:bg-blue-50/50{{end}} rounded-md transition-colors group">
+                    <a href="{{.Url}}" class="flex items-center gap-3 px-3 py-1 text-[14px] font-medium {{if .Active}}text-blue-600 bg-blue-50/50 font-bold{{else}}text-gray-500 hover:text-blue-600 hover:bg-blue-50/50{{end}} rounded-md transition-colors group">
                         <span class="text-base {{if not .Active}}opacity-60 group-hover:opacity-100{{end}}">{{.Icon}}</span>
                         {{call $.T .Label}}
                     </a>
@@ -28,13 +28,13 @@
             </div>
 
             <!-- Categories List -->
-            <div class="space-y-1.5 pt-2">
-                <div class="px-2 flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest">
+            <div class="space-y-1 pt-2">
+                <div class="px-2 flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">
                     <span>{{call .T "sidebar_categories"}}</span>
                 </div>
-                <div class="space-y-0.5">
+                <div class="space-y-0">
                     {{range .Data.Sidebar.CategoryItems}}
-                    <a href="{{.Url}}" class="flex items-center gap-3 px-3 py-1.5 text-[14px] {{if .Active}}text-blue-600 bg-blue-50/50 font-bold{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-100/80{{end}} rounded-md transition-all group {{if not .Active}}hover:translate-x-1{{end}}">
+                    <a href="{{.Url}}" class="flex items-center gap-3 px-3 py-1 text-[14px] {{if .Active}}text-blue-600 bg-blue-50/50 font-bold{{else}}text-gray-600 hover:text-gray-900 hover:bg-gray-100/80{{end}} rounded-md transition-all group {{if not .Active}}hover:translate-x-1{{end}}">
                         {{if .Icon}}
                         <span class="text-base {{if not .Active}}opacity-60 group-hover:opacity-100{{end}}" style="color: {{.Color}}">{{.Icon}}</span>
                         {{else}}
