@@ -10,11 +10,11 @@
 
         <!-- Top Banner / Announcement -->
         {{if .Data.Announcement.Enabled}}
-        <div class="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50 shadow-sm transition-all group mb-2">
+        <div class="relative overflow-hidden rounded-lg border border-blue-100 bg-blue-50/60 shadow-sm transition-all group mb-2">
             <div class="flex items-center gap-3 px-4 py-3">
                 <!-- Icon -->
                 <div class="flex-shrink-0">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 text-white shadow-md">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-md">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
@@ -24,7 +24,7 @@
                 <!-- Content -->
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
-                        <span class="inline-flex items-center rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold text-gray-700 uppercase tracking-wider shadow-sm">
+                        <span class="inline-flex items-center rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
                             {{call .T "announcement"}}
                         </span>
                         <h3 class="text-sm font-bold text-gray-900 truncate">
@@ -37,7 +37,7 @@
                 </div>
 
                 <!-- Close Button -->
-                <button class="flex-shrink-0 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-md p-1 transition-colors" title="Dismiss">
+                <button class="flex-shrink-0 text-gray-400 hover:text-blue-600 hover:bg-blue-100/50 rounded-md p-1 transition-colors" title="Dismiss">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
