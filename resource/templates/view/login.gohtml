@@ -8,58 +8,58 @@
 <body class="bg-gray-50 text-gray-900 font-sans antialiased selection:bg-blue-100 selection:text-blue-900">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" x-data="loginHandler()">
         <!-- Card -->
-        <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100">
-            <!-- Logo/Header -->
-            <div class="text-center">
-                <a href="/" class="inline-block text-3xl font-black tracking-tighter text-blue-600 hover:text-blue-700 transition-colors">
-                    Goose<span class="text-gray-900">Forum</span>
-                </a>
-                <h2 class="mt-4 text-center text-lg font-bold text-gray-900" x-text="getHeaderTitle()"></h2>
-                <p class="mt-2 text-center text-sm text-gray-600" x-show="activeTab === 'login'">{{call .T "welcome_back"}}</p>
-                <p class="mt-2 text-center text-sm text-gray-600" x-show="activeTab === 'register'">{{call .T "create_account"}}</p>
-                <p class="mt-2 text-center text-sm text-gray-600" x-show="activeTab === 'forgot'">{{call .T "reset_password"}}</p>
-            </div>
+        <div class="max-w-4xl w-full bg-white rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden flex flex-col md:flex-row">
+            
+            <!-- Left Side: Forms -->
+            <div class="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center">
+                <!-- Logo/Header -->
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900" x-text="getHeaderTitle()"></h2>
+                    <p class="mt-1 text-sm text-gray-600" x-show="activeTab === 'login'">{{call .T "welcome_back"}}</p>
+                    <p class="mt-1 text-sm text-gray-600" x-show="activeTab === 'register'">{{call .T "create_account"}}</p>
+                    <p class="mt-1 text-sm text-gray-600" x-show="activeTab === 'forgot'">{{call .T "reset_password"}}</p>
+                </div>
 
-            <!-- Tabs -->
-            <div class="flex p-1 space-x-1 bg-gray-50 rounded-xl" x-show="activeTab !== 'forgot'">
-                <button class="w-full py-2.5 text-sm font-medium leading-5 rounded-lg focus:outline-none transition-all duration-200"
-                    :class="activeTab === 'login' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'"
-                    @click="switchTab('login')">
-                    {{call .T "login_btn"}}
-                </button>
-                <button class="w-full py-2.5 text-sm font-medium leading-5 rounded-lg focus:outline-none transition-all duration-200"
-                    :class="activeTab === 'register' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'"
-                    @click="switchTab('register')">
-                    {{call .T "register_btn"}}
-                </button>
-            </div>
+                <!-- Tabs -->
+                <div class="flex p-1 space-x-1 bg-gray-50 rounded-xl mb-5" x-show="activeTab !== 'forgot'">
+                    <button class="w-full py-1.5 text-sm font-medium leading-5 rounded-lg focus:outline-none transition-all duration-200"
+                        :class="activeTab === 'login' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'"
+                        @click="switchTab('login')">
+                        {{call .T "login_btn"}}
+                    </button>
+                    <button class="w-full py-1.5 text-sm font-medium leading-5 rounded-lg focus:outline-none transition-all duration-200"
+                        :class="activeTab === 'register' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700'"
+                        @click="switchTab('register')">
+                        {{call .T "register_btn"}}
+                    </button>
+                </div>
 
             <!-- Login Form -->
-            <form x-show="activeTab === 'login'" @submit.prevent="handleLogin" class="mt-8 space-y-6" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-                <div class="space-y-4 rounded-md">
+            <form x-show="activeTab === 'login'" @submit.prevent="handleLogin" class="space-y-4" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+                <div class="space-y-3 rounded-md">
                     <div>
                         <label for="login-username" class="sr-only">{{call .T "username_label"}}</label>
-                        <input id="login-username" x-model="loginForm.username" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="{{call .T "username_placeholder"}}" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.login.username }">
+                        <input id="login-username" x-model="loginForm.username" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="{{call .T "username_placeholder"}}" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.login.username }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.login.username" x-text="errors.login.username"></p>
                     </div>
                     <div>
                         <label for="login-password" class="sr-only">{{call .T "password_placeholder"}}</label>
-                        <input id="login-password" x-model="loginForm.password" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="{{call .T "password_placeholder"}}" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.login.password }">
+                        <input id="login-password" x-model="loginForm.password" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="{{call .T "password_placeholder"}}" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.login.password }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.login.password" x-text="errors.login.password"></p>
                     </div>
                     <div>
                         <div class="flex gap-3">
                             <div class="flex-1">
                                 <label for="login-captcha" class="sr-only">{{call .T "captcha_placeholder"}}</label>
-                                <input id="login-captcha" x-model="loginForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="{{call .T "captcha_placeholder"}}" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.login.captcha }">
+                                <input id="login-captcha" x-model="loginForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="{{call .T "captcha_placeholder"}}" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.login.captcha }">
                             </div>
-                            <img :src="captchaImg" alt="{{call .T "captcha_placeholder"}}" class="w-32 h-[46px] cursor-pointer rounded-xl border border-gray-200 object-cover hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="{{call .T "click_to_refresh"}}" />
+                            <img :src="captchaImg" alt="{{call .T "captcha_placeholder"}}" class="w-32 h-[42px] cursor-pointer rounded-xl border border-gray-200 object-cover hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="{{call .T "click_to_refresh"}}" />
                         </div>
                         <p class="mt-1 text-xs text-red-500" x-show="errors.login.captcha" x-text="errors.login.captcha"></p>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between mt-2">
                     <div class="text-sm">
                         <a href="#" @click.prevent="switchTab('forgot')" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
                             {{call .T "forgot_password"}}
@@ -97,41 +97,41 @@
             </form>
 
             <!-- Register Form -->
-            <form x-show="activeTab === 'register'" @submit.prevent="handleRegister" class="mt-8 space-y-6" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-                <div class="space-y-4 rounded-md">
+            <form x-show="activeTab === 'register'" @submit.prevent="handleRegister" class="space-y-4" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+                <div class="space-y-3 rounded-md">
                     <div>
                         <label for="reg-username" class="sr-only">用户名</label>
-                        <input id="reg-username" x-model="registerForm.username" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="用户名" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.username }">
+                        <input id="reg-username" x-model="registerForm.username" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="用户名" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.username }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.username" x-text="errors.register.username"></p>
                     </div>
                     <div>
                         <label for="reg-email" class="sr-only">邮箱</label>
-                        <input id="reg-email" x-model="registerForm.email" type="email" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="邮箱地址" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.email }">
+                        <input id="reg-email" x-model="registerForm.email" type="email" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="邮箱地址" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.email }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.email" x-text="errors.register.email"></p>
                     </div>
                     <div>
                         <label for="reg-password" class="sr-only">密码</label>
-                        <input id="reg-password" x-model="registerForm.password" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="密码 (至少6位)" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.password }">
+                        <input id="reg-password" x-model="registerForm.password" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="密码 (至少6位)" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.password }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.password" x-text="errors.register.password"></p>
                     </div>
                     <div>
                         <label for="reg-confirm-password" class="sr-only">确认密码</label>
-                        <input id="reg-confirm-password" x-model="registerForm.confirmPassword" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="确认密码" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.confirmPassword }">
+                        <input id="reg-confirm-password" x-model="registerForm.confirmPassword" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="确认密码" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.confirmPassword }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.confirmPassword" x-text="errors.register.confirmPassword"></p>
                     </div>
                     <div>
                         <div class="flex gap-3">
                             <div class="flex-1">
                                 <label for="reg-captcha" class="sr-only">验证码</label>
-                                <input id="reg-captcha" x-model="registerForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="验证码" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.captcha }">
+                                <input id="reg-captcha" x-model="registerForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="验证码" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.captcha }">
                             </div>
-                            <img :src="captchaImg" alt="验证码" class="w-32 h-[46px] cursor-pointer rounded-xl border border-gray-200 object-cover hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="点击刷新" />
+                            <img :src="captchaImg" alt="验证码" class="w-32 h-[42px] cursor-pointer rounded-xl border border-gray-200 object-cover hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="点击刷新" />
                         </div>
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.captcha" x-text="errors.register.captcha"></p>
                     </div>
                 </div>
 
-                <div class="flex items-center">
+                <div class="flex items-center mt-2">
                     <input id="agree-terms" x-model="registerForm.agree" type="checkbox" required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                     <label for="agree-terms" class="ml-2 block text-sm text-gray-900">
                         我同意 <a href="/terms-of-service" target="_blank" class="font-medium text-blue-600 hover:text-blue-500">用户协议</a> 和 <a href="/privacy-policy" target="_blank" class="font-medium text-blue-600 hover:text-blue-500">隐私政策</a>
@@ -226,27 +226,33 @@
                      <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors" @click.prevent="switchTab('login')">返回登录</a>
                 </div>
             </form>
+            </div>
 
-            <!-- Social Login -->
-            <div x-show="activeTab !== 'forgot'">
-                <div class="relative mt-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-200"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">Or continue with</span>
-                    </div>
+            <!-- Right Side: Social Login (Only show on desktop or bottom on mobile) -->
+            <div class="w-full md:w-1/2 bg-gray-50/50 p-8 md:p-12 flex flex-col justify-center border-t md:border-t-0 md:border-l border-gray-100" x-show="activeTab !== 'forgot'">
+                <div class="mb-6">
+                    <h3 class="text-sm font-medium text-gray-900 mb-4">Or continue with</h3>
                 </div>
 
-                <div class="mt-6">
-                    <button @click="handleGitHubLogin" class="w-full flex justify-center items-center px-4 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors">
+                <div class="space-y-3">
+                    <button @click="handleGitHubLogin" class="w-full flex justify-center items-center px-4 py-2.5 border border-gray-200 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors">
                         <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                         </svg>
-                        GitHub
+                        使用 GitHub 登录
+                    </button>
+                    <!-- Mock buttons for visual layout as per user screenshot -->
+                    <button class="w-full flex justify-center items-center px-4 py-2.5 border border-gray-200 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
+                        <svg class="h-5 w-5 mr-2 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>
+                        使用 Google 登录
+                    </button>
+                    <button class="w-full flex justify-center items-center px-4 py-2.5 border border-gray-200 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
+                        <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        使用 X 登录
                     </button>
                 </div>
             </div>
+
         </div>
     </div>
 
