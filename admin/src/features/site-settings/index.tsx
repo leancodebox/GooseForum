@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, Image as ImageIcon, Globe, Mail, FileText, Code } from 'lucide-react'
+import { Loader2, Image as ImageIcon, Globe, Mail, FileText, Code, PanelBottom } from 'lucide-react'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { ContentLayout } from '@/components/layout/content-layout'
@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { siteInfoSchema, type SiteInfo } from './data/schema'
+import { FooterEditor } from './components/footer-editor'
 
 export default function SiteInfoManagement() {
   const [loading, setLoading] = useState(true)
@@ -34,6 +35,10 @@ export default function SiteInfoManagement() {
       siteDescription: '',
       siteKeywords: '',
       externalLinks: '',
+      footerInfo: {
+        primary: [],
+        list: [],
+      },
     },
   })
 
@@ -42,7 +47,14 @@ export default function SiteInfoManagement() {
       try {
         const response = await axios.get('/api/admin/site-settings')
         if (response.data.code === 0) {
-          form.reset(response.data.result)
+          const result = response.data.result
+          if (!result.footerInfo) {
+            result.footerInfo = { primary: [], list: [] }
+          } else {
+            if (!result.footerInfo.primary) result.footerInfo.primary = []
+            if (!result.footerInfo.list) result.footerInfo.list = []
+          }
+          form.reset(result)
         }
       } catch (error) {
         toast.error('加载站点设置失败')
@@ -266,7 +278,6 @@ export default function SiteInfoManagement() {
                       />
                     </div>
                   </div>
-
                   {/* 外部资源区块 */}
                   <div className='space-y-6'>
                     <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
@@ -286,13 +297,24 @@ export default function SiteInfoManagement() {
                             />
                           </FormControl>
                           <FormDescription>
-                            每行输入一个完整的 HTML 标签。请确保代码片段安全，这些代码将被直接注入到页面头部。
+                            每行输入一个完整的 HTML 标签。请确保代码片段安全。
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Footer 页脚编辑区块 - 占据全宽 */}
+              <div className='space-y-6 pt-4'>
+                <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
+                  <PanelBottom className='h-5 w-5 text-muted-foreground' />
+                  页脚内容 (Footer)
+                </div>
+                <div className='bg-background rounded-lg border p-4'>
+                  <FooterEditor control={form.control} />
                 </div>
               </div>
 

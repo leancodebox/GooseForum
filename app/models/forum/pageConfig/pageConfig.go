@@ -105,14 +105,19 @@ type SponsorsConfig struct {
 // SiteSettingsConfig 站点设置配置
 type SiteSettingsConfig struct {
 	// 站点基本信息
-	SiteName        string       `json:"siteName"`
-	SiteLogo        string       `json:"siteLogo"`
-	SiteDescription string       `json:"siteDescription"`
-	SiteKeywords    string       `json:"siteKeywords"`
-	SiteUrl         string       `json:"siteUrl"`
-	SiteEmail       string       `json:"siteEmail"`
-	ExternalLinks   string       `json:"externalLinks,omitempty"`
-	FooterConfig    FooterConfig `json:"footerConfig,omitempty"`
+	SiteName        string     `json:"siteName"`
+	SiteLogo        string     `json:"siteLogo"`
+	SiteDescription string     `json:"siteDescription"`
+	SiteKeywords    string     `json:"siteKeywords"`
+	SiteUrl         string     `json:"siteUrl"`
+	SiteEmail       string     `json:"siteEmail"`
+	ExternalLinks   string     `json:"externalLinks,omitempty"`
+	FooterInfo      FooterInfo `json:"footerInfo,omitempty"`
+}
+
+type FooterInfo struct {
+	Primary []PItem      `json:"primary"`
+	List    []FooterItem `json:"list"`
 }
 
 // MailSettingsConfig 邮件设置配置
