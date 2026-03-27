@@ -130,9 +130,9 @@ export default function SiteInfoManagement() {
             </CardHeader>
             <CardContent className='space-y-10 pt-4'>
               
-              {/* 基本信息与联系方式区块 - 采用左右分栏的更紧凑布局 */}
+              {/* 采用左右分栏的更紧凑布局 */}
               <div className='grid gap-10 md:grid-cols-2'>
-                {/* 左侧：基本信息 */}
+                {/* 左侧：基本信息 & 联系方式 */}
                 <div className='space-y-6'>
                   <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
                     <Globe className='h-5 w-5 text-muted-foreground' />
@@ -207,17 +207,6 @@ export default function SiteInfoManagement() {
                         </FormItem>
                       )}
                     />
-                  </div>
-                </div>
-
-                {/* 右侧：联系方式 & SEO */}
-                <div className='space-y-10'>
-                  {/* 联系方式 */}
-                  <div className='space-y-6'>
-                    <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
-                      <Mail className='h-5 w-5 text-muted-foreground' />
-                      联系方式
-                    </div>
                     <FormField
                       control={form.control}
                       name='siteEmail'
@@ -233,7 +222,10 @@ export default function SiteInfoManagement() {
                       )}
                     />
                   </div>
+                </div>
 
+                {/* 右侧：SEO & 外部资源 */}
+                <div className='space-y-10'>
                   {/* SEO 设置 */}
                   <div className='space-y-6'>
                     <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
@@ -274,34 +266,34 @@ export default function SiteInfoManagement() {
                       />
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* 外部资源区块 - 占据全宽 */}
-              <div className='space-y-6 pt-4'>
-                <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
-                  <Code className='h-5 w-5 text-muted-foreground' />
-                  外部资源链接 / Meta 标签
+                  {/* 外部资源区块 */}
+                  <div className='space-y-6'>
+                    <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
+                      <Code className='h-5 w-5 text-muted-foreground' />
+                      外部资源链接 / Meta 标签
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name='externalLinks'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              placeholder='<link rel="stylesheet" href="...">&#10;<script src="..."></script>'
+                              className='min-h-[160px] font-mono text-sm'
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            每行输入一个完整的 HTML 标签。请确保代码片段安全，这些代码将被直接注入到页面头部。
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
-                <FormField
-                  control={form.control}
-                  name='externalLinks'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          placeholder='<link rel="stylesheet" href="...">&#10;<script src="..."></script>'
-                          className='min-h-[160px] font-mono text-sm'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        每行输入一个完整的 HTML 标签。请确保代码片段安全，这些代码将被直接注入到页面头部。
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
             </CardContent>
