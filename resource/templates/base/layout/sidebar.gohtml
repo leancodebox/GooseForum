@@ -1,7 +1,7 @@
 {{define "sidebar.gohtml"}}
     <!-- Left Sidebar: Discourse Style Navigation -->
     <div class="hidden lg:flex flex-col w-[260px] xl:w-[280px] flex-shrink-0 sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto py-4 pl-4 sm:pl-6 lg:pl-8 pr-2 no-scrollbar overscroll-contain">
-        <div class="space-y-2 pr-2">
+        <div class="space-y-1 pr-2">
             <!-- Main Menu -->
             <nav class="space-y-0">
                 {{range .Data.Sidebar.MainMenu}}
@@ -48,8 +48,8 @@
         </div>
 
         <!-- Sidebar Footer -->
-        <div class="mt-auto pt-6 pr-2">
-            <div class="border-t border-gray-100 pt-4">
+        <div class="mt-auto pt-2 pr-2">
+            <div class="border-t border-gray-100 pt-2">
                 <div class="flex flex-wrap gap-x-3 gap-y-1.5 mb-3">
                     <a href="/rss.xml" class="text-xs font-medium text-gray-500 hover:text-gray-900">Rss</a>
                     <a href="/sitemap.xml" class="text-xs font-medium text-gray-500 hover:text-gray-900">Site Map</a>

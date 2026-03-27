@@ -1,6 +1,4 @@
 import {defineConfig} from 'vite'
-import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
 import tailwindcss from '@tailwindcss/vite'
 import {basename, resolve} from 'path'
 import {glob} from 'glob'
@@ -20,7 +18,7 @@ const getEntries = () => {
 }
 
 export default defineConfig({
-    plugins: [vue(), vueJsx(), tailwindcss(),],
+    plugins: [tailwindcss()],
     build: {
         outDir: 'static/dist',
         assetsDir: 'assets',
