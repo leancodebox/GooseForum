@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, Image as ImageIcon, Globe, Mail, FileText, Code, PanelBottom } from 'lucide-react'
+import { Loader2, Image as ImageIcon, Globe, FileText, Code, PanelBottom } from 'lucide-react'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { ContentLayout } from '@/components/layout/content-layout'

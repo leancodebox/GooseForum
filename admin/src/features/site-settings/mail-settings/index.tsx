@@ -17,8 +17,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { Card, CardContent } from '@/components/ui/card'
 import { mailSettingsSchema, type MailSettings } from './data/schema'
 
 export default function MailSettingsManagement() {
@@ -123,214 +122,223 @@ export default function MailSettingsManagement() {
           </Button>
         }
       >
-        <div className='max-w-4xl'>
+        <div className='w-full'>
           <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-            <div className='grid gap-6 md:grid-cols-2'>
-              {/* SMTP服务器设置 */}
-              <Card className='md:col-span-2'>
-                <CardHeader>
-                  <CardTitle className='flex items-center gap-2'>
-                    <Server className='h-5 w-5' />
-                    SMTP 服务器设置
-                  </CardTitle>
-                  <CardDescription>配置邮件推送服务的服务器连接信息。</CardDescription>
-                </CardHeader>
-                <CardContent className='space-y-4'>
-                  <FormField
-                    control={form.control}
-                    name='enableMail'
-                    render={({ field }) => (
-                      <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                        <div className='space-y-0.5'>
-                          <FormLabel className='text-base'>启用邮件服务</FormLabel>
-                          <FormDescription>
-                            开启后，系统将能够发送验证码、通知等邮件。
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className='grid gap-4 md:grid-cols-2'>
-                    <FormField
-                      control={form.control}
-                      name='smtpHost'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>SMTP 主机</FormLabel>
-                          <FormControl>
-                            <Input placeholder='smtp.example.com' {...field} disabled={!form.watch('enableMail')} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name='smtpPort'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>SMTP 端口</FormLabel>
-                          <FormControl>
-                            <Input
-                              type='number'
-                              placeholder='587'
-                              {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
-                              disabled={!form.watch('enableMail')}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name='smtpUsername'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>用户名 (邮箱)</FormLabel>
-                          <FormControl>
-                            <Input placeholder='user@example.com' {...field} disabled={!form.watch('enableMail')} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name='smtpPassword'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>密码 / 授权码</FormLabel>
-                          <FormControl>
-                            <Input type='password' placeholder='••••••••' {...field} disabled={!form.watch('enableMail')} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name='useSSL'
-                    render={({ field }) => (
-                      <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                        <div className='space-y-0.5'>
-                          <FormLabel className='text-base flex items-center gap-2'>
-                            <Shield className='h-4 w-4' />
-                            使用 SSL 加密
-                          </FormLabel>
-                          <FormDescription>
-                            通常端口 465 需要开启 SSL，587 通常使用 STARTTLS。
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={!form.watch('enableMail')}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* 发件人信息 */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className='flex items-center gap-2'>
-                    <Mail className='h-5 w-5' />
-                    发件人信息
-                  </CardTitle>
-                  <CardDescription>设置邮件中显示的发件人名称和地址。</CardDescription>
-                </CardHeader>
-                <CardContent className='space-y-4'>
-                  <FormField
-                    control={form.control}
-                    name='fromName'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>发件人名称</FormLabel>
-                        <FormControl>
-                          <Input placeholder='GooseForum' {...field} disabled={!form.watch('enableMail')} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name='fromEmail'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>发件人邮箱</FormLabel>
-                        <FormControl>
-                          <Input placeholder='noreply@example.com' {...field} disabled={!form.watch('enableMail')} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* 测试邮件 */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className='flex items-center gap-2'>
-                    <Send className='h-5 w-5' />
-                    发送测试邮件
-                  </CardTitle>
-                  <CardDescription>在保存后，可以发送一封测试邮件来验证配置是否正确。</CardDescription>
-                </CardHeader>
-                <CardContent className='space-y-4'>
-                  <div className='space-y-2'>
-                    <FormLabel>测试收件箱</FormLabel>
-                    <div className='flex gap-2'>
-                      <Input
-                        type='email'
-                        placeholder='test@example.com'
-                        value={testEmail}
-                        onChange={(e) => setTestEmail(e.target.value)}
+            <Card>
+              <CardContent className='space-y-10'>
+                <div className='grid gap-10 md:grid-cols-2 lg:grid-cols-3'>
+                  {/* 左侧：SMTP 服务器设置 */}
+                  <div className='space-y-6 lg:col-span-2'>
+                    <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
+                      <Server className='h-5 w-5 text-muted-foreground' />
+                      SMTP 服务器设置
+                    </div>
+                    <div className='space-y-4'>
+                      <FormField
+                        control={form.control}
+                        name='enableMail'
+                        render={({ field }) => (
+                          <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20'>
+                            <div className='space-y-0.5'>
+                              <FormLabel className='text-base'>启用邮件服务</FormLabel>
+                              <FormDescription>
+                                开启后，系统将能够发送验证码、通知等邮件。
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
                       />
-                      <Button
-                        type='button'
-                        variant='outline'
-                        onClick={handleTestConnection}
-                        disabled={testing || !testEmail}
-                      >
-                        {testing ? <Loader2 className='h-4 w-4 animate-spin' /> : <Send className='h-4 w-4' />}
-                        <span className='ml-2'>测试</span>
-                      </Button>
+
+                      <div className='grid gap-6 md:grid-cols-2'>
+                        <FormField
+                          control={form.control}
+                          name='smtpHost'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>SMTP 主机</FormLabel>
+                              <FormControl>
+                                <Input placeholder='smtp.example.com' {...field} disabled={!form.watch('enableMail')} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name='smtpPort'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>SMTP 端口</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type='number'
+                                  placeholder='587'
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                  disabled={!form.watch('enableMail')}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name='smtpUsername'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>用户名 (邮箱)</FormLabel>
+                              <FormControl>
+                                <Input placeholder='user@example.com' {...field} disabled={!form.watch('enableMail')} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name='smtpPassword'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>密码 / 授权码</FormLabel>
+                              <FormControl>
+                                <Input type='password' placeholder='••••••••' {...field} disabled={!form.watch('enableMail')} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name='useSSL'
+                        render={({ field }) => (
+                          <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20'>
+                            <div className='space-y-0.5'>
+                              <FormLabel className='text-base flex items-center gap-2'>
+                                <Shield className='h-4 w-4' />
+                                使用 SSL 加密
+                              </FormLabel>
+                              <FormDescription>
+                                通常端口 465 需要开启 SSL，587 通常使用 STARTTLS。
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                disabled={!form.watch('enableMail')}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
                     </div>
                   </div>
-                  <Separator />
-                  <div className='space-y-2'>
-                    <h4 className='text-sm font-medium flex items-center gap-2'>
-                      <Info className='h-4 w-4' />
-                      常用配置参考
-                    </h4>
-                    <div className='grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground'>
-                      <span>QQ 邮箱:</span> <span>smtp.qq.com:587</span>
-                      <span>163 邮箱:</span> <span>smtp.163.com:25</span>
-                      <span>Gmail:</span> <span>smtp.gmail.com:587</span>
-                      <span>Outlook:</span> <span>smtp.office365.com:587</span>
+
+                  {/* 右侧：发件人信息 & 测试邮件 */}
+                  <div className='space-y-10 lg:col-span-1'>
+                    {/* 发件人信息 */}
+                    <div className='space-y-6'>
+                      <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
+                        <Mail className='h-5 w-5 text-muted-foreground' />
+                        发件人信息
+                      </div>
+                      <div className='space-y-4'>
+                        <FormField
+                          control={form.control}
+                          name='fromName'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>发件人名称</FormLabel>
+                              <FormControl>
+                                <Input placeholder='GooseForum' {...field} disabled={!form.watch('enableMail')} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name='fromEmail'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>发件人邮箱</FormLabel>
+                              <FormControl>
+                                <Input placeholder='noreply@example.com' {...field} disabled={!form.watch('enableMail')} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 测试邮件 */}
+                    <div className='space-y-6'>
+                      <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
+                        <Send className='h-5 w-5 text-muted-foreground' />
+                        发送测试邮件
+                      </div>
+                      <div className='space-y-6'>
+                        <div className='space-y-2'>
+                          <FormLabel>测试收件箱</FormLabel>
+                          <div className='flex gap-2'>
+                            <Input
+                              type='email'
+                              placeholder='test@example.com'
+                              value={testEmail}
+                              onChange={(e) => setTestEmail(e.target.value)}
+                            />
+                            <Button
+                              type='button'
+                              variant='secondary'
+                              onClick={handleTestConnection}
+                              disabled={testing || !testEmail}
+                            >
+                              {testing ? <Loader2 className='h-4 w-4 animate-spin' /> : <Send className='h-4 w-4' />}
+                              <span className='ml-2'>测试</span>
+                            </Button>
+                          </div>
+                        </div>
+                        <div className='rounded-lg border bg-muted/30 p-4 space-y-3'>
+                          <h4 className='text-sm font-medium flex items-center gap-2'>
+                            <Info className='h-4 w-4 text-blue-500 shrink-0' />
+                            常用配置参考
+                          </h4>
+                          <div className='flex flex-col gap-2 text-xs text-muted-foreground'>
+                            <div className='flex items-start justify-between gap-4'>
+                              <span className='shrink-0 mt-[2px]'>QQ 邮箱:</span>
+                              <span className='font-mono break-all text-right'>smtp.qq.com:587</span>
+                            </div>
+                            <div className='flex items-start justify-between gap-4'>
+                              <span className='shrink-0 mt-[2px]'>163 邮箱:</span>
+                              <span className='font-mono break-all text-right'>smtp.163.com:25</span>
+                            </div>
+                            <div className='flex items-start justify-between gap-4'>
+                              <span className='shrink-0 mt-[2px]'>Gmail:</span>
+                              <span className='font-mono break-all text-right'>smtp.gmail.com:587</span>
+                            </div>
+                            <div className='flex items-start justify-between gap-4'>
+                              <span className='shrink-0 mt-[2px]'>Outlook:</span>
+                              <span className='font-mono break-all text-right'>smtp.office365.com:587</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </form>
         </Form>
       </div>
