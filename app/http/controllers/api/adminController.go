@@ -590,26 +590,6 @@ func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.
 	return component.SuccessResponse("success")
 }
 
-// GetFooterLinks 获取页脚配置
-func GetFooterLinks(req component.BetterRequest[null]) component.Response {
-	res := pageConfig.GetConfigByPageType(pageConfig.FooterLinks, defaultconfig.GetDefaultFooter())
-	return component.SuccessResponse(res)
-}
-
-type SaveFooterLinksReq struct {
-	FooterConfig pageConfig.FooterConfig `json:"footerConfig"`
-}
-
-// SaveFooterLinks 保存页脚配置
-func SaveFooterLinks(req component.BetterRequest[SaveFooterLinksReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.FooterLinks)
-	configEntity.PageType = pageConfig.FooterLinks
-	configEntity.Config = jsonopt.Encode(req.Params.FooterConfig)
-	pageConfig.CreateOrSave(&configEntity)
-	hotdataserve.ClearFooterConfigCache()
-	return component.SuccessResponse("success")
-}
-
 // GetSponsors 获取赞助商配置
 func GetSponsors(req component.BetterRequest[null]) component.Response {
 	defaultSponsors := pageConfig.SponsorsConfig{

@@ -18,7 +18,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { useBoardContext } from './board-context';
 import { DropIndicator } from './drop-indicator';
 import { SponsorItem, Sponsors } from '../data/schema';
@@ -94,7 +93,7 @@ export function SponsorCard({ sponsor, level, index, onEdit, onDelete }: Sponsor
       
       <div className="flex items-start justify-between mb-2">
         <Avatar className="h-10 w-10 rounded-lg border">
-          <AvatarImage src={sponsor.logo} alt={sponsor.name} className="object-cover" />
+          <AvatarImage src={sponsor.avatarUrl} alt={sponsor.name} className="object-cover" />
           <AvatarFallback>
             <Heart className="h-5 w-5 text-muted-foreground" />
           </AvatarFallback>
@@ -115,12 +114,14 @@ export function SponsorCard({ sponsor, level, index, onEdit, onDelete }: Sponsor
             <DropdownMenuItem className="text-destructive" onClick={onDelete}>
               删除赞助商
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href={sponsor.url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                访问主页
-              </a>
-            </DropdownMenuItem>
+            {sponsor.link && (
+              <DropdownMenuItem asChild>
+                <a href={sponsor.link} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  访问主页
+                </a>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -130,19 +131,8 @@ export function SponsorCard({ sponsor, level, index, onEdit, onDelete }: Sponsor
           {sponsor.name}
         </h4>
         <p className="text-xs text-muted-foreground line-clamp-2 mb-1.5 h-8">
-          {sponsor.info}
+          {sponsor.message}
         </p>
-        <div className="flex flex-wrap gap-1 mt-auto">
-          {sponsor.tag.map((tag) => (
-            <Badge
-              key={tag}
-              variant="secondary"
-              className="text-[10px] px-1.5 py-0 h-4"
-            >
-              {tag}
-            </Badge>
-          ))}
-        </div>
       </div>
     </div>
   );

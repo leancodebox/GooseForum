@@ -38,15 +38,6 @@ func Reload[T any](key string, dataObj T) error {
 	return errors.New("no cache")
 }
 
-var footerConfigCache = &datacache.Cache[pageConfig.FooterConfig]{}
-
-func GetFooterConfigCache() pageConfig.FooterConfig {
-	data, _ := footerConfigCache.GetOrLoadE("", func() (pageConfig.FooterConfig, error) {
-		return pageConfig.GetConfigByPageType(pageConfig.FooterLinks, defaultconfig.GetDefaultFooter()), nil
-	}, time.Minute)
-	return data
-}
-
 var sponsorsConfigCache = &datacache.Cache[pageConfig.SponsorsConfig]{}
 
 func SponsorsConfigCache() pageConfig.SponsorsConfig {
@@ -119,10 +110,6 @@ func ClearMailSettingsConfigCache() {
 
 func ClearAnnouncementConfigCache() {
 	announcementConfigCache.Clear()
-}
-
-func ClearFooterConfigCache() {
-	footerConfigCache.Clear()
 }
 
 func ClearSponsorsConfigCache() {

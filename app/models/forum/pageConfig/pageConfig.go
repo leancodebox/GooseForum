@@ -32,7 +32,6 @@ func (itself *Entity) TableName() string {
 
 const (
 	FriendShipLinks  = `friendShipLinks`
-	FooterLinks      = `footerLinks`
 	SponsorsPage     = `sponsors`
 	SiteSettings     = `siteSettings`
 	EmailSettings    = `emailSetting`
@@ -62,34 +61,28 @@ type FooterItem struct {
 	Url  string `json:"url"`
 }
 
-type FooterGroup struct {
-	Name     string       `json:"name"`
-	Children []FooterItem `json:"children"`
-}
-
 type PItem struct {
 	Content string `json:"content"`
 }
 
-type FooterConfig struct {
-	Primary []PItem       `json:"primary"`
-	List    []FooterGroup `json:"list"`
-}
-
-// SponsorItem 赞助商相关数据结构
-type SponsorItem struct {
-	Name string   `json:"name"`
-	Logo string   `json:"logo"`
-	Info string   `json:"info"`
-	Url  string   `json:"url"`
-	Tag  []string `json:"tag"`
-}
+// 赞助商配置
 
 type UserSponsor struct {
-	Name   string `json:"name"`
-	Amount string `json:"amount"`
-	Time   string `json:"time"`
+	UserId    uint64 `json:"userId"`
+	Amount    int    `json:"amount"` // 单位：分
+	Link      string `json:"link"`
+	Message   string `json:"message"`
+	AvatarUrl string `json:"avatarUrl"`
+	Name      string `json:"name"`
 }
+
+type SponsorItem struct {
+	Link      string `json:"link"`
+	Message   string `json:"message"`
+	AvatarUrl string `json:"avatarUrl"`
+	Name      string `json:"name"`
+}
+
 type Sponsors struct {
 	Level0 []SponsorItem `json:"level0"`
 	Level1 []SponsorItem `json:"level1"`

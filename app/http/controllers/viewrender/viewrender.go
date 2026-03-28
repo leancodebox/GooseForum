@@ -37,7 +37,7 @@ func init() {
 type TmplData[T any] struct {
 	IsProduction  bool
 	Theme         string
-	Footer        pageConfig.FooterConfig
+	Footer        pageConfig.FooterInfo
 	SiteSetting   pageConfig.SiteSettingsConfig
 	Data          T
 	Url           URLHelper
@@ -94,7 +94,7 @@ func SafeRender[T any](c *gin.Context, name string, data T, pageMeta ...*PageMet
 	templateData := TmplData[T]{
 		IsProduction:  setting.IsProduction(),
 		Theme:         GetTheme(c),
-		Footer:        hotdataserve.GetFooterConfigCache(),
+		Footer:        hotdataserve.GetSiteSettingsConfigCache().FooterInfo,
 		SiteSetting:   hotdataserve.GetSiteSettingsConfigCache(),
 		Data:          data,
 		Url:           URLHelper{},

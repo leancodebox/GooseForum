@@ -9,7 +9,7 @@ import {
   extractClosestEdge,
 } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import type { Edge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/types';
-import { MoreHorizontal, User } from 'lucide-react';
+import { ExternalLink, MoreHorizontal, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -82,47 +82,61 @@ export function UserCard({ user, index, onEdit, onDelete }: UserCardProps) {
   return (
     <div
       ref={ref}
-      className={`relative group flex items-center gap-2 p-2 bg-white rounded-xl border shadow-sm transition-all hover:shadow-md ${
+      className={`relative group flex flex-col p-3 bg-white rounded-xl border shadow-sm transition-all hover:shadow-md ${
         dragging ? 'opacity-50 grayscale' : ''
       } border-transparent`}
     >
       {closestEdge && <DropIndicator edge={closestEdge} />}
       
-      <Avatar className="h-8 w-8 rounded-full border">
-        <AvatarImage src={user.logo} alt={user.name} className="object-cover" />
-        <AvatarFallback>
-          <User className="h-4 w-4 text-muted-foreground" />
-        </AvatarFallback>
-      </Avatar>
+      <div className="flex items-start justify-between mb-2">
+        <Avatar className="h-10 w-10 border">
+          <AvatarImage src={user.avatarUrl} alt={user.name} className="object-cover" />
+          <AvatarFallback>
+            <User className="h-5 w-5 text-muted-foreground" />
+          </AvatarFallback>
+        </Avatar>
 
-      <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-semibold truncate text-foreground">
-          {user.name}
-        </h4>
-        <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
-          <span className="font-medium text-primary">¥{user.amount}</span>
-          <span>•</span>
-          <span>{user.time}</span>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onEdit}>编辑记录</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={onDelete}>
+              删除记录
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onEdit}>编辑用户</DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive" onClick={onDelete}>
-            删除用户
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex-1 min-w-0 flex flex-col justify-between">
+        <div>
+          <h4 className="text-sm font-semibold truncate text-foreground mb-1">
+            {user.name}
+          </h4>
+          {user.message && (
+            <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+              "{user.message}"
+            </p>
+          )}
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-mono font-semibold bg-blue-50 text-blue-700">
+            ¥ {(user.amount / 100).toFixed(2)}
+          </span>
+          {user.link && (
+            <a href={user.link} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
+              <ExternalLink className="h-3 w-3" /> 链接
+            </a>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

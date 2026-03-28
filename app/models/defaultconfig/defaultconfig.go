@@ -2,28 +2,6 @@ package defaultconfig
 
 import "github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 
-// Footer 管理相关
-var defaultFooter = pageConfig.FooterConfig{
-	Primary: []pageConfig.PItem{
-		{Content: `Power by <a href="https://github.com/leancodebox/GooseForum">GooseForum</a>.`},
-		{Content: `Providing reliable tech since 2025`},
-	},
-	List: []pageConfig.FooterGroup{
-		{
-			Name: "Services",
-			Children: []pageConfig.FooterItem{
-				{Name: "Github", Url: "https://github.com/leancodebox/GooseForum"},
-				{Name: "License", Url: "https://github.com/leancodebox/GooseForum/blob/main/LICENSE"},
-				{Name: "LeanCodeBox", Url: "https://github.com/leancodebox"},
-			},
-		},
-	},
-}
-
-func GetDefaultFooter() pageConfig.FooterConfig {
-	return defaultFooter
-}
-
 var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
 	SiteName:        "GooseForum",
 	SiteLogo:        "/static/pic/icon.webp",
@@ -31,6 +9,17 @@ var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
 	SiteKeywords:    "forum,discussion,community",
 	SiteUrl:         "",
 	SiteEmail:       "example@example.example",
+	FooterInfo: pageConfig.FooterInfo{
+		Primary: []pageConfig.PItem{
+			{Content: `Power by <a href="https://github.com/leancodebox/GooseForum">GooseForum</a>.`},
+			{Content: `Providing reliable tech since 2025`},
+		},
+		List: []pageConfig.FooterItem{
+			{Name: "Github", Url: "https://github.com/leancodebox/GooseForum"},
+			{Name: "License", Url: "https://github.com/leancodebox/GooseForum/blob/main/LICENSE"},
+			{Name: "LeanCodeBox", Url: "https://github.com/leancodebox"},
+		},
+	},
 }
 
 func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {

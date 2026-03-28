@@ -44,7 +44,6 @@ import { Route as AuthenticatedSiteSettingsSiteInfoIndexRouteImport } from './ro
 import { Route as AuthenticatedSiteSettingsSecuritySettingsIndexRouteImport } from './routes/_authenticated/site-settings/security-settings/index'
 import { Route as AuthenticatedSiteSettingsPostingSettingsIndexRouteImport } from './routes/_authenticated/site-settings/posting-settings/index'
 import { Route as AuthenticatedSiteSettingsMailSettingsIndexRouteImport } from './routes/_authenticated/site-settings/mail-settings/index'
-import { Route as AuthenticatedSiteSettingsFooterManagementIndexRouteImport } from './routes/_authenticated/site-settings/footer-management/index'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -239,12 +238,6 @@ const AuthenticatedSiteSettingsMailSettingsIndexRoute =
     path: '/site-settings/mail-settings/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedSiteSettingsFooterManagementIndexRoute =
-  AuthenticatedSiteSettingsFooterManagementIndexRouteImport.update({
-    id: '/site-settings/footer-management/',
-    path: '/site-settings/footer-management/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -277,7 +270,6 @@ export interface FileRoutesByFullPath {
   '/tasks/': typeof AuthenticatedTasksIndexRoute
   '/users-management/': typeof AuthenticatedUsersManagementIndexRoute
   '/users/': typeof AuthenticatedUsersIndexRoute
-  '/site-settings/footer-management/': typeof AuthenticatedSiteSettingsFooterManagementIndexRoute
   '/site-settings/mail-settings/': typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
   '/site-settings/posting-settings/': typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
   '/site-settings/security-settings/': typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
@@ -313,7 +305,6 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users-management': typeof AuthenticatedUsersManagementIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
-  '/site-settings/footer-management': typeof AuthenticatedSiteSettingsFooterManagementIndexRoute
   '/site-settings/mail-settings': typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
   '/site-settings/posting-settings': typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
   '/site-settings/security-settings': typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
@@ -352,7 +343,6 @@ export interface FileRoutesById {
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users-management/': typeof AuthenticatedUsersManagementIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
-  '/_authenticated/site-settings/footer-management/': typeof AuthenticatedSiteSettingsFooterManagementIndexRoute
   '/_authenticated/site-settings/mail-settings/': typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
   '/_authenticated/site-settings/posting-settings/': typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
   '/_authenticated/site-settings/security-settings/': typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
@@ -391,7 +381,6 @@ export interface FileRouteTypes {
     | '/tasks/'
     | '/users-management/'
     | '/users/'
-    | '/site-settings/footer-management/'
     | '/site-settings/mail-settings/'
     | '/site-settings/posting-settings/'
     | '/site-settings/security-settings/'
@@ -427,7 +416,6 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/users-management'
     | '/users'
-    | '/site-settings/footer-management'
     | '/site-settings/mail-settings'
     | '/site-settings/posting-settings'
     | '/site-settings/security-settings'
@@ -465,7 +453,6 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks/'
     | '/_authenticated/users-management/'
     | '/_authenticated/users/'
-    | '/_authenticated/site-settings/footer-management/'
     | '/_authenticated/site-settings/mail-settings/'
     | '/_authenticated/site-settings/posting-settings/'
     | '/_authenticated/site-settings/security-settings/'
@@ -733,13 +720,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSiteSettingsMailSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/site-settings/footer-management/': {
-      id: '/_authenticated/site-settings/footer-management/'
-      path: '/site-settings/footer-management'
-      fullPath: '/site-settings/footer-management/'
-      preLoaderRoute: typeof AuthenticatedSiteSettingsFooterManagementIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
   }
 }
 
@@ -782,7 +762,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedUsersManagementIndexRoute: typeof AuthenticatedUsersManagementIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
-  AuthenticatedSiteSettingsFooterManagementIndexRoute: typeof AuthenticatedSiteSettingsFooterManagementIndexRoute
   AuthenticatedSiteSettingsMailSettingsIndexRoute: typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
   AuthenticatedSiteSettingsPostingSettingsIndexRoute: typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
   AuthenticatedSiteSettingsSecuritySettingsIndexRoute: typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
@@ -811,8 +790,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUsersManagementIndexRoute:
     AuthenticatedUsersManagementIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
-  AuthenticatedSiteSettingsFooterManagementIndexRoute:
-    AuthenticatedSiteSettingsFooterManagementIndexRoute,
   AuthenticatedSiteSettingsMailSettingsIndexRoute:
     AuthenticatedSiteSettingsMailSettingsIndexRoute,
   AuthenticatedSiteSettingsPostingSettingsIndexRoute:

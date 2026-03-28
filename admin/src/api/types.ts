@@ -128,18 +128,18 @@ export interface PostingSettings {
   }
 }
 
-export interface FooterItem {
+export interface PItem {
   content: string
 }
 
-export interface FooterGroup {
-  title: string
-  links: { name: string; url: string }[]
+export interface FooterItem {
+  name: string
+  url: string
 }
 
-export interface FooterConfig {
-  primary: FooterItem[]
-  list: FooterGroup[]
+export interface FooterInfo {
+  primary: PItem[]
+  list: FooterItem[]
 }
 
 export interface SponsorItem {

@@ -2,7 +2,7 @@ import request from '@/lib/request'
 import type { 
   PageResult, Category, User, Article, Role, Permission,
   DailyTraffic, SiteSettings, MailSettings, SecuritySettings,
-  PostingSettings, FooterConfig, SponsorsConfig, AnnouncementConfig
+  PostingSettings, SponsorsConfig, AnnouncementConfig
 } from './types'
 import { LinkGroup } from '@/features/links-management/data/schema'
 
@@ -128,14 +128,6 @@ export function getPostingSettings() {
 
 export function savePostingSettings(data: { settings: PostingSettings }) {
   return request.post<any>('/api/admin/save-posting-settings', data)
-}
-
-export function getFooterLinks() {
-  return request.post<FooterConfig>('/api/admin/footer-links')
-}
-
-export function saveFooterLinks(data: { settings: FooterConfig }) {
-  return request.post<any>('/api/admin/save-footer-links', data)
 }
 
 export function getSponsors() {

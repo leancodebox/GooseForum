@@ -13,7 +13,6 @@ import {
   Palette,
   ServerOff,
   Settings,
-  PanelsTopLeft,
   Wrench,
   UserCog,
   UserX,
@@ -23,11 +22,11 @@ import {
   FileText,
   Tags,
   Mail,
-  PanelBottom,
   Heart,
   AudioWaveform,
   Command,
   GalleryVerticalEnd,
+  PanelsTopLeft,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -75,20 +74,15 @@ const allNavGroups = [
         icon: Settings,
         items: [
           {
-            title: '站点信息',
-            url: '/site-settings/site-info',
-            icon: PanelsTopLeft,
-          },
-          {
-            title: '页脚管理',
-            url: '/site-settings/footer-management',
-            icon: PanelBottom,
-          },
-          {
-            title: '邮箱设置',
-            url: '/site-settings/mail-settings',
-            icon: Mail,
-          },
+              title: '基础信息',
+              url: '/site-settings/site-info',
+              icon: PanelsTopLeft,
+            },
+            {
+              title: '发信服务',
+              url: '/site-settings/mail-settings',
+              icon: Mail,
+            },
           {
             title: '安全与注册',
             url: '/site-settings/security-settings',

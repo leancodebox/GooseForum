@@ -216,7 +216,12 @@ function SponsorshipManagementContent() {
   const handleAddSponsor = (level: keyof Sponsors) => {
     setCurrentLevel(level);
     setCurrentIndex(null);
-    setCurrentRow(null);
+    setCurrentRow({
+      name: '',
+      avatarUrl: '',
+      message: '',
+      link: ''
+    });
     setOpen('add-sponsor');
   };
 
@@ -252,7 +257,14 @@ function SponsorshipManagementContent() {
 
   const handleAddUser = () => {
     setCurrentIndex(null);
-    setCurrentRow(null);
+    setCurrentRow({
+      name: '',
+      avatarUrl: '',
+      amount: 0,
+      link: '',
+      message: '',
+      userId: 0
+    });
     setOpen('add-user');
   };
 

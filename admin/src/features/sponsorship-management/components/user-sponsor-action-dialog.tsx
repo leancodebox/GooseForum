@@ -42,21 +42,29 @@ export function UserSponsorActionDialog({
     resolver: zodResolver(userSponsorSchema) as any,
     defaultValues: {
       name: '',
-      logo: '',
-      amount: '',
-      time: new Date().toISOString().split('T')[0],
+      avatarUrl: '',
+      amount: 0,
+      link: '',
+      message: '',
     },
   })
 
   useEffect(() => {
     if (currentRow) {
-      form.reset(currentRow)
+      form.reset({
+        name: currentRow.name || '',
+        avatarUrl: currentRow.avatarUrl || '',
+        amount: currentRow.amount || 0,
+        link: currentRow.link || '',
+        message: currentRow.message || '',
+      })
     } else {
       form.reset({
         name: '',
-        logo: '',
-        amount: '',
-        time: new Date().toISOString().split('T')[0],
+        avatarUrl: '',
+        amount: 0,
+        link: '',
+        message: '',
       })
     }
   }, [currentRow, form, open])
@@ -75,7 +83,7 @@ export function UserSponsorActionDialog({
         },
       })
       if (response.data.code === 0) {
-        form.setValue('logo', response.data.result.url)
+        form.setValue('avatarUrl', response.data.result.url)
         toast.success('上传成功')
       } else {
         toast.error(response.data.message || '上传失败')
@@ -115,13 +123,13 @@ export function UserSponsorActionDialog({
             />
             <FormField
               control={form.control}
-              name='logo'
+              name='avatarUrl'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>头像 (Logo)</FormLabel>
+                  <FormLabel>头像</FormLabel>
                   <div className='flex gap-2'>
                     <FormControl>
-                      <Input placeholder='请输入Logo URL或上传图片' {...field} />
+                      <Input placeholder='请输入头像 URL或上传图片' {...field} />
                     </FormControl>
                     <div className='relative'>
                       <Input
@@ -140,7 +148,7 @@ export function UserSponsorActionDialog({
                       <img
                         src={field.value}
                         alt='头像预览'
-                        className='h-12 w-12 rounded-full border object-cover'
+                        className='h-16 w-16 rounded-full border object-cover'
                       />
                     </div>
                   )}
@@ -148,14 +156,52 @@ export function UserSponsorActionDialog({
                 </FormItem>
               )}
             />
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                control={form.control}
+                name='amount'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>赞助金额 (分)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type='number' 
+                        placeholder='例如: 1000' 
+                        {...field} 
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='userId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>关联用户 ID (可选)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type='number' 
+                        placeholder='例如: 100' 
+                        {...field} 
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
-              name='amount'
+              name='message'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>赞助金额</FormLabel>
+                  <FormLabel>留言 / 描述</FormLabel>
                   <FormControl>
-                    <Input placeholder='例如: ￥100' {...field} />
+                    <Input placeholder='例如: 感谢支持' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -163,12 +209,12 @@ export function UserSponsorActionDialog({
             />
             <FormField
               control={form.control}
-              name='time'
+              name='link'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>赞助时间</FormLabel>
+                  <FormLabel>个人链接</FormLabel>
                   <FormControl>
-                    <Input type='date' {...field} />
+                    <Input placeholder='例如: https://github.com/xxx' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

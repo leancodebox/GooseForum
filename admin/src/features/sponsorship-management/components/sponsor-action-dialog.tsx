@@ -43,23 +43,26 @@ export function SponsorActionDialog({
     resolver: zodResolver(sponsorItemSchema) as any,
     defaultValues: {
       name: '',
-      logo: '',
-      info: '',
-      url: '',
-      tag: [],
+      avatarUrl: '',
+      message: '',
+      link: '',
     },
   })
 
   useEffect(() => {
     if (currentRow) {
-      form.reset(currentRow)
+      form.reset({
+        name: currentRow.name || '',
+        avatarUrl: currentRow.avatarUrl || '',
+        message: currentRow.message || '',
+        link: currentRow.link || '',
+      })
     } else {
       form.reset({
         name: '',
-        logo: '',
-        info: '',
-        url: '',
-        tag: [],
+        avatarUrl: '',
+        message: '',
+        link: '',
       })
     }
   }, [currentRow, form, open])
@@ -78,7 +81,7 @@ export function SponsorActionDialog({
         },
       })
       if (response.data.code === 0) {
-        form.setValue('logo', response.data.result.url)
+        form.setValue('avatarUrl', response.data.result.url)
         toast.success('上传成功')
       } else {
         toast.error(response.data.message || '上传失败')
@@ -118,7 +121,7 @@ export function SponsorActionDialog({
             />
             <FormField
               control={form.control}
-              name='logo'
+              name='avatarUrl'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Logo</FormLabel>
@@ -153,7 +156,7 @@ export function SponsorActionDialog({
             />
             <FormField
               control={form.control}
-              name='info'
+              name='message'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>描述信息</FormLabel>
@@ -166,35 +169,12 @@ export function SponsorActionDialog({
             />
             <FormField
               control={form.control}
-              name='url'
+              name='link'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>官网链接</FormLabel>
                   <FormControl>
                     <Input placeholder='请输入官网链接' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='tag'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>标签 (用逗号分隔)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='例如: 技术, 开源, 云服务'
-                      value={field.value.join(', ')}
-                      onChange={(e) => {
-                        const tags = e.target.value
-                          .split(',')
-                          .map((t) => t.trim())
-                          .filter((t) => t !== '')
-                        field.onChange(tags)
-                      }}
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
