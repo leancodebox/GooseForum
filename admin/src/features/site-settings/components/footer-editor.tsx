@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useFieldArray, type Control } from 'react-hook-form'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
-import { Plus, GripVertical, Trash2, Edit, Link as LinkIcon, Type } from 'lucide-react'
+import { Plus, GripVertical, Trash2, Edit, Type } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
