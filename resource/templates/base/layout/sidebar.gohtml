@@ -51,14 +51,14 @@
         <div class="mt-auto pt-2 pr-2">
             <div class="border-t border-gray-100 pt-2">
                 <div class="flex flex-wrap gap-x-3 gap-y-1.5 mb-3">
-                    <a href="/rss.xml" class="text-xs font-medium text-gray-500 hover:text-gray-900">Rss</a>
-                    <a href="/sitemap.xml" class="text-xs font-medium text-gray-500 hover:text-gray-900">Site Map</a>
-                    <a href="/links" class="text-[11px] text-gray-500 hover:text-gray-900 transition-colors">Links</a>
-                    <a href="https://github.com/leancodebox/GooseForum" target="_blank" class="text-[11px] text-gray-500 hover:text-gray-900 transition-colors">{{call .T "sidebar_github"}}</a>
+                    {{range .Footer.List}}
+                    <a href="{{.Url}}" class="text-[11px] text-gray-500 hover:text-gray-900 transition-colors">{{.Name}}</a>
+                    {{end}}
                 </div>
-                <div class="flex items-center gap-2 text-[11px] text-gray-400">
-                    <span class="font-bold">GooseForum</span>
-                    <span>© 2024</span>
+                <div class="flex flex-wrap items-center gap-2 text-[11px] text-gray-400">
+                    {{range .Footer.Primary}}
+                    <span>{{.Content | SafeHTML}}</span>
+                    {{end}}
                 </div>
             </div>
         </div>

@@ -82,7 +82,6 @@ export function FooterEditor({ control }: FooterEditorProps) {
     <div className='space-y-8'>
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className='grid gap-8 md:grid-cols-2'>
-          {/* List 区域 */}
           <div className='space-y-4'>
             <div className='flex items-center justify-between'>
               <div className='text-sm font-medium text-muted-foreground'>上方链接列表 (List)</div>
@@ -95,12 +94,12 @@ export function FooterEditor({ control }: FooterEditorProps) {
                 <Plus className='h-4 w-4 mr-1' /> 添加链接
               </Button>
             </div>
-            <Droppable droppableId='footer-list' type='list'>
+            <Droppable droppableId='footer-list' type='list' direction='horizontal'>
               {(provided) => (
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className='space-y-2'
+                  className='flex flex-wrap gap-2 min-h-[48px] p-2 bg-muted/30 rounded-lg border border-dashed'
                 >
                   {listFields.map((field, index) => (
                     <Draggable key={field.id} draggableId={field.id} index={index}>
@@ -108,38 +107,29 @@ export function FooterEditor({ control }: FooterEditorProps) {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className='flex items-center justify-between p-2 md:p-3 bg-muted/50 rounded-lg border group'
+                          className='flex items-center gap-1.5 pl-1.5 pr-1 py-1 bg-background rounded-md border shadow-sm group hover:border-primary/50 transition-colors'
                         >
-                          <div className='flex items-center gap-2 overflow-hidden'>
-                            <div
-                              {...provided.dragHandleProps}
-                              className='cursor-grab text-muted-foreground hover:text-foreground'
-                            >
-                              <GripVertical className='h-4 w-4' />
-                            </div>
-                            <LinkIcon className='h-4 w-4 text-muted-foreground shrink-0' />
-                            <span className='text-sm font-medium truncate'>
-                              {field.name || '未命名'}
-                            </span>
+                          <div
+                            {...provided.dragHandleProps}
+                            className='cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing'
+                          >
+                            <GripVertical className='h-3.5 w-3.5' />
                           </div>
-                          <div className='flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity'>
+                          <span
+                            className='text-xs font-medium cursor-pointer hover:underline'
+                            onClick={() => openEdit('list', index)}
+                          >
+                            {field.name || '未命名'}
+                          </span>
+                          <div className='flex items-center ml-1'>
                             <Button
                               type='button'
                               variant='ghost'
                               size='icon'
-                              className='h-8 w-8'
-                              onClick={() => openEdit('list', index)}
-                            >
-                              <Edit className='h-4 w-4' />
-                            </Button>
-                            <Button
-                              type='button'
-                              variant='ghost'
-                              size='icon'
-                              className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+                              className='h-5 w-5 rounded-sm hover:bg-destructive/10 hover:text-destructive'
                               onClick={() => removeList(index)}
                             >
-                              <Trash2 className='h-4 w-4' />
+                              <Trash2 className='h-3 w-3' />
                             </Button>
                           </div>
                         </div>
@@ -148,7 +138,7 @@ export function FooterEditor({ control }: FooterEditorProps) {
                   ))}
                   {provided.placeholder}
                   {listFields.length === 0 && (
-                    <div className='text-center p-4 border border-dashed rounded-lg text-sm text-muted-foreground'>
+                    <div className='w-full text-center text-sm text-muted-foreground py-2'>
                       暂无链接
                     </div>
                   )}
