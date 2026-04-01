@@ -34,3 +34,4 @@ dist/
 .vercel
 **/node_modules/
 /resource/static/admin/dict
+tmp_app
