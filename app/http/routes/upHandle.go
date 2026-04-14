@@ -57,30 +57,12 @@ func UpFormReq[T any](action func(ctx component.BetterRequest[T]) component.Resp
 func bindAndExecute[T any](c *gin.Context, binder func(any) error, action func(component.BetterRequest[T]) component.Response, strict bool) {
 	userId := c.GetUint64("userId")
 	var params T
-
-	// // CSRF 检查：仅针对非 GET/HEAD/OPTIONS 请求且已登录用户
-	// if userId > 0 &&
-	// 	c.Request.Method != http.MethodGet &&
-	// 	c.Request.Method != http.MethodHead &&
-	// 	c.Request.Method != http.MethodOptions {
-
-	// 	// 检查自定义 Header
-	// 	if c.GetHeader("X-Requested-With") != "XMLHttpRequest" && c.GetHeader("X-Goose-Request") != "true" {
-	// 		c.JSON(http.StatusForbidden, component.FailData("CSRF Token Check Failed"))
-	// 		c.Abort()
-	// 		return
-	// 	}
-	// }
-
-	// 执行绑定
 	if err := binder(&params); err != nil {
 		if strict {
 			c.JSON(http.StatusBadRequest, component.FailData("参数解析失败: "+err.Error()))
 			return
 		}
 	}
-
-	c.Set("requestData", params)
 	if err := validate.Valid(params); err != nil {
 		c.JSON(http.StatusOK, component.FailData(validate.FormatError(err)))
 		return

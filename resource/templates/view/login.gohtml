@@ -4,9 +4,12 @@
     {{template "common-head.gohtml" .}}
     <!-- V2 Styles & Scripts -->
     {{ViteEntry `src/gf-main.ts`}}
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans antialiased selection:bg-blue-100 selection:text-blue-900">
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" x-data="loginHandler()">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" x-data="loginHandler()" x-cloak>
         <!-- Card -->
         <div class="max-w-4xl w-full bg-white rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden flex flex-col md:flex-row">
             
@@ -53,7 +56,12 @@
                                 <label for="login-captcha" class="sr-only">{{call .T "captcha_placeholder"}}</label>
                                 <input id="login-captcha" x-model="loginForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="{{call .T "captcha_placeholder"}}" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.login.captcha }">
                             </div>
-                            <img :src="captchaImg" alt="{{call .T "captcha_placeholder"}}" class="w-32 h-[42px] cursor-pointer rounded-xl border border-gray-200 object-cover hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="{{call .T "click_to_refresh"}}" />
+                            <div class="relative w-32 h-[42px] flex-shrink-0 cursor-pointer rounded-xl border border-gray-200 overflow-hidden bg-gray-50 hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="{{call .T "click_to_refresh"}}">
+                                <div x-show="captchaLoading || !captchaImg" class="absolute inset-0 flex items-center justify-center animate-pulse">
+                                    <svg class="h-5 w-5 text-gray-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </div>
+                                <img x-show="!captchaLoading && captchaImg" :src="captchaImg" alt="{{call .T "captcha_placeholder"}}" class="w-full h-full object-cover" />
+                            </div>
                         </div>
                         <p class="mt-1 text-xs text-red-500" x-show="errors.login.captcha" x-text="errors.login.captcha"></p>
                     </div>
@@ -125,7 +133,12 @@
                                 <label for="reg-captcha" class="sr-only">验证码</label>
                                 <input id="reg-captcha" x-model="registerForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="验证码" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.captcha }">
                             </div>
-                            <img :src="captchaImg" alt="验证码" class="w-32 h-[42px] cursor-pointer rounded-xl border border-gray-200 object-cover hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="点击刷新" />
+                            <div class="relative w-32 h-[42px] flex-shrink-0 cursor-pointer rounded-xl border border-gray-200 overflow-hidden bg-gray-50 hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="点击刷新">
+                                <div x-show="captchaLoading || !captchaImg" class="absolute inset-0 flex items-center justify-center animate-pulse">
+                                    <svg class="h-5 w-5 text-gray-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </div>
+                                <img x-show="!captchaLoading && captchaImg" :src="captchaImg" alt="验证码" class="w-full h-full object-cover" />
+                            </div>
                         </div>
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.captcha" x-text="errors.register.captcha"></p>
                     </div>
@@ -178,7 +191,12 @@
                                 <label for="forgot-captcha" class="sr-only">验证码</label>
                                 <input id="forgot-captcha" x-model="forgotForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="验证码" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.forgot.captcha }">
                             </div>
-                            <img :src="captchaImg" alt="验证码" class="w-32 h-[46px] cursor-pointer rounded-xl border border-gray-200 object-cover hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="点击刷新" />
+                            <div class="relative w-32 h-[46px] flex-shrink-0 cursor-pointer rounded-xl border border-gray-200 overflow-hidden bg-gray-50 hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="点击刷新">
+                                <div x-show="captchaLoading || !captchaImg" class="absolute inset-0 flex items-center justify-center animate-pulse">
+                                    <svg class="h-5 w-5 text-gray-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </div>
+                                <img x-show="!captchaLoading && captchaImg" :src="captchaImg" alt="验证码" class="w-full h-full object-cover" />
+                            </div>
                         </div>
                         <p class="mt-1 text-xs text-red-500" x-show="errors.forgot.captcha" x-text="errors.forgot.captcha"></p>
                     </div>
@@ -262,6 +280,7 @@
             activeTab: 'login',
             captchaImg: '',
             captchaId: '',
+            captchaLoading: true,
             loginForm: { username: '', password: '', captcha: '' },
             registerForm: { username: '', email: '', password: '', confirmPassword: '', captcha: '', agree: false },
             forgotForm: { email: '', captcha: '' },
@@ -302,8 +321,10 @@
             },
 
             refreshCaptcha() {
+                this.captchaLoading = true;
                 if (!window.api || !window.api.getCaptcha) {
                     console.error('API not initialized');
+                    this.captchaLoading = false;
                     return;
                 }
                 window.api.getCaptcha()
@@ -311,7 +332,10 @@
                         this.captchaId = res.result.captchaId;
                         this.captchaImg = res.result.captchaImg;
                     })
-                    .catch(err => console.error('Captcha error:', err));
+                    .catch(err => console.error('Captcha error:', err))
+                    .finally(() => {
+                        this.captchaLoading = false;
+                    });
             },
 
             async handleLogin() {

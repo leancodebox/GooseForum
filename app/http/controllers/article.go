@@ -104,10 +104,8 @@ func PostDetail(c *gin.Context) {
 
 	categoryMap := hotdataserve.ArticleCategoryMap()
 	articleCategory := lo.FilterMap(entity.CategoryId, func(id uint64, _ int) (string, bool) {
-		if c, ok := categoryMap[id]; ok {
-			return c.Category, true
-		}
-		return "", false
+		category, ok := categoryMap[id]
+		return category.Category, ok
 	})
 
 	iLike, isFollowing, isBookmarked := false, false, false
