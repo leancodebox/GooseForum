@@ -2,6 +2,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-theme="{{.Theme}}">
 <head>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
     {{template "common-head.gohtml" .}}
     <!-- V2 Styles & Scripts -->
     {{ViteEntry `src/gf-main.ts`}}
