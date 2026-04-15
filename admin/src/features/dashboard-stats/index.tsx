@@ -4,12 +4,6 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format, subDays } from 'date-fns'
 import { DateRange } from 'react-day-picker'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { ContentLayout } from '@/components/layout/content-layout'
 import { Users, FileText, MessageSquare, Link as LinkIcon } from 'lucide-react'
 import { TrafficOverview } from './components/traffic-overview'
@@ -79,62 +73,59 @@ export function DashboardStats() {
       title='站点统计'
       description='查看论坛的实时运行数据和活跃度指标。'
       topNav={topNav}
-    >
-      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-          <Card>
-            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>总用户数</CardTitle>
-              <Users className='h-4 w-4 text-muted-foreground' />
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>{statsLoading ? '...' : stats?.userCount.toLocaleString()}</div>
-              <p className='text-xs text-muted-foreground'>
-                本月新增: {statsLoading ? '...' : stats?.userMonthCount}
-              </p>
-            </CardContent>
-          </Card>
+      headerActions={
+        <div className='flex items-center gap-6 mt-4 md:mt-0'>
+          <div className='flex flex-col items-end justify-center'>
+            <div className='flex items-center gap-1.5 text-muted-foreground mb-1'>
+              <Users className='h-3.5 w-3.5' />
+              <span className='text-xs font-medium'>总用户数</span>
+            </div>
+            <div className='flex items-baseline gap-1.5'>
+              <span className='text-xl font-bold leading-none'>{statsLoading ? '...' : stats?.userCount.toLocaleString()}</span>
+              <span className='text-[10px] text-muted-foreground'>+{stats?.userMonthCount || 0}</span>
+            </div>
+          </div>
+          
+          <div className='h-8 w-px bg-border' />
 
-          <Card>
-            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>总文章数</CardTitle>
-              <FileText className='h-4 w-4 text-muted-foreground' />
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>{statsLoading ? '...' : stats?.articleCount.toLocaleString()}</div>
-              <p className='text-xs text-muted-foreground'>
-                本月新增: {statsLoading ? '...' : stats?.articleMonthCount}
-              </p>
-            </CardContent>
-          </Card>
+          <div className='flex flex-col items-end justify-center'>
+            <div className='flex items-center gap-1.5 text-muted-foreground mb-1'>
+              <FileText className='h-3.5 w-3.5' />
+              <span className='text-xs font-medium'>总文章数</span>
+            </div>
+            <div className='flex items-baseline gap-1.5'>
+              <span className='text-xl font-bold leading-none'>{statsLoading ? '...' : stats?.articleCount.toLocaleString()}</span>
+              <span className='text-[10px] text-muted-foreground'>+{stats?.articleMonthCount || 0}</span>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>总回复数</CardTitle>
-              <MessageSquare className='h-4 w-4 text-muted-foreground' />
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>{statsLoading ? '...' : stats?.reply.toLocaleString()}</div>
-              <p className='text-xs text-muted-foreground'>
-                社区活跃度指标
-              </p>
-            </CardContent>
-          </Card>
+          <div className='h-8 w-px bg-border hidden sm:block' />
 
-          <Card>
-            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>友情链接</CardTitle>
-              <LinkIcon className='h-4 w-4 text-muted-foreground' />
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>{statsLoading ? '...' : stats?.linksCount}</div>
-              <p className='text-xs text-muted-foreground'>
-                合作站点数量
-              </p>
-            </CardContent>
-          </Card>
+          <div className='hidden sm:flex flex-col items-end justify-center'>
+            <div className='flex items-center gap-1.5 text-muted-foreground mb-1'>
+              <MessageSquare className='h-3.5 w-3.5' />
+              <span className='text-xs font-medium'>总回复数</span>
+            </div>
+            <div className='flex items-baseline gap-1.5'>
+              <span className='text-xl font-bold leading-none'>{statsLoading ? '...' : stats?.reply.toLocaleString()}</span>
+            </div>
+          </div>
+
+          <div className='h-8 w-px bg-border hidden md:block' />
+
+          <div className='hidden md:flex flex-col items-end justify-center'>
+            <div className='flex items-center gap-1.5 text-muted-foreground mb-1'>
+              <LinkIcon className='h-3.5 w-3.5' />
+              <span className='text-xs font-medium'>友情链接</span>
+            </div>
+            <div className='flex items-baseline gap-1.5'>
+              <span className='text-xl font-bold leading-none'>{statsLoading ? '...' : stats?.linksCount}</span>
+            </div>
+          </div>
         </div>
-
-        <div className='mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12'>
+      }
+    >
+      <div className='mt-2 grid grid-cols-1 gap-8 lg:grid-cols-12'>
           <div className='lg:col-span-8'>
             <TrafficOverview 
               data={trafficData?.result || []} 

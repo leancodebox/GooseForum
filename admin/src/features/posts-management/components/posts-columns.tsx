@@ -1,4 +1,4 @@
-import { DotsHorizontalIcon } from '@radix-ui/react-icons'
+import { DotsHorizontalIcon, EyeOpenIcon, ChatBubbleIcon, HeartIcon } from '@radix-ui/react-icons'
 import { type ColumnDef, type Row } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import {
@@ -80,16 +80,31 @@ export const postsColumns: ColumnDef<Post>[] = [
     ),
     cell: ({ row }) => {
       const post = row.original
+      const types: Record<number, { label: string; color: string }> = {
+        0: { label: '博文', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+        1: { label: '分享', color: 'bg-green-100 text-green-800 border-green-200' },
+        2: { label: '问答', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' }
+      }
+      const typeInfo = types[post.type] || { label: '文章', color: 'bg-gray-100 text-gray-800 border-gray-200' }
+
       return (
-        <div className='flex flex-col min-w-0 max-w-[400px]'>
-          <a 
-            href={`/p/post/${post.id}`} 
-            target="_blank" 
-            className='font-medium text-sm line-clamp-2 hover:underline'
-          >
-            {post.title}
-          </a>
-          <span className='text-xs text-muted-foreground line-clamp-1 mt-1'>
+        <div className='w-[200px] sm:w-[280px] lg:w-[350px] xl:w-[450px] flex flex-col pr-4'>
+          <div className='flex items-start gap-2'>
+            <Badge variant="outline" className={`mt-0.5 px-1.5 py-0 text-[10px] font-semibold whitespace-nowrap shrink-0 ${typeInfo.color}`}>
+              {typeInfo.label}
+            </Badge>
+            <a 
+              href={`/p/post/${post.id}`} 
+              target="_blank" 
+              className='font-medium text-sm line-clamp-2 hover:underline break-all'
+            >
+              {post.title}
+            </a>
+            {post.processStatus === 1 && (
+              <Badge variant='destructive' className='mt-0.5 px-1.5 py-0 text-[10px] font-semibold whitespace-nowrap shrink-0'>封禁</Badge>
+            )}
+          </div>
+          <span className='text-xs text-muted-foreground line-clamp-1 mt-1 break-all'>
             {post.description || '暂无摘要'}
           </span>
         </div>
@@ -99,12 +114,12 @@ export const postsColumns: ColumnDef<Post>[] = [
   {
     accessorKey: 'username',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='作者' />
+      <DataTableColumnHeader column={column} title='作者' className='w-[140px] justify-center' />
     ),
     cell: ({ row }) => {
       const post = row.original
       return (
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center justify-center gap-2'>
           <Avatar className='h-7 w-7'>
             <AvatarImage src={post.userAvatarUrl || ''} alt={post.username} />
             <AvatarFallback>{post.username[0]}</AvatarFallback>
@@ -117,37 +132,17 @@ export const postsColumns: ColumnDef<Post>[] = [
     },
   },
   {
-    accessorKey: 'type',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='分类' />
-    ),
-    cell: ({ row }) => {
-      const type = row.getValue('type') as number
-      const types: Record<number, string> = {
-        0: '博文',
-        1: '教程',
-        2: '问答',
-        3: '分享'
-      }
-      return <Badge variant='outline'>{types[type] || '文章'}</Badge>
-    },
-  },
-  {
     accessorKey: 'articleStatus',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='状态' />
+      <DataTableColumnHeader column={column} title='状态' className='w-[100px] justify-center' />
     ),
     cell: ({ row }) => {
       const status = row.getValue('articleStatus') as number
-      const processStatus = row.original.processStatus
       return (
-        <div className='flex flex-col gap-1'>
+        <div className='flex items-center justify-center gap-1.5 flex-wrap'>
           <Badge variant={status === 1 ? 'default' : 'secondary'}>
             {status === 1 ? '发布' : '草稿'}
           </Badge>
-          {processStatus === 1 && (
-            <Badge variant='destructive'>封禁</Badge>
-          )}
         </div>
       )
     },
@@ -155,15 +150,24 @@ export const postsColumns: ColumnDef<Post>[] = [
   {
     id: 'stats',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='统计' />
+      <DataTableColumnHeader column={column} title='统计' className='w-[160px] justify-center' />
     ),
     cell: ({ row }) => {
       const post = row.original
       return (
-        <div className='text-xs space-y-1 text-muted-foreground'>
-          <div>浏览: {post.viewCount}</div>
-          <div>评论: {post.replyCount}</div>
-          <div>点赞: {post.likeCount}</div>
+        <div className='flex items-center justify-center gap-4 text-muted-foreground whitespace-nowrap w-full'>
+          <div className='flex items-center gap-1.5' title='浏览量'>
+            <EyeOpenIcon className='h-3.5 w-3.5' />
+            <span className='text-xs tabular-nums min-w-[20px]'>{post.viewCount}</span>
+          </div>
+          <div className='flex items-center gap-1.5' title='评论数'>
+            <ChatBubbleIcon className='h-3 w-3' />
+            <span className='text-xs tabular-nums min-w-[20px]'>{post.replyCount}</span>
+          </div>
+          <div className='flex items-center gap-1.5' title='点赞数'>
+            <HeartIcon className='h-3.5 w-3.5' />
+            <span className='text-xs tabular-nums min-w-[20px]'>{post.likeCount}</span>
+          </div>
         </div>
       )
     },
@@ -171,7 +175,7 @@ export const postsColumns: ColumnDef<Post>[] = [
   {
     accessorKey: 'createdAt',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='发布时间' />
+      <DataTableColumnHeader column={column} title='发布时间' className='w-[140px]' />
     ),
     cell: ({ row }) => <div className='text-xs whitespace-nowrap'>{row.getValue('createdAt')}</div>,
   },

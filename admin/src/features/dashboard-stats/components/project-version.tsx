@@ -40,7 +40,7 @@ export function ProjectVersion({ releases, loading, error }: ProjectVersionProps
 
   return (
     <Card className='flex flex-col h-full'>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
+      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-1'>
         <div className='space-y-1'>
           <CardTitle className='flex items-center gap-2 text-lg font-semibold'>
             <Code2 className='h-5 w-5' />
@@ -59,8 +59,8 @@ export function ProjectVersion({ releases, loading, error }: ProjectVersionProps
           </a>
         </Button>
       </CardHeader>
-      <CardContent className='flex-1 flex flex-col'>
-        <div className='flex-1 rounded-lg border bg-muted/30 p-4'>
+      <CardContent className='flex-1 flex flex-col min-h-0 p-4 pt-0'>
+        <div className='flex-1 rounded-lg border bg-muted/30 p-4 overflow-y-auto min-h-0' style={{ maxHeight: '350px' }}>
           {loading ? (
             <div className='flex h-full w-full flex-col items-center justify-center space-y-2 text-muted-foreground'>
               <Loader2 className='h-6 w-6 animate-spin' />
@@ -73,20 +73,20 @@ export function ProjectVersion({ releases, loading, error }: ProjectVersionProps
             </div>
           ) : releases.length > 0 ? (
             <div className='space-y-4'>
-              {releases.slice(0, 3).map((release, index) => (
+              {releases.map((release, index) => (
                 <div key={release.id} className='group'>
                   <div className='flex items-start justify-between gap-4'>
-                    <div className='flex-1 space-y-1'>
-                      <div className='flex items-center gap-2'>
-                        <Tag className='h-4 w-4 text-primary' />
-                        <span className='font-medium'>{release.tag_name}</span>
+                    <div className='flex-1 space-y-1 min-w-0'>
+                      <div className='flex items-center gap-2 flex-wrap'>
+                        <Tag className='h-4 w-4 text-primary shrink-0' />
+                        <span className='font-medium truncate'>{release.tag_name}</span>
                         {release.prerelease && (
-                          <Badge variant='secondary' className='bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] h-4 px-1'>
+                          <Badge variant='secondary' className='bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] h-4 px-1 shrink-0'>
                             预发布
                           </Badge>
                         )}
                         {release.draft && (
-                          <Badge variant='outline' className='text-[10px] h-4 px-1'>
+                          <Badge variant='outline' className='text-[10px] h-4 px-1 shrink-0'>
                             草稿
                           </Badge>
                         )}
@@ -97,17 +97,17 @@ export function ProjectVersion({ releases, loading, error }: ProjectVersionProps
                           locale: zhCN,
                         })}
                       </p>
-                      <p className='mt-2 line-clamp-2 text-sm text-foreground/80'>
+                      <p className='mt-2 line-clamp-2 text-sm text-foreground/80 break-words'>
                         {release.body || '暂无发布说明'}
                       </p>
                     </div>
-                    <Button variant='ghost' size='icon' className='h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity' asChild>
+                    <Button variant='ghost' size='icon' className='h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0' asChild>
                       <a href={release.html_url} target='_blank' rel='noopener noreferrer'>
                         <ChevronRight className='h-4 w-4' />
                       </a>
                     </Button>
                   </div>
-                  {index < Math.min(releases.length, 3) - 1 && (
+                  {index < releases.length - 1 && (
                     <div className='mt-4 border-t' />
                   )}
                 </div>
