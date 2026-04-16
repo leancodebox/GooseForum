@@ -100,46 +100,57 @@
 
                                 <!-- Content -->
                                 <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-500" x-text="getTypeLabel(notification.eventType)"></span>
-                                        <span class="text-gray-300">•</span>
-                                        <span class="text-xs text-gray-400 tabular-nums" x-text="formatDate(notification.createdAt)"></span>
-                                        <span x-show="!notification.isRead" class="w-2 h-2 bg-blue-500 rounded-full ml-1"></span>
-                                    </div>
-
-                                    <div class="text-[15px] text-gray-900 leading-relaxed">
+                                    <div class="text-[14px] text-gray-900 leading-6 mb-1 flex items-center flex-wrap gap-x-3 gap-y-1.5">
                                         <!-- Comment/Reply -->
                                         <template x-if="['comment', 'reply'].includes(notification.eventType)">
-                                            <div>
+                                            <div class="flex items-center flex-wrap gap-x-2.5 gap-y-1">
                                                 <a :href="'/u/'+notification.payload.actorId" class="font-bold hover:underline text-gray-900" x-text="notification.payload.actorName"></a>
-                                                <span class="text-gray-600">{{call .T "text_commented_on"}}</span>
-                                                <a :href="'/p/post/'+notification.payload.articleId" class="font-medium text-blue-600 hover:underline" x-text="notification.payload.articleTitle"></a>
-                                                <div class="mt-1.5 text-gray-600 bg-gray-50 p-3 rounded-lg text-sm border border-gray-100" x-text="notification.payload.content"></div>
+                                                <span class="text-gray-500 px-1.5 py-0.5 rounded-md bg-gray-50">{{call .T "text_commented_on"}}</span>
+                                                <a :href="'/p/post/'+notification.payload.articleId" class="font-medium text-blue-600 hover:text-blue-700 transition-colors" x-text="notification.payload.articleTitle"></a>
+                                                <span class="text-gray-300 mx-2">•</span>
+                                                <span class="text-xs text-gray-400 tabular-nums" x-text="formatDate(notification.createdAt)"></span>
+                                                <span x-show="!notification.isRead" class="w-1.5 h-1.5 bg-blue-500 rounded-full ml-2"></span>
                                             </div>
                                         </template>
 
                                         <!-- Like -->
                                         <template x-if="notification.eventType === 'like'">
-                                            <div>
+                                            <div class="flex items-center flex-wrap gap-x-2.5 gap-y-1">
                                                 <a :href="'/u/'+notification.payload.actorId" class="font-bold hover:underline text-gray-900" x-text="notification.payload.actorName"></a>
-                                                <span class="text-gray-600">{{call .T "text_liked_post"}}</span>
-                                                <a :href="'/p/post/'+notification.payload.articleId" class="font-medium text-blue-600 hover:underline" x-text="notification.payload.articleTitle"></a>
+                                                <span class="text-gray-500 px-1.5 py-0.5 rounded-md bg-gray-50">{{call .T "text_liked_post"}}</span>
+                                                <a :href="'/p/post/'+notification.payload.articleId" class="font-medium text-blue-600 hover:text-blue-700 transition-colors" x-text="notification.payload.articleTitle"></a>
+                                                <span class="text-gray-300 mx-2">•</span>
+                                                <span class="text-xs text-gray-400 tabular-nums" x-text="formatDate(notification.createdAt)"></span>
+                                                <span x-show="!notification.isRead" class="w-1.5 h-1.5 bg-blue-500 rounded-full ml-2"></span>
                                             </div>
                                         </template>
 
                                         <!-- Follow -->
                                         <template x-if="notification.eventType === 'follow'">
-                                            <div>
+                                            <div class="flex items-center flex-wrap gap-x-2.5 gap-y-1">
                                                 <a :href="'/u/'+notification.payload.actorId" class="font-bold hover:underline text-gray-900" x-text="notification.payload.actorName"></a>
-                                                <span class="text-gray-600">{{call .T "text_started_following"}}</span>
+                                                <span class="text-gray-500 px-1.5 py-0.5 rounded-md bg-gray-50">{{call .T "text_started_following"}}</span>
+                                                <span class="text-gray-300 mx-2">•</span>
+                                                <span class="text-xs text-gray-400 tabular-nums" x-text="formatDate(notification.createdAt)"></span>
+                                                <span x-show="!notification.isRead" class="w-1.5 h-1.5 bg-blue-500 rounded-full ml-2"></span>
                                             </div>
                                         </template>
 
                                         <!-- Default -->
                                         <template x-if="!['comment', 'reply', 'like', 'follow'].includes(notification.eventType)">
-                                            <span x-text="notification.message || '{{call .T "type_notification"}}'"></span>
+                                            <div class="flex items-center flex-wrap gap-x-2.5 gap-y-1">
+                                                <span class="font-medium" x-text="notification.message || '{{call .T "type_notification"}}'"></span>
+                                                <span class="text-gray-300 mx-2">•</span>
+                                                <span class="text-xs text-gray-400 tabular-nums" x-text="formatDate(notification.createdAt)"></span>
+                                                <span x-show="!notification.isRead" class="w-1.5 h-1.5 bg-blue-500 rounded-full ml-2"></span>
+                                            </div>
                                         </template>
                                     </div>
+
+                                    <!-- Content snippet (Only for comments/replies) -->
+                                    <template x-if="['comment', 'reply'].includes(notification.eventType) && notification.payload.content">
+                                        <div class="text-gray-700 text-[14px] line-clamp-2 mt-2 bg-blue-50 p-3 rounded-lg border border-blue-100" x-text="notification.payload.content"></div>
+                                    </template>
                                 </div>
 
                                 <!-- Actions -->
