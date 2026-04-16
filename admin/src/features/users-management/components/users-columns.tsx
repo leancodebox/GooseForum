@@ -15,13 +15,27 @@ export const usersColumns: ColumnDef<User>[] = [
       const user = row.original
       return (
         <div className='flex items-center gap-3'>
-          <Avatar className='h-10 w-10'>
-            <AvatarImage src={user.avatarUrl || undefined} alt={user.username} />
-            <AvatarFallback>{user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div className='flex flex-col'>
-            <span className='font-medium'>{user.username}</span>
-            <span className='text-xs text-muted-foreground'>{user.email}</span>
+          <a href={`/u/${user.userId}`} target='_blank' rel='noreferrer' className='shrink-0'>
+            <Avatar className='h-10 w-10 transition-opacity hover:opacity-85'>
+              <AvatarImage src={user.avatarUrl || undefined} alt={user.username} />
+              <AvatarFallback>{user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </a>
+          <div className='flex min-w-0 flex-col'>
+            <a
+              href={`/u/${user.userId}`}
+              target='_blank'
+              rel='noreferrer'
+              className='font-medium hover:underline'
+            >
+              {user.username}
+            </a>
+            <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+              <span className='truncate'>{user.email}</span>
+              <Badge variant={user.validate === 1 ? 'secondary' : 'outline'} className='text-[10px]'>
+                {user.validate === 1 ? '邮箱已验证' : '邮箱未验证'}
+              </Badge>
+            </div>
           </div>
         </div>
       )
@@ -29,13 +43,12 @@ export const usersColumns: ColumnDef<User>[] = [
   },
   {
     accessorKey: 'roleList',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='角色' />
-    ),
+    enableSorting: false,
+    header: () => <div className='w-full text-center'>角色</div>,
     cell: ({ row }) => {
       const { roleList } = row.original
       return (
-        <div className='flex flex-wrap gap-1'>
+        <div className='flex flex-wrap justify-center gap-1'>
           {roleList?.map((role) => (
             <Badge key={role.value} variant='secondary' className='text-[10px]'>
               {role.name}
@@ -48,48 +61,33 @@ export const usersColumns: ColumnDef<User>[] = [
   },
   {
     accessorKey: 'status',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='状态' />
-    ),
+    enableSorting: false,
+    header: () => <div className='w-full text-center'>状态</div>,
     cell: ({ row }) => {
       const status = row.getValue('status') as number
       return (
-        <Badge variant={status === 1 ? 'destructive' : 'default'} className='text-[10px]'>
-          {status === 0 ? '正常' : '已封禁'}
-        </Badge>
-      )
-    },
-  },
-  {
-    accessorKey: 'validate',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='验证' />
-    ),
-    cell: ({ row }) => {
-      const validate = row.getValue('validate') as number
-      return (
-        <Badge variant={validate === 1 ? 'secondary' : 'outline'} className='text-[10px]'>
-          {validate === 1 ? '已验证' : '未验证'}
-        </Badge>
+        <div className='flex justify-center'>
+          <Badge variant={status === 1 ? 'destructive' : 'default'} className='text-[10px]'>
+            {status === 0 ? '正常' : '已封禁'}
+          </Badge>
+        </div>
       )
     },
   },
   {
     accessorKey: 'createTime',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='注册时间' />
-    ),
+    enableSorting: false,
+    header: () => <div className='w-full text-center'>注册时间</div>,
     cell: ({ row }) => (
-      <div className='text-xs text-muted-foreground'>{row.getValue('createTime')}</div>
+      <div className='w-full text-center text-xs text-muted-foreground'>{row.getValue('createTime')}</div>
     ),
   },
   {
     accessorKey: 'lastActiveTime',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='最后登录' />
-    ),
+    enableSorting: false,
+    header: () => <div className='w-full text-center'>最后登录</div>,
     cell: ({ row }) => (
-      <div className='text-xs text-muted-foreground'>{row.getValue('lastActiveTime') || '从未登录'}</div>
+      <div className='w-full text-center text-xs text-muted-foreground'>{row.getValue('lastActiveTime') || '从未登录'}</div>
     ),
   },
   {
