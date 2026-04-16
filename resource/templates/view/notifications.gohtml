@@ -5,16 +5,16 @@
 
     <div class="flex-1 min-w-0 py-4 pr-4 sm:pr-6 lg:pr-8 pl-2">
         <div class="space-y-6 pb-12" x-data="notificationsHandler()" x-cloak>
-            
+
             <!-- Header with Tabs and Actions -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h1 class="text-2xl font-bold text-gray-900">{{call .T "notifications_title"}}</h1>
-                
+
                 <div class="flex items-center gap-3">
                     <!-- Tabs -->
                     <div class="flex p-1 bg-gray-100 rounded-lg">
                         <template x-for="filter in filters" :key="filter.key">
-                            <button 
+                            <button
                                 @click="setFilter(filter.key)"
                                 :class="activeFilter === filter.key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
                                 class="px-4 py-1.5 text-sm font-medium rounded-md transition-all"
@@ -24,7 +24,7 @@
                     </div>
 
                     <!-- Mark all as read -->
-                    <button 
+                    <button
                         x-show="notificationList.some(n => !n.isRead)"
                         @click="markAllAsRead"
                         :disabled="isLoading"
@@ -39,7 +39,7 @@
 
             <!-- Notifications List -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 min-h-[400px] overflow-hidden">
-                
+
                 <!-- Loading State -->
                 <div x-show="isLoading && notificationList.length === 0" class="p-6 space-y-6">
                     <template x-for="i in 5">
@@ -74,7 +74,7 @@
                                 <div class="flex-shrink-0 mt-1">
                                     <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
                                          :class="notification.isRead ? 'bg-gray-100 text-gray-400' : 'bg-blue-100 text-blue-600'">
-                                        
+
                                         <template x-if="['comment', 'reply'].includes(notification.eventType)">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                               <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
@@ -126,7 +126,7 @@
                                                 <a :href="'/p/post/'+notification.payload.articleId" class="font-medium text-blue-600 hover:underline" x-text="notification.payload.articleTitle"></a>
                                             </div>
                                         </template>
-                                        
+
                                         <!-- Follow -->
                                         <template x-if="notification.eventType === 'follow'">
                                             <div>
@@ -134,14 +134,14 @@
                                                 <span class="text-gray-600">{{call .T "text_started_following"}}</span>
                                             </div>
                                         </template>
-                                        
+
                                         <!-- Default -->
                                         <template x-if="!['comment', 'reply', 'like', 'follow'].includes(notification.eventType)">
                                             <span x-text="notification.message || '{{call .T "type_notification"}}'"></span>
                                         </template>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Actions -->
                                 <button @click="deleteNotification(notification.id)" class="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Delete">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -152,11 +152,11 @@
                         </li>
                     </template>
                 </ul>
-                
+
                 <!-- Pagination (Load More) -->
                 <div x-show="hasMore" class="p-4 border-t border-gray-100 text-center" x-cloak>
-                    <button 
-                        @click="loadMore" 
+                    <button
+                        @click="loadMore"
                         :disabled="isLoading"
                         class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 shadow-sm">
                         <span x-show="!isLoading">{{call .T "load_more"}}</span>
@@ -184,14 +184,14 @@
                 { key: 'all', label: '{{call .T "filter_all"}}' },
                 { key: 'unread', label: '{{call .T "filter_unread"}}' }
             ],
-            notificationList: [],
-            page: 1,
+            notificationList: {{json .Data.List}},
+            page: 2,
             limit: 20,
-            hasMore: false,
+            hasMore: {{.Data.HasMore}},
             isLoading: false,
 
             init() {
-                this.loadNotifications(true);
+                // this.loadNotifications(true);
             },
 
             setFilter(filter) {
@@ -203,7 +203,7 @@
             async loadNotifications(reset = false) {
                 if (this.isLoading) return;
                 this.isLoading = true;
-                
+
                 if (reset) {
                     this.page = 1;
                     this.notificationList = [];
@@ -222,7 +222,7 @@
                         })
                     });
                     const result = await response.json();
-                    
+
                     if (result.code === 0) {
                         const newNotifications = result.result.list || [];
                         if (reset) {
@@ -272,7 +272,7 @@
 
             async deleteNotification(id) {
                 if (!confirm('{{call .T "confirm_delete_notification"}}')) return;
-                
+
                 try {
                     const response = await fetch('/api/forum/notification/delete', {
                         method: 'POST',
@@ -289,7 +289,7 @@
                     console.error('Error deleting notification:', error);
                 }
             },
-            
+
             formatDate(dateStr) {
                 if (!dateStr) return '';
                 const date = new Date(dateStr);
@@ -304,7 +304,7 @@
                 if (diffMin < 60) return `${diffMin}{{call .T "time_m_ago"}}`;
                 if (diffHr < 24) return `${diffHr}{{call .T "time_h_ago"}}`;
                 if (diffDay < 7) return `${diffDay}{{call .T "time_d_ago"}}`;
-                
+
                 return date.toLocaleDateString();
             },
 

@@ -5,6 +5,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/samber/lo"
 )
 
@@ -54,29 +55,7 @@ type GetNotificationListReq struct {
 // GetNotificationList 获取通知列表
 func GetNotificationList(req component.BetterRequest[GetNotificationListReq]) component.Response {
 	offset := (req.Params.Page - 1) * req.Params.PageSize
-	notifications, total, err := eventNotification.GetByUserId(req.UserId, req.Params.PageSize, offset, req.Params.UnreadOnly)
-	if err != nil {
-		return component.FailResponse("获取通知列表失败")
-	}
-	userIds := lo.FilterMap(notifications, func(n *eventNotification.Entity, _ int) (uint64, bool) {
-		return n.Payload.ActorId, n.Payload.ActorId != 0
-	})
-	articleIds := lo.FilterMap(notifications, func(n *eventNotification.Entity, _ int) (uint64, bool) {
-		return n.Payload.ArticleId, n.Payload.ArticleId != 0
-	})
-	userMap := users.GetMapByIds(userIds)
-	articleMap := articles.GetMapByIds(articleIds)
-
-	// 转换数据
-	lo.ForEach(notifications, func(notification *eventNotification.Entity, _ int) {
-		if userInfo, ok := userMap[notification.Payload.ActorId]; ok {
-			notification.Payload.ActorName = userInfo.Username
-		}
-		if articleInfo, ok := articleMap[notification.Payload.ArticleId]; ok {
-			notification.Payload.ArticleTitle = articleInfo.Title
-		}
-	})
-
+	total, notifications := notificationservice.GetNotificationItemList(req.UserId, req.Params.PageSize, offset, req.Params.UnreadOnly)
 	return component.SuccessResponse(component.DataMap{
 		"list":  notifications,
 		"total": total,

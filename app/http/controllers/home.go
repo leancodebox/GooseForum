@@ -8,12 +8,14 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
@@ -221,6 +223,9 @@ func NewTopic(c *gin.Context) {
 
 type NotificationsData struct {
 	CommonDataVo
+	Total   int64
+	List    []*eventNotification.Entity
+	HasMore bool
 }
 
 func Notifications(c *gin.Context) {
@@ -228,12 +233,16 @@ func Notifications(c *gin.Context) {
 		SetTitle("Notifications - GooseForum").
 		SetCanonicalURL(component.BuildCanonicalHref(c)).
 		Build()
-
+	userId := c.GetUint64("userId")
+	total, notifications := notificationservice.GetNotificationItemList(userId, 20, 0, false)
 	commonData := GetCommonData(c)
 	commonData.Sidebar.SetActive("notifications")
 
 	viewrender.SafeRender(c, "notifications.gohtml", NotificationsData{
 		CommonDataVo: commonData,
+		Total:        total,
+		List:         notifications,
+		HasMore:      len(notifications) >= 20,
 	}, pageMeta)
 }
 
