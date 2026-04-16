@@ -62,7 +62,7 @@ export function UsersActionDialog({
     if (open) {
       const fetchRoles = async () => {
         try {
-          const response = await axios.post('/api/admin/get-all-role-item')
+          const response = await axios.get('/api/admin/get-all-role-item')
           if (response.data.code === 0) {
             const roleOptions = response.data.result.map((r: any) => ({
               label: r.name,
