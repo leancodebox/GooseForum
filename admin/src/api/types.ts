@@ -81,6 +81,10 @@ export interface SiteSettings {
   siteUrl: string
   siteEmail: string
   externalLinks?: string
+  footerInfo?: FooterInfo
+  brandType?: 'default' | 'text' | 'image'
+  brandText?: string
+  brandImage?: string
 }
 
 export interface MailSettings {

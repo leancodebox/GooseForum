@@ -22,7 +22,10 @@ export const siteInfoSchema = z.object({
   siteDescription: z.string().max(500, '站点描述不能超过 500 个字符'),
   siteKeywords: z.string().max(200, '关键词不能超过 200 个字符'),
   externalLinks: z.string().or(z.literal('')),
-  footerInfo: footerInfoSchema
+  footerInfo: footerInfoSchema,
+  brandType: z.enum(['default', 'text', 'image']),
+  brandText: z.string().or(z.literal('')),
+  brandImage: z.string().or(z.literal(''))
 })
 
 export type SiteInfo = z.infer<typeof siteInfoSchema>

@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
 import { siteInfoSchema, type SiteInfo } from './data/schema'
 import { FooterEditor } from './components/footer-editor'
 
@@ -38,6 +40,9 @@ export default function SiteInfoManagement() {
         primary: [],
         list: [],
       },
+      brandType: 'default',
+      brandText: '',
+      brandImage: '',
     },
   })
 
@@ -221,6 +226,124 @@ export default function SiteInfoManagement() {
                           </FormItem>
                         )}
                       />
+                      {/* 品牌标识设置 */}
+                      <div className='space-y-4'>
+                        <div className='flex items-center gap-2 border-b pb-2 text-base font-medium'>
+                          <ImageIcon className='h-4 w-4 text-muted-foreground' />
+                          品牌标识
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name='brandType'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>标识类型</FormLabel>
+                              <FormControl>
+                                <RadioGroup
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                  className='flex gap-4'
+                                >
+                                  <div className='flex items-center gap-2'>
+                                    <RadioGroupItem value='default' id='brand-default' />
+                                    <Label htmlFor='brand-default'>默认样式</Label>
+                                  </div>
+                                  <div className='flex items-center gap-2'>
+                                    <RadioGroupItem value='text' id='brand-text' />
+                                    <Label htmlFor='brand-text'>自定义文字</Label>
+                                  </div>
+                                  <div className='flex items-center gap-2'>
+                                    <RadioGroupItem value='image' id='brand-image' />
+                                    <Label htmlFor='brand-image'>图片</Label>
+                                  </div>
+                                </RadioGroup>
+                              </FormControl>
+                              <FormDescription>
+                                {field.value === 'default' && '影响左上角 Logo，默认展示 GooseForum'}
+                                {field.value === 'text' && '影响左上角 Logo，可自定义品牌文字'}
+                                {field.value === 'image' && '影响左上角 Logo，可上传品牌图片'}
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {form.watch('brandType') === 'text' && (
+                          <FormField
+                            control={form.control}
+                            name='brandText'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>品牌文字</FormLabel>
+                                <FormControl>
+                                  <Input placeholder='MyBrand' {...field} />
+                                </FormControl>
+                                <FormDescription>自定义品牌文字，默认：GooseForum</FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                        {form.watch('brandType') === 'image' && (
+                          <FormField
+                            control={form.control}
+                            name='brandImage'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>品牌图片</FormLabel>
+                                <div className='flex items-start gap-4'>
+                                  <div className='h-20 w-20 shrink-0 overflow-hidden rounded-lg border bg-muted flex items-center justify-center'>
+                                    {field.value ? (
+                                      <img src={field.value} alt='Brand' className='h-full w-full object-cover' />
+                                    ) : (
+                                      <ImageIcon className='h-10 w-10 text-muted-foreground/50' />
+                                    )}
+                                  </div>
+                                  <div className='flex flex-col gap-3 w-full'>
+                                    <FormControl>
+                                      <Input placeholder='Brand Image URL' {...field} />
+                                    </FormControl>
+                                    <div className='flex items-center gap-2'>
+                                      <Button
+                                        type='button'
+                                        variant='secondary'
+                                        size='sm'
+                                        className='w-full sm:w-auto'
+                                        onClick={() => document.getElementById('brand-image-upload')?.click()}
+                                      >
+                                        上传图片
+                                      </Button>
+                                      <input
+                                        id='brand-image-upload'
+                                        type='file'
+                                        accept='image/*'
+                                        className='hidden'
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0]
+                                          if (!file) return
+                                          const formData = new FormData()
+                                          formData.append('file', file)
+                                          axios.post('/file/img-upload', formData, {
+                                            headers: { 'Content-Type': 'multipart/form-data' },
+                                          }).then((res) => {
+                                            if (res.data.code === 0) {
+                                              form.setValue('brandImage', res.data.result.url)
+                                              toast.success('上传成功')
+                                            } else {
+                                              toast.error(res.data.message || '上传失败')
+                                            }
+                                          }).catch(() => toast.error('上传失败'))
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <FormDescription>上传品牌图片，建议尺寸 200x50</FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                      </div>
                       <FormField
                         control={form.control}
                         name='siteEmail'

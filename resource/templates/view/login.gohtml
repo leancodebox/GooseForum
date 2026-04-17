@@ -270,6 +270,26 @@
                     </button>
                 </div>
             </div>
+            <!-- Right Side: Branding -->
+            <div class="hidden md:flex w-1/2 bg-gradient-to-br from-blue-50 to-indigo-50 p-8 md:p-12 flex-col justify-center items-center text-center border-t md:border-t-0 md:border-l border-gray-100" x-show="activeTab === 'forgot'">
+                <div class="mb-6">
+                    {{if or (eq .SiteSetting.BrandType "default") (eq .SiteSetting.BrandType "")}}
+                    <a href="/" class="inline-block text-4xl font-black tracking-tighter text-blue-600 hover:text-blue-700 transition-colors">
+                        Goose<span class="text-gray-900">Forum</span>
+                    </a>
+                    {{else if eq .SiteSetting.BrandType "text"}}
+                    <a href="/" class="inline-block text-4xl font-black tracking-tighter text-blue-600 hover:text-blue-700 transition-colors">
+                        {{.SiteSetting.BrandText}}
+                    </a>
+                    {{else if eq .SiteSetting.BrandType "image"}}
+                    <a href="/" class="inline-block">
+                        <img src="{{.SiteSetting.BrandImage}}" alt="Brand" class="h-16 w-auto object-contain" />
+                    </a>
+                    {{end}}
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">欢迎使用 {{.SiteSetting.SiteName}}</h2>
+                <p class="text-sm text-gray-600 max-w-xs">{{.SiteSetting.SiteDescription}}</p>
+            </div>
 
         </div>
     </div>

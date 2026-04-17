@@ -20,6 +20,9 @@ var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
 			{Name: "LeanCodeBox", Url: "https://github.com/leancodebox"},
 		},
 	},
+	BrandType:  "default",
+	BrandText:   "",
+	BrandImage:  "",
 }
 
 func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {

@@ -22,9 +22,19 @@
                 <!-- Logo & Nav Container -->
                 <div class="flex items-center gap-4 sm:gap-8 flex-1 min-w-0">
                     <!-- Logo (Always Visible) -->
+                    {{if or (eq .SiteSetting.BrandType "default") (eq .SiteSetting.BrandType "")}}
                     <a href="/" class="text-xl sm:text-2xl font-black tracking-tighter text-blue-600 hover:text-blue-700 transition-colors flex-shrink-0">
                         Goose<span class="text-gray-900">Forum</span>
                     </a>
+                    {{else if eq .SiteSetting.BrandType "text"}}
+                    <a href="/" class="text-xl sm:text-2xl font-black tracking-tighter text-blue-600 hover:text-blue-700 transition-colors flex-shrink-0">
+                        {{.SiteSetting.BrandText}}
+                    </a>
+                    {{else if eq .SiteSetting.BrandType "image"}}
+                    <a href="/" class="flex-shrink-0">
+                        <img src="{{.SiteSetting.BrandImage}}" alt="Brand" class="h-8 sm:h-10 w-auto object-contain" />
+                    </a>
+                    {{end}}
 
                     <!-- Desktop Nav (Default) -->
                     <nav class="hidden md:flex items-center gap-6"
