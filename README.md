@@ -1,12 +1,12 @@
 <div align="center">
   <img src="resource/static/pic/icon_300.webp" width="140"/>
   <h1>GooseForum</h1>
-  <p>🚀 Modern Go + Vue 3 + TailwindCSS Forum System</p>
-  
+  <p>🚀 Modern Go + Alpine.js Forum System</p>
+
   <p>
     <a href="https://github.com/leancodebox/GooseForum/releases"><img src="https://img.shields.io/github/release/leancodebox/GooseForum.svg" alt="GitHub release"></a>
-    <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.23+-blue.svg" alt="Go version"></a>
-    <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue-3.0+-green.svg" alt="Vue version"></a>
+    <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.24+-blue.svg" alt="Go version"></a>
+    <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/TailwindCSS-4-blue.svg" alt="TailwindCSS"></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/leancodebox/GooseForum.svg" alt="License"></a>
     <a href="https://github.com/leancodebox/GooseForum/stargazers"><img src="https://img.shields.io/github/stars/leancodebox/GooseForum.svg?style=social" alt="GitHub stars"></a>
   </p>
@@ -18,7 +18,7 @@
 
 ## 📖 Project Overview
 
-GooseForum is a modern technical community platform built with Go + Vue 3 + TailwindCSS technology stack. It provides simple deployment and rich community features, designed as a lightweight forum system specifically for technical developers.
+GooseForum is a modern technical community platform built with Go + Alpine.js + TailwindCSS. It provides simple deployment and rich community features, designed as a lightweight forum system for technical developers.
 
 🌐 **Live Demo**: [GooseForum](https://gooseforum.online/)
 
@@ -26,67 +26,67 @@ GooseForum is a modern technical community platform built with Go + Vue 3 + Tail
 
 ### 🎯 User System
 - **User Registration/Login** - Email activation support
-- **Permission Management** - Role-based access control system
+- **Permission Management** - Role-based access control
 - **User Center** - Profile management, avatar upload
-- **Points System** - Check-in, posting, reply point rewards
-- **Admin Panel** - Complete backend management functionality
+- **Points System** - Check-in, posting, reply rewards
+- **Admin Panel** - Complete backend management
 
 ### 📝 Content Management
-- **Article Publishing** - Markdown editor support
-- **Comment System** - Multi-level comment replies
+- **Article Publishing** - Markdown editor with preview
+- **Comment System** - Multi-level replies
 - **Article Categories** - Flexible category management
-- **Tag System** - Article tagging management
-- **Content Moderation** - Admin content review functionality
+- **Real-time Notifications** - WebSocket-powered notifications
+- **Chat System** - Real-time messaging
 
 ### 🛠 Technical Features
-- **Single File Deployment** - Single executable file after compilation
-- **SQLite Support** - Default SQLite, MySQL support
+- **Single File Deployment** - Single executable after compilation
+- **SQLite/MySQL Support** - Default SQLite, MySQL optional
 - **Auto Backup** - Scheduled database backup
 - **Responsive Design** - Perfect mobile support
-- **Theme Switching** - Light/dark theme support
+- **Brand Customization** - Custom logo/text/image support
 - **SEO Friendly** - Complete SEO optimization
 
 ## 🚀 Quick Start
 
 ### Method 1: Download Pre-compiled Version (Recommended)
 
-1. Download the pre-compiled version for your system from [GitHub Releases](https://github.com/leancodebox/GooseForum/releases)
+1. Download pre-compiled version from [GitHub Releases](https://github.com/leancodebox/GooseForum/releases)
 2. Extract and start:
 
 ```bash
-# Extract the downloaded file
+# Extract
 tar -zxvf GooseForum_Linux_x86_64.tar.gz
 
-# Grant execute permission
+# Grant permission
 chmod +x ./GooseForum
 
 # Start service
 ./GooseForum serve
 ```
 
-### Quick Build with GoReleaser
+### Build with GoReleaser
 
 ```bash
 # Install GoReleaser
 go install github.com/goreleaser/goreleaser@latest
 
-# Build for all platforms
+# Build all platforms
 goreleaser build --snapshot --clean
 
-# Build for current platform
+# Build current platform
 goreleaser build --snapshot --clean --single-target
 ```
 
-3. Visit `http://localhost:5234` to start using
+3. Visit `http://localhost:5234`
 
-> 💡 **Tip**: After first startup, the first registered account will automatically become an administrator
+> 💡 **Tip**: First registered account becomes administrator
 
 ### Method 2: Build from Source
 
 #### Requirements
-- Go 1.23+
+- Go 1.24+
 - Node.js 18+
-- npm or yarn
+- npm or pnpm
 
 #### Build Steps
 
@@ -95,11 +95,8 @@ goreleaser build --snapshot --clean --single-target
 git clone https://github.com/leancodebox/GooseForum.git
 cd GooseForum
 
-# Build frontend resources
-cd resource
-npm install
-npm run build
-cd ..
+# Build frontend
+cd resource && pnpm install && pnpm build && cd ..
 
 # Build backend
 go mod tidy
@@ -109,18 +106,30 @@ go build -ldflags="-w -s" .
 ./GooseForum serve
 ```
 
+### Development Mode
+
+```bash
+# Start all services (backend + frontend + admin)
+./dev.sh
+
+# Or run individually:
+air                    # Backend with hot reload
+cd resource && pnpm dev    # Vue frontend
+cd admin && pnpm dev      # React admin panel
+```
+
 ## 🔧 Configuration
 
-GooseForum will automatically create a `config.toml` configuration file on startup. Main configuration items:
+GooseForum auto-creates `config.toml` on first startup:
 
 ```toml
 [server]
 port = 5234                    # Service port
-url = "http://localhost"     # Site URL
+url = "http://localhost"       # Site URL
 
 [db.default]
-connection = "sqlite"        # Database type (sqlite/mysql)
-path = "./storage/database/sqlite.db"  # SQLite database path
+connection = "sqlite"          # Database type (sqlite/mysql)
+path = "./storage/database/sqlite.db"
 ```
 
 📖 **Detailed Configuration**: [Configuration Documentation](docs/configuration.md)
@@ -128,88 +137,78 @@ path = "./storage/database/sqlite.db"  # SQLite database path
 ## 🏗 Technical Architecture
 
 ### Backend Tech Stack
-- **Go 1.23+** - Main development language
+- **Go 1.24+** - Main language
 - **Gin** - Web framework
-- **GORM** - ORM framework
-- **SQLite/MySQL** - Database support
+- **GORM** - ORM
+- **SQLite/MySQL** - Database
 - **JWT** - Authentication
-- **Viper** - Configuration management
-- **Cobra** - Command line tool
+- **Cobra** - CLI
 
 ### Frontend Tech Stack
-- **Vue 3** - Frontend framework (Composition API)
-- **Vite** - Build tool
+- **Alpine.js** - Lightweight JS framework
 - **TailwindCSS 4** - CSS framework
-- **DaisyUI** - UI component library
-- **TypeScript** - Type support
-- **Pinia** - State management
-- **Vue Router** - Route management
+- **GoHTML** - Server-side templates
+- **Vite** - Build tool
 
-### Development Tools
-- **Air** - Hot reload development
-- **GoReleaser** - Automated build and release
-- **Vitest** - Frontend testing
+### Admin Panel Tech Stack
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **shadcn-admin** - Admin template
+- **TanStack Query/Router** - Data fetching & routing
+- **Radix UI** - Component library
 
 ## 📁 Project Structure
 
 ```
 GooseForum/
-├── app/                    # Backend application code
-│   ├── bundles/           # Utility packages
-│   ├── console/           # Command line tools
-│   ├── http/              # HTTP controllers and routes
-│   ├── models/            # Data models
+├── app/                    # Backend code
+│   ├── bundles/           # Utilities (JWT, cache, events)
+│   ├── console/           # CLI commands
+│   ├── http/              # Controllers, middleware, routes
+│   ├── models/            # GORM models
 │   └── service/           # Business services
 ├── resource/              # Frontend resources
-│   ├── src/               # Vue source code
+│   ├── src/               # Alpine.js source
 │   ├── static/            # Static assets
-│   └── templates/         # Go templates
-├── docs/                  # Project documentation
-├── main.go               # Program entry point
-└── config.toml           # Configuration file
+│   └── templates/         # GoHTML templates
+├── admin/                 # React admin panel
+├── docs/                  # Documentation
+├── main.go               # Entry point
+└── config.toml           # Configuration
 ```
 
 ## 🛡 Admin Features
 
-### User Management
 ```bash
 # Reset admin password
 ./GooseForum user:manage
 
 # Set user email
-./GooseForum user:set-email
+./GooseForum user:set-email <email>
 ```
+
+### Admin Panel Features
+- **User Management** - Search, filter, ban, delete users
+- **Site Settings** - General, brand, footer, mail, security, posting
+- **Category Management** - Create, edit, delete categories
+- **Sponsorship Management** - Sponsor tiers and user sponsors
+- **Dashboard** - Traffic stats, daily analytics
 
 ### Data Backup
-- Automatic scheduled SQLite database backup
-- Configurable backup frequency and retention count
-- Backup files stored in `./storage/databasebackup/` directory
+- Automatic scheduled SQLite backup
+- Configurable frequency and retention
+- Backup in `./storage/databasebackup/`
 
-## 🔄 Development Mode
+## 📦 Deployment
 
-```bash
-# Install Air hot reload tool
-go install github.com/cosmtrek/air@latest
-
-# Start development mode
-air
-
-# Frontend development mode
-cd resource
-npm run dev
-```
-
-## 📦 Deployment Recommendations
-
-### Production Environment Deployment
+### Production
 1. Use reverse proxy (Nginx/Apache)
-2. Configure HTTPS certificates
+2. Configure HTTPS
 3. Set up scheduled backups
-4. Monitor log files
+4. Monitor logs
 
-### Docker Deployment
+### Docker
 ```dockerfile
-# Dockerfile example
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
@@ -220,22 +219,23 @@ CMD ["./GooseForum", "serve"]
 ## 🤝 Contributing
 
 1. Fork this project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Create a Pull Request
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push branch (`git push origin feature/AmazingFeature`)
+5. Create Pull Request
 
 ## 📄 License
 
-This project is open source under the [MIT License](LICENSE).
+MIT License - see [LICENSE](LICENSE)
 
 ## 📚 Related Documentation
 
-- [Configuration Documentation](docs/configuration.md) - Detailed configuration options
+- [Configuration Documentation](docs/configuration.md)
+- [Chinese README](README_ZH.md)
 
 ## 🙏 Acknowledgments
 
-Thanks to all developers who have contributed to the GooseForum project!
+Thanks to all contributors!
 
 ---
 
