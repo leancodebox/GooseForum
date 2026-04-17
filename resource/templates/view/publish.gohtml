@@ -13,7 +13,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 translate-y-2"
-             class="fixed top-4 right-4 z-50 w-full max-w-sm">
+             class="fixed top-20 right-4 z-60 w-full max-w-sm">
             <div class="rounded-md p-3 shadow-lg flex items-center space-x-3"
                  :class="{
                      'bg-green-50 border border-green-200 text-green-800': message.type === 'success',
@@ -89,7 +89,7 @@
                                     {{call .T "select_category_label"}} <span class="text-red-500">*</span>
                                 </label>
                             </div>
-                            
+
                             <div class="flex-1 relative" x-data="{ showDropdown: false }" @click.away="showDropdown = false">
                                 <div class="flex justify-between items-end mb-1">
                                     <span class="text-xs text-gray-500" x-show="form.categoryIds.length > 0">
@@ -104,7 +104,7 @@
                                 <div class="relative">
                                     <div class="min-h-[42px] w-full bg-white border border-gray-300 rounded-md shadow-sm flex flex-wrap gap-1 p-1.5 cursor-text focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500"
                                          @click="showDropdown = true; $refs.categorySearch.focus()">
-                                        
+
                                         <!-- Selected Categories Tags -->
                                         <template x-for="id in form.categoryIds" :key="id">
                                             <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100">
@@ -116,12 +116,12 @@
                                         </template>
 
                                         <!-- Search Input inside trigger -->
-                                        <input type="text" x-ref="categorySearch" x-model="categoryFilter" 
+                                        <input type="text" x-ref="categorySearch" x-model="categoryFilter"
                                                class="flex-1 min-w-[120px] outline-none border-none text-sm bg-transparent px-1 focus:ring-0 p-0"
                                                :placeholder="form.categoryIds.length === 0 ? '{{call .T "select_category_label"}}...' : ''"
                                                @focus="showDropdown = true">
                                     </div>
-                                    
+
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                                         <svg class="h-4 w-4 text-gray-400 transition-transform duration-200" :class="showDropdown ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -144,7 +144,7 @@
                                             <span class="ml-3 text-sm text-gray-700 group-hover:text-gray-900">{{.Category}}</span>
                                         </label>
                                         {{end}}
-                                        
+
                                         <!-- No results state -->
                                         <div x-show="categoryFilter && $el.previousElementSibling && $el.parentElement.querySelectorAll('label[style*=\'display: none\']').length === {{len .Data.CommonDataVo.ArticleCategoryList}}"
                                              class="text-center py-3 text-sm text-gray-500">
@@ -152,7 +152,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="flex justify-between items-start mt-1.5">
                                     <p class="text-xs text-red-500 flex items-center gap-1 font-medium" x-show="form.categoryIds.length === 0 && form.title.length > 0" x-transition>
                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -439,7 +439,7 @@ function newTopicHandler() {
                 }
             } catch (error) {
                 console.error('Upload error:', error);
-                this.showMsg('图片上传失败', 'error');
+                this.showMsg(error.message || '图片上传失败', 'error');
             } finally {
                 this.ui.uploading = false;
             }

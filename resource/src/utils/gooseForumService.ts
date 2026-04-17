@@ -34,25 +34,13 @@ export const getArticlesOrigin = async (id: any): Promise<Result<any>> => {
 
 // 提交文章的函数
 export const submitArticle = async (article: ArticleData): Promise<Result<any>> => {
-    try {
-        return await axiosInstance.post('/forum/write-articles', {
-            id: article.id,
-            content: article.content,
-            title: article.title,
-            type: article.type,
-            categoryId: article.categoryId,
-        });
-    } catch (error) {
-        // 检查是否有响应数据
-        if (axios.isAxiosError(error) && error.response) {
-            // 从响应中提取错误信息
-            const errorMessage = error.response.data?.msg || '提交文章失败';
-            alert(`提交文章失败: ${errorMessage}`);
-        } else {
-            alert(`提交文章失败`);
-        }
-        throw new Error(`提交文章失败: ${error}`);
-    }
+    return await axiosInstance.post('/forum/write-articles', {
+        id: article.id,
+        content: article.content,
+        title: article.title,
+        type: article.type,
+        categoryId: article.categoryId,
+    });
 };
 
 // Mock 获取用户信息
@@ -238,6 +226,12 @@ export function uploadImage(formData: FormData): Promise<Result<any>> {
         headers: {
             'Content-Type': 'multipart/form-data'
         }
+    }).catch((error) => {
+        if (axios.isAxiosError(error) && error.response) {
+            const msg = error.response.data?.msg || '图片上传失败';
+            throw new Error(msg);
+        }
+        throw new Error('图片上传失败');
     });
 }
 

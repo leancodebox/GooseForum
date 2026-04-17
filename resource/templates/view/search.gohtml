@@ -38,21 +38,21 @@
             {{if .Data.ArticleList}}
             <div class="bg-white rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden">
                 <div class="w-full overflow-x-auto">
-                    <table class="w-full text-left border-separate border-spacing-y-2 table-fixed">
+                    <table class="w-full text-left border-collapse table-fixed">
                         <thead>
-                            <tr class="text-[12px] font-semibold uppercase tracking-wider text-gray-400">
-                                <th class="px-4 sm:px-6 py-1 text-gray-400/80">Topic</th>
-                                <th class="hidden lg:table-cell px-4 py-1 text-center text-gray-400/80 w-[120px]">Users</th>
-                                <th class="hidden md:table-cell px-4 py-1 text-center text-gray-400/80 w-[80px]">Replies</th>
-                                <th class="hidden md:table-cell px-4 py-1 text-center text-gray-400/80 w-[80px]">Views</th>
-                                <th class="hidden sm:table-cell px-6 py-1 text-right text-gray-400/80 w-[110px]">Activity</th>
+                            <tr class="text-[12px] font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-100">
+                                <th class="px-4 sm:px-6 py-2.5 text-gray-400/80">Topic</th>
+                                <th class="hidden lg:table-cell px-4 py-2.5 text-center text-gray-400/80 w-[120px]">Users</th>
+                                <th class="hidden md:table-cell px-4 py-2.5 text-center text-gray-400/80 w-[80px]">Replies</th>
+                                <th class="hidden md:table-cell px-4 py-2.5 text-center text-gray-400/80 w-[80px]">Views</th>
+                                <th class="hidden sm:table-cell px-6 py-2.5 text-right text-gray-400/80 w-[110px]">Activity</th>
                             </tr>
                         </thead>
                         <tbody>
                             {{range .Data.ArticleList}}
-                            <tr class="group transition-all duration-200 hover:bg-gray-50 hover:shadow-sm hover:-translate-y-0.5">
+                            <tr class="group transition-colors duration-200 hover:bg-gray-50 cursor-pointer">
                                 <!-- Topic Column -->
-                                <td class="px-4 sm:px-6 py-4 align-middle rounded-l-2xl rounded-r-2xl sm:rounded-r-none">
+                                <td class="px-4 sm:px-6 py-4 align-middle">
                                     <div class="flex items-center gap-3">
                                         <div class="min-w-0 flex-1">
                                             <div class="flex items-center flex-wrap gap-x-3 gap-y-2 mb-1.5">
@@ -92,8 +92,7 @@
                                     <div class="flex items-center justify-center -space-x-3">
                                         {{range .Posters}}
                                         <img src="{{.AvatarUrl}}"
-                                             loading="lazy"
-                                             class="relative z-30 inline-block h-9 w-9 rounded-full ring-2 ring-white shadow-sm object-cover hover:z-40 hover:scale-110 transition-transform cursor-pointer"
+                                             class="relative z-30 inline-block h-8 w-8 rounded-full ring-2 ring-white shadow-sm object-cover hover:z-40 hover:scale-110 transition-transform cursor-pointer"
                                              title="{{.Username}}"
                                              @click.stop="$dispatch('show-user-card', { userId: {{.Id}}, username: '{{.Username}}', avatarUrl: '{{.AvatarUrl}}', target: $el, event: $event })">
                                         {{end}}
@@ -103,20 +102,20 @@
                                 <!-- Replies Column -->
                                 <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
                                     <div class="inline-flex items-center justify-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-                                        <span class="text-[15px] font-medium tabular-nums format-number {{if gt .CommentCount 10}}text-orange-500 font-bold{{else}}text-gray-900{{end}}" data-number="{{.CommentCount}}">{{.CommentCount}}</span>
+                                        <span class="text-[14px] font-medium tabular-nums format-number {{if gt .CommentCount 10}}text-orange-500 font-bold{{else}}text-gray-900{{end}}" data-number="{{.CommentCount}}">{{.CommentCount}}</span>
                                     </div>
                                 </td>
 
                                 <!-- Views Column -->
                                 <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
                                     <div class="inline-flex items-center justify-center gap-1.5 transition-opacity duration-300">
-                                        <span class="text-[15px] font-medium format-number {{if gt .ViewCount 500}}text-orange-400 font-bold{{else}}text-gray-900 opacity-60 group-hover:opacity-100{{end}} tabular-nums" data-number="{{.ViewCount}}">{{.ViewCount}}</span>
+                                        <span class="text-[14px] font-medium format-number {{if gt .ViewCount 500}}text-orange-400 font-bold{{else}}text-gray-900 opacity-60 group-hover:opacity-100{{end}} tabular-nums" data-number="{{.ViewCount}}">{{.ViewCount}}</span>
                                     </div>
                                 </td>
 
                                 <!-- Activity Column -->
-                                <td class="hidden sm:table-cell px-6 py-4 text-right align-middle rounded-r-2xl">
-                                    <span class="text-[13px] font-medium text-gray-400/80 whitespace-nowrap time-ago tabular-nums group-hover:text-gray-500 transition-colors" data-time="{{.LastUpdateTime}}">{{.LastUpdateTime}}</span>
+                                <td class="hidden sm:table-cell px-6 py-4 text-right align-middle">
+                                    <span class="text-[13px] font-medium text-gray-400 whitespace-nowrap time-ago tabular-nums group-hover:text-gray-600 transition-colors" data-time="{{.LastUpdateTime}}">{{.LastUpdateTime}}</span>
                                 </td>
                             </tr>
                             {{end}}
@@ -130,7 +129,7 @@
                     current: {{.Data.CurrentPage}},
                     total: {{.Data.TotalPages}},
                     query: '{{.Data.Query}}'
-                })" x-show="total > 1" class=" px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-8 pb-8" style="display: none;">
+                })" x-show="total > 1" class="px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-8 pb-8" style="display: none;">
                     <!-- Mobile/Simple Prev/Next -->
                     <div class="flex items-center gap-2 sm:hidden w-full justify-between">
                         {{if gt .Data.CurrentPage 1}}

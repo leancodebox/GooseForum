@@ -56,7 +56,6 @@ document.addEventListener('alpine:init', () => {
                 }
             } catch (error) {
                 console.error('Follow action error:', error);
-                alert(error instanceof Error ? error.message : 'An error occurred');
             } finally {
                 this.loading = false;
             }

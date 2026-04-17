@@ -135,35 +135,24 @@ type AnnouncementConfig struct {
 }
 
 type SecurityAndRegistration struct {
-	EnableSignup            bool `json:"enableSignup"`
-	EnableEmailVerification bool `json:"enableEmailVerification"`
-	MustApproveUsers        bool `json:"mustApproveUsers"`
-	MinPasswordLength       int  `json:"minPasswordLength"`
-	InviteOnly              bool `json:"inviteOnly"`
-	Restrictions            struct {
-		AllowedDomains        []string `json:"allowedDomains"`
-		BlockedDomains        []string `json:"blockedDomains"`
-		MaxRegistrationsPerIp int      `json:"maxRegistrationsPerIp"`
-	} `json:"restrictions"`
+	EnableSignup            bool     `json:"enableSignup"`
+	EnableEmailVerification bool     `json:"enableEmailVerification"`
+	AllowedDomains          []string `json:"allowedDomains"`
 }
 
 type PostingContent struct {
 	TextControl struct {
-		MinPostLength       int  `json:"minPostLength"`
-		MaxPostLength       int  `json:"maxPostLength"`
-		MinTitleLength      int  `json:"minTitleLength"`
-		MaxTitleLength      int  `json:"maxTitleLength"`
-		AllowUppercasePosts bool `json:"allowUppercasePosts"`
+		MinPostLength              int `json:"minPostLength"`
+		MaxPostLength              int `json:"maxPostLength"`
+		MinTitleLength             int `json:"minTitleLength"`
+		MaxTitleLength             int `json:"maxTitleLength"`
+		NewUserPostCooldownMinutes int `json:"newUserPostCooldownMinutes"`
 	} `json:"textControl"`
 	UploadControl struct {
-		AllowAttachments      bool     `json:"allowAttachments"`
-		AuthorizedExtensions  []string `json:"authorizedExtensions"`
-		MaxAttachmentSizeKb   int      `json:"maxAttachmentSizeKb"`
-		MaxAttachmentsPerPost int      `json:"maxAttachmentsPerPost"`
+		AllowAttachments             bool     `json:"allowAttachments"`
+		AuthorizedExtensions         []string `json:"authorizedExtensions"`
+		MaxAttachmentSizeKb          int      `json:"maxAttachmentSizeKb"`
+		MaxDailyUploadsPerUser       int      `json:"maxDailyUploadsPerUser"`
+		NewUserUploadCooldownMinutes int      `json:"newUserUploadCooldownMinutes"`
 	} `json:"uploadControl"`
-	EditControl struct {
-		EditingGracePeriod      int  `json:"editingGracePeriod"`
-		PostEditTimeLimit       int  `json:"postEditTimeLimit"`
-		AllowUsersToDeletePosts bool `json:"allowUsersToDeletePosts"`
-	} `json:"editControl"`
 }

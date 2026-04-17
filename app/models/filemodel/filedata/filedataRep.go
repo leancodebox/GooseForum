@@ -93,7 +93,11 @@ func GetFileByName(name string) (*Entity, error) {
 	return &entity, nil
 }
 
-// SaveFileFromUpload 处理文件上传的通用方法
+// CountDailyUploads 统计用户当日上传次数
+func CountDailyUploads(userId uint64) int64 {
+	return CountUserUploadsToday(userId)
+}
+
 func SaveFileFromUpload(userId uint64, fileData []byte, filename string, customPath string) (*Entity, error) {
 	// 验证文件大小
 	if len(fileData) > MaxFileSize {

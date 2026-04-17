@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"slices"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
@@ -55,22 +54,9 @@ func Register(c *gin.Context) {
 	r.Email = strings.TrimSpace(strings.ToLower(r.Email))
 
 	// 检查邮箱域名限制
-	emailParts := strings.Split(r.Email, "@")
-	if len(emailParts) == 2 {
-		domain := emailParts[1]
-		// 检查白名单
-		if len(securityConfig.Restrictions.AllowedDomains) > 0 {
-			allowed := slices.Contains(securityConfig.Restrictions.AllowedDomains, domain)
-			if !allowed {
-				c.JSON(200, component.FailData("该邮箱域名不在允许注册的白名单中"))
-				return
-			}
-		}
-		// 检查黑名单
-		if slices.Contains(securityConfig.Restrictions.BlockedDomains, domain) {
-			c.JSON(200, component.FailData("该邮箱域名已被禁止注册"))
-			return
-		}
+	if err := component.ValidateEmailDomain(r.Email); err != nil {
+		c.JSON(200, component.FailData(err.Error()))
+		return
 	}
 
 	if !component.ValidateUsername(r.Username) {
@@ -79,7 +65,7 @@ func Register(c *gin.Context) {
 	}
 
 	// 验证密码复杂度
-	if err := component.ValidatePassword(r.Password, securityConfig.MinPasswordLength); err != nil {
+	if err := component.ValidatePassword(r.Password, 6); err != nil {
 		c.JSON(200, component.FailData(err.Error()))
 		return
 	}

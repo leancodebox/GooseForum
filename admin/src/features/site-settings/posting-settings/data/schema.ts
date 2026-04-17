@@ -6,18 +6,14 @@ export const postingSettingsSchema = z.object({
     maxPostLength: z.number().min(1),
     minTitleLength: z.number().min(1),
     maxTitleLength: z.number().min(1),
-    allowUppercasePosts: z.boolean(),
+    newUserPostCooldownMinutes: z.number().min(0),
   }),
   uploadControl: z.object({
     allowAttachments: z.boolean(),
     authorizedExtensions: z.array(z.string()),
     maxAttachmentSizeKb: z.number().min(1),
-    maxAttachmentsPerPost: z.number().min(1),
-  }),
-  editControl: z.object({
-    editingGracePeriod: z.number().min(0),
-    postEditTimeLimit: z.number().min(0),
-    allowUsersToDeletePosts: z.boolean(),
+    maxDailyUploadsPerUser: z.number().min(0),
+    newUserUploadCooldownMinutes: z.number().min(0),
   }),
 })
 

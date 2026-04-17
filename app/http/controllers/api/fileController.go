@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
@@ -50,6 +51,34 @@ func SaveImgByGinContext(c *gin.Context) {
 	if userId == 0 {
 		c.JSON(http.StatusUnauthorized, component.FailData("用户未登录"))
 		return
+	}
+
+	userEntity, _ := users.Get(userId)
+
+	// 统一权限检查
+	if err, code := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
+		c.JSON(code, component.FailData(err.Error()))
+		return
+	}
+
+	// 检查新用户上传冷却时间
+	if postingConfig.UploadControl.NewUserUploadCooldownMinutes > 0 {
+		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.UploadControl.NewUserUploadCooldownMinutes) * time.Minute)
+		if time.Now().Before(cooldownTime) {
+			c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("新用户注册%d分钟后才能上传，请在 %s 后再试",
+				postingConfig.UploadControl.NewUserUploadCooldownMinutes,
+				cooldownTime.Format("2006-01-02 15:04:05"))))
+			return
+		}
+	}
+
+	// 检查单用户每日上传限制
+	if postingConfig.UploadControl.MaxDailyUploadsPerUser > 0 {
+		count := filedata.CountDailyUploads(userId)
+		if count >= int64(postingConfig.UploadControl.MaxDailyUploadsPerUser) {
+			c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("您今日已上传 %d 个文件，已达到每日限制", count)))
+			return
+		}
 	}
 
 	// 获取上传的文件

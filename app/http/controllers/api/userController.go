@@ -101,6 +101,12 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 	}
 
 	newEmail := req.GetParams().Email
+
+	// 检查邮箱域名限制
+	if err := component.ValidateEmailDomain(newEmail); err != nil {
+		return component.FailResponse(err.Error())
+	}
+
 	// 如果要修改邮箱,需要检查邮箱是否已被使用
 	// 检查邮箱是否已存在
 	if users.ExistEmail(newEmail) {
@@ -283,7 +289,7 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 	if err != nil {
 		return component.FailResponse("获取用户信息失败")
 	}
-	if err = component.ValidatePassword(req.Params.NewPassword, hotdataserve.GetSecuritySettingsConfigCache().MinPasswordLength); err != nil {
+	if err = component.ValidatePassword(req.Params.NewPassword, 6); err != nil {
 		return component.FailResponse(err.Error())
 	}
 	// 验证旧密码
@@ -379,8 +385,7 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 		return component.FailResponse("重置链接无效")
 	}
 
-	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
-	if err = component.ValidatePassword(req.Params.NewPassword, securityConfig.MinPasswordLength); err != nil {
+	if err = component.ValidatePassword(req.Params.NewPassword, 6); err != nil {
 		return component.FailResponse(err.Error())
 	}
 

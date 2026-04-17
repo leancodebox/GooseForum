@@ -100,12 +100,40 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	// 获取发布设置
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 
+	userEntity, err := req.GetUser()
+	if err != nil || userEntity.Id == 0 {
+		return component.FailResponse("获取用户信息失败")
+	}
+
+	// 统一权限检查
+	if err, _ := component.CheckUserPermission(&userEntity, "发帖"); err != nil {
+		return component.FailResponse(err.Error())
+	}
+
 	if len(req.Params.Title) < postingConfig.TextControl.MinTitleLength {
 		return component.FailResponse(fmt.Sprintf("标题长度不能少于%d位", postingConfig.TextControl.MinTitleLength))
 	}
 
+	if len(req.Params.Title) > postingConfig.TextControl.MaxTitleLength {
+		return component.FailResponse(fmt.Sprintf("标题长度不能超过%d位", postingConfig.TextControl.MaxTitleLength))
+	}
+
 	if len(req.Params.Content) < postingConfig.TextControl.MinPostLength {
 		return component.FailResponse(fmt.Sprintf("正文长度不能少于%d位", postingConfig.TextControl.MinPostLength))
+	}
+
+	if len(req.Params.Content) > postingConfig.TextControl.MaxPostLength {
+		return component.FailResponse(fmt.Sprintf("正文长度不能超过%d位", postingConfig.TextControl.MaxPostLength))
+	}
+
+	// 检查新用户冷却时间
+	if postingConfig.TextControl.NewUserPostCooldownMinutes > 0 {
+		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.TextControl.NewUserPostCooldownMinutes) * time.Minute)
+		if time.Now().Before(cooldownTime) {
+			return component.FailResponse(fmt.Sprintf("新用户注册%d分钟后才能发帖，请在 %s 后再试",
+				postingConfig.TextControl.NewUserPostCooldownMinutes,
+				cooldownTime.Format("2006-01-02 15:04:05")))
+		}
 	}
 
 	if articles.CantWriteNew(req.UserId, 10) {
@@ -193,8 +221,33 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	// 获取发布设置
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 
-	if len(strings.TrimSpace(req.Params.Content)) < postingConfig.TextControl.MinPostLength {
+	userEntity, err := req.GetUser()
+	if err != nil || userEntity.Id == 0 {
+		return component.FailResponse("获取用户信息失败")
+	}
+
+	// 统一权限检查
+	if err, _ := component.CheckUserPermission(&userEntity, "评论"); err != nil {
+		return component.FailResponse(err.Error())
+	}
+
+	content := strings.TrimSpace(req.Params.Content)
+	if len(content) < postingConfig.TextControl.MinPostLength {
 		return component.FailResponse(fmt.Sprintf("评论内容长度不能少于%d位", postingConfig.TextControl.MinPostLength))
+	}
+
+	if len(content) > postingConfig.TextControl.MaxPostLength {
+		return component.FailResponse(fmt.Sprintf("评论内容长度不能超过%d位", postingConfig.TextControl.MaxPostLength))
+	}
+
+	// 评论也受发帖冷却限制
+	if postingConfig.TextControl.NewUserPostCooldownMinutes > 0 {
+		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.TextControl.NewUserPostCooldownMinutes) * time.Minute)
+		if time.Now().Before(cooldownTime) {
+			return component.FailResponse(fmt.Sprintf("新用户注册%d分钟后才能发表内容，请在 %s 后再试",
+				postingConfig.TextControl.NewUserPostCooldownMinutes,
+				cooldownTime.Format("2006-01-02 15:04:05")))
+		}
 	}
 
 	articleEntity := articles.GetSimple(req.Params.ArticleId)
@@ -213,7 +266,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		ReplyId:   req.Params.ReplyId,
 	}
 
-	err := reply.Create(replyEntity)
+	err = reply.Create(replyEntity)
 	if err != nil {
 		return component.FailResponse("评论失败:" + err.Error())
 	}

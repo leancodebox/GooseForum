@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
@@ -85,4 +86,46 @@ func SendAEmail4User(userEntity *users.EntityComplete) error {
 		return nil
 	}
 	return nil
+}
+
+// CheckUserPermission 统一检查用户操作权限（封禁状态、邮箱验证等）
+func CheckUserPermission(userEntity *users.EntityComplete, action string) (error, int) {
+	if userEntity == nil || userEntity.Id == 0 {
+		return errors.New("用户不存在或未登录"), 401
+	}
+
+	// 1. 检查用户是否被冻结
+	if userEntity.IsFrozen == users.StatusFrozen {
+		return fmt.Errorf("您的账号已被封禁，无法进行%s操作", action), 403
+	}
+
+	// 2. 检查邮箱验证（如果系统开启了强制要求）
+	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
+	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
+		return fmt.Errorf("请先完成邮箱验证后再进行%s操作", action), 403
+	}
+
+	return nil, 200
+}
+
+// ValidateEmailDomain 验证邮箱域名是否符合白名单限制
+func ValidateEmailDomain(email string) error {
+	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
+	if len(securityConfig.AllowedDomains) == 0 {
+		return nil
+	}
+
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 {
+		return errors.New("邮箱格式不正确")
+	}
+
+	domain := parts[1]
+	for _, allowed := range securityConfig.AllowedDomains {
+		if domain == allowed {
+			return nil
+		}
+	}
+
+	return errors.New("该邮箱域名不在允许的注册白名单中")
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, Mail, Server, Shield, Send, Info, Save } from 'lucide-react'
+import { Loader2, Server, Shield, Send, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { ContentLayout } from '@/components/layout/content-layout'
@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { Card, CardContent } from '@/components/ui/card'
 import { mailSettingsSchema, type MailSettings } from './data/schema'
 
 export default function MailSettingsManagement() {
@@ -107,26 +106,32 @@ export default function MailSettingsManagement() {
   }
 
   return (
-    <>
-      <ContentLayout
-        title='邮件设置'
-        description='配置 SMTP 服务器以发送验证邮件、通知等。'
-        headerActions={
-          <Button onClick={form.handleSubmit(onSubmit)} disabled={saving}>
-            {saving ? (
-              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-            ) : (
-              <Save className='mr-2 h-4 w-4' />
-            )}
-            保存配置
-          </Button>
-        }
-      >
-        <div className='w-full'>
-          <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-            <Card>
-              <CardContent className='space-y-10'>
+    <ContentLayout 
+      title='邮件设置'
+      description='配置 SMTP 服务器以发送验证邮件、通知等。'
+      showSeparator={true}
+      headerActions={
+        <Button 
+          onClick={form.handleSubmit(onSubmit, (errors) => {
+            console.error('Form validation errors:', errors)
+            toast.error('请检查表单填写是否正确')
+          })} 
+          disabled={saving}
+        >
+          {saving ? (
+            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+          ) : (
+            <Save className='mr-2 h-4 w-4' />
+          )}
+          保存配置
+        </Button>
+      }
+    >
+      <div className='flex flex-1 flex-col'>
+        <div className='faded-bottom h-full w-full overflow-y-auto scroll-smooth pe-4 pb-12'>
+          <div className='-mx-1 px-1.5'>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-10'>
                 <div className='grid gap-10 md:grid-cols-2 lg:grid-cols-3'>
                   {/* 左侧：SMTP 服务器设置 */}
                   <div className='space-y-6 lg:col-span-2'>
@@ -141,7 +146,7 @@ export default function MailSettingsManagement() {
                         render={({ field }) => (
                           <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20'>
                             <div className='space-y-0.5'>
-                              <FormLabel className='text-base'>启用邮件服务</FormLabel>
+                              <FormLabel className='text-base font-medium'>启用邮件服务</FormLabel>
                               <FormDescription>
                                 开启后，系统将能够发送验证码、通知等邮件。
                               </FormDescription>
@@ -223,8 +228,8 @@ export default function MailSettingsManagement() {
                         render={({ field }) => (
                           <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20'>
                             <div className='space-y-0.5'>
-                              <FormLabel className='text-base flex items-center gap-2'>
-                                <Shield className='h-4 w-4' />
+                              <FormLabel className='text-base font-medium flex items-center gap-2'>
+                                <Shield className='h-4 w-4 text-muted-foreground' />
                                 使用 SSL 加密
                               </FormLabel>
                               <FormDescription>
@@ -249,7 +254,7 @@ export default function MailSettingsManagement() {
                     {/* 发件人信息 */}
                     <div className='space-y-6'>
                       <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
-                        <Mail className='h-5 w-5 text-muted-foreground' />
+                        <Send className='h-5 w-5 text-muted-foreground' />
                         发件人信息
                       </div>
                       <div className='space-y-4'>
@@ -262,6 +267,7 @@ export default function MailSettingsManagement() {
                               <FormControl>
                                 <Input placeholder='GooseForum' {...field} disabled={!form.watch('enableMail')} />
                               </FormControl>
+                              <FormDescription>显示在收件人邮箱中的发送者名称。</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -275,6 +281,7 @@ export default function MailSettingsManagement() {
                               <FormControl>
                                 <Input placeholder='noreply@example.com' {...field} disabled={!form.watch('enableMail')} />
                               </FormControl>
+                              <FormDescription>通常与 SMTP 用户名一致。</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -282,67 +289,47 @@ export default function MailSettingsManagement() {
                       </div>
                     </div>
 
-                    {/* 测试邮件 */}
+                    {/* 连接测试 */}
                     <div className='space-y-6'>
                       <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
-                        <Send className='h-5 w-5 text-muted-foreground' />
-                        发送测试邮件
+                        <Server className='h-5 w-5 text-muted-foreground' />
+                        发送测试
                       </div>
-                      <div className='space-y-6'>
-                        <div className='space-y-2'>
-                          <FormLabel>测试收件箱</FormLabel>
-                          <div className='flex gap-2'>
-                            <Input
-                              type='email'
-                              placeholder='test@example.com'
-                              value={testEmail}
-                              onChange={(e) => setTestEmail(e.target.value)}
-                            />
-                            <Button
-                              type='button'
-                              variant='secondary'
-                              onClick={handleTestConnection}
-                              disabled={testing || !testEmail}
-                            >
-                              {testing ? <Loader2 className='h-4 w-4 animate-spin' /> : <Send className='h-4 w-4' />}
-                              <span className='ml-2'>测试</span>
-                            </Button>
-                          </div>
-                        </div>
-                        <div className='rounded-lg border bg-muted/30 p-4 space-y-3'>
-                          <h4 className='text-sm font-medium flex items-center gap-2'>
-                            <Info className='h-4 w-4 text-blue-500 shrink-0' />
-                            常用配置参考
-                          </h4>
-                          <div className='flex flex-col gap-2 text-xs text-muted-foreground'>
-                            <div className='flex items-start justify-between gap-4'>
-                              <span className='shrink-0 mt-[2px]'>QQ 邮箱:</span>
-                              <span className='font-mono break-all text-right'>smtp.qq.com:587</span>
-                            </div>
-                            <div className='flex items-start justify-between gap-4'>
-                              <span className='shrink-0 mt-[2px]'>163 邮箱:</span>
-                              <span className='font-mono break-all text-right'>smtp.163.com:25</span>
-                            </div>
-                            <div className='flex items-start justify-between gap-4'>
-                              <span className='shrink-0 mt-[2px]'>Gmail:</span>
-                              <span className='font-mono break-all text-right'>smtp.gmail.com:587</span>
-                            </div>
-                            <div className='flex items-start justify-between gap-4'>
-                              <span className='shrink-0 mt-[2px]'>Outlook:</span>
-                              <span className='font-mono break-all text-right'>smtp.office365.com:587</span>
-                            </div>
-                          </div>
+                      <div className='rounded-lg border p-4 space-y-4'>
+                        <p className='text-sm text-muted-foreground'>
+                          保存配置前，您可以发送一封测试邮件以验证 SMTP 服务器设置是否正确。
+                        </p>
+                        <div className='space-y-3'>
+                          <Input
+                            placeholder='输入接收测试的邮箱'
+                            value={testEmail}
+                            onChange={(e) => setTestEmail(e.target.value)}
+                            disabled={!form.watch('enableMail')}
+                          />
+                          <Button
+                            type='button'
+                            variant='secondary'
+                            className='w-full'
+                            disabled={testing || !form.watch('enableMail')}
+                            onClick={handleTestConnection}
+                          >
+                            {testing ? (
+                              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                            ) : (
+                              <Send className='mr-2 h-4 w-4' />
+                            )}
+                            发送测试邮件
+                          </Button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </form>
-        </Form>
+              </form>
+            </Form>
+          </div>
+        </div>
       </div>
     </ContentLayout>
-    </>
   )
 }

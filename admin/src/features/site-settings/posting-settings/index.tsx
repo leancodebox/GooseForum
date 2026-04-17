@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, FileText, Upload, Edit3, Save, Plus, Trash2 } from 'lucide-react'
+import { Loader2, FileText, Upload, Save, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { ContentLayout } from '@/components/layout/content-layout'
@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { postingSettingsSchema, type PostingSettings } from './data/schema'
 
@@ -34,18 +33,14 @@ export default function PostingSettingsManagement() {
         maxPostLength: 50000,
         minTitleLength: 5,
         maxTitleLength: 100,
-        allowUppercasePosts: true,
+        newUserPostCooldownMinutes: 0,
       },
       uploadControl: {
         allowAttachments: true,
         authorizedExtensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
         maxAttachmentSizeKb: 5120,
-        maxAttachmentsPerPost: 10,
-      },
-      editControl: {
-        editingGracePeriod: 300,
-        postEditTimeLimit: 86400,
-        allowUsersToDeletePosts: true,
+        maxDailyUploadsPerUser: 10,
+        newUserUploadCooldownMinutes: 0,
       },
     },
   })
@@ -55,7 +50,12 @@ export default function PostingSettingsManagement() {
       try {
         const response = await axios.get('/api/admin/posting-settings')
         if (response.data.code === 0) {
-          form.reset(response.data.result)
+          const result = response.data.result
+          // 确保 authorizedExtensions 始终为数组，防止 Zod 校验失败
+          if (result && result.uploadControl && result.uploadControl.authorizedExtensions === null) {
+            result.uploadControl.authorizedExtensions = []
+          }
+          form.reset(result)
         }
       } catch (error) {
         toast.error('加载发布设置失败')
@@ -115,11 +115,18 @@ export default function PostingSettingsManagement() {
   }
 
   return (
-    <ContentLayout
+    <ContentLayout 
       title='发布内容设置'
       description='控制帖子标题、内容长度及附件上传规则。'
+      showSeparator={true}
       headerActions={
-        <Button onClick={form.handleSubmit(onSubmit)} disabled={saving}>
+        <Button 
+          onClick={form.handleSubmit(onSubmit, (errors) => {
+            console.error('Form validation errors:', errors)
+            toast.error('请检查表单填写是否正确')
+          })} 
+          disabled={saving}
+        >
           {saving ? (
             <Loader2 className='mr-2 h-4 w-4 animate-spin' />
           ) : (
@@ -129,243 +136,217 @@ export default function PostingSettingsManagement() {
         </Button>
       }
     >
-        <div className='w-full'>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-              <Card>
-                <CardContent className='space-y-10 pt-6'>
-                  <div className='grid gap-10 md:grid-cols-2 lg:grid-cols-3'>
-                    
-                    {/* 左侧区域：文本控制 & 编辑控制 (占 2/3 宽度) */}
-                    <div className='space-y-10 lg:col-span-2'>
-                      
-                      {/* 文本控制 */}
-                      <div className='space-y-6'>
-                        <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
-                          <FileText className='h-5 w-5 text-muted-foreground' />
-                          文本内容控制
-                        </div>
-                        <div className='space-y-4'>
-                          <div className='grid gap-6 md:grid-cols-2'>
-                            <FormField
-                              control={form.control}
-                              name='textControl.minTitleLength'
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>最小标题长度</FormLabel>
-                                  <FormControl>
-                                    <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name='textControl.maxTitleLength'
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>最大标题长度</FormLabel>
-                                  <FormControl>
-                                    <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name='textControl.minPostLength'
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>最小正文长度</FormLabel>
-                                  <FormControl>
-                                    <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name='textControl.maxPostLength'
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>最大正文长度</FormLabel>
-                                  <FormControl>
-                                    <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          <FormField
-                            control={form.control}
-                            name='textControl.allowUppercasePosts'
-                            render={({ field }) => (
-                              <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20'>
-                                <div className='space-y-0.5'>
-                                  <FormLabel className='text-base'>允许全大写内容</FormLabel>
-                                  <FormDescription>是否允许用户发布全部由大写字母组成的标题或内容。</FormDescription>
-                                </div>
-                                <FormControl>
-                                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-
-                      {/* 编辑控制 */}
-                      <div className='space-y-6'>
-                        <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
-                          <Edit3 className='h-5 w-5 text-muted-foreground' />
-                          编辑与删除控制
-                        </div>
-                        <div className='space-y-4'>
-                          <div className='grid gap-6 md:grid-cols-2'>
-                            <FormField
-                              control={form.control}
-                              name='editControl.editingGracePeriod'
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>编辑宽限期 (秒)</FormLabel>
-                                  <FormControl>
-                                    <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                                  </FormControl>
-                                  <FormDescription>发布后多少秒内编辑不显示“已编辑”标记。</FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name='editControl.postEditTimeLimit'
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>可编辑时限 (秒)</FormLabel>
-                                  <FormControl>
-                                    <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                                  </FormControl>
-                                  <FormDescription>发布后多少秒内允许用户编辑。0 为不限制。</FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          <FormField
-                            control={form.control}
-                            name='editControl.allowUsersToDeletePosts'
-                            render={({ field }) => (
-                              <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20'>
-                                <div className='space-y-0.5'>
-                                  <FormLabel className='text-base'>允许用户删除帖子</FormLabel>
-                                  <FormDescription>是否允许普通用户自行删除已发布的帖子。</FormDescription>
-                                </div>
-                                <FormControl>
-                                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-
+      <div className='flex flex-1 flex-col'>
+        <div className='faded-bottom h-full w-full overflow-y-auto scroll-smooth pe-4 pb-12'>
+          <div className='-mx-1 px-1.5'>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                console.error('Form validation errors:', errors)
+                toast.error('请检查表单填写是否正确')
+              })} className='space-y-12'>
+                
+                <div className='grid gap-12 lg:grid-cols-2'>
+                  {/* 左侧区域：文本内容控制 */}
+                  <div className='space-y-6'>
+                    <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
+                      <FileText className='h-5 w-5 text-muted-foreground' />
+                      文本内容控制
                     </div>
+                        <div className='grid gap-6 sm:grid-cols-2'>
+                          <FormField
+                            control={form.control}
+                            name='textControl.minTitleLength'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>最小标题长度</FormLabel>
+                                <FormControl>
+                                  <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name='textControl.maxTitleLength'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>最大标题长度</FormLabel>
+                                <FormControl>
+                                  <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name='textControl.minPostLength'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>最小正文长度</FormLabel>
+                                <FormControl>
+                                  <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name='textControl.maxPostLength'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>最大正文长度</FormLabel>
+                                <FormControl>
+                                  <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name='textControl.newUserPostCooldownMinutes'
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>新用户发帖冷却 (分钟)</FormLabel>
+                                <FormControl>
+                                  <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                                </FormControl>
+                                <FormDescription>注册后需等待多久才能发布第一个帖子。</FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                  </div>
 
-                    {/* 右侧区域：上传控制 (占 1/3 宽度) */}
-                    <div className='space-y-6 lg:col-span-1'>
-                      <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
-                        <Upload className='h-5 w-5 text-muted-foreground' />
-                        上传控制
-                      </div>
-                      <div className='space-y-6'>
+                  {/* 右侧区域：附件控制 */}
+                  <div className='space-y-6'>
+                    <div className='flex items-center gap-2 border-b pb-2 text-lg font-medium'>
+                      <Upload className='h-5 w-5 text-muted-foreground' />
+                      附件控制
+                    </div>
+                    <div className='space-y-6'>
+                      <FormField
+                        control={form.control}
+                        name='uploadControl.allowAttachments'
+                        render={({ field }) => (
+                          <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/10'>
+                            <div className='space-y-0.5'>
+                              <FormLabel className='text-base font-medium'>允许上传附件</FormLabel>
+                              <FormDescription>开启后，用户可以在帖子中上传图片或文件。</FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className='grid gap-6 sm:grid-cols-2'>
                         <FormField
                           control={form.control}
-                          name='uploadControl.allowAttachments'
+                          name='uploadControl.maxDailyUploadsPerUser'
                           render={({ field }) => (
-                            <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/20'>
-                              <div className='space-y-0.5'>
-                                <FormLabel className='text-base'>允许上传附件</FormLabel>
-                                <FormDescription>开启后用户可以在帖子中上传文件。</FormDescription>
-                              </div>
+                            <FormItem>
+                              <FormLabel>单用户每日最大上传数量</FormLabel>
                               <FormControl>
-                                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} disabled={!form.watch('uploadControl.allowAttachments')} />
                               </FormControl>
+                              <FormDescription className='min-h-[32px]'>限制每个用户每天上传附件总数。</FormDescription>
+                              <FormMessage />
                             </FormItem>
                           )}
                         />
-                        <div className='space-y-4'>
-                          <FormField
-                            control={form.control}
-                            name='uploadControl.maxAttachmentSizeKb'
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>最大附件大小 (KB)</FormLabel>
-                                <FormControl>
-                                  <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
+                        
+                        <FormField
+                          control={form.control}
+                          name='uploadControl.maxAttachmentSizeKb'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>单个附件大小限制 (KB)</FormLabel>
+                              <FormControl>
+                                <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} disabled={!form.watch('uploadControl.allowAttachments')} />
+                              </FormControl>
+                              <FormDescription className='min-h-[32px]'>设置允许上传的单个文件最大体积。</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name='uploadControl.newUserUploadCooldownMinutes'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>新用户上传冷却 (分钟)</FormLabel>
+                              <FormControl>
+                                <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} disabled={!form.watch('uploadControl.allowAttachments')} />
+                              </FormControl>
+                              <FormDescription className='min-h-[32px]'>注册后需等待多久才能上传附件。</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className='space-y-4 pt-2'>
+                        <FormLabel className='text-sm font-medium'>允许的扩展名</FormLabel>
+                        <div className='flex gap-2'>
+                          <Input
+                            placeholder='例如: .jpg'
+                            value={newExtension}
+                            onChange={(e) => setNewExtension(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault()
+                                addExtension()
+                              }
+                            }}
+                            className='max-w-[150px]'
+                            disabled={!form.watch('uploadControl.allowAttachments')}
                           />
-                          <FormField
-                            control={form.control}
-                            name='uploadControl.maxAttachmentsPerPost'
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>单帖最大附件数</FormLabel>
-                                <FormControl>
-                                  <Input type='number' {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                          <Button
+                            type='button'
+                            variant='secondary'
+                            onClick={addExtension}
+                            disabled={!form.watch('uploadControl.allowAttachments')}
+                          >
+                            <Plus className='mr-2 h-4 w-4' /> 添加
+                          </Button>
                         </div>
-                        <div className='space-y-4'>
-                          <FormLabel>允许的文件扩展名</FormLabel>
-                          <div className='flex gap-2'>
-                            <Input
-                              placeholder='.pdf'
-                              value={newExtension}
-                              onChange={(e) => setNewExtension(e.target.value)}
-                            />
-                            <Button type='button' variant='secondary' size='icon' className='shrink-0' onClick={addExtension}>
-                              <Plus className='h-4 w-4' />
-                            </Button>
-                          </div>
-                          <div className='flex flex-wrap gap-2'>
-                            {form.watch('uploadControl.authorizedExtensions').map((ext: string) => (
-                              <Badge key={ext} variant='secondary' className='pl-2 pr-1 py-1 text-xs'>
+
+                        <div className='flex flex-wrap gap-2'>
+                          {(form.watch('uploadControl.authorizedExtensions') || []).length === 0 ? (
+                            <span className='text-sm text-muted-foreground italic'>无限制或不允许</span>
+                          ) : (
+                            (form.watch('uploadControl.authorizedExtensions') || []).map((ext: string) => (
+                              <Badge key={ext} variant='secondary' className='px-3 py-1.5 text-sm font-normal'>
                                 {ext}
-                                <Button
+                                <button
                                   type='button'
-                                  variant='ghost'
-                                  size='icon'
-                                  className='h-4 w-4 ml-1 hover:bg-transparent'
+                                  className='ml-2 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2'
                                   onClick={() => removeExtension(ext)}
+                                  disabled={!form.watch('uploadControl.allowAttachments')}
                                 >
-                                  <Trash2 className='h-3 w-3 text-destructive' />
-                                </Button>
+                                  <Trash2 className='h-3.5 w-3.5 text-muted-foreground hover:text-destructive transition-colors' />
+                                </button>
                               </Badge>
-                            ))}
-                            {form.watch('uploadControl.authorizedExtensions').length === 0 && (
-                              <span className='text-xs text-muted-foreground'>未配置扩展名</span>
-                            )}
-                          </div>
+                            ))
+                          )}
                         </div>
                       </div>
                     </div>
-
                   </div>
-                </CardContent>
-              </Card>
-            </form>
-          </Form>
+                </div>
+              </form>
+            </Form>
+          </div>
         </div>
-      </ContentLayout>
-    )
-  }
+      </div>
+    </ContentLayout>
+  )
+}
+
