@@ -229,8 +229,8 @@
                     <div class="max-w-2xl space-y-6">
                         <div class="flex items-center justify-between py-4 border-b border-gray-100">
                             <div>
-                                <h3 class="text-base font-medium text-gray-900">Show My Articles</h3>
-                                <p class="text-sm text-gray-500">Allow others to see your article list on your profile.</p>
+                                <h3 class="text-base font-medium text-gray-900">{{call .T "show_articles"}}</h3>
+                                <p class="text-sm text-gray-500">{{call .T "show_articles_desc"}}</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" x-model="privacy.showArticles" @change="savePrivacy" class="sr-only peer">
@@ -239,8 +239,8 @@
                         </div>
                          <div class="flex items-center justify-between py-4 border-b border-gray-100">
                             <div>
-                                <h3 class="text-base font-medium text-gray-900">Show Who I Follow</h3>
-                                <p class="text-sm text-gray-500">Allow others to see your following and followers list.</p>
+                                <h3 class="text-base font-medium text-gray-900">{{call .T "show_following"}}</h3>
+                                <p class="text-sm text-gray-500">{{call .T "show_following_desc"}}</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" x-model="privacy.showFollowing" @change="savePrivacy" class="sr-only peer">
@@ -249,8 +249,8 @@
                         </div>
                          <div class="flex items-center justify-between py-4">
                             <div>
-                                <h3 class="text-base font-medium text-gray-900">Email Notifications</h3>
-                                <p class="text-sm text-gray-500">Receive emails about activity on your account.</p>
+                                <h3 class="text-base font-medium text-gray-900">{{call .T "email_notifications"}}</h3>
+                                <p class="text-sm text-gray-500">{{call .T "email_notifications_desc"}}</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" x-model="privacy.emailNotifications" @change="savePrivacy" class="sr-only peer">
@@ -263,7 +263,7 @@
                  <!-- Binding Tab -->
                 <div x-show="activeTab === 'binding'" class="p-6">
                      <div class="max-w-2xl space-y-4">
-                         <h3 class="text-lg font-medium text-gray-900 mb-4">Connected Accounts</h3>
+                         <h3 class="text-lg font-medium text-gray-900 mb-4">{{call .T "connected_accounts"}}</h3>
                          
                          <template x-if="loadingBindings">
                              <div class="flex justify-center py-8">
@@ -289,7 +289,7 @@
                                  <button @click="toggleBinding('github')" 
                                          class="inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
                                          :class="isBound('github') ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500'">
-                                     <span x-text="isBound('github') ? 'Disconnect' : 'Connect'"></span>
+                                     <span x-text="isBound('github') ? '{{call .T "disconnect"}}' : '{{call .T "connect"}}'"></span>
                                  </button>
                              </div>
 
@@ -307,7 +307,7 @@
                                   <button @click="toggleBinding('google')" 
                                          class="inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
                                          :class="isBound('google') ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500'">
-                                     <span x-text="isBound('google') ? 'Disconnect' : 'Connect'"></span>
+                                     <span x-text="isBound('google') ? '{{call .T "disconnect"}}' : '{{call .T "connect"}}'"></span>
                                  </button>
                              </div>
                          </div>

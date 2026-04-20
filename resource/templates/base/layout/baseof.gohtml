@@ -141,12 +141,12 @@
                                   class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-100 py-1 z-50"
                                   style="display: none;">
                                 <div class="px-4 py-3 border-b border-gray-50 flex justify-between items-center">
-                                    <h3 class="font-semibold text-gray-900 text-sm">消息通知</h3>
-                                    <a href="/notifications" class="text-xs text-blue-600 hover:text-blue-700">查看全部</a>
+                                    <h3 class="font-semibold text-gray-900 text-sm">{{call .T "notifications_title"}}</h3>
+                                    <a href="/notifications" class="text-xs text-blue-600 hover:text-blue-700">{{call .T "view_all"}}</a>
                                 </div>
                                 <div class="px-4 py-3">
                                      <div class="text-sm" x-html="notificationHtml">
-                                         <div class="py-1 text-gray-500">暂无新消息</div>
+                                         <div class="py-1 text-gray-500">{{call .T "no_new_notifications"}}</div>
                                      </div>
                                 </div>
                             </div>
@@ -187,9 +187,9 @@
                             {{"new_topic" | call .T}}
                         </a>
                     {{else}}
-                        <a href="/login" class="text-sm font-medium text-gray-600 hover:text-blue-600 px-3 py-2">Login</a>
+                        <a href="/login" class="text-sm font-medium text-gray-600 hover:text-blue-600 px-3 py-2">{{call .T "login_link"}}</a>
                         <a href="/login?register=true" class="hidden sm:inline-flex items-center justify-center h-9 px-4 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-all">
-                            Sign Up
+                            {{call .T "sign_up_link"}}
                         </a>
                     {{end}}
 
@@ -232,9 +232,9 @@
 
             <!-- Drawer Header -->
             <div class="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-gray-50/50">
-                <span class="text-lg font-bold text-gray-900">Menu</span>
+                <span class="text-lg font-bold text-gray-900">{{call .T "menu_label"}}</span>
                 <button @click="mobileMenuOpen = false" type="button" class="-mr-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none">
-                    <span class="sr-only">Close menu</span>
+                    <span class="sr-only">{{call .T "close_menu"}}</span>
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -425,7 +425,7 @@
         Alpine.data('notificationHandler', () => ({
             open: false,
             hasUnread: false,
-            notificationHtml: '<div class="py-1">暂无新消息</div>',
+            notificationHtml: '<div class="py-1">{{call .T "no_new_notifications"}}</div>',
 
             init() {
                 this.checkUnreadNotifications();
@@ -472,14 +472,14 @@
                     this.hasUnread = true;
                     let messageText = '';
                     if (result.eventType === 'comment') {
-                        messageText = '• 您的文章收到新评论';
+                        messageText = '{{call .T "notification_new_comment"}}';
                     } else {
-                        messageText = '• 您有新的消息通知';
+                        messageText = '{{call .T "notification_new_message"}}';
                     }
                     this.notificationHtml = `<div class="py-1 text-gray-900">${messageText}</div>`;
                 } else {
                     this.hasUnread = false;
-                    this.notificationHtml = '<div class="py-1 text-gray-500">暂无新消息</div>';
+                    this.notificationHtml = '<div class="py-1 text-gray-500">{{call .T "no_new_notifications"}}</div>';
                 }
             }
         }))

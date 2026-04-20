@@ -24,6 +24,115 @@ click_to_refresh: 点击刷新
 forgot_password: 忘记密码？
 logging_in: 登录中...
 
+# Register Form
+reg_username_label: 用户名
+reg_email_label: 邮箱
+reg_password_label: 密码
+reg_password_help: 至少6位
+reg_confirm_password_label: 确认密码
+reg_captcha_label: 验证码
+agree_terms: 我同意
+and: 和
+terms_of_service: 用户协议
+privacy_policy: 隐私政策
+register_btn_text: 注册
+registering: 注册中...
+login_link_text: 返回登录
+
+# Forgot Password Form
+forgot_email_placeholder: 注册时使用的邮箱地址
+send_reset_email: 发送重置邮件
+sending: 发送中...
+reset_success: 重置邮件已发送，请查收
+send_failed: 发送失败
+
+# Forgot Password Page
+forgot_password_title: 忘记密码？
+forgot_password_desc: 输入您注册时使用的邮箱地址，我们会向您发送密码重置链接。
+reset_password_desc: 设置您的新密码
+
+# Login Page
+login_to_account: 登录到您的账户
+create_new_account: 创建一个新账户
+reset_your_password: 重置密码
+input_username: 请输入用户名
+input_password: 请输入密码
+input_captcha: 请输入验证码
+login_failed: 登录失败
+invalid_email: 邮箱格式不正确
+registration_failed: 注册失败
+email_required: 请输入邮箱
+password_mismatch: 密码不一致
+password_min_length: 密码长度至少6位
+
+# Reset Password Page
+set_new_password: 设置您的新密码
+invalid_token: 链接无效
+token_expired: 重置链接无效或已过期，请重新申请密码重置
+new_password_placeholder: 新密码
+confirm_password_placeholder: 确认新密码
+resetting: 重置中...
+reset_password_btn: 重置密码
+reset_success_desc: 密码重置成功！您现在可以使用新密码登录了
+reset_failed: 密码重置失败，请稍后重试
+enter_new_password: 请输入新密码
+password_too_short: 密码长度至少6位
+confirm_password_required: 请确认新密码
+passwords_not_match: 两次输入的密码不一致
+
+# Activate Page
+account_activation: 账号激活
+contact_support: 联系支持
+login_now: 立即登录
+
+# Social Login
+or_continue_with: 或继续使用
+login_with_github: 使用 GitHub 登录
+login_with_google: 使用 Google 登录
+login_with_x: 使用 X 登录
+
+# Notifications
+notification_op_failed: 操作失败
+notification_bookmark_success: 收藏成功
+notification_bookmark_cancel: 取消收藏成功
+notification_input_required: 请输入内容
+notification_comment_success: 发表成功
+notification_delete_confirm: 确定要删除这条评论吗？
+notification_delete_success: 删除成功
+notification_delete_failed: 删除失败
+
+# Github OAuth
+github_connected: 已连接
+github_not_connected: 未连接
+google_connected: 已连接
+google_not_connected: 未连接
+disconnect: 断开
+connect: 连接
+
+# Account Binding
+connected_accounts: 已连接的账号
+
+# Privacy Settings
+show_articles: 显示我的文章
+show_articles_desc: 允许他人在您的个人主页看到您的文章列表
+show_following: 显示关注列表
+show_following_desc: 允许他人查看您的关注和粉丝列表
+email_notifications: 邮件通知
+email_notifications_desc: 接收关于您账户活动的邮件通知
+
+# Header & Navigation
+notifications_title: 消息通知
+view_all: 查看全部
+no_new_notifications: 暂无新消息
+login_link: 登录
+sign_up_link: 注册
+menu_label: 菜单
+close_menu: 关闭菜单
+
+# Notification Messages
+notification_new_comment: • 您收到新评论
+notification_new_message: • 您有新的消息通知
+
 # Publish
 create_topic_title: 发布新话题
 topic_title_label: 标题
@@ -197,13 +306,14 @@ time_h_ago: 小时前
 time_d_ago: 天前
 
 # Notifications Page
-notifications_title: 通知
+notifications_page_title: 通知
 filter_all: 全部
 filter_unread: 未读
 mark_all_read: 全部已读
 no_notifications: 暂无通知
 no_notifications_desc: 你已读完所有通知！稍后再来查看。
 text_commented_on: 评论了
+text_replied_to: 回复了
 text_liked_post: 点赞了你的话题
 text_started_following: 关注了你
 confirm_mark_all: 确定要将所有通知标记为已读吗？

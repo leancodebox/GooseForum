@@ -108,36 +108,36 @@
             <form x-show="activeTab === 'register'" @submit.prevent="handleRegister" class="space-y-4" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 <div class="space-y-3 rounded-md">
                     <div>
-                        <label for="reg-username" class="sr-only">用户名</label>
-                        <input id="reg-username" x-model="registerForm.username" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="用户名" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.username }">
+                        <label for="reg-username" class="sr-only">{{call .T "reg_username_label"}}</label>
+                        <input id="reg-username" x-model="registerForm.username" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" :placeholder="registerForm.username ? '' : '{{call .T "reg_username_label"}}'" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.username }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.username" x-text="errors.register.username"></p>
                     </div>
                     <div>
-                        <label for="reg-email" class="sr-only">邮箱</label>
-                        <input id="reg-email" x-model="registerForm.email" type="email" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="邮箱地址" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.email }">
+                        <label for="reg-email" class="sr-only">{{call .T "reg_email_label"}}</label>
+                        <input id="reg-email" x-model="registerForm.email" type="email" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" :placeholder="registerForm.email ? '' : '{{call .T "reg_email_label"}}'" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.email }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.email" x-text="errors.register.email"></p>
                     </div>
                     <div>
-                        <label for="reg-password" class="sr-only">密码</label>
-                        <input id="reg-password" x-model="registerForm.password" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="密码 (至少6位)" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.password }">
+                        <label for="reg-password" class="sr-only">{{call .T "reg_password_label"}}</label>
+                        <input id="reg-password" x-model="registerForm.password" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" :placeholder="'{{call .T "reg_password_label"}}'" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.password }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.password" x-text="errors.register.password"></p>
                     </div>
                     <div>
-                        <label for="reg-confirm-password" class="sr-only">确认密码</label>
-                        <input id="reg-confirm-password" x-model="registerForm.confirmPassword" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="确认密码" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.confirmPassword }">
+                        <label for="reg-confirm-password" class="sr-only">{{call .T "reg_confirm_password_label"}}</label>
+                        <input id="reg-confirm-password" x-model="registerForm.confirmPassword" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" :placeholder="'{{call .T "reg_confirm_password_label"}}'" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.confirmPassword }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.confirmPassword" x-text="errors.register.confirmPassword"></p>
                     </div>
                     <div>
                         <div class="flex gap-3">
                             <div class="flex-1">
-                                <label for="reg-captcha" class="sr-only">验证码</label>
-                                <input id="reg-captcha" x-model="registerForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="验证码" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.captcha }">
+                                <label for="reg-captcha" class="sr-only">{{call .T "reg_captcha_label"}}</label>
+                                <input id="reg-captcha" x-model="registerForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" :placeholder="captchaPlaceholder" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.register.captcha }">
                             </div>
-                            <div class="relative w-32 h-[42px] flex-shrink-0 cursor-pointer rounded-xl border border-gray-200 overflow-hidden bg-gray-50 hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="点击刷新">
+                            <div class="relative w-32 h-[42px] flex-shrink-0 cursor-pointer rounded-xl border border-gray-200 overflow-hidden bg-gray-50 hover:opacity-80 transition-opacity" @click="refreshCaptcha" :title="'{{call .T "click_to_refresh"}}'">
                                 <div x-show="captchaLoading || !captchaImg" class="absolute inset-0 flex items-center justify-center animate-pulse">
                                     <svg class="h-5 w-5 text-gray-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 </div>
-                                <img x-show="!captchaLoading && captchaImg" :src="captchaImg" alt="验证码" class="w-full h-full object-cover" />
+                                <img x-show="!captchaLoading && captchaImg" :src="captchaImg" alt="{{call .T "captcha_placeholder"}}" class="w-full h-full object-cover" />
                             </div>
                         </div>
                         <p class="mt-1 text-xs text-red-500" x-show="errors.register.captcha" x-text="errors.register.captcha"></p>
@@ -147,7 +147,7 @@
                 <div class="flex items-center mt-2">
                     <input id="agree-terms" x-model="registerForm.agree" type="checkbox" required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                     <label for="agree-terms" class="ml-2 block text-sm text-gray-900">
-                        我同意 <a href="/terms-of-service" target="_blank" class="font-medium text-blue-600 hover:text-blue-500">用户协议</a> 和 <a href="/privacy-policy" target="_blank" class="font-medium text-blue-600 hover:text-blue-500">隐私政策</a>
+                        {{call .T "agree_terms"}} <a href="/terms-of-service" target="_blank" class="font-medium text-blue-600 hover:text-blue-500">{{call .T "terms_of_service"}}</a> {{call .T "and"}} <a href="/privacy-policy" target="_blank" class="font-medium text-blue-600 hover:text-blue-500">{{call .T "privacy_policy"}}</a>
                     </label>
                 </div>
 
@@ -172,7 +172,7 @@
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </span>
-                        <span x-text="loading.register ? '注册中...' : '注册'"></span>
+                        <span x-text="loading.register ? '{{call .T "registering"}}' : '{{call .T "register_btn_text"}}'"></span>
                     </button>
                 </div>
             </form>
@@ -181,21 +181,21 @@
             <form x-show="activeTab === 'forgot'" @submit.prevent="handleForgot" class="mt-8 space-y-6" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 <div class="space-y-4 rounded-md">
                     <div>
-                        <label for="forgot-email" class="sr-only">邮箱地址</label>
-                        <input id="forgot-email" x-model="forgotForm.email" type="email" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="注册时使用的邮箱地址" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.forgot.email }">
+                        <label for="forgot-email" class="sr-only">{{call .T "email_label"}}</label>
+                        <input id="forgot-email" x-model="forgotForm.email" type="email" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" :placeholder="'{{call .T "forgot_email_placeholder"}}'" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.forgot.email }">
                         <p class="mt-1 text-xs text-red-500" x-show="errors.forgot.email" x-text="errors.forgot.email"></p>
                     </div>
                     <div>
                         <div class="flex gap-3">
                             <div class="flex-1">
-                                <label for="forgot-captcha" class="sr-only">验证码</label>
-                                <input id="forgot-captcha" x-model="forgotForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" placeholder="验证码" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.forgot.captcha }">
+                                <label for="forgot-captcha" class="sr-only">{{call .T "captcha_placeholder"}}</label>
+                                <input id="forgot-captcha" x-model="forgotForm.captcha" type="text" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors" :placeholder="'{{call .T "captcha_placeholder"}}'" :class="{ 'border-red-300 focus:ring-red-500 focus:border-red-500': errors.forgot.captcha }">
                             </div>
-                            <div class="relative w-32 h-[46px] flex-shrink-0 cursor-pointer rounded-xl border border-gray-200 overflow-hidden bg-gray-50 hover:opacity-80 transition-opacity" @click="refreshCaptcha" title="点击刷新">
+                            <div class="relative w-32 h-[46px] flex-shrink-0 cursor-pointer rounded-xl border border-gray-200 overflow-hidden bg-gray-50 hover:opacity-80 transition-opacity" @click="refreshCaptcha" :title="'{{call .T "click_to_refresh"}}'">
                                 <div x-show="captchaLoading || !captchaImg" class="absolute inset-0 flex items-center justify-center animate-pulse">
                                     <svg class="h-5 w-5 text-gray-400 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 </div>
-                                <img x-show="!captchaLoading && captchaImg" :src="captchaImg" alt="验证码" class="w-full h-full object-cover" />
+                                <img x-show="!captchaLoading && captchaImg" :src="captchaImg" alt="{{call .T "captcha_placeholder"}}" class="w-full h-full object-cover" />
                             </div>
                         </div>
                         <p class="mt-1 text-xs text-red-500" x-show="errors.forgot.captcha" x-text="errors.forgot.captcha"></p>
@@ -236,12 +236,12 @@
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </span>
-                        <span x-text="loading.forgot ? '发送中...' : '发送重置邮件'"></span>
+                        <span x-text="loading.forgot ? '{{call .T "sending"}}' : '{{call .T "send_reset_email"}}'"></span>
                     </button>
                 </div>
-                
+
                 <div class="text-center mt-4">
-                     <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors" @click.prevent="switchTab('login')">返回登录</a>
+                     <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors" @click.prevent="switchTab('login')">{{call .T "login_link_text"}}</a>
                 </div>
             </form>
             </div>
@@ -249,7 +249,7 @@
             <!-- Right Side: Social Login (Only show on desktop or bottom on mobile) -->
             <div class="w-full md:w-1/2 bg-gray-50/50 p-8 md:p-12 flex flex-col justify-center border-t md:border-t-0 md:border-l border-gray-100" x-show="activeTab !== 'forgot'">
                 <div class="mb-6">
-                    <h3 class="text-sm font-medium text-gray-900 mb-4">Or continue with</h3>
+                    <h3 class="text-sm font-medium text-gray-900 mb-4">{{call .T "or_continue_with"}}</h3>
                 </div>
 
                 <div class="space-y-3">
@@ -257,16 +257,16 @@
                         <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                         </svg>
-                        使用 GitHub 登录
+                        {{call .T "login_with_github"}}
                     </button>
                     <!-- Mock buttons for visual layout as per user screenshot -->
                     <button class="w-full flex justify-center items-center px-4 py-2.5 border border-gray-200 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
                         <svg class="h-5 w-5 mr-2 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>
-                        使用 Google 登录
+                        {{call .T "login_with_google"}}
                     </button>
                     <button class="w-full flex justify-center items-center px-4 py-2.5 border border-gray-200 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition-colors opacity-50 cursor-not-allowed">
                         <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                        使用 X 登录
+                        {{call .T "login_with_x"}}
                     </button>
                 </div>
             </div>
@@ -287,8 +287,8 @@
                     </a>
                     {{end}}
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">忘记密码？</h2>
-                <p class="text-sm text-gray-600 max-w-xs">输入您注册时使用的邮箱地址，我们会向您发送密码重置链接。</p>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">{{call .T "forgot_password_title"}}</h2>
+                <p class="text-sm text-gray-600 max-w-xs">{{call .T "forgot_password_desc"}}</p>
             </div>
 
         </div>
@@ -322,9 +322,9 @@
             },
             
             getHeaderTitle() {
-                if (this.activeTab === 'login') return '登录到您的账户';
-                if (this.activeTab === 'register') return '创建一个新账户';
-                if (this.activeTab === 'forgot') return '重置密码';
+                if (this.activeTab === 'login') return '{{call .T "login_to_account"}}';
+                if (this.activeTab === 'register') return '{{call .T "create_new_account"}}';
+                if (this.activeTab === 'forgot') return '{{call .T "reset_your_password"}}';
                 return 'Welcome';
             },
 
@@ -360,9 +360,9 @@
 
             async handleLogin() {
                 this.clearErrors();
-                if (!this.loginForm.username) this.errors.login.username = '请输入用户名';
-                if (!this.loginForm.password) this.errors.login.password = '请输入密码';
-                if (!this.loginForm.captcha) this.errors.login.captcha = '请输入验证码';
+                if (!this.loginForm.username) this.errors.login.username = '{{call .T "input_username"}}';
+                if (!this.loginForm.password) this.errors.login.password = '{{call .T "input_password"}}';
+                if (!this.loginForm.captcha) this.errors.login.captcha = '{{call .T "input_captcha"}}';
 
                 if (Object.keys(this.errors.login).length > 0) return;
 
@@ -377,7 +377,7 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     window.location.href = urlParams.get('redirect') || '/';
                 } catch (e) {
-                    this.errors.login.general = e.message || '登录失败';
+                    this.errors.login.general = e.message || '{{call .T "login_failed"}}';
                     this.refreshCaptcha();
                 } finally {
                     this.loading.login = false;
@@ -386,12 +386,12 @@
 
             async handleRegister() {
                 this.clearErrors();
-                if (!this.registerForm.username) this.errors.register.username = '请输入用户名';
-                if (!this.registerForm.email) this.errors.register.email = '请输入邮箱';
-                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.registerForm.email)) this.errors.register.email = '邮箱格式不正确';
-                if (!this.registerForm.password) this.errors.register.password = '请输入密码';
-                if (this.registerForm.password !== this.registerForm.confirmPassword) this.errors.register.confirmPassword = '密码不一致';
-                if (!this.registerForm.captcha) this.errors.register.captcha = '请输入验证码';
+                if (!this.registerForm.username) this.errors.register.username = '{{call .T "input_username"}}';
+                if (!this.registerForm.email) this.errors.register.email = '{{call .T "email_required"}}';
+                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.registerForm.email)) this.errors.register.email = '{{call .T "invalid_email"}}';
+                if (!this.registerForm.password) this.errors.register.password = '{{call .T "input_password"}}';
+                if (this.registerForm.password !== this.registerForm.confirmPassword) this.errors.register.confirmPassword = '{{call .T "password_mismatch"}}';
+                if (!this.registerForm.captcha) this.errors.register.captcha = '{{call .T "input_captcha"}}';
 
                 if (Object.keys(this.errors.register).length > 0) return;
 
@@ -407,7 +407,7 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     window.location.href = urlParams.get('redirect') || '/';
                 } catch (e) {
-                    this.errors.register.general = e.message || '注册失败';
+                    this.errors.register.general = e.message || '{{call .T "registration_failed"}}';
                     this.refreshCaptcha();
                 } finally {
                     this.loading.register = false;
@@ -416,9 +416,9 @@
 
             async handleForgot() {
                 this.clearErrors();
-                if (!this.forgotForm.email) this.errors.forgot.email = '请输入邮箱';
-                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.forgotForm.email)) this.errors.forgot.email = '邮箱格式不正确';
-                if (!this.forgotForm.captcha) this.errors.forgot.captcha = '请输入验证码';
+                if (!this.forgotForm.email) this.errors.forgot.email = '{{call .T "email_required"}}';
+                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.forgotForm.email)) this.errors.forgot.email = '{{call .T "invalid_email"}}';
+                if (!this.forgotForm.captcha) this.errors.forgot.captcha = '{{call .T "input_captcha"}}';
 
                 if (Object.keys(this.errors.forgot).length > 0) return;
 
@@ -429,9 +429,9 @@
                         this.captchaId,
                         this.forgotForm.captcha
                     );
-                    this.success.forgot = '重置邮件已发送，请查收';
+                    this.success.forgot = '{{call .T "reset_success"}}';
                 } catch (e) {
-                    this.errors.forgot.general = e.message || '发送失败';
+                    this.errors.forgot.general = e.message || '{{call .T "send_failed"}}';
                     this.refreshCaptcha();
                 } finally {
                     this.loading.forgot = false;

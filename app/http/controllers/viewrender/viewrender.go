@@ -58,17 +58,7 @@ func SafeRender[T any](c *gin.Context, name string, data T, pageMeta ...*PageMet
 	}
 
 	// Determine language
-	lang := c.Query("lang")
-	if lang == "" {
-		if cookie, err := c.Cookie("lang"); err == nil && cookie != "" {
-			lang = cookie
-		} else {
-			lang = c.GetHeader("Accept-Language")
-		}
-	}
-	if lang == "" {
-		lang = "zh" // Default fallback
-	}
+	lang := GetLang(c)
 
 	localizer := appI18n.GetLocalizer(lang)
 	tFunc := func(key string, args ...any) string {
@@ -115,6 +105,21 @@ func SafeRender[T any](c *gin.Context, name string, data T, pageMeta ...*PageMet
 		slog.Error("render template err", "err", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
+}
+
+func GetLang(c *gin.Context) string {
+	lang := c.Query("lang")
+	if lang == "" {
+		if cookie, err := c.Cookie("lang"); err == nil && cookie != "" {
+			lang = cookie
+		} else {
+			lang = c.GetHeader("Accept-Language")
+		}
+	}
+	if lang == "" {
+		lang = "zh" // Default fallback
+	}
+	return lang
 }
 
 // GetTheme 从cookie中读取主题设置
