@@ -31,6 +31,10 @@ func Init(fsys fs.FS) {
 		if err != nil {
 			slog.Error("Failed to load zh translations", "err", err)
 		}
+		_, err = bundle.LoadMessageFileFS(fsys, "locales/active.ja.yaml")
+		if err != nil {
+			slog.Error("Failed to load ja translations", "err", err)
+		}
 	})
 }
 

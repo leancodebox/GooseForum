@@ -1,0 +1,340 @@
+announcement: お知らせ
+latest: 最新
+hot: 人気
+top: トップ
+categories: カテゴリー
+tags: タグ
+new_topic: 新規トピック
+table_topic: トピック
+table_users: ユーザー
+table_replies: 回复
+table_views: 閲覧
+table_activity: アクティビティ
+
+# Login
+welcome_back: お帰りなさい！
+create_account: アカウントを作成
+reset_password: パスワードをリセット
+login_btn: ログイン
+register_btn: 登録
+username_placeholder: ユーザー名
+password_placeholder: パスワード
+captcha_placeholder: キャプチャ
+click_to_refresh: クリックして更新
+forgot_password: パスワードをお忘れですか？
+logging_in: ログイン中...
+
+# Register Form
+reg_username_label: ユーザー名
+reg_email_label: メールアドレス
+reg_password_label: パスワード
+reg_password_help: 6文字以上
+reg_confirm_password_label: パスワード確認
+reg_captcha_label: キャプチャ
+agree_terms: 同意します
+and: と
+terms_of_service: 利用規約
+privacy_policy: プライバシーポリシー
+register_btn_text: 登録
+registering: 登録中...
+login_link_text: ログインに戻る
+
+# Forgot Password Form
+forgot_email_placeholder: 登録時に使用したメールアドレス
+send_reset_email: リセットメールを送信
+sending: 送信中...
+reset_success: リセットメールを送信しました、ご確認ください
+send_failed: 送信失敗
+
+# Login Page
+login_to_account: アカウントにログイン
+create_new_account: 新規アカウントを作成
+reset_your_password: パスワードをリセット
+input_username: ユーザー名を入力してください
+input_password: パスワードを入力してください
+input_captcha: キャプチャを入力してください
+login_failed: ログイン失敗
+invalid_email: メールアドレスの形式が正しくありません
+registration_failed: 登録失敗
+email_required: メールアドレスを入力してください
+password_mismatch: パスワードが一致しません
+password_min_length: パスワードは6文字以上である必要があります
+
+# Reset Password Page
+set_new_password: 新しいパスワードを設定
+invalid_token: 無効なリンク
+token_expired: リセットリンクが無効または期限切れです。再度パスワードリセットを申請してください。
+new_password_placeholder: 新しいパスワード
+confirm_password_placeholder: パスワード確認
+resetting: リセット中...
+reset_password_btn: パスワードをリセット
+reset_success_desc: パスワードのリセットが完了しました。新しいパスワードでログインできます。
+reset_failed: パスワードのリセットに失敗しました。もう一度お試しください。
+enter_new_password: 新しいパスワードを入力してください
+password_too_short: パスワードは6文字以上である必要があります
+confirm_password_required: パスワード確認を入力してください
+passwords_not_match: パスワードが一致しません
+
+# Forgot Password Page
+forgot_password_title: パスワードをお忘れですか？
+forgot_password_desc: 登録時に使用したメールアドレスを入力すると、パスワードリセットリンクを送信します。
+reset_password_desc: 新しいパスワードを設定してください
+
+# Activate Page
+account_activation: アカウント有効化
+contact_support: サポートに連絡
+login_now: 今すぐログイン
+
+# Social Login
+or_continue_with: または次の方法で続行
+login_with_github: GitHubでログイン
+login_with_google: Googleでログイン
+login_with_x: Xでログイン
+
+# Notifications
+notification_op_failed: 操作に失敗しました
+notification_bookmark_success: ブックマークしました
+notification_bookmark_cancel: ブックマークを解除しました
+notification_input_required: 内容を入力してください
+notification_comment_success: 投稿しました
+notification_delete_confirm: このコメントを削除してもよろしいですか？
+notification_delete_success: 削除しました
+notification_delete_failed: 削除に失敗しました
+
+# Github OAuth
+github_connected: 接続済み
+github_not_connected: 未接続
+google_connected: 接続済み
+google_not_connected: 未接続
+disconnect: 切断
+connect: 接続
+
+# Account Binding
+connected_accounts: 接続されたアカウント
+
+# Privacy Settings
+show_articles: 私の記事を公開
+show_articles_desc: プロフィールで記事リストを他のユーザーに公開する
+show_following: フォロー情報を公開
+show_following_desc: フォローとフォロワーのリストを他のユーザーに公開する
+email_notifications: メール通知
+email_notifications_desc: アカウントアクティビティに関するメールを受け取る
+
+# Header & Navigation
+notifications_title: 通知
+view_all: すべて見る
+no_new_notifications: 新しい通知はありません
+login_link: ログイン
+sign_up_link: 登録
+menu_label: メニュー
+close_menu: メニューを閉じる
+
+# Notification Messages
+notification_new_comment: • 新しいコメントを受け取りました
+notification_new_message: • 新しい通知があります
+
+# Publish
+create_topic_title: 新規トピックを作成
+topic_title_label: タイトル
+topic_title_placeholder: この議論について何ですか？
+topic_title_help: タイトルは説明的にしてください（15文字以上）
+select_type_label: タイプ
+select_category_label: カテゴリー
+selected_count_label: 選択済み
+topic_content_label: 内容
+
+# Settings
+settings_title: 設定
+saved_success: 保存しました
+tab_profile: プロフィール
+tab_password: パスワード
+tab_privacy: プライバシー
+tab_binding: アカウント連携
+profile_picture_label: アバター
+profile_picture_help: JPG、GIF、またはPNG。最大5MB。
+upload_picture_btn: 新しい画像をアップロード
+account_info_title: アカウント情報
+username_label: ユーザー名
+email_label: メールアドレス
+edit_btn: 編集
+save_btn: 保存
+cancel_btn: キャンセル
+
+# User Profile
+admin_badge: 管理者
+location_shanghai: 上海
+message_btn: メッセージ
+edit_profile_btn: プロフィールを編集
+follow_btn: フォロー
+following_btn: フォロー中
+no_bio: -bioはまだありません。
+joined_label: 入会
+last_post_label: 最後の投稿
+seen_label: 最終アクセス
+online_status: オンライン
+
+# Category
+no_summary: 摘要信息はありません...
+hot_tag: "#人気"
+load_more: さらに読み込む
+load_more_category: "{{.Category}}のさらに読み込む..."
+loading: 読み込み中...
+no_more_topics: これ以上のトピックはありません
+no_more_activities: これ以上のアクティビティはありません
+next_page: 次のページ
+nav_latest: 最新
+nav_new: 新規
+category_label: カテゴリー
+table_header_topic: トピック
+table_header_users: ユーザー
+table_header_replies: 回复
+table_header_views: 閲覧
+table_header_activity: アクティビティ
+
+# Detail
+btn_like: いいね
+btn_save: ブックマーク
+btn_saved: ブックマーク済み
+btn_edit: 編集
+btn_reply: 回复
+btn_cancel: キャンセル
+badge_op: OP
+replying_to: 返信先
+btn_delete: 削除
+placeholder_reply: 返信を書く...
+placeholder_comment: あなたの考えは？
+btn_post_reply: 回复を投稿
+join_discussion_title: 議論に参加
+join_discussion_desc: ログインまたは登録してコメントを残す
+btn_login: ログイン
+btn_signup: 登録
+
+# Links
+links_title: フレンドリーリンク
+links_desc: 他の高品質サイトとリンクを交換
+links_cat_communities: コミュニティ
+links_cat_tools: ツール
+links_cat_blogs: ブログ
+apply_link_title: リンクを申請
+apply_rule_healthy: 健康的な内容
+apply_rule_tech: テクノロジー関連
+apply_rule_stable: 安定したアクセス
+label_site_name: サイト名
+label_description: 説明
+label_logo_url: Logo URL
+label_site_url: サイトURL
+label_contact_email: 連絡先メール
+label_reciprocal_link: 相互リンク
+placeholder_site_name: 私の素晴らしいブログ
+placeholder_description: 短い説明
+placeholder_logo_url: https://...
+placeholder_site_url: https://...
+placeholder_contact_email: you@example.com
+placeholder_reciprocal_link: こちら로부터リンクされた場所
+btn_submit_application: 申請を提出
+btn_sending: 送信中...
+stats_title: 統計情報
+stats_total_links: 総リンク数
+stats_communities: コミュニティ
+stats_tools: ツール
+stats_blogs: ブログ
+
+# Detail Sidebar
+topic_map_title: トピックマップ
+topic_map_created: 作成日時
+topic_map_last_reply: 最後の返信
+topic_map_replies: 回复数
+topic_map_views: 閲覧数
+topic_map_participants: 参加者
+topic_map_frequent_posters: 頻繁な投稿者は
+topic_map_suggested: 提案された
+btn_share_topic: トピックを共有
+
+# Global Sidebar
+sidebar_resources: リソース
+sidebar_categories: カテゴリー
+sidebar_about: 概要
+sidebar_privacy: プライバシー
+sidebar_terms: 条款
+sidebar_github: GitHub
+
+# Script Alerts
+op_failed: 操作に失敗しました
+bookmark_success: ブックマークしました
+bookmark_cancel_success: ブックマークを解除しました
+input_content_required: 内容を入力してください
+comment_success: 投稿しました
+confirm_delete_reply: このコメントを削除してもよろしいですか？
+delete_success: 削除しました
+delete_failed: 削除に失敗しました
+submit_success: 送信しました
+submit_error: 送信エラー
+
+# Error Page
+back_home: ホームに戻る
+back_page: 前のページに戻る
+error_request_id: リクエストID
+error_time: 時間
+
+# Chat Page
+messages_title: メッセージ
+search_messages: メッセージを検索...
+type_message: メッセージを入力...
+send_hint: Enterで送信、Shift + Enterで改行
+select_conversation: 会话を選択
+select_conversation_desc: リストから 사람을 선택하여チャットを開始
+start_new_chat: 新規チャットを開始
+new_message_title: 新規メッセージ
+search_people: 人を検索...
+suggested_people: 提案
+status_online: オンライン
+status_offline: オフライン
+date_today: 今日
+
+# Notification Types
+type_comment: コメント
+type_reply: 回复
+type_like: いいね
+type_follow: フォロー
+type_system: システム
+type_notification: 通知
+
+# Time format
+time_just_now: たった今
+time_m_ago: 分前
+time_h_ago: 時間前
+time_d_ago: 日前
+
+# Notifications Page
+notifications_page_title: 通知
+filter_all: すべて
+filter_unread: 未読
+mark_all_read: すべて既読にする
+no_notifications: 通知はありません
+no_notifications_desc: すべての通知を読みました！また後で確認してください。
+text_commented_on: コメントしました
+text_replied_to: 回复しました
+text_liked_post: あなたの投稿をいいねしました
+text_started_following: あなたをフォローしました
+confirm_mark_all: すべての通知を既読にしますか？
+confirm_delete_notification: この通知を削除してもよろしいですか？
+
+# Navigation
+nav_home: ホーム
+nav_explore: 探索
+nav_resources: リソース
+nav_topics: トピック
+nav_messages: メッセージ
+nav_notifications: 通知
+nav_recent: 最近のアクティビティ
+nav_more: もっと
+nav_links: フレンドリーリンク
+nav_sponsors: スポンサー
+nav_docs: ドキュメント
+nav_new_topic: 新規トピック
+
+# User Menu
+menu_profile: プロフィール
+menu_settings: 設定
+menu_admin: 管理画面
+menu_logout: ログアウト
