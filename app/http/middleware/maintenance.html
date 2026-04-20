@@ -2,40 +2,801 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>维护中</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统维护中 | Maintenance</title>
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        :root {
+            color-scheme: light;
+            --bg: #f6f3ea;
+            --bg-accent: #fde68a;
+            --panel: rgba(255, 255, 255, 0.8);
+            --panel-border: rgba(15, 23, 42, 0.08);
+            --text: #172033;
+            --muted: #5f6b7c;
+            --line: rgba(23, 32, 51, 0.12);
+            --pill: rgba(255, 255, 255, 0.72);
+            --pill-active: #172033;
+            --pill-active-text: #fffef7;
+            --accent: #ffcf33;
+            --accent-strong: #f59e0b;
+            --signal: #5b8cff;
+            --dot: #ffb703;
+            --shadow: 0 30px 90px rgba(23, 32, 51, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            background: linear-gradient(135deg, #ff6f61, #6ab04c);
+            padding: 0;
         }
+
+        html, body {
+            min-height: 100%;
+        }
+
+        body {
+            font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(255, 207, 51, 0.34), transparent 28%),
+                radial-gradient(circle at top right, rgba(91, 140, 255, 0.14), transparent 32%),
+                linear-gradient(180deg, #fffdf5 0%, var(--bg) 100%);
+            overflow: hidden;
+        }
+
+        .noise,
+        .grid {
+            inset: 0;
+            pointer-events: none;
+            position: fixed;
+        }
+
+        .grid {
+            background-image:
+                linear-gradient(rgba(23, 32, 51, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(23, 32, 51, 0.04) 1px, transparent 1px);
+            background-size: 36px 36px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent);
+        }
+
+        .noise {
+            opacity: 0.18;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.9) 0 1px, transparent 1px),
+                radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.9) 0 1px, transparent 1px),
+                radial-gradient(circle at 50% 70%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1px);
+            background-size: 120px 120px, 160px 160px, 200px 200px;
+        }
+
+        main {
+            min-height: 100vh;
+            padding: 32px;
+            display: grid;
+            place-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            width: min(960px, 100%);
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before,
+        .card::after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            filter: blur(10px);
+            opacity: 0.6;
+        }
+
+        .card::before {
+            width: 180px;
+            height: 180px;
+            top: -70px;
+            right: -40px;
+            background: rgba(255, 207, 51, 0.25);
+        }
+
+        .card::after {
+            width: 220px;
+            height: 220px;
+            bottom: -120px;
+            left: -60px;
+            background: rgba(91, 140, 255, 0.16);
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 0;
+        }
+
+        .hero {
+            padding: 40px 40px 36px;
+            border-right: 1px solid rgba(23, 32, 51, 0.08);
+        }
+
+        .meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            color: var(--muted);
+            font-size: 0.94rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #f97316;
+            box-shadow: 0 0 0 7px rgba(249, 115, 22, 0.14);
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+
         h1 {
-            color: #333333;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            font-size: clamp(2.3rem, 5vw, 4.5rem);
+            line-height: 0.94;
+            letter-spacing: -0.06em;
+            margin-bottom: 16px;
         }
-        p {
-            color: #333333;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-            margin-top: 10px;
+
+        .headline-top,
+        .headline-bottom {
+            display: block;
         }
-        .container {
+
+        .headline-bottom {
+            color: #405168;
+        }
+
+        .summary {
+            max-width: 38rem;
+            font-size: 1.02rem;
+            line-height: 1.8;
+            color: var(--muted);
+            margin-bottom: 28px;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .lang-btn {
+            appearance: none;
+            border: 1px solid rgba(23, 32, 51, 0.1);
+            background: var(--pill);
+            color: var(--text);
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: transform 180ms ease, background 180ms ease, color 180ms ease, border-color 180ms ease;
+        }
+
+        .lang-btn:hover,
+        .lang-btn:focus-visible {
+            transform: translateY(-1px);
+            border-color: rgba(23, 32, 51, 0.25);
+            outline: none;
+        }
+
+        .lang-btn.active {
+            background: var(--pill-active);
+            color: var(--pill-active-text);
+            border-color: var(--pill-active);
+        }
+
+        .hint {
+            font-size: 0.88rem;
+            color: #7a8797;
+        }
+
+        .stage {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 24px;
+            min-height: 100%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.78));
+        }
+
+        .clock-wrap {
+            position: relative;
+            min-height: 330px;
+            border-radius: 26px;
+            border: 1px solid rgba(23, 32, 51, 0.08);
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top left, rgba(255, 207, 51, 0.24), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(91, 140, 255, 0.2), transparent 34%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 245, 236, 0.98));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        }
+
+        .clock-wrap::before,
+        .clock-wrap::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .clock-wrap::before {
+            background:
+                linear-gradient(90deg, rgba(23, 32, 51, 0.028) 1px, transparent 1px),
+                linear-gradient(rgba(23, 32, 51, 0.028) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.56), transparent 90%);
+        }
+
+        .clock-wrap::after {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 34%, transparent 72%, rgba(255, 255, 255, 0.3));
+        }
+
+        .clock-glow {
+            position: absolute;
+            inset: 18% 18% auto auto;
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 207, 51, 0.24), transparent 68%);
+            filter: blur(8px);
+            opacity: 0.9;
+        }
+
+        .clock-panel {
+            position: relative;
+            z-index: 1;
+            min-height: 330px;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            padding: 24px;
+        }
+
+        .clock-topline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            color: var(--muted);
+            font-size: 0.84rem;
+        }
+
+        .clock-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(23, 32, 51, 0.08);
+        }
+
+        .clock-badge::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-strong);
+            box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.12);
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+
+        .clock-shell {
+            display: grid;
+            place-items: center;
+            padding: 8px 0 4px;
+        }
+
+        .clock-face {
+            position: relative;
+            width: min(250px, 72vw);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.98), rgba(255, 249, 233, 0.98) 52%, rgba(241, 229, 193, 0.96) 100%);
+            border: 1px solid rgba(23, 32, 51, 0.08);
+            box-shadow:
+                inset 0 3px 0 rgba(255, 255, 255, 0.86),
+                inset 0 -12px 24px rgba(23, 32, 51, 0.06),
+                0 28px 50px rgba(23, 32, 51, 0.12);
+        }
+
+        .clock-face::before {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(91, 140, 255, 0.12);
+        }
+
+        .clock-center {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            width: 16px;
+            height: 16px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: #1d2940;
+            box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.82);
+            z-index: 5;
+        }
+
+        .clock-tick {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 4px;
+            height: 18px;
+            margin-left: -2px;
+            margin-top: calc(-50% + 14px);
+            transform-origin: center calc(50% + 92px);
+            border-radius: 999px;
+            background: rgba(23, 32, 51, 0.22);
+            z-index: 1;
+        }
+
+        .clock-tick.is-major {
+            width: 5px;
+            height: 28px;
+            margin-left: -2.5px;
+            background: rgba(23, 32, 51, 0.48);
+        }
+
+        .clock-hand {
+            position: absolute;
+            left: 50%;
+            bottom: 50%;
+            transform-origin: bottom center;
+            border-radius: 999px;
+            will-change: transform;
+            z-index: 3;
+        }
+
+        .clock-hand.hour {
+            width: 8px;
+            height: 60px;
+            margin-left: -4px;
+            background: linear-gradient(180deg, #1a2438, #344765);
+            box-shadow: 0 4px 8px rgba(23, 32, 51, 0.16);
+        }
+
+        .clock-hand.minute {
+            width: 6px;
+            height: 86px;
+            margin-left: -3px;
+            background: linear-gradient(180deg, #47628d, #203550);
+            box-shadow: 0 4px 8px rgba(23, 32, 51, 0.14);
+        }
+
+        .clock-hand.second {
+            width: 2px;
+            height: 96px;
+            margin-left: -1px;
+            background: linear-gradient(180deg, var(--accent-strong), #f97316);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.28);
+        }
+
+        .clock-hand.second::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 14px;
+            width: 8px;
+            height: 8px;
+            margin-left: -4px;
+            border-radius: 50%;
+            background: var(--accent-strong);
+        }
+
+        .clock-meta {
+            display: grid;
+            gap: 8px;
+            justify-items: center;
             text-align: center;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding-top: 2px;
+        }
+
+        .clock-label {
+            font-size: 0.76rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(23, 32, 51, 0.56);
+        }
+
+        .clock-digital {
+            font-size: clamp(2rem, 4vw, 2.6rem);
+            line-height: 1;
+            letter-spacing: -0.06em;
+            font-weight: 800;
+            color: #1f2c42;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clock-date {
+            color: #516079;
+            font-size: 0.96rem;
+            font-weight: 700;
+        }
+
+        .clock-foot {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: end;
+            padding-top: 10px;
+        }
+
+        .clock-foot-note {
+            max-width: 12rem;
+            color: #67758a;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .clock-foot-zone {
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(23, 32, 51, 0.08);
+            color: #314258;
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 7px rgba(249, 115, 22, 0.14);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 0 0 10px rgba(249, 115, 22, 0.08);
+            }
+        }
+
+        @media (max-width: 860px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                border-right: 0;
+                border-bottom: 1px solid rgba(23, 32, 51, 0.08);
+            }
+
+            .stage {
+                padding-top: 28px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                overflow: auto;
+            }
+
+            main {
+                padding: 18px;
+            }
+
+            .hero,
+            .stage {
+                padding: 24px 20px;
+            }
+
+            .clock-wrap {
+                min-height: 300px;
+            }
+
+            .clock-panel {
+                padding: 18px;
+            }
+
+            .clock-face {
+                width: min(220px, 74vw);
+            }
+
+            .clock-hand.hour {
+                height: 52px;
+            }
+
+            .clock-hand.minute {
+                height: 76px;
+            }
+
+            .clock-hand.second {
+                height: 84px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+
+            .clock-badge::before {
+                animation: none !important;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>网站维护中</h1>
-    <p>我们正在进行系统升级，请稍后再试。感谢您的耐心等待与支持！</p>
-</div>
+    <div class="grid" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+
+    <main>
+        <section class="card" aria-labelledby="maintenance-title">
+            <div class="content">
+                <div class="hero">
+                    <div class="meta">
+                        <span class="status-dot" aria-hidden="true"></span>
+                        <span data-i18n="meta">服务器正在维护模式中</span>
+                    </div>
+
+                    <h1 id="maintenance-title">
+                        <span class="headline-top" data-i18n="headlineTop">维护进行中</span>
+                        <span class="headline-bottom" data-i18n="headlineBottom">我们很快回来</span>
+                    </h1>
+
+                    <p class="summary" data-i18n="summary">
+                        我们正在进行系统更新与优化，短暂离开是为了更稳定地回来。你可以稍后刷新页面，我们会尽快恢复服务。
+                    </p>
+
+                    <div class="actions" aria-label="Language switcher">
+                        <button class="lang-btn" type="button" data-lang="zh">中文</button>
+                        <button class="lang-btn" type="button" data-lang="en">English</button>
+                        <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+                        <button class="lang-btn" type="button" data-lang="ko">한국어</button>
+                    </div>
+
+                    <p class="hint" data-i18n="hint">页面语言会根据浏览器自动切换，也可以手动选择。</p>
+                </div>
+
+                <div class="stage">
+                    <div class="clock-wrap" aria-hidden="true">
+                        <div class="clock-glow"></div>
+                        <div class="clock-panel">
+                            <div class="clock-topline">
+                                <span class="clock-badge" data-i18n="clockBadge">Maintenance clock</span>
+                                <span id="clockTimezoneShort">UTC+00:00</span>
+                            </div>
+
+                            <div class="clock-shell">
+                                <div class="clock-face" id="clockFace">
+                                    <div class="clock-hand hour" id="hourHand"></div>
+                                    <div class="clock-hand minute" id="minuteHand"></div>
+                                    <div class="clock-hand second" id="secondHand"></div>
+                                    <div class="clock-center"></div>
+                                </div>
+                            </div>
+
+                            <div class="clock-meta">
+                                <span class="clock-label" data-i18n="clockLabel">Local service time</span>
+                                <strong class="clock-digital" id="clockDigital">00:00:00</strong>
+                                <div class="clock-date" id="clockDate">2026-04-20</div>
+                            </div>
+
+                            <div class="clock-foot">
+                                <p class="clock-foot-note" data-i18n="clockNote">The maintenance window follows the server clock and updates live.</p>
+                                <div class="clock-foot-zone" id="clockTimezoneLong">Coordinated time</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <p class="sr-only" id="live-region" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const copy = {
+                zh: {
+                    meta: "服务器正在维护模式中",
+                    headlineTop: "维护进行中",
+                    headlineBottom: "我们很快回来",
+                    summary: "我们正在进行系统更新与优化，短暂离开是为了更稳定地回来。你可以稍后刷新页面，我们会尽快恢复服务。",
+                    hint: "页面语言会根据浏览器自动切换，也可以手动选择。",
+                    clockBadge: "维护时钟",
+                    clockLabel: "当前本地时间",
+                    clockNote: "维护窗口会跟随当前设备时间实时更新。",
+                    title: "系统维护中 | Maintenance",
+                    weekday: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
+                },
+                en: {
+                    meta: "The server is currently in maintenance mode.",
+                    headlineTop: "Under Maintenance",
+                    headlineBottom: "We will be back soon",
+                    summary: "We are rolling out updates and polishing the experience. This short pause helps us return with a more stable service. Please refresh again in a little while.",
+                    hint: "The page follows your browser language automatically, and you can switch it manually at any time.",
+                    clockBadge: "Maintenance clock",
+                    clockLabel: "Local service time",
+                    clockNote: "The maintenance window follows your current device time and updates live.",
+                    title: "Under Maintenance | 系统维护中",
+                    weekday: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+                },
+                ja: {
+                    meta: "現在サーバーはメンテナンスモードです。",
+                    headlineTop: "メンテナンス中",
+                    headlineBottom: "まもなく復旧します",
+                    summary: "現在、システムの更新と最適化を行っています。より安定した状態で戻るための短い停止です。しばらくしてから再読み込みしてください。",
+                    hint: "ブラウザの言語に合わせて自動切り替えされ、手動でも変更できます。",
+                    clockBadge: "メンテナンス時計",
+                    clockLabel: "現在のローカル時間",
+                    clockNote: "メンテナンス時間は現在の端末時刻に合わせてリアルタイムで更新されます。",
+                    title: "メンテナンス中 | Maintenance",
+                    weekday: ["日", "月", "火", "水", "木", "金", "土"]
+                },
+                ko: {
+                    meta: "현재 서버가 점검 모드로 전환되어 있습니다.",
+                    headlineTop: "시스템 점검 중",
+                    headlineBottom: "곧 다시 돌아옵니다",
+                    summary: "지금은 시스템 업데이트와 최적화를 진행하고 있습니다. 더 안정적인 서비스로 돌아오기 위한 짧은 점검입니다. 잠시 후 다시 새로고침해 주세요.",
+                    hint: "브라우저 언어를 따라 자동 전환되며, 원하는 언어로 직접 바꿀 수도 있습니다.",
+                    clockBadge: "점검 시계",
+                    clockLabel: "현재 로컬 시간",
+                    clockNote: "점검 시간은 현재 기기 시간을 기준으로 실시간 갱신됩니다.",
+                    title: "시스템 점검 중 | Maintenance",
+                    weekday: ["일", "월", "화", "수", "목", "금", "토"]
+                }
+            };
+
+            const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+            const liveRegion = document.getElementById("live-region");
+            const clockFace = document.getElementById("clockFace");
+            const hourHand = document.getElementById("hourHand");
+            const minuteHand = document.getElementById("minuteHand");
+            const secondHand = document.getElementById("secondHand");
+            const clockDigital = document.getElementById("clockDigital");
+            const clockDate = document.getElementById("clockDate");
+            const clockTimezoneShort = document.getElementById("clockTimezoneShort");
+            const clockTimezoneLong = document.getElementById("clockTimezoneLong");
+            const langButtons = Array.from(document.querySelectorAll(".lang-btn"));
+
+            let currentLang = "zh";
+
+            function buildTicks() {
+                for (let i = 0; i < 60; i += 1) {
+                    const tick = document.createElement("span");
+                    tick.className = "clock-tick" + (i % 5 === 0 ? " is-major" : "");
+                    tick.style.transform = "rotate(" + (i * 6) + "deg)";
+                    clockFace.appendChild(tick);
+                }
+            }
+
+            function pad(value) {
+                return String(value).padStart(2, "0");
+            }
+
+            function getOffsetLabel(date) {
+                const offset = -date.getTimezoneOffset();
+                const sign = offset >= 0 ? "+" : "-";
+                const abs = Math.abs(offset);
+                const hours = pad(Math.floor(abs / 60));
+                const minutes = pad(abs % 60);
+                return "UTC" + sign + hours + ":" + minutes;
+            }
+
+            function getZoneName() {
+                try {
+                    return Intl.DateTimeFormat().resolvedOptions().timeZone || "Local Time";
+                } catch (error) {
+                    return "Local Time";
+                }
+            }
+
+            function updateClock() {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                const seconds = now.getSeconds();
+                const milliseconds = now.getMilliseconds();
+                const dictionary = copy[currentLang];
+
+                const hourAngle = (hours % 12) * 30 + minutes * 0.5 + seconds / 120;
+                const minuteAngle = minutes * 6 + seconds * 0.1;
+                const secondAngle = (seconds + milliseconds / 1000) * 6;
+
+                hourHand.style.transform = "rotate(" + hourAngle + "deg)";
+                minuteHand.style.transform = "rotate(" + minuteAngle + "deg)";
+                secondHand.style.transform = "rotate(" + secondAngle + "deg)";
+
+                clockDigital.textContent = pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
+                clockDate.textContent = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate()) + "  " + dictionary.weekday[now.getDay()];
+                clockTimezoneShort.textContent = getOffsetLabel(now);
+                clockTimezoneLong.textContent = getZoneName();
+                liveRegion.textContent = clockDigital.textContent;
+
+                if (!REDUCED_MOTION) {
+                    window.requestAnimationFrame(updateClock);
+                }
+            }
+
+            function applyLanguage(lang) {
+                const dictionary = copy[lang] || copy.en;
+                currentLang = copy[lang] ? lang : "en";
+
+                document.documentElement.lang = currentLang === "zh" ? "zh-CN" : currentLang;
+                document.title = dictionary.title;
+
+                document.querySelectorAll("[data-i18n]").forEach(function (node) {
+                    const key = node.getAttribute("data-i18n");
+                    if (dictionary[key]) {
+                        node.textContent = dictionary[key];
+                    }
+                });
+
+                langButtons.forEach(function (button) {
+                    button.classList.toggle("active", button.getAttribute("data-lang") === currentLang);
+                });
+                updateClock();
+            }
+
+            function detectLanguage() {
+                const raw = (navigator.language || "en").toLowerCase();
+                if (raw.indexOf("zh") === 0) {
+                    return "zh";
+                }
+                if (raw.indexOf("ja") === 0) {
+                    return "ja";
+                }
+                if (raw.indexOf("ko") === 0) {
+                    return "ko";
+                }
+                return "en";
+            }
+
+            buildTicks();
+            applyLanguage(detectLanguage());
+
+            langButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    applyLanguage(button.getAttribute("data-lang"));
+                });
+            });
+
+            if (REDUCED_MOTION) {
+                window.setInterval(updateClock, 1000);
+            } else {
+                window.requestAnimationFrame(updateClock);
+            }
+        })();
+    </script>
 </body>
 </html>

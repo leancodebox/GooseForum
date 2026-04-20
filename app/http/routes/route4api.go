@@ -42,18 +42,8 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.Use(middleware.JWTAuth).
 		Use(gzip.Gzip(gzip.DefaultCompression))
 
-	//
 	viewRouteApp.GET("/", controllers.Home)
 	viewRouteApp.GET("/login", controllers.LoginView)
-	// 301 重定向旧路径到新路径
-	viewRouteApp.GET("/post/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		c.Redirect(http.StatusMovedPermanently, "/p/post/"+id)
-	})
-	viewRouteApp.GET("/user/:userId", func(c *gin.Context) {
-		userId := c.Param("userId")
-		c.Redirect(http.StatusMovedPermanently, "/u/"+userId)
-	})
 	viewRouteApp.GET("/c/:slug/:id", controllers.Category)
 	viewRouteApp.GET("/c/:slug/:id/l/:sort", controllers.Category)
 	viewRouteApp.GET("/p/post/:id", controllers.PostDetail)
