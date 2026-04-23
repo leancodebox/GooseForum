@@ -27,6 +27,7 @@ import {
   Command,
   GalleryVerticalEnd,
   PanelsTopLeft,
+  Megaphone,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -92,6 +93,11 @@ const allNavGroups = [
             title: '发布内容',
             url: '/site-settings/posting-settings',
             icon: FileText,
+          },
+          {
+            title: '系统公告',
+            url: '/site-settings/announcement-settings',
+            icon: Megaphone,
           },
         ],
       },

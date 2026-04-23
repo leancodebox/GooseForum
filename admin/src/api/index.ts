@@ -139,7 +139,7 @@ export function saveSponsors(data: { settings: SponsorsConfig }) {
 }
 
 export function getAnnouncement() {
-  return request.post<AnnouncementConfig>('/api/admin/announcement')
+  return request.get<AnnouncementConfig>('/api/admin/announcement')
 }
 
 export function saveAnnouncement(data: { settings: AnnouncementConfig }) {

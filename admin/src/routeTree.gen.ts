@@ -44,6 +44,7 @@ import { Route as AuthenticatedSiteSettingsSiteInfoIndexRouteImport } from './ro
 import { Route as AuthenticatedSiteSettingsSecuritySettingsIndexRouteImport } from './routes/_authenticated/site-settings/security-settings/index'
 import { Route as AuthenticatedSiteSettingsPostingSettingsIndexRouteImport } from './routes/_authenticated/site-settings/posting-settings/index'
 import { Route as AuthenticatedSiteSettingsMailSettingsIndexRouteImport } from './routes/_authenticated/site-settings/mail-settings/index'
+import { Route as AuthenticatedSiteSettingsAnnouncementSettingsIndexRouteImport } from './routes/_authenticated/site-settings/announcement-settings/index'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -238,6 +239,12 @@ const AuthenticatedSiteSettingsMailSettingsIndexRoute =
     path: '/site-settings/mail-settings/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute =
+  AuthenticatedSiteSettingsAnnouncementSettingsIndexRouteImport.update({
+    id: '/site-settings/announcement-settings/',
+    path: '/site-settings/announcement-settings/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -270,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/tasks/': typeof AuthenticatedTasksIndexRoute
   '/users-management/': typeof AuthenticatedUsersManagementIndexRoute
   '/users/': typeof AuthenticatedUsersIndexRoute
+  '/site-settings/announcement-settings/': typeof AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute
   '/site-settings/mail-settings/': typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
   '/site-settings/posting-settings/': typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
   '/site-settings/security-settings/': typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
@@ -305,6 +313,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users-management': typeof AuthenticatedUsersManagementIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/site-settings/announcement-settings': typeof AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute
   '/site-settings/mail-settings': typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
   '/site-settings/posting-settings': typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
   '/site-settings/security-settings': typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
@@ -343,6 +352,7 @@ export interface FileRoutesById {
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users-management/': typeof AuthenticatedUsersManagementIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_authenticated/site-settings/announcement-settings/': typeof AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute
   '/_authenticated/site-settings/mail-settings/': typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
   '/_authenticated/site-settings/posting-settings/': typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
   '/_authenticated/site-settings/security-settings/': typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/tasks/'
     | '/users-management/'
     | '/users/'
+    | '/site-settings/announcement-settings/'
     | '/site-settings/mail-settings/'
     | '/site-settings/posting-settings/'
     | '/site-settings/security-settings/'
@@ -416,6 +427,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/users-management'
     | '/users'
+    | '/site-settings/announcement-settings'
     | '/site-settings/mail-settings'
     | '/site-settings/posting-settings'
     | '/site-settings/security-settings'
@@ -453,6 +465,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks/'
     | '/_authenticated/users-management/'
     | '/_authenticated/users/'
+    | '/_authenticated/site-settings/announcement-settings/'
     | '/_authenticated/site-settings/mail-settings/'
     | '/_authenticated/site-settings/posting-settings/'
     | '/_authenticated/site-settings/security-settings/'
@@ -720,6 +733,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSiteSettingsMailSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/site-settings/announcement-settings/': {
+      id: '/_authenticated/site-settings/announcement-settings/'
+      path: '/site-settings/announcement-settings'
+      fullPath: '/site-settings/announcement-settings/'
+      preLoaderRoute: typeof AuthenticatedSiteSettingsAnnouncementSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -762,6 +782,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedUsersManagementIndexRoute: typeof AuthenticatedUsersManagementIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+  AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute: typeof AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute
   AuthenticatedSiteSettingsMailSettingsIndexRoute: typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
   AuthenticatedSiteSettingsPostingSettingsIndexRoute: typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
   AuthenticatedSiteSettingsSecuritySettingsIndexRoute: typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
@@ -790,6 +811,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUsersManagementIndexRoute:
     AuthenticatedUsersManagementIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+  AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute:
+    AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute,
   AuthenticatedSiteSettingsMailSettingsIndexRoute:
     AuthenticatedSiteSettingsMailSettingsIndexRoute,
   AuthenticatedSiteSettingsPostingSettingsIndexRoute:
