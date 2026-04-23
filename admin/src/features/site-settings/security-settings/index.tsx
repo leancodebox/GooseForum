@@ -40,7 +40,7 @@ export default function SecuritySettingsManagement() {
         if (response.data.code === 0) {
           const result = response.data.result
           // 确保 allowedDomains 始终为数组，防止 Zod 校验失败
-          if (result && result.allowedDomains === null) {
+          if (result && !Array.isArray(result.allowedDomains)) {
             result.allowedDomains = []
           }
           form.reset(result)
@@ -212,10 +212,12 @@ export default function SecuritySettingsManagement() {
                   </div>
 
                   <div className='flex flex-wrap gap-2'>
-                      {(form.watch('allowedDomains') || []).length === 0 ? (
-                        <span className='text-sm text-muted-foreground italic'>未限制域名</span>
-                      ) : (
-                        (form.watch('allowedDomains') || []).map((domain: string) => (
+                      {(() => {
+                        const domains = form.watch('allowedDomains')
+                        if (!Array.isArray(domains) || domains.length === 0) {
+                          return <span className='text-sm text-muted-foreground italic'>未限制域名</span>
+                        }
+                        return domains.map((domain: string) => (
                           <Badge key={domain} variant='secondary' className='px-3 py-1.5 text-sm font-normal'>
                           {domain}
                           <button
@@ -226,9 +228,9 @@ export default function SecuritySettingsManagement() {
                             <Trash2 className='h-3.5 w-3.5 text-muted-foreground hover:text-destructive transition-colors' />
                           </button>
                         </Badge>
-                      ))
-                    )}
-                  </div>
+                        ))
+                      })()}
+                    </div>
                 </div>
               </form>
             </Form>
