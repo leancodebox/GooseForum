@@ -184,8 +184,8 @@
                                 <div class="px-4 py-3 border-b border-gray-50">
                                     <p class="text-sm font-semibold text-gray-900">{{.User.Username}}</p>
                                 </div>
-                                <a href="/u/{{.CurrentUserId}}" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600">{{call .T "menu_profile"}}</a>
-                                <a href="/settings" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600">{{call .T "menu_settings"}}</a>
+                                <a href="/u/{{.CurrentUserId}}" class="block px-4 py-2 text-sm hover:bg-gray-50 hover:text-blue-600">{{call .T "menu_profile"}}</a>
+                                <a href="/settings" class="block px-4 py-2 text-sm hover:bg-gray-50 hover:text-blue-600">{{call .T "menu_settings"}}</a>
                                 {{if .User.IsAdmin}}
                                     <a href="/admin/" class="block px-4 py-2 text-sm text-amber-600 hover:bg-amber-50">{{call .T "menu_admin"}}</a>
                                 {{end}}
