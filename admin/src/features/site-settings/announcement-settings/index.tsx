@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, Save, Megaphone } from 'lucide-react'
+import { Loader2, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { ContentLayout } from '@/components/layout/content-layout'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,6 @@ import {
   FormItem,
   FormLabel,
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { getAnnouncement, saveAnnouncement } from '@/api'
@@ -27,9 +26,7 @@ export default function AnnouncementSettingsManagement() {
     resolver: zodResolver(announcementSettingsSchema),
     defaultValues: {
       enabled: false,
-      title: '',
       content: '',
-      link: '',
     },
   })
 
@@ -41,9 +38,7 @@ export default function AnnouncementSettingsManagement() {
           const result = response.result
           form.reset({
             enabled: result.enabled ?? false,
-            title: result.title ?? '',
             content: result.content ?? '',
-            link: result.link ?? '',
           })
         }
       } catch (error) {
@@ -82,7 +77,7 @@ export default function AnnouncementSettingsManagement() {
   return (
     <ContentLayout
       title='系统公告'
-      description='配置显示在页面顶部的系统公告横幅。'
+      description='配置显示在页面顶部的系统公告，正文支持 Markdown 渲染。'
       showSeparator={true}
       headerActions={
         <Button
@@ -103,9 +98,9 @@ export default function AnnouncementSettingsManagement() {
     >
       <div className='flex flex-1 flex-col'>
         <div className='faded-bottom h-full w-full overflow-y-auto scroll-smooth pe-4 pb-12'>
-          <div className='-mx-1 px-1.5 lg:max-w-2xl'>
+          <div className='-mx-1 px-1.5 lg:max-w-3xl'>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+              <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
                 <FormField
                   control={form.control}
                   name='enabled'
@@ -114,7 +109,7 @@ export default function AnnouncementSettingsManagement() {
                       <div className='space-y-0.5'>
                         <FormLabel className='text-base font-medium'>启用公告</FormLabel>
                         <FormDescription>
-                          开启后，系统公告将显示在页面顶部。
+                          开启后，系统公告将显示在首页顶部。
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -129,62 +124,19 @@ export default function AnnouncementSettingsManagement() {
 
                 <FormField
                   control={form.control}
-                  name='title'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className='text-base font-medium'>公告标题</FormLabel>
-                      <FormDescription>
-                        输入公告的标题文本。
-                      </FormDescription>
-                      <FormControl>
-                        <Input
-                          placeholder='例如：网站维护通知'
-                          {...field}
-                          className='max-w-sm'
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name='content'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className='text-base font-medium'>公告内容</FormLabel>
                       <FormDescription>
-                        输入公告的详细内容，支持多行文本。
+                        支持 Markdown 语法，保存后会渲染为富文本公告内容。
                       </FormDescription>
                       <FormControl>
                         <Textarea
-                          placeholder='例如：网站将于今晚22:00-24:00进行系统维护，届时可能无法访问。'
+                          placeholder={'例如：## 维护通知\n\n网站将于今晚 22:00 - 24:00 进行系统维护，期间可能无法访问。'}
                           {...field}
-                          rows={4}
-                          className='max-w-sm resize-none'
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='link'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className='text-base font-medium flex items-center gap-2'>
-                        <Megaphone className='h-4 w-4 text-muted-foreground' />
-                        公告链接（可选）
-                      </FormLabel>
-                      <FormDescription>
-                        输入点击公告后跳转的链接，留空则不可点击。
-                      </FormDescription>
-                      <FormControl>
-                        <Input
-                          placeholder='例如：https://example.com/announcement'
-                          {...field}
-                          className='max-w-sm'
+                          rows={10}
+                          className='max-w-3xl resize-y font-mono'
                         />
                       </FormControl>
                     </FormItem>

@@ -2,6 +2,8 @@ package pageConfig
 
 import (
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 )
 
 const tableName = "page_config"
@@ -107,9 +109,9 @@ type SiteSettingsConfig struct {
 	ExternalLinks   string     `json:"externalLinks,omitempty"`
 	FooterInfo      FooterInfo `json:"footerInfo,omitempty"`
 	// 品牌标识类型: default(默认样式), text(自定义文字), image(图片)
-	BrandType   string `json:"brandType"`
-	BrandText   string `json:"brandText"`
-	BrandImage  string `json:"brandImage"`
+	BrandType  string `json:"brandType"`
+	BrandText  string `json:"brandText"`
+	BrandImage string `json:"brandImage"`
 }
 
 type FooterInfo struct {
@@ -132,10 +134,23 @@ type MailSettingsConfig struct {
 
 // AnnouncementConfig 公告设置配置
 type AnnouncementConfig struct {
-	Enabled bool   `json:"enabled"`        // 是否启用公告
-	Title   string `json:"title"`          // 公告标题
-	Content string `json:"content"`        // 公告内容
-	Link    string `json:"link,omitempty"` // 公告链接
+	Enabled     bool   `json:"enabled"` // 是否启用公告
+	Content     string `json:"content"` // 公告内容
+	HtmlContent string `json:"-"`       // 预渲染后的 HTML，仅服务端使用
+}
+
+func (itself *AnnouncementConfig) PrepareHTML() {
+	if itself == nil || itself.HtmlContent != "" || itself.Content == "" {
+		return
+	}
+	itself.HtmlContent = markdown2html.MarkdownToHTML(itself.Content)
+}
+
+func (itself AnnouncementConfig) GetHtmlContent() string {
+	if itself.HtmlContent != "" || itself.Content == "" {
+		return itself.HtmlContent
+	}
+	return markdown2html.MarkdownToHTML(itself.Content)
 }
 
 type SecurityAndRegistration struct {

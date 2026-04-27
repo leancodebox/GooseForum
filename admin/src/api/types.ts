@@ -172,7 +172,5 @@ export interface SponsorsConfig {
 
 export interface AnnouncementConfig {
   enabled: boolean
-  title: string
   content: string
-  link?: string
 }

@@ -69,7 +69,9 @@ var announcementConfigCache = &datacache.Cache[pageConfig.AnnouncementConfig]{}
 
 func GetAnnouncementConfigCache() pageConfig.AnnouncementConfig {
 	data, _ := announcementConfigCache.GetOrLoadE("", func() (pageConfig.AnnouncementConfig, error) {
-		return pageConfig.GetConfigByPageType(pageConfig.Announcement, pageConfig.AnnouncementConfig{}), nil
+		config := pageConfig.GetConfigByPageType(pageConfig.Announcement, pageConfig.AnnouncementConfig{})
+		config.PrepareHTML()
+		return config, nil
 	}, time.Second*5)
 	return data
 }

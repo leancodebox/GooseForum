@@ -11,9 +11,9 @@
         <!-- Top Banner / Announcement -->
         {{if .Data.Announcement.Enabled}}
         <div class="relative overflow-hidden rounded-lg border border-blue-100 bg-blue-50/60 shadow-sm transition-all group mb-2">
-            <div class="flex items-center gap-3 px-4 py-3">
+            <div class="flex items-start gap-3 px-4 py-3">
                 <!-- Icon -->
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 pt-0.5">
                     <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-md">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -23,25 +23,24 @@
 
                 <!-- Content -->
                 <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2">
-                        <span class="inline-flex items-center rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm">
-                            {{call .T "announcement"}}
-                        </span>
-                        <h3 class="text-sm font-bold text-gray-900 truncate">
-                            {{.Data.Announcement.Title}}
-                        </h3>
+                    <div class="prose prose-slate max-w-none mt-1 text-[13px]
+                        prose-headings:font-medium prose-headings:text-gray-900 prose-headings:mb-2 prose-headings:mt-4
+                        prose-h1:font-bold prose-h1:text-2xl prose-h1:mb-3
+                        prose-h2:text-xl prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-1 prose-h2:mb-2
+                        prose-h3:text-lg
+                        prose-p:my-1 prose-p:leading-relaxed prose-p:text-gray-700
+                        prose-li:my-0.5 prose-li:text-gray-700
+                        prose-ul:my-1.5 prose-ol:my-1.5
+                        prose-hr:my-4 prose-hr:border-gray-200
+                        prose-a:text-blue-600 prose-a:no-underline prose-a:px-1 prose-a:py-0.5 prose-a:rounded prose-a:transition-colors prose-a:font-medium
+                        [&_a:hover]:text-blue-700 [&_a:hover]:bg-blue-50
+                        prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-100 prose-pre:text-gray-800 prose-pre:my-3 prose-pre:p-3
+                        prose-code:text-pink-600 prose-code:bg-gray-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:font-mono
+                        prose-img:rounded-lg prose-img:my-3 prose-img:shadow-sm
+                        [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                        {{ SafeHTML .Data.Announcement.GetHtmlContent}}
                     </div>
-                    <p class="mt-0.5 text-[13px] text-gray-800 line-clamp-1 font-medium">
-                        {{.Data.Announcement.Content}}
-                    </p>
                 </div>
-
-                <!-- Close Button -->
-                <button class="flex-shrink-0 text-gray-400 hover:text-blue-600 hover:bg-blue-100/50 rounded-md p-1 transition-colors" title="Dismiss">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
             </div>
         </div>
         {{end}}
