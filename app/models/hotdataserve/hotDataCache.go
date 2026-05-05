@@ -195,7 +195,7 @@ func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[ui
 	categoryMap := ArticleCategoryMap()
 	return lo.Map(data, func(t *articles.SmallEntity, _ int) *vo.ArticlesSimpleVo {
 		categoryNames := lo.Map(t.CategoryId, func(item uint64, _ int) string {
-			if category, ok := categoryMap[item]; ok {
+			if category, ok := categoryMap[item]; ok && category != nil {
 				return category.Category
 			}
 			return ""

@@ -40,6 +40,14 @@ function LinksManagementContent() {
   const [instanceId] = useState(() => Symbol('instance-id'));
   const [registry] = useState(createRegistry);
 
+  const closeDialog = useCallback(() => {
+    setOpen(null);
+    setCurrentRow(null);
+    setCurrentGroup(null);
+    setGroupIndex(null);
+    setLinkIndex(null);
+  }, [setCurrentGroup, setCurrentRow, setGroupIndex, setLinkIndex, setOpen]);
+
   const fetchLinks = async () => {
     try {
       const res = await getFriendLinks();
@@ -266,7 +274,7 @@ function LinksManagementContent() {
     }
     setGroups(newGroups);
     saveLinks(newGroups);
-    setOpen(null);
+    closeDialog();
   };
 
   const boardContextValue = useMemo(() => ({
@@ -322,21 +330,21 @@ function LinksManagementContent() {
 
         <LinksGroupActionDialog
           open={open === 'add-group' || open === 'edit-group'}
-          onOpenChange={() => setOpen(null)}
+          onOpenChange={() => closeDialog()}
           currentRow={currentGroup}
           onSubmit={onGroupSubmit}
         />
 
         <LinksActionDialog
           open={open === 'add' || open === 'edit'}
-          onOpenChange={() => setOpen(null)}
+          onOpenChange={() => closeDialog()}
           currentRow={currentRow}
           onSubmit={onLinkSubmit}
         />
 
         <LinksDeleteDialog
           open={open === 'delete' || open === 'delete-group'}
-          onOpenChange={() => setOpen(null)}
+          onOpenChange={() => closeDialog()}
           onConfirm={onConfirmDelete}
           title={open === 'delete-group' ? '删除分组' : '删除链接'}
           description={

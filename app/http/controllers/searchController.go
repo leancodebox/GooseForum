@@ -3,13 +3,9 @@ package controllers
 import (
 	"fmt"
 	"math"
-	"time"
 
-	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/samber/lo"
 
 	"github.com/gin-gonic/gin"
@@ -112,61 +108,7 @@ func SearchPage(c *gin.Context) {
 				return t.ID
 			})
 			articleEntityList := articles.GetByIds(ids)
-			// 收集所有需要查询的用户ID (作者 + 回复者)
-			userIds := lo.FlatMap(articleEntityList, func(t *articles.SmallEntity, _ int) []uint64 {
-				return append([]uint64{t.UserId}, lo.Map(t.GetPosters(), func(p articles.Poster, _ int) uint64 {
-					return p.UserID
-				})...)
-			})
-			userIds = lo.Uniq(userIds)
-
-			userMap := users.GetMapByIds(userIds)
-			categoryMap := hotdataserve.ArticleCategoryMap()
-			articleList := lo.Map(articleEntityList, func(t *articles.SmallEntity, _ int) *vo.ArticlesSimpleVo {
-				categoryNames := lo.Map(t.CategoryId, func(item uint64, _ int) string {
-					if category, ok := categoryMap[item]; ok {
-						return category.Category
-					}
-					return ""
-				})
-				username := ""
-				avatarUrl := urlconfig.GetDefaultAvatar()
-				if user, ok := userMap[t.UserId]; ok {
-					username = user.Username
-					avatarUrl = user.GetWebAvatarUrl()
-				}
-
-				// 构建 Posters 列表
-				posters := lo.FilterMap(t.GetPosters(), func(p articles.Poster, _ int) (vo.PosterVo, bool) {
-					if u, ok := userMap[p.UserID]; ok {
-						return vo.PosterVo{
-							Id:        u.Id,
-							Username:  u.Username,
-							AvatarUrl: u.GetWebAvatarUrl(),
-						}, true
-					}
-					return vo.PosterVo{}, false
-				})
-
-				return &vo.ArticlesSimpleVo{
-					Id:             t.Id,
-					Title:          t.Title,
-					Description:    t.Description,
-					LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
-					Username:       username,
-					AuthorId:       t.UserId,
-					AvatarUrl:      avatarUrl,
-					ViewCount:      t.ViewCount,
-					CommentCount:   t.ReplyCount,
-					Categories:     categoryNames,
-					CategoriesId:   t.CategoryId,
-					Type:           t.Type,
-					TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
-					Posters:        posters,
-				}
-			})
-
-			data.ArticleList = articleList
+			data.ArticleList = hotdataserve.ArticlesSmallEntity2Vo(articleEntityList)
 			// 计算分页信息
 			totalPages := int(math.Ceil(float64(result.Total) / float64(pageSize)))
 			data.TotalPages = totalPages

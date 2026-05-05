@@ -226,13 +226,7 @@ export function uploadImage(formData: FormData): Promise<Result<any>> {
         headers: {
             'Content-Type': 'multipart/form-data'
         }
-    }).catch((error) => {
-        if (axios.isAxiosError(error) && error.response) {
-            const msg = error.response.data?.msg || '图片上传失败';
-            throw new Error(msg);
-        }
-        throw new Error('图片上传失败');
-    });
+    })
 }
 
 // 关注用户

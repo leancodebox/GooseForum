@@ -321,15 +321,13 @@ confirm_delete_notification: この通知を削除してもよろしいですか
 
 # Navigation
 nav_home: ホーム
-nav_explore: 探索
-nav_resources: リソース
+nav_acknowledgements: 謝辞
 nav_topics: トピック
 nav_messages: メッセージ
 nav_notifications: 通知
 nav_recent: 最近のアクティビティ
 nav_more: もっと
 nav_links: フレンドリーリンク
-nav_sponsors: スポンサー
 nav_docs: ドキュメント
 nav_new_topic: 新規トピック
 

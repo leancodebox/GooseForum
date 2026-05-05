@@ -83,7 +83,7 @@ func NewSidebarMenu(categories []*articleCategory.Entity, isLoggedIn bool) Sideb
 		MainMenu: mainMenu,
 		ResourceItems: []*SidebarItem{
 			{Key: "links", Label: "nav_links", Icon: "🔗", Url: urlconfig.Links()},
-			{Key: "sponsors", Label: "nav_sponsors", Icon: "❤️", Url: urlconfig.Sponsors()},
+			{Key: "sponsors", Label: "nav_acknowledgements", Icon: "❤️", Url: urlconfig.Sponsors()},
 			//{Key: "docs", Label: "nav_docs", Icon: "📘", Url: urlconfig.Docs()},
 		},
 	}

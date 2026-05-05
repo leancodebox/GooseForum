@@ -321,15 +321,13 @@ confirm_delete_notification: 确定要删除这条通知吗？
 
 # Navigation
 nav_home: 首页
-nav_explore: 发现
-nav_resources: 资源
+nav_acknowledgements: 鸣谢
 nav_topics: 话题
 nav_messages: 私信
 nav_notifications: 通知
 nav_recent: 最新动态
 nav_more: 更多
 nav_links: 友情链接
-nav_sponsors: 赞助商
 nav_docs: 文档
 nav_new_topic: 发起话题
 

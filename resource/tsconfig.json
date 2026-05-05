@@ -10,5 +10,10 @@
     {
       "path": "./tsconfig.vitest.json"
     }
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts", // 确保包含了 .d.ts 文件
+    "src/**/*.tsx"
   ]
 }

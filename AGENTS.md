@@ -8,6 +8,12 @@ GooseForum 是一个现代化论坛平台，后端使用 Go，前端包含 Vue 3
 
 ## 开发命令
 
+### `resource` 构建规则
+- 修改 `resource/` 下的模板、样式、前端脚本后，必须根据当前环境重新处理前端产物。
+- 当 `config.toml` 中 `[app].env = "local"` 时，使用开发模式：`cd resource && pnpm dev`。
+- 当 `config.toml` 中 `[app].env = "production"` 时，使用生产构建：`cd resource && pnpm build`。
+- 如果页面样式、资源引用或模板表现异常，优先检查是否遗漏了上面的 `resource` 开发/构建步骤。
+
 ### 一体化开发环境
 ```bash
 ./dev.sh

@@ -321,15 +321,13 @@ confirm_delete_notification: Are you sure you want to delete this notification?
 
 # Navigation
 nav_home: Home
-nav_explore: Explore
-nav_resources: Resources
+nav_acknowledgements: Acknowledgements
 nav_topics: Topics
 nav_messages: Messages
 nav_notifications: Notifications
 nav_recent: Recent Activity
 nav_more: More
 nav_links: Friendly Links
-nav_sponsors: Sponsors
 nav_docs: Docs
 nav_new_topic: New Topic
 

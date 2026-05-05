@@ -3,6 +3,7 @@ package filequeue
 import (
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 	"testing"
 
@@ -114,9 +115,9 @@ func TestQueue4bigData(t *testing.T) {
 	stopNum := maxTest / 10
 	var q Queue
 	q, err := NewFileQueue("./storage/bigBlockQueue", 1024)
-	var longStr string
+	var longStr strings.Builder
 	for i := 1; i <= 100; i++ {
-		longStr += "字"
+		longStr.WriteString("字")
 	}
 	if err != nil {
 		t.Error(err)
@@ -126,7 +127,7 @@ func TestQueue4bigData(t *testing.T) {
 		t.Error(err)
 	}
 	for i := 1; i <= maxTest; i++ {
-		err = q.Push(jsonopt.Encode(TestUnitData{true, int64(i), longStr}))
+		err = q.Push(jsonopt.Encode(TestUnitData{true, int64(i), longStr.String()}))
 		if err != nil {
 			t.Error(err)
 		}
@@ -147,7 +148,7 @@ func TestQueue4bigData(t *testing.T) {
 			t.Log(`n%`+fmt.Sprintf("%v", stopNum), data)
 		}
 		res := jsonopt.Decode[TestUnitData](data)
-		if res.Data != longStr {
+		if res.Data != longStr.String() {
 			t.Errorf("数据波动 %v", res.Data)
 		}
 	}

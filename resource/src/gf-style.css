@@ -1,36 +1,13 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
-@source not "admin";
-@source not "../admin";
-@source "../templates/view";
-@source "../templates/base";
+@source "../templates";
 
 @theme {
     --color-primary: #3b82f6;
-    --color-primary-focus: #2563eb;
-    --color-primary-content: #ffffff;
-    
     --color-secondary: #f472b6;
-    --color-secondary-focus: #ec4899;
-    --color-secondary-content: #ffffff;
-
-    --color-accent: #37cdbe;
-    --color-accent-focus: #2aa79b;
-    --color-accent-content: #ffffff;
-
-    --color-neutral: #3d4451;
-    --color-neutral-focus: #2a2e37;
-    --color-neutral-content: #ffffff;
-
-    --color-base-100: #ffffff;
     --color-base-200: #f9fafb;
-    --color-base-300: #d1d5db;
     --color-base-content: #1f2937;
-
     --color-info: #2094f3;
-    --color-success: #009485;
-    --color-warning: #ff9900;
-    --color-error: #ff5724;
 }
 
 body {
@@ -39,11 +16,133 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
-/* Custom Utilities for V2 */
-.card-hover {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-.card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+@layer components {
+    .gf-prose {
+        @apply prose prose-slate max-w-none;
+    }
+
+    .gf-prose h1 {
+        @apply mb-3 text-2xl font-bold text-gray-900;
+    }
+
+    .gf-prose h2 {
+        @apply mb-2 border-b border-gray-100 pb-1 text-xl text-gray-900;
+    }
+
+    .gf-prose h3 {
+        @apply text-lg text-gray-900;
+    }
+
+    .gf-prose h1,
+    .gf-prose h2,
+    .gf-prose h3,
+    .gf-prose h4,
+    .gf-prose h5,
+    .gf-prose h6 {
+        @apply mt-4 font-medium text-gray-900;
+    }
+
+    .gf-prose p {
+        @apply leading-relaxed text-gray-700;
+    }
+
+    .gf-prose li {
+        @apply my-0.5 text-gray-700;
+    }
+
+    .gf-prose hr {
+        @apply my-4 border-gray-200;
+    }
+
+    .gf-prose a {
+        @apply rounded px-1 py-0.5 font-medium text-blue-600 no-underline transition-colors;
+    }
+
+    .gf-prose a:hover {
+        @apply bg-blue-50 text-blue-700;
+    }
+
+    .gf-prose pre {
+        @apply my-3 border border-gray-100 bg-gray-50 p-3 text-gray-800;
+    }
+
+    .gf-prose code {
+        @apply rounded bg-gray-50 px-1 py-0.5 font-mono text-pink-600;
+    }
+
+    .gf-prose img {
+        @apply my-3 rounded-lg shadow-sm;
+    }
+
+    .gf-prose > :first-child {
+        @apply mt-0;
+    }
+
+    .gf-prose > :last-child {
+        @apply mb-0;
+    }
+
+    .gf-prose-compact {
+        @apply mt-1 text-[13px];
+    }
+
+    .gf-prose-compact p {
+        @apply my-1;
+    }
+
+    .gf-prose-compact ul,
+    .gf-prose-compact ol {
+        @apply my-1.5;
+    }
+
+    .gf-prose-article p {
+        @apply my-2;
+    }
+
+    .gf-prose-article ul,
+    .gf-prose-article ol {
+        @apply my-2;
+    }
+
+    .gf-prose-preview {
+        @apply text-[15px];
+    }
+
+    .gf-prose-preview h1 {
+        @apply text-3xl;
+    }
+
+    .gf-prose-preview h2 {
+        @apply text-2xl;
+    }
+
+    .gf-prose-preview h1,
+    .gf-prose-preview h2,
+    .gf-prose-preview h3,
+    .gf-prose-preview h4,
+    .gf-prose-preview h5,
+    .gf-prose-preview h6 {
+        @apply mt-6;
+    }
+
+    .gf-prose-preview p {
+        @apply my-3 leading-7 text-gray-600;
+    }
+
+    .gf-prose-preview li {
+        @apply my-1 text-gray-600;
+    }
+
+    .gf-prose-preview ul,
+    .gf-prose-preview ol {
+        @apply my-3;
+    }
+
+    .gf-prose-preview pre {
+        @apply my-4;
+    }
+
+    .gf-prose-preview img {
+        @apply my-4;
+    }
 }

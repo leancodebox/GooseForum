@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -29,18 +30,31 @@ interface Props {
   onSubmit: (data: Link) => void
 }
 
+const EMPTY_LINK: Link = {
+  name: '',
+  desc: '',
+  url: '',
+  logoUrl: '',
+  status: 1,
+}
+
 export function LinksActionDialog({ currentRow, open, onOpenChange, onSubmit }: Props) {
   const isEdit = !!currentRow
   const form = useForm<Link>({
     resolver: zodResolver(linkSchema),
-    values: (currentRow ?? {
-      name: '',
-      desc: '',
-      url: '',
-      logoUrl: '',
-      status: 1,
-    }) as Link,
+    defaultValues: EMPTY_LINK,
   })
+
+  useEffect(() => {
+    if (open && currentRow) {
+      form.reset(currentRow)
+      return
+    }
+
+    if (open) {
+      form.reset(EMPTY_LINK)
+    }
+  }, [open, currentRow, form])
 
   const handleSubmit = (data: Link) => {
     onSubmit(data)
@@ -52,7 +66,7 @@ export function LinksActionDialog({ currentRow, open, onOpenChange, onSubmit }: 
       open={open}
       onOpenChange={(v) => {
         onOpenChange(v)
-        if (!v) form.reset()
+        if (!v) form.reset(EMPTY_LINK)
       }}
     >
       <DialogContent className='sm:max-w-[425px]'>

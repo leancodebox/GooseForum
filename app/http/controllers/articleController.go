@@ -363,7 +363,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 		lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) vo.ArticlesSimpleVo {
 
 			categoryNames := lo.Map(t.CategoryId, func(t uint64, _ int) string {
-				if category, ok := categoryMap[t]; ok {
+				if category, ok := categoryMap[t]; ok && category != nil {
 					return category.Category
 				}
 				return ""
@@ -427,7 +427,7 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 	// 构建返回数据
 	articleVos := lo.Map(articleList, func(t *articles.SmallEntity, _ int) vo.ArticlesSimpleVo {
 		categoryNames := lo.Map(t.CategoryId, func(item uint64, _ int) string {
-			if category, ok := categoryMap[item]; ok {
+			if category, ok := categoryMap[item]; ok && category != nil {
 				return category.Category
 			}
 			return ""

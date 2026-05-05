@@ -4,141 +4,75 @@
     {{template "sidebar.gohtml" .}}
 
     <div class="flex-1 min-w-0 py-4 pr-4 sm:pr-6 lg:pr-8 pl-2">
-        <div class="space-y-6 pb-12">
-            <!-- Search Header -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h1 class="text-2xl font-bold text-gray-900 mb-4">Search Results</h1>
-                <form action="/search" method="GET" class="relative max-w-2xl">
-                    <input type="text"
-                           name="q"
-                           value="{{.Data.Query}}"
-                           placeholder="Search topics..."
-                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all">
-                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
-                        Search
-                    </button>
-                </form>
-                {{if .Data.Query}}
-                <div class="mt-4 text-sm text-gray-500">
-                    {{if .Data.SearchResponse}}
-                    Found <span class="font-bold text-gray-900">{{.Data.SearchResponse.Total}}</span> results for "<span class="font-medium text-gray-900">{{.Data.Query}}</span>"
-                    {{else}}
-                    No results found for "{{.Data.Query}}"
-                    {{end}}
-                </div>
-                {{end}}
-            </div>
-
-            <!-- Results Table -->
-            {{if .Data.ArticleList}}
+        <div class="space-y-4 pb-12">
             <div class="bg-white rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-3 mb-1">
+                            <h1 class="text-xl font-black text-gray-900 tracking-tight">Search</h1>
+                            <span class="px-2 py-0.5 rounded-md bg-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Discover</span>
+                        </div>
+                        <p class="text-sm text-gray-500 leading-relaxed">
+                            {{if .Data.Query}}
+                            <span class="break-words">Search results for "<span class="font-medium text-gray-900 break-all">{{.Data.Query}}</span>"</span>
+                            {{if .Data.SearchResponse}}
+                            <span class="text-gray-400"> · </span>
+                            <span><span class="font-semibold text-gray-900">{{.Data.SearchResponse.Total}}</span> topics matched</span>
+                            {{end}}
+                            {{else}}
+                            Search topics, keywords, and recent discussions across GooseForum.
+                            {{end}}
+                        </p>
+                    </div>
+
+                    <form action="/search" method="GET" class="w-full lg:max-w-xl">
+                        <div class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 transition-colors focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+                            <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input type="text"
+                                   name="q"
+                                   value="{{.Data.Query}}"
+                                   placeholder="Search topics..."
+                                   class="min-w-0 flex-1 border-0 bg-transparent px-0 py-1.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-0">
+                            <button type="submit" class="inline-flex shrink-0 items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
+                                Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {{if .Data.ArticleList}}
                 <div class="w-full overflow-x-auto">
                     <table class="w-full text-left border-collapse table-fixed">
                         <thead>
                             <tr class="text-[12px] font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-100">
-                                <th class="px-4 sm:px-6 py-2.5 text-gray-400/80">Topic</th>
-                                <th class="hidden lg:table-cell px-4 py-2.5 text-center text-gray-400/80 w-[120px]">Users</th>
-                                <th class="hidden md:table-cell px-4 py-2.5 text-center text-gray-400/80 w-[80px]">Replies</th>
-                                <th class="hidden md:table-cell px-4 py-2.5 text-center text-gray-400/80 w-[80px]">Views</th>
-                                <th class="hidden sm:table-cell px-6 py-2.5 text-right text-gray-400/80 w-[110px]">Activity</th>
+                                <th class="px-4 sm:px-6 py-2.5 text-gray-400/80">{{"table_topic" | call .T}}</th>
+                                <th class="hidden lg:table-cell px-4 py-2.5 text-center text-gray-400/80 w-[120px]">{{"table_users" | call .T}}</th>
+                                <th class="hidden md:table-cell px-4 py-2.5 text-center text-gray-400/80 w-[80px]">{{"table_replies" | call .T}}</th>
+                                <th class="hidden md:table-cell px-4 py-2.5 text-center text-gray-400/80 w-[80px]">{{"table_views" | call .T}}</th>
+                                <th class="hidden sm:table-cell px-6 py-2.5 text-right text-gray-400/80 w-[110px]">{{"table_activity" | call .T}}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {{range .Data.ArticleList}}
-                            <tr class="group transition-colors duration-200 hover:bg-gray-50 cursor-pointer">
-                                <!-- Topic Column -->
-                                <td class="px-4 sm:px-6 py-4 align-middle">
-                                    <div class="flex items-center gap-3">
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-center flex-wrap gap-x-3 gap-y-2 mb-1.5">
-                                                <a href="/p/post/{{.Id}}" class="text-[15px] sm:text-[16px] font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 leading-normal tracking-tight">{{.Title}}</a>
-                                                <div class="flex items-center gap-2 flex-shrink-0">
-                                                    {{range .Categories}}
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-medium bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">{{.}}</span>
-                                                    {{end}}
-                                                    {{if gt .ViewCount 100}}
-                                                    <span class="text-[11px] text-orange-400 font-bold opacity-80">#hot</span>
-                                                    {{end}}
-                                                </div>
-                                            </div>
-                                            <!-- Summary Text -->
-                                            <p class="text-[13px] text-gray-500 line-clamp-1 group-hover:text-gray-900 transition-colors">
-                                                {{if .Description}}{{.Description}}{{else}}{{call $.T "no_summary"}}{{end}}
-                                            </p>
-
-                                            <!-- Mobile Meta Info -->
-                                            <div class="flex sm:hidden items-center gap-4 mt-2 text-xs text-gray-400 font-medium">
-                                                <span class="time-ago" data-time="{{.LastUpdateTime}}">{{.LastUpdateTime}}</span>
-                                                <div class="flex items-center gap-1">
-                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                                    <span class="format-number" data-number="{{.CommentCount}}">{{.CommentCount}}</span>
-                                                </div>
-                                                <div class="flex items-center gap-1">
-                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                                    <span class="format-number" data-number="{{.ViewCount}}">{{.ViewCount}}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <!-- Users Column -->
-                                <td class="hidden lg:table-cell px-4 py-4 text-center align-middle">
-                                    <div class="flex items-center justify-center -space-x-3">
-                                        {{range .Posters}}
-                                        <img src="{{.AvatarUrl}}"
-                                             class="relative z-30 inline-block h-8 w-8 rounded-full ring-2 ring-white shadow-sm object-cover hover:z-40 hover:scale-110 transition-transform cursor-pointer"
-                                             title="{{.Username}}"
-                                             @click.stop="$dispatch('show-user-card', { userId: {{.Id}}, username: '{{.Username}}', avatarUrl: '{{.AvatarUrl}}', target: $el, event: $event })">
-                                        {{end}}
-                                    </div>
-                                </td>
-
-                                <!-- Replies Column -->
-                                <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
-                                    <div class="inline-flex items-center justify-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-                                        <span class="text-[14px] font-medium tabular-nums format-number {{if gt .CommentCount 10}}text-orange-500 font-bold{{else}}text-gray-900{{end}}" data-number="{{.CommentCount}}">{{.CommentCount}}</span>
-                                    </div>
-                                </td>
-
-                                <!-- Views Column -->
-                                <td class="hidden md:table-cell px-4 py-4 text-center align-middle">
-                                    <div class="inline-flex items-center justify-center gap-1.5 transition-opacity duration-300">
-                                        <span class="text-[14px] font-medium format-number {{if gt .ViewCount 500}}text-orange-400 font-bold{{else}}text-gray-900 opacity-60 group-hover:opacity-100{{end}} tabular-nums" data-number="{{.ViewCount}}">{{.ViewCount}}</span>
-                                    </div>
-                                </td>
-
-                                <!-- Activity Column -->
-                                <td class="hidden sm:table-cell px-6 py-4 text-right align-middle">
-                                    <span class="text-[13px] font-medium text-gray-400 whitespace-nowrap time-ago tabular-nums group-hover:text-gray-600 transition-colors" data-time="{{.LastUpdateTime}}">{{.LastUpdateTime}}</span>
-                                </td>
-                            </tr>
+                            {{template "article-row" .}}
                             {{end}}
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 {{if gt .Data.TotalPages 1}}
-                <div x-data="pagination({
-                    current: {{.Data.CurrentPage}},
-                    total: {{.Data.TotalPages}},
-                    query: '{{.Data.Query}}'
-                })" x-show="total > 1" class="px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-8 pb-8" style="display: none;">
-                    <!-- Mobile/Simple Prev/Next -->
-                    <div class="flex items-center gap-2 sm:hidden w-full justify-between">
+                <div class="px-4 sm:px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/40">
+                    <div class="text-sm text-gray-500">
+                        Page <span class="font-semibold text-gray-900">{{.Data.CurrentPage}}</span> of <span class="font-semibold text-gray-900">{{.Data.TotalPages}}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
                         {{if gt .Data.CurrentPage 1}}
                         <a href="/search?q={{.Data.Query}}&page={{sub .Data.CurrentPage 1}}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">Previous</a>
                         {{else}}
                         <button disabled class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-medium text-gray-300 cursor-not-allowed">Previous</button>
                         {{end}}
-
-                        <span class="text-sm text-gray-500 font-medium">Page {{.Data.CurrentPage}} of {{.Data.TotalPages}}</span>
 
                         {{if lt .Data.CurrentPage .Data.TotalPages}}
                         <a href="/search?q={{.Data.Query}}&page={{add .Data.CurrentPage 1}}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">Next</a>
@@ -146,71 +80,27 @@
                         <button disabled class="px-4 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-medium text-gray-300 cursor-not-allowed">Next</button>
                         {{end}}
                     </div>
-
-                    <!-- Desktop Pagination -->
-                    <div class="hidden sm:flex items-center gap-1">
-                        <!-- Previous -->
-                        {{if gt .Data.CurrentPage 1}}
-                        <a href="/search?q={{.Data.Query}}&page={{sub .Data.CurrentPage 1}}" class="w-9 h-9 flex items-center justify-center rounded-lg border border-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all" title="Previous Page">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                        </a>
-                        {{else}}
-                        <span class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                        </span>
-                        {{end}}
-
-                        <!-- Page Numbers -->
-                        {{range $page := .Data.PageNumbers}}
-                            {{if eq $page $.Data.CurrentPage}}
-                            <span class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-900 text-white text-sm font-bold shadow-md shadow-gray-200">{{$page}}</span>
-                            {{else}}
-                            <a href="/search?q={{$.Data.Query}}&page={{$page}}" class="w-9 h-9 flex items-center justify-center rounded-lg border border-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-900 text-sm font-medium transition-all">{{$page}}</a>
-                            {{end}}
-                        {{end}}
-
-                        <!-- Next -->
-                        {{if lt .Data.CurrentPage .Data.TotalPages}}
-                        <a href="/search?q={{.Data.Query}}&page={{add .Data.CurrentPage 1}}" class="w-9 h-9 flex items-center justify-center rounded-lg border border-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-all" title="Next Page">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </a>
-                        {{else}}
-                        <span class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </span>
-                        {{end}}
-                    </div>
-
-                    <!-- Jump to Page -->
-                    <div class="hidden sm:flex items-center gap-2">
-                        <span class="text-sm text-gray-400 font-medium">Go to</span>
-                        <div class="relative">
-                            <input type="number"
-                                   x-model="jumpPage"
-                                   @keydown.enter="window.location.href = '/search?q={{.Data.Query}}&page=' + jumpPage"
-                                   class="w-14 h-9 pl-2 pr-1 rounded-lg border border-gray-200 text-sm font-medium text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                                   min="1"
-                                   max="{{.Data.TotalPages}}">
-                        </div>
-                        <span class="text-sm text-gray-400 font-medium">of {{.Data.TotalPages}}</span>
-                    </div>
+                </div>
+                {{end}}
+                {{else if .Data.Query}}
+                <div class="px-6 py-16 text-center">
+                    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-2xl text-gray-400">?</div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No results found</h3>
+                    <p class="text-sm text-gray-500">Try another keyword, shorten the query, or search with a different phrase.</p>
+                </div>
+                {{else}}
+                <div class="px-6 py-16 text-center">
+                    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-2xl text-gray-400">/</div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Start a search</h3>
+                    <p class="text-sm text-gray-500">Enter a topic title, keyword, or phrase to search the forum.</p>
                 </div>
                 {{end}}
             </div>
-            {{else if .Data.Query}}
-            <div class="text-center py-12 bg-white rounded-xl border border-gray-100 border-dashed">
-                <div class="text-4xl mb-4">🔍</div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No results found</h3>
-                <p class="text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
-            </div>
-            {{end}}
         </div>
     </div>
 </div>
-
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // SSR elements handling
+document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.time-ago').forEach(el => {
             const originalTime = el.getAttribute('data-time');
             if (originalTime) {
@@ -226,46 +116,6 @@
                 el.title = parseInt(numStr).toLocaleString();
             }
         });
-    });
-
-    function searchHandler() {
-
-    // Alpine Pagination Logic
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('pagination', (config) => ({
-            current: config.current,
-            total: config.total,
-            query: config.query,
-            jumpPage: config.current,
-
-            get pages() {
-                let pages = [];
-                let start = Math.max(1, this.current - 2);
-                let end = Math.min(this.total, this.current + 2);
-
-                // Always include first page
-                if (start > 1) {
-                    pages.push(1);
-                    if (start > 2) pages.push('...');
-                }
-
-                for (let i = start; i <= end; i++) {
-                    pages.push(i);
-                }
-
-                // Always include last page
-                if (end < this.total) {
-                    if (end < this.total - 1) pages.push('...');
-                    pages.push(this.total);
-                }
-
-                return pages;
-            },
-
-            getUrl(page) {
-                return `/search?q=${this.query}&page=${page}`;
-            }
-        }));
     });
 </script>
 {{end}}

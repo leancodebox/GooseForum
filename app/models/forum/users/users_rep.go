@@ -3,6 +3,7 @@ package users
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
@@ -30,8 +31,12 @@ func GetRoleId(userId uint64) (roleId uint64, err error) {
 
 func Verify(usernameOrEmail string, password string) (*EntityComplete, error) {
 	var user EntityComplete
-	// 尝试通过用户名或邮箱查找用户
-	err := builder().Where("username = ? OR email = ?", usernameOrEmail, usernameOrEmail).First(&user).Error
+	var err error
+	if strings.Contains(usernameOrEmail, "@") {
+		err = builder().Where("email = ?", usernameOrEmail).First(&user).Error
+	} else {
+		err = builder().Where("username = ?", usernameOrEmail).First(&user).Error
+	}
 	if err != nil {
 		return &user, err
 	}

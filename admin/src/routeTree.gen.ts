@@ -247,7 +247,6 @@ const AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedIndexRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
@@ -259,29 +258,30 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/': typeof AuthenticatedIndexRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
-  '/apps/': typeof AuthenticatedAppsIndexRoute
-  '/categories-management/': typeof AuthenticatedCategoriesManagementIndexRoute
-  '/chats/': typeof AuthenticatedChatsIndexRoute
-  '/dashboard-stats/': typeof AuthenticatedDashboardStatsIndexRoute
-  '/help-center/': typeof AuthenticatedHelpCenterIndexRoute
-  '/links-management/': typeof AuthenticatedLinksManagementIndexRoute
-  '/posts-management/': typeof AuthenticatedPostsManagementIndexRoute
-  '/roles-management/': typeof AuthenticatedRolesManagementIndexRoute
+  '/apps': typeof AuthenticatedAppsIndexRoute
+  '/categories-management': typeof AuthenticatedCategoriesManagementIndexRoute
+  '/chats': typeof AuthenticatedChatsIndexRoute
+  '/dashboard-stats': typeof AuthenticatedDashboardStatsIndexRoute
+  '/help-center': typeof AuthenticatedHelpCenterIndexRoute
+  '/links-management': typeof AuthenticatedLinksManagementIndexRoute
+  '/posts-management': typeof AuthenticatedPostsManagementIndexRoute
+  '/roles-management': typeof AuthenticatedRolesManagementIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/sponsorship-management/': typeof AuthenticatedSponsorshipManagementIndexRoute
-  '/tasks/': typeof AuthenticatedTasksIndexRoute
-  '/users-management/': typeof AuthenticatedUsersManagementIndexRoute
-  '/users/': typeof AuthenticatedUsersIndexRoute
-  '/site-settings/announcement-settings/': typeof AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute
-  '/site-settings/mail-settings/': typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
-  '/site-settings/posting-settings/': typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
-  '/site-settings/security-settings/': typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
-  '/site-settings/site-info/': typeof AuthenticatedSiteSettingsSiteInfoIndexRoute
+  '/sponsorship-management': typeof AuthenticatedSponsorshipManagementIndexRoute
+  '/tasks': typeof AuthenticatedTasksIndexRoute
+  '/users-management': typeof AuthenticatedUsersManagementIndexRoute
+  '/users': typeof AuthenticatedUsersIndexRoute
+  '/site-settings/announcement-settings': typeof AuthenticatedSiteSettingsAnnouncementSettingsIndexRoute
+  '/site-settings/mail-settings': typeof AuthenticatedSiteSettingsMailSettingsIndexRoute
+  '/site-settings/posting-settings': typeof AuthenticatedSiteSettingsPostingSettingsIndexRoute
+  '/site-settings/security-settings': typeof AuthenticatedSiteSettingsSecuritySettingsIndexRoute
+  '/site-settings/site-info': typeof AuthenticatedSiteSettingsSiteInfoIndexRoute
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
@@ -361,7 +361,6 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/settings'
     | '/forgot-password'
     | '/otp'
@@ -373,29 +372,30 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/'
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
-    | '/apps/'
-    | '/categories-management/'
-    | '/chats/'
-    | '/dashboard-stats/'
-    | '/help-center/'
-    | '/links-management/'
-    | '/posts-management/'
-    | '/roles-management/'
+    | '/apps'
+    | '/categories-management'
+    | '/chats'
+    | '/dashboard-stats'
+    | '/help-center'
+    | '/links-management'
+    | '/posts-management'
+    | '/roles-management'
     | '/settings/'
-    | '/sponsorship-management/'
-    | '/tasks/'
-    | '/users-management/'
-    | '/users/'
-    | '/site-settings/announcement-settings/'
-    | '/site-settings/mail-settings/'
-    | '/site-settings/posting-settings/'
-    | '/site-settings/security-settings/'
-    | '/site-settings/site-info/'
+    | '/sponsorship-management'
+    | '/tasks'
+    | '/users-management'
+    | '/users'
+    | '/site-settings/announcement-settings'
+    | '/site-settings/mail-settings'
+    | '/site-settings/posting-settings'
+    | '/site-settings/security-settings'
+    | '/site-settings/site-info'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/forgot-password'
@@ -491,7 +491,7 @@ declare module '@tanstack/react-router' {
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
-      fullPath: '/'
+      fullPath: ''
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -582,28 +582,28 @@ declare module '@tanstack/react-router' {
     '/_authenticated/users/': {
       id: '/_authenticated/users/'
       path: '/users'
-      fullPath: '/users/'
+      fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/users-management/': {
       id: '/_authenticated/users-management/'
       path: '/users-management'
-      fullPath: '/users-management/'
+      fullPath: '/users-management'
       preLoaderRoute: typeof AuthenticatedUsersManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/tasks/': {
       id: '/_authenticated/tasks/'
       path: '/tasks'
-      fullPath: '/tasks/'
+      fullPath: '/tasks'
       preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sponsorship-management/': {
       id: '/_authenticated/sponsorship-management/'
       path: '/sponsorship-management'
-      fullPath: '/sponsorship-management/'
+      fullPath: '/sponsorship-management'
       preLoaderRoute: typeof AuthenticatedSponsorshipManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
@@ -617,56 +617,56 @@ declare module '@tanstack/react-router' {
     '/_authenticated/roles-management/': {
       id: '/_authenticated/roles-management/'
       path: '/roles-management'
-      fullPath: '/roles-management/'
+      fullPath: '/roles-management'
       preLoaderRoute: typeof AuthenticatedRolesManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/posts-management/': {
       id: '/_authenticated/posts-management/'
       path: '/posts-management'
-      fullPath: '/posts-management/'
+      fullPath: '/posts-management'
       preLoaderRoute: typeof AuthenticatedPostsManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/links-management/': {
       id: '/_authenticated/links-management/'
       path: '/links-management'
-      fullPath: '/links-management/'
+      fullPath: '/links-management'
       preLoaderRoute: typeof AuthenticatedLinksManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
-      fullPath: '/help-center/'
+      fullPath: '/help-center'
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard-stats/': {
       id: '/_authenticated/dashboard-stats/'
       path: '/dashboard-stats'
-      fullPath: '/dashboard-stats/'
+      fullPath: '/dashboard-stats'
       preLoaderRoute: typeof AuthenticatedDashboardStatsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chats/': {
       id: '/_authenticated/chats/'
       path: '/chats'
-      fullPath: '/chats/'
+      fullPath: '/chats'
       preLoaderRoute: typeof AuthenticatedChatsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/categories-management/': {
       id: '/_authenticated/categories-management/'
       path: '/categories-management'
-      fullPath: '/categories-management/'
+      fullPath: '/categories-management'
       preLoaderRoute: typeof AuthenticatedCategoriesManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/apps/': {
       id: '/_authenticated/apps/'
       path: '/apps'
-      fullPath: '/apps/'
+      fullPath: '/apps'
       preLoaderRoute: typeof AuthenticatedAppsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
@@ -708,35 +708,35 @@ declare module '@tanstack/react-router' {
     '/_authenticated/site-settings/site-info/': {
       id: '/_authenticated/site-settings/site-info/'
       path: '/site-settings/site-info'
-      fullPath: '/site-settings/site-info/'
+      fullPath: '/site-settings/site-info'
       preLoaderRoute: typeof AuthenticatedSiteSettingsSiteInfoIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/site-settings/security-settings/': {
       id: '/_authenticated/site-settings/security-settings/'
       path: '/site-settings/security-settings'
-      fullPath: '/site-settings/security-settings/'
+      fullPath: '/site-settings/security-settings'
       preLoaderRoute: typeof AuthenticatedSiteSettingsSecuritySettingsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/site-settings/posting-settings/': {
       id: '/_authenticated/site-settings/posting-settings/'
       path: '/site-settings/posting-settings'
-      fullPath: '/site-settings/posting-settings/'
+      fullPath: '/site-settings/posting-settings'
       preLoaderRoute: typeof AuthenticatedSiteSettingsPostingSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/site-settings/mail-settings/': {
       id: '/_authenticated/site-settings/mail-settings/'
       path: '/site-settings/mail-settings'
-      fullPath: '/site-settings/mail-settings/'
+      fullPath: '/site-settings/mail-settings'
       preLoaderRoute: typeof AuthenticatedSiteSettingsMailSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/site-settings/announcement-settings/': {
       id: '/_authenticated/site-settings/announcement-settings/'
       path: '/site-settings/announcement-settings'
-      fullPath: '/site-settings/announcement-settings/'
+      fullPath: '/site-settings/announcement-settings'
       preLoaderRoute: typeof AuthenticatedSiteSettingsAnnouncementSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }

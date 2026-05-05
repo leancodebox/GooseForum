@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -121,10 +122,8 @@ func ValidateEmailDomain(email string) error {
 	}
 
 	domain := parts[1]
-	for _, allowed := range securityConfig.AllowedDomains {
-		if domain == allowed {
-			return nil
-		}
+	if slices.Contains(securityConfig.AllowedDomains, domain) {
+		return nil
 	}
 
 	return errors.New("该邮箱域名不在允许的注册白名单中")
