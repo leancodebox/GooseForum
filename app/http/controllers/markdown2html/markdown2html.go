@@ -11,12 +11,11 @@ import (
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/text"
 )
 
 func GetVersion() uint32 {
-	return 2
+	return 3
 }
 
 var md = goldmark.New(
@@ -30,9 +29,6 @@ var md = goldmark.New(
 	),
 	goldmark.WithParserOptions(
 		parser.WithAutoHeadingID(),
-	),
-	goldmark.WithRendererOptions(
-		html.WithHardWraps(),
 	),
 )
 
