@@ -70,6 +70,15 @@ body {
         @apply rounded bg-gray-50 px-1 py-0.5 font-mono text-pink-600;
     }
 
+    .gf-prose code::before,
+    .gf-prose code::after {
+        content: none;
+    }
+
+    .gf-prose pre code {
+        @apply bg-transparent p-0 text-inherit;
+    }
+
     .gf-prose img {
         @apply my-3 rounded-lg shadow-sm;
     }
@@ -102,47 +111,5 @@ body {
     .gf-prose-article ul,
     .gf-prose-article ol {
         @apply my-2;
-    }
-
-    .gf-prose-preview {
-        @apply text-[15px];
-    }
-
-    .gf-prose-preview h1 {
-        @apply text-3xl;
-    }
-
-    .gf-prose-preview h2 {
-        @apply text-2xl;
-    }
-
-    .gf-prose-preview h1,
-    .gf-prose-preview h2,
-    .gf-prose-preview h3,
-    .gf-prose-preview h4,
-    .gf-prose-preview h5,
-    .gf-prose-preview h6 {
-        @apply mt-6;
-    }
-
-    .gf-prose-preview p {
-        @apply my-3 leading-7 text-gray-600;
-    }
-
-    .gf-prose-preview li {
-        @apply my-1 text-gray-600;
-    }
-
-    .gf-prose-preview ul,
-    .gf-prose-preview ol {
-        @apply my-3;
-    }
-
-    .gf-prose-preview pre {
-        @apply my-4;
-    }
-
-    .gf-prose-preview img {
-        @apply my-4;
     }
 }
