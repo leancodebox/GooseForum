@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
+import { encryptLoginPassword } from '@/lib/login-crypto'
 
 const formSchema = z.object({
   email: z.string().min(1, 'Please enter your email/username'),
@@ -79,9 +80,10 @@ export function UserAuthForm({
     setIsLoading(true)
 
     try {
+      const encryptedPassword = await encryptLoginPassword(data.password)
       const response = await axios.post('/api/login', {
         username: data.email,
-        password: data.password,
+        encryptedPassword,
         captchaId: captchaData.id,
         captchaCode: data.captcha,
       })

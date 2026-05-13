@@ -73,6 +73,7 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi := ginApp.Group("api")
 
 	baseApi.POST("login", controllers.Login)
+	baseApi.GET("login-public-key", controllers.LoginPublicKey)
 	baseApi.POST("register", controllers.Register)
 	baseApi.POST("logout", controllers.Logout)
 

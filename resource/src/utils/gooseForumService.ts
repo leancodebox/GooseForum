@@ -1,6 +1,7 @@
 import axiosInstance from './axiosInstance';
 
 import axios from 'axios';
+import {encryptLoginPassword} from './loginCrypto';
 import type {
     ArticleData,
     ArticleListItem,
@@ -182,10 +183,11 @@ export function getCaptcha(): Promise<Result<any>> {
 }
 
 // 用户登录
-export function login(username: string, password: string, captchaId: string, captchaCode: string): Promise<Result<any>> {
+export async function login(username: string, password: string, captchaId: string, captchaCode: string): Promise<Result<any>> {
+    const encryptedPassword = await encryptLoginPassword(password);
     return axiosInstance.post('/login', {
         username,
-        password,
+        encryptedPassword,
         captchaId,
         captchaCode
     });

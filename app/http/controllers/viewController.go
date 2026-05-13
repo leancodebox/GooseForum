@@ -7,6 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
+	"github.com/leancodebox/GooseForum/app/bundles/logincrypto"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -140,10 +141,17 @@ func Register(c *gin.Context) {
 }
 
 type LoginReq struct {
-	Username    string `json:"username" validate:"required"` // 可以是用户名或邮箱
-	Password    string `json:"password" validate:"required"`
-	CaptchaId   string `json:"captchaId"`
-	CaptchaCode string `json:"captchaCode"`
+	Username          string `json:"username" validate:"required"` // 可以是用户名或邮箱
+	EncryptedPassword string `json:"encryptedPassword" validate:"required"`
+	CaptchaId         string `json:"captchaId"`
+	CaptchaCode       string `json:"captchaCode"`
+}
+
+func LoginPublicKey(c *gin.Context) {
+	c.JSON(http.StatusOK, component.SuccessData(map[string]string{
+		"publicKey": logincrypto.PublicKeyPEM(),
+		"algorithm": "RSA-OAEP-256",
+	}))
 }
 
 // Login 处理登录请求
@@ -161,13 +169,19 @@ func Login(c *gin.Context) {
 	}
 
 	username := strings.TrimSpace(req.Username)
-	password := req.Password
 	captchaId := req.CaptchaId
 	captchaCode := req.CaptchaCode
 
 	// 验证用户名/邮箱格式
 	if username == "" {
 		c.JSON(200, component.FailData("用户名或邮箱不能为空"))
+		return
+	}
+
+	password, err := logincrypto.DecryptPassword(req.EncryptedPassword)
+	if err != nil {
+		slog.Info("登录密码解密失败", "username", username, "error", err)
+		c.JSON(200, component.FailData("登录请求无效，请刷新页面后重试"))
 		return
 	}
 
