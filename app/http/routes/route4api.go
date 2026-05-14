@@ -57,19 +57,16 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/sponsors", controllers.Sponsors)
 	viewRouteApp.GET("/search", controllers.SearchPage)
 
-	// 添加激活路由
 	viewRouteApp.GET("/activate", controllers.ActivateAccount)
 }
 
 func siteInfoRoute(ginApp *gin.Engine) {
-	// SEO 相关路由
 	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
 	ginApp.GET("/sitemap.xml", controllers.RenderSitemapXml)
 	ginApp.GET("/rss.xml", controllers.RenderRssV2)
 }
 
 func apiRoute(ginApp *gin.Engine) {
-	// 非登陆下的用户操作
 	baseApi := ginApp.Group("api")
 
 	baseApi.POST("login", controllers.Login)
@@ -77,47 +74,31 @@ func apiRoute(ginApp *gin.Engine) {
 	baseApi.POST("register", controllers.Register)
 	baseApi.POST("logout", controllers.Logout)
 
-	// 验证码
 	baseApi.GET("get-captcha", UpQueryReq(api.GetCaptcha))
-	// 用户卡片信息
 	baseApi.GET("user-card", UpQueryReq(api.GetUserCard))
-	// 用户活动记录
 	baseApi.GET("user-activities", UpQueryReq(api.GetUserActivities))
-	// 忘记密码和重置密码路由
 	baseApi.POST("forgot-password", UpButterReq(api.ForgotPassword))
 	baseApi.POST("reset-password", UpButterReq(api.ResetPassword))
-	// GitHub OAuth 路由
 	baseApi.GET("auth/:provider", controllers.ProviderLogin)
 	baseApi.GET("auth/:provider/callback", middleware.JWTAuth, controllers.ProviderCallback)
 
-	// 登陆状态下的用户操作
 	loginApi := ginApp.Group("api").Use(middleware.JWTAuthCheck)
-	// 用户信息
 	loginApi.GET("get-user-info", UpButterReq(api.UserInfo))
-	// 设置用户信息
 	loginApi.POST("set-user-info", UpButterReq(api.EditUserInfo))
 	loginApi.POST("set-user-email", UpButterReq(api.EditUserEmail))
 	loginApi.POST("set-user-name", UpButterReq(api.EditUsername))
-	// 邀请码
 	loginApi.POST("invitation", UpButterReq(api.Invitation))
-	// 上传头像
 	loginApi.POST("upload-avatar", api.UploadAvatar)
-	// 修改密码
 	loginApi.POST("change-password", UpButterReq(api.ChangePassword))
-	// OAuth 解绑和绑定状态查询
 	loginApi.POST("auth/:provider/unbind", UpButterReq(controllers.UnbindOAuth))
 	loginApi.GET("oauth/bindings", UpButterReq(controllers.GetOAuthBindings))
 
 	forumApi := baseApi.Group("forum")
-	// 站点统计
 	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
-	// 分类列表
 	forumApi.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
-	// 搜索文章
 	forumApi.POST("search-articles", UpButterReq(controllers.SearchArticles))
 
 	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
-	// 通知相关接口
 	forumLoginApi.POST("notification/list", UpButterReq(api.GetNotificationList))
 	forumLoginApi.POST("notification/query", UpButterReq(api.QueryNotificationList))
 	forumLoginApi.GET("notification/unread-count", UpButterReq(api.GetUnreadCount))
@@ -126,27 +107,17 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("notification/mark-all-read", UpButterReq(api.MarkAllAsRead))
 	forumLoginApi.POST("notification/delete", UpButterReq(api.DeleteNotification))
 	forumLoginApi.GET("notification/types", UpButterReq(api.GetNotificationTypes))
-	// 编辑文章时原始文章内容
 	forumLoginApi.POST("get-articles-origin", middleware.CheckLogin, UpButterReq(controllers.WriteArticlesOrigin))
-	// 发布文章
 	forumLoginApi.POST("write-articles", UpButterReq(controllers.WriteArticles))
-	// 删除文章
 	forumLoginApi.POST("article-delete", UpButterReq(controllers.DeleteArticle))
-	// 回复文章
 	forumLoginApi.POST("articles-reply", UpButterReq(controllers.ArticleReply))
-	// 回复评论
 	forumLoginApi.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
-	// 用户文章列表
 	forumLoginApi.POST("get-user-articles", UpButterReq(controllers.GetUserArticles))
 	forumLoginApi.POST("get-user-bookmarked-articles", UpButterReq(controllers.GetUserBookmarkedArticles))
-	// 文章点赞
 	forumLoginApi.POST("like-articles", UpButterReq(controllers.LikeArticle))
-	// 文章收藏
 	forumLoginApi.POST("bookmark-article", UpButterReq(controllers.BookmarkArticle))
-	// 关注
 	forumLoginApi.POST("follow-user", UpButterReq(controllers.FollowUser))
 
-	// 私信相关接口
 	chatApi := forumApi.Group("chat", middleware.JWTAuthCheck)
 	chatApi.POST("send", UpButterReq(api.SendMessage))
 	chatApi.POST("list", UpButterReq(api.GetChatList))
@@ -159,14 +130,12 @@ func apiRoute(ginApp *gin.Engine) {
 
 	adminApi.POST("traffic-overview", UpButterReq(api.GetTrafficOverview))
 
-	// 用户管理
 	adminApi.
 		Group("", middleware.CheckPermission(permission.UserManager)).
 		POST("user-list", UpButterReq(api.UserList)).
 		POST("user-edit", UpButterReq(api.EditUser)).
 		GET("get-all-role-item", UpButterReq(api.GetAllRoleItem))
 
-	// 文章管理 &  分类管理
 	adminApi.Group("", middleware.CheckPermission(permission.ArticlesManager)).
 		POST("articles-list", UpButterReq(api.ArticlesList)).
 		POST("article-edit", UpButterReq(api.EditArticle)).
@@ -174,18 +143,15 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("category-save", UpButterReq(api.SaveCategory)).
 		POST("category-delete", UpButterReq(api.DeleteCategory))
 
-	// 权限管理
 	adminApi.Group("", middleware.CheckPermission(permission.RoleManager)).
 		POST("get-permission-list", UpButterReq(api.GetPermissionList)).
 		POST("role-list", UpButterReq(api.RoleList)).
 		POST("role-save", UpButterReq(api.RoleSave)).
 		POST("role-delete", UpButterReq(api.RoleDel))
 
-	// 操作日志
 	adminApi.Group("", middleware.CheckPermission(permission.Admin)).
 		POST("opt-record-page", UpButterReq(api.OptRecordPage))
 
-	// 站点管理
 	adminApi.Group("", middleware.CheckPermission(permission.SiteManager)).
 		GET("friend-links", UpButterReq(api.GetFriendLinks)).
 		POST("save-friend-links", UpButterReq(api.SaveFriendLinks)).
@@ -207,8 +173,6 @@ func apiRoute(ginApp *gin.Engine) {
 
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
-	// 文件上传接口
 	r.POST("/img-upload", middleware.JWTAuthCheck, api.SaveImgByGinContext)
-	// 文件获取接口 - 通过路径
 	r.GET("/img/*filename", middleware.BrowserCache, api.GetFileByFileName)
 }

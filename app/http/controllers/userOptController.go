@@ -57,7 +57,7 @@ type ActivateAccountData struct {
 	Description string
 }
 
-// 添加新的辅助函数
+// renderActivationPage 渲染账号激活结果页。
 func renderActivationPage(c *gin.Context, success bool, message string) {
 	status := "失败"
 	description := "激活失败，请检查您的激活链接是否正确或联系管理员。"

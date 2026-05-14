@@ -1,5 +1,6 @@
 package vo
 
+// ArticlesSimpleVo is the compact article payload used by list views and feed-like responses.
 type ArticlesSimpleVo struct {
 	Id             uint64     `json:"id"`
 	Title          string     `json:"title,omitempty"`
@@ -19,6 +20,7 @@ type ArticlesSimpleVo struct {
 	Posters        []PosterVo `json:"posters,omitempty"`
 }
 
+// PosterVo is a lightweight user summary attached to compact article responses.
 type PosterVo struct {
 	Id        uint64 `json:"id"`
 	Username  string `json:"username"`

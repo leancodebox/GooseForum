@@ -27,9 +27,7 @@ func SendMessage(req component.BetterRequest[SendMessageReq]) component.Response
 	if err != nil {
 		return component.FailResponse(err.Error())
 	}
-	return component.SuccessResponse(component.DataMap{
-		"convId": convId,
-	})
+	return successDataMap("convId", convId)
 }
 
 // GetChatListReq 获取私信列表请求
@@ -42,9 +40,7 @@ func GetChatList(req component.BetterRequest[GetChatListReq]) component.Response
 	if err != nil {
 		return component.FailResponse("Failed to get chat list")
 	}
-	return component.SuccessResponse(component.DataMap{
-		"list": list,
-	})
+	return successDataMap("list", list)
 }
 
 // GetMessagesReq 获取消息记录请求
@@ -60,9 +56,7 @@ func GetMessages(req component.BetterRequest[GetMessagesReq]) component.Response
 	if err != nil {
 		return component.FailResponse("Failed to get messages")
 	}
-	return component.SuccessResponse(component.DataMap{
-		"list": msgs,
-	})
+	return successDataMap("list", msgs)
 }
 
 // MarkReadReq 标记已读请求
@@ -104,7 +98,5 @@ func GetSuggestedUsers(req component.BetterRequest[component.Null]) component.Re
 			"avatar":   u.GetWebAvatarUrl(),
 		}
 	})
-	return component.SuccessResponse(component.DataMap{
-		"list": users,
-	})
+	return successDataMap("list", users)
 }

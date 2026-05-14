@@ -35,7 +35,7 @@ func NewPageMetaBuilder() *PageMetaBuilder {
 	}
 }
 
-// SetTitle 基础信息设置
+// SetTitle sets the page title and default social titles.
 func (b *PageMetaBuilder) SetTitle(title string) *PageMetaBuilder {
 	b.meta.Title = title
 	if b.meta.OG.Title == "" {
@@ -72,15 +72,14 @@ func (b *PageMetaBuilder) SetCanonicalURL(url string) *PageMetaBuilder {
 	return b
 }
 
-// SetPageType 页面类型设置
+// SetPageType sets the Open Graph page type.
 func (b *PageMetaBuilder) SetPageType(pageType string) *PageMetaBuilder {
 	b.meta.OG.Type = pageType
 	return b
 }
 
-// SetArticle 文章特定设置
+// SetArticle sets article-specific metadata.
 func (b *PageMetaBuilder) SetArticle(title, desc, author string, categories []string, publishTime, modifyTime *time.Time) *PageMetaBuilder {
-	// 应用站点默认配置
 	if title != "" && !strings.HasSuffix(title, b.siteConfig.SiteName) {
 		title = fmt.Sprintf("%s - %s", title, b.siteConfig.SiteName)
 	}
@@ -90,7 +89,6 @@ func (b *PageMetaBuilder) SetArticle(title, desc, author string, categories []st
 
 	b.meta.Author = author
 
-	// 设置 OpenGraph 文章信息
 	b.meta.OG.ArticleAuthor = author
 	b.meta.OG.ArticlePublishedTime = publishTime
 	b.meta.OG.ArticleModifiedTime = modifyTime
@@ -104,7 +102,7 @@ func (b *PageMetaBuilder) SetArticle(title, desc, author string, categories []st
 	return b
 }
 
-// SetUserProfile 用户页面设置
+// SetUserProfile sets profile-page metadata.
 func (b *PageMetaBuilder) SetUserProfile(username, bio string) *PageMetaBuilder {
 	b.SetTitle(fmt.Sprintf("%s 的个人主页 - %s", username, b.siteConfig.SiteName))
 	b.SetDescription(bio)
@@ -112,7 +110,7 @@ func (b *PageMetaBuilder) SetUserProfile(username, bio string) *PageMetaBuilder 
 	return b
 }
 
-// SetImage 图片设置
+// SetImage sets social preview image metadata.
 func (b *PageMetaBuilder) SetImage(imageURL, imageAlt string) *PageMetaBuilder {
 	b.meta.OG.Image = imageURL
 	b.meta.OG.ImageAlt = imageAlt
@@ -121,13 +119,13 @@ func (b *PageMetaBuilder) SetImage(imageURL, imageAlt string) *PageMetaBuilder {
 	return b
 }
 
-// SetSchemaOrg 结构化数据设置
+// SetSchemaOrg sets schema.org JSON-LD metadata.
 func (b *PageMetaBuilder) SetSchemaOrg(jsonLD template.JS) *PageMetaBuilder {
 	b.meta.SchemaOrgJSON = jsonLD
 	return b
 }
 
-// Build 构建最终的 PageMeta
+// Build returns PageMeta with site defaults filled in.
 func (b *PageMetaBuilder) Build() *PageMeta {
 
 	if b.meta.Description == "" {

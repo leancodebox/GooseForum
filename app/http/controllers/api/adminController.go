@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
@@ -222,30 +221,30 @@ type ArticlesListReq struct {
 type ArticlesInfoVo struct {
 	Id            uint64 `json:"id"`
 	Title         string `json:"title"`
-	Type          int8   `json:"type"`   // 文章类型：0 博文，1教程，2问答，3分享
-	UserId        uint64 `json:"userId"` //
+	Type          int8   `json:"type"`
+	UserId        uint64 `json:"userId"`
 	Username      string `json:"username"`
-	ArticleStatus int8   `json:"articleStatus"` // 文章状态：0 草稿 1 发布
-	ProcessStatus int8   `json:"processStatus"` // 管理状态：0 正常 1 封禁
-	CreatedAt     string `json:"createdAt"`     // 改为 string 类型
-	UpdatedAt     string `json:"updatedAt"`     // 改为 string 类型
+	ArticleStatus int8   `json:"articleStatus"`
+	ProcessStatus int8   `json:"processStatus"`
+	CreatedAt     string `json:"createdAt"`
+	UpdatedAt     string `json:"updatedAt"`
 }
 
 type ArticlesInfoAdminVo struct {
 	Id            uint64 `json:"id"`
 	Title         string `json:"title"`
 	Description   string `json:"description"`
-	Type          int8   `json:"type"`   // 文章类型：0 博文，1教程，2问答，3分享
-	UserId        uint64 `json:"userId"` //
+	Type          int8   `json:"type"`
+	UserId        uint64 `json:"userId"`
 	Username      string `json:"username"`
 	UserAvatarUrl string `json:"userAvatarUrl"`
-	ArticleStatus int8   `json:"articleStatus"` // 文章状态：0 草稿 1 发布
-	ProcessStatus int8   `json:"processStatus"` // 管理状态：0 正常 1 封禁
+	ArticleStatus int8   `json:"articleStatus"`
+	ProcessStatus int8   `json:"processStatus"`
 	ViewCount     uint64 `json:"viewCount"`
 	ReplyCount    uint64 `json:"replyCount"`
 	LikeCount     uint64 `json:"likeCount"`
-	CreatedAt     string `json:"createdAt"` // 改为 string 类型
-	UpdatedAt     string `json:"updatedAt"` // 改为 string 类型
+	CreatedAt     string `json:"createdAt"`
+	UpdatedAt     string `json:"updatedAt"`
 }
 
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
@@ -546,7 +545,7 @@ func DeleteCategory(req component.BetterRequest[struct {
 	return component.SuccessResponse(true)
 }
 
-func GetFriendLinks(req component.BetterRequest[null]) component.Response {
+func GetFriendLinks(req component.BetterRequest[component.Null]) component.Response {
 	lItem := pageConfig.LinkItem{
 		Name:    "GooseForum",
 		Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
@@ -582,16 +581,11 @@ type SaveFriendLinksReq struct {
 
 // SaveFriendLinks 保存友情链接
 func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
-	configEntity.PageType = pageConfig.FriendShipLinks
-	configEntity.Config = jsonopt.Encode(req.Params.LinksInfo)
-	pageConfig.CreateOrSave(&configEntity)
-	hotdataserve.ClearFriendLinksConfigCache()
-	return component.SuccessResponse("success")
+	return savePageConfig(pageConfig.FriendShipLinks, req.Params.LinksInfo, hotdataserve.ClearFriendLinksConfigCache)
 }
 
 // GetSponsors 获取赞助商配置
-func GetSponsors(req component.BetterRequest[null]) component.Response {
+func GetSponsors(req component.BetterRequest[component.Null]) component.Response {
 	defaultSponsors := pageConfig.SponsorsConfig{
 		Sponsors: pageConfig.Sponsors{
 			Level0: []pageConfig.SponsorItem{},
@@ -611,16 +605,11 @@ type SaveSponsorsReq struct {
 
 // SaveSponsors 保存赞助商配置
 func SaveSponsors(req component.BetterRequest[SaveSponsorsReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.SponsorsPage)
-	configEntity.PageType = pageConfig.SponsorsPage
-	configEntity.Config = jsonopt.Encode(req.Params.SponsorsInfo)
-	pageConfig.CreateOrSave(&configEntity)
-	hotdataserve.ClearSponsorsConfigCache()
-	return component.SuccessResponse("success")
+	return savePageConfig(pageConfig.SponsorsPage, req.Params.SponsorsInfo, hotdataserve.ClearSponsorsConfigCache)
 }
 
 // GetSiteSettings 获取站点设置
-func GetSiteSettings(req component.BetterRequest[null]) component.Response {
+func GetSiteSettings(req component.BetterRequest[component.Null]) component.Response {
 	defaultSettings := defaultconfig.GetDefaultSiteSettingsConfig()
 	res := pageConfig.GetConfigByPageType(pageConfig.SiteSettings, defaultSettings)
 	return component.SuccessResponse(res)
@@ -632,16 +621,11 @@ type SaveSiteSettingsReq struct {
 
 // SaveSiteSettings 保存站点设置
 func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.SiteSettings)
-	configEntity.PageType = pageConfig.SiteSettings
-	configEntity.Config = jsonopt.Encode(req.Params.Settings)
-	pageConfig.CreateOrSave(&configEntity)
-	hotdataserve.ClearSiteSettingsConfigCache()
-	return component.SuccessResponse("success")
+	return savePageConfig(pageConfig.SiteSettings, req.Params.Settings, hotdataserve.ClearSiteSettingsConfigCache)
 }
 
 // GetMailSettings 获取邮件设置
-func GetMailSettings(req component.BetterRequest[null]) component.Response {
+func GetMailSettings(req component.BetterRequest[component.Null]) component.Response {
 	// 获取当前站点设置
 	defaultSettings := defaultconfig.GetDefaultEmailSettingsConfig()
 	emailSettings := pageConfig.GetConfigByPageType(pageConfig.EmailSettings, defaultSettings)
@@ -654,12 +638,7 @@ type SaveMailSettingsReq struct {
 
 // SaveMailSettings 保存邮件设置
 func SaveMailSettings(req component.BetterRequest[SaveMailSettingsReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.EmailSettings)
-	configEntity.PageType = pageConfig.EmailSettings
-	configEntity.Config = jsonopt.Encode(req.Params.Settings)
-	pageConfig.CreateOrSave(&configEntity)
-	hotdataserve.ClearMailSettingsConfigCache()
-	return component.SuccessResponse("success")
+	return savePageConfig(pageConfig.EmailSettings, req.Params.Settings, hotdataserve.ClearMailSettingsConfigCache)
 }
 
 type TestMailConnectionReq struct {
@@ -693,7 +672,7 @@ func TestMailConnection(req component.BetterRequest[TestMailConnectionReq]) comp
 }
 
 // GetAnnouncement 获取公告设置
-func GetAnnouncement(req component.BetterRequest[null]) component.Response {
+func GetAnnouncement(req component.BetterRequest[component.Null]) component.Response {
 	config := pageConfig.GetConfigByPageType(pageConfig.Announcement, pageConfig.AnnouncementConfig{})
 	return component.SuccessResponse(config)
 }
@@ -704,16 +683,11 @@ type SaveAnnouncementReq struct {
 
 // SaveAnnouncement 保存公告设置
 func SaveAnnouncement(req component.BetterRequest[SaveAnnouncementReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.Announcement)
-	configEntity.PageType = pageConfig.Announcement
-	configEntity.Config = jsonopt.Encode(req.Params.Settings)
-	pageConfig.CreateOrSave(&configEntity)
-	hotdataserve.ClearAnnouncementConfigCache()
-	return component.SuccessResponse("success")
+	return savePageConfig(pageConfig.Announcement, req.Params.Settings, hotdataserve.ClearAnnouncementConfigCache)
 }
 
 // GetSecuritySettings 获取安全与注册设置
-func GetSecuritySettings(req component.BetterRequest[null]) component.Response {
+func GetSecuritySettings(req component.BetterRequest[component.Null]) component.Response {
 	defaultSettings := defaultconfig.GetDefaultSecuritySettingsConfig()
 	res := pageConfig.GetConfigByPageType(pageConfig.SecuritySettings, defaultSettings)
 	return component.SuccessResponse(res)
@@ -725,16 +699,11 @@ type SaveSecuritySettingsReq struct {
 
 // SaveSecuritySettings 保存安全与注册设置
 func SaveSecuritySettings(req component.BetterRequest[SaveSecuritySettingsReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.SecuritySettings)
-	configEntity.PageType = pageConfig.SecuritySettings
-	configEntity.Config = jsonopt.Encode(req.Params.Settings)
-	pageConfig.CreateOrSave(&configEntity)
-	hotdataserve.ClearSecuritySettingsConfigCache()
-	return component.SuccessResponse("success")
+	return savePageConfig(pageConfig.SecuritySettings, req.Params.Settings, hotdataserve.ClearSecuritySettingsConfigCache)
 }
 
 // GetPostingSettings 获取发布内容设置
-func GetPostingSettings(req component.BetterRequest[null]) component.Response {
+func GetPostingSettings(req component.BetterRequest[component.Null]) component.Response {
 	defaultSettings := defaultconfig.GetDefaultPostingSettingsConfig()
 	res := pageConfig.GetConfigByPageType(pageConfig.PostingSettings, defaultSettings)
 	return component.SuccessResponse(res)
@@ -746,10 +715,5 @@ type SavePostingSettingsReq struct {
 
 // SavePostingSettings 保存发布内容设置
 func SavePostingSettings(req component.BetterRequest[SavePostingSettingsReq]) component.Response {
-	configEntity := pageConfig.GetByPageType(pageConfig.PostingSettings)
-	configEntity.PageType = pageConfig.PostingSettings
-	configEntity.Config = jsonopt.Encode(req.Params.Settings)
-	pageConfig.CreateOrSave(&configEntity)
-	hotdataserve.ClearPostingSettingsConfigCache()
-	return component.SuccessResponse("success")
+	return savePageConfig(pageConfig.PostingSettings, req.Params.Settings, hotdataserve.ClearPostingSettingsConfigCache)
 }

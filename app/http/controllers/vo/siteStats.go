@@ -1,5 +1,6 @@
 package vo
 
+// SiteStats contains site-wide counters shown in shared page components.
 type SiteStats struct {
 	UserCount         uint64 `json:"userCount"`
 	UserMonthCount    int64  `json:"userMonthCount"`

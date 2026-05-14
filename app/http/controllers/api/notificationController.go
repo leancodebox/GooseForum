@@ -40,9 +40,7 @@ func QueryNotificationList(req component.BetterRequest[QueryNotificationListReq]
 		}
 	})
 
-	return component.SuccessResponse(component.DataMap{
-		"list": notifications,
-	})
+	return successDataMap("list", notifications)
 }
 
 // GetNotificationListReq 获取通知列表请求
@@ -73,17 +71,13 @@ func GetUnreadCount(req component.BetterRequest[GetUnreadCountReq]) component.Re
 		return component.FailResponse("获取未读数量失败")
 	}
 
-	return component.SuccessResponse(component.DataMap{
-		"count": count,
-	})
+	return successDataMap("count", count)
 }
 
 // GetLastUnread 获取未读通知数量
 func GetLastUnread(req component.BetterRequest[GetUnreadCountReq]) component.Response {
 	entity := eventNotification.GetLastUnread(req.UserId)
-	return component.SuccessResponse(component.DataMap{
-		"eventType": entity.EventType,
-	})
+	return successDataMap("eventType", entity.EventType)
 }
 
 // MarkAsReadReq 标记通知已读请求

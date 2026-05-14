@@ -6,6 +6,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
+// UserCard is the compact public profile payload used by profile cards.
 type UserCard struct {
 	UserId            uint64                    `json:"userId"`
 	Username          string                    `json:"username"`

@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ginUpNP  支持空参数
+// ginUpNP wraps handlers that do not need request parameters.
 func ginUpNP(action func() component.Response) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		response := action()
@@ -23,37 +23,35 @@ func UpButterReq[T any](action func(ctx component.BetterRequest[T]) component.Re
 	}
 }
 
-// UpJsonReq 强制 JSON 绑定
+// UpJsonReq binds JSON request bodies.
 func UpJsonReq[T any](action func(ctx component.BetterRequest[T]) component.Response) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		bindAndExecute(c, c.ShouldBindJSON, action, true)
 	}
 }
 
-// UpQueryReq 强制 Query 绑定
+// UpQueryReq binds query parameters.
 func UpQueryReq[T any](action func(ctx component.BetterRequest[T]) component.Response) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		bindAndExecute(c, c.ShouldBindQuery, action, true)
 	}
 }
 
-// UpUriReq 强制 URI 绑定 (Path params)
+// UpUriReq binds URI path parameters.
 func UpUriReq[T any](action func(ctx component.BetterRequest[T]) component.Response) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		bindAndExecute(c, c.ShouldBindUri, action, true)
 	}
 }
 
-// UpFormReq 强制 Form 绑定
+// UpFormReq binds form or multipart form data.
 func UpFormReq[T any](action func(ctx component.BetterRequest[T]) component.Response) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		// c.ShouldBind 在 Content-Type 为 multipart/form-data 或 application/x-www-form-urlencoded 时会自动处理
-		// 但为了语义明确，我们也可以使用 ShouldBindWith，不过 ShouldBind 足够智能
 		bindAndExecute(c, c.ShouldBind, action, true)
 	}
 }
 
-// bindAndExecute 内部通用处理逻辑
+// bindAndExecute binds params, validates them, and executes the controller action.
 func bindAndExecute[T any](c *gin.Context, binder func(any) error, action func(component.BetterRequest[T]) component.Response, strict bool) {
 	userId := c.GetUint64("userId")
 	var params T

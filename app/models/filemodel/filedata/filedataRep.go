@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// 添加支持的图片类型映射
 var supportedImageTypes = map[string]string{
 	".jpg":  "image/jpeg",
 	".jpeg": "image/jpeg",
@@ -21,7 +20,7 @@ var supportedImageTypes = map[string]string{
 	".bmp":  "image/bmp",
 }
 
-// CheckImageType 检查文件类型是否支持，返回对应的 Content-Type
+// CheckImageType returns the image MIME type for supported extensions.
 func CheckImageType(filename string) (string, error) {
 	ext := strings.ToLower(path.Ext(filename))
 	if contentType, ok := supportedImageTypes[ext]; ok {
@@ -93,41 +92,36 @@ func GetFileByName(name string) (*Entity, error) {
 	return &entity, nil
 }
 
-// CountDailyUploads 统计用户当日上传次数
+// CountDailyUploads returns the number of files uploaded by a user today.
 func CountDailyUploads(userId uint64) int64 {
 	return CountUserUploadsToday(userId)
 }
 
 func SaveFileFromUpload(userId uint64, fileData []byte, filename string, customPath string) (*Entity, error) {
-	// 验证文件大小
 	if len(fileData) > MaxFileSize {
 		return nil, fmt.Errorf("file size exceeds maximum limit of %dMB", MaxFileSize/(1024*1024))
 	}
 
-	// 检查文件类型
 	contentType, err := CheckImageType(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	// 生成文件路径
 	fileExt := path.Ext(filename)
 	newFilename := fmt.Sprintf("%s/%s%s",
 		customPath,
 		uuid.New().String(),
 		fileExt)
 
-	// 保存文件
 	return SaveFile(userId, newFilename, contentType, fileData)
 }
 
-// 在 supportedImageTypes 映射后添加新的常量
 const (
 	MaxFileSize = 4 * 1024 * 1024 // 4MB
 	AvatarPath  = "avatars"
 )
 
-// SaveAvatar 现在可以基于通用方法实现
+// SaveAvatar stores an uploaded avatar file.
 func SaveAvatar(userId uint64, fileData []byte, filename string) (*Entity, error) {
 	avatarPath := fmt.Sprintf("%s/avatar_%d_%d",
 		AvatarPath,
@@ -137,14 +131,14 @@ func SaveAvatar(userId uint64, fileData []byte, filename string) (*Entity, error
 	return SaveFileFromUpload(userId, fileData, filename, avatarPath)
 }
 
-// CountUserUploadsInTimeRange 统计用户在指定时间范围内的上传次数
+// CountUserUploadsInTimeRange counts uploads for a user within a time range.
 func CountUserUploadsInTimeRange(userId uint64, startTime, endTime time.Time) int64 {
 	var count int64
 	builder().Where("user_id = ? AND created_at >= ? AND created_at <= ?", userId, startTime, endTime).Count(&count)
 	return count
 }
 
-// CountUserUploadsToday 统计用户今日上传次数
+// CountUserUploadsToday counts uploads for a user today.
 func CountUserUploadsToday(userId uint64) int64 {
 	now := time.Now()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())

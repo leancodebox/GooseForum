@@ -25,7 +25,7 @@ var robotsTxt string
 //go:embed templ/sitemap.xml.tmpl
 var sitemapTpl string
 
-// RenderRobotsTxt 渲染 robots.txt
+// RenderRobotsTxt renders robots.txt.
 func RenderRobotsTxt(c *gin.Context) {
 	host := component.GetHost(c)
 	c.Header("Content-Type", "text/plain")
@@ -38,7 +38,7 @@ type SitemapURL struct {
 	Priority float64
 }
 
-// RenderSitemapXml 渲染 sitemap.xml
+// RenderSitemapXml renders sitemap.xml.
 func RenderSitemapXml(c *gin.Context) {
 	host := component.GetHost(c)
 	list, _ := articles.GetLatestArticles(5000)
@@ -57,7 +57,6 @@ func RenderSitemapXml(c *gin.Context) {
 			Priority: 0.7,
 		})
 	}
-	// Add Categories
 	categories := hotdataserve.GetArticleCategory()
 	for _, cat := range categories {
 		sitemaps = append(sitemaps, SitemapURL{
@@ -104,7 +103,6 @@ func RenderRssV2(c *gin.Context) {
 		return
 	}
 
-	// 创建Feed对象
 	feed := &feeds.Feed{
 		Title:       settingConfig.SiteName,
 		Link:        &feeds.Link{Href: host},
@@ -113,9 +111,7 @@ func RenderRssV2(c *gin.Context) {
 		Created:     time.Now(),
 	}
 
-	// 添加文章项
 	for _, item := range articleList {
-		// 使用RenderedHTML作为内容，如果为空则使用Description
 		content := item.RenderedHTML
 		if content == "" {
 			content = markdown2html.MarkdownToHTML(item.Content)
@@ -131,7 +127,6 @@ func RenderRssV2(c *gin.Context) {
 		})
 	}
 
-	// 生成RSS XML
 	rssString, err := feed.ToRss()
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error generating RSS feed")

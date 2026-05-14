@@ -41,20 +41,16 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// 获取安全设置
 	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
 
-	// 检查是否允许注册
 	if !securityConfig.EnableSignup {
 		c.JSON(200, component.FailData("目前已关闭注册功能"))
 		return
 	}
 
-	// 清理输入数据
 	r.Username = strings.TrimSpace(r.Username)
 	r.Email = strings.TrimSpace(strings.ToLower(r.Email))
 
-	// 检查邮箱域名限制
 	if err := component.ValidateEmailDomain(r.Email); err != nil {
 		c.JSON(200, component.FailData(err.Error()))
 		return
@@ -65,25 +61,21 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// 验证密码复杂度
 	if err := component.ValidatePassword(r.Password, 6); err != nil {
 		c.JSON(200, component.FailData(err.Error()))
 		return
 	}
 
-	// 首先验证验证码
 	if !captchaOpt.VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
 		c.JSON(200, component.FailData("验证码错误或已过期"))
 		return
 	}
 
-	// 检查用户名是否已存在
 	if users.ExistUsername(r.Username) {
 		c.JSON(200, component.FailData("用户名已存在"))
 		return
 	}
 
-	// 检查邮箱是否已存在
 	if users.ExistEmail(r.Email) {
 		c.JSON(200, component.FailData("邮箱已被使用"))
 		return
@@ -99,7 +91,6 @@ func Register(c *gin.Context) {
 		slog.Error("添加邮件任务到队列失败", "error", err)
 	}
 
-	// 发布注册事件
 	eventbus.Publish(context.Background(), &eventhandlers.UserSignUpEvent{
 		UserId:   userEntity.Id,
 		Username: userEntity.Username,
@@ -118,7 +109,6 @@ func Register(c *gin.Context) {
 		})
 	}
 
-	// 如果开启了邮件验证，不自动登录
 	if securityConfig.EnableEmailVerification {
 		c.JSON(http.StatusOK, component.SuccessData(
 			"注册成功，请前往邮箱验证您的账号",
@@ -126,13 +116,11 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// 生成 token
 	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
 	if err != nil {
 
 		c.JSON(200, component.FailData("注册异常，尝试登陆"))
 	}
-	// 设置Cookie
 	jwt.TokenSetting(c, token)
 
 	c.JSON(http.StatusOK, component.SuccessData(
@@ -162,7 +150,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// 验证输入参数
 	if err := validate.Valid(req); err != nil {
 		c.JSON(200, component.FailData("请求参数验证失败"))
 		return
@@ -172,7 +159,6 @@ func Login(c *gin.Context) {
 	captchaId := req.CaptchaId
 	captchaCode := req.CaptchaCode
 
-	// 验证用户名/邮箱格式
 	if username == "" {
 		c.JSON(200, component.FailData("用户名或邮箱不能为空"))
 		return
@@ -185,7 +171,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// 验证密码长度（登录时只检查最小长度，避免暴露密码策略）
 	if len(password) < 6 {
 		c.JSON(200, component.FailData("密码格式错误"))
 		return
@@ -203,13 +188,11 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// 检查用户状态
 	if userEntity.IsFrozen == users.StatusFrozen {
 		c.JSON(200, component.FailData("账户已被冻结，请联系管理员"))
 		return
 	}
 
-	// 检查是否通过验证
 	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
 	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
 		c.JSON(200, component.FailData("账户邮箱未验证，请先验证您的邮箱"))

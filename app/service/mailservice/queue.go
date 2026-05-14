@@ -10,24 +10,23 @@ import (
 )
 
 const (
-	MaxRetries    = 3               // 最大重试次数
-	RetryInterval = time.Second * 5 // 重试间隔
-	BatchSize     = 10              // 每次处理的任务数量
+	MaxRetries    = 3
+	RetryInterval = time.Second * 5
+	BatchSize     = 10
 )
 
 type EmailTask struct {
 	To       string `json:"to"`
 	Username string `json:"username"`
 	Token    string `json:"token"`
-	Type     string `json:"type"` // activation, reset_password 等
+	Type     string `json:"type"`
 }
 
 func init() {
-	// 启动邮件处理器
 	StartEmailProcessor()
 }
 
-// AddToQueue 添加邮件任务到队列
+// AddToQueue stores an email task for background processing.
 func AddToQueue(task EmailTask) error {
 	taskJson, err := json.Marshal(task)
 	if err != nil {
@@ -43,11 +42,10 @@ func AddToQueue(task EmailTask) error {
 	return taskQueue.Create(queueTask)
 }
 
-// StartEmailProcessor 启动邮件处理器
+// StartEmailProcessor starts the background email queue worker.
 func StartEmailProcessor() {
 	go func() {
 		for {
-			// 获取待处理的任务
 			tasks := taskQueue.GetPendingTasks(BatchSize)
 			if len(tasks) == 0 {
 				time.Sleep(time.Second * 5)
@@ -55,13 +53,11 @@ func StartEmailProcessor() {
 			}
 
 			for _, task := range tasks {
-				// 更新任务状态为处理中
 				if err := taskQueue.UpdateStatus(task.Id, taskQueue.StatusRunning, nil); err != nil {
 					slog.Error("更新任务状态失败", "error", err)
 					continue
 				}
 
-				// 解析任务数据
 				var emailTask EmailTask
 				if err := json.Unmarshal([]byte(task.TaskJson), &emailTask); err != nil {
 					slog.Error("解析任务数据失败", "error", err)
@@ -69,7 +65,6 @@ func StartEmailProcessor() {
 					continue
 				}
 
-				// 处理任务
 				err := processEmailTask(emailTask)
 				if err != nil {
 					slog.Error("处理邮件任务失败",
@@ -78,7 +73,6 @@ func StartEmailProcessor() {
 						"error", err,
 					)
 
-					// 处理重试逻辑
 					if task.RetryCount < MaxRetries {
 						taskQueue.IncrementRetryCount(task.Id)
 						taskQueue.UpdateStatus(task.Id, taskQueue.StatusRetrying, err)
@@ -90,7 +84,6 @@ func StartEmailProcessor() {
 					continue
 				}
 
-				// 更新任务状态为成功
 				taskQueue.UpdateStatus(task.Id, taskQueue.StatusSuccess, nil)
 				slog.Info("邮件发送成功",
 					"type", emailTask.Type,
@@ -101,7 +94,7 @@ func StartEmailProcessor() {
 	}()
 }
 
-// processEmailTask 处理邮件任务
+// processEmailTask dispatches an email task by type.
 func processEmailTask(task EmailTask) error {
 	switch task.Type {
 	case "activation":

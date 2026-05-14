@@ -19,7 +19,7 @@ import (
 type null struct {
 }
 
-// SidebarItem represents a single item in the sidebar
+// SidebarItem describes one navigation entry rendered by the shared sidebar.
 type SidebarItem struct {
 	Key        string
 	Label      string
@@ -31,14 +31,14 @@ type SidebarItem struct {
 	CategoryId uint64
 }
 
-// SidebarMenu controls the display and selection of sidebar items
+// SidebarMenu groups sidebar navigation entries and tracks their active state.
 type SidebarMenu struct {
 	MainMenu      []*SidebarItem
 	ResourceItems []*SidebarItem
 	CategoryItems []*SidebarItem
 }
 
-// SetActive sets the active item by key
+// SetActive marks the sidebar item with the given key as active.
 func (s *SidebarMenu) SetActive(key string) {
 	for _, item := range s.MainMenu {
 		item.Active = item.Key == key
@@ -51,7 +51,7 @@ func (s *SidebarMenu) SetActive(key string) {
 	}
 }
 
-// SetActiveCategory sets the active category by ID
+// SetActiveCategory marks the category item with the given category ID as active.
 func (s *SidebarMenu) SetActiveCategory(id uint64) {
 	for _, item := range s.MainMenu {
 		item.Active = false
@@ -64,7 +64,7 @@ func (s *SidebarMenu) SetActiveCategory(id uint64) {
 	}
 }
 
-// NewSidebarMenu creates a new SidebarMenu with default items and categories
+// NewSidebarMenu builds the default sidebar menu for the current visitor.
 func NewSidebarMenu(categories []*articleCategory.Entity, isLoggedIn bool) SidebarMenu {
 	mainMenu := []*SidebarItem{
 		{Key: "topics", Label: "nav_topics", Icon: "💬", Url: urlconfig.Home()},
@@ -103,18 +103,18 @@ func NewSidebarMenu(categories []*articleCategory.Entity, isLoggedIn bool) Sideb
 	return menu
 }
 
-// CommonDataVo 包含所有 V3 页面共有的基础数据（如侧边栏、站点统计等）
+// CommonDataVo carries data shared by V3 template-rendered pages.
 type CommonDataVo struct {
 	ArticleCategoryList []*articleCategory.Entity
 	Stats               *vo.SiteStats
 	RecommendedArticles []*articles.SmallEntity
 	Announcement        pageConfig.AnnouncementConfig
 	GooseForumInfo      ForumInfo
-	Category            *articleCategory.Entity // 当前页面所属的分类（如果有），用于侧边栏高亮
-	Sidebar             SidebarMenu             // 侧边栏菜单控制
+	Category            *articleCategory.Entity // Category is the current page category, if one should be highlighted.
+	Sidebar             SidebarMenu             // Sidebar is rebuilt per request so active state never leaks from cache.
 }
 
-// GetCommonData 获取 V3 页面共有的基础数据（使用 hotdataserve.GetOrLoad 缓存机制）
+// GetCommonData loads cached V3 shared page data and adds request-scoped sidebar state.
 func GetCommonData(c *gin.Context) CommonDataVo {
 	data := hotdataserve.GetOrLoad("common_data", func() (CommonDataVo, error) {
 		return CommonDataVo{
@@ -126,13 +126,12 @@ func GetCommonData(c *gin.Context) CommonDataVo {
 		}, nil
 	})
 
-	// Rebuild SidebarMenu for each request to allow per-request state (Active)
 	currentUserId := component.LoginUserId(c)
 	data.Sidebar = NewSidebarMenu(data.ArticleCategoryList, currentUserId > 0)
 	return data
 }
 
-// HomeData V3 首页专用的数据结构
+// HomeData is the V3 home page view object.
 type HomeData struct {
 	CommonDataVo
 	LatestArticles []*vo.ArticlesSimpleVo
@@ -141,7 +140,7 @@ type HomeData struct {
 	Sort           string
 }
 
-// CategoryData V3 分类页专用的数据结构
+// CategoryData is the V3 category page view object.
 type CategoryData struct {
 	CommonDataVo
 	Category          *articleCategory.Entity
@@ -152,6 +151,7 @@ type CategoryData struct {
 	Sort              string
 }
 
+// PostDetailData contains the article detail fields shared by old and V3 detail views.
 type PostDetailData struct {
 	Article              articles.Entity
 	Username             string
@@ -169,34 +169,39 @@ type PostDetailData struct {
 	Posters              []vo.PosterVo
 }
 
-// PostDetailDataVo V3 帖子详情页专用的数据结构
+// PostDetailDataVo is the V3 post detail page view object.
 type PostDetailDataVo struct {
 	CommonDataVo
 	PostDetailData
 	LatestArticles      []*vo.ArticlesSimpleVo
-	ArticleCategoryList []*articleCategory.Entity // 显式定义以解决嵌入结构体字段冲突
+	ArticleCategoryList []*articleCategory.Entity // ArticleCategoryList resolves the embedded field name conflict.
 }
 
+// UserDataVo is the V3 user profile page view object.
 type UserDataVo struct {
 	CommonDataVo
 	UserData
 }
 
+// MessagesData is the V3 private messages page view object.
 type MessagesData struct {
 	CommonDataVo
 }
 
+// SettingsData is the V3 account settings page view object.
 type SettingsData struct {
 	CommonDataVo
 	User  *vo.UserDetailedVo
 	Stats userStatistics.Entity
 }
 
+// NewTopicData is the V3 topic editor page view object.
 type NewTopicData struct {
 	CommonDataVo
 	ArticleId uint64
 }
 
+// SearchData is the V3 search results page view object.
 type SearchData struct {
 	CommonDataVo
 	Query          string

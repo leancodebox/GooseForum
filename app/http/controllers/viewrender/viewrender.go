@@ -20,7 +20,6 @@ var (
 )
 
 func Reload() {
-	// Initialize i18n bundle
 	appI18n.Init(resource.GetTemplateFS())
 
 	var err error
@@ -57,7 +56,6 @@ func SafeRender[T any](c *gin.Context, name string, data T, pageMeta ...*PageMet
 		meta = NewPageMetaBuilder().Build()
 	}
 
-	// Determine language
 	lang := GetLang(c)
 
 	localizer := appI18n.GetLocalizer(lang)
@@ -75,7 +73,6 @@ func SafeRender[T any](c *gin.Context, name string, data T, pageMeta ...*PageMet
 
 		msg, err := localizer.Localize(config)
 		if err != nil {
-			// fallback to key or log error
 			return key
 		}
 		return msg
@@ -117,14 +114,14 @@ func GetLang(c *gin.Context) string {
 		}
 	}
 	if lang == "" {
-		lang = "zh" // Default fallback
+		lang = "zh"
 	}
 	return lang
 }
 
-// GetTheme 从cookie中读取主题设置
+// GetTheme reads the selected theme from cookies.
 func GetTheme(c *gin.Context) string {
-	theme := "light" // 默认主题
+	theme := "light"
 	if themeCookie, err := c.Cookie("theme"); err == nil && themeCookie != "" {
 		theme = themeCookie
 	}

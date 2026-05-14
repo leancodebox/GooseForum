@@ -6,6 +6,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
+// UserInfoShow is the authenticated user summary exposed to pages and APIs.
 type UserInfoShow struct {
 	UserId              uint64                    `json:"userId,omitempty"`
 	Username            string                    `json:"username"`
@@ -21,6 +22,7 @@ type UserInfoShow struct {
 	ExternalInformation users.ExternalInformation `json:"externalInformation"`
 }
 
+// UserDetailedVo is the editable profile payload used by account settings.
 type UserDetailedVo struct {
 	Id                  uint64                    `json:"id"`
 	Username            string                    `json:"username"`

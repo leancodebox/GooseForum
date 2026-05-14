@@ -1,5 +1,6 @@
 package vo
 
+// RegReq is the user registration request payload.
 type RegReq struct {
 	Email          string `json:"email" validate:"required,email"`
 	Username       string `json:"userName"  validate:"required"`

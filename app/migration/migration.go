@@ -2,7 +2,6 @@ package migration
 
 import (
 	_ "embed"
-	"fmt"
 	"log/slog"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
@@ -39,7 +38,6 @@ import (
 )
 
 func M() {
-	// 数据库迁移
 	migration(setting.UseMigration())
 	initData()
 }
@@ -48,7 +46,6 @@ func migration(migration bool) {
 	if !migration {
 		return
 	}
-	// 自动迁移
 	var err error
 
 	db := dbconnect.Connect()
@@ -85,7 +82,6 @@ func migration(migration bool) {
 		slog.Info("dbconnect migration end")
 	}
 
-	// 因为图片数据库比较大，所以单独迁移
 	db4file := db4fileconnect.Connect()
 	if err = db4file.AutoMigrate(
 		&filedata.Entity{},
@@ -103,7 +99,7 @@ func initData() {
 		category.Category = "GooseForum"
 		category.Desc = "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆"
 		articleCategory.SaveOrCreateById(&category)
-		fmt.Println("标签不存在，创建标签")
+		slog.Info("created default article category")
 	}
 
 	lItem := pageConfig.LinkItem{

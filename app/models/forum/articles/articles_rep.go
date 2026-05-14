@@ -54,14 +54,14 @@ func GetByIds(ids []uint64) (entities []*SmallEntity) {
 	return
 }
 
-// GetAllSimple 用于全量导出/修复数据，支持分页查询
+// GetAllSimple returns paginated simple entities for export and repair jobs.
 func GetAllSimple(offset, limit int) ([]*SmallEntity, error) {
 	var entities []*SmallEntity
 	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
 	return entities, err
 }
 
-// GetCountGroupByDay 按天统计发帖数
+// GetCountGroupByDay groups article counts by day.
 func GetCountGroupByDay() ([]map[string]any, error) {
 	var results []map[string]any
 	err := builder().Select("DATE(created_at) as date, count(*) as count").Group("date").Order("date ASC").Find(&results).Error
@@ -135,12 +135,9 @@ WHERE rs.article_id = articles.id AND rs.article_category_id IN (?) AND rs.effec
 		}
 	}
 
-	// 处理排序
 	if q.Sort == "new" {
-		// 按照ID倒序（即创建时间倒序）
 		b.Order(queryopt.Desc(pid))
 	} else {
-		// 默认按照更新时间倒序 (latest)
 		b.Order(queryopt.Desc(fieldUpdatedAt))
 	}
 

@@ -68,7 +68,7 @@ type WriteArticlesOriginReq struct {
 	Id int64 `json:"id"`
 }
 
-// WriteArticlesOrigin 写文章
+// WriteArticlesOrigin 返回当前用户可编辑文章的原始内容。
 func WriteArticlesOrigin(req component.BetterRequest[WriteArticlesOriginReq]) component.Response {
 	entity := articles.Get(uint64(req.Params.Id))
 	if entity.Id == 0 {
@@ -95,7 +95,7 @@ type WriteArticleReq struct {
 	CategoryId []uint64 `json:"categoryId" validate:"min=1,max=3"`
 }
 
-// WriteArticles 写文章
+// WriteArticles 创建或更新文章。
 func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Response {
 	// 获取发布设置
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
@@ -163,7 +163,6 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 			return id, true
 		})
 
-		// 遍历 rsList，更新或删除无效的条目
 		for _, item := range articleCategoryRs.GetByArticleId(article.Id) {
 			if _, ok := categoryIDMap[item.ArticleCategoryId]; ok {
 				item.Effective = 1
@@ -178,7 +177,6 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		// 插入新的条目
 		for id := range categoryIDMap {
 			rs := &articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: id, Effective: 1}
-			fmt.Println(*rs)
 			articleCategoryRs.SaveOrCreateById(rs)
 		}
 		eventbus.Publish(context.Background(), &eventhandlers.ArticleUpdatedEvent{Article: &article})
@@ -342,7 +340,7 @@ func updateArticleStat(article articles.SmallEntity, userId uint64, isDelete boo
 	}
 }
 
-// GetUserArticlesRequest 添加新的请求结构体
+// GetUserArticlesRequest 用户文章列表请求。
 type GetUserArticlesRequest struct {
 	Page     int `json:"page"`
 	PageSize int `json:"pageSize"`
@@ -369,7 +367,6 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 				return ""
 			})
 
-			// 获取作者信息（虽然是当前用户，为了前端统一处理，也返回完整信息）
 			username := user.Username
 			avatarUrl := user.GetWebAvatarUrl()
 
@@ -393,7 +390,7 @@ func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) compon
 	)
 }
 
-// GetUserBookmarkedArticlesRequest 获取用户收藏文章列表请求结构体
+// GetUserBookmarkedArticlesRequest 用户收藏文章列表请求。
 type GetUserBookmarkedArticlesRequest struct {
 	Page     int `json:"page"`
 	PageSize int `json:"pageSize"`
@@ -465,7 +462,7 @@ func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArti
 
 type LikeArticleReq struct {
 	Id     uint64 `json:"id"`
-	Action int    `json:"action" validate:"min=1,max=2"` // 1 like 2 cancel
+	Action int    `json:"action" validate:"min=1,max=2"` // 1 点赞，2 取消
 }
 
 func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response {
@@ -515,7 +512,7 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 
 type BookmarkArticleReq struct {
 	Id     uint64 `json:"id"`
-	Action int    `json:"action" validate:"min=1,max=2"` // 1 Bookmark 2 cancel
+	Action int    `json:"action" validate:"min=1,max=2"` // 1 收藏，2 取消
 }
 
 func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.Response {
@@ -547,7 +544,7 @@ func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.
 
 type FollowUserReq struct {
 	Id     uint64 `json:"id"`
-	Action int    `json:"action" validate:"min=1,max=2"` // 1 like 2 cancel
+	Action int    `json:"action" validate:"min=1,max=2"` // 1 关注，2 取消
 }
 
 func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {

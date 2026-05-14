@@ -1,10 +1,6 @@
 package articleCategory
 
-import (
-	"fmt"
-
-	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
-)
+import "github.com/leancodebox/GooseForum/app/bundles/queryopt"
 
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
@@ -13,7 +9,6 @@ func create(entity *Entity) int64 {
 
 func save(entity *Entity) int64 {
 	result := builder().Save(entity)
-	fmt.Println(result.Error)
 	return result.RowsAffected
 }
 

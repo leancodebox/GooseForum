@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-// TemplateFuncs defines the available functions for templates
+// TemplateFuncs defines the functions available in Go templates.
 var TemplateFuncs = template.FuncMap{
 	"Url": func() URLHelper {
 		return URLHelper{}
@@ -30,8 +30,6 @@ var TemplateFuncs = template.FuncMap{
 		return t.Format(time.DateTime)
 	},
 	"Nl2br": func(text string) template.HTML {
-		// 将换行符转换为HTML的<br>标签
-		// 先进行HTML转义，然后替换换行符
 		escaped := template.HTMLEscapeString(text)
 		result := strings.ReplaceAll(escaped, "\n", "<br>")
 		return template.HTML(result)
@@ -53,13 +51,12 @@ var TemplateFuncs = template.FuncMap{
 	},
 }
 
-// Asset 返回静态资源的完整路径，如果配置了 CDN 则返回 CDN 路径
+// Asset returns a public asset URL, using the configured CDN when present.
 func Asset(path string) string {
 	if path == "" {
 		return ""
 	}
 
-	// 如果 path 已经是一个完整的 URL，直接返回
 	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") || strings.HasPrefix(path, "//") {
 		return path
 	}
@@ -72,9 +69,7 @@ func Asset(path string) string {
 		return "/" + path
 	}
 
-	// 移除 path 开头的斜杠，避免拼接出两个斜杠
 	path = strings.TrimPrefix(path, "/")
-	// 移除 cdnURL 结尾的斜杠
 	cdnURL = strings.TrimSuffix(cdnURL, "/")
 
 	return cdnURL + "/" + path

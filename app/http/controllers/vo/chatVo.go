@@ -1,5 +1,6 @@
 package vo
 
+// ChatItemVo summarizes one conversation in the messages list.
 type ChatItemVo struct {
 	Id           uint64 `json:"id"` // user_chat_config id
 	PeerId       uint64 `json:"peerId"`
@@ -11,6 +12,7 @@ type ChatItemVo struct {
 	ConvId       uint64 `json:"convId"`
 }
 
+// MessageVo represents one chat message decorated for the current viewer.
 type MessageVo struct {
 	Id        uint64 `json:"id"`
 	SenderId  uint64 `json:"senderId"`

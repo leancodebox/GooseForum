@@ -2,7 +2,7 @@ package userservice
 
 import (
 	_ "embed"
-	"fmt"
+	"log/slog"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
@@ -27,10 +27,10 @@ func FirstUserInit(adminUser *users.EntityComplete) {
 		roleEntity.RoleName = "管理员"
 		roleEntity.Effective = 1
 		if err := role.SaveOrCreateById(&roleEntity); err != nil {
-			fmt.Println(err)
+			slog.Error("create admin role failed", "error", err)
 			return
 		}
-		fmt.Println("角色不存在，创建角色")
+		slog.Info("created missing admin role")
 	}
 
 	rp := rolePermissionRs.GetRsByRoleIdAndPermission(roleEntity.Id, permission.Admin.Id())
@@ -39,7 +39,7 @@ func FirstUserInit(adminUser *users.EntityComplete) {
 		rp.PermissionId = permission.Admin.Id()
 		rp.Effective = 1
 		rolePermissionRs.SaveOrCreateById(&rp)
-		fmt.Println("角色权限关系不存在，创建角色权限关系")
+		slog.Info("created missing admin role permission relation")
 	}
 
 	adminUser.RoleId = roleEntity.Id

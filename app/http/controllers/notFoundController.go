@@ -20,11 +20,9 @@ const (
 
 func NotFound(c *gin.Context) {
 	uri := c.Request.RequestURI
-	// SPA 回退：凡是以 /actor 开头的未知路由，返回 index.html 交由前端路由处理
 	if strings.HasPrefix(uri, "/admin") {
 		fsEntity, _ := resource.GetAdminFS()
-		// 不要使用index.html
-		// Go net/http 有把 index.html 处理为 ./ 的奇怪逻辑
+		// Empty path serves the admin index without net/http rewriting index.html to ./.
 		c.FileFromFS(path.Join(""), http.FS(fsEntity))
 		return
 	}

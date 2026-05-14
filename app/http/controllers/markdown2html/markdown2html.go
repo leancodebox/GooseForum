@@ -32,10 +32,9 @@ var md = goldmark.New(
 	),
 )
 
-// MarkdownToHTML 添加新的服务端渲染的控制器方法
+// MarkdownToHTML renders Markdown to HTML with the shared server parser.
 func MarkdownToHTML(markdown string) string {
 	var buf bytes.Buffer
-	// 创建带有改进的标题 ID 生成的上下文
 	ctx := parser.NewContext(parser.WithIDs(headingid.NewIDs()))
 	if err := md.Convert([]byte(markdown), &buf, parser.WithContext(ctx)); err != nil {
 		slog.Error("转化失败", "err", err)
@@ -43,38 +42,33 @@ func MarkdownToHTML(markdown string) string {
 	return buf.String()
 }
 
-// GetParser 获取 goldmark 解析器实例
+// GetParser returns the shared goldmark parser.
 func GetParser() goldmark.Markdown {
 	return md
 }
 
-// ExtractDescription 从markdown内容中智能提取描述
+// ExtractDescription extracts readable summary text from Markdown.
 func ExtractDescription(content string, maxLength int) string {
 	if maxLength <= 0 {
-		maxLength = 200 // 默认最大长度
+		maxLength = 200
 	}
 
-	// 使用 goldmark 解析 markdown
 	reader := text.NewReader([]byte(content))
 	doc := GetParser().Parser().Parse(reader)
 
-	// 提取纯文本
 	var textParts []string
 	err := ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch node := n.(type) {
 			case *ast.Text:
-				// 提取文本节点内容
 				textContent := string(node.Segment.Value(reader.Source()))
 				textContent = strings.TrimSpace(textContent)
 				if textContent != "" && len(textContent) > 3 {
 					textParts = append(textParts, textContent)
 				}
 			case *ast.CodeBlock, *ast.FencedCodeBlock:
-				// 跳过代码块
 				return ast.WalkSkipChildren, nil
 			case *ast.Image:
-				// 跳过图片
 				return ast.WalkSkipChildren, nil
 			}
 		}
@@ -82,21 +76,17 @@ func ExtractDescription(content string, maxLength int) string {
 	})
 
 	if err != nil {
-		// 如果解析失败，回退到简单的文本清理
 		return fallbackExtractDescription(content, maxLength)
 	}
 
-	// 合并文本并清理
 	description := strings.Join(textParts, " ")
 	description = strings.ReplaceAll(description, "\n", " ")
 	description = strings.ReplaceAll(description, "\t", " ")
-	// 清理多余空格
 	for strings.Contains(description, "  ") {
 		description = strings.ReplaceAll(description, "  ", " ")
 	}
 	description = strings.TrimSpace(description)
 
-	// 截断到指定长度，确保不会截断中文字符
 	if utf8.RuneCountInString(description) > maxLength {
 		runes := []rune(description)
 		if len(runes) > maxLength {
@@ -107,9 +97,8 @@ func ExtractDescription(content string, maxLength int) string {
 	return description
 }
 
-// fallbackExtractDescription 简单的回退文本提取方法
+// fallbackExtractDescription strips common Markdown markers without parsing.
 func fallbackExtractDescription(content string, maxLength int) string {
-	// 简单清理：移除常见的 markdown 标记
 	lines := strings.Split(content, "\n")
 	var textLines []string
 
@@ -119,22 +108,18 @@ func fallbackExtractDescription(content string, maxLength int) string {
 			continue
 		}
 
-		// 跳过代码块标记
 		if strings.HasPrefix(line, "```") {
 			continue
 		}
 
-		// 跳过图片
 		if strings.Contains(line, "![]") || (strings.Contains(line, "![") && strings.Contains(line, "](") && strings.Contains(line, ")")) {
 			continue
 		}
 
-		// 移除标题标记
 		if strings.HasPrefix(line, "#") {
 			line = strings.TrimLeft(line, "# ")
 		}
 
-		// 移除列表标记
 		if strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* ") || strings.HasPrefix(line, "+ ") {
 			line = line[2:]
 		}
@@ -146,7 +131,6 @@ func fallbackExtractDescription(content string, maxLength int) string {
 
 	description := strings.Join(textLines, " ")
 
-	// 截断到指定长度
 	if utf8.RuneCountInString(description) > maxLength {
 		runes := []rune(description)
 		if len(runes) > maxLength {
@@ -157,18 +141,16 @@ func fallbackExtractDescription(content string, maxLength int) string {
 	return description
 }
 
-// ExtractSearchContent 为全文搜索优化的提取器
+// ExtractSearchContent extracts searchable text while preserving useful Markdown context.
 func ExtractSearchContent(content string) string {
 	reader := text.NewReader([]byte(content))
 	doc := GetParser().Parser().Parse(reader)
 
 	var searchBuf strings.Builder
-	stack := make([]ast.Node, 0, 8) // 节点栈用于上下文感知
+	stack := make([]ast.Node, 0, 8)
 
 	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
-		// 上下行关系处理
 		if entering {
-			// 识别上下文分隔点（标题/分隔线）
 			if n.Kind() == ast.KindHeading || n.Kind() == ast.KindThematicBreak {
 				if searchBuf.Len() > 0 {
 					searchBuf.WriteByte('\n')
@@ -176,14 +158,12 @@ func ExtractSearchContent(content string) string {
 			}
 			stack = append(stack, n)
 		} else {
-			stack = stack[:len(stack)-1] // 弹出当前节点
+			stack = stack[:len(stack)-1]
 		}
 
-		// 内容提取策略
 		switch node := n.(type) {
 		case *ast.Text:
 			if entering {
-				// 智能空格插入（考虑中文无空格特性）
 				if searchBuf.Len() > 0 && shouldInsertSpace(stack) {
 					searchBuf.WriteByte(' ')
 				}
@@ -192,7 +172,6 @@ func ExtractSearchContent(content string) string {
 			}
 
 		case *ast.Link:
-			// 保留链接文本+URL（提升搜索命中率）
 			if entering {
 				searchBuf.WriteString("[")
 			} else {
@@ -210,7 +189,6 @@ func ExtractSearchContent(content string) string {
 			}
 
 		case *ast.Image:
-			// 提取alt文本 + URL（可搜索图片内容）
 			if entering {
 				searchBuf.WriteString("![")
 			} else {
@@ -230,30 +208,27 @@ func ExtractSearchContent(content string) string {
 		return ast.WalkContinue, nil
 	})
 
-	// 压缩冗余空白（保留换行结构）
 	return compactWhitespace(searchBuf.String())
 }
 
-// 智能空格决策（中文不插入空格）
+// shouldInsertSpace decides whether adjacent text nodes need a separator.
 func shouldInsertSpace(stack []ast.Node) bool {
 	if len(stack) == 0 {
 		return false
 	}
 
-	// 检查上层节点是否中文上下文
 	for i := len(stack) - 1; i >= 0; i-- {
 		switch stack[i].Kind() {
 		case ast.KindParagraph:
-			return true // 英文段落需要空格
+			return true
 		case ast.KindHeading:
-			// 根据语言检测决定（此处简化实现）
 			return true
 		}
 	}
 	return false
 }
 
-// 保留段落分隔的空白压缩
+// compactWhitespace collapses repeated whitespace while preserving paragraph breaks.
 func compactWhitespace(s string) string {
 	var buf strings.Builder
 	lines := strings.Split(s, "\n")
@@ -268,7 +243,6 @@ func compactWhitespace(s string) string {
 		}
 		buf.WriteString(trimmed)
 
-		// 保留标题后的空行
 		if i < len(lines)-1 && strings.HasPrefix(trimmed, "#") {
 			buf.WriteByte('\n')
 		}

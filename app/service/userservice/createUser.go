@@ -17,25 +17,21 @@ func CreateUser(username, password, email string, needValid bool) (*users.Entity
 	if !needValid {
 		userEntity.IsActivated = users.ActivationSuccess
 	}
-	// 默认状态为正常
 	userEntity.IsFrozen = users.StatusNormal
-	// 初始化用户积分
 	pointservice.InitUserPoints(userEntity.Id, 100)
 	err := users.Create(userEntity)
 	if err != nil {
 		return nil, err
 	}
 	userSt := userStatistics.Entity{UserId: userEntity.Id}
-	// 初始化统计表
 	userStatistics.SaveOrCreateById(&userSt)
 	if userEntity.Id == 1 {
-		// For the first user registered, elevate it to admin group.
 		FirstUserInit(userEntity)
 	}
 	return userEntity, nil
 }
 
-// GenerateGooseNickname 生成鹅相关昵称（优化长度版）
+// GenerateGooseNickname creates a compact random default nickname.
 func GenerateGooseNickname() string {
 	prefixes := []string{
 		"鹅", "大白鹅", "灰鹅", "小鹅", "鹅宝",
@@ -43,20 +39,16 @@ func GenerateGooseNickname() string {
 	}
 	prefix := prefixes[rand.Intn(len(prefixes))]
 
-	// 使用毫秒级时间戳+随机数确保唯一性
 	now := time.Now()
-	timestamp := now.UnixMilli()  // 毫秒级时间戳
-	randomPart := rand.Intn(1296) // 0-1295 (36^2范围)
+	timestamp := now.UnixMilli()
+	randomPart := rand.Intn(1296)
 
-	// 转换为36进制（0-9a-z）
 	timestamp36 := strconv.FormatInt(timestamp, 36)
 	random36 := strconv.FormatInt(int64(randomPart), 36)
 
-	// 确保随机数部分固定2位（补零）
 	if len(random36) < 2 {
 		random36 = "0" + random36
 	}
 
-	// 组合成更紧凑的字符串
 	return fmt.Sprintf("%s%s%s", prefix, timestamp36, random36)
 }

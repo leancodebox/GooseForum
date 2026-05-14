@@ -1,70 +1,65 @@
 package jwtopt
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
 
 func TestCreateNewToken(t *testing.T) {
-	token, err := CreateNewToken(123456, time.Second*2)
+	const userID uint64 = 123456
+	token, err := CreateNewToken(userID, time.Second)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
-	fmt.Println(token)
-	time.Sleep(time.Second)
 	userId, newToken, err := VerifyTokenWithFresh(token)
-	fmt.Printf("userId %v newToken %v %v", userId, newToken, err)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
+	}
+	if userId != userID {
+		t.Fatalf("VerifyTokenWithFresh userId = %d, want %d", userId, userID)
+	}
+	if newToken == "" {
+		t.Fatal("expected refreshed token")
 	}
 
 	userId, err = VerifyToken(token)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
-	fmt.Println(userId)
-	fmt.Println("token还可以用")
+	if userId != userID {
+		t.Fatalf("VerifyToken userId = %d, want %d", userId, userID)
+	}
 
-	time.Sleep(time.Second * 2)
-	fmt.Println(token)
-	userId, err = VerifyToken(token)
-	if err != nil {
-		t.Error(err)
-		return
+	time.Sleep(1100 * time.Millisecond)
+	if _, err = VerifyToken(token); err == nil {
+		t.Fatal("expected expired token error")
 	}
-	fmt.Println(userId)
 }
 
 func TestVerifyTokenWithFresh(t *testing.T) {
+	const userID uint64 = 123456
 	token, err := CreateNewToken(123456, 15*time.Second)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
-	fmt.Println("token created : ", token)
 	userId, newToken, err := VerifyTokenWithFresh(token)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
-	fmt.Println("token can use")
+	if userId != userID {
+		t.Fatalf("VerifyTokenWithFresh userId = %d, want %d", userId, userID)
+	}
 	if newToken != token {
 		token = newToken
 	}
-	fmt.Println(userId)
 
 	time.Sleep(time.Second * 2)
-	fmt.Println(token)
 	userId, err = VerifyToken(token)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
-	fmt.Println(userId)
-	fmt.Println("success")
+	if userId != userID {
+		t.Fatalf("VerifyToken userId = %d, want %d", userId, userID)
+	}
 }

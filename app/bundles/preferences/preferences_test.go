@@ -1,11 +1,9 @@
 package preferences
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 func TestSpliceConfig(t *testing.T) {
-	d := GetIntSlice("db.list")
-	fmt.Println(d)
+	if got := GetIntSlice("missing.list"); len(got) != 0 {
+		t.Fatalf("GetIntSlice() = %v, want empty slice for missing key", got)
+	}
 }

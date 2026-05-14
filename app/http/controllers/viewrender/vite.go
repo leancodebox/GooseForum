@@ -15,7 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/resource"
 )
 
-// ManifestItem represents an entry in the manifest.json
+// ManifestItem represents one Vite manifest entry.
 type ManifestItem struct {
 	File           string   `json:"file"`
 	Name           string   `json:"name"`
@@ -36,15 +36,13 @@ type ViteHandler struct {
 }
 
 var (
-	// DefaultViteHandler is the default instance of ViteHandler
+	// DefaultViteHandler is shared by template functions.
 	DefaultViteHandler *ViteHandler
 )
 
 func init() {
-	// Try to load manifest if available
 	manifestPath := "static/dist/.vite/manifest.json"
 
-	// Parse theme.json if available
 	theme, _ := resource.GetThemeConfig()
 	if theme != nil && theme.Manifest != "" {
 		manifestPath = theme.Manifest
@@ -55,7 +53,6 @@ func init() {
 
 	content, err := fs.ReadFile(resource.GetTemplateFS(), manifestPath)
 	if err != nil {
-		// Only log error in production if we expect it to exist
 		if isProduction {
 			slog.Error("ManifestGetError", "error", err, "path", manifestPath)
 		}
@@ -70,7 +67,7 @@ func init() {
 	)
 }
 
-// NewViteHandler creates a new ViteHandler
+// NewViteHandler creates a Vite asset helper for development or production.
 func NewViteHandler(viteDevServerURL string, isProduction bool, manifestItemMap map[string]ManifestItem) *ViteHandler {
 	if manifestItemMap == nil {
 		manifestItemMap = make(map[string]ManifestItem)
@@ -81,7 +78,6 @@ func NewViteHandler(viteDevServerURL string, isProduction bool, manifestItemMap 
 		isProduction:     isProduction,
 	}
 
-	// Prebuild cache in production
 	if isProduction {
 		handler.prebuildProductionCache()
 	}
@@ -89,7 +85,7 @@ func NewViteHandler(viteDevServerURL string, isProduction bool, manifestItemMap 
 	return handler
 }
 
-// prebuildProductionCache builds HTML cache for all entries in production
+// prebuildProductionCache caches HTML tags for production entrypoints.
 func (v *ViteHandler) prebuildProductionCache() {
 	for key, item := range v.manifestItemMap {
 		if item.IsEntry {
@@ -166,12 +162,12 @@ func (v *ViteHandler) collectAllAssets(entryKey string, visited map[string]bool)
 	return assetFiles
 }
 
-// ViteEntry generates HTML tags for an entry point
+// ViteEntry generates HTML tags for an entry point.
 func ViteEntry(origin string) template.HTML {
 	return DefaultViteHandler.ViteEntry(origin)
 }
 
-// ViteEntry generates HTML tags for an entry point
+// ViteEntry generates HTML tags for an entry point.
 func (v *ViteHandler) ViteEntry(origin string) template.HTML {
 	cacheKey := fmt.Sprintf("%s_%v", origin, v.isProduction)
 	if val, cached := v.htmlHeaderCache.Load(cacheKey); cached {
@@ -190,21 +186,19 @@ func (v *ViteHandler) ViteEntry(origin string) template.HTML {
 	return res
 }
 
-// VitePath returns the resolved URL for an asset
+// VitePath returns the resolved URL for an asset.
 func VitePath(path string) string {
 	return DefaultViteHandler.VitePath(path)
 }
 
-// VitePath returns the resolved URL for an asset
+// VitePath returns the resolved URL for an asset.
 func (v *ViteHandler) VitePath(path string) string {
 	if v.isProduction {
 		if item, ok := v.manifestItemMap[path]; ok {
 			return Asset(item.File)
 		}
-		// If not found in manifest, assume it's a direct asset
 		return Asset(path)
 	}
-	// Development: proxy to vite server
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(v.viteDevServerURL, "/"), strings.TrimPrefix(path, "/"))
 }
 

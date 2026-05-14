@@ -17,7 +17,6 @@ import (
 	"github.com/spf13/cast"
 )
 
-// 初始化缓存
 var (
 	siteStatisticsDataCache = &datacache.Cache[*vo.SiteStats]{}
 	articleCache            = &datacache.Cache[[]*articles.SmallEntity]{}
@@ -54,7 +53,6 @@ func GetLatestArticlesSimpleVoPaginated(page int, sort string) []*vo.ArticlesSim
 	if page < 1 {
 		page = 1
 	}
-	// Default sort to latest if empty
 	if sort == "" {
 		sort = "latest"
 	}

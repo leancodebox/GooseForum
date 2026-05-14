@@ -1,22 +1,23 @@
 package jsonopt
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 func TestJsonEncode(t *testing.T) {
 	type tmp struct {
 		Name string
 	}
-	fmt.Println(Encode(tmp{Name: "name"}))
+	if got := Encode(tmp{Name: "name"}); got != `{"Name":"name"}` {
+		t.Fatalf("Encode() = %s", got)
+	}
 }
 
 func TestJsonDecode(t *testing.T) {
 	type tmp struct {
 		Name string
 	}
-	fmt.Println(Decode[tmp](`{"name":"name"}`))
+	if got := Decode[tmp](`{"name":"name"}`); got.Name != "name" {
+		t.Fatalf("Decode().Name = %q", got.Name)
+	}
 	type Cat struct {
 		Id int `json:"id"`
 	}
@@ -24,15 +25,20 @@ func TestJsonDecode(t *testing.T) {
 		Body T `json:"body"`
 	}
 	catList, _ := DecodeE[[]Cat](`[{"id":1}]`)
-	fmt.Println(catList)
+	if len(catList) != 1 || catList[0].Id != 1 {
+		t.Fatalf("DecodeE list = %#v", catList)
+	}
 	catMap, _ := DecodeE[map[string]Cat](`{"ok":{"id":1}}`)
-	fmt.Println(catMap)
+	if catMap["ok"].Id != 1 {
+		t.Fatalf("DecodeE map = %#v", catMap)
+	}
 	dk, _ := DecodeE[DogKing[Cat]](`{"body":{"id":1231}}`)
-	fmt.Println(dk)
-	fmt.Println(dk.Body)
+	if dk.Body.Id != 1231 {
+		t.Fatalf("DecodeE generic struct = %#v", dk)
+	}
 	type HighDogKing map[string]DogKing[Cat]
 	dk2, _ := DecodeE[HighDogKing](`{"key":{"body":{"id":1231}}}`)
-	fmt.Println(dk2)
-	fmt.Println(dk2["key"])
-	fmt.Println(dk2["key"].Body)
+	if dk2["key"].Body.Id != 1231 {
+		t.Fatalf("DecodeE generic map = %#v", dk2)
+	}
 }

@@ -20,16 +20,12 @@ func NewRegistry(fileSystem fs.FS) (*TemplateRegistry, error) {
 		templates: make(map[string]*template.Template),
 	}
 
-	// 1. Get Base Template (Layouts + Components)
-	// Create base template with functions
 	tmpl := template.New("resource_v2").
 		Funcs(TemplateFuncs).
 		Funcs(sprig.FuncMap())
 
-	// Load Base Templates (Layouts and Components)
 	baseTmpl := template.Must(tmpl.ParseFS(fileSystem, "templates/base/**/*.gohtml"))
 
-	// 2. Walk and Load Views
 	err := fs.WalkDir(fileSystem, "templates", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -38,19 +34,16 @@ func NewRegistry(fileSystem fs.FS) (*TemplateRegistry, error) {
 			return nil
 		}
 
-		// Skip layout and components directories
 		normalizedPath := filepath.ToSlash(path)
 		if strings.Contains(normalizedPath, "templates/base") {
 			return nil
 		}
 
-		// Clone Base
 		tmpl, err := baseTmpl.Clone()
 		if err != nil {
 			return err
 		}
 
-		// Parse View
 		_, err = tmpl.ParseFS(fileSystem, path)
 		if err != nil {
 			return err

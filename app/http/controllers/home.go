@@ -25,7 +25,6 @@ func Home(c *gin.Context) {
 
 	page := lo.Ternary(cast.ToInt(c.Query("page")) <= 0, 1, cast.ToInt(c.Query("page")))
 
-	// Use the paginated version
 	latestArticles := hotdataserve.GetLatestArticlesSimpleVoPaginated(page, sort)
 
 	nextPage := 0
@@ -33,7 +32,6 @@ func Home(c *gin.Context) {
 		nextPage = page + 1
 	}
 
-	// If AJAX request, return JSON
 	if c.GetHeader("Accept") == "application/json" || c.Query("format") == "json" {
 		c.JSON(http.StatusOK, latestArticles)
 		return
@@ -73,7 +71,6 @@ func Category(c *gin.Context) {
 		return
 	}
 
-	// Discourse 风格：如果 slug 不匹配，重定向到正确的 slug
 	slug := c.Param("slug")
 	sort := c.Param("sort")
 	if slug != category.Category {
@@ -94,7 +91,6 @@ func Category(c *gin.Context) {
 		nextPage = page + 1
 	}
 
-	// 如果请求 JSON 格式（AJAX 加载更多），直接返回 JSON 数据
 	if c.GetHeader("Accept") == "application/json" || c.Query("format") == "json" {
 		c.JSON(http.StatusOK, articlesData)
 		return
@@ -135,17 +131,12 @@ func User(c *gin.Context) {
 
 	last, _ := articles.GetLatestArticlesByUserId(id, 5)
 
-	// 获取关注和粉丝列表（默认显示前10个）
 	followingList := userFollow.GetFollowingList(id, 1, 10)
 	followerList := userFollow.GetFollowerList(id, 1, 10)
 
-	// 获取用户活动记录
 	activities, _ := userActivities.GetUserTimeline(id, 0, 20)
-
-	// 获取当前登录用户信息
 	currentUserId := component.LoginUserId(c)
 
-	// 检查当前用户是否关注了列表中的用户
 	isFollowingAuthor := userFollow.IsFollowing(currentUserId, id)
 
 	user, _ := users.Get(id)

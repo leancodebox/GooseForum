@@ -33,14 +33,12 @@ func TestViteHandler_ProdMode(t *testing.T) {
 	}
 	handler := NewViteHandler("", true, manifest)
 
-	// Test VitePath
 	path := handler.VitePath("src/main.ts")
-	
+
 	if !strings.Contains(path, "assets/main.123456.js") {
 		t.Errorf("Expected path to contain assets/main.123456.js, got %s", path)
 	}
 
-	// Test ViteEntry
 	html := handler.ViteEntry("src/main.ts")
 	htmlStr := string(html)
 

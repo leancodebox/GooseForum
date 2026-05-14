@@ -1,7 +1,6 @@
 package datacache
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
@@ -15,5 +14,7 @@ func TestCache_GetOrLoad(t *testing.T) {
 		return "a", nil
 	}, time.Minute)
 
-	fmt.Println(a)
+	if a != "a" {
+		t.Fatalf("GetOrLoadE() = %q", a)
+	}
 }

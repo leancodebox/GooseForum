@@ -12,27 +12,24 @@ import (
 	"github.com/samber/lo"
 )
 
-// SendMessage 发送私信
+// SendMessage creates or updates a direct conversation and stores a message.
 func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64, error) {
 	if senderId == peerId {
 		return 0, errors.New("cannot send message to yourself")
 	}
 
-	// 1. Check if conversation exists for sender
 	senderConfig := imUserChatConfigs.GetConfig(senderId, peerId)
 	var convId uint64
 
 	if senderConfig == nil {
-		// Create new conversation
 		conv := &imConversations.Entity{
-			Type:           1, // C2C
+			Type:           1,
 			LastMsgContent: content,
 			LastMsgTime:    time.Now(),
 		}
 		imConversations.SaveOrCreateById(conv)
 		convId = conv.Id
 
-		// Create config for sender
 		imUserChatConfigs.SaveOrCreateById(&imUserChatConfigs.Entity{
 			UserId:    senderId,
 			PeerId:    peerId,
@@ -40,7 +37,6 @@ func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64,
 			UpdatedAt: time.Now(),
 		})
 
-		// Create config for receiver
 		imUserChatConfigs.SaveOrCreateById(&imUserChatConfigs.Entity{
 			UserId:      peerId,
 			PeerId:      senderId,
@@ -50,14 +46,9 @@ func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64,
 		})
 	} else {
 		convId = senderConfig.ConvId
-		// Update conversation last msg
 		imConversations.UpdateLastMsg(convId, content)
-
-		// Update sender config (touch)
 		imUserChatConfigs.Touch(convId, senderId)
 
-		// Update receiver config (incr unread)
-		// Check if receiver config exists (it should, but safety first)
 		peerConfig := imUserChatConfigs.GetConfig(peerId, senderId)
 		if peerConfig == nil {
 			imUserChatConfigs.SaveOrCreateById(&imUserChatConfigs.Entity{
@@ -72,7 +63,6 @@ func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64,
 		}
 	}
 
-	// Save message
 	msg := &messages.Entity{
 		ConvId:    convId,
 		SenderId:  senderId,
@@ -86,7 +76,7 @@ func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64,
 	return convId, nil
 }
 
-// GetChatList 获取私信列表
+// GetChatList returns the current user's conversations.
 func GetChatList(userId uint64) ([]*vo.ChatItemVo, error) {
 	configs := imUserChatConfigs.GetUserConfigs(userId)
 	if len(configs) == 0 {
@@ -132,7 +122,7 @@ func GetChatList(userId uint64) ([]*vo.ChatItemVo, error) {
 	return list, nil
 }
 
-// GetMessages 获取消息记录
+// GetMessages returns paginated messages for a conversation.
 func GetMessages(userId, convId uint64, page, pageSize int) ([]*vo.MessageVo, error) {
 	offset := (page - 1) * pageSize
 	msgs := messages.GetByConvId(convId, offset, pageSize)
@@ -150,14 +140,14 @@ func GetMessages(userId, convId uint64, page, pageSize int) ([]*vo.MessageVo, er
 	}), nil
 }
 
-// MarkRead 标记已读
+// MarkRead clears unread state for a conversation.
 func MarkRead(userId, convId uint64) error {
 	imUserChatConfigs.ClearUnread(convId, userId)
 	messages.MarkMessagesRead(convId, userId)
 	return nil
 }
 
-// DeleteChat 删除对话（逻辑删除）
+// DeleteChat hides a conversation for the user.
 func DeleteChat(userId, convId uint64) error {
 	imUserChatConfigs.DeleteConfig(convId, userId)
 	return nil

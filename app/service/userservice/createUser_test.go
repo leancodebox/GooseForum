@@ -1,13 +1,11 @@
 package userservice
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 func TestGenerateName(t *testing.T) {
-	fmt.Println(GenerateGooseNickname())
-	fmt.Println(GenerateGooseNickname())
-	fmt.Println(GenerateGooseNickname())
-	fmt.Println(GenerateGooseNickname())
+	for i := 0; i < 4; i++ {
+		if name := GenerateGooseNickname(); name == "" {
+			t.Fatal("expected generated nickname")
+		}
+	}
 }

@@ -1,7 +1,6 @@
 package permission
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/leancodebox/GooseForum/app/datastruct"
@@ -12,5 +11,7 @@ func TestEnum(t *testing.T) {
 	for i := Admin; i.Name() != ""; i++ {
 		l = append(l, datastruct.Option[string, Enum]{Name: i.Name(), Value: i})
 	}
-	fmt.Println(l)
+	if len(l) == 0 {
+		t.Fatal("expected permission options")
+	}
 }

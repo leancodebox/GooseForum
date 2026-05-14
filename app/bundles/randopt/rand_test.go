@@ -1,7 +1,6 @@
 package randopt
 
 import (
-	"fmt"
 	"sync"
 	"testing"
 )
@@ -15,7 +14,9 @@ func BenchmarkB(b *testing.B) {
 
 func TestRand(t *testing.T) {
 	str := RandomString(10)
-	fmt.Println(str)
+	if len(str) != 10 {
+		t.Fatalf("RandomString length = %d", len(str))
+	}
 }
 
 type CounterOld struct {
@@ -39,15 +40,19 @@ func (itself *CounterOld) Get() int64 {
 func TestIdMakerP(t *testing.T) {
 	counter := Counter{}
 	wg := sync.WaitGroup{}
-	for i := 1; i <= 10; i++ {
+	const goroutines = 10
+	const increments = 10000
+	for i := 1; i <= goroutines; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for start := 1; start <= 10000000; start++ {
+			for start := 1; start <= increments; start++ {
 				counter.Add()
 			}
 		}()
 	}
 	wg.Wait()
-	fmt.Println(counter.Get())
+	if got, want := counter.Get(), int64(goroutines*increments); got != want {
+		t.Fatalf("counter = %d, want %d", got, want)
+	}
 }

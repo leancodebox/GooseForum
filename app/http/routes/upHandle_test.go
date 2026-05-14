@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -21,9 +20,7 @@ func CatAction(req CatActionReq) Response {
 func upCatAction(params any) func(string) string {
 	m0 := reflect.TypeOf(params)
 	for i := 0; i < m0.NumIn(); i++ {
-		fmt.Println(m0.In(i))
-		data := reflect.New(m0.In(0))
-		fmt.Println(data)
+		_ = reflect.New(m0.In(i))
 	}
 	return func(s string) string {
 		return s

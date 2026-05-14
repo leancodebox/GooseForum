@@ -70,7 +70,7 @@ const (
 	Help
 )
 
-// Poster 定义单个头像条目的信息
+// Poster stores one participant avatar entry.
 type Poster struct {
 	UserID      uint64 `json:"user_id"`
 	Description string `json:"description"`
@@ -116,7 +116,6 @@ func (itself *SmallEntity) PubDate() string {
 	now := time.Now()
 	duration := now.Sub(itself.CreatedAt)
 
-	// 使用秒数进行计算，避免重复的浮点运算
 	seconds := int64(duration.Seconds())
 
 	if seconds < 60 {
@@ -132,7 +131,6 @@ func (itself *SmallEntity) PubDate() string {
 		return fmt.Sprintf("%d天前", days)
 	}
 
-	// 超过7天显示具体日期
 	return itself.CreatedAt.Format("2006-01-02")
 }
 

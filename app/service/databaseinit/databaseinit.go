@@ -3,7 +3,6 @@ package databaseinit
 import (
 	"database/sql"
 	_ "embed"
-	"fmt"
 	"log/slog"
 	"strings"
 
@@ -20,7 +19,7 @@ func DBInit() {
 		dbUrl      = dbConfig.Get(`url`)
 	)
 	if connection == "sqlite" {
-		fmt.Println("不支持")
+		slog.Info("database init skipped for sqlite")
 		return
 	}
 
@@ -35,8 +34,7 @@ func DBInit() {
 	for s := range sqlItem {
 		_, err := db.Exec(s)
 		if err != nil {
-			fmt.Println(s)
-			fmt.Println(err)
+			slog.Error("database init statement failed", "sql", s, "error", err)
 		}
 	}
 }

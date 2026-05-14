@@ -43,33 +43,25 @@ func GetUserCard(req component.BetterRequest[GetUserCardReq]) component.Response
 	}
 
 	userStats := userStatistics.Get(userId)
-
-	// 获取当前登录用户信息
 	currentUserId := req.UserId
-
-	// 检查当前用户是否关注了列表中的用户
 	var isFollowingAuthor bool
 
 	if currentUserId > 0 && currentUserId != userId {
 		isFollowingAuthor = userFollow.IsFollowing(currentUserId, userId)
 	}
-	// Since this is a public API without mandatory auth, we assume currentUserId is 0 (guest)
-	// If we want to support isFollowing, we would need to check the token optionally.
-	// For now, we return the card as seen by a guest.
 
 	card := transform.User2UserCard(userEntity, userStats, isFollowingAuthor, currentUserId)
 
 	return component.SuccessResponse(card)
 }
 
-// UserInfo 获取登录用户信息
-func UserInfo(req component.BetterRequest[null]) component.Response {
+// UserInfo returns the current user's profile and statistics.
+func UserInfo(req component.BetterRequest[component.Null]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
 		return component.FailResponse("账号异常" + err.Error())
 	}
 
-	// 处理头像URL
 	avatarUrl := userEntity.GetWebAvatarUrl()
 	authorInfoStatistics := userStatistics.Get(userEntity.Id)
 
@@ -93,7 +85,7 @@ type EditUserEmailReq struct {
 	Email string `json:"email" validate:"required,email"`
 }
 
-// EditUserEmail 编辑用户
+// EditUserEmail updates the current user's email and resets activation state.
 func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
@@ -102,18 +94,14 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 
 	newEmail := req.GetParams().Email
 
-	// 检查邮箱域名限制
 	if err := component.ValidateEmailDomain(newEmail); err != nil {
 		return component.FailResponse(err.Error())
 	}
 
-	// 如果要修改邮箱,需要检查邮箱是否已被使用
-	// 检查邮箱是否已存在
 	if users.ExistEmail(newEmail) {
 		return component.FailResponse("邮箱已被使用")
 	}
 	userEntity.Email = newEmail
-	// 修改邮箱后需要重新激活
 	userEntity.IsActivated = users.ActivationPending
 	userEntity.ActivatedAt = nil
 
@@ -135,7 +123,7 @@ type GetUserActivitiesReq struct {
 	Limit  int    `form:"limit" validate:"max=50"`
 }
 
-// GetUserActivities 获取用户活动记录
+// GetUserActivities returns a user's activity timeline.
 func GetUserActivities(req component.BetterRequest[GetUserActivitiesReq]) component.Response {
 	limit := req.Params.Limit
 	if limit <= 0 {
@@ -154,7 +142,7 @@ type EditUsernameReq struct {
 	Username string `json:"username" validate:"required"`
 }
 
-// EditUsername 编辑用户
+// EditUsername updates the current user's username.
 func EditUsername(req component.BetterRequest[EditUsernameReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
@@ -164,7 +152,6 @@ func EditUsername(req component.BetterRequest[EditUsernameReq]) component.Respon
 	if !component.ValidateUsername(newUsername) {
 		return component.FailResponse("用户名仅允许字母、数字、下划线、连字符，长度6-32")
 	}
-	// 检查用户名是否已存在
 	if users.ExistUsername(newUsername) {
 		return component.FailResponse("用户名已存在")
 	}
@@ -186,7 +173,7 @@ type EditUserInfoReq struct {
 	ExternalInformation users.ExternalInformation `json:"externalInformation"`
 }
 
-// EditUserInfo 编辑用户
+// EditUserInfo updates the current user's profile fields.
 func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
@@ -211,16 +198,15 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 	return component.SuccessResponse("更新成功")
 }
 
-func Invitation(req component.BetterRequest[null]) component.Response {
+func Invitation(req component.BetterRequest[component.Null]) component.Response {
 	base36 := strconv.FormatInt(int64(req.UserId), 36)
 	return component.SuccessResponse(map[string]any{
 		"invitation": base36,
 	})
 }
 
-// UploadAvatar 头像上传处理函数
+// UploadAvatar stores a new avatar for the current user.
 func UploadAvatar(c *gin.Context) {
-	// 从 context 中获取用户 ID
 	userId := c.GetUint64("userId")
 
 	if userId == 0 {
@@ -228,14 +214,12 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	// 获取用户信息
 	userEntity, err := users.Get(userId)
 	if err != nil {
 		c.JSON(200, component.FailData("获取用户信息失败"))
 		return
 	}
 
-	// 获取上传的文件
 	file, err := c.FormFile("avatar")
 	if err != nil {
 		slog.Error(err.Error())
@@ -243,7 +227,6 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	// 打开上传的文件
 	src, err := file.Open()
 	if err != nil {
 		c.JSON(200, component.FailData("打开文件失败"))
@@ -251,21 +234,18 @@ func UploadAvatar(c *gin.Context) {
 	}
 	defer src.Close()
 
-	// 读取文件内容
 	fileData, err := io.ReadAll(src)
 	if err != nil {
 		c.JSON(200, component.FailData("读取文件失败"))
 		return
 	}
 
-	// 保存头像
 	fileEntity, err := filedata.SaveAvatar(userId, fileData, file.Filename)
 	if err != nil {
 		c.JSON(200, component.FailData("保存文件失败: "+err.Error()))
 		return
 	}
 
-	// 更新用户头像信息
 	userEntity.AvatarUrl = fileEntity.Name
 	if err := SaveUser(&userEntity); err != nil {
 		c.JSON(200, component.FailData("更新用户信息失败"))
@@ -277,13 +257,13 @@ func UploadAvatar(c *gin.Context) {
 	}))
 }
 
-// ChangePasswordReq 添加新的请求结构体
+// ChangePasswordReq is the password change request.
 type ChangePasswordReq struct {
 	OldPassword string `json:"oldPassword" validate:"required"`
 	NewPassword string `json:"newPassword" validate:"required"`
 }
 
-// ChangePassword 添加修改密码的处理函数
+// ChangePassword updates the current user's password.
 func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
@@ -292,13 +272,11 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 	if err = component.ValidatePassword(req.Params.NewPassword, 6); err != nil {
 		return component.FailResponse(err.Error())
 	}
-	// 验证旧密码
 	err = algorithm.VerifyEncryptPassword(userEntity.Password, req.Params.OldPassword)
 	if err != nil {
 		return component.FailResponse("原密码错误")
 	}
 
-	// 更新密码
 	userEntity.SetPassword(req.Params.NewPassword)
 	err = SaveUser(&userEntity)
 	if err != nil {
@@ -318,7 +296,7 @@ func SaveUser(userEntity *users.EntityComplete) error {
 	return err
 }
 
-// ForgotPasswordReq 忘记密码请求结构体
+// ForgotPasswordReq is the password reset email request.
 type ForgotPasswordReq struct {
 	Email       string `json:"email" validate:"required,email"`
 	CaptchaId   string `json:"captchaId" validate:"required"`
@@ -327,25 +305,21 @@ type ForgotPasswordReq struct {
 
 // ForgotPassword 忘记密码 - 发送重置邮件
 func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Response {
-	// 验证验证码
 	if !captchaOpt.VerifyCaptcha(req.Params.CaptchaId, req.Params.CaptchaCode) {
 		return component.FailResponse("验证码错误或已过期")
 	}
 
-	// 查找用户
 	userEntity, err := users.GetByEmail(req.Params.Email)
 	if err != nil {
 		// 为了安全考虑，即使邮箱不存在也返回成功消息
 		return component.SuccessResponse("操作成功：如果该邮箱已注册，您将收到密码重置邮件")
 	}
 
-	// 生成密码重置token
 	token, err := tokenservice.GeneratePasswordResetToken(userEntity.Id, userEntity.Email)
 	if err != nil {
 		return component.FailResponse("生成重置令牌失败")
 	}
 
-	// 将密码重置邮件任务加入队列
 	err = mailservice.AddToQueue(mailservice.EmailTask{
 		To:       userEntity.Email,
 		Username: userEntity.Username,
@@ -360,7 +334,7 @@ func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Re
 	return component.SuccessResponse("操作成功：如果该邮箱已注册，您将收到密码重置邮件")
 }
 
-// ResetPasswordReq 重置密码请求结构体
+// ResetPasswordReq is the password reset confirmation request.
 type ResetPasswordReq struct {
 	Token       string `json:"token" validate:"required"`
 	NewPassword string `json:"newPassword" validate:"required"`
@@ -368,19 +342,16 @@ type ResetPasswordReq struct {
 
 // ResetPassword 重置密码
 func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Response {
-	// 解析重置令牌
 	claims, err := tokenservice.ParsePasswordResetToken(req.Params.Token)
 	if err != nil {
 		return component.FailResponse("重置链接已过期或无效")
 	}
 
-	// 获取用户信息
 	userEntity, err := users.Get(claims.UserId)
 	if err != nil {
 		return component.FailResponse("用户不存在")
 	}
 
-	// 检查邮箱是否匹配
 	if userEntity.Email != claims.Email {
 		return component.FailResponse("重置链接无效")
 	}
@@ -389,7 +360,6 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 		return component.FailResponse(err.Error())
 	}
 
-	// 更新密码
 	userEntity.SetPassword(req.Params.NewPassword)
 	err = SaveUser(&userEntity)
 	if err != nil {

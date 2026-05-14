@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-// IndexBuildResult 索引构建结果
+// IndexBuildResult summarizes a Meilisearch rebuild.
 type IndexBuildResult struct {
 	ProcessedCount int    `json:"processedCount"`
 	FailedCount    int    `json:"failedCount"`
@@ -20,9 +20,8 @@ type IndexBuildResult struct {
 	IndexName      string `json:"indexName"`
 }
 
-// convertToSearchDocument 转换文章实体为搜索文档
+// convertToSearchDocument maps an article entity to a search document.
 func convertToSearchDocument(article *articles.Entity) ArticleSearchDocument {
-	// 提取优化的搜索内容
 	searchContent := markdown2html.ExtractSearchContent(article.Content)
 	categoryIds := article.CategoryId
 	return ArticleSearchDocument{
@@ -39,53 +38,46 @@ func convertToSearchDocument(article *articles.Entity) ArticleSearchDocument {
 }
 
 func BuildSingleArticleSearchDocument(article *articles.Entity) (*meilisearch.TaskInfo, error) {
-	// 检查 Meilisearch 是否可用
 	if !meiliconnect.IsAvailable() {
 		return nil, nil
 	}
 
-	// 获取 Meilisearch 客户端
 	client := meiliconnect.GetClient()
 	indexName := Index
 	index := client.Index(indexName)
 	var task *meilisearch.TaskInfo
 	var err error
 	pk := "id"
-	// 只索引已发布且正常状态的文章
 	if article.ArticleStatus == 1 && article.ProcessStatus == 0 {
 		doc := convertToSearchDocument(article)
 		task, err = index.AddDocuments(doc, &pk)
 		if err != nil {
 			slog.Warn(fmt.Sprintf("Meilisearch 处理文章 ID:%v 失败: %v\n", doc.ID, err))
-			return nil, nil // 内部消化错误，不向外抛出
+			return nil, nil
 		}
 		slog.Info(fmt.Sprintf("处理文章 ID:%v, TaskUID: %v\n", doc.ID, getTaskUID(task)))
 	} else {
-		// 删除不符合条件的文章
 		_, err = index.Delete(cast.ToString(article.Id))
 		if err != nil {
 			slog.Warn(fmt.Sprintf("Meilisearch 删除文档失败: %v, Error: %v\n", article.Id, err))
-			return nil, nil // 内部消化错误
+			return nil, nil
 		}
 	}
 	return task, nil
 }
 
-// BuildMeilisearchIndex 构建Meilisearch索引
+// BuildMeilisearchIndex rebuilds the Meilisearch article index.
 func BuildMeilisearchIndex() (*IndexBuildResult, error) {
-	// 检查 Meilisearch 是否可用
 	if !meiliconnect.IsAvailable() {
 		return nil, fmt.Errorf("Meilisearch 服务不可用，请检查配置或连接状态")
 	}
 
 	fmt.Println("开始构建 Meilisearch 文章索引...")
 
-	// 获取 Meilisearch 客户端
 	client := meiliconnect.GetClient()
 	indexName := Index
 	index := client.Index(indexName)
 
-	// 配置索引设置
 	fmt.Println("配置索引设置...")
 	if err := configureIndex(index); err != nil {
 		return nil, fmt.Errorf("配置索引失败: %v", err)
@@ -102,7 +94,6 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 		if len(articleList) == 0 {
 			break
 		}
-		// 转换为搜索文档
 		lo.ForEach(articleList, func(article *articles.Entity, _ int) {
 			task, _ := BuildSingleArticleSearchDocument(article)
 			fmt.Printf("处理文章 ID:%v, TaskUID: %v\n", article.Id, getTaskUID(task))
@@ -132,19 +123,17 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 	return result, nil
 }
 
-// configureIndex 配置 Meilisearch 索引设置
+// configureIndex applies searchable, filterable, sortable and displayed fields.
 func configureIndex(index meilisearch.IndexManager) error {
-	// 设置可搜索字段（按权重排序）
 	searchableAttributes := []string{
-		"title",         // 权重最高
-		"searchContent", // 优化后的搜索内容
+		"title",
+		"searchContent",
 	}
 	_, err := index.UpdateSearchableAttributes(&searchableAttributes)
 	if err != nil {
 		return fmt.Errorf("设置可搜索字段失败: %v", err)
 	}
 
-	// 设置可过滤字段
 	filterableAttributes := []any{
 		"type",
 		"userId",
@@ -155,7 +144,6 @@ func configureIndex(index meilisearch.IndexManager) error {
 		return fmt.Errorf("设置可过滤字段失败: %v", err)
 	}
 
-	// 设置可排序字段
 	sortableAttributes := []string{
 		"createdAt",
 		"updatedAt",
@@ -165,7 +153,6 @@ func configureIndex(index meilisearch.IndexManager) error {
 		return fmt.Errorf("设置可排序字段失败: %v", err)
 	}
 
-	// 设置显示字段（返回所有字段）
 	displayedAttributes := []string{"id", "title"}
 	_, err = index.UpdateDisplayedAttributes(&displayedAttributes)
 	if err != nil {
@@ -180,7 +167,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 	return nil
 }
 
-// getTaskUID 安全获取TaskUID
+// getTaskUID returns nil when no task was created.
 func getTaskUID(task *meilisearch.TaskInfo) any {
 	if task == nil {
 		return nil
