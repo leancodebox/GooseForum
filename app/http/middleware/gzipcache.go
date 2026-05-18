@@ -20,7 +20,7 @@ var bufferPool = sync.Pool{
 type cachedResponse struct {
 	statusCode int
 	headers    http.Header
-	body       *bytes.Buffer
+	body       []byte
 }
 type cachingResponseWriter struct {
 	gin.ResponseWriter
@@ -47,9 +47,13 @@ func CacheMiddleware(c *gin.Context) {
 		c.Next()
 		return
 	}
+	if c.Request.Method != http.MethodGet {
+		c.Next()
+		return
+	}
 	// 如果浏览器支持 Gzip 那么就开启缓存，否则就直接执行下个中间件
 	if strings.Contains(c.Request.Header.Get("Accept-Encoding"), "gzip") {
-		key := c.Request.URL.Path
+		key := c.Request.Method + ":" + c.Request.URL.RequestURI()
 		// 检查缓存
 		if val, ok := gzipCache.Load(key); ok {
 			if cachedResp, ok := val.(cachedResponse); ok {
@@ -59,7 +63,7 @@ func CacheMiddleware(c *gin.Context) {
 						c.Header(k, v)
 					}
 				}
-				c.Data(cachedResp.statusCode, cachedResp.headers.Get("Content-Type"), cachedResp.body.Bytes())
+				c.Data(cachedResp.statusCode, cachedResp.headers.Get("Content-Type"), cachedResp.body)
 				c.Abort()
 				return
 			}
@@ -79,11 +83,10 @@ func CacheMiddleware(c *gin.Context) {
 			gzipCache.Store(key, cachedResponse{
 				statusCode: writer.statusCode,
 				headers:    writer.Header().Clone(),
-				body:       writer.body,
+				body:       append([]byte(nil), writer.body.Bytes()...),
 			})
-		} else {
-			writer.resetAndPut()
 		}
+		writer.resetAndPut()
 	} else {
 		c.Next()
 	}

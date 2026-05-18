@@ -94,7 +94,7 @@ func RenderSitemapXml(c *gin.Context) {
 	c.String(http.StatusOK, buf.String())
 }
 
-func RenderRssV2(c *gin.Context) {
+func RenderRss(c *gin.Context) {
 	settingConfig := hotdataserve.GetSiteSettingsConfigCache()
 	host := component.GetHost(c)
 	articleList, err := articles.GetLatestArticlesWithContent(100)

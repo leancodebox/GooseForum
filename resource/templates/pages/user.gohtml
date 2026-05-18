@@ -1,0 +1,40 @@
+{{template "layout/app.gohtml" .}}
+
+{{define "noscript"}}
+{{template "page" .}}
+{{end}}
+
+{{define "page"}}
+<main>
+    <header>
+        <img src="{{.Payload.Props.User.AvatarUrl}}" alt="{{.Payload.Props.User.Username}}" width="96" height="96">
+        <h1>{{.Payload.Props.User.Nickname}}</h1>
+        <p>@{{.Payload.Props.User.Username}}</p>
+        {{if .Payload.Props.User.Bio}}<p>{{.Payload.Props.User.Bio}}</p>{{end}}
+        <dl>
+            <dt>主题</dt><dd>{{.Payload.Props.User.ArticleCount}}</dd>
+            <dt>回复</dt><dd>{{.Payload.Props.User.ReplyCount}}</dd>
+            <dt>获赞</dt><dd>{{.Payload.Props.User.LikeReceivedCount}}</dd>
+            <dt>关注者</dt><dd>{{.Payload.Props.User.FollowerCount}}</dd>
+        </dl>
+    </header>
+
+    <section>
+        <h2>最近主题</h2>
+        {{template "partials/topic_list.gohtml" .Payload.Props.Topics}}
+    </section>
+
+    <section>
+        <h2>最近动态</h2>
+        <ul>
+            {{range .Payload.Props.Activities}}
+            <li>
+                {{if .URL}}<a href="{{.URL}}">{{.Label}}</a>{{else}}{{.Label}}{{end}}
+                {{if .ContentPreview}}：{{.ContentPreview}}{{end}}
+                <time>{{.CreatedAt}}</time>
+            </li>
+            {{end}}
+        </ul>
+    </section>
+</main>
+{{end}}

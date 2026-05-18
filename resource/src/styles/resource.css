@@ -1,0 +1,109 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@source "../**/*.{ts,vue}";
+@source "../../templates/**/*.gohtml";
+
+html,
+body,
+#goose-app {
+  min-height: 100%;
+  background: #f9fafb;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
+}
+
+@keyframes gf-loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100vw);
+  }
+}
+
+@layer components {
+  .gf-prose {
+    @apply prose prose-slate max-w-none;
+  }
+
+  .gf-prose-compact {
+    @apply text-[13px];
+  }
+
+  .gf-prose-compact p {
+    @apply my-1;
+  }
+
+  .gf-prose-announcement {
+    @apply text-[14px] leading-7 text-gray-700;
+  }
+
+  .gf-prose-announcement p {
+    @apply my-1;
+  }
+
+  .gf-prose-announcement > :first-child {
+    @apply mt-0;
+  }
+
+  .gf-prose-announcement > :last-child {
+    @apply mb-0;
+  }
+
+  .gf-prose-announcement strong {
+    @apply font-semibold text-gray-950;
+  }
+
+  .gf-prose-announcement a {
+    @apply font-medium text-blue-600 no-underline hover:text-blue-700;
+  }
+
+  .gf-prose-article {
+    @apply text-[15px] leading-relaxed text-gray-800;
+  }
+
+  .gf-prose-article p {
+    @apply my-3;
+  }
+
+  .gf-prose code {
+    @apply rounded bg-gray-50 px-1 py-0.5 font-mono text-pink-600;
+  }
+
+  .gf-prose code::before,
+  .gf-prose code::after {
+    content: none;
+  }
+
+  .gf-prose pre {
+    @apply my-3 overflow-x-auto rounded-lg border border-gray-100 bg-gray-50 p-3 text-gray-800;
+  }
+
+  .gf-prose pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+
+  .gf-prose blockquote {
+    @apply border-l-4 border-gray-200 bg-gray-50/70 py-1 pr-3 text-gray-600;
+  }
+
+  .gf-prose table {
+    @apply text-sm;
+  }
+
+  .gf-prose img {
+    @apply my-3 rounded-lg border border-gray-100;
+  }
+
+  .avatar-crop-workspace cropper-canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .avatar-crop-workspace cropper-selection {
+    outline-color: rgba(37, 99, 235, 0.9);
+  }
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/api"
+	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 
 	"github.com/gin-contrib/gzip"
@@ -42,20 +43,20 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.Use(middleware.JWTAuth).
 		Use(gzip.Gzip(gzip.DefaultCompression))
 
-	viewRouteApp.GET("/", controllers.Home)
-	viewRouteApp.GET("/login", controllers.LoginView)
-	viewRouteApp.GET("/c/:slug/:id", controllers.Category)
-	viewRouteApp.GET("/c/:slug/:id/l/:sort", controllers.Category)
-	viewRouteApp.GET("/p/post/:id", controllers.PostDetail)
-	viewRouteApp.GET("/u/:userId", controllers.User)
-	viewRouteApp.GET("/messages", middleware.CheckLogin, controllers.Messages)
-	viewRouteApp.GET("/settings", middleware.CheckLogin, controllers.Settings)
-	viewRouteApp.GET("/publish", middleware.CheckLogin, controllers.NewTopic)
-	viewRouteApp.GET("/reset-password", controllers.ResetPasswordView)
-	viewRouteApp.GET("/notifications", middleware.CheckLogin, controllers.Notifications)
-	viewRouteApp.GET("/links", controllers.Links)
-	viewRouteApp.GET("/sponsors", controllers.Sponsors)
-	viewRouteApp.GET("/search", controllers.SearchPage)
+	viewRouteApp.GET("/", forum.Home)
+	viewRouteApp.GET("/p/post/:id", forum.ArticleDetail)
+	viewRouteApp.GET("/u/:userId", forum.UserProfile)
+	viewRouteApp.GET("/c/:slug/:id", forum.Category)
+	viewRouteApp.GET("/c/:slug/:id/l/:sort", forum.Category)
+	viewRouteApp.GET("/links", forum.Links)
+	viewRouteApp.GET("/sponsors", forum.Sponsors)
+	viewRouteApp.GET("/messages", middleware.CheckLogin, forum.Messages)
+	viewRouteApp.GET("/settings", middleware.CheckLogin, forum.Settings)
+	viewRouteApp.GET("/notifications", middleware.CheckLogin, forum.Notifications)
+	viewRouteApp.GET("/publish", middleware.CheckLogin, forum.Publish)
+	viewRouteApp.GET("/search", forum.Search)
+	viewRouteApp.GET("/login", forum.Login)
+	viewRouteApp.GET("/reset-password", forum.ResetPassword)
 
 	viewRouteApp.GET("/activate", controllers.ActivateAccount)
 }
@@ -63,7 +64,7 @@ func viewRoute(ginApp *gin.Engine) {
 func siteInfoRoute(ginApp *gin.Engine) {
 	ginApp.GET("/robots.txt", controllers.RenderRobotsTxt)
 	ginApp.GET("/sitemap.xml", controllers.RenderSitemapXml)
-	ginApp.GET("/rss.xml", controllers.RenderRssV2)
+	ginApp.GET("/rss.xml", controllers.RenderRss)
 }
 
 func apiRoute(ginApp *gin.Engine) {

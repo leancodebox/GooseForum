@@ -1,0 +1,27 @@
+{{template "layout/app.gohtml" .}}
+
+{{define "noscript"}}
+{{template "page" .}}
+{{end}}
+
+{{define "page"}}
+<main>
+    <header>
+        <h1>友情链接</h1>
+        <p>共 {{.Payload.Props.TotalCount}} 个社区伙伴。</p>
+    </header>
+    {{range .Payload.Props.Groups}}
+    <section>
+        <h2>{{.Name}}</h2>
+        <ul>
+            {{range .Links}}
+            <li>
+                <a href="{{.URL}}" target="_blank" rel="noopener noreferrer">{{.Name}}</a>
+                {{if .Desc}}<p>{{.Desc}}</p>{{end}}
+            </li>
+            {{end}}
+        </ul>
+    </section>
+    {{end}}
+</main>
+{{end}}

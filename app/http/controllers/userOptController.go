@@ -2,13 +2,20 @@ package controllers
 
 import (
 	"fmt"
+	"html/template"
+	"log/slog"
+	"net/http"
+	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
+	"github.com/leancodebox/GooseForum/resource"
 )
+
+var activationTemplate = sync.OnceValues(func() (*template.Template, error) {
+	return template.ParseFS(resource.GetTemplateFS(), "templates/view/activate.gohtml")
+})
 
 // ActivateAccount 激活处理函数
 func ActivateAccount(c *gin.Context) {
@@ -66,17 +73,44 @@ func renderActivationPage(c *gin.Context, success bool, message string) {
 		description = "您的账号已成功激活！现在您可以使用完整的论坛功能，包括发帖、回复、个人中心等服务。"
 	}
 
-	pageMeta := viewrender.NewPageMetaBuilder().
-		SetTitle(fmt.Sprintf("账号激活%v", status)).
-		SetDescription(description).
-		SetCanonicalURL(component.BuildCanonicalHref(c)).
-		Build()
+	tmpl, err := activationTemplate()
+	if err != nil {
+		slog.Error("parse activation template failed", "err", err)
+		c.String(http.StatusInternalServerError, "activation page unavailable")
+		return
+	}
 
-	viewrender.SafeRender(c, "activate.gohtml", ActivateAccountData{
-		Title:       fmt.Sprintf("账号激活%v", status),
-		Status:      status,
-		Message:     message,
-		Success:     success,
-		Description: description,
-	}, pageMeta)
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	if err = tmpl.Execute(c.Writer, struct {
+		Data ActivateAccountData
+		T    func(string, ...any) string
+		Lang string
+	}{
+		Data: ActivateAccountData{
+			Title:       fmt.Sprintf("账号激活%v", status),
+			Status:      status,
+			Message:     message,
+			Success:     success,
+			Description: description,
+		},
+		T:    activationText,
+		Lang: "zh",
+	}); err != nil {
+		slog.Error("render activation template failed", "err", err)
+	}
+}
+
+func activationText(key string, _ ...any) string {
+	switch key {
+	case "account_activation":
+		return "账号激活"
+	case "back_home":
+		return "回到首页"
+	case "contact_support":
+		return "联系支持"
+	case "login_now":
+		return "立即登录"
+	default:
+		return key
+	}
 }

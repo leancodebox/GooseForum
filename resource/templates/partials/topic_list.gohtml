@@ -1,0 +1,22 @@
+{{define "partials/topic_list.gohtml"}}
+{{if .}}
+<ol>
+    {{range .}}
+    <li>
+        <article>
+            <h2><a href="{{.URL}}">{{.Title}}</a></h2>
+            {{if .Description}}<p>{{.Description}}</p>{{end}}
+            <p>
+                {{range .Categories}}<a href="{{.URL}}">{{.Name}}</a> {{end}}
+                <span>{{.ReplyCount}} 回复</span>
+                <span>{{.ViewCount}} 浏览</span>
+                <time>{{.ActivityText}}</time>
+            </p>
+        </article>
+    </li>
+    {{end}}
+</ol>
+{{else}}
+<p>暂无主题。</p>
+{{end}}
+{{end}}

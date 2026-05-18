@@ -20,13 +20,16 @@ func NewRegistry(fileSystem fs.FS) (*TemplateRegistry, error) {
 		templates: make(map[string]*template.Template),
 	}
 
-	tmpl := template.New("resource_v2").
+	tmpl := template.New("resource").
 		Funcs(TemplateFuncs).
 		Funcs(sprig.FuncMap())
 
-	baseTmpl := template.Must(tmpl.ParseFS(fileSystem, "templates/base/**/*.gohtml"))
+	baseTmpl, err := tmpl.ParseFS(fileSystem, "templates/base/**/*.gohtml")
+	if err != nil {
+		return nil, err
+	}
 
-	err := fs.WalkDir(fileSystem, "templates", func(path string, d fs.DirEntry, err error) error {
+	err = fs.WalkDir(fileSystem, "templates", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}

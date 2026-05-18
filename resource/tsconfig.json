@@ -1,19 +1,8 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.vitest.json"
-    }
-  ],
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts", // 确保包含了 .d.ts 文件
-    "src/**/*.tsx"
-  ]
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true
+  }
 }

@@ -1,0 +1,18 @@
+{{template "layout/app.gohtml" .}}
+
+{{define "noscript"}}
+{{template "page" .}}
+{{end}}
+
+{{define "page"}}
+<main>
+    <header>
+        <h1>{{.Payload.Props.Category.Name}}</h1>
+        {{if .Payload.Props.Category.Description}}<p>{{.Payload.Props.Category.Description}}</p>{{end}}
+    </header>
+    {{template "partials/topic_list.gohtml" .Payload.Props.Topics}}
+    {{if .Payload.Props.Pagination.HasNext}}
+    <p><a href="{{.Payload.Props.Pagination.NextURL}}" rel="next">下一页</a></p>
+    {{end}}
+</main>
+{{end}}

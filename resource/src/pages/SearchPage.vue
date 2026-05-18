@@ -1,0 +1,177 @@
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { MessageSquare, Search, Sparkles, UsersRound } from '@lucide/vue'
+import AppShell from '../components/AppShell.vue'
+import { formatNumber, timeAgo } from '../runtime/format'
+import { scheduleHideUserCard, showUserCard } from '../runtime/user-card-events'
+import type { LayoutPayload, SearchPageProps } from '../types/payload'
+
+const page = defineProps<{
+  layout: LayoutPayload
+  props: SearchPageProps
+}>()
+
+const query = ref(page.props.query)
+const topics = computed(() => page.props.topics || [])
+const hasQuery = computed(() => (page.props.query || '').trim().length > 0)
+const hasResults = computed(() => topics.value.length > 0)
+
+watch(
+  () => page.props.query,
+  () => {
+    query.value = page.props.query
+  },
+)
+</script>
+
+<template>
+  <AppShell :layout="layout">
+    <main class="min-w-0 pb-12">
+      <section class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+        <header class="border-b border-gray-100 px-4 py-4">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-bold text-gray-950">搜索</h1>
+                <span class="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-bold uppercase text-gray-600">Discover</span>
+              </div>
+              <p class="mt-1 text-sm text-gray-500">
+                <template v-if="hasQuery">
+                  “<span class="font-semibold text-gray-900">{{ page.props.query }}</span>”
+                  <span class="text-gray-300"> · </span>
+                  <span><span class="font-semibold text-gray-900">{{ formatNumber(page.props.total) }}</span> 个结果</span>
+                </template>
+                <template v-else>
+                  搜索主题、关键词和社区讨论。
+                </template>
+              </p>
+            </div>
+
+            <form action="/search" method="GET" class="w-full lg:max-w-xl">
+              <label class="flex h-11 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-500 transition focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
+                <Search class="h-4 w-4 shrink-0" />
+                <input v-model="query" name="q" class="min-w-0 flex-1 bg-transparent text-gray-900 outline-none placeholder:text-gray-400" placeholder="搜索主题..." />
+                <button type="submit" class="shrink-0 rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800">搜索</button>
+              </label>
+            </form>
+          </div>
+        </header>
+
+        <template v-if="hasResults">
+          <div class="hidden grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] border-b border-gray-100 bg-gray-50/60 px-4 py-2 text-[11px] font-bold uppercase text-gray-600 lg:grid">
+            <div>Topic</div>
+            <div class="text-center">Users</div>
+            <div class="text-center">Replies</div>
+            <div class="text-center">Views</div>
+            <div class="text-right">Activity</div>
+          </div>
+
+          <div class="relative bg-white">
+            <article
+              v-for="topic in topics"
+              :key="topic.id"
+              class="group relative isolate grid gap-3 bg-white px-4 py-3 transition before:absolute before:inset-0 before:-z-10 before:bg-white before:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-gray-100/70 after:content-[''] last:after:hidden hover:before:bg-gray-50 lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center"
+            >
+              <div class="min-w-0">
+                <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                  <a :href="topic.url" class="truncate text-[15px] font-semibold leading-snug text-gray-950 group-hover:text-blue-600 sm:text-base">
+                    {{ topic.title }}
+                  </a>
+                  <a
+                    v-for="category in topic.categories"
+                    :key="category.id"
+                    :href="category.url"
+                    class="inline-flex h-6 items-center gap-1.5 rounded-full bg-gray-100 px-2 text-[11px] font-medium text-gray-500 hover:bg-blue-50 hover:text-blue-600"
+                  >
+                    <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
+                    {{ category.name }}
+                  </a>
+                  <span v-if="topic.viewCount > 500" class="inline-flex h-6 items-center gap-1 text-[11px] font-semibold text-orange-500">
+                    <Sparkles class="h-3 w-3" /> hot
+                  </span>
+                </div>
+                <p v-if="topic.description" class="mt-1 truncate text-[13px] leading-relaxed text-gray-500">{{ topic.description }}</p>
+                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 lg:hidden">
+                  <div class="flex -space-x-2">
+                    <a
+                      v-for="participant in topic.participants"
+                      :key="participant.id"
+                      :href="`/u/${participant.id}`"
+                      :title="participant.username"
+                      class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
+                      @mouseenter="showUserCard(participant, $event)"
+                      @mouseleave="scheduleHideUserCard"
+                      @focus="showUserCard(participant, $event)"
+                      @blur="scheduleHideUserCard"
+                    >
+                      <img :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
+                    </a>
+                  </div>
+                  <span>{{ timeAgo(topic.lastUpdateTime) }}</span>
+                  <span class="inline-flex items-center gap-1">
+                    <MessageSquare class="h-3.5 w-3.5" /> {{ formatNumber(topic.replyCount) }}
+                  </span>
+                </div>
+              </div>
+              <div class="hidden justify-center lg:flex">
+                <div class="flex -space-x-3">
+                  <a
+                    v-for="participant in topic.participants"
+                    :key="participant.id"
+                    :href="`/u/${participant.id}`"
+                    :title="participant.username"
+                    class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
+                    @mouseenter="showUserCard(participant, $event)"
+                    @mouseleave="scheduleHideUserCard"
+                    @focus="showUserCard(participant, $event)"
+                    @blur="scheduleHideUserCard"
+                  >
+                    <img :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
+                  </a>
+                </div>
+              </div>
+              <div class="hidden text-center text-sm font-semibold tabular-nums text-gray-700 lg:block">{{ formatNumber(topic.replyCount) }}</div>
+              <div class="hidden text-center text-sm tabular-nums text-gray-500 lg:block">{{ formatNumber(topic.viewCount) }}</div>
+              <div class="hidden text-right text-[13px] font-medium tabular-nums text-gray-400 lg:block">{{ timeAgo(topic.lastUpdateTime) }}</div>
+            </article>
+          </div>
+
+          <footer v-if="page.props.totalPages > 1" class="flex flex-col gap-3 border-t border-gray-100 bg-gray-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-sm text-gray-500">
+              第 <span class="font-semibold text-gray-900">{{ page.props.pagination.page }}</span> / <span class="font-semibold text-gray-900">{{ page.props.totalPages }}</span> 页
+            </div>
+            <div class="flex items-center gap-2">
+              <a
+                v-if="page.props.pagination.page > 1"
+                :href="`/search?q=${encodeURIComponent(page.props.query)}&page=${page.props.pagination.page - 1}`"
+                class="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-950"
+              >
+                上一页
+              </a>
+              <a
+                v-if="page.props.pagination.hasNext"
+                :href="page.props.pagination.nextUrl"
+                class="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-950"
+                rel="next"
+              >
+                下一页
+              </a>
+            </div>
+          </footer>
+        </template>
+
+        <div v-else-if="hasQuery" class="px-6 py-16 text-center">
+          <UsersRound class="mx-auto h-8 w-8 text-gray-300" />
+          <h2 class="mt-3 text-base font-semibold text-gray-950">没有找到结果</h2>
+          <p class="mt-1 text-sm text-gray-500">换个关键词，或者缩短搜索词再试试。</p>
+        </div>
+
+        <div v-else class="px-6 py-16 text-center">
+          <Search class="mx-auto h-8 w-8 text-gray-300" />
+          <h2 class="mt-3 text-base font-semibold text-gray-950">开始搜索</h2>
+          <p class="mt-1 text-sm text-gray-500">输入主题标题、关键词或短语来搜索论坛。</p>
+        </div>
+      </section>
+    </main>
+  </AppShell>
+</template>
