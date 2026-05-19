@@ -1,4 +1,5 @@
 import { readonly, ref } from 'vue'
+import { i18n } from './i18n'
 
 const CACHE_KEY = 'goose:last-unread-notification'
 const CACHE_TTL = 10_000
@@ -9,7 +10,7 @@ interface LastUnreadNotification {
 }
 
 const hasUnread = ref(false)
-const message = ref('暂无新通知')
+const message = ref(i18n.global.t('notifications.noUnread'))
 const checked = ref(false)
 let inFlight: Promise<LastUnreadNotification> | null = null
 let pollTimer: number | undefined
@@ -40,7 +41,11 @@ function writeCache(data: LastUnreadNotification) {
 function applyUnread(data: LastUnreadNotification | null) {
   const eventType = data?.eventType || ''
   hasUnread.value = Boolean(eventType)
-  message.value = eventType === 'comment' ? '有新的评论回复' : eventType ? '有新的通知' : '暂无新通知'
+  message.value = eventType === 'comment'
+    ? i18n.global.t('notifications.newComment')
+    : eventType
+      ? i18n.global.t('notifications.newNotification')
+      : i18n.global.t('notifications.noUnread')
   checked.value = true
 }
 
@@ -52,7 +57,7 @@ async function fetchLastUnread() {
   })
   if (!response.ok) throw new Error(`HTTP ${response.status}`)
   const data = await response.json() as { code?: number; result?: LastUnreadNotification; data?: LastUnreadNotification }
-  if (data.code !== undefined && data.code !== 0) throw new Error('通知检查失败')
+  if (data.code !== undefined && data.code !== 0) throw new Error(i18n.global.t('notifications.checkFailed'))
   return data.result ?? data.data ?? {}
 }
 
@@ -92,7 +97,7 @@ function startPolling() {
 
 function clearUnread() {
   hasUnread.value = false
-  message.value = '暂无新通知'
+  message.value = i18n.global.t('notifications.noUnread')
   checked.value = true
   writeCache({})
 }

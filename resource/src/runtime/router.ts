@@ -1,7 +1,7 @@
 import { useNavigationState } from './navigation-state'
 import { resolvePageComponent } from './page-registry'
 import type { Component } from 'vue'
-import type { PagePayload } from '../types/payload'
+import type { PagePayload } from '@/types/payload'
 
 export interface PreparedPage {
   payload: PagePayload

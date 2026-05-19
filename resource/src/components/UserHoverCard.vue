@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { CalendarDays, Loader2, Radio, UserPlus } from '@lucide/vue'
-import { getUserHoverCard } from '../runtime/api'
-import { formatDate, formatNumber, timeAgo } from '../runtime/format'
-import type { UserCardShowDetail } from '../runtime/user-card-events'
-import type { UserHoverCardPayload } from '../types/payload'
+import { getUserHoverCard } from '@/runtime/api'
+import { formatDate, formatNumber, timeAgo } from '@/runtime/format'
+import type { UserCardShowDetail } from '@/runtime/user-card-events'
+import type { UserHoverCardPayload } from '@/types/payload'
 
 const visible = ref(false)
 const loading = ref(false)

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Loader2, MessageSquare, Plus, UsersRound } from '@lucide/vue'
-import { formatNumber, timeAgo } from '../runtime/format'
-import { fetchPage } from '../runtime/router'
-import { scheduleHideUserCard, showUserCard } from '../runtime/user-card-events'
-import type { CategoryPageProps, LayoutPayload, PagePayload, TopicPayload } from '../types/payload'
+import { formatNumber, timeAgo } from '@/runtime/format'
+import { fetchPage } from '@/runtime/router'
+import { scheduleHideUserCard, showUserCard } from '@/runtime/user-card-events'
+import type { CategoryPageProps, LayoutPayload, PagePayload, TopicPayload } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload

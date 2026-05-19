@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Component } from 'vue'
-import AppShell from './components/AppShell.vue'
-import { provideI18n } from './runtime/i18n'
-import { useShellState } from './runtime/shell-state'
-import type { PagePayload } from './types/payload'
+import AppShell from '@/components/AppShell.vue'
+import { useShellState } from '@/runtime/shell-state'
+import type { PagePayload } from '@/types/payload'
 
 const props = defineProps<{
   payload: PagePayload
   component: Component
 }>()
-
-provideI18n()
 
 const shellState = useShellState()
 const standaloneComponents = new Set(['auth.login', 'auth.resetPassword'])

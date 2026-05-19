@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ExternalLink, HeartHandshake, Mail, ShieldCheck } from '@lucide/vue'
-import type { LayoutPayload, SponsorPayload, SponsorSectionPayload, SponsorsPageProps } from '../types/payload'
+import type { LayoutPayload, SponsorPayload, SponsorSectionPayload, SponsorsPageProps } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload

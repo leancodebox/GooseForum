@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import { AnimatePresence, Motion } from 'motion-v'
 import { X } from '@lucide/vue'
-import { mobileDrawerMotion, motionTransitions, overlayMotion } from '../runtime/motion'
-import type { CategoryNavPayload, FooterPayload, NavItemPayload } from '../types/payload'
+import { mobileDrawerMotion, motionTransitions, overlayMotion } from '@/runtime/motion'
+import type { CategoryNavPayload, FooterPayload, NavItemPayload } from '@/types/payload'
 
 const props = defineProps<{
   open: boolean

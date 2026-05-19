@@ -4,9 +4,9 @@ import { Bold, Code2, Image, Italic, Link, ListChecks, MessageSquareQuote, Send,
 import MarkdownIt from 'markdown-it'
 import anchor from 'markdown-it-anchor'
 import taskLists from 'markdown-it-task-lists'
-import { submitArticle, uploadImage } from '../runtime/api'
-import { processImageFile, validateImageFile } from '../runtime/image'
-import type { LayoutPayload, PublishPageProps } from '../types/payload'
+import { submitArticle, uploadImage } from '@/runtime/api'
+import { processImageFile, validateImageFile } from '@/runtime/image'
+import type { LayoutPayload, PublishPageProps } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload

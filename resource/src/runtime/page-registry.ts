@@ -1,20 +1,20 @@
 import type { Component } from 'vue'
 
 export const pageLoaders = {
-  'home.index': () => import('../pages/HomePage.vue'),
-  'article.detail': () => import('../pages/ArticlePage.vue'),
-  'user.profile': () => import('../pages/UserPage.vue'),
-  'category.index': () => import('../pages/CategoryPage.vue'),
-  'links.index': () => import('../pages/LinksPage.vue'),
-  'sponsors.index': () => import('../pages/SponsorsPage.vue'),
-  'notifications.index': () => import('../pages/NotificationsPage.vue'),
-  'messages.index': () => import('../pages/MessagesPage.vue'),
-  'settings.index': () => import('../pages/SettingsPage.vue'),
-  'publish.index': () => import('../pages/PublishPage.vue'),
-  'search.index': () => import('../pages/SearchPage.vue'),
-  'auth.login': () => import('../pages/LoginPage.vue'),
-  'auth.resetPassword': () => import('../pages/ResetPasswordPage.vue'),
-  'error.notFound': () => import('../pages/ErrorPage.vue'),
+  'home.index': () => import('@/pages/HomePage.vue'),
+  'article.detail': () => import('@/pages/ArticlePage.vue'),
+  'user.profile': () => import('@/pages/UserPage.vue'),
+  'category.index': () => import('@/pages/CategoryPage.vue'),
+  'links.index': () => import('@/pages/LinksPage.vue'),
+  'sponsors.index': () => import('@/pages/SponsorsPage.vue'),
+  'notifications.index': () => import('@/pages/NotificationsPage.vue'),
+  'messages.index': () => import('@/pages/MessagesPage.vue'),
+  'settings.index': () => import('@/pages/SettingsPage.vue'),
+  'publish.index': () => import('@/pages/PublishPage.vue'),
+  'search.index': () => import('@/pages/SearchPage.vue'),
+  'auth.login': () => import('@/pages/LoginPage.vue'),
+  'auth.resetPassword': () => import('@/pages/ResetPasswordPage.vue'),
+  'error.notFound': () => import('@/pages/ErrorPage.vue'),
 } as const
 
 export type PageComponentName = keyof typeof pageLoaders

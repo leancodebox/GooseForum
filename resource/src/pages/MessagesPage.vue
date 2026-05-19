@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { ArrowLeft, MessageSquare, MoreVertical, PenLine, Search, Send, Smile, X } from '@lucide/vue'
-import { getChatMessages, markChatRead, sendChatMessage, type ChatMessagePayload } from '../runtime/api'
-import { formatDateTime } from '../runtime/format'
-import type { LayoutPayload, MessageConversationPayload, MessagesPageProps, UserConnectionPayload } from '../types/payload'
+import { getChatMessages, markChatRead, sendChatMessage, type ChatMessagePayload } from '@/runtime/api'
+import { formatDateTime } from '@/runtime/format'
+import type { LayoutPayload, MessageConversationPayload, MessagesPageProps, UserConnectionPayload } from '@/types/payload'
 
 type ChatConversation = MessageConversationPayload & {
   messages: ChatMessagePayload[]

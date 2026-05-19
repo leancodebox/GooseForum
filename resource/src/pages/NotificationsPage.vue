@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { Bell, CheckCheck, Heart, Info, MessageCircle, UserPlus } from '@lucide/vue'
-import { markAllNotificationsRead } from '../runtime/api'
-import { formatDateTime } from '../runtime/format'
-import { useI18n } from '../runtime/i18n'
-import { useUnreadNotifications } from '../runtime/unread-notifications'
-import type { LayoutPayload, NotificationPayload, NotificationsPageProps } from '../types/payload'
+import { useI18n } from 'vue-i18n'
+import { markAllNotificationsRead } from '@/runtime/api'
+import { formatDateTime } from '@/runtime/format'
+import { useUnreadNotifications } from '@/runtime/unread-notifications'
+import type { LayoutPayload, NotificationPayload, NotificationsPageProps } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { MessageSquare, Search, Sparkles, UsersRound } from '@lucide/vue'
-import { formatNumber, timeAgo } from '../runtime/format'
-import { scheduleHideUserCard, showUserCard } from '../runtime/user-card-events'
-import type { LayoutPayload, SearchPageProps } from '../types/payload'
+import { formatNumber, timeAgo } from '@/runtime/format'
+import { scheduleHideUserCard, showUserCard } from '@/runtime/user-card-events'
+import type { LayoutPayload, SearchPageProps } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload

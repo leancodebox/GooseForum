@@ -17,11 +17,12 @@ import {
   Shield,
   UserRound,
 } from '@lucide/vue'
+import { useI18n } from 'vue-i18n'
 import UserHoverCard from './UserHoverCard.vue'
-import { useI18n } from '../runtime/i18n'
-import { useNavigationState } from '../runtime/navigation-state'
-import { useUnreadNotifications } from '../runtime/unread-notifications'
-import type { LayoutPayload } from '../types/payload'
+import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
+import { useNavigationState } from '@/runtime/navigation-state'
+import { useUnreadNotifications } from '@/runtime/unread-notifications'
+import type { LayoutPayload } from '@/types/payload'
 
 const props = defineProps<{
   layout: LayoutPayload
@@ -39,7 +40,7 @@ const closeTimers: Record<'lang' | 'user', number | undefined> = {
   user: undefined,
 }
 const { navigating } = useNavigationState()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const unreadNotifications = useUnreadNotifications()
 const hasUnreadNotification = computed(() => unreadNotifications.hasUnread.value)
 const notificationTitle = computed(() => unreadNotifications.message.value)
@@ -82,9 +83,9 @@ onMounted(() => {
   }
 })
 
-function setLang(lang: string) {
-  document.cookie = `lang=${lang}; path=/; max-age=31536000`
-  window.location.reload()
+function setLang(lang: Locale) {
+  setLocale(lang)
+  langMenuOpen.value = false
 }
 
 function openDrawer() {
@@ -219,9 +220,16 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
               class="absolute right-0 top-full z-[70] w-36 pt-2"
             >
               <div class="rounded-md border border-gray-100 bg-white py-1 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)]">
-                <button class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50" type="button" @click="setLang('zh')">简体中文</button>
-                <button class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50" type="button" @click="setLang('en')">English</button>
-                <button class="block w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50" type="button" @click="setLang('ja')">日本語</button>
+                <button
+                  v-for="item in supportedLocales"
+                  :key="item"
+                  class="block w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50"
+                  :class="locale === item ? 'font-semibold text-blue-600' : 'text-gray-700'"
+                  type="button"
+                  @click="setLang(item)"
+                >
+                  {{ t(`locale.${item}`) }}
+                </button>
               </div>
             </div>
           </div>

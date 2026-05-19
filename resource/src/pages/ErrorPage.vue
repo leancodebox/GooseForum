@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ArrowLeft, Home } from '@lucide/vue'
-import { useI18n } from '../runtime/i18n'
-import type { ErrorPageProps, LayoutPayload } from '../types/payload'
+import { useI18n } from 'vue-i18n'
+import type { ErrorPageProps, LayoutPayload } from '@/types/payload'
 
 defineProps<{
   layout: LayoutPayload

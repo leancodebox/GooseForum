@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
 import { Bookmark, Clock, CornerDownLeft, Eye, Heart, MessageSquare, PencilLine, Send, X } from '@lucide/vue'
-import { bookmarkArticle, likeArticle, postReply } from '../runtime/api'
-import { formatDateTime, formatNumber } from '../runtime/format'
-import { fetchPage } from '../runtime/router'
-import { useShellState } from '../runtime/shell-state'
-import { scheduleHideUserCard, showUserCard } from '../runtime/user-card-events'
-import type { ArticleDetailProps, LayoutPayload } from '../types/payload'
+import { bookmarkArticle, likeArticle, postReply } from '@/runtime/api'
+import { formatDateTime, formatNumber } from '@/runtime/format'
+import { fetchPage } from '@/runtime/router'
+import { useShellState } from '@/runtime/shell-state'
+import { scheduleHideUserCard, showUserCard } from '@/runtime/user-card-events'
+import type { ArticleDetailProps, LayoutPayload } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload

@@ -21,10 +21,10 @@ import {
   unbindOAuth,
   uploadAvatar,
   type OAuthBindingsPayload,
-} from '../runtime/api'
-import { formatDate, formatNumber } from '../runtime/format'
-import { canvasToImageFile, processImageFile, validateImageFile } from '../runtime/image'
-import type { LayoutPayload, SettingsPageProps } from '../types/payload'
+} from '@/runtime/api'
+import { formatDate, formatNumber } from '@/runtime/format'
+import { canvasToImageFile, processImageFile, validateImageFile } from '@/runtime/image'
+import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload

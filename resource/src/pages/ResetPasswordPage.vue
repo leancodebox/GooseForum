@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { Check, LoaderCircle, LockKeyhole } from '@lucide/vue'
-import { resetPassword } from '../runtime/api'
-import type { LayoutPayload, ResetPasswordPageProps } from '../types/payload'
+import { resetPassword } from '@/runtime/api'
+import type { LayoutPayload, ResetPasswordPageProps } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload

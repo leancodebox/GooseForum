@@ -1,4 +1,4 @@
-import type { PagePayload } from '../types/payload'
+import type { PagePayload } from '@/types/payload'
 
 export function readInitialPayload(): PagePayload {
   const el = document.getElementById('goose-payload')

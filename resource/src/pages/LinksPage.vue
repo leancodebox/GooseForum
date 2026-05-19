@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ExternalLink, Link, Send, ShieldCheck } from '@lucide/vue'
-import type { LayoutPayload, LinksPageProps } from '../types/payload'
+import type { LayoutPayload, LinksPageProps } from '@/types/payload'
 
 defineProps<{
   layout: LayoutPayload

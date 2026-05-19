@@ -1,3 +1,5 @@
+import { i18n } from './i18n'
+
 export function formatNumber(value: number): string {
   if (value >= 1000000) return `${trim(value / 1000000)}m`
   if (value >= 1000) return `${trim(value / 1000)}k`
@@ -24,13 +26,13 @@ export function timeAgo(value: string): string {
   const timestamp = new Date(normalized).getTime()
   if (Number.isNaN(timestamp)) return value
   const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000))
-  if (seconds < 60) return '刚刚'
+  if (seconds < 60) return i18n.global.t('time.justNow')
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes} 分钟前`
+  if (minutes < 60) return i18n.global.t('time.minuteAgo', { count: minutes })
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} 小时前`
+  if (hours < 24) return i18n.global.t('time.hourAgo', { count: hours })
   const days = Math.floor(hours / 24)
-  if (days < 7) return `${days} 天前`
+  if (days < 7) return i18n.global.t('time.dayAgo', { count: days })
   return formatDate(value)
 }
 

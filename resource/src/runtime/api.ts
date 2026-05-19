@@ -1,4 +1,4 @@
-import type { UserCardPayload, UserHoverCardPayload } from '../types/payload'
+import type { UserCardPayload, UserHoverCardPayload } from '@/types/payload'
 
 interface ApiResponse<T> {
   code?: number

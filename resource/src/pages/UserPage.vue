@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { CalendarDays, FileText, Heart, MessageCircle, MessageSquare, PenLine, Radio, Settings, UserPlus, UsersRound } from '@lucide/vue'
-import { followUser } from '../runtime/api'
-import { formatDate, formatDateTime, formatNumber, timeAgo } from '../runtime/format'
-import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '../types/payload'
+import { followUser } from '@/runtime/api'
+import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/format'
+import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload
