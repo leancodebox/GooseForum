@@ -45,6 +45,9 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem onClick={() => { setCurrentRow(post); setOpen('recommend'); }}>
           推荐
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => { setCurrentRow(post); setOpen('categories'); }}>
+          修改分类
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         {post.processStatus === 1 ? (
           <DropdownMenuItem

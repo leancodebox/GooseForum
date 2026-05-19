@@ -1,5 +1,7 @@
-import axios from 'axios'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { editArticle, editArticleCategories, getCategoryList } from '@/api'
+import type { Category } from '@/api/types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,38 +12,119 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 import { usePosts } from './posts-provider'
 
 export function PostsActionDialog() {
   const { open, setOpen, currentRow, setCurrentRow } = usePosts()
+  const [categories, setCategories] = useState<Category[]>([])
+  const [categoryLoading, setCategoryLoading] = useState(false)
+  const [categoryLoaded, setCategoryLoaded] = useState(false)
+  const [categorySaving, setCategorySaving] = useState(false)
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([])
+  const isCategoryDialog = open === 'categories'
+
+  useEffect(() => {
+    if (!isCategoryDialog || !currentRow) return
+    setSelectedCategoryIds(currentRow.categoryId || [])
+    if (categoryLoaded || categoryLoading) return
+
+    setCategoryLoading(true)
+    getCategoryList()
+      .then((res) => {
+        if (res.code === 0) {
+          setCategories(res.result || [])
+        } else {
+          toast.error(res.msg || '分类加载失败')
+        }
+      })
+      .catch(() => {
+        toast.error('分类加载失败')
+      })
+      .finally(() => {
+        setCategoryLoaded(true)
+        setCategoryLoading(false)
+      })
+  }, [categoryLoaded, categoryLoading, currentRow, isCategoryDialog])
+
+  const closeDialog = () => {
+    setOpen(null)
+    setCurrentRow(null)
+  }
 
   const handleAction = async () => {
     if (!currentRow) return
 
     try {
-      let response;
-      if (open === 'approve' || open === 'reject') {
-        response = await axios.post('/api/admin/article-edit', {
-          id: currentRow.id,
-          processStatus: open === 'reject' ? 1 : 0,
-        })
-      } else if (open === 'top' || open === 'recommend') {
-        // 后端暂时没看到对应的 API，Vue 代码里也是 todo
+      if (open === 'top' || open === 'recommend') {
         toast.info('该功能暂未实现')
-        setOpen(null)
+        closeDialog()
         return
       }
 
-      if (response && response.data.code === 0) {
+      const response = await editArticle({
+        id: currentRow.id,
+        processStatus: open === 'reject' ? 1 : 0,
+      })
+
+      if (response.code === 0) {
         toast.success('操作成功')
-        setOpen(null)
-        setCurrentRow(null)
+        closeDialog()
         window.location.reload()
       } else {
-        toast.error(response?.data.message || '操作失败')
+        toast.error(response.msg || '操作失败')
       }
-    } catch (error) {
+    } catch {
       toast.error('请求失败')
+    }
+  }
+
+  const toggleCategory = (categoryId: number) => {
+    setSelectedCategoryIds((prev) => {
+      if (prev.includes(categoryId)) {
+        return prev.filter((id) => id !== categoryId)
+      }
+      if (prev.length >= 3) {
+        toast.warning('最多选择 3 个分类')
+        return prev
+      }
+      return [...prev, categoryId]
+    })
+  }
+
+  const handleSaveCategories = async () => {
+    if (!currentRow || categorySaving) return
+    if (selectedCategoryIds.length === 0) {
+      toast.warning('至少选择一个分类')
+      return
+    }
+
+    setCategorySaving(true)
+    try {
+      const response = await editArticleCategories({
+        id: currentRow.id,
+        categoryId: selectedCategoryIds,
+      })
+      if (response.code === 0) {
+        toast.success('分类已更新')
+        closeDialog()
+        window.location.reload()
+      } else {
+        toast.error(response.msg || '分类更新失败')
+      }
+    } catch {
+      toast.error('分类更新失败')
+    } finally {
+      setCategorySaving(false)
     }
   }
 
@@ -66,29 +149,102 @@ export function PostsActionDialog() {
   }
 
   return (
-    <AlertDialog
-      open={open !== null && open !== 'view'}
-      onOpenChange={(val) => !val && setOpen(null)}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{getTitle()}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {getDescription()}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setCurrentRow(null)}>
-            取消
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleAction}
-            className={open === 'reject' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
-          >
-            确认
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <>
+      <Dialog
+        open={isCategoryDialog}
+        onOpenChange={(val) => !val && closeDialog()}
+      >
+        <DialogContent className='sm:max-w-[560px]'>
+          <DialogHeader>
+            <DialogTitle>修改文章分类</DialogTitle>
+            <DialogDescription className='line-clamp-2'>
+              为「{currentRow?.title}」选择 1 到 3 个分类。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='rounded-lg border bg-muted/20 p-3'>
+            {categoryLoading ? (
+              <div className='py-8 text-center text-sm text-muted-foreground'>
+                正在加载分类...
+              </div>
+            ) : categories.length === 0 ? (
+              <div className='py-8 text-center text-sm text-muted-foreground'>
+                暂无可用分类
+              </div>
+            ) : (
+              <div className='grid gap-2 sm:grid-cols-2'>
+                {categories.map((category) => {
+                  const checked = selectedCategoryIds.includes(category.id)
+                  return (
+                    <button
+                      key={category.id}
+                      type='button'
+                      onClick={() => toggleCategory(category.id)}
+                      className={cn(
+                        'flex min-h-12 items-center gap-3 rounded-md border bg-background px-3 py-2 text-left text-sm transition-colors hover:border-primary/50 hover:bg-primary/5',
+                        checked && 'border-primary bg-primary/10 text-primary'
+                      )}
+                    >
+                      <span
+                        className='size-2.5 shrink-0 rounded-full'
+                        style={{ backgroundColor: category.color || '#64748b' }}
+                      />
+                      <span className='min-w-0 flex-1 truncate font-medium'>
+                        {category.category}
+                      </span>
+                      <span
+                        className={cn(
+                          'grid size-5 shrink-0 place-items-center rounded-full border text-[11px] font-bold',
+                          checked ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30 text-transparent'
+                        )}
+                      >
+                        ✓
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant='outline' onClick={closeDialog}>
+              取消
+            </Button>
+            <Button
+              onClick={handleSaveCategories}
+              disabled={categoryLoading || categorySaving || categories.length === 0}
+            >
+              {categorySaving ? '保存中...' : '保存分类'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        open={open !== null && open !== 'view' && open !== 'categories'}
+        onOpenChange={(val) => !val && closeDialog()}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{getTitle()}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {getDescription()}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDialog}>
+              取消
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleAction}
+              className={open === 'reject' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
+            >
+              确认
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

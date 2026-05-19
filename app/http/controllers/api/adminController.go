@@ -231,20 +231,21 @@ type ArticlesInfoVo struct {
 }
 
 type ArticlesInfoAdminVo struct {
-	Id            uint64 `json:"id"`
-	Title         string `json:"title"`
-	Description   string `json:"description"`
-	Type          int8   `json:"type"`
-	UserId        uint64 `json:"userId"`
-	Username      string `json:"username"`
-	UserAvatarUrl string `json:"userAvatarUrl"`
-	ArticleStatus int8   `json:"articleStatus"`
-	ProcessStatus int8   `json:"processStatus"`
-	ViewCount     uint64 `json:"viewCount"`
-	ReplyCount    uint64 `json:"replyCount"`
-	LikeCount     uint64 `json:"likeCount"`
-	CreatedAt     string `json:"createdAt"`
-	UpdatedAt     string `json:"updatedAt"`
+	Id            uint64   `json:"id"`
+	Title         string   `json:"title"`
+	Description   string   `json:"description"`
+	Type          int8     `json:"type"`
+	CategoryId    []uint64 `json:"categoryId"`
+	UserId        uint64   `json:"userId"`
+	Username      string   `json:"username"`
+	UserAvatarUrl string   `json:"userAvatarUrl"`
+	ArticleStatus int8     `json:"articleStatus"`
+	ProcessStatus int8     `json:"processStatus"`
+	ViewCount     uint64   `json:"viewCount"`
+	ReplyCount    uint64   `json:"replyCount"`
+	LikeCount     uint64   `json:"likeCount"`
+	CreatedAt     string   `json:"createdAt"`
+	UpdatedAt     string   `json:"updatedAt"`
 }
 
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
@@ -267,6 +268,7 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 				Title:         t.Title,
 				Description:   t.Description,
 				Type:          t.Type,
+				CategoryId:    t.CategoryId,
 				UserId:        t.UserId,
 				Username:      username,
 				UserAvatarUrl: userAvatarUrl,
@@ -288,6 +290,11 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 type EditArticleReq struct {
 	Id            uint64 `json:"id" validate:"required"`
 	ProcessStatus int8   `json:"processStatus" validate:"oneof=0 1"` // 0正常 1封禁
+}
+
+type EditArticleCategoriesReq struct {
+	Id         uint64   `json:"id" validate:"required"`
+	CategoryId []uint64 `json:"categoryId" validate:"min=1,max=3"`
 }
 
 // EditArticle 文章状态管理
@@ -313,6 +320,63 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 		fmt.Sprintf("文章%s操作:[%s]", status, article.Title))
 	searchservice.BuildSingleArticleSearchDocument(&article)
 	return component.SuccessResponse("操作成功")
+}
+
+// EditArticleCategories 文章分类管理
+func EditArticleCategories(req component.BetterRequest[EditArticleCategoriesReq]) component.Response {
+	categoryIds := lo.Uniq(req.Params.CategoryId)
+	if len(categoryIds) == 0 {
+		return component.FailResponse("至少选择一个分类")
+	}
+	if len(categoryIds) > 3 {
+		return component.FailResponse("最多选择 3 个分类")
+	}
+	for _, categoryId := range categoryIds {
+		if categoryId == 0 || articleCategory.Get(categoryId).Id == 0 {
+			return component.FailResponse("分类不存在")
+		}
+	}
+
+	article := articles.Get(req.Params.Id)
+	if article.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+
+	oldCategoryIds := append([]uint64(nil), article.CategoryId...)
+	article.CategoryId = categoryIds
+	if err := articles.Save(&article); err != nil {
+		return component.FailResponse("操作失败")
+	}
+
+	syncArticleCategoryRelations(article.Id, categoryIds)
+	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
+		fmt.Sprintf("文章分类调整:[%s] %v -> %v", article.Title, oldCategoryIds, categoryIds))
+	searchservice.BuildSingleArticleSearchDocument(&article)
+	return component.SuccessResponse("操作成功")
+}
+
+func syncArticleCategoryRelations(articleId uint64, categoryIds []uint64) {
+	categoryIDMap := lo.SliceToMap(categoryIds, func(id uint64) (uint64, bool) {
+		return id, true
+	})
+	for _, item := range articleCategoryRs.GetByArticleId(articleId) {
+		if _, ok := categoryIDMap[item.ArticleCategoryId]; ok {
+			item.Effective = 1
+			articleCategoryRs.SaveOrCreateById(item)
+			delete(categoryIDMap, item.ArticleCategoryId)
+		} else {
+			item.Effective = 0
+			articleCategoryRs.SaveOrCreateById(item)
+		}
+	}
+	for id := range categoryIDMap {
+		rs := &articleCategoryRs.Entity{
+			ArticleId:         articleId,
+			ArticleCategoryId: id,
+			Effective:         1,
+		}
+		articleCategoryRs.SaveOrCreateById(rs)
+	}
 }
 
 type PermissionListReq struct {

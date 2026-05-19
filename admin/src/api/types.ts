@@ -41,6 +41,7 @@ export interface Article {
   title: string
   description: string
   type: number
+  categoryId: number[]
   userId: number
   username: string
   userAvatarUrl: string

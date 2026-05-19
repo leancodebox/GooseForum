@@ -61,6 +61,10 @@ export function editArticle(data: { id: number; processStatus: number }) {
   return request.post<any>('/api/admin/article-edit', data)
 }
 
+export function editArticleCategories(data: { id: number; categoryId: number[] }) {
+  return request.post<any>('/api/admin/article-categories-edit', data)
+}
+
 export function getRoleList() {
   return request.post<PageResult<Role>>('/api/admin/role-list')
 }

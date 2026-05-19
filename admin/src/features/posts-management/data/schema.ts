@@ -5,6 +5,7 @@ export const postSchema = z.object({
   title: z.string(),
   description: z.string().nullable().optional(),
   type: z.number(),
+  categoryId: z.array(z.number()).default([]),
   userId: z.number(),
   username: z.string(),
   userAvatarUrl: z.string().nullable().optional(),
