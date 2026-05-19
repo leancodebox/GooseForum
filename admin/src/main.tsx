@@ -9,6 +9,7 @@ import {
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
+import { RoutePending } from '@/components/route-pending'
 import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
@@ -80,6 +81,8 @@ const queryClient = new QueryClient({
 const router = createRouter({
   routeTree,
   context: { queryClient },
+  defaultPendingComponent: RoutePending,
+  defaultPendingMinMs: 180,
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
   basepath: '/admin',
