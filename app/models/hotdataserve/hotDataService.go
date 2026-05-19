@@ -3,6 +3,7 @@ package hotdataserve
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/allegro/bigcache/v3"
@@ -21,19 +22,34 @@ func init() {
 func GetOrLoad[T any](key string, load func() (T, error)) T {
 	if cacheResp != nil {
 		if data, err := cacheResp.Get(key); err == nil {
+			slog.Debug("hotdataserve cache: hit", "key", key)
 			return jsonopt.Decode[T](data)
 		}
 	}
+	slog.Debug("hotdataserve cache: miss", "key", key)
 	res, err := load()
-	if cacheResp != nil && err == nil {
-		cacheResp.Set(key, []byte(jsonopt.Encode(res)))
+	if err != nil {
+		slog.Debug("hotdataserve cache: loader error", "key", key, "err", err)
+		return res
+	}
+	if cacheResp != nil {
+		if setErr := cacheResp.Set(key, []byte(jsonopt.Encode(res))); setErr != nil {
+			slog.Debug("hotdataserve cache: store error", "key", key, "err", setErr)
+		} else {
+			slog.Debug("hotdataserve cache: stored", "key", key)
+		}
 	}
 	return res
 }
 
 func Reload[T any](key string, dataObj T) error {
 	if cacheResp != nil {
-		return cacheResp.Set(key, []byte(jsonopt.Encode(dataObj)))
+		if err := cacheResp.Set(key, []byte(jsonopt.Encode(dataObj))); err != nil {
+			slog.Debug("hotdataserve cache: reload error", "key", key, "err", err)
+			return err
+		}
+		slog.Debug("hotdataserve cache: reloaded", "key", key)
+		return nil
 	}
 	return errors.New("no cache")
 }

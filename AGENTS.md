@@ -101,4 +101,4 @@ cd resource && npx vitest run
 全部配置在 `config.toml` 中，关键项：
 - `server.port`：HTTP 端口（默认：5234）
 - `db.default.connection`：sqlite 或 mysql
-- `app.debug`：是否启用调试模式
+- `app.debug`：是否启用调试模式；不配置时 `local` 默认开启，其他环境默认关闭

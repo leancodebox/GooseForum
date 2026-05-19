@@ -1,4 +1,4 @@
-import { defineAsyncComponent } from 'vue'
+import type { Component } from 'vue'
 
 export const pageLoaders = {
   'home.index': () => import('../pages/HomePage.vue'),
@@ -19,25 +19,17 @@ export const pageLoaders = {
 
 export type PageComponentName = keyof typeof pageLoaders
 
-export const asyncPageComponents = {
-  HomePage: defineAsyncComponent(pageLoaders['home.index']),
-  ArticlePage: defineAsyncComponent(pageLoaders['article.detail']),
-  UserPage: defineAsyncComponent(pageLoaders['user.profile']),
-  CategoryPage: defineAsyncComponent(pageLoaders['category.index']),
-  LinksPage: defineAsyncComponent(pageLoaders['links.index']),
-  SponsorsPage: defineAsyncComponent(pageLoaders['sponsors.index']),
-  NotificationsPage: defineAsyncComponent(pageLoaders['notifications.index']),
-  MessagesPage: defineAsyncComponent(pageLoaders['messages.index']),
-  SettingsPage: defineAsyncComponent(pageLoaders['settings.index']),
-  PublishPage: defineAsyncComponent(pageLoaders['publish.index']),
-  SearchPage: defineAsyncComponent(pageLoaders['search.index']),
-  LoginPage: defineAsyncComponent(pageLoaders['auth.login']),
-  ResetPasswordPage: defineAsyncComponent(pageLoaders['auth.resetPassword']),
-  ErrorPage: defineAsyncComponent(pageLoaders['error.notFound']),
-}
+const componentCache = new Map<string, Component>()
 
-export async function preloadPageComponent(component: string) {
+export async function resolvePageComponent(component: string): Promise<Component | null> {
+  const cached = componentCache.get(component)
+  if (cached) return cached
+
   const loader = pageLoaders[component as PageComponentName]
-  if (!loader) return
-  await loader()
+  if (!loader) return null
+
+  const mod = await loader()
+  const resolved = mod.default
+  componentCache.set(component, resolved)
+  return resolved
 }

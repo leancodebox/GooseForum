@@ -1,7 +1,7 @@
 <div align="center">
   <img src="resource/static/pic/icon_300.webp" width="140"/>
   <h1>GooseForum</h1>
-  <p>🚀 现代化的 Go + Alpine.js 论坛系统</p>
+  <p>🚀 现代化的 Go + Vue 3 论坛系统</p>
 
   <p>
     <a href="https://github.com/leancodebox/GooseForum/releases"><img src="https://img.shields.io/github/release/leancodebox/GooseForum.svg" alt="GitHub release"></a>
@@ -18,7 +18,7 @@
 
 ## 📖 项目简介
 
-GooseForum 是一个现代化的技术交流社区平台，采用 Go + Alpine.js + TailwindCSS 技术栈开发。提供极简的部署方式和丰富的社区功能，专为技术开发者打造的轻量级论坛系统。
+GooseForum 是一个现代化的技术交流社区平台，采用 Go + Vue 3 + TailwindCSS 技术栈开发。项目保持简单部署，同时通过服务端 payload 驱动 SPA 体验，并保留 no-js HTML 渲染用于 SEO 和降级访问。
 
 🌐 **在线体验**: [GooseForum](https://gooseforum.online/)
 
@@ -44,7 +44,8 @@ GooseForum 是一个现代化的技术交流社区平台，采用 Go + Alpine.js
 - **自动备份** - 定时数据库备份
 - **响应式设计** - 完美支持移动端
 - **品牌定制** - 支持自定义 Logo/文字/图片
-- **SEO 友好** - 完整的 SEO 优化
+- **Payload 驱动 SPA** - 服务端输出页面 payload，前端提供平滑站内切换
+- **SEO 友好** - 轻量 no-js GoHTML 渲染，兼顾搜索引擎和降级访问
 
 ## 🚀 快速开始
 
@@ -86,7 +87,7 @@ goreleaser build --snapshot --clean --single-target
 #### 环境要求
 - Go 1.24+
 - Node.js 18+
-- npm 或 pnpm
+- pnpm
 
 #### 构建步骤
 
@@ -123,6 +124,10 @@ cd admin && pnpm dev         # React 管理后台
 GooseForum 启动时自动创建 `config.toml`：
 
 ```toml
+[app]
+env = "production"              # local 或 production
+# debug 为可选覆盖项；不配置时 local 默认 true，其他环境默认 false
+
 [server]
 port = 5234                    # 服务端口
 url = "http://localhost"         # 站点 URL
@@ -145,9 +150,11 @@ path = "./storage/database/sqlite.db"
 - **Cobra** - 命令行工具
 
 ### 前端技术栈
-- **Alpine.js** - 轻量级 JS 框架
+- **Vue 3** - 主站 UI 框架
+- **TypeScript** - 前端类型支持
+- **Payload SPA Runtime** - 通过 `X-Goose-Page` JSON payload 实现站内导航
 - **TailwindCSS 4** - CSS 框架
-- **GoHTML** - 服务器端模板
+- **GoHTML** - 轻量 no-js/SEO 模板
 - **Vite** - 构建工具
 
 ### 管理后台技术栈
@@ -168,9 +175,9 @@ GooseForum/
 │   ├── models/            # GORM 模型
 │   └── service/           # 业务服务
 ├── resource/              # 前端资源
-│   ├── src/               # Alpine.js 源码
+│   ├── src/               # Vue 3 SPA 源码
 │   ├── static/            # 静态资源
-│   └── templates/         # GoHTML 模板
+│   └── templates/         # no-js/SEO GoHTML 模板
 ├── admin/                 # React 管理后台
 ├── docs/                  # 文档
 ├── main.go               # 程序入口

@@ -12,7 +12,6 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 	"github.com/leancodebox/GooseForum/resource"
 )
 
@@ -26,10 +25,16 @@ type templateData struct {
 }
 
 var currentRegistry = mustNewRegistry()
+var currentRegistryErr error
+
+func ReloadTemplates() {
+	currentRegistry = mustNewRegistry()
+}
 
 func mustNewRegistry() *templateRegistry {
 	registry, err := newRegistry(resource.GetTemplateFS())
 	if err != nil {
+		currentRegistryErr = err
 		slog.Error("failed to load resource templates", "err", err)
 	}
 	return registry
@@ -106,15 +111,19 @@ func renderPage(c *gin.Context, templateName string, payload PagePayload) {
 		return
 	}
 	if currentRegistry == nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+		if currentRegistryErr != nil {
+			c.String(http.StatusInternalServerError, currentRegistryErr.Error())
+			return
+		}
+		c.String(http.StatusInternalServerError, "resource template registry is not initialized")
 		return
 	}
 	if err := currentRegistry.render(c.Writer, filepath.Base(templateName), templateData{
 		Payload: payload,
-		Lang:    viewrender.GetLang(c),
+		Lang:    requestLang(c),
 	}); err != nil {
 		slog.Error("render resource template failed", "template", templateName, "err", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.String(http.StatusInternalServerError, err.Error())
 	}
 }
 

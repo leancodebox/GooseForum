@@ -4,7 +4,6 @@ import { Bold, Code2, Image, Italic, Link, ListChecks, MessageSquareQuote, Send,
 import MarkdownIt from 'markdown-it'
 import anchor from 'markdown-it-anchor'
 import taskLists from 'markdown-it-task-lists'
-import AppShell from '../components/AppShell.vue'
 import { submitArticle, uploadImage } from '../runtime/api'
 import { processImageFile, validateImageFile } from '../runtime/image'
 import type { LayoutPayload, PublishPageProps } from '../types/payload'
@@ -232,7 +231,6 @@ async function save() {
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <main class="min-w-0 pb-12">
       <header class="mb-4 border-b border-gray-200/70 pb-4">
         <h1 class="text-2xl font-bold text-gray-950">{{ props.isEditing ? '编辑主题' : '发布主题' }}</h1>
@@ -395,5 +393,4 @@ async function save() {
         </aside>
       </div>
     </main>
-  </AppShell>
 </template>

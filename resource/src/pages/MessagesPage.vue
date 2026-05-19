@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { ArrowLeft, MessageSquare, MoreVertical, PenLine, Search, Send, Smile, X } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import { getChatMessages, markChatRead, sendChatMessage, type ChatMessagePayload } from '../runtime/api'
 import { formatDateTime } from '../runtime/format'
 import type { LayoutPayload, MessageConversationPayload, MessagesPageProps, UserConnectionPayload } from '../types/payload'
@@ -176,7 +175,6 @@ async function startChat(user: UserConnectionPayload) {
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <main class="h-[calc(100dvh-5.5rem)] min-h-[620px] min-w-0 pb-3">
       <section class="grid h-full overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] md:grid-cols-[300px_minmax(0,1fr)]">
         <aside
@@ -384,5 +382,4 @@ async function startChat(user: UserConnectionPayload) {
         </div>
       </div>
     </main>
-  </AppShell>
 </template>

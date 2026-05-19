@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { Bell, CheckCheck, Heart, Info, MessageCircle, UserPlus } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import { markAllNotificationsRead } from '../runtime/api'
 import { formatDateTime } from '../runtime/format'
 import { useI18n } from '../runtime/i18n'
@@ -94,7 +93,6 @@ async function markAllRead() {
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <main class="min-w-0 pb-8">
       <header class="mb-3 flex flex-col gap-2 border-b border-gray-200/70 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
@@ -172,5 +170,4 @@ async function markAllRead() {
         </div>
       </section>
     </main>
-  </AppShell>
 </template>

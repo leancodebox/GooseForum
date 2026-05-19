@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ExternalLink, HeartHandshake, Mail, ShieldCheck } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import type { LayoutPayload, SponsorPayload, SponsorSectionPayload, SponsorsPageProps } from '../types/payload'
 
 const page = defineProps<{
@@ -9,7 +8,7 @@ const page = defineProps<{
   props: SponsorsPageProps
 }>()
 
-const hasSponsors = computed(() => page.props.sections.length > 0 || page.props.communitySupport.length > 0)
+const hasSponsors = computed(() => page.props.sections.length > 0)
 
 function sectionGrid(section: SponsorSectionPayload) {
   if (section.tone === 'diamond') return 'grid-cols-1 md:grid-cols-2'
@@ -36,14 +35,13 @@ function showMessage(sponsor: SponsorPayload) {
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <div class="pb-12">
       <header class="mb-4 border-b border-gray-200/70 pb-4">
         <div class="flex flex-wrap items-center gap-2">
           <h1 class="text-2xl font-bold text-gray-950">赞助</h1>
           <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">{{ props.totalCount }}</span>
         </div>
-        <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-500">感谢这些赞助者和社区支持者帮助 GooseForum 持续变好。</p>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-500">感谢这些赞助者帮助 GooseForum 持续变好。</p>
       </header>
 
       <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
@@ -85,26 +83,6 @@ function showMessage(sponsor: SponsorPayload) {
             </div>
           </section>
 
-          <section v-if="props.communitySupport.length" class="space-y-3">
-            <div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2">
-              <h2 class="text-base font-bold text-gray-950">Community Support</h2>
-              <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500">{{ props.communitySupport.length }}</span>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <a
-                v-for="supporter in props.communitySupport"
-                :key="supporter.name"
-                :href="supporter.link || '#'"
-                :target="supporter.link ? '_blank' : undefined"
-                :rel="supporter.link ? 'noopener noreferrer' : undefined"
-                class="inline-flex max-w-full items-center gap-2 rounded-full border border-gray-200 bg-white px-2 py-1 hover:border-blue-200 hover:bg-blue-50/30"
-              >
-                <img :src="supporter.avatarUrl" :alt="supporter.name" class="h-5 w-5 rounded-full object-cover" />
-                <span class="truncate text-xs font-medium text-gray-600">{{ supporter.name }}</span>
-              </a>
-            </div>
-          </section>
-
           <div v-if="!hasSponsors" class="rounded-lg border border-gray-200 bg-white px-5 py-16 text-center">
             <HeartHandshake class="mx-auto h-8 w-8 text-gray-300" />
             <h2 class="mt-3 text-base font-semibold text-gray-900">暂无赞助者</h2>
@@ -142,5 +120,4 @@ function showMessage(sponsor: SponsorPayload) {
         </aside>
       </div>
     </div>
-  </AppShell>
 </template>

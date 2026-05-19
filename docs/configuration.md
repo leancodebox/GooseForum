@@ -19,13 +19,13 @@
 ```toml
 [app]
 env = "production"              # 运行环境: local, production
-debug = true                    # 调试模式
+debug = false                   # 调试模式，可选覆盖项
 cdn_url = ""                    # CDN 域名
 ```
 
 **配置说明：**
 - `env`: 影响某些加载逻辑，生产环境建议保持 `production`
-- `debug`: 开启后会输出更详细的日志信息
+- `debug`: 可选覆盖项；不配置时 `local` 默认开启，其他环境默认关闭。开启后会输出更详细的日志信息
 - `cdn_url`: CDN 域名，用于静态资源加速
 
 ### [server] 服务器配置
@@ -172,10 +172,11 @@ chmod 600 config.toml
 
 ### 调试模式
 
-开启调试模式获取更多信息：
+需要强制开启调试模式时可以显式配置：
 
 ```toml
 [app]
+env = "production"
 debug = true
 
 [log]

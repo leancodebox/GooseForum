@@ -9,7 +9,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/resource"
 )
 
@@ -23,8 +23,15 @@ type manifestItem struct {
 var manifest = loadManifest()
 
 func resourceEntry(origin string) template.HTML {
-	if devServer := preferences.GetString("resource.devServer", ""); devServer != "" {
-		return template.HTML(fmt.Sprintf(`<script type="module" src="%s/%s"></script>`, strings.TrimRight(devServer, "/"), strings.TrimPrefix(origin, "/")))
+	if devServer := viteDevServer(); devServer != "" {
+		devServer = strings.TrimRight(devServer, "/")
+		origin = strings.TrimPrefix(origin, "/")
+		devBase := strings.Trim(viteDevBase(), "/")
+		if devBase != "" {
+			devBase += "/"
+		}
+		return template.HTML(fmt.Sprintf(`<script type="module" src="%s/%s@vite/client"></script>
+<script type="module" src="%s/%s%s"></script>`, devServer, devBase, devServer, devBase, origin))
 	}
 
 	item, ok := manifest[origin]
@@ -40,6 +47,24 @@ func resourceEntry(origin string) template.HTML {
 	fmt.Fprintf(&sb, `<script type="module" src="%s" crossorigin></script>`, resourceAsset(item.File))
 	sb.WriteByte('\n')
 	return template.HTML(sb.String())
+}
+
+func viteDevServer() string {
+	return viteDevServerFor(preferences.GetString("resource.devServer", ""), setting.IsProduction())
+}
+
+func viteDevServerFor(devServer string, production bool) string {
+	if devServer != "" {
+		return devServer
+	}
+	if !production {
+		return "http://localhost:3010"
+	}
+	return ""
+}
+
+func viteDevBase() string {
+	return preferences.GetString("resource.devBase", "/assets/")
 }
 
 func resourceAsset(path string) string {
@@ -90,7 +115,7 @@ func dedupeStrings(values []string) []string {
 
 func templateFuncs() template.FuncMap {
 	funcs := template.FuncMap{}
-	for key, fn := range viewrender.TemplateFuncs {
+	for key, fn := range templateFuncMap {
 		funcs[key] = fn
 	}
 	funcs["ResourceEntry"] = resourceEntry

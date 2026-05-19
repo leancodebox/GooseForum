@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { CalendarDays, Loader2, Radio, UserPlus } from '@lucide/vue'
-import { getUserCard } from '../runtime/api'
+import { getUserHoverCard } from '../runtime/api'
 import { formatDate, formatNumber, timeAgo } from '../runtime/format'
 import type { UserCardShowDetail } from '../runtime/user-card-events'
-import type { UserCardPayload } from '../types/payload'
+import type { UserHoverCardPayload } from '../types/payload'
 
 const visible = ref(false)
 const loading = ref(false)
 const error = ref('')
 const fallbackUser = ref<UserCardShowDetail['user'] | null>(null)
-const card = ref<UserCardPayload | null>(null)
+const card = ref<UserHoverCardPayload | null>(null)
 const position = ref({ left: 0, top: 0 })
-const cache = new Map<number, UserCardPayload>()
+const cache = new Map<number, UserHoverCardPayload>()
 let hideTimer: number | undefined
 let requestToken = 0
 
@@ -44,7 +44,7 @@ function scheduleHide() {
 function placeCard(target: HTMLElement) {
   const rect = target.getBoundingClientRect()
   const cardWidth = Math.min(320, window.innerWidth - 24)
-  const estimatedCardHeight = 292
+  const estimatedCardHeight = 252
   const gap = 10
   const viewportPadding = 12
   const viewportWidth = window.innerWidth
@@ -82,7 +82,7 @@ async function show(event: Event) {
   loading.value = true
   card.value = null
   try {
-    const result = await getUserCard(detail.user.id)
+    const result = await getUserHoverCard(detail.user.id)
     if (token !== requestToken) return
     cache.set(detail.user.id, result)
     card.value = result
@@ -141,13 +141,28 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div v-if="loading" class="mt-4 flex items-center gap-2 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-500">
-        <Loader2 class="h-4 w-4 animate-spin" />
-        加载用户资料
+      <div v-if="loading" class="mt-3 min-h-[164px]">
+        <div class="space-y-2">
+          <div class="h-4 w-full rounded bg-gray-100" />
+          <div class="h-4 w-3/4 rounded bg-gray-100" />
+        </div>
+        <div class="mt-3 grid grid-cols-4 divide-x divide-gray-100 border-y border-gray-100 py-2">
+          <div v-for="item in 4" :key="item" class="px-2 text-center">
+            <div class="mx-auto h-4 w-7 rounded bg-gray-100" />
+            <div class="mx-auto mt-1 h-3 w-8 rounded bg-gray-100" />
+          </div>
+        </div>
+        <div class="mt-3 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-1.5 text-xs text-gray-400">
+            <Loader2 class="h-3.5 w-3.5 animate-spin" />
+            加载用户资料
+          </div>
+          <div class="h-8 w-24 rounded-md bg-gray-100" />
+        </div>
       </div>
-      <div v-else-if="error" class="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{{ error }}</div>
+      <div v-else-if="error" class="mt-3 flex min-h-[164px] items-center rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{{ error }}</div>
       <template v-else>
-        <p class="mt-3 line-clamp-2 text-sm leading-relaxed text-gray-600">{{ bioText }}</p>
+        <p class="mt-3 h-10 line-clamp-2 text-sm leading-relaxed text-gray-600">{{ bioText }}</p>
 
         <div class="mt-3 grid grid-cols-4 divide-x divide-gray-100 border-y border-gray-100 py-2">
           <div class="px-2 text-center">

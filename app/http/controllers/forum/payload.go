@@ -284,9 +284,8 @@ type FriendLinkPayload struct {
 }
 
 type SponsorsPageProps struct {
-	Sections         []SponsorSectionPayload `json:"sections"`
-	CommunitySupport []SponsorPayload        `json:"communitySupport"`
-	TotalCount       int                     `json:"totalCount"`
+	Sections   []SponsorSectionPayload `json:"sections"`
+	TotalCount int                     `json:"totalCount"`
 }
 
 type SponsorSectionPayload struct {
@@ -1009,32 +1008,13 @@ func buildSponsorsPageProps(config pageConfig.SponsorsConfig) SponsorsPageProps 
 		total += len(section.Sponsors)
 		visibleSections = append(visibleSections, section)
 	}
-	community := buildCommunitySponsorPayloads(config.Users)
-	total += len(community)
 	return SponsorsPageProps{
-		Sections:         visibleSections,
-		CommunitySupport: community,
-		TotalCount:       total,
+		Sections:   visibleSections,
+		TotalCount: total,
 	}
 }
 
 func buildSponsorPayloads(items []pageConfig.SponsorItem) []SponsorPayload {
-	res := make([]SponsorPayload, 0, len(items))
-	for _, item := range items {
-		if item.Name == "" {
-			continue
-		}
-		res = append(res, SponsorPayload{
-			Name:      item.Name,
-			Message:   item.Message,
-			Link:      item.Link,
-			AvatarURL: sponsorAvatar(item.AvatarUrl),
-		})
-	}
-	return res
-}
-
-func buildCommunitySponsorPayloads(items []pageConfig.UserSponsor) []SponsorPayload {
 	res := make([]SponsorPayload, 0, len(items))
 	for _, item := range items {
 		if item.Name == "" {

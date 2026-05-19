@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { MessageSquare, Search, Sparkles, UsersRound } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import { formatNumber, timeAgo } from '../runtime/format'
 import { scheduleHideUserCard, showUserCard } from '../runtime/user-card-events'
 import type { LayoutPayload, SearchPageProps } from '../types/payload'
@@ -25,7 +24,6 @@ watch(
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <main class="min-w-0 pb-12">
       <section class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <header class="border-b border-gray-100 px-4 py-4">
@@ -173,5 +171,4 @@ watch(
         </div>
       </section>
     </main>
-  </AppShell>
 </template>

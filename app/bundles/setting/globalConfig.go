@@ -22,7 +22,10 @@ func IsLocal() bool {
 }
 
 func IsDebug() bool {
-	return preferences.GetBool("app.debug", true)
+	if preferences.IsSet("app.debug") {
+		return preferences.GetBool("app.debug")
+	}
+	return IsLocal()
 }
 
 func GetCDNURL() string {

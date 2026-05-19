@@ -49,6 +49,26 @@ func User2UserCard(user users.EntityComplete, stats userStatistics.Entity, isFol
 	}
 }
 
+func User2UserHoverCard(user users.EntityComplete, stats userStatistics.Entity, isFollowing bool) *vo.UserHoverCard {
+	return &vo.UserHoverCard{
+		UserId:            user.Id,
+		Username:          user.Username,
+		Nickname:          user.Nickname,
+		AvatarUrl:         user.GetWebAvatarUrl(),
+		Bio:               user.Bio,
+		Signature:         user.Signature,
+		IsAdmin:           user.RoleId > 0,
+		ArticleCount:      stats.ArticleCount,
+		ReplyCount:        stats.ReplyCount,
+		LikeReceivedCount: stats.LikeReceivedCount,
+		FollowerCount:     stats.FollowerCount,
+		IsOnline:          time.Since(stats.LastActiveTime) < 120*time.Second,
+		IsFollowing:       isFollowing,
+		LastActiveTime:    stats.LastActiveTime,
+		CreatedAt:         user.CreatedAt,
+	}
+}
+
 func User2UserDetailedVo(user users.EntityComplete) *vo.UserDetailedVo {
 	return &vo.UserDetailedVo{
 		Id:                  user.Id,

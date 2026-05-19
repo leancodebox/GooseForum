@@ -186,6 +186,24 @@ export interface UserCardPayload {
   createdAt: string
 }
 
+export interface UserHoverCardPayload {
+  userId: number
+  username: string
+  nickname: string
+  avatarUrl: string
+  bio: string
+  signature: string
+  isAdmin: boolean
+  articleCount: number
+  replyCount: number
+  likeReceivedCount: number
+  followerCount: number
+  isOnline: boolean
+  isFollowing: boolean
+  lastActiveTime: string
+  createdAt: string
+}
+
 export interface UserProfileProps {
   user: UserCardPayload
   topics: TopicPayload[]
@@ -260,7 +278,6 @@ export interface FriendLinkPayload {
 
 export interface SponsorsPageProps {
   sections: SponsorSectionPayload[]
-  communitySupport: SponsorPayload[]
   totalCount: number
 }
 

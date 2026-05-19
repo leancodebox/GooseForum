@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Loader2, MessageSquare, Plus, Sparkles, UsersRound } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import { formatNumber, timeAgo } from '../runtime/format'
 import { fetchPage } from '../runtime/router'
 import { scheduleHideUserCard, showUserCard } from '../runtime/user-card-events'
@@ -70,10 +69,10 @@ onMounted(observeSentinel)
 onBeforeUnmount(() => {
   observer?.disconnect()
 })
+
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <div class="pb-12">
       <aside v-if="page.props.announcement.enabled" class="mb-3 rounded-lg border border-gray-200/80 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.035)]" aria-label="公告">
         <div class="border-l-[3px] border-blue-500 px-4 py-3">
@@ -205,5 +204,4 @@ onBeforeUnmount(() => {
         </div>
       </section>
     </div>
-  </AppShell>
 </template>

@@ -6,6 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"text/template"
 
@@ -40,18 +43,33 @@ func GenerateConfig() []byte {
 
 // 初始化配置信息，完成对环境变量以及 conf 信息的加载
 func init() {
-	if !fileopt.IsExist("config.toml") {
-		err := fileopt.FilePutContents("config.toml", GenerateConfig())
+	cfgPath := "config.toml"
+	wd, _ := os.Getwd()
+	if isTestMode() {
+		dir, err := findConfigDirTest(wd, 6)
 		if err != nil {
-			panic(err)
+			slog.Error("preferences.test.search", "err", err)
+			dir = wd
+		}
+		cfgPath = filepath.Join(dir, "config.toml")
+		if !fileopt.IsExist(cfgPath) {
+			if e := fileopt.PutContents(cfgPath, GenerateConfig()); e != nil {
+				slog.Error("preferences.test.init", "err", e)
+			} else {
+				slog.Info("preferences.test.init", "path", cfgPath)
+			}
+		}
+	} else {
+		if !fileopt.IsExist(cfgPath) {
+			if err := fileopt.PutContents(cfgPath, GenerateConfig()); err != nil {
+				panic(err)
+			}
 		}
 	}
-	// 使用独立的实例。防止外部直接调用 viper 标准实例
 	v = viper.New()
-	v.SetConfigType("toml") // "json", "toml", "yaml", "yml", "properties", "props", "prop", "env", "dotenv"
-	v.AddConfigPath(".")
-	configFlag := flag.String("config", "config.toml", "path to config file")
-	// 将命令行标志的值设置为 Viper 配置实例的属性
+	v.SetConfigType("toml")
+	v.AddConfigPath(filepath.Dir(cfgPath))
+	configFlag := flag.String("config", cfgPath, "path to config file")
 	v.SetConfigFile(*configFlag)
 	if err := v.ReadInConfig(); err != nil {
 		slog.Warn("ReadInConfig", "err", err)
@@ -70,12 +88,17 @@ func internalGet(path string, defaultValue ...any) any {
 	return v.Get(path)
 }
 
+func IsSet(path string) bool {
+	return v.IsSet(path) && v.Get(path) != nil
+}
+
 // OpenConfigChangeEvent 开启监控配置文件⌚️
 func OpenConfigChangeEvent() {
 	v.OnConfigChange(runEvent)
 }
 
 var eventManagerLock sync.Mutex
+
 var eventList []func(e fsnotify.Event)
 
 func AddWatch(event func(e fsnotify.Event)) {
@@ -147,4 +170,37 @@ func GetIntSlice(path string) []int {
 
 func All() map[string]any {
 	return v.AllSettings()
+}
+
+func isTestMode() bool {
+	if strings.HasSuffix(os.Args[0], ".test") {
+		return true
+	}
+	for _, a := range os.Args {
+		if strings.HasPrefix(a, "-test.") {
+			return true
+		}
+	}
+	return false
+}
+
+func findConfigDirTest(start string, maxDepth int) (string, error) {
+	if fileopt.IsExist(filepath.Join(start, "config.toml")) {
+		return start, nil
+	}
+	if fileopt.IsExist(filepath.Join(start, "go.mod")) {
+		return start, nil
+	}
+	cur := start
+	for range maxDepth {
+		next := filepath.Dir(cur)
+		if next == cur {
+			break
+		}
+		cur = next
+		if fileopt.IsExist(filepath.Join(cur, "go.mod")) {
+			return cur, nil
+		}
+	}
+	return "", fmt.Errorf("preferences: test mode cannot find go.mod within %d levels from %s", maxDepth, start)
 }

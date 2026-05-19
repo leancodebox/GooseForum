@@ -6,7 +6,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/api"
 	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
-	"github.com/leancodebox/GooseForum/app/http/controllers/viewrender"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -35,7 +34,7 @@ func viewRoute(ginApp *gin.Engine) {
 			c.String(http.StatusNotFound, "404")
 			return
 		}
-		viewrender.Reload()
+		forum.ReloadTemplates()
 		c.String(200, "模板已刷新")
 	})
 
@@ -77,6 +76,7 @@ func apiRoute(ginApp *gin.Engine) {
 
 	baseApi.GET("get-captcha", UpQueryReq(api.GetCaptcha))
 	baseApi.GET("user-card", UpQueryReq(api.GetUserCard))
+	baseApi.GET("user-hover-card", UpQueryReq(api.GetUserHoverCard))
 	baseApi.GET("user-activities", UpQueryReq(api.GetUserActivities))
 	baseApi.POST("forgot-password", UpButterReq(api.ForgotPassword))
 	baseApi.POST("reset-password", UpButterReq(api.ResetPassword))

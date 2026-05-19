@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
 import { Bookmark, Clock, CornerDownLeft, Eye, Heart, MessageSquare, PencilLine, Send, X } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import { bookmarkArticle, likeArticle, postReply } from '../runtime/api'
 import { formatDateTime, formatNumber } from '../runtime/format'
 import { fetchPage } from '../runtime/router'
+import { useShellState } from '../runtime/shell-state'
 import { scheduleHideUserCard, showUserCard } from '../runtime/user-card-events'
 import type { ArticleDetailProps, LayoutPayload } from '../types/payload'
 
@@ -28,6 +28,7 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const titleEl = ref<HTMLElement | null>(null)
 const showHeaderTitle = ref(false)
+const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
 
 function observeTitle() {
@@ -57,10 +58,22 @@ watch(
     isBookmarked.value = page.props.article.isBookmarked
     void nextTick(observeTitle)
   },
+  { immediate: true },
+)
+
+watch(
+  () => [page.props.article.title, showHeaderTitle.value] as const,
+  ([title, show]) => {
+    shellState.headerTitle = title
+    shellState.showHeaderTitle = show
+  },
+  { immediate: true },
 )
 
 onBeforeUnmount(() => {
   titleObserver?.disconnect()
+  shellState.headerTitle = ''
+  shellState.showHeaderTitle = false
 })
 
 async function toggleLike() {
@@ -140,12 +153,7 @@ async function submitReply(replyId = 0) {
 </script>
 
 <template>
-  <AppShell
-    :layout="layout"
-    :header-title="page.props.article.title"
-    :show-header-title="showHeaderTitle"
-    rail
-  >
+  <div>
     <article class="min-w-0 pb-12">
       <header class="mb-4 border-b border-gray-200/70 pb-4">
         <h1 ref="titleEl" class="text-2xl font-bold leading-tight text-gray-950 sm:text-3xl">{{ page.props.article.title }}</h1>
@@ -193,7 +201,7 @@ async function submitReply(replyId = 0) {
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <a :href="`/u/${page.props.article.author.id}`" class="font-semibold text-gray-950 hover:text-blue-600">{{ page.props.article.author.username }}</a>
-                <div class="text-xs font-medium text-gray-600">原帖</div>
+                <div class="text-xs font-medium text-gray-600">正文</div>
               </div>
               <div class="flex flex-wrap items-center justify-end gap-3 text-xs font-medium text-gray-600">
                 <div class="flex items-center gap-3">
@@ -344,7 +352,7 @@ async function submitReply(replyId = 0) {
       </section>
     </article>
 
-    <template #rail>
+    <Teleport defer to="#goose-shell-rail">
       <div class="sticky top-19 space-y-3">
         <div class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
           <div class="border-b border-gray-100 px-4 py-4">
@@ -415,6 +423,6 @@ async function submitReply(replyId = 0) {
         </div>
 
       </div>
-    </template>
-  </AppShell>
+    </Teleport>
+  </div>
 </template>

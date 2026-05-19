@@ -67,17 +67,6 @@ type PItem struct {
 	Content string `json:"content"`
 }
 
-// 赞助商配置
-
-type UserSponsor struct {
-	UserId    uint64 `json:"userId"`
-	Amount    int    `json:"amount"` // 单位：分
-	Link      string `json:"link"`
-	Message   string `json:"message"`
-	AvatarUrl string `json:"avatarUrl"`
-	Name      string `json:"name"`
-}
-
 type SponsorItem struct {
 	Link      string `json:"link"`
 	Message   string `json:"message"`
@@ -93,8 +82,7 @@ type Sponsors struct {
 }
 
 type SponsorsConfig struct {
-	Sponsors Sponsors      `json:"sponsors"`
-	Users    []UserSponsor `json:"users"`
+	Sponsors Sponsors `json:"sponsors"`
 }
 
 // SiteSettingsConfig 站点设置配置

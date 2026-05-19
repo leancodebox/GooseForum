@@ -12,7 +12,6 @@ import {
   Shield,
   UserRound,
 } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import {
   changePassword,
   getOAuthBindings,
@@ -402,7 +401,6 @@ async function toggleBinding(provider: string) {
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <main class="min-w-0 pb-12">
       <header class="mb-4 border-b border-gray-200/70 pb-4">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -765,5 +763,4 @@ async function toggleBinding(provider: string) {
         </div>
       </div>
     </main>
-  </AppShell>
 </template>

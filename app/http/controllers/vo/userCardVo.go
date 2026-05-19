@@ -29,3 +29,22 @@ type UserCard struct {
 	LastActiveTime    time.Time                 `json:"lastActiveTime"`
 	CreatedAt         time.Time                 `json:"createdAt"`
 }
+
+// UserHoverCard is the minimal public profile payload used by hover cards.
+type UserHoverCard struct {
+	UserId            uint64    `json:"userId"`
+	Username          string    `json:"username"`
+	Nickname          string    `json:"nickname"`
+	AvatarUrl         string    `json:"avatarUrl"`
+	Bio               string    `json:"bio"`
+	Signature         string    `json:"signature"`
+	IsAdmin           bool      `json:"isAdmin"`
+	ArticleCount      uint      `json:"articleCount"`
+	ReplyCount        uint      `json:"replyCount"`
+	LikeReceivedCount uint      `json:"likeReceivedCount"`
+	FollowerCount     uint      `json:"followerCount"`
+	IsOnline          bool      `json:"isOnline"`
+	IsFollowing       bool      `json:"isFollowing"`
+	LastActiveTime    time.Time `json:"lastActiveTime"`
+	CreatedAt         time.Time `json:"createdAt"`
+}

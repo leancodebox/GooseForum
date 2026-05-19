@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ArrowLeft, Home } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import { useI18n } from '../runtime/i18n'
 import type { ErrorPageProps, LayoutPayload } from '../types/payload'
 
@@ -21,7 +20,6 @@ function goBack() {
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <main class="min-w-0 pb-12">
       <section class="rounded-lg border border-gray-200/70 bg-white px-6 py-12 text-center shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         <div class="text-sm font-bold uppercase tracking-wide text-gray-400">{{ props.code }}</div>
@@ -43,5 +41,4 @@ function goBack() {
         </div>
       </section>
     </main>
-  </AppShell>
 </template>

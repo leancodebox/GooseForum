@@ -10,13 +10,10 @@ import { getReorderDestinationIndex } from '@atlaskit/pragmatic-drag-and-drop-hi
 
 import { Button } from '@/components/ui/button';
 import { ContentLayout } from '@/components/layout/content-layout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SponsorshipProvider, { useSponsorship } from './components/sponsorship-provider';
 import { SponsorActionDialog } from './components/sponsor-action-dialog';
-import { UserSponsorActionDialog } from './components/user-sponsor-action-dialog';
-import { type SponsorsConfig, type SponsorItem, type UserSponsor, type Sponsors } from './data/schema';
+import { type SponsorsConfig, type SponsorItem, type Sponsors } from './data/schema';
 import { SponsorColumn } from './components/sponsor-column';
-import { UserColumn } from './components/user-column';
 import { BoardContext } from './components/board-context';
 import { createRegistry } from './components/registry';
 
@@ -46,7 +43,6 @@ function SponsorshipManagementContent() {
       level2: [],
       level3: [],
     },
-    users: [],
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,7 +53,7 @@ function SponsorshipManagementContent() {
     try {
       const res = await axios.get('/api/admin/sponsors');
       if (res.data.code === 0) {
-        setConfig(res.data.result || { sponsors: { level0: [], level1: [], level2: [], level3: [] }, users: [] });
+        setConfig(res.data.result || { sponsors: { level0: [], level1: [], level2: [], level3: [] } });
       } else {
         toast.error(res.data.msg || '获取赞助商失败');
       }
@@ -114,17 +110,6 @@ function SponsorshipManagementContent() {
     });
   }, []);
 
-  const reorderUser = useCallback(({ startIndex, finishIndex }: { startIndex: number; finishIndex: number }) => {
-    setConfig((prev) => {
-      const newUsers = reorder({
-        list: prev.users,
-        startIndex,
-        finishIndex,
-      });
-      return { ...prev, users: newUsers };
-    });
-  }, []);
-
   useEffect(() => {
     return combine(
       monitorForElements({
@@ -176,42 +161,18 @@ function SponsorshipManagementContent() {
             }
           }
 
-          if (source.data.type === 'user') {
-            const startIndex = source.data.index as number;
-
-            // Dropping on a user card
-            if (location.current.dropTargets.length >= 1) {
-              const target = location.current.dropTargets[0];
-              
-              if (target.data.type === 'user') {
-                const destIndex = target.data.index as number;
-                const closestEdgeOfTarget = extractClosestEdge(target.data);
-
-                const finishIndex = getReorderDestinationIndex({
-                  startIndex,
-                  indexOfTarget: destIndex,
-                  closestEdgeOfTarget,
-                  axis: 'horizontal',
-                });
-
-                reorderUser({ startIndex, finishIndex });
-              }
-            }
-          }
         },
       })
     );
-  }, [instanceId, reorderSponsor, reorderUser, config.sponsors]);
+  }, [instanceId, reorderSponsor, config.sponsors]);
 
   const contextValue = useMemo(() => ({
     getConfig: () => config,
     reorderSponsor,
-    reorderUser,
     instanceId,
     registerLevel: registry.registerLevel,
     registerSponsor: registry.registerSponsor,
-    registerUser: registry.registerUser,
-  }), [config, reorderSponsor, reorderUser, instanceId, registry]);
+  }), [config, reorderSponsor, instanceId, registry]);
 
   const handleAddSponsor = (level: keyof Sponsors) => {
     setCurrentLevel(level);
@@ -255,51 +216,11 @@ function SponsorshipManagementContent() {
     setOpen(null);
   };
 
-  const handleAddUser = () => {
-    setCurrentIndex(null);
-    setCurrentRow({
-      name: '',
-      avatarUrl: '',
-      amount: 0,
-      link: '',
-      message: '',
-      userId: 0
-    });
-    setOpen('add-user');
-  };
-
-  const handleEditUser = (index: number) => {
-    setCurrentIndex(index);
-    setCurrentRow(config.users[index]);
-    setOpen('edit-user');
-  };
-
-  const handleDeleteUser = (index: number) => {
-    setConfig((prev) => {
-      const newUsers = [...prev.users];
-      newUsers.splice(index, 1);
-      return { ...prev, users: newUsers };
-    });
-  };
-
-  const handleUserSubmit = (data: UserSponsor) => {
-    setConfig((prev) => {
-      const newUsers = [...prev.users];
-      if (currentIndex !== null) {
-        newUsers[currentIndex] = data;
-      } else {
-        newUsers.push(data);
-      }
-      return { ...prev, users: newUsers };
-    });
-    setOpen(null);
-  };
-
   return (
     <BoardContext.Provider value={contextValue}>
       <ContentLayout
         title='赞助管理'
-        description='管理赞助商和个人赞助者。'
+        description='按前台赞助页的展示层级管理赞助商。'
         headerActions={
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
@@ -316,37 +237,39 @@ function SponsorshipManagementContent() {
             <Loader2 className='h-8 w-8 animate-spin text-primary' />
           </div>
         ) : (
-          <Tabs defaultValue='sponsors' className='w-full'>
-            <TabsList className='mb-4'>
-              <TabsTrigger value='sponsors'>赞助商管理</TabsTrigger>
-              <TabsTrigger value='users'>个人赞助者管理</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value='sponsors' className='space-y-6'>
-              <div className='flex flex-col gap-6'>
-                {(Object.keys(LEVEL_NAMES) as Array<keyof Sponsors>).map((level) => (
-                  <SponsorColumn
-                    key={level}
-                    level={level}
-                    title={LEVEL_NAMES[level]}
-                    sponsors={config.sponsors[level]}
-                    onAdd={() => handleAddSponsor(level)}
-                    onEdit={(index) => handleEditSponsor(level, index)}
-                    onDelete={(index) => handleDeleteSponsor(level, index)}
-                  />
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value='users'>
-              <UserColumn
-                users={config.users}
-                onAdd={handleAddUser}
-                onEdit={handleEditUser}
-                onDelete={handleDeleteUser}
+          <div className='grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]'>
+            <div className='space-y-5'>
+            {(Object.keys(LEVEL_NAMES) as Array<keyof Sponsors>).map((level) => (
+              <SponsorColumn
+                key={level}
+                level={level}
+                title={LEVEL_NAMES[level]}
+                sponsors={config.sponsors[level]}
+                onAdd={() => handleAddSponsor(level)}
+                onEdit={(index) => handleEditSponsor(level, index)}
+                onDelete={(index) => handleDeleteSponsor(level, index)}
               />
-            </TabsContent>
-          </Tabs>
+            ))}
+            </div>
+            <aside className='space-y-3'>
+              <div className='rounded-lg border border-border/70 bg-background p-4'>
+                <h2 className='text-sm font-semibold text-foreground'>展示规则</h2>
+                <div className='mt-3 space-y-2 text-sm leading-6 text-muted-foreground'>
+                  <p>层级本身固定，不参与拖拽。</p>
+                  <p>同一层级内的赞助商可以拖拽排序，也可以拖到其他层级。</p>
+                  <p>保存后会同步到前台赞助页。</p>
+                </div>
+              </div>
+              <div className='rounded-lg border border-border/70 bg-background p-4'>
+                <h2 className='text-sm font-semibold text-foreground'>内容建议</h2>
+                <div className='mt-3 space-y-2 text-sm leading-6 text-muted-foreground'>
+                  <p>Logo 建议使用清晰方图。</p>
+                  <p>描述文案保持一到两行，前台会做截断。</p>
+                  <p>链接留空时前台不会跳转。</p>
+                </div>
+              </div>
+            </aside>
+          </div>
         )}
 
         <SponsorActionDialog
@@ -357,13 +280,6 @@ function SponsorshipManagementContent() {
           title={open === 'add-sponsor' ? '添加赞助商' : '编辑赞助商'}
         />
 
-        <UserSponsorActionDialog
-          open={open === 'add-user' || open === 'edit-user'}
-          onOpenChange={() => setOpen(null)}
-          onSubmit={handleUserSubmit}
-          currentRow={currentRow as UserSponsor}
-          title={open === 'add-user' ? '添加个人赞助' : '编辑个人赞助'}
-        />
       </ContentLayout>
     </BoardContext.Provider>
   );

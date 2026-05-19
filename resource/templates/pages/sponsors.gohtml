@@ -23,15 +23,5 @@
         </ul>
     </section>
     {{end}}
-    {{if .Payload.Props.CommunitySupport}}
-    <section>
-        <h2>Community Support</h2>
-        <ul>
-            {{range .Payload.Props.CommunitySupport}}
-            <li>{{if .Link}}<a href="{{.Link}}" target="_blank" rel="noopener noreferrer">{{.Name}}</a>{{else}}{{.Name}}{{end}}</li>
-            {{end}}
-        </ul>
-    </section>
-    {{end}}
 </main>
 {{end}}

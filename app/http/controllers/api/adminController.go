@@ -593,7 +593,6 @@ func GetSponsors(req component.BetterRequest[component.Null]) component.Response
 			Level2: []pageConfig.SponsorItem{},
 			Level3: []pageConfig.SponsorItem{},
 		},
-		Users: []pageConfig.UserSponsor{},
 	}
 	res := pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, defaultSponsors)
 	return component.SuccessResponse(res)

@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
@@ -23,30 +24,48 @@ var resources embed.FS
 
 func GetTemplateFS() fs.FS {
 	if !setting.IsProduction() {
-		return os.DirFS("resource")
+		return os.DirFS(resourceDir())
 	}
 	return resources
 }
 
 func GetAssetsFS() (fs.FS, error) {
 	if !setting.IsProduction() {
-		return os.DirFS(path.Join("resource", "static", "dist")), nil
+		return os.DirFS(filepath.Join(resourceDir(), "static", "dist")), nil
 	}
 	return fs.Sub(resources, path.Join("static", "dist"))
 }
 
 func GetStaticFS() (fs.FS, error) {
 	if !setting.IsProduction() {
-		return os.DirFS(path.Join("resource", "static")), nil
+		return os.DirFS(filepath.Join(resourceDir(), "static")), nil
 	}
 	return fs.Sub(resources, "static")
 }
 
 func GetAdminFS() (fs.FS, error) {
 	if !setting.IsProduction() {
-		return os.DirFS(path.Join("resource", "static", "admin", "dict")), nil
+		return os.DirFS(filepath.Join(resourceDir(), "static", "admin", "dict")), nil
 	}
 	return fs.Sub(resources, path.Join("static", "admin", "dict"))
+}
+
+func resourceDir() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "resource"
+	}
+	for {
+		candidate := filepath.Join(wd, "resource")
+		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+			return candidate
+		}
+		parent := filepath.Dir(wd)
+		if parent == wd {
+			return "resource"
+		}
+		wd = parent
+	}
 }
 
 func GetThemeConfig() (*ThemeConfig, error) {

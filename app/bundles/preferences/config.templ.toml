@@ -2,8 +2,8 @@
 # 运行环境配置 (local/production/staging等)
 # 当设置为 'local' 时会自动绑定到 127.0.0.1，其他值则监听所有接口
 env = "production"
-# 调试模式开关
-# local 环境下建议设为 true，生产环境建议设为 false
+# 调试模式开关，可选覆盖项
+# 不配置时：local 默认 true，其他环境默认 false
 debug = false
 # 维护模式开关
 # 为 true 时所有请求返回503维护页面
@@ -65,4 +65,3 @@ client_id = ""
 client_secret = ""
 
 # end #
-

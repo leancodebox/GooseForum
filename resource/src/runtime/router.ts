@@ -1,12 +1,14 @@
 import { useNavigationState } from './navigation-state'
-import { preloadPageComponent } from './page-registry'
+import { resolvePageComponent } from './page-registry'
+import type { Component } from 'vue'
 import type { PagePayload } from '../types/payload'
 
-const PREFETCH_TTL = 15_000
-const pageCache = new Map<string, { promise: Promise<PagePayload>; expiresAt: number }>()
-let prefetchedUrl = ''
+export interface PreparedPage {
+  payload: PagePayload
+  component: Component
+}
 
-export function installNavigation(onPage: (payload: PagePayload) => void) {
+export function installNavigation(onPage: (page: PreparedPage) => void) {
   const navigation = useNavigationState()
 
   document.addEventListener('click', async (event) => {
@@ -23,9 +25,9 @@ export function installNavigation(onPage: (payload: PagePayload) => void) {
     navigation.setNavigating(true)
 
     try {
-      const payload = await getPreparedPage(url)
-      history.pushState({ goose: true, payload }, '', url)
-      onPage(payload)
+      const page = await getPreparedPage(url)
+      history.pushState({ goose: true, payload: page.payload }, '', url)
+      onPage(page)
       window.scrollTo({ top: 0 })
     } catch {
       window.location.href = url.toString()
@@ -34,22 +36,12 @@ export function installNavigation(onPage: (payload: PagePayload) => void) {
     }
   })
 
-  document.addEventListener('pointerover', (event) => {
-    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[href]')
-    prefetchLink(link)
-  })
-
-  document.addEventListener('touchstart', (event) => {
-    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[href]')
-    prefetchLink(link)
-  }, { passive: true })
-
   window.addEventListener('popstate', async (event) => {
     const cached = event.state?.payload as PagePayload | undefined
     if (cached) {
       navigation.setNavigating(true)
-      preloadPageComponent(cached.component)
-        .then(() => onPage(cached))
+      preparePayload(cached)
+        .then(onPage)
         .finally(() => navigation.setNavigating(false))
       return
     }
@@ -65,41 +57,8 @@ export function installNavigation(onPage: (payload: PagePayload) => void) {
   })
 }
 
-function prefetchLink(link: HTMLAnchorElement | null | undefined) {
-  if (!link || link.target === '_blank' || link.hasAttribute('download')) return
-
-  const url = new URL(link.href)
-  if (url.origin !== window.location.origin || !isRoutablePath(url.pathname)) return
-  if (url.href === window.location.href || url.href === prefetchedUrl) return
-
-  prefetchedUrl = url.href
-  getPreparedPage(url).catch(() => {
-    pageCache.delete(url.href)
-  })
-}
-
-async function getPreparedPage(url: URL): Promise<PagePayload> {
-  const payload = await cachedFetchPage(url)
-  await preloadPageComponent(payload.component)
-  return payload
-}
-
-function cachedFetchPage(url: URL): Promise<PagePayload> {
-  const cacheKey = url.href
-  const cached = pageCache.get(cacheKey)
-  if (cached && cached.expiresAt > Date.now()) {
-    return cached.promise
-  }
-
-  const promise = fetchPage(url).catch((error) => {
-    pageCache.delete(cacheKey)
-    throw error
-  })
-  pageCache.set(cacheKey, {
-    promise,
-    expiresAt: Date.now() + PREFETCH_TTL,
-  })
-  return promise
+async function getPreparedPage(url: URL): Promise<PreparedPage> {
+  return preparePayload(await fetchPage(url))
 }
 
 export async function fetchPage(url: URL): Promise<PagePayload> {
@@ -113,6 +72,14 @@ export async function fetchPage(url: URL): Promise<PagePayload> {
     throw new Error(`Page request failed: ${response.status}`)
   }
   return response.json() as Promise<PagePayload>
+}
+
+export async function preparePayload(payload: PagePayload): Promise<PreparedPage> {
+  const component = await resolvePageComponent(payload.component)
+  if (!component) {
+    throw new Error(`Unknown page component: ${payload.component}`)
+  }
+  return { payload, component }
 }
 
 function isRoutablePath(pathname: string) {

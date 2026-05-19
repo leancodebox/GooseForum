@@ -1,7 +1,7 @@
 <div align="center">
   <img src="resource/static/pic/icon_300.webp" width="140"/>
   <h1>GooseForum</h1>
-  <p>🚀 Modern Go + Alpine.js Forum System</p>
+  <p>🚀 Modern Go + Vue 3 Forum System</p>
 
   <p>
     <a href="https://github.com/leancodebox/GooseForum/releases"><img src="https://img.shields.io/github/release/leancodebox/GooseForum.svg" alt="GitHub release"></a>
@@ -18,7 +18,7 @@
 
 ## 📖 Project Overview
 
-GooseForum is a modern technical community platform built with Go + Alpine.js + TailwindCSS. It provides simple deployment and rich community features, designed as a lightweight forum system for technical developers.
+GooseForum is a modern technical community platform built with Go + Vue 3 + TailwindCSS. It keeps deployment simple while using a payload-driven SPA experience with no-js HTML rendering for SEO and graceful fallback.
 
 🌐 **Live Demo**: [GooseForum](https://gooseforum.online/)
 
@@ -44,7 +44,8 @@ GooseForum is a modern technical community platform built with Go + Alpine.js + 
 - **Auto Backup** - Scheduled database backup
 - **Responsive Design** - Perfect mobile support
 - **Brand Customization** - Custom logo/text/image support
-- **SEO Friendly** - Complete SEO optimization
+- **Payload-driven SPA** - Smooth in-app navigation with server-provided page payloads
+- **SEO Friendly** - Lightweight no-js GoHTML rendering for crawlers and fallback
 
 ## 🚀 Quick Start
 
@@ -86,7 +87,7 @@ goreleaser build --snapshot --clean --single-target
 #### Requirements
 - Go 1.24+
 - Node.js 18+
-- npm or pnpm
+- pnpm
 
 #### Build Steps
 
@@ -123,6 +124,10 @@ cd admin && pnpm dev      # React admin panel
 GooseForum auto-creates `config.toml` on first startup:
 
 ```toml
+[app]
+env = "production"              # local or production
+# debug is optional; local defaults to true, other environments default to false
+
 [server]
 port = 5234                    # Service port
 url = "http://localhost"       # Site URL
@@ -145,9 +150,11 @@ path = "./storage/database/sqlite.db"
 - **Cobra** - CLI
 
 ### Frontend Tech Stack
-- **Alpine.js** - Lightweight JS framework
+- **Vue 3** - Main UI framework
+- **TypeScript** - Type-safe frontend code
+- **Payload SPA Runtime** - Client-side navigation via `X-Goose-Page` JSON payloads
 - **TailwindCSS 4** - CSS framework
-- **GoHTML** - Server-side templates
+- **GoHTML** - Lightweight no-js/SEO templates
 - **Vite** - Build tool
 
 ### Admin Panel Tech Stack
@@ -168,9 +175,9 @@ GooseForum/
 │   ├── models/            # GORM models
 │   └── service/           # Business services
 ├── resource/              # Frontend resources
-│   ├── src/               # Alpine.js source
+│   ├── src/               # Vue 3 SPA source
 │   ├── static/            # Static assets
-│   └── templates/         # GoHTML templates
+│   └── templates/         # No-js/SEO GoHTML templates
 ├── admin/                 # React admin panel
 ├── docs/                  # Documentation
 ├── main.go               # Entry point

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
-import { Plus } from 'lucide-react';
+import { Plus, Send, ShieldCheck } from 'lucide-react';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { reorder } from '@atlaskit/pragmatic-drag-and-drop/reorder';
@@ -299,7 +299,7 @@ function LinksManagementContent() {
     <BoardContext.Provider value={boardContextValue}>
       <ContentLayout
         title="友情链接管理"
-        description="管理站点的友情链接及分组。"
+        description="按前台友情链接页的展示形态管理站点链接。"
         headerActions={
           <Button onClick={handleAddGroup}>
             <Plus className="mr-2 h-4 w-4" /> 添加分组
@@ -311,20 +311,54 @@ function LinksManagementContent() {
             <p className="text-muted-foreground">加载中...</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-8 pb-8">
-            {groups.map((group, gIdx) => (
-              <Column
-                key={group.name}
-                group={group}
-                groupIdx={gIdx}
-                onEditGroup={() => handleEditGroup(group, gIdx)}
-                onDeleteGroup={() => handleDeleteGroup(gIdx)}
-                onAddLink={() => handleAddLink(gIdx)}
-                onEditLink={(lIdx) => handleEditLink(gIdx, lIdx, group.links[lIdx])}
-                onDeleteLink={(lIdx) => handleDeleteLink(gIdx, lIdx)}
-                onToggleLinkStatus={(lIdx) => handleToggleLinkStatus(gIdx, lIdx)}
-              />
-            ))}
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
+            <div className="space-y-5 pb-8">
+              {groups.map((group, gIdx) => (
+                <Column
+                  key={group.name}
+                  group={group}
+                  groupIdx={gIdx}
+                  onEditGroup={() => handleEditGroup(group, gIdx)}
+                  onDeleteGroup={() => handleDeleteGroup(gIdx)}
+                  onAddLink={() => handleAddLink(gIdx)}
+                  onEditLink={(lIdx) => handleEditLink(gIdx, lIdx, group.links[lIdx])}
+                  onDeleteLink={(lIdx) => handleDeleteLink(gIdx, lIdx)}
+                  onToggleLinkStatus={(lIdx) => handleToggleLinkStatus(gIdx, lIdx)}
+                />
+              ))}
+            </div>
+            <aside className="space-y-3">
+              <div className="rounded-lg border border-border/70 bg-background p-4">
+                <h2 className="text-sm font-semibold text-foreground">申请友链</h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  前台会引导用户发帖申请，管理员在这里审核后录入展示。
+                </p>
+                <Button asChild className="mt-4 h-9 gap-1.5">
+                  <a href="/publish" target="_blank" rel="noopener noreferrer">
+                    <Send className="h-4 w-4" />
+                    查看申请入口
+                  </a>
+                </Button>
+              </div>
+
+              <div className="rounded-lg border border-border/70 bg-background p-4">
+                <h2 className="text-sm font-semibold text-foreground">收录原则</h2>
+                <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+                  <div className="flex gap-2">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <span>内容健康、长期可访问。</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <span>优先技术、开源、社区相关站点。</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <span>站点信息清晰，Logo 可稳定加载。</span>
+                  </div>
+                </div>
+              </div>
+            </aside>
           </div>
         )}
 

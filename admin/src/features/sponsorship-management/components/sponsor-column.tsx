@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import {
   dropTargetForElements,
@@ -8,8 +8,9 @@ import {
   extractClosestEdge,
 } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import type { Edge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/types';
-import { Plus } from 'lucide-react';
+import { HeartHandshake, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useBoardContext } from './board-context';
 import { SponsorCard } from './sponsor-card';
 import { DropIndicator } from './drop-indicator';
@@ -34,17 +35,32 @@ export function SponsorColumn({
 }: SponsorColumnProps) {
   const { registerLevel, instanceId } = useBoardContext();
   const ref = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
+  const levelLabel = useMemo(() => title.replace(/\s*\(Level\s*\d+\)/, ''), [title]);
+  const levelCode = useMemo(() => title.match(/Level\s*\d+/)?.[0] ?? level, [level, title]);
+  const tone = {
+    level0: 'diamond',
+    level1: 'gold',
+    level2: 'silver',
+    level3: 'bronze',
+  }[level];
+  const badgeClass = {
+    diamond: 'bg-blue-50 text-blue-700',
+    gold: 'bg-amber-50 text-amber-700',
+    silver: 'bg-gray-100 text-gray-600',
+    bronze: 'bg-rose-50 text-rose-700',
+  }[tone];
+  const gridClass = {
+    diamond: 'grid-cols-1 md:grid-cols-2',
+    gold: 'grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3',
+    silver: 'grid-cols-2 sm:grid-cols-3 xl:grid-cols-4',
+    bronze: 'grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
+  }[tone];
 
   useEffect(() => {
     const element = ref.current;
-    const header = headerRef.current;
-    if (!element || !header) return;
+    if (!element) return;
 
-    // We don't necessarily need columns to be draggable for now, 
-    // but we'll implement it to match the links-management style if needed.
-    // For now, let's just make them drop targets for sponsors.
     return combine(
       registerLevel(level, { element }),
       dropTargetForElements({
@@ -64,12 +80,12 @@ export function SponsorColumn({
           });
         },
         onDragEnter: ({ self, source }) => {
-          if (source.data.type === 'level') {
+          if (source.data.type === 'sponsor') {
             setClosestEdge(extractClosestEdge(self.data));
           }
         },
         onDrag: ({ self, source }) => {
-          if (source.data.type === 'level') {
+          if (source.data.type === 'sponsor') {
             setClosestEdge(extractClosestEdge(self.data));
           }
         },
@@ -82,43 +98,61 @@ export function SponsorColumn({
   return (
     <div
       ref={ref}
-      className={`relative flex flex-col w-full bg-[#f4f5f7] rounded-2xl transition-all border-transparent`}
+      className='relative space-y-3'
     >
       {closestEdge && <DropIndicator edge={closestEdge} />}
       <div
-        ref={headerRef}
-        className="flex items-center justify-between px-4 py-3 border-b border-[#091e4214] hover:bg-[#091e4208] transition-colors rounded-t-2xl"
+        className='flex items-center justify-between gap-3 border-b border-border/70 pb-2'
       >
-        <div className="flex items-center gap-2 overflow-hidden">
-          <h3 className="text-[12px] font-bold text-[#44546f] uppercase tracking-tight truncate">
-            {title}
-          </h3>
-          <span className="flex-shrink-0 min-w-[20px] h-5 flex items-center justify-center bg-[#091e420f] text-[#44546f] text-[11px] font-medium px-1.5 rounded-full">
+        <div className='flex min-w-0 items-center gap-2'>
+          <span className={cn('rounded px-1.5 py-0.5 text-[11px] font-semibold', badgeClass)}>
+            {levelLabel}
+          </span>
+          <span className='text-xs font-medium text-muted-foreground'>{levelCode}</span>
+          <span className='rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground'>
             {sponsors.length}
           </span>
         </div>
         <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 text-[#44546f] hover:bg-[#091e420f] text-[12px] font-medium"
+          variant='ghost'
+          size='sm'
+          className='h-8 shrink-0 gap-1.5 px-2 text-xs'
           onClick={onAdd}
         >
-          <Plus className="mr-1 h-3.5 w-3.5" />
+          <Plus className='h-3.5 w-3.5' />
           添加
         </Button>
       </div>
 
-      <div className="p-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 min-h-[120px]">
-        {sponsors.map((sponsor, index) => (
-          <SponsorCard
-            key={`${level}-${sponsor.name}-${index}`}
-            sponsor={sponsor}
-            level={level}
-            index={index}
-            onEdit={() => onEdit(index)}
-            onDelete={() => onDelete(index)}
-          />
-        ))}
+      <div
+        className={cn(
+          'min-h-24 rounded-lg border border-dashed border-transparent',
+          sponsors.length === 0 && 'border-muted-foreground/20 bg-muted/20'
+        )}
+      >
+        {sponsors.length === 0 ? (
+          <button
+            type='button'
+            onClick={onAdd}
+            className='flex h-28 w-full flex-col items-center justify-center rounded-lg text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground'
+          >
+            <HeartHandshake className='mb-2 h-5 w-5' />
+            添加这个级别的第一个赞助商
+          </button>
+        ) : (
+          <div className={cn('grid gap-3', gridClass)}>
+            {sponsors.map((sponsor, index) => (
+              <SponsorCard
+                key={`${level}-${sponsor.name}-${index}`}
+                sponsor={sponsor}
+                level={level}
+                index={index}
+                onEdit={() => onEdit(index)}
+                onDelete={() => onDelete(index)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

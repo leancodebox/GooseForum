@@ -55,6 +55,26 @@ func GetUserCard(req component.BetterRequest[GetUserCardReq]) component.Response
 	return component.SuccessResponse(card)
 }
 
+func GetUserHoverCard(req component.BetterRequest[GetUserCardReq]) component.Response {
+	userId := req.Params.UserId
+	userEntity, err := users.Get(userId)
+	if err != nil || userEntity.Id == 0 {
+		return component.FailResponse("User not found")
+	}
+
+	userStats := userStatistics.Get(userId)
+	currentUserId := req.UserId
+	var isFollowingAuthor bool
+
+	if currentUserId > 0 && currentUserId != userId {
+		isFollowingAuthor = userFollow.IsFollowing(currentUserId, userId)
+	}
+
+	card := transform.User2UserHoverCard(userEntity, userStats, isFollowingAuthor)
+
+	return component.SuccessResponse(card)
+}
+
 // UserInfo returns the current user's profile and statistics.
 func UserInfo(req component.BetterRequest[component.Null]) component.Response {
 	userEntity, err := req.GetUser()

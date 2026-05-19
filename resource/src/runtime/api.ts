@@ -1,4 +1,4 @@
-import type { UserCardPayload } from '../types/payload'
+import type { UserCardPayload, UserHoverCardPayload } from '../types/payload'
 
 interface ApiResponse<T> {
   code?: number
@@ -87,6 +87,28 @@ export async function getUserCard(userId: number): Promise<UserCardPayload> {
   }
 
   const data = (await response.json()) as ApiResponse<UserCardPayload>
+  if (data.code !== undefined && data.code !== 0) {
+    throw new Error(data.message || data.msg || '用户信息加载失败')
+  }
+
+  const result = data.result ?? data.data
+  if (!result) {
+    throw new Error('用户信息为空')
+  }
+  return result
+}
+
+export async function getUserHoverCard(userId: number): Promise<UserHoverCardPayload> {
+  const response = await fetch(`/api/user-hover-card?userId=${encodeURIComponent(String(userId))}`, {
+    headers: {
+      Accept: 'application/json',
+    },
+  })
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+
+  const data = (await response.json()) as ApiResponse<UserHoverCardPayload>
   if (data.code !== undefined && data.code !== 0) {
     throw new Error(data.message || data.msg || '用户信息加载失败')
   }

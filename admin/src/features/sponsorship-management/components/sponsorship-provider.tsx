@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState } from 'react'
-import { SponsorItem, UserSponsor, Sponsors } from '../data/schema'
+import { SponsorItem, Sponsors } from '../data/schema'
 
-type SponsorshipDialogType = 'add-sponsor' | 'edit-sponsor' | 'delete-sponsor' | 'add-user' | 'edit-user' | 'delete-user'
+type SponsorshipDialogType = 'add-sponsor' | 'edit-sponsor' | 'delete-sponsor'
 
 interface SponsorshipContextType {
   open: SponsorshipDialogType | null
   setOpen: (open: SponsorshipDialogType | null) => void
-  currentRow: SponsorItem | UserSponsor | null
-  setCurrentRow: (row: SponsorItem | UserSponsor | null) => void
+  currentRow: SponsorItem | null
+  setCurrentRow: (row: SponsorItem | null) => void
   currentLevel: keyof Sponsors | null
   setCurrentLevel: (level: keyof Sponsors | null) => void
   currentIndex: number | null
@@ -22,7 +22,7 @@ interface Props {
 
 export default function SponsorshipProvider({ children }: Props) {
   const [open, setOpen] = useState<SponsorshipDialogType | null>(null)
-  const [currentRow, setCurrentRow] = useState<SponsorItem | UserSponsor | null>(null)
+  const [currentRow, setCurrentRow] = useState<SponsorItem | null>(null)
   const [currentLevel, setCurrentLevel] = useState<keyof Sponsors | null>(null)
   const [currentIndex, setCurrentIndex] = useState<number | null>(null)
 

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { CalendarDays, FileText, Heart, MessageCircle, MessageSquare, PenLine, Radio, Settings, UserPlus, UsersRound } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import { followUser } from '../runtime/api'
 import { formatDate, formatDateTime, formatNumber, timeAgo } from '../runtime/format'
 import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '../types/payload'
@@ -60,7 +59,6 @@ function topicCategories(topic: TopicPayload) {
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <article class="pb-12">
       <section class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
         <div class="h-24 border-b border-gray-100 bg-[linear-gradient(135deg,#f8fafc_0%,#eff6ff_48%,#f8fafc_100%)]" />
@@ -245,5 +243,4 @@ function topicCategories(topic: TopicPayload) {
         </div>
       </section>
     </article>
-  </AppShell>
 </template>

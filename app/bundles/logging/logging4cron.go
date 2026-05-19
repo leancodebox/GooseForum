@@ -18,5 +18,5 @@ func (itself CronLogging) Info(msg string, keysAndValues ...any) {
 
 // Error logs an error condition.
 func (itself CronLogging) Error(err error, msg string, keysAndValues ...any) {
-	slog.Error("error", "msg", msg, "err", err, keysAndValues)
+	slog.Error("error", append([]any{"msg", msg, "err", err}, keysAndValues...)...)
 }

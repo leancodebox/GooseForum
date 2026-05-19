@@ -154,12 +154,6 @@ export interface SponsorItem {
   tag: string[]
 }
 
-export interface UserSponsor {
-  name: string
-  amount: string
-  time: string
-}
-
 export interface SponsorsConfig {
   sponsors: {
     level0: SponsorItem[]
@@ -167,7 +161,6 @@ export interface SponsorsConfig {
     level2: SponsorItem[]
     level3: SponsorItem[]
   }
-  users: UserSponsor[]
 }
 
 export interface AnnouncementConfig {

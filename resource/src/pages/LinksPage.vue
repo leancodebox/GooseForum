@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ExternalLink, Link, Send, ShieldCheck } from '@lucide/vue'
-import AppShell from '../components/AppShell.vue'
 import type { LayoutPayload, LinksPageProps } from '../types/payload'
 
 defineProps<{
@@ -10,7 +9,6 @@ defineProps<{
 </script>
 
 <template>
-  <AppShell :layout="layout">
     <div class="pb-12">
       <header class="mb-3 border-b border-gray-200/70 pb-4">
         <div class="flex flex-wrap items-center gap-2">
@@ -105,5 +103,4 @@ defineProps<{
         </aside>
       </div>
     </div>
-  </AppShell>
 </template>
