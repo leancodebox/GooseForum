@@ -132,7 +132,7 @@ export function testMailConnection(data: { host: string; port: number; username:
 }
 
 export function getSiteSettings() {
-  return request.post<SiteSettings>('/api/admin/site-settings')
+  return request.get<SiteSettings>('/api/admin/site-settings')
 }
 
 export function saveSiteSettings(data: { settings: SiteSettings }) {
