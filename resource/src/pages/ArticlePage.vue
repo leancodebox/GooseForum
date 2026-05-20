@@ -39,9 +39,16 @@ const deleteErrorMessage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const titleEl = ref<HTMLElement | null>(null)
+const replyEditorEl = ref<HTMLTextAreaElement | null>(null)
+const replySectionEl = ref<HTMLElement | null>(null)
+const replyLoadMoreEl = ref<HTMLElement | null>(null)
 const showHeaderTitle = ref(false)
+const showFloatingReply = ref(false)
+const floatingReplyExpanded = ref(false)
 const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
+let replyEditorObserver: IntersectionObserver | undefined
+let replyLoadObserver: IntersectionObserver | undefined
 const highlightedReplyId = ref<number | null>(null)
 let highlightTimer: number | undefined
 
@@ -62,6 +69,8 @@ function observeTitle() {
 
 onMounted(() => {
   void nextTick(observeTitle)
+  void nextTick(observeReplyEditor)
+  void nextTick(observeReplyLoader)
   void syncReplyHash()
 })
 
@@ -73,6 +82,8 @@ watch(
     isBookmarked.value = page.props.article.isBookmarked
     resetRepliesFromProps()
     void nextTick(observeTitle)
+    void nextTick(observeReplyEditor)
+    void nextTick(observeReplyLoader)
     void nextTick(syncReplyHash)
   },
   { immediate: true },
@@ -89,10 +100,41 @@ watch(
 
 onBeforeUnmount(() => {
   titleObserver?.disconnect()
+  replyEditorObserver?.disconnect()
+  replyLoadObserver?.disconnect()
   window.clearTimeout(highlightTimer)
   shellState.headerTitle = ''
   shellState.showHeaderTitle = false
 })
+
+function observeReplyEditor() {
+  replyEditorObserver?.disconnect()
+  showFloatingReply.value = false
+  if (!replySectionEl.value || !page.props.permissions.canReply || !('IntersectionObserver' in window)) return
+
+  replyEditorObserver = new IntersectionObserver(
+    (entries) => {
+      showFloatingReply.value = !entries[0]?.isIntersecting
+    },
+    { threshold: 0.08, rootMargin: '0px 0px -96px 0px' },
+  )
+  replyEditorObserver.observe(replySectionEl.value)
+}
+
+function observeReplyLoader() {
+  replyLoadObserver?.disconnect()
+  if (!replyLoadMoreEl.value || !replyHasAfter.value || !('IntersectionObserver' in window)) return
+
+  replyLoadObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting && replyHasAfter.value && !loadingReplyWindow.value && !replyWindowError.value) {
+        void loadReplyWindow('after')
+      }
+    },
+    { rootMargin: '360px 0px' },
+  )
+  replyLoadObserver.observe(replyLoadMoreEl.value)
+}
 
 function resetRepliesFromProps() {
   replies.value = [...page.props.replies]
@@ -156,6 +198,7 @@ function mergeReplies(nextReplies: ReplyPayload[], mode: 'replace' | 'prepend' |
 async function loadReplyWindow(direction: 'before' | 'after' | 'anchor', anchorReplyId = 0) {
   if (loadingReplyWindow.value) return
 
+  const wasWindowMode = replyWindowMode.value
   loadingReplyWindow.value = true
   loadingReplyDirection.value = direction
   replyWindowError.value = ''
@@ -168,18 +211,34 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor', anchorR
       limit: 20,
     })
 
-    replyWindowMode.value = true
+    replyWindowMode.value = direction === 'anchor' || direction === 'before' || wasWindowMode
     mergeReplies(payload.replies, direction === 'before' ? 'prepend' : direction === 'after' ? 'append' : 'replace')
-    replyHasBefore.value = payload.hasBefore
+    replyHasBefore.value = replyWindowMode.value ? payload.hasBefore : false
     replyHasAfter.value = payload.hasAfter
     replyBeforeCursor.value = payload.beforeCursor ?? firstReplyId(replies.value)
     replyAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
+    await nextTick()
+    observeReplyLoader()
   } catch (error) {
     replyWindowError.value = error instanceof Error ? error.message : '回复加载失败'
   } finally {
     loadingReplyWindow.value = false
     loadingReplyDirection.value = null
   }
+}
+
+function focusReplyEditor() {
+  replyEditorEl.value?.focus()
+  replyEditorEl.value?.scrollIntoView({ block: 'center' })
+}
+
+function openFloatingReply() {
+  floatingReplyExpanded.value = true
+  openReplyId.value = null
+}
+
+function closeFloatingReply() {
+  floatingReplyExpanded.value = false
 }
 
 async function toggleLike() {
@@ -382,7 +441,7 @@ async function removeReply(replyId: number) {
 
         <span v-if="replies.length" id="replies" class="block scroll-mt-20" aria-hidden="true" />
 
-        <div v-if="replyWindowMode || replyHasBefore || replyWindowError" class="border-t border-gray-100 px-4 py-3 text-center">
+        <div v-if="replyHasBefore" class="border-t border-gray-100 px-4 py-3 text-center">
           <button
             v-if="replyHasBefore"
             type="button"
@@ -393,7 +452,6 @@ async function removeReply(replyId: number) {
             <Loader2 v-if="loadingReplyDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
             加载更早回复
           </button>
-          <p v-if="replyWindowError" class="mt-2 text-xs text-red-600">{{ replyWindowError }}</p>
         </div>
 
         <div
@@ -471,20 +529,27 @@ async function removeReply(replyId: number) {
           </div>
         </div>
 
-        <div v-if="replyHasAfter" class="border-t border-gray-100 px-4 py-3 text-center">
+        <div v-if="replyHasAfter || loadingReplyDirection === 'after' || replyWindowError || replies.length" ref="replyLoadMoreEl" class="border-t border-gray-100 px-4 py-3 text-center">
           <button
+            v-if="replyHasAfter && replyWindowError"
             type="button"
             class="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="loadingReplyWindow"
             @click="loadReplyWindow('after')"
           >
             <Loader2 v-if="loadingReplyDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
-            加载更多回复
+            重试加载回复
           </button>
+          <p v-else-if="replyWindowError" class="text-xs text-red-600">{{ replyWindowError }}</p>
+          <p v-else-if="replyHasAfter && loadingReplyDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-gray-500">
+            <Loader2 class="h-3.5 w-3.5 animate-spin" />
+            正在加载更多回复...
+          </p>
+          <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-gray-400">已显示全部回复</p>
         </div>
       </section>
 
-      <section class="mt-4 rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] sm:p-5">
+      <section ref="replySectionEl" class="mt-4 rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] sm:p-5">
         <template v-if="page.props.permissions.canReply">
           <div class="mb-3 flex items-center justify-between">
             <label class="text-sm font-semibold text-gray-950" for="reply-content">参与讨论</label>
@@ -492,6 +557,7 @@ async function removeReply(replyId: number) {
           </div>
           <textarea
             id="reply-content"
+            ref="replyEditorEl"
             v-model="replyContent"
             class="min-h-28 w-full resize-y rounded-md border border-gray-200 p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             placeholder="写下你的回复..."
@@ -518,6 +584,57 @@ async function removeReply(replyId: number) {
         </template>
       </section>
     </article>
+
+    <Teleport v-if="page.props.permissions.canReply && showFloatingReply" to="body">
+      <div class="pointer-events-none fixed inset-x-0 bottom-4 z-[80] px-3 sm:px-6">
+        <Transition name="floating-reply" mode="out-in">
+          <button
+            v-if="!floatingReplyExpanded"
+            type="button"
+            class="pointer-events-auto mx-auto flex h-10 items-center gap-2 rounded-full border border-gray-200/80 bg-white/95 px-4 text-sm font-semibold text-gray-700 shadow-[0_14px_34px_-22px_rgba(15,23,42,0.55),0_4px_14px_-10px_rgba(15,23,42,0.35)] backdrop-blur transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+            @click="openFloatingReply"
+          >
+            <MessageSquare class="h-4 w-4" />
+            参与讨论
+          </button>
+          <div
+            v-else
+            class="pointer-events-auto mx-auto w-full max-w-2xl rounded-lg border border-gray-200/80 bg-white/95 p-3 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.5),0_4px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur"
+          >
+            <div class="mb-2 flex items-center justify-between">
+              <div class="text-sm font-semibold text-gray-950">参与讨论</div>
+              <button type="button" class="rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700" @click="closeFloatingReply">
+                <X class="h-4 w-4" />
+              </button>
+            </div>
+            <textarea
+              v-model="replyContent"
+              rows="3"
+              class="min-h-24 w-full resize-y rounded-md border border-gray-200 bg-white p-3 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              placeholder="写下你的回复..."
+              @focus="openReplyId = null"
+            />
+            <p v-if="errorMessage" class="mt-2 text-sm text-red-600">{{ errorMessage }}</p>
+            <p v-if="successMessage" class="mt-2 text-sm text-green-600">{{ successMessage }}</p>
+            <div class="mt-3 flex justify-end gap-2">
+              <button type="button" class="h-9 rounded-md px-3 text-sm font-semibold text-gray-500 transition hover:bg-gray-100 hover:text-gray-800" @click="focusReplyEditor">
+                完整编辑
+              </button>
+              <button
+                type="button"
+                class="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                :disabled="submitting || !replyContent.trim()"
+                @click="submitReply()"
+              >
+                <Loader2 v-if="submitting && currentReplyId === 0" class="h-4 w-4 animate-spin" />
+                <Send v-else class="h-4 w-4" />
+                {{ submitting && currentReplyId === 0 ? '发布中...' : '发布回复' }}
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Teleport>
 
     <Teleport defer to="#goose-shell-rail">
       <div class="sticky top-19 space-y-3">
@@ -649,3 +766,25 @@ async function removeReply(replyId: number) {
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+.floating-reply-enter-active,
+.floating-reply-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.floating-reply-enter-from,
+.floating-reply-leave-to {
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-reply-enter-active,
+  .floating-reply-leave-active {
+    transition: none;
+  }
+}
+</style>
