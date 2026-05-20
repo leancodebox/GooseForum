@@ -292,7 +292,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		ParentReplyAuthorId: parentReplyAuthorId,
 	})
 
-	return component.SuccessResponse(true)
+	return component.SuccessResponse(replyEntity.Id)
 }
 
 type DeleteReplyId struct {

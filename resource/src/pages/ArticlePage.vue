@@ -241,6 +241,72 @@ function closeFloatingReply() {
   floatingReplyExpanded.value = false
 }
 
+function isElementMostlyVisible(element: HTMLElement) {
+  const rect = element.getBoundingClientRect()
+  return rect.top >= 96 && rect.bottom <= window.innerHeight - 120
+}
+
+function scrollReplyIntoComfortView(element: HTMLElement) {
+  const targetTop = element.getBoundingClientRect().top + window.scrollY - 160
+  window.scrollTo({
+    top: Math.max(0, targetTop),
+    behavior: 'smooth',
+  })
+}
+
+async function revealCreatedReply(reply: ReplyPayload) {
+  if (!reply.id) return
+
+  mergeReplies([reply], 'append')
+  replyHasAfter.value = false
+  replyAfterCursor.value = Math.max(replyAfterCursor.value, reply.id)
+  await nextTick()
+  highlightReply(reply.id)
+  const element = document.getElementById(`reply-${reply.id}`)
+  if (element && !isElementMostlyVisible(element)) {
+    scrollReplyIntoComfortView(element)
+  }
+}
+
+function buildCreatedReply(replyId: number, content: string, replyToId: number): ReplyPayload {
+  const parentReply = replyToId > 0 ? replies.value.find((reply) => reply.id === replyToId) : undefined
+  const viewer = page.layout.viewer
+  return {
+    id: replyId,
+    articleId: page.props.article.id,
+    content,
+    author: {
+      id: viewer.id,
+      username: viewer.username,
+      avatarUrl: viewer.avatarUrl,
+    },
+    createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    replyToId: replyToId || undefined,
+    replyToUserId: parentReply?.author.id,
+    replyToUsername: parentReply?.author.username,
+    isOwnReply: true,
+  }
+}
+
+async function fetchAndRevealCreatedReply(replyId: number) {
+  if (!replyId) return
+
+  const payload = await getArticleRepliesWindow({
+    articleId: page.props.article.id,
+    anchorReplyId: replyId,
+    limit: 3,
+  })
+  mergeReplies(payload.replies, 'append')
+  replyHasAfter.value = payload.hasAfter
+  replyAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
+  await nextTick()
+  highlightReply(replyId)
+  const element = document.getElementById(`reply-${replyId}`)
+  if (element && !isElementMostlyVisible(element)) {
+    scrollReplyIntoComfortView(element)
+  }
+}
+
 async function toggleLike() {
   if (actingLike.value) return
 
@@ -297,15 +363,24 @@ async function submitReply(replyId = 0) {
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    await postReply(page.props.article.id, content, replyId)
+    const createdReplyId = await postReply(page.props.article.id, content, replyId)
     if (replyId > 0) {
       replyContents[replyId] = ''
       openReplyId.value = null
     } else {
       replyContent.value = ''
+      closeFloatingReply()
     }
     successMessage.value = replyId > 0 ? '回复已发布。' : '回复已发布。'
-    await refreshCurrentPage()
+    if (typeof createdReplyId === 'number') {
+      if (page.layout.viewer.isAuthenticated) {
+        await revealCreatedReply(buildCreatedReply(createdReplyId, content, replyId))
+      } else {
+        await fetchAndRevealCreatedReply(createdReplyId)
+      }
+    } else {
+      await refreshCurrentPage()
+    }
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '回复失败'
   } finally {
