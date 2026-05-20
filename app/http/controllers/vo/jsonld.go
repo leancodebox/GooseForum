@@ -23,12 +23,18 @@ type InteractionCounter struct {
 
 // ArticleJSONLD is the structured data payload embedded on article detail pages.
 type ArticleJSONLD struct {
-	Context              string             `json:"@context"`
-	Type                 string             `json:"@type"`
-	Headline             string             `json:"headline"`
-	Author               Person             `json:"author"`
-	Publisher            Organization       `json:"publisher"`
-	DatePublished        string             `json:"datePublished"`
-	URL                  string             `json:"url"`
-	InteractionStatistic InteractionCounter `json:"interactionStatistic"`
+	Context              string               `json:"@context"`
+	Type                 string               `json:"@type"`
+	Headline             string               `json:"headline"`
+	Description          string               `json:"description,omitempty"`
+	Author               Person               `json:"author"`
+	Publisher            Organization         `json:"publisher"`
+	DatePublished        string               `json:"datePublished"`
+	DateModified         string               `json:"dateModified,omitempty"`
+	URL                  string               `json:"url"`
+	MainEntityOfPage     string               `json:"mainEntityOfPage,omitempty"`
+	ArticleSection       string               `json:"articleSection,omitempty"`
+	Keywords             []string             `json:"keywords,omitempty"`
+	CommentCount         uint64               `json:"commentCount,omitempty"`
+	InteractionStatistic []InteractionCounter `json:"interactionStatistic,omitempty"`
 }

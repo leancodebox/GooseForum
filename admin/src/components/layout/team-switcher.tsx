@@ -23,7 +23,7 @@ export function TeamSwitcher({ teams }: TeamSwitcherProps) {
           asChild
           className='hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
         >
-          <a href='/'>
+          <a href='/' target='_blank' rel='noopener noreferrer'>
             <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
               <ShieldCheck className='size-5' />
             </div>

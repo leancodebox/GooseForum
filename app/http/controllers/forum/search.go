@@ -27,13 +27,13 @@ func Search(c *gin.Context) {
 }
 
 func buildSearchMeta(c *gin.Context, query string) PageMeta {
-	title := "搜索 - GooseForum"
+	title := "搜索"
 	if query != "" {
-		title = query + " - 搜索 - GooseForum"
+		title = query + " - 搜索"
 	}
 	return PageMeta{
-		Title:       title,
-		Description: "搜索 GooseForum 主题、关键词和讨论。",
+		Title:       pageTitle(title),
+		Description: "搜索 " + siteTitle() + " 主题、关键词和讨论。",
 		Canonical:   component.GetBaseUri(c) + buildSearchURL(query, 1),
 	}
 }

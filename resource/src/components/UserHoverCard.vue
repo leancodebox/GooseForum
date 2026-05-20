@@ -1,10 +1,25 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { CalendarDays, Loader2, Radio, UserPlus } from '@lucide/vue'
+import {
+  Bird,
+  CalendarDays,
+  ExternalLink,
+  Loader2,
+  Radio,
+  UserPlus,
+} from '@lucide/vue'
 import { getUserHoverCard } from '@/runtime/api'
 import { formatDate, formatNumber, timeAgo } from '@/runtime/format'
 import type { UserCardShowDetail } from '@/runtime/user-card-events'
 import type { UserHoverCardPayload } from '@/types/payload'
+import {
+  siBilibili,
+  siGithub,
+  siSinaweibo,
+  siX,
+  siZhihu,
+  type SimpleIcon,
+} from 'simple-icons'
 
 const visible = ref(false)
 const loading = ref(false)
@@ -12,39 +27,85 @@ const error = ref('')
 const fallbackUser = ref<UserCardShowDetail['user'] | null>(null)
 const card = ref<UserHoverCardPayload | null>(null)
 const position = ref({ left: 0, top: 0 })
+const cardEl = ref<HTMLElement | null>(null)
+const activeBadgeCode = ref('')
 const cache = new Map<number, UserHoverCardPayload>()
-let hideTimer: number | undefined
 let requestToken = 0
+let preferredSide: 'top' | 'bottom' | null = null
+
+const linkedInIcon: SimpleIcon = {
+  title: 'LinkedIn',
+  slug: 'linkedin',
+  hex: '0A66C2',
+  source: 'https://www.linkedin.com/',
+  path: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z',
+  svg: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
+}
+
+const socialIcons: Record<string, SimpleIcon> = {
+  github: siGithub,
+  twitter: siX,
+  linkedIn: linkedInIcon,
+  weibo: siSinaweibo,
+  bilibili: siBilibili,
+  zhihu: siZhihu,
+}
 
 const displayName = computed(() => card.value?.nickname || fallbackUser.value?.username || card.value?.username || '')
 const username = computed(() => card.value?.username || fallbackUser.value?.username || '')
 const avatarUrl = computed(() => card.value?.avatarUrl || fallbackUser.value?.avatarUrl || '')
 const profileUrl = computed(() => `/u/${card.value?.userId || fallbackUser.value?.id || 0}`)
-const bioText = computed(() => card.value?.bio || card.value?.signature || '这个用户还没有留下简介。')
-
-function clearHideTimer() {
-  if (hideTimer) {
-    window.clearTimeout(hideTimer)
-    hideTimer = undefined
+const bioText = computed(() => card.value?.bio || card.value?.signature || '')
+const externalLinks = computed(() => {
+  const links: Array<{ key: string; label: string; url: string; icon?: SimpleIcon }> = []
+  const primaryUrl = normalizeWebsiteURL(card.value?.website || '')
+  if (primaryUrl) {
+    links.push({
+      key: 'website',
+      label: card.value?.websiteName || formatLinkLabel(primaryUrl),
+      url: primaryUrl,
+    })
   }
+  const socialLabels: Record<string, string> = {
+    github: 'GitHub',
+    twitter: 'Twitter',
+    linkedIn: 'LinkedIn',
+    weibo: '微博',
+    bilibili: 'Bilibili',
+    zhihu: '知乎',
+  }
+  const externalInformation = card.value?.externalInformation || {}
+  for (const [key, item] of Object.entries(externalInformation)) {
+    const url = normalizeWebsiteURL(item?.link || '')
+    if (!url) continue
+    links.push({ key, label: socialLabels[key] || formatLinkLabel(url), url, icon: socialIcons[key] })
+  }
+  return links
+})
+const visibleBadges = computed(() => (card.value?.badges || []).slice(0, 5))
+
+function normalizeWebsiteURL(value: string) {
+  const url = value.trim()
+  if (!url) return ''
+  if (/^https?:\/\//i.test(url)) return url
+  return `https://${url}`
+}
+
+function formatLinkLabel(url: string) {
+  return url.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/$/, '')
 }
 
 function hideNow() {
-  clearHideTimer()
   visible.value = false
-}
-
-function scheduleHide() {
-  clearHideTimer()
-  hideTimer = window.setTimeout(() => {
-    visible.value = false
-  }, 130)
+  activeBadgeCode.value = ''
+  preferredSide = null
 }
 
 function placeCard(target: HTMLElement) {
   const rect = target.getBoundingClientRect()
   const cardWidth = Math.min(320, window.innerWidth - 24)
-  const estimatedCardHeight = 252
+  const measuredHeight = cardEl.value?.offsetHeight || 0
+  const cardHeight = Math.max(measuredHeight, 220)
   const gap = 10
   const viewportPadding = 12
   const viewportWidth = window.innerWidth
@@ -52,12 +113,17 @@ function placeCard(target: HTMLElement) {
   let left = rect.left
   left = Math.max(viewportPadding, Math.min(left, viewportWidth - cardWidth - viewportPadding))
   const belowTop = rect.bottom + gap
-  const aboveTop = rect.top - estimatedCardHeight - gap
-  const top = belowTop + estimatedCardHeight > window.innerHeight - viewportPadding && aboveTop > viewportPadding ? aboveTop : belowTop
+  const aboveTop = rect.top - cardHeight - gap
+  if (!preferredSide) {
+    const belowSpace = window.innerHeight - rect.bottom - gap - viewportPadding
+    const aboveSpace = rect.top - gap - viewportPadding
+    preferredSide = belowSpace >= cardHeight || belowSpace >= aboveSpace ? 'bottom' : 'top'
+  }
+  const top = preferredSide === 'top' ? aboveTop : belowTop
 
   position.value = {
     left,
-    top: Math.max(viewportPadding, Math.min(top, window.innerHeight - estimatedCardHeight - viewportPadding)),
+    top: Math.max(viewportPadding, Math.min(top, window.innerHeight - cardHeight - viewportPadding)),
   }
 }
 
@@ -65,11 +131,10 @@ async function show(event: Event) {
   const detail = (event as CustomEvent<UserCardShowDetail>).detail
   if (!detail?.user?.id || !detail.target) return
 
-  clearHideTimer()
   fallbackUser.value = detail.user
   visible.value = true
   error.value = ''
-  placeCard(detail.target)
+  requestAnimationFrame(() => placeCard(detail.target))
 
   const cached = cache.get(detail.user.id)
   if (cached) {
@@ -86,6 +151,7 @@ async function show(event: Event) {
     if (token !== requestToken) return
     cache.set(detail.user.id, result)
     card.value = result
+    requestAnimationFrame(() => placeCard(detail.target))
   } catch {
     if (token !== requestToken) return
     error.value = '用户资料暂时不可用'
@@ -94,9 +160,21 @@ async function show(event: Event) {
   }
 }
 
+function onDocumentPointerDown(event: PointerEvent) {
+  if (!visible.value) return
+  const target = event.target
+  if (target instanceof Node && cardEl.value?.contains(target)) return
+  hideNow()
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') hideNow()
+}
+
 onMounted(() => {
   window.addEventListener('goose:user-card-show', show)
-  window.addEventListener('goose:user-card-hide', scheduleHide)
+  document.addEventListener('pointerdown', onDocumentPointerDown)
+  window.addEventListener('keydown', onKeydown)
   window.addEventListener('scroll', hideNow, { passive: true })
   window.addEventListener('resize', hideNow)
   window.addEventListener('goose:page', hideNow)
@@ -104,23 +182,52 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('goose:user-card-show', show)
-  window.removeEventListener('goose:user-card-hide', scheduleHide)
+  document.removeEventListener('pointerdown', onDocumentPointerDown)
+  window.removeEventListener('keydown', onKeydown)
   window.removeEventListener('scroll', hideNow)
   window.removeEventListener('resize', hideNow)
   window.removeEventListener('goose:page', hideNow)
-  clearHideTimer()
 })
+
+function badgeClass(color: string, level: string) {
+  if (color === 'blue') return 'bg-blue-100 text-blue-700 ring-blue-200'
+  if (color === 'emerald') return 'bg-emerald-100 text-emerald-700 ring-emerald-200'
+  if (color === 'teal') return 'bg-teal-100 text-teal-700 ring-teal-200'
+  if (color === 'sky') return 'bg-sky-100 text-sky-700 ring-sky-200'
+  if (color === 'cyan') return 'bg-cyan-100 text-cyan-700 ring-cyan-200'
+  if (color === 'rose') return 'bg-rose-100 text-rose-700 ring-rose-200'
+  if (color === 'violet') return 'bg-violet-100 text-violet-700 ring-violet-200'
+  if (color === 'purple') return 'bg-purple-100 text-purple-700 ring-purple-200'
+  if (color === 'fuchsia') return 'bg-fuchsia-100 text-fuchsia-700 ring-fuchsia-200'
+  if (color === 'indigo') return 'bg-indigo-100 text-indigo-700 ring-indigo-200'
+  if (color === 'amber') return 'bg-amber-100 text-amber-700 ring-amber-200'
+  if (color === 'orange') return 'bg-orange-100 text-orange-700 ring-orange-200'
+  if (color === 'yellow') return 'bg-yellow-100 text-yellow-700 ring-yellow-200'
+  if (color === 'slate') return 'bg-slate-100 text-slate-700 ring-slate-200'
+  if (level === 'gold') return 'bg-amber-100 text-amber-700 ring-amber-200'
+  if (level === 'special') return 'bg-indigo-100 text-indigo-700 ring-indigo-200'
+  return 'bg-blue-100 text-blue-700 ring-blue-200'
+}
+
+function badgeTooltip(badge: UserHoverCardPayload['badges'][number]) {
+  return badge.description ? `${badge.name}：${badge.description}` : badge.name
+}
+
+function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
+  return badge.iconUrl || '/static/badges/contributor.svg'
+}
 </script>
 
 <template>
   <Teleport to="body">
-    <div
-      v-if="visible"
-      class="fixed z-[90] w-[min(20rem,calc(100vw-1.5rem))] rounded-lg border border-gray-200 bg-white p-3 text-gray-900 shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45),0_8px_24px_-16px_rgba(15,23,42,0.25)]"
-      :style="{ left: `${position.left}px`, top: `${position.top}px` }"
-      @mouseenter="clearHideTimer"
-      @mouseleave="scheduleHide"
-    >
+    <Transition name="user-card-pop">
+      <div
+        v-if="visible"
+        ref="cardEl"
+        class="fixed z-[90] w-[min(20rem,calc(100vw-1.5rem))] rounded-lg border border-gray-200 bg-white p-3 text-gray-900 shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45),0_8px_24px_-16px_rgba(15,23,42,0.25)]"
+        :style="{ left: `${position.left}px`, top: `${position.top}px` }"
+        @click.stop
+      >
       <div class="flex items-start gap-3">
         <a :href="profileUrl" class="shrink-0 rounded-full ring-2 ring-white">
           <img :src="avatarUrl" :alt="username" class="h-14 w-14 rounded-full object-cover ring-1 ring-gray-100" />
@@ -141,28 +248,56 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div v-if="loading" class="mt-3 min-h-[164px]">
-        <div class="space-y-2">
-          <div class="h-4 w-full rounded bg-gray-100" />
-          <div class="h-4 w-3/4 rounded bg-gray-100" />
-        </div>
-        <div class="mt-3 grid grid-cols-4 divide-x divide-gray-100 border-y border-gray-100 py-2">
-          <div v-for="item in 4" :key="item" class="px-2 text-center">
-            <div class="mx-auto h-4 w-7 rounded bg-gray-100" />
-            <div class="mx-auto mt-1 h-3 w-8 rounded bg-gray-100" />
+        <Transition name="user-card-content" mode="out-in">
+          <div v-if="loading" key="loading" class="mt-3 min-h-[164px]">
+            <div class="space-y-2">
+              <div class="h-4 w-full rounded bg-gray-100" />
+              <div class="h-4 w-3/4 rounded bg-gray-100" />
+            </div>
+            <div class="mt-3 grid grid-cols-4 divide-x divide-gray-100 border-y border-gray-100 py-2">
+              <div v-for="item in 4" :key="item" class="px-2 text-center">
+                <div class="mx-auto h-4 w-7 rounded bg-gray-100" />
+                <div class="mx-auto mt-1 h-3 w-8 rounded bg-gray-100" />
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-1.5 text-xs text-gray-400">
+                <Loader2 class="h-3.5 w-3.5 animate-spin" />
+                加载用户资料
+              </div>
+              <div class="h-8 w-24 rounded-md bg-gray-100" />
+            </div>
           </div>
+          <div v-else-if="error" key="error" class="mt-3 flex min-h-[164px] items-center rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{{ error }}</div>
+          <div v-else key="content">
+        <p v-if="bioText" class="mt-3 line-clamp-2 text-sm leading-relaxed text-gray-600">{{ bioText }}</p>
+
+        <div v-if="visibleBadges.length" class="mt-3 flex gap-2">
+          <span
+            v-for="badge in visibleBadges"
+            :key="badge.code"
+            class="group relative flex h-8 w-8 shrink-0 items-center justify-center"
+            tabindex="0"
+            @mouseenter="activeBadgeCode = badge.code"
+            @mouseleave="activeBadgeCode = ''"
+            @focus="activeBadgeCode = badge.code"
+            @blur="activeBadgeCode = ''"
+          >
+            <span
+              class="flex h-8 w-8 items-center justify-center ring-1 ring-inset transition duration-150"
+              :class="[badgeClass(badge.color, badge.level), activeBadgeCode === badge.code ? '-translate-y-0.5 scale-110 shadow-md' : 'shadow-none']"
+              style="clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)"
+            >
+              <img :src="badgeIconURL(badge)" :alt="badge.name" class="h-4 w-4 object-contain" />
+            </span>
+            <span
+              v-if="activeBadgeCode === badge.code"
+              class="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-max max-w-48 -translate-x-1/2 rounded-md bg-gray-950 px-2 py-1 text-xs font-medium leading-5 text-white shadow-lg"
+            >
+              {{ badgeTooltip(badge) }}
+            </span>
+          </span>
         </div>
-        <div class="mt-3 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-1.5 text-xs text-gray-400">
-            <Loader2 class="h-3.5 w-3.5 animate-spin" />
-            加载用户资料
-          </div>
-          <div class="h-8 w-24 rounded-md bg-gray-100" />
-        </div>
-      </div>
-      <div v-else-if="error" class="mt-3 flex min-h-[164px] items-center rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{{ error }}</div>
-      <template v-else>
-        <p class="mt-3 h-10 line-clamp-2 text-sm leading-relaxed text-gray-600">{{ bioText }}</p>
 
         <div class="mt-3 grid grid-cols-4 divide-x divide-gray-100 border-y border-gray-100 py-2">
           <div class="px-2 text-center">
@@ -183,6 +318,34 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
+        <div v-if="externalLinks.length" class="mt-3 flex items-center gap-2 border-b border-gray-100 pb-3">
+          <a
+            v-for="link in externalLinks.slice(0, 8)"
+            :key="`${link.key}-${link.url}`"
+            :href="link.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group relative inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-50 hover:text-blue-600"
+            :title="link.label"
+            :aria-label="link.label"
+          >
+            <Bird v-if="link.key === 'website'" class="h-4 w-4" />
+            <svg
+              v-else-if="link.icon"
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path :d="link.icon.path" />
+            </svg>
+            <ExternalLink v-else class="h-4 w-4" />
+            <span class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate rounded-md bg-gray-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+              {{ link.label }}
+            </span>
+          </a>
+        </div>
+
         <div class="mt-3 flex items-center justify-between gap-3">
           <div class="inline-flex items-center gap-1.5 text-xs text-gray-400">
             <CalendarDays class="h-3.5 w-3.5" />
@@ -196,7 +359,47 @@ onBeforeUnmount(() => {
             {{ card?.isFollowing ? '已关注' : '查看主页' }}
           </a>
         </div>
-      </template>
-    </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
   </Teleport>
 </template>
+
+<style scoped>
+.user-card-pop-enter-active,
+.user-card-pop-leave-active {
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+  transform-origin: top left;
+}
+
+.user-card-pop-enter-from,
+.user-card-pop-leave-to {
+  opacity: 0;
+  transform: translateY(4px) scale(0.98);
+}
+
+.user-card-content-enter-active,
+.user-card-content-leave-active {
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.user-card-content-enter-from,
+.user-card-content-leave-to {
+  opacity: 0;
+  transform: translateY(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .user-card-pop-enter-active,
+  .user-card-pop-leave-active,
+  .user-card-content-enter-active,
+  .user-card-content-leave-active {
+    transition: none;
+  }
+}
+</style>

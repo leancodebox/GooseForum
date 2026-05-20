@@ -15,6 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
+	"github.com/leancodebox/GooseForum/app/service/usercardservice"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
@@ -37,40 +38,31 @@ type GetUserCardReq struct {
 
 func GetUserCard(req component.BetterRequest[GetUserCardReq]) component.Response {
 	userId := req.Params.UserId
-	userEntity, err := users.Get(userId)
-	if err != nil || userEntity.Id == 0 {
+	card, ok := usercardservice.GetCard(userId)
+	if !ok {
 		return component.FailResponse("User not found")
 	}
-
-	userStats := userStatistics.Get(userId)
 	currentUserId := req.UserId
-	var isFollowingAuthor bool
-
+	card.IsSelf = currentUserId == userId
+	card.IsFollowing = false
 	if currentUserId > 0 && currentUserId != userId {
-		isFollowingAuthor = userFollow.IsFollowing(currentUserId, userId)
+		card.IsFollowing = userFollow.IsFollowing(currentUserId, userId)
 	}
-
-	card := transform.User2UserCard(userEntity, userStats, isFollowingAuthor, currentUserId)
 
 	return component.SuccessResponse(card)
 }
 
 func GetUserHoverCard(req component.BetterRequest[GetUserCardReq]) component.Response {
 	userId := req.Params.UserId
-	userEntity, err := users.Get(userId)
-	if err != nil || userEntity.Id == 0 {
+	card, ok := usercardservice.GetHoverCard(userId)
+	if !ok {
 		return component.FailResponse("User not found")
 	}
-
-	userStats := userStatistics.Get(userId)
 	currentUserId := req.UserId
-	var isFollowingAuthor bool
-
+	card.IsFollowing = false
 	if currentUserId > 0 && currentUserId != userId {
-		isFollowingAuthor = userFollow.IsFollowing(currentUserId, userId)
+		card.IsFollowing = userFollow.IsFollowing(currentUserId, userId)
 	}
-
-	card := transform.User2UserHoverCard(userEntity, userStats, isFollowingAuthor)
 
 	return component.SuccessResponse(card)
 }
@@ -130,7 +122,7 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 		return component.FailResponse("更新用户信息失败")
 	}
 
-	if err = component.SendAEmail4User(&userEntity); err == nil {
+	if err = component.SendAEmail4User(&userEntity); err != nil {
 		slog.Info("验证邮件发送失败", "error", err)
 	}
 
@@ -312,6 +304,7 @@ func SaveUser(userEntity *users.EntityComplete) error {
 		if cacheErr := hotdataserve.Reload(fmt.Sprintf("user:%v", userEntity.Id), transform.User2userShow(*userEntity)); cacheErr != nil {
 			slog.Error(cacheErr.Error())
 		}
+		usercardservice.Invalidate(userEntity.Id)
 	}
 	return err
 }

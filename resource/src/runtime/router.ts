@@ -28,7 +28,7 @@ export function installNavigation(onPage: (page: PreparedPage) => void) {
       const page = await getPreparedPage(url)
       history.pushState({ goose: true, payload: page.payload }, '', url)
       onPage(page)
-      window.scrollTo({ top: 0 })
+      scrollAfterNavigation(url)
     } catch {
       window.location.href = url.toString()
     } finally {
@@ -80,6 +80,22 @@ export async function preparePayload(payload: PagePayload): Promise<PreparedPage
     throw new Error(`Unknown page component: ${payload.component}`)
   }
   return { payload, component }
+}
+
+function scrollAfterNavigation(url: URL) {
+  if (!url.hash) {
+    window.scrollTo({ top: 0 })
+    return
+  }
+
+  requestAnimationFrame(() => {
+    const target = document.getElementById(decodeURIComponent(url.hash.slice(1)))
+    if (target) {
+      target.scrollIntoView({ block: 'start' })
+      return
+    }
+    window.scrollTo({ top: 0 })
+  })
 }
 
 function isRoutablePath(pathname: string) {

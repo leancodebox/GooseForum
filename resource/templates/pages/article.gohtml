@@ -10,18 +10,18 @@
         <h1>{{.Payload.Props.Article.Title}}</h1>
         {{if .Payload.Props.Article.Description}}<p>{{.Payload.Props.Article.Description}}</p>{{end}}
         <p>
+            {{if .Payload.Props.Article.Categories}}
+            {{range .Payload.Props.Article.Categories}}
+            <a href="{{.URL}}" rel="tag">{{.Name}}</a>
+            {{end}}
+            {{end}}
             <a href="/u/{{.Payload.Props.Article.Author.ID}}">{{.Payload.Props.Article.Author.Username}}</a>
-            <time>{{.Payload.Props.Article.CreatedAt}}</time>
+            <time datetime="{{.Payload.Meta.OpenGraph.PublishedTime}}">{{.Payload.Props.Article.CreatedAt}}</time>
+            {{if .Payload.Meta.OpenGraph.ModifiedTime}}<time datetime="{{.Payload.Meta.OpenGraph.ModifiedTime}}">更新于 {{.Payload.Props.Article.UpdatedAt}}</time>{{end}}
             <span>{{.Payload.Props.Article.ReplyCount}} 回复</span>
+            <span>{{.Payload.Props.Article.LikeCount}} 赞</span>
             <span>{{.Payload.Props.Article.ViewCount}} 浏览</span>
         </p>
-        {{if .Payload.Props.Article.Categories}}
-        <p>
-            {{range .Payload.Props.Article.Categories}}
-            <a href="{{.URL}}">{{.Name}}</a>
-            {{end}}
-        </p>
-        {{end}}
         <div>
             {{SafeHTML .Payload.Props.Article.HTML}}
         </div>

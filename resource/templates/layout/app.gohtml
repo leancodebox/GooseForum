@@ -8,6 +8,26 @@
     {{if .Payload.Meta.Description}}<meta name="description" content="{{.Payload.Meta.Description}}">{{end}}
     {{if .Payload.Meta.Canonical}}<link rel="canonical" href="{{.Payload.Meta.Canonical}}">{{end}}
     {{if .Payload.Meta.Robots}}<meta name="robots" content="{{.Payload.Meta.Robots}}">{{end}}
+    {{with .Payload.Meta.OpenGraph}}
+    {{if .Title}}<meta property="og:title" content="{{.Title}}">{{end}}
+    {{if .Description}}<meta property="og:description" content="{{.Description}}">{{end}}
+    {{if .Type}}<meta property="og:type" content="{{.Type}}">{{end}}
+    {{if .URL}}<meta property="og:url" content="{{.URL}}">{{end}}
+    {{if .SiteName}}<meta property="og:site_name" content="{{.SiteName}}">{{end}}
+    {{if .Image}}<meta property="og:image" content="{{.Image}}">{{end}}
+    {{if .PublishedTime}}<meta property="article:published_time" content="{{.PublishedTime}}">{{end}}
+    {{if .ModifiedTime}}<meta property="article:modified_time" content="{{.ModifiedTime}}">{{end}}
+    {{if .Author}}<meta property="article:author" content="{{.Author}}">{{end}}
+    {{if .Section}}<meta property="article:section" content="{{.Section}}">{{end}}
+    {{range .Tags}}<meta property="article:tag" content="{{.}}">{{end}}
+    {{end}}
+    {{with .Payload.Meta.Twitter}}
+    {{if .Card}}<meta name="twitter:card" content="{{.Card}}">{{end}}
+    {{if .Title}}<meta name="twitter:title" content="{{.Title}}">{{end}}
+    {{if .Description}}<meta name="twitter:description" content="{{.Description}}">{{end}}
+    {{if .Image}}<meta name="twitter:image" content="{{.Image}}">{{end}}
+    {{end}}
+    {{if .Payload.Meta.JSONLD}}<script type="application/ld+json" data-goose-jsonld="page">{{json .Payload.Meta.JSONLD}}</script>{{end}}
     {{if .Payload.Layout.Site.Favicon}}<link rel="icon" href="{{ResourceAsset .Payload.Layout.Site.Favicon}}">{{end}}
     {{if .Payload.Layout.Site.ExternalLinks}}{{SafeHTML .Payload.Layout.Site.ExternalLinks}}{{end}}
     {{ResourceEntry `src/main.ts`}}

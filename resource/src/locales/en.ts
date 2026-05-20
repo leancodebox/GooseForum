@@ -69,6 +69,7 @@ export default {
     unread: '{count} unread',
     summary: '{total} notifications, including replies, likes, follows, and system messages.',
     markAllRead: 'Mark all read',
+    markRead: 'Mark read',
     table: {
       notification: 'Notification',
       time: 'Time',
@@ -82,6 +83,8 @@ export default {
     noUnread: 'No new notifications',
     newComment: 'New comment or reply',
     newNotification: 'New notification',
+    followDescription: '{actor} followed you',
+    viewProfile: 'View profile',
     verb: {
       like: 'liked',
       follow: 'followed you',

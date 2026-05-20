@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ContentLayout } from '@/components/layout/content-layout'
 import { Button } from '@/components/ui/button'
 import { PlusIcon, ReloadIcon } from '@radix-ui/react-icons'
-import { getArticlesList } from '@/api'
+import { getArticlesList, getCategoryList } from '@/api'
 import { PostsProvider } from './components/posts-provider'
-import { postsColumns } from './components/posts-columns'
+import { getPostsColumns } from './components/posts-columns'
 import { PostsTable } from './components/posts-table'
 import { PostsActionDialog } from './components/posts-action-dialog'
 
@@ -18,6 +18,14 @@ function PostsManagementContent() {
     queryKey: ['articles', page, pageSize, search],
     queryFn: () => getArticlesList({ page, pageSize, search }),
   })
+  const { data: categoryRes } = useQuery({
+    queryKey: ['post-categories'],
+    queryFn: getCategoryList,
+  })
+  const categoryMap = useMemo(() => {
+    return new Map((categoryRes?.result || []).map((category) => [category.id, category]))
+  }, [categoryRes?.result])
+  const columns = useMemo(() => getPostsColumns(categoryMap), [categoryMap])
 
   return (
     <>
@@ -39,7 +47,7 @@ function PostsManagementContent() {
       >
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
           <PostsTable
-            columns={postsColumns}
+            columns={columns}
             data={data?.result?.list || []}
             total={data?.result?.total || 0}
             page={page}

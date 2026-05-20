@@ -18,8 +18,28 @@ export const sponsorsSchema = z.object({
 
 export type Sponsors = z.infer<typeof sponsorsSchema>
 
+export const sponsorsContentSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+})
+
+export const sponsorsContactSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  buttonText: z.string(),
+  buttonLink: z.string(),
+})
+
+export const sponsorsRuleSchema = z.object({
+  content: z.string(),
+})
+
 export const sponsorsConfigSchema = z.object({
   sponsors: sponsorsSchema,
+  content: sponsorsContentSchema,
+  contact: sponsorsContactSchema,
+  rules: z.array(sponsorsRuleSchema),
 })
 
 export type SponsorsConfig = z.infer<typeof sponsorsConfigSchema>
+export type SponsorsRule = z.infer<typeof sponsorsRuleSchema>

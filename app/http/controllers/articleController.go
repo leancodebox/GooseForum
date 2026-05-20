@@ -21,6 +21,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
+	"github.com/leancodebox/GooseForum/app/service/usercardservice"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
@@ -183,6 +184,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	} else {
 		articles.Create(&article)
 		userStatistics.WriteArticle(req.UserId)
+		usercardservice.Invalidate(req.UserId)
 		lo.ForEach(req.Params.CategoryId, func(item uint64, _ int) {
 			rs := articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: item, Effective: 1}
 			articleCategoryRs.SaveOrCreateById(&rs)
@@ -269,6 +271,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		return component.FailResponse("评论失败:" + err.Error())
 	}
 	userStatistics.WriteComment(req.UserId)
+	usercardservice.Invalidate(req.UserId)
 	updateArticleStat(articleEntity, req.UserId, false)
 
 	// 获取父评论作者ID
@@ -493,6 +496,8 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 			articles.IncrementLike(articleEntity)
 			userStatistics.LikeArticle(articleEntity.UserId)
 			userStatistics.GivenLike(req.UserId)
+			usercardservice.Invalidate(articleEntity.UserId)
+			usercardservice.Invalidate(req.UserId)
 
 			// 发送点赞事件
 			eventbus.Publish(context.Background(), &eventhandlers.ArticleLikedEvent{
@@ -505,6 +510,8 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 			articles.DecrementLike(articleEntity)
 			userStatistics.CancelLikeArticle(articleEntity.UserId)
 			userStatistics.CancelGivenLike(req.UserId)
+			usercardservice.Invalidate(articleEntity.UserId)
+			usercardservice.Invalidate(req.UserId)
 		}
 	}
 	return component.SuccessResponse(true)
@@ -572,6 +579,8 @@ func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {
 		if req.Params.Action == 1 {
 			userStatistics.Following(req.UserId)
 			userStatistics.Follower(req.Params.Id)
+			usercardservice.Invalidate(req.UserId)
+			usercardservice.Invalidate(req.Params.Id)
 
 			// 发送关注通知
 			followerUser, _ := req.GetUser()
@@ -583,6 +592,8 @@ func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {
 		} else {
 			userStatistics.CancelFollowing(req.UserId)
 			userStatistics.CancelFollower(req.Params.Id)
+			usercardservice.Invalidate(req.UserId)
+			usercardservice.Invalidate(req.Params.Id)
 		}
 	}
 	return component.SuccessResponse(true)

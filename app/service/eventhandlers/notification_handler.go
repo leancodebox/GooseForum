@@ -39,7 +39,7 @@ func NewCommentCreatedHandler() cqrs.EventHandler {
 			}
 			// 如果是回复评论，且不是回复自己，通知原评论作者
 			if event.ParentReplyId > 0 && event.ParentReplyAuthorId != event.UserId {
-				_ = eventnotice.SendReplyNotification(event.ParentReplyAuthorId, event.ParentReplyId, event.ArticleId, contentPreview, event.UserId)
+				_ = eventnotice.SendReplyNotification(event.ParentReplyAuthorId, event.CommentId, event.ArticleId, contentPreview, event.UserId)
 			}
 			return nil
 		},
@@ -58,7 +58,7 @@ func NewUserFollowedHandler() cqrs.EventHandler {
 	return cqrs.NewEventHandler(
 		"UserFollowedHandler",
 		func(ctx context.Context, event *UserFollowedEvent) error {
-			return eventnotice.SendFollowNotification(event.UserId, event.FollowerName)
+			return eventnotice.SendFollowNotification(event.UserId, event.FollowerId, event.FollowerName)
 		},
 	)
 }

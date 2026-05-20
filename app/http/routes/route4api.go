@@ -102,6 +102,7 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
 	forumLoginApi.POST("notification/list", UpButterReq(api.GetNotificationList))
 	forumLoginApi.POST("notification/query", UpButterReq(api.QueryNotificationList))
+	forumLoginApi.GET("unread-status", middleware.NoUpdateUserActivity, UpButterReq(api.GetUnreadStatus))
 	forumLoginApi.GET("notification/unread-count", UpButterReq(api.GetUnreadCount))
 	forumLoginApi.GET("notification/last-unread", middleware.NoUpdateUserActivity, UpButterReq(api.GetLastUnread))
 	forumLoginApi.POST("notification/mark-read", UpButterReq(api.MarkAsRead))
@@ -135,6 +136,8 @@ func apiRoute(ginApp *gin.Engine) {
 		Group("", middleware.CheckPermission(permission.UserManager)).
 		POST("user-list", UpButterReq(api.UserList)).
 		POST("user-edit", UpButterReq(api.EditUser)).
+		POST("user-badge-options", UpButterReq(api.UserBadgeOptions)).
+		POST("save-user-badges", UpButterReq(api.SaveUserBadges)).
 		GET("get-all-role-item", UpButterReq(api.GetAllRoleItem))
 
 	adminApi.Group("", middleware.CheckPermission(permission.ArticlesManager)).
@@ -169,7 +172,10 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("sponsors", UpButterReq(api.GetSponsors)).
 		POST("save-sponsors", UpButterReq(api.SaveSponsors)).
 		GET("announcement", UpButterReq(api.GetAnnouncement)).
-		POST("save-announcement", UpButterReq(api.SaveAnnouncement))
+		POST("save-announcement", UpButterReq(api.SaveAnnouncement)).
+		GET("badges", UpButterReq(api.BadgeList)).
+		POST("badge-save", UpButterReq(api.SaveBadge)).
+		POST("badge-delete", UpButterReq(api.DeleteBadge))
 
 }
 

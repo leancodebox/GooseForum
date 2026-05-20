@@ -89,6 +89,11 @@ func (c *Cache[V]) Clear() {
 	slog.Debug("datacache: cleared", "deleted", deleted)
 }
 
+func (c *Cache[V]) Delete(key string) {
+	c.items.Delete(key)
+	slog.Debug("datacache: deleted", "key", key)
+}
+
 // 私有方法：带过期检查的读取
 func (c *Cache[V]) get(key string) (V, bool) {
 	if item, ok := c.items.Load(key); ok {

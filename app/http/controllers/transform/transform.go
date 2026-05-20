@@ -6,6 +6,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 )
 
 func User2userShow(user users.EntityComplete) *vo.UserInfoShow {
@@ -32,6 +33,9 @@ func User2UserCard(user users.EntityComplete, stats userStatistics.Entity, isFol
 		AvatarUrl:         user.GetWebAvatarUrl(),
 		Bio:               user.Bio,
 		Signature:         user.Signature,
+		WebsiteName:       user.WebsiteName,
+		Website:           user.Website,
+		ExternalInfo:      user.ExternalInformation,
 		IsAdmin:           user.RoleId > 0,
 		ArticleCount:      stats.ArticleCount,
 		ReplyCount:        stats.ReplyCount,
@@ -42,8 +46,8 @@ func User2UserCard(user users.EntityComplete, stats userStatistics.Entity, isFol
 		CollectionCount:   stats.CollectionCount,
 		IsOnline:          time.Since(stats.LastActiveTime) < 120*time.Second,
 		IsFollowing:       isFollowing,
-		ExternalInfo:      user.ExternalInformation,
 		IsSelf:            currentUserId == user.Id,
+		Badges:            badgeservice.GetUserBadges(user.Id),
 		LastActiveTime:    stats.LastActiveTime,
 		CreatedAt:         user.CreatedAt,
 	}
@@ -57,6 +61,9 @@ func User2UserHoverCard(user users.EntityComplete, stats userStatistics.Entity, 
 		AvatarUrl:         user.GetWebAvatarUrl(),
 		Bio:               user.Bio,
 		Signature:         user.Signature,
+		WebsiteName:       user.WebsiteName,
+		Website:           user.Website,
+		ExternalInfo:      user.ExternalInformation,
 		IsAdmin:           user.RoleId > 0,
 		ArticleCount:      stats.ArticleCount,
 		ReplyCount:        stats.ReplyCount,
@@ -64,6 +71,7 @@ func User2UserHoverCard(user users.EntityComplete, stats userStatistics.Entity, 
 		FollowerCount:     stats.FollowerCount,
 		IsOnline:          time.Since(stats.LastActiveTime) < 120*time.Second,
 		IsFollowing:       isFollowing,
+		Badges:            badgeservice.GetUserBadges(user.Id),
 		LastActiveTime:    stats.LastActiveTime,
 		CreatedAt:         user.CreatedAt,
 	}

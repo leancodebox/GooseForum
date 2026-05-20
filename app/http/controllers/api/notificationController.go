@@ -6,6 +6,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
+	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/samber/lo"
 )
 
@@ -64,6 +65,15 @@ func GetNotificationList(req component.BetterRequest[GetNotificationListReq]) co
 // GetUnreadCountReq 获取未读数量请求
 type GetUnreadCountReq struct{}
 
+func GetUnreadStatus(req component.BetterRequest[GetUnreadCountReq]) component.Response {
+	status := unreadservice.GetStatus(req.UserId)
+	return component.SuccessResponse(component.DataMap{
+		"notifications":          status.Notifications,
+		"messages":               status.Messages,
+		"latestNotificationType": status.LatestNotificationType,
+	})
+}
+
 // GetUnreadCount 获取未读通知数量
 func GetUnreadCount(req component.BetterRequest[GetUnreadCountReq]) component.Response {
 	count, err := eventNotification.GetUnreadCount(req.UserId)
@@ -91,6 +101,7 @@ func MarkAsRead(req component.BetterRequest[MarkAsReadReq]) component.Response {
 	if err != nil {
 		return component.FailResponse("标记已读失败")
 	}
+	unreadservice.Invalidate(req.UserId)
 
 	return component.SuccessResponse("标记已读成功")
 }
@@ -104,6 +115,7 @@ func MarkAllAsRead(req component.BetterRequest[MarkAllAsReadReq]) component.Resp
 	if err != nil {
 		return component.FailResponse("标记全部已读失败")
 	}
+	unreadservice.Invalidate(req.UserId)
 
 	return component.SuccessResponse("标记全部已读成功")
 }
@@ -119,6 +131,7 @@ func DeleteNotification(req component.BetterRequest[DeleteNotificationReq]) comp
 	if err != nil {
 		return component.FailResponse("删除通知失败")
 	}
+	unreadservice.Invalidate(req.UserId)
 
 	return component.SuccessResponse("删除通知成功")
 }
@@ -133,6 +146,7 @@ func GetNotificationTypes(req component.BetterRequest[GetNotificationTypesReq]) 
 		{"type": eventNotification.EventTypeReply, "name": "回复通知"},
 		{"type": eventNotification.EventTypeSystem, "name": "系统通知"},
 		{"type": eventNotification.EventTypeFollow, "name": "关注通知"},
+		{"type": eventNotification.EventTypeBadge, "name": "徽章通知"},
 	}
 
 	return component.SuccessResponse(types)

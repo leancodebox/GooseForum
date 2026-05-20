@@ -106,4 +106,13 @@ body {
   .avatar-crop-workspace cropper-selection {
     outline-color: rgba(37, 99, 235, 0.9);
   }
+
+  .gf-scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .gf-scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }

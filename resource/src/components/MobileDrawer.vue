@@ -11,6 +11,8 @@ const props = defineProps<{
   resourceItems: NavItemPayload[]
   categoryItems: CategoryNavPayload[]
   footer: FooterPayload
+  hasUnreadMessages?: boolean
+  hasUnreadNotifications?: boolean
   closeLabel: string
   menuLabel: string
   categoriesLabel: string
@@ -66,7 +68,12 @@ function close() {
               aria-hidden="true"
             />
             <span v-else class="flex w-4 justify-center opacity-80" aria-hidden="true">{{ item.icon }}</span>
-            <span>{{ item.label }}</span>
+            <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+            <span
+              v-if="(item.key === 'messages' && hasUnreadMessages) || (item.key === 'notifications' && hasUnreadNotifications)"
+              class="h-2 w-2 shrink-0 rounded-full bg-red-500"
+              aria-hidden="true"
+            />
           </a>
         </div>
         <div v-if="categoryItems.length" class="mt-5 space-y-0.5">

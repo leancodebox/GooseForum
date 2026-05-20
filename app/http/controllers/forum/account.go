@@ -13,7 +13,7 @@ func Notifications(c *gin.Context) {
 	payload := PagePayload{
 		Component: "notifications.index",
 		Props:     buildNotificationsPageProps(c),
-		Meta:      buildSimpleMeta(c, "通知 - GooseForum"),
+		Meta:      buildSimpleMeta(c, "通知"),
 		Layout:    buildLayout(c, "notifications"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -27,7 +27,7 @@ func Messages(c *gin.Context) {
 	payload := PagePayload{
 		Component: "messages.index",
 		Props:     buildMessagesPageProps(c),
-		Meta:      buildSimpleMeta(c, "私信 - GooseForum"),
+		Meta:      buildSimpleMeta(c, "私信"),
 		Layout:    buildLayout(c, "messages"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -46,7 +46,7 @@ func Settings(c *gin.Context) {
 	payload := PagePayload{
 		Component: "settings.index",
 		Props:     buildSettingsPageProps(user),
-		Meta:      buildSimpleMeta(c, "个人设置 - GooseForum"),
+		Meta:      buildSimpleMeta(c, "个人设置"),
 		Layout:    buildLayout(c, "settings"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -63,9 +63,9 @@ func Publish(c *gin.Context) {
 		c.String(http.StatusNotFound, "not found")
 		return
 	}
-	title := "发布主题 - GooseForum"
+	title := "发布主题"
 	if articleID > 0 {
-		title = "编辑主题 - GooseForum"
+		title = "编辑主题"
 	}
 	payload := PagePayload{
 		Component: "publish.index",
@@ -84,7 +84,7 @@ func Login(c *gin.Context) {
 	payload := PagePayload{
 		Component: "auth.login",
 		Props:     buildLoginPageProps(c),
-		Meta:      buildSimpleMeta(c, "登录/注册 - GooseForum"),
+		Meta:      buildSimpleMeta(c, "登录/注册"),
 		Layout:    buildLayout(c, ""),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -98,7 +98,7 @@ func ResetPassword(c *gin.Context) {
 	payload := PagePayload{
 		Component: "auth.resetPassword",
 		Props:     ResetPasswordPageProps{Token: c.Query("token")},
-		Meta:      buildSimpleMeta(c, "重置密码 - GooseForum"),
+		Meta:      buildSimpleMeta(c, "重置密码"),
 		Layout:    buildLayout(c, ""),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -110,7 +110,7 @@ func ResetPassword(c *gin.Context) {
 
 func buildSimpleMeta(c *gin.Context, title string) PageMeta {
 	return PageMeta{
-		Title:     title,
+		Title:     pageTitle(title),
 		Canonical: buildPageURL(c),
 	}
 }

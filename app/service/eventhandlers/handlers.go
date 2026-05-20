@@ -26,5 +26,11 @@ func Handlers() []cqrs.EventHandler {
 		NewStatsSignUpHandler(),
 		NewStatsPostHandler(),
 		NewStatsReplyHandler(),
+
+		// 徽章自动授予处理器
+		NewBadgePostHandler(),
+		NewBadgeCommentHandler(),
+		NewBadgeLikeHandler(),
+		NewBadgeFollowHandler(),
 	}
 }

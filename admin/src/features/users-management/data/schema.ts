@@ -15,6 +15,14 @@ export const userSchema = z.object({
   roleId: z.number().nullable().optional(),
   createTime: z.string(),
   lastActiveTime: z.string().nullable().optional(),
+  badges: z.array(z.object({
+    code: z.string(),
+    name: z.string(),
+    iconUrl: z.string().optional(),
+    color: z.string().optional(),
+    level: z.string().optional(),
+    source: z.string().optional(),
+  })).optional(),
 })
 
 export type User = z.infer<typeof userSchema>

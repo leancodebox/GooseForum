@@ -9,7 +9,12 @@ export interface UserCardShowDetail {
   target: HTMLElement
 }
 
-export function showUserCard(user: UserCardTarget, event: MouseEvent | FocusEvent) {
+export function showUserCard(user: UserCardTarget, event: MouseEvent) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+  event.preventDefault()
+  event.stopPropagation()
+
   const target = event.currentTarget
   if (!(target instanceof HTMLElement)) return
 
@@ -18,8 +23,4 @@ export function showUserCard(user: UserCardTarget, event: MouseEvent | FocusEven
       detail: { user, target },
     }),
   )
-}
-
-export function scheduleHideUserCard() {
-  window.dispatchEvent(new CustomEvent('goose:user-card-hide'))
 }

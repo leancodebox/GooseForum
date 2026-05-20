@@ -59,3 +59,17 @@ func GetUserTimeline(userId uint64, lastId uint64, limit int) (entities []*Entit
 		Find(&entities).Error
 	return
 }
+
+type ActionCount struct {
+	Action int
+	Count  int64
+}
+
+func CountActionsByUser(userId uint64) (items []ActionCount) {
+	builder().
+		Select("action, count(*) as count").
+		Where("user_id = ?", userId).
+		Group("action").
+		Find(&items)
+	return
+}

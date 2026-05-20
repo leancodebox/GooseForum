@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -23,6 +25,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { SelectDropdown } from '@/components/select-dropdown'
+import { getUserBadgeOptions, saveUserBadges } from '@/api'
+import type { BadgeItem, UserBadge } from '@/api/types'
 import { type User } from '../data/schema'
 
 const formSchema = z.object({
@@ -47,6 +51,9 @@ export function UsersActionDialog({
   onSuccess,
 }: UserActionDialogProps) {
   const [roles, setRoles] = useState<{ label: string; value: string }[]>([])
+  const [badgeOptions, setBadgeOptions] = useState<BadgeItem[]>([])
+  const [activeBadges, setActiveBadges] = useState<UserBadge[]>([])
+  const [selectedBadgeCodes, setSelectedBadgeCodes] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
 
   const form = useForm<UserForm>({
@@ -76,8 +83,25 @@ export function UsersActionDialog({
         }
       }
       fetchRoles()
+      const fetchBadges = async () => {
+        if (!currentRow?.userId) return
+        try {
+          const response = await getUserBadgeOptions(currentRow.userId)
+          if (response.code === 0) {
+            const options = response.result.options || []
+            const active = response.result.active || []
+            setBadgeOptions(options)
+            setActiveBadges(active)
+            const optionCodes = new Set(options.map((item) => item.code))
+            setSelectedBadgeCodes(active.filter((item) => item.source === 'manual' && optionCodes.has(item.code)).map((item) => item.code))
+          }
+        } catch (error) {
+          console.error('Failed to fetch user badges:', error)
+        }
+      }
+      void fetchBadges()
     }
-  }, [open])
+  }, [open, currentRow?.userId])
 
   useEffect(() => {
     if (currentRow) {
@@ -102,6 +126,7 @@ export function UsersActionDialog({
       })
 
       if (response.data.code === 0) {
+        await saveUserBadges(currentRow.userId, selectedBadgeCodes)
         toast.success('更新成功')
         onOpenChange(false)
         onSuccess?.()
@@ -116,6 +141,37 @@ export function UsersActionDialog({
     }
   }
 
+  const toggleBadge = (code: string, checked: boolean) => {
+    setSelectedBadgeCodes((current) => {
+      if (checked) return Array.from(new Set([...current, code]))
+      return current.filter((item) => item !== code)
+    })
+  }
+
+  const badgeIconURL = (badge: BadgeItem | UserBadge) => {
+    return badge.iconUrl || '/static/badges/contributor.svg'
+  }
+
+  const badgeToneClass = (badge: BadgeItem | UserBadge) => {
+    if (badge.color === 'blue') return 'bg-blue-100 text-blue-700 ring-blue-200'
+    if (badge.color === 'emerald') return 'bg-emerald-100 text-emerald-700 ring-emerald-200'
+    if (badge.color === 'teal') return 'bg-teal-100 text-teal-700 ring-teal-200'
+    if (badge.color === 'sky') return 'bg-sky-100 text-sky-700 ring-sky-200'
+    if (badge.color === 'cyan') return 'bg-cyan-100 text-cyan-700 ring-cyan-200'
+    if (badge.color === 'rose') return 'bg-rose-100 text-rose-700 ring-rose-200'
+    if (badge.color === 'violet') return 'bg-violet-100 text-violet-700 ring-violet-200'
+    if (badge.color === 'purple') return 'bg-purple-100 text-purple-700 ring-purple-200'
+    if (badge.color === 'fuchsia') return 'bg-fuchsia-100 text-fuchsia-700 ring-fuchsia-200'
+    if (badge.color === 'indigo') return 'bg-indigo-100 text-indigo-700 ring-indigo-200'
+    if (badge.color === 'amber') return 'bg-amber-100 text-amber-700 ring-amber-200'
+    if (badge.color === 'orange') return 'bg-orange-100 text-orange-700 ring-orange-200'
+    if (badge.color === 'yellow') return 'bg-yellow-100 text-yellow-700 ring-yellow-200'
+    if (badge.color === 'slate') return 'bg-slate-100 text-slate-700 ring-slate-200'
+    if (badge.level === 'gold') return 'bg-amber-100 text-amber-700 ring-amber-200'
+    if (badge.level === 'special') return 'bg-indigo-100 text-indigo-700 ring-indigo-200'
+    return 'bg-blue-100 text-blue-700 ring-blue-200'
+  }
+
   return (
     <Dialog
       open={open}
@@ -124,7 +180,7 @@ export function UsersActionDialog({
         onOpenChange(state)
       }}
     >
-      <DialogContent className='sm:max-w-lg'>
+      <DialogContent className='sm:max-w-4xl'>
         <DialogHeader className='text-start'>
           <DialogTitle>编辑用户</DialogTitle>
           <DialogDescription>
@@ -201,6 +257,45 @@ export function UsersActionDialog({
                   </FormItem>
                 )}
               />
+              <div className='grid grid-cols-6 gap-x-4 gap-y-2'>
+                <FormLabel className='col-span-2 pt-2 text-right'>手动徽章</FormLabel>
+                <div className='col-span-4 space-y-3'>
+                  {activeBadges.some((badge) => badge.source !== 'manual') && (
+                    <div className='flex flex-wrap gap-1.5'>
+                      {activeBadges.filter((badge) => badge.source !== 'manual').map((badge) => (
+                        <Badge key={badge.code} variant='secondary'>{badge.name}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  <div className='grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6'>
+                    {badgeOptions.map((badge) => (
+                      <label
+                        key={badge.code}
+                        title={badge.description || badge.code}
+                        className={`group relative flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md p-1.5 text-center transition-colors hover:bg-muted/50 ${
+                          selectedBadgeCodes.includes(badge.code) ? 'bg-primary/5 ring-1 ring-primary/40' : ''
+                        }`}
+                      >
+                        <div
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center ring-1 ring-inset transition-transform group-hover:scale-105 ${badgeToneClass(badge)}`}
+                          style={{ clipPath: 'polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)' }}
+                        >
+                          <img src={badgeIconURL(badge)} alt={badge.name} className='h-6 w-6 object-contain' />
+                        </div>
+                        <span className='block max-w-full truncate text-xs font-medium leading-5'>{badge.name}</span>
+                        <Checkbox
+                          className='absolute right-1 top-1 h-3.5 w-3.5 shrink-0 rounded-full bg-background'
+                          checked={selectedBadgeCodes.includes(badge.code)}
+                          onCheckedChange={(checked) => toggleBadge(badge.code, checked === true)}
+                        />
+                      </label>
+                    ))}
+                    {!badgeOptions.length && (
+                      <div className='rounded-md border border-dashed p-3 text-sm text-muted-foreground'>暂无可手动下发的徽章。</div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </form>
           </Form>
         </div>

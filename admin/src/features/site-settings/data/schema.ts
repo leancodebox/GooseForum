@@ -32,4 +32,3 @@ export type SiteInfo = z.infer<typeof siteInfoSchema>
 export type FooterInfo = z.infer<typeof footerInfoSchema>
 export type PItem = z.infer<typeof pItemSchema>
 export type FooterItem = z.infer<typeof footerItemSchema>
-

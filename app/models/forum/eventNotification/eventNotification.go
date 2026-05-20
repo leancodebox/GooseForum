@@ -13,6 +13,7 @@ const (
 	EventTypeSystem  = "system"  // 系统通知
 	EventTypeFollow  = "follow"  // 关注通知
 	EventTypeLike    = "like"    // 关注通知
+	EventTypeBadge   = "badge"   // 徽章通知
 )
 
 // NotificationPayload 通知内容的基础结构
@@ -33,6 +34,10 @@ type NotificationPayload struct {
 
 type Extra struct {
 	FollowerName string `json:"followerName"`
+	BadgeCode    string `json:"badgeCode,omitempty"`
+	BadgeName    string `json:"badgeName,omitempty"`
+	BadgeIconURL string `json:"badgeIconUrl,omitempty"`
+	ProfileURL   string `json:"profileUrl,omitempty"`
 }
 
 type Entity struct {

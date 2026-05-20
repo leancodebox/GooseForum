@@ -38,6 +38,19 @@ export async function postReply(articleId: number, content: string, replyId = 0)
   return readApiResponse<number | boolean>(response, '回复失败')
 }
 
+export async function deleteReply(replyId: number): Promise<boolean> {
+  const response = await fetch('/api/forum/articles-reply-delete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      replyId,
+    }),
+  })
+  return readApiResponse<boolean>(response, '删除回复失败')
+}
+
 export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
   const response = await fetch('/api/forum/like-articles', {
     method: 'POST',
@@ -72,6 +85,18 @@ export async function markAllNotificationsRead(): Promise<boolean> {
     headers: {
       'Content-Type': 'application/json',
     },
+  })
+  return readApiResponse<boolean>(response, '标记已读失败')
+}
+
+export async function markNotificationRead(notificationId: number): Promise<boolean> {
+  const response = await fetch('/api/forum/notification/mark-read', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ notificationId }),
+    keepalive: true,
   })
   return readApiResponse<boolean>(response, '标记已读失败')
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/chat/messages"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/samber/lo"
 )
 
@@ -72,6 +73,7 @@ func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64,
 		CreatedAt: time.Now(),
 	}
 	messages.SaveOrCreateById(msg)
+	unreadservice.Invalidate(peerId)
 
 	return convId, nil
 }
@@ -144,11 +146,13 @@ func GetMessages(userId, convId uint64, page, pageSize int) ([]*vo.MessageVo, er
 func MarkRead(userId, convId uint64) error {
 	imUserChatConfigs.ClearUnread(convId, userId)
 	messages.MarkMessagesRead(convId, userId)
+	unreadservice.Invalidate(userId)
 	return nil
 }
 
 // DeleteChat hides a conversation for the user.
 func DeleteChat(userId, convId uint64) error {
 	imUserChatConfigs.DeleteConfig(convId, userId)
+	unreadservice.Invalidate(userId)
 	return nil
 }

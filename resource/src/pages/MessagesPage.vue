@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { ArrowLeft, MessageSquare, MoreVertical, PenLine, Search, Send, Smile, X } from '@lucide/vue'
 import { getChatMessages, markChatRead, sendChatMessage, type ChatMessagePayload } from '@/runtime/api'
 import { formatDateTime } from '@/runtime/format'
+import { useUnreadStatus } from '@/runtime/unread-status'
 import type { LayoutPayload, MessageConversationPayload, MessagesPageProps, UserConnectionPayload } from '@/types/payload'
 
 type ChatConversation = MessageConversationPayload & {
@@ -26,6 +27,7 @@ const sending = ref(false)
 const error = ref('')
 const messagesEl = ref<HTMLElement | null>(null)
 const messageInput = ref<HTMLTextAreaElement | null>(null)
+const unreadStatus = useUnreadStatus()
 const emojis = ['😀', '😂', '😍', '😊', '😭', '👍', '🙏', '🔥', '✨', '🎉', '🤔', '👀', '❤️', '🙌', '👏', '✅']
 
 const filteredConversations = computed(() => {
@@ -81,6 +83,9 @@ async function selectConversation(conversation: ChatConversation) {
   }
   if (conversation.unreadCount > 0 && conversation.convId) {
     conversation.unreadCount = 0
+    if (!conversations.value.some((item) => item.peerId !== conversation.peerId && item.unreadCount > 0)) {
+      unreadStatus.clearMessages()
+    }
     void markChatRead(conversation.convId).catch(() => undefined)
   }
   await scrollToBottom()
@@ -209,7 +214,14 @@ async function startChat(user: UserConnectionPayload) {
               :class="active?.peerId === conversation.peerId ? 'bg-white shadow-[inset_3px_0_0_#2563eb]' : ''"
               @click="selectConversation(conversation)"
             >
-              <img :src="conversation.peerAvatar" :alt="conversation.peerUsername" class="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-gray-100" />
+              <span class="relative h-10 w-10 shrink-0">
+                <img :src="conversation.peerAvatar" :alt="conversation.peerUsername" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-100" />
+                <span
+                  v-if="conversation.unreadCount"
+                  class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"
+                  aria-hidden="true"
+                />
+              </span>
               <div class="min-w-0 flex-1">
                 <div class="flex items-baseline justify-between gap-2">
                   <span class="truncate text-sm font-semibold text-gray-950">{{ conversation.peerUsername }}</span>
@@ -219,7 +231,6 @@ async function startChat(user: UserConnectionPayload) {
                   <p class="min-w-0 flex-1 truncate text-sm" :class="conversation.unreadCount ? 'font-semibold text-gray-900' : 'text-gray-500'">
                     {{ conversation.lastMsg || '还没有消息' }}
                   </p>
-                  <span v-if="conversation.unreadCount" class="h-2 w-2 shrink-0 rounded-full bg-blue-600" />
                 </div>
               </div>
             </button>

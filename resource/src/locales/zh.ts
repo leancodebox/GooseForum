@@ -69,6 +69,7 @@ export default {
     unread: '{count} 未读',
     summary: '共 {total} 条，回复、点赞、关注和系统消息会集中展示在这里。',
     markAllRead: '全部已读',
+    markRead: '标为已读',
     table: {
       notification: 'Notification',
       time: 'Time',
@@ -82,6 +83,8 @@ export default {
     noUnread: '暂无新通知',
     newComment: '有新的评论回复',
     newNotification: '有新的通知',
+    followDescription: '{actor} 关注了你',
+    viewProfile: '查看主页',
     verb: {
       like: '点赞了',
       follow: '关注了你',

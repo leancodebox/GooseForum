@@ -82,7 +82,26 @@ type Sponsors struct {
 }
 
 type SponsorsConfig struct {
-	Sponsors Sponsors `json:"sponsors"`
+	Sponsors Sponsors          `json:"sponsors"`
+	Content  SponsorsPageIntro `json:"content"`
+	Contact  SponsorsContact   `json:"contact"`
+	Rules    []SponsorsRule    `json:"rules"`
+}
+
+type SponsorsPageIntro struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+type SponsorsContact struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	ButtonText  string `json:"buttonText"`
+	ButtonLink  string `json:"buttonLink"`
+}
+
+type SponsorsRule struct {
+	Content string `json:"content"`
 }
 
 // SiteSettingsConfig 站点设置配置
@@ -94,7 +113,7 @@ type SiteSettingsConfig struct {
 	SiteKeywords    string     `json:"siteKeywords"`
 	SiteUrl         string     `json:"siteUrl"`
 	SiteEmail       string     `json:"siteEmail"`
-	ExternalLinks   string     `json:"externalLinks,omitempty"`
+	ExternalLinks   string     `json:"externalLinks"`
 	FooterInfo      FooterInfo `json:"footerInfo,omitempty"`
 	// 品牌标识类型: default(默认样式), text(自定义文字), image(图片)
 	BrandType  string `json:"brandType"`

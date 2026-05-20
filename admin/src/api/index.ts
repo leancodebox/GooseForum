@@ -2,7 +2,8 @@ import request from '@/lib/request'
 import type { 
   PageResult, Category, User, Article, Role, Permission,
   DailyTraffic, SiteSettings, MailSettings, SecuritySettings,
-  PostingSettings, SponsorsConfig, AnnouncementConfig
+  PostingSettings, SponsorsConfig, AnnouncementConfig, BadgeItem,
+  UserBadgeOptions
 } from './types'
 import { LinkGroup } from '@/features/links-management/data/schema'
 
@@ -44,6 +45,26 @@ export function editUser(data: { userId: number; status: number; validate: numbe
 
 export function getAllRoleItem() {
   return request.get<any>('/api/admin/get-all-role-item')
+}
+
+export function getBadges() {
+  return request.get<BadgeItem[]>('/api/admin/badges')
+}
+
+export function saveBadge(data: BadgeItem) {
+  return request.post<any>('/api/admin/badge-save', data)
+}
+
+export function deleteBadge(code: string) {
+  return request.post<any>('/api/admin/badge-delete', { code })
+}
+
+export function getUserBadgeOptions(userId: number) {
+  return request.post<UserBadgeOptions>('/api/admin/user-badge-options', { userId })
+}
+
+export function saveUserBadges(userId: number, badgeCodes: string[]) {
+  return request.post<any>('/api/admin/save-user-badges', { userId, badgeCodes })
 }
 
 export interface ArticlesListParams {
@@ -135,10 +156,10 @@ export function savePostingSettings(data: { settings: PostingSettings }) {
 }
 
 export function getSponsors() {
-  return request.post<SponsorsConfig>('/api/admin/sponsors')
+  return request.get<SponsorsConfig>('/api/admin/sponsors')
 }
 
-export function saveSponsors(data: { settings: SponsorsConfig }) {
+export function saveSponsors(data: { sponsorsInfo: SponsorsConfig }) {
   return request.post<any>('/api/admin/save-sponsors', data)
 }
 

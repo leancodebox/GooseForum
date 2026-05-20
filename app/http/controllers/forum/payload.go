@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
@@ -24,14 +23,32 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/samber/lo"
 )
 
 const payloadVersion = "1.0"
+
+func siteTitle() string {
+	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
+	if siteConfig.SiteName != "" {
+		return siteConfig.SiteName
+	}
+	return "GooseForum"
+}
+
+func pageTitle(title string) string {
+	siteName := siteTitle()
+	if title == "" || title == siteName {
+		return siteName
+	}
+	return title + " - " + siteName
+}
 
 type PagePayload struct {
 	Component string        `json:"component"`
@@ -43,10 +60,34 @@ type PagePayload struct {
 }
 
 type PageMeta struct {
-	Title       string `json:"title"`
+	Title       string         `json:"title"`
+	Description string         `json:"description,omitempty"`
+	Canonical   string         `json:"canonical,omitempty"`
+	Robots      string         `json:"robots,omitempty"`
+	OpenGraph   *OpenGraphMeta `json:"openGraph,omitempty"`
+	Twitter     *TwitterMeta   `json:"twitter,omitempty"`
+	JSONLD      any            `json:"jsonLd,omitempty"`
+}
+
+type OpenGraphMeta struct {
+	Title         string   `json:"title,omitempty"`
+	Description   string   `json:"description,omitempty"`
+	Type          string   `json:"type,omitempty"`
+	URL           string   `json:"url,omitempty"`
+	SiteName      string   `json:"siteName,omitempty"`
+	Image         string   `json:"image,omitempty"`
+	PublishedTime string   `json:"publishedTime,omitempty"`
+	ModifiedTime  string   `json:"modifiedTime,omitempty"`
+	Author        string   `json:"author,omitempty"`
+	Section       string   `json:"section,omitempty"`
+	Tags          []string `json:"tags,omitempty"`
+}
+
+type TwitterMeta struct {
+	Card        string `json:"card,omitempty"`
+	Title       string `json:"title,omitempty"`
 	Description string `json:"description,omitempty"`
-	Canonical   string `json:"canonical,omitempty"`
-	Robots      string `json:"robots,omitempty"`
+	Image       string `json:"image,omitempty"`
 }
 
 type ErrorPageProps struct {
@@ -67,10 +108,17 @@ type ResetPasswordPageProps struct {
 }
 
 type LayoutPayload struct {
-	Site    SitePayload    `json:"site"`
-	Viewer  ViewerPayload  `json:"viewer"`
-	Sidebar SidebarPayload `json:"sidebar"`
-	Footer  FooterPayload  `json:"footer"`
+	Site    SitePayload         `json:"site"`
+	Viewer  ViewerPayload       `json:"viewer"`
+	Sidebar SidebarPayload      `json:"sidebar"`
+	Footer  FooterPayload       `json:"footer"`
+	Unread  UnreadStatusPayload `json:"unread"`
+}
+
+type UnreadStatusPayload struct {
+	Notifications          bool   `json:"notifications"`
+	Messages               bool   `json:"messages"`
+	LatestNotificationType string `json:"latestNotificationType,omitempty"`
 }
 
 type SitePayload struct {
@@ -215,16 +263,17 @@ type ArticlePermissions struct {
 }
 
 type UserProfileProps struct {
-	User         *vo.UserCard            `json:"user"`
-	Topics       []TopicPayload          `json:"topics"`
-	Activities   []UserActivityPayload   `json:"activities"`
-	Following    []UserConnectionPayload `json:"following"`
-	Followers    []UserConnectionPayload `json:"followers"`
-	IsOwnProfile bool                    `json:"isOwnProfile"`
-	CanMessage   bool                    `json:"canMessage"`
-	CanFollow    bool                    `json:"canFollow"`
-	MessageURL   string                  `json:"messageUrl"`
-	SettingsURL  string                  `json:"settingsUrl"`
+	User         *vo.UserCard             `json:"user"`
+	Badges       []badgeservice.UserBadge `json:"badges"`
+	Topics       []TopicPayload           `json:"topics"`
+	Activities   []UserActivityPayload    `json:"activities"`
+	Following    []UserConnectionPayload  `json:"following"`
+	Followers    []UserConnectionPayload  `json:"followers"`
+	IsOwnProfile bool                     `json:"isOwnProfile"`
+	CanMessage   bool                     `json:"canMessage"`
+	CanFollow    bool                     `json:"canFollow"`
+	MessageURL   string                   `json:"messageUrl"`
+	SettingsURL  string                   `json:"settingsUrl"`
 }
 
 type UserActivityPayload struct {
@@ -284,8 +333,11 @@ type FriendLinkPayload struct {
 }
 
 type SponsorsPageProps struct {
-	Sections   []SponsorSectionPayload `json:"sections"`
-	TotalCount int                     `json:"totalCount"`
+	Sections   []SponsorSectionPayload  `json:"sections"`
+	TotalCount int                      `json:"totalCount"`
+	Content    SponsorsPageIntroPayload `json:"content"`
+	Contact    SponsorsContactPayload   `json:"contact"`
+	Rules      []SponsorsRulePayload    `json:"rules"`
 }
 
 type SponsorSectionPayload struct {
@@ -300,6 +352,22 @@ type SponsorPayload struct {
 	Message   string `json:"message"`
 	Link      string `json:"link"`
 	AvatarURL string `json:"avatarUrl"`
+}
+
+type SponsorsPageIntroPayload struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+type SponsorsContactPayload struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	ButtonText  string `json:"buttonText"`
+	ButtonLink  string `json:"buttonLink"`
+}
+
+type SponsorsRulePayload struct {
+	Content string `json:"content"`
 }
 
 type NotificationsPageProps struct {
@@ -406,6 +474,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			IsAdmin:         currentUser.IsAdmin,
 		}
 	}
+	unread := buildUnreadStatus(viewer.ID)
 
 	footerPrimary := make([]string, 0, len(siteConfig.FooterInfo.Primary))
 	for _, item := range siteConfig.FooterInfo.Primary {
@@ -433,6 +502,16 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			Links:   siteConfig.FooterInfo.List,
 			Primary: footerPrimary,
 		},
+		Unread: unread,
+	}
+}
+
+func buildUnreadStatus(userID uint64) UnreadStatusPayload {
+	status := unreadservice.GetStatus(userID)
+	return UnreadStatusPayload{
+		Notifications:          status.Notifications,
+		Messages:               status.Messages,
+		LatestNotificationType: status.LatestNotificationType,
 	}
 }
 
@@ -635,10 +714,10 @@ func buildPageURL(c *gin.Context) string {
 }
 
 func buildHomeMeta(c *gin.Context) PageMeta {
-	info := controllers.GetGooseForumInfo()
+	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
 	return PageMeta{
-		Title:       "GooseForum",
-		Description: info.Desc,
+		Title:       siteTitle(),
+		Description: siteConfig.SiteDescription,
 		Canonical:   buildPageURL(c),
 	}
 }
@@ -779,11 +858,84 @@ func ensureRenderedHTML(entity *articles.Entity) {
 }
 
 func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
-	return PageMeta{
-		Title:       article.Title + " - GooseForum",
-		Description: article.Description,
-		Canonical:   component.GetBaseUri(c) + article.URL,
+	canonical := component.GetBaseUri(c) + article.URL
+	description := article.Description
+	if description == "" {
+		description = "阅读 " + article.Title + "，参与 " + siteTitle() + " 的社区讨论。"
 	}
+	categoryNames := lo.Map(article.Categories, func(item TopicCategoryPayload, _ int) string { return item.Name })
+	section := ""
+	if len(categoryNames) > 0 {
+		section = categoryNames[0]
+	}
+	publishedAt := parsePayloadTime(article.CreatedAt)
+	modifiedAt := parsePayloadTime(article.UpdatedAt)
+	publishedTime := ""
+	modifiedTime := ""
+	if !publishedAt.IsZero() {
+		publishedTime = publishedAt.Format(time.RFC3339)
+	}
+	if !modifiedAt.IsZero() {
+		modifiedTime = modifiedAt.Format(time.RFC3339)
+	}
+	jsonLD := vo.ArticleJSONLD{
+		Context:          "https://schema.org",
+		Type:             "DiscussionForumPosting",
+		Headline:         article.Title,
+		Description:      description,
+		Author:           vo.Person{Type: "Person", Name: article.Author.Username, URL: component.GetBaseUri(c) + "/u/" + strconv.FormatUint(article.Author.ID, 10)},
+		Publisher:        vo.Organization{Type: "Organization", Name: siteTitle(), URL: component.GetBaseUri(c)},
+		DatePublished:    publishedTime,
+		DateModified:     modifiedTime,
+		URL:              canonical,
+		MainEntityOfPage: canonical,
+		ArticleSection:   section,
+		Keywords:         categoryNames,
+		CommentCount:     article.ReplyCount,
+		InteractionStatistic: []vo.InteractionCounter{
+			{Type: "InteractionCounter", InteractionType: "https://schema.org/CommentAction", UserInteractionCount: article.ReplyCount},
+			{Type: "InteractionCounter", InteractionType: "https://schema.org/LikeAction", UserInteractionCount: article.LikeCount},
+			{Type: "InteractionCounter", InteractionType: "https://schema.org/ViewAction", UserInteractionCount: article.ViewCount},
+		},
+	}
+	return PageMeta{
+		Title:       pageTitle(article.Title),
+		Description: description,
+		Canonical:   canonical,
+		OpenGraph: &OpenGraphMeta{
+			Title:         article.Title,
+			Description:   description,
+			Type:          "article",
+			URL:           canonical,
+			SiteName:      siteTitle(),
+			PublishedTime: publishedTime,
+			ModifiedTime:  modifiedTime,
+			Author:        article.Author.Username,
+			Section:       section,
+			Tags:          categoryNames,
+		},
+		Twitter: &TwitterMeta{
+			Card:        "summary",
+			Title:       article.Title,
+			Description: description,
+		},
+		JSONLD: jsonLD,
+	}
+}
+
+func parsePayloadTime(value string) time.Time {
+	if value == "" {
+		return time.Time{}
+	}
+	parsed, err := time.ParseInLocation(time.DateTime, value, time.Local)
+	if err == nil {
+		return parsed
+	}
+	parsed, err = time.Parse(time.RFC3339, value)
+	if err == nil {
+		return parsed
+	}
+	return time.Time{}
 }
 
 func buildUserProfileProps(c *gin.Context, user users.EntityComplete) UserProfileProps {
@@ -797,6 +949,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete) UserProfil
 
 	return UserProfileProps{
 		User:         userCard,
+		Badges:       badgeservice.GetUserBadges(user.Id),
 		Topics:       buildTopicPayloads(hotdataserve.ArticlesSmallEntity2Vo(latestArticles)),
 		Activities:   buildUserActivities(activities),
 		Following:    buildUserConnections(userFollow.GetFollowingList(user.Id, 1, 12)),
@@ -884,10 +1037,10 @@ func buildUserMeta(c *gin.Context, user *vo.UserCard) PageMeta {
 		description = user.Signature
 	}
 	if description == "" {
-		description = "查看 " + user.Username + " 在 GooseForum 的主题、动态和社区关系。"
+		description = "查看 " + user.Username + " 在 " + siteTitle() + " 的主题、动态和社区关系。"
 	}
 	return PageMeta{
-		Title:       user.Username + " - GooseForum",
+		Title:       pageTitle(user.Username),
 		Description: description,
 		Canonical:   component.GetBaseUri(c) + "/u/" + strconv.FormatUint(user.UserId, 10),
 	}
@@ -948,7 +1101,7 @@ func buildCategoryMeta(c *gin.Context, category *articleCategory.Entity) PageMet
 		description = "浏览 " + category.Category + " 分类下的主题。"
 	}
 	return PageMeta{
-		Title:       category.Category + " - GooseForum",
+		Title:       pageTitle(category.Category),
 		Description: description,
 		Canonical:   component.GetBaseUri(c) + categoryURL(category),
 	}
@@ -986,8 +1139,8 @@ func buildLinksPageProps(groups []pageConfig.FriendLinksGroup) LinksPageProps {
 
 func buildLinksMeta(c *gin.Context) PageMeta {
 	return PageMeta{
-		Title:       "友情链接 - GooseForum",
-		Description: "GooseForum 友情链接与社区伙伴。",
+		Title:       pageTitle("友情链接"),
+		Description: siteTitle() + " 友情链接与社区伙伴。",
 		Canonical:   component.GetBaseUri(c) + "/links",
 	}
 }
@@ -1011,7 +1164,43 @@ func buildSponsorsPageProps(config pageConfig.SponsorsConfig) SponsorsPageProps 
 	return SponsorsPageProps{
 		Sections:   visibleSections,
 		TotalCount: total,
+		Content: SponsorsPageIntroPayload{
+			Title:       sponsorText(config.Content.Title, "赞助"),
+			Description: sponsorText(config.Content.Description, "感谢这些赞助者帮助 GooseForum 持续变好。"),
+		},
+		Contact: SponsorsContactPayload{
+			Title:       sponsorText(config.Contact.Title, "成为赞助者"),
+			Description: sponsorText(config.Contact.Description, "支持社区建设，赞助者可展示在赞助页，并获得更醒目的社区露出。"),
+			ButtonText:  sponsorText(config.Contact.ButtonText, "联系我们"),
+			ButtonLink:  sponsorText(config.Contact.ButtonLink, "mailto:contact@gooseforum.online"),
+		},
+		Rules: buildSponsorsRules(config.Rules),
 	}
+}
+
+func sponsorText(value string, fallback string) string {
+	if value != "" {
+		return value
+	}
+	return fallback
+}
+
+func buildSponsorsRules(items []pageConfig.SponsorsRule) []SponsorsRulePayload {
+	if len(items) == 0 {
+		items = []pageConfig.SponsorsRule{
+			{Content: "链接需稳定可访问。"},
+			{Content: "内容需适合公开社区展示。"},
+			{Content: "头像或 Logo 建议保持清晰。"},
+		}
+	}
+	res := make([]SponsorsRulePayload, 0, len(items))
+	for _, item := range items {
+		if item.Content == "" {
+			continue
+		}
+		res = append(res, SponsorsRulePayload{Content: item.Content})
+	}
+	return res
 }
 
 func buildSponsorPayloads(items []pageConfig.SponsorItem) []SponsorPayload {
@@ -1039,8 +1228,8 @@ func sponsorAvatar(avatar string) string {
 
 func buildSponsorsMeta(c *gin.Context) PageMeta {
 	return PageMeta{
-		Title:       "赞助 - GooseForum",
-		Description: "感谢支持 GooseForum 的赞助者与社区伙伴。",
+		Title:       pageTitle("赞助"),
+		Description: "感谢支持 " + siteTitle() + " 的赞助者与社区伙伴。",
 		Canonical:   component.GetBaseUri(c) + "/sponsors",
 	}
 }
@@ -1084,11 +1273,18 @@ func buildNotificationPayload(notification *eventNotification.Entity) Notificati
 		},
 		Payload: payload,
 	}
+	if item.Actor.Username == "" && payload.Extra.FollowerName != "" {
+		item.Actor.Username = payload.Extra.FollowerName
+	}
 	if payload.ArticleId > 0 {
+		articleURL := urlconfig.PostDetail(payload.ArticleId)
+		if payload.CommentId > 0 {
+			articleURL = fmt.Sprintf("%s#reply-%d", articleURL, payload.CommentId)
+		}
 		item.Article = &NotificationArticlePayload{
 			ID:    payload.ArticleId,
 			Title: payload.ArticleTitle,
-			URL:   urlconfig.PostDetail(payload.ArticleId),
+			URL:   articleURL,
 		}
 	}
 	return item

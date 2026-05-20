@@ -44,6 +44,15 @@ func GetUserConfigs(userId uint64) []Entity {
 	return entities
 }
 
+func HasUnread(userId uint64) bool {
+	var entity Entity
+	return builder().
+		Select("id").
+		Where("user_id = ? AND is_deleted = 0 AND unread_count > 0", userId).
+		Limit(1).
+		First(&entity).Error == nil && entity.Id != 0
+}
+
 func IncrUnread(convId, userId uint64) {
 	builder().Where("conv_id = ? AND user_id = ?", convId, userId).Updates(map[string]any{
 		"unread_count": gorm.Expr("unread_count + ?", 1),

@@ -12,6 +12,26 @@ export interface PageMeta {
   description?: string
   canonical?: string
   robots?: string
+  openGraph?: {
+    title?: string
+    description?: string
+    type?: string
+    url?: string
+    siteName?: string
+    image?: string
+    publishedTime?: string
+    modifiedTime?: string
+    author?: string
+    section?: string
+    tags?: string[]
+  }
+  twitter?: {
+    card?: string
+    title?: string
+    description?: string
+    image?: string
+  }
+  jsonLd?: unknown
 }
 
 export interface ErrorPageProps {
@@ -36,6 +56,13 @@ export interface LayoutPayload {
   viewer: ViewerPayload
   sidebar: SidebarPayload
   footer: FooterPayload
+  unread: UnreadStatusPayload
+}
+
+export interface UnreadStatusPayload {
+  notifications: boolean
+  messages: boolean
+  latestNotificationType?: string
 }
 
 export interface SitePayload {
@@ -171,6 +198,9 @@ export interface UserCardPayload {
   avatarUrl: string
   bio: string
   signature: string
+  websiteName: string
+  website: string
+  externalInformation: Record<string, { link?: string }>
   isAdmin: boolean
   articleCount: number
   replyCount: number
@@ -193,6 +223,9 @@ export interface UserHoverCardPayload {
   avatarUrl: string
   bio: string
   signature: string
+  websiteName: string
+  website: string
+  externalInformation: Record<string, { link?: string }>
   isAdmin: boolean
   articleCount: number
   replyCount: number
@@ -200,12 +233,14 @@ export interface UserHoverCardPayload {
   followerCount: number
   isOnline: boolean
   isFollowing: boolean
+  badges: UserBadgePayload[]
   lastActiveTime: string
   createdAt: string
 }
 
 export interface UserProfileProps {
   user: UserCardPayload
+  badges: UserBadgePayload[]
   topics: TopicPayload[]
   activities: UserActivityPayload[]
   following: UserConnectionPayload[]
@@ -215,6 +250,27 @@ export interface UserProfileProps {
   canFollow: boolean
   messageUrl: string
   settingsUrl: string
+}
+
+export interface BadgePayload {
+  code: string
+  type: string
+  grantMode: string
+  name: string
+  description: string
+  iconType: string
+  iconKey: string
+  iconUrl: string
+  color: string
+  level: string
+  isEnabled: boolean
+  sortOrder: number
+}
+
+export interface UserBadgePayload extends BadgePayload {
+  source: string
+  reason: string
+  grantedAt: string
 }
 
 export interface UserActivityPayload {
@@ -279,6 +335,9 @@ export interface FriendLinkPayload {
 export interface SponsorsPageProps {
   sections: SponsorSectionPayload[]
   totalCount: number
+  content: SponsorsPageIntroPayload
+  contact: SponsorsContactPayload
+  rules: SponsorsRulePayload[]
 }
 
 export interface SponsorSectionPayload {
@@ -293,6 +352,22 @@ export interface SponsorPayload {
   message: string
   link: string
   avatarUrl: string
+}
+
+export interface SponsorsPageIntroPayload {
+  title: string
+  description: string
+}
+
+export interface SponsorsContactPayload {
+  title: string
+  description: string
+  buttonText: string
+  buttonLink: string
+}
+
+export interface SponsorsRulePayload {
+  content: string
 }
 
 export interface NotificationsPageProps {
@@ -331,6 +406,13 @@ export interface NotificationPayload {
     actorName?: string
     articleId?: number
     articleTitle?: string
+    metadata?: {
+      followerName?: string
+      badgeCode?: string
+      badgeName?: string
+      badgeIconUrl?: string
+      profileUrl?: string
+    }
   }
 }
 

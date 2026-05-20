@@ -19,6 +19,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/articlesUserStat"
+	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
@@ -29,6 +30,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
 	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
+	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
@@ -57,6 +59,7 @@ func migration(migration bool) {
 		&articleLike.Entity{},
 		&articles.Entity{},
 		&articlesUserStat.Entity{},
+		&badges.Entity{},
 		&eventNotification.Entity{},
 		&optRecord.Entity{},
 		&pageConfig.Entity{},
@@ -66,6 +69,7 @@ func migration(migration bool) {
 		&rolePermissionRs.Entity{},
 		&taskQueue.Entity{},
 		&userFollow.Entity{},
+		&userBadges.Entity{},
 		&userOAuth.Entity{},
 		&userPoints.Entity{},
 		&users.EntityComplete{},

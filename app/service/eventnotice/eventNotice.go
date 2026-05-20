@@ -2,6 +2,8 @@ package eventnotice
 
 import (
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
+	"github.com/leancodebox/GooseForum/app/service/unreadservice"
+	"github.com/spf13/cast"
 )
 
 // SendCommentNotification 发送评论通知
@@ -20,7 +22,11 @@ func SendCommentNotification(userId uint64, articleId uint64, commentContent str
 		Payload:   payload,
 	}
 
-	return eventNotification.Create(notification)
+	err := eventNotification.Create(notification)
+	if err == nil {
+		unreadservice.Invalidate(userId)
+	}
+	return err
 }
 
 // SendReplyNotification 发送回复通知
@@ -39,7 +45,11 @@ func SendReplyNotification(userId uint64, commentId uint64, articleId uint64, re
 		Payload:   payload,
 	}
 
-	return eventNotification.Create(notification)
+	err := eventNotification.Create(notification)
+	if err == nil {
+		unreadservice.Invalidate(userId)
+	}
+	return err
 }
 
 // SendSystemNotification 发送系统通知
@@ -56,14 +66,45 @@ func SendSystemNotification(userId uint64, title string, content string, extra m
 		Payload:   payload,
 	}
 
-	return eventNotification.Create(notification)
+	err := eventNotification.Create(notification)
+	if err == nil {
+		unreadservice.Invalidate(userId)
+	}
+	return err
+}
+
+func SendBadgeNotification(userId uint64, badgeCode string, badgeName string, badgeIconURL string) error {
+	payload := eventNotification.NotificationPayload{
+		Title:   "获得新徽章",
+		Content: "你获得了「" + badgeName + "」徽章",
+		ActorId: userId,
+		Extra: eventNotification.Extra{
+			BadgeCode:    badgeCode,
+			BadgeName:    badgeName,
+			BadgeIconURL: badgeIconURL,
+			ProfileURL:   "/u/" + cast.ToString(userId),
+		},
+	}
+
+	notification := &eventNotification.Entity{
+		UserId:    userId,
+		EventType: eventNotification.EventTypeBadge,
+		Payload:   payload,
+	}
+
+	err := eventNotification.Create(notification)
+	if err == nil {
+		unreadservice.Invalidate(userId)
+	}
+	return err
 }
 
 // SendFollowNotification 发送关注通知
-func SendFollowNotification(userId uint64, followerName string) error {
+func SendFollowNotification(userId uint64, followerId uint64, followerName string) error {
 	payload := eventNotification.NotificationPayload{
 		Title:   "新增关注者",
 		Content: followerName + " 关注了你",
+		ActorId: followerId,
 		Extra:   eventNotification.Extra{FollowerName: followerName},
 	}
 
@@ -73,5 +114,9 @@ func SendFollowNotification(userId uint64, followerName string) error {
 		Payload:   payload,
 	}
 
-	return eventNotification.Create(notification)
+	err := eventNotification.Create(notification)
+	if err == nil {
+		unreadservice.Invalidate(userId)
+	}
+	return err
 }

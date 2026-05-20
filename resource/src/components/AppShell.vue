@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n'
 import UserHoverCard from './UserHoverCard.vue'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
 import { useNavigationState } from '@/runtime/navigation-state'
-import { useUnreadNotifications } from '@/runtime/unread-notifications'
+import { useUnreadStatus } from '@/runtime/unread-status'
 import type { LayoutPayload } from '@/types/payload'
 
 const props = defineProps<{
@@ -41,9 +41,10 @@ const closeTimers: Record<'lang' | 'user', number | undefined> = {
 }
 const { navigating } = useNavigationState()
 const { t, locale } = useI18n()
-const unreadNotifications = useUnreadNotifications()
-const hasUnreadNotification = computed(() => unreadNotifications.hasUnread.value)
-const notificationTitle = computed(() => unreadNotifications.message.value)
+const unreadStatus = useUnreadStatus()
+const hasUnreadNotification = computed(() => unreadStatus.notifications.value)
+const hasUnreadMessage = computed(() => unreadStatus.messages.value)
+const notificationTitle = computed(() => unreadStatus.notificationMessage.value)
 const asArray = <T>(value: T[] | null | undefined): T[] => (Array.isArray(value) ? value : [])
 const primaryItems = computed(() => asArray(props.layout.sidebar.main))
 const resourceItems = computed(() => asArray(props.layout.sidebar.resources))
@@ -79,9 +80,19 @@ watch(
 
 onMounted(() => {
   if (props.layout.viewer.isAuthenticated) {
-    unreadNotifications.startPolling()
+    unreadStatus.startPolling(props.layout.unread)
   }
 })
+
+watch(
+  () => props.layout.unread,
+  (unread) => {
+    if (props.layout.viewer.isAuthenticated) {
+      unreadStatus.applyUnread(unread)
+    }
+  },
+  { deep: true },
+)
 
 function setLang(lang: Locale) {
   setLocale(lang)
@@ -236,6 +247,18 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
 
           <template v-if="layout.viewer.isAuthenticated">
             <a
+              href="/messages"
+              class="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              aria-label="私信"
+              title="私信"
+            >
+              <Inbox class="h-5 w-5" />
+              <span
+                v-show="hasUnreadMessage"
+                class="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"
+              />
+            </a>
+            <a
               href="/notifications"
               class="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
               :aria-label="t('shell.notifications')"
@@ -306,7 +329,7 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
       class="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-3 px-3 py-3 sm:px-5 lg:grid-cols-[210px_minmax(0,1fr)] lg:px-8 xl:grid-cols-[224px_minmax(0,1fr)]"
       :class="{ 'xl:grid-cols-[224px_minmax(0,1fr)_280px]': rail }"
     >
-      <aside class="sticky top-19 hidden h-[calc(100vh-5.5rem)] overflow-y-auto self-start lg:block" aria-label="Sidebar">
+      <aside class="gf-scrollbar-none sticky top-19 hidden h-[calc(100vh-5.5rem)] overflow-y-auto self-start lg:block" aria-label="Sidebar">
         <nav>
           <div class="pb-2">
             <div class="space-y-0.5">
@@ -324,18 +347,23 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
                   aria-hidden="true"
                 />
                 <span v-else class="flex w-4 justify-center text-[13px] opacity-80" aria-hidden="true">{{ item.icon }}</span>
-                <span class="truncate">{{ item.label }}</span>
+                <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+                <span
+                  v-if="(item.key === 'messages' && hasUnreadMessage) || (item.key === 'notifications' && hasUnreadNotification)"
+                  class="h-2 w-2 shrink-0 rounded-full bg-red-500"
+                  aria-hidden="true"
+                />
               </a>
             </div>
 
-            <div v-if="resourceItems.length" class="mt-2.5">
+            <div v-if="resourceItems.length" class="mt-2">
               <div class="mb-1 px-2 text-[10px] font-bold uppercase tracking-wide text-gray-500">{{ t('shell.resources') }}</div>
-              <div class="space-y-0.5">
+              <div class="space-y-px">
                 <a
                   v-for="item in resourceItems"
                   :key="item.key"
                   :href="item.url"
-                  class="flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium"
+                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium"
                   :class="item.active ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'"
                 >
                   <component
@@ -350,14 +378,14 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
               </div>
             </div>
 
-            <div v-if="categoryItems.length" class="mt-2.5">
+            <div v-if="categoryItems.length" class="mt-2">
               <div class="mb-1 px-2 text-[10px] font-bold uppercase tracking-wide text-gray-500">{{ t('shell.categories') }}</div>
-              <div class="space-y-0.5">
+              <div class="space-y-px">
                 <a
                   v-for="category in categoryItems"
                   :key="category.key"
                   :href="category.url"
-                  class="flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium"
+                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium"
                   :class="category.active ? 'bg-gray-100 text-gray-950' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'"
                 >
                   <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
@@ -367,7 +395,7 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
             </div>
           </div>
 
-          <footer v-if="hasFooter" class="mt-1.5 border-t border-gray-100 px-2 pt-2 text-xs leading-5 text-gray-600">
+          <footer v-if="hasFooter" class="mt-0 px-2 pt-0.5 text-xs leading-5 text-gray-600">
             <div v-if="footerLinks.length" class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
               <a
                 v-for="link in footerLinks"
@@ -406,6 +434,8 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
       :resource-items="resourceItems"
       :category-items="categoryItems"
       :footer="layout.footer"
+      :has-unread-messages="hasUnreadMessage"
+      :has-unread-notifications="hasUnreadNotification"
       :close-label="t('shell.closeMenu')"
       :menu-label="t('shell.menu')"
       :categories-label="t('shell.categories')"

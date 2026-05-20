@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useFieldArray, type Control } from 'react-hook-form'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
-import { Plus, GripVertical, Trash2, Edit, Type } from 'lucide-react'
+import { Plus, GripVertical, Trash2, Edit } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -79,19 +79,20 @@ export function FooterEditor({ control }: FooterEditorProps) {
   }
 
   return (
-    <div className='space-y-8'>
+    <div>
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className='grid gap-8 md:grid-cols-2'>
-          <div className='space-y-4'>
+        <div>
+          <div className='space-y-2 border-b border-border/70 pb-3'>
             <div className='flex items-center justify-between'>
-              <div className='text-sm font-medium text-muted-foreground'>上方链接列表 (List)</div>
+              <div className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>第一行：链接</div>
               <Button
                 type='button'
-                variant='outline'
+                variant='ghost'
                 size='sm'
+                className='h-8 px-2'
                 onClick={() => appendList({ name: '新链接', url: '#' })}
               >
-                <Plus className='h-4 w-4 mr-1' /> 添加链接
+                <Plus className='mr-1 h-4 w-4' /> 添加链接
               </Button>
             </div>
             <Droppable droppableId='footer-list' type='list' direction='horizontal'>
@@ -99,7 +100,7 @@ export function FooterEditor({ control }: FooterEditorProps) {
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className='flex flex-wrap gap-2 min-h-[48px] p-2 bg-muted/30 rounded-lg border border-dashed'
+                  className='flex min-h-9 flex-wrap items-center gap-x-3 gap-y-1.5'
                 >
                   {listFields.map((field, index) => (
                     <Draggable key={field.id} draggableId={field.id} index={index}>
@@ -107,29 +108,39 @@ export function FooterEditor({ control }: FooterEditorProps) {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className='flex items-center gap-1.5 pl-1.5 pr-1 py-1 bg-background rounded-md border shadow-sm group hover:border-primary/50 transition-colors'
+                          className='group -ml-1 inline-flex items-center rounded-md px-1 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-within:bg-muted/60'
                         >
                           <div
                             {...provided.dragHandleProps}
-                            className='cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing'
+                            className='mr-0.5 cursor-grab text-muted-foreground/50 opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 active:cursor-grabbing'
                           >
                             <GripVertical className='h-3.5 w-3.5' />
                           </div>
-                          <span
-                            className='text-xs font-medium cursor-pointer hover:underline'
+                          <button
+                            type='button'
+                            className='min-h-6 max-w-[11rem] truncate rounded-sm px-1 text-left font-medium outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-ring'
                             onClick={() => openEdit('list', index)}
                           >
                             {field.name || '未命名'}
-                          </span>
-                          <div className='flex items-center ml-1'>
+                          </button>
+                          <div className='ml-0.5 flex items-center opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100'>
                             <Button
                               type='button'
                               variant='ghost'
                               size='icon'
-                              className='h-5 w-5 rounded-sm hover:bg-destructive/10 hover:text-destructive'
+                              className='h-6 w-6 rounded-sm hover:bg-background'
+                              onClick={() => openEdit('list', index)}
+                            >
+                              <Edit className='h-3.5 w-3.5' />
+                            </Button>
+                            <Button
+                              type='button'
+                              variant='ghost'
+                              size='icon'
+                              className='h-6 w-6 rounded-sm hover:bg-destructive/10 hover:text-destructive'
                               onClick={() => removeList(index)}
                             >
-                              <Trash2 className='h-3 w-3' />
+                              <Trash2 className='h-3.5 w-3.5' />
                             </Button>
                           </div>
                         </div>
@@ -138,7 +149,7 @@ export function FooterEditor({ control }: FooterEditorProps) {
                   ))}
                   {provided.placeholder}
                   {listFields.length === 0 && (
-                    <div className='w-full text-center text-sm text-muted-foreground py-2'>
+                    <div className='py-1 text-sm text-muted-foreground'>
                       暂无链接
                     </div>
                   )}
@@ -148,16 +159,17 @@ export function FooterEditor({ control }: FooterEditorProps) {
           </div>
 
           {/* Primary 区域 */}
-          <div className='space-y-4'>
+          <div className='space-y-2 pt-3'>
             <div className='flex items-center justify-between'>
-              <div className='text-sm font-medium text-muted-foreground'>下方文字内容 (Primary)</div>
+              <div className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>第二行：文字内容</div>
               <Button
                 type='button'
-                variant='outline'
+                variant='ghost'
                 size='sm'
+                className='h-8 px-2'
                 onClick={() => appendPrimary({ content: '新内容' })}
               >
-                <Plus className='h-4 w-4 mr-1' /> 添加文字
+                <Plus className='mr-1 h-4 w-4' /> 添加文字
               </Button>
             </div>
             <Droppable droppableId='footer-primary' type='primary'>
@@ -165,7 +177,7 @@ export function FooterEditor({ control }: FooterEditorProps) {
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className='space-y-2'
+                  className='flex min-h-9 flex-wrap items-center gap-x-3 gap-y-1.5'
                 >
                   {primaryFields.map((field, index) => (
                     <Draggable key={field.id} draggableId={field.id} index={index}>
@@ -173,38 +185,39 @@ export function FooterEditor({ control }: FooterEditorProps) {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className='flex items-center justify-between p-2 md:p-3 bg-muted/50 rounded-lg border group'
+                          className='group -ml-1 inline-flex max-w-full items-center rounded-md px-1 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-within:bg-muted/60'
                         >
-                          <div className='flex items-center gap-2 overflow-hidden'>
-                            <div
-                              {...provided.dragHandleProps}
-                              className='cursor-grab text-muted-foreground hover:text-foreground'
-                            >
-                              <GripVertical className='h-4 w-4' />
-                            </div>
-                            <Type className='h-4 w-4 text-muted-foreground shrink-0' />
-                            <span className='text-sm truncate'>
-                              {field.content || '空内容'}
-                            </span>
+                          <div
+                            {...provided.dragHandleProps}
+                            className='mr-0.5 cursor-grab text-muted-foreground/50 opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 active:cursor-grabbing'
+                          >
+                            <GripVertical className='h-3.5 w-3.5' />
                           </div>
-                          <div className='flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity'>
+                          <button
+                            type='button'
+                            className='min-h-6 max-w-[20rem] truncate rounded-sm px-1 text-left font-medium outline-none hover:text-primary focus-visible:ring-1 focus-visible:ring-ring'
+                            onClick={() => openEdit('primary', index)}
+                          >
+                            {field.content || '空内容'}
+                          </button>
+                          <div className='ml-0.5 flex items-center opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100'>
                             <Button
                               type='button'
                               variant='ghost'
                               size='icon'
-                              className='h-8 w-8'
+                              className='h-6 w-6 rounded-sm hover:bg-background'
                               onClick={() => openEdit('primary', index)}
                             >
-                              <Edit className='h-4 w-4' />
+                              <Edit className='h-3.5 w-3.5' />
                             </Button>
                             <Button
                               type='button'
                               variant='ghost'
                               size='icon'
-                              className='h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10'
+                              className='h-6 w-6 rounded-sm hover:bg-destructive/10 hover:text-destructive'
                               onClick={() => removePrimary(index)}
                             >
-                              <Trash2 className='h-4 w-4' />
+                              <Trash2 className='h-3.5 w-3.5' />
                             </Button>
                           </div>
                         </div>
@@ -213,7 +226,7 @@ export function FooterEditor({ control }: FooterEditorProps) {
                   ))}
                   {provided.placeholder}
                   {primaryFields.length === 0 && (
-                    <div className='text-center p-4 border border-dashed rounded-lg text-sm text-muted-foreground'>
+                    <div className='py-1 text-sm text-muted-foreground'>
                       暂无内容
                     </div>
                   )}
@@ -255,7 +268,7 @@ export function FooterEditor({ control }: FooterEditorProps) {
             )}
             {editType === 'primary' && (
               <div className='space-y-2'>
-                <Label>文字内容 / HTML</Label>
+                <Label>文字内容</Label>
                 <Input
                   value={editData?.content || ''}
                   onChange={(e) => setEditData({ ...editData, content: e.target.value })}

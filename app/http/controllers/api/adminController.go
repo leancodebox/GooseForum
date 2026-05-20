@@ -5,24 +5,29 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/usercardservice"
 	"github.com/samber/lo"
 )
 
@@ -118,6 +123,7 @@ type UserItem struct {
 	RoleId         uint64                              `json:"roleId,omitempty"`
 	CreateTime     string                              `json:"createTime"`
 	LastActiveTime string                              `json:"lastActiveTime"`
+	Badges         []badgeservice.UserBadge            `json:"badges"`
 }
 
 func UserList(req component.BetterRequest[UserListReq]) component.Response {
@@ -164,6 +170,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 			RoleId:         t.RoleId,
 			CreateTime:     t.CreatedAt.Format(time.DateTime),
 			LastActiveTime: LastActiveTime,
+			Badges:         badgeservice.GetUserBadges(t.Id),
 		}
 	})
 	return component.SuccessPage(
@@ -172,6 +179,163 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 		pageData.PageSize,
 		pageData.Total,
 	)
+}
+
+type BadgeSaveReq struct {
+	Code        string `json:"code"`
+	Type        string `json:"type"`
+	GrantMode   string `json:"grantMode"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	IconType    string `json:"iconType"`
+	IconKey     string `json:"iconKey"`
+	IconURL     string `json:"iconUrl"`
+	Color       string `json:"color"`
+	Level       string `json:"level"`
+	IsEnabled   bool   `json:"isEnabled"`
+	SortOrder   int    `json:"sortOrder"`
+}
+
+func BadgeList(req component.BetterRequest[component.Null]) component.Response {
+	return component.SuccessResponse(badgeservice.AllForAdmin())
+}
+
+func generateCustomBadgeCode() string {
+	for i := 0; i < 16; i++ {
+		code := "custom_" + strings.ToLower(randopt.RandomString(10))
+		if badges.GetByCode(code).Id == 0 {
+			return code
+		}
+	}
+	return fmt.Sprintf("custom_%x", time.Now().UnixNano())
+}
+
+func SaveBadge(req component.BetterRequest[BadgeSaveReq]) component.Response {
+	params := req.Params
+	params.Code = strings.TrimSpace(params.Code)
+	params.Name = strings.TrimSpace(params.Name)
+	if params.Name == "" {
+		return component.FailResponse("徽章名称不能为空")
+	}
+	if params.Type == "" {
+		params.Type = badges.TypeCustom
+	}
+	if params.Type != badges.TypeSystem && params.Type != badges.TypeCustom {
+		return component.FailResponse("徽章类型不合法")
+	}
+	if params.Code == "" {
+		if params.Type == badges.TypeSystem {
+			return component.FailResponse("系统徽章编码不能为空")
+		}
+		params.Code = generateCustomBadgeCode()
+	}
+	if params.GrantMode == "" {
+		params.GrantMode = badges.GrantModeManual
+	}
+	if params.GrantMode != badges.GrantModeAuto && params.GrantMode != badges.GrantModeManual {
+		return component.FailResponse("授予方式不合法")
+	}
+	if params.IconType == "" {
+		params.IconType = badges.IconTypeAsset
+	}
+	if params.Type == badges.TypeSystem {
+		systemBadge := badgeservice.ResolveOne(params.Code)
+		if systemBadge.Code == "" || systemBadge.Type != badges.TypeSystem {
+			return component.FailResponse("系统徽章不存在")
+		}
+		params.GrantMode = systemBadge.GrantMode
+	}
+
+	entity := badges.GetByCode(params.Code)
+	if entity.Id == 0 {
+		entity.Code = params.Code
+	}
+	entity.Type = params.Type
+	entity.GrantMode = params.GrantMode
+	entity.Name = params.Name
+	entity.Description = params.Description
+	entity.IconType = params.IconType
+	entity.IconKey = params.IconKey
+	entity.IconURL = params.IconURL
+	entity.Color = params.Color
+	entity.Level = params.Level
+	entity.IsEnabled = params.IsEnabled
+	entity.SortOrder = params.SortOrder
+	if err := badges.Save(&entity); err != nil {
+		return component.FailResponse("保存徽章失败")
+	}
+	badgeservice.InvalidateDefinitions()
+	usercardservice.Clear()
+	return component.SuccessResponse("success")
+}
+
+type BadgeDeleteReq struct {
+	Code string `json:"code"`
+}
+
+func DeleteBadge(req component.BetterRequest[BadgeDeleteReq]) component.Response {
+	code := strings.TrimSpace(req.Params.Code)
+	if code == "" {
+		return component.FailResponse("徽章编码不能为空")
+	}
+	badge := badgeservice.ResolveOne(code)
+	if badge.Type == badges.TypeSystem {
+		return component.FailResponse("系统默认徽章不可删除")
+	}
+	if err := badges.DeleteByCode(code); err != nil {
+		return component.FailResponse("删除徽章失败")
+	}
+	badgeservice.InvalidateDefinitions()
+	usercardservice.Clear()
+	return component.SuccessResponse("success")
+}
+
+type UserBadgeOptionsReq struct {
+	UserId uint64 `json:"userId"`
+}
+
+type UserBadgeOptionsResp struct {
+	Options []badgeservice.Badge     `json:"options"`
+	Active  []badgeservice.UserBadge `json:"active"`
+}
+
+func UserBadgeOptions(req component.BetterRequest[UserBadgeOptionsReq]) component.Response {
+	return component.SuccessResponse(UserBadgeOptionsResp{
+		Options: badgeservice.ManualGrantBadgesForAdmin(),
+		Active:  badgeservice.GetUserBadges(req.Params.UserId),
+	})
+}
+
+type SaveUserBadgesReq struct {
+	UserId     uint64   `json:"userId"`
+	BadgeCodes []string `json:"badgeCodes"`
+}
+
+func SaveUserBadges(req component.BetterRequest[SaveUserBadgesReq]) component.Response {
+	userID := req.Params.UserId
+	if userID == 0 {
+		return component.FailResponse("用户不存在")
+	}
+	allowed := lo.KeyBy(badgeservice.ManualGrantBadgesForAdmin(), func(item badgeservice.Badge) string { return item.Code })
+	nextCodes := lo.Uniq(req.Params.BadgeCodes)
+	nextSet := map[string]bool{}
+	for _, code := range nextCodes {
+		if _, ok := allowed[code]; !ok {
+			continue
+		}
+		nextSet[code] = true
+		_, _ = badgeservice.Grant(userID, code, userBadges.SourceManual, "管理员手动授予", req.UserId)
+	}
+	for _, active := range badgeservice.GetUserBadges(userID) {
+		if active.Source != userBadges.SourceManual {
+			continue
+		}
+		if !nextSet[active.Code] {
+			_ = userBadges.Revoke(userID, active.Code)
+		}
+	}
+	usercardservice.Invalidate(userID)
+	return component.SuccessResponse("success")
 }
 
 type EditUserReq struct {
@@ -650,15 +814,8 @@ func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.
 
 // GetSponsors 获取赞助商配置
 func GetSponsors(req component.BetterRequest[component.Null]) component.Response {
-	defaultSponsors := pageConfig.SponsorsConfig{
-		Sponsors: pageConfig.Sponsors{
-			Level0: []pageConfig.SponsorItem{},
-			Level1: []pageConfig.SponsorItem{},
-			Level2: []pageConfig.SponsorItem{},
-			Level3: []pageConfig.SponsorItem{},
-		},
-	}
-	res := pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, defaultSponsors)
+	res := pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, defaultSponsorsConfig())
+	fillSponsorsConfigDefaults(&res)
 	return component.SuccessResponse(res)
 }
 
@@ -668,7 +825,72 @@ type SaveSponsorsReq struct {
 
 // SaveSponsors 保存赞助商配置
 func SaveSponsors(req component.BetterRequest[SaveSponsorsReq]) component.Response {
-	return savePageConfig(pageConfig.SponsorsPage, req.Params.SponsorsInfo, hotdataserve.ClearSponsorsConfigCache)
+	config := req.Params.SponsorsInfo
+	fillSponsorsConfigDefaults(&config)
+	return savePageConfig(pageConfig.SponsorsPage, config, hotdataserve.ClearSponsorsConfigCache)
+}
+
+func defaultSponsorsConfig() pageConfig.SponsorsConfig {
+	return pageConfig.SponsorsConfig{
+		Sponsors: pageConfig.Sponsors{
+			Level0: []pageConfig.SponsorItem{},
+			Level1: []pageConfig.SponsorItem{},
+			Level2: []pageConfig.SponsorItem{},
+			Level3: []pageConfig.SponsorItem{},
+		},
+		Content: pageConfig.SponsorsPageIntro{
+			Title:       "赞助",
+			Description: "感谢这些赞助者帮助 GooseForum 持续变好。",
+		},
+		Contact: pageConfig.SponsorsContact{
+			Title:       "成为赞助者",
+			Description: "支持社区建设，赞助者可展示在赞助页，并获得更醒目的社区露出。",
+			ButtonText:  "联系我们",
+			ButtonLink:  "mailto:contact@gooseforum.online",
+		},
+		Rules: []pageConfig.SponsorsRule{
+			{Content: "链接需稳定可访问。"},
+			{Content: "内容需适合公开社区展示。"},
+			{Content: "头像或 Logo 建议保持清晰。"},
+		},
+	}
+}
+
+func fillSponsorsConfigDefaults(config *pageConfig.SponsorsConfig) {
+	defaultConfig := defaultSponsorsConfig()
+	if config.Sponsors.Level0 == nil {
+		config.Sponsors.Level0 = []pageConfig.SponsorItem{}
+	}
+	if config.Sponsors.Level1 == nil {
+		config.Sponsors.Level1 = []pageConfig.SponsorItem{}
+	}
+	if config.Sponsors.Level2 == nil {
+		config.Sponsors.Level2 = []pageConfig.SponsorItem{}
+	}
+	if config.Sponsors.Level3 == nil {
+		config.Sponsors.Level3 = []pageConfig.SponsorItem{}
+	}
+	if config.Content.Title == "" {
+		config.Content.Title = defaultConfig.Content.Title
+	}
+	if config.Content.Description == "" {
+		config.Content.Description = defaultConfig.Content.Description
+	}
+	if config.Contact.Title == "" {
+		config.Contact.Title = defaultConfig.Contact.Title
+	}
+	if config.Contact.Description == "" {
+		config.Contact.Description = defaultConfig.Contact.Description
+	}
+	if config.Contact.ButtonText == "" {
+		config.Contact.ButtonText = defaultConfig.Contact.ButtonText
+	}
+	if config.Contact.ButtonLink == "" {
+		config.Contact.ButtonLink = defaultConfig.Contact.ButtonLink
+	}
+	if config.Rules == nil {
+		config.Rules = defaultConfig.Rules
+	}
 }
 
 // GetSiteSettings 获取站点设置

@@ -84,7 +84,7 @@ func SendAEmail4User(userEntity *users.EntityComplete) error {
 		Type:     "activation",
 	})
 	if err != nil {
-		return nil
+		return err
 	}
 	return nil
 }

@@ -2,7 +2,8 @@
 import { computed, ref, watch } from 'vue'
 import { MessageSquare, Search, Sparkles, UsersRound } from '@lucide/vue'
 import { formatNumber, timeAgo } from '@/runtime/format'
-import { scheduleHideUserCard, showUserCard } from '@/runtime/user-card-events'
+import { topicDescription } from '@/runtime/topic-description'
+import { showUserCard } from '@/runtime/user-card-events'
 import type { LayoutPayload, SearchPageProps } from '@/types/payload'
 
 const page = defineProps<{
@@ -88,7 +89,7 @@ watch(
                     <Sparkles class="h-3 w-3" /> hot
                   </span>
                 </div>
-                <p v-if="topic.description" class="mt-1 truncate text-[13px] leading-relaxed text-gray-500">{{ topic.description }}</p>
+                <p class="mt-1 truncate text-[13px] leading-relaxed text-gray-500">{{ topicDescription(topic) }}</p>
                 <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 lg:hidden">
                   <div class="flex -space-x-2">
                     <a
@@ -97,10 +98,7 @@ watch(
                       :href="`/u/${participant.id}`"
                       :title="participant.username"
                       class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
-                      @mouseenter="showUserCard(participant, $event)"
-                      @mouseleave="scheduleHideUserCard"
-                      @focus="showUserCard(participant, $event)"
-                      @blur="scheduleHideUserCard"
+                      @click="showUserCard(participant, $event)"
                     >
                       <img :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
                     </a>
@@ -119,10 +117,7 @@ watch(
                     :href="`/u/${participant.id}`"
                     :title="participant.username"
                     class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
-                    @mouseenter="showUserCard(participant, $event)"
-                    @mouseleave="scheduleHideUserCard"
-                    @focus="showUserCard(participant, $event)"
-                    @blur="scheduleHideUserCard"
+                    @click="showUserCard(participant, $event)"
                   >
                     <img :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
                   </a>

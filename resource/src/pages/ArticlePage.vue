@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
-import { Bookmark, Clock, CornerDownLeft, Eye, Heart, MessageSquare, PencilLine, Send, X } from '@lucide/vue'
-import { bookmarkArticle, likeArticle, postReply } from '@/runtime/api'
+import { AlertTriangle, Bookmark, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
+import { bookmarkArticle, deleteReply, likeArticle, postReply } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
-import { scheduleHideUserCard, showUserCard } from '@/runtime/user-card-events'
-import type { ArticleDetailProps, LayoutPayload } from '@/types/payload'
+import { showUserCard } from '@/runtime/user-card-events'
+import type { ArticleDetailProps, LayoutPayload, ReplyPayload } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload
@@ -24,12 +24,17 @@ const actionMessage = ref('')
 const actingLike = ref(false)
 const actingBookmark = ref(false)
 const submitting = ref(false)
+const deletingReplyId = ref(0)
+const pendingDeleteReply = ref<ReplyPayload | null>(null)
+const deleteErrorMessage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const titleEl = ref<HTMLElement | null>(null)
 const showHeaderTitle = ref(false)
 const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
+const highlightedReplyId = ref<number | null>(null)
+let highlightTimer: number | undefined
 
 function observeTitle() {
   titleObserver?.disconnect()
@@ -48,6 +53,7 @@ function observeTitle() {
 
 onMounted(() => {
   void nextTick(observeTitle)
+  highlightReplyFromHash()
 })
 
 watch(
@@ -57,6 +63,7 @@ watch(
     isLiked.value = page.props.article.isLiked
     isBookmarked.value = page.props.article.isBookmarked
     void nextTick(observeTitle)
+    void nextTick(highlightReplyFromHash)
   },
   { immediate: true },
 )
@@ -72,9 +79,21 @@ watch(
 
 onBeforeUnmount(() => {
   titleObserver?.disconnect()
+  window.clearTimeout(highlightTimer)
   shellState.headerTitle = ''
   shellState.showHeaderTitle = false
 })
+
+function highlightReplyFromHash() {
+  const match = window.location.hash.match(/^#reply-(\d+)$/)
+  if (!match) return
+
+  highlightedReplyId.value = Number(match[1])
+  window.clearTimeout(highlightTimer)
+  highlightTimer = window.setTimeout(() => {
+    highlightedReplyId.value = null
+  }, 2400)
+}
 
 async function toggleLike() {
   if (actingLike.value) return
@@ -140,14 +159,48 @@ async function submitReply(replyId = 0) {
       replyContent.value = ''
     }
     successMessage.value = replyId > 0 ? '回复已发布。' : '回复已发布。'
-    const payload = await fetchPage(new URL(window.location.href))
-    history.replaceState({ goose: true, payload }, '', window.location.href)
-    window.dispatchEvent(new CustomEvent('goose:page', { detail: payload }))
+    await refreshCurrentPage()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '回复失败'
   } finally {
     submitting.value = false
     currentReplyId.value = 0
+  }
+}
+
+async function refreshCurrentPage() {
+  const payload = await fetchPage(new URL(window.location.href))
+  history.replaceState({ goose: true, payload }, '', window.location.href)
+  window.dispatchEvent(new CustomEvent('goose:page', { detail: payload }))
+}
+
+function requestDeleteReply(reply: ReplyPayload) {
+  pendingDeleteReply.value = reply
+  deleteErrorMessage.value = ''
+}
+
+function closeDeleteDialog() {
+  if (deletingReplyId.value) return
+  pendingDeleteReply.value = null
+  deleteErrorMessage.value = ''
+}
+
+async function removeReply(replyId: number) {
+  if (deletingReplyId.value) return
+
+  deletingReplyId.value = replyId
+  errorMessage.value = ''
+  successMessage.value = ''
+  deleteErrorMessage.value = ''
+  try {
+    await deleteReply(replyId)
+    successMessage.value = '回复已删除。'
+    pendingDeleteReply.value = null
+    await refreshCurrentPage()
+  } catch (error) {
+    deleteErrorMessage.value = error instanceof Error ? error.message : '删除回复失败'
+  } finally {
+    deletingReplyId.value = 0
   }
 }
 </script>
@@ -161,10 +214,7 @@ async function submitReply(replyId = 0) {
           <a
             :href="`/u/${page.props.article.author.id}`"
             class="inline-flex items-center gap-2 font-medium text-gray-700 hover:text-blue-600"
-            @mouseenter="showUserCard(page.props.article.author, $event)"
-            @mouseleave="scheduleHideUserCard"
-            @focus="showUserCard(page.props.article.author, $event)"
-            @blur="scheduleHideUserCard"
+            @click="showUserCard(page.props.article.author, $event)"
           >
             <img :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" class="h-5 w-5 rounded-full object-cover" />
             {{ page.props.article.author.username }}
@@ -190,10 +240,7 @@ async function submitReply(replyId = 0) {
           <a
             :href="`/u/${page.props.article.author.id}`"
             class="sticky top-19 self-start pt-1"
-            @mouseenter="showUserCard(page.props.article.author, $event)"
-            @mouseleave="scheduleHideUserCard"
-            @focus="showUserCard(page.props.article.author, $event)"
-            @blur="scheduleHideUserCard"
+            @click="showUserCard(page.props.article.author, $event)"
           >
             <img :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" class="h-11 w-11 rounded-full object-cover ring-1 ring-gray-100" />
           </a>
@@ -252,15 +299,13 @@ async function submitReply(replyId = 0) {
           v-for="(reply, index) in page.props.replies"
           :id="`reply-${reply.id}`"
           :key="reply.id"
-          class="group grid grid-cols-[44px_minmax(0,1fr)] gap-3 border-t border-gray-100 p-4 transition hover:bg-gray-50/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
+          class="group grid scroll-mt-20 grid-cols-[44px_minmax(0,1fr)] gap-3 border-t border-gray-100 p-4 transition hover:bg-gray-50/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
+          :class="{ 'bg-blue-50/50 ring-1 ring-inset ring-blue-100': highlightedReplyId === reply.id }"
         >
           <a
             :href="`/u/${reply.author.id}`"
             class="sticky top-19 self-start pt-1"
-            @mouseenter="showUserCard(reply.author, $event)"
-            @mouseleave="scheduleHideUserCard"
-            @focus="showUserCard(reply.author, $event)"
-            @blur="scheduleHideUserCard"
+            @click="showUserCard(reply.author, $event)"
           >
             <img :src="reply.author.avatarUrl" :alt="reply.author.username" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-100" />
           </a>
@@ -279,6 +324,16 @@ async function submitReply(replyId = 0) {
                 >
                   <CornerDownLeft class="h-3.5 w-3.5" />
                   回复
+                </button>
+                <button
+                  v-if="reply.isOwnReply"
+                  type="button"
+                  class="inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-gray-500 opacity-100 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                  :disabled="deletingReplyId === reply.id"
+                  @click="requestDeleteReply(reply)"
+                >
+                  <Trash2 class="h-3.5 w-3.5" />
+                  {{ deletingReplyId === reply.id ? '删除中...' : '删除' }}
                 </button>
                 <time class="text-xs text-gray-400">{{ formatDateTime(reply.createdAt) }}</time>
               </div>
@@ -390,10 +445,7 @@ async function submitReply(replyId = 0) {
                 :key="participant.id"
                 :href="`/u/${participant.id}`"
                 class="rounded-full"
-                @mouseenter="showUserCard(participant, $event)"
-                @mouseleave="scheduleHideUserCard"
-                @focus="showUserCard(participant, $event)"
-                @blur="scheduleHideUserCard"
+                @click="showUserCard(participant, $event)"
               >
                 <img :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover ring-1 ring-gray-100 transition hover:ring-blue-300" />
               </a>
@@ -422,6 +474,65 @@ async function submitReply(replyId = 0) {
           </div>
         </div>
 
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div
+        v-if="pendingDeleteReply"
+        class="fixed inset-0 z-[110] flex items-center justify-center bg-gray-950/45 px-4 py-6 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-reply-title"
+        @click.self="closeDeleteDialog"
+      >
+        <div class="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.55),0_10px_32px_-18px_rgba(15,23,42,0.28)]">
+          <div class="flex items-start gap-3">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
+              <AlertTriangle class="h-5 w-5" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <h2 id="delete-reply-title" class="text-base font-bold text-gray-950">删除这条回复？</h2>
+              <p class="mt-1 text-sm leading-6 text-gray-500">删除后这条回复会从主题中移除，相关回复数也会同步更新。</p>
+            </div>
+            <button
+              type="button"
+              class="rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="Boolean(deletingReplyId)"
+              @click="closeDeleteDialog"
+            >
+              <X class="h-4 w-4" />
+            </button>
+          </div>
+
+          <div class="mt-4 rounded-md border border-gray-100 bg-gray-50 px-3 py-2">
+            <div class="text-xs font-semibold text-gray-500">@{{ pendingDeleteReply.author.username }}</div>
+            <p class="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">{{ pendingDeleteReply.content }}</p>
+          </div>
+
+          <p v-if="deleteErrorMessage" class="mt-3 text-sm text-red-600">{{ deleteErrorMessage }}</p>
+
+          <div class="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              class="h-9 rounded-md px-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="Boolean(deletingReplyId)"
+              @click="closeDeleteDialog"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-9 items-center gap-1.5 rounded-md bg-red-600 px-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="Boolean(deletingReplyId)"
+              @click="removeReply(pendingDeleteReply.id)"
+            >
+              <Loader2 v-if="deletingReplyId === pendingDeleteReply.id" class="h-4 w-4 animate-spin" />
+              <Trash2 v-else class="h-4 w-4" />
+              {{ deletingReplyId === pendingDeleteReply.id ? '删除中...' : '确认删除' }}
+            </button>
+          </div>
+        </div>
       </div>
     </Teleport>
   </div>

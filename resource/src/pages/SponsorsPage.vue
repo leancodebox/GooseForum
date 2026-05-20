@@ -38,10 +38,10 @@ function showMessage(sponsor: SponsorPayload) {
     <div class="pb-12">
       <header class="mb-4 border-b border-gray-200/70 pb-4">
         <div class="flex flex-wrap items-center gap-2">
-          <h1 class="text-2xl font-bold text-gray-950">赞助</h1>
+          <h1 class="text-2xl font-bold text-gray-950">{{ props.content.title }}</h1>
           <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">{{ props.totalCount }}</span>
         </div>
-        <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-500">感谢这些赞助者帮助 GooseForum 持续变好。</p>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-500">{{ props.content.description }}</p>
       </header>
 
       <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
@@ -92,28 +92,20 @@ function showMessage(sponsor: SponsorPayload) {
 
         <aside class="space-y-3">
           <div class="rounded-lg border border-gray-200/70 bg-white p-4">
-            <h2 class="text-sm font-semibold text-gray-950">成为赞助者</h2>
-            <p class="mt-2 text-sm leading-6 text-gray-500">支持社区建设，赞助者可展示在赞助页，并获得更醒目的社区露出。</p>
-            <a href="mailto:contact@gooseforum.online" class="mt-4 inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700">
+            <h2 class="text-sm font-semibold text-gray-950">{{ props.contact.title }}</h2>
+            <p class="mt-2 text-sm leading-6 text-gray-500">{{ props.contact.description }}</p>
+            <a :href="props.contact.buttonLink" class="mt-4 inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700">
               <Mail class="h-4 w-4" />
-              联系我们
+              {{ props.contact.buttonText }}
             </a>
           </div>
 
-          <div class="rounded-lg border border-gray-200/70 bg-white p-4">
+          <div v-if="props.rules.length" class="rounded-lg border border-gray-200/70 bg-white p-4">
             <h2 class="text-sm font-semibold text-gray-950">展示规则</h2>
             <div class="mt-3 space-y-2 text-sm text-gray-600">
-              <div class="flex gap-2">
+              <div v-for="rule in props.rules" :key="rule.content" class="flex gap-2">
                 <ShieldCheck class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>链接需稳定可访问。</span>
-              </div>
-              <div class="flex gap-2">
-                <ShieldCheck class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>内容需适合公开社区展示。</span>
-              </div>
-              <div class="flex gap-2">
-                <ShieldCheck class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>头像或 Logo 建议保持清晰。</span>
+                <span>{{ rule.content }}</span>
               </div>
             </div>
           </div>

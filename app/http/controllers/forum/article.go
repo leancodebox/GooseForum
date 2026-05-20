@@ -53,7 +53,7 @@ func renderNotFound(c *gin.Context) {
 			Message: "这个主题不存在，或已经被删除。",
 		},
 		Meta: PageMeta{
-			Title:  "页面不存在 - GooseForum",
+			Title:  pageTitle("页面不存在"),
 			Robots: "noindex",
 		},
 		Layout:  buildLayout(c, "topics"),

@@ -130,9 +130,9 @@ export function PostsTable<TData, TValue>({
           }
         ]}
       />
-      <div className='rounded-md border'>
+      <div className='overflow-hidden rounded-lg border bg-background shadow-sm'>
         <Table>
-          <TableHeader>
+          <TableHeader className='bg-muted/30'>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -156,9 +156,10 @@ export function PostsTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
+                  className='hover:bg-muted/30'
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className='py-2'>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

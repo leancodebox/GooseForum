@@ -69,6 +69,7 @@ export default {
     unread: '{count} 未読',
     summary: '全 {total} 件。返信、いいね、フォロー、システム通知をまとめて表示します。',
     markAllRead: 'すべて既読',
+    markRead: '既読にする',
     table: {
       notification: 'Notification',
       time: 'Time',
@@ -82,6 +83,8 @@ export default {
     noUnread: '新しい通知はありません',
     newComment: '新しいコメントまたは返信があります',
     newNotification: '新しい通知があります',
+    followDescription: '{actor} さんがあなたをフォローしました',
+    viewProfile: 'プロフィールを見る',
     verb: {
       like: 'いいねしました',
       follow: 'あなたをフォローしました',

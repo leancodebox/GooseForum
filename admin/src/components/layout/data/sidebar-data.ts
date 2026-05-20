@@ -28,6 +28,7 @@ import {
   GalleryVerticalEnd,
   PanelsTopLeft,
   Megaphone,
+  Award,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -69,6 +70,11 @@ const allNavGroups = [
         title: '赞助管理',
         url: '/sponsorship-management',
         icon: Heart,
+      },
+      {
+        title: '徽章管理',
+        url: '/badges-management',
+        icon: Award,
       },
       {
         title: '站点设置',

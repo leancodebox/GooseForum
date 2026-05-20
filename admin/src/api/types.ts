@@ -34,6 +34,35 @@ export interface User {
   roleId: number
   createTime: string
   lastActiveTime: string
+  badges?: UserBadge[]
+}
+
+export interface BadgeItem {
+  code: string
+  type: 'system' | 'custom'
+  grantMode: 'auto' | 'manual'
+  name: string
+  description: string
+  iconType: string
+  iconKey: string
+  iconUrl: string
+  color: string
+  level: string
+  isEnabled: boolean
+  sortOrder: number
+  isSystem?: boolean
+  canDelete?: boolean
+}
+
+export interface UserBadge extends BadgeItem {
+  source: string
+  reason: string
+  grantedAt: string
+}
+
+export interface UserBadgeOptions {
+  options: BadgeItem[]
+  active: UserBadge[]
 }
 
 export interface Article {
@@ -149,10 +178,9 @@ export interface FooterInfo {
 
 export interface SponsorItem {
   name: string
-  logo: string
-  info: string
-  url: string
-  tag: string[]
+  avatarUrl: string
+  message: string
+  link: string
 }
 
 export interface SponsorsConfig {
@@ -162,6 +190,25 @@ export interface SponsorsConfig {
     level2: SponsorItem[]
     level3: SponsorItem[]
   }
+  content: SponsorsPageIntro
+  contact: SponsorsContact
+  rules: SponsorsRule[]
+}
+
+export interface SponsorsPageIntro {
+  title: string
+  description: string
+}
+
+export interface SponsorsContact {
+  title: string
+  description: string
+  buttonText: string
+  buttonLink: string
+}
+
+export interface SponsorsRule {
+  content: string
 }
 
 export interface AnnouncementConfig {

@@ -3,10 +3,13 @@ package mailservice
 import (
 	"bytes"
 	_ "embed"
-	"fmt"
 	"html/template"
+	"net/url"
+	"strings"
 
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
 
 //go:embed activation-email.gohtml
@@ -26,10 +29,9 @@ func generateActivationEmailBody(username, token string) (string, error) {
 	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
 	var buf bytes.Buffer
 	err := emailTmpl.Execute(&buf, map[string]any{
-		"SiteName": hotdataserve.GetSiteSettingsConfigCache().SiteName,
-		"Username": username,
-		"ActivationLink": fmt.Sprintf("%s/activate?token=%s",
-			siteConfig.SiteUrl, token),
+		"SiteName":       siteConfig.SiteName,
+		"Username":       username,
+		"ActivationLink": buildEmailActionURL(emailSiteBaseURL(siteConfig.SiteUrl), urlconfig.Activate(), token),
 	})
 	if err != nil {
 		return "", err
@@ -41,12 +43,28 @@ func generatePasswordResetEmailBody(username, token string) (string, error) {
 	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
 	var buf bytes.Buffer
 	err := passwordResetTmpl.Execute(&buf, map[string]any{
-		"Username": username,
-		"ResetLink": fmt.Sprintf("%s/reset-password?token=%s",
-			siteConfig.SiteUrl, token),
+		"Username":  username,
+		"ResetLink": buildEmailActionURL(emailSiteBaseURL(siteConfig.SiteUrl), urlconfig.ResetPassword(), token),
 	})
 	if err != nil {
 		return "", err
 	}
 	return buf.String(), nil
+}
+
+func emailSiteBaseURL(siteURL string) string {
+	baseURL := strings.TrimSpace(siteURL)
+	if baseURL == "" {
+		baseURL = strings.TrimSpace(preferences.GetString("server.url", ""))
+	}
+	return strings.TrimRight(baseURL, "/")
+}
+
+func buildEmailActionURL(baseURL, actionPath, token string) string {
+	cleanBaseURL := strings.TrimRight(strings.TrimSpace(baseURL), "/")
+	cleanPath := "/" + strings.TrimLeft(actionPath, "/")
+	actionURL := cleanBaseURL + cleanPath
+	query := url.Values{}
+	query.Set("token", token)
+	return actionURL + "?" + query.Encode()
 }

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Image as ImageIcon, Globe, FileText, Code, PanelBottom } from 'lucide-react'
 import { toast } from 'sonner'
 import axios from 'axios'
+import { getSiteSettings, saveSiteSettings } from '@/api'
 import { ContentLayout } from '@/components/layout/content-layout'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +22,23 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { siteInfoSchema, type SiteInfo } from './data/schema'
 import { FooterEditor } from './components/footer-editor'
+
+const normalizeSiteInfo = (settings: Partial<SiteInfo> = {}): SiteInfo => ({
+  siteName: settings.siteName ?? '',
+  siteUrl: settings.siteUrl ?? '',
+  siteLogo: settings.siteLogo ?? '',
+  siteEmail: settings.siteEmail ?? '',
+  siteDescription: settings.siteDescription ?? '',
+  siteKeywords: settings.siteKeywords ?? '',
+  externalLinks: settings.externalLinks ?? '',
+  footerInfo: {
+    primary: settings.footerInfo?.primary ?? [],
+    list: settings.footerInfo?.list ?? [],
+  },
+  brandType: settings.brandType ?? 'default',
+  brandText: settings.brandText ?? '',
+  brandImage: settings.brandImage ?? '',
+})
 
 export default function SiteInfoManagement() {
   const [loading, setLoading] = useState(true)
@@ -49,16 +67,11 @@ export default function SiteInfoManagement() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await axios.get('/api/admin/site-settings')
-        if (response.data.code === 0) {
-          const result = response.data.result
-          if (!result.footerInfo) {
-            result.footerInfo = { primary: [], list: [] }
-          } else {
-            if (!result.footerInfo.primary) result.footerInfo.primary = []
-            if (!result.footerInfo.list) result.footerInfo.list = []
-          }
-          form.reset(result)
+        const response = await getSiteSettings()
+        if (response.code === 0) {
+          form.reset(normalizeSiteInfo(response.result))
+        } else {
+          toast.error(response.msg || '加载站点设置失败')
         }
       } catch (error) {
         toast.error('加载站点设置失败')
@@ -73,13 +86,13 @@ export default function SiteInfoManagement() {
   const onSubmit = async (data: SiteInfo) => {
     setSaving(true)
     try {
-      const response = await axios.post('/api/admin/save-site-settings', {
-        settings: data,
+      const response = await saveSiteSettings({
+        settings: normalizeSiteInfo(data),
       })
-      if (response.data.code === 0) {
+      if (response.code === 0) {
         toast.success('保存成功')
       } else {
-        toast.error(response.data.message || '保存失败')
+        toast.error(response.msg || '保存失败')
       }
     } catch (error) {
       toast.error('保存失败')

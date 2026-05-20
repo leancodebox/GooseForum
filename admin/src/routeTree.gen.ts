@@ -34,6 +34,7 @@ import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedDashboardStatsIndexRouteImport } from './routes/_authenticated/dashboard-stats/index'
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
 import { Route as AuthenticatedCategoriesManagementIndexRouteImport } from './routes/_authenticated/categories-management/index'
+import { Route as AuthenticatedBadgesManagementIndexRouteImport } from './routes/_authenticated/badges-management/index'
 import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authenticated/apps/index'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
@@ -180,6 +181,12 @@ const AuthenticatedCategoriesManagementIndexRoute =
     path: '/categories-management/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedBadgesManagementIndexRoute =
+  AuthenticatedBadgesManagementIndexRouteImport.update({
+    id: '/badges-management/',
+    path: '/badges-management/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAppsIndexRoute = AuthenticatedAppsIndexRouteImport.update({
   id: '/apps/',
   path: '/apps/',
@@ -265,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/apps/': typeof AuthenticatedAppsIndexRoute
+  '/badges-management/': typeof AuthenticatedBadgesManagementIndexRoute
   '/categories-management/': typeof AuthenticatedCategoriesManagementIndexRoute
   '/chats/': typeof AuthenticatedChatsIndexRoute
   '/dashboard-stats/': typeof AuthenticatedDashboardStatsIndexRoute
@@ -301,6 +309,7 @@ export interface FileRoutesByTo {
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
+  '/badges-management': typeof AuthenticatedBadgesManagementIndexRoute
   '/categories-management': typeof AuthenticatedCategoriesManagementIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/dashboard-stats': typeof AuthenticatedDashboardStatsIndexRoute
@@ -340,6 +349,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
+  '/_authenticated/badges-management/': typeof AuthenticatedBadgesManagementIndexRoute
   '/_authenticated/categories-management/': typeof AuthenticatedCategoriesManagementIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
   '/_authenticated/dashboard-stats/': typeof AuthenticatedDashboardStatsIndexRoute
@@ -379,6 +389,7 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/apps/'
+    | '/badges-management/'
     | '/categories-management/'
     | '/chats/'
     | '/dashboard-stats/'
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/apps'
+    | '/badges-management'
     | '/categories-management'
     | '/chats'
     | '/dashboard-stats'
@@ -453,6 +465,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/apps/'
+    | '/_authenticated/badges-management/'
     | '/_authenticated/categories-management/'
     | '/_authenticated/chats/'
     | '/_authenticated/dashboard-stats/'
@@ -663,6 +676,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCategoriesManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/badges-management/': {
+      id: '/_authenticated/badges-management/'
+      path: '/badges-management'
+      fullPath: '/badges-management/'
+      preLoaderRoute: typeof AuthenticatedBadgesManagementIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/apps/': {
       id: '/_authenticated/apps/'
       path: '/apps'
@@ -771,6 +791,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
+  AuthenticatedBadgesManagementIndexRoute: typeof AuthenticatedBadgesManagementIndexRoute
   AuthenticatedCategoriesManagementIndexRoute: typeof AuthenticatedCategoriesManagementIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedDashboardStatsIndexRoute: typeof AuthenticatedDashboardStatsIndexRoute
@@ -794,6 +815,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
+  AuthenticatedBadgesManagementIndexRoute:
+    AuthenticatedBadgesManagementIndexRoute,
   AuthenticatedCategoriesManagementIndexRoute:
     AuthenticatedCategoriesManagementIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,

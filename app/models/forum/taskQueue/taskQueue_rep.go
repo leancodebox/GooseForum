@@ -2,8 +2,6 @@ package taskQueue
 
 import (
 	"time"
-
-	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 )
 
 func Create(entity *Entity) error {
@@ -16,7 +14,7 @@ func Save(entity *Entity) error {
 
 // GetPendingTasks 获取待处理的任务
 func GetPendingTasks(limit int) (tasks []*Entity) {
-	builder().Where(queryopt.Eq("status", StatusPending)).
+	builder().Where("status IN ?", []uint8{StatusPending, StatusRetrying}).
 		Order("id asc").
 		Limit(limit).
 		Find(&tasks)

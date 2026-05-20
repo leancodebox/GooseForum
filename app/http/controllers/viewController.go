@@ -87,8 +87,10 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	if err = component.SendAEmail4User(userEntity); err != nil {
-		slog.Error("添加邮件任务到队列失败", "error", err)
+	if securityConfig.EnableEmailVerification {
+		if err = component.SendAEmail4User(userEntity); err != nil {
+			slog.Error("添加邮件任务到队列失败", "error", err)
+		}
 	}
 
 	eventbus.Publish(context.Background(), &eventhandlers.UserSignUpEvent{

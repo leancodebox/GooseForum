@@ -13,6 +13,7 @@ import { usePosts } from './posts-provider'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import type { Category } from '@/api/types'
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -75,7 +76,21 @@ export function DataTableRowActions<TData>({
   )
 }
 
-export const postsColumns: ColumnDef<Post>[] = [
+type CategoryMap = Map<number, Pick<Category, 'id' | 'category' | 'color'>>
+
+const articleTypes: Record<number, { label: string; className: string }> = {
+  0: { label: '博文', className: 'bg-blue-50 text-blue-700 ring-blue-100' },
+  1: { label: '分享', className: 'bg-emerald-50 text-emerald-700 ring-emerald-100' },
+  2: { label: '问答', className: 'bg-amber-50 text-amber-700 ring-amber-100' },
+  3: { label: '教程', className: 'bg-violet-50 text-violet-700 ring-violet-100' },
+}
+
+function typeInfo(type: number) {
+  return articleTypes[type] || { label: '文章', className: 'bg-slate-50 text-slate-700 ring-slate-100' }
+}
+
+export function getPostsColumns(categoryMap: CategoryMap): ColumnDef<Post>[] {
+  return [
   {
     accessorKey: 'title',
     header: ({ column }) => (
@@ -83,33 +98,66 @@ export const postsColumns: ColumnDef<Post>[] = [
     ),
     cell: ({ row }) => {
       const post = row.original
-      const types: Record<number, { label: string; color: string }> = {
-        0: { label: '博文', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-        1: { label: '分享', color: 'bg-green-100 text-green-800 border-green-200' },
-        2: { label: '问答', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' }
-      }
-      const typeInfo = types[post.type] || { label: '文章', color: 'bg-gray-100 text-gray-800 border-gray-200' }
+      const info = typeInfo(post.type)
+      const categories = post.categoryId
+        .map((id) => categoryMap.get(id))
+        .filter(Boolean)
+      const createdAt = String(post.createdAt || '')
+      const createdDate = createdAt.slice(0, 10)
 
       return (
-        <div className='w-[200px] sm:w-[280px] lg:w-[350px] xl:w-[450px] flex flex-col pr-4'>
-          <div className='flex items-start gap-2'>
-            <Badge variant="outline" className={`mt-0.5 px-1.5 py-0 text-[10px] font-semibold whitespace-nowrap shrink-0 ${typeInfo.color}`}>
-              {typeInfo.label}
-            </Badge>
+        <div className='flex min-w-0 max-w-[640px] flex-col gap-1 pr-3'>
+          <div className='flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1'>
             <a 
               href={`/p/post/${post.id}`} 
               target="_blank" 
-              className='font-medium text-sm line-clamp-2 hover:underline break-all'
+              className='min-w-0 max-w-full truncate text-[15px] font-bold leading-5 text-foreground hover:text-primary hover:underline'
             >
               {post.title}
             </a>
+            <span className={`inline-flex h-5 shrink-0 items-center rounded-full px-1.5 text-[11px] font-semibold ring-1 ${info.className}`}>
+              {info.label}
+            </span>
             {post.processStatus === 1 && (
-              <Badge variant='destructive' className='mt-0.5 px-1.5 py-0 text-[10px] font-semibold whitespace-nowrap shrink-0'>封禁</Badge>
+              <Badge variant='destructive' className='h-5 shrink-0 rounded-full px-1.5 text-[10px] font-semibold'>封禁</Badge>
             )}
+            <span className='inline-flex shrink-0 items-center gap-1'>
+              {categories.length > 0 ? (
+                categories.slice(0, 2).map((category) => (
+                <span
+                  key={category!.id}
+                  className='inline-flex h-5 items-center gap-1 rounded-full bg-muted px-1.5 text-[11px] font-medium text-muted-foreground'
+                >
+                  <span
+                    className='h-1.5 w-1.5 rounded-full'
+                    style={{ backgroundColor: category!.color || '#64748b' }}
+                  />
+                  {category!.category}
+                </span>
+                ))
+              ) : (
+                <span className='inline-flex h-5 items-center rounded-full bg-muted px-1.5 text-[11px] text-muted-foreground'>未分类</span>
+              )}
+            </span>
+            <span className='inline-flex shrink-0 items-center gap-2 text-xs text-muted-foreground'>
+              <span className='inline-flex items-center gap-1' title='浏览量'>
+              <EyeOpenIcon className='h-3.5 w-3.5' />
+              <span className='tabular-nums'>{post.viewCount}</span>
+              </span>
+              <span className='inline-flex items-center gap-1' title='评论数'>
+                <ChatBubbleIcon className='h-3.5 w-3.5' />
+                <span className='tabular-nums'>{post.replyCount}</span>
+              </span>
+              <span className='inline-flex items-center gap-1' title='点赞数'>
+                <HeartIcon className='h-3.5 w-3.5' />
+                <span className='tabular-nums'>{post.likeCount}</span>
+              </span>
+            </span>
+            <span className='shrink-0 text-xs text-muted-foreground/80 xl:hidden'>{createdDate}</span>
           </div>
-          <span className='text-xs text-muted-foreground line-clamp-1 mt-1 break-all'>
+          <div className='min-w-0 truncate text-xs leading-5 text-muted-foreground'>
             {post.description || '暂无摘要'}
-          </span>
+          </div>
         </div>
       )
     },
@@ -123,13 +171,15 @@ export const postsColumns: ColumnDef<Post>[] = [
       const post = row.original
       return (
         <div className='flex items-center justify-center gap-2'>
-          <Avatar className='h-7 w-7'>
+          <Avatar className='h-8 w-8 ring-1 ring-border'>
             <AvatarImage src={post.userAvatarUrl || ''} alt={post.username} />
             <AvatarFallback>{post.username[0]}</AvatarFallback>
           </Avatar>
-          <a href={`/u/${post.userId}`} target="_blank" className='text-sm hover:underline'>
-            {post.username}
-          </a>
+          <div className='min-w-0'>
+            <a href={`/u/${post.userId}`} target="_blank" className='block max-w-[120px] truncate text-sm font-semibold hover:text-primary hover:underline'>
+              {post.username}
+            </a>
+          </div>
         </div>
       )
     },
@@ -142,8 +192,8 @@ export const postsColumns: ColumnDef<Post>[] = [
     cell: ({ row }) => {
       const status = row.getValue('articleStatus') as number
       return (
-        <div className='flex items-center justify-center gap-1.5 flex-wrap'>
-          <Badge variant={status === 1 ? 'default' : 'secondary'}>
+        <div className='flex items-center justify-center gap-1.5'>
+          <Badge variant={status === 1 ? 'default' : 'secondary'} className='h-6 rounded-md px-2'>
             {status === 1 ? '发布' : '草稿'}
           </Badge>
         </div>
@@ -151,39 +201,20 @@ export const postsColumns: ColumnDef<Post>[] = [
     },
   },
   {
-    id: 'stats',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='统计' className='w-[160px] justify-center' />
-    ),
-    cell: ({ row }) => {
-      const post = row.original
-      return (
-        <div className='flex items-center justify-center gap-4 text-muted-foreground whitespace-nowrap w-full'>
-          <div className='flex items-center gap-1.5' title='浏览量'>
-            <EyeOpenIcon className='h-3.5 w-3.5' />
-            <span className='text-xs tabular-nums min-w-[20px]'>{post.viewCount}</span>
-          </div>
-          <div className='flex items-center gap-1.5' title='评论数'>
-            <ChatBubbleIcon className='h-3 w-3' />
-            <span className='text-xs tabular-nums min-w-[20px]'>{post.replyCount}</span>
-          </div>
-          <div className='flex items-center gap-1.5' title='点赞数'>
-            <HeartIcon className='h-3.5 w-3.5' />
-            <span className='text-xs tabular-nums min-w-[20px]'>{post.likeCount}</span>
-          </div>
-        </div>
-      )
-    },
-  },
-  {
     accessorKey: 'createdAt',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='发布时间' className='w-[140px]' />
+      <DataTableColumnHeader column={column} title='发布时间' className='hidden w-[92px] xl:flex' />
     ),
-    cell: ({ row }) => <div className='text-xs whitespace-nowrap'>{row.getValue('createdAt')}</div>,
+    cell: ({ row }) => {
+      const createdAt = String(row.getValue('createdAt') || '')
+      return <div className='hidden whitespace-nowrap text-xs text-muted-foreground xl:block'>{createdAt.slice(0, 10)}</div>
+    },
   },
   {
     id: 'actions',
     cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]
+}
+
+export const postsColumns: ColumnDef<Post>[] = getPostsColumns(new Map())
