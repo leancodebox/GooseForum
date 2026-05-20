@@ -173,6 +173,16 @@ export interface ReplyPayload {
   isOwnReply: boolean
 }
 
+export interface ReplyWindowPayload {
+  replies: ReplyPayload[]
+  anchorReplyId?: number
+  beforeCursor?: number
+  afterCursor?: number
+  hasBefore: boolean
+  hasAfter: boolean
+  total: number
+}
+
 export interface TopicPayload {
   id: number
   title: string

@@ -14,6 +14,14 @@ func Get(id any) (entity Entity) {
 	return
 }
 
+func GetByIds(ids []uint64) (entities []*Entity) {
+	if len(ids) == 0 {
+		return
+	}
+	builder().Where(queryopt.In(pid, ids)).Find(&entities)
+	return
+}
+
 // GetAll 用于全量导出/修复数据，支持分页查询
 func GetAll(offset, limit int) ([]*Entity, error) {
 	var entities []*Entity
@@ -66,13 +74,47 @@ func GetByMaxIdPage(articleId uint64, id uint64, pageSize int) (entities []Entit
 }
 
 func GetByArticleId(articleId uint64) (entities []*Entity) {
-	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Limit(333).Order(queryopt.Desc(pid)).Find(&entities)
+	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Limit(20).Order(queryopt.Asc(pid)).Find(&entities)
 	return
 }
 
 func GetAllByArticleId(articleId uint64) (entities []*Entity) {
 	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Find(&entities)
 	return
+}
+
+func GetByArticleIdAsc(articleId uint64, limit int) (entities []*Entity) {
+	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Limit(limit).Order(queryopt.Asc(pid)).Find(&entities)
+	return
+}
+
+func GetByArticleIdAfter(articleId uint64, id uint64, limit int) (entities []*Entity) {
+	builder().
+		Where(queryopt.Eq(fieldArticleId, articleId)).
+		Where(queryopt.Gt(pid, id)).
+		Limit(limit).
+		Order(queryopt.Asc(pid)).
+		Find(&entities)
+	return
+}
+
+func GetByArticleIdBefore(articleId uint64, id uint64, limit int) (entities []*Entity) {
+	builder().
+		Where(queryopt.Eq(fieldArticleId, articleId)).
+		Where(queryopt.Lt(pid, id)).
+		Limit(limit).
+		Order(queryopt.Desc(pid)).
+		Find(&entities)
+	for i, j := 0, len(entities)-1; i < j; i, j = i+1, j-1 {
+		entities[i], entities[j] = entities[j], entities[i]
+	}
+	return
+}
+
+func CountByArticleId(articleId uint64) int64 {
+	var count int64
+	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Count(&count)
+	return count
 }
 
 func GetUserCount(userId uint64) int64 {

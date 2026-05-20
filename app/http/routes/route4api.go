@@ -98,6 +98,7 @@ func apiRoute(ginApp *gin.Engine) {
 	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
 	forumApi.GET("get-articles-enum", ginUpNP(controllers.GetArticlesEnum))
 	forumApi.POST("search-articles", UpButterReq(controllers.SearchArticles))
+	forumApi.GET("article-replies-window", middleware.JWTAuth, middleware.NoUpdateUserActivity, UpQueryReq(forum.ArticleRepliesWindow))
 
 	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
 	forumLoginApi.POST("notification/list", UpButterReq(api.GetNotificationList))

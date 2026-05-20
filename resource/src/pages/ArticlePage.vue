@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
 import { AlertTriangle, Bookmark, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
-import { bookmarkArticle, deleteReply, likeArticle, postReply } from '@/runtime/api'
+import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
@@ -26,6 +26,15 @@ const actingBookmark = ref(false)
 const submitting = ref(false)
 const deletingReplyId = ref(0)
 const pendingDeleteReply = ref<ReplyPayload | null>(null)
+const replies = ref<ReplyPayload[]>([...page.props.replies])
+const replyWindowMode = ref(false)
+const replyHasBefore = ref(false)
+const replyHasAfter = ref(hasMoreInitialReplies())
+const replyBeforeCursor = ref(firstReplyId(page.props.replies))
+const replyAfterCursor = ref(lastReplyId(page.props.replies))
+const loadingReplyWindow = ref(false)
+const loadingReplyDirection = ref<'before' | 'after' | 'anchor' | null>(null)
+const replyWindowError = ref('')
 const deleteErrorMessage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -53,7 +62,7 @@ function observeTitle() {
 
 onMounted(() => {
   void nextTick(observeTitle)
-  highlightReplyFromHash()
+  void syncReplyHash()
 })
 
 watch(
@@ -62,8 +71,9 @@ watch(
     likeCount.value = page.props.article.likeCount
     isLiked.value = page.props.article.isLiked
     isBookmarked.value = page.props.article.isBookmarked
+    resetRepliesFromProps()
     void nextTick(observeTitle)
-    void nextTick(highlightReplyFromHash)
+    void nextTick(syncReplyHash)
   },
   { immediate: true },
 )
@@ -84,15 +94,92 @@ onBeforeUnmount(() => {
   shellState.showHeaderTitle = false
 })
 
-function highlightReplyFromHash() {
-  const match = window.location.hash.match(/^#reply-(\d+)$/)
-  if (!match) return
+function resetRepliesFromProps() {
+  replies.value = [...page.props.replies]
+  replyWindowMode.value = false
+  replyHasBefore.value = false
+  replyHasAfter.value = hasMoreInitialReplies()
+  replyBeforeCursor.value = firstReplyId(page.props.replies)
+  replyAfterCursor.value = lastReplyId(page.props.replies)
+  replyWindowError.value = ''
+}
 
-  highlightedReplyId.value = Number(match[1])
+function firstReplyId(items: ReplyPayload[]) {
+  return items.length ? items[0].id : 0
+}
+
+function lastReplyId(items: ReplyPayload[]) {
+  return items.length ? items[items.length - 1].id : 0
+}
+
+function hasMoreInitialReplies() {
+  return page.props.article.replyCount > page.props.replies.length
+}
+
+function findReplyHashId() {
+  const match = window.location.hash.match(/^#reply-(\d+)$/)
+  return match ? Number(match[1]) : 0
+}
+
+async function syncReplyHash() {
+  const replyId = findReplyHashId()
+  if (!replyId) return
+
+  if (!replies.value.some((reply) => reply.id === replyId)) {
+    await loadReplyWindow('anchor', replyId)
+  }
+
+  highlightReply(replyId)
+  await nextTick()
+  document.getElementById(`reply-${replyId}`)?.scrollIntoView({ block: 'center' })
+}
+
+function highlightReply(replyId: number) {
+  highlightedReplyId.value = replyId
   window.clearTimeout(highlightTimer)
   highlightTimer = window.setTimeout(() => {
     highlightedReplyId.value = null
   }, 2400)
+}
+
+function mergeReplies(nextReplies: ReplyPayload[], mode: 'replace' | 'prepend' | 'append') {
+  if (mode === 'replace') {
+    replies.value = nextReplies
+    return
+  }
+
+  const seen = new Set(replies.value.map((reply) => reply.id))
+  const filtered = nextReplies.filter((reply) => !seen.has(reply.id))
+  replies.value = mode === 'prepend' ? [...filtered, ...replies.value] : [...replies.value, ...filtered]
+}
+
+async function loadReplyWindow(direction: 'before' | 'after' | 'anchor', anchorReplyId = 0) {
+  if (loadingReplyWindow.value) return
+
+  loadingReplyWindow.value = true
+  loadingReplyDirection.value = direction
+  replyWindowError.value = ''
+  try {
+    const payload = await getArticleRepliesWindow({
+      articleId: page.props.article.id,
+      anchorReplyId: direction === 'anchor' ? anchorReplyId : undefined,
+      before: direction === 'before' ? replyBeforeCursor.value : undefined,
+      after: direction === 'after' ? replyAfterCursor.value : undefined,
+      limit: 20,
+    })
+
+    replyWindowMode.value = true
+    mergeReplies(payload.replies, direction === 'before' ? 'prepend' : direction === 'after' ? 'append' : 'replace')
+    replyHasBefore.value = payload.hasBefore
+    replyHasAfter.value = payload.hasAfter
+    replyBeforeCursor.value = payload.beforeCursor ?? firstReplyId(replies.value)
+    replyAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
+  } catch (error) {
+    replyWindowError.value = error instanceof Error ? error.message : '回复加载失败'
+  } finally {
+    loadingReplyWindow.value = false
+    loadingReplyDirection.value = null
+  }
 }
 
 async function toggleLike() {
@@ -293,10 +380,24 @@ async function removeReply(replyId: number) {
           </div>
         </div>
 
-        <span v-if="page.props.replies.length" id="replies" class="block scroll-mt-20" aria-hidden="true" />
+        <span v-if="replies.length" id="replies" class="block scroll-mt-20" aria-hidden="true" />
+
+        <div v-if="replyWindowMode || replyHasBefore || replyWindowError" class="border-t border-gray-100 px-4 py-3 text-center">
+          <button
+            v-if="replyHasBefore"
+            type="button"
+            class="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            :disabled="loadingReplyWindow"
+            @click="loadReplyWindow('before')"
+          >
+            <Loader2 v-if="loadingReplyDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
+            加载更早回复
+          </button>
+          <p v-if="replyWindowError" class="mt-2 text-xs text-red-600">{{ replyWindowError }}</p>
+        </div>
 
         <div
-          v-for="(reply, index) in page.props.replies"
+          v-for="reply in replies"
           :id="`reply-${reply.id}`"
           :key="reply.id"
           class="group grid scroll-mt-20 grid-cols-[44px_minmax(0,1fr)] gap-3 border-t border-gray-100 p-4 transition hover:bg-gray-50/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
@@ -313,7 +414,6 @@ async function removeReply(replyId: number) {
             <div class="mb-2 flex flex-wrap items-center justify-between gap-3">
               <div class="flex items-center gap-2">
                 <a :href="`/u/${reply.author.id}`" class="font-semibold text-gray-950 hover:text-blue-600">{{ reply.author.username }}</a>
-                <span class="rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-500">#{{ index + 1 }}</span>
               </div>
               <div class="flex items-center gap-3">
                 <button
@@ -369,6 +469,18 @@ async function removeReply(replyId: number) {
               </div>
             </div>
           </div>
+        </div>
+
+        <div v-if="replyHasAfter" class="border-t border-gray-100 px-4 py-3 text-center">
+          <button
+            type="button"
+            class="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            :disabled="loadingReplyWindow"
+            @click="loadReplyWindow('after')"
+          >
+            <Loader2 v-if="loadingReplyDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
+            加载更多回复
+          </button>
         </div>
       </section>
 

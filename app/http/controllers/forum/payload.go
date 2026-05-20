@@ -257,6 +257,16 @@ type ReplyPayload struct {
 	IsOwnReply      bool               `json:"isOwnReply"`
 }
 
+type ReplyWindowPayload struct {
+	Replies       []ReplyPayload `json:"replies"`
+	AnchorReplyID uint64         `json:"anchorReplyId,omitempty"`
+	BeforeCursor  uint64         `json:"beforeCursor,omitempty"`
+	AfterCursor   uint64         `json:"afterCursor,omitempty"`
+	HasBefore     bool           `json:"hasBefore"`
+	HasAfter      bool           `json:"hasAfter"`
+	Total         int64          `json:"total"`
+}
+
 type ArticlePermissions struct {
 	IsOwnArticle bool `json:"isOwnArticle"`
 	CanReply     bool `json:"canReply"`
@@ -728,38 +738,72 @@ func buildArticleDetailProps(c *gin.Context, entity *articles.Entity) ArticleDet
 	userIDs := []uint64{entity.UserId}
 	userIDs = append(userIDs, lo.Map(replyEntities, func(item *reply.Entity, _ int) uint64 { return item.UserId })...)
 	userMap := users.GetMapByIds(lo.Uniq(userIDs))
-	replyMap := lo.KeyBy(replyEntities, func(item *reply.Entity) uint64 { return item.Id })
 
 	return ArticleDetailProps{
-		Article: buildArticlePayload(c, entity, userMap),
-		Replies: lo.Map(replyEntities, func(item *reply.Entity, _ int) ReplyPayload {
-			author := userPayload(item.UserId, userMap)
-			replyToName, replyToUserID := "", uint64(0)
-			if item.ReplyId > 0 {
-				if parent, ok := replyMap[item.ReplyId]; ok && parent != nil {
-					parentAuthor := userPayload(parent.UserId, userMap)
-					replyToName = parentAuthor.Username
-					replyToUserID = parentAuthor.ID
-				}
-			}
-			return ReplyPayload{
-				ID:              item.Id,
-				ArticleID:       item.ArticleId,
-				Content:         item.Content,
-				Author:          author,
-				CreatedAt:       item.CreatedAt.Format(time.DateTime),
-				ReplyToID:       item.ReplyId,
-				ReplyToUserID:   replyToUserID,
-				ReplyToUsername: replyToName,
-				IsOwnReply:      currentUserID == item.UserId,
-			}
-		}),
+		Article:   buildArticlePayload(c, entity, userMap),
+		Replies:   buildReplyPayloads(replyEntities, userMap, currentUserID),
 		HotTopics: buildArticleHotTopics(entity.Id),
 		Permissions: ArticlePermissions{
 			IsOwnArticle: currentUserID == entity.UserId,
 			CanReply:     currentUserID > 0,
 		},
 	}
+}
+
+func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64) []ReplyPayload {
+	replyMap := lo.KeyBy(replyEntities, func(item *reply.Entity) uint64 { return item.Id })
+	missingParentIDs := make([]uint64, 0)
+	for _, item := range replyEntities {
+		if item == nil || item.ReplyId == 0 {
+			continue
+		}
+		if _, ok := replyMap[item.ReplyId]; !ok {
+			missingParentIDs = append(missingParentIDs, item.ReplyId)
+		}
+	}
+	for _, parent := range reply.GetByIds(lo.Uniq(missingParentIDs)) {
+		if parent != nil {
+			replyMap[parent.Id] = parent
+		}
+	}
+
+	userIDs := make([]uint64, 0, len(replyEntities)+len(replyMap))
+	for _, item := range replyEntities {
+		if item != nil {
+			userIDs = append(userIDs, item.UserId)
+		}
+	}
+	for _, parent := range replyMap {
+		if parent != nil {
+			userIDs = append(userIDs, parent.UserId)
+		}
+	}
+	for userID, user := range users.GetMapByIds(lo.Uniq(userIDs)) {
+		userMap[userID] = user
+	}
+
+	return lo.Map(replyEntities, func(item *reply.Entity, _ int) ReplyPayload {
+		author := userPayload(item.UserId, userMap)
+		replyToName, replyToUserID := "", uint64(0)
+		if item.ReplyId > 0 {
+			if parent, ok := replyMap[item.ReplyId]; ok && parent != nil {
+				parentAuthor := userPayload(parent.UserId, userMap)
+				replyToName = parentAuthor.Username
+				replyToUserID = parentAuthor.ID
+			}
+		}
+		return ReplyPayload{
+			ID:              item.Id,
+			ArticleID:       item.ArticleId,
+			Content:         item.Content,
+			Author:          author,
+			CreatedAt:       item.CreatedAt.Format(time.DateTime),
+			ReplyToID:       item.ReplyId,
+			ReplyToUserID:   replyToUserID,
+			ReplyToUsername: replyToName,
+			IsOwnReply:      currentUserID == item.UserId,
+		}
+	})
 }
 
 func buildArticleHotTopics(currentArticleID uint64) []TopicPayload {

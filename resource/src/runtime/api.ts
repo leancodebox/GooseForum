@@ -1,4 +1,4 @@
-import type { UserCardPayload, UserHoverCardPayload } from '@/types/payload'
+import type { ReplyWindowPayload, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
 
 interface ApiResponse<T> {
   code?: number
@@ -49,6 +49,31 @@ export async function deleteReply(replyId: number): Promise<boolean> {
     }),
   })
   return readApiResponse<boolean>(response, '删除回复失败')
+}
+
+export interface ReplyWindowInput {
+  articleId: number
+  anchorReplyId?: number
+  before?: number
+  after?: number
+  limit?: number
+}
+
+export async function getArticleRepliesWindow(input: ReplyWindowInput): Promise<ReplyWindowPayload> {
+  const params = new URLSearchParams({
+    articleId: String(input.articleId),
+  })
+  if (input.anchorReplyId) params.set('anchorReplyId', String(input.anchorReplyId))
+  if (input.before) params.set('before', String(input.before))
+  if (input.after) params.set('after', String(input.after))
+  if (input.limit) params.set('limit', String(input.limit))
+
+  const response = await fetch(`/api/forum/article-replies-window?${params.toString()}`, {
+    headers: {
+      Accept: 'application/json',
+    },
+  })
+  return readApiResponse<ReplyWindowPayload>(response, '回复加载失败')
 }
 
 export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
