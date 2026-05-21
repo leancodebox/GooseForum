@@ -81,6 +81,11 @@ func Publish(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
+	if component.LoginUserId(c) > 0 {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
 	payload := PagePayload{
 		Component: "auth.login",
 		Props:     buildLoginPageProps(c),
