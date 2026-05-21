@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { Languages, LoaderCircle, LockKeyhole, Mail, UserRound } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { forgotPassword, getCaptcha, login, register } from '@/runtime/api'
+import { queueFlashMessage } from '@/runtime/flash-message'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
 import type { LayoutPayload, LoginPageProps } from '@/types/payload'
 
@@ -121,11 +122,7 @@ async function handleRegister() {
   error.value = ''
   try {
     const message = await register(registerForm.username, registerForm.email, registerForm.password, captchaId.value, registerForm.captcha)
-    if (message.includes('邮箱') || message.includes('验证')) {
-      notice.value = message
-      switchMode('login')
-      return
-    }
+    queueFlashMessage(message || t('auth.validation.registerSuccess'), message.includes('邮箱') || message.includes('验证') ? 'info' : 'success')
     window.location.href = homeUrl.value
   } catch (err) {
     error.value = errorMessage(err, t('auth.validation.registerFailed'))

@@ -107,6 +107,13 @@ export interface DailyTraffic {
   replyCount: number
 }
 
+export interface ServerVersion {
+  version: string
+  commit: string
+  buildDate: string
+  mode: 'development' | 'snapshot' | 'release' | 'custom' | string
+}
+
 export interface SiteSettings {
   siteName: string
   siteLogo: string

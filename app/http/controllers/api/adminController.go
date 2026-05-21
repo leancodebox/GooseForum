@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/buildinfo"
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
@@ -947,6 +948,10 @@ func GetSiteSettings(req component.BetterRequest[component.Null]) component.Resp
 	defaultSettings := defaultconfig.GetDefaultSiteSettingsConfig()
 	res := pageConfig.GetConfigByPageType(pageConfig.SiteSettings, defaultSettings)
 	return component.SuccessResponse(res)
+}
+
+func ServerVersion(req component.BetterRequest[component.Null]) component.Response {
+	return component.SuccessResponse(buildinfo.Get())
 }
 
 type SaveSiteSettingsReq struct {

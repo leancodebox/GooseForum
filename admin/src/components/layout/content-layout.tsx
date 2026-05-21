@@ -8,7 +8,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { Separator } from '@/components/ui/separator'
 
 interface ContentLayoutProps {
-  title: string
+  title: React.ReactNode
   description?: string
   children: React.ReactNode
   headerActions?: React.ReactNode

@@ -61,6 +61,7 @@ export default {
       termsRequired: 'Please agree to the terms and privacy policy first',
       loginFailed: 'Login failed',
       registerFailed: 'Registration failed',
+      registerSuccess: 'Registration successful',
       resetEmailFailed: 'Failed to send reset email',
     },
   },

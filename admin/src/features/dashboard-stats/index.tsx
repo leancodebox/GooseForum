@@ -9,7 +9,9 @@ import { Users, FileText, MessageSquare, Link as LinkIcon } from 'lucide-react'
 import { TrafficOverview } from './components/traffic-overview'
 import { DateRangePicker } from '@/components/date-range-picker'
 import { ProjectVersion } from './components/project-version'
-import { getSiteStatistics, getTrafficOverview } from '@/api'
+import { getServerVersion, getSiteStatistics, getTrafficOverview } from '@/api'
+import { Badge } from '@/components/ui/badge'
+import type { ServerVersion } from '@/api/types'
 
 interface Release {
   id: number
@@ -19,6 +21,52 @@ interface Release {
   html_url: string
   prerelease: boolean
   draft: boolean
+}
+
+function modeLabel(mode?: string) {
+  switch (mode) {
+    case 'release':
+      return '正式版'
+    case 'snapshot':
+      return '快照版'
+    case 'development':
+      return '开发版'
+    case 'custom':
+      return '自定义'
+    default:
+      return '未知'
+  }
+}
+
+function shortCommit(commit?: string) {
+  return commit ? commit.slice(0, 7) : ''
+}
+
+function ServerVersionBadge({
+  version,
+  loading,
+}: {
+  version?: ServerVersion
+  loading: boolean
+}) {
+  const label = loading ? '读取中...' : version?.version || 'dev'
+  const commit = shortCommit(version?.commit)
+
+  return (
+    <div className='inline-flex max-w-full items-center gap-2 rounded-md border bg-muted/35 px-2.5 py-1 text-xs text-muted-foreground align-middle'>
+      <span className='h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0' />
+      <span className='shrink-0'>服务端</span>
+      <span className='truncate font-semibold text-foreground'>{label}</span>
+      {!loading && (
+        <Badge variant='secondary' className='h-5 shrink-0 px-1.5 text-[10px]'>
+          {modeLabel(version?.mode)}
+        </Badge>
+      )}
+      {!loading && commit && (
+        <span className='hidden text-muted-foreground sm:inline'>#{commit}</span>
+      )}
+    </div>
+  )
 }
 
 export function DashboardStats() {
@@ -39,6 +87,11 @@ export function DashboardStats() {
       endDate: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
     }),
     enabled: !!dateRange?.from && !!dateRange?.to,
+  })
+
+  const { data: serverVersionData, isLoading: serverVersionLoading } = useQuery({
+    queryKey: ['serverVersion'],
+    queryFn: () => getServerVersion(),
   })
 
   const [releases, setReleases] = useState<Release[]>([])
@@ -70,7 +123,15 @@ export function DashboardStats() {
 
   return (
     <ContentLayout
-      title='站点统计'
+      title={
+        <div className='flex flex-wrap items-center gap-3'>
+          <span>站点统计</span>
+          <ServerVersionBadge
+            version={serverVersionData?.result}
+            loading={serverVersionLoading}
+          />
+        </div>
+      }
       description='查看论坛的实时运行数据和活跃度指标。'
       topNav={topNav}
       headerActions={

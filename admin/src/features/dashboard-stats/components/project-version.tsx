@@ -35,9 +35,6 @@ interface ProjectVersionProps {
 }
 
 export function ProjectVersion({ releases, loading, error }: ProjectVersionProps) {
-  const currentVersion = releases.length > 0 ? releases[0].tag_name : 'v1.0.0'
-  const lastUpdate = releases.length > 0 ? releases[0].published_at : null
-
   return (
     <Card className='flex flex-col h-full'>
       <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-1'>
@@ -121,19 +118,6 @@ export function ProjectVersion({ releases, loading, error }: ProjectVersionProps
           )}
         </div>
 
-        {!loading && !error && releases.length > 0 && (
-          <div className='mt-4 flex flex-col gap-1 text-xs text-muted-foreground'>
-            <div className='flex items-center gap-2'>
-              <div className='h-2 w-2 rounded-full bg-emerald-500' />
-              <span>当前版本：{currentVersion}</span>
-            </div>
-            {lastUpdate && (
-              <div className='ml-4'>
-                最后更新：{new Date(lastUpdate).toLocaleDateString('zh-CN')}
-              </div>
-            )}
-          </div>
-        )}
       </CardContent>
     </Card>
   )

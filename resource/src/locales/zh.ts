@@ -61,6 +61,7 @@ export default {
       termsRequired: '请先同意服务条款和隐私政策',
       loginFailed: '登录失败',
       registerFailed: '注册失败',
+      registerSuccess: '注册成功',
       resetEmailFailed: '重置邮件发送失败',
     },
   },

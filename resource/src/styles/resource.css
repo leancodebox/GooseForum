@@ -24,6 +24,23 @@ body {
   }
 }
 
+.gf-flash-enter-active,
+.gf-flash-leave-active {
+  transition:
+    opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gf-flash-enter-from,
+.gf-flash-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+}
+
+.gf-flash-move {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @layer components {
   .gf-prose {
     @apply prose prose-slate max-w-none min-w-0;

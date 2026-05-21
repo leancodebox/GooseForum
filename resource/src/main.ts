@@ -5,6 +5,7 @@ import { readInitialPayload, updateDocumentMeta } from '@/runtime/payload'
 import { installNavigation, preparePayload } from '@/runtime/router'
 import { resetShellState } from '@/runtime/shell-state'
 import { currentLocale, i18n } from '@/runtime/i18n'
+import { hydrateFlashMessages } from '@/runtime/flash-message'
 
 const initialPayload = readInitialPayload()
 const initialPage = await preparePayload(initialPayload)
@@ -24,6 +25,7 @@ const app = createApp({
 
 app.use(i18n)
 app.mount('#goose-app')
+hydrateFlashMessages()
 
 function commitPage(nextPage: typeof initialPage) {
   resetShellState()

@@ -61,6 +61,7 @@ export default {
       termsRequired: '先に利用規約とプライバシーポリシーに同意してください',
       loginFailed: 'ログインに失敗しました',
       registerFailed: '登録に失敗しました',
+      registerSuccess: '登録が完了しました',
       resetEmailFailed: '再設定メールの送信に失敗しました',
     },
   },

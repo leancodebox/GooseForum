@@ -3,7 +3,7 @@ import type {
   PageResult, Category, User, Article, ArticleSource, Role, Permission,
   DailyTraffic, SiteSettings, MailSettings, SecuritySettings,
   PostingSettings, SponsorsConfig, AnnouncementConfig, BadgeItem,
-  UserBadgeOptions
+  UserBadgeOptions, ServerVersion
 } from './types'
 import { LinkGroup } from '@/features/links-management/data/schema'
 
@@ -113,6 +113,10 @@ export interface TrafficOverviewParams {
 
 export function getTrafficOverview(params: TrafficOverviewParams) {
   return request.post<DailyTraffic[]>('/api/admin/traffic-overview', params)
+}
+
+export function getServerVersion() {
+  return request.get<ServerVersion>('/api/admin/server-version')
 }
 
 export function getOptRecordPage(params: { page?: number; pageSize?: number }) {

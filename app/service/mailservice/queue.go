@@ -39,7 +39,12 @@ func AddToQueue(task EmailTask) error {
 		TaskJson: string(taskJson),
 	}
 
-	return taskQueue.Create(queueTask)
+	if err = taskQueue.Create(queueTask); err != nil {
+		slog.Debug("邮件任务写入队列失败", "type", task.Type, "to", task.To, "err", err)
+		return err
+	}
+	slog.Debug("邮件任务写入队列成功", "id", queueTask.Id, "type", task.Type, "to", task.To)
+	return nil
 }
 
 // StartEmailProcessor starts the background email queue worker.
@@ -51,8 +56,10 @@ func StartEmailProcessor() {
 				time.Sleep(time.Second * 5)
 				continue
 			}
+			slog.Debug("邮件队列拉取任务", "count", len(tasks))
 
 			for _, task := range tasks {
+				slog.Debug("邮件队列开始处理任务", "id", task.Id, "type", task.Type, "status", task.Status, "retryCount", task.RetryCount)
 				if err := taskQueue.UpdateStatus(task.Id, taskQueue.StatusRunning, nil); err != nil {
 					slog.Error("更新任务状态失败", "error", err)
 					continue
@@ -68,8 +75,10 @@ func StartEmailProcessor() {
 				err := processEmailTask(emailTask)
 				if err != nil {
 					slog.Error("处理邮件任务失败",
+						"id", task.Id,
 						"type", emailTask.Type,
 						"to", emailTask.To,
+						"retryCount", task.RetryCount,
 						"error", err,
 					)
 
@@ -86,6 +95,7 @@ func StartEmailProcessor() {
 
 				taskQueue.UpdateStatus(task.Id, taskQueue.StatusSuccess, nil)
 				slog.Info("邮件发送成功",
+					"id", task.Id,
 					"type", emailTask.Type,
 					"to", emailTask.To,
 				)
