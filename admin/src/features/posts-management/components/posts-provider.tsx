@@ -1,7 +1,7 @@
 import React from 'react'
 import { type Post } from '../data/schema'
 
-type PostActionType = 'view' | 'approve' | 'reject' | 'top' | 'recommend' | 'categories'
+type PostActionType = 'view' | 'source' | 'approve' | 'reject' | 'top' | 'recommend' | 'categories'
 
 interface PostsContextType {
   open: PostActionType | null

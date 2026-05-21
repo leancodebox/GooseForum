@@ -40,6 +40,9 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem onClick={() => window.open(`/p/post/${post.id}`, '_blank')}>
           查看
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => { setCurrentRow(post); setOpen('source'); }}>
+          查看原文
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => { setCurrentRow(post); setOpen('top'); }}>
           置顶
         </DropdownMenuItem>

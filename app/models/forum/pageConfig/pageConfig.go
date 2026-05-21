@@ -55,7 +55,7 @@ type FriendLinksGroup struct {
 	Name  string     `json:"name,omitempty"`
 	Emoji string     `json:"emoji,omitempty"`
 	Color string     `json:"color,omitempty"`
-	Links []LinkItem `json:"links,omitempty"`
+	Links []LinkItem `json:"links"`
 }
 
 type FooterItem struct {

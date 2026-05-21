@@ -533,7 +533,7 @@ async function removeReply(replyId: number) {
           v-for="reply in replies"
           :id="`reply-${reply.id}`"
           :key="reply.id"
-          class="group grid scroll-mt-20 grid-cols-[44px_minmax(0,1fr)] gap-3 border-t border-gray-100 p-4 transition hover:bg-gray-50/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
+          class="group grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-gray-100 px-3 py-4 transition hover:bg-gray-50/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
           :class="{ 'bg-blue-50/50 ring-1 ring-inset ring-blue-100': highlightedReplyId === reply.id }"
         >
           <a
@@ -541,40 +541,43 @@ async function removeReply(replyId: number) {
             class="sticky top-19 self-start pt-1"
             @click="showUserCard(reply.author, $event)"
           >
-            <img :src="reply.author.avatarUrl" :alt="reply.author.username" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-100" />
+            <img :src="reply.author.avatarUrl" :alt="reply.author.username" class="h-9 w-9 rounded-full object-cover ring-1 ring-gray-100 sm:h-10 sm:w-10" />
           </a>
           <div class="min-w-0">
-            <div class="mb-2 flex flex-wrap items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <a :href="`/u/${reply.author.id}`" class="font-semibold text-gray-950 hover:text-blue-600">{{ reply.author.username }}</a>
+            <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
+              <div class="min-w-0">
+                <a :href="`/u/${reply.author.id}`" class="min-w-0 truncate font-semibold text-gray-950 hover:text-blue-600">{{ reply.author.username }}</a>
+                <time class="mt-0.5 block truncate text-xs text-gray-400 sm:hidden">{{ formatDateTime(reply.createdAt) }}</time>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex shrink-0 items-center gap-0.5 sm:gap-3">
                 <button
                   v-if="page.props.permissions.canReply"
                   type="button"
-                  class="inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-gray-600 opacity-100 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                  class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-600 opacity-100 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                  title="回复"
                   @click="toggleReplyForm(reply.id)"
                 >
                   <CornerDownLeft class="h-3.5 w-3.5" />
-                  回复
+                  <span class="sr-only sm:not-sr-only">回复</span>
                 </button>
                 <button
                   v-if="reply.isOwnReply"
                   type="button"
-                  class="inline-flex min-h-9 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-gray-500 opacity-100 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                  class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-500 opacity-100 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                   :disabled="deletingReplyId === reply.id"
+                  :title="deletingReplyId === reply.id ? '删除中...' : '删除'"
                   @click="requestDeleteReply(reply)"
                 >
                   <Trash2 class="h-3.5 w-3.5" />
-                  {{ deletingReplyId === reply.id ? '删除中...' : '删除' }}
+                  <span class="sr-only sm:not-sr-only">{{ deletingReplyId === reply.id ? '删除中...' : '删除' }}</span>
                 </button>
-                <time class="text-xs text-gray-400">{{ formatDateTime(reply.createdAt) }}</time>
+                <time class="hidden shrink-0 text-xs text-gray-400 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
               </div>
             </div>
-            <p v-if="reply.replyToUsername" class="mb-2 w-fit rounded bg-gray-50 px-2 py-1 text-sm text-gray-500">
+            <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full items-center rounded bg-gray-50 px-2 py-1 text-sm text-gray-500">
               回复 <a :href="`/u/${reply.replyToUserId}`" class="font-medium text-gray-700 hover:text-blue-600">@{{ reply.replyToUsername }}</a>
             </p>
-            <p class="whitespace-pre-wrap leading-relaxed text-gray-800">{{ reply.content }}</p>
+            <p class="whitespace-pre-wrap break-words leading-relaxed text-gray-800 [overflow-wrap:anywhere]">{{ reply.content }}</p>
 
             <div v-if="openReplyId === reply.id" class="mt-4 border-l-2 border-blue-100 pl-3">
               <div class="mb-2 flex items-center justify-between">

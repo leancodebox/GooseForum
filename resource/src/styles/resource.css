@@ -26,7 +26,7 @@ body {
 
 @layer components {
   .gf-prose {
-    @apply prose prose-slate max-w-none;
+    @apply prose prose-slate max-w-none min-w-0;
   }
 
   .gf-prose-compact {
@@ -62,7 +62,7 @@ body {
   }
 
   .gf-prose-article {
-    @apply text-[15px] leading-relaxed text-gray-800;
+    @apply min-w-0 text-[15px] leading-relaxed text-gray-800;
   }
 
   .gf-prose-article p {
@@ -71,6 +71,12 @@ body {
 
   .gf-prose code {
     @apply rounded bg-gray-50 px-1 py-0.5 font-mono text-pink-600;
+  }
+
+  .gf-prose :not(pre) > code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
   }
 
   .gf-prose code::before,
@@ -84,6 +90,9 @@ body {
 
   .gf-prose pre code {
     @apply bg-transparent p-0 text-inherit;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: pre;
   }
 
   .gf-prose blockquote {

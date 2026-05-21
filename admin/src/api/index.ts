@@ -1,6 +1,6 @@
 import request from '@/lib/request'
 import type { 
-  PageResult, Category, User, Article, Role, Permission,
+  PageResult, Category, User, Article, ArticleSource, Role, Permission,
   DailyTraffic, SiteSettings, MailSettings, SecuritySettings,
   PostingSettings, SponsorsConfig, AnnouncementConfig, BadgeItem,
   UserBadgeOptions
@@ -76,6 +76,10 @@ export interface ArticlesListParams {
 
 export function getArticlesList(params: ArticlesListParams) {
   return request.post<PageResult<Article>>('/api/admin/articles-list', params)
+}
+
+export function getArticleSource(id: number) {
+  return request.post<ArticleSource>('/api/admin/article-source', { id })
 }
 
 export function editArticle(data: { id: number; processStatus: number }) {

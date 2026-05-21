@@ -145,12 +145,16 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 }
 
 func renderNotFound(c *gin.Context) {
+	renderNotFoundWithMessage(c, "这个主题不存在，或已经被删除。")
+}
+
+func renderNotFoundWithMessage(c *gin.Context, message string) {
 	payload := PagePayload{
 		Component: "error.notFound",
 		Props: ErrorPageProps{
 			Code:    "404",
 			Title:   "页面不存在",
-			Message: "这个主题不存在，或已经被删除。",
+			Message: message,
 		},
 		Meta: PageMeta{
 			Title:  pageTitle("页面不存在"),

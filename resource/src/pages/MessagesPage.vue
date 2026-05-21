@@ -180,14 +180,14 @@ async function startChat(user: UserConnectionPayload) {
 </script>
 
 <template>
-    <main class="h-[calc(100dvh-5.5rem)] min-h-[620px] min-w-0 pb-3">
-      <section class="grid h-full overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] md:grid-cols-[300px_minmax(0,1fr)]">
+    <main class="-mx-3 -my-3 h-[calc(100dvh-4rem)] min-h-0 min-w-0 overflow-hidden sm:-mx-5 md:mx-0 md:my-0 md:h-[calc(100dvh-5.5rem)] md:min-h-[620px] md:pb-3">
+      <section class="grid h-full overflow-hidden bg-white md:grid-cols-[300px_minmax(0,1fr)] md:rounded-lg md:border md:border-gray-200/70 md:shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         <aside
-          class="flex min-h-0 flex-col border-gray-100 bg-gray-50/50 md:border-r"
+          class="flex min-h-0 flex-col border-gray-100 bg-white md:border-r md:bg-gray-50/50"
           :class="active ? 'hidden md:flex' : 'flex'"
         >
-          <div class="flex h-15 shrink-0 items-center justify-between border-b border-gray-100 bg-white px-4">
-            <h1 class="text-lg font-bold text-gray-950">私信</h1>
+          <div class="flex h-14 shrink-0 items-center justify-between border-b border-gray-100 bg-white px-4 md:h-15">
+            <h1 class="text-base font-bold text-gray-950 md:text-lg">私信</h1>
             <button
               type="button"
               class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
@@ -198,8 +198,8 @@ async function startChat(user: UserConnectionPayload) {
             </button>
           </div>
 
-          <div class="border-b border-gray-100 p-3">
-            <label class="flex h-9 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-500">
+          <div class="border-b border-gray-100 p-3 md:bg-transparent">
+            <label class="flex h-9 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-500 md:bg-white">
               <Search class="h-4 w-4" />
               <input v-model="search" class="min-w-0 flex-1 bg-transparent outline-none" placeholder="搜索会话" />
             </label>
@@ -210,8 +210,8 @@ async function startChat(user: UserConnectionPayload) {
               v-for="conversation in filteredConversations"
               :key="conversation.peerId"
               type="button"
-              class="flex w-full gap-3 border-b border-gray-100 px-4 py-3 text-left transition hover:bg-white"
-              :class="active?.peerId === conversation.peerId ? 'bg-white shadow-[inset_3px_0_0_#2563eb]' : ''"
+              class="flex w-full gap-3 border-b border-gray-100 px-4 py-3 text-left transition hover:bg-gray-50 md:hover:bg-white"
+              :class="active?.peerId === conversation.peerId ? 'bg-blue-50/50 shadow-[inset_3px_0_0_#2563eb] md:bg-white' : ''"
               @click="selectConversation(conversation)"
             >
               <span class="relative h-10 w-10 shrink-0">
@@ -248,7 +248,7 @@ async function startChat(user: UserConnectionPayload) {
 
         <section class="relative min-h-0 min-w-0 bg-white" :class="active ? 'flex' : 'hidden md:flex'">
           <div v-if="active" class="flex min-h-0 w-full flex-col">
-            <header class="flex h-15 shrink-0 items-center justify-between border-b border-gray-100 px-4">
+            <header class="flex h-14 shrink-0 items-center justify-between border-b border-gray-100 px-3 md:h-15 md:px-4">
               <div class="flex min-w-0 items-center gap-3">
                 <button type="button" class="-ml-2 inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 md:hidden" @click="active = null">
                   <ArrowLeft class="h-5 w-5" />
@@ -264,7 +264,7 @@ async function startChat(user: UserConnectionPayload) {
               </button>
             </header>
 
-            <div ref="messagesEl" class="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
+            <div ref="messagesEl" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3 md:space-y-4 md:px-4 md:py-4">
               <div class="flex justify-center">
                 <span class="rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400">今天</span>
               </div>
@@ -274,13 +274,13 @@ async function startChat(user: UserConnectionPayload) {
                 <div
                   v-for="message in active.messages"
                   :key="message.id"
-                  class="flex max-w-[82%] gap-2"
+                  class="flex max-w-[88%] gap-2 md:max-w-[82%]"
                   :class="message.isSelf ? 'ml-auto flex-row-reverse' : ''"
                 >
                   <img v-if="!message.isSelf" :src="active.peerAvatar" :alt="active.peerUsername" class="mt-auto h-8 w-8 rounded-full object-cover ring-1 ring-gray-100" />
                   <div class="group relative min-w-0">
                     <div
-                      class="whitespace-pre-wrap break-words rounded-2xl px-4 py-2 text-sm leading-relaxed shadow-sm"
+                      class="whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-sm leading-relaxed shadow-sm md:px-4"
                       :class="message.isSelf ? 'rounded-br-sm bg-blue-600 text-white' : 'rounded-bl-sm bg-gray-100 text-gray-900'"
                     >
                       {{ message.content }}
@@ -296,10 +296,10 @@ async function startChat(user: UserConnectionPayload) {
               </div>
             </div>
 
-            <footer class="shrink-0 border-t border-gray-100 bg-white/95 px-4 py-3">
+            <footer class="shrink-0 border-t border-gray-100 bg-white/95 px-3 py-2 md:px-4 md:py-3">
               <div class="mx-auto max-w-4xl">
                 <p v-if="error" class="mb-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{{ error }}</p>
-                <div class="rounded-2xl border border-gray-200 bg-gray-50/80 p-2 transition focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-[0_10px_28px_rgba(37,99,235,0.08)]">
+                <div class="rounded-xl border border-gray-200 bg-gray-50/80 p-2 transition focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-[0_10px_28px_rgba(37,99,235,0.08)] md:rounded-2xl">
                   <textarea
                     ref="messageInput"
                     v-model="newMessage"

@@ -36,7 +36,7 @@ func GetByUserId(userId uint64, limit, offset int, unreadOnly bool) (notificatio
 	if err != nil {
 		return
 	}
-	err = db.Order("created_at DESC").
+	err = db.Order("id DESC").
 		Limit(limit).
 		Offset(offset).
 		Find(&notifications).Error

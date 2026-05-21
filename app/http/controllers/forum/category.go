@@ -13,7 +13,7 @@ func Category(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
 	category := hotdataserve.GetCategoryById(id)
 	if category == nil {
-		c.String(http.StatusNotFound, "Category not found")
+		renderNotFoundWithMessage(c, "这个分类不存在，或已经被删除。")
 		return
 	}
 

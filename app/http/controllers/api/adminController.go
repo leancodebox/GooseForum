@@ -412,6 +412,24 @@ type ArticlesInfoAdminVo struct {
 	UpdatedAt     string   `json:"updatedAt"`
 }
 
+type ArticleSourceReq struct {
+	Id uint64 `json:"id" validate:"required"`
+}
+
+type ArticleSourceVo struct {
+	Id            uint64   `json:"id"`
+	Title         string   `json:"title"`
+	Description   string   `json:"description"`
+	Content       string   `json:"content"`
+	Type          int8     `json:"type"`
+	CategoryId    []uint64 `json:"categoryId"`
+	UserId        uint64   `json:"userId"`
+	ArticleStatus int8     `json:"articleStatus"`
+	ProcessStatus int8     `json:"processStatus"`
+	CreatedAt     string   `json:"createdAt"`
+	UpdatedAt     string   `json:"updatedAt"`
+}
+
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
 	param := req.Params
 	pageData := articles.Page[articles.SmallEntity](articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
@@ -449,6 +467,27 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 		pageData.PageSize,
 		pageData.Total,
 	)
+}
+
+func ArticleSource(req component.BetterRequest[ArticleSourceReq]) component.Response {
+	article := articles.Get(req.Params.Id)
+	if article.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+
+	return component.SuccessResponse(ArticleSourceVo{
+		Id:            article.Id,
+		Title:         article.Title,
+		Description:   article.Description,
+		Content:       article.Content,
+		Type:          article.Type,
+		CategoryId:    article.CategoryId,
+		UserId:        article.UserId,
+		ArticleStatus: article.ArticleStatus,
+		ProcessStatus: article.ProcessStatus,
+		CreatedAt:     article.CreatedAt.Format(time.DateTime),
+		UpdatedAt:     article.UpdatedAt.Format(time.DateTime),
+	})
 }
 
 type EditArticleReq struct {
@@ -800,6 +839,7 @@ func GetFriendLinks(req component.BetterRequest[component.Null]) component.Respo
 			Links: []pageConfig.LinkItem{lItem},
 		},
 	})
+	normalizeFriendLinks(res)
 	return component.SuccessResponse(res)
 }
 
@@ -809,7 +849,16 @@ type SaveFriendLinksReq struct {
 
 // SaveFriendLinks 保存友情链接
 func SaveFriendLinks(req component.BetterRequest[SaveFriendLinksReq]) component.Response {
+	normalizeFriendLinks(req.Params.LinksInfo)
 	return savePageConfig(pageConfig.FriendShipLinks, req.Params.LinksInfo, hotdataserve.ClearFriendLinksConfigCache)
+}
+
+func normalizeFriendLinks(groups []pageConfig.FriendLinksGroup) {
+	for i := range groups {
+		if groups[i].Links == nil {
+			groups[i].Links = []pageConfig.LinkItem{}
+		}
+	}
 }
 
 // GetSponsors 获取赞助商配置

@@ -3,6 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
+	"github.com/leancodebox/GooseForum/app/http/httputil"
 )
 
 func BrowserCache(c *gin.Context) {
@@ -10,6 +11,11 @@ func BrowserCache(c *gin.Context) {
 		c.Next()
 		return
 	}
-	c.Header("Cache-Control", "public, max-age=18144000")
+	if httputil.IsAdminIndexPath(c.Request.URL.Path) {
+		httputil.SetNoStore(c)
+		c.Next()
+		return
+	}
+	httputil.SetLongPublic(c)
 	c.Next()
 }

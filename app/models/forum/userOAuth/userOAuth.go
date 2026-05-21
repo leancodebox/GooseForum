@@ -40,16 +40,16 @@ const fieldCreatedAt = "created_at"
 const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
-	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                             // id
-	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;index" json:"userId"`         // 关联用户id
-	Provider     string    `gorm:"column:provider;type:varchar(32);default:0;" json:"provider"`                        // 平台标识(github/twitter)
-	ProviderUid  string    `gorm:"column:provider_uid;type:varchar(255);not null;default:'';index" json:"providerUid"` // 第三方用户唯一ID
-	AccessToken  string    `gorm:"column:access_token;type:varchar(1024);not null;default:'';" json:"accessToken"`     // 访问令牌
-	RefreshToken string    `gorm:"column:refresh_token;type:varchar(1024);not null;default:'';" json:"refreshToken"`   // 刷新令牌
-	TokenExpiry  time.Time `gorm:"column:token_expiry;type:datetime;" json:"tokenExpiry"`                              // 令牌过期时间
-	Scopes       string    `gorm:"column:scopes;type:text;" json:"scopes"`                                             // 授权范围
-	RawUserData  string    `gorm:"column:raw_user_data;type:text;" json:"rawUserData"`                                 // 平台返回的原始用户数据
-	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`                 //
+	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                                          // id
+	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;index;index:idx_user_provider,priority:1" json:"userId"`                   // 关联用户id
+	Provider     string    `gorm:"column:provider;type:varchar(32);default:0;index:idx_provider_uid,priority:1;index:idx_user_provider,priority:2" json:"provider"` // 平台标识(github/twitter)
+	ProviderUid  string    `gorm:"column:provider_uid;type:varchar(255);not null;default:'';index;index:idx_provider_uid,priority:2" json:"providerUid"`            // 第三方用户唯一ID
+	AccessToken  string    `gorm:"column:access_token;type:varchar(1024);not null;default:'';" json:"accessToken"`                                                  // 访问令牌
+	RefreshToken string    `gorm:"column:refresh_token;type:varchar(1024);not null;default:'';" json:"refreshToken"`                                                // 刷新令牌
+	TokenExpiry  time.Time `gorm:"column:token_expiry;type:datetime;" json:"tokenExpiry"`                                                                           // 令牌过期时间
+	Scopes       string    `gorm:"column:scopes;type:text;" json:"scopes"`                                                                                          // 授权范围
+	RawUserData  string    `gorm:"column:raw_user_data;type:text;" json:"rawUserData"`                                                                              // 平台返回的原始用户数据
+	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`                                                              //
 	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 

@@ -83,6 +83,10 @@ export interface Article {
   updatedAt: string
 }
 
+export interface ArticleSource extends Article {
+  content: string
+}
+
 export interface Role {
   roleId: number
   roleName: string

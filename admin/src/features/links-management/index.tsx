@@ -19,6 +19,14 @@ import { BoardContext } from './components/board-context';
 import { createRegistry } from './components/registry';
 import { getFriendLinks, saveFriendLinks } from '@/api';
 
+function normalizeLinkGroups(groups: LinkGroup[] | null | undefined): LinkGroup[] {
+  if (!Array.isArray(groups)) return [];
+  return groups.map((group) => ({
+    ...group,
+    links: Array.isArray(group.links) ? group.links : [],
+  }));
+}
+
 function LinksManagementContent() {
   const {
     open,
@@ -52,7 +60,7 @@ function LinksManagementContent() {
     try {
       const res = await getFriendLinks();
       if (res.code === 0) {
-        setGroups(res.result || []);
+        setGroups(normalizeLinkGroups(res.result));
       } else {
         toast.error(res.msg || '获取友情链接失败');
       }
@@ -68,8 +76,9 @@ function LinksManagementContent() {
   }, []);
 
   const saveLinks = useCallback(async (newGroups: LinkGroup[]) => {
+    const normalizedGroups = normalizeLinkGroups(newGroups);
     try {
-      const res = await saveFriendLinks(newGroups);
+      const res = await saveFriendLinks(normalizedGroups);
       if (res.code === 0) {
         toast.success('保存成功');
       } else {

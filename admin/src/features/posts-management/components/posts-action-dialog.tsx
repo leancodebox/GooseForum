@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { editArticle, editArticleCategories, getCategoryList } from '@/api'
-import type { Category } from '@/api/types'
+import { editArticle, editArticleCategories, getArticleSource, getCategoryList } from '@/api'
+import type { ArticleSource, Category } from '@/api/types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { usePosts } from './posts-provider'
 
@@ -31,7 +33,10 @@ export function PostsActionDialog() {
   const [categoryLoaded, setCategoryLoaded] = useState(false)
   const [categorySaving, setCategorySaving] = useState(false)
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([])
+  const [source, setSource] = useState<ArticleSource | null>(null)
+  const [sourceLoading, setSourceLoading] = useState(false)
   const isCategoryDialog = open === 'categories'
+  const isSourceDialog = open === 'source'
 
   useEffect(() => {
     if (!isCategoryDialog || !currentRow) return
@@ -56,9 +61,41 @@ export function PostsActionDialog() {
       })
   }, [categoryLoaded, categoryLoading, currentRow, isCategoryDialog])
 
+  useEffect(() => {
+    if (!isSourceDialog || !currentRow) return
+
+    setSource(null)
+    setSourceLoading(true)
+    getArticleSource(currentRow.id)
+      .then((res) => {
+        if (res.code === 0) {
+          setSource(res.result || null)
+        } else {
+          toast.error(res.msg || '原文加载失败')
+        }
+      })
+      .catch(() => {
+        toast.error('原文加载失败')
+      })
+      .finally(() => {
+        setSourceLoading(false)
+      })
+  }, [currentRow, isSourceDialog])
+
   const closeDialog = () => {
     setOpen(null)
     setCurrentRow(null)
+    setSource(null)
+  }
+
+  const copySource = async () => {
+    if (!source?.content) return
+    try {
+      await navigator.clipboard.writeText(source.content)
+      toast.success('原文已复制')
+    } catch {
+      toast.error('复制失败')
+    }
   }
 
   const handleAction = async () => {
@@ -221,8 +258,86 @@ export function PostsActionDialog() {
         </DialogContent>
       </Dialog>
 
+      <Dialog
+        open={isSourceDialog}
+        onOpenChange={(val) => !val && closeDialog()}
+      >
+        <DialogContent className='max-h-[86vh] overflow-hidden p-0 sm:max-w-[820px]'>
+          <DialogHeader className='border-b px-5 py-4 text-left'>
+            <div className='flex items-start justify-between gap-4'>
+              <div className='min-w-0'>
+                <DialogTitle className='truncate text-lg'>
+                  {source?.title || currentRow?.title || '查看帖子原文'}
+                </DialogTitle>
+                <DialogDescription className='mt-1 flex flex-wrap items-center gap-2'>
+                  <span>原始 Markdown / 文本内容</span>
+                  {source && (
+                    <>
+                      <Badge variant={source.articleStatus === 1 ? 'default' : 'secondary'}>
+                        {source.articleStatus === 1 ? '发布' : '草稿'}
+                      </Badge>
+                      {source.processStatus === 1 && <Badge variant='destructive'>封禁</Badge>}
+                    </>
+                  )}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className='grid min-h-0 gap-3 px-5 py-4'>
+            {sourceLoading ? (
+              <div className='rounded-lg border bg-muted/20 py-16 text-center text-sm text-muted-foreground'>
+                正在加载原文...
+              </div>
+            ) : source ? (
+              <>
+                <div className='grid gap-2 rounded-lg border bg-muted/20 p-3 text-sm sm:grid-cols-[1fr_auto]'>
+                  <div className='min-w-0 space-y-1'>
+                    <div className='truncate font-medium text-foreground'>{source.title}</div>
+                    <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground'>
+                      <span>作者：{currentRow?.username || '未知用户'}</span>
+                      <span>创建：{source.createdAt}</span>
+                      <span>更新：{source.updatedAt}</span>
+                    </div>
+                    {source.description && (
+                      <p className='line-clamp-2 text-xs leading-5 text-muted-foreground'>
+                        {source.description}
+                      </p>
+                    )}
+                  </div>
+                  <div className='flex items-center gap-2 sm:justify-end'>
+                    <Button variant='outline' size='sm' onClick={() => window.open(`/p/post/${source.id}`, '_blank')}>
+                      打开前台
+                    </Button>
+                    <Button size='sm' onClick={copySource}>
+                      复制原文
+                    </Button>
+                  </div>
+                </div>
+
+                <ScrollArea className='h-[52vh] rounded-lg border bg-slate-950 text-slate-50'>
+                  <pre className='min-h-full whitespace-pre-wrap break-words p-4 font-mono text-xs leading-6 [overflow-wrap:anywhere]'>
+                    {source.content || '暂无原文内容'}
+                  </pre>
+                </ScrollArea>
+              </>
+            ) : (
+              <div className='rounded-lg border bg-muted/20 py-16 text-center text-sm text-muted-foreground'>
+                未能加载原文内容
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className='border-t px-5 py-3'>
+            <Button variant='outline' onClick={closeDialog}>
+              关闭
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog
-        open={open !== null && open !== 'view' && open !== 'categories'}
+        open={open !== null && open !== 'view' && open !== 'source' && open !== 'categories'}
         onOpenChange={(val) => !val && closeDialog()}
       >
         <AlertDialogContent>

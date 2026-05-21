@@ -25,12 +25,12 @@ const fieldCreatedAt = "created_at"
 const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
-	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                                   // 主键
-	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article_book,priority:1" json:"userId"`       // 用户
-	ArticleId uint64    `gorm:"column:article_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article_book,priority:2" json:"articleId"` //
-	Status    int       `gorm:"column:status;type:int;not null;default:1;" json:"status"`                                                                 // 收藏状态（1:有效点赞 0:取消点赞）
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                                                             //
-	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;index;" json:"updatedAt"`
+	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                                                                     // 主键
+	UserId    uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article_book,priority:1;index:idx_user_bookmark_list,priority:1" json:"userId"` // 用户
+	ArticleId uint64    `gorm:"column:article_id;type:bigint unsigned;not null;default:0;uniqueIndex:uniq_user_article_book,priority:2" json:"articleId"`                                   //
+	Status    int       `gorm:"column:status;type:int;not null;default:1;index:idx_user_bookmark_list,priority:2" json:"status"`                                                            // 收藏状态（1:有效点赞 0:取消点赞）
+	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                                                                                               //
+	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;index;index:idx_user_bookmark_list,priority:3" json:"updatedAt"`
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

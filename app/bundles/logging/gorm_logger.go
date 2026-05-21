@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	gormLogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
 )
@@ -41,13 +43,15 @@ func NewGormLogger(config *GormLoggerConfig) *GormLogger {
 		config.Logger = slog.Default()
 	}
 	if config.SlowThreshold == 0 {
-		config.SlowThreshold = 200 * time.Millisecond
+		config.SlowThreshold = slowSQLThreshold()
 	}
 	if config.LogLevel == 0 {
 		if debug {
 			config.LogLevel = gormLogger.Info
-		} else {
+		} else if slowSQLEnabled() {
 			config.LogLevel = gormLogger.Warn
+		} else {
+			config.LogLevel = gormLogger.Error
 		}
 	}
 
@@ -66,6 +70,20 @@ func NewGormLogger(config *GormLoggerConfig) *GormLogger {
 // NewGormLoggerWithDefault 使用默认配置创建 GormLogger
 func NewGormLoggerWithDefault() *GormLogger {
 	return NewGormLogger(nil)
+}
+
+func slowSQLEnabled() bool {
+	return preferences.GetBool("log.slowSQL", setting.IsProduction())
+}
+
+func slowSQLThreshold() time.Duration {
+	raw := preferences.GetString("log.slowSQLThreshold", "200ms")
+	threshold, err := time.ParseDuration(raw)
+	if err != nil || threshold <= 0 {
+		slog.Warn("invalid slow sql threshold, fallback to 200ms", "value", raw, "err", err)
+		return 200 * time.Millisecond
+	}
+	return threshold
 }
 
 // LogMode 实现 gormLogger.Interface 的 LogMode 方法

@@ -4,11 +4,17 @@ import (
 	"fmt"
 )
 
-func NotIn(field string, list any) (string, any) {
+type InValue interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint16 | ~uint32 | ~uint64 |
+		~string
+}
+
+func NotIn[T InValue](field string, list []T) (string, any) {
 	return fmt.Sprintf(`%v not in ?`, field), list
 }
 
-func In(field string, list any) (string, any) {
+func In[T InValue](field string, list []T) (string, any) {
 	return fmt.Sprintf(`%v in ?`, field), list
 }
 

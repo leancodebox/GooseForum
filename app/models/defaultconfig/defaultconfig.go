@@ -21,8 +21,8 @@ var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
 		},
 	},
 	BrandType:  "default",
-	BrandText:   "",
-	BrandImage:  "",
+	BrandText:  "",
+	BrandImage: "",
 }
 
 func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {

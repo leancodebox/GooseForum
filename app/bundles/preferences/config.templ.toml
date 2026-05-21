@@ -58,6 +58,9 @@ rolling = true # 是否开启滚动 true ,false
 maxage = 10 # 最大日期
 maxsize = 256 # 最大文件大小 MB
 maxBackUps = 30 # 最大保留文件数量
+# 慢 SQL 日志。默认生产环境建议开启，local 可按需关闭。
+slowSQL = true
+slowSQLThreshold = "200ms"
 
 # GitHub OAuth配置
 [github]

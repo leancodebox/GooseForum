@@ -146,8 +146,8 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
     </div>
 
     <header class="sticky top-0 z-50 border-b border-gray-200/70 bg-white/95 backdrop-blur">
-      <div class="mx-auto grid h-16 w-full max-w-[1600px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-3 sm:gap-8 sm:px-5 lg:px-8">
-        <div class="flex min-w-0 items-center gap-5 sm:gap-8">
+      <div class="mx-auto grid h-16 w-full max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:gap-4 sm:px-5 md:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-8 lg:px-8">
+        <div class="flex min-w-0 items-center gap-2 sm:gap-4 lg:gap-8">
           <button
             type="button"
             class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 lg:hidden"
@@ -156,20 +156,20 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
           >
             <Menu class="h-5 w-5" />
           </button>
-          <a href="/" class="flex min-w-0 shrink-0 items-center gap-2">
+          <a href="/" class="flex min-w-0 items-center gap-2">
             <img
               v-if="brandType === 'image' && layout.site.brandImage"
               :src="layout.site.brandImage"
               :alt="layout.site.name"
-              class="h-8 w-auto max-w-40 shrink-0 object-contain sm:h-9"
+              class="h-8 w-auto max-w-32 shrink-0 object-contain sm:max-w-40 sm:h-9"
             />
             <span
               v-else-if="brandType === 'text'"
-              class="truncate text-xl font-semibold tracking-tighter text-blue-600 sm:text-2xl"
+              class="max-w-36 truncate text-xl font-semibold tracking-tighter text-blue-600 sm:max-w-44 sm:text-2xl md:max-w-none"
             >
               {{ brandText }}
             </span>
-            <span v-else class="truncate text-xl font-semibold tracking-tighter text-blue-600 sm:text-2xl">
+            <span v-else class="max-w-36 truncate text-xl font-semibold tracking-tighter text-blue-600 sm:max-w-44 sm:text-2xl md:max-w-none">
               Goose<span class="text-gray-950">Forum</span>
             </span>
           </a>
@@ -189,7 +189,7 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
           </nav>
         </div>
 
-        <div class="min-w-0">
+        <div class="hidden min-w-0 md:block">
           <button
             v-if="showHeaderTitle && headerTitle"
             type="button"
@@ -200,10 +200,10 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
           </button>
         </div>
 
-        <div class="flex items-center justify-end gap-1">
+        <div class="flex items-center justify-end gap-0.5 sm:gap-1">
           <a
             href="/search"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+            class="hidden h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 sm:inline-flex"
             :aria-label="t('shell.search')"
             :title="t('shell.search')"
           >
@@ -211,7 +211,7 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
           </a>
 
           <div
-            class="relative"
+            class="relative hidden md:block"
             @mouseenter="setHoverMenu('lang', true)"
             @mouseleave="closeHoverMenuSoon('lang')"
             @focusin="setHoverMenu('lang', true)"
@@ -248,7 +248,7 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
           <template v-if="layout.viewer.isAuthenticated">
             <a
               href="/messages"
-              class="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              class="relative hidden h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 sm:inline-flex"
               aria-label="私信"
               title="私信"
             >

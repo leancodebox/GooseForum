@@ -143,6 +143,7 @@ func apiRoute(ginApp *gin.Engine) {
 
 	adminApi.Group("", middleware.CheckPermission(permission.ArticlesManager)).
 		POST("articles-list", UpButterReq(api.ArticlesList)).
+		POST("article-source", UpButterReq(api.ArticleSource)).
 		POST("article-edit", UpButterReq(api.EditArticle)).
 		POST("article-categories-edit", UpButterReq(api.EditArticleCategories)).
 		POST("category-list", UpButterReq(api.GetCategoryList)).
