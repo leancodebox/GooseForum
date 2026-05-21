@@ -76,7 +76,7 @@ var mailSettingsConfigCache = &datacache.Cache[pageConfig.MailSettingsConfig]{}
 
 func GetMailSettingsConfigCache() pageConfig.MailSettingsConfig {
 	data, _ := mailSettingsConfigCache.GetOrLoadE("", func() (pageConfig.MailSettingsConfig, error) {
-		return pageConfig.GetConfigByPageType(pageConfig.EmailSettings, pageConfig.MailSettingsConfig{}), nil
+		return pageConfig.GetConfigByPageType(pageConfig.EmailSettings, defaultconfig.GetDefaultEmailSettingsConfig()), nil
 	}, time.Second*5)
 	return data
 }
