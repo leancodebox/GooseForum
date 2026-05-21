@@ -268,13 +268,14 @@ async function revealCreatedReply(reply: ReplyPayload) {
   }
 }
 
-function buildCreatedReply(replyId: number, content: string, replyToId: number): ReplyPayload {
+function buildCreatedReply(replyId: number, content: string, renderedContent: string, replyToId: number): ReplyPayload {
   const parentReply = replyToId > 0 ? replies.value.find((reply) => reply.id === replyToId) : undefined
   const viewer = page.layout.viewer
   return {
     id: replyId,
     articleId: page.props.article.id,
     content,
+    renderedContent,
     author: {
       id: viewer.id,
       username: viewer.username,
@@ -286,6 +287,18 @@ function buildCreatedReply(replyId: number, content: string, replyToId: number):
     replyToUsername: parentReply?.author.username,
     isOwnReply: true,
   }
+}
+
+function escapePlainText(content: string) {
+  return content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\n/g, '<br>\n')
 }
 
 async function fetchAndRevealCreatedReply(replyId: number) {
@@ -363,7 +376,7 @@ async function submitReply(replyId = 0) {
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    const createdReplyId = await postReply(page.props.article.id, content, replyId)
+    const createdReply = await postReply(page.props.article.id, content, replyId)
     if (replyId > 0) {
       replyContents[replyId] = ''
       openReplyId.value = null
@@ -372,9 +385,11 @@ async function submitReply(replyId = 0) {
       closeFloatingReply()
     }
     successMessage.value = replyId > 0 ? '回复已发布。' : '回复已发布。'
+    const createdReplyId = typeof createdReply === 'object' && createdReply !== null ? createdReply.id : createdReply
+    const renderedContent = typeof createdReply === 'object' && createdReply !== null ? createdReply.renderedContent : escapePlainText(content)
     if (typeof createdReplyId === 'number') {
       if (page.layout.viewer.isAuthenticated) {
-        await revealCreatedReply(buildCreatedReply(createdReplyId, content, replyId))
+        await revealCreatedReply(buildCreatedReply(createdReplyId, content, renderedContent, replyId))
       } else {
         await fetchAndRevealCreatedReply(createdReplyId)
       }
@@ -577,7 +592,7 @@ async function removeReply(replyId: number) {
             <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full items-center rounded bg-gray-50 px-2 py-1 text-sm text-gray-500">
               回复 <a :href="`/u/${reply.replyToUserId}`" class="font-medium text-gray-700 hover:text-blue-600">@{{ reply.replyToUsername }}</a>
             </p>
-            <p class="whitespace-pre-wrap break-words leading-relaxed text-gray-800 [overflow-wrap:anywhere]">{{ reply.content }}</p>
+            <div class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
 
             <div v-if="openReplyId === reply.id" class="mt-4 border-l-2 border-blue-100 pl-3">
               <div class="mb-2 flex items-center justify-between">

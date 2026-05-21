@@ -69,6 +69,22 @@ body {
     @apply my-3;
   }
 
+  .gf-prose-comment {
+    @apply max-w-none min-w-0 text-[15px] leading-relaxed text-gray-800;
+  }
+
+  .gf-prose-comment p {
+    @apply my-2;
+  }
+
+  .gf-prose-comment > :first-child {
+    @apply mt-0;
+  }
+
+  .gf-prose-comment > :last-child {
+    @apply mb-0;
+  }
+
   .gf-prose code {
     @apply rounded bg-gray-50 px-1 py-0.5 font-mono text-pink-600;
   }
@@ -105,6 +121,52 @@ body {
 
   .gf-prose img {
     @apply my-3 rounded-lg border border-gray-100;
+  }
+
+  .gf-prose-comment ul,
+  .gf-prose-comment ol {
+    @apply my-2 pl-5;
+  }
+
+  .gf-prose-comment li {
+    @apply my-0.5;
+  }
+
+  .gf-prose-comment blockquote {
+    @apply my-2 border-l-4 border-gray-200 bg-gray-50/70 py-1 pl-3 pr-3 text-gray-600;
+  }
+
+  .gf-prose-comment code {
+    @apply rounded bg-gray-50 px-1 py-0.5 font-mono text-pink-600;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .gf-prose-comment code::before,
+  .gf-prose-comment code::after {
+    content: none;
+  }
+
+  .gf-prose-comment pre {
+    @apply my-2 overflow-x-auto rounded-lg border border-gray-100 bg-gray-50 p-3 text-gray-800;
+  }
+
+  .gf-prose-comment pre code {
+    @apply bg-transparent p-0 text-inherit;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: pre;
+  }
+
+  .gf-prose-comment a {
+    @apply font-medium text-blue-600 no-underline hover:text-blue-700;
+    overflow-wrap: anywhere;
+  }
+
+  .gf-prose-comment img {
+    @apply my-2 max-w-full rounded-lg border border-gray-100 object-contain;
+    max-height: min(360px, 70vh);
   }
 
   .avatar-crop-workspace cropper-canvas {

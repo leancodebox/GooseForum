@@ -260,10 +260,12 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	}
 
 	replyEntity := &reply.Entity{
-		ArticleId: req.Params.ArticleId,
-		Content:   req.Params.Content,
-		UserId:    req.UserId,
-		ReplyId:   req.Params.ReplyId,
+		ArticleId:       req.Params.ArticleId,
+		Content:         content,
+		RenderedHTML:    markdown2html.CommentMarkdownToHTML(content),
+		RenderedVersion: markdown2html.GetCommentVersion(),
+		UserId:          req.UserId,
+		ReplyId:         req.Params.ReplyId,
 	}
 
 	err = reply.Create(replyEntity)
@@ -292,7 +294,10 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		ParentReplyAuthorId: parentReplyAuthorId,
 	})
 
-	return component.SuccessResponse(replyEntity.Id)
+	return component.SuccessResponse(map[string]any{
+		"id":              replyEntity.Id,
+		"renderedContent": replyEntity.RenderedHTML,
+	})
 }
 
 type DeleteReplyId struct {

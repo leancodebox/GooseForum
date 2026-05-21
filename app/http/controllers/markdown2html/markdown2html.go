@@ -12,10 +12,15 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
+	nethtml "golang.org/x/net/html"
 )
 
 func GetVersion() uint32 {
 	return 3
+}
+
+func GetCommentVersion() uint32 {
+	return 1
 }
 
 var md = goldmark.New(
@@ -40,6 +45,73 @@ func MarkdownToHTML(markdown string) string {
 		slog.Error("转化失败", "err", err)
 	}
 	return buf.String()
+}
+
+// CommentMarkdownToHTML renders comment Markdown and normalizes links/images for public UGC.
+func CommentMarkdownToHTML(markdown string) string {
+	return normalizeCommentHTML(MarkdownToHTML(markdown))
+}
+
+func normalizeCommentHTML(raw string) string {
+	root, err := nethtml.Parse(strings.NewReader("<div>" + raw + "</div>"))
+	if err != nil {
+		return raw
+	}
+
+	var walk func(*nethtml.Node)
+	walk = func(node *nethtml.Node) {
+		if node.Type == nethtml.ElementNode {
+			switch node.Data {
+			case "a":
+				setHTMLAttr(node, "target", "_blank")
+				setHTMLAttr(node, "rel", "nofollow ugc noopener noreferrer")
+			case "img":
+				setHTMLAttr(node, "loading", "lazy")
+				setHTMLAttr(node, "decoding", "async")
+			}
+		}
+		for child := node.FirstChild; child != nil; child = child.NextSibling {
+			walk(child)
+		}
+	}
+	walk(root)
+
+	container := findFirstElement(root, "div")
+	if container == nil {
+		return raw
+	}
+	var buf bytes.Buffer
+	for child := container.FirstChild; child != nil; child = child.NextSibling {
+		if err := nethtml.Render(&buf, child); err != nil {
+			return raw
+		}
+	}
+	return buf.String()
+}
+
+func findFirstElement(node *nethtml.Node, tag string) *nethtml.Node {
+	if node == nil {
+		return nil
+	}
+	if node.Type == nethtml.ElementNode && node.Data == tag {
+		return node
+	}
+	for child := node.FirstChild; child != nil; child = child.NextSibling {
+		if found := findFirstElement(child, tag); found != nil {
+			return found
+		}
+	}
+	return nil
+}
+
+func setHTMLAttr(node *nethtml.Node, key, value string) {
+	for i := range node.Attr {
+		if node.Attr[i].Key == key {
+			node.Attr[i].Val = value
+			return
+		}
+	}
+	node.Attr = append(node.Attr, nethtml.Attribute{Key: key, Val: value})
 }
 
 // GetParser returns the shared goldmark parser.

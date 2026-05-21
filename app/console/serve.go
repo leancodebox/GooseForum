@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
 	"github.com/leancodebox/GooseForum/app/http/routes"
+	"github.com/leancodebox/GooseForum/app/migration"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 	"github.com/spf13/cast"
 
@@ -54,6 +55,7 @@ func pprofServe() {
 }
 
 func ginServe() {
+	migration.RunAppMigrations()
 	// 初始化OAuth配置
 	oauthservice.InitOAuth()
 	RunJob()

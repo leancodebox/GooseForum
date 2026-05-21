@@ -41,6 +41,7 @@ const (
 	SecuritySettings = `securitySettings`
 	PostingSettings  = `postingSettings`
 	Version          = `version`
+	Migration        = `migration`
 )
 
 type LinkItem struct {

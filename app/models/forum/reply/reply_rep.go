@@ -9,6 +9,11 @@ func Create(entity *Entity) error {
 	return result.Error
 }
 
+func SaveNoUpdate(entity *Entity) error {
+	result := builder().Omit(fieldUpdatedAt).Save(entity)
+	return result.Error
+}
+
 func Get(id any) (entity Entity) {
 	builder().Where(pid, id).First(&entity)
 	return
@@ -27,6 +32,11 @@ func GetAll(offset, limit int) ([]*Entity, error) {
 	var entities []*Entity
 	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
 	return entities, err
+}
+
+func QueryById(startId uint64, limit int) (entities []*Entity) {
+	builder().Where(queryopt.Gt(pid, startId)).Limit(limit).Order(queryopt.Asc(pid)).Find(&entities)
+	return
 }
 
 // GetCountGroupByDay 按天统计回复数

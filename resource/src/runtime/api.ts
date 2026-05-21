@@ -23,7 +23,12 @@ async function readApiResponse<T>(response: Response, fallback: string): Promise
   return (data.result ?? data.data) as T
 }
 
-export async function postReply(articleId: number, content: string, replyId = 0): Promise<number | boolean> {
+export interface PostReplyResult {
+  id: number
+  renderedContent: string
+}
+
+export async function postReply(articleId: number, content: string, replyId = 0): Promise<PostReplyResult | number | boolean> {
   const response = await fetch('/api/forum/articles-reply', {
     method: 'POST',
     headers: {
@@ -35,7 +40,7 @@ export async function postReply(articleId: number, content: string, replyId = 0)
       replyId,
     }),
   })
-  return readApiResponse<number | boolean>(response, '回复失败')
+  return readApiResponse<PostReplyResult | number | boolean>(response, '回复失败')
 }
 
 export async function deleteReply(replyId: number): Promise<boolean> {

@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/spf13/cast"
-
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/spf13/cast"
 )
 
 func create(entity *Entity) int64 {
@@ -57,16 +56,24 @@ func GetConfigByPageTypeE[T any](pageType string, defaultValue T) (T, error) {
 	return defaultValue, errors.New("no data")
 }
 
-const GooseForumVersion = 0
+const AppMigrationVersion uint32 = 1
+
+func GetMigrationVersion() uint32 {
+	configEntity := GetByPageType(Migration)
+	return cast.ToUint32(configEntity.Config)
+}
 
 func CheckVersion() bool {
-	configEntity := GetByPageType(Version)
-	return cast.ToInt(configEntity.Config) >= GooseForumVersion
+	return GetMigrationVersion() >= AppMigrationVersion
 }
 
 func SyncVersion() {
-	configEntity := GetByPageType(Version)
-	configEntity.PageType = Version
-	configEntity.Config = cast.ToString(GooseForumVersion)
+	SyncMigrationVersion(AppMigrationVersion)
+}
+
+func SyncMigrationVersion(version uint32) {
+	configEntity := GetByPageType(Migration)
+	configEntity.PageType = Migration
+	configEntity.Config = cast.ToString(version)
 	CreateOrSave(&configEntity)
 }

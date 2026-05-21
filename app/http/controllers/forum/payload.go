@@ -252,6 +252,7 @@ type ReplyPayload struct {
 	ID              uint64             `json:"id"`
 	ArticleID       uint64             `json:"articleId"`
 	Content         string             `json:"content"`
+	RenderedContent string             `json:"renderedContent"`
 	Author          TopicAuthorPayload `json:"author"`
 	CreatedAt       string             `json:"createdAt"`
 	ReplyToID       uint64             `json:"replyToId,omitempty"`
@@ -799,6 +800,7 @@ func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users
 			ID:              item.Id,
 			ArticleID:       item.ArticleId,
 			Content:         item.Content,
+			RenderedContent: item.RenderedHTML,
 			Author:          author,
 			CreatedAt:       item.CreatedAt.Format(time.DateTime),
 			ReplyToID:       item.ReplyId,

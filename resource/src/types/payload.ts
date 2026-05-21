@@ -161,6 +161,7 @@ export interface ReplyPayload {
   id: number
   articleId: number
   content: string
+  renderedContent: string
   author: {
     id: number
     username: string
