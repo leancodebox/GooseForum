@@ -9,9 +9,11 @@ export interface FlashMessage {
 }
 
 const STORAGE_KEY = 'goose:flash-messages'
+const MAX_VISIBLE_MESSAGES = 5
 const messages = ref<FlashMessage[]>([])
 let nextId = 1
 let hydrated = false
+const dismissTimers = new Map<number, number>()
 
 function readStoredMessages(): Omit<FlashMessage, 'id'>[] {
   try {
@@ -46,8 +48,12 @@ function push(message: string, type: FlashMessageType = 'info') {
     type,
     message: text,
   }
+  const overflow = messages.value.length - MAX_VISIBLE_MESSAGES + 1
+  if (overflow > 0) {
+    messages.value.slice(0, overflow).forEach((message) => dismiss(message.id))
+  }
   messages.value = [...messages.value, item]
-  window.setTimeout(() => dismiss(item.id), 5200)
+  dismissTimers.set(item.id, window.setTimeout(() => dismiss(item.id), 5200))
 }
 
 export function queueFlashMessage(message: string, type: FlashMessageType = 'info') {
@@ -71,6 +77,9 @@ export function hydrateFlashMessages() {
 }
 
 export function dismiss(id: number) {
+  const timer = dismissTimers.get(id)
+  if (timer) window.clearTimeout(timer)
+  dismissTimers.delete(id)
   messages.value = messages.value.filter((item) => item.id !== id)
 }
 

@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import type { Component } from 'vue'
 import AppShell from '@/components/AppShell.vue'
-import GlobalFlash from '@/components/GlobalFlash.vue'
 import { useShellState } from '@/runtime/shell-state'
 import type { PagePayload } from '@/types/payload'
 
@@ -18,7 +17,6 @@ const hasRail = computed(() => props.payload.component === 'article.detail')
 </script>
 
 <template>
-  <GlobalFlash />
   <template v-if="isStandalone">
     <component
       :is="component"

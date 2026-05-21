@@ -18,6 +18,7 @@ import {
   UserRound,
 } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import GlobalFlash from './GlobalFlash.vue'
 import UserHoverCard from './UserHoverCard.vue'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
 import { useNavigationState } from '@/runtime/navigation-state'
@@ -324,6 +325,8 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
         </div>
       </div>
     </header>
+
+    <GlobalFlash />
 
     <main
       class="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-3 px-3 py-3 sm:px-5 lg:grid-cols-[210px_minmax(0,1fr)] lg:px-8 xl:grid-cols-[224px_minmax(0,1fr)]"

@@ -23,8 +23,10 @@ import {
   type OAuthBindingsPayload,
 } from '@/runtime/api'
 import { formatDate, formatNumber } from '@/runtime/format'
+import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message'
 import { canvasToImageFile, processImageFile, validateImageFile } from '@/runtime/image'
 import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
+import FlashSpriteIcon from '@/components/FlashSpriteIcon.vue'
 
 const page = defineProps<{
   layout: LayoutPayload
@@ -56,6 +58,7 @@ let cropPreviewFrame = 0
 const editingUsername = ref(false)
 const editingEmail = ref(false)
 const bindings = ref<OAuthBindingsPayload>({})
+const { push: pushFlash } = useFlashMessages()
 
 const socialKeys = ['github', 'twitter', 'linkedIn', 'weibo', 'bilibili', 'zhihu'] as const
 
@@ -94,6 +97,13 @@ const providers = computed(() => [
   { key: 'github', label: 'GitHub', supported: true },
   { key: 'google', label: 'Google', supported: false },
 ])
+
+const easterEggMessages: Array<{ type: FlashMessageType; message: string }> = [
+  { type: 'success', message: '彩蛋触发成功：今天的头像也很有精神。' },
+  { type: 'info', message: '系统提示：这条消息只是来检查展示效果的。' },
+  { type: 'warning', message: '小提醒：你发现了设置页侧栏头像的隐藏开关。' },
+  { type: 'error', message: '模拟错误：别紧张，这只是消息框验收专用。' },
+]
 
 watch(
   () => page.props.user.id,
@@ -140,6 +150,11 @@ function setActiveTab(key: TabKey) {
   if (key === 'profile') url.searchParams.delete('tab')
   else url.searchParams.set('tab', key)
   history.replaceState(history.state, '', url)
+}
+
+function triggerAvatarFlash() {
+  const item = easterEggMessages[Math.floor(Math.random() * easterEggMessages.length)]
+  pushFlash(item.message, item.type)
 }
 
 function showStatus(message: string) {
@@ -421,7 +436,7 @@ async function toggleBinding(provider: string) {
       <div class="grid gap-3 xl:grid-cols-[240px_minmax(0,1fr)]">
         <aside class="self-start rounded-lg border border-gray-200/70 bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)] xl:sticky xl:top-19">
           <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
-            <img :src="avatarUrl" :alt="usernameForm.username" class="h-12 w-12 rounded-full object-cover ring-1 ring-gray-100" />
+            <img :src="avatarUrl" :alt="usernameForm.username" class="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-gray-100" />
             <div class="min-w-0">
               <div class="truncate font-semibold text-gray-950">{{ displayName }}</div>
               <div class="truncate text-sm text-gray-400">@{{ usernameForm.username }}</div>
@@ -462,9 +477,17 @@ async function toggleBinding(provider: string) {
 
         <section class="space-y-3">
           <section v-show="activeTab === 'profile'" class="rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-            <div class="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
+            <div class="relative flex items-center gap-2 border-b border-gray-100 px-4 py-3 pr-13">
               <UserRound class="h-4 w-4 text-gray-400" />
               <h2 class="text-sm font-semibold text-gray-950">公开资料</h2>
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-gray-50 outline-none ring-1 ring-gray-100 transition hover:bg-blue-50 hover:ring-blue-100 focus-visible:ring-4 focus-visible:ring-blue-100"
+                aria-label="触发随机系统提示"
+                @click="triggerAvatarFlash"
+              >
+                <FlashSpriteIcon type="info" class="h-6 w-6" />
+              </button>
             </div>
             <div class="space-y-6 p-4">
               <div class="flex flex-col gap-4 border-b border-gray-100 pb-5 sm:flex-row sm:items-center">
