@@ -38,6 +38,7 @@ const replyWindowError = ref('')
 const deleteErrorMessage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
+const inlineReplyErrors = reactive<Record<number, string>>({})
 const titleEl = ref<HTMLElement | null>(null)
 const replyEditorEl = ref<HTMLTextAreaElement | null>(null)
 const replySectionEl = ref<HTMLElement | null>(null)
@@ -365,16 +366,40 @@ function toggleReplyForm(replyId: number) {
   if (replyContents[replyId] === undefined) {
     replyContents[replyId] = ''
   }
+  inlineReplyErrors[replyId] = ''
+}
+
+function clearReplyValidation(replyId = 0) {
+  if (replyId > 0) {
+    inlineReplyErrors[replyId] = ''
+    return
+  }
+
+  errorMessage.value = ''
+  successMessage.value = ''
 }
 
 async function submitReply(replyId = 0) {
   const content = replyId > 0 ? (replyContents[replyId] || '').trim() : replyContent.value.trim()
-  if (!content || submitting.value) return
+  if (submitting.value) return
+
+  if (!content) {
+    if (replyId > 0) {
+      inlineReplyErrors[replyId] = '回复内容不能为空'
+    } else {
+      errorMessage.value = '回复内容不能为空'
+      successMessage.value = ''
+    }
+    return
+  }
 
   submitting.value = true
   currentReplyId.value = replyId
   errorMessage.value = ''
   successMessage.value = ''
+  if (replyId > 0) {
+    inlineReplyErrors[replyId] = ''
+  }
   try {
     const createdReply = await postReply(page.props.article.id, content, replyId)
     if (replyId > 0) {
@@ -383,8 +408,8 @@ async function submitReply(replyId = 0) {
     } else {
       replyContent.value = ''
       closeFloatingReply()
+      successMessage.value = '回复已发布。'
     }
-    successMessage.value = replyId > 0 ? '回复已发布。' : '回复已发布。'
     const createdReplyId = typeof createdReply === 'object' && createdReply !== null ? createdReply.id : createdReply
     const renderedContent = typeof createdReply === 'object' && createdReply !== null ? createdReply.renderedContent : escapePlainText(content)
     if (typeof createdReplyId === 'number') {
@@ -397,7 +422,12 @@ async function submitReply(replyId = 0) {
       await refreshCurrentPage()
     }
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '回复失败'
+    const message = error instanceof Error ? error.message : '回复失败'
+    if (replyId > 0) {
+      inlineReplyErrors[replyId] = message
+    } else {
+      errorMessage.value = message
+    }
   } finally {
     submitting.value = false
     currentReplyId.value = 0
@@ -605,13 +635,15 @@ async function removeReply(replyId: number) {
                 v-model="replyContents[reply.id]"
                 class="min-h-20 w-full resize-y rounded-md border border-gray-200 bg-white p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                 placeholder="写下你的回复..."
+                @input="clearReplyValidation(reply.id)"
               />
+              <p v-if="inlineReplyErrors[reply.id]" class="mt-2 text-sm text-red-600">{{ inlineReplyErrors[reply.id] }}</p>
               <div class="mt-2 flex justify-end gap-2">
                 <button type="button" class="h-8 rounded-md px-3 text-xs font-semibold text-gray-500 hover:bg-gray-100" @click="openReplyId = null">取消</button>
                 <button
                   type="button"
                   class="inline-flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="submitting || !replyContents[reply.id]?.trim()"
+                  :disabled="submitting"
                   @click="submitReply(reply.id)"
                 >
                   <Send class="h-3.5 w-3.5" />
@@ -654,13 +686,14 @@ async function removeReply(replyId: number) {
             v-model="replyContent"
             class="min-h-28 w-full resize-y rounded-md border border-gray-200 p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             placeholder="写下你的回复..."
+            @input="clearReplyValidation()"
           />
           <p v-if="errorMessage" class="mt-2 text-sm text-red-600">{{ errorMessage }}</p>
           <p v-if="successMessage" class="mt-2 text-sm text-green-600">{{ successMessage }}</p>
           <div class="mt-3 flex justify-end">
             <button
               class="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="submitting || !replyContent.trim()"
+              :disabled="submitting"
               @click="submitReply()"
             >
               <Send class="h-4 w-4" />
@@ -706,6 +739,7 @@ async function removeReply(replyId: number) {
               class="min-h-24 w-full resize-y rounded-md border border-gray-200 bg-white p-3 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               placeholder="写下你的回复..."
               @focus="openReplyId = null"
+              @input="clearReplyValidation()"
             />
             <p v-if="errorMessage" class="mt-2 text-sm text-red-600">{{ errorMessage }}</p>
             <p v-if="successMessage" class="mt-2 text-sm text-green-600">{{ successMessage }}</p>
@@ -716,7 +750,7 @@ async function removeReply(replyId: number) {
               <button
                 type="button"
                 class="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                :disabled="submitting || !replyContent.trim()"
+                :disabled="submitting"
                 @click="submitReply()"
               >
                 <Loader2 v-if="submitting && currentReplyId === 0" class="h-4 w-4 animate-spin" />
