@@ -102,6 +102,7 @@ function isRoutablePath(pathname: string) {
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/admin') ||
+    pathname.startsWith('/manage') ||
     pathname.startsWith('/assets') ||
     pathname.startsWith('/static') ||
     pathname.startsWith('/file')

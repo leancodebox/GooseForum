@@ -30,7 +30,7 @@ func TestAssetsAreGzipped(t *testing.T) {
 		t.Fatalf("decode manifest: %v", err)
 	}
 
-	entry := manifest["src/main.ts"]
+	entry := manifest["src/site/main.ts"]
 	targets := []string{entry.File}
 	targets = append(targets, entry.Css...)
 	for _, target := range targets {

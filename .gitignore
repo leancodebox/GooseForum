@@ -33,5 +33,7 @@ dist/
 .trae/rules/project_rules.md
 .vercel
 **/node_modules/
+.pnpm-store/
 /resource/static/admin/dict
 tmp_app
+tmp_refs/

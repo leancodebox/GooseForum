@@ -70,7 +70,7 @@ func TestResourceEntryUsesViteInLocalMode(t *testing.T) {
 
 func TestResourceEntryUsesConfiguredDevServer(t *testing.T) {
 	t.Setenv("GOOSE_UNUSED", "keeps test isolated")
-	html := string(resourceEntry("src/main.ts"))
+	html := string(resourceEntry("src/site/main.ts"))
 	devServer := viteDevServer()
 	if devServer == "" {
 		t.Skip("current test config uses production manifest")
@@ -78,7 +78,7 @@ func TestResourceEntryUsesConfiguredDevServer(t *testing.T) {
 	if !strings.Contains(html, strings.TrimRight(devServer, "/")+`/assets/@vite/client`) {
 		t.Fatalf("expected resource entry to include Vite client: %s", html)
 	}
-	if !strings.Contains(html, strings.TrimRight(devServer, "/")+`/assets/src/main.ts`) {
+	if !strings.Contains(html, strings.TrimRight(devServer, "/")+`/assets/src/site/main.ts`) {
 		t.Fatalf("expected resource entry to include Vite entry: %s", html)
 	}
 	if strings.Contains(html, `/assets/assets/`) {

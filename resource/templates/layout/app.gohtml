@@ -30,7 +30,7 @@
     {{if .Payload.Meta.JSONLD}}<script type="application/ld+json" data-goose-jsonld="page">{{json .Payload.Meta.JSONLD}}</script>{{end}}
     {{if .Payload.Layout.Site.Favicon}}<link rel="icon" href="{{ResourceAsset .Payload.Layout.Site.Favicon}}">{{end}}
     {{if .Payload.Layout.Site.ExternalLinks}}{{SafeHTML .Payload.Layout.Site.ExternalLinks}}{{end}}
-    {{ResourceEntry `src/main.ts`}}
+    {{ResourceEntry `src/site/main.ts`}}
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
     <script id="goose-payload" type="application/json">{{json .Payload}}</script>

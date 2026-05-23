@@ -1,0 +1,20 @@
+{{define "layout/admin.gohtml"}}
+<!DOCTYPE html>
+<html lang="{{.Lang}}" data-goose-admin>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Payload.Meta.Title}}</title>
+    {{if .Payload.Meta.Robots}}<meta name="robots" content="{{.Payload.Meta.Robots}}">{{end}}
+    {{if .Payload.Layout.Site.Favicon}}<link rel="icon" href="{{ResourceAsset .Payload.Layout.Site.Favicon}}">{{end}}
+    {{ResourceEntry `src/admin/main.ts`}}
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+    <script id="goose-payload" type="application/json">{{json .Payload}}</script>
+    <div id="goose-admin-app"></div>
+    <noscript>
+        {{block "noscript" .}}{{end}}
+    </noscript>
+</body>
+</html>
+{{end}}

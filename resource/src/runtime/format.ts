@@ -8,8 +8,7 @@ export function formatNumber(value: number): string {
 
 export function formatDateTime(value: string): string {
   if (!value) return ''
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T')
-  const date = new Date(normalized)
+  const date = parseDate(value)
   if (Number.isNaN(date.getTime())) return value
   return date.toLocaleString(undefined, {
     year: 'numeric',
@@ -20,10 +19,22 @@ export function formatDateTime(value: string): string {
   })
 }
 
+export function formatChatTime(value: string): string {
+  if (!value) return ''
+  const date = parseDate(value)
+  if (Number.isNaN(date.getTime())) return value
+  const now = new Date()
+  const time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  if (isSameDay(date, now)) return time
+  if (date.getFullYear() === now.getFullYear()) {
+    return `${date.getMonth() + 1}月${date.getDate()}日 ${time}`
+  }
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${time}`
+}
+
 export function timeAgo(value: string): string {
   if (!value) return ''
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T')
-  const timestamp = new Date(normalized).getTime()
+  const timestamp = parseDate(value).getTime()
   if (Number.isNaN(timestamp)) return value
   const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000))
   if (seconds < 60) return i18n.global.t('time.justNow')
@@ -38,13 +49,27 @@ export function timeAgo(value: string): string {
 
 export function formatDate(value: string): string {
   if (!value) return ''
-  const normalized = value.includes('T') ? value : value.replace(' ', 'T')
-  const date = new Date(normalized)
+  const date = parseDate(value)
   if (Number.isNaN(date.getTime())) return value.split(' ')[0] || value
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+function parseDate(value: string): Date {
+  const normalized = value.includes('T') ? value : value.replace(' ', 'T')
+  return new Date(normalized)
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear()
+    && a.getMonth() === b.getMonth()
+    && a.getDate() === b.getDate()
+}
+
+function pad(value: number): string {
+  return String(value).padStart(2, '0')
 }
 
 function trim(value: number): string {

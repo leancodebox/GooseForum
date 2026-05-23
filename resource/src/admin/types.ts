@@ -1,0 +1,234 @@
+import type { LayoutPayload } from '@/types/payload'
+
+export interface AdminPayload<TProps = unknown> {
+  component: string
+  props: TProps
+  meta: {
+    title: string
+    robots?: string
+  }
+  layout: LayoutPayload
+  url: string
+  version: string
+}
+
+export interface ManageHomeProps {
+  legacyAdminUrl: string
+}
+
+export interface ApiEnvelope<T> {
+  code?: number
+  msg?: string
+  message?: string
+  result?: T
+  data?: T
+}
+
+export interface PageResult<T> {
+  list: T[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export interface AdminCategory {
+  id: number
+  category: string
+  desc?: string
+  icon?: string
+  color?: string
+  slug?: string
+  sort?: number
+  status?: number
+}
+
+export interface AdminUser {
+  userId: number
+  username: string
+  avatarUrl?: string | null
+  email: string
+  status: number
+  validate: number
+  prestige: number
+  roleId?: number | null
+  roleList?: { name: string, value: number }[] | null
+  createTime: string
+  lastActiveTime?: string | null
+  badges?: UserBadge[]
+}
+
+export interface UserBadge extends AdminBadge {
+  source?: string
+  reason?: string
+  grantedAt?: string
+}
+
+export interface UserBadgeOptions {
+  options: AdminBadge[]
+  active: UserBadge[]
+}
+
+export interface AdminRole {
+  roleId: number
+  roleName: string
+  effective: number
+  permissions: { id: number, name: string }[]
+  createTime: string
+}
+
+export interface AdminArticle {
+  id: number
+  title: string
+  description?: string | null
+  type: number
+  categoryId: number[]
+  userId: number
+  username: string
+  userAvatarUrl?: string | null
+  articleStatus: number
+  processStatus: number
+  viewCount: number
+  replyCount: number
+  likeCount: number
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface ArticleSource extends AdminArticle {
+  content: string
+}
+
+export interface AdminBadge {
+  code: string
+  type: 'system' | 'custom' | string
+  grantMode: 'auto' | 'manual' | string
+  name: string
+  description: string
+  iconType?: string
+  iconKey?: string
+  iconUrl: string
+  color: string
+  level: string
+  isEnabled: boolean
+  sortOrder: number
+  isSystem?: boolean
+  canDelete?: boolean
+}
+
+export interface FriendLink {
+  name: string
+  url: string
+  desc?: string
+  logoUrl?: string
+  status?: number
+}
+
+export interface FriendLinkGroup {
+  name: string
+  emoji?: string
+  color?: string
+  links: FriendLink[]
+}
+
+export interface SponsorItem {
+  name: string
+  avatarUrl: string
+  message: string
+  link: string
+}
+
+export interface SponsorsConfig {
+  sponsors: Record<'level0' | 'level1' | 'level2' | 'level3', SponsorItem[]>
+  content: { title: string, description: string }
+  contact: { title: string, description: string, buttonText: string, buttonLink: string }
+  rules: { content: string }[]
+}
+
+export interface SiteSettings {
+  siteName: string
+  siteUrl: string
+  siteLogo: string
+  siteEmail: string
+  siteDescription: string
+  siteKeywords: string
+  externalLinks?: string
+  footerInfo?: {
+    primary: { content: string }[]
+    list: { name: string, url: string }[]
+  }
+  brandType?: string
+  brandText?: string
+  brandImage?: string
+}
+
+export interface MailSettings {
+  enableMail: boolean
+  smtpHost: string
+  smtpPort: number
+  useSSL: boolean
+  smtpUsername: string
+  smtpPassword: string
+  fromName: string
+  fromEmail: string
+}
+
+export interface SecuritySettings {
+  enableSignup: boolean
+  enableEmailVerification: boolean
+  allowedDomains: string[]
+}
+
+export interface PostingSettings {
+  textControl: {
+    minPostLength: number
+    maxPostLength: number
+    minTitleLength: number
+    maxTitleLength: number
+    newUserPostCooldownMinutes: number
+  }
+  uploadControl: {
+    allowAttachments: boolean
+    authorizedExtensions: string[]
+    maxAttachmentSizeKb: number
+    maxDailyUploadsPerUser: number
+    newUserUploadCooldownMinutes: number
+  }
+}
+
+export interface AnnouncementConfig {
+  enabled: boolean
+  content: string
+}
+
+export interface SiteStatistics {
+  userCount: number
+  userMonthCount: number
+  articleCount: number
+  articleMonthCount: number
+  reply: number
+  linksCount: number
+}
+
+export interface DailyTraffic {
+  date: string
+  regCount: number
+  articleCount: number
+  replyCount: number
+}
+
+export interface ServerVersion {
+  version: string
+  commit: string
+  buildDate: string
+  mode: 'development' | 'snapshot' | 'release' | 'custom' | string
+}
+
+export interface GithubRelease {
+  id: number
+  tag_name: string
+  published_at: string
+  body: string
+  html_url: string
+  prerelease: boolean
+  draft: boolean
+}

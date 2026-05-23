@@ -79,6 +79,7 @@ export interface SitePayload {
 export interface ViewerPayload {
   id: number
   username: string
+  email: string
   avatarUrl: string
   isAuthenticated: boolean
   isAdmin: boolean

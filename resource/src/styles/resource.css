@@ -1,7 +1,10 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
-@source "../**/*.{ts,vue}";
-@source "../../templates/**/*.gohtml";
+@source "../site/**/*.{ts,vue}";
+@source "../runtime/**/*.{ts,vue}";
+@source "../types/**/*.{ts,vue}";
+@source "../../templates/layout/app.gohtml";
+@source "../../templates/view/**/*.gohtml";
 
 html,
 body,

@@ -18,7 +18,8 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: 'src/main.ts',
+        site: 'src/site/main.ts',
+        admin: 'src/admin/main.ts',
       },
     },
   },

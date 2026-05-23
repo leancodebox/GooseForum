@@ -138,6 +138,7 @@ type SitePayload struct {
 type ViewerPayload struct {
 	ID              uint64 `json:"id"`
 	Username        string `json:"username"`
+	Email           string `json:"email"`
 	AvatarURL       string `json:"avatarUrl"`
 	IsAuthenticated bool   `json:"isAuthenticated"`
 	IsAdmin         bool   `json:"isAdmin"`
@@ -483,6 +484,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 		viewer = ViewerPayload{
 			ID:              currentUser.UserId,
 			Username:        currentUser.Username,
+			Email:           currentUser.Email,
 			AvatarURL:       currentUser.AvatarUrl,
 			IsAuthenticated: currentUser.UserId > 0,
 			IsAdmin:         currentUser.IsAdmin,

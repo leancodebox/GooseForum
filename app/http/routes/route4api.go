@@ -54,6 +54,8 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/notifications", middleware.CheckLogin, forum.Notifications)
 	viewRouteApp.GET("/publish", middleware.CheckLogin, forum.Publish)
 	viewRouteApp.GET("/search", forum.Search)
+	viewRouteApp.GET("/manage", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), forum.Manage)
+	viewRouteApp.GET("/manage/*path", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), forum.Manage)
 	viewRouteApp.GET("/login", forum.Login)
 	viewRouteApp.GET("/reset-password", forum.ResetPassword)
 
