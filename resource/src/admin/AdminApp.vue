@@ -15,7 +15,6 @@ installAdminRouter()
 type PageKey =
   | 'placeholder'
   | 'settings'
-  | 'home'
   | 'stats'
   | 'badges'
   | 'categories'
@@ -30,7 +29,6 @@ type PageLoader = () => Promise<{ default: Component }>
 const pageLoaders: Record<PageKey, PageLoader> = {
   placeholder: () => import('./pages/AdminPlaceholderPage.vue'),
   settings: () => import('./pages/AdminSettingsPage.vue'),
-  home: () => import('./pages/ManageHomePage.vue'),
   stats: () => import('./pages/StatsPage.vue'),
   badges: () => import('./pages/management/BadgesManagementPage.vue'),
   categories: () => import('./pages/management/CategoriesManagementPage.vue'),
@@ -63,7 +61,7 @@ function resolvePage(path: string): { key: PageKey, props: Record<string, unknow
   const settingsKind = settingsPages[path as keyof typeof settingsPages]
   const placeholder = placeholderPages[path]
   switch (path) {
-    case '/admin/metrics':
+    case '/admin':
       return { key: 'stats', props: {} }
     case '/admin/users':
       return { key: 'users', props: {} }
@@ -79,8 +77,6 @@ function resolvePage(path: string): { key: PageKey, props: Record<string, unknow
       return { key: 'sponsors', props: {} }
     case '/admin/badges':
       return { key: 'badges', props: {} }
-    case '/admin':
-      return { key: 'home', props: {} }
     default:
       if (settingsKind) return { key: 'settings', props: { kind: settingsKind } }
       if (placeholder) {
@@ -92,7 +88,7 @@ function resolvePage(path: string): { key: PageKey, props: Record<string, unknow
           },
         }
       }
-      return { key: 'home', props: {} }
+      return { key: 'stats', props: {} }
   }
 }
 
@@ -129,7 +125,6 @@ watch(
 )
 
 runWhenIdle(() => {
-  void loadPage('home')
   void loadPage('stats')
 })
 </script>

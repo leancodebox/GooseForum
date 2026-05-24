@@ -24,12 +24,8 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarRail,
 } from '@/admin/components/ui/sidebar'
 import { currentAdminPath, navigateAdmin } from '@/admin/runtime/router'
@@ -60,7 +56,7 @@ const navGroups: NavGroup[] = [
   {
     title: 'GooseForum',
     items: [
-      { title: '站点统计', url: '/admin/metrics', icon: Monitor },
+      { title: '站点统计', url: '/admin', icon: Monitor },
       { title: '用户管理', url: '/admin/users', icon: UserCog },
       { title: '角色管理', url: '/admin/roles', icon: ShieldCheck },
       { title: '分类管理', url: '/admin/categories', icon: Tags },
@@ -102,8 +98,8 @@ function isActive(item: NavItem) {
                 <GalleryVerticalEnd class="size-4" />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold">{{ layout.site.name || 'Acme Inc' }}</span>
-                <span class="truncate text-xs">Enterprise</span>
+                <span class="truncate font-semibold">{{ layout.site.name || 'GooseForum' }}</span>
+                <span class="truncate text-xs">Admin</span>
               </div>
             </a>
           </SidebarMenuButton>
@@ -128,21 +124,6 @@ function isActive(item: NavItem) {
                 <ExternalLink v-if="item.external" class="ml-auto size-4" />
               </a>
             </SidebarMenuButton>
-            <SidebarMenuAction v-if="item.items?.length" as-child show-on-hover>
-              <a :href="item.url" @click="navigateAdmin(item.url, $event)">
-                <ChevronsUpDown class="size-4" />
-              </a>
-            </SidebarMenuAction>
-            <SidebarMenuSub v-if="item.items?.length">
-              <SidebarMenuSubItem v-for="child in item.items" :key="child.title">
-                <SidebarMenuSubButton as-child :is-active="currentPath === child.url">
-                  <a :href="child.url" @click="navigateAdmin(child.url, $event)">
-                    <component :is="child.icon" />
-                    <span>{{ child.title }}</span>
-                  </a>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            </SidebarMenuSub>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
