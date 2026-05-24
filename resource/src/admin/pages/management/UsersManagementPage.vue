@@ -198,7 +198,7 @@ onMounted(() => {
         </button>
       </template>
 
-      <div class="overflow-hidden rounded-lg border bg-background">
+      <div class="overflow-hidden rounded-lg border bg-card">
         <div class="flex flex-col gap-2 border-b bg-muted/10 px-3 py-2 lg:flex-row lg:items-center lg:justify-between">
           <form class="flex min-w-0 flex-1 items-center gap-2" @submit.prevent="applySearch">
             <div class="relative min-w-0 flex-1 sm:max-w-md">
