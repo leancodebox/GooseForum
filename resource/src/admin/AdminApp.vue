@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue'
+import { computed, markRaw, shallowRef, watch } from 'vue'
 import type { Component } from 'vue'
+import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import AdminPageLoading from './pages/AdminPageLoading.vue'
 import { currentAdminPath, installAdminRouter } from '@/admin/runtime/router'
 import type { AdminPayload, ManageHomeProps } from '@/admin/types'
@@ -11,24 +12,33 @@ const props = defineProps<{
 
 installAdminRouter()
 
-const asyncPage = (loader: () => Promise<{ default: Component }>) => defineAsyncComponent({
-  loader,
-  loadingComponent: AdminPageLoading,
-  delay: 80,
-})
+type PageKey =
+  | 'placeholder'
+  | 'settings'
+  | 'home'
+  | 'stats'
+  | 'badges'
+  | 'categories'
+  | 'links'
+  | 'posts'
+  | 'roles'
+  | 'sponsors'
+  | 'users'
 
-const pages = {
-  placeholder: asyncPage(() => import('./pages/AdminPlaceholderPage.vue')),
-  settings: asyncPage(() => import('./pages/AdminSettingsPage.vue')),
-  home: asyncPage(() => import('./pages/ManageHomePage.vue')),
-  stats: asyncPage(() => import('./pages/StatsPage.vue')),
-  badges: asyncPage(() => import('./pages/management/BadgesManagementPage.vue')),
-  categories: asyncPage(() => import('./pages/management/CategoriesManagementPage.vue')),
-  links: asyncPage(() => import('./pages/management/LinksManagementPage.vue')),
-  posts: asyncPage(() => import('./pages/management/PostsManagementPage.vue')),
-  roles: asyncPage(() => import('./pages/management/RolesManagementPage.vue')),
-  sponsors: asyncPage(() => import('./pages/management/SponsorsManagementPage.vue')),
-  users: asyncPage(() => import('./pages/management/UsersManagementPage.vue')),
+type PageLoader = () => Promise<{ default: Component }>
+
+const pageLoaders: Record<PageKey, PageLoader> = {
+  placeholder: () => import('./pages/AdminPlaceholderPage.vue'),
+  settings: () => import('./pages/AdminSettingsPage.vue'),
+  home: () => import('./pages/ManageHomePage.vue'),
+  stats: () => import('./pages/StatsPage.vue'),
+  badges: () => import('./pages/management/BadgesManagementPage.vue'),
+  categories: () => import('./pages/management/CategoriesManagementPage.vue'),
+  links: () => import('./pages/management/LinksManagementPage.vue'),
+  posts: () => import('./pages/management/PostsManagementPage.vue'),
+  roles: () => import('./pages/management/RolesManagementPage.vue'),
+  sponsors: () => import('./pages/management/SponsorsManagementPage.vue'),
+  users: () => import('./pages/management/UsersManagementPage.vue'),
 }
 
 const placeholderPages: Record<string, { title: string, description: string }> = {
@@ -43,49 +53,93 @@ const settingsPages = {
   '/manage/settings/announcement': 'announcement',
 } as const
 
-const settingsKind = computed(() => settingsPages[currentAdminPath.value as keyof typeof settingsPages])
+const pageCache = new Map<PageKey, Component>()
+const activeComponent = shallowRef<Component>()
+const activeComponentProps = shallowRef<Record<string, unknown>>({})
 
-const placeholder = computed(() => placeholderPages[currentAdminPath.value])
+const isInitialLoading = computed(() => !activeComponent.value)
 
-const componentProps = computed(() => {
-  if (settingsKind.value) return { kind: settingsKind.value }
-  return {
-    title: placeholder.value?.title,
-    description: placeholder.value?.description,
-  }
-})
-
-const component = computed(() => {
-  switch (currentAdminPath.value) {
+function resolvePage(path: string): { key: PageKey, props: Record<string, unknown> } {
+  const settingsKind = settingsPages[path as keyof typeof settingsPages]
+  const placeholder = placeholderPages[path]
+  switch (path) {
     case '/manage/metrics':
-      return pages.stats
+      return { key: 'stats', props: {} }
     case '/manage/users':
-      return pages.users
+      return { key: 'users', props: {} }
     case '/manage/roles':
-      return pages.roles
+      return { key: 'roles', props: {} }
     case '/manage/categories':
-      return pages.categories
+      return { key: 'categories', props: {} }
     case '/manage/posts':
-      return pages.posts
+      return { key: 'posts', props: {} }
     case '/manage/links':
-      return pages.links
+      return { key: 'links', props: {} }
     case '/manage/sponsors':
-      return pages.sponsors
+      return { key: 'sponsors', props: {} }
     case '/manage/badges':
-      return pages.badges
+      return { key: 'badges', props: {} }
     case '/manage':
-      return pages.home
+      return { key: 'home', props: {} }
     default:
-      if (settingsKind.value) return pages.settings
-      return placeholderPages[currentAdminPath.value] ? pages.placeholder : pages.home
+      if (settingsKind) return { key: 'settings', props: { kind: settingsKind } }
+      if (placeholder) {
+        return {
+          key: 'placeholder',
+          props: {
+            title: placeholder.title,
+            description: placeholder.description,
+          },
+        }
+      }
+      return { key: 'home', props: {} }
   }
+}
+
+async function loadPage(key: PageKey): Promise<Component> {
+  const cached = pageCache.get(key)
+  if (cached) return cached
+  const page = markRaw((await pageLoaders[key]()).default)
+  pageCache.set(key, page)
+  return page
+}
+
+let requestId = 0
+
+function runWhenIdle(callback: () => void) {
+  if (typeof window === 'undefined') return
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(callback, { timeout: 3000 })
+    return
+  }
+  globalThis.setTimeout(callback, 1200)
+}
+
+watch(
+  currentAdminPath,
+  async (path) => {
+    const currentRequestId = ++requestId
+    const nextPage = resolvePage(path)
+    const nextComponent = await loadPage(nextPage.key)
+    if (currentRequestId !== requestId) return
+    activeComponent.value = nextComponent
+    activeComponentProps.value = nextPage.props
+  },
+  { immediate: true },
+)
+
+runWhenIdle(() => {
+  void loadPage('home')
+  void loadPage('stats')
 })
 </script>
 
 <template>
-  <component
-    :is="component"
-    :payload="payload as AdminPayload<ManageHomeProps>"
-    v-bind="componentProps"
-  />
+  <AdminLayout :layout="payload.layout">
+    <component
+      :is="isInitialLoading ? AdminPageLoading : activeComponent"
+      :payload="payload as AdminPayload<ManageHomeProps>"
+      v-bind="activeComponentProps"
+    />
+  </AdminLayout>
 </template>

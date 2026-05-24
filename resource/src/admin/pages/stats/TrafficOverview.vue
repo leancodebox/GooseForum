@@ -72,33 +72,39 @@ const svgDefs = `
 </script>
 
 <template>
-  <Card class="h-full pt-0">
-    <CardHeader class="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-      <div class="grid flex-1 gap-1">
+  <Card class="h-full overflow-hidden pt-0">
+    <CardHeader class="grid gap-3 space-y-0 border-b px-4 py-4 sm:flex sm:flex-row sm:items-center sm:px-5">
+      <div class="grid min-w-0 flex-1 gap-1">
         <CardTitle>流量概览</CardTitle>
         <CardDescription>展示注册用户、文章和回复的增长趋势</CardDescription>
       </div>
-      <slot name="headerAction" />
+      <div class="min-w-0 sm:shrink-0">
+        <slot name="headerAction" />
+      </div>
     </CardHeader>
-    <CardContent class="px-2 pt-4 pb-4 sm:px-6 sm:pt-6">
-      <div v-if="loading" class="flex h-[350px] items-center justify-center text-muted-foreground">
+    <CardContent class="px-3 pb-3 pt-4 sm:px-5">
+      <div v-if="loading" class="flex h-[260px] items-center justify-center text-muted-foreground sm:h-[320px]">
         加载中...
       </div>
-      <ChartContainer v-else :config="chartConfig" class="aspect-auto h-[300px] w-full" :cursor="false">
+      <ChartContainer v-else :config="chartConfig" class="aspect-auto h-[260px] w-full sm:h-[320px]" :cursor="false">
         <VisXYContainer
           :data="chartData"
           :svg-defs="svgDefs"
-          :margin="{ top: 12, right: 12, left: -40, bottom: 24 }"
+          :margin="{ top: 18, right: 18, left: -24, bottom: 28 }"
         >
           <VisArea
             :x="(d: Data) => d.date"
             :y="[(d: Data) => d.regCount, (d: Data) => d.articleCount, (d: Data) => d.replyCount]"
             :color="(_d: Data, i: number) => ['url(#fillRegCount)', 'url(#fillArticleCount)', 'url(#fillReplyCount)'][i]"
-            :opacity="0.6"
+            :opacity="1"
           />
           <VisLine
             :x="(d: Data) => d.date"
-            :y="[(d: Data) => d.regCount, (d: Data) => d.articleCount, (d: Data) => d.replyCount]"
+            :y="[
+              (d: Data) => d.regCount,
+              (d: Data) => d.regCount + d.articleCount,
+              (d: Data) => d.regCount + d.articleCount + d.replyCount,
+            ]"
             :color="(_d: Data, i: number) => [chartConfig.regCount.color, chartConfig.articleCount.color, chartConfig.replyCount.color][i]"
             :line-width="1"
           />
@@ -108,7 +114,7 @@ const svgDefs = `
             :tick-line="false"
             :domain-line="false"
             :grid-line="false"
-            :num-ticks="6"
+            :num-ticks="7"
             :tick-format="(d: number) => {
               const date = new Date(d)
               return date.toLocaleDateString('en-US', {
@@ -119,7 +125,7 @@ const svgDefs = `
           />
           <VisAxis
             type="y"
-            :num-ticks="4"
+            :num-ticks="5"
             :tick-line="false"
             :domain-line="false"
           />

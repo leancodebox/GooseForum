@@ -2,6 +2,7 @@
 import type { DateValue } from '@internationalized/date'
 import type { DateRange } from 'reka-ui'
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
+import { useMediaQuery } from '@vueuse/core'
 import { Calendar } from '@lucide/vue'
 import { computed, ref, shallowRef, watch } from 'vue'
 import { Button } from '@/admin/components/ui/button'
@@ -27,6 +28,7 @@ const formatter = new DateFormatter('en-US', {
 })
 
 const open = ref(false)
+const isDesktop = useMediaQuery('(min-width: 640px)')
 const value = shallowRef<DateRange>({
   start: parseDate(props.startDate),
   end: parseDate(props.endDate),
@@ -83,7 +85,7 @@ function formatDateValue(value: DateValue): string {
       <Button
         variant="outline"
         :class="cn(
-          'h-10 w-full justify-start rounded-lg bg-background px-3 text-left font-normal shadow-sm sm:w-[320px]',
+          'h-10 w-full min-w-0 justify-start rounded-lg bg-background px-3 text-left font-normal shadow-sm sm:w-[320px]',
           !value.start && 'text-muted-foreground',
         )"
       >
@@ -91,10 +93,10 @@ function formatDateValue(value: DateValue): string {
         <span class="truncate">{{ label }}</span>
       </Button>
     </PopoverTrigger>
-    <PopoverContent class="w-auto p-0" align="end">
+    <PopoverContent class="max-h-[min(80vh,640px)] w-[calc(100vw-2rem)] overflow-auto p-0 sm:w-auto" align="end">
       <RangeCalendar
         :model-value="value"
-        :number-of-months="2"
+        :number-of-months="isDesktop ? 2 : 1"
         initial-focus
         @update:model-value="handleValueChange"
       />

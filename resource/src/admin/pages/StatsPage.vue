@@ -177,27 +177,28 @@ onMounted(() => {
         </div>
       </template>
 
-      <div class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="mb-4 grid overflow-hidden rounded-lg border bg-card shadow-sm sm:grid-cols-2 xl:grid-cols-4">
         <div
-          v-for="item in summaryItems"
+          v-for="(item, index) in summaryItems"
           :key="item.label"
-          class="flex items-center justify-between rounded-xl border bg-card px-4 py-3 text-card-foreground shadow-sm"
+          class="flex min-h-20 items-center justify-between border-b px-4 py-3 text-card-foreground sm:[&:nth-child(2n+1)]:border-r xl:border-b-0 xl:border-r xl:last:border-r-0"
+          :class="index >= 2 ? 'sm:border-b-0' : ''"
         >
-          <div>
-            <div class="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <component :is="item.icon" class="h-3.5 w-3.5" />
+          <div class="min-w-0">
+            <div class="mb-2 flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground">
+              <component :is="item.icon" class="h-4 w-4" />
               <span>{{ item.label }}</span>
             </div>
             <div class="flex items-baseline gap-1.5">
-              <span class="text-xl font-bold leading-none">{{ formatNumber(item.value) }}</span>
-              <span v-if="item.delta" class="text-[10px] text-muted-foreground">{{ item.delta }}</span>
+              <span class="text-2xl font-bold leading-none tracking-tight">{{ formatNumber(item.value) }}</span>
+              <span v-if="item.delta" class="text-xs font-medium text-muted-foreground">{{ item.delta }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        <div class="lg:col-span-8">
+      <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div class="min-w-0">
           <TrafficOverview :data="traffic" :loading="trafficLoading">
             <template #headerAction>
               <DateRangePicker
@@ -208,7 +209,7 @@ onMounted(() => {
             </template>
           </TrafficOverview>
         </div>
-        <div class="lg:col-span-4">
+        <div class="min-w-0">
           <ProjectVersion
             :releases="releases"
             :loading="releasesLoading"
