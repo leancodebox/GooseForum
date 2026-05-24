@@ -2,13 +2,10 @@ package controllers
 
 import (
 	"net/http"
-	"path"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/http/httputil"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
-	"github.com/leancodebox/GooseForum/resource"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,14 +17,6 @@ const (
 )
 
 func NotFound(c *gin.Context) {
-	uri := c.Request.RequestURI
-	if strings.HasPrefix(uri, "/admin") {
-		fsEntity, _ := resource.GetAdminFS()
-		httputil.SetNoStore(c)
-		// Empty path serves the admin index without net/http rewriting index.html to ./.
-		c.FileFromFS(path.Join(""), http.FS(fsEntity))
-		return
-	}
 	if strings.Contains(c.GetHeader("Accept"), contentTypeHTML) {
 		c.Redirect(http.StatusTemporaryRedirect, urlconfig.Home())
 		return

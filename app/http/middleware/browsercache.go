@@ -11,11 +11,6 @@ func BrowserCache(c *gin.Context) {
 		c.Next()
 		return
 	}
-	if httputil.IsAdminIndexPath(c.Request.URL.Path) {
-		httputil.SetNoStore(c)
-		c.Next()
-		return
-	}
 	httputil.SetLongPublic(c)
 	c.Next()
 }

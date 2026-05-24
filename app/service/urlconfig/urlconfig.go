@@ -37,7 +37,7 @@ const (
 	PathNotifications = "/notifications"
 	PathActivate      = "/activate"
 	PathResetPassword = "/reset-password"
-	PathAdmin         = "/admin/"
+	PathAdmin         = "/admin"
 )
 
 func Home() string { return PathHome }

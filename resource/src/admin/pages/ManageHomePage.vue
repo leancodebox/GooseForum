@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import { Button } from '@/admin/components/ui/button'
 import {
   Tabs,
   TabsContent,
@@ -33,14 +32,6 @@ const activeTab = ref(tabs.value[0].value)
       description="workspace description"
       sticky
     >
-      <template #actions>
-        <Button as-child>
-          <a :href="payload.props.legacyAdminUrl">
-            Download
-          </a>
-        </Button>
-      </template>
-
       <Tabs :default-value="activeTab" class="w-full">
         <TabsList>
           <TabsTrigger

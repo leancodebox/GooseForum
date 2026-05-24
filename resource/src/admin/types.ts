@@ -12,9 +12,7 @@ export interface AdminPayload<TProps = unknown> {
   version: string
 }
 
-export interface ManageHomeProps {
-  legacyAdminUrl: string
-}
+export type ManageHomeProps = Record<string, never>
 
 export interface ApiEnvelope<T> {
   code?: number

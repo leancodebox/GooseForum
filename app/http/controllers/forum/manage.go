@@ -6,16 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ManageHomeProps struct {
-	LegacyAdminURL string `json:"legacyAdminUrl"`
-}
+type ManageHomeProps struct{}
 
 func Manage(c *gin.Context) {
 	payload := PagePayload{
 		Component: "admin.shell",
-		Props: ManageHomeProps{
-			LegacyAdminURL: "/admin/",
-		},
+		Props:     ManageHomeProps{},
 		Meta: PageMeta{
 			Title:  pageTitle("管理后台"),
 			Robots: "noindex,nofollow",
@@ -27,5 +23,5 @@ func Manage(c *gin.Context) {
 
 	c.Header("Vary", "X-Goose-Page, Accept")
 	c.Status(http.StatusOK)
-	renderPage(c, "manage.gohtml", payload)
+	renderPage(c, "admin.gohtml", payload)
 }

@@ -4,7 +4,7 @@
 @source "../**/*.{ts,vue}";
 @source "../../types/**/*.{ts,vue}";
 @source "../../../templates/layout/admin.gohtml";
-@source "../../../templates/pages/manage.gohtml";
+@source "../../../templates/pages/admin.gohtml";
 
 :root {
   --radius: 0.625rem;

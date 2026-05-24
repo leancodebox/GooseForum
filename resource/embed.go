@@ -43,13 +43,6 @@ func GetStaticFS() (fs.FS, error) {
 	return fs.Sub(resources, "static")
 }
 
-func GetAdminFS() (fs.FS, error) {
-	if !setting.IsProduction() {
-		return os.DirFS(filepath.Join(resourceDir(), "static", "admin", "dict")), nil
-	}
-	return fs.Sub(resources, path.Join("static", "admin", "dict"))
-}
-
 func resourceDir() string {
 	wd, err := os.Getwd()
 	if err != nil {

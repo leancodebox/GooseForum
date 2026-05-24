@@ -9,6 +9,6 @@ Sitemap: %s/rss.xml
 
 # Disallow
 Disallow: /api/
-Disallow: /admin/
+Disallow: /admin
 Disallow: /login
 Disallow: /publish

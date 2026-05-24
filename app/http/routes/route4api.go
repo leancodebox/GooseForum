@@ -18,14 +18,12 @@ import (
 func assertRouter(ginApp *gin.Engine) {
 	assetsFs, _ := resource.GetAssetsFS()
 	staticFS, _ := resource.GetStaticFS()
-	adminFs, _ := resource.GetAdminFS()
 	ginApp.Group("/").
 		Use(middleware.CacheMiddleware).
 		Use(gzip.Gzip(gzip.DefaultCompression)).
 		Use(middleware.BrowserCache).
 		StaticFS("assets", http.FS(assetsFs)).
-		StaticFS("static", http.FS(staticFS)).
-		StaticFS("admin", http.FS(adminFs))
+		StaticFS("static", http.FS(staticFS))
 }
 
 func viewRoute(ginApp *gin.Engine) {
@@ -54,8 +52,8 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/notifications", middleware.CheckLogin, forum.Notifications)
 	viewRouteApp.GET("/publish", middleware.CheckLogin, forum.Publish)
 	viewRouteApp.GET("/search", forum.Search)
-	viewRouteApp.GET("/manage", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), forum.Manage)
-	viewRouteApp.GET("/manage/*path", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), forum.Manage)
+	viewRouteApp.GET("/admin", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), forum.Manage)
+	viewRouteApp.GET("/admin/*path", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), forum.Manage)
 	viewRouteApp.GET("/login", forum.Login)
 	viewRouteApp.GET("/reset-password", forum.ResetPassword)
 

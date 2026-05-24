@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 
 function normalizePath(path: string): string {
-  const normalized = path.replace(/\/+$/, '') || '/manage'
-  return normalized.startsWith('/manage') ? normalized : '/manage'
+  const normalized = path.replace(/\/+$/, '') || '/admin'
+  return normalized.startsWith('/admin') ? normalized : '/admin'
 }
 
 export const currentAdminPath = ref(normalizePath(window.location.pathname))

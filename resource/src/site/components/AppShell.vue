@@ -308,7 +308,7 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
                   <a href="/settings" class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
                     <Settings class="h-4 w-4 text-gray-400" /> {{ t('shell.settings') }}
                   </a>
-                  <a v-if="layout.viewer.isAdmin" href="/admin/" class="flex items-center gap-2 px-3 py-1.5 text-sm text-amber-700 hover:bg-amber-50">
+                  <a v-if="layout.viewer.isAdmin" href="/admin" class="flex items-center gap-2 px-3 py-1.5 text-sm text-amber-700 hover:bg-amber-50">
                     <Shield class="h-4 w-4" /> {{ t('shell.admin') }}
                   </a>
                   <button class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50" type="button" @click="logout">

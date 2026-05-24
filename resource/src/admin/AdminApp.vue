@@ -42,15 +42,15 @@ const pageLoaders: Record<PageKey, PageLoader> = {
 }
 
 const placeholderPages: Record<string, { title: string, description: string }> = {
-  '/manage/unknown': { title: '管理页面', description: '这个管理入口还在迁移中。' },
+  '/admin/unknown': { title: '管理页面', description: '这个管理入口还在迁移中。' },
 }
 
 const settingsPages = {
-  '/manage/settings/site-info': 'site-info',
-  '/manage/settings/mail': 'mail',
-  '/manage/settings/security': 'security',
-  '/manage/settings/posting': 'posting',
-  '/manage/settings/announcement': 'announcement',
+  '/admin/settings/site-info': 'site-info',
+  '/admin/settings/mail': 'mail',
+  '/admin/settings/security': 'security',
+  '/admin/settings/posting': 'posting',
+  '/admin/settings/announcement': 'announcement',
 } as const
 
 const pageCache = new Map<PageKey, Component>()
@@ -63,23 +63,23 @@ function resolvePage(path: string): { key: PageKey, props: Record<string, unknow
   const settingsKind = settingsPages[path as keyof typeof settingsPages]
   const placeholder = placeholderPages[path]
   switch (path) {
-    case '/manage/metrics':
+    case '/admin/metrics':
       return { key: 'stats', props: {} }
-    case '/manage/users':
+    case '/admin/users':
       return { key: 'users', props: {} }
-    case '/manage/roles':
+    case '/admin/roles':
       return { key: 'roles', props: {} }
-    case '/manage/categories':
+    case '/admin/categories':
       return { key: 'categories', props: {} }
-    case '/manage/posts':
+    case '/admin/posts':
       return { key: 'posts', props: {} }
-    case '/manage/links':
+    case '/admin/links':
       return { key: 'links', props: {} }
-    case '/manage/sponsors':
+    case '/admin/sponsors':
       return { key: 'sponsors', props: {} }
-    case '/manage/badges':
+    case '/admin/badges':
       return { key: 'badges', props: {} }
-    case '/manage':
+    case '/admin':
       return { key: 'home', props: {} }
     default:
       if (settingsKind) return { key: 'settings', props: { kind: settingsKind } }
