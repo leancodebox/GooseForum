@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
-import { AlertTriangle, Bookmark, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
-import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply } from '@/runtime/api'
+import { AlertTriangle, Bookmark, Check, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
+import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateReply } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
@@ -25,6 +25,8 @@ const actingLike = ref(false)
 const actingBookmark = ref(false)
 const submitting = ref(false)
 const deletingReplyId = ref(0)
+const editingReplyId = ref(0)
+const savingEditReplyId = ref(0)
 const pendingDeleteReply = ref<ReplyPayload | null>(null)
 const replies = ref<ReplyPayload[]>([...page.props.replies])
 const replyWindowMode = ref(false)
@@ -39,6 +41,8 @@ const deleteErrorMessage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const inlineReplyErrors = reactive<Record<number, string>>({})
+const editReplyContents = reactive<Record<number, string>>({})
+const editReplyErrors = reactive<Record<number, string>>({})
 const titleEl = ref<HTMLElement | null>(null)
 const replyEditorEl = ref<HTMLTextAreaElement | null>(null)
 const replySectionEl = ref<HTMLElement | null>(null)
@@ -145,6 +149,7 @@ function resetRepliesFromProps() {
   replyBeforeCursor.value = firstReplyId(page.props.replies)
   replyAfterCursor.value = lastReplyId(page.props.replies)
   replyWindowError.value = ''
+  editingReplyId.value = 0
 }
 
 function firstReplyId(items: ReplyPayload[]) {
@@ -287,6 +292,7 @@ function buildCreatedReply(replyId: number, content: string, renderedContent: st
     replyToUserId: parentReply?.author.id,
     replyToUsername: parentReply?.author.username,
     isOwnReply: true,
+    updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
   }
 }
 
@@ -363,6 +369,7 @@ async function toggleBookmark() {
 
 function toggleReplyForm(replyId: number) {
   openReplyId.value = openReplyId.value === replyId ? null : replyId
+  editingReplyId.value = 0
   if (replyContents[replyId] === undefined) {
     replyContents[replyId] = ''
   }
@@ -377,6 +384,59 @@ function clearReplyValidation(replyId = 0) {
 
   errorMessage.value = ''
   successMessage.value = ''
+}
+
+function startEditReply(reply: ReplyPayload) {
+  openReplyId.value = null
+  editingReplyId.value = reply.id
+  editReplyContents[reply.id] = reply.content
+  editReplyErrors[reply.id] = ''
+}
+
+function cancelEditReply(replyId: number) {
+  if (savingEditReplyId.value) return
+  editingReplyId.value = 0
+  editReplyErrors[replyId] = ''
+}
+
+function clearEditReplyValidation(replyId: number) {
+  editReplyErrors[replyId] = ''
+}
+
+async function saveReplyEdit(reply: ReplyPayload) {
+  if (savingEditReplyId.value) return
+
+  const content = (editReplyContents[reply.id] || '').trim()
+  if (!content) {
+    editReplyErrors[reply.id] = '回复内容不能为空'
+    return
+  }
+  if (content === reply.content.trim()) {
+    editingReplyId.value = 0
+    editReplyErrors[reply.id] = ''
+    return
+  }
+
+  savingEditReplyId.value = reply.id
+  editReplyErrors[reply.id] = ''
+  try {
+    const updated = await updateReply(reply.id, content)
+    const index = replies.value.findIndex((item) => item.id === reply.id)
+    if (index >= 0) {
+      replies.value[index] = {
+        ...replies.value[index],
+        content: updated.content,
+        renderedContent: updated.renderedContent,
+        updatedAt: updated.updatedAt,
+      }
+    }
+    editingReplyId.value = 0
+    successMessage.value = '回复已更新。'
+  } catch (error) {
+    editReplyErrors[reply.id] = error instanceof Error ? error.message : '更新回复失败'
+  } finally {
+    savingEditReplyId.value = 0
+  }
 }
 
 async function submitReply(replyId = 0) {
@@ -441,6 +501,7 @@ async function refreshCurrentPage() {
 }
 
 function requestDeleteReply(reply: ReplyPayload) {
+  if (savingEditReplyId.value === reply.id) return
   pendingDeleteReply.value = reply
   deleteErrorMessage.value = ''
 }
@@ -452,7 +513,7 @@ function closeDeleteDialog() {
 }
 
 async function removeReply(replyId: number) {
-  if (deletingReplyId.value) return
+  if (deletingReplyId.value || savingEditReplyId.value === replyId) return
 
   deletingReplyId.value = replyId
   errorMessage.value = ''
@@ -608,6 +669,17 @@ async function removeReply(replyId: number) {
                 <button
                   v-if="reply.isOwnReply"
                   type="button"
+                  class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-500 opacity-100 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                  :disabled="savingEditReplyId === reply.id || deletingReplyId === reply.id"
+                  title="编辑"
+                  @click="startEditReply(reply)"
+                >
+                  <PencilLine class="h-3.5 w-3.5" />
+                  <span class="sr-only sm:not-sr-only">编辑</span>
+                </button>
+                <button
+                  v-if="reply.isOwnReply"
+                  type="button"
                   class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-500 opacity-100 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                   :disabled="deletingReplyId === reply.id"
                   :title="deletingReplyId === reply.id ? '删除中...' : '删除'"
@@ -622,7 +694,40 @@ async function removeReply(replyId: number) {
             <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full items-center rounded bg-gray-50 px-2 py-1 text-sm text-gray-500">
               回复 <a :href="`/u/${reply.replyToUserId}`" class="font-medium text-gray-700 hover:text-blue-600">@{{ reply.replyToUsername }}</a>
             </p>
-            <div class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
+            <div v-if="editingReplyId === reply.id" class="mt-3 rounded-lg border border-blue-100 bg-blue-50/40 p-3">
+              <div class="mb-2 flex items-center justify-between">
+                <div class="text-xs font-semibold text-blue-700">编辑自己的回复</div>
+                <button type="button" class="rounded-md p-1 text-gray-400 hover:bg-white hover:text-gray-700" @click="cancelEditReply(reply.id)">
+                  <X class="h-4 w-4" />
+                </button>
+              </div>
+              <textarea
+                v-model="editReplyContents[reply.id]"
+                class="min-h-24 w-full resize-y rounded-md border border-blue-100 bg-white p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                placeholder="修改你的回复..."
+                @input="clearEditReplyValidation(reply.id)"
+              />
+              <p v-if="editReplyErrors[reply.id]" class="mt-2 text-sm text-red-600">{{ editReplyErrors[reply.id] }}</p>
+              <div class="mt-2 flex justify-end gap-2">
+                <button type="button" class="h-8 rounded-md px-3 text-xs font-semibold text-gray-500 hover:bg-white" @click="cancelEditReply(reply.id)">取消</button>
+                <button
+                  type="button"
+                  class="inline-flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  :disabled="savingEditReplyId === reply.id"
+                  @click="saveReplyEdit(reply)"
+                >
+                  <Loader2 v-if="savingEditReplyId === reply.id" class="h-3.5 w-3.5 animate-spin" />
+                  <Check v-else class="h-3.5 w-3.5" />
+                  {{ savingEditReplyId === reply.id ? '保存中...' : '保存' }}
+                </button>
+              </div>
+            </div>
+            <template v-else>
+              <div class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
+              <div v-if="reply.updatedAt && reply.updatedAt !== reply.createdAt" class="mt-2 text-xs font-medium text-gray-400">
+                已编辑于 {{ formatDateTime(reply.updatedAt) }}
+              </div>
+            </template>
 
             <div v-if="openReplyId === reply.id" class="mt-4 border-l-2 border-blue-100 pl-3">
               <div class="mb-2 flex items-center justify-between">

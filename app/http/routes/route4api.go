@@ -114,6 +114,7 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("write-articles", UpButterReq(controllers.WriteArticles))
 	forumLoginApi.POST("article-delete", UpButterReq(controllers.DeleteArticle))
 	forumLoginApi.POST("articles-reply", UpButterReq(controllers.ArticleReply))
+	forumLoginApi.POST("articles-reply-update", UpButterReq(controllers.UpdateReply))
 	forumLoginApi.POST("articles-reply-delete", UpButterReq(controllers.DeleteReply))
 	forumLoginApi.POST("get-user-articles", UpButterReq(controllers.GetUserArticles))
 	forumLoginApi.POST("get-user-bookmarked-articles", UpButterReq(controllers.GetUserBookmarkedArticles))
@@ -145,6 +146,7 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("articles-list", UpButterReq(api.ArticlesList)).
 		POST("article-source", UpButterReq(api.ArticleSource)).
 		POST("article-edit", UpButterReq(api.EditArticle)).
+		POST("article-pin-edit", UpButterReq(api.EditArticlePin)).
 		POST("article-categories-edit", UpButterReq(api.EditArticleCategories)).
 		POST("category-list", UpButterReq(api.GetCategoryList)).
 		POST("category-save", UpButterReq(api.SaveCategory)).

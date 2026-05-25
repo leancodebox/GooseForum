@@ -88,6 +88,7 @@ export interface AdminArticle {
   viewCount: number
   replyCount: number
   likeCount: number
+  pinWeight: number
   createdAt: string
   updatedAt?: string
 }

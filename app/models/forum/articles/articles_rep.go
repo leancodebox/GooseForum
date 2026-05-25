@@ -135,11 +135,7 @@ WHERE rs.article_id = articles.id AND rs.article_category_id IN (?) AND rs.effec
 		}
 	}
 
-	if q.Sort == "new" {
-		b.Order(queryopt.Desc(pid))
-	} else {
-		b.Order(queryopt.Desc(fieldUpdatedAt))
-	}
+	applyPageSort(b, q.Sort)
 
 	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Find(&list)
 	var total int64
@@ -155,6 +151,19 @@ WHERE rs.article_id = articles.id AND rs.article_category_id IN (?) AND rs.effec
 	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, Total: total}
 }
 
+func applyPageSort(b *gorm.DB, sort string) {
+	switch sort {
+	case "hot":
+		b.Order(queryopt.Desc(fieldReplyCount)).Order(queryopt.Desc(pid))
+	case "popular":
+		b.Order(queryopt.Desc(fieldViewCount)).Order(queryopt.Desc(pid))
+	case "new":
+		b.Order(queryopt.Desc(fieldCreatedAt)).Order(queryopt.Desc(pid))
+	default:
+		b.Order(queryopt.Desc(fieldPinWeight)).Order(queryopt.Desc(fieldUpdatedAt)).Order(queryopt.Desc(pid))
+	}
+}
+
 func IncrementLike(entity Entity) int64 {
 	result := builder().Exec("UPDATE articles SET like_count = like_count+1 where id = ?", entity.Id)
 	return result.RowsAffected
@@ -168,6 +177,12 @@ func DecrementLike(entity Entity) int64 {
 func IncrementView(entity Entity) int64 {
 	result := builder().Exec("UPDATE articles SET view_count = view_count+1 where id = ?", entity.Id)
 	return result.RowsAffected
+}
+
+func UpdatePinWeight(id uint64, pinWeight int) error {
+	return builder().Where(queryopt.Eq(pid, id)).Updates(map[string]any{
+		fieldPinWeight: pinWeight,
+	}).Error
 }
 
 func IncrementReplyFast(articleId uint64, posters []Poster) error {

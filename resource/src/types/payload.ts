@@ -173,6 +173,7 @@ export interface ReplyPayload {
   replyToUserId?: number
   replyToUsername?: string
   isOwnReply: boolean
+  updatedAt?: string
 }
 
 export interface ReplyWindowPayload {
@@ -199,6 +200,7 @@ export interface TopicPayload {
   categories: Array<{ id: number; name: string; url: string; color: string }>
   replyCount: number
   viewCount: number
+  pinWeight: number
   activityText: string
   lastUpdateTime: string
 }

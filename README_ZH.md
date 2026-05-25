@@ -110,14 +110,14 @@ go build -ldflags="-w -s" .
 ### 开发模式
 
 ```bash
-# 启动所有服务（后端 + 前端 + 管理后台）
-./dev.sh
+# 后端热重载
+air
 
-# 或单独运行：
-air                         # 后端热重载
-cd resource && pnpm dev      # Vue 前端
-cd admin && pnpm dev         # React 管理后台
+# 主站和管理后台前端
+cd resource && pnpm dev
 ```
+
+当前管理后台由 `resource` Vue 应用提供，路径为 `/admin`，不需要单独启动管理端前端服务。
 
 ## 🔧 配置说明
 
@@ -150,7 +150,7 @@ path = "./storage/database/sqlite.db"
 - **Cobra** - 命令行工具
 
 ### 前端技术栈
-- **Vue 3** - 主站 UI 框架
+- **Vue 3** - 主站和管理后台 UI 框架
 - **TypeScript** - 前端类型支持
 - **Payload SPA Runtime** - 通过 `X-Goose-Page` JSON payload 实现站内导航
 - **TailwindCSS 4** - CSS 框架
@@ -158,11 +158,11 @@ path = "./storage/database/sqlite.db"
 - **Vite** - 构建工具
 
 ### 管理后台技术栈
-- **React 19** - UI 框架
-- **TypeScript** - 类型支持
-- **shadcn-admin** - 管理后台模板
-- **TanStack Query/Router** - 数据获取和路由
-- **Radix UI** - 组件库
+- **Vue 3 + TypeScript** - 位于 `resource/src/admin` 的管理后台
+- **TailwindCSS 4** - 管理后台独立样式和设计变量
+- **Reka UI / VueUse** - 必要时用于可访问性基础组件和交互工具
+- **Unovis** - 管理后台图表和统计可视化
+- **SortableJS / vuedraggable** - 运营列表拖拽排序
 
 ## 📁 项目结构
 
@@ -175,10 +175,14 @@ GooseForum/
 │   ├── models/            # GORM 模型
 │   └── service/           # 业务服务
 ├── resource/              # 前端资源
-│   ├── src/               # Vue 3 SPA 源码
+│   ├── src/
+│   │   ├── site/          # 主站 Vue 应用
+│   │   ├── admin/         # 管理后台 Vue 应用
+│   │   ├── runtime/       # 共享 payload 运行时
+│   │   ├── styles/        # 主站样式
+│   │   └── types/         # 共享前端类型
 │   ├── static/            # 静态资源
 │   └── templates/         # no-js/SEO GoHTML 模板
-├── admin/                 # React 管理后台
 ├── docs/                  # 文档
 ├── main.go               # 程序入口
 └── config.toml           # 配置文件
@@ -212,12 +216,12 @@ GooseForum/
 # 安装 Air 热重载工具
 go install github.com/cosmtrek/air@latest
 
-# 启动开发模式
+# 后端开发模式
 air
 
-# 前端开发模式
+# 主站和管理后台前端开发模式
 cd resource
-npm run dev
+pnpm dev
 ```
 
 ## 📦 部署建议
@@ -253,6 +257,10 @@ CMD ["./GooseForum", "serve"]
 ## 📚 相关文档
 
 - [配置文档](docs/configuration.md) - 详细的配置选项说明
+- [Resource 前端设计](RESOURCE_DESIGN.md)
+- [Resource UI 规范](RESOURCE_UI_SPEC.md)
+- [文章置顶方案](docs/article-pinning.md)
+- [Resource 管理后台现状](docs/admin-resource-phase1.md)
 - [English README](README.md)
 
 ## 🙏 致谢

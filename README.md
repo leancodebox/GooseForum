@@ -110,14 +110,14 @@ go build -ldflags="-w -s" .
 ### Development Mode
 
 ```bash
-# Start all services (backend + frontend + admin)
-./dev.sh
+# Backend with hot reload
+air
 
-# Or run individually:
-air                    # Backend with hot reload
-cd resource && pnpm dev    # Vue frontend
-cd admin && pnpm dev      # React admin panel
+# Public site and admin console frontend
+cd resource && pnpm dev
 ```
+
+The current admin console is served by the `resource` Vue app under `/admin`. It does not require a separate admin frontend service.
 
 ## 🔧 Configuration
 
@@ -150,7 +150,7 @@ path = "./storage/database/sqlite.db"
 - **Cobra** - CLI
 
 ### Frontend Tech Stack
-- **Vue 3** - Main UI framework
+- **Vue 3** - Public site and admin UI framework
 - **TypeScript** - Type-safe frontend code
 - **Payload SPA Runtime** - Client-side navigation via `X-Goose-Page` JSON payloads
 - **TailwindCSS 4** - CSS framework
@@ -158,11 +158,11 @@ path = "./storage/database/sqlite.db"
 - **Vite** - Build tool
 
 ### Admin Panel Tech Stack
-- **React 19** - UI framework
-- **TypeScript** - Type safety
-- **shadcn-admin** - Admin template
-- **TanStack Query/Router** - Data fetching & routing
-- **Radix UI** - Component library
+- **Vue 3 + TypeScript** - Admin UI inside `resource/src/admin`
+- **TailwindCSS 4** - Admin-scoped styling and design tokens
+- **Reka UI / VueUse** - Accessible primitives and interaction utilities where needed
+- **Unovis** - Admin charts and statistics visualization
+- **SortableJS / vuedraggable** - Drag sorting for operational lists
 
 ## 📁 Project Structure
 
@@ -175,10 +175,14 @@ GooseForum/
 │   ├── models/            # GORM models
 │   └── service/           # Business services
 ├── resource/              # Frontend resources
-│   ├── src/               # Vue 3 SPA source
+│   ├── src/
+│   │   ├── site/          # Public Vue app
+│   │   ├── admin/         # Admin Vue app
+│   │   ├── runtime/       # Shared payload runtime
+│   │   ├── styles/        # Public-site styles
+│   │   └── types/         # Shared frontend types
 │   ├── static/            # Static assets
 │   └── templates/         # No-js/SEO GoHTML templates
-├── admin/                 # React admin panel
 ├── docs/                  # Documentation
 ├── main.go               # Entry point
 └── config.toml           # Configuration
@@ -238,6 +242,10 @@ MIT License - see [LICENSE](LICENSE)
 ## 📚 Related Documentation
 
 - [Configuration Documentation](docs/configuration.md)
+- [Resource Frontend Design](RESOURCE_DESIGN.md)
+- [Resource UI Specification](RESOURCE_UI_SPEC.md)
+- [Article Pinning Design](docs/article-pinning.md)
+- [Resource Admin Current State](docs/admin-resource-phase1.md)
 - [Chinese README](README_ZH.md)
 
 ## 🙏 Acknowledgments

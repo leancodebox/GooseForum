@@ -31,7 +31,13 @@ const fieldArticleStatus = "article_status"
 const fieldProcessStatus = "process_status"
 
 // fieldReplyCount 回复量
-const fieldReplyCount = "view_count"
+const fieldReplyCount = "reply_count"
+
+// fieldViewCount 浏览量
+const fieldViewCount = "view_count"
+
+// fieldPinWeight 全站置顶权重，0 表示不置顶，数字越大越靠前
+const fieldPinWeight = "pin_weight"
 
 // fieldCreatedAt
 const fieldCreatedAt = "created_at"
@@ -53,13 +59,14 @@ type Entity struct {
 	CategoryId      []uint64       `gorm:"column:category_id;type:varchar(255);not null;default:'[]';serializer:json" json:"categoryId"` // 分类
 	UserId          uint64         `gorm:"column:user_id;type:bigint unsigned;not null;default:0;index:idx_user_status;" json:"userId"`  //
 	Posters         []Poster       `gorm:"column:posters;type:text;serializer:json" json:"posters"`
-	ArticleStatus   int8           `gorm:"column:article_status;type:tinyint;not null;default:0;index:idx_user_status;index:idx_updated_at_status" json:"articleStatus"`  // 文章状态：0 草稿 1 发布
-	ProcessStatus   int8           `gorm:"column:process_status;type:tinyint;not null;default:0;index:idx_user_status;index:idx_updated_at_status;" json:"processStatus"` // 管理状态：0 正常 1 封禁
-	LikeCount       uint64         `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`                                                   // 喜欢数量
-	ViewCount       uint64         `gorm:"column:view_count;index;type:bigint unsigned;not null;default:0;" json:"viewCount"`                                             // 访问数量
-	ReplyCount      uint64         `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;index;" json:"replyCount"`                                           // 评论数量
-	CreatedAt       time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                                                                  //
-	UpdatedAt       time.Time      `gorm:"column:updated_at;autoUpdateTime;index:idx_updated_at_status,priority:1;" json:"updatedAt"`
+	ArticleStatus   int8           `gorm:"column:article_status;type:tinyint;not null;default:0;index:idx_user_status;index:idx_updated_at_status;index:idx_pin_updated_status,priority:3;index:idx_created_status,priority:2" json:"articleStatus"`  // 文章状态：0 草稿 1 发布
+	ProcessStatus   int8           `gorm:"column:process_status;type:tinyint;not null;default:0;index:idx_user_status;index:idx_updated_at_status;index:idx_pin_updated_status,priority:4;index:idx_created_status,priority:3;" json:"processStatus"` // 管理状态：0 正常 1 封禁
+	LikeCount       uint64         `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`                                                                                                                               // 喜欢数量
+	ViewCount       uint64         `gorm:"column:view_count;index;type:bigint unsigned;not null;default:0;" json:"viewCount"`                                                                                                                         // 访问数量
+	ReplyCount      uint64         `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;index;" json:"replyCount"`                                                                                                                       // 评论数量
+	PinWeight       int            `gorm:"column:pin_weight;type:int;not null;default:0;index:idx_pin_updated_status,priority:1;" json:"pinWeight"`                                                                                                   // 全站置顶权重，0 表示不置顶
+	CreatedAt       time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;index:idx_created_status,priority:1;" json:"createdAt"`                                                                                                          //
+	UpdatedAt       time.Time      `gorm:"column:updated_at;autoUpdateTime;index:idx_updated_at_status,priority:1;index:idx_pin_updated_status,priority:2;" json:"updatedAt"`
 	DeletedAt       gorm.DeletedAt //
 }
 
@@ -103,6 +110,7 @@ type SmallEntity struct {
 	ViewCount     uint64         `gorm:"column:view_count;type:bigint unsigned;not null;default:0;" json:"viewCount"`   // 访问数量
 	ReplyCount    uint64         `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"` // 评论
 	LikeCount     uint64         `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`   // 被喜欢
+	PinWeight     int            `gorm:"column:pin_weight;type:int;not null;default:0;" json:"pinWeight"`               // 全站置顶权重，0 表示不置顶
 	CreatedAt     time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`                  //
 	UpdatedAt     time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 	DeletedAt     gorm.DeletedAt //

@@ -157,6 +157,10 @@ export function editArticle(data: { id: number, processStatus: number }) {
   return postJson<unknown>('/api/admin/article-edit', data, '保存帖子状态失败')
 }
 
+export function editArticlePin(data: { id: number, pinWeight: number }) {
+  return postJson<unknown>('/api/admin/article-pin-edit', data, '保存置顶权重失败')
+}
+
 export function editArticleCategories(data: { id: number, categoryId: number[] }) {
   return postJson<unknown>('/api/admin/article-categories-edit', data, '保存帖子分类失败')
 }

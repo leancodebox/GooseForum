@@ -24,7 +24,7 @@ import {
 } from '@/runtime/api'
 import { formatDate, formatNumber } from '@/runtime/format'
 import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message'
-import { canvasToImageFile, processImageFile, validateImageFile } from '@/runtime/image'
+import { canvasToImageFile, validateImageFile } from '@/runtime/image'
 import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
 import FlashSpriteIcon from '@/site/components/FlashSpriteIcon.vue'
 
@@ -337,8 +337,7 @@ async function uploadCroppedAvatar() {
       },
     })
     const avatarFile = await canvasToImageFile(canvas, cropSourceFile.value.name, undefined, 0.86)
-    const optimized = await processImageFile(avatarFile, 0.86)
-    avatarUrl.value = await uploadAvatar(optimized.file)
+    avatarUrl.value = await uploadAvatar(avatarFile)
     closeCropModal()
     showStatus('头像已更新')
   } catch (err) {

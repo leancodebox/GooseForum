@@ -2,9 +2,14 @@
 
 本文档为 Codex（Codex.ai/code）在本仓库工作时提供指导说明。
 
+## 工程原则
+
+- 代码以可维护为优先：改动保持简洁，命名和结构要清晰；在代码可读性、复用性之间保持平衡，不为了复用而过度抽象，也不重复堆业务逻辑。
+- 外部库选择和复杂逻辑实现以稳定、主流、可靠、契合项目为原则；优先使用已经被广泛验证且适合当前技术栈的方案，避免引入小众、维护不稳定或与项目边界不匹配的依赖。
+
 ## 项目概览
 
-GooseForum 是一个现代化论坛平台，后端使用 Go，前端包含 Vue 3 与 React 管理端。后端框架采用 Gin，数据库 ORM 使用 GORM，支持 SQLite 与 MySQL。
+GooseForum 是一个现代化论坛平台，后端使用 Go，前端和管理后台统一由 `resource/` 下的 Vue 3 应用提供。后端框架采用 Gin，数据库 ORM 使用 GORM，支持 SQLite 与 MySQL。
 
 ## 开发命令
 
@@ -14,25 +19,13 @@ GooseForum 是一个现代化论坛平台，后端使用 Go，前端包含 Vue 3
 - 当 `config.toml` 中 `[app].env = "production"` 时，使用生产构建：`cd resource && pnpm build`。
 - 如果页面样式、资源引用或模板表现异常，优先检查是否遗漏了上面的 `resource` 开发/构建步骤。
 
-### 一体化开发环境
-```bash
-./dev.sh
-```
-同时启动三个服务：
-- 后端（Go）：http://localhost:5234
-- 前端（Vue）：http://localhost:3009
-- 管理端（React）：http://localhost:5173
-
 ### 单独启动服务
 ```bash
 # 后端（热重载）
 air
 
-# 前端（Vue）
+# 前端与管理后台（Vue）
 cd resource && pnpm dev
-
-# 管理端（React）
-cd admin && pnpm dev
 ```
 
 ### 构建
@@ -44,11 +37,8 @@ go build -ldflags="-w -s" .
 goreleaser build --snapshot --clean
 goreleaser build --snapshot --clean --single-target  # 仅当前平台
 
-# 构建前端（Vue）
+# 构建前端与管理后台（Vue）
 cd resource && pnpm build
-
-# 构建管理端（React）
-cd admin && pnpm build
 ```
 
 ### 测试
@@ -82,13 +72,12 @@ cd resource && npx vitest run
 - `service/`：业务服务
 
 ### 前端目录结构（`resource/`）
-- 技术栈：Vue 3 + TypeScript + Vite
-- 使用 TailwindCSS 4、PrimeVue、Pinia、Vue Router
-- 组件位于 `src/components/`，页面位于 `src/views/`
-
-### 管理端（`admin/`）
-- 技术栈：React 19 + TypeScript + Vite
-- 使用 TailwindCSS 4、TanStack Query、TanStack Router、Radix UI
+- 技术栈：Vue 3 + TypeScript + Vite + TailwindCSS 4。
+- `src/site/`：主站前端入口、页面与组件。
+- `src/admin/`：管理后台入口、布局、页面、组件和独立样式。
+- `src/runtime/`：共享 payload runtime 与浏览器辅助逻辑。
+- `src/types/`：共享前端类型。
+- `templates/`：GoHTML 模板，用于首屏、SEO 与 no-js 降级。
 
 ## 数据库
 

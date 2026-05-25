@@ -202,6 +202,7 @@ type TopicPayload struct {
 	Title          string                 `json:"title"`
 	Description    string                 `json:"description"`
 	URL            string                 `json:"url"`
+	PinWeight      int                    `json:"pinWeight"`
 	Author         TopicAuthorPayload     `json:"author"`
 	Participants   []TopicAuthorPayload   `json:"participants"`
 	Categories     []TopicCategoryPayload `json:"categories"`
@@ -260,6 +261,7 @@ type ReplyPayload struct {
 	ReplyToUserID   uint64             `json:"replyToUserId,omitempty"`
 	ReplyToUsername string             `json:"replyToUsername,omitempty"`
 	IsOwnReply      bool               `json:"isOwnReply"`
+	UpdatedAt       string             `json:"updatedAt"`
 }
 
 type ReplyWindowPayload struct {
@@ -658,6 +660,7 @@ func buildTopicPayloads(topics []*vo.ArticlesSimpleVo) []TopicPayload {
 			Title:       topic.Title,
 			Description: topic.Description,
 			URL:         urlconfig.PostDetail(topic.Id),
+			PinWeight:   topic.PinWeight,
 			Author: TopicAuthorPayload{
 				ID:        topic.AuthorId,
 				Username:  topic.Username,
@@ -809,6 +812,7 @@ func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users
 			ReplyToUserID:   replyToUserID,
 			ReplyToUsername: replyToName,
 			IsOwnReply:      currentUserID == item.UserId,
+			UpdatedAt:       item.UpdatedAt.Format(time.DateTime),
 		}
 	})
 }

@@ -12,6 +12,7 @@ type ArticlesSimpleVo struct {
 	AuthorId       uint64     `json:"authorId,omitempty"`
 	ViewCount      uint64     `json:"viewCount"`
 	CommentCount   uint64     `json:"commentCount"`
+	PinWeight      int        `json:"pinWeight"`
 	Type           int8       `json:"type,omitempty"`
 	TypeStr        string     `json:"typeStr,omitempty"`
 	Categories     []string   `json:"categories,omitempty"`

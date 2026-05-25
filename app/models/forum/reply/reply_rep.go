@@ -9,6 +9,11 @@ func Create(entity *Entity) error {
 	return result.Error
 }
 
+func Save(entity *Entity) error {
+	result := builder().Save(entity)
+	return result.Error
+}
+
 func SaveNoUpdate(entity *Entity) error {
 	result := builder().Omit(fieldUpdatedAt).Save(entity)
 	return result.Error

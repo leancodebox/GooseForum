@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { Loader2, MessageSquare, Plus, Sparkles, UsersRound } from '@lucide/vue'
+import { Loader2, MessageSquare, Pin, Plus, Sparkles, UsersRound } from '@lucide/vue'
 import { formatNumber, timeAgo } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { topicDescription } from '@/runtime/topic-description'
@@ -20,6 +20,7 @@ const loadMoreSentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | undefined
 
 const hasTopics = computed(() => topics.value.length > 0)
+const showPinnedLabels = computed(() => page.props.sort === '' || page.props.sort === 'latest')
 
 watch(
   () => [page.props.sort, page.props.pagination.page, page.props.topics],
@@ -120,6 +121,11 @@ onBeforeUnmount(() => {
           >
             <div class="min-w-0">
               <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                <Pin
+                  v-if="showPinnedLabels && topic.pinWeight > 0"
+                  class="h-3.5 w-3.5 shrink-0 rotate-45 text-rose-500"
+                  aria-label="置顶"
+                />
                 <a :href="topic.url" class="truncate text-[15px] font-semibold leading-snug text-gray-950 group-hover:text-blue-600 sm:text-base">
                   {{ topic.title }}
                 </a>

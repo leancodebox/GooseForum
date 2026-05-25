@@ -28,6 +28,13 @@ export interface PostReplyResult {
   renderedContent: string
 }
 
+export interface UpdateReplyResult {
+  id: number
+  content: string
+  renderedContent: string
+  updatedAt: string
+}
+
 export async function postReply(articleId: number, content: string, replyId = 0): Promise<PostReplyResult | number | boolean> {
   const response = await fetch('/api/forum/articles-reply', {
     method: 'POST',
@@ -41,6 +48,20 @@ export async function postReply(articleId: number, content: string, replyId = 0)
     }),
   })
   return readApiResponse<PostReplyResult | number | boolean>(response, '回复失败')
+}
+
+export async function updateReply(replyId: number, content: string): Promise<UpdateReplyResult> {
+  const response = await fetch('/api/forum/articles-reply-update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      replyId,
+      content,
+    }),
+  })
+  return readApiResponse<UpdateReplyResult>(response, '更新回复失败')
 }
 
 export async function deleteReply(replyId: number): Promise<boolean> {

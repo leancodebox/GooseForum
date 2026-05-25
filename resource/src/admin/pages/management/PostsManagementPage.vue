@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Ban, ExternalLink, Eye, FileText, Heart, MessageSquare, RefreshCw, Search, Tags, Undo2 } from '@lucide/vue'
+import { Ban, ExternalLink, Eye, FileText, Heart, MessageSquare, Pin, RefreshCw, Search, Tags, Undo2 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { Button } from '@/admin/components/ui/button'
@@ -25,6 +25,7 @@ import {
 import {
   editArticle,
   editArticleCategories,
+  editArticlePin,
   getArticleSource,
   getArticlesList,
   getCategoryList,
@@ -52,6 +53,8 @@ const selectedCategoryIds = ref<number[]>([])
 const sourceDialogRow = ref<AdminArticle | null>(null)
 const source = ref<ArticleSource | null>(null)
 const actionRow = ref<AdminArticle | null>(null)
+const pinDialogRow = ref<AdminArticle | null>(null)
+const pinWeightInput = ref(0)
 
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
 const categoryMap = computed(() => new Map(categories.value.map(item => [item.id, item])))
@@ -134,6 +137,11 @@ function openCategoryDialog(post: AdminArticle) {
   selectedCategoryIds.value = [...(post.categoryId || [])]
 }
 
+function openPinDialog(post: AdminArticle) {
+  pinDialogRow.value = post
+  pinWeightInput.value = post.pinWeight || 0
+}
+
 function toggleCategory(id: number) {
   if (selectedCategoryIds.value.includes(id)) {
     selectedCategoryIds.value = selectedCategoryIds.value.filter(value => value !== id)
@@ -160,6 +168,22 @@ async function saveCategories() {
     adminToast.success('分类已更新')
   } catch (err) {
     adminToast.error(err, '保存分类失败')
+  } finally {
+    saving.value = false
+  }
+}
+
+async function savePinWeight() {
+  if (!pinDialogRow.value) return
+  const pinWeight = Math.max(0, Math.trunc(Number(pinWeightInput.value) || 0))
+  saving.value = true
+  try {
+    await editArticlePin({ id: pinDialogRow.value.id, pinWeight })
+    pinDialogRow.value = null
+    await loadPosts()
+    adminToast.success(pinWeight > 0 ? '置顶权重已更新' : '已取消置顶')
+  } catch (err) {
+    adminToast.error(err, '保存置顶权重失败')
   } finally {
     saving.value = false
   }
@@ -270,6 +294,7 @@ onMounted(() => {
                       {{ typeInfo(post.type).label }}
                     </span>
                     <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">封禁</Badge>
+                    <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">置顶 {{ post.pinWeight }}</Badge>
                   </div>
                   <p class="line-clamp-2 break-words text-[12px] leading-5 text-muted-foreground">
                     {{ post.description || '暂无摘要' }}
@@ -311,6 +336,9 @@ onMounted(() => {
                   </Button>
                   <Button variant="ghost" size="icon-sm" type="button" title="修改分类" @click="openCategoryDialog(post)">
                     <Tags class="size-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon-sm" type="button" :class="post.pinWeight > 0 ? 'text-primary hover:text-primary' : ''" title="置顶权重" @click="openPinDialog(post)">
+                    <Pin class="size-4" />
                   </Button>
                   <Button variant="ghost" size="icon-sm" type="button" :class="post.processStatus === 1 ? 'text-emerald-600 hover:text-emerald-700' : 'text-destructive hover:text-destructive'" :title="post.processStatus === 1 ? '恢复帖子' : '封禁帖子'" @click="actionRow = post">
                     <Undo2 v-if="post.processStatus === 1" class="size-4" />
@@ -354,6 +382,7 @@ onMounted(() => {
                           {{ typeInfo(post.type).label }}
                         </span>
                         <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">封禁</Badge>
+                        <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">置顶 {{ post.pinWeight }}</Badge>
                       </div>
                       <p class="truncate text-[12px] leading-4 text-muted-foreground">
                         {{ post.description || '暂无摘要' }}
@@ -404,6 +433,9 @@ onMounted(() => {
                       <Button variant="ghost" size="icon-sm" type="button" title="修改分类" @click="openCategoryDialog(post)">
                         <Tags class="size-4" />
                       </Button>
+                      <Button variant="ghost" size="icon-sm" type="button" :class="post.pinWeight > 0 ? 'text-primary hover:text-primary' : ''" title="置顶权重" @click="openPinDialog(post)">
+                        <Pin class="size-4" />
+                      </Button>
                       <Button variant="ghost" size="icon-sm" type="button" :class="post.processStatus === 1 ? 'text-emerald-600 hover:text-emerald-700' : 'text-destructive hover:text-destructive'" :title="post.processStatus === 1 ? '恢复帖子' : '封禁帖子'" @click="actionRow = post">
                         <Undo2 v-if="post.processStatus === 1" class="size-4" />
                         <Ban v-else class="size-4" />
@@ -442,6 +474,25 @@ onMounted(() => {
           <DialogFooter>
             <Button variant="outline" type="button" @click="categoryDialogRow = null">取消</Button>
             <Button type="button" :disabled="saving" @click="saveCategories">{{ saving ? '保存中...' : '保存分类' }}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog :open="pinDialogRow !== null" @update:open="(open) => !open && (pinDialogRow = null)">
+        <DialogContent class="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>设置全站置顶权重</DialogTitle>
+            <DialogDescription class="line-clamp-2">
+              「{{ pinDialogRow?.title }}」权重为 0 表示不置顶，数字越大越靠前。
+            </DialogDescription>
+          </DialogHeader>
+          <div class="space-y-2">
+            <Input v-model.number="pinWeightInput" type="number" min="0" max="1000000" />
+            <p class="text-xs text-muted-foreground">建议从 100 开始设置，后续可用更大的数字调整顺序。</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" type="button" @click="pinDialogRow = null">取消</Button>
+            <Button type="button" :disabled="saving" @click="savePinWeight">{{ saving ? '保存中...' : '保存' }}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

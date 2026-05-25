@@ -231,6 +231,7 @@ func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[ui
 			AvatarUrl:      avatarUrl,
 			ViewCount:      t.ViewCount,
 			CommentCount:   t.ReplyCount,
+			PinWeight:      t.PinWeight,
 			Categories:     categoryNames,
 			CategoriesId:   t.CategoryId,
 			Type:           t.Type,
@@ -238,4 +239,9 @@ func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[ui
 			Posters:        postersVo,
 		}
 	})
+}
+
+func ClearArticleListCache() {
+	articleCache.Clear()
+	articleSimpleVoCache.Clear()
 }

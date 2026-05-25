@@ -409,6 +409,7 @@ type ArticlesInfoAdminVo struct {
 	ViewCount     uint64   `json:"viewCount"`
 	ReplyCount    uint64   `json:"replyCount"`
 	LikeCount     uint64   `json:"likeCount"`
+	PinWeight     int      `json:"pinWeight"`
 	CreatedAt     string   `json:"createdAt"`
 	UpdatedAt     string   `json:"updatedAt"`
 }
@@ -460,6 +461,7 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 				ViewCount:     t.ViewCount,
 				ReplyCount:    t.ReplyCount,
 				LikeCount:     t.LikeCount,
+				PinWeight:     t.PinWeight,
 				CreatedAt:     t.CreatedAt.Format(time.DateTime),
 				UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
 			}
@@ -496,6 +498,11 @@ type EditArticleReq struct {
 	ProcessStatus int8   `json:"processStatus" validate:"oneof=0 1"` // 0正常 1封禁
 }
 
+type EditArticlePinReq struct {
+	Id        uint64 `json:"id" validate:"required"`
+	PinWeight int    `json:"pinWeight" validate:"min=0,max=1000000"`
+}
+
 type EditArticleCategoriesReq struct {
 	Id         uint64   `json:"id" validate:"required"`
 	CategoryId []uint64 `json:"categoryId" validate:"min=1,max=3"`
@@ -523,6 +530,24 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
 		fmt.Sprintf("文章%s操作:[%s]", status, article.Title))
 	searchservice.BuildSingleArticleSearchDocument(&article)
+	return component.SuccessResponse("操作成功")
+}
+
+func EditArticlePin(req component.BetterRequest[EditArticlePinReq]) component.Response {
+	article := articles.Get(req.Params.Id)
+	if article.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+	if article.PinWeight == req.Params.PinWeight {
+		return component.SuccessResponse("操作成功")
+	}
+	oldPinWeight := article.PinWeight
+	if err := articles.UpdatePinWeight(article.Id, req.Params.PinWeight); err != nil {
+		return component.FailResponse("操作失败")
+	}
+	hotdataserve.ClearArticleListCache()
+	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
+		fmt.Sprintf("文章置顶权重调整:[%s] %d -> %d", article.Title, oldPinWeight, req.Params.PinWeight))
 	return component.SuccessResponse("操作成功")
 }
 

@@ -304,6 +304,46 @@ type DeleteReplyId struct {
 	ReplyId uint64 `json:"replyId"`
 }
 
+type UpdateReplyReq struct {
+	ReplyId uint64 `json:"replyId"`
+	Content string `json:"content"`
+}
+
+func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response {
+	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
+	replyEntity := reply.Get(req.Params.ReplyId)
+	if replyEntity.Id == 0 {
+		return component.FailResponse("回复不存在")
+	}
+	if replyEntity.UserId != req.UserId {
+		return component.FailResponse("不可操作")
+	}
+
+	content := strings.TrimSpace(req.Params.Content)
+	if len(content) < postingConfig.TextControl.MinPostLength {
+		return component.FailResponse(fmt.Sprintf("评论内容长度不能少于%d位", postingConfig.TextControl.MinPostLength))
+	}
+
+	if len(content) > postingConfig.TextControl.MaxPostLength {
+		return component.FailResponse(fmt.Sprintf("评论内容长度不能超过%d位", postingConfig.TextControl.MaxPostLength))
+	}
+
+	replyEntity.Content = content
+	replyEntity.RenderedHTML = markdown2html.CommentMarkdownToHTML(content)
+	replyEntity.RenderedVersion = markdown2html.GetCommentVersion()
+
+	if err := reply.Save(&replyEntity); err != nil {
+		return component.FailResponse("更新回复失败:" + err.Error())
+	}
+
+	return component.SuccessResponse(map[string]any{
+		"id":              replyEntity.Id,
+		"content":         replyEntity.Content,
+		"renderedContent": replyEntity.RenderedHTML,
+		"updatedAt":       replyEntity.UpdatedAt.Format(time.DateTime),
+	})
+}
+
 func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response {
 	replyEntity := reply.Get(req.Params.ReplyId)
 	if replyEntity.Id == 0 {
