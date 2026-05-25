@@ -584,7 +584,7 @@ async function toggleBinding(provider: string) {
                     <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100" @click="cancelEmailEdit">取消</button>
                   </div>
                 </label>
-                <label class="block">
+                <label class="block sm:col-span-2">
                   <span class="text-sm font-medium text-gray-700">显示名称</span>
                   <input v-model="profileForm.nickname" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
                 </label>
@@ -592,7 +592,7 @@ async function toggleBinding(provider: string) {
                   <span class="text-sm font-medium text-gray-700">网站名称</span>
                   <input v-model="profileForm.websiteName" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
                 </label>
-                <label class="block sm:col-span-2">
+                <label class="block">
                   <span class="text-sm font-medium text-gray-700">个人网站</span>
                   <input v-model="profileForm.website" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" placeholder="https://example.com" />
                 </label>
