@@ -11,7 +11,6 @@ var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
 	SiteEmail:       "example@example.example",
 	FooterInfo: pageConfig.FooterInfo{
 		Primary: []pageConfig.PItem{
-			{Content: `Power by <a href="https://github.com/leancodebox/GooseForum">GooseForum</a>.`},
 			{Content: `Providing reliable tech since 2025`},
 		},
 		List: []pageConfig.FooterItem{
