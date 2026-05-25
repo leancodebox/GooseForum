@@ -27,7 +27,7 @@ func ArticleDetail(c *gin.Context) {
 		return
 	}
 	loginUser := component.GetLoginUser(c)
-	if entity.ProcessStatus != 0 && (loginUser == nil || !loginUser.IsAdmin) {
+	if !canViewArticle(&entity, loginUser.UserId, loginUser.IsAdmin) {
 		renderNotFound(c)
 		return
 	}
@@ -42,11 +42,16 @@ func ArticleDetail(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
+	if entity.ArticleStatus != 1 {
+		payload.Meta.Robots = "noindex"
+	}
 
 	c.Header("Vary", "X-Goose-Page, Accept")
 	c.Status(http.StatusOK)
 	renderPage(c, "article.gohtml", payload)
-	articles.IncrementView(entity)
+	if shouldCountArticleView(&entity) {
+		articles.IncrementView(entity)
+	}
 }
 
 type ArticleRepliesWindowReq struct {
@@ -65,6 +70,9 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 
 	articleEntity := articles.GetSimple(articleID)
 	if articleEntity.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+	if !canViewArticleSimple(&articleEntity, req.UserId, false) {
 		return component.FailResponse("文章不存在")
 	}
 
@@ -142,6 +150,30 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 		HasAfter:      hasAfter,
 		Total:         reply.CountByArticleId(articleID),
 	})
+}
+
+func canViewArticle(entity *articles.Entity, userID uint64, isAdmin bool) bool {
+	if entity.ArticleStatus != 1 {
+		return userID != 0 && userID == entity.UserId
+	}
+	if entity.ProcessStatus != 0 && !isAdmin {
+		return false
+	}
+	return true
+}
+
+func canViewArticleSimple(entity *articles.SmallEntity, userID uint64, isAdmin bool) bool {
+	if entity.ArticleStatus != 1 {
+		return userID != 0 && userID == entity.UserId
+	}
+	if entity.ProcessStatus != 0 && !isAdmin {
+		return false
+	}
+	return true
+}
+
+func shouldCountArticleView(entity *articles.Entity) bool {
+	return entity.ArticleStatus == 1 && entity.ProcessStatus == 0
 }
 
 func renderNotFound(c *gin.Context) {

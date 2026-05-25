@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 )
 
 func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
@@ -37,5 +38,35 @@ func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 	}
 	if jsonLD.Author.Name == "" {
 		t.Fatal("expected author name")
+	}
+}
+
+func TestDraftArticleCanOnlyBeViewedByAuthor(t *testing.T) {
+	draft := &articles.Entity{Id: 1, UserId: 10, ArticleStatus: 0, ProcessStatus: 0}
+
+	if !canViewArticle(draft, 10, false) {
+		t.Fatal("expected draft author to view draft article")
+	}
+	if canViewArticle(draft, 11, false) {
+		t.Fatal("expected other users to be blocked from draft article")
+	}
+	if canViewArticle(draft, 0, false) {
+		t.Fatal("expected guests to be blocked from draft article")
+	}
+}
+
+func TestDraftArticleViewIsNotCounted(t *testing.T) {
+	draft := &articles.Entity{Id: 1, UserId: 10, ArticleStatus: 0, ProcessStatus: 0}
+	published := &articles.Entity{Id: 2, UserId: 10, ArticleStatus: 1, ProcessStatus: 0}
+	blocked := &articles.Entity{Id: 3, UserId: 10, ArticleStatus: 1, ProcessStatus: 1}
+
+	if shouldCountArticleView(draft) {
+		t.Fatal("expected draft article views to be ignored")
+	}
+	if !shouldCountArticleView(published) {
+		t.Fatal("expected published normal article views to be counted")
+	}
+	if shouldCountArticleView(blocked) {
+		t.Fatal("expected blocked article views to be ignored")
 	}
 }
