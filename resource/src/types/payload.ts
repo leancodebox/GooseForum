@@ -142,6 +142,7 @@ export interface ArticlePayload {
   description: string
   url: string
   html: string
+  articleStatus: number
   author: {
     id: number
     username: string
@@ -396,6 +397,30 @@ export interface NotificationsPageProps {
   }
 }
 
+export interface DraftsPageProps {
+  total: number
+  drafts: DraftPayload[]
+  pagination: {
+    page: number
+    nextPage: number
+    hasNext: boolean
+    nextUrl: string
+  }
+}
+
+export interface DraftPayload {
+  id: number
+  title: string
+  description: string
+  editUrl: string
+  replyCount: number
+  viewCount: number
+  processStatus: number
+  updatedAt: string
+  createdAt: string
+  categories: Array<{ id: number; name: string; url: string; color: string }>
+}
+
 export interface NotificationPayload {
   id: number
   eventType: string
@@ -485,6 +510,7 @@ export interface PublishPageProps {
     content: string
     type: number
     categoryIds: number[]
+    articleStatus: number
   }
 }
 

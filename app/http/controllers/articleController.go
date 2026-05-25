@@ -82,6 +82,7 @@ func WriteArticlesOrigin(req component.BetterRequest[WriteArticlesOriginReq]) co
 	return component.SuccessResponse(map[string]any{
 		"userId":         entity.UserId,
 		"type":           entity.Type,
+		"articleStatus":  entity.ArticleStatus,
 		"articleTitle":   entity.Title,
 		"articleContent": entity.Content,
 		"categoryId":     entity.CategoryId,
@@ -89,11 +90,12 @@ func WriteArticlesOrigin(req component.BetterRequest[WriteArticlesOriginReq]) co
 }
 
 type WriteArticleReq struct {
-	Id         int64    `json:"id"`
-	Content    string   `json:"content" validate:"required"`
-	Title      string   `json:"title" validate:"required"`
-	Type       int8     `json:"type"`
-	CategoryId []uint64 `json:"categoryId" validate:"min=1,max=3"`
+	Id            int64    `json:"id"`
+	Content       string   `json:"content" validate:"required"`
+	Title         string   `json:"title" validate:"required"`
+	Type          int8     `json:"type"`
+	CategoryId    []uint64 `json:"categoryId" validate:"min=1,max=3"`
+	ArticleStatus int8     `json:"articleStatus" validate:"oneof=0 1"`
 }
 
 // WriteArticles 创建或更新文章。
@@ -151,7 +153,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		article.Type = req.Params.Type
 	}
 	article.CategoryId = req.Params.CategoryId
-	article.ArticleStatus = 1
+	article.ArticleStatus = req.Params.ArticleStatus
 	article.Content = req.Params.Content
 	article.Title = req.Params.Title
 	// 自动生成文章描述
@@ -180,18 +182,50 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 			rs := &articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: id, Effective: 1}
 			articleCategoryRs.SaveOrCreateById(rs)
 		}
-		eventbus.Publish(context.Background(), &eventhandlers.ArticleUpdatedEvent{Article: &article})
+		if article.ArticleStatus == 1 {
+			eventbus.Publish(context.Background(), &eventhandlers.ArticleUpdatedEvent{Article: &article})
+		}
 	} else {
 		articles.Create(&article)
-		userStatistics.WriteArticle(req.UserId)
+		if article.ArticleStatus == 1 {
+			userStatistics.WriteArticle(req.UserId)
+		}
 		usercardservice.Invalidate(req.UserId)
 		lo.ForEach(req.Params.CategoryId, func(item uint64, _ int) {
 			rs := articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: item, Effective: 1}
 			articleCategoryRs.SaveOrCreateById(&rs)
 		})
-		eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Article: &article})
+		if article.ArticleStatus == 1 {
+			eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Article: &article})
+		}
 	}
 	return component.SuccessResponse(article.Id)
+}
+
+type ArticleStatusReq struct {
+	Id            uint64 `json:"id" validate:"required"`
+	ArticleStatus int8   `json:"articleStatus" validate:"oneof=0 1"`
+}
+
+func UpdateArticleStatus(req component.BetterRequest[ArticleStatusReq]) component.Response {
+	article := articles.Get(req.Params.Id)
+	if article.Id == 0 {
+		return component.FailResponse("文章不存在")
+	}
+	if article.UserId != req.UserId {
+		return component.FailResponse("不可操作")
+	}
+	if article.ArticleStatus == req.Params.ArticleStatus {
+		return component.SuccessResponse(true)
+	}
+	article.ArticleStatus = req.Params.ArticleStatus
+	if err := articles.Save(&article); err != nil {
+		return component.FailResponse("保存失败")
+	}
+	if article.ArticleStatus == 1 {
+		eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Article: &article})
+	}
+	return component.SuccessResponse(true)
 }
 
 type DeleteArticleReq struct {

@@ -130,6 +130,20 @@ export async function bookmarkArticle(id: number, action: 1 | 2): Promise<boolea
   return readApiResponse<boolean>(response, '收藏失败')
 }
 
+export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Promise<boolean> {
+  const response = await fetch('/api/forum/article-status', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id,
+      articleStatus,
+    }),
+  })
+  return readApiResponse<boolean>(response, '保存文章状态失败')
+}
+
 export async function markAllNotificationsRead(): Promise<boolean> {
   const response = await fetch('/api/forum/notification/mark-all-read', {
     method: 'POST',
@@ -224,6 +238,7 @@ export interface SubmitArticleInput {
   content: string
   type: number
   categoryId: number[]
+  articleStatus: 0 | 1
 }
 
 export async function submitArticle(article: SubmitArticleInput): Promise<number> {

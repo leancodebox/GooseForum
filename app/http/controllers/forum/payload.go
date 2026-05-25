@@ -233,21 +233,22 @@ type ArticleDetailProps struct {
 }
 
 type ArticlePayload struct {
-	ID           uint64                 `json:"id"`
-	Title        string                 `json:"title"`
-	Description  string                 `json:"description"`
-	URL          string                 `json:"url"`
-	HTML         string                 `json:"html"`
-	Author       TopicAuthorPayload     `json:"author"`
-	Participants []TopicAuthorPayload   `json:"participants"`
-	Categories   []TopicCategoryPayload `json:"categories"`
-	ReplyCount   uint64                 `json:"replyCount"`
-	ViewCount    uint64                 `json:"viewCount"`
-	LikeCount    uint64                 `json:"likeCount"`
-	IsLiked      bool                   `json:"isLiked"`
-	IsBookmarked bool                   `json:"isBookmarked"`
-	CreatedAt    string                 `json:"createdAt"`
-	UpdatedAt    string                 `json:"updatedAt"`
+	ID            uint64                 `json:"id"`
+	Title         string                 `json:"title"`
+	Description   string                 `json:"description"`
+	URL           string                 `json:"url"`
+	HTML          string                 `json:"html"`
+	ArticleStatus int8                   `json:"articleStatus"`
+	Author        TopicAuthorPayload     `json:"author"`
+	Participants  []TopicAuthorPayload   `json:"participants"`
+	Categories    []TopicCategoryPayload `json:"categories"`
+	ReplyCount    uint64                 `json:"replyCount"`
+	ViewCount     uint64                 `json:"viewCount"`
+	LikeCount     uint64                 `json:"likeCount"`
+	IsLiked       bool                   `json:"isLiked"`
+	IsBookmarked  bool                   `json:"isBookmarked"`
+	CreatedAt     string                 `json:"createdAt"`
+	UpdatedAt     string                 `json:"updatedAt"`
 }
 
 type ReplyPayload struct {
@@ -394,6 +395,25 @@ type NotificationsPageProps struct {
 	Pagination    PaginationPayload     `json:"pagination"`
 }
 
+type DraftsPageProps struct {
+	Total      int64             `json:"total"`
+	Drafts     []DraftPayload    `json:"drafts"`
+	Pagination PaginationPayload `json:"pagination"`
+}
+
+type DraftPayload struct {
+	ID            uint64                 `json:"id"`
+	Title         string                 `json:"title"`
+	Description   string                 `json:"description"`
+	EditURL       string                 `json:"editUrl"`
+	ReplyCount    uint64                 `json:"replyCount"`
+	ViewCount     uint64                 `json:"viewCount"`
+	ProcessStatus int8                   `json:"processStatus"`
+	UpdatedAt     string                 `json:"updatedAt"`
+	CreatedAt     string                 `json:"createdAt"`
+	Categories    []TopicCategoryPayload `json:"categories"`
+}
+
 type NotificationPayload struct {
 	ID        uint64                                `json:"id"`
 	EventType string                                `json:"eventType"`
@@ -464,10 +484,11 @@ type PublishTypePayload struct {
 }
 
 type PublishArticlePayload struct {
-	Title       string   `json:"title"`
-	Content     string   `json:"content"`
-	Type        int8     `json:"type"`
-	CategoryIDs []uint64 `json:"categoryIds"`
+	Title         string   `json:"title"`
+	Content       string   `json:"content"`
+	Type          int8     `json:"type"`
+	CategoryIDs   []uint64 `json:"categoryIds"`
+	ArticleStatus int8     `json:"articleStatus"`
 }
 
 type SearchPageProps struct {
@@ -543,6 +564,7 @@ func buildSidebarPayload(categories []*articleCategory.Entity, activeKey string,
 		main = append(main,
 			NavItemPayload{Key: "messages", Label: "私信", Icon: "✉", URL: "/messages", Active: activeKey == "messages"},
 			NavItemPayload{Key: "notifications", Label: "通知", Icon: "🔔", URL: "/notifications", Active: activeKey == "notifications"},
+			NavItemPayload{Key: "drafts", Label: "草稿箱", Icon: "📝", URL: "/drafts", Active: activeKey == "drafts"},
 		)
 	}
 
@@ -859,21 +881,22 @@ func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[ui
 	}
 
 	return ArticlePayload{
-		ID:           entity.Id,
-		Title:        entity.Title,
-		Description:  entity.Description,
-		URL:          urlconfig.PostDetail(entity.Id),
-		HTML:         entity.RenderedHTML,
-		Author:       userPayload(entity.UserId, userMap),
-		Participants: participants,
-		Categories:   categoryPayloads(entity.CategoryId),
-		ReplyCount:   entity.ReplyCount,
-		ViewCount:    entity.ViewCount,
-		LikeCount:    entity.LikeCount,
-		IsLiked:      isLiked,
-		IsBookmarked: isBookmarked,
-		CreatedAt:    entity.CreatedAt.Format(time.DateTime),
-		UpdatedAt:    entity.UpdatedAt.Format(time.DateTime),
+		ID:            entity.Id,
+		Title:         entity.Title,
+		Description:   entity.Description,
+		URL:           urlconfig.PostDetail(entity.Id),
+		HTML:          entity.RenderedHTML,
+		ArticleStatus: entity.ArticleStatus,
+		Author:        userPayload(entity.UserId, userMap),
+		Participants:  participants,
+		Categories:    categoryPayloads(entity.CategoryId),
+		ReplyCount:    entity.ReplyCount,
+		ViewCount:     entity.ViewCount,
+		LikeCount:     entity.LikeCount,
+		IsLiked:       isLiked,
+		IsBookmarked:  isBookmarked,
+		CreatedAt:     entity.CreatedAt.Format(time.DateTime),
+		UpdatedAt:     entity.UpdatedAt.Format(time.DateTime),
 	}
 }
 
@@ -1367,6 +1390,57 @@ func buildNotificationsPageProps(c *gin.Context) NotificationsPageProps {
 	}
 }
 
+func buildDraftPayloads(entities []*articles.SmallEntity) []DraftPayload {
+	categoryMap := hotdataserve.ArticleCategoryMap()
+	items := make([]DraftPayload, 0, len(entities))
+	for _, entity := range entities {
+		if entity == nil {
+			continue
+		}
+		categories := make([]TopicCategoryPayload, 0, len(entity.CategoryId))
+		for _, categoryID := range entity.CategoryId {
+			category, ok := categoryMap[categoryID]
+			if !ok || category == nil {
+				continue
+			}
+			categories = append(categories, TopicCategoryPayload{
+				ID:    categoryID,
+				Name:  category.Category,
+				URL:   categoryURL(category),
+				Color: category.Color,
+			})
+		}
+		items = append(items, DraftPayload{
+			ID:            entity.Id,
+			Title:         entity.Title,
+			Description:   entity.Description,
+			EditURL:       urlconfig.Publish() + "?id=" + strconv.FormatUint(entity.Id, 10),
+			ReplyCount:    entity.ReplyCount,
+			ViewCount:     entity.ViewCount,
+			ProcessStatus: entity.ProcessStatus,
+			UpdatedAt:     entity.UpdatedAt.Format(time.DateTime),
+			CreatedAt:     entity.CreatedAt.Format(time.DateTime),
+			Categories:    categories,
+		})
+	}
+	return items
+}
+
+func buildDraftsPageProps(c *gin.Context) DraftsPageProps {
+	userID := component.LoginUserId(c)
+	drafts, _ := articles.GetDraftArticlesByUserId(userID, 100)
+	return DraftsPageProps{
+		Total:  int64(len(drafts)),
+		Drafts: buildDraftPayloads(drafts),
+		Pagination: PaginationPayload{
+			Page:     1,
+			NextPage: 0,
+			HasNext:  false,
+			NextURL:  "",
+		},
+	}
+}
+
 func buildNotificationPayload(notification *eventNotification.Entity) NotificationPayload {
 	payload := notification.Payload
 	item := NotificationPayload{
@@ -1483,10 +1557,11 @@ func buildPublishPageProps(c *gin.Context, articleID uint64) (PublishPageProps, 
 		return props, fmt.Errorf("article not found")
 	}
 	props.Article = PublishArticlePayload{
-		Title:       entity.Title,
-		Content:     entity.Content,
-		Type:        entity.Type,
-		CategoryIDs: entity.CategoryId,
+		Title:         entity.Title,
+		Content:       entity.Content,
+		Type:          entity.Type,
+		CategoryIDs:   entity.CategoryId,
+		ArticleStatus: entity.ArticleStatus,
 	}
 	return props, nil
 }

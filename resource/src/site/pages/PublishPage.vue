@@ -219,11 +219,34 @@ async function save() {
       content: content.value.trim(),
       type: type.value,
       categoryId: categoryIds.value,
+      articleStatus: 1,
     })
     message.value = page.props.isEditing ? '主题已更新。' : '主题已发布。'
     window.location.href = `/p/post/${id}`
   } catch (err) {
     error.value = err instanceof Error ? err.message : '保存失败'
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function saveDraft() {
+  if (!isValid.value || submitting.value) return
+  submitting.value = true
+  error.value = ''
+  message.value = ''
+  try {
+    await submitArticle({
+      id: page.props.articleId,
+      title: title.value.trim(),
+      content: content.value.trim(),
+      type: type.value,
+      categoryId: categoryIds.value,
+      articleStatus: 0,
+    })
+    window.location.href = '/drafts'
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '保存草稿失败'
   } finally {
     submitting.value = false
   }
@@ -348,6 +371,14 @@ async function save() {
 
             <div class="flex items-center justify-end gap-2 border-t border-gray-100 pt-4">
               <a href="/" class="inline-flex h-10 items-center rounded-md px-3 text-sm font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-900">取消</a>
+              <button
+                type="button"
+                class="inline-flex h-10 items-center rounded-md border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                :disabled="!isValid || submitting || uploading"
+                @click="saveDraft"
+              >
+                {{ submitting ? '保存中...' : '保存草稿' }}
+              </button>
               <button
                 type="button"
                 class="inline-flex h-10 items-center gap-1.5 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"

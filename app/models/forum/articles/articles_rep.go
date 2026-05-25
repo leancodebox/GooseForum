@@ -268,6 +268,18 @@ func GetLatestArticlesByUserId(userId uint64, limit int) ([]*SmallEntity, error)
 	return articles, err
 }
 
+func GetDraftArticlesByUserId(userId uint64, limit int) ([]*SmallEntity, error) {
+	var articles []*SmallEntity
+	b := builder()
+	b.Where(queryopt.Eq(fieldArticleStatus, 0))
+	b.Where(queryopt.Eq(fieldUserId, userId))
+	err := b.
+		Order(queryopt.Desc(fieldUpdatedAt)).
+		Limit(limit).
+		Find(&articles).Error
+	return articles, err
+}
+
 func GetUserCount(userId uint64) int64 {
 	var count int64
 	builder().Where(queryopt.Eq(fieldUserId, userId)).Where("deleted_at IS NULL").Count(&count)

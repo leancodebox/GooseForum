@@ -37,6 +37,20 @@ func Messages(c *gin.Context) {
 	renderPage(c, "messages.gohtml", payload)
 }
 
+func Drafts(c *gin.Context) {
+	payload := PagePayload{
+		Component: "drafts.index",
+		Props:     buildDraftsPageProps(c),
+		Meta:      buildSimpleMeta(c, "草稿箱"),
+		Layout:    buildLayout(c, "drafts"),
+		URL:       buildPageURL(c),
+		Version:   payloadVersion,
+	}
+	c.Header("Vary", "X-Goose-Page, Accept")
+	c.Status(http.StatusOK)
+	renderPage(c, "drafts.gohtml", payload)
+}
+
 func Settings(c *gin.Context) {
 	user, err := users.Get(component.LoginUserId(c))
 	if err != nil || user.Id == 0 {

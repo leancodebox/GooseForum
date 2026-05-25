@@ -2,6 +2,7 @@
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import {
   Bell,
+  FileText,
   Flame,
   Heart,
   Inbox,
@@ -66,6 +67,7 @@ const sidebarIconMap = {
   popular: TrendingUp,
   messages: Inbox,
   notifications: Bell,
+  drafts: FileText,
   links: Link,
   sponsors: Heart,
 } as const

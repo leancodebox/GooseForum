@@ -33,6 +33,7 @@ const (
 	PathLogin         = "/login"
 	PathRss           = "/rss.xml"
 	PathMessages      = "/messages"
+	PathDrafts        = "/drafts"
 	PathSettings      = "/settings"
 	PathNotifications = "/notifications"
 	PathActivate      = "/activate"
@@ -61,6 +62,8 @@ func Register() string { return PathRegister }
 func Login() string { return PathLogin }
 
 func Messages() string { return PathMessages }
+
+func Drafts() string { return PathDrafts }
 
 func Settings() string { return PathSettings }
 

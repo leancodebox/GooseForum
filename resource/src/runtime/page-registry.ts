@@ -9,6 +9,7 @@ export const pageLoaders = {
   'sponsors.index': () => import('@/site/pages/SponsorsPage.vue'),
   'notifications.index': () => import('@/site/pages/NotificationsPage.vue'),
   'messages.index': () => import('@/site/pages/MessagesPage.vue'),
+  'drafts.index': () => import('@/site/pages/DraftsPage.vue'),
   'settings.index': () => import('@/site/pages/SettingsPage.vue'),
   'publish.index': () => import('@/site/pages/PublishPage.vue'),
   'search.index': () => import('@/site/pages/SearchPage.vue'),
