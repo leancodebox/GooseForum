@@ -480,6 +480,8 @@ export interface SettingsPageProps {
     followerCount: number
     followingCount: number
     likeReceivedCount: number
+    likeGivenCount: number
+    collectionCount: number
     createdAt: string
   }
   tabs: Array<{ key: string; label: string; url: string; active: boolean }>

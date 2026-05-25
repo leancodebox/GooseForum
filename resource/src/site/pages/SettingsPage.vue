@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import Cropper from 'cropperjs'
 import {
+  CalendarDays,
   Camera,
   Check,
   KeyRound,
@@ -27,6 +28,7 @@ import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message
 import { canvasToImageFile, validateImageFile } from '@/runtime/image'
 import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
 import FlashSpriteIcon from '@/site/components/FlashSpriteIcon.vue'
+import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 
 const page = defineProps<{
   layout: LayoutPayload
@@ -92,7 +94,22 @@ const privacy = reactive({
 })
 
 const displayName = computed(() => profileForm.nickname || usernameForm.username)
+const profileBioText = computed(() => profileForm.bio || profileForm.signature || '这个用户还没有留下简介。')
 const hasStatus = computed(() => Boolean(status.value || error.value))
+const statsItems = computed(() => [
+  { label: '主题', value: page.props.stats.articleCount },
+  { label: '回复', value: page.props.stats.replyCount },
+  { label: '获赞', value: page.props.stats.likeReceivedCount },
+  { label: '点赞', value: page.props.stats.likeGivenCount },
+  { label: '粉丝', value: page.props.stats.followerCount },
+  { label: '关注', value: page.props.stats.followingCount },
+  { label: '收藏', value: page.props.stats.collectionCount },
+])
+const socialItems = computed(() => socialKeys.map((key) => ({
+  key,
+  label: socialLabels[key],
+  icon: socialIcons[key],
+})))
 const providers = computed(() => [
   { key: 'github', label: 'GitHub', supported: true },
   { key: 'google', label: 'Google', supported: false },
@@ -416,107 +433,110 @@ async function toggleBinding(provider: string) {
 
 <template>
     <main class="min-w-0 pb-12">
-      <header class="mb-4 border-b border-gray-200/70 pb-4">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-950">个人设置</h1>
-            <p class="mt-1 text-sm text-gray-500">管理公开资料、账号安全、隐私偏好和登录绑定。</p>
-          </div>
-          <p
-            v-if="hasStatus"
-            class="rounded-md px-3 py-1.5 text-sm font-medium"
-            :class="error ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'"
-          >
-            {{ error || status }}
-          </p>
-        </div>
-      </header>
+      <section class="mb-4 overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+        <div class="h-24 border-b border-gray-100 bg-[linear-gradient(135deg,#f8fafc_0%,#eff6ff_48%,#f8fafc_100%)]" />
+        <div class="px-4 pb-4 sm:px-5">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div class="flex min-w-0 gap-4">
+              <button
+                type="button"
+                class="group relative -mt-10 h-20 w-20 shrink-0 rounded-lg border-4 border-white bg-white shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-blue-100 sm:h-24 sm:w-24"
+                :disabled="uploadingAvatar"
+                aria-label="上传头像"
+                @click="chooseAvatar"
+              >
+                <img :src="avatarUrl" :alt="usernameForm.username" class="h-full w-full rounded object-cover transition group-hover:brightness-90" />
+                <span class="absolute inset-0 flex items-center justify-center rounded bg-gray-950/0 text-white transition group-hover:bg-gray-950/20">
+                  <Loader2 v-if="uploadingAvatar" class="h-6 w-6 animate-spin opacity-100" />
+                  <Camera v-else class="h-6 w-6 opacity-0 transition group-hover:opacity-100" />
+                </span>
+                <span class="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white shadow-sm ring-2 ring-white">
+                  <Loader2 v-if="uploadingAvatar" class="h-4 w-4 animate-spin" />
+                  <Camera v-else class="h-4 w-4" />
+                </span>
+                <input ref="avatarInput" type="file" class="hidden" accept="image/*" @change="handleAvatarChange" />
+              </button>
 
-      <div class="grid gap-3 xl:grid-cols-[240px_minmax(0,1fr)]">
-        <aside class="self-start rounded-lg border border-gray-200/70 bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)] xl:sticky xl:top-19">
-          <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
-            <img :src="avatarUrl" :alt="usernameForm.username" class="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-gray-100" />
-            <div class="min-w-0">
-              <div class="truncate font-semibold text-gray-950">{{ displayName }}</div>
-              <div class="truncate text-sm text-gray-400">@{{ usernameForm.username }}</div>
+              <div class="min-w-0 pt-3">
+                <div class="flex min-w-0 flex-wrap items-center gap-2">
+                  <h2 class="truncate text-2xl font-bold leading-tight text-gray-950">{{ displayName }}</h2>
+                  <span class="rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-blue-700">编辑中</span>
+                  <button
+                    type="button"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full outline-none transition hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-blue-100"
+                    aria-label="触发随机系统提示"
+                    title="触发彩蛋"
+                    @click="triggerAvatarFlash"
+                  >
+                    <FlashSpriteIcon type="info" class="h-6 w-6" />
+                  </button>
+                </div>
+                <p class="mt-1 text-sm font-medium text-gray-400">@{{ usernameForm.username }}</p>
+                <p class="mt-2 max-w-3xl text-sm leading-relaxed text-gray-600">{{ profileBioText }}</p>
+              </div>
+            </div>
+
+            <div class="flex shrink-0 flex-wrap items-center gap-2">
+              <button
+                type="button"
+                class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                @click="chooseAvatar"
+              >
+                <Camera class="h-4 w-4" />
+                更换头像
+              </button>
             </div>
           </div>
-          <nav class="mt-3 space-y-1">
+
+          <div class="mt-5 grid grid-cols-4 border-y border-gray-100 py-3 lg:grid-cols-7 lg:py-4">
+            <div v-for="item in statsItems" :key="item.label" class="px-1 py-1 text-center lg:px-0 lg:text-left">
+              <div class="text-lg font-bold tabular-nums text-gray-950 lg:text-xl">{{ formatNumber(item.value) }}</div>
+              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">{{ item.label }}</div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-gray-400">
+            <span class="inline-flex items-center gap-1.5"><CalendarDays class="h-3.5 w-3.5" /> 加入于 {{ formatDate(props.stats.createdAt) }}</span>
+            <span v-if="profileForm.website" class="inline-flex min-w-0 items-center gap-1.5">
+              <LinkIcon class="h-3.5 w-3.5 shrink-0" />
+              <span class="truncate">{{ profileForm.websiteName || profileForm.website }}</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <p
+        v-if="hasStatus"
+        class="mb-3 rounded-md px-3 py-2 text-sm font-medium"
+        :class="error ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'"
+      >
+        {{ error || status }}
+      </p>
+
+      <section class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+        <nav class="flex overflow-x-auto border-b border-gray-100 px-3">
             <button
               v-for="tab in props.tabs"
               :key="tab.key"
               type="button"
-              class="flex h-8 w-full items-center rounded-md px-2 text-left text-sm font-medium"
-              :class="activeTab === tab.key ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'"
+              class="inline-flex h-11 shrink-0 items-center border-b-2 px-4 text-sm font-semibold"
+              :class="activeTab === tab.key ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-900'"
               @click="setActiveTab(tab.key as TabKey)"
             >
               {{ tab.label }}
             </button>
           </nav>
-          <dl class="mt-3 space-y-1 border-t border-gray-100 pt-3 text-sm">
-            <div class="flex items-center justify-between rounded-md px-2 py-1.5">
-              <dt class="text-gray-500">主题</dt>
-              <dd class="font-semibold tabular-nums text-gray-950">{{ formatNumber(props.stats.articleCount) }}</dd>
-            </div>
-            <div class="flex items-center justify-between rounded-md px-2 py-1.5">
-              <dt class="text-gray-500">回复</dt>
-              <dd class="font-semibold tabular-nums text-gray-950">{{ formatNumber(props.stats.replyCount) }}</dd>
-            </div>
-            <div class="flex items-center justify-between rounded-md px-2 py-1.5">
-              <dt class="text-gray-500">获赞</dt>
-              <dd class="font-semibold tabular-nums text-gray-950">{{ formatNumber(props.stats.likeReceivedCount) }}</dd>
-            </div>
-            <div class="flex items-center justify-between rounded-md px-2 py-1.5">
-              <dt class="text-gray-500">关注者</dt>
-              <dd class="font-semibold tabular-nums text-gray-950">{{ formatNumber(props.stats.followerCount) }}</dd>
-            </div>
-          </dl>
-          <p class="mt-3 text-xs text-gray-400">加入于 {{ formatDate(props.stats.createdAt) }}</p>
-        </aside>
 
-        <section class="space-y-3">
-          <section v-show="activeTab === 'profile'" class="rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-            <div class="relative flex items-center gap-2 border-b border-gray-100 px-4 py-3 pr-13">
+        <div class="space-y-3">
+          <section v-show="activeTab === 'profile'">
+            <div class="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
               <UserRound class="h-4 w-4 text-gray-400" />
-              <h2 class="text-sm font-semibold text-gray-950">公开资料</h2>
-              <button
-                type="button"
-                class="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-gray-50 outline-none ring-1 ring-gray-100 transition hover:bg-blue-50 hover:ring-blue-100 focus-visible:ring-4 focus-visible:ring-blue-100"
-                aria-label="触发随机系统提示"
-                @click="triggerAvatarFlash"
-              >
-                <FlashSpriteIcon type="info" class="h-6 w-6" />
-              </button>
+              <div>
+                <h2 class="text-sm font-semibold text-gray-950">公开资料</h2>
+                <p class="mt-0.5 text-xs text-gray-400">这里的内容会展示在你的个人主页和悬停卡片中。</p>
+              </div>
             </div>
             <div class="space-y-6 p-4">
-              <div class="flex flex-col gap-4 border-b border-gray-100 pb-5 sm:flex-row sm:items-center">
-                <button
-                  type="button"
-                  class="group relative h-24 w-24 shrink-0 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-blue-100"
-                  :disabled="uploadingAvatar"
-                  aria-label="上传头像"
-                  @click="chooseAvatar"
-                >
-                  <img :src="avatarUrl" :alt="usernameForm.username" class="h-24 w-24 rounded-full object-cover ring-4 ring-gray-50 transition group-hover:brightness-90" />
-                  <span class="absolute inset-0 flex items-center justify-center rounded-full bg-gray-950/0 text-white transition group-hover:bg-gray-950/20">
-                    <Loader2 v-if="uploadingAvatar" class="h-6 w-6 animate-spin opacity-100" />
-                    <Camera v-else class="h-6 w-6 opacity-0 transition group-hover:opacity-100" />
-                  </span>
-                  <span class="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white shadow-sm ring-2 ring-white">
-                    <Loader2 v-if="uploadingAvatar" class="h-4 w-4 animate-spin" />
-                    <Camera v-else class="h-4 w-4" />
-                  </span>
-                  <input ref="avatarInput" type="file" class="hidden" accept="image/*" @change="handleAvatarChange" />
-                </button>
-                <div>
-                  <div class="text-sm font-semibold text-gray-950">头像</div>
-                  <p class="mt-1 text-sm text-gray-500">点击头像即可上传。图片会自动裁成正方形，并按浏览器能力优化为 WebP。</p>
-                  <button type="button" class="mt-3 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50" @click="chooseAvatar">
-                    上传图片
-                  </button>
-                </div>
-              </div>
-
               <div class="grid gap-4 sm:grid-cols-2">
                 <label class="block min-w-0">
                   <span class="text-sm font-medium text-gray-700">用户名</span>
@@ -593,9 +613,16 @@ async function toggleBinding(provider: string) {
                   <h3 class="text-sm font-semibold text-gray-950">社交资料</h3>
                 </div>
                 <div class="grid gap-3 sm:grid-cols-2">
-                  <label v-for="key in socialKeys" :key="key" class="block">
-                    <span class="text-sm font-medium capitalize text-gray-700">{{ key }}</span>
-                    <input v-model="profileForm.externalInformation[key].link" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                  <label v-for="item in socialItems" :key="item.key" class="block">
+                    <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <span class="inline-flex h-5 w-5 items-center justify-center text-gray-500">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path :d="item.icon.path" />
+                        </svg>
+                      </span>
+                      {{ item.label }}
+                    </span>
+                    <input v-model="profileForm.externalInformation[item.key].link" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
                   </label>
                 </div>
               </div>
@@ -607,16 +634,14 @@ async function toggleBinding(provider: string) {
                   :disabled="savingProfile"
                   @click="saveProfile"
                 >
-                  <span class="flex h-4 w-4 items-center justify-center">
-                    <Loader2 v-if="savingProfile" class="h-4 w-4 animate-spin" />
-                  </span>
+                  <Loader2 v-if="savingProfile" class="h-4 w-4 animate-spin" />
                   <span>{{ savingProfile ? '保存中' : '保存资料' }}</span>
                 </button>
               </div>
             </div>
           </section>
 
-          <section v-show="activeTab === 'account'" class="rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+          <section v-show="activeTab === 'account'" class="p-4">
             <div class="mb-4 flex items-center gap-2">
               <KeyRound class="h-4 w-4 text-gray-400" />
               <h2 class="text-sm font-semibold text-gray-950">账号安全</h2>
@@ -642,7 +667,7 @@ async function toggleBinding(provider: string) {
             </form>
           </section>
 
-          <section v-show="activeTab === 'privacy'" class="rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+          <section v-show="activeTab === 'privacy'" class="p-4">
             <div class="mb-2 flex items-center gap-2">
               <Shield class="h-4 w-4 text-gray-400" />
               <h2 class="text-sm font-semibold text-gray-950">隐私偏好</h2>
@@ -672,7 +697,7 @@ async function toggleBinding(provider: string) {
             </div>
           </section>
 
-          <section v-show="activeTab === 'binding'" class="rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+          <section v-show="activeTab === 'binding'" class="p-4">
             <div class="mb-4 flex items-center justify-between gap-3">
               <div class="flex items-center gap-2">
                 <Mail class="h-4 w-4 text-gray-400" />
@@ -733,8 +758,8 @@ async function toggleBinding(provider: string) {
               </div>
             </div>
           </section>
-        </section>
-      </div>
+        </div>
+      </section>
 
       <div v-if="cropModalOpen" class="fixed inset-0 z-[100] overflow-y-auto bg-gray-950/50 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true">
         <div class="mx-auto flex min-h-full max-w-[980px] items-center justify-center">

@@ -461,6 +461,8 @@ type SettingsStatsPayload struct {
 	FollowerCount     uint   `json:"followerCount"`
 	FollowingCount    uint   `json:"followingCount"`
 	LikeReceivedCount uint   `json:"likeReceivedCount"`
+	LikeGivenCount    uint   `json:"likeGivenCount"`
+	CollectionCount   uint   `json:"collectionCount"`
 	CreatedAt         string `json:"createdAt"`
 }
 
@@ -1527,6 +1529,8 @@ func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 			FollowerCount:     stats.FollowerCount,
 			FollowingCount:    stats.FollowingCount,
 			LikeReceivedCount: stats.LikeReceivedCount,
+			LikeGivenCount:    stats.LikeGivenCount,
+			CollectionCount:   stats.CollectionCount,
 			CreatedAt:         user.CreatedAt.Format(time.DateTime),
 		},
 		Tabs: []TabPayload{
