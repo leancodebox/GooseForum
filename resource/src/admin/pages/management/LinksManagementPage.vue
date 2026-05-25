@@ -226,12 +226,12 @@ onMounted(() => {
               >
                 <template #item="{ element: link, index: linkIndex }">
                   <article
-                    class="group relative mb-2 inline-flex w-full rounded-md border px-2.5 py-2 transition hover:border-primary/30 md:mr-2 md:w-[calc(33.333%-0.5rem)] xl:w-[calc(25%-0.5rem)] 2xl:w-[calc(20%-0.5rem)]"
-                    :class="(link.status ?? 1) === 0 && 'bg-muted/40 opacity-65'"
-                    :style="(link.status ?? 1) === 0 ? undefined : { borderColor: groupTint(group, 0.22), backgroundColor: groupTint(group, 0.045) }"
+                    class="group relative mb-2 inline-flex w-full rounded-md border bg-card px-2.5 py-2 pr-3 transition hover:border-primary/30 md:mr-2 md:w-[calc(33.333%-0.5rem)] xl:w-[calc(25%-0.5rem)] 2xl:w-[calc(20%-0.5rem)]"
+                    :class="(link.status ?? 1) === 0 && 'opacity-65'"
+                    :style="{ borderColor: groupTint(group, 0.22) }"
                   >
                     <GripVertical class="js-link-handle absolute left-1 top-1 size-3.5 cursor-grab text-muted-foreground/30 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing" />
-                    <div class="flex min-w-0 flex-1 items-center gap-2 pl-1">
+                    <div class="flex min-w-0 flex-1 items-start gap-2 pl-1">
                       <div class="relative shrink-0">
                         <img v-if="link.logoUrl" :src="link.logoUrl" class="size-8 rounded-md border border-border/70 object-cover" alt="" :class="(link.status ?? 1) === 0 && 'grayscale'" />
                         <span v-else class="grid size-8 place-items-center rounded-md border border-border/70 bg-muted text-muted-foreground">
@@ -249,20 +249,35 @@ onMounted(() => {
                         </button>
                       </div>
                       <div class="min-w-0 flex-1">
-                        <div class="flex min-w-0 items-center gap-2">
-                          <h3 class="truncate text-[13px] font-semibold group-hover:text-primary" :class="(link.status ?? 1) === 0 && 'text-muted-foreground'">{{ link.name }}</h3>
-                          <a :href="link.url" target="_blank" rel="noopener noreferrer" class="shrink-0 text-muted-foreground/40 transition-colors hover:text-primary" @click.stop>
-                            <ExternalLink class="size-3" />
-                          </a>
-                        </div>
+                        <a
+                          :href="link.url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="block truncate text-[13px] font-semibold text-foreground transition-colors hover:text-primary"
+                          :class="(link.status ?? 1) === 0 && 'text-muted-foreground'"
+                          :title="`打开 ${link.name}`"
+                          @click.stop
+                        >
+                          {{ link.name }}
+                        </a>
                         <p class="mt-0.5 truncate text-[11px] leading-4 text-muted-foreground">{{ link.desc || link.url }}</p>
                       </div>
                     </div>
-                    <div class="absolute right-1 top-1 flex opacity-0 transition-opacity group-hover:opacity-100">
-                      <Button variant="ghost" size="icon" class="size-7 rounded-md bg-background/90 shadow-sm" type="button" @click="openEditLink(groupIndex, linkIndex, link)">
+                    <div class="absolute right-1 top-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <a
+                        :href="link.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="grid size-6 place-items-center rounded-md border bg-background/95 text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-primary"
+                        title="打开链接"
+                        @click.stop
+                      >
+                        <ExternalLink class="size-3.5" />
+                      </a>
+                      <Button variant="ghost" size="icon" class="size-6 rounded-md border bg-background/95 shadow-sm" type="button" @click="openEditLink(groupIndex, linkIndex, link)">
                         <Pencil class="size-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" class="size-7 rounded-md bg-background/90 text-destructive shadow-sm hover:text-destructive" type="button" @click="deleteDialog = { type: 'link', groupIndex, linkIndex }">
+                      <Button variant="ghost" size="icon" class="size-6 rounded-md border bg-background/95 text-destructive shadow-sm hover:text-destructive" type="button" @click="deleteDialog = { type: 'link', groupIndex, linkIndex }">
                         <Trash2 class="size-3.5" />
                       </Button>
                     </div>
