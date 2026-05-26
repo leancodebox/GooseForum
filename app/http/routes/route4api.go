@@ -1,13 +1,15 @@
 package routes
 
 import (
+	"log/slog"
 	"net/http"
 
+	"github.com/gin-contrib/gzip"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/http/controllers/api"
 	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
 
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/middleware"
@@ -15,12 +17,22 @@ import (
 	"github.com/leancodebox/GooseForum/resource"
 )
 
+func gzipEnabled() bool {
+	return preferences.GetBool("server.gzip", true)
+}
+
 func assertRouter(ginApp *gin.Engine) {
 	assetsFs, _ := resource.GetAssetsFS()
 	staticFS, _ := resource.GetStaticFS()
-	ginApp.Group("/").
-		Use(middleware.CacheMiddleware).
-		Use(gzip.Gzip(gzip.DefaultCompression)).
+	staticRoute := ginApp.Group("/")
+	if gzipEnabled() {
+		staticRoute.Use(middleware.CacheMiddleware)
+		staticRoute.Use(gzip.Gzip(gzip.DefaultCompression))
+		slog.Info("static assets gzip enabled", "cache", true)
+	} else {
+		slog.Info("static assets gzip disabled", "cache", false)
+	}
+	staticRoute.
 		Use(middleware.BrowserCache).
 		StaticFS("assets", http.FS(assetsFs)).
 		StaticFS("static", http.FS(staticFS))
@@ -37,8 +49,13 @@ func viewRoute(ginApp *gin.Engine) {
 	})
 
 	viewRouteApp := ginApp.Group("")
-	viewRouteApp.Use(middleware.JWTAuth).
-		Use(gzip.Gzip(gzip.DefaultCompression))
+	viewRouteApp.Use(middleware.JWTAuth)
+	if gzipEnabled() {
+		viewRouteApp.Use(gzip.Gzip(gzip.DefaultCompression))
+		slog.Info("view gzip enabled")
+	} else {
+		slog.Info("view gzip disabled")
+	}
 
 	viewRouteApp.GET("/", forum.Home)
 	viewRouteApp.GET("/p/post/:id", forum.ArticleDetail)

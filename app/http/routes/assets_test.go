@@ -8,10 +8,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/resource"
 )
 
-func TestAssetsAreGzipped(t *testing.T) {
+func TestAssetsGzipSwitch(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	type manifestItem struct {
@@ -31,18 +32,24 @@ func TestAssetsAreGzipped(t *testing.T) {
 	}
 
 	entry := manifest["src/site/main.ts"]
-	targets := []string{entry.File}
-	targets = append(targets, entry.Css...)
+	targets := append([]string{entry.File}, entry.Css...)
 	for _, target := range targets {
 		if target == "" {
 			t.Fatal("manifest contains empty asset path")
 		}
-		assertGzipAsset(t, "/assets/"+strings.TrimPrefix(target, "/"))
+		assertAssetGzip(t, "/assets/"+strings.TrimPrefix(target, "/"), true)
+		assertAssetGzip(t, "/assets/"+strings.TrimPrefix(target, "/"), false)
 	}
 }
 
-func assertGzipAsset(t *testing.T, path string) {
+func assertAssetGzip(t *testing.T, path string, enabled bool) {
 	t.Helper()
+
+	previous := gzipEnabled()
+	preferences.Set("server.gzip", enabled)
+	t.Cleanup(func() {
+		preferences.Set("server.gzip", previous)
+	})
 
 	router := gin.New()
 	assertRouter(router)
@@ -57,8 +64,12 @@ func assertGzipAsset(t *testing.T, path string) {
 		if response.Code != http.StatusOK {
 			t.Fatalf("%s request %d status = %d, want 200", path, i+1, response.Code)
 		}
-		if got := response.Header().Get("Content-Encoding"); got != "gzip" {
+		got := response.Header().Get("Content-Encoding")
+		if enabled && got != "gzip" {
 			t.Fatalf("%s request %d Content-Encoding = %q, want gzip", path, i+1, got)
+		}
+		if !enabled && got == "gzip" {
+			t.Fatalf("%s request %d Content-Encoding = gzip, want empty", path, i+1)
 		}
 		if response.Body.Len() == 0 {
 			t.Fatalf("%s request %d body is empty", path, i+1)

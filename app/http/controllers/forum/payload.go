@@ -767,7 +767,7 @@ func buildHomeMeta(c *gin.Context) PageMeta {
 
 func buildArticleDetailProps(c *gin.Context, entity *articles.Entity) ArticleDetailProps {
 	currentUserID := component.LoginUserId(c)
-	replyEntities := reply.GetByArticleId(entity.Id)
+	replyEntities := reply.GetFirstPageByArticleId(entity.Id)
 	userIDs := []uint64{entity.UserId}
 	userIDs = append(userIDs, lo.Map(replyEntities, func(item *reply.Entity, _ int) uint64 { return item.UserId })...)
 	userMap := users.GetMapByIds(lo.Uniq(userIDs))

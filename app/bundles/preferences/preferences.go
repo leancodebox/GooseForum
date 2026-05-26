@@ -92,6 +92,10 @@ func IsSet(path string) bool {
 	return v.IsSet(path) && v.Get(path) != nil
 }
 
+func Set(path string, value any) {
+	v.Set(path, value)
+}
+
 // OpenConfigChangeEvent 开启监控配置文件⌚️
 func OpenConfigChangeEvent() {
 	v.OnConfigChange(runEvent)

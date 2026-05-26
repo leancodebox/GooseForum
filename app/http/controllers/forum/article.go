@@ -8,6 +8,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/articleviewservice"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
@@ -50,7 +51,7 @@ func ArticleDetail(c *gin.Context) {
 	c.Status(http.StatusOK)
 	renderPage(c, "article.gohtml", payload)
 	if shouldCountArticleView(&entity) {
-		articles.IncrementView(entity)
+		articleviewservice.Count(entity.Id)
 	}
 }
 

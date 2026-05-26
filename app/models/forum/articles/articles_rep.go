@@ -179,6 +179,18 @@ func IncrementView(entity Entity) int64 {
 	return result.RowsAffected
 }
 
+func IncrementViews(counts map[uint64]uint64) error {
+	for articleID, count := range counts {
+		if articleID == 0 || count == 0 {
+			continue
+		}
+		if err := builder().Exec("UPDATE articles SET view_count = view_count + ? where id = ?", count, articleID).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func UpdatePinWeight(id uint64, pinWeight int) error {
 	return builder().Where(queryopt.Eq(pid, id)).Updates(map[string]any{
 		fieldPinWeight: pinWeight,

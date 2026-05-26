@@ -19,6 +19,7 @@ type PageKey =
   | 'badges'
   | 'categories'
   | 'links'
+  | 'optRecords'
   | 'posts'
   | 'roles'
   | 'sponsors'
@@ -33,6 +34,7 @@ const pageLoaders: Record<PageKey, PageLoader> = {
   badges: () => import('./pages/management/BadgesManagementPage.vue'),
   categories: () => import('./pages/management/CategoriesManagementPage.vue'),
   links: () => import('./pages/management/LinksManagementPage.vue'),
+  optRecords: () => import('./pages/management/OptRecordsManagementPage.vue'),
   posts: () => import('./pages/management/PostsManagementPage.vue'),
   roles: () => import('./pages/management/RolesManagementPage.vue'),
   sponsors: () => import('./pages/management/SponsorsManagementPage.vue'),
@@ -77,6 +79,8 @@ function resolvePage(path: string): { key: PageKey, props: Record<string, unknow
       return { key: 'sponsors', props: {} }
     case '/admin/badges':
       return { key: 'badges', props: {} }
+    case '/admin/opt-records':
+      return { key: 'optRecords', props: {} }
     default:
       if (settingsKind) return { key: 'settings', props: { kind: settingsKind } }
       if (placeholder) {

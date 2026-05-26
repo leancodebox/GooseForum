@@ -9,7 +9,7 @@ func (receiver OptEnum) TargetTypeEnum() TargetTypeEnum {
 	case EditUser:
 		return User
 	case EditArticle:
-		return User
+		return Article
 	}
 	return System
 }

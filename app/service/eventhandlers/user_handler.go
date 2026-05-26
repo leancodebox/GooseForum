@@ -19,7 +19,7 @@ func NewUserLastActiveUpdatedHandler() cqrs.EventHandler {
 	return cqrs.NewEventHandler(
 		"UserLastActiveUpdatedHandler",
 		func(ctx context.Context, event *UserLastActiveUpdatedEvent) error {
-			userservice.UpdateUserActivity(event.UserId)
+			userservice.UpdateUserActivityAt(event.UserId, event.ActiveTime)
 			return nil
 		},
 	)

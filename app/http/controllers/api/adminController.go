@@ -742,10 +742,23 @@ func RoleDel(req component.BetterRequest[RoleSaveDel]) component.Response {
 }
 
 type OptRecordPageReq struct {
+	Page       int    `json:"page"`
+	PageSize   int    `json:"pageSize"`
+	OptUserId  uint64 `json:"optUserId"`
+	OptType    int    `json:"optType"`
+	TargetType int    `json:"targetType"`
+	TargetId   int    `json:"targetId"`
 }
 
 func OptRecordPage(req component.BetterRequest[OptRecordPageReq]) component.Response {
-	pageData := optRecord.Page(optRecord.PageQuery{})
+	pageData := optRecord.Page(optRecord.PageQuery{
+		Page:       req.Params.Page,
+		PageSize:   component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50),
+		OptUserId:  req.Params.OptUserId,
+		OptType:    req.Params.OptType,
+		TargetType: req.Params.TargetType,
+		TargetId:   req.Params.TargetId,
+	})
 	return component.SuccessPage(
 		lo.Map(pageData.Data, func(item optRecord.Entity, _ int) optRecord.Entity {
 			return item

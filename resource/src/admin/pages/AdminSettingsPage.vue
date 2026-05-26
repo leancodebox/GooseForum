@@ -10,6 +10,14 @@ import { Input } from '@/admin/components/ui/input'
 import { Textarea } from '@/admin/components/ui/textarea'
 import { Switch } from '@/admin/components/ui/switch'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/admin/components/ui/dialog'
+import {
   getAnnouncement,
   getMailSettings,
   getPostingSettings,
@@ -47,6 +55,9 @@ const error = ref('')
 const testEmail = ref('')
 const newAllowedDomain = ref('')
 const newExtension = ref('')
+const footerDialog = ref<null | { type: 'link' | 'primary', index: number }>(null)
+const footerLinkForm = reactive({ name: '', url: '' })
+const footerPrimaryForm = reactive({ content: '' })
 
 const siteForm = reactive<SiteSettings>({
   siteName: '',
@@ -305,11 +316,50 @@ function removeExtension(ext: string) {
 function addFooterPrimary() {
   siteForm.footerInfo ||= { primary: [], list: [] }
   siteForm.footerInfo.primary.push({ content: '' })
+  openFooterPrimary(siteForm.footerInfo.primary.length - 1)
 }
 
 function addFooterLink() {
   siteForm.footerInfo ||= { primary: [], list: [] }
   siteForm.footerInfo.list.push({ name: '', url: '' })
+  openFooterLink(siteForm.footerInfo.list.length - 1)
+}
+
+function openFooterLink(index: number) {
+  const item = siteForm.footerInfo?.list[index]
+  if (!item) return
+  footerLinkForm.name = item.name
+  footerLinkForm.url = item.url
+  footerDialog.value = { type: 'link', index }
+}
+
+function openFooterPrimary(index: number) {
+  const item = siteForm.footerInfo?.primary[index]
+  if (!item) return
+  footerPrimaryForm.content = item.content
+  footerDialog.value = { type: 'primary', index }
+}
+
+function saveFooterItem() {
+  if (!footerDialog.value) return
+  const { type, index } = footerDialog.value
+  if (type === 'link') {
+    const item = siteForm.footerInfo?.list[index]
+    if (item) {
+      item.name = footerLinkForm.name.trim()
+      item.url = footerLinkForm.url.trim()
+    }
+  } else {
+    const item = siteForm.footerInfo?.primary[index]
+    if (item) {
+      item.content = footerPrimaryForm.content.trim()
+    }
+  }
+  footerDialog.value = null
+}
+
+function closeFooterDialog(open: boolean) {
+  if (!open) footerDialog.value = null
 }
 
 function addAnnouncementExample() {
@@ -387,61 +437,63 @@ onMounted(load)
             <label class="grid gap-2 text-sm font-medium">站点描述<Textarea v-model="siteForm.siteDescription" class="min-h-24" /></label>
             <label class="grid gap-2 text-sm font-medium">关键词<Input v-model="siteForm.siteKeywords" placeholder="forum, community" /></label>
             <label class="grid gap-2 text-sm font-medium">外部资源链接 / Meta 标签<Textarea v-model="siteForm.externalLinks" class="min-h-28 font-mono text-xs" /></label>
-            <div class="space-y-3 border-y py-4">
-              <div class="flex items-center justify-between">
-                <div class="font-semibold">页脚内容 (Footer)</div>
+            <div class="space-y-4 border-y py-4">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div class="font-semibold">页脚内容 (Footer)</div>
+                  <p class="text-xs text-muted-foreground">这里尽量按照前台侧栏页脚的两行展示方式编辑。</p>
+                </div>
                 <div class="flex gap-2">
                   <Button variant="ghost" size="sm" type="button" @click="addFooterLink"><Plus class="size-4" />添加链接</Button>
                   <Button variant="ghost" size="sm" type="button" @click="addFooterPrimary"><Plus class="size-4" />添加文字</Button>
                 </div>
               </div>
-              <div class="space-y-3">
-                <div class="space-y-2 border-b border-border/70 pb-3">
-                  <div class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">第一行：链接</div>
+              <div class="rounded-lg border bg-background px-3 py-3 text-xs leading-5 text-muted-foreground shadow-xs">
+                <div class="space-y-1.5">
                   <Draggable
                     v-model="siteForm.footerInfo!.list"
                     item-key="name"
                     direction="horizontal"
                     handle=".js-footer-handle"
-                    class="flex min-h-9 flex-wrap items-center gap-x-3 gap-y-1.5"
+                    class="flex min-h-5 flex-wrap items-center gap-x-3 gap-y-1"
                     ghost-class="opacity-40"
                   >
                     <template #item="{ element: item, index }">
-                      <div class="group -ml-1 inline-flex items-center rounded-md px-1 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-within:bg-muted/60">
-                        <span class="js-footer-handle mr-0.5 cursor-grab text-muted-foreground/50 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
-                        <Input v-model="item.name" class="h-7 w-28 border-0 bg-transparent px-1 text-sm font-medium shadow-none focus-visible:ring-1" placeholder="名称" />
-                        <Input v-model="item.url" class="h-7 w-40 border-0 bg-transparent px-1 text-xs shadow-none focus-visible:ring-1" placeholder="URL" />
-                        <Button variant="ghost" size="icon" class="size-6 rounded-sm opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100" type="button" @click="siteForm.footerInfo?.list.splice(index, 1)">
+                      <div class="group inline-flex min-h-5 items-center rounded text-muted-foreground transition-colors hover:bg-muted/60 hover:text-primary">
+                        <span class="js-footer-handle -ml-1 mr-0.5 cursor-grab text-muted-foreground/45 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
+                        <button class="inline-flex min-h-5 items-center rounded px-0.5 text-left text-xs" type="button" @click="openFooterLink(index)">
+                          {{ item.name || '未命名链接' }}
+                        </button>
+                        <Button variant="ghost" size="icon" class="ml-0.5 size-5 rounded-sm opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100" type="button" @click="siteForm.footerInfo?.list.splice(index, 1)">
                           <Trash2 class="size-3.5" />
                         </Button>
                       </div>
                     </template>
                     <template #footer>
-                      <div v-if="siteForm.footerInfo?.list.length === 0" class="py-1 text-sm text-muted-foreground">暂无链接</div>
+                      <div v-if="siteForm.footerInfo?.list.length === 0" class="min-h-5 text-muted-foreground/70">暂无链接</div>
                     </template>
                   </Draggable>
-                </div>
 
-                <div class="space-y-2 pt-1">
-                  <div class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">第二行：文字内容</div>
                   <Draggable
                     v-model="siteForm.footerInfo!.primary"
                     item-key="content"
                     handle=".js-footer-handle"
-                    class="flex min-h-9 flex-wrap items-center gap-x-3 gap-y-1.5"
+                    class="mt-1 flex min-h-5 flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground"
                     ghost-class="opacity-40"
                   >
                     <template #item="{ element: item, index }">
-                      <div class="group -ml-1 inline-flex max-w-full items-center rounded-md px-1 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-within:bg-muted/60">
-                        <span class="js-footer-handle mr-0.5 cursor-grab text-muted-foreground/50 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
-                        <Input v-model="item.content" class="h-7 min-w-56 border-0 bg-transparent px-1 text-sm font-medium shadow-none focus-visible:ring-1" placeholder="文字内容" />
-                        <Button variant="ghost" size="icon" class="size-6 rounded-sm opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100" type="button" @click="siteForm.footerInfo?.primary.splice(index, 1)">
+                      <div class="group inline-flex min-h-5 max-w-full items-center rounded transition-colors hover:bg-muted/60">
+                        <span class="js-footer-handle -ml-1 mr-0.5 cursor-grab text-muted-foreground/45 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
+                        <button class="inline-flex min-h-5 items-center rounded px-0.5 text-left text-xs text-muted-foreground" type="button" @click="openFooterPrimary(index)">
+                          {{ item.content || '空文字内容' }}
+                        </button>
+                        <Button variant="ghost" size="icon" class="ml-0.5 size-5 rounded-sm opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100" type="button" @click="siteForm.footerInfo?.primary.splice(index, 1)">
                           <Trash2 class="size-3.5" />
                         </Button>
                       </div>
                     </template>
                     <template #footer>
-                      <div v-if="siteForm.footerInfo?.primary.length === 0" class="py-1 text-sm text-muted-foreground">暂无内容</div>
+                      <div v-if="siteForm.footerInfo?.primary.length === 0" class="min-h-5 text-muted-foreground/70">暂无内容</div>
                     </template>
                   </Draggable>
                 </div>
@@ -565,6 +617,41 @@ onMounted(load)
         </label>
         <Button variant="outline" type="button" @click="addAnnouncementExample"><Code class="size-4" />填入示例</Button>
       </form>
+
+      <Dialog v-if="kind === 'site-info'" :open="footerDialog !== null" @update:open="closeFooterDialog">
+        <DialogContent class="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{{ footerDialog?.type === 'link' ? '编辑页脚链接' : '编辑页脚文字' }}</DialogTitle>
+            <DialogDescription>
+              页脚会按前台侧栏的两行样式展示，第一行是链接，第二行是文字。
+            </DialogDescription>
+          </DialogHeader>
+          <form v-if="footerDialog?.type === 'link'" class="grid gap-4" @submit.prevent="saveFooterItem">
+            <label class="grid gap-2 text-sm font-medium">
+              链接名称
+              <Input v-model="footerLinkForm.name" placeholder="Github" />
+            </label>
+            <label class="grid gap-2 text-sm font-medium">
+              链接地址
+              <Input v-model="footerLinkForm.url" placeholder="https://example.com" />
+            </label>
+            <DialogFooter>
+              <Button variant="outline" type="button" @click="footerDialog = null">取消</Button>
+              <Button type="submit">保存</Button>
+            </DialogFooter>
+          </form>
+          <form v-else class="grid gap-4" @submit.prevent="saveFooterItem">
+            <label class="grid gap-2 text-sm font-medium">
+              文字内容
+              <Input v-model="footerPrimaryForm.content" placeholder="Powered by GooseForum" />
+            </label>
+            <DialogFooter>
+              <Button variant="outline" type="button" @click="footerDialog = null">取消</Button>
+              <Button type="submit">保存</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </BasicPage>
   </AdminLayout>
 </template>

@@ -6,6 +6,7 @@ import {
   GalleryVerticalEnd,
   Heart,
   Link,
+  ListChecks,
   Mail,
   Megaphone,
   Monitor,
@@ -64,6 +65,7 @@ const navGroups: NavGroup[] = [
       { title: '友情链接', url: '/admin/links', icon: Link },
       { title: '赞助管理', url: '/admin/sponsors', icon: Heart },
       { title: '徽章管理', url: '/admin/badges', icon: Award },
+      { title: '操作记录', url: '/admin/opt-records', icon: ListChecks },
     ],
   },
   {

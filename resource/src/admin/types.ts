@@ -26,7 +26,8 @@ export interface PageResult<T> {
   list: T[]
   total: number
   page: number
-  pageSize: number
+  pageSize?: number
+  size?: number
 }
 
 export interface AdminCategory {
@@ -91,6 +92,16 @@ export interface AdminArticle {
   pinWeight: number
   createdAt: string
   updatedAt?: string
+}
+
+export interface AdminOptRecord {
+  id: number
+  optUserId: number
+  optType: number
+  targetType: number
+  targetId: string
+  optInfo: string
+  createdAt: string
 }
 
 export interface ArticleSource extends AdminArticle {

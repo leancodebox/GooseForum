@@ -3,6 +3,7 @@ import type {
   AdminArticle,
   AdminBadge,
   AdminCategory,
+  AdminOptRecord,
   AdminRole,
   AdminUser,
   AnnouncementConfig,
@@ -147,6 +148,10 @@ export function deleteCategory(id: number) {
 
 export function getArticlesList(params: { page?: number, pageSize?: number, search?: string }) {
   return postJson<PageResult<AdminArticle>>('/api/admin/articles-list', params, '获取帖子列表失败')
+}
+
+export function getOptRecordList(params: { page?: number, pageSize?: number, optUserId?: number, optType?: number, targetType?: number, targetId?: number }) {
+  return postJson<PageResult<AdminOptRecord>>('/api/admin/opt-record-page', params, '获取操作记录失败')
 }
 
 export function getArticleSource(id: number) {
