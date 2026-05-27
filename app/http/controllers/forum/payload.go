@@ -2,9 +2,7 @@ package forum
 
 import (
 	"fmt"
-	"html"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -201,6 +199,7 @@ type TopicPayload struct {
 	ID             uint64                 `json:"id"`
 	Title          string                 `json:"title"`
 	Description    string                 `json:"description"`
+	FirstImageURL  string                 `json:"firstImageUrl,omitempty"`
 	URL            string                 `json:"url"`
 	PinWeight      int                    `json:"pinWeight"`
 	Author         TopicAuthorPayload     `json:"author"`
@@ -236,6 +235,7 @@ type ArticlePayload struct {
 	ID            uint64                 `json:"id"`
 	Title         string                 `json:"title"`
 	Description   string                 `json:"description"`
+	FirstImageURL string                 `json:"firstImageUrl,omitempty"`
 	URL           string                 `json:"url"`
 	HTML          string                 `json:"html"`
 	ArticleStatus int8                   `json:"articleStatus"`
@@ -680,11 +680,12 @@ func buildTopicPayloads(topics []*vo.ArticlesSimpleVo) []TopicPayload {
 		}
 
 		res = append(res, TopicPayload{
-			ID:          topic.Id,
-			Title:       topic.Title,
-			Description: topic.Description,
-			URL:         urlconfig.PostDetail(topic.Id),
-			PinWeight:   topic.PinWeight,
+			ID:            topic.Id,
+			Title:         topic.Title,
+			Description:   topic.Description,
+			FirstImageURL: topic.FirstImageURL,
+			URL:           urlconfig.PostDetail(topic.Id),
+			PinWeight:     topic.PinWeight,
 			Author: TopicAuthorPayload{
 				ID:        topic.AuthorId,
 				Username:  topic.Username,
@@ -886,6 +887,7 @@ func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[ui
 		ID:            entity.Id,
 		Title:         entity.Title,
 		Description:   entity.Description,
+		FirstImageURL: entity.FirstImageURL,
 		URL:           urlconfig.PostDetail(entity.Id),
 		HTML:          entity.RenderedHTML,
 		ArticleStatus: entity.ArticleStatus,
@@ -938,11 +940,13 @@ func ensureRenderedHTML(entity *articles.Entity) {
 }
 
 func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
-	canonical := component.GetBaseUri(c) + article.URL
+	baseURL := component.GetBaseUri(c)
+	canonical := baseURL + article.URL
 	description := article.Description
 	if description == "" {
 		description = "阅读 " + article.Title + "，参与 " + siteTitle() + " 的社区讨论。"
 	}
+	inlineImages := articleImageURLs(article, baseURL)
 	categoryNames := lo.Map(article.Categories, func(item TopicCategoryPayload, _ int) string { return item.Name })
 	section := ""
 	if len(categoryNames) > 0 {
@@ -964,8 +968,9 @@ func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
 		Headline:         article.Title,
 		Description:      description,
 		Text:             articlePlainText(article),
-		Author:           vo.Person{Type: "Person", Name: article.Author.Username, URL: component.GetBaseUri(c) + "/u/" + strconv.FormatUint(article.Author.ID, 10)},
-		Publisher:        vo.Organization{Type: "Organization", Name: siteTitle(), URL: component.GetBaseUri(c)},
+		Image:            inlineImages,
+		Author:           vo.Person{Type: "Person", Name: article.Author.Username, URL: baseURL + "/u/" + strconv.FormatUint(article.Author.ID, 10)},
+		Publisher:        vo.Organization{Type: "Organization", Name: siteTitle(), URL: baseURL},
 		DatePublished:    publishedTime,
 		DateModified:     modifiedTime,
 		URL:              canonical,
@@ -973,7 +978,6 @@ func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
 		ArticleSection:   section,
 		Keywords:         categoryNames,
 		CommentCount:     article.ReplyCount,
-		Comment:          articleCommentsJSONLD(c, article.ID),
 		InteractionStatistic: []vo.InteractionCounter{
 			{Type: "InteractionCounter", InteractionType: "https://schema.org/CommentAction", UserInteractionCount: article.ReplyCount},
 			{Type: "InteractionCounter", InteractionType: "https://schema.org/LikeAction", UserInteractionCount: article.LikeCount},
@@ -995,58 +999,55 @@ func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
 			Author:        article.Author.Username,
 			Section:       section,
 			Tags:          categoryNames,
+			Image:         firstString(inlineImages),
 		},
 		Twitter: &TwitterMeta{
 			Card:        "summary",
 			Title:       article.Title,
 			Description: description,
+			Image:       firstString(inlineImages),
 		},
 		JSONLD: jsonLD,
 	}
 }
 
 func articlePlainText(article ArticlePayload) string {
-	text := plainTextFromHTML(article.HTML)
-	if text == "" {
-		text = article.Description
-	}
-	return truncateSEOText(text, 5000)
+	return truncateSEOText(article.Description, 1000)
 }
 
-func articleCommentsJSONLD(c *gin.Context, articleID uint64) []vo.Comment {
-	replyEntities := reply.GetByArticleIdAsc(articleID, 10)
-	if len(replyEntities) == 0 {
-		return nil
+func articleImageURLs(article ArticlePayload, baseURL string) []string {
+	if imageURL := absolutePublicURL(article.FirstImageURL, baseURL); imageURL != "" {
+		return []string{imageURL}
 	}
+	return nil
+}
 
-	userIDs := lo.Map(replyEntities, func(item *reply.Entity, _ int) uint64 {
-		return item.UserId
-	})
-	userMap := users.GetMapByIds(lo.Uniq(userIDs))
-	baseURL := component.GetBaseUri(c)
-	comments := make([]vo.Comment, 0, len(replyEntities))
-	for _, item := range replyEntities {
-		if item == nil {
-			continue
+func absolutePublicURL(value string, baseURL string) string {
+	if value == "" || strings.HasPrefix(value, "data:") || strings.HasPrefix(value, "blob:") {
+		return ""
+	}
+	parsed, err := url.Parse(value)
+	if err != nil {
+		return ""
+	}
+	if parsed.IsAbs() {
+		if parsed.Scheme == "http" || parsed.Scheme == "https" {
+			return parsed.String()
 		}
-		author := userPayload(item.UserId, userMap)
-		comments = append(comments, vo.Comment{
-			Type:          "Comment",
-			Text:          truncateSEOText(plainTextFromHTML(item.Content), 1000),
-			Author:        vo.Person{Type: "Person", Name: author.Username, URL: baseURL + "/u/" + strconv.FormatUint(author.ID, 10)},
-			DatePublished: item.CreatedAt.Format(time.RFC3339),
-			URL:           baseURL + urlconfig.PostDetail(articleID) + "#reply-" + strconv.FormatUint(item.Id, 10),
-		})
+		return ""
 	}
-	return comments
+	base, err := url.Parse(strings.TrimRight(baseURL, "/") + "/")
+	if err != nil {
+		return ""
+	}
+	return base.ResolveReference(parsed).String()
 }
 
-var htmlTagPattern = regexp.MustCompile(`<[^>]+>`)
-
-func plainTextFromHTML(value string) string {
-	value = htmlTagPattern.ReplaceAllString(value, " ")
-	value = html.UnescapeString(value)
-	return strings.Join(strings.Fields(value), " ")
+func firstString(values []string) string {
+	if len(values) == 0 {
+		return ""
+	}
+	return values[0]
 }
 
 func truncateSEOText(value string, limit int) string {

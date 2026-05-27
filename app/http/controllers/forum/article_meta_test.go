@@ -30,14 +30,49 @@ func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected ArticleJSONLD, got %T", meta.JSONLD)
 	}
-	if jsonLD.Text != "正文内容 重点" {
-		t.Fatalf("expected text field to contain plain article body, got %q", jsonLD.Text)
+	if jsonLD.Text != "讨论描述" {
+		t.Fatalf("expected text field to use precomputed article description, got %q", jsonLD.Text)
 	}
 	if jsonLD.Type != "DiscussionForumPosting" {
 		t.Fatalf("expected DiscussionForumPosting, got %q", jsonLD.Type)
 	}
 	if jsonLD.Author.Name == "" {
 		t.Fatal("expected author name")
+	}
+}
+
+func TestArticleMetaJSONLDIncludesImageForImageOnlyArticle(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(nil)
+	c.Request = httptest.NewRequest("GET", "https://example.com/p/post/440", nil)
+
+	meta := buildArticleMeta(c, ArticlePayload{
+		ID:            440,
+		Title:         "叮叮叮～又得到一个徽章",
+		Description:   "",
+		URL:           "/p/post/440",
+		FirstImageURL: "/file/badges/earned.webp",
+		HTML:          `<p><img src="/file/badges/fallback.webp" alt="徽章"></p>`,
+		Author:        TopicAuthorPayload{ID: 1, Username: "abandon1a2b"},
+		CreatedAt:     time.Now().Format(time.DateTime),
+		UpdatedAt:     time.Now().Format(time.DateTime),
+	})
+
+	jsonLD, ok := meta.JSONLD.(vo.ArticleJSONLD)
+	if !ok {
+		t.Fatalf("expected ArticleJSONLD, got %T", meta.JSONLD)
+	}
+	if jsonLD.Text != "" {
+		t.Fatalf("expected image-only article text to be empty, got %q", jsonLD.Text)
+	}
+	if len(jsonLD.Image) != 1 || jsonLD.Image[0] != "http://localhost/file/badges/earned.webp" {
+		t.Fatalf("expected absolute inline image URL, got %#v", jsonLD.Image)
+	}
+	if meta.OpenGraph == nil || meta.OpenGraph.Image != "http://localhost/file/badges/earned.webp" {
+		t.Fatalf("expected OpenGraph image to use first inline image, got %#v", meta.OpenGraph)
+	}
+	if meta.Twitter == nil || meta.Twitter.Image != "http://localhost/file/badges/earned.webp" {
+		t.Fatalf("expected Twitter image to use first inline image, got %#v", meta.Twitter)
 	}
 }
 

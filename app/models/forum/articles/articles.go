@@ -53,6 +53,7 @@ type Entity struct {
 	Title           string         `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`                             //
 	Content         string         `gorm:"column:content;type:text;" json:"content"`                                                     //
 	Description     string         `gorm:"column:description;type:varchar(255);not null;default:'';" json:"description"`                 // 文章描述，用于SEO
+	FirstImageURL   string         `gorm:"column:first_image_url;type:varchar(512);not null;default:'';" json:"firstImageUrl"`           // 正文首图，用于SEO和分享
 	RenderedHTML    string         `gorm:"column:rendered_html;type:text;" json:"renderedHTML"`                                          //md 渲染后数据
 	RenderedVersion uint32         `gorm:"column:rendered_version;type:bigint unsigned;not null;default:0;" json:"renderedVersion"`      //md 的渲染器版本
 	Type            int8           `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`                                     // 文章类型：0 博文，1教程，2问答，3分享
@@ -101,6 +102,7 @@ type SmallEntity struct {
 	Id            uint64         `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                       //
 	Title         string         `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`                             //
 	Description   string         `gorm:"column:description;type:varchar(255);not null;default:'';" json:"description"`                 // 文章描述，用于SEO
+	FirstImageURL string         `gorm:"column:first_image_url;type:varchar(512);not null;default:'';" json:"firstImageUrl"`           // 正文首图，用于SEO和分享
 	Type          int8           `gorm:"column:type;type:tinyint;not null;default:0;" json:"type"`                                     // 文章类型：0 博文，1教程，2问答，3分享
 	CategoryId    []uint64       `gorm:"column:category_id;type:varchar(255);not null;default:'[]';serializer:json" json:"categoryId"` // 分类
 	UserId        uint64         `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`                        //

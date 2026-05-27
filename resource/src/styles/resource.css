@@ -53,6 +53,10 @@ body {
     @apply prose prose-slate max-w-none min-w-0;
   }
 
+  .gf-prose > * {
+    max-width: 100%;
+  }
+
   .gf-prose :where(p, li, blockquote, h1, h2, h3, h4, h5, h6, a, strong, em) {
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -131,6 +135,7 @@ body {
 
   .gf-prose pre {
     @apply my-3 overflow-x-auto rounded-lg border border-gray-100 bg-gray-50 p-3 text-gray-800;
+    max-width: 100%;
   }
 
   .gf-prose pre code {
@@ -146,10 +151,13 @@ body {
 
   .gf-prose table {
     @apply text-sm;
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   .gf-prose img {
-    @apply my-3 rounded-lg border border-gray-100;
+    @apply my-3 max-w-full rounded-lg border border-gray-100 object-contain;
   }
 
   .gf-prose-comment ul,

@@ -97,6 +97,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	article.Title = req.Params.Title
 	// 自动生成文章描述
 	article.Description = markdown2html.ExtractDescription(req.Params.Content, 200)
+	article.FirstImageURL = markdown2html.ExtractFirstImageURL(req.Params.Content)
 	article.RenderedVersion = markdown2html.GetVersion()
 	article.RenderedHTML = "" // 用户提交后不用渲染，避免提交时间过长。
 	if article.Id > 0 {

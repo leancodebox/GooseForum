@@ -594,7 +594,7 @@ async function removeReply(replyId: number) {
   <div>
     <article class="min-w-0 pb-12">
       <header class="mb-4 border-b border-gray-200/70 pb-4">
-        <h1 ref="titleEl" class="text-2xl font-bold leading-tight text-gray-950 sm:text-3xl">{{ page.props.article.title }}</h1>
+        <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-gray-950 [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.article.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-gray-500">
           <a
             :href="`/u/${page.props.article.author.id}`"
@@ -749,8 +749,9 @@ async function removeReply(replyId: number) {
                 <time class="hidden shrink-0 text-xs text-gray-400 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
               </div>
             </div>
-            <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full items-center rounded bg-gray-50 px-2 py-1 text-sm text-gray-500">
-              回复 <a :href="`/u/${reply.replyToUserId}`" class="font-medium text-gray-700 hover:text-blue-600">@{{ reply.replyToUsername }}</a>
+            <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-gray-50 px-2 py-1 text-sm text-gray-500">
+              <span class="shrink-0">回复</span>
+              <a :href="`/u/${reply.replyToUserId}`" class="min-w-0 truncate font-medium text-gray-700 hover:text-blue-600">@{{ reply.replyToUsername }}</a>
             </p>
             <div v-if="editingReplyId === reply.id" class="mt-3 rounded-lg border border-blue-100 bg-blue-50/40 p-3">
               <div class="mb-2 flex items-center justify-between">

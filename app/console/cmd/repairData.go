@@ -106,6 +106,7 @@ func repairArticleDescriptions() {
 			})
 			article.CategoryId = cateIds
 			article.LikeCount = cast.ToUint64(articleLike.GetArticleLikeByArticleId(article.Id))
+			article.FirstImageURL = markdown2html.ExtractFirstImageURL(article.Content)
 			articles.SaveNoUpdate(article)
 			// 如果描述为空或者很短，重新生成
 			if article.Description == "" || len(strings.TrimSpace(article.Description)) < 10 {

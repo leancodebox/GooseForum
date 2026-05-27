@@ -31,6 +31,7 @@ func runRebuildMarkdown2Html(cmd *cobra.Command, args []string) {
 			mdInfo := markdown2html.MarkdownToHTML(article.Content)
 			article.RenderedHTML = mdInfo
 			article.RenderedVersion = markdown2html.GetVersion()
+			article.FirstImageURL = markdown2html.ExtractFirstImageURL(article.Content)
 			articles.SaveNoUpdate(article)
 			fmt.Println(article.Id)
 		}

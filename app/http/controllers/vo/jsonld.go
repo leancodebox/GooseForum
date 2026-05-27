@@ -16,11 +16,12 @@ type Organization struct {
 
 // Comment represents a schema.org Comment node attached to a forum post.
 type Comment struct {
-	Type          string `json:"@type"`
-	Text          string `json:"text"`
-	Author        Person `json:"author"`
-	DatePublished string `json:"datePublished,omitempty"`
-	URL           string `json:"url,omitempty"`
+	Type          string   `json:"@type"`
+	Text          string   `json:"text,omitempty"`
+	Image         []string `json:"image,omitempty"`
+	Author        Person   `json:"author"`
+	DatePublished string   `json:"datePublished,omitempty"`
+	URL           string   `json:"url,omitempty"`
 }
 
 // InteractionCounter represents schema.org interaction statistics for an article.
@@ -37,6 +38,7 @@ type ArticleJSONLD struct {
 	Headline             string               `json:"headline"`
 	Description          string               `json:"description,omitempty"`
 	Text                 string               `json:"text,omitempty"`
+	Image                []string             `json:"image,omitempty"`
 	Author               Person               `json:"author"`
 	Publisher            Organization         `json:"publisher"`
 	DatePublished        string               `json:"datePublished"`

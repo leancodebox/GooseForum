@@ -5,6 +5,7 @@ type ArticlesSimpleVo struct {
 	Id             uint64     `json:"id"`
 	Title          string     `json:"title,omitempty"`
 	Description    string     `json:"description,omitempty"`
+	FirstImageURL  string     `json:"firstImageUrl,omitempty"`
 	Content        string     `json:"content,omitempty"`
 	CreateTime     string     `json:"createTime,omitempty"`
 	LastUpdateTime string     `json:"lastUpdateTime,omitempty"`

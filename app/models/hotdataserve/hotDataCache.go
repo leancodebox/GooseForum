@@ -211,6 +211,7 @@ func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[ui
 			Id:             t.Id,
 			Title:          t.Title,
 			Description:    t.Description,
+			FirstImageURL:  t.FirstImageURL,
 			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
 			CreateTime:     t.CreatedAt.Format(time.DateTime),
 			AuthorId:       t.UserId,

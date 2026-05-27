@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import {
   Bell,
   FileText,
@@ -20,12 +20,13 @@ import {
 } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import GlobalFlash from './GlobalFlash.vue'
-import UserHoverCard from './UserHoverCard.vue'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
 import { useNavigationState } from '@/runtime/navigation-state'
 import { useUnreadStatus } from '@/runtime/unread-status'
 import type { LayoutPayload } from '@/types/payload'
+import type { UserCardShowDetail } from '@/runtime/user-card-events'
 import UserAvatar from './UserAvatar.vue'
+import type UserHoverCardComponent from './UserHoverCard.vue'
 
 const props = defineProps<{
   layout: LayoutPayload
@@ -36,6 +37,7 @@ const props = defineProps<{
 }>()
 
 const MobileDrawer = defineAsyncComponent(() => import('./MobileDrawer.vue'))
+const UserHoverCard = shallowRef<typeof UserHoverCardComponent | null>(null)
 const drawerOpen = ref(false)
 const langMenuOpen = ref(false)
 const userMenuOpen = ref(false)
@@ -74,6 +76,7 @@ const sidebarIconMap = {
   links: Link,
   sponsors: Heart,
 } as const
+let userHoverCardLoading: Promise<void> | undefined
 
 watch(
   () => props.layout.sidebar.activeKey,
@@ -88,6 +91,11 @@ onMounted(() => {
   if (props.layout.viewer.isAuthenticated) {
     unreadStatus.startPolling(props.layout.unread)
   }
+  window.addEventListener('goose:user-card-show', ensureUserHoverCardForEvent)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('goose:user-card-show', ensureUserHoverCardForEvent)
 })
 
 watch(
@@ -139,6 +147,30 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
     if (menu === 'lang') langMenuOpen.value = false
     else userMenuOpen.value = false
   }, 120)
+}
+
+function ensureUserHoverCardForEvent(event: Event) {
+  if (UserHoverCard.value) return
+  const detail = (event as CustomEvent<UserCardShowDetail>).detail
+  if (!detail?.user?.id || !detail.target) return
+  void loadUserHoverCard().then(async () => {
+    await nextTick()
+    window.dispatchEvent(new CustomEvent<UserCardShowDetail>('goose:user-card-show', { detail }))
+  })
+}
+
+async function loadUserHoverCard() {
+  if (UserHoverCard.value) return
+  if (!userHoverCardLoading) {
+    userHoverCardLoading = import('./UserHoverCard.vue')
+      .then((module) => {
+        UserHoverCard.value = module.default
+      })
+      .finally(() => {
+        userHoverCardLoading = undefined
+      })
+  }
+  await userHoverCardLoading
 }
 </script>
 
@@ -503,6 +535,6 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
       @close="closeDrawer"
     />
 
-    <UserHoverCard />
+    <component :is="UserHoverCard" v-if="UserHoverCard" />
   </div>
 </template>

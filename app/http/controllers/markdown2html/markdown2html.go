@@ -3,6 +3,7 @@ package markdown2html
 import (
 	"bytes"
 	"log/slog"
+	"net/url"
 	"strings"
 	"unicode/utf8"
 
@@ -117,6 +118,44 @@ func setHTMLAttr(node *nethtml.Node, key, value string) {
 // GetParser returns the shared goldmark parser.
 func GetParser() goldmark.Markdown {
 	return md
+}
+
+// ExtractFirstImageURL returns the first public image destination from Markdown.
+func ExtractFirstImageURL(content string) string {
+	reader := text.NewReader([]byte(content))
+	doc := GetParser().Parser().Parse(reader)
+
+	firstImageURL := ""
+	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering || firstImageURL != "" {
+			return ast.WalkContinue, nil
+		}
+		image, ok := n.(*ast.Image)
+		if !ok {
+			return ast.WalkContinue, nil
+		}
+		imageURL := strings.TrimSpace(string(image.Destination))
+		if isPublicImageURL(imageURL) {
+			firstImageURL = imageURL
+			return ast.WalkStop, nil
+		}
+		return ast.WalkContinue, nil
+	})
+	return firstImageURL
+}
+
+func isPublicImageURL(value string) bool {
+	if value == "" || strings.HasPrefix(value, "data:") || strings.HasPrefix(value, "blob:") {
+		return false
+	}
+	parsed, err := url.Parse(value)
+	if err != nil {
+		return false
+	}
+	if parsed.IsAbs() {
+		return parsed.Scheme == "http" || parsed.Scheme == "https"
+	}
+	return strings.HasPrefix(value, "/")
 }
 
 // ExtractDescription extracts readable summary text from Markdown.
