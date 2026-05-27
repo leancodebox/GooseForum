@@ -118,23 +118,23 @@ onBeforeUnmount(() => {
           <article
             v-for="topic in topics"
             :key="topic.id"
-            class="group relative isolate grid gap-3 bg-white px-4 py-3 transition before:absolute before:inset-0 before:-z-10 before:bg-white before:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-gray-100/70 after:content-[''] last:after:hidden hover:before:bg-gray-50 lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center"
+            class="group relative isolate grid min-h-[96px] gap-3 bg-white px-4 py-3 transition before:absolute before:inset-0 before:-z-10 before:bg-white before:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-gray-100/70 after:content-[''] last:after:hidden hover:before:bg-gray-50 lg:min-h-[76px] lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center"
           >
             <div class="min-w-0">
-              <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+              <div class="flex min-h-6 min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                 <Pin
                   v-if="showPinnedLabels && topic.pinWeight > 0"
                   class="h-3.5 w-3.5 shrink-0 rotate-45 text-rose-500"
                   aria-label="置顶"
                 />
-                <a :href="topic.url" class="truncate text-[15px] font-semibold leading-snug text-gray-950 group-hover:text-blue-600 sm:text-base">
+                <a :href="topic.url" class="min-w-0 max-w-full truncate text-[15px] font-semibold leading-6 text-gray-950 group-hover:text-blue-600 sm:text-base">
                   {{ topic.title }}
                 </a>
                 <a
                   v-for="category in topic.categories"
                   :key="category.id"
                   :href="category.url"
-                  class="inline-flex h-6 items-center gap-1.5 rounded-full bg-gray-100 px-2 text-[11px] font-medium text-gray-500 hover:bg-blue-50 hover:text-blue-600"
+                  class="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full bg-gray-100 px-2 text-[11px] font-medium text-gray-500 hover:bg-blue-50 hover:text-blue-600"
                 >
                   <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
                   {{ category.name }}
@@ -143,15 +143,15 @@ onBeforeUnmount(() => {
                   <Sparkles class="h-3 w-3" /> hot
                 </span>
               </div>
-              <p class="mt-1 truncate text-[13px] leading-relaxed text-gray-500">{{ topicDescription(topic) }}</p>
-              <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 lg:hidden">
-                <div class="flex -space-x-2">
+              <p class="mt-1 min-h-5 truncate text-[13px] leading-5 text-gray-500">{{ topicDescription(topic) }}</p>
+              <div class="mt-2 flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 lg:hidden">
+                <div class="flex h-6 min-w-6 -space-x-2">
                   <a
                     v-for="participant in topic.participants"
                     :key="participant.id"
                     :href="`/u/${participant.id}`"
                     :title="participant.username"
-                    class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
+                    class="h-6 w-6 rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
                     @click="showUserCard(participant, $event)"
                   >
                     <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
@@ -164,13 +164,13 @@ onBeforeUnmount(() => {
               </div>
             </div>
             <div class="hidden justify-center lg:flex">
-              <div class="flex -space-x-3">
+              <div class="flex h-8 min-w-8 -space-x-3">
                   <a
                     v-for="participant in topic.participants"
                     :key="participant.id"
                     :href="`/u/${participant.id}`"
                     :title="participant.username"
-                    class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
+                    class="h-8 w-8 rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
                     @click="showUserCard(participant, $event)"
                   >
                     <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />

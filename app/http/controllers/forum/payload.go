@@ -987,7 +987,14 @@ func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
 }
 
 func articlePlainText(article ArticlePayload) string {
-	return truncateSEOText(article.Description, 1000)
+	text := truncateSEOText(article.Description, 1000)
+	if text != "" {
+		return text
+	}
+	if article.Title != "" {
+		return "阅读 " + article.Title + "，参与 " + siteTitle() + " 的社区讨论。"
+	}
+	return "参与 " + siteTitle() + " 的社区讨论。"
 }
 
 func articleImageURLs(article ArticlePayload, baseURL string) []string {

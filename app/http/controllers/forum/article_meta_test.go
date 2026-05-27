@@ -62,8 +62,9 @@ func TestArticleMetaJSONLDIncludesImageForImageOnlyArticle(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected ArticleJSONLD, got %T", meta.JSONLD)
 	}
-	if jsonLD.Text != "" {
-		t.Fatalf("expected image-only article text to be empty, got %q", jsonLD.Text)
+	expectedText := "阅读 叮叮叮～又得到一个徽章，参与 GooseForum 的社区讨论。"
+	if jsonLD.Text != expectedText {
+		t.Fatalf("expected image-only article text fallback, got %q", jsonLD.Text)
 	}
 	if len(jsonLD.Image) != 1 || jsonLD.Image[0] != "http://localhost/file/badges/earned.webp" {
 		t.Fatalf("expected absolute inline image URL, got %#v", jsonLD.Image)

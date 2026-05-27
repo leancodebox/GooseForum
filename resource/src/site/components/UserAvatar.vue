@@ -42,5 +42,5 @@ function formatAvatarUrl(src: string, url: URL): string {
 </script>
 
 <template>
-  <img :src="resolvedSrc" :alt="alt">
+  <img :src="resolvedSrc" :alt="alt" width="96" height="96" decoding="async">
 </template>
