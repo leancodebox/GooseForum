@@ -36,6 +36,19 @@ const props = defineProps<{
   showHeaderTitle?: boolean
 }>()
 
+interface SidebarNavItem {
+  key: string
+  label: string
+  url: string
+  active: boolean
+  icon?: string
+}
+
+interface SidebarCategoryItem extends SidebarNavItem {
+  id: number
+  color: string
+}
+
 const MobileDrawer = defineAsyncComponent(() => import('./MobileDrawer.vue'))
 const UserHoverCard = shallowRef<typeof UserHoverCardComponent | null>(null)
 const drawerOpen = ref(false)
@@ -52,9 +65,40 @@ const hasUnreadNotification = computed(() => unreadStatus.notifications.value)
 const hasUnreadMessage = computed(() => unreadStatus.messages.value)
 const notificationTitle = computed(() => unreadStatus.notificationMessage.value)
 const asArray = <T>(value: T[] | null | undefined): T[] => (Array.isArray(value) ? value : [])
-const primaryItems = computed(() => asArray(props.layout.sidebar.main))
-const resourceItems = computed(() => asArray(props.layout.sidebar.resources))
-const categoryItems = computed(() => asArray(props.layout.sidebar.categories))
+const activeSidebarKey = computed(() => props.layout.sidebar.activeKey || 'topics')
+const primaryItems = computed<SidebarNavItem[]>(() => {
+  const items: SidebarNavItem[] = [
+    sidebarItem('topics', t('shell.nav.topics'), '/'),
+    sidebarItem('hot', t('shell.nav.hot'), '/?sort=hot'),
+    sidebarItem('popular', t('shell.nav.popular'), '/?sort=popular'),
+  ]
+  if (props.layout.viewer.isAuthenticated) {
+    items.push(
+      sidebarItem('messages', t('shell.nav.messages'), '/messages'),
+      sidebarItem('notifications', t('shell.nav.notifications'), '/notifications'),
+      sidebarItem('drafts', t('shell.nav.drafts'), '/drafts'),
+    )
+  }
+  return [...items, ...serverSidebarItems(props.layout.sidebar.main)]
+})
+const resourceItems = computed<SidebarNavItem[]>(() => [
+  sidebarItem('links', t('shell.nav.links'), '/links'),
+  sidebarItem('sponsors', t('shell.nav.sponsors'), '/sponsors'),
+  ...serverSidebarItems(props.layout.sidebar.resources),
+])
+const categoryItems = computed<SidebarCategoryItem[]>(() =>
+  asArray(props.layout.sidebar.categories).map((category) => {
+    const key = `category_${category.id}`
+    return {
+      key,
+      id: category.id,
+      label: category.label,
+      url: category.url,
+      color: category.color,
+      active: activeSidebarKey.value === key,
+    }
+  }),
+)
 const headerResourceItems = computed(() =>
   ['sponsors', 'links']
     .map((key) => resourceItems.value.find((item) => item.key === key))
@@ -128,6 +172,25 @@ async function logout() {
 
 function sidebarIcon(key: string) {
   return sidebarIconMap[key as keyof typeof sidebarIconMap]
+}
+
+function sidebarItem(key: string, label: string, url: string): SidebarNavItem {
+  return {
+    key,
+    label,
+    url,
+    active: activeSidebarKey.value === key,
+  }
+}
+
+function serverSidebarItems(items: typeof props.layout.sidebar.main): SidebarNavItem[] {
+  return asArray(items).map((item) => ({
+    key: item.key,
+    label: item.label,
+    url: item.url,
+    icon: item.icon,
+    active: activeSidebarKey.value === item.key,
+  }))
 }
 
 function scrollToTop() {
@@ -437,7 +500,7 @@ async function loadUserHoverCard() {
                   class="h-4 w-4 shrink-0"
                   aria-hidden="true"
                 />
-                <span v-else class="flex w-4 justify-center text-[13px] opacity-80" aria-hidden="true">{{ item.icon }}</span>
+                <span v-else-if="item.icon" class="flex w-4 justify-center text-[13px] opacity-80" aria-hidden="true">{{ item.icon }}</span>
                 <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
                 <span
                   v-if="(item.key === 'messages' && hasUnreadMessage) || (item.key === 'notifications' && hasUnreadNotification)"
@@ -463,7 +526,7 @@ async function loadUserHoverCard() {
                     class="h-4 w-4 shrink-0"
                     aria-hidden="true"
                   />
-                  <span v-else class="flex w-4 justify-center text-[13px] opacity-80" aria-hidden="true">{{ item.icon }}</span>
+                  <span v-else-if="item.icon" class="flex w-4 justify-center text-[13px] opacity-80" aria-hidden="true">{{ item.icon }}</span>
                   <span class="truncate">{{ item.label }}</span>
                 </a>
               </div>

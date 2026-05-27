@@ -24,6 +24,16 @@ export default {
     register: '注册',
     resources: 'Resources',
     categories: 'Categories',
+    nav: {
+      topics: '主题',
+      hot: '热门',
+      popular: '流行',
+      messages: '私信',
+      notifications: '通知',
+      drafts: '草稿箱',
+      links: '链接',
+      sponsors: '赞助',
+    },
   },
   locale: {
     zh: '简体中文',

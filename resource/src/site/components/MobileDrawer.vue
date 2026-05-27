@@ -3,13 +3,26 @@ import { computed } from 'vue'
 import { AnimatePresence, Motion } from 'motion-v'
 import { X } from '@lucide/vue'
 import { mobileDrawerMotion, motionTransitions, overlayMotion } from '@/runtime/motion'
-import type { CategoryNavPayload, FooterPayload, NavItemPayload } from '@/types/payload'
+import type { FooterPayload } from '@/types/payload'
+
+interface SidebarNavItem {
+  key: string
+  label: string
+  url: string
+  active: boolean
+  icon?: string
+}
+
+interface SidebarCategoryItem extends SidebarNavItem {
+  id: number
+  color: string
+}
 
 const props = defineProps<{
   open: boolean
-  primaryItems: NavItemPayload[]
-  resourceItems: NavItemPayload[]
-  categoryItems: CategoryNavPayload[]
+  primaryItems: SidebarNavItem[]
+  resourceItems: SidebarNavItem[]
+  categoryItems: SidebarCategoryItem[]
   footer: FooterPayload
   hasUnreadMessages?: boolean
   hasUnreadNotifications?: boolean
@@ -67,7 +80,7 @@ function close() {
               class="h-4 w-4 shrink-0"
               aria-hidden="true"
             />
-            <span v-else class="flex w-4 justify-center opacity-80" aria-hidden="true">{{ item.icon }}</span>
+            <span v-else-if="item.icon" class="flex w-4 justify-center opacity-80" aria-hidden="true">{{ item.icon }}</span>
             <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
             <span
               v-if="(item.key === 'messages' && hasUnreadMessages) || (item.key === 'notifications' && hasUnreadNotifications)"

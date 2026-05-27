@@ -24,6 +24,16 @@ export default {
     register: '登録',
     resources: 'Resources',
     categories: 'Categories',
+    nav: {
+      topics: 'トピック',
+      hot: '人気',
+      popular: '注目',
+      messages: 'メッセージ',
+      notifications: '通知',
+      drafts: '下書き',
+      links: 'リンク',
+      sponsors: 'スポンサー',
+    },
   },
   locale: {
     zh: '简体中文',

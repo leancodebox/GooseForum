@@ -143,22 +143,22 @@ type ViewerPayload struct {
 }
 
 type NavItemPayload struct {
-	Key    string `json:"key"`
-	Label  string `json:"label"`
-	Icon   string `json:"icon"`
-	URL    string `json:"url"`
-	Active bool   `json:"active"`
+	Key   string `json:"key"`
+	Label string `json:"label"`
+	Icon  string `json:"icon,omitempty"`
+	URL   string `json:"url"`
 }
 
 type CategoryNavPayload struct {
-	NavItemPayload
 	ID    uint64 `json:"id"`
+	Label string `json:"label"`
+	URL   string `json:"url"`
 	Color string `json:"color"`
 }
 
 type SidebarPayload struct {
-	Main       []NavItemPayload     `json:"main"`
-	Resources  []NavItemPayload     `json:"resources"`
+	Main       []NavItemPayload     `json:"main,omitempty"`
+	Resources  []NavItemPayload     `json:"resources,omitempty"`
 	Categories []CategoryNavPayload `json:"categories"`
 	ActiveKey  string               `json:"activeKey"`
 }
@@ -537,7 +537,6 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 		Sidebar: buildSidebarPayload(
 			hotdataserve.GetArticleCategory(),
 			activeKey,
-			viewer.IsAuthenticated,
 		),
 		Footer: FooterPayload{
 			Links:   siteConfig.FooterInfo.List,
@@ -556,45 +555,21 @@ func buildUnreadStatus(userID uint64) UnreadStatusPayload {
 	}
 }
 
-func buildSidebarPayload(categories []*articleCategory.Entity, activeKey string, isLoggedIn bool) SidebarPayload {
-	main := []NavItemPayload{
-		{Key: "topics", Label: "主题", Icon: "💬", URL: "/", Active: activeKey == "topics"},
-		{Key: "hot", Label: "热门", Icon: "🔥", URL: "/?sort=hot", Active: activeKey == "hot"},
-		{Key: "popular", Label: "流行", Icon: "📈", URL: "/?sort=popular", Active: activeKey == "popular"},
-	}
-	if isLoggedIn {
-		main = append(main,
-			NavItemPayload{Key: "messages", Label: "私信", Icon: "✉", URL: "/messages", Active: activeKey == "messages"},
-			NavItemPayload{Key: "notifications", Label: "通知", Icon: "🔔", URL: "/notifications", Active: activeKey == "notifications"},
-			NavItemPayload{Key: "drafts", Label: "草稿箱", Icon: "📝", URL: "/drafts", Active: activeKey == "drafts"},
-		)
-	}
-
+func buildSidebarPayload(categories []*articleCategory.Entity, activeKey string) SidebarPayload {
 	categoryItems := make([]CategoryNavPayload, 0, len(categories))
 	for _, category := range categories {
 		if category == nil {
 			continue
 		}
-		key := "category_" + strconv.FormatUint(category.Id, 10)
 		categoryItems = append(categoryItems, CategoryNavPayload{
-			NavItemPayload: NavItemPayload{
-				Key:    key,
-				Label:  category.Category,
-				Icon:   category.Icon,
-				URL:    categoryURL(category),
-				Active: activeKey == key,
-			},
 			ID:    category.Id,
+			Label: category.Category,
+			URL:   categoryURL(category),
 			Color: category.Color,
 		})
 	}
 
 	return SidebarPayload{
-		Main: main,
-		Resources: []NavItemPayload{
-			{Key: "links", Label: "链接", Icon: "🔗", URL: "/links", Active: activeKey == "links"},
-			{Key: "sponsors", Label: "赞助", Icon: "♥", URL: "/sponsors", Active: activeKey == "sponsors"},
-		},
 		Categories: categoryItems,
 		ActiveKey:  activeKey,
 	}

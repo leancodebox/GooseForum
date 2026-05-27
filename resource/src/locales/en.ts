@@ -24,6 +24,16 @@ export default {
     register: 'Sign up',
     resources: 'Resources',
     categories: 'Categories',
+    nav: {
+      topics: 'Topics',
+      hot: 'Hot',
+      popular: 'Popular',
+      messages: 'Messages',
+      notifications: 'Notifications',
+      drafts: 'Drafts',
+      links: 'Links',
+      sponsors: 'Sponsors',
+    },
   },
   locale: {
     zh: '简体中文',

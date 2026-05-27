@@ -85,22 +85,23 @@ export interface ViewerPayload {
   isAdmin: boolean
 }
 
-export interface NavItemPayload {
-  key: string
-  label: string
-  icon: string
-  url: string
-  active: boolean
-}
-
-export interface CategoryNavPayload extends NavItemPayload {
+export interface CategoryNavPayload {
   id: number
+  label: string
+  url: string
   color: string
 }
 
+export interface NavItemPayload {
+  key: string
+  label: string
+  icon?: string
+  url: string
+}
+
 export interface SidebarPayload {
-  main: NavItemPayload[]
-  resources: NavItemPayload[]
+  main?: NavItemPayload[]
+  resources?: NavItemPayload[]
   categories: CategoryNavPayload[]
   activeKey: string
 }
