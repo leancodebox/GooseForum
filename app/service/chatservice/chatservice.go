@@ -149,10 +149,3 @@ func MarkRead(userId, convId uint64) error {
 	unreadservice.Invalidate(userId)
 	return nil
 }
-
-// DeleteChat hides a conversation for the user.
-func DeleteChat(userId, convId uint64) error {
-	imUserChatConfigs.DeleteConfig(convId, userId)
-	unreadservice.Invalidate(userId)
-	return nil
-}

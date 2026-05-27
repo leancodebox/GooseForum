@@ -30,6 +30,7 @@ const props = defineProps<{
   layout: LayoutPayload
   rail?: boolean
   headerTitle?: string
+  headerTags?: Array<{ id: number | string; name: string; color?: string }>
   showHeaderTitle?: boolean
 }>()
 
@@ -61,6 +62,7 @@ const footerPrimary = computed(() => asArray(props.layout.footer.primary))
 const hasFooter = computed(() => footerLinks.value.length > 0 || footerPrimary.value.length > 0)
 const brandType = computed(() => props.layout.site.brandType || 'default')
 const brandText = computed(() => props.layout.site.brandText || props.layout.site.name)
+const hasHeaderTitle = computed(() => Boolean(props.showHeaderTitle && props.headerTitle))
 const sidebarIconMap = {
   topics: MessageCircle,
   hot: Flame,
@@ -159,7 +161,37 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
           >
             <Menu class="h-5 w-5" />
           </button>
-          <a href="/" class="flex min-w-0 items-center gap-2">
+          <button
+            v-if="hasHeaderTitle"
+            type="button"
+            class="flex min-w-0 flex-1 flex-col items-start justify-center gap-0.5 self-stretch text-left transition md:hidden"
+            @click="scrollToTop"
+          >
+            <span class="block max-w-full truncate text-lg font-semibold leading-6 text-gray-900 hover:text-blue-600">
+              {{ headerTitle }}
+            </span>
+            <span
+              v-if="headerTags?.length"
+              class="flex max-w-full items-center gap-1 overflow-hidden text-[11px] font-medium leading-4 text-gray-500"
+            >
+              <span
+                v-for="tag in headerTags"
+                :key="tag.id"
+                class="inline-flex min-w-0 shrink-0 items-center gap-1"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-[2px]"
+                  :style="{ backgroundColor: tag.color || '#9ca3af' }"
+                />
+                <span class="max-w-20 truncate">{{ tag.name }}</span>
+              </span>
+            </span>
+          </button>
+          <a
+            href="/"
+            class="min-w-0 items-center gap-2"
+            :class="hasHeaderTitle ? 'hidden md:flex' : 'flex'"
+          >
             <img
               v-if="brandType === 'image' && layout.site.brandImage"
               :src="layout.site.brandImage"
@@ -194,16 +226,37 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
 
         <div class="hidden min-w-0 md:block">
           <button
-            v-if="showHeaderTitle && headerTitle"
+            v-if="hasHeaderTitle"
             type="button"
-            class="block max-w-full truncate text-left text-base font-semibold text-gray-900 transition hover:text-blue-600 sm:text-lg"
+            class="flex h-16 max-w-full flex-col items-start justify-center gap-0.5 text-left transition"
             @click="scrollToTop"
           >
-            {{ headerTitle }}
+            <span class="block max-w-full truncate text-xl font-semibold leading-6 text-gray-900 hover:text-blue-600">
+              {{ headerTitle }}
+            </span>
+            <span
+              v-if="headerTags?.length"
+              class="flex max-w-full items-center gap-2 overflow-hidden text-[11px] font-medium leading-4 text-gray-500"
+            >
+              <span
+                v-for="tag in headerTags"
+                :key="tag.id"
+                class="inline-flex min-w-0 shrink-0 items-center gap-1"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-[2px]"
+                  :style="{ backgroundColor: tag.color || '#9ca3af' }"
+                />
+                <span class="max-w-28 truncate">{{ tag.name }}</span>
+              </span>
+            </span>
           </button>
         </div>
 
-        <div class="flex items-center justify-end gap-0.5 sm:gap-1">
+        <div
+          class="items-center justify-end gap-0.5 sm:gap-1"
+          :class="hasHeaderTitle ? 'hidden md:flex' : 'flex'"
+        >
           <a
             href="/search"
             class="hidden h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 sm:inline-flex"
@@ -251,7 +304,7 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
           <template v-if="layout.viewer.isAuthenticated">
             <a
               href="/messages"
-              class="relative hidden h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 sm:inline-flex"
+              class="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
               aria-label="私信"
               title="私信"
             >

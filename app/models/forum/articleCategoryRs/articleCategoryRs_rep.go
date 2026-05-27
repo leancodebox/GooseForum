@@ -57,12 +57,6 @@ func DeleteByArticleId(articleId uint64) int64 {
 	return result.RowsAffected
 }
 
-// DisableByArticleId 逻辑删除文章的所有分类关系
-func DisableByArticleId(articleId uint64) int64 {
-	result := builder().Where("article_id = ?", articleId).Update("effective", 0)
-	return result.RowsAffected
-}
-
 // BatchCreate 批量创建分类关系
 func BatchCreate(entities []*Entity) int64 {
 	if len(entities) == 0 {

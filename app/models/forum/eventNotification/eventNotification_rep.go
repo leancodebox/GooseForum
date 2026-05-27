@@ -95,11 +95,3 @@ func MarkAllAsRead(userId uint64) error {
 			"read_at": now,
 		}).Error
 }
-
-// DeleteNotification 删除通知
-func DeleteNotification(notificationId uint64, userId uint64) error {
-	return builder().
-		Where(queryopt.Eq("id", notificationId)).
-		Where(queryopt.Eq("user_id", userId)). // 确保只能删除自己的通知
-		Delete(&Entity{}).Error
-}

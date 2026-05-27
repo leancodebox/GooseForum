@@ -2,65 +2,9 @@ package api
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
-	"github.com/samber/lo"
 )
-
-// QueryNotificationListReq 获取通知列表请求
-type QueryNotificationListReq struct {
-	StartId    int  `json:"startId"`
-	PageSize   int  `json:"pageSize" validate:"required,min=1,max=100"`
-	UnreadOnly bool `json:"unreadOnly"`
-}
-
-func QueryNotificationList(req component.BetterRequest[QueryNotificationListReq]) component.Response {
-	notifications, err := eventNotification.QueryByUserId(req.UserId, req.Params.PageSize, req.Params.StartId, req.Params.UnreadOnly)
-	if err != nil {
-		return component.FailResponse("获取通知列表失败")
-	}
-	userIds := lo.FilterMap(notifications, func(n *eventNotification.Entity, _ int) (uint64, bool) {
-		return n.Payload.ActorId, n.Payload.ActorId != 0
-	})
-	articleIds := lo.FilterMap(notifications, func(n *eventNotification.Entity, _ int) (uint64, bool) {
-		return n.Payload.ArticleId, n.Payload.ArticleId != 0
-	})
-	userMap := users.GetMapByIds(userIds)
-	articleMap := articles.GetMapByIds(articleIds)
-
-	// 转换数据
-	lo.ForEach(notifications, func(notification *eventNotification.Entity, _ int) {
-		if userInfo, ok := userMap[notification.Payload.ActorId]; ok {
-			notification.Payload.ActorName = userInfo.Username
-		}
-		if articleInfo, ok := articleMap[notification.Payload.ArticleId]; ok {
-			notification.Payload.ArticleTitle = articleInfo.Title
-		}
-	})
-
-	return successDataMap("list", notifications)
-}
-
-// GetNotificationListReq 获取通知列表请求
-type GetNotificationListReq struct {
-	Page       int  `json:"page" validate:"required,min=1"`
-	PageSize   int  `json:"pageSize" validate:"required,min=1,max=100"`
-	UnreadOnly bool `json:"unreadOnly"`
-}
-
-// GetNotificationList 获取通知列表
-func GetNotificationList(req component.BetterRequest[GetNotificationListReq]) component.Response {
-	offset := (req.Params.Page - 1) * req.Params.PageSize
-	total, notifications := notificationservice.GetNotificationItemList(req.UserId, req.Params.PageSize, offset, req.Params.UnreadOnly)
-	return component.SuccessResponse(component.DataMap{
-		"list":  notifications,
-		"total": total,
-		"page":  req.Params.Page,
-	})
-}
 
 // GetUnreadCountReq 获取未读数量请求
 type GetUnreadCountReq struct{}
@@ -72,22 +16,6 @@ func GetUnreadStatus(req component.BetterRequest[GetUnreadCountReq]) component.R
 		"messages":               status.Messages,
 		"latestNotificationType": status.LatestNotificationType,
 	})
-}
-
-// GetUnreadCount 获取未读通知数量
-func GetUnreadCount(req component.BetterRequest[GetUnreadCountReq]) component.Response {
-	count, err := eventNotification.GetUnreadCount(req.UserId)
-	if err != nil {
-		return component.FailResponse("获取未读数量失败")
-	}
-
-	return successDataMap("count", count)
-}
-
-// GetLastUnread 获取未读通知数量
-func GetLastUnread(req component.BetterRequest[GetUnreadCountReq]) component.Response {
-	entity := eventNotification.GetLastUnread(req.UserId)
-	return successDataMap("eventType", entity.EventType)
 }
 
 // MarkAsReadReq 标记通知已读请求
@@ -118,36 +46,4 @@ func MarkAllAsRead(req component.BetterRequest[MarkAllAsReadReq]) component.Resp
 	unreadservice.Invalidate(req.UserId)
 
 	return component.SuccessResponse("标记全部已读成功")
-}
-
-// DeleteNotificationReq 删除通知请求
-type DeleteNotificationReq struct {
-	NotificationId uint64 `json:"notificationId" validate:"required"`
-}
-
-// DeleteNotification 删除通知
-func DeleteNotification(req component.BetterRequest[DeleteNotificationReq]) component.Response {
-	err := eventNotification.DeleteNotification(req.Params.NotificationId, req.UserId)
-	if err != nil {
-		return component.FailResponse("删除通知失败")
-	}
-	unreadservice.Invalidate(req.UserId)
-
-	return component.SuccessResponse("删除通知成功")
-}
-
-// GetNotificationTypesReq 获取通知类型请求
-type GetNotificationTypesReq struct{}
-
-// GetNotificationTypes 获取所有通知类型
-func GetNotificationTypes(req component.BetterRequest[GetNotificationTypesReq]) component.Response {
-	types := []component.DataMap{
-		{"type": eventNotification.EventTypeComment, "name": "评论通知"},
-		{"type": eventNotification.EventTypeReply, "name": "回复通知"},
-		{"type": eventNotification.EventTypeSystem, "name": "系统通知"},
-		{"type": eventNotification.EventTypeFollow, "name": "关注通知"},
-		{"type": eventNotification.EventTypeBadge, "name": "徽章通知"},
-	}
-
-	return component.SuccessResponse(types)
 }

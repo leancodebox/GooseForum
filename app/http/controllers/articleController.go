@@ -9,7 +9,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
@@ -23,70 +22,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/usercardservice"
 	"github.com/samber/lo"
-	"github.com/spf13/cast"
 )
 
 func GetSiteStatistics() component.Response {
 	return component.SuccessResponse(hotdataserve.GetSiteStatisticsData())
-}
-
-func GetArticlesEnum() component.Response {
-	res := hotdataserve.ArticleCategoryLabel()
-	return component.SuccessResponse(map[string]any{
-		"category": res,
-		"type":     hotdataserve.GetArticlesType(),
-	})
-}
-
-type GetArticlesPageRequest struct {
-	Page       int    `form:"page"`
-	PageSize   int    `form:"pageSize"`
-	Search     string `form:"search"`
-	Categories []int  `form:"categories"`
-}
-
-type GetArticlesDetailRequest struct {
-	Id           uint64 `json:"id"`
-	MaxCommentId uint64 `json:"maxCommentId"`
-	PageSize     int    `json:"pageSize"`
-}
-
-type ReplyVo struct {
-	Id              uint64 `json:"id"`
-	ArticleId       uint64 `json:"articleId"`
-	UserId          uint64 `json:"userId"`
-	UserAvatarUrl   string `json:"userAvatarUrl"`
-	Username        string `json:"username"`
-	Content         string `json:"content"`
-	CreateTime      string `json:"createTime"`
-	ReplyToId       uint64 `json:"replyToId,omitempty"`
-	ReplyToUsername string `json:"replyToUsername,omitempty"`
-	ReplyToUserId   uint64 `json:"replyToUserId,omitempty"`
-	IsOwnReply      bool   `json:"isOwnReply"`
-}
-
-type WriteArticlesOriginReq struct {
-	Id int64 `json:"id"`
-}
-
-// WriteArticlesOrigin 返回当前用户可编辑文章的原始内容。
-func WriteArticlesOrigin(req component.BetterRequest[WriteArticlesOriginReq]) component.Response {
-	entity := articles.Get(uint64(req.Params.Id))
-	if entity.Id == 0 {
-		return component.FailResponse("不存在")
-	}
-	if entity.UserId != req.UserId {
-		return component.FailResponse("不存在")
-	}
-
-	return component.SuccessResponse(map[string]any{
-		"userId":         entity.UserId,
-		"type":           entity.Type,
-		"articleStatus":  entity.ArticleStatus,
-		"articleTitle":   entity.Title,
-		"articleContent": entity.Content,
-		"categoryId":     entity.CategoryId,
-	})
 }
 
 type WriteArticleReq struct {
@@ -225,23 +164,6 @@ func UpdateArticleStatus(req component.BetterRequest[ArticleStatusReq]) componen
 	if article.ArticleStatus == 1 {
 		eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Article: &article})
 	}
-	return component.SuccessResponse(true)
-}
-
-type DeleteArticleReq struct {
-	Id uint64 `json:"id"`
-}
-
-func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Response {
-	articleEntity := articles.Get(req.Params.Id)
-	if articleEntity.Id == 0 {
-		return component.FailResponse("文章不存在")
-	}
-	if articleEntity.UserId != req.UserId {
-		return component.FailResponse("不可操作")
-	}
-	articles.Delete(&articleEntity)
-	articleCategoryRs.DisableByArticleId(articleEntity.Id)
 	return component.SuccessResponse(true)
 }
 
@@ -420,126 +342,6 @@ func updateArticleStat(article articles.SmallEntity, userId uint64, isDelete boo
 	} else {
 		articles.IncrementReplyFast(article.Id, pList)
 	}
-}
-
-// GetUserArticlesRequest 用户文章列表请求。
-type GetUserArticlesRequest struct {
-	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
-}
-
-// GetUserArticles 获取用户文章列表
-func GetUserArticles(req component.BetterRequest[GetUserArticlesRequest]) component.Response {
-	pageData := articles.Page[articles.SmallEntity](articles.PageQuery{
-		Page:         max(req.Params.Page, 1),
-		PageSize:     req.Params.PageSize,
-		UserId:       req.UserId,
-		FilterStatus: true,
-	})
-	authorInfoStatistics := userStatistics.Get(req.UserId)
-	user, _ := req.GetUser()
-	categoryMap := hotdataserve.ArticleCategoryMap()
-	return component.SuccessPage(
-		lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) vo.ArticlesSimpleVo {
-
-			categoryNames := lo.Map(t.CategoryId, func(t uint64, _ int) string {
-				if category, ok := categoryMap[t]; ok && category != nil {
-					return category.Category
-				}
-				return ""
-			})
-
-			username := user.Username
-			avatarUrl := user.GetWebAvatarUrl()
-
-			return vo.ArticlesSimpleVo{
-				Id:             t.Id,
-				Title:          t.Title,
-				CreateTime:     t.CreatedAt.Format(time.DateTime),
-				LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
-				Username:       username,
-				AuthorId:       t.UserId,
-				AvatarUrl:      avatarUrl,
-				ViewCount:      t.ViewCount,
-				CommentCount:   t.ReplyCount,
-				Categories:     categoryNames,
-				TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
-			}
-		}),
-		pageData.Page,
-		pageData.PageSize,
-		cast.ToInt64(authorInfoStatistics.ArticleCount),
-	)
-}
-
-// GetUserBookmarkedArticlesRequest 用户收藏文章列表请求。
-type GetUserBookmarkedArticlesRequest struct {
-	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
-}
-
-// GetUserBookmarkedArticles 获取用户收藏文章列表
-func GetUserBookmarkedArticles(req component.BetterRequest[GetUserBookmarkedArticlesRequest]) component.Response {
-	// 获取收藏的文章ID列表
-	articleIds, total := articleBookmark.GetUserBookmarkedArticleIds(req.UserId, max(req.Params.Page, 1), req.Params.PageSize)
-	if len(articleIds) == 0 {
-		return component.SuccessPage(
-			[]vo.ArticlesSimpleVo{},
-			max(req.Params.Page, 1),
-			req.Params.PageSize,
-			total,
-		)
-	}
-	authorInfoStatistics := userStatistics.Get(req.UserId)
-
-	// 根据文章ID获取文章详情
-	articleList := articles.GetByIds(articleIds)
-
-	// 获取作者信息
-	userIds := lo.Map(articleList, func(t *articles.SmallEntity, _ int) uint64 {
-		return t.UserId
-	})
-	userMap := users.GetMapByIds(userIds)
-
-	categoryMap := hotdataserve.ArticleCategoryMap()
-
-	// 构建返回数据
-	articleVos := lo.Map(articleList, func(t *articles.SmallEntity, _ int) vo.ArticlesSimpleVo {
-		categoryNames := lo.Map(t.CategoryId, func(item uint64, _ int) string {
-			if category, ok := categoryMap[item]; ok && category != nil {
-				return category.Category
-			}
-			return ""
-		})
-
-		username := ""
-		avatarUrl := ""
-		if user, ok := userMap[t.UserId]; ok {
-			username = user.Username
-			avatarUrl = user.GetWebAvatarUrl()
-		}
-
-		return vo.ArticlesSimpleVo{
-			Id:             t.Id,
-			Title:          t.Title,
-			CreateTime:     t.CreatedAt.Format(time.DateTime),
-			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
-			Username:       username,
-			AuthorId:       t.UserId,
-			AvatarUrl:      avatarUrl,
-			ViewCount:      t.ViewCount,
-			CommentCount:   t.ReplyCount,
-			Categories:     categoryNames,
-			TypeStr:        hotdataserve.GetArticlesTypeName(int(t.Type)),
-		}
-	})
-
-	return component.SuccessPage(
-		articleVos,
-		max(req.Params.Page, 1),
-		req.Params.PageSize,
-		cast.ToInt64(authorInfoStatistics.CollectionCount),
-	)
 }
 
 type LikeArticleReq struct {

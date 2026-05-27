@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"strconv"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
-	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
-	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
@@ -67,32 +64,6 @@ func GetUserHoverCard(req component.BetterRequest[GetUserCardReq]) component.Res
 	return component.SuccessResponse(card)
 }
 
-// UserInfo returns the current user's profile and statistics.
-func UserInfo(req component.BetterRequest[component.Null]) component.Response {
-	userEntity, err := req.GetUser()
-	if err != nil {
-		return component.FailResponse("账号异常" + err.Error())
-	}
-
-	avatarUrl := userEntity.GetWebAvatarUrl()
-	authorInfoStatistics := userStatistics.Get(userEntity.Id)
-
-	return component.SuccessResponse(component.DataMap{
-		"username":             userEntity.Username,
-		"userId":               userEntity.Id,
-		"avatarUrl":            avatarUrl,
-		"email":                userEntity.Email,
-		"nickname":             userEntity.Nickname,
-		"isAdmin":              userEntity.RoleId != 0,
-		"bio":                  userEntity.Bio,
-		"signature":            userEntity.Signature,
-		"website":              userEntity.Website,
-		"websiteName":          userEntity.WebsiteName,
-		"externalInformation":  userEntity.ExternalInformation,
-		"authorInfoStatistics": authorInfoStatistics,
-	})
-}
-
 type EditUserEmailReq struct {
 	Email string `json:"email" validate:"required,email"`
 }
@@ -127,27 +98,6 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 	}
 
 	return component.SuccessResponse("更新成功")
-}
-
-type GetUserActivitiesReq struct {
-	UserId uint64 `form:"userId" validate:"required"`
-	LastId uint64 `form:"lastId"`
-	Limit  int    `form:"limit" validate:"max=50"`
-}
-
-// GetUserActivities returns a user's activity timeline.
-func GetUserActivities(req component.BetterRequest[GetUserActivitiesReq]) component.Response {
-	limit := req.Params.Limit
-	if limit <= 0 {
-		limit = 20
-	}
-
-	activities, err := userActivities.GetUserTimeline(req.Params.UserId, req.Params.LastId, limit)
-	if err != nil {
-		return component.FailResponse("获取活动记录失败")
-	}
-
-	return component.SuccessResponse(activities)
 }
 
 type EditUsernameReq struct {
@@ -208,13 +158,6 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 		return component.FailResponse("更新用户信息失败")
 	}
 	return component.SuccessResponse("更新成功")
-}
-
-func Invitation(req component.BetterRequest[component.Null]) component.Response {
-	base36 := strconv.FormatInt(int64(req.UserId), 36)
-	return component.SuccessResponse(map[string]any{
-		"invitation": base36,
-	})
 }
 
 // UploadAvatar stores a new avatar for the current user.

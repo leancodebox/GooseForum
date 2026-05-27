@@ -75,6 +75,12 @@ export interface AdminRole {
   createTime: string
 }
 
+export interface AdminPermissionOption {
+  name: string
+  label?: string
+  value: number
+}
+
 export interface AdminArticle {
   id: number
   title: string

@@ -29,6 +29,7 @@ const hasRail = computed(() => props.payload.component === 'article.detail')
     <AppShell
       :layout="payload.layout"
       :header-title="shellState.headerTitle"
+      :header-tags="shellState.headerTags"
       :show-header-title="shellState.showHeaderTitle"
       :rail="hasRail"
     >

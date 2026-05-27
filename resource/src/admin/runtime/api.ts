@@ -4,6 +4,7 @@ import type {
   AdminBadge,
   AdminCategory,
   AdminOptRecord,
+  AdminPermissionOption,
   AdminRole,
   AdminUser,
   AnnouncementConfig,
@@ -124,6 +125,10 @@ export function saveUserBadges(userId: number, badgeCodes: string[]) {
 
 export function getRoleList() {
   return postJson<PageResult<AdminRole>>('/api/admin/role-list', {}, '获取角色列表失败')
+}
+
+export function getPermissionList() {
+  return postJson<AdminPermissionOption[]>('/api/admin/get-permission-list', {}, '获取权限列表失败')
 }
 
 export function saveRole(data: { id: number, roleName: string, permissions: number[] }) {

@@ -4,7 +4,7 @@
 env = "production"
 # 调试模式开关，可选覆盖项
 # 不配置时：local 默认 true，其他环境默认 false
-debug = false
+# debug = false
 # 维护模式开关
 # 为 true 时所有请求返回503维护页面
 maintenance = false

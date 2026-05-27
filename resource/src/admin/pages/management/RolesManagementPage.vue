@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, XCircle } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import AdminLayout from '@/admin/layouts/AdminLayout.vue'
-import { deleteRole, getRoleList, saveRole } from '@/admin/runtime/api'
+import { deleteRole, getPermissionList, getRoleList, saveRole } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminPayload, AdminRole, ManageHomeProps } from '@/admin/types'
 import ManagementTable from './ManagementTable.vue'
@@ -12,20 +12,12 @@ defineProps<{
   payload: AdminPayload<ManageHomeProps>
 }>()
 
-const permissionOptions = [
-  { id: 0, name: '管理员' },
-  { id: 1, name: '用户管理' },
-  { id: 2, name: '文章管理' },
-  { id: 3, name: '页面管理' },
-  { id: 4, name: '角色管理' },
-  { id: 5, name: '站点管理' },
-]
-
 const loading = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
 const error = ref('')
 const rows = ref<AdminRole[]>([])
+const permissionOptions = ref<{ id: number, name: string }[]>([])
 const page = ref(1)
 const pageSize = ref(10)
 const search = ref('')
@@ -55,8 +47,12 @@ async function loadRoles() {
   loading.value = true
   error.value = ''
   try {
-    const data = await getRoleList()
+    const [data, permissions] = await Promise.all([getRoleList(), getPermissionList()])
     rows.value = data.list || []
+    permissionOptions.value = permissions.map(item => ({
+      id: Number(item.value),
+      name: item.label || item.name,
+    }))
   } catch (err) {
     error.value = err instanceof Error ? err.message : '加载角色失败'
   } finally {

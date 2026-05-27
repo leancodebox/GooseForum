@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
 import { AlertTriangle, Bookmark, Check, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
 import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateReply } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
@@ -48,12 +48,17 @@ const replyEditorEl = ref<HTMLTextAreaElement | null>(null)
 const replySectionEl = ref<HTMLElement | null>(null)
 const replyLoadMoreEl = ref<HTMLElement | null>(null)
 const showHeaderTitle = ref(false)
+const isMobileHeaderViewport = ref(false)
+const mobileHeaderTitleVisible = ref(false)
+const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const showFloatingReply = ref(false)
 const floatingReplyExpanded = ref(false)
 const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
 let replyEditorObserver: IntersectionObserver | undefined
 let replyLoadObserver: IntersectionObserver | undefined
+let lastHeaderScrollY = 0
+let headerScrollFrame = 0
 const highlightedReplyId = ref<number | null>(null)
 let highlightTimer: number | undefined
 
@@ -73,6 +78,7 @@ function observeTitle() {
 }
 
 onMounted(() => {
+  setupHeaderTitleBehavior()
   void nextTick(observeTitle)
   void nextTick(observeReplyEditor)
   void nextTick(observeReplyLoader)
@@ -85,6 +91,10 @@ watch(
     likeCount.value = page.props.article.likeCount
     isLiked.value = page.props.article.isLiked
     isBookmarked.value = page.props.article.isBookmarked
+    mobileHeaderTitleVisible.value = false
+    if (typeof window !== 'undefined') {
+      lastHeaderScrollY = window.scrollY
+    }
     resetRepliesFromProps()
     void nextTick(observeTitle)
     void nextTick(observeReplyEditor)
@@ -95,9 +105,14 @@ watch(
 )
 
 watch(
-  () => [page.props.article.title, showHeaderTitle.value] as const,
-  ([title, show]) => {
+  () => [page.props.article.title, page.props.article.categories, effectiveShowHeaderTitle.value] as const,
+  ([title, categories, show]) => {
     shellState.headerTitle = title
+    shellState.headerTags = categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      color: category.color,
+    }))
     shellState.showHeaderTitle = show
   },
   { immediate: true },
@@ -107,10 +122,53 @@ onBeforeUnmount(() => {
   titleObserver?.disconnect()
   replyEditorObserver?.disconnect()
   replyLoadObserver?.disconnect()
+  window.removeEventListener('scroll', updateMobileHeaderTitle)
+  window.removeEventListener('resize', updateHeaderViewport)
+  window.cancelAnimationFrame(headerScrollFrame)
   window.clearTimeout(highlightTimer)
   shellState.headerTitle = ''
+  shellState.headerTags = []
   shellState.showHeaderTitle = false
 })
+
+function setupHeaderTitleBehavior() {
+  lastHeaderScrollY = window.scrollY
+  updateHeaderViewport()
+  window.addEventListener('scroll', updateMobileHeaderTitle, { passive: true })
+  window.addEventListener('resize', updateHeaderViewport)
+}
+
+function updateHeaderViewport() {
+  const wasMobile = isMobileHeaderViewport.value
+  const isMobile = window.innerWidth < 768
+  isMobileHeaderViewport.value = isMobile
+  if (isMobile && !wasMobile) {
+    mobileHeaderTitleVisible.value = false
+    return
+  }
+  if (!isMobile) {
+    mobileHeaderTitleVisible.value = true
+  }
+}
+
+function updateMobileHeaderTitle() {
+  if (headerScrollFrame) return
+  headerScrollFrame = window.requestAnimationFrame(applyMobileHeaderTitle)
+}
+
+function applyMobileHeaderTitle() {
+  headerScrollFrame = 0
+  const scrollY = window.scrollY
+  const delta = scrollY - lastHeaderScrollY
+  if (Math.abs(delta) < 4) {
+    return
+  }
+
+  if (isMobileHeaderViewport.value) {
+    mobileHeaderTitleVisible.value = delta > 0
+  }
+  lastHeaderScrollY = scrollY
+}
 
 function observeReplyEditor() {
   replyEditorObserver?.disconnect()

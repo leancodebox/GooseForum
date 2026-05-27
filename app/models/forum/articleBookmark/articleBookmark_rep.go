@@ -32,27 +32,6 @@ func GetByArticleId(userId, articleId any) (entity Entity) {
 	return
 }
 
-// GetUserBookmarkedArticleIds 获取用户收藏的文章ID列表
-func GetUserBookmarkedArticleIds(userId uint64, page, pageSize int) ([]uint64, int64) {
-	var articleIds []uint64
-	var total int64
-
-	// 计算总数
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&total)
-
-	// 获取分页数据
-	offset := (page - 1) * pageSize
-	builder().
-		Where(queryopt.Eq(fieldUserId, userId)).
-		Where(queryopt.Eq(fieldStatus, 1)).
-		Order("updated_at DESC").
-		Offset(offset).
-		Limit(pageSize).
-		Pluck(fieldArticleId, &articleIds)
-
-	return articleIds, total
-}
-
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
 //	return result.RowsAffected

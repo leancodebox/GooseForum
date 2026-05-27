@@ -38,10 +38,6 @@ func GetArticlesType() *[]datastruct.Option[string, int] {
 	return &articlesType
 }
 
-func GetArticlesTypeName(iType int) string {
-	return articlesTypeMap[iType].Name
-}
-
 func GetLatestArticleSimpleVo() []*vo.ArticlesSimpleVo {
 	return articleSimpleVoCache.GetOrLoad("home:GetLatestArticles", func() ([]*vo.ArticlesSimpleVo, error) {
 		res := ArticlesSmallEntity2Vo(GetLatestArticles())
@@ -145,15 +141,6 @@ func GetArticleCategory() []*articleCategory.Entity {
 		1*time.Minute,
 	)
 	return data
-}
-
-func ArticleCategoryLabel() []datastruct.Option[string, uint64] {
-	return lo.Map(GetArticleCategory(), func(t *articleCategory.Entity, _ int) datastruct.Option[string, uint64] {
-		return datastruct.Option[string, uint64]{
-			Name:  t.Category,
-			Value: t.Id,
-		}
-	})
 }
 
 // ArticleCategoryMap GetMapByIds 根据ID列表获取分类Map

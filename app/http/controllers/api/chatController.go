@@ -2,10 +2,7 @@ package api
 
 import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
-	"github.com/samber/lo"
 )
 
 // SendMessageReq 发送私信请求
@@ -28,19 +25,6 @@ func SendMessage(req component.BetterRequest[SendMessageReq]) component.Response
 		return component.FailResponse(err.Error())
 	}
 	return successDataMap("convId", convId)
-}
-
-// GetChatListReq 获取私信列表请求
-type GetChatListReq struct {
-}
-
-// GetChatList 获取私信列表
-func GetChatList(req component.BetterRequest[GetChatListReq]) component.Response {
-	list, err := chatservice.GetChatList(req.UserId)
-	if err != nil {
-		return component.FailResponse("Failed to get chat list")
-	}
-	return successDataMap("list", list)
 }
 
 // GetMessagesReq 获取消息记录请求
@@ -71,32 +55,4 @@ func MarkChatRead(req component.BetterRequest[MarkReadReq]) component.Response {
 		return component.FailResponse("Failed to mark read")
 	}
 	return component.SuccessResponse(nil)
-}
-
-// DeleteChatReq 删除对话请求
-type DeleteChatReq struct {
-	ConvId uint64 `json:"convId" validate:"required"`
-}
-
-// DeleteChat 删除对话
-func DeleteChat(req component.BetterRequest[DeleteChatReq]) component.Response {
-	err := chatservice.DeleteChat(req.UserId, req.Params.ConvId)
-	if err != nil {
-		return component.FailResponse("Failed to delete chat")
-	}
-	return component.SuccessResponse(nil)
-}
-
-// GetSuggestedUsers 获取推荐用户（关注的人）
-func GetSuggestedUsers(req component.BetterRequest[component.Null]) component.Response {
-	list := userFollow.GetFollowingList(req.UserId, 1, 20)
-	users := lo.Map(list, func(u *users.EntityComplete, _ int) component.DataMap {
-		return component.DataMap{
-			"id":       u.Id,
-			"name":     u.Username,
-			"username": u.Username,
-			"avatar":   u.GetWebAvatarUrl(),
-		}
-	})
-	return successDataMap("list", users)
 }
