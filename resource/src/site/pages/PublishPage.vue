@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter, type RouteLocationNormalized } from 'vue-router'
 import { Bold, Code2, Image, Italic, Link, ListChecks, MessageSquareQuote, Send, X } from '@lucide/vue'
 import MarkdownIt from 'markdown-it'
 import anchor from 'markdown-it-anchor'
@@ -17,6 +18,7 @@ const title = ref(page.props.article.title || '')
 const content = ref(page.props.article.content || '')
 const type = ref(page.props.article.type || page.props.types[0]?.value || 0)
 const categoryIds = ref<number[]>([...(page.props.article.categoryIds || [])])
+const currentArticleId = ref(page.props.articleId)
 const preview = ref(false)
 const submitting = ref(false)
 const uploading = ref(false)
@@ -26,6 +28,9 @@ const uploadDone = ref(0)
 const message = ref('')
 const error = ref('')
 const editor = ref<HTMLTextAreaElement | null>(null)
+const leavePromptOpen = ref(false)
+const pendingNavigationUrl = ref('')
+const forcedNavigation = ref(false)
 const markdown = new MarkdownIt({
   html: true,
   linkify: true,
@@ -38,10 +43,40 @@ const markdown = new MarkdownIt({
 const isValid = computed(() => title.value.trim() && content.value.trim() && categoryIds.value.length > 0)
 const selectedCategories = computed(() => page.props.categories.filter((category) => categoryIds.value.includes(category.id)))
 const renderedPreview = computed(() => markdown.render(content.value || ''))
+const draftSaveable = computed(() => isValid.value && !submitting.value && !uploading.value)
+const savedSnapshot = ref(editorSnapshot())
+const hasUnsavedChanges = computed(() => editorSnapshot() !== savedSnapshot.value)
 const uploadText = computed(() => {
   if (!uploading.value) return ''
   return uploadTotal.value > 1 ? `正在处理图片 ${uploadDone.value}/${uploadTotal.value}` : '正在处理图片...'
 })
+const router = useRouter()
+let removeRouteGuard: (() => void) | undefined
+let resolveLeavePrompt: ((allow: boolean) => void) | undefined
+
+onMounted(() => {
+  removeRouteGuard = router.beforeEach((to) => confirmRouteLeave(to))
+  window.addEventListener('beforeunload', handleBeforeUnload)
+})
+
+onBeforeUnmount(() => {
+  removeRouteGuard?.()
+  resolveLeavePrompt?.(true)
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+})
+
+function editorSnapshot() {
+  return JSON.stringify({
+    title: title.value.trim(),
+    content: content.value.trim(),
+    type: type.value,
+    categoryIds: [...categoryIds.value].sort((a, b) => a - b),
+  })
+}
+
+function syncSavedSnapshot() {
+  savedSnapshot.value = editorSnapshot()
+}
 
 function toggleCategory(id: number) {
   if (categoryIds.value.includes(id)) {
@@ -214,13 +249,16 @@ async function save() {
   message.value = ''
   try {
     const id = await submitArticle({
-      id: page.props.articleId,
+      id: currentArticleId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       type: type.value,
       categoryId: categoryIds.value,
       articleStatus: 1,
     })
+    currentArticleId.value = id
+    syncSavedSnapshot()
+    forcedNavigation.value = true
     message.value = page.props.isEditing ? '主题已更新。' : '主题已发布。'
     window.location.href = `/p/post/${id}`
   } catch (err) {
@@ -232,24 +270,71 @@ async function save() {
 
 async function saveDraft() {
   if (!isValid.value || submitting.value) return
+  await persistDraft('/drafts')
+}
+
+async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean> {
   submitting.value = true
   error.value = ''
   message.value = ''
   try {
-    await submitArticle({
-      id: page.props.articleId,
+    const id = await submitArticle({
+      id: currentArticleId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       type: type.value,
       categoryId: categoryIds.value,
       articleStatus: 0,
     })
-    window.location.href = '/drafts'
+    currentArticleId.value = id
+    syncSavedSnapshot()
+    forcedNavigation.value = true
+    if (redirect) window.location.href = nextUrl || '/drafts'
+    return true
   } catch (err) {
     error.value = err instanceof Error ? err.message : '保存草稿失败'
+    return false
   } finally {
     submitting.value = false
   }
+}
+
+function handleBeforeUnload(event: BeforeUnloadEvent) {
+  if (forcedNavigation.value || !hasUnsavedChanges.value) return
+  event.preventDefault()
+  event.returnValue = ''
+}
+
+function confirmRouteLeave(to: RouteLocationNormalized) {
+  if (forcedNavigation.value || !hasUnsavedChanges.value) return true
+  pendingNavigationUrl.value = new URL(to.fullPath, window.location.origin).toString()
+  leavePromptOpen.value = true
+  return new Promise<boolean>((resolve) => {
+    resolveLeavePrompt = resolve
+  })
+}
+
+function closeLeavePrompt() {
+  leavePromptOpen.value = false
+  pendingNavigationUrl.value = ''
+  resolveLeavePrompt?.(false)
+  resolveLeavePrompt = undefined
+}
+
+function discardAndLeave() {
+  forcedNavigation.value = true
+  leavePromptOpen.value = false
+  resolveLeavePrompt?.(true)
+  resolveLeavePrompt = undefined
+}
+
+async function saveDraftAndLeave() {
+  if (!draftSaveable.value) return
+  const saved = await persistDraft(undefined, false)
+  if (!saved) return
+  leavePromptOpen.value = false
+  resolveLeavePrompt?.(true)
+  resolveLeavePrompt = undefined
 }
 </script>
 
@@ -422,6 +507,38 @@ async function saveDraft() {
             </div>
           </section>
         </aside>
+      </div>
+
+      <div v-if="leavePromptOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-950/50 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+        <div class="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl">
+          <div class="border-b border-gray-100 px-5 py-4">
+            <h2 class="text-base font-semibold text-gray-950">保存未完成的编辑？</h2>
+            <p class="mt-1 text-sm leading-6 text-gray-500">
+              当前内容还没有保存。离开前可以先存为草稿，之后在草稿箱继续编辑。
+            </p>
+          </div>
+
+          <div v-if="!isValid" class="border-b border-amber-100 bg-amber-50 px-5 py-3 text-sm font-medium text-amber-700">
+            草稿需要填写标题、正文和至少一个分类后才能保存。
+          </div>
+
+          <div class="flex flex-wrap items-center justify-end gap-2 bg-gray-50 px-5 py-4">
+            <button type="button" class="h-10 rounded-md px-3 text-sm font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-900" @click="closeLeavePrompt">
+              继续编辑
+            </button>
+            <button type="button" class="h-10 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50" @click="discardAndLeave">
+              不保存离开
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-10 min-w-28 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="!draftSaveable"
+              @click="saveDraftAndLeave"
+            >
+              {{ submitting ? '保存中...' : '保存草稿' }}
+            </button>
+          </div>
+        </div>
       </div>
     </main>
 </template>

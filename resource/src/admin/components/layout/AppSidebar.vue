@@ -29,7 +29,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/admin/components/ui/sidebar'
-import { currentAdminPath, navigateAdmin } from '@/admin/runtime/router'
+import { RouterLink, useRoute } from 'vue-router'
 import type { LayoutPayload } from '@/types/payload'
 import type { LucideIcon } from '@lucide/vue'
 
@@ -37,7 +37,8 @@ defineProps<{
   layout: LayoutPayload
 }>()
 
-const currentPath = computed(() => currentAdminPath.value)
+const route = useRoute()
+const currentPath = computed(() => route.path.replace(/\/+$/, '') || '/admin')
 
 interface NavItem {
   title: string
@@ -116,15 +117,19 @@ function isActive(item: NavItem) {
           <SidebarMenuItem v-for="item in group.items" :key="item.title">
             <SidebarMenuButton as-child :is-active="isActive(item)" :tooltip="item.title">
               <a
+                v-if="item.external"
                 :href="item.url"
-                :target="item.external ? '_blank' : undefined"
-                :rel="item.external ? 'noopener noreferrer' : undefined"
-                @click="item.external ? undefined : navigateAdmin(item.url, $event)"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <component :is="item.icon" />
                 <span>{{ item.title }}</span>
-                <ExternalLink v-if="item.external" class="ml-auto size-4" />
+                <ExternalLink class="ml-auto size-4" />
               </a>
+              <RouterLink v-else :to="item.url">
+                <component :is="item.icon" />
+                <span>{{ item.title }}</span>
+              </RouterLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

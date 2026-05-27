@@ -1,28 +1,70 @@
-import { ref } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 
-function normalizePath(path: string): string {
-  const normalized = path.replace(/\/+$/, '') || '/admin'
-  return normalized.startsWith('/admin') ? normalized : '/admin'
-}
+const settingsPages = {
+  '/admin/settings/site-info': 'site-info',
+  '/admin/settings/mail': 'mail',
+  '/admin/settings/security': 'security',
+  '/admin/settings/posting': 'posting',
+  '/admin/settings/announcement': 'announcement',
+} as const
 
-export const currentAdminPath = ref(normalizePath(window.location.pathname))
-
-let listening = false
-
-export function installAdminRouter() {
-  if (listening) return
-  listening = true
-  window.addEventListener('popstate', () => {
-    currentAdminPath.value = normalizePath(window.location.pathname)
-  })
-}
-
-export function navigateAdmin(path: string, event?: MouseEvent) {
-  if (event) {
-    event.preventDefault()
-  }
-  const nextPath = normalizePath(path)
-  if (nextPath === currentAdminPath.value) return
-  window.history.pushState({}, '', nextPath)
-  currentAdminPath.value = nextPath
-}
+export const adminRouter = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/admin',
+      component: () => import('@/admin/pages/StatsPage.vue'),
+    },
+    {
+      path: '/admin/users',
+      component: () => import('@/admin/pages/management/UsersManagementPage.vue'),
+    },
+    {
+      path: '/admin/roles',
+      component: () => import('@/admin/pages/management/RolesManagementPage.vue'),
+    },
+    {
+      path: '/admin/categories',
+      component: () => import('@/admin/pages/management/CategoriesManagementPage.vue'),
+    },
+    {
+      path: '/admin/posts',
+      component: () => import('@/admin/pages/management/PostsManagementPage.vue'),
+    },
+    {
+      path: '/admin/links',
+      component: () => import('@/admin/pages/management/LinksManagementPage.vue'),
+    },
+    {
+      path: '/admin/sponsors',
+      component: () => import('@/admin/pages/management/SponsorsManagementPage.vue'),
+    },
+    {
+      path: '/admin/badges',
+      component: () => import('@/admin/pages/management/BadgesManagementPage.vue'),
+    },
+    {
+      path: '/admin/opt-records',
+      component: () => import('@/admin/pages/management/OptRecordsManagementPage.vue'),
+    },
+    ...Object.entries(settingsPages).map(([path, kind]) => ({
+      path,
+      component: () => import('@/admin/pages/AdminSettingsPage.vue'),
+      meta: { pageProps: { kind } },
+    })),
+    {
+      path: '/admin/unknown',
+      component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+      meta: {
+        pageProps: {
+          title: '管理页面',
+          description: '这个管理入口还在迁移中。',
+        },
+      },
+    },
+    {
+      path: '/admin/:pathMatch(.*)*',
+      redirect: '/admin',
+    },
+  ],
+})

@@ -6,26 +6,13 @@ import { installNavigation, preparePayload } from '@/runtime/router'
 import { resetShellState } from '@/runtime/shell-state'
 import { currentLocale, i18n } from '@/runtime/i18n'
 import { hydrateFlashMessages } from '@/runtime/flash-message'
+import PayloadRouteView from '@/site/components/PayloadRouteView.vue'
 
 const initialPayload = readInitialPayload()
 const initialPage = await preparePayload(initialPayload)
 const currentPage = shallowRef(initialPage)
 
 document.documentElement.lang = currentLocale()
-history.replaceState({ goose: true, payload: currentPage.value.payload }, '', window.location.href)
-
-const app = createApp({
-  setup() {
-    return () => h(App, {
-      payload: currentPage.value.payload,
-      component: currentPage.value.component,
-    })
-  },
-})
-
-app.use(i18n)
-app.mount('#goose-app')
-hydrateFlashMessages()
 
 function commitPage(nextPage: typeof initialPage) {
   resetShellState()
@@ -33,9 +20,23 @@ function commitPage(nextPage: typeof initialPage) {
   updateDocumentMeta(nextPage.payload)
 }
 
-installNavigation((nextPage) => {
+const router = installNavigation(initialPage, PayloadRouteView, (nextPage) => {
   commitPage(nextPage)
 })
+
+const app = createApp({
+  setup() {
+    return () => h(App, {
+      page: currentPage.value,
+    })
+  },
+})
+
+app.use(i18n)
+app.use(router)
+await router.isReady()
+app.mount('#goose-app')
+hydrateFlashMessages()
 
 window.addEventListener('goose:page', async (event) => {
   const nextPayload = event instanceof CustomEvent ? event.detail : undefined

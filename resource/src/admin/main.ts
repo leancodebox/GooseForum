@@ -4,12 +4,13 @@ import AdminApp from './AdminApp.vue'
 import './styles/admin.css'
 import 'vue-sonner/style.css'
 import { readAdminPayload } from '@/admin/runtime/payload'
+import { adminRouter } from '@/admin/runtime/router'
 
 const payload = readAdminPayload()
 
 document.documentElement.lang = document.documentElement.lang || 'zh-CN'
 
-createApp({
+const app = createApp({
   render: () => [
     h(AdminApp, { payload }),
     h(Toaster, {
@@ -21,4 +22,8 @@ createApp({
       },
     }),
   ],
-}).mount('#goose-admin-app')
+})
+
+app.use(adminRouter)
+await adminRouter.isReady()
+app.mount('#goose-admin-app')

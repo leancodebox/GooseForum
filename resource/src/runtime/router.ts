@@ -2,14 +2,56 @@ import { useNavigationState } from './navigation-state'
 import { resolvePageComponent } from './page-registry'
 import type { Component } from 'vue'
 import type { PagePayload } from '@/types/payload'
+import { createRouter, createWebHistory, isNavigationFailure, type Router } from 'vue-router'
 
 export interface PreparedPage {
   payload: PagePayload
   component: Component
 }
 
-export function installNavigation(onPage: (page: PreparedPage) => void) {
+export function installNavigation(initialPage: PreparedPage, routeComponent: Component, onPage: (page: PreparedPage) => void): Router {
   const navigation = useNavigationState()
+  let initialNavigation = true
+  let loadedPage = initialPage
+
+  const router = createRouter({
+    history: createWebHistory(),
+    routes: [
+      {
+        path: '/:pathMatch(.*)*',
+        component: routeComponent,
+      },
+    ],
+  })
+
+  router.beforeEach(async (to) => {
+    if (initialNavigation) {
+      initialNavigation = false
+      loadedPage = initialPage
+      return true
+    }
+
+    const url = new URL(to.fullPath, window.location.origin)
+
+    navigation.setNavigating(true)
+    try {
+      loadedPage = await getPreparedPage(url)
+      return true
+    } catch {
+      window.location.href = url.toString()
+      return false
+    }
+  })
+
+  router.afterEach((to, _from, failure) => {
+    if (failure && isNavigationFailure(failure)) {
+      navigation.setNavigating(false)
+      return
+    }
+    onPage(loadedPage)
+    scrollAfterNavigation(new URL(to.fullPath, window.location.origin))
+    navigation.setNavigating(false)
+  })
 
   document.addEventListener('click', async (event) => {
     if (event.defaultPrevented || event.button !== 0) return
@@ -22,39 +64,14 @@ export function installNavigation(onPage: (page: PreparedPage) => void) {
     if (url.origin !== window.location.origin || !isRoutablePath(url.pathname)) return
 
     event.preventDefault()
-    navigation.setNavigating(true)
-
     try {
-      const page = await getPreparedPage(url)
-      history.pushState({ goose: true, payload: page.payload }, '', url)
-      onPage(page)
-      scrollAfterNavigation(url)
+      await router.push(`${url.pathname}${url.search}${url.hash}`)
     } catch {
       window.location.href = url.toString()
-    } finally {
-      navigation.setNavigating(false)
     }
   })
 
-  window.addEventListener('popstate', async (event) => {
-    const cached = event.state?.payload as PagePayload | undefined
-    if (cached) {
-      navigation.setNavigating(true)
-      preparePayload(cached)
-        .then(onPage)
-        .finally(() => navigation.setNavigating(false))
-      return
-    }
-
-    try {
-      navigation.setNavigating(true)
-      onPage(await getPreparedPage(new URL(window.location.href)))
-    } catch {
-      window.location.reload()
-    } finally {
-      navigation.setNavigating(false)
-    }
-  })
+  return router
 }
 
 async function getPreparedPage(url: URL): Promise<PreparedPage> {
