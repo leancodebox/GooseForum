@@ -555,7 +555,6 @@ async function submitReply(replyId = 0) {
 
 async function refreshCurrentPage() {
   const payload = await fetchPage(new URL(window.location.href))
-  history.replaceState({ goose: true, payload }, '', window.location.href)
   window.dispatchEvent(new CustomEvent('goose:page', { detail: payload }))
 }
 

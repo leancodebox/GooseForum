@@ -53,6 +53,11 @@ body {
     @apply prose prose-slate max-w-none min-w-0;
   }
 
+  .gf-prose :where(p, li, blockquote, h1, h2, h3, h4, h5, h6, a, strong, em) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
   .gf-prose-compact {
     @apply text-[13px];
   }

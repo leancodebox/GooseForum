@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRouter, type RouteLocationNormalized } from 'vue-router'
+import { computed, nextTick, ref } from 'vue'
 import { Bold, Code2, Image, Italic, Link, ListChecks, MessageSquareQuote, Send, X } from '@lucide/vue'
 import MarkdownIt from 'markdown-it'
 import anchor from 'markdown-it-anchor'
 import taskLists from 'markdown-it-task-lists'
 import { submitArticle, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
+import { useUnsavedDraftGuard } from '@/site/composables/useUnsavedDraftGuard'
 import type { LayoutPayload, PublishPageProps } from '@/types/payload'
 
 const page = defineProps<{
@@ -28,9 +28,6 @@ const uploadDone = ref(0)
 const message = ref('')
 const error = ref('')
 const editor = ref<HTMLTextAreaElement | null>(null)
-const leavePromptOpen = ref(false)
-const pendingNavigationUrl = ref('')
-const forcedNavigation = ref(false)
 const markdown = new MarkdownIt({
   html: true,
   linkify: true,
@@ -40,7 +37,7 @@ const markdown = new MarkdownIt({
   .use(anchor)
   .use(taskLists, { enabled: true })
 
-const isValid = computed(() => title.value.trim() && content.value.trim() && categoryIds.value.length > 0)
+const isValid = computed(() => Boolean(title.value.trim() && content.value.trim() && categoryIds.value.length > 0))
 const selectedCategories = computed(() => page.props.categories.filter((category) => categoryIds.value.includes(category.id)))
 const renderedPreview = computed(() => markdown.render(content.value || ''))
 const draftSaveable = computed(() => isValid.value && !submitting.value && !uploading.value)
@@ -50,19 +47,16 @@ const uploadText = computed(() => {
   if (!uploading.value) return ''
   return uploadTotal.value > 1 ? `正在处理图片 ${uploadDone.value}/${uploadTotal.value}` : '正在处理图片...'
 })
-const router = useRouter()
-let removeRouteGuard: (() => void) | undefined
-let resolveLeavePrompt: ((allow: boolean) => void) | undefined
-
-onMounted(() => {
-  removeRouteGuard = router.beforeEach((to) => confirmRouteLeave(to))
-  window.addEventListener('beforeunload', handleBeforeUnload)
-})
-
-onBeforeUnmount(() => {
-  removeRouteGuard?.()
-  resolveLeavePrompt?.(true)
-  window.removeEventListener('beforeunload', handleBeforeUnload)
+const {
+  leavePromptOpen,
+  forceNextNavigation,
+  closeLeavePrompt,
+  discardAndLeave,
+  saveDraftAndLeave,
+} = useUnsavedDraftGuard({
+  hasUnsavedChanges,
+  canSaveDraft: draftSaveable,
+  saveDraftBeforeLeave: () => persistDraft(undefined, false),
 })
 
 function editorSnapshot() {
@@ -258,7 +252,7 @@ async function save() {
     })
     currentArticleId.value = id
     syncSavedSnapshot()
-    forcedNavigation.value = true
+    forceNextNavigation()
     message.value = page.props.isEditing ? '主题已更新。' : '主题已发布。'
     window.location.href = `/p/post/${id}`
   } catch (err) {
@@ -288,7 +282,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
     })
     currentArticleId.value = id
     syncSavedSnapshot()
-    forcedNavigation.value = true
+    forceNextNavigation()
     if (redirect) window.location.href = nextUrl || '/drafts'
     return true
   } catch (err) {
@@ -297,44 +291,6 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
   } finally {
     submitting.value = false
   }
-}
-
-function handleBeforeUnload(event: BeforeUnloadEvent) {
-  if (forcedNavigation.value || !hasUnsavedChanges.value) return
-  event.preventDefault()
-  event.returnValue = ''
-}
-
-function confirmRouteLeave(to: RouteLocationNormalized) {
-  if (forcedNavigation.value || !hasUnsavedChanges.value) return true
-  pendingNavigationUrl.value = new URL(to.fullPath, window.location.origin).toString()
-  leavePromptOpen.value = true
-  return new Promise<boolean>((resolve) => {
-    resolveLeavePrompt = resolve
-  })
-}
-
-function closeLeavePrompt() {
-  leavePromptOpen.value = false
-  pendingNavigationUrl.value = ''
-  resolveLeavePrompt?.(false)
-  resolveLeavePrompt = undefined
-}
-
-function discardAndLeave() {
-  forcedNavigation.value = true
-  leavePromptOpen.value = false
-  resolveLeavePrompt?.(true)
-  resolveLeavePrompt = undefined
-}
-
-async function saveDraftAndLeave() {
-  if (!draftSaveable.value) return
-  const saved = await persistDraft(undefined, false)
-  if (!saved) return
-  leavePromptOpen.value = false
-  resolveLeavePrompt?.(true)
-  resolveLeavePrompt = undefined
 }
 </script>
 

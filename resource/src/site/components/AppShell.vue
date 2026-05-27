@@ -488,6 +488,7 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
     </main>
 
     <MobileDrawer
+      v-if="drawerOpen"
       :open="drawerOpen"
       :primary-items="primaryItems"
       :resource-items="resourceItems"

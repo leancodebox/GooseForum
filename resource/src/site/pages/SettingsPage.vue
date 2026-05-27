@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import Cropper from 'cropperjs'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import {
   CalendarDays,
   Camera,
@@ -20,12 +19,11 @@ import {
   saveUserInfo,
   saveUserName,
   unbindOAuth,
-  uploadAvatar,
   type OAuthBindingsPayload,
 } from '@/runtime/api'
 import { formatDate, formatNumber } from '@/runtime/format'
 import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message'
-import { canvasToImageFile, validateImageFile } from '@/runtime/image'
+import { useAvatarCropUpload } from '@/site/composables/useAvatarCropUpload'
 import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
 import FlashSpriteIcon from '@/site/components/FlashSpriteIcon.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
@@ -46,23 +44,30 @@ const savingProfile = ref(false)
 const savingUsername = ref(false)
 const savingEmail = ref(false)
 const savingPassword = ref(false)
-const uploadingAvatar = ref(false)
 const loadingBindings = ref(false)
 const bindingAction = ref('')
-const avatarInput = ref<HTMLInputElement | null>(null)
-const cropperImage = ref<HTMLImageElement | null>(null)
-const avatarUrl = ref(page.props.user.avatarUrl)
-const cropModalOpen = ref(false)
-const cropImageUrl = ref('')
-const cropPreviewUrl = ref('')
-const cropError = ref('')
-const cropSourceFile = ref<File | null>(null)
-let cropper: Cropper | undefined
-let cropPreviewFrame = 0
 const editingUsername = ref(false)
 const editingEmail = ref(false)
 const bindings = ref<OAuthBindingsPayload>({})
 const { push: pushFlash } = useFlashMessages()
+const {
+  uploadingAvatar,
+  avatarInput,
+  cropperImage,
+  avatarUrl,
+  cropModalOpen,
+  cropImageUrl,
+  cropPreviewUrl,
+  cropError,
+  chooseAvatar,
+  handleAvatarChange,
+  closeCropModal,
+  uploadCroppedAvatar,
+} = useAvatarCropUpload({
+  initialAvatarUrl: page.props.user.avatarUrl,
+  onStatus: showStatus,
+  onError: showError,
+})
 
 const socialKeys = ['github', 'twitter', 'linkedIn', 'weibo', 'bilibili', 'zhihu'] as const
 
@@ -148,11 +153,6 @@ onMounted(() => {
     Object.assign(privacy, JSON.parse(savedPrivacy))
   }
   void loadBindings()
-})
-
-onBeforeUnmount(() => {
-  destroyCropper()
-  revokeCropImageUrl()
 })
 
 function buildExternalInfo() {
@@ -265,179 +265,6 @@ async function submitPassword() {
 function savePrivacy() {
   localStorage.setItem('goose-privacy-settings', JSON.stringify(privacy))
   showStatus('隐私偏好已保存')
-}
-
-function chooseAvatar() {
-  avatarInput.value?.click()
-}
-
-async function handleAvatarChange(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  const validationError = validateImageFile(file, 5 * 1024 * 1024)
-  if (validationError) return showError(validationError)
-
-  openCropModal(file)
-  if (avatarInput.value) avatarInput.value.value = ''
-}
-
-function openCropModal(file: File) {
-  destroyCropper()
-  revokeCropImageUrl()
-  cropError.value = ''
-  cropSourceFile.value = file
-  cropImageUrl.value = URL.createObjectURL(file)
-  cropModalOpen.value = true
-  void nextTick(initCropper)
-}
-
-function initCropper() {
-  if (!cropperImage.value) return
-  cropper = new Cropper(cropperImage.value, {
-    template: `
-      <cropper-canvas background>
-        <cropper-image translatable scalable rotatable></cropper-image>
-        <cropper-shade hidden></cropper-shade>
-        <cropper-handle action="select" plain></cropper-handle>
-        <cropper-selection aspect-ratio="1" movable resizable zoomable outlined>
-          <cropper-grid role="grid" bordered covered></cropper-grid>
-          <cropper-crosshair centered></cropper-crosshair>
-          <cropper-handle action="move" theme-color="rgba(37, 99, 235, 0.35)"></cropper-handle>
-          <cropper-handle action="n-resize"></cropper-handle>
-          <cropper-handle action="e-resize"></cropper-handle>
-          <cropper-handle action="s-resize"></cropper-handle>
-          <cropper-handle action="w-resize"></cropper-handle>
-          <cropper-handle action="ne-resize"></cropper-handle>
-          <cropper-handle action="nw-resize"></cropper-handle>
-          <cropper-handle action="se-resize"></cropper-handle>
-          <cropper-handle action="sw-resize"></cropper-handle>
-        </cropper-selection>
-      </cropper-canvas>
-    `,
-  })
-  void resetCropSelectionToImageShortSide()
-  cropper.container.addEventListener('pointerup', scheduleCropPreview)
-  cropper.container.addEventListener('wheel', scheduleCropPreview, { passive: true })
-  cropper.container.addEventListener('keyup', scheduleCropPreview)
-}
-
-async function resetCropSelectionToImageShortSide() {
-  const cropperImageElement = cropper?.getCropperImage()
-  const cropperCanvas = cropper?.getCropperCanvas()
-  const selection = cropper?.getCropperSelection()
-  if (!cropperImageElement || !cropperCanvas || !selection) return
-
-  try {
-    await cropperImageElement.$ready()
-  } catch {
-    return
-  }
-
-  window.requestAnimationFrame(() => {
-    const canvasRect = cropperCanvas.getBoundingClientRect()
-    const imageRect = cropperImageElement.getBoundingClientRect()
-    const side = Math.min(imageRect.width, imageRect.height)
-    if (side <= 0) return
-
-    const x = imageRect.left - canvasRect.left + (imageRect.width - side) / 2
-    const y = imageRect.top - canvasRect.top + (imageRect.height - side) / 2
-    selection.$change(x, y, side, side, 1, true)
-    void updateCropPreview()
-  })
-}
-
-function closeCropModal() {
-  cropModalOpen.value = false
-  cropSourceFile.value = null
-  cropError.value = ''
-  destroyCropper()
-  revokeCropImageUrl()
-}
-
-function destroyCropper() {
-  window.cancelAnimationFrame(cropPreviewFrame)
-  cropPreviewFrame = 0
-  cropper?.destroy()
-  cropper = undefined
-  cropPreviewUrl.value = ''
-}
-
-function revokeCropImageUrl() {
-  if (cropImageUrl.value) URL.revokeObjectURL(cropImageUrl.value)
-  cropImageUrl.value = ''
-}
-
-async function uploadCroppedAvatar() {
-  if (!cropper || !cropSourceFile.value) return
-
-  uploadingAvatar.value = true
-  cropError.value = ''
-  try {
-    const selection = cropper.getCropperSelection()
-    if (!selection) throw new Error('请选择裁切区域')
-    const canvas = await selection.$toCanvas({
-      width: 300,
-      height: 300,
-      beforeDraw(context) {
-        context.imageSmoothingEnabled = true
-        context.imageSmoothingQuality = 'high'
-      },
-    })
-    const avatarFiles = await createAvatarUploadFiles(canvas, cropSourceFile.value.name)
-    avatarUrl.value = await uploadAvatar(avatarFiles)
-    closeCropModal()
-    showStatus('头像已更新')
-  } catch (err) {
-    const message = err instanceof Error ? err.message : '头像上传失败'
-    cropError.value = message
-    showError(message)
-  } finally {
-    uploadingAvatar.value = false
-  }
-}
-
-async function createAvatarUploadFiles(sourceCanvas: HTMLCanvasElement, filename: string): Promise<File[]> {
-  const avatar300 = await canvasToImageFile(sourceCanvas, filename, undefined, 0.86)
-  const avatarMedium = await canvasToImageFile(resizeAvatarCanvas(sourceCanvas, 96), 'avatar_medium.webp', undefined, 0.9)
-  return [avatar300, avatarMedium]
-}
-
-function resizeAvatarCanvas(sourceCanvas: HTMLCanvasElement, size: number): HTMLCanvasElement {
-  const canvas = document.createElement('canvas')
-  canvas.width = size
-  canvas.height = size
-  const context = canvas.getContext('2d')
-  if (!context) throw new Error('无法处理头像')
-
-  context.imageSmoothingEnabled = true
-  context.imageSmoothingQuality = 'high'
-  context.drawImage(sourceCanvas, 0, 0, sourceCanvas.width, sourceCanvas.height, 0, 0, size, size)
-  return canvas
-}
-
-function scheduleCropPreview() {
-  window.cancelAnimationFrame(cropPreviewFrame)
-  cropPreviewFrame = window.requestAnimationFrame(() => {
-    void updateCropPreview()
-  })
-}
-
-async function updateCropPreview() {
-  const selection = cropper?.getCropperSelection()
-  if (!selection) return
-  try {
-    const canvas = await selection.$toCanvas({
-      width: 160,
-      height: 160,
-      beforeDraw(context) {
-        context.imageSmoothingEnabled = true
-        context.imageSmoothingQuality = 'high'
-      },
-    })
-    cropPreviewUrl.value = canvas.toDataURL('image/webp', 0.82)
-  } catch {
-    cropPreviewUrl.value = ''
-  }
 }
 
 async function loadBindings() {
