@@ -3,7 +3,6 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import Draggable from 'vuedraggable'
 import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
 import { Input } from '@/admin/components/ui/input'
@@ -376,15 +375,14 @@ onMounted(load)
 </script>
 
 <template>
-  <AdminLayout :layout="payload.layout">
-    <BasicPage :title="pageMeta.title" :description="pageMeta.description" sticky>
-      <template #actions>
-        <Button type="button" :disabled="saving" @click="save">
-          <Loader2 v-if="saving" class="size-4 animate-spin" />
-          <Save v-else class="size-4" />
-          保存配置
-        </Button>
-      </template>
+  <BasicPage :title="pageMeta.title" :description="pageMeta.description" sticky>
+    <template #actions>
+      <Button type="button" :disabled="saving" @click="save">
+        <Loader2 v-if="saving" class="size-4 animate-spin" />
+        <Save v-else class="size-4" />
+        保存配置
+      </Button>
+    </template>
 
       <div v-if="loading" class="flex h-[400px] items-center justify-center">
         <Loader2 class="size-8 animate-spin text-primary" />
@@ -653,5 +651,4 @@ onMounted(load)
         </DialogContent>
       </Dialog>
     </BasicPage>
-  </AdminLayout>
 </template>

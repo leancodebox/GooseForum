@@ -2,7 +2,6 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Pencil, Plus, RefreshCw, Search, Trash2 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
 import { Input } from '@/admin/components/ui/input'
@@ -154,20 +153,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminLayout :layout="payload.layout">
-    <BasicPage title="分类管理" description="管理论坛的文章分类、展示颜色、Slug 和排序。" sticky>
-      <template #actions>
-        <div class="flex items-center gap-2">
-          <Button variant="outline" type="button" @click="loadCategories">
-            <RefreshCw class="size-4" />
-            刷新
-          </Button>
-          <Button type="button" @click="openCreate">
-            <Plus class="size-4" />
-            新增分类
-          </Button>
-        </div>
-      </template>
+  <BasicPage title="分类管理" description="管理论坛的文章分类、展示颜色、Slug 和排序。" sticky>
+    <template #actions>
+      <div class="flex items-center gap-2">
+        <Button variant="outline" type="button" @click="loadCategories">
+          <RefreshCw class="size-4" />
+          刷新
+        </Button>
+        <Button type="button" @click="openCreate">
+          <Plus class="size-4" />
+          新增分类
+        </Button>
+      </div>
+    </template>
 
       <div class="mb-4 flex items-center gap-2">
         <div class="relative w-full max-w-md">
@@ -318,5 +316,4 @@ onMounted(() => {
         </DialogContent>
       </Dialog>
     </BasicPage>
-  </AdminLayout>
 </template>

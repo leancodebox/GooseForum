@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { Ban, ExternalLink, Eye, FileText, Heart, MessageSquare, Pin, RefreshCw, Search, Tags, Undo2 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
 import { Input } from '@/admin/components/ui/input'
@@ -241,14 +240,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminLayout :layout="payload.layout">
-    <BasicPage title="帖子管理" description="审核内容、调整分类、查看原文和处理异常帖子。" sticky>
-      <template #actions>
-        <Button variant="outline" type="button" @click="loadPosts">
-          <RefreshCw class="size-4" />
-          刷新
-        </Button>
-      </template>
+  <BasicPage title="帖子管理" description="审核内容、调整分类、查看原文和处理异常帖子。" sticky>
+    <template #actions>
+      <Button variant="outline" type="button" @click="loadPosts">
+        <RefreshCw class="size-4" />
+        刷新
+      </Button>
+    </template>
 
       <div class="overflow-hidden rounded-lg border bg-card">
         <div class="flex flex-col gap-2 border-b bg-muted/10 px-3 py-2 lg:flex-row lg:items-center lg:justify-between">
@@ -531,5 +529,4 @@ onMounted(() => {
         </DialogContent>
       </Dialog>
     </BasicPage>
-  </AdminLayout>
 </template>

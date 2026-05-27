@@ -3,7 +3,6 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import Draggable from 'vuedraggable'
 import { GripVertical, Loader2, PenLine, Plus, RefreshCw, Save, Trash2, Upload } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { Button } from '@/admin/components/ui/button'
 import { Input } from '@/admin/components/ui/input'
 import { Textarea } from '@/admin/components/ui/textarea'
@@ -204,21 +203,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminLayout :layout="payload.layout">
-    <BasicPage title="赞助管理" description="按前台赞助页的展示层级管理赞助商。" sticky>
-      <template #actions>
-        <div class="flex items-center gap-2">
-          <Button variant="outline" type="button" @click="loadSponsors">
-            <RefreshCw class="size-4" />
-            刷新
-          </Button>
-          <Button type="button" :disabled="saving" @click="persist">
-            <Loader2 v-if="saving" class="size-4 animate-spin" />
-            <Save v-else class="size-4" />
-            保存配置
-          </Button>
-        </div>
-      </template>
+  <BasicPage title="赞助管理" description="按前台赞助页的展示层级管理赞助商。" sticky>
+    <template #actions>
+      <div class="flex items-center gap-2">
+        <Button variant="outline" type="button" @click="loadSponsors">
+          <RefreshCw class="size-4" />
+          刷新
+        </Button>
+        <Button type="button" :disabled="saving" @click="persist">
+          <Loader2 v-if="saving" class="size-4 animate-spin" />
+          <Save v-else class="size-4" />
+          保存配置
+        </Button>
+      </div>
+    </template>
 
       <div v-if="loading" class="flex h-64 items-center justify-center rounded-lg border">
         <Loader2 class="size-8 animate-spin text-primary" />
@@ -357,5 +355,4 @@ onMounted(() => {
         </DialogContent>
       </Dialog>
     </BasicPage>
-  </AdminLayout>
 </template>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { RefreshCw } from '@lucide/vue'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Badge } from '@/admin/components/ui/badge'
 import { Button } from '@/admin/components/ui/button'
@@ -86,14 +85,13 @@ onMounted(loadRecords)
 </script>
 
 <template>
-  <AdminLayout :layout="props.payload.layout">
-    <BasicPage title="操作记录" description="查看后台关键管理操作的审计记录。" sticky>
-      <template #actions>
-        <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadRecords">
-          <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
-          刷新
-        </Button>
-      </template>
+  <BasicPage title="操作记录" description="查看后台关键管理操作的审计记录。" sticky>
+    <template #actions>
+      <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadRecords">
+        <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
+        刷新
+      </Button>
+    </template>
 
       <ManagementTable
         :columns="columns"
@@ -125,5 +123,4 @@ onMounted(loadRecords)
         </tr>
       </ManagementTable>
     </BasicPage>
-  </AdminLayout>
 </template>

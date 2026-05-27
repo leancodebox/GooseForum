@@ -2,7 +2,6 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Edit3, Plus, RefreshCw, Trash2 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
 import { Input } from '@/admin/components/ui/input'
@@ -161,20 +160,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminLayout :layout="payload.layout">
-    <BasicPage title="徽章管理" description="管理系统默认徽章和自定义徽章。系统默认徽章只能编辑，不能删除。" sticky>
-      <template #actions>
-        <div class="flex items-center gap-2">
-          <Button variant="outline" type="button" @click="loadBadges">
-            <RefreshCw class="size-4" />
-            刷新
-          </Button>
-          <Button type="button" @click="openCreate">
-            <Plus class="size-4" />
-            新增徽章
-          </Button>
-        </div>
-      </template>
+  <BasicPage title="徽章管理" description="管理系统默认徽章和自定义徽章。系统默认徽章只能编辑，不能删除。" sticky>
+    <template #actions>
+      <div class="flex items-center gap-2">
+        <Button variant="outline" type="button" @click="loadBadges">
+          <RefreshCw class="size-4" />
+          刷新
+        </Button>
+        <Button type="button" @click="openCreate">
+          <Plus class="size-4" />
+          新增徽章
+        </Button>
+      </div>
+    </template>
 
       <div class="mb-3 flex flex-wrap gap-2 text-sm text-muted-foreground">
         <Badge variant="secondary">系统默认 {{ stats.system }}</Badge>
@@ -281,5 +279,4 @@ onMounted(() => {
         </DialogContent>
       </Dialog>
     </BasicPage>
-  </AdminLayout>
 </template>

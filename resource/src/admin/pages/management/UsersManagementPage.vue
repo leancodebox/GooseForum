@@ -2,7 +2,6 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Award, ChevronLeft, ChevronRight, CheckCircle2, Loader2, Pencil, RefreshCw, Search, ShieldOff, XCircle } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { editUser, getAllRoleItem, getUserBadgeOptions, getUserList, saveUserBadges } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminBadge, AdminPayload, AdminUser, ManageHomeProps, UserBadge } from '@/admin/types'
@@ -189,14 +188,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminLayout :layout="payload.layout">
-    <BasicPage title="用户管理" description="在此管理系统用户，您可以修改用户状态、验证状态以及分配角色。" sticky>
-      <template #actions>
-        <button class="inline-flex h-9 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium shadow-xs hover:bg-muted" type="button" @click="loadUsers">
-          <RefreshCw class="size-4" />
-          刷新
-        </button>
-      </template>
+  <BasicPage title="用户管理" description="在此管理系统用户，您可以修改用户状态、验证状态以及分配角色。" sticky>
+    <template #actions>
+      <button class="inline-flex h-9 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium shadow-xs hover:bg-muted" type="button" @click="loadUsers">
+        <RefreshCw class="size-4" />
+        刷新
+      </button>
+    </template>
 
       <div class="overflow-hidden rounded-lg border bg-card">
         <div class="flex flex-col gap-2 border-b bg-muted/10 px-3 py-2 lg:flex-row lg:items-center lg:justify-between">
@@ -484,5 +482,4 @@ onMounted(() => {
         </form>
       </div>
     </BasicPage>
-  </AdminLayout>
 </template>

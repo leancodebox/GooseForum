@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { FileText, Link as LinkIcon, MessageSquare, Users } from '@lucide/vue'
-import { computed, onMounted, ref } from 'vue'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import {
   getGithubReleases,
@@ -9,9 +8,6 @@ import {
   getSiteStatistics,
   getTrafficOverview,
 } from '@/admin/runtime/api'
-import DateRangePicker from '@/admin/pages/stats/DateRangePicker.vue'
-import ProjectVersion from '@/admin/pages/stats/ProjectVersion.vue'
-import TrafficOverview from '@/admin/pages/stats/TrafficOverview.vue'
 import type {
   AdminPayload,
   DailyTraffic,
@@ -24,6 +20,10 @@ import type {
 defineProps<{
   payload: AdminPayload<ManageHomeProps>
 }>()
+
+const DateRangePicker = defineAsyncComponent(() => import('@/admin/pages/stats/DateRangePicker.vue'))
+const ProjectVersion = defineAsyncComponent(() => import('@/admin/pages/stats/ProjectVersion.vue'))
+const TrafficOverview = defineAsyncComponent(() => import('@/admin/pages/stats/TrafficOverview.vue'))
 
 const stats = ref<SiteStatistics>()
 const statsLoading = ref(true)
@@ -152,30 +152,29 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminLayout :layout="payload.layout">
-    <BasicPage
-      title="站点统计"
-      description="查看论坛的实时运行数据和活跃度指标。"
-      sticky
-    >
-      <template #actions>
-        <div class="flex flex-wrap items-center gap-3">
-          <div class="inline-flex max-w-full items-center gap-2 rounded-md border bg-muted/35 px-2.5 py-1 text-xs text-muted-foreground">
-            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-            <span class="shrink-0">服务端</span>
-            <span class="truncate font-semibold text-foreground">{{ serverVersionLoading ? '读取中...' : serverVersion?.version || 'dev' }}</span>
-            <span
-              v-if="!serverVersionLoading"
-              class="inline-flex h-5 shrink-0 items-center rounded-md bg-secondary px-1.5 text-[10px] font-medium text-secondary-foreground"
-            >
-              {{ modeLabel(serverVersion?.mode) }}
-            </span>
-            <span v-if="!serverVersionLoading && shortCommit(serverVersion?.commit)" class="hidden text-muted-foreground sm:inline">
-              #{{ shortCommit(serverVersion?.commit) }}
-            </span>
-          </div>
+  <BasicPage
+    title="站点统计"
+    description="查看论坛的实时运行数据和活跃度指标。"
+    sticky
+  >
+    <template #actions>
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="inline-flex max-w-full items-center gap-2 rounded-md border bg-muted/35 px-2.5 py-1 text-xs text-muted-foreground">
+          <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+          <span class="shrink-0">服务端</span>
+          <span class="truncate font-semibold text-foreground">{{ serverVersionLoading ? '读取中...' : serverVersion?.version || 'dev' }}</span>
+          <span
+            v-if="!serverVersionLoading"
+            class="inline-flex h-5 shrink-0 items-center rounded-md bg-secondary px-1.5 text-[10px] font-medium text-secondary-foreground"
+          >
+            {{ modeLabel(serverVersion?.mode) }}
+          </span>
+          <span v-if="!serverVersionLoading && shortCommit(serverVersion?.commit)" class="hidden text-muted-foreground sm:inline">
+            #{{ shortCommit(serverVersion?.commit) }}
+          </span>
         </div>
-      </template>
+      </div>
+    </template>
 
       <div class="mb-4 grid overflow-hidden rounded-lg border bg-card shadow-sm sm:grid-cols-2 xl:grid-cols-4">
         <div
@@ -218,5 +217,4 @@ onMounted(() => {
         </div>
       </div>
     </BasicPage>
-  </AdminLayout>
 </template>

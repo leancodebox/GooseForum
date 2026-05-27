@@ -3,7 +3,6 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import Draggable from 'vuedraggable'
 import { ExternalLink, Eye, EyeOff, GripVertical, Link as LinkIcon, Pencil, Plus, RefreshCw, Send, ShieldCheck, Trash2 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
 import { Input } from '@/admin/components/ui/input'
@@ -159,20 +158,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminLayout :layout="payload.layout">
-    <BasicPage title="友情链接管理" description="按前台友情链接页的展示形态管理站点链接。" sticky>
-      <template #actions>
-        <div class="flex items-center gap-2">
-          <Button variant="outline" type="button" @click="loadLinks">
-            <RefreshCw class="size-4" />
-            刷新
-          </Button>
-          <Button type="button" @click="openAddGroup">
-            <Plus class="size-4" />
-            添加分组
-          </Button>
-        </div>
-      </template>
+  <BasicPage title="友情链接管理" description="按前台友情链接页的展示形态管理站点链接。" sticky>
+    <template #actions>
+      <div class="flex items-center gap-2">
+        <Button variant="outline" type="button" @click="loadLinks">
+          <RefreshCw class="size-4" />
+          刷新
+        </Button>
+        <Button type="button" @click="openAddGroup">
+          <Plus class="size-4" />
+          添加分组
+        </Button>
+      </div>
+    </template>
 
       <div v-if="loading" class="flex h-64 items-center justify-center rounded-lg border text-muted-foreground">加载中...</div>
       <div v-else-if="error" class="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{{ error }}</div>
@@ -395,5 +393,4 @@ onMounted(() => {
         </DialogContent>
       </Dialog>
     </BasicPage>
-  </AdminLayout>
 </template>

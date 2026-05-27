@@ -2,7 +2,6 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, XCircle } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
-import AdminLayout from '@/admin/layouts/AdminLayout.vue'
 import { deleteRole, getPermissionList, getRoleList, saveRole } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminPayload, AdminRole, ManageHomeProps } from '@/admin/types'
@@ -141,20 +140,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminLayout :layout="payload.layout">
-    <BasicPage title="角色管理" description="在这里管理系统的角色及其权限。" sticky>
-      <template #actions>
-        <div class="flex items-center gap-2">
-          <button class="inline-flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium shadow-sm hover:bg-muted" type="button" @click="loadRoles">
-            <RefreshCw class="size-4" />
-            刷新
-          </button>
-          <button class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90" type="button" @click="openAdd">
-            <Plus class="size-4" />
-            添加角色
-          </button>
-        </div>
-      </template>
+  <BasicPage title="角色管理" description="在这里管理系统的角色及其权限。" sticky>
+    <template #actions>
+      <div class="flex items-center gap-2">
+        <button class="inline-flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium shadow-sm hover:bg-muted" type="button" @click="loadRoles">
+          <RefreshCw class="size-4" />
+          刷新
+        </button>
+        <button class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90" type="button" @click="openAdd">
+          <Plus class="size-4" />
+          添加角色
+        </button>
+      </div>
+    </template>
 
       <div class="mb-4 flex flex-wrap items-center gap-2">
         <form class="flex min-w-64 flex-1 gap-2 sm:flex-none" @submit.prevent="applySearch">
@@ -268,5 +266,4 @@ onMounted(() => {
         </div>
       </div>
     </BasicPage>
-  </AdminLayout>
 </template>
