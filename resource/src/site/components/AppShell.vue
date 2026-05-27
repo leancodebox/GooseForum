@@ -387,8 +387,8 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
       class="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-3 px-3 py-3 sm:px-5 lg:grid-cols-[210px_minmax(0,1fr)] lg:px-8 xl:grid-cols-[224px_minmax(0,1fr)]"
       :class="{ 'xl:grid-cols-[224px_minmax(0,1fr)_280px]': rail }"
     >
-      <aside class="gf-scrollbar-none sticky top-19 hidden h-[calc(100vh-5.5rem)] overflow-y-auto self-start lg:block" aria-label="Sidebar">
-        <nav>
+      <aside class="gf-scrollbar-none sticky top-16 -my-3 hidden h-[calc(100vh-4rem)] overflow-y-auto self-start lg:block" aria-label="Sidebar">
+        <nav class="py-3">
           <div class="pb-2">
             <div class="space-y-0.5">
               <a
