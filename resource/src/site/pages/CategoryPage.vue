@@ -5,6 +5,7 @@ import { formatNumber, timeAgo } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { topicDescription } from '@/runtime/topic-description'
 import { showUserCard } from '@/runtime/user-card-events'
+import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { CategoryPageProps, LayoutPayload, PagePayload, TopicPayload } from '@/types/payload'
 
 const page = defineProps<{
@@ -135,7 +136,7 @@ onBeforeUnmount(() => {
                     class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
                     @click="showUserCard(participant, $event)"
                   >
-                    <img :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
+                    <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
                   </a>
                 </div>
                 <span>{{ timeAgo(topic.lastUpdateTime) }}</span>
@@ -154,7 +155,7 @@ onBeforeUnmount(() => {
                   class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
                   @click="showUserCard(participant, $event)"
                 >
-                  <img :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
+                  <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
                 </a>
               </div>
             </div>

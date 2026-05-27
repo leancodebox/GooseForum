@@ -13,6 +13,7 @@ import { formatDate, formatNumber, timeAgo } from '@/runtime/format'
 import type { UserCardShowDetail } from '@/runtime/user-card-events'
 import type { UserHoverCardPayload } from '@/types/payload'
 import { socialIcons, socialLabels, type SimpleIcon } from '@/site/utils/social-icons'
+import UserAvatar from './UserAvatar.vue'
 
 const visible = ref(false)
 const loading = ref(false)
@@ -197,7 +198,7 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
       >
       <div class="flex items-start gap-3">
         <a :href="profileUrl" class="shrink-0 rounded-full ring-2 ring-white">
-          <img :src="avatarUrl" :alt="username" class="h-14 w-14 rounded-full object-cover ring-1 ring-gray-100" />
+          <UserAvatar :src="avatarUrl" :alt="username" size="medium" class="h-14 w-14 rounded-full object-cover ring-1 ring-gray-100" />
         </a>
         <div class="min-w-0 flex-1">
           <div class="flex min-w-0 items-center gap-2">

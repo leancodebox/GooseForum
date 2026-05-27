@@ -6,6 +6,7 @@ import { formatDateTime, formatNumber } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
+import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { ArticleDetailProps, LayoutPayload, ReplyPayload } from '@/types/payload'
 
 const page = defineProps<{
@@ -601,7 +602,7 @@ async function removeReply(replyId: number) {
             class="inline-flex items-center gap-2 font-medium text-gray-700 hover:text-blue-600"
             @click="showUserCard(page.props.article.author, $event)"
           >
-            <img :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" class="h-5 w-5 rounded-full object-cover" />
+            <UserAvatar :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" class="h-5 w-5 rounded-full object-cover" />
             {{ page.props.article.author.username }}
           </a>
           <span class="inline-flex items-center gap-1.5">
@@ -627,7 +628,7 @@ async function removeReply(replyId: number) {
             class="sticky top-19 self-start pt-1"
             @click="showUserCard(page.props.article.author, $event)"
           >
-            <img :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" class="h-11 w-11 rounded-full object-cover ring-1 ring-gray-100" />
+            <UserAvatar :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" class="h-11 w-11 rounded-full object-cover ring-1 ring-gray-100" />
           </a>
           <div class="min-w-0">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -705,7 +706,7 @@ async function removeReply(replyId: number) {
             class="sticky top-19 self-start pt-1"
             @click="showUserCard(reply.author, $event)"
           >
-            <img :src="reply.author.avatarUrl" :alt="reply.author.username" class="h-9 w-9 rounded-full object-cover ring-1 ring-gray-100 sm:h-10 sm:w-10" />
+            <UserAvatar :src="reply.author.avatarUrl" :alt="reply.author.username" class="h-9 w-9 rounded-full object-cover ring-1 ring-gray-100 sm:h-10 sm:w-10" />
           </a>
           <div class="min-w-0">
             <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
@@ -966,7 +967,7 @@ async function removeReply(replyId: number) {
                 class="rounded-full"
                 @click="showUserCard(participant, $event)"
               >
-                <img :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover ring-1 ring-gray-100 transition hover:ring-blue-300" />
+                <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover ring-1 ring-gray-100 transition hover:ring-blue-300" />
               </a>
             </div>
           </div>

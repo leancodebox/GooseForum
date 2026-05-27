@@ -63,13 +63,16 @@ func all() (entities []*Entity) {
 }
 
 func SaveFile(userId uint64, name string, fileType string, data []byte) (*Entity, error) {
+	if GetByName(name).Id != 0 {
+		return nil, fmt.Errorf("file already exists: %s", name)
+	}
 	entity := &Entity{
 		Name:   name,
 		Type:   fileType,
 		Data:   data,
 		UserId: userId,
 	}
-	affected := CreateOrSave(entity)
+	affected := create(entity)
 	if affected == 0 {
 		return nil, fmt.Errorf("failed to save file, possibly duplicate name")
 	}
@@ -121,6 +124,11 @@ const (
 	AvatarPath  = "avatars"
 )
 
+type AvatarUpload struct {
+	Filename string
+	Data     []byte
+}
+
 // SaveAvatar stores an uploaded avatar file.
 func SaveAvatar(userId uint64, fileData []byte, filename string) (*Entity, error) {
 	avatarPath := fmt.Sprintf("%s/avatar_%d_%d",
@@ -129,6 +137,39 @@ func SaveAvatar(userId uint64, fileData []byte, filename string) (*Entity, error
 		time.Now().Unix())
 
 	return SaveFileFromUpload(userId, fileData, filename, avatarPath)
+}
+
+func SaveAvatarSet(userId uint64, uploads []AvatarUpload) ([]*Entity, error) {
+	if len(uploads) == 0 {
+		return nil, fmt.Errorf("avatar files are required")
+	}
+	if len(uploads) > 2 {
+		return nil, fmt.Errorf("avatar files exceed maximum limit of 2")
+	}
+
+	avatarPath := fmt.Sprintf("%s/%d/%d", AvatarPath, userId, time.Now().UnixNano())
+	avatarNames := []string{"avatar", "avatar_medium"}
+	entities := make([]*Entity, 0, len(uploads))
+
+	for index, upload := range uploads {
+		if len(upload.Data) > MaxFileSize {
+			return nil, fmt.Errorf("file size exceeds maximum limit of %dMB", MaxFileSize/(1024*1024))
+		}
+
+		contentType, err := CheckImageType(upload.Filename)
+		if err != nil {
+			return nil, err
+		}
+
+		fileExt := strings.ToLower(path.Ext(upload.Filename))
+		entity, err := SaveFile(userId, fmt.Sprintf("%s/%s%s", avatarPath, avatarNames[index], fileExt), contentType, upload.Data)
+		if err != nil {
+			return nil, err
+		}
+		entities = append(entities, entity)
+	}
+
+	return entities, nil
 }
 
 // CountUserUploadsInTimeRange counts uploads for a user within a time range.

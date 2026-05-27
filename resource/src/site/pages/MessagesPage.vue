@@ -4,6 +4,7 @@ import { ArrowLeft, MessageSquare, MoreVertical, PenLine, Search, Send, Smile, X
 import { getChatMessages, markChatRead, sendChatMessage, type ChatMessagePayload } from '@/runtime/api'
 import { formatChatTime } from '@/runtime/format'
 import { useUnreadStatus } from '@/runtime/unread-status'
+import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { LayoutPayload, MessageConversationPayload, MessagesPageProps, UserConnectionPayload } from '@/types/payload'
 
 type ChatConversation = MessageConversationPayload & {
@@ -215,7 +216,7 @@ async function startChat(user: UserConnectionPayload) {
               @click="selectConversation(conversation)"
             >
               <span class="relative h-10 w-10 shrink-0">
-                <img :src="conversation.peerAvatar" :alt="conversation.peerUsername" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-100" />
+                <UserAvatar :src="conversation.peerAvatar" :alt="conversation.peerUsername" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-100" />
                 <span
                   v-if="conversation.unreadCount"
                   class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"
@@ -253,7 +254,7 @@ async function startChat(user: UserConnectionPayload) {
                 <button type="button" class="-ml-2 inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 md:hidden" @click="active = null">
                   <ArrowLeft class="h-5 w-5" />
                 </button>
-                <img :src="active.peerAvatar" :alt="active.peerUsername" class="h-9 w-9 rounded-full object-cover ring-1 ring-gray-100" />
+                <UserAvatar :src="active.peerAvatar" :alt="active.peerUsername" class="h-9 w-9 rounded-full object-cover ring-1 ring-gray-100" />
                 <div class="min-w-0">
                   <a :href="active.peerUrl" class="truncate text-sm font-bold text-gray-950 hover:text-blue-600">{{ active.peerUsername }}</a>
                   <p class="text-xs text-gray-400">私信对话</p>
@@ -277,7 +278,7 @@ async function startChat(user: UserConnectionPayload) {
                   class="flex max-w-[88%] gap-2 md:max-w-[82%]"
                   :class="message.isSelf ? 'ml-auto flex-row-reverse' : ''"
                 >
-                  <img v-if="!message.isSelf" :src="active.peerAvatar" :alt="active.peerUsername" class="mt-auto h-8 w-8 rounded-full object-cover ring-1 ring-gray-100" />
+                  <UserAvatar v-if="!message.isSelf" :src="active.peerAvatar" :alt="active.peerUsername" class="mt-auto h-8 w-8 rounded-full object-cover ring-1 ring-gray-100" />
                   <div class="group relative min-w-0">
                     <div
                       class="whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-sm leading-relaxed shadow-sm md:px-4"
@@ -382,7 +383,7 @@ async function startChat(user: UserConnectionPayload) {
               class="flex w-full items-center gap-3 rounded-md p-3 text-left hover:bg-gray-50"
               @click="startChat(user)"
             >
-              <img :src="user.avatarUrl" :alt="user.username" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-100" />
+              <UserAvatar :src="user.avatarUrl" :alt="user.username" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-100" />
               <div class="min-w-0">
                 <div class="truncate text-sm font-semibold text-gray-950">{{ user.nickname || user.username }}</div>
                 <div class="truncate text-xs text-gray-400">@{{ user.username }}</div>

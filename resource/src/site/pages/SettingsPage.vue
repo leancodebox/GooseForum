@@ -28,6 +28,7 @@ import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message
 import { canvasToImageFile, validateImageFile } from '@/runtime/image'
 import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
 import FlashSpriteIcon from '@/site/components/FlashSpriteIcon.vue'
+import UserAvatar from '@/site/components/UserAvatar.vue'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 
 const page = defineProps<{
@@ -54,6 +55,7 @@ const avatarUrl = ref(page.props.user.avatarUrl)
 const cropModalOpen = ref(false)
 const cropImageUrl = ref('')
 const cropPreviewUrl = ref('')
+const cropError = ref('')
 const cropSourceFile = ref<File | null>(null)
 let cropper: Cropper | undefined
 let cropPreviewFrame = 0
@@ -282,6 +284,7 @@ async function handleAvatarChange(event: Event) {
 function openCropModal(file: File) {
   destroyCropper()
   revokeCropImageUrl()
+  cropError.value = ''
   cropSourceFile.value = file
   cropImageUrl.value = URL.createObjectURL(file)
   cropModalOpen.value = true
@@ -296,7 +299,7 @@ function initCropper() {
         <cropper-image translatable scalable rotatable></cropper-image>
         <cropper-shade hidden></cropper-shade>
         <cropper-handle action="select" plain></cropper-handle>
-        <cropper-selection initial-coverage="0.92" aspect-ratio="1" movable resizable zoomable outlined>
+        <cropper-selection aspect-ratio="1" movable resizable zoomable outlined>
           <cropper-grid role="grid" bordered covered></cropper-grid>
           <cropper-crosshair centered></cropper-crosshair>
           <cropper-handle action="move" theme-color="rgba(37, 99, 235, 0.35)"></cropper-handle>
@@ -312,15 +315,41 @@ function initCropper() {
       </cropper-canvas>
     `,
   })
-  window.setTimeout(updateCropPreview, 120)
+  void resetCropSelectionToImageShortSide()
   cropper.container.addEventListener('pointerup', scheduleCropPreview)
   cropper.container.addEventListener('wheel', scheduleCropPreview, { passive: true })
   cropper.container.addEventListener('keyup', scheduleCropPreview)
 }
 
+async function resetCropSelectionToImageShortSide() {
+  const cropperImageElement = cropper?.getCropperImage()
+  const cropperCanvas = cropper?.getCropperCanvas()
+  const selection = cropper?.getCropperSelection()
+  if (!cropperImageElement || !cropperCanvas || !selection) return
+
+  try {
+    await cropperImageElement.$ready()
+  } catch {
+    return
+  }
+
+  window.requestAnimationFrame(() => {
+    const canvasRect = cropperCanvas.getBoundingClientRect()
+    const imageRect = cropperImageElement.getBoundingClientRect()
+    const side = Math.min(imageRect.width, imageRect.height)
+    if (side <= 0) return
+
+    const x = imageRect.left - canvasRect.left + (imageRect.width - side) / 2
+    const y = imageRect.top - canvasRect.top + (imageRect.height - side) / 2
+    selection.$change(x, y, side, side, 1, true)
+    void updateCropPreview()
+  })
+}
+
 function closeCropModal() {
   cropModalOpen.value = false
   cropSourceFile.value = null
+  cropError.value = ''
   destroyCropper()
   revokeCropImageUrl()
 }
@@ -342,26 +371,48 @@ async function uploadCroppedAvatar() {
   if (!cropper || !cropSourceFile.value) return
 
   uploadingAvatar.value = true
+  cropError.value = ''
   try {
     const selection = cropper.getCropperSelection()
     if (!selection) throw new Error('请选择裁切区域')
     const canvas = await selection.$toCanvas({
-      width: 400,
-      height: 400,
+      width: 300,
+      height: 300,
       beforeDraw(context) {
         context.imageSmoothingEnabled = true
         context.imageSmoothingQuality = 'high'
       },
     })
-    const avatarFile = await canvasToImageFile(canvas, cropSourceFile.value.name, undefined, 0.86)
-    avatarUrl.value = await uploadAvatar(avatarFile)
+    const avatarFiles = await createAvatarUploadFiles(canvas, cropSourceFile.value.name)
+    avatarUrl.value = await uploadAvatar(avatarFiles)
     closeCropModal()
     showStatus('头像已更新')
   } catch (err) {
-    showError(err instanceof Error ? err.message : '头像上传失败')
+    const message = err instanceof Error ? err.message : '头像上传失败'
+    cropError.value = message
+    showError(message)
   } finally {
     uploadingAvatar.value = false
   }
+}
+
+async function createAvatarUploadFiles(sourceCanvas: HTMLCanvasElement, filename: string): Promise<File[]> {
+  const avatar300 = await canvasToImageFile(sourceCanvas, filename, undefined, 0.86)
+  const avatarMedium = await canvasToImageFile(resizeAvatarCanvas(sourceCanvas, 96), 'avatar_medium.webp', undefined, 0.9)
+  return [avatar300, avatarMedium]
+}
+
+function resizeAvatarCanvas(sourceCanvas: HTMLCanvasElement, size: number): HTMLCanvasElement {
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('无法处理头像')
+
+  context.imageSmoothingEnabled = true
+  context.imageSmoothingQuality = 'high'
+  context.drawImage(sourceCanvas, 0, 0, sourceCanvas.width, sourceCanvas.height, 0, 0, size, size)
+  return canvas
 }
 
 function scheduleCropPreview() {
@@ -445,7 +496,7 @@ async function toggleBinding(provider: string) {
                 aria-label="上传头像"
                 @click="chooseAvatar"
               >
-                <img :src="avatarUrl" :alt="usernameForm.username" class="h-full w-full rounded object-cover transition group-hover:brightness-90" />
+                <UserAvatar :src="avatarUrl" :alt="usernameForm.username" size="large" class="h-full w-full rounded object-cover transition group-hover:brightness-90" />
                 <span class="absolute inset-0 flex items-center justify-center rounded bg-gray-950/0 text-white transition group-hover:bg-gray-950/20">
                   <Loader2 v-if="uploadingAvatar" class="h-6 w-6 animate-spin opacity-100" />
                   <Camera v-else class="h-6 w-6 opacity-0 transition group-hover:opacity-100" />
@@ -761,10 +812,10 @@ async function toggleBinding(provider: string) {
         </div>
       </section>
 
-      <div v-if="cropModalOpen" class="fixed inset-0 z-[100] overflow-y-auto bg-gray-950/50 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true">
-        <div class="mx-auto flex min-h-full max-w-[980px] items-center justify-center">
-          <div class="w-full overflow-hidden rounded-xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      <div v-if="cropModalOpen" class="fixed inset-0 z-[100] overflow-y-auto bg-gray-950/50 px-3 py-4 backdrop-blur-sm sm:px-4" role="dialog" aria-modal="true">
+        <div class="mx-auto flex min-h-full max-w-[760px] items-center justify-center">
+          <div class="flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-gray-100 px-5 py-3">
               <div>
                 <h2 class="text-base font-semibold text-gray-950">裁切头像</h2>
                 <p class="mt-0.5 text-sm text-gray-500">拖动或缩放裁切框，确认后会自动压缩并优化格式。</p>
@@ -774,25 +825,29 @@ async function toggleBinding(provider: string) {
               </button>
             </div>
 
-            <div class="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_170px]">
-              <div class="avatar-crop-workspace h-[360px] overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+            <div class="grid gap-4 overflow-y-auto p-4 md:grid-cols-[minmax(280px,420px)_180px] md:items-start md:justify-center">
+              <div class="avatar-crop-workspace aspect-square w-full max-w-[420px] justify-self-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
                 <img ref="cropperImage" :src="cropImageUrl" alt="待裁切头像" class="block" />
               </div>
 
-              <aside class="space-y-4">
-                <div>
+              <aside class="grid gap-4 sm:grid-cols-[128px_minmax(0,1fr)] md:block md:space-y-4">
+                <div class="min-w-0">
                   <div class="mb-2 text-sm font-semibold text-gray-950">预览</div>
                   <div class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-gray-100 bg-gray-50">
                     <img v-if="cropPreviewUrl" :src="cropPreviewUrl" alt="头像预览" class="h-full w-full object-cover" />
                   </div>
                 </div>
-                <div class="rounded-lg bg-gray-50 p-3 text-sm leading-6 text-gray-500">
-                  建议让脸部或标识位于圆形中心。最终头像会导出为 400 x 400，并按浏览器支持优先转为 WebP。
+                <div class="self-start rounded-lg bg-gray-50 p-3 text-sm leading-6 text-gray-500">
+                  建议让脸部或标识位于圆形中心。最终头像会导出为 300 x 300，并按浏览器支持优先转为 WebP。
                 </div>
               </aside>
             </div>
 
-            <div class="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50 px-5 py-4">
+            <div v-if="cropError" class="border-t border-red-100 bg-red-50 px-5 py-3 text-sm font-medium text-red-600">
+              {{ cropError }}
+            </div>
+
+            <div class="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50 px-5 py-3">
               <button type="button" class="h-10 rounded-md px-4 text-sm font-medium text-gray-600 hover:bg-gray-100" @click="closeCropModal">
                 取消
               </button>

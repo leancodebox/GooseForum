@@ -14,6 +14,7 @@ import {
 import { followUser } from '@/runtime/api'
 import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/format'
 import { topicDescription } from '@/runtime/topic-description'
+import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '@/types/payload'
 
 const page = defineProps<{
@@ -101,9 +102,10 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex min-w-0 gap-4">
-              <img
+              <UserAvatar
                 :src="page.props.user.avatarUrl"
                 :alt="page.props.user.username"
+                size="large"
                 class="-mt-10 h-20 w-20 rounded-lg border-4 border-white bg-white object-cover shadow-sm sm:h-24 sm:w-24"
               />
               <div class="min-w-0 pt-3">
@@ -285,7 +287,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
               :href="item.url"
               class="flex min-w-0 gap-3 rounded-md border border-gray-100 p-3 hover:border-blue-100 hover:bg-blue-50/30"
             >
-              <img :src="item.avatarUrl" :alt="item.username" class="h-10 w-10 rounded-full object-cover" />
+              <UserAvatar :src="item.avatarUrl" :alt="item.username" class="h-10 w-10 rounded-full object-cover" />
               <span class="min-w-0">
                 <span class="block truncate text-sm font-semibold text-gray-900">{{ item.nickname || item.username }}</span>
                 <span class="block truncate text-xs text-gray-400">@{{ item.username }}</span>

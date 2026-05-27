@@ -1,9 +1,14 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log/slog"
+	"mime/multipart"
+	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
@@ -162,6 +167,12 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 
 // UploadAvatar stores a new avatar for the current user.
 func UploadAvatar(c *gin.Context) {
+	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
+	if !postingConfig.UploadControl.AllowAttachments {
+		c.JSON(200, component.FailData("目前已关闭附件上传功能"))
+		return
+	}
+
 	userId := c.GetUint64("userId")
 
 	if userId == 0 {
@@ -175,41 +186,162 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	file, err := c.FormFile("avatar")
+	if err, code := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
+		c.JSON(code, component.FailData(err.Error()))
+		return
+	}
+
+	if postingConfig.UploadControl.NewUserUploadCooldownMinutes > 0 {
+		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.UploadControl.NewUserUploadCooldownMinutes) * time.Minute)
+		if time.Now().Before(cooldownTime) {
+			c.JSON(200, component.FailData(fmt.Sprintf("新用户注册%d分钟后才能上传，请在 %s 后再试",
+				postingConfig.UploadControl.NewUserUploadCooldownMinutes,
+				cooldownTime.Format("2006-01-02 15:04:05"))))
+			return
+		}
+	}
+
+	files, err := avatarFormFiles(c)
 	if err != nil {
 		slog.Error(err.Error())
 		c.JSON(200, component.FailData("获取上传文件失败"))
 		return
 	}
 
-	src, err := file.Open()
-	if err != nil {
-		c.JSON(200, component.FailData("打开文件失败"))
-		return
-	}
-	defer src.Close()
-
-	fileData, err := io.ReadAll(src)
-	if err != nil {
-		c.JSON(200, component.FailData("读取文件失败"))
-		return
+	fileCount := files.Count()
+	if postingConfig.UploadControl.MaxDailyUploadsPerUser > 0 {
+		count := filedata.CountDailyUploads(userId)
+		if count+int64(fileCount) > int64(postingConfig.UploadControl.MaxDailyUploadsPerUser) {
+			c.JSON(200, component.FailData(fmt.Sprintf("您今日已上传 %d 个文件，上传头像需要 %d 个名额，已超过每日限制", count, fileCount)))
+			return
+		}
 	}
 
-	fileEntity, err := filedata.SaveAvatar(userId, fileData, file.Filename)
+	maxSize := avatarUploadMaxSize()
+	if configMaxSize := int64(postingConfig.UploadControl.MaxAttachmentSizeKb) * 1024; configMaxSize > 0 && configMaxSize < maxSize {
+		maxSize = configMaxSize
+	}
+	allowedExts := postingConfig.UploadControl.AuthorizedExtensions
+
+	mainData, err := readAvatarUploadFile(files.Main, maxSize, allowedExts)
 	if err != nil {
-		c.JSON(200, component.FailData("保存文件失败: "+err.Error()))
+		c.JSON(200, component.FailData(err.Error()))
 		return
 	}
 
-	userEntity.AvatarUrl = fileEntity.Name
+	var fileEntities []*filedata.Entity
+	if files.AvatarMedium == nil {
+		fileEntity, err := filedata.SaveAvatar(userId, mainData, files.Main.Filename)
+		if err != nil {
+			c.JSON(200, component.FailData("保存文件失败: "+err.Error()))
+			return
+		}
+		fileEntities = []*filedata.Entity{fileEntity}
+	} else {
+		uploads := []filedata.AvatarUpload{{
+			Filename: files.Main.Filename,
+			Data:     mainData,
+		}}
+		fileData, err := readAvatarUploadFile(files.AvatarMedium, maxSize, allowedExts)
+		if err != nil {
+			c.JSON(200, component.FailData(err.Error()))
+			return
+		}
+		uploads = append(uploads, filedata.AvatarUpload{
+			Filename: files.AvatarMedium.Filename,
+			Data:     fileData,
+		})
+
+		fileEntities, err = filedata.SaveAvatarSet(userId, uploads)
+		if err != nil {
+			c.JSON(200, component.FailData("保存文件失败: "+err.Error()))
+			return
+		}
+	}
+
+	userEntity.AvatarUrl = fileEntities[0].Name
 	if err := SaveUser(&userEntity); err != nil {
 		c.JSON(200, component.FailData("更新用户信息失败"))
 		return
 	}
 
-	c.JSON(200, component.SuccessData(map[string]string{
-		"avatarUrl": urlconfig.FilePath(fileEntity.Name),
-	}))
+	response := map[string]string{
+		"avatarUrl": urlconfig.FilePath(fileEntities[0].Name),
+	}
+	if len(fileEntities) > 1 {
+		response["avatarMediumUrl"] = urlconfig.FilePath(fileEntities[1].Name)
+	}
+	c.JSON(200, component.SuccessData(response))
+}
+
+type avatarUploadFiles struct {
+	Main         *multipart.FileHeader
+	AvatarMedium *multipart.FileHeader
+}
+
+func (files avatarUploadFiles) Count() int {
+	count := 0
+	for _, file := range []*multipart.FileHeader{files.Main, files.AvatarMedium} {
+		if file != nil {
+			count++
+		}
+	}
+	return count
+}
+
+func avatarFormFiles(c *gin.Context) (avatarUploadFiles, error) {
+	main, err := c.FormFile("avatar")
+	if err != nil {
+		return avatarUploadFiles{}, err
+	}
+
+	files := avatarUploadFiles{Main: main}
+	files.AvatarMedium, _ = c.FormFile("avatarMedium")
+	return files, nil
+}
+
+func avatarUploadMaxSize() int64 {
+	return int64(filedata.MaxFileSize)
+}
+
+func readAvatarUploadFile(file *multipart.FileHeader, maxSize int64, allowedExts []string) ([]byte, error) {
+	if file.Filename == "" {
+		return nil, fmt.Errorf("文件名不能为空")
+	}
+	if file.Size > maxSize {
+		return nil, fmt.Errorf("文件大小超过限制，最大允许%dKB", maxSize/1024)
+	}
+
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if len(allowedExts) > 0 {
+		if !isAllowedExtension(ext, allowedExts) {
+			return nil, fmt.Errorf("不支持的文件格式，允许的格式为: %s", strings.Join(allowedExts, ", "))
+		}
+	} else if _, err := filedata.CheckImageType(file.Filename); err != nil {
+		return nil, fmt.Errorf("不支持的图片格式，仅支持 JPG、PNG、GIF、WebP、BMP 格式")
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return nil, fmt.Errorf("打开文件失败")
+	}
+	defer src.Close()
+
+	header := make([]byte, 512)
+	n, _ := io.ReadFull(src, header)
+	if n > 0 && !isValidImageContent(header[:n]) {
+		return nil, fmt.Errorf("文件内容不是有效的图片格式")
+	}
+
+	remainingData, err := io.ReadAll(io.LimitReader(src, maxSize-int64(n)+1))
+	if err != nil {
+		return nil, fmt.Errorf("读取文件失败")
+	}
+	fileData := append(bytes.Clone(header[:n]), remainingData...)
+	if int64(len(fileData)) > maxSize {
+		return nil, fmt.Errorf("文件大小超过限制，最大允许%dKB", maxSize/1024)
+	}
+	return fileData, nil
 }
 
 // ChangePasswordReq is the password change request.

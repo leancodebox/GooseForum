@@ -25,6 +25,7 @@ import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
 import { useNavigationState } from '@/runtime/navigation-state'
 import { useUnreadStatus } from '@/runtime/unread-status'
 import type { LayoutPayload } from '@/types/payload'
+import UserAvatar from './UserAvatar.vue'
 
 const props = defineProps<{
   layout: LayoutPayload
@@ -347,7 +348,7 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
                 :aria-label="t('shell.userMenu')"
                 :aria-expanded="userMenuOpen"
               >
-                <img :src="layout.viewer.avatarUrl" :alt="layout.viewer.username" class="h-9 w-9 rounded-full object-cover" />
+                <UserAvatar :src="layout.viewer.avatarUrl" :alt="layout.viewer.username" class="h-9 w-9 rounded-full object-cover" />
               </button>
               <div
                 v-if="userMenuOpen"

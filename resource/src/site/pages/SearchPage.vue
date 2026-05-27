@@ -4,6 +4,7 @@ import { MessageSquare, Search, Sparkles, UsersRound } from '@lucide/vue'
 import { formatNumber, timeAgo } from '@/runtime/format'
 import { topicDescription } from '@/runtime/topic-description'
 import { showUserCard } from '@/runtime/user-card-events'
+import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { LayoutPayload, SearchPageProps } from '@/types/payload'
 
 const page = defineProps<{
@@ -100,7 +101,7 @@ watch(
                       class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
                       @click="showUserCard(participant, $event)"
                     >
-                      <img :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
+                      <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
                     </a>
                   </div>
                   <span>{{ timeAgo(topic.lastUpdateTime) }}</span>
@@ -119,7 +120,7 @@ watch(
                     class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
                     @click="showUserCard(participant, $event)"
                   >
-                    <img :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
+                    <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
                   </a>
                 </div>
               </div>

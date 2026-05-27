@@ -406,9 +406,14 @@ export async function changePassword(oldPassword: string, newPassword: string): 
   return true
 }
 
-export async function uploadAvatar(avatar: Blob): Promise<string> {
+export async function uploadAvatar(avatar: Blob | Blob[]): Promise<string> {
   const formData = new FormData()
-  formData.append('avatar', avatar, 'avatar.webp')
+  const avatars = Array.isArray(avatar) ? avatar : [avatar]
+  const fields = ['avatar', 'avatarMedium']
+  const filenames = ['avatar.webp', 'avatar_medium.webp']
+  avatars.slice(0, 2).forEach((item, index) => {
+    formData.append(fields[index], item, item instanceof File ? item.name : filenames[index])
+  })
   const response = await fetch('/api/upload-avatar', {
     method: 'POST',
     body: formData,
