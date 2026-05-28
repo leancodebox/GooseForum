@@ -76,26 +76,29 @@ var (
 	customCaptchaStore = &customStore{store}
 	captchaExpiration  = time.Minute * 3 // 验证码3分钟过期
 	cleanupStopCh      = make(chan struct{})
+	cleanupOnce        sync.Once
 	cleanupWg          sync.WaitGroup
 )
 
-// 定期清理过期验证码
-func init() {
-	closer.Register(StopCleanup)
-	cleanupWg.Add(1)
-	go func() {
-		defer cleanupWg.Done()
-		ticker := time.NewTicker(time.Minute) // 每分钟清理一次
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				store.cleanup()
-			case <-cleanupStopCh:
-				return
+// StartCleanup starts the expired captcha cleanup worker.
+func StartCleanup() {
+	cleanupOnce.Do(func() {
+		closer.Register(StopCleanup)
+		cleanupWg.Add(1)
+		go func() {
+			defer cleanupWg.Done()
+			ticker := time.NewTicker(time.Minute) // 每分钟清理一次
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ticker.C:
+					store.cleanup()
+				case <-cleanupStopCh:
+					return
+				}
 			}
-		}
-	}()
+		}()
+	})
 }
 
 // StopCleanup stops the expired captcha cleanup worker.

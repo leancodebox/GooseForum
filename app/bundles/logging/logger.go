@@ -134,8 +134,8 @@ func Shutdown() {
 		_ = zapLogger.Sync()
 	}
 	if asyncWriter != nil {
-		// 显式刷新 buffer
-		_ = asyncWriter.Sync()
+		_ = asyncWriter.Stop()
+		asyncWriter = nil
 	}
 	if lumberJackLogger != nil {
 		_ = lumberJackLogger.Close()

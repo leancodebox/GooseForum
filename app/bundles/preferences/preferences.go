@@ -74,7 +74,6 @@ func init() {
 	if err := v.ReadInConfig(); err != nil {
 		slog.Warn("ReadInConfig", "err", err)
 	}
-	v.WatchConfig()
 }
 
 func internalGet(path string, defaultValue ...any) any {
@@ -96,9 +95,14 @@ func Set(path string, value any) {
 	v.Set(path, value)
 }
 
+var watchConfigOnce sync.Once
+
 // OpenConfigChangeEvent 开启监控配置文件⌚️
 func OpenConfigChangeEvent() {
-	v.OnConfigChange(runEvent)
+	watchConfigOnce.Do(func() {
+		v.OnConfigChange(runEvent)
+		v.WatchConfig()
+	})
 }
 
 var eventManagerLock sync.Mutex

@@ -1,4 +1,4 @@
-package console
+package job
 
 import (
 	"errors"
@@ -14,21 +14,21 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-var c = cron.New(
+var scheduler = cron.New(
 	cron.WithLogger(cron.VerbosePrintfLogger(logging.CronLogging{})),
 )
-var runCron = false
+var running = false
 
-func RunJob() {
-	closer.Register(StopJob)
+func Run() {
+	closer.Register(Stop)
 	slog.Info("start cron")
 	backupSpec := preferences.Get("db.spec", "0 3 * * *")
-	entryID, err := c.AddFunc(backupSpec, upCmd(func() {
+	entryID, err := scheduler.AddFunc(backupSpec, upCmd(func() {
 		dbconnect.BackupSQLiteHandle()
 		db4fileconnect.BackupSQLiteHandle()
 	}))
 	slog.Info("reg cron", "entryID", entryID, "spec", backupSpec, "err", err)
-	entryID, err = c.AddFunc("3 3 * * *", upCmd(func() {
+	entryID, err = scheduler.AddFunc("3 3 * * *", upCmd(func() {
 		// 实现未来7天的创建。检查除了今天以外6天的是否创建，如果没有创建则进行创建
 		now := time.Now()
 		keys := []dailyStats.StatType{
@@ -44,18 +44,18 @@ func RunJob() {
 		}
 	}))
 	slog.Info("reg cron", "entryID", entryID, "spec", backupSpec, "err", err)
-	runCron = true
-	c.Start()
+	running = true
+	scheduler.Start()
 }
 
-func StopJob() error {
-	if !runCron {
+func Stop() error {
+	if !running {
 		return nil
 	}
-	ctx := c.Stop()
+	ctx := scheduler.Stop()
 	select {
 	case <-ctx.Done():
-		runCron = false
+		running = false
 		return nil
 	case <-time.After(10 * time.Second):
 		slog.Error("timed out waiting for job to stop")

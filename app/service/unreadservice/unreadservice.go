@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/allegro/bigcache/v3"
+	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
@@ -22,10 +23,18 @@ type Status struct {
 var statusCache = newStatusCache()
 
 func newStatusCache() *bigcache.BigCache {
-	cache, err := bigcache.New(context.Background(), bigcache.DefaultConfig(statusTTL))
+	config := bigcache.DefaultConfig(statusTTL)
+	config.Shards = 16
+	config.MaxEntriesInWindow = 1024
+	config.MaxEntrySize = 512
+	config.HardMaxCacheSize = 8
+	config.Verbose = false
+
+	cache, err := bigcache.New(context.Background(), config)
 	if err != nil {
 		return nil
 	}
+	closer.Register(cache.Close)
 	return cache
 }
 

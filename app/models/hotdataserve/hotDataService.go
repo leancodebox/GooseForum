@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/allegro/bigcache/v3"
+	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	"github.com/leancodebox/GooseForum/app/bundles/datacache"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
@@ -16,7 +17,22 @@ import (
 var cacheResp *bigcache.BigCache
 
 func init() {
-	cacheResp, _ = bigcache.New(context.Background(), bigcache.DefaultConfig(1*time.Minute))
+	config := bigcache.DefaultConfig(1 * time.Minute)
+	config.Shards = 16
+	config.MaxEntriesInWindow = 256
+	config.MaxEntrySize = 4096
+	config.HardMaxCacheSize = 8
+	config.Verbose = false
+
+	var err error
+	cacheResp, err = bigcache.New(context.Background(), config)
+	if err != nil {
+		slog.Error("hotdataserve cache init failed", "err", err)
+		return
+	}
+	closer.Register(func() error {
+		return cacheResp.Close()
+	})
 }
 
 func GetOrLoad[T any](key string, load func() (T, error)) T {

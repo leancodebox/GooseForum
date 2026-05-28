@@ -32,10 +32,6 @@ var emailProcessor = struct {
 	stopCh: make(chan struct{}),
 }
 
-func init() {
-	StartEmailProcessor()
-}
-
 // AddToQueue stores an email task for background processing.
 func AddToQueue(task EmailTask) error {
 	taskJson, err := json.Marshal(task)
@@ -67,12 +63,16 @@ func StartEmailProcessor() {
 			ticker := time.NewTicker(5 * time.Second)
 			defer ticker.Stop()
 
-			processPendingEmailTasks()
+			if !processPendingEmailTasks(emailProcessor.stopCh) {
+				return
+			}
 
 			for {
 				select {
 				case <-ticker.C:
-					processPendingEmailTasks()
+					if !processPendingEmailTasks(emailProcessor.stopCh) {
+						return
+					}
 				case <-emailProcessor.stopCh:
 					return
 				}
@@ -92,11 +92,17 @@ func StopEmailProcessor() error {
 	return nil
 }
 
-func processPendingEmailTasks() {
+func processPendingEmailTasks(stopCh <-chan struct{}) bool {
 	for {
+		select {
+		case <-stopCh:
+			return false
+		default:
+		}
+
 		tasks := taskQueue.GetPendingTasks(BatchSize)
 		if len(tasks) == 0 {
-			return
+			return true
 		}
 		slog.Debug("邮件队列拉取任务", "count", len(tasks))
 
@@ -127,7 +133,11 @@ func processPendingEmailTasks() {
 				if task.RetryCount < MaxRetries {
 					taskQueue.IncrementRetryCount(task.Id)
 					taskQueue.UpdateStatus(task.Id, taskQueue.StatusRetrying, err)
-					time.Sleep(RetryInterval)
+					select {
+					case <-time.After(RetryInterval):
+					case <-stopCh:
+						return false
+					}
 					continue
 				}
 
