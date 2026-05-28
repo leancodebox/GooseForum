@@ -1,0 +1,29 @@
+{
+  "sponsors": {
+    "level0": [],
+    "level1": [],
+    "level2": [],
+    "level3": []
+  },
+  "content": {
+    "title": "赞助",
+    "description": "感谢这些赞助者帮助 GooseForum 持续变好。"
+  },
+  "contact": {
+    "title": "成为赞助者",
+    "description": "支持社区建设，赞助者可展示在赞助页，并获得更醒目的社区露出。",
+    "buttonText": "联系我们",
+    "buttonLink": "mailto:contact@gooseforum.online"
+  },
+  "rules": [
+    {
+      "content": "链接需稳定可访问。"
+    },
+    {
+      "content": "内容需适合公开社区展示。"
+    },
+    {
+      "content": "头像或 Logo 建议保持清晰。"
+    }
+  ]
+}

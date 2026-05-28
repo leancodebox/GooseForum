@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Award, ChevronLeft, ChevronRight, CheckCircle2, Loader2, Pencil, RefreshCw, Search, ShieldOff, XCircle } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -45,7 +46,7 @@ async function loadUsers() {
     total.value = data.total || 0
     if (page.value > totalPages.value) page.value = totalPages.value
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '加载用户失败'
+    error.value = err instanceof Error ? err.message : adminText('k0031')
   } finally {
     loading.value = false
   }
@@ -54,9 +55,9 @@ async function loadUsers() {
 async function ensureRoles() {
   if (roles.value.length) return
   try {
-    roles.value = [{ name: '无', value: 0 }, ...(await getAllRoleItem())]
+    roles.value = [{ name: adminText('k0032'), value: 0 }, ...(await getAllRoleItem())]
   } catch {
-    roles.value = [{ name: '无', value: 0 }]
+    roles.value = [{ name: adminText('k0032'), value: 0 }]
   }
 }
 
@@ -138,7 +139,7 @@ async function loadUserBadges(userId: number) {
       .map(item => item.code)
     badgesLoaded.value = true
   } catch (err) {
-    adminToast.error(err, '加载用户徽章失败')
+    adminToast.error(err, adminText('k0033'))
   } finally {
     badgeLoading.value = false
   }
@@ -170,9 +171,9 @@ async function saveUser() {
     }
     editingUser.value = null
     await loadUsers()
-    adminToast.success('保存成功')
+    adminToast.success(adminText('k000e'))
   } catch (err) {
-    adminToast.error(err, '保存用户失败')
+    adminToast.error(err, adminText('k000r'))
   } finally {
     saving.value = false
   }
@@ -188,11 +189,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage title="用户管理" description="在此管理系统用户，您可以修改用户状态、验证状态以及分配角色。" sticky>
+  <BasicPage :title="adminText('k006i')" :description="adminText('k006j')" sticky>
     <template #actions>
       <button class="inline-flex h-9 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium shadow-xs hover:bg-muted" type="button" @click="loadUsers">
         <RefreshCw class="size-4" />
-        刷新
+        {{ adminText('k004q') }}
       </button>
     </template>
 
@@ -204,12 +205,12 @@ onMounted(() => {
               <input
                 v-model="search"
                 class="h-9 w-full rounded-md border bg-background pl-8 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                placeholder="搜索用户名..."
+                :placeholder="adminText('k006t')"
               />
             </div>
-            <button class="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90" type="submit">搜索</button>
+            <button class="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90" type="submit">{{ adminText('k00al') }}</button>
             <button v-if="appliedSearch" class="h-9 rounded-md px-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground" type="button" @click="search = ''; applySearch()">
-              清除
+              {{ adminText('k00at') }}
             </button>
           </form>
           <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -219,10 +220,10 @@ onMounted(() => {
               :value="pageSize"
               @change="changePageSize(Number(($event.target as HTMLSelectElement).value))"
             >
-              <option :value="10">10 / 页</option>
-              <option :value="20">20 / 页</option>
-              <option :value="30">30 / 页</option>
-              <option :value="50">50 / 页</option>
+              <option :value="10">{{ adminText('k002x') }}</option>
+              <option :value="20">{{ adminText('k002y') }}</option>
+              <option :value="30">{{ adminText('k002z') }}</option>
+              <option :value="50">{{ adminText('k0030') }}</option>
             </select>
             <button
               class="inline-flex size-9 items-center justify-center rounded-md border bg-background text-foreground disabled:cursor-not-allowed disabled:opacity-45"
@@ -245,12 +246,12 @@ onMounted(() => {
         </div>
 
         <div class="md:hidden">
-          <div v-if="loading" class="px-3 py-10 text-center text-sm text-muted-foreground">加载中...</div>
+          <div v-if="loading" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k0046') }}</div>
           <div v-else-if="error" class="px-3 py-10 text-center">
             <div class="text-sm text-destructive">{{ error }}</div>
-            <button class="mt-2 text-sm font-medium underline underline-offset-4" type="button" @click="loadUsers">重试</button>
+            <button class="mt-2 text-sm font-medium underline underline-offset-4" type="button" @click="loadUsers">{{ adminText('k002w') }}</button>
           </div>
-          <div v-else-if="rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">暂无用户</div>
+          <div v-else-if="rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k00bm') }}</div>
           <div v-else class="divide-y">
             <article v-for="user in rows" :key="user.userId" class="px-3 py-3">
               <div class="flex min-w-0 items-start gap-3">
@@ -261,7 +262,7 @@ onMounted(() => {
                 <div class="min-w-0 flex-1">
                   <div class="flex min-w-0 items-center justify-between gap-2">
                     <a :href="`/u/${user.userId}`" target="_blank" rel="noreferrer" class="truncate font-semibold hover:text-primary hover:underline">{{ user.username }}</a>
-                    <button class="inline-flex size-8 shrink-0 items-center justify-center rounded-md hover:bg-muted" type="button" title="编辑" @click="openEdit(user)">
+                    <button class="inline-flex size-8 shrink-0 items-center justify-center rounded-md hover:bg-muted" type="button" :title="adminText('k005j')" @click="openEdit(user)">
                       <Pencil class="size-4" />
                     </button>
                   </div>
@@ -269,13 +270,13 @@ onMounted(() => {
                   <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                     <span class="inline-flex items-center gap-1" :class="user.status === 0 ? 'text-emerald-700' : 'text-destructive'">
                       <span class="size-1.5 rounded-full" :class="user.status === 0 ? 'bg-emerald-500' : 'bg-destructive'" />
-                      {{ user.status === 0 ? '正常' : '已封禁' }}
+                      {{ user.status === 0 ? adminText('k005y') : adminText('k006k') }}
                     </span>
                     <span class="inline-flex items-center gap-1" :class="user.validate === 1 ? 'text-emerald-700' : ''">
                       <span class="size-1.5 rounded-full" :class="user.validate === 1 ? 'bg-emerald-500' : 'bg-muted-foreground/40'" />
-                      {{ user.validate === 1 ? '已验证' : '未验证' }}
+                      {{ user.validate === 1 ? adminText('k006l') : adminText('k006m') }}
                     </span>
-                    <span>{{ roleNames(user).join(' / ') || '无角色' }}</span>
+                    <span>{{ roleNames(user).join(' / ') || adminText('k006n') }}</span>
                   </div>
                 </div>
               </div>
@@ -287,28 +288,28 @@ onMounted(() => {
           <table class="w-full min-w-[880px] table-fixed text-sm">
             <thead class="border-b bg-muted/25 text-xs font-medium text-muted-foreground">
               <tr>
-                <th class="h-10 px-3 text-left align-middle">用户</th>
-                <th class="w-[220px] px-3 text-left align-middle">角色</th>
-                <th class="w-[150px] px-3 text-left align-middle">状态</th>
-                <th class="w-[150px] px-3 text-left align-middle">注册</th>
-                <th class="w-[150px] px-3 text-left align-middle">最后登录</th>
-                <th class="w-[72px] px-3 text-right align-middle">操作</th>
+                <th class="h-10 px-3 text-left align-middle">{{ adminText('k003f') }}</th>
+                <th class="w-[220px] px-3 text-left align-middle">{{ adminText('k00bn') }}</th>
+                <th class="w-[150px] px-3 text-left align-middle">{{ adminText('k007j') }}</th>
+                <th class="w-[150px] px-3 text-left align-middle">{{ adminText('k00bo') }}</th>
+                <th class="w-[150px] px-3 text-left align-middle">{{ adminText('k00bp') }}</th>
+                <th class="w-[72px] px-3 text-right align-middle">{{ adminText('k007m') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y">
               <tr v-if="loading">
-                <td colspan="6" class="h-28 px-3 text-center text-muted-foreground">加载中...</td>
+                <td colspan="6" class="h-28 px-3 text-center text-muted-foreground">{{ adminText('k0046') }}</td>
               </tr>
               <tr v-else-if="error">
                 <td colspan="6" class="h-28 px-3 text-center">
                   <div class="inline-flex items-center gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-destructive">
                     <span>{{ error }}</span>
-                    <button class="text-sm font-medium underline underline-offset-4" type="button" @click="loadUsers">重试</button>
+                    <button class="text-sm font-medium underline underline-offset-4" type="button" @click="loadUsers">{{ adminText('k002w') }}</button>
                   </div>
                 </td>
               </tr>
               <tr v-else-if="rows.length === 0">
-                <td colspan="6" class="h-28 px-3 text-center text-muted-foreground">暂无用户</td>
+                <td colspan="6" class="h-28 px-3 text-center text-muted-foreground">{{ adminText('k00bm') }}</td>
               </tr>
               <tr v-for="user in rows" v-else :key="user.userId" class="hover:bg-muted/25">
                 <td class="max-w-0 px-3 py-2">
@@ -323,7 +324,7 @@ onMounted(() => {
                         <span class="truncate">{{ user.email || '-' }}</span>
                         <span class="inline-flex shrink-0 items-center gap-1" :class="user.validate === 1 ? 'text-emerald-700' : ''">
                           <span class="size-1.5 rounded-full" :class="user.validate === 1 ? 'bg-emerald-500' : 'bg-muted-foreground/40'" />
-                          {{ user.validate === 1 ? '已验证' : '未验证' }}
+                          {{ user.validate === 1 ? adminText('k006l') : adminText('k006m') }}
                         </span>
                       </div>
                     </div>
@@ -332,20 +333,20 @@ onMounted(() => {
                 <td class="px-3 py-2">
                   <div class="flex flex-wrap gap-1">
                     <span v-for="role in user.roleList" :key="role.value" class="rounded-md bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{{ role.name }}</span>
-                    <span v-if="!user.roleList?.length" class="text-xs text-muted-foreground">无</span>
+                    <span v-if="!user.roleList?.length" class="text-xs text-muted-foreground">{{ adminText('k0032') }}</span>
                   </div>
                 </td>
                 <td class="px-3 py-2">
                   <span class="inline-flex items-center gap-1.5 text-xs font-medium" :class="user.status === 0 ? 'text-emerald-700' : 'text-destructive'">
                     <CheckCircle2 v-if="user.status === 0" class="size-3.5" />
                     <ShieldOff v-else class="size-3.5" />
-                    {{ user.status === 0 ? '正常' : '已封禁' }}
+                    {{ user.status === 0 ? adminText('k005y') : adminText('k006k') }}
                   </span>
                 </td>
                 <td class="px-3 py-2 text-xs text-muted-foreground">{{ user.createTime || '-' }}</td>
-                <td class="px-3 py-2 text-xs text-muted-foreground">{{ user.lastActiveTime || '从未登录' }}</td>
+                <td class="px-3 py-2 text-xs text-muted-foreground">{{ user.lastActiveTime || adminText('k006o') }}</td>
                 <td class="px-3 py-2 text-right">
-                  <button class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" type="button" title="编辑" @click="openEdit(user)">
+                  <button class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" type="button" :title="adminText('k005j')" @click="openEdit(user)">
                     <Pencil class="size-4" />
                   </button>
                 </td>
@@ -362,8 +363,8 @@ onMounted(() => {
               <img v-if="editingUser.avatarUrl" :src="editingUser.avatarUrl" class="size-11 rounded-full object-cover ring-1 ring-border" alt="" />
               <span v-else class="flex size-11 items-center justify-center rounded-full bg-muted text-sm font-semibold">{{ avatarText(editingUser) }}</span>
               <div class="min-w-0">
-                <h2 class="truncate text-lg font-semibold">编辑用户</h2>
-                <p class="truncate text-sm text-muted-foreground">{{ editingUser.username }} · {{ editingUser.email || '无邮箱' }}</p>
+                <h2 class="truncate text-lg font-semibold">{{ adminText('k00bq') }}</h2>
+                <p class="truncate text-sm text-muted-foreground">{{ editingUser.username }} · {{ editingUser.email || adminText('k006p') }}</p>
               </div>
             </div>
             <button class="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground" type="button" @click="editingUser = null">
@@ -375,24 +376,24 @@ onMounted(() => {
             <div class="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
               <aside class="space-y-4">
                 <section class="rounded-lg border bg-muted/10 p-4">
-                  <div class="mb-3 text-sm font-semibold">账号状态</div>
+                  <div class="mb-3 text-sm font-semibold">{{ adminText('k00br') }}</div>
                   <div class="grid gap-3">
                     <label class="grid gap-1.5 text-sm font-medium">
-                      账号状态
+                      {{ adminText('k00br') }}
                       <select v-model.number="form.status" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                        <option :value="0">正常</option>
-                        <option :value="1">已封禁</option>
+                        <option :value="0">{{ adminText('k005y') }}</option>
+                        <option :value="1">{{ adminText('k006k') }}</option>
                       </select>
                     </label>
                     <label class="grid gap-1.5 text-sm font-medium">
-                      验证状态
+                      {{ adminText('k00bs') }}
                       <select v-model.number="form.validate" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                        <option :value="0">未验证</option>
-                        <option :value="1">已验证</option>
+                        <option :value="0">{{ adminText('k006m') }}</option>
+                        <option :value="1">{{ adminText('k006l') }}</option>
                       </select>
                     </label>
                     <label class="grid gap-1.5 text-sm font-medium">
-                      用户角色
+                      {{ adminText('k00bt') }}
                       <select v-model.number="form.roleId" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
                         <option v-for="role in roles" :key="role.value" :value="role.value">{{ role.name }}</option>
                       </select>
@@ -401,18 +402,18 @@ onMounted(() => {
                 </section>
 
                 <section class="rounded-lg border bg-muted/10 p-4">
-                  <div class="mb-3 text-sm font-semibold">用户信息</div>
+                  <div class="mb-3 text-sm font-semibold">{{ adminText('k00bu') }}</div>
                   <dl class="grid gap-2 text-sm">
                     <div class="flex justify-between gap-3">
-                      <dt class="text-muted-foreground">注册时间</dt>
+                      <dt class="text-muted-foreground">{{ adminText('k00bv') }}</dt>
                       <dd class="truncate text-right">{{ editingUser.createTime || '-' }}</dd>
                     </div>
                     <div class="flex justify-between gap-3">
-                      <dt class="text-muted-foreground">最后登录</dt>
-                      <dd class="truncate text-right">{{ editingUser.lastActiveTime || '从未登录' }}</dd>
+                      <dt class="text-muted-foreground">{{ adminText('k00bp') }}</dt>
+                      <dd class="truncate text-right">{{ editingUser.lastActiveTime || adminText('k006o') }}</dd>
                     </div>
                     <div class="flex justify-between gap-3">
-                      <dt class="text-muted-foreground">声望</dt>
+                      <dt class="text-muted-foreground">{{ adminText('k00bw') }}</dt>
                       <dd class="font-medium">{{ editingUser.prestige || 0 }}</dd>
                     </div>
                   </dl>
@@ -424,16 +425,16 @@ onMounted(() => {
                   <div>
                     <div class="flex items-center gap-2 text-sm font-semibold">
                       <Award class="size-4 text-muted-foreground" />
-                      用户徽章
+                      {{ adminText('k00bx') }}
                     </div>
-                    <p class="mt-0.5 text-xs text-muted-foreground">自动徽章只读，手动徽章可在这里直接分配。</p>
+                    <p class="mt-0.5 text-xs text-muted-foreground">{{ adminText('k00by') }}</p>
                   </div>
                   <Loader2 v-if="badgeLoading" class="size-4 animate-spin text-muted-foreground" />
                 </div>
 
                 <div class="space-y-4 p-4">
                   <div v-if="autoBadges().length" class="space-y-2">
-                    <div class="text-xs font-medium text-muted-foreground">自动获得</div>
+                    <div class="text-xs font-medium text-muted-foreground">{{ adminText('k00bz') }}</div>
                     <div class="flex flex-wrap gap-1.5">
                       <span v-for="badge in autoBadges()" :key="badge.code" class="rounded-md bg-background px-2 py-1 text-xs text-muted-foreground ring-1 ring-border">
                         {{ badge.name }}
@@ -442,7 +443,7 @@ onMounted(() => {
                   </div>
 
                   <div class="space-y-2">
-                    <div class="text-xs font-medium text-muted-foreground">手动分配</div>
+                    <div class="text-xs font-medium text-muted-foreground">{{ adminText('k00c0') }}</div>
                     <div v-if="badgeOptions.length" class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6">
                       <button
                         v-for="badge in badgeOptions"
@@ -465,7 +466,7 @@ onMounted(() => {
                       </button>
                     </div>
                     <div v-else class="rounded-md border border-dashed bg-background p-6 text-center text-sm text-muted-foreground">
-                      {{ badgeLoading ? '正在加载徽章...' : '暂无可手动下发的徽章。' }}
+                      {{ badgeLoading ? adminText('k006q') : adminText('k006r') }}
                     </div>
                   </div>
                 </div>
@@ -474,9 +475,9 @@ onMounted(() => {
           </div>
 
           <div class="flex justify-end gap-2 border-t bg-muted/20 px-5 py-3">
-            <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="editingUser = null">取消</button>
+            <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="editingUser = null">{{ adminText('k009q') }}</button>
             <button class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" type="submit" :disabled="saving">
-              {{ saving ? '保存中...' : '保存更改' }}
+              {{ saving ? adminText('k005f') : adminText('k006s') }}
             </button>
           </div>
         </form>

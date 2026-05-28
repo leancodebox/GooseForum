@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { X } from '@lucide/vue'
 import FlashSpriteIcon from '@/site/components/FlashSpriteIcon.vue'
 import { dismiss, useFlashMessages, type FlashMessageType } from '@/runtime/flash-message'
 
 const { messages } = useFlashMessages()
+const { t } = useI18n()
 
 const visibleMessages = computed(() => messages.value)
 
@@ -24,13 +26,13 @@ function accentClass(type: FlashMessageType) {
 function labelFor(type: FlashMessageType) {
   switch (type) {
     case 'success':
-      return '已完成'
+      return t('flash.success')
     case 'warning':
-      return '请注意'
+      return t('flash.warning')
     case 'error':
-      return '出错了'
+      return t('flash.error')
     default:
-      return '提示'
+      return t('flash.info')
   }
 }
 </script>
@@ -65,7 +67,7 @@ function labelFor(type: FlashMessageType) {
         <button
           type="button"
           class="-mr-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
-          aria-label="关闭提示"
+          :aria-label="t('flash.close')"
           @click="dismiss(item.id)"
         >
           <X class="h-3.5 w-3.5" />

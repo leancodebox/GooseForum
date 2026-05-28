@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import { ExternalLink, HeartHandshake, Mail, ShieldCheck } from '@lucide/vue'
 import type { LayoutPayload, SponsorPayload, SponsorSectionPayload, SponsorsPageProps } from '@/types/payload'
+import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
   layout: LayoutPayload
   props: SponsorsPageProps
 }>()
 
+const { t } = useI18n()
 const hasSponsors = computed(() => page.props.sections.length > 0)
 
 function sectionGrid(section: SponsorSectionPayload) {
@@ -30,7 +32,7 @@ function sponsorCardClass(section: SponsorSectionPayload) {
 }
 
 function showMessage(sponsor: SponsorPayload) {
-  return sponsor.message || '感谢支持 GooseForum。'
+  return sponsor.message || t('sponsors.defaultMessage')
 }
 </script>
 
@@ -85,8 +87,8 @@ function showMessage(sponsor: SponsorPayload) {
 
           <div v-if="!hasSponsors" class="rounded-lg border border-gray-200 bg-white px-5 py-16 text-center">
             <HeartHandshake class="mx-auto h-8 w-8 text-gray-300" />
-            <h2 class="mt-3 text-base font-semibold text-gray-900">暂无赞助者</h2>
-            <p class="mt-1 text-sm text-gray-500">站点还没有配置赞助信息。</p>
+            <h2 class="mt-3 text-base font-semibold text-gray-900">{{ t('sponsors.emptyTitle') }}</h2>
+            <p class="mt-1 text-sm text-gray-500">{{ t('sponsors.emptyDescription') }}</p>
           </div>
         </div>
 
@@ -101,7 +103,7 @@ function showMessage(sponsor: SponsorPayload) {
           </div>
 
           <div v-if="props.rules.length" class="rounded-lg border border-gray-200/70 bg-white p-4">
-            <h2 class="text-sm font-semibold text-gray-950">展示规则</h2>
+            <h2 class="text-sm font-semibold text-gray-950">{{ t('sponsors.rulesTitle') }}</h2>
             <div class="mt-3 space-y-2 text-sm text-gray-600">
               <div v-for="rule in props.rules" :key="rule.content" class="flex gap-2">
                 <ShieldCheck class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />

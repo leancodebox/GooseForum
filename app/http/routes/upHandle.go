@@ -57,12 +57,15 @@ func bindAndExecute[T any](c *gin.Context, binder func(any) error, action func(c
 	var params T
 	if err := binder(&params); err != nil {
 		if strict {
-			c.JSON(http.StatusBadRequest, component.FailData("参数解析失败: "+err.Error()))
+			c.JSON(http.StatusBadRequest, component.FailDataCode(
+				component.MessageRequestParseFailed,
+
+				component.MessageParams{"error": err.Error()}))
 			return
 		}
 	}
 	if err := validate.Valid(params); err != nil {
-		c.JSON(http.StatusOK, component.FailData(validate.FormatError(err)))
+		c.JSON(http.StatusOK, component.FailDataCode(component.MessageRequestInvalidParams, nil))
 		return
 	}
 

@@ -1,3 +1,4 @@
+import { adminText } from '@/admin/runtime/i18n-text'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const settingsPages = {
@@ -57,8 +58,8 @@ export const adminRouter = createRouter({
       component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
       meta: {
         pageProps: {
-          title: '管理页面',
-          description: '这个管理入口还在迁移中。',
+          title: adminText('k002d'),
+          description: adminText('k002e'),
         },
       },
     },

@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import Draggable from 'vuedraggable'
 import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload } from '@lucide/vue'
@@ -30,6 +31,7 @@ import {
   testMailConnection,
 } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
+import { resolveApiMessage } from '@/runtime/api-message'
 import type {
   AdminPayload,
   AnnouncementConfig,
@@ -112,11 +114,11 @@ const announcementForm = reactive<AnnouncementConfig>({
 })
 
 const meta: Record<Kind, { title: string, description: string }> = {
-  'site-info': { title: '站点信息', description: '管理论坛的基础信息、SEO 设置、页脚和外部资源。' },
-  mail: { title: '邮件设置', description: '配置 SMTP 服务器以发送验证邮件、通知等。' },
-  security: { title: '安全与注册', description: '控制用户注册、邮箱验证以及允许的注册邮箱域名。' },
-  posting: { title: '发布内容设置', description: '控制帖子标题、内容长度及附件上传规则。' },
-  announcement: { title: '系统公告', description: '配置显示在页面顶部的系统公告，正文支持 Markdown 渲染。' },
+  'site-info': { title: adminText('k0001'), description: adminText('k0002') },
+  mail: { title: adminText('k0003'), description: adminText('k0004') },
+  security: { title: adminText('k0005'), description: adminText('k0006') },
+  posting: { title: adminText('k0007'), description: adminText('k0008') },
+  announcement: { title: adminText('k0009'), description: adminText('k000a') },
 }
 
 const pageMeta = computed(() => meta[props.kind])
@@ -223,12 +225,12 @@ async function uploadImage(target: 'siteLogo' | 'brandImage', event: Event) {
     const data = await response.json()
     if (data.code === 0) {
       siteForm[target] = data.result?.url || ''
-      adminToast.success('上传成功')
+      adminToast.success(adminText('k000b'))
     } else {
-      adminToast.error(new Error(data.msg || data.message || '上传失败'), '上传失败')
+      adminToast.error(new Error(resolveApiMessage(data, adminText('k000c'))), adminText('k000c'))
     }
   } catch (err) {
-    adminToast.error(err, '上传失败')
+    adminToast.error(err, adminText('k000c'))
   } finally {
     input.value = ''
   }
@@ -244,7 +246,7 @@ async function load() {
     else if (props.kind === 'posting') Object.assign(postingForm, normalizePosting(await getPostingSettings()))
     else Object.assign(announcementForm, normalizeAnnouncement(await getAnnouncement()))
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '加载设置失败'
+    error.value = err instanceof Error ? err.message : adminText('k000d')
   } finally {
     loading.value = false
   }
@@ -258,9 +260,9 @@ async function save() {
     else if (props.kind === 'security') await saveSecuritySettings(normalizeSecurity(securityForm))
     else if (props.kind === 'posting') await savePostingSettings(normalizePosting(postingForm))
     else await saveAnnouncement(normalizeAnnouncement(announcementForm))
-    adminToast.success('保存成功')
+    adminToast.success(adminText('k000e'))
   } catch (err) {
-    adminToast.error(err, '保存失败')
+    adminToast.error(err, adminText('k000f'))
   } finally {
     saving.value = false
   }
@@ -268,15 +270,15 @@ async function save() {
 
 async function sendTestMail() {
   if (!testEmail.value.trim()) {
-    adminToast.warning('请输入测试邮箱')
+    adminToast.warning(adminText('k000g'))
     return
   }
   testing.value = true
   try {
     const response = await testMailConnection(normalizeMail(mailForm), testEmail.value.trim())
-    adminToast.success(response.result?.message || response.message || response.msg || '测试邮件已发送')
+    adminToast.success(resolveApiMessage(response.result || response, adminText('k000h')))
   } catch (err) {
-    adminToast.error(err, '发送测试邮件失败')
+    adminToast.error(err, adminText('k000i'))
   } finally {
     testing.value = false
   }
@@ -299,7 +301,7 @@ function addExtension() {
   const ext = newExtension.value.trim().toLowerCase()
   if (!ext) return
   if (!ext.startsWith('.')) {
-    adminToast.warning('扩展名必须以 . 开头')
+    adminToast.warning(adminText('k000j'))
     return
   }
   if (!postingForm.uploadControl.authorizedExtensions.includes(ext)) {
@@ -363,7 +365,7 @@ function closeFooterDialog(open: boolean) {
 
 function addAnnouncementExample() {
   if (!announcementForm.content) {
-    announcementForm.content = '## 维护通知\n\n网站将于今晚 22:00 - 24:00 进行系统维护，期间可能无法访问。'
+    announcementForm.content = adminText('k000k')
   }
 }
 
@@ -380,7 +382,7 @@ onMounted(load)
       <Button type="button" :disabled="saving" @click="save">
         <Loader2 v-if="saving" class="size-4 animate-spin" />
         <Save v-else class="size-4" />
-        保存配置
+        {{ adminText('k004f') }}
       </Button>
     </template>
 
@@ -392,11 +394,11 @@ onMounted(load)
       <form v-else-if="kind === 'site-info'" class="space-y-10" @submit.prevent="save">
         <div class="grid gap-10 md:grid-cols-2">
           <section class="space-y-6">
-            <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><Globe class="size-5 text-muted-foreground" />基本信息</div>
-            <label class="grid gap-2 text-sm font-medium">站点名称<Input v-model="siteForm.siteName" placeholder="GooseForum" /></label>
-            <label class="grid gap-2 text-sm font-medium">站点 URL<Input v-model="siteForm.siteUrl" placeholder="https://example.com" /></label>
-            <label class="grid gap-2 text-sm font-medium">联系邮箱<Input v-model="siteForm.siteEmail" placeholder="contact@example.com" /></label>
-            <label class="grid gap-2 text-sm font-medium">站点 Logo
+            <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><Globe class="size-5 text-muted-foreground" />{{ adminText('k007z') }}</div>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k0080') }}<Input v-model="siteForm.siteName" placeholder="GooseForum" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k0081') }}<Input v-model="siteForm.siteUrl" placeholder="https://example.com" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k0082') }}<Input v-model="siteForm.siteEmail" placeholder="contact@example.com" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k0083') }}
               <div class="flex items-start gap-4">
                 <div class="grid size-20 shrink-0 place-items-center overflow-hidden rounded-lg border bg-muted">
                   <img v-if="siteForm.siteLogo" :src="siteForm.siteLogo" class="size-full object-cover" alt="Logo" />
@@ -405,21 +407,21 @@ onMounted(load)
                 <div class="grid flex-1 gap-2">
                   <Input v-model="siteForm.siteLogo" placeholder="Logo URL" />
                   <label class="inline-flex h-9 w-fit cursor-pointer items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium shadow-xs hover:bg-accent">
-                    上传图片
+                    {{ adminText('k0084') }}
                     <input class="hidden" type="file" accept="image/*" @change="uploadImage('siteLogo', $event)" />
                   </label>
                 </div>
               </div>
             </label>
             <div class="space-y-4">
-              <div class="flex items-center gap-2 border-b pb-2 text-base font-medium">品牌标识</div>
+              <div class="flex items-center gap-2 border-b pb-2 text-base font-medium">{{ adminText('k0085') }}</div>
               <div class="flex flex-wrap gap-4 text-sm">
-                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="default" />默认样式</label>
-                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="text" />自定义文字</label>
-                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="image" />图片</label>
+                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="default" />{{ adminText('k0086') }}</label>
+                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="text" />{{ adminText('k0087') }}</label>
+                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="image" />{{ adminText('k0088') }}</label>
               </div>
-              <label v-if="siteForm.brandType === 'text'" class="grid gap-2 text-sm font-medium">品牌文字<Input v-model="siteForm.brandText" placeholder="MyBrand" /></label>
-              <label v-if="siteForm.brandType === 'image'" class="grid gap-2 text-sm font-medium">品牌图片
+              <label v-if="siteForm.brandType === 'text'" class="grid gap-2 text-sm font-medium">{{ adminText('k0089') }}<Input v-model="siteForm.brandText" placeholder="MyBrand" /></label>
+              <label v-if="siteForm.brandType === 'image'" class="grid gap-2 text-sm font-medium">{{ adminText('k008a') }}
                 <div class="flex gap-2">
                   <Input v-model="siteForm.brandImage" placeholder="Brand Image URL" />
                   <label class="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border bg-background shadow-xs hover:bg-accent">
@@ -431,19 +433,19 @@ onMounted(load)
             </div>
           </section>
           <section class="space-y-6">
-            <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><FileText class="size-5 text-muted-foreground" />SEO 与资源</div>
-            <label class="grid gap-2 text-sm font-medium">站点描述<Textarea v-model="siteForm.siteDescription" class="min-h-24" /></label>
-            <label class="grid gap-2 text-sm font-medium">关键词<Input v-model="siteForm.siteKeywords" placeholder="forum, community" /></label>
-            <label class="grid gap-2 text-sm font-medium">外部资源链接 / Meta 标签<Textarea v-model="siteForm.externalLinks" class="min-h-28 font-mono text-xs" /></label>
+            <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><FileText class="size-5 text-muted-foreground" />{{ adminText('k008b') }}</div>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k008c') }}<Textarea v-model="siteForm.siteDescription" class="min-h-24" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k008d') }}<Input v-model="siteForm.siteKeywords" placeholder="forum, community" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k008e') }}<Textarea v-model="siteForm.externalLinks" class="min-h-28 font-mono text-xs" /></label>
             <div class="space-y-4 border-y py-4">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <div class="font-semibold">页脚内容 (Footer)</div>
-                  <p class="text-xs text-muted-foreground">这里尽量按照前台侧栏页脚的两行展示方式编辑。</p>
+                  <div class="font-semibold">{{ adminText('k008f') }}</div>
+                  <p class="text-xs text-muted-foreground">{{ adminText('k008g') }}</p>
                 </div>
                 <div class="flex gap-2">
-                  <Button variant="ghost" size="sm" type="button" @click="addFooterLink"><Plus class="size-4" />添加链接</Button>
-                  <Button variant="ghost" size="sm" type="button" @click="addFooterPrimary"><Plus class="size-4" />添加文字</Button>
+                  <Button variant="ghost" size="sm" type="button" @click="addFooterLink"><Plus class="size-4" />{{ adminText('k0071') }}</Button>
+                  <Button variant="ghost" size="sm" type="button" @click="addFooterPrimary"><Plus class="size-4" />{{ adminText('k008h') }}</Button>
                 </div>
               </div>
               <div class="rounded-lg border bg-background px-3 py-3 text-xs leading-5 text-muted-foreground shadow-xs">
@@ -460,7 +462,7 @@ onMounted(load)
                       <div class="group inline-flex min-h-5 items-center rounded text-muted-foreground transition-colors hover:bg-muted/60 hover:text-primary">
                         <span class="js-footer-handle -ml-1 mr-0.5 cursor-grab text-muted-foreground/45 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
                         <button class="inline-flex min-h-5 items-center rounded px-0.5 text-left text-xs" type="button" @click="openFooterLink(index)">
-                          {{ item.name || '未命名链接' }}
+                          {{ item.name || adminText('k004g') }}
                         </button>
                         <Button variant="ghost" size="icon" class="ml-0.5 size-5 rounded-sm opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100" type="button" @click="siteForm.footerInfo?.list.splice(index, 1)">
                           <Trash2 class="size-3.5" />
@@ -468,7 +470,7 @@ onMounted(load)
                       </div>
                     </template>
                     <template #footer>
-                      <div v-if="siteForm.footerInfo?.list.length === 0" class="min-h-5 text-muted-foreground/70">暂无链接</div>
+                      <div v-if="siteForm.footerInfo?.list.length === 0" class="min-h-5 text-muted-foreground/70">{{ adminText('k008i') }}</div>
                     </template>
                   </Draggable>
 
@@ -483,7 +485,7 @@ onMounted(load)
                       <div class="group inline-flex min-h-5 max-w-full items-center rounded transition-colors hover:bg-muted/60">
                         <span class="js-footer-handle -ml-1 mr-0.5 cursor-grab text-muted-foreground/45 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
                         <button class="inline-flex min-h-5 items-center rounded px-0.5 text-left text-xs text-muted-foreground" type="button" @click="openFooterPrimary(index)">
-                          {{ item.content || '空文字内容' }}
+                          {{ item.content || adminText('k004h') }}
                         </button>
                         <Button variant="ghost" size="icon" class="ml-0.5 size-5 rounded-sm opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100" type="button" @click="siteForm.footerInfo?.primary.splice(index, 1)">
                           <Trash2 class="size-3.5" />
@@ -491,7 +493,7 @@ onMounted(load)
                       </div>
                     </template>
                     <template #footer>
-                      <div v-if="siteForm.footerInfo?.primary.length === 0" class="min-h-5 text-muted-foreground/70">暂无内容</div>
+                      <div v-if="siteForm.footerInfo?.primary.length === 0" class="min-h-5 text-muted-foreground/70">{{ adminText('k0062') }}</div>
                     </template>
                   </Draggable>
                 </div>
@@ -503,37 +505,37 @@ onMounted(load)
 
       <form v-else-if="kind === 'mail'" class="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]" @submit.prevent="save">
         <section class="space-y-6">
-          <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium">SMTP 服务器设置</div>
+          <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium">{{ adminText('k008j') }}</div>
           <div class="flex items-center justify-between rounded-lg border bg-muted/20 p-4">
-            <div><div class="font-medium">启用邮件服务</div><p class="text-sm text-muted-foreground">开启后，系统将能够发送验证码、通知等邮件。</p></div>
+            <div><div class="font-medium">{{ adminText('k008k') }}</div><p class="text-sm text-muted-foreground">{{ adminText('k008l') }}</p></div>
             <Switch v-model="mailForm.enableMail" />
           </div>
           <div class="grid gap-6 md:grid-cols-2">
-            <label class="grid gap-2 text-sm font-medium">SMTP 主机<Input v-model="mailForm.smtpHost" :disabled="!mailForm.enableMail" placeholder="smtp.example.com" /></label>
-            <label class="grid gap-2 text-sm font-medium">SMTP 端口<Input v-model.number="mailForm.smtpPort" :disabled="!mailForm.enableMail" type="number" /></label>
-            <label class="grid gap-2 text-sm font-medium">用户名 (邮箱)<Input v-model="mailForm.smtpUsername" :disabled="!mailForm.enableMail" /></label>
-            <label class="grid gap-2 text-sm font-medium">密码 / 授权码<Input v-model="mailForm.smtpPassword" :disabled="!mailForm.enableMail" type="password" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k008m') }}<Input v-model="mailForm.smtpHost" :disabled="!mailForm.enableMail" placeholder="smtp.example.com" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k008n') }}<Input v-model.number="mailForm.smtpPort" :disabled="!mailForm.enableMail" type="number" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k008o') }}<Input v-model="mailForm.smtpUsername" :disabled="!mailForm.enableMail" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k008p') }}<Input v-model="mailForm.smtpPassword" :disabled="!mailForm.enableMail" type="password" /></label>
           </div>
           <div class="flex items-center justify-between rounded-lg border bg-muted/20 p-4">
-            <div><div class="flex items-center gap-2 font-medium"><Shield class="size-4" />使用 SSL 加密</div><p class="text-sm text-muted-foreground">通常端口 465 需要开启 SSL，587 通常使用 STARTTLS。</p></div>
+            <div><div class="flex items-center gap-2 font-medium"><Shield class="size-4" />{{ adminText('k008q') }}</div><p class="text-sm text-muted-foreground">{{ adminText('k008r') }}</p></div>
             <Switch v-model="mailForm.useSSL" :disabled="!mailForm.enableMail" />
           </div>
         </section>
         <aside class="space-y-8">
           <section class="space-y-4">
-            <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><Send class="size-5 text-muted-foreground" />发件人信息</div>
-            <label class="grid gap-2 text-sm font-medium">发件人名称<Input v-model="mailForm.fromName" :disabled="!mailForm.enableMail" placeholder="GooseForum" /></label>
-            <label class="grid gap-2 text-sm font-medium">发件人邮箱<Input v-model="mailForm.fromEmail" :disabled="!mailForm.enableMail" placeholder="noreply@example.com" /></label>
+            <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><Send class="size-5 text-muted-foreground" />{{ adminText('k008s') }}</div>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k008t') }}<Input v-model="mailForm.fromName" :disabled="!mailForm.enableMail" placeholder="GooseForum" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k008u') }}<Input v-model="mailForm.fromEmail" :disabled="!mailForm.enableMail" placeholder="noreply@example.com" /></label>
           </section>
           <section class="space-y-4">
-            <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium">发送测试</div>
+            <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium">{{ adminText('k008v') }}</div>
             <div class="space-y-3 rounded-lg border p-4">
-              <p class="text-sm text-muted-foreground">保存配置前，可以发送一封测试邮件验证 SMTP 设置。</p>
-              <Input v-model="testEmail" :disabled="!mailForm.enableMail" placeholder="输入接收测试的邮箱" />
+              <p class="text-sm text-muted-foreground">{{ adminText('k008w') }}</p>
+              <Input v-model="testEmail" :disabled="!mailForm.enableMail" :placeholder="adminText('k004k')" />
               <Button class="w-full" type="button" variant="secondary" :disabled="testing || !mailForm.enableMail" @click="sendTestMail">
                 <Loader2 v-if="testing" class="size-4 animate-spin" />
                 <Send v-else class="size-4" />
-                发送测试邮件
+                {{ adminText('k008x') }}
               </Button>
             </div>
           </section>
@@ -542,21 +544,21 @@ onMounted(load)
 
       <form v-else-if="kind === 'security'" class="max-w-2xl space-y-8" @submit.prevent="save">
         <div class="flex items-center justify-between">
-          <div><div class="text-base font-medium">允许新用户注册</div><p class="text-sm text-muted-foreground">关闭后，前台将不允许创建新账号。</p></div>
+          <div><div class="text-base font-medium">{{ adminText('k008y') }}</div><p class="text-sm text-muted-foreground">{{ adminText('k008z') }}</p></div>
           <Switch v-model="securityForm.enableSignup" />
         </div>
         <div class="flex items-center justify-between">
-          <div><div class="flex items-center gap-2 text-base font-medium"><MailCheck class="size-4" />要求验证邮箱</div><p class="text-sm text-muted-foreground">新用户完成邮箱验证后才能正常激活和使用账号。</p></div>
+          <div><div class="flex items-center gap-2 text-base font-medium"><MailCheck class="size-4" />{{ adminText('k0090') }}</div><p class="text-sm text-muted-foreground">{{ adminText('k0091') }}</p></div>
           <Switch v-model="securityForm.enableEmailVerification" />
         </div>
         <div class="space-y-4">
-          <div><div class="text-base font-medium">允许注册的邮箱域名</div><p class="text-sm text-muted-foreground">留空表示不限制。配置后，仅允许这些邮箱域名完成注册。</p></div>
+          <div><div class="text-base font-medium">{{ adminText('k0092') }}</div><p class="text-sm text-muted-foreground">{{ adminText('k0093') }}</p></div>
           <div class="flex gap-2">
-            <Input v-model="newAllowedDomain" class="max-w-sm" placeholder="例如: gmail.com" @keydown.enter.prevent="addAllowedDomain" />
-            <Button type="button" variant="secondary" @click="addAllowedDomain"><Plus class="size-4" />添加</Button>
+            <Input v-model="newAllowedDomain" class="max-w-sm" :placeholder="adminText('k004l')" @keydown.enter.prevent="addAllowedDomain" />
+            <Button type="button" variant="secondary" @click="addAllowedDomain"><Plus class="size-4" />{{ adminText('k0094') }}</Button>
           </div>
           <div class="flex flex-wrap gap-2">
-            <span v-if="allowedDomains.length === 0" class="text-sm italic text-muted-foreground">未限制域名</span>
+            <span v-if="allowedDomains.length === 0" class="text-sm italic text-muted-foreground">{{ adminText('k0095') }}</span>
             <Badge v-for="domain in allowedDomains" :key="domain" variant="secondary" class="gap-2 px-3 py-1.5 text-sm font-normal">
               {{ domain }}
               <button type="button" @click="removeAllowedDomain(domain)"><Trash2 class="size-3.5 text-muted-foreground hover:text-destructive" /></button>
@@ -567,31 +569,31 @@ onMounted(load)
 
       <form v-else-if="kind === 'posting'" class="grid gap-12 lg:grid-cols-2" @submit.prevent="save">
         <section class="space-y-6">
-          <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><FileText class="size-5 text-muted-foreground" />文本内容控制</div>
+          <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><FileText class="size-5 text-muted-foreground" />{{ adminText('k0096') }}</div>
           <div class="grid gap-6 sm:grid-cols-2">
-            <label class="grid gap-2 text-sm font-medium">最小标题长度<Input v-model.number="postingForm.textControl.minTitleLength" type="number" /></label>
-            <label class="grid gap-2 text-sm font-medium">最大标题长度<Input v-model.number="postingForm.textControl.maxTitleLength" type="number" /></label>
-            <label class="grid gap-2 text-sm font-medium">最小正文长度<Input v-model.number="postingForm.textControl.minPostLength" type="number" /></label>
-            <label class="grid gap-2 text-sm font-medium">最大正文长度<Input v-model.number="postingForm.textControl.maxPostLength" type="number" /></label>
-            <label class="grid gap-2 text-sm font-medium">新用户发帖冷却 (分钟)<Input v-model.number="postingForm.textControl.newUserPostCooldownMinutes" type="number" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k0097') }}<Input v-model.number="postingForm.textControl.minTitleLength" type="number" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k0098') }}<Input v-model.number="postingForm.textControl.maxTitleLength" type="number" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k0099') }}<Input v-model.number="postingForm.textControl.minPostLength" type="number" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k009a') }}<Input v-model.number="postingForm.textControl.maxPostLength" type="number" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k009b') }}<Input v-model.number="postingForm.textControl.newUserPostCooldownMinutes" type="number" /></label>
           </div>
         </section>
         <section class="space-y-6">
-          <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><Upload class="size-5 text-muted-foreground" />附件控制</div>
+          <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><Upload class="size-5 text-muted-foreground" />{{ adminText('k009c') }}</div>
           <div class="flex items-center justify-between rounded-lg border bg-muted/10 p-4">
-            <div><div class="text-base font-medium">允许上传附件</div><p class="text-sm text-muted-foreground">开启后，用户可以在帖子中上传图片或文件。</p></div>
+            <div><div class="text-base font-medium">{{ adminText('k009d') }}</div><p class="text-sm text-muted-foreground">{{ adminText('k009e') }}</p></div>
             <Switch v-model="postingForm.uploadControl.allowAttachments" />
           </div>
           <div class="grid gap-6 sm:grid-cols-2">
-            <label class="grid gap-2 text-sm font-medium">每日最大上传数量<Input v-model.number="postingForm.uploadControl.maxDailyUploadsPerUser" :disabled="!postingForm.uploadControl.allowAttachments" type="number" /></label>
-            <label class="grid gap-2 text-sm font-medium">单个附件大小限制 (KB)<Input v-model.number="postingForm.uploadControl.maxAttachmentSizeKb" :disabled="!postingForm.uploadControl.allowAttachments" type="number" /></label>
-            <label class="grid gap-2 text-sm font-medium">新用户上传冷却 (分钟)<Input v-model.number="postingForm.uploadControl.newUserUploadCooldownMinutes" :disabled="!postingForm.uploadControl.allowAttachments" type="number" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k009f') }}<Input v-model.number="postingForm.uploadControl.maxDailyUploadsPerUser" :disabled="!postingForm.uploadControl.allowAttachments" type="number" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k009g') }}<Input v-model.number="postingForm.uploadControl.maxAttachmentSizeKb" :disabled="!postingForm.uploadControl.allowAttachments" type="number" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k009h') }}<Input v-model.number="postingForm.uploadControl.newUserUploadCooldownMinutes" :disabled="!postingForm.uploadControl.allowAttachments" type="number" /></label>
           </div>
           <div class="space-y-3">
-            <div class="text-sm font-medium">允许的扩展名</div>
+            <div class="text-sm font-medium">{{ adminText('k009i') }}</div>
             <div class="flex gap-2">
-              <Input v-model="newExtension" placeholder="例如: .jpg" @keydown.enter.prevent="addExtension" />
-              <Button type="button" variant="secondary" @click="addExtension"><Plus class="size-4" />添加</Button>
+              <Input v-model="newExtension" :placeholder="adminText('k004m')" @keydown.enter.prevent="addExtension" />
+              <Button type="button" variant="secondary" @click="addExtension"><Plus class="size-4" />{{ adminText('k0094') }}</Button>
             </div>
             <div class="flex flex-wrap gap-2">
               <Badge v-for="ext in postingForm.uploadControl.authorizedExtensions" :key="ext" variant="secondary" class="gap-2 px-3 py-1.5 text-sm font-normal">
@@ -605,47 +607,47 @@ onMounted(load)
 
       <form v-else class="max-w-3xl space-y-6" @submit.prevent="save">
         <div class="flex items-center justify-between">
-          <div><div class="text-base font-medium">启用公告</div><p class="text-sm text-muted-foreground">开启后，系统公告将显示在首页顶部。</p></div>
+          <div><div class="text-base font-medium">{{ adminText('k009j') }}</div><p class="text-sm text-muted-foreground">{{ adminText('k009k') }}</p></div>
           <Switch v-model="announcementForm.enabled" />
         </div>
         <label class="grid gap-2 text-sm font-medium">
-          公告内容
-          <span class="text-sm font-normal text-muted-foreground">支持 Markdown 语法，保存后会渲染为富文本公告内容。</span>
-          <Textarea v-model="announcementForm.content" class="min-h-64 resize-y font-mono text-sm" placeholder="例如：## 维护通知" />
+          {{ adminText('k009l') }}
+          <span class="text-sm font-normal text-muted-foreground">{{ adminText('k009m') }}</span>
+          <Textarea v-model="announcementForm.content" class="min-h-64 resize-y font-mono text-sm" :placeholder="adminText('k004n')" />
         </label>
-        <Button variant="outline" type="button" @click="addAnnouncementExample"><Code class="size-4" />填入示例</Button>
+        <Button variant="outline" type="button" @click="addAnnouncementExample"><Code class="size-4" />{{ adminText('k009n') }}</Button>
       </form>
 
       <Dialog v-if="kind === 'site-info'" :open="footerDialog !== null" @update:open="closeFooterDialog">
         <DialogContent class="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{{ footerDialog?.type === 'link' ? '编辑页脚链接' : '编辑页脚文字' }}</DialogTitle>
+            <DialogTitle>{{ footerDialog?.type === 'link' ? adminText('k004i') : adminText('k004j') }}</DialogTitle>
             <DialogDescription>
-              页脚会按前台侧栏的两行样式展示，第一行是链接，第二行是文字。
+              {{ adminText('k009o') }}
             </DialogDescription>
           </DialogHeader>
           <form v-if="footerDialog?.type === 'link'" class="grid gap-4" @submit.prevent="saveFooterItem">
             <label class="grid gap-2 text-sm font-medium">
-              链接名称
+              {{ adminText('k0079') }}
               <Input v-model="footerLinkForm.name" placeholder="Github" />
             </label>
             <label class="grid gap-2 text-sm font-medium">
-              链接地址
+              {{ adminText('k009p') }}
               <Input v-model="footerLinkForm.url" placeholder="https://example.com" />
             </label>
             <DialogFooter>
-              <Button variant="outline" type="button" @click="footerDialog = null">取消</Button>
-              <Button type="submit">保存</Button>
+              <Button variant="outline" type="button" @click="footerDialog = null">{{ adminText('k009q') }}</Button>
+              <Button type="submit">{{ adminText('k005g') }}</Button>
             </DialogFooter>
           </form>
           <form v-else class="grid gap-4" @submit.prevent="saveFooterItem">
             <label class="grid gap-2 text-sm font-medium">
-              文字内容
+              {{ adminText('k009r') }}
               <Input v-model="footerPrimaryForm.content" placeholder="Powered by GooseForum" />
             </label>
             <DialogFooter>
-              <Button variant="outline" type="button" @click="footerDialog = null">取消</Button>
-              <Button type="submit">保存</Button>
+              <Button variant="outline" type="button" @click="footerDialog = null">{{ adminText('k009q') }}</Button>
+              <Button type="submit">{{ adminText('k005g') }}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

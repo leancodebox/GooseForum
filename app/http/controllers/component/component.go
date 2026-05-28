@@ -1,6 +1,7 @@
 package component
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -45,9 +46,10 @@ type Response struct {
 }
 
 type ResultStruct struct {
-	Msg    any    `json:"msg"`
-	Result any    `json:"result"`
-	Code   Status `json:"code"`
+	Result      any           `json:"result"`
+	Code        Status        `json:"code"`
+	MessageCode MessageCode   `json:"messageCode,omitempty"`
+	Params      MessageParams `json:"params,omitempty"`
 }
 
 type DataMap map[string]any
@@ -68,22 +70,63 @@ func SuccessPage[T any](list []T, page, size int, total int64) Response {
 
 func SuccessData(data any) ResultStruct {
 	return ResultStruct{
-		Msg:    nil,
 		Result: data,
 		Code:   SUCCESS,
 	}
 }
 
-func FailResponse(msg any) Response {
+// SuccessDataCode returns a successful response with a stable message code.
+func SuccessDataCode(data any, messageCode MessageCode, params MessageParams) ResultStruct {
+	return ResultStruct{
+		Result:      data,
+		Code:        SUCCESS,
+		MessageCode: messageCode,
+		Params:      params,
+	}
+}
+
+func SuccessResponseCode(data any, messageCode MessageCode, params MessageParams) Response {
+	return BuildResponse(http.StatusOK, SuccessDataCode(data, messageCode, params))
+}
+
+func FailResponse() Response {
 	return BuildResponse(http.StatusOK,
-		FailData(msg),
+		FailData(),
 	)
 }
 
-func FailData(msg any) ResultStruct {
+func FailData() ResultStruct {
 	return ResultStruct{
-		Msg:    msg,
 		Result: nil,
 		Code:   FAIL,
 	}
+}
+
+// FailDataCode returns a failed response with a stable message code.
+func FailDataCode(messageCode MessageCode, params MessageParams) ResultStruct {
+	return ResultStruct{
+		Result:      nil,
+		Code:        FAIL,
+		MessageCode: messageCode,
+		Params:      params,
+	}
+}
+
+func FailResponseCode(messageCode MessageCode, params MessageParams) Response {
+	return BuildResponse(http.StatusOK, FailDataCode(messageCode, params))
+}
+
+func FailDataError(err error) ResultStruct {
+	if err == nil {
+		return FailData()
+	}
+	var messageErr MessageError
+	if errors.As(err, &messageErr) {
+		return FailDataCode(messageErr.Code, messageErr.Params)
+	}
+	return FailData()
+}
+
+func FailResponseError(err error) Response {
+	return BuildResponse(http.StatusOK, FailDataError(err))
 }

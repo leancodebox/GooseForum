@@ -21,6 +21,12 @@ var (
 	usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{6,32}$`)
 )
 
+var permissionActionCodes = map[string]string{
+	"上传附件": "uploadAttachment",
+	"发帖":   "post",
+	"评论":   "comment",
+}
+
 func ValidateUsername(username string) bool {
 	return usernameRegex.MatchString(username)
 }
@@ -31,10 +37,14 @@ func ValidatePassword(password string, minLength int) error {
 		minLength = 8
 	}
 	if len(password) < minLength {
-		return fmt.Errorf("密码长度不能少于%d位", minLength)
+		return NewMessageError(
+			MessageAuthPasswordTooShort,
+			fmt.Sprintf("密码长度不能少于%d位", minLength),
+			MessageParams{"minLength": minLength},
+		)
 	}
 	if len(password) > 64 {
-		return fmt.Errorf("密码长度不能超过64位")
+		return NewMessageError(MessageAuthPasswordTooLong, "密码长度不能超过64位", nil)
 	}
 
 	// 检查是否包含数字
@@ -43,7 +53,7 @@ func ValidatePassword(password string, minLength int) error {
 	hasLetter := regexp.MustCompile(`[a-zA-Z]`).MatchString(password)
 
 	if !hasDigit || !hasLetter {
-		return fmt.Errorf("密码必须包含字母和数字")
+		return NewMessageError(MessageAuthPasswordNeedsLetterNumber, "密码必须包含字母和数字", nil)
 	}
 
 	return nil
@@ -96,21 +106,37 @@ func SendAEmail4User(userEntity *users.EntityComplete) error {
 // CheckUserPermission 统一检查用户操作权限（封禁状态、邮箱验证等）
 func CheckUserPermission(userEntity *users.EntityComplete, action string) (error, int) {
 	if userEntity == nil || userEntity.Id == 0 {
-		return errors.New("用户不存在或未登录"), 401
+		return NewMessageError(MessageAuthRequired, "用户不存在或未登录", nil), 401
 	}
 
 	// 1. 检查用户是否被冻结
 	if userEntity.IsFrozen == users.StatusFrozen {
-		return fmt.Errorf("您的账号已被封禁，无法进行%s操作", action), 403
+		return NewMessageError(
+			MessagePermissionUserFrozen,
+			fmt.Sprintf("您的账号已被封禁，无法进行%s操作", action),
+			permissionActionParams(action),
+		), 403
 	}
 
 	// 2. 检查邮箱验证（如果系统开启了强制要求）
 	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
 	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
-		return fmt.Errorf("请先完成邮箱验证后再进行%s操作", action), 403
+		return NewMessageError(
+			MessagePermissionEmailRequired,
+			fmt.Sprintf("请先完成邮箱验证后再进行%s操作", action),
+			permissionActionParams(action),
+		), 403
 	}
 
 	return nil, 200
+}
+
+func permissionActionParams(action string) MessageParams {
+	params := MessageParams{"action": action}
+	if actionCode, ok := permissionActionCodes[action]; ok {
+		params["actionCode"] = actionCode
+	}
+	return params
 }
 
 // ValidateEmailDomain 验证邮箱域名是否符合白名单限制
@@ -122,7 +148,7 @@ func ValidateEmailDomain(email string) error {
 
 	parts := strings.Split(email, "@")
 	if len(parts) != 2 {
-		return errors.New("邮箱格式不正确")
+		return NewMessageError(MessageAuthEmailDomainInvalid, "邮箱格式不正确", nil)
 	}
 
 	domain := parts[1]
@@ -130,5 +156,9 @@ func ValidateEmailDomain(email string) error {
 		return nil
 	}
 
-	return errors.New("该邮箱域名不在允许的注册白名单中")
+	return NewMessageError(
+		MessageAuthEmailDomainNotAllowed,
+		"该邮箱域名不在允许的注册白名单中",
+		MessageParams{"domain": domain},
+	)
 }

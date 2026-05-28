@@ -32,35 +32,6 @@ func GetByArticleId(userId, articleId any) (entity Entity) {
 	return
 }
 
-func GetLikeReceivedCount(userId uint64) int64 {
-	var count int64
-	builder().
-		Joins("left join articles on articles.id = article_like.article_id").
-		Where("articles.user_id = ?", userId).
-		Where("article_like.status = ?", 1).
-		Count(&count)
-	return count
-}
-
-func GetLikeGivenCount(userId uint64) int64 {
-	var count int64
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&count)
-	return count
-}
-
-func GetArticleLikeByArticleId(articleId uint64) int64 {
-	var count int64
-	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Count(&count)
-	return count
-}
-
-// GetAll 用于全量导出/修复数据，支持分页查询
-func GetAll(offset, limit int) ([]*Entity, error) {
-	var entities []*Entity
-	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
-	return entities, err
-}
-
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
 //	return result.RowsAffected

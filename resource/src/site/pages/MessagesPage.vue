@@ -6,6 +6,7 @@ import { formatChatTime } from '@/runtime/format'
 import { useUnreadStatus } from '@/runtime/unread-status'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { LayoutPayload, MessageConversationPayload, MessagesPageProps, UserConnectionPayload } from '@/types/payload'
+import { useI18n } from 'vue-i18n'
 
 type ChatConversation = MessageConversationPayload & {
   messages: ChatMessagePayload[]
@@ -17,6 +18,7 @@ const page = defineProps<{
   props: MessagesPageProps
 }>()
 
+const { t } = useI18n()
 const conversations = ref<ChatConversation[]>(page.props.conversations.map((item) => ({ ...item, messages: [] })))
 const active = ref<ChatConversation | null>(null)
 const newMessage = ref('')
@@ -56,7 +58,7 @@ onMounted(() => {
       void selectConversation(existing)
       return
     }
-    const username = params.get('username') || '用户'
+    const username = params.get('username') || t('notifications.actorFallback')
     const avatar = params.get('avatar') || '/static/pic/default-avatar.webp'
     void startChat({ id: targetUserId, username, nickname: username, avatarUrl: avatar, bio: '', url: `/u/${targetUserId}` })
     return
@@ -77,7 +79,7 @@ async function selectConversation(conversation: ChatConversation) {
       const messages = await getChatMessages(conversation.convId)
       conversation.messages = messages.reverse()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : '消息加载失败'
+      error.value = err instanceof Error ? err.message : t('api.messagesLoadFailed')
     } finally {
       conversation.loading = false
     }
@@ -129,7 +131,7 @@ async function submitMessage() {
     showEmoji.value = false
     await scrollToBottom()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '发送失败'
+    error.value = err instanceof Error ? err.message : t('api.sendFailed')
   } finally {
     sending.value = false
   }
@@ -188,11 +190,11 @@ async function startChat(user: UserConnectionPayload) {
           :class="active ? 'hidden md:flex' : 'flex'"
         >
           <div class="flex h-14 shrink-0 items-center justify-between border-b border-gray-100 bg-white px-4 md:h-15">
-            <h1 class="text-base font-bold text-gray-950 md:text-lg">私信</h1>
+            <h1 class="text-base font-bold text-gray-950 md:text-lg">{{ t('messages.title') }}</h1>
             <button
               type="button"
               class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-              title="新私信"
+              :title="t('messages.newMessage')"
               @click="showNewChat = true"
             >
               <PenLine class="h-4 w-4" />
@@ -202,7 +204,7 @@ async function startChat(user: UserConnectionPayload) {
           <div class="border-b border-gray-100 p-3 md:bg-transparent">
             <label class="flex h-9 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-500 md:bg-white">
               <Search class="h-4 w-4" />
-              <input v-model="search" class="min-w-0 flex-1 bg-transparent outline-none" placeholder="搜索会话" />
+              <input v-model="search" class="min-w-0 flex-1 bg-transparent outline-none" :placeholder="t('messages.searchConversations')" />
             </label>
           </div>
 
@@ -230,7 +232,7 @@ async function startChat(user: UserConnectionPayload) {
                 </div>
                 <div class="mt-1 flex items-center gap-2">
                   <p class="min-w-0 flex-1 truncate text-sm" :class="conversation.unreadCount ? 'font-semibold text-gray-900' : 'text-gray-500'">
-                    {{ conversation.lastMsg || '还没有消息' }}
+                    {{ conversation.lastMsg || t('messages.noMessagesYet') }}
                   </p>
                 </div>
               </div>
@@ -239,10 +241,10 @@ async function startChat(user: UserConnectionPayload) {
 
           <div v-else class="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
             <MessageSquare class="h-10 w-10 text-gray-300" />
-            <h2 class="mt-3 text-base font-semibold text-gray-950">暂无会话</h2>
-            <p class="mt-1 text-sm text-gray-500">开始一次私信聊天。</p>
+            <h2 class="mt-3 text-base font-semibold text-gray-950">{{ t('messages.emptyConversationsTitle') }}</h2>
+            <p class="mt-1 text-sm text-gray-500">{{ t('messages.emptyConversationsDescription') }}</p>
             <button type="button" class="mt-4 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700" @click="showNewChat = true">
-              新私信
+              {{ t('messages.newMessage') }}
             </button>
           </div>
         </aside>
@@ -257,7 +259,7 @@ async function startChat(user: UserConnectionPayload) {
                 <UserAvatar :src="active.peerAvatar" :alt="active.peerUsername" class="h-9 w-9 rounded-full object-cover ring-1 ring-gray-100" />
                 <div class="min-w-0">
                   <a :href="active.peerUrl" class="truncate text-sm font-bold text-gray-950 hover:text-blue-600">{{ active.peerUsername }}</a>
-                  <p class="text-xs text-gray-400">私信对话</p>
+                  <p class="text-xs text-gray-400">{{ t('messages.conversation') }}</p>
                 </div>
               </div>
               <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700">
@@ -267,10 +269,10 @@ async function startChat(user: UserConnectionPayload) {
 
             <div ref="messagesEl" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3 md:space-y-4 md:px-4 md:py-4">
               <div class="flex justify-center">
-                <span class="rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400">今天</span>
+                <span class="rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400">{{ t('messages.today') }}</span>
               </div>
 
-              <div v-if="active.loading" class="py-12 text-center text-sm text-gray-400">消息加载中...</div>
+              <div v-if="active.loading" class="py-12 text-center text-sm text-gray-400">{{ t('messages.loading') }}</div>
               <template v-else-if="active.messages.length">
                 <div
                   v-for="message in active.messages"
@@ -292,8 +294,8 @@ async function startChat(user: UserConnectionPayload) {
               </template>
               <div v-else class="flex h-full flex-col items-center justify-center text-center">
                 <MessageSquare class="h-10 w-10 text-gray-300" />
-                <h2 class="mt-3 text-base font-semibold text-gray-950">开始聊天</h2>
-                <p class="mt-1 text-sm text-gray-500">给 {{ active.peerUsername }} 发第一条消息。</p>
+                <h2 class="mt-3 text-base font-semibold text-gray-950">{{ t('messages.startChat') }}</h2>
+                <p class="mt-1 text-sm text-gray-500">{{ t('messages.firstMessageTo', { user: active.peerUsername }) }}</p>
               </div>
             </div>
 
@@ -306,7 +308,7 @@ async function startChat(user: UserConnectionPayload) {
                     v-model="newMessage"
                     rows="1"
                     class="block max-h-36 min-h-11 w-full resize-none bg-transparent px-2 py-2 text-[15px] leading-relaxed text-gray-900 outline-none placeholder:text-gray-400"
-                    placeholder="输入消息..."
+                    :placeholder="t('messages.inputPlaceholder')"
                     @input="resizeMessageInput"
                     @keydown.enter="handleEnter"
                   />
@@ -316,7 +318,7 @@ async function startChat(user: UserConnectionPayload) {
                         <button
                           type="button"
                           class="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-white hover:text-blue-600 hover:shadow-sm"
-                          title="表情"
+                          :title="t('messages.emoji')"
                           @click="showEmoji = !showEmoji"
                         >
                           <Smile class="h-5 w-5" />
@@ -333,7 +335,7 @@ async function startChat(user: UserConnectionPayload) {
                           </button>
                         </div>
                       </div>
-                      <span class="hidden truncate text-[11px] font-medium text-gray-400 sm:inline">Enter 发送，Shift + Enter 换行</span>
+                      <span class="hidden truncate text-[11px] font-medium text-gray-400 sm:inline">{{ t('messages.enterHint') }}</span>
                     </div>
                     <button
                       type="button"
@@ -342,7 +344,7 @@ async function startChat(user: UserConnectionPayload) {
                       @click="submitMessage"
                     >
                       <Send class="h-4 w-4" />
-                      <span>发送</span>
+                      <span>{{ t('messages.send') }}</span>
                     </button>
                   </div>
                 </div>
@@ -352,10 +354,10 @@ async function startChat(user: UserConnectionPayload) {
 
           <div v-else class="hidden flex-1 flex-col items-center justify-center p-8 text-center md:flex">
             <MessageSquare class="h-12 w-12 text-gray-300" />
-            <h2 class="mt-3 text-lg font-semibold text-gray-950">选择一个会话</h2>
-            <p class="mt-1 text-sm text-gray-500">从左侧选择会话，或开始新的私信。</p>
+            <h2 class="mt-3 text-lg font-semibold text-gray-950">{{ t('messages.selectConversation') }}</h2>
+            <p class="mt-1 text-sm text-gray-500">{{ t('messages.selectConversationDescription') }}</p>
             <button type="button" class="mt-4 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700" @click="showNewChat = true">
-              开始聊天
+              {{ t('messages.startChat') }}
             </button>
           </div>
         </section>
@@ -364,7 +366,7 @@ async function startChat(user: UserConnectionPayload) {
       <div v-if="showNewChat" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/20 px-4 backdrop-blur-sm" @click.self="showNewChat = false">
         <div class="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-xl">
           <div class="flex h-13 items-center justify-between border-b border-gray-100 px-4">
-            <h2 class="text-sm font-semibold text-gray-950">新私信</h2>
+            <h2 class="text-sm font-semibold text-gray-950">{{ t('messages.newMessage') }}</h2>
             <button type="button" class="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700" @click="showNewChat = false">
               <X class="h-4 w-4" />
             </button>
@@ -372,7 +374,7 @@ async function startChat(user: UserConnectionPayload) {
           <div class="border-b border-gray-100 p-3">
             <label class="flex h-9 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-500">
               <Search class="h-4 w-4" />
-              <input v-model="userSearch" class="min-w-0 flex-1 bg-transparent outline-none" placeholder="搜索用户" />
+              <input v-model="userSearch" class="min-w-0 flex-1 bg-transparent outline-none" :placeholder="t('messages.searchUsers')" />
             </label>
           </div>
           <div class="min-h-0 overflow-y-auto p-2">
@@ -389,7 +391,7 @@ async function startChat(user: UserConnectionPayload) {
                 <div class="truncate text-xs text-gray-400">@{{ user.username }}</div>
               </div>
             </button>
-            <p v-if="!filteredUsers.length" class="px-4 py-8 text-center text-sm text-gray-500">暂无可联系用户。</p>
+            <p v-if="!filteredUsers.length" class="px-4 py-8 text-center text-sm text-gray-500">{{ t('messages.noContactableUsers') }}</p>
           </div>
         </div>
       </div>

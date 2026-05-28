@@ -3,7 +3,6 @@ import App from '@/site/App.vue'
 import '@/styles/resource.css'
 import { readInitialPayload, updateDocumentMeta } from '@/runtime/payload'
 import { installNavigation, preparePayload } from '@/runtime/router'
-import { resetShellState } from '@/runtime/shell-state'
 import { currentLocale, i18n } from '@/runtime/i18n'
 import { hydrateFlashMessages } from '@/runtime/flash-message'
 import PayloadRouteView from '@/site/components/PayloadRouteView.vue'
@@ -15,7 +14,6 @@ const currentPage = shallowRef(initialPage)
 document.documentElement.lang = currentLocale()
 
 function commitPage(nextPage: typeof initialPage) {
-  resetShellState()
   currentPage.value = nextPage
   updateDocumentMeta(nextPage.payload)
 }

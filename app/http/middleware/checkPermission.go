@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +13,7 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId := c.GetUint64("userId")
 		if userId == 0 {
-			c.JSON(http.StatusUnauthorized, component.FailData("未登陆"))
+			c.JSON(http.StatusUnauthorized, component.FailDataCode(component.MessageAuthRequired, nil))
 			c.Abort()
 			return
 		}
@@ -30,15 +29,16 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 			var err error
 			roleId, err = users.GetRoleId(userId)
 			if err != nil {
-				c.JSON(http.StatusForbidden, component.FailData("操作异常"))
+				c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionResolveFailed, nil))
 				c.Abort()
 				return
 			}
 		}
 
 		if permission.CheckRole(roleId, permissionType) == false {
-			msg := fmt.Sprintf("User(%d)-不可操作-%s", userId, permissionType.Name())
-			c.JSON(http.StatusForbidden, component.FailData(msg))
+			c.JSON(http.StatusForbidden, component.FailDataCode(
+				component.MessagePermissionDenied,
+				component.MessageParams{"permission": permissionType.Name()}))
 			c.Abort()
 			return
 		}
@@ -62,7 +62,7 @@ func CheckPermissionOrNoUser(permissionType permission.Enum) gin.HandlerFunc {
 			var err error
 			roleId, err = users.GetRoleId(userId)
 			if err != nil {
-				c.JSON(http.StatusForbidden, component.FailData("操作异常"))
+				c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionResolveFailed, nil))
 				c.Abort()
 				return
 			}

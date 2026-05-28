@@ -1,0 +1,5 @@
+{
+  "enableSignup": true,
+  "enableEmailVerification": false,
+  "allowedDomains": []
+}

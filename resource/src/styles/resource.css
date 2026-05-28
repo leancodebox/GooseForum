@@ -48,6 +48,99 @@ body {
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.gf-page-enter-active {
+  transition:
+    opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gf-page-leave-active {
+  display: none;
+}
+
+.gf-page-enter-from {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.gf-menu-enter-active,
+.gf-menu-leave-active {
+  transition:
+    opacity 0.14s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gf-menu-enter-from,
+.gf-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.gf-local-expand-enter-active,
+.gf-local-expand-leave-active {
+  overflow: hidden;
+  transition:
+    opacity 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gf-local-expand-enter-from,
+.gf-local-expand-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.gf-modal-enter-active,
+.gf-modal-leave-active {
+  transition: opacity 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gf-modal-enter-active > *,
+.gf-modal-leave-active > * {
+  transition:
+    opacity 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gf-modal-enter-from,
+.gf-modal-leave-to {
+  opacity: 0;
+}
+
+.gf-modal-enter-from > *,
+.gf-modal-leave-to > * {
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gf-page-enter-active,
+  .gf-page-leave-active,
+  .gf-menu-enter-active,
+  .gf-menu-leave-active,
+  .gf-local-expand-enter-active,
+  .gf-local-expand-leave-active,
+  .gf-modal-enter-active,
+  .gf-modal-leave-active,
+  .gf-modal-enter-active > *,
+  .gf-modal-leave-active > *,
+  .gf-flash-enter-active,
+  .gf-flash-leave-active,
+  .gf-flash-move {
+    transition-duration: 0.01ms;
+  }
+
+  .gf-page-enter-from,
+  .gf-menu-enter-from,
+  .gf-menu-leave-to,
+  .gf-local-expand-enter-from,
+  .gf-local-expand-leave-to,
+  .gf-modal-enter-from > *,
+  .gf-modal-leave-to > * {
+    transform: none;
+  }
+}
+
 @layer components {
   .gf-prose {
     @apply prose prose-slate max-w-none min-w-0;

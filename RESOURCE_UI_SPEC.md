@@ -114,6 +114,11 @@ Motion should make state changes legible without making the app feel soft or del
 
 Rules:
 
+- Maintain motion rules globally, but implement motion at the component that owns the state.
+- `resource/src/runtime/motion.ts` is the source of truth for public-site timing, easing, and shared motion presets.
+- App shell and route-level motion should only handle navigation and shell stability. Local components should own local transitions such as menus, drawers, reply editors, hover cards, and flash messages.
+- Avoid a centralized animation controller that reaches into component internals.
+- Avoid page-specific one-off transitions unless the page has a unique interaction model.
 - Layout transitions should animate width, transform, opacity, or grid tracks predictably.
 - Sidebar collapse must not make icons jump vertically or horizontally.
 - Page switches should avoid full white flashes.
@@ -124,10 +129,36 @@ Recommended durations:
 
 ```text
 Fast control feedback: 120ms to 160ms
+Content enter and small expansion: 140ms to 180ms
 Panel/sidebar transitions: 180ms to 240ms
 Overlay enter/leave: 160ms to 220ms
 Chart or metric update: 200ms to 320ms
 ```
+
+Public-site motion layering:
+
+```text
+runtime/motion.ts
+  Defines shared durations, easing, and motion presets.
+
+AppShell / PayloadRouteView / navigation-state
+  Handles route transition, loading visibility, and shell stability.
+
+Local site components
+  Use shared motion tokens while owning their own DOM transitions.
+```
+
+Public SPA navigation rules:
+
+- Keep the app shell mounted across in-app navigation.
+- Do not clear shell header state before the next page is ready to render.
+- Animate the main content area only when the page identity changes, such as topic list to article detail.
+- Do not animate the whole page for same-view filter changes. Stable regions such as announcements, tabs, headers, and list frames should stay still when only list data changes.
+- Let the component that owns the changed data provide local motion when it does not disturb document height. For same-view topic sort changes, do not animate the whole topic list in or out; prefer direct data replacement plus stable tab/loading feedback.
+- Keep the previous page visible until the next payload and component are ready.
+- Use subtle opacity and small vertical movement for page content. Avoid scale, large movement, or whole-shell animation.
+- Sidebar active state may transition color/background, but must not change item size or position.
+- Loading indicators should appear only after a short delay and remain visible long enough to avoid flicker.
 
 ## Public App Shell
 

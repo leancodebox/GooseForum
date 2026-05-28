@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	"github.com/mojocn/base64Captcha"
 )
 
@@ -74,16 +75,38 @@ var (
 	}
 	customCaptchaStore = &customStore{store}
 	captchaExpiration  = time.Minute * 3 // 验证码3分钟过期
+	cleanupStopCh      = make(chan struct{})
+	cleanupWg          sync.WaitGroup
 )
 
 // 定期清理过期验证码
 func init() {
+	closer.Register(StopCleanup)
+	cleanupWg.Add(1)
 	go func() {
+		defer cleanupWg.Done()
 		ticker := time.NewTicker(time.Minute) // 每分钟清理一次
-		for range ticker.C {
-			store.cleanup()
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				store.cleanup()
+			case <-cleanupStopCh:
+				return
+			}
 		}
 	}()
+}
+
+// StopCleanup stops the expired captcha cleanup worker.
+func StopCleanup() error {
+	select {
+	case <-cleanupStopCh:
+	default:
+		close(cleanupStopCh)
+	}
+	cleanupWg.Wait()
+	return nil
 }
 
 // 清理过期验证码

@@ -56,8 +56,9 @@ cd resource && npx vitest run
 ### CLI 命令
 ```bash
 ./gooseforum serve                 # 启动服务
-./gooseforum user:manage           # 重置管理员密码
-./gooseforum user:set-email <email>  # 设置用户邮箱
+./gooseforum set-user-admin <userId>  # 设置管理员
+./gooseforum set-user-email <userId> <email>  # 设置用户邮箱
+./gooseforum set-user-password <userId> <password>  # 重置用户密码
 ```
 
 ## 架构

@@ -12,7 +12,7 @@ import (
 
 func init() {
 	cmd := &cobra.Command{
-		Use:   "mockArticles",
+		Use:   "mock-articles",
 		Short: "Mock articles for testing",
 		Run:   runMockArticles,
 	}
@@ -47,7 +47,7 @@ func runMockArticles(cmd *cobra.Command, args []string) {
 		if resp.Data.Code == component.SUCCESS {
 			fmt.Printf("[%d/%d] Created article: %s (User: %s)\n", i, totalArticles, req.Params.Title, user.Username)
 		} else {
-			fmt.Printf("[%d/%d] Failed to create article: %v\n", i, totalArticles, resp.Data.Msg)
+			fmt.Printf("[%d/%d] Failed to create article: %s\n", i, totalArticles, resp.Data.MessageCode)
 		}
 
 		// Small delay to ensure sequence and timestamp difference

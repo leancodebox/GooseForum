@@ -1,0 +1,44 @@
+[
+  {
+    "name": "community",
+    "emoji": "👥",
+    "color": "#3b82f6",
+    "links": [
+      {
+        "name": "GooseForum",
+        "desc": "简单的社区构建软件 / Easy forum software for building friendly communities.",
+        "url": "https://gooseforum.online",
+        "logoUrl": "/static/pic/default-avatar.webp",
+        "status": 0
+      }
+    ]
+  },
+  {
+    "name": "blog",
+    "emoji": "✍️",
+    "color": "#22c55e",
+    "links": [
+      {
+        "name": "GooseForum",
+        "desc": "简单的社区构建软件 / Easy forum software for building friendly communities.",
+        "url": "https://gooseforum.online",
+        "logoUrl": "/static/pic/default-avatar.webp",
+        "status": 0
+      }
+    ]
+  },
+  {
+    "name": "tool",
+    "emoji": "🛠️",
+    "color": "#a855f7",
+    "links": [
+      {
+        "name": "GooseForum",
+        "desc": "简单的社区构建软件 / Easy forum software for building friendly communities.",
+        "url": "https://gooseforum.online",
+        "logoUrl": "/static/pic/default-avatar.webp",
+        "status": 0
+      }
+    ]
+  }
+]

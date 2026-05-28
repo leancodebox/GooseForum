@@ -42,7 +42,7 @@ func GetUserCard(req component.BetterRequest[GetUserCardReq]) component.Response
 	userId := req.Params.UserId
 	card, ok := usercardservice.GetCard(userId)
 	if !ok {
-		return component.FailResponse("User not found")
+		return component.FailResponseCode(component.MessageUserNotFound, nil)
 	}
 	currentUserId := req.UserId
 	card.IsSelf = currentUserId == userId
@@ -58,7 +58,7 @@ func GetUserHoverCard(req component.BetterRequest[GetUserCardReq]) component.Res
 	userId := req.Params.UserId
 	card, ok := usercardservice.GetHoverCard(userId)
 	if !ok {
-		return component.FailResponse("User not found")
+		return component.FailResponseCode(component.MessageUserNotFound, nil)
 	}
 	currentUserId := req.UserId
 	card.IsFollowing = false
@@ -77,17 +77,17 @@ type EditUserEmailReq struct {
 func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
-		return component.FailResponse("获取用户信息失败")
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
 
 	newEmail := req.GetParams().Email
 
 	if err := component.ValidateEmailDomain(newEmail); err != nil {
-		return component.FailResponse(err.Error())
+		return component.FailResponseError(err)
 	}
 
 	if users.ExistEmail(newEmail) {
-		return component.FailResponse("邮箱已被使用")
+		return component.FailResponseCode(component.MessageAuthEmailExists, nil)
 	}
 	userEntity.Email = newEmail
 	userEntity.IsActivated = users.ActivationPending
@@ -95,14 +95,14 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 
 	err = SaveUser(&userEntity)
 	if err != nil {
-		return component.FailResponse("更新用户信息失败")
+		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
 	}
 
 	if err = component.SendAEmail4User(&userEntity); err != nil {
 		slog.Info("验证邮件发送失败", "error", err)
 	}
 
-	return component.SuccessResponse("更新成功")
+	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
 }
 
 type EditUsernameReq struct {
@@ -113,22 +113,22 @@ type EditUsernameReq struct {
 func EditUsername(req component.BetterRequest[EditUsernameReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
-		return component.FailResponse("获取用户信息失败")
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
 	newUsername := req.GetParams().Username
 	if !component.ValidateUsername(newUsername) {
-		return component.FailResponse("用户名仅允许字母、数字、下划线、连字符，长度6-32")
+		return component.FailResponseCode(component.MessageAuthUsernameInvalid, nil)
 	}
 	if users.ExistUsername(newUsername) {
-		return component.FailResponse("用户名已存在")
+		return component.FailResponseCode(component.MessageAuthUsernameExists, nil)
 	}
 	userEntity.Username = newUsername
 	err = SaveUser(&userEntity)
 	if err != nil {
-		return component.FailResponse("更新用户信息失败")
+		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
 	}
 
-	return component.SuccessResponse("更新成功")
+	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
 }
 
 type EditUserInfoReq struct {
@@ -144,7 +144,7 @@ type EditUserInfoReq struct {
 func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
-		return component.FailResponse("获取用户信息失败")
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
 
 	userEntity.Nickname = req.Params.Nickname
@@ -160,43 +160,46 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 
 	err = SaveUser(&userEntity)
 	if err != nil {
-		return component.FailResponse("更新用户信息失败")
+		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
 	}
-	return component.SuccessResponse("更新成功")
+	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
 }
 
 // UploadAvatar stores a new avatar for the current user.
 func UploadAvatar(c *gin.Context) {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 	if !postingConfig.UploadControl.AllowAttachments {
-		c.JSON(200, component.FailData("目前已关闭附件上传功能"))
+		c.JSON(200, component.FailDataCode(component.MessageUploadAttachmentDisabled, nil))
 		return
 	}
 
 	userId := c.GetUint64("userId")
 
 	if userId == 0 {
-		c.JSON(200, component.FailData("未登录"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthRequired, nil))
 		return
 	}
 
 	userEntity, err := users.Get(userId)
 	if err != nil {
-		c.JSON(200, component.FailData("获取用户信息失败"))
+		c.JSON(200, component.FailDataCode(component.MessageUserFetchFailed, nil))
 		return
 	}
 
 	if err, code := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
-		c.JSON(code, component.FailData(err.Error()))
+		c.JSON(code, component.FailDataError(err))
 		return
 	}
 
 	if postingConfig.UploadControl.NewUserUploadCooldownMinutes > 0 {
 		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.UploadControl.NewUserUploadCooldownMinutes) * time.Minute)
 		if time.Now().Before(cooldownTime) {
-			c.JSON(200, component.FailData(fmt.Sprintf("新用户注册%d分钟后才能上传，请在 %s 后再试",
-				postingConfig.UploadControl.NewUserUploadCooldownMinutes,
-				cooldownTime.Format("2006-01-02 15:04:05"))))
+			minutes := postingConfig.UploadControl.NewUserUploadCooldownMinutes
+			availableAt := cooldownTime.Format("2006-01-02 15:04:05")
+			c.JSON(200, component.FailDataCode(
+				component.MessageUploadCooldown,
+
+				component.MessageParams{"minutes": minutes, "availableAt": availableAt}))
 			return
 		}
 	}
@@ -204,7 +207,7 @@ func UploadAvatar(c *gin.Context) {
 	files, err := avatarFormFiles(c)
 	if err != nil {
 		slog.Error(err.Error())
-		c.JSON(200, component.FailData("获取上传文件失败"))
+		c.JSON(200, component.FailDataCode(component.MessageUploadFileMissing, nil))
 		return
 	}
 
@@ -212,7 +215,10 @@ func UploadAvatar(c *gin.Context) {
 	if postingConfig.UploadControl.MaxDailyUploadsPerUser > 0 {
 		count := filedata.CountDailyUploads(userId)
 		if count+int64(fileCount) > int64(postingConfig.UploadControl.MaxDailyUploadsPerUser) {
-			c.JSON(200, component.FailData(fmt.Sprintf("您今日已上传 %d 个文件，上传头像需要 %d 个名额，已超过每日限制", count, fileCount)))
+			c.JSON(200, component.FailDataCode(
+				component.MessageUploadDailyLimitAvatar,
+
+				component.MessageParams{"count": count, "fileCount": fileCount}))
 			return
 		}
 	}
@@ -225,7 +231,7 @@ func UploadAvatar(c *gin.Context) {
 
 	mainData, err := readAvatarUploadFile(files.Main, maxSize, allowedExts)
 	if err != nil {
-		c.JSON(200, component.FailData(err.Error()))
+		c.JSON(200, component.FailDataError(err))
 		return
 	}
 
@@ -233,7 +239,10 @@ func UploadAvatar(c *gin.Context) {
 	if files.AvatarMedium == nil {
 		fileEntity, err := filedata.SaveAvatar(userId, mainData, files.Main.Filename)
 		if err != nil {
-			c.JSON(200, component.FailData("保存文件失败: "+err.Error()))
+			c.JSON(200, component.FailDataCode(
+				component.MessageUploadSaveFailed,
+
+				component.MessageParams{"error": err.Error()}))
 			return
 		}
 		fileEntities = []*filedata.Entity{fileEntity}
@@ -244,7 +253,7 @@ func UploadAvatar(c *gin.Context) {
 		}}
 		fileData, err := readAvatarUploadFile(files.AvatarMedium, maxSize, allowedExts)
 		if err != nil {
-			c.JSON(200, component.FailData(err.Error()))
+			c.JSON(200, component.FailDataError(err))
 			return
 		}
 		uploads = append(uploads, filedata.AvatarUpload{
@@ -254,14 +263,17 @@ func UploadAvatar(c *gin.Context) {
 
 		fileEntities, err = filedata.SaveAvatarSet(userId, uploads)
 		if err != nil {
-			c.JSON(200, component.FailData("保存文件失败: "+err.Error()))
+			c.JSON(200, component.FailDataCode(
+				component.MessageUploadSaveFailed,
+
+				component.MessageParams{"error": err.Error()}))
 			return
 		}
 	}
 
 	userEntity.AvatarUrl = fileEntities[0].Name
 	if err := SaveUser(&userEntity); err != nil {
-		c.JSON(200, component.FailData("更新用户信息失败"))
+		c.JSON(200, component.FailDataCode(component.MessageUserUpdateFailed, nil))
 		return
 	}
 
@@ -271,7 +283,7 @@ func UploadAvatar(c *gin.Context) {
 	if len(fileEntities) > 1 {
 		response["avatarMediumUrl"] = urlconfig.FilePath(fileEntities[1].Name)
 	}
-	c.JSON(200, component.SuccessData(response))
+	c.JSON(200, component.SuccessDataCode(response, component.MessageUploadSuccess, nil))
 }
 
 type avatarUploadFiles struct {
@@ -306,40 +318,53 @@ func avatarUploadMaxSize() int64 {
 
 func readAvatarUploadFile(file *multipart.FileHeader, maxSize int64, allowedExts []string) ([]byte, error) {
 	if file.Filename == "" {
-		return nil, fmt.Errorf("文件名不能为空")
+		return nil, component.NewMessageError(component.MessageUploadFilenameRequired, "文件名不能为空", nil)
 	}
 	if file.Size > maxSize {
-		return nil, fmt.Errorf("文件大小超过限制，最大允许%dKB", maxSize/1024)
+		return nil, component.NewMessageError(
+			component.MessageUploadFileTooLarge,
+			fmt.Sprintf("文件大小超过限制，最大允许%dKB", maxSize/1024),
+			component.MessageParams{"maxSizeKb": maxSize / 1024},
+		)
 	}
 
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	if len(allowedExts) > 0 {
 		if !isAllowedExtension(ext, allowedExts) {
-			return nil, fmt.Errorf("不支持的文件格式，允许的格式为: %s", strings.Join(allowedExts, ", "))
+			extensions := strings.Join(allowedExts, ", ")
+			return nil, component.NewMessageError(
+				component.MessageUploadUnsupportedExt,
+				fmt.Sprintf("不支持的文件格式，允许的格式为: %s", extensions),
+				component.MessageParams{"extensions": extensions},
+			)
 		}
 	} else if _, err := filedata.CheckImageType(file.Filename); err != nil {
-		return nil, fmt.Errorf("不支持的图片格式，仅支持 JPG、PNG、GIF、WebP、BMP 格式")
+		return nil, component.NewMessageError(component.MessageUploadUnsupportedImage, "不支持的图片格式，仅支持 JPG、PNG、GIF、WebP、BMP 格式", nil)
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		return nil, fmt.Errorf("打开文件失败")
+		return nil, component.NewMessageError(component.MessageUploadOpenFailed, "打开文件失败", nil)
 	}
 	defer src.Close()
 
 	header := make([]byte, 512)
 	n, _ := io.ReadFull(src, header)
 	if n > 0 && !isValidImageContent(header[:n]) {
-		return nil, fmt.Errorf("文件内容不是有效的图片格式")
+		return nil, component.NewMessageError(component.MessageUploadInvalidImage, "文件内容不是有效的图片格式", nil)
 	}
 
 	remainingData, err := io.ReadAll(io.LimitReader(src, maxSize-int64(n)+1))
 	if err != nil {
-		return nil, fmt.Errorf("读取文件失败")
+		return nil, component.NewMessageError(component.MessageUploadReadFailed, "读取文件失败", nil)
 	}
 	fileData := append(bytes.Clone(header[:n]), remainingData...)
 	if int64(len(fileData)) > maxSize {
-		return nil, fmt.Errorf("文件大小超过限制，最大允许%dKB", maxSize/1024)
+		return nil, component.NewMessageError(
+			component.MessageUploadFileTooLarge,
+			fmt.Sprintf("文件大小超过限制，最大允许%dKB", maxSize/1024),
+			component.MessageParams{"maxSizeKb": maxSize / 1024},
+		)
 	}
 	return fileData, nil
 }
@@ -354,23 +379,23 @@ type ChangePasswordReq struct {
 func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Response {
 	userEntity, err := req.GetUser()
 	if err != nil {
-		return component.FailResponse("获取用户信息失败")
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
 	if err = component.ValidatePassword(req.Params.NewPassword, 6); err != nil {
-		return component.FailResponse(err.Error())
+		return component.FailResponseError(err)
 	}
 	err = algorithm.VerifyEncryptPassword(userEntity.Password, req.Params.OldPassword)
 	if err != nil {
-		return component.FailResponse("原密码错误")
+		return component.FailResponseCode(component.MessageAuthOldPasswordInvalid, nil)
 	}
 
 	userEntity.SetPassword(req.Params.NewPassword)
 	err = SaveUser(&userEntity)
 	if err != nil {
-		return component.FailResponse("更新密码失败")
+		return component.FailResponseCode(component.MessageAuthPasswordUpdateFailed, nil)
 	}
 
-	return component.SuccessResponse("密码修改成功")
+	return component.SuccessResponseCode("密码修改成功", component.MessageAuthPasswordUpdateSuccess, nil)
 }
 
 func SaveUser(userEntity *users.EntityComplete) error {
@@ -394,18 +419,18 @@ type ForgotPasswordReq struct {
 // ForgotPassword 忘记密码 - 发送重置邮件
 func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Response {
 	if !captchaOpt.VerifyCaptcha(req.Params.CaptchaId, req.Params.CaptchaCode) {
-		return component.FailResponse("验证码错误或已过期")
+		return component.FailResponseCode(component.MessageAuthCaptchaInvalid, nil)
 	}
 
 	userEntity, err := users.GetByEmail(req.Params.Email)
 	if err != nil {
 		// 为了安全考虑，即使邮箱不存在也返回成功消息
-		return component.SuccessResponse("操作成功：如果该邮箱已注册，您将收到密码重置邮件")
+		return component.SuccessResponseCode("操作成功：如果该邮箱已注册，您将收到密码重置邮件", component.MessageAuthResetMailQueued, nil)
 	}
 
 	token, err := tokenservice.GeneratePasswordResetToken(userEntity.Id, userEntity.Email)
 	if err != nil {
-		return component.FailResponse("生成重置令牌失败")
+		return component.FailResponseCode(component.MessageAuthResetTokenCreateFailed, nil)
 	}
 
 	err = mailservice.AddToQueue(mailservice.EmailTask{
@@ -416,10 +441,10 @@ func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Re
 	})
 	if err != nil {
 		slog.Error("添加密码重置邮件任务到队列失败", "error", err)
-		return component.FailResponse("发送重置邮件失败")
+		return component.FailResponseCode(component.MessageAuthResetMailSendFailed, nil)
 	}
 
-	return component.SuccessResponse("操作成功：如果该邮箱已注册，您将收到密码重置邮件")
+	return component.SuccessResponseCode("操作成功：如果该邮箱已注册，您将收到密码重置邮件", component.MessageAuthResetMailQueued, nil)
 }
 
 // ResetPasswordReq is the password reset confirmation request.
@@ -432,27 +457,27 @@ type ResetPasswordReq struct {
 func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Response {
 	claims, err := tokenservice.ParsePasswordResetToken(req.Params.Token)
 	if err != nil {
-		return component.FailResponse("重置链接已过期或无效")
+		return component.FailResponseCode(component.MessageAuthResetTokenInvalid, nil)
 	}
 
 	userEntity, err := users.Get(claims.UserId)
 	if err != nil {
-		return component.FailResponse("用户不存在")
+		return component.FailResponseCode(component.MessageUserNotFound, nil)
 	}
 
 	if userEntity.Email != claims.Email {
-		return component.FailResponse("重置链接无效")
+		return component.FailResponseCode(component.MessageAuthResetTokenInvalid, nil)
 	}
 
 	if err = component.ValidatePassword(req.Params.NewPassword, 6); err != nil {
-		return component.FailResponse(err.Error())
+		return component.FailResponseError(err)
 	}
 
 	userEntity.SetPassword(req.Params.NewPassword)
 	err = SaveUser(&userEntity)
 	if err != nil {
-		return component.FailResponse("重置密码失败")
+		return component.FailResponseCode(component.MessageAuthResetFailed, nil)
 	}
 
-	return component.SuccessResponse("密码重置成功")
+	return component.SuccessResponseCode("密码重置成功", component.MessageAuthResetSuccess, nil)
 }

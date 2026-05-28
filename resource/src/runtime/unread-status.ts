@@ -1,5 +1,6 @@
 import { computed, readonly, ref } from 'vue'
 import { i18n } from './i18n'
+import { resolveApiMessage } from './api-message'
 import { setUnreadMessagesDocumentTitle } from './document-title'
 import type { UnreadStatusPayload } from '@/types/payload'
 
@@ -68,8 +69,14 @@ async function fetchUnreadStatus() {
     },
   })
   if (!response.ok) throw new Error(`HTTP ${response.status}`)
-  const data = await response.json() as { code?: number; result?: UnreadStatusPayload; data?: UnreadStatusPayload }
-  if (data.code !== undefined && data.code !== 0) throw new Error(i18n.global.t('notifications.checkFailed'))
+  const data = await response.json() as {
+    code?: number
+    messageCode?: string
+    params?: Record<string, unknown>
+    result?: UnreadStatusPayload
+    data?: UnreadStatusPayload
+  }
+  if (data.code !== undefined && data.code !== 0) throw new Error(resolveApiMessage(data, i18n.global.t('notifications.checkFailed')))
   return normalizeStatus(data.result ?? data.data)
 }
 

@@ -1,15 +1,21 @@
 import type { ReplyWindowPayload, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
+import { i18n } from './i18n'
+import { resolveApiMessage } from './api-message'
 
 interface ApiResponse<T> {
   code?: number
-  message?: string
-  msg?: string
+  messageCode?: string
+  params?: Record<string, unknown>
   result?: T
   data?: T
 }
 
 function responseMessage(data: ApiResponse<unknown>, fallback: string) {
-  return String(data.message || data.msg || fallback)
+  return resolveApiMessage(data, fallback)
+}
+
+function t(key: string) {
+  return i18n.global.t(key)
 }
 
 async function readApiResponse<T>(response: Response, fallback: string): Promise<T> {
@@ -21,6 +27,17 @@ async function readApiResponse<T>(response: Response, fallback: string): Promise
     throw new Error(responseMessage(data, fallback))
   }
   return (data.result ?? data.data) as T
+}
+
+async function readApiSuccessMessage(response: Response, successFallback: string, errorFallback: string): Promise<string> {
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+  const data = (await response.json()) as ApiResponse<unknown>
+  if (data.code !== undefined && data.code !== 0) {
+    throw new Error(responseMessage(data, errorFallback))
+  }
+  return responseMessage(data, successFallback)
 }
 
 export interface PostReplyResult {
@@ -47,7 +64,7 @@ export async function postReply(articleId: number, content: string, replyId = 0)
       replyId,
     }),
   })
-  return readApiResponse<PostReplyResult | number | boolean>(response, '回复失败')
+  return readApiResponse<PostReplyResult | number | boolean>(response, t('api.replyFailed'))
 }
 
 export async function updateReply(replyId: number, content: string): Promise<UpdateReplyResult> {
@@ -61,7 +78,7 @@ export async function updateReply(replyId: number, content: string): Promise<Upd
       content,
     }),
   })
-  return readApiResponse<UpdateReplyResult>(response, '更新回复失败')
+  return readApiResponse<UpdateReplyResult>(response, t('api.replyUpdateFailed'))
 }
 
 export async function deleteReply(replyId: number): Promise<boolean> {
@@ -74,7 +91,7 @@ export async function deleteReply(replyId: number): Promise<boolean> {
       replyId,
     }),
   })
-  return readApiResponse<boolean>(response, '删除回复失败')
+  return readApiResponse<boolean>(response, t('api.replyDeleteFailed'))
 }
 
 export interface ReplyWindowInput {
@@ -99,7 +116,7 @@ export async function getArticleRepliesWindow(input: ReplyWindowInput): Promise<
       Accept: 'application/json',
     },
   })
-  return readApiResponse<ReplyWindowPayload>(response, '回复加载失败')
+  return readApiResponse<ReplyWindowPayload>(response, t('api.repliesLoadFailed'))
 }
 
 export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
@@ -113,7 +130,7 @@ export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
       action,
     }),
   })
-  return readApiResponse<boolean>(response, '点赞失败')
+  return readApiResponse<boolean>(response, t('api.likeFailed'))
 }
 
 export async function bookmarkArticle(id: number, action: 1 | 2): Promise<boolean> {
@@ -127,7 +144,7 @@ export async function bookmarkArticle(id: number, action: 1 | 2): Promise<boolea
       action,
     }),
   })
-  return readApiResponse<boolean>(response, '收藏失败')
+  return readApiResponse<boolean>(response, t('api.bookmarkFailed'))
 }
 
 export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Promise<boolean> {
@@ -141,7 +158,7 @@ export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Pro
       articleStatus,
     }),
   })
-  return readApiResponse<boolean>(response, '保存文章状态失败')
+  return readApiResponse<boolean>(response, t('api.articleStatusFailed'))
 }
 
 export async function markAllNotificationsRead(): Promise<boolean> {
@@ -151,7 +168,7 @@ export async function markAllNotificationsRead(): Promise<boolean> {
       'Content-Type': 'application/json',
     },
   })
-  return readApiResponse<boolean>(response, '标记已读失败')
+  return readApiResponse<boolean>(response, t('api.markReadFailed'))
 }
 
 export async function markNotificationRead(notificationId: number): Promise<boolean> {
@@ -163,7 +180,7 @@ export async function markNotificationRead(notificationId: number): Promise<bool
     body: JSON.stringify({ notificationId }),
     keepalive: true,
   })
-  return readApiResponse<boolean>(response, '标记已读失败')
+  return readApiResponse<boolean>(response, t('api.markReadFailed'))
 }
 
 export async function getUserCard(userId: number): Promise<UserCardPayload> {
@@ -178,12 +195,12 @@ export async function getUserCard(userId: number): Promise<UserCardPayload> {
 
   const data = (await response.json()) as ApiResponse<UserCardPayload>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(data.message || data.msg || '用户信息加载失败')
+    throw new Error(responseMessage(data, t('api.userLoadFailed')))
   }
 
   const result = data.result ?? data.data
   if (!result) {
-    throw new Error('用户信息为空')
+    throw new Error(t('api.userEmpty'))
   }
   return result
 }
@@ -200,12 +217,12 @@ export async function getUserHoverCard(userId: number): Promise<UserHoverCardPay
 
   const data = (await response.json()) as ApiResponse<UserHoverCardPayload>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(data.message || data.msg || '用户信息加载失败')
+    throw new Error(responseMessage(data, t('api.userLoadFailed')))
   }
 
   const result = data.result ?? data.data
   if (!result) {
-    throw new Error('用户信息为空')
+    throw new Error(t('api.userEmpty'))
   }
   return result
 }
@@ -227,7 +244,7 @@ export async function followUser(userId: number, isFollowing: boolean): Promise<
 
   const data = (await response.json()) as ApiResponse<boolean>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(data.message || data.msg || '关注操作失败')
+    throw new Error(responseMessage(data, t('api.followFailed')))
   }
   return data.result ?? data.data ?? true
 }
@@ -255,7 +272,7 @@ export async function submitArticle(article: SubmitArticleInput): Promise<number
 
   const data = (await response.json()) as ApiResponse<number>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(data.message || data.msg || '文章保存失败')
+    throw new Error(responseMessage(data, t('api.articleSaveFailed')))
   }
   return data.result ?? data.data ?? article.id
 }
@@ -273,11 +290,11 @@ export async function uploadImage(file: File): Promise<string> {
 
   const data = (await response.json()) as ApiResponse<{ url: string }>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(data.message || data.msg || '图片上传失败')
+    throw new Error(responseMessage(data, t('api.imageUploadFailed')))
   }
   const result = data.result ?? data.data
   if (!result?.url) {
-    throw new Error('图片上传返回为空')
+    throw new Error(t('api.imageUploadEmpty'))
   }
   return result.url
 }
@@ -306,7 +323,7 @@ export async function getChatMessages(convId: number, page = 1, pageSize = 50): 
 
   const data = (await response.json()) as ApiResponse<{ list: ChatMessagePayload[] }>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(data.message || data.msg || '消息加载失败')
+    throw new Error(responseMessage(data, t('api.messagesLoadFailed')))
   }
   return data.result?.list ?? data.data?.list ?? []
 }
@@ -325,7 +342,7 @@ export async function sendChatMessage(peerId: number, content: string): Promise<
 
   const data = (await response.json()) as ApiResponse<{ convId: number }>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(data.message || data.msg || '发送失败')
+    throw new Error(responseMessage(data, t('api.sendFailed')))
   }
   return data.result?.convId ?? data.data?.convId ?? 0
 }
@@ -344,7 +361,7 @@ export async function markChatRead(convId: number): Promise<boolean> {
 
   const data = (await response.json()) as ApiResponse<boolean>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(data.message || data.msg || '标记已读失败')
+    throw new Error(responseMessage(data, t('api.markReadFailed')))
   }
   return data.result ?? data.data ?? true
 }
@@ -366,7 +383,7 @@ export async function saveUserInfo(input: SaveUserInfoInput): Promise<boolean> {
     },
     body: JSON.stringify(input),
   })
-  await readApiResponse<unknown>(response, '资料保存失败')
+  await readApiResponse<unknown>(response, t('api.profileSaveFailed'))
   return true
 }
 
@@ -378,7 +395,7 @@ export async function saveUserEmail(email: string): Promise<boolean> {
     },
     body: JSON.stringify({ email }),
   })
-  await readApiResponse<unknown>(response, '邮箱保存失败')
+  await readApiResponse<unknown>(response, t('api.emailSaveFailed'))
   return true
 }
 
@@ -390,7 +407,7 @@ export async function saveUserName(username: string): Promise<boolean> {
     },
     body: JSON.stringify({ username }),
   })
-  await readApiResponse<unknown>(response, '用户名保存失败')
+  await readApiResponse<unknown>(response, t('api.usernameSaveFailed'))
   return true
 }
 
@@ -402,7 +419,7 @@ export async function changePassword(oldPassword: string, newPassword: string): 
     },
     body: JSON.stringify({ oldPassword, newPassword }),
   })
-  await readApiResponse<unknown>(response, '密码修改失败')
+  await readApiResponse<unknown>(response, t('api.passwordChangeFailed'))
   return true
 }
 
@@ -418,10 +435,10 @@ export async function uploadAvatar(avatar: Blob | Blob[]): Promise<string> {
     method: 'POST',
     body: formData,
   })
-  const result = await readApiResponse<string | { avatarUrl?: string; url?: string }>(response, '头像上传失败')
+  const result = await readApiResponse<string | { avatarUrl?: string; url?: string }>(response, t('api.avatarUploadFailed'))
   if (typeof result === 'string') return result
   const url = result.avatarUrl || result.url
-  if (!url) throw new Error('头像上传返回为空')
+  if (!url) throw new Error(t('api.avatarUploadEmpty'))
   return url
 }
 
@@ -440,14 +457,14 @@ export async function getOAuthBindings(): Promise<OAuthBindingsPayload> {
       Accept: 'application/json',
     },
   })
-  return readApiResponse<OAuthBindingsPayload>(response, '绑定状态加载失败')
+  return readApiResponse<OAuthBindingsPayload>(response, t('api.bindingsLoadFailed'))
 }
 
 export async function unbindOAuth(provider: string): Promise<boolean> {
   const response = await fetch(`/api/auth/${encodeURIComponent(provider)}/unbind`, {
     method: 'POST',
   })
-  await readApiResponse<unknown>(response, '解绑失败')
+  await readApiResponse<unknown>(response, t('api.unbindFailed'))
   return true
 }
 
@@ -464,7 +481,7 @@ export async function getCaptcha(): Promise<CaptchaPayload> {
       Accept: 'application/json',
     },
   })
-  return readApiResponse<CaptchaPayload>(response, '验证码加载失败')
+  return readApiResponse<CaptchaPayload>(response, t('api.captchaLoadFailed'))
 }
 
 export async function login(username: string, password: string, captchaId: string, captchaCode: string): Promise<boolean> {
@@ -481,7 +498,7 @@ export async function login(username: string, password: string, captchaId: strin
       captchaCode,
     }),
   })
-  await readApiResponse<unknown>(response, '登录失败')
+  await readApiResponse<unknown>(response, t('api.loginFailed'))
   return true
 }
 
@@ -505,7 +522,7 @@ export async function register(
       captchaCode,
     }),
   })
-  return readApiResponse<string>(response, '注册失败')
+  return readApiSuccessMessage(response, t('auth.validation.registerSuccess'), t('api.registerFailed'))
 }
 
 export async function forgotPassword(email: string, captchaId: string, captchaCode: string): Promise<string> {
@@ -520,7 +537,7 @@ export async function forgotPassword(email: string, captchaId: string, captchaCo
       captchaCode,
     }),
   })
-  return readApiResponse<string>(response, '重置邮件发送失败')
+  return readApiSuccessMessage(response, t('server.auth.passwordReset.mailQueued'), t('api.resetEmailFailed'))
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<string> {
@@ -534,12 +551,12 @@ export async function resetPassword(token: string, newPassword: string): Promise
       newPassword,
     }),
   })
-  return readApiResponse<string>(response, '密码重置失败')
+  return readApiSuccessMessage(response, t('server.auth.passwordReset.success'), t('api.passwordResetFailed'))
 }
 
 async function encryptLoginPassword(password: string): Promise<string> {
   if (!window.crypto?.subtle) {
-    throw new Error('当前浏览器不支持安全登录加密')
+    throw new Error(t('api.secureLoginUnsupported'))
   }
 
   const publicKey = await getLoginPublicKey()
@@ -573,7 +590,7 @@ async function getLoginPublicKey(): Promise<string> {
       headers: {
         Accept: 'application/json',
       },
-    }).then((response) => readApiResponse<{ publicKey: string }>(response, '登录密钥加载失败').then((data) => data.publicKey))
+    }).then((response) => readApiResponse<{ publicKey: string }>(response, t('api.loginKeyLoadFailed')).then((data) => data.publicKey))
   }
   return publicKeyPromise
 }

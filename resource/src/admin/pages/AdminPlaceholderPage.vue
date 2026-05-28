@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { adminText } from '@/admin/runtime/i18n-text'
 import { BasicPage } from '@/admin/components/global-layout'
 import type { AdminPayload, ManageHomeProps } from '@/admin/types'
 
@@ -16,7 +17,7 @@ defineProps<{
         <p class="text-sm font-medium text-muted-foreground">Resource Admin</p>
         <h2 class="mt-2 text-2xl font-semibold tracking-tight">{{ title }}</h2>
         <p class="mt-3 text-sm leading-6 text-muted-foreground">
-          这个入口已经接入 resource 管理后台，但暂时没有对应的页面配置。
+          {{ adminText('k004b') }}
         </p>
       </div>
     </section>

@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { VisArea, VisAxis, VisLine, VisXYContainer } from '@unovis/vue'
 import { computed } from 'vue'
 import type { ChartConfig } from '@/admin/components/ui/chart'
@@ -42,15 +43,15 @@ const chartData = computed<Data[]>(() =>
 
 const chartConfig = {
   regCount: {
-    label: '注册用户',
+    label: adminText('k001p'),
     color: 'var(--chart-1)',
   },
   articleCount: {
-    label: '新增文章',
+    label: adminText('k001q'),
     color: 'var(--chart-2)',
   },
   replyCount: {
-    label: '新增回复',
+    label: adminText('k001r'),
     color: 'var(--chart-4)',
   },
 } satisfies ChartConfig
@@ -75,8 +76,8 @@ const svgDefs = `
   <Card class="h-full overflow-hidden pt-0">
     <CardHeader class="grid gap-3 space-y-0 border-b px-4 py-4 sm:flex sm:flex-row sm:items-center sm:px-5">
       <div class="grid min-w-0 flex-1 gap-1">
-        <CardTitle>流量概览</CardTitle>
-        <CardDescription>展示注册用户、文章和回复的增长趋势</CardDescription>
+        <CardTitle>{{ adminText('k001s') }}</CardTitle>
+        <CardDescription>{{ adminText('k001t') }}</CardDescription>
       </div>
       <div class="min-w-0 sm:shrink-0">
         <slot name="headerAction" />
@@ -84,7 +85,7 @@ const svgDefs = `
     </CardHeader>
     <CardContent class="px-3 pb-3 pt-4 sm:px-5">
       <div v-if="loading" class="flex h-[260px] items-center justify-center text-muted-foreground sm:h-[320px]">
-        加载中...
+        {{ adminText('k0046') }}
       </div>
       <ChartContainer v-else :config="chartConfig" class="aspect-auto h-[260px] w-full sm:h-[320px]" :cursor="false">
         <VisXYContainer

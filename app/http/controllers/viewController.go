@@ -33,18 +33,18 @@ func Logout(c *gin.Context) {
 func Register(c *gin.Context) {
 	var r vo.RegReq
 	if err := c.ShouldBindJSON(&r); err != nil {
-		c.JSON(200, component.FailData("请求参数格式错误"))
+		c.JSON(200, component.FailDataCode(component.MessageRequestInvalidFormat, nil))
 		return
 	}
 	if err := validate.Valid(r); err != nil {
-		c.JSON(200, component.FailData(validate.FormatError(err)))
+		c.JSON(200, component.FailDataCode(component.MessageRequestInvalidParams, nil))
 		return
 	}
 
 	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
 
 	if !securityConfig.EnableSignup {
-		c.JSON(200, component.FailData("目前已关闭注册功能"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthSignupDisabled, nil))
 		return
 	}
 
@@ -52,39 +52,39 @@ func Register(c *gin.Context) {
 	r.Email = strings.TrimSpace(strings.ToLower(r.Email))
 
 	if err := component.ValidateEmailDomain(r.Email); err != nil {
-		c.JSON(200, component.FailData(err.Error()))
+		c.JSON(200, component.FailDataError(err))
 		return
 	}
 
 	if !component.ValidateUsername(r.Username) {
-		c.JSON(200, component.FailData("用户名仅允许字母、数字、下划线、连字符，长度6-32"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthUsernameInvalid, nil))
 		return
 	}
 
 	if err := component.ValidatePassword(r.Password, 6); err != nil {
-		c.JSON(200, component.FailData(err.Error()))
+		c.JSON(200, component.FailDataError(err))
 		return
 	}
 
 	if !captchaOpt.VerifyCaptcha(r.CaptchaId, r.CaptchaCode) {
-		c.JSON(200, component.FailData("验证码错误或已过期"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthCaptchaInvalid, nil))
 		return
 	}
 
 	if users.ExistUsername(r.Username) {
-		c.JSON(200, component.FailData("用户名已存在"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthUsernameExists, nil))
 		return
 	}
 
 	if users.ExistEmail(r.Email) {
-		c.JSON(200, component.FailData("邮箱已被使用"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthEmailExists, nil))
 		return
 	}
 
 	userEntity, err := userservice.CreateUser(r.Username, r.Password, r.Email, true)
 	if userEntity == nil || err != nil {
 		slog.Error("注册创建用户失败", "username", r.Username, "email", r.Email, "error", err)
-		c.JSON(200, component.FailData("注册失败"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthRegisterFailed, nil))
 		return
 	}
 
@@ -116,21 +116,21 @@ func Register(c *gin.Context) {
 
 	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
 	if err != nil {
-		c.JSON(200, component.FailData("注册异常，尝试登陆"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthRegisterRetryLogin, nil))
 		return
 	}
 	jwt.TokenSetting(c, token)
 
 	if securityConfig.EnableEmailVerification {
-		c.JSON(http.StatusOK, component.SuccessData(
+		c.JSON(http.StatusOK, component.SuccessDataCode(
 			"注册成功，请前往邮箱验证您的账号",
-		))
+			component.MessageAuthRegisterEmailVerify,
+
+			nil))
 		return
 	}
 
-	c.JSON(http.StatusOK, component.SuccessData(
-		"登录成功",
-	))
+	c.JSON(http.StatusOK, component.SuccessDataCode("登录成功", component.MessageAuthLoginSuccess, nil))
 }
 
 type LoginReq struct {
@@ -151,12 +151,12 @@ func LoginPublicKey(c *gin.Context) {
 func Login(c *gin.Context) {
 	var req LoginReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(200, component.FailData("请求参数格式错误"))
+		c.JSON(200, component.FailDataCode(component.MessageRequestInvalidFormat, nil))
 		return
 	}
 
 	if err := validate.Valid(req); err != nil {
-		c.JSON(200, component.FailData("请求参数验证失败"))
+		c.JSON(200, component.FailDataCode(component.MessageRequestInvalidParams, nil))
 		return
 	}
 
@@ -165,54 +165,52 @@ func Login(c *gin.Context) {
 	captchaCode := req.CaptchaCode
 
 	if username == "" {
-		c.JSON(200, component.FailData("用户名或邮箱不能为空"))
+		c.JSON(200, component.FailDataCode(component.MessageRequestInvalidParams, nil))
 		return
 	}
 
 	password, err := logincrypto.DecryptPassword(req.EncryptedPassword)
 	if err != nil {
 		slog.Info("登录密码解密失败", "username", username, "error", err)
-		c.JSON(200, component.FailData("登录请求无效，请刷新页面后重试"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthLoginInvalidRequest, nil))
 		return
 	}
 
 	if len(password) < 6 {
-		c.JSON(200, component.FailData("密码格式错误"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthPasswordInvalidFormat, nil))
 		return
 	}
 
 	if !captchaOpt.VerifyCaptcha(captchaId, captchaCode) {
-		c.JSON(200, component.FailData("验证码错误或已过期"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthCaptchaInvalid, nil))
 		return
 	}
 
 	userEntity, err := users.Verify(username, password)
 	if err != nil {
 		slog.Info("登录失败", "username", username, "error", err)
-		c.JSON(200, component.FailData("用户名/邮箱或密码错误"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthInvalidCredentials, nil))
 		return
 	}
 
 	if userEntity.IsFrozen == users.StatusFrozen {
-		c.JSON(200, component.FailData("账户已被冻结，请联系管理员"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthAccountFrozen, nil))
 		return
 	}
 
 	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
 	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
-		c.JSON(200, component.FailData("账户邮箱未验证，请先验证您的邮箱"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthEmailUnverified, nil))
 		return
 	}
 
 	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
 	if err != nil {
 		slog.Error("生成 token 失败", "userId", userEntity.Id, "error", err)
-		c.JSON(200, component.FailData("登录异常，请稍后重试"))
+		c.JSON(200, component.FailDataCode(component.MessageAuthLoginFailed, nil))
 		return
 	}
 
 	jwt.TokenSetting(c, token)
-	c.JSON(http.StatusOK, component.SuccessData(
-		"登录成功",
-	))
+	c.JSON(http.StatusOK, component.SuccessDataCode("登录成功", component.MessageAuthLoginSuccess, nil))
 }

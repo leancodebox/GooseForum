@@ -54,20 +54,6 @@ func GetByIds(ids []uint64) (entities []*SmallEntity) {
 	return
 }
 
-// GetAllSimple returns paginated simple entities for export and repair jobs.
-func GetAllSimple(offset, limit int) ([]*SmallEntity, error) {
-	var entities []*SmallEntity
-	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
-	return entities, err
-}
-
-// GetCountGroupByDay groups article counts by day.
-func GetCountGroupByDay() ([]map[string]any, error) {
-	var results []map[string]any
-	err := builder().Select("DATE(created_at) as date, count(*) as count").Group("date").Order("date ASC").Find(&results).Error
-	return results, err
-}
-
 func GetMapByIds(ids []uint64) map[uint64]*SmallEntity {
 	return lo.KeyBy(GetByIds(ids), func(v *SmallEntity) uint64 {
 		return v.Id
@@ -82,10 +68,6 @@ func GetLast(limit int) (entities []*Entity) {
 func GetBatch(minId uint64, limit int) (entities []*Entity) {
 	builder().Where(queryopt.Gt(pid, minId)).Order(queryopt.Asc(pid)).Limit(limit).Find(&entities)
 	return
-}
-
-func UpdatePosters(id uint64, posters []Poster) error {
-	return builder().Where(pid, id).Select("Posters").Updates(Entity{Posters: posters}).Error
 }
 
 func CantWriteNew(userId uint64, maxCount int64) bool {

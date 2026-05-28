@@ -27,9 +27,9 @@ export function formatChatTime(value: string): string {
   const time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
   if (isSameDay(date, now)) return time
   if (date.getFullYear() === now.getFullYear()) {
-    return `${date.getMonth() + 1}月${date.getDate()}日 ${time}`
+    return i18n.global.t('date.monthDayTime', { month: date.getMonth() + 1, day: date.getDate(), time })
   }
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${time}`
+  return i18n.global.t('date.yearMonthDayTime', { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate(), time })
 }
 
 export function timeAgo(value: string): string {

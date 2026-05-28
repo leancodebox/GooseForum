@@ -11,6 +11,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/chat/imConversations"
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/chat/messages"
+	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
@@ -106,31 +107,10 @@ func initData() {
 		slog.Info("created default article category")
 	}
 
-	lItem := pageConfig.LinkItem{
-		Name:    "GooseForum",
-		Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
-		Url:     "https://gooseforum.online",
-		LogoUrl: "/static/pic/default-avatar.webp",
-		Status:  1,
-	}
-	res := []pageConfig.FriendLinksGroup{
-		{
-			Name:  "community",
-			Links: []pageConfig.LinkItem{lItem},
-		},
-		{
-			Name:  "blog",
-			Links: []pageConfig.LinkItem{lItem},
-		},
-		{
-			Name:  "tool",
-			Links: []pageConfig.LinkItem{lItem},
-		},
-	}
 	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
 	if configEntity.Id == 0 {
 		configEntity.PageType = pageConfig.FriendShipLinks
-		configEntity.Config = jsonopt.Encode(res)
+		configEntity.Config = jsonopt.Encode(defaultconfig.GetDefaultFriendLinksConfig())
 		pageConfig.CreateOrSave(&configEntity)
 	}
 }

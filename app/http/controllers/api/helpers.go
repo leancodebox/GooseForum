@@ -20,5 +20,5 @@ func savePageConfig(pageType string, config any, clearCache func()) component.Re
 	configEntity.Config = jsonopt.Encode(config)
 	pageConfig.CreateOrSave(&configEntity)
 	clearCache()
-	return component.SuccessResponse("success")
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }

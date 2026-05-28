@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import type { DateValue } from '@internationalized/date'
 import type { DateRange } from 'reka-ui'
 import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
@@ -35,7 +36,7 @@ const value = shallowRef<DateRange>({
 })
 
 const label = computed(() => {
-  if (!value.value.start) return '选择日期范围'
+  if (!value.value.start) return adminText('k002f')
   const start = formatDateValue(value.value.start)
   if (!value.value.end) return start
   return `${start} - ${formatDateValue(value.value.end)}`

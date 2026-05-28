@@ -8,12 +8,14 @@ import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { ArticleDetailProps, LayoutPayload, ReplyPayload } from '@/types/payload'
+import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
   layout: LayoutPayload
   props: ArticleDetailProps
 }>()
 
+const { t } = useI18n()
 const replyContent = ref('')
 const replyContents = reactive<Record<number, string>>({})
 const openReplyId = ref<number | null>(null)
@@ -285,7 +287,7 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor', anchorR
     await nextTick()
     observeReplyLoader()
   } catch (error) {
-    replyWindowError.value = error instanceof Error ? error.message : '回复加载失败'
+    replyWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
   } finally {
     loadingReplyWindow.value = false
     loadingReplyDirection.value = null
@@ -401,7 +403,7 @@ async function toggleLike() {
   } catch (error) {
     isLiked.value = previousLiked
     likeCount.value = previousCount
-    actionMessage.value = error instanceof Error ? error.message : '点赞失败'
+    actionMessage.value = error instanceof Error ? error.message : t('api.likeFailed')
   } finally {
     actingLike.value = false
   }
@@ -417,10 +419,10 @@ async function toggleBookmark() {
   isBookmarked.value = nextBookmarked
   try {
     await bookmarkArticle(page.props.article.id, nextBookmarked ? 1 : 2)
-    actionMessage.value = nextBookmarked ? '已收藏。' : '已取消收藏。'
+    actionMessage.value = nextBookmarked ? t('article.bookmarkAdded') : t('article.bookmarkRemoved')
   } catch (error) {
     isBookmarked.value = previousBookmarked
-    actionMessage.value = error instanceof Error ? error.message : '收藏失败'
+    actionMessage.value = error instanceof Error ? error.message : t('api.bookmarkFailed')
   } finally {
     actingBookmark.value = false
   }
@@ -467,7 +469,7 @@ async function saveReplyEdit(reply: ReplyPayload) {
 
   const content = (editReplyContents[reply.id] || '').trim()
   if (!content) {
-    editReplyErrors[reply.id] = '回复内容不能为空'
+    editReplyErrors[reply.id] = t('article.replyRequired')
     return
   }
   if (content === reply.content.trim()) {
@@ -490,9 +492,9 @@ async function saveReplyEdit(reply: ReplyPayload) {
       }
     }
     editingReplyId.value = 0
-    successMessage.value = '回复已更新。'
+    successMessage.value = t('article.replyUpdated')
   } catch (error) {
-    editReplyErrors[reply.id] = error instanceof Error ? error.message : '更新回复失败'
+    editReplyErrors[reply.id] = error instanceof Error ? error.message : t('api.replyUpdateFailed')
   } finally {
     savingEditReplyId.value = 0
   }
@@ -504,9 +506,9 @@ async function submitReply(replyId = 0) {
 
   if (!content) {
     if (replyId > 0) {
-      inlineReplyErrors[replyId] = '回复内容不能为空'
+      inlineReplyErrors[replyId] = t('article.replyRequired')
     } else {
-      errorMessage.value = '回复内容不能为空'
+      errorMessage.value = t('article.replyRequired')
       successMessage.value = ''
     }
     return
@@ -527,7 +529,7 @@ async function submitReply(replyId = 0) {
     } else {
       replyContent.value = ''
       closeFloatingReply()
-      successMessage.value = '回复已发布。'
+      successMessage.value = t('article.replyPosted')
     }
     const createdReplyId = typeof createdReply === 'object' && createdReply !== null ? createdReply.id : createdReply
     const renderedContent = typeof createdReply === 'object' && createdReply !== null ? createdReply.renderedContent : escapePlainText(content)
@@ -541,7 +543,7 @@ async function submitReply(replyId = 0) {
       await refreshCurrentPage()
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : '回复失败'
+    const message = error instanceof Error ? error.message : t('api.replyFailed')
     if (replyId > 0) {
       inlineReplyErrors[replyId] = message
     } else {
@@ -579,11 +581,11 @@ async function removeReply(replyId: number) {
   deleteErrorMessage.value = ''
   try {
     await deleteReply(replyId)
-    successMessage.value = '回复已删除。'
+    successMessage.value = t('article.replyDeleted')
     pendingDeleteReply.value = null
     await refreshCurrentPage()
   } catch (error) {
-    deleteErrorMessage.value = error instanceof Error ? error.message : '删除回复失败'
+    deleteErrorMessage.value = error instanceof Error ? error.message : t('api.replyDeleteFailed')
   } finally {
     deletingReplyId.value = 0
   }
@@ -633,7 +635,7 @@ async function removeReply(replyId: number) {
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <a :href="`/u/${page.props.article.author.id}`" class="font-semibold text-gray-950 hover:text-blue-600">{{ page.props.article.author.username }}</a>
-                <div class="text-xs font-medium text-gray-600">正文</div>
+                <div class="text-xs font-medium text-gray-600">{{ t('article.body') }}</div>
               </div>
               <div class="flex flex-wrap items-center justify-end gap-3 text-xs font-medium text-gray-600">
                 <div class="flex items-center gap-3">
@@ -647,7 +649,7 @@ async function removeReply(replyId: number) {
                   class="inline-flex h-7 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2 text-xs font-semibold text-gray-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
                 >
                   <PencilLine class="h-3.5 w-3.5" />
-                  编辑
+                  {{ t('common.edit') }}
                 </a>
               </div>
             </div>
@@ -661,7 +663,7 @@ async function removeReply(replyId: number) {
                 @click="toggleLike"
               >
                 <Heart class="h-4 w-4" :fill="isLiked ? 'currentColor' : 'none'" />
-                {{ likeCount ? formatNumber(likeCount) : '点赞' }}
+                {{ likeCount ? formatNumber(likeCount) : t('article.like') }}
               </button>
               <button
                 type="button"
@@ -671,9 +673,9 @@ async function removeReply(replyId: number) {
                 @click="toggleBookmark"
               >
                 <Bookmark class="h-4 w-4" :fill="isBookmarked ? 'currentColor' : 'none'" />
-                {{ isBookmarked ? '已收藏' : '收藏' }}
+                {{ isBookmarked ? t('article.bookmarked') : t('article.bookmark') }}
               </button>
-              <span v-if="actionMessage" class="text-xs" :class="actionMessage.includes('失败') ? 'text-red-600' : 'text-gray-600'">{{ actionMessage }}</span>
+              <span v-if="actionMessage" class="text-xs" :class="actionMessage === t('article.bookmarkAdded') || actionMessage === t('article.bookmarkRemoved') ? 'text-gray-600' : 'text-red-600'">{{ actionMessage }}</span>
             </div>
           </div>
         </div>
@@ -689,7 +691,7 @@ async function removeReply(replyId: number) {
             @click="loadReplyWindow('before')"
           >
             <Loader2 v-if="loadingReplyDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
-            加载更早回复
+            {{ t('article.loadEarlierReplies') }}
           </button>
         </div>
 
@@ -718,103 +720,107 @@ async function removeReply(replyId: number) {
                   v-if="page.props.permissions.canReply"
                   type="button"
                   class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-600 opacity-100 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
-                  title="回复"
+                  :title="t('article.reply')"
                   @click="toggleReplyForm(reply.id)"
                 >
                   <CornerDownLeft class="h-3.5 w-3.5" />
-                  <span class="sr-only sm:not-sr-only">回复</span>
+                  <span class="sr-only sm:not-sr-only">{{ t('article.reply') }}</span>
                 </button>
                 <button
                   v-if="reply.isOwnReply"
                   type="button"
                   class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-500 opacity-100 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                   :disabled="savingEditReplyId === reply.id || deletingReplyId === reply.id"
-                  title="编辑"
+                  :title="t('common.edit')"
                   @click="startEditReply(reply)"
                 >
                   <PencilLine class="h-3.5 w-3.5" />
-                  <span class="sr-only sm:not-sr-only">编辑</span>
+                  <span class="sr-only sm:not-sr-only">{{ t('common.edit') }}</span>
                 </button>
                 <button
                   v-if="reply.isOwnReply"
                   type="button"
                   class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-500 opacity-100 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
                   :disabled="deletingReplyId === reply.id"
-                  :title="deletingReplyId === reply.id ? '删除中...' : '删除'"
+                  :title="deletingReplyId === reply.id ? t('article.deleting') : t('article.delete')"
                   @click="requestDeleteReply(reply)"
                 >
                   <Trash2 class="h-3.5 w-3.5" />
-                  <span class="sr-only sm:not-sr-only">{{ deletingReplyId === reply.id ? '删除中...' : '删除' }}</span>
+                  <span class="sr-only sm:not-sr-only">{{ deletingReplyId === reply.id ? t('article.deleting') : t('article.delete') }}</span>
                 </button>
                 <time class="hidden shrink-0 text-xs text-gray-400 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
               </div>
             </div>
             <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-gray-50 px-2 py-1 text-sm text-gray-500">
-              <span class="shrink-0">回复</span>
+              <span class="shrink-0">{{ t('article.reply') }}</span>
               <a :href="`/u/${reply.replyToUserId}`" class="min-w-0 truncate font-medium text-gray-700 hover:text-blue-600">@{{ reply.replyToUsername }}</a>
             </p>
-            <div v-if="editingReplyId === reply.id" class="mt-3 rounded-lg border border-blue-100 bg-blue-50/40 p-3">
-              <div class="mb-2 flex items-center justify-between">
-                <div class="text-xs font-semibold text-blue-700">编辑自己的回复</div>
-                <button type="button" class="rounded-md p-1 text-gray-400 hover:bg-white hover:text-gray-700" @click="cancelEditReply(reply.id)">
-                  <X class="h-4 w-4" />
-                </button>
+            <Transition name="gf-local-expand">
+              <div v-if="editingReplyId === reply.id" class="mt-3 rounded-lg border border-blue-100 bg-blue-50/40 p-3">
+                <div class="mb-2 flex items-center justify-between">
+                  <div class="text-xs font-semibold text-blue-700">{{ t('article.editOwnReply') }}</div>
+                  <button type="button" class="rounded-md p-1 text-gray-400 hover:bg-white hover:text-gray-700" @click="cancelEditReply(reply.id)">
+                    <X class="h-4 w-4" />
+                  </button>
+                </div>
+                <textarea
+                  v-model="editReplyContents[reply.id]"
+                  class="min-h-24 w-full resize-y rounded-md border border-blue-100 bg-white p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  :placeholder="t('article.editReplyPlaceholder')"
+                  @input="clearEditReplyValidation(reply.id)"
+                />
+                <p v-if="editReplyErrors[reply.id]" class="mt-2 text-sm text-red-600">{{ editReplyErrors[reply.id] }}</p>
+                <div class="mt-2 flex justify-end gap-2">
+                  <button type="button" class="h-8 rounded-md px-3 text-xs font-semibold text-gray-500 hover:bg-white" @click="cancelEditReply(reply.id)">{{ t('common.cancel') }}</button>
+                  <button
+                    type="button"
+                    class="inline-flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="savingEditReplyId === reply.id"
+                    @click="saveReplyEdit(reply)"
+                  >
+                    <Loader2 v-if="savingEditReplyId === reply.id" class="h-3.5 w-3.5 animate-spin" />
+                    <Check v-else class="h-3.5 w-3.5" />
+                    {{ savingEditReplyId === reply.id ? t('common.saving') : t('common.save') }}
+                  </button>
+                </div>
               </div>
-              <textarea
-                v-model="editReplyContents[reply.id]"
-                class="min-h-24 w-full resize-y rounded-md border border-blue-100 bg-white p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                placeholder="修改你的回复..."
-                @input="clearEditReplyValidation(reply.id)"
-              />
-              <p v-if="editReplyErrors[reply.id]" class="mt-2 text-sm text-red-600">{{ editReplyErrors[reply.id] }}</p>
-              <div class="mt-2 flex justify-end gap-2">
-                <button type="button" class="h-8 rounded-md px-3 text-xs font-semibold text-gray-500 hover:bg-white" @click="cancelEditReply(reply.id)">取消</button>
-                <button
-                  type="button"
-                  class="inline-flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="savingEditReplyId === reply.id"
-                  @click="saveReplyEdit(reply)"
-                >
-                  <Loader2 v-if="savingEditReplyId === reply.id" class="h-3.5 w-3.5 animate-spin" />
-                  <Check v-else class="h-3.5 w-3.5" />
-                  {{ savingEditReplyId === reply.id ? '保存中...' : '保存' }}
-                </button>
-              </div>
-            </div>
-            <template v-else>
+            </Transition>
+            <template v-if="editingReplyId !== reply.id">
               <div class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
               <div v-if="reply.updatedAt && reply.updatedAt !== reply.createdAt" class="mt-2 text-xs font-medium text-gray-400">
-                已编辑于 {{ formatDateTime(reply.updatedAt) }}
+                {{ t('article.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
               </div>
             </template>
 
-            <div v-if="openReplyId === reply.id" class="mt-4 border-l-2 border-blue-100 pl-3">
-              <div class="mb-2 flex items-center justify-between">
-                <div class="text-xs font-medium text-gray-500">回复 @{{ reply.author.username }}</div>
-                <button type="button" class="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700" @click="openReplyId = null">
-                  <X class="h-4 w-4" />
-                </button>
+            <Transition name="gf-local-expand">
+              <div v-if="openReplyId === reply.id" class="mt-4 border-l-2 border-blue-100 pl-3">
+                <div class="mb-2 flex items-center justify-between">
+                  <div class="text-xs font-medium text-gray-500">{{ t('article.replyTo', { user: `@${reply.author.username}` }) }}</div>
+                  <button type="button" class="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700" @click="openReplyId = null">
+                    <X class="h-4 w-4" />
+                  </button>
+                </div>
+                <textarea
+                  v-model="replyContents[reply.id]"
+                  class="min-h-20 w-full resize-y rounded-md border border-gray-200 bg-white p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  :placeholder="t('article.replyPlaceholder')"
+                  @input="clearReplyValidation(reply.id)"
+                />
+                <p v-if="inlineReplyErrors[reply.id]" class="mt-2 text-sm text-red-600">{{ inlineReplyErrors[reply.id] }}</p>
+                <div class="mt-2 flex justify-end gap-2">
+                  <button type="button" class="h-8 rounded-md px-3 text-xs font-semibold text-gray-500 hover:bg-gray-100" @click="openReplyId = null">{{ t('common.cancel') }}</button>
+                  <button
+                    type="button"
+                    class="inline-flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="submitting"
+                    @click="submitReply(reply.id)"
+                  >
+                    <Send class="h-3.5 w-3.5" />
+                    {{ submitting && currentReplyId === reply.id ? t('article.publishing') : t('article.reply') }}
+                  </button>
+                </div>
               </div>
-              <textarea
-                v-model="replyContents[reply.id]"
-                class="min-h-20 w-full resize-y rounded-md border border-gray-200 bg-white p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                placeholder="写下你的回复..."
-                @input="clearReplyValidation(reply.id)"
-              />
-              <p v-if="inlineReplyErrors[reply.id]" class="mt-2 text-sm text-red-600">{{ inlineReplyErrors[reply.id] }}</p>
-              <div class="mt-2 flex justify-end gap-2">
-                <button type="button" class="h-8 rounded-md px-3 text-xs font-semibold text-gray-500 hover:bg-gray-100" @click="openReplyId = null">取消</button>
-                <button
-                  type="button"
-                  class="inline-flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="submitting"
-                  @click="submitReply(reply.id)"
-                >
-                  <Send class="h-3.5 w-3.5" />
-                  {{ submitting && currentReplyId === reply.id ? '发布中...' : '回复' }}
-                </button>
-              </div>
-            </div>
+            </Transition>
           </div>
         </div>
 
@@ -827,29 +833,29 @@ async function removeReply(replyId: number) {
             @click="loadReplyWindow('after')"
           >
             <Loader2 v-if="loadingReplyDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
-            重试加载回复
+            {{ t('article.retryLoadReplies') }}
           </button>
           <p v-else-if="replyWindowError" class="text-xs text-red-600">{{ replyWindowError }}</p>
           <p v-else-if="replyHasAfter && loadingReplyDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-gray-500">
             <Loader2 class="h-3.5 w-3.5 animate-spin" />
-            正在加载更多回复...
+            {{ t('article.loadingMoreReplies') }}
           </p>
-          <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-gray-400">已显示全部回复</p>
+          <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-gray-400">{{ t('article.allRepliesShown') }}</p>
         </div>
       </section>
 
       <section ref="replySectionEl" class="mt-4 rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] sm:p-5">
         <template v-if="page.props.permissions.canReply">
           <div class="mb-3 flex items-center justify-between">
-            <label class="text-sm font-semibold text-gray-950" for="reply-content">参与讨论</label>
-            <span class="text-xs text-gray-400">Markdown 支持稍后补齐</span>
+            <label class="text-sm font-semibold text-gray-950" for="reply-content">{{ t('article.joinDiscussion') }}</label>
+            <span class="text-xs text-gray-400">{{ t('article.markdownSoon') }}</span>
           </div>
           <textarea
             id="reply-content"
             ref="replyEditorEl"
             v-model="replyContent"
             class="min-h-28 w-full resize-y rounded-md border border-gray-200 p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-            placeholder="写下你的回复..."
+            :placeholder="t('article.replyPlaceholder')"
             @input="clearReplyValidation()"
           />
           <p v-if="errorMessage" class="mt-2 text-sm text-red-600">{{ errorMessage }}</p>
@@ -861,15 +867,15 @@ async function removeReply(replyId: number) {
               @click="submitReply()"
             >
               <Send class="h-4 w-4" />
-              {{ submitting ? '发布中...' : '发布回复' }}
+              {{ submitting ? t('article.publishing') : t('article.publishReply') }}
             </button>
           </div>
         </template>
         <template v-else>
           <div class="text-center">
-            <h2 class="text-base font-semibold text-gray-950">加入讨论</h2>
-            <p class="mt-1 text-sm text-gray-500">登录后可以回复这个主题。</p>
-            <a href="/login" class="mt-4 inline-flex h-9 items-center rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700">登录</a>
+            <h2 class="text-base font-semibold text-gray-950">{{ t('article.joinDiscussion') }}</h2>
+            <p class="mt-1 text-sm text-gray-500">{{ t('article.loginToReply') }}</p>
+            <a href="/login" class="mt-4 inline-flex h-9 items-center rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700">{{ t('auth.loginTitle') }}</a>
           </div>
         </template>
       </section>
@@ -885,14 +891,14 @@ async function removeReply(replyId: number) {
             @click="openFloatingReply"
           >
             <MessageSquare class="h-4 w-4" />
-            参与讨论
+            {{ t('article.joinDiscussion') }}
           </button>
           <div
             v-else
             class="pointer-events-auto mx-auto w-full max-w-2xl rounded-lg border border-gray-200/80 bg-white/95 p-3 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.5),0_4px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur"
           >
             <div class="mb-2 flex items-center justify-between">
-              <div class="text-sm font-semibold text-gray-950">参与讨论</div>
+              <div class="text-sm font-semibold text-gray-950">{{ t('article.joinDiscussion') }}</div>
               <button type="button" class="rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700" @click="closeFloatingReply">
                 <X class="h-4 w-4" />
               </button>
@@ -901,7 +907,7 @@ async function removeReply(replyId: number) {
               v-model="replyContent"
               rows="3"
               class="min-h-24 w-full resize-y rounded-md border border-gray-200 bg-white p-3 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              placeholder="写下你的回复..."
+              :placeholder="t('article.replyPlaceholder')"
               @focus="openReplyId = null"
               @input="clearReplyValidation()"
             />
@@ -909,7 +915,7 @@ async function removeReply(replyId: number) {
             <p v-if="successMessage" class="mt-2 text-sm text-green-600">{{ successMessage }}</p>
             <div class="mt-3 flex justify-end gap-2">
               <button type="button" class="h-9 rounded-md px-3 text-sm font-semibold text-gray-500 transition hover:bg-gray-100 hover:text-gray-800" @click="focusReplyEditor">
-                完整编辑
+                {{ t('article.fullEditor') }}
               </button>
               <button
                 type="button"
@@ -919,7 +925,7 @@ async function removeReply(replyId: number) {
               >
                 <Loader2 v-if="submitting && currentReplyId === 0" class="h-4 w-4 animate-spin" />
                 <Send v-else class="h-4 w-4" />
-                {{ submitting && currentReplyId === 0 ? '发布中...' : '发布回复' }}
+                {{ submitting && currentReplyId === 0 ? t('article.publishing') : t('article.publishReply') }}
               </button>
             </div>
           </div>
@@ -931,34 +937,34 @@ async function removeReply(replyId: number) {
       <div class="sticky top-19 space-y-3">
         <div class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
           <div class="border-b border-gray-100 px-4 py-4">
-            <h2 class="text-sm font-semibold text-gray-500">主题概览</h2>
+            <h2 class="text-sm font-semibold text-gray-500">{{ t('article.overview') }}</h2>
           </div>
 
           <dl class="space-y-4 px-4 py-5 text-sm">
             <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-gray-500">创建于</dt>
+              <dt class="font-semibold text-gray-500">{{ t('article.createdAt') }}</dt>
               <dd class="text-right font-semibold tabular-nums text-gray-950">{{ formatDateTime(page.props.article.createdAt) }}</dd>
             </div>
             <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-gray-500">最后回复</dt>
+              <dt class="font-semibold text-gray-500">{{ t('article.lastReply') }}</dt>
               <dd class="text-right font-semibold tabular-nums text-gray-950">{{ formatDateTime(page.props.article.updatedAt) }}</dd>
             </div>
             <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-gray-500">回复数</dt>
+              <dt class="font-semibold text-gray-500">{{ t('article.replyCount') }}</dt>
               <dd class="text-right font-semibold tabular-nums text-gray-950">{{ formatNumber(page.props.article.replyCount) }}</dd>
             </div>
             <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-gray-500">阅读数</dt>
+              <dt class="font-semibold text-gray-500">{{ t('article.viewCount') }}</dt>
               <dd class="text-right font-semibold tabular-nums text-gray-950">{{ formatNumber(page.props.article.viewCount) }}</dd>
             </div>
             <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-gray-500">参与者</dt>
+              <dt class="font-semibold text-gray-500">{{ t('article.participants') }}</dt>
               <dd class="text-right font-semibold tabular-nums text-gray-950">{{ page.props.article.participants.length }}</dd>
             </div>
           </dl>
 
           <div v-if="page.props.article.participants.length" class="border-t border-gray-100 px-4 py-4">
-            <h3 class="mb-3 text-sm font-semibold text-gray-500">活跃参与者</h3>
+            <h3 class="mb-3 text-sm font-semibold text-gray-500">{{ t('article.activeParticipants') }}</h3>
             <div class="flex flex-wrap gap-1.5">
               <a
                 v-for="participant in page.props.article.participants"
@@ -975,8 +981,8 @@ async function removeReply(replyId: number) {
 
         <div v-if="page.props.hotTopics.length" class="rounded-lg border border-gray-200/70 bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
           <div class="mb-2 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-950">热门内容</h2>
-            <a href="/?sort=hot" class="text-xs font-medium text-blue-600 hover:text-blue-700">更多</a>
+            <h2 class="text-sm font-semibold text-gray-950">{{ t('article.hotContent') }}</h2>
+            <a href="/?sort=hot" class="text-xs font-medium text-blue-600 hover:text-blue-700">{{ t('article.more') }}</a>
           </div>
           <div class="space-y-0.5">
             <a
@@ -988,7 +994,7 @@ async function removeReply(replyId: number) {
               <div class="line-clamp-2 text-sm font-semibold leading-snug text-gray-900">{{ topic.title }}</div>
               <div class="mt-1 flex items-center gap-2 text-xs font-medium text-gray-600">
                 <span class="truncate">{{ topic.author.username }}</span>
-                <span class="shrink-0 tabular-nums">{{ formatNumber(topic.replyCount) }} 回复</span>
+                <span class="shrink-0 tabular-nums">{{ t('article.replyCountValue', { count: formatNumber(topic.replyCount) }) }}</span>
               </div>
             </a>
           </div>
@@ -998,62 +1004,64 @@ async function removeReply(replyId: number) {
     </Teleport>
 
     <Teleport to="body">
-      <div
-        v-if="pendingDeleteReply"
-        class="fixed inset-0 z-[110] flex items-center justify-center bg-gray-950/45 px-4 py-6 backdrop-blur-sm"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="delete-reply-title"
-        @click.self="closeDeleteDialog"
-      >
-        <div class="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.55),0_10px_32px_-18px_rgba(15,23,42,0.28)]">
-          <div class="flex items-start gap-3">
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
-              <AlertTriangle class="h-5 w-5" />
+      <Transition name="gf-modal">
+        <div
+          v-if="pendingDeleteReply"
+          class="fixed inset-0 z-[110] flex items-center justify-center bg-gray-950/45 px-4 py-6 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-reply-title"
+          @click.self="closeDeleteDialog"
+        >
+          <div class="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.55),0_10px_32px_-18px_rgba(15,23,42,0.28)]">
+            <div class="flex items-start gap-3">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                <AlertTriangle class="h-5 w-5" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h2 id="delete-reply-title" class="text-base font-bold text-gray-950">{{ t('article.deleteReplyTitle') }}</h2>
+                <p class="mt-1 text-sm leading-6 text-gray-500">{{ t('article.deleteReplyDescription') }}</p>
+              </div>
+              <button
+                type="button"
+                class="rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                :disabled="Boolean(deletingReplyId)"
+                @click="closeDeleteDialog"
+              >
+                <X class="h-4 w-4" />
+              </button>
             </div>
-            <div class="min-w-0 flex-1">
-              <h2 id="delete-reply-title" class="text-base font-bold text-gray-950">删除这条回复？</h2>
-              <p class="mt-1 text-sm leading-6 text-gray-500">删除后这条回复会从主题中移除，相关回复数也会同步更新。</p>
+
+            <div class="mt-4 rounded-md border border-gray-100 bg-gray-50 px-3 py-2">
+              <div class="text-xs font-semibold text-gray-500">@{{ pendingDeleteReply.author.username }}</div>
+              <p class="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">{{ pendingDeleteReply.content }}</p>
             </div>
-            <button
-              type="button"
-              class="rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="Boolean(deletingReplyId)"
-              @click="closeDeleteDialog"
-            >
-              <X class="h-4 w-4" />
-            </button>
-          </div>
 
-          <div class="mt-4 rounded-md border border-gray-100 bg-gray-50 px-3 py-2">
-            <div class="text-xs font-semibold text-gray-500">@{{ pendingDeleteReply.author.username }}</div>
-            <p class="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">{{ pendingDeleteReply.content }}</p>
-          </div>
+            <p v-if="deleteErrorMessage" class="mt-3 text-sm text-red-600">{{ deleteErrorMessage }}</p>
 
-          <p v-if="deleteErrorMessage" class="mt-3 text-sm text-red-600">{{ deleteErrorMessage }}</p>
-
-          <div class="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              class="h-9 rounded-md px-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="Boolean(deletingReplyId)"
-              @click="closeDeleteDialog"
-            >
-              取消
-            </button>
-            <button
-              type="button"
-              class="inline-flex h-9 items-center gap-1.5 rounded-md bg-red-600 px-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-              :disabled="Boolean(deletingReplyId)"
-              @click="removeReply(pendingDeleteReply.id)"
-            >
-              <Loader2 v-if="deletingReplyId === pendingDeleteReply.id" class="h-4 w-4 animate-spin" />
-              <Trash2 v-else class="h-4 w-4" />
-              {{ deletingReplyId === pendingDeleteReply.id ? '删除中...' : '确认删除' }}
-            </button>
+            <div class="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                class="h-9 rounded-md px-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                :disabled="Boolean(deletingReplyId)"
+                @click="closeDeleteDialog"
+              >
+                {{ t('common.cancel') }}
+              </button>
+              <button
+                type="button"
+                class="inline-flex h-9 items-center gap-1.5 rounded-md bg-red-600 px-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                :disabled="Boolean(deletingReplyId)"
+                @click="removeReply(pendingDeleteReply.id)"
+              >
+                <Loader2 v-if="deletingReplyId === pendingDeleteReply.id" class="h-4 w-4 animate-spin" />
+                <Trash2 v-else class="h-4 w-4" />
+                {{ deletingReplyId === pendingDeleteReply.id ? t('article.deleting') : t('article.confirmDelete') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </Transition>
     </Teleport>
   </div>
 </template>

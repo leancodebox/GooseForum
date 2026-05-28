@@ -20,9 +20,9 @@ export const socialLabels: Record<string, string> = {
   github: 'GitHub',
   twitter: 'Twitter',
   linkedIn: 'LinkedIn',
-  weibo: '微博',
+  weibo: 'Weibo',
   bilibili: 'Bilibili',
-  zhihu: '知乎',
+  zhihu: 'Zhihu',
 }
 
 export const socialIcons: Record<string, SimpleIcon> = {

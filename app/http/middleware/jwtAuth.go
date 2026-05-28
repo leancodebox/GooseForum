@@ -17,7 +17,7 @@ const SkipUpdateUserActivity = "SkipUpdateUserActivity"
 func JWTAuthCheck(c *gin.Context) {
 	userId := JWTAuthGetUserId(c)
 	if userId == 0 {
-		c.JSON(http.StatusUnauthorized, component.FailData("not authorized"))
+		c.JSON(http.StatusUnauthorized, component.FailDataCode(component.MessageAuthRequired, nil))
 		c.Abort()
 		return
 	}

@@ -1,4 +1,5 @@
 import Compressor from 'compressorjs'
+import { i18n } from './i18n'
 
 export interface ImageProcessResult {
   file: File
@@ -15,8 +16,8 @@ export function supportsWebP(): boolean {
 }
 
 export function validateImageFile(file: File, maxSize = 10 * 1024 * 1024): string | null {
-  if (!file.type.startsWith('image/')) return '请选择图片文件'
-  if (file.size > maxSize) return `图片大小不能超过${(maxSize / 1024 / 1024).toFixed(0)}MB`
+  if (!file.type.startsWith('image/')) return i18n.global.t('image.selectFile')
+  if (file.size > maxSize) return i18n.global.t('image.maxSize', { size: (maxSize / 1024 / 1024).toFixed(0) })
   return null
 }
 
@@ -34,7 +35,7 @@ export async function processImageFile(file: File, quality = 0.85): Promise<Imag
       newSize: converted.size,
     }
   } catch (error) {
-    console.warn('图片优化失败，使用原始文件:', error)
+    console.warn(i18n.global.t('image.optimizeFailed'), error)
     return {
       file,
       converted: false,
@@ -54,7 +55,7 @@ export async function createSquareAvatarFile(file: File, size = 400, quality = 0
   canvas.width = size
   canvas.height = size
   const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('无法处理图片')
+  if (!ctx) throw new Error(i18n.global.t('image.processFailed'))
 
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
@@ -99,7 +100,7 @@ function compressImage(file: File, mimeType: string, quality: number): Promise<F
         }))
       },
       error: (error) => {
-        reject(new Error(`图片压缩失败: ${error.message}`))
+        reject(new Error(i18n.global.t('image.compressFailed', { message: error.message })))
       },
     })
   })
@@ -115,14 +116,14 @@ async function createBitmap(file: File): Promise<ImageBitmap> {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = new Image()
       img.onload = () => resolve(img)
-      img.onerror = () => reject(new Error('图片读取失败'))
+      img.onerror = () => reject(new Error(i18n.global.t('image.readFailed')))
       img.src = url
     })
     const canvas = document.createElement('canvas')
     canvas.width = image.naturalWidth
     canvas.height = image.naturalHeight
     const ctx = canvas.getContext('2d')
-    if (!ctx) throw new Error('无法处理图片')
+    if (!ctx) throw new Error(i18n.global.t('image.processFailed'))
     ctx.drawImage(image, 0, 0)
     return createImageBitmap(canvas)
   } finally {
@@ -135,7 +136,7 @@ function canvasToBlob(canvas: HTMLCanvasElement, mimeType: string, quality: numb
     canvas.toBlob(
       (blob) => {
         if (blob) resolve(blob)
-        else reject(new Error('图片编码失败'))
+        else reject(new Error(i18n.global.t('image.encodeFailed')))
       },
       mimeType,
       quality,

@@ -378,31 +378,33 @@ async function loadUserHoverCard() {
             >
               <Languages class="h-5 w-5" />
             </button>
-            <div
-              v-if="langMenuOpen"
-              class="absolute right-0 top-full z-[70] w-36 pt-2"
-            >
-              <div class="rounded-md border border-gray-100 bg-white py-1 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)]">
-                <button
-                  v-for="item in supportedLocales"
-                  :key="item"
-                  class="block w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50"
-                  :class="locale === item ? 'font-semibold text-blue-600' : 'text-gray-700'"
-                  type="button"
-                  @click="setLang(item)"
-                >
-                  {{ t(`locale.${item}`) }}
-                </button>
+            <Transition name="gf-menu">
+              <div
+                v-if="langMenuOpen"
+                class="absolute right-0 top-full z-[70] w-36 pt-2"
+              >
+                <div class="rounded-md border border-gray-100 bg-white py-1 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)]">
+                  <button
+                    v-for="item in supportedLocales"
+                    :key="item"
+                    class="block w-full px-3 py-1.5 text-left text-sm transition-colors duration-150 hover:bg-gray-50"
+                    :class="locale === item ? 'font-semibold text-blue-600' : 'text-gray-700'"
+                    type="button"
+                    @click="setLang(item)"
+                  >
+                    {{ t(`locale.${item}`) }}
+                  </button>
+                </div>
               </div>
-            </div>
+            </Transition>
           </div>
 
           <template v-if="layout.viewer.isAuthenticated">
             <a
               href="/messages"
               class="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-              aria-label="私信"
-              title="私信"
+              :aria-label="t('shell.nav.messages')"
+              :title="t('shell.nav.messages')"
             >
               <Inbox class="h-5 w-5" />
               <span
@@ -445,28 +447,30 @@ async function loadUserHoverCard() {
               >
                 <UserAvatar :src="layout.viewer.avatarUrl" :alt="layout.viewer.username" class="h-9 w-9 rounded-full object-cover" />
               </button>
-              <div
-                v-if="userMenuOpen"
-                class="absolute right-0 top-full z-[70] w-52 pt-2"
-              >
-                <div class="rounded-md border border-gray-100 bg-white py-1 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)]">
-                  <div class="border-b border-gray-50 px-3 py-2">
-                    <div class="truncate text-sm font-semibold text-gray-900">{{ layout.viewer.username }}</div>
+              <Transition name="gf-menu">
+                <div
+                  v-if="userMenuOpen"
+                  class="absolute right-0 top-full z-[70] w-52 pt-2"
+                >
+                  <div class="rounded-md border border-gray-100 bg-white py-1 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)]">
+                    <div class="border-b border-gray-50 px-3 py-2">
+                      <div class="truncate text-sm font-semibold text-gray-900">{{ layout.viewer.username }}</div>
+                    </div>
+                    <a :href="`/u/${layout.viewer.id}`" class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 transition-colors duration-150 hover:bg-gray-50">
+                      <UserRound class="h-4 w-4 text-gray-400" /> {{ t('shell.profile') }}
+                    </a>
+                    <a href="/settings" class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 transition-colors duration-150 hover:bg-gray-50">
+                      <Settings class="h-4 w-4 text-gray-400" /> {{ t('shell.settings') }}
+                    </a>
+                    <a v-if="layout.viewer.isAdmin" href="/admin" class="flex items-center gap-2 px-3 py-1.5 text-sm text-amber-700 transition-colors duration-150 hover:bg-amber-50">
+                      <Shield class="h-4 w-4" /> {{ t('shell.admin') }}
+                    </a>
+                    <button class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-red-600 transition-colors duration-150 hover:bg-red-50" type="button" @click="logout">
+                      <LogOut class="h-4 w-4" /> {{ t('shell.logout') }}
+                    </button>
                   </div>
-                  <a :href="`/u/${layout.viewer.id}`" class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
-                    <UserRound class="h-4 w-4 text-gray-400" /> {{ t('shell.profile') }}
-                  </a>
-                  <a href="/settings" class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
-                    <Settings class="h-4 w-4 text-gray-400" /> {{ t('shell.settings') }}
-                  </a>
-                  <a v-if="layout.viewer.isAdmin" href="/admin" class="flex items-center gap-2 px-3 py-1.5 text-sm text-amber-700 hover:bg-amber-50">
-                    <Shield class="h-4 w-4" /> {{ t('shell.admin') }}
-                  </a>
-                  <button class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50" type="button" @click="logout">
-                    <LogOut class="h-4 w-4" /> {{ t('shell.logout') }}
-                  </button>
                 </div>
-              </div>
+              </Transition>
             </div>
           </template>
           <template v-else>
@@ -491,7 +495,7 @@ async function loadUserHoverCard() {
                 v-for="item in primaryItems"
                 :key="item.key"
                 :href="item.url"
-                class="flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium"
+                class="flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors duration-150"
                 :class="item.active ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'"
               >
                 <component
@@ -517,7 +521,7 @@ async function loadUserHoverCard() {
                   v-for="item in resourceItems"
                   :key="item.key"
                   :href="item.url"
-                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium"
+                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors duration-150"
                   :class="item.active ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'"
                 >
                   <component
@@ -539,7 +543,7 @@ async function loadUserHoverCard() {
                   v-for="category in categoryItems"
                   :key="category.key"
                   :href="category.url"
-                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium"
+                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors duration-150"
                   :class="category.active ? 'bg-gray-100 text-gray-950' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'"
                 >
                   <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />

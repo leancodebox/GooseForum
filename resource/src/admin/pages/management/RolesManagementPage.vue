@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, XCircle } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -53,7 +54,7 @@ async function loadRoles() {
       name: item.label || item.name,
     }))
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '加载角色失败'
+    error.value = err instanceof Error ? err.message : adminText('k002r')
   } finally {
     loading.value = false
   }
@@ -95,11 +96,11 @@ function togglePermission(id: number, checked: boolean) {
 
 async function submitRole() {
   if (!form.roleName.trim()) {
-    adminToast.warning('角色名称不能为空')
+    adminToast.warning(adminText('k002s'))
     return
   }
   if (!form.permissions.length) {
-    adminToast.warning('请至少选择一个权限')
+    adminToast.warning(adminText('k002t'))
     return
   }
   saving.value = true
@@ -111,9 +112,9 @@ async function submitRole() {
     })
     dialogMode.value = null
     await loadRoles()
-    adminToast.success('保存成功')
+    adminToast.success(adminText('k000e'))
   } catch (err) {
-    adminToast.error(err, '保存角色失败')
+    adminToast.error(err, adminText('k000x'))
   } finally {
     saving.value = false
   }
@@ -126,9 +127,9 @@ async function confirmDelete() {
     await deleteRole(deletingRole.value.roleId)
     deletingRole.value = null
     await loadRoles()
-    adminToast.success('删除成功')
+    adminToast.success(adminText('k002u'))
   } catch (err) {
-    adminToast.error(err, '删除角色失败')
+    adminToast.error(err, adminText('k000y'))
   } finally {
     deleting.value = false
   }
@@ -140,16 +141,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage title="角色管理" description="在这里管理系统的角色及其权限。" sticky>
+  <BasicPage :title="adminText('k007f')" :description="adminText('k007g')" sticky>
     <template #actions>
       <div class="flex items-center gap-2">
         <button class="inline-flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium shadow-sm hover:bg-muted" type="button" @click="loadRoles">
           <RefreshCw class="size-4" />
-          刷新
+          {{ adminText('k004q') }}
         </button>
         <button class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90" type="button" @click="openAdd">
           <Plus class="size-4" />
-          添加角色
+          {{ adminText('k007h') }}
         </button>
       </div>
     </template>
@@ -158,19 +159,19 @@ onMounted(() => {
         <form class="flex min-w-64 flex-1 gap-2 sm:flex-none" @submit.prevent="applySearch">
           <div class="relative flex-1">
             <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input v-model="search" class="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder="搜索角色名称..." />
+            <input v-model="search" class="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :placeholder="adminText('k007q')" />
           </div>
-          <button class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">搜索</button>
+          <button class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">{{ adminText('k00al') }}</button>
         </form>
         <select v-model="effectiveFilter" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" @change="page = 1">
-          <option value="">全部状态</option>
-          <option value="1">有效</option>
-          <option value="0">无效</option>
+          <option value="">{{ adminText('k00am') }}</option>
+          <option value="1">{{ adminText('k007n') }}</option>
+          <option value="0">{{ adminText('k007o') }}</option>
         </select>
       </div>
 
       <ManagementTable
-        :columns="['ID', '角色名称', '状态', '权限', '创建时间', '操作']"
+        :columns="['ID', adminText('k007i'), adminText('k007j'), adminText('k007k'), adminText('k007l'), adminText('k007m')]"
         :loading="loading"
         :error="error"
         :total="total"
@@ -181,7 +182,7 @@ onMounted(() => {
         @update:page-size="changePageSize"
       >
         <tr v-if="pagedRows.length === 0">
-          <td colspan="6" class="h-28 px-4 text-center text-muted-foreground">暂无角色</td>
+          <td colspan="6" class="h-28 px-4 text-center text-muted-foreground">{{ adminText('k00an') }}</td>
         </tr>
         <tr v-for="role in pagedRows" :key="role.roleId" class="hover:bg-muted/35">
           <td class="px-4 py-3 font-mono text-xs text-muted-foreground">{{ role.roleId }}</td>
@@ -189,7 +190,7 @@ onMounted(() => {
           <td class="px-4 py-3">
             <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium" :class="role.effective === 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'">
               <ShieldCheck class="size-3.5" />
-              {{ role.effective === 1 ? '有效' : '无效' }}
+              {{ role.effective === 1 ? adminText('k007n') : adminText('k007o') }}
             </span>
           </td>
           <td class="px-4 py-3">
@@ -202,11 +203,11 @@ onMounted(() => {
             <div class="flex gap-2">
               <button class="inline-flex items-center gap-1.5 rounded-md border bg-background px-2.5 py-1.5 text-xs font-medium hover:bg-muted" type="button" @click="openEdit(role)">
                 <Pencil class="size-3.5" />
-                编辑
+                {{ adminText('k005j') }}
               </button>
               <button class="inline-flex items-center gap-1.5 rounded-md border border-destructive/30 bg-background px-2.5 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/5" type="button" @click="deletingRole = role">
                 <Trash2 class="size-3.5" />
-                删除
+                {{ adminText('k005i') }}
               </button>
             </div>
           </td>
@@ -217,8 +218,8 @@ onMounted(() => {
         <form class="w-full max-w-lg rounded-lg border bg-background p-6 shadow-xl" @submit.prevent="submitRole">
           <div class="mb-5 flex items-start justify-between gap-4">
             <div>
-              <h2 class="text-lg font-semibold">{{ dialogMode === 'add' ? '添加角色' : '编辑角色' }}</h2>
-              <p class="mt-1 text-sm text-muted-foreground">填写角色名称并分配权限。</p>
+              <h2 class="text-lg font-semibold">{{ dialogMode === 'add' ? adminText('k007h') : adminText('k007p') }}</h2>
+              <p class="mt-1 text-sm text-muted-foreground">{{ adminText('k00ao') }}</p>
             </div>
             <button class="rounded-md p-1 text-muted-foreground hover:bg-muted" type="button" @click="dialogMode = null">
               <XCircle class="size-5" />
@@ -226,11 +227,11 @@ onMounted(() => {
           </div>
           <div class="space-y-5">
             <label class="grid gap-2 text-sm font-medium">
-              角色名称
-              <input v-model="form.roleName" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder="输入角色名称" />
+              {{ adminText('k007i') }}
+              <input v-model="form.roleName" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :placeholder="adminText('k007r')" />
             </label>
             <div class="grid gap-2">
-              <div class="text-sm font-medium">权限分配</div>
+              <div class="text-sm font-medium">{{ adminText('k00ap') }}</div>
               <div class="grid max-h-56 grid-cols-2 gap-3 overflow-y-auto rounded-md border p-4">
                 <label v-for="permission in permissionOptions" :key="permission.id" class="flex items-center gap-2 text-sm">
                   <input
@@ -245,9 +246,9 @@ onMounted(() => {
             </div>
           </div>
           <div class="mt-6 flex justify-end gap-2">
-            <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="dialogMode = null">取消</button>
+            <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="dialogMode = null">{{ adminText('k009q') }}</button>
             <button class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" type="submit" :disabled="saving">
-              {{ saving ? '保存中...' : '保存' }}
+              {{ saving ? adminText('k005f') : adminText('k005g') }}
             </button>
           </div>
         </form>
@@ -255,12 +256,12 @@ onMounted(() => {
 
       <div v-if="deletingRole" class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" @click.self="deletingRole = null">
         <div class="w-full max-w-md rounded-lg border bg-background p-6 shadow-xl">
-          <h2 class="text-lg font-semibold">确认删除角色？</h2>
-          <p class="mt-2 text-sm text-muted-foreground">此操作将永久删除角色 <span class="font-semibold text-foreground">{{ deletingRole.roleName }}</span>，且不可撤销。</p>
+          <h2 class="text-lg font-semibold">{{ adminText('k00aq') }}</h2>
+          <p class="mt-2 text-sm text-muted-foreground">{{ adminText('k00ar') }} <span class="font-semibold text-foreground">{{ deletingRole.roleName }}</span>{{ adminText('k00as') }}</p>
           <div class="mt-6 flex justify-end gap-2">
-            <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="deletingRole = null">取消</button>
+            <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="deletingRole = null">{{ adminText('k009q') }}</button>
             <button class="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground disabled:opacity-60" type="button" :disabled="deleting" @click="confirmDelete">
-              {{ deleting ? '删除中...' : '删除' }}
+              {{ deleting ? adminText('k005h') : adminText('k005i') }}
             </button>
           </div>
         </div>

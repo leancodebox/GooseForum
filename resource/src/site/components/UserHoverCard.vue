@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   Bird,
   CalendarDays,
@@ -15,6 +16,7 @@ import type { UserHoverCardPayload } from '@/types/payload'
 import { socialIcons, socialLabels, type SimpleIcon } from '@/site/utils/social-icons'
 import UserAvatar from './UserAvatar.vue'
 
+const { t } = useI18n()
 const visible = ref(false)
 const loading = ref(false)
 const error = ref('')
@@ -122,7 +124,7 @@ async function show(event: Event) {
     requestAnimationFrame(() => placeCard(detail.target))
   } catch {
     if (token !== requestToken) return
-    error.value = '用户资料暂时不可用'
+    error.value = t('userCard.unavailable')
   } finally {
     if (token === requestToken) loading.value = false
   }
@@ -209,9 +211,9 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
             <span class="truncate">@{{ username }}</span>
             <span v-if="card?.isOnline" class="inline-flex items-center gap-1 text-emerald-600">
               <Radio class="h-3 w-3" />
-              在线
+              {{ t('userCard.online') }}
             </span>
-            <span v-else-if="card?.lastActiveTime">活跃于 {{ timeAgo(card.lastActiveTime) }}</span>
+            <span v-else-if="card?.lastActiveTime">{{ t('userCard.activeAt', { time: timeAgo(card.lastActiveTime) }) }}</span>
           </div>
         </div>
       </div>
@@ -231,7 +233,7 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
             <div class="mt-3 flex items-center justify-between gap-3">
               <div class="flex items-center gap-1.5 text-xs text-gray-400">
                 <Loader2 class="h-3.5 w-3.5 animate-spin" />
-                加载用户资料
+                {{ t('userCard.loading') }}
               </div>
               <div class="h-8 w-24 rounded-md bg-gray-100" />
             </div>
@@ -270,19 +272,19 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
         <div class="mt-3 grid grid-cols-4 divide-x divide-gray-100 border-y border-gray-100 py-2">
           <div class="px-2 text-center">
             <div class="text-sm font-bold tabular-nums text-gray-950">{{ formatNumber(card?.articleCount || 0) }}</div>
-            <div class="mt-0.5 text-[11px] text-gray-400">主题</div>
+            <div class="mt-0.5 text-[11px] text-gray-400">{{ t('userCard.stats.topics') }}</div>
           </div>
           <div class="px-2 text-center">
             <div class="text-sm font-bold tabular-nums text-gray-950">{{ formatNumber(card?.replyCount || 0) }}</div>
-            <div class="mt-0.5 text-[11px] text-gray-400">回复</div>
+            <div class="mt-0.5 text-[11px] text-gray-400">{{ t('userCard.stats.replies') }}</div>
           </div>
           <div class="px-2 text-center">
             <div class="text-sm font-bold tabular-nums text-gray-950">{{ formatNumber(card?.likeReceivedCount || 0) }}</div>
-            <div class="mt-0.5 text-[11px] text-gray-400">获赞</div>
+            <div class="mt-0.5 text-[11px] text-gray-400">{{ t('userCard.stats.likes') }}</div>
           </div>
           <div class="px-2 text-center">
             <div class="text-sm font-bold tabular-nums text-gray-950">{{ formatNumber(card?.followerCount || 0) }}</div>
-            <div class="mt-0.5 text-[11px] text-gray-400">关注者</div>
+            <div class="mt-0.5 text-[11px] text-gray-400">{{ t('userCard.stats.followers') }}</div>
           </div>
         </div>
 
@@ -317,14 +319,14 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
         <div class="mt-3 flex items-center justify-between gap-3">
           <div class="inline-flex items-center gap-1.5 text-xs text-gray-400">
             <CalendarDays class="h-3.5 w-3.5" />
-            加入于 {{ card?.createdAt ? formatDate(card.createdAt) : '-' }}
+            {{ t('userCard.joinedAt', { date: card?.createdAt ? formatDate(card.createdAt) : '-' }) }}
           </div>
           <a
             :href="profileUrl"
             class="inline-flex h-8 items-center gap-1.5 rounded-md bg-gray-900 px-3 text-sm font-semibold text-white hover:bg-gray-800"
           >
             <UserPlus class="h-4 w-4" />
-            {{ card?.isFollowing ? '已关注' : '查看主页' }}
+            {{ card?.isFollowing ? t('userCard.following') : t('userCard.viewProfile') }}
           </a>
         </div>
           </div>

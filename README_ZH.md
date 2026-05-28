@@ -191,11 +191,14 @@ GooseForum/
 ## 🛡 管理功能
 
 ```bash
-# 重置管理员密码
-./GooseForum user:manage
+# 设置管理员
+./GooseForum set-user-admin <用户ID>
 
 # 设置用户邮箱
-./GooseForum user:set-email <邮箱>
+./GooseForum set-user-email <用户ID> <邮箱>
+
+# 重置用户密码
+./GooseForum set-user-password <用户ID> <密码>
 ```
 
 ### 管理后台功能

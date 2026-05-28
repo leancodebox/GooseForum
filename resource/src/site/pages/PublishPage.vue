@@ -8,12 +8,14 @@ import { submitArticle, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { useUnsavedDraftGuard } from '@/site/composables/useUnsavedDraftGuard'
 import type { LayoutPayload, PublishPageProps } from '@/types/payload'
+import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
   layout: LayoutPayload
   props: PublishPageProps
 }>()
 
+const { t } = useI18n()
 const title = ref(page.props.article.title || '')
 const content = ref(page.props.article.content || '')
 const type = ref(page.props.article.type || page.props.types[0]?.value || 0)
@@ -45,7 +47,7 @@ const savedSnapshot = ref(editorSnapshot())
 const hasUnsavedChanges = computed(() => editorSnapshot() !== savedSnapshot.value)
 const uploadText = computed(() => {
   if (!uploading.value) return ''
-  return uploadTotal.value > 1 ? `正在处理图片 ${uploadDone.value}/${uploadTotal.value}` : '正在处理图片...'
+  return uploadTotal.value > 1 ? t('publish.processingImages', { done: uploadDone.value, total: uploadTotal.value }) : t('publish.processingImage')
 })
 const {
   leavePromptOpen,
@@ -170,7 +172,7 @@ async function uploadImageFiles(files: File[]) {
         const url = await uploadImage(optimized.file)
         markdownImages.push(`![${imageAlt(file.name)}](${url})`)
       } catch (err) {
-        failed.push(`${file.name}: ${err instanceof Error ? err.message : '图片上传失败'}`)
+        failed.push(`${file.name}: ${err instanceof Error ? err.message : t('api.imageUploadFailed')}`)
       } finally {
         uploadDone.value += 1
       }
@@ -178,13 +180,13 @@ async function uploadImageFiles(files: File[]) {
 
     if (markdownImages.length) {
       insertMarkdownBlock(markdownImages.join('\n'))
-      message.value = markdownImages.length > 1 ? `已插入 ${markdownImages.length} 张图片。` : '图片已插入。'
+      message.value = markdownImages.length > 1 ? t('publish.imagesInserted', { count: markdownImages.length }) : t('publish.imageInserted')
     }
 
     if (failed.length) {
-      error.value = failed.slice(0, 3).join('；') + (failed.length > 3 ? `；另有 ${failed.length - 3} 张失败` : '')
+      error.value = failed.slice(0, 3).join(t('punctuation.semicolon')) + (failed.length > 3 ? t('publish.moreImageFailures', { count: failed.length - 3 }) : '')
     } else if (!markdownImages.length) {
-      error.value = '没有可上传的图片文件'
+      error.value = t('publish.noUploadableImages')
     }
   } finally {
     uploading.value = false
@@ -226,13 +228,13 @@ function handleEditorKeydown(event: KeyboardEvent) {
   const key = event.key.toLowerCase()
   if (key === 'b') {
     event.preventDefault()
-    insert('**', '**', '加粗文本')
+    insert('**', '**', t('publish.placeholder.bold'))
   } else if (key === 'i') {
     event.preventDefault()
-    insert('*', '*', '斜体文本')
+    insert('*', '*', t('publish.placeholder.italic'))
   } else if (key === 'k') {
     event.preventDefault()
-    insert('[', '](https://)', '链接文本')
+    insert('[', '](https://)', t('publish.placeholder.link'))
   }
 }
 
@@ -253,10 +255,10 @@ async function save() {
     currentArticleId.value = id
     syncSavedSnapshot()
     forceNextNavigation()
-    message.value = page.props.isEditing ? '主题已更新。' : '主题已发布。'
+    message.value = page.props.isEditing ? t('publish.topicUpdated') : t('publish.topicPublished')
     window.location.href = `/p/post/${id}`
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '保存失败'
+    error.value = err instanceof Error ? err.message : t('publish.saveFailed')
   } finally {
     submitting.value = false
   }
@@ -286,7 +288,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
     if (redirect) window.location.href = nextUrl || '/drafts'
     return true
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '保存草稿失败'
+    error.value = err instanceof Error ? err.message : t('publish.draftSaveFailed')
     return false
   } finally {
     submitting.value = false
@@ -297,24 +299,24 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 <template>
     <main class="min-w-0 pb-12">
       <header class="mb-4 border-b border-gray-200/70 pb-4">
-        <h1 class="text-2xl font-bold text-gray-950">{{ props.isEditing ? '编辑主题' : '发布主题' }}</h1>
-        <p class="mt-1 text-sm text-gray-500">写清楚标题，选择合适分类，让讨论更容易被找到。</p>
+        <h1 class="text-2xl font-bold text-gray-950">{{ props.isEditing ? t('publish.editTitle') : t('publish.createTitle') }}</h1>
+        <p class="mt-1 text-sm text-gray-500">{{ t('publish.subtitle') }}</p>
       </header>
 
       <div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
         <section class="rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] sm:p-5">
           <div class="space-y-5">
             <label class="block">
-              <span class="text-sm font-semibold text-gray-700">标题</span>
+              <span class="text-sm font-semibold text-gray-700">{{ t('publish.fields.title') }}</span>
               <input
                 v-model="title"
                 class="mt-1 h-11 w-full rounded-md border border-gray-200 px-3 text-lg font-semibold outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                placeholder="输入主题标题"
+                :placeholder="t('publish.titlePlaceholder')"
               />
             </label>
 
             <div>
-              <div class="mb-2 text-sm font-semibold text-gray-700">类型</div>
+              <div class="mb-2 text-sm font-semibold text-gray-700">{{ t('publish.fields.type') }}</div>
               <div class="flex flex-wrap gap-2">
                 <button
                   v-for="item in props.types"
@@ -331,8 +333,8 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 
             <div>
               <div class="mb-2 flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-700">分类</span>
-                <span class="text-xs text-gray-400">最多 3 个</span>
+                <span class="text-sm font-semibold text-gray-700">{{ t('publish.fields.category') }}</span>
+                <span class="text-xs text-gray-400">{{ t('publish.maxCategories') }}</span>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button
@@ -352,10 +354,10 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 
             <div>
               <div class="mb-2 flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-700">正文</span>
+                <span class="text-sm font-semibold text-gray-700">{{ t('publish.fields.body') }}</span>
                 <div class="inline-flex rounded-md border border-gray-200 p-0.5 text-xs font-semibold">
-                  <button type="button" class="rounded px-2 py-1" :class="!preview ? 'bg-gray-900 text-white' : 'text-gray-500'" @click="preview = false">编辑</button>
-                  <button type="button" class="rounded px-2 py-1" :class="preview ? 'bg-gray-900 text-white' : 'text-gray-500'" @click="preview = true">预览</button>
+                  <button type="button" class="rounded px-2 py-1" :class="!preview ? 'bg-gray-900 text-white' : 'text-gray-500'" @click="preview = false">{{ t('common.edit') }}</button>
+                  <button type="button" class="rounded px-2 py-1" :class="preview ? 'bg-gray-900 text-white' : 'text-gray-500'" @click="preview = true">{{ t('publish.preview') }}</button>
                 </div>
               </div>
 
@@ -365,16 +367,16 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                 :class="dragOver ? 'border-blue-500 bg-blue-50/50 shadow-[0_0_0_4px_rgba(59,130,246,0.12)]' : 'border-gray-200 bg-white'"
               >
                 <div class="flex flex-wrap items-center gap-1 border-b border-gray-100 bg-gray-50 px-2 py-2">
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" title="加粗" @click="insert('**', '**', '加粗文本')"><Bold class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" title="斜体" @click="insert('*', '*', '斜体文本')"><Italic class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" title="链接" @click="insert('[', '](https://)', '链接文本')"><Link class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" title="引用" @click="insert('\\n> ', '', '引用内容')"><MessageSquareQuote class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" title="代码" @click="insert('\\n```\\n', '\\n```\\n', 'code')"><Code2 class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.bold')" @click="insert('**', '**', t('publish.placeholder.bold'))"><Bold class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.italic')" @click="insert('*', '*', t('publish.placeholder.italic'))"><Italic class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.link')" @click="insert('[', '](https://)', t('publish.placeholder.link'))"><Link class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.quote')" @click="insert('\\n> ', '', t('publish.placeholder.quote'))"><MessageSquareQuote class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.code')" @click="insert('\\n```\\n', '\\n```\\n', 'code')"><Code2 class="h-4 w-4" /></button>
                   <span v-if="uploadText" class="ml-auto rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">{{ uploadText }}</span>
                   <label
                     class="rounded p-1.5 text-gray-500 transition hover:bg-white hover:text-gray-900"
                     :class="uploadText ? '' : 'ml-auto'"
-                    title="上传图片，支持多选、粘贴和拖拽"
+                    :title="t('publish.uploadImageTitle')"
                   >
                     <Image class="h-4 w-4" />
                     <input type="file" accept="image/*" multiple class="hidden" :disabled="uploading" @change="handleImage" />
@@ -385,7 +387,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                     ref="editor"
                     v-model="content"
                     class="min-h-96 w-full resize-y border-0 bg-transparent px-4 py-3 font-mono text-sm leading-relaxed outline-none"
-                    placeholder="输入正文，支持 Markdown；可粘贴或拖拽图片"
+                    :placeholder="t('publish.bodyPlaceholder')"
                     @keydown="handleEditorKeydown"
                     @paste="handlePaste"
                     @drop="handleDrop"
@@ -396,14 +398,14 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                     v-if="dragOver"
                     class="pointer-events-none absolute inset-3 grid place-items-center rounded-lg border-2 border-dashed border-blue-400 bg-blue-50/80 text-sm font-semibold text-blue-700"
                   >
-                    松开后上传并插入图片
+                    {{ t('publish.dropToUpload') }}
                   </div>
                 </div>
               </div>
 
               <div v-else class="gf-prose gf-prose-article min-h-96 rounded-lg border border-gray-200 bg-gray-50/50 p-5">
                 <div v-if="content.trim()" v-html="renderedPreview" />
-                <p v-else class="text-sm text-gray-400">还没有可预览的内容。</p>
+                <p v-else class="text-sm text-gray-400">{{ t('publish.emptyPreview') }}</p>
               </div>
             </div>
 
@@ -411,14 +413,14 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
             <p v-if="message" class="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">{{ message }}</p>
 
             <div class="flex items-center justify-end gap-2 border-t border-gray-100 pt-4">
-              <a href="/" class="inline-flex h-10 items-center rounded-md px-3 text-sm font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-900">取消</a>
+              <a href="/" class="inline-flex h-10 items-center rounded-md px-3 text-sm font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-900">{{ t('common.cancel') }}</a>
               <button
                 type="button"
                 class="inline-flex h-10 items-center rounded-md border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                 :disabled="!isValid || submitting || uploading"
                 @click="saveDraft"
               >
-                {{ submitting ? '保存中...' : '保存草稿' }}
+                {{ submitting ? t('common.saving') : t('publish.saveDraft') }}
               </button>
               <button
                 type="button"
@@ -427,7 +429,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                 @click="save"
               >
                 <Send class="h-4 w-4" />
-                {{ submitting ? '保存中...' : props.isEditing ? '更新主题' : '发布主题' }}
+                {{ submitting ? t('common.saving') : props.isEditing ? t('publish.updateTopic') : t('publish.publishTopic') }}
               </button>
             </div>
           </div>
@@ -437,17 +439,17 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
           <section class="rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
             <div class="flex items-center gap-2">
               <ListChecks class="h-4 w-4 text-gray-400" />
-              <h2 class="text-sm font-semibold text-gray-950">发布检查</h2>
+              <h2 class="text-sm font-semibold text-gray-950">{{ t('publish.checklist.title') }}</h2>
             </div>
             <ul class="mt-3 space-y-2 text-sm text-gray-600">
-              <li class="flex items-center justify-between gap-3"><span>标题</span><span :class="title.trim() ? 'text-green-600' : 'text-gray-400'">{{ title.trim() ? '已填写' : '待填写' }}</span></li>
-              <li class="flex items-center justify-between gap-3"><span>分类</span><span :class="categoryIds.length ? 'text-green-600' : 'text-gray-400'">{{ categoryIds.length }}/3</span></li>
-              <li class="flex items-center justify-between gap-3"><span>正文</span><span :class="content.trim() ? 'text-green-600' : 'text-gray-400'">{{ content.trim().length }} 字</span></li>
+              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.title') }}</span><span :class="title.trim() ? 'text-green-600' : 'text-gray-400'">{{ title.trim() ? t('publish.checklist.done') : t('publish.checklist.pending') }}</span></li>
+              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.category') }}</span><span :class="categoryIds.length ? 'text-green-600' : 'text-gray-400'">{{ categoryIds.length }}/3</span></li>
+              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.body') }}</span><span :class="content.trim() ? 'text-green-600' : 'text-gray-400'">{{ t('publish.checklist.characters', { count: content.trim().length }) }}</span></li>
             </ul>
           </section>
 
           <section v-if="selectedCategories.length" class="rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-            <h2 class="text-sm font-semibold text-gray-950">已选分类</h2>
+            <h2 class="text-sm font-semibold text-gray-950">{{ t('publish.selectedCategories') }}</h2>
             <div class="mt-3 flex flex-wrap gap-2">
               <button
                 v-for="category in selectedCategories"
@@ -468,22 +470,22 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
       <div v-if="leavePromptOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-950/50 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
         <div class="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl">
           <div class="border-b border-gray-100 px-5 py-4">
-            <h2 class="text-base font-semibold text-gray-950">保存未完成的编辑？</h2>
+            <h2 class="text-base font-semibold text-gray-950">{{ t('publish.leaveTitle') }}</h2>
             <p class="mt-1 text-sm leading-6 text-gray-500">
-              当前内容还没有保存。离开前可以先存为草稿，之后在草稿箱继续编辑。
+              {{ t('publish.leaveDescription') }}
             </p>
           </div>
 
           <div v-if="!isValid" class="border-b border-amber-100 bg-amber-50 px-5 py-3 text-sm font-medium text-amber-700">
-            草稿需要填写标题、正文和至少一个分类后才能保存。
+            {{ t('publish.draftRequirement') }}
           </div>
 
           <div class="flex flex-wrap items-center justify-end gap-2 bg-gray-50 px-5 py-4">
             <button type="button" class="h-10 rounded-md px-3 text-sm font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-900" @click="closeLeavePrompt">
-              继续编辑
+              {{ t('publish.continueEditing') }}
             </button>
             <button type="button" class="h-10 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50" @click="discardAndLeave">
-              不保存离开
+              {{ t('publish.leaveWithoutSaving') }}
             </button>
             <button
               type="button"
@@ -491,7 +493,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               :disabled="!draftSaveable"
               @click="saveDraftAndLeave"
             >
-              {{ submitting ? '保存中...' : '保存草稿' }}
+              {{ submitting ? t('common.saving') : t('publish.saveDraft') }}
             </button>
           </div>
         </div>

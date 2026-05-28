@@ -2,7 +2,6 @@ package api
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 	"path/filepath"
@@ -20,7 +19,10 @@ import (
 func GetFileByFileName(c *gin.Context) {
 	filename := c.Param("filename")
 	if filename == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid filename"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":       "Invalid filename",
+			"messageCode": component.MessageRequestInvalidParams,
+		})
 		return
 	}
 	filename = strings.TrimPrefix(filename, "/")
@@ -39,29 +41,32 @@ func SaveImgByGinContext(c *gin.Context) {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 
 	if !postingConfig.UploadControl.AllowAttachments {
-		c.JSON(http.StatusForbidden, component.FailData("目前已关闭附件上传功能"))
+		c.JSON(http.StatusForbidden, component.FailDataCode(component.MessageUploadAttachmentDisabled, nil))
 		return
 	}
 
 	userId := c.GetUint64(`userId`)
 	if userId == 0 {
-		c.JSON(http.StatusUnauthorized, component.FailData("用户未登录"))
+		c.JSON(http.StatusUnauthorized, component.FailDataCode(component.MessageAuthRequired, nil))
 		return
 	}
 
 	userEntity, _ := users.Get(userId)
 
 	if err, code := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
-		c.JSON(code, component.FailData(err.Error()))
+		c.JSON(code, component.FailDataError(err))
 		return
 	}
 
 	if postingConfig.UploadControl.NewUserUploadCooldownMinutes > 0 {
 		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.UploadControl.NewUserUploadCooldownMinutes) * time.Minute)
 		if time.Now().Before(cooldownTime) {
-			c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("新用户注册%d分钟后才能上传，请在 %s 后再试",
-				postingConfig.UploadControl.NewUserUploadCooldownMinutes,
-				cooldownTime.Format("2006-01-02 15:04:05"))))
+			minutes := postingConfig.UploadControl.NewUserUploadCooldownMinutes
+			availableAt := cooldownTime.Format("2006-01-02 15:04:05")
+			c.JSON(http.StatusBadRequest, component.FailDataCode(
+				component.MessageUploadCooldown,
+
+				component.MessageParams{"minutes": minutes, "availableAt": availableAt}))
 			return
 		}
 	}
@@ -69,19 +74,22 @@ func SaveImgByGinContext(c *gin.Context) {
 	if postingConfig.UploadControl.MaxDailyUploadsPerUser > 0 {
 		count := filedata.CountDailyUploads(userId)
 		if count >= int64(postingConfig.UploadControl.MaxDailyUploadsPerUser) {
-			c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("您今日已上传 %d 个文件，已达到每日限制", count)))
+			c.JSON(http.StatusBadRequest, component.FailDataCode(
+				component.MessageUploadDailyLimit,
+
+				component.MessageParams{"count": count}))
 			return
 		}
 	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, component.FailData("文件上传失败，请检查文件是否正确选择"))
+		c.JSON(http.StatusBadRequest, component.FailDataCode(component.MessageUploadFileMissing, nil))
 		return
 	}
 
 	if file.Filename == "" {
-		c.JSON(http.StatusBadRequest, component.FailData("文件名不能为空"))
+		c.JSON(http.StatusBadRequest, component.FailDataCode(component.MessageUploadFilenameRequired, nil))
 		return
 	}
 
@@ -92,7 +100,10 @@ func SaveImgByGinContext(c *gin.Context) {
 	}
 
 	if file.Size > maxSize {
-		c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("文件大小超过限制，最大允许%dKB", maxSize/1024)))
+		c.JSON(http.StatusBadRequest, component.FailDataCode(
+			component.MessageUploadFileTooLarge,
+
+			component.MessageParams{"maxSizeKb": maxSize / 1024}))
 		return
 	}
 
@@ -100,19 +111,23 @@ func SaveImgByGinContext(c *gin.Context) {
 	allowedExts := postingConfig.UploadControl.AuthorizedExtensions
 	if len(allowedExts) > 0 {
 		if !isAllowedExtension(ext, allowedExts) {
-			c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("不支持的文件格式，允许的格式为: %s", strings.Join(allowedExts, ", "))))
+			extensions := strings.Join(allowedExts, ", ")
+			c.JSON(http.StatusBadRequest, component.FailDataCode(
+				component.MessageUploadUnsupportedExt,
+
+				component.MessageParams{"extensions": extensions}))
 			return
 		}
 	} else {
 		if _, err = filedata.CheckImageType(file.Filename); err != nil {
-			c.JSON(http.StatusBadRequest, component.FailData("不支持的图片格式，仅支持 JPG、PNG、GIF、WebP、BMP 格式"))
+			c.JSON(http.StatusBadRequest, component.FailDataCode(component.MessageUploadUnsupportedImage, nil))
 			return
 		}
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, component.FailData("文件读取失败，请重试"))
+		c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageUploadReadFailed, nil))
 		return
 	}
 	defer src.Close()
@@ -121,21 +136,24 @@ func SaveImgByGinContext(c *gin.Context) {
 	n, _ := io.ReadFull(src, header)
 	if n > 0 {
 		if !isValidImageContent(header[:n]) {
-			c.JSON(http.StatusBadRequest, component.FailData("文件内容不是有效的图片格式"))
+			c.JSON(http.StatusBadRequest, component.FailDataCode(component.MessageUploadInvalidImage, nil))
 			return
 		}
 	}
 
 	remainingData, err := io.ReadAll(io.LimitReader(src, maxSize-int64(n)))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, component.FailData("文件内容读取失败"))
+		c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageUploadContentReadFailed, nil))
 		return
 	}
 
 	fileData := append(header[:n], remainingData...)
 
 	if int64(len(fileData)) > maxSize {
-		c.JSON(http.StatusBadRequest, component.FailData(fmt.Sprintf("文件大小超过限制，最大允许%dKB", maxSize/1024)))
+		c.JSON(http.StatusBadRequest, component.FailDataCode(
+			component.MessageUploadFileTooLarge,
+
+			component.MessageParams{"maxSizeKb": maxSize / 1024}))
 		return
 	}
 
@@ -143,16 +161,18 @@ func SaveImgByGinContext(c *gin.Context) {
 
 	entity, err := filedata.SaveFileFromUpload(userId, fileData, file.Filename, folderName)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, component.FailData(fmt.Sprintf("文件保存失败: %s", err.Error())))
+		c.JSON(http.StatusInternalServerError, component.FailDataCode(
+			component.MessageUploadSaveFailed,
+
+			component.MessageParams{"error": err.Error()}))
 		return
 	}
 
-	c.JSON(http.StatusOK, component.SuccessData(map[string]any{
+	c.JSON(http.StatusOK, component.SuccessDataCode(map[string]any{
 		"url":      entity.GetAccessPath(),
 		"filename": file.Filename,
 		"size":     len(fileData),
-		"message":  "图片上传成功",
-	}))
+	}, component.MessageUploadSuccess, nil))
 }
 
 // isValidImageContent checks common image file signatures.

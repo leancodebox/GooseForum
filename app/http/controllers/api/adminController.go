@@ -63,7 +63,7 @@ func GetTrafficOverview(req component.BetterRequest[TrafficOverviewReq]) compone
 
 	stats, err := dailyStats.GetStatsInRange(keys, startDate, endDate)
 	if err != nil {
-		return component.FailResponse("获取统计数据失败")
+		return component.FailResponseCode(component.MessageAdminStatsFetchFailed, nil)
 	}
 
 	// 按日期分组
@@ -216,17 +216,17 @@ func SaveBadge(req component.BetterRequest[BadgeSaveReq]) component.Response {
 	params.Code = strings.TrimSpace(params.Code)
 	params.Name = strings.TrimSpace(params.Name)
 	if params.Name == "" {
-		return component.FailResponse("徽章名称不能为空")
+		return component.FailResponseCode(component.MessageAdminBadgeNameRequired, nil)
 	}
 	if params.Type == "" {
 		params.Type = badges.TypeCustom
 	}
 	if params.Type != badges.TypeSystem && params.Type != badges.TypeCustom {
-		return component.FailResponse("徽章类型不合法")
+		return component.FailResponseCode(component.MessageAdminBadgeTypeInvalid, nil)
 	}
 	if params.Code == "" {
 		if params.Type == badges.TypeSystem {
-			return component.FailResponse("系统徽章编码不能为空")
+			return component.FailResponseCode(component.MessageAdminBadgeCodeRequired, nil)
 		}
 		params.Code = generateCustomBadgeCode()
 	}
@@ -234,7 +234,7 @@ func SaveBadge(req component.BetterRequest[BadgeSaveReq]) component.Response {
 		params.GrantMode = badges.GrantModeManual
 	}
 	if params.GrantMode != badges.GrantModeAuto && params.GrantMode != badges.GrantModeManual {
-		return component.FailResponse("授予方式不合法")
+		return component.FailResponseCode(component.MessageAdminBadgeGrantModeInvalid, nil)
 	}
 	if params.IconType == "" {
 		params.IconType = badges.IconTypeAsset
@@ -242,7 +242,7 @@ func SaveBadge(req component.BetterRequest[BadgeSaveReq]) component.Response {
 	if params.Type == badges.TypeSystem {
 		systemBadge := badgeservice.ResolveOne(params.Code)
 		if systemBadge.Code == "" || systemBadge.Type != badges.TypeSystem {
-			return component.FailResponse("系统徽章不存在")
+			return component.FailResponseCode(component.MessageAdminBadgeSystemNotFound, nil)
 		}
 		params.GrantMode = systemBadge.GrantMode
 	}
@@ -263,11 +263,11 @@ func SaveBadge(req component.BetterRequest[BadgeSaveReq]) component.Response {
 	entity.IsEnabled = params.IsEnabled
 	entity.SortOrder = params.SortOrder
 	if err := badges.Save(&entity); err != nil {
-		return component.FailResponse("保存徽章失败")
+		return component.FailResponseCode(component.MessageAdminBadgeSaveFailed, nil)
 	}
 	badgeservice.InvalidateDefinitions()
 	usercardservice.Clear()
-	return component.SuccessResponse("success")
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
 type BadgeDeleteReq struct {
@@ -277,18 +277,18 @@ type BadgeDeleteReq struct {
 func DeleteBadge(req component.BetterRequest[BadgeDeleteReq]) component.Response {
 	code := strings.TrimSpace(req.Params.Code)
 	if code == "" {
-		return component.FailResponse("徽章编码不能为空")
+		return component.FailResponseCode(component.MessageAdminBadgeCodeRequired, nil)
 	}
 	badge := badgeservice.ResolveOne(code)
 	if badge.Type == badges.TypeSystem {
-		return component.FailResponse("系统默认徽章不可删除")
+		return component.FailResponseCode(component.MessageAdminBadgeSystemDeleteBlock, nil)
 	}
 	if err := badges.DeleteByCode(code); err != nil {
-		return component.FailResponse("删除徽章失败")
+		return component.FailResponseCode(component.MessageAdminBadgeDeleteFailed, nil)
 	}
 	badgeservice.InvalidateDefinitions()
 	usercardservice.Clear()
-	return component.SuccessResponse("success")
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
 type UserBadgeOptionsReq struct {
@@ -315,7 +315,7 @@ type SaveUserBadgesReq struct {
 func SaveUserBadges(req component.BetterRequest[SaveUserBadgesReq]) component.Response {
 	userID := req.Params.UserId
 	if userID == 0 {
-		return component.FailResponse("用户不存在")
+		return component.FailResponseCode(component.MessageUserNotFound, nil)
 	}
 	allowed := lo.KeyBy(badgeservice.ManualGrantBadgesForAdmin(), func(item badgeservice.Badge) string { return item.Code })
 	nextCodes := lo.Uniq(req.Params.BadgeCodes)
@@ -336,7 +336,7 @@ func SaveUserBadges(req component.BetterRequest[SaveUserBadgesReq]) component.Re
 		}
 	}
 	usercardservice.Invalidate(userID)
-	return component.SuccessResponse("success")
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
 type EditUserReq struct {
@@ -350,7 +350,7 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 	params := req.Params
 	user, err := users.Get(params.UserId)
 	if err != nil || user.Id == 0 {
-		return component.FailResponse("目标用户查询失败")
+		return component.FailResponseCode(component.MessageAdminTargetUserFetchFailed, nil)
 	}
 	opt := false
 	msg := "用户编辑"
@@ -373,7 +373,7 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 		users.Save(&user)
 		optlogger.UserOpt(req.UserId, optlogger.EditUser, user.Id, msg)
 	}
-	return component.SuccessResponse("success")
+	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
 type ArticlesListReq struct {
@@ -475,7 +475,7 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 func ArticleSource(req component.BetterRequest[ArticleSourceReq]) component.Response {
 	article := articles.Get(req.Params.Id)
 	if article.Id == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
 	return component.SuccessResponse(ArticleSourceVo{
@@ -512,14 +512,14 @@ type EditArticleCategoriesReq struct {
 func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response {
 	article := articles.Get(req.Params.Id)
 	if article.Id == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
 	// 更新文章状态
 	article.ProcessStatus = req.Params.ProcessStatus
 	err := articles.Save(&article)
 	if err != nil {
-		return component.FailResponse("操作失败")
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 
 	// 记录操作日志
@@ -530,58 +530,58 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
 		fmt.Sprintf("文章%s操作:[%s]", status, article.Title))
 	searchservice.BuildSingleArticleSearchDocument(&article)
-	return component.SuccessResponse("操作成功")
+	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
 func EditArticlePin(req component.BetterRequest[EditArticlePinReq]) component.Response {
 	article := articles.Get(req.Params.Id)
 	if article.Id == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 	if article.PinWeight == req.Params.PinWeight {
-		return component.SuccessResponse("操作成功")
+		return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 	}
 	oldPinWeight := article.PinWeight
 	if err := articles.UpdatePinWeight(article.Id, req.Params.PinWeight); err != nil {
-		return component.FailResponse("操作失败")
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	hotdataserve.ClearArticleListCache()
 	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
 		fmt.Sprintf("文章置顶权重调整:[%s] %d -> %d", article.Title, oldPinWeight, req.Params.PinWeight))
-	return component.SuccessResponse("操作成功")
+	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
 // EditArticleCategories 文章分类管理
 func EditArticleCategories(req component.BetterRequest[EditArticleCategoriesReq]) component.Response {
 	categoryIds := lo.Uniq(req.Params.CategoryId)
 	if len(categoryIds) == 0 {
-		return component.FailResponse("至少选择一个分类")
+		return component.FailResponseCode(component.MessageAdminCategorySelectRequired, nil)
 	}
 	if len(categoryIds) > 3 {
-		return component.FailResponse("最多选择 3 个分类")
+		return component.FailResponseCode(component.MessageAdminCategorySelectTooMany, nil)
 	}
 	for _, categoryId := range categoryIds {
 		if categoryId == 0 || articleCategory.Get(categoryId).Id == 0 {
-			return component.FailResponse("分类不存在")
+			return component.FailResponseCode(component.MessageAdminCategoryNotFound, nil)
 		}
 	}
 
 	article := articles.Get(req.Params.Id)
 	if article.Id == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
 	oldCategoryIds := append([]uint64(nil), article.CategoryId...)
 	article.CategoryId = categoryIds
 	if err := articles.Save(&article); err != nil {
-		return component.FailResponse("操作失败")
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 
 	syncArticleCategoryRelations(article.Id, categoryIds)
 	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
 		fmt.Sprintf("文章分类调整:[%s] %v -> %v", article.Title, oldCategoryIds, categoryIds))
 	searchservice.BuildSingleArticleSearchDocument(&article)
-	return component.SuccessResponse("操作成功")
+	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
 func syncArticleCategoryRelations(articleId uint64, categoryIds []uint64) {
@@ -730,7 +730,7 @@ type RoleSaveDel struct {
 func RoleDel(req component.BetterRequest[RoleSaveDel]) component.Response {
 	roleEntity := role.Get(req.Params.Id)
 	if roleEntity.Id == 0 {
-		return component.FailResponse("角色不存在")
+		return component.FailResponseCode(component.MessageAdminRoleNotFound, nil)
 	}
 	rsList := rolePermissionRs.GetRsByRoleId(roleEntity.Id)
 	// 删除
@@ -816,12 +816,12 @@ type CategorySaveReq struct {
 // SaveCategory 保存分类
 func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Response {
 	if len(strings.TrimSpace(req.Params.Category)) == 0 {
-		return component.FailResponse("分类名称不能为空")
+		return component.FailResponseCode(component.MessageAdminCategoryRequired, nil)
 	}
 
 	entity := articleCategory.Get(req.Params.Id)
 	if req.Params.Id != 0 && entity.Id == 0 {
-		return component.FailResponse("数据不存在")
+		return component.FailResponseCode(component.MessageAdminCategoryDataNotFound, nil)
 	}
 	entity.Category = req.Params.Category
 	entity.Desc = req.Params.Desc
@@ -839,45 +839,20 @@ func DeleteCategory(req component.BetterRequest[struct {
 }]) component.Response {
 	entity := articleCategory.Get(req.Params.Id)
 	if entity.Id == 0 {
-		return component.FailResponse("分类不存在")
+		return component.FailResponseCode(component.MessageAdminCategoryNotFound, nil)
 	}
 	if articleCategory.Count() == 1 {
-		return component.FailResponse("至少保留1个分类")
+		return component.FailResponseCode(component.MessageAdminCategoryKeepOne, nil)
 	}
 	if articleCategoryRs.GetOneByCategoryId(entity.Id).Id > 0 {
-		return component.FailResponse("当前分类存在有效文章")
+		return component.FailResponseCode(component.MessageAdminCategoryHasArticles, nil)
 	}
 	articleCategory.DeleteEntity(&entity)
 	return component.SuccessResponse(true)
 }
 
 func GetFriendLinks(req component.BetterRequest[component.Null]) component.Response {
-	lItem := pageConfig.LinkItem{
-		Name:    "GooseForum",
-		Desc:    "简单的社区构建软件 / Easy forum software for building friendly communities.",
-		Url:     "https://gooseforum.online",
-		LogoUrl: "/static/pic/default-avatar.webp",
-	}
-	res := pageConfig.GetConfigByPageType(pageConfig.FriendShipLinks, []pageConfig.FriendLinksGroup{
-		{
-			Name:  "community",
-			Emoji: "👥",
-			Color: "#3b82f6",
-			Links: []pageConfig.LinkItem{lItem},
-		},
-		{
-			Name:  "blog",
-			Emoji: "✍️",
-			Color: "#22c55e",
-			Links: []pageConfig.LinkItem{lItem},
-		},
-		{
-			Name:  "tool",
-			Emoji: "🛠️",
-			Color: "#a855f7",
-			Links: []pageConfig.LinkItem{lItem},
-		},
-	})
+	res := pageConfig.GetConfigByPageType(pageConfig.FriendShipLinks, defaultconfig.GetDefaultFriendLinksConfig())
 	normalizeFriendLinks(res)
 	return component.SuccessResponse(res)
 }
@@ -902,7 +877,7 @@ func normalizeFriendLinks(groups []pageConfig.FriendLinksGroup) {
 
 // GetSponsors 获取赞助商配置
 func GetSponsors(req component.BetterRequest[component.Null]) component.Response {
-	res := pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, defaultSponsorsConfig())
+	res := pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, defaultconfig.GetDefaultSponsorsConfig())
 	fillSponsorsConfigDefaults(&res)
 	return component.SuccessResponse(res)
 }
@@ -918,34 +893,8 @@ func SaveSponsors(req component.BetterRequest[SaveSponsorsReq]) component.Respon
 	return savePageConfig(pageConfig.SponsorsPage, config, hotdataserve.ClearSponsorsConfigCache)
 }
 
-func defaultSponsorsConfig() pageConfig.SponsorsConfig {
-	return pageConfig.SponsorsConfig{
-		Sponsors: pageConfig.Sponsors{
-			Level0: []pageConfig.SponsorItem{},
-			Level1: []pageConfig.SponsorItem{},
-			Level2: []pageConfig.SponsorItem{},
-			Level3: []pageConfig.SponsorItem{},
-		},
-		Content: pageConfig.SponsorsPageIntro{
-			Title:       "赞助",
-			Description: "感谢这些赞助者帮助 GooseForum 持续变好。",
-		},
-		Contact: pageConfig.SponsorsContact{
-			Title:       "成为赞助者",
-			Description: "支持社区建设，赞助者可展示在赞助页，并获得更醒目的社区露出。",
-			ButtonText:  "联系我们",
-			ButtonLink:  "mailto:contact@gooseforum.online",
-		},
-		Rules: []pageConfig.SponsorsRule{
-			{Content: "链接需稳定可访问。"},
-			{Content: "内容需适合公开社区展示。"},
-			{Content: "头像或 Logo 建议保持清晰。"},
-		},
-	}
-}
-
 func fillSponsorsConfigDefaults(config *pageConfig.SponsorsConfig) {
-	defaultConfig := defaultSponsorsConfig()
+	defaultConfig := defaultconfig.GetDefaultSponsorsConfig()
 	if config.Sponsors.Level0 == nil {
 		config.Sponsors.Level0 = []pageConfig.SponsorItem{}
 	}
@@ -1024,33 +973,37 @@ type TestMailConnectionReq struct {
 }
 
 type TestMailConnectionResp struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
+	Success     bool                    `json:"success"`
+	MessageCode component.MessageCode   `json:"messageCode"`
+	Params      component.MessageParams `json:"params,omitempty"`
 }
 
 // TestMailConnection 测试邮件连接
 func TestMailConnection(req component.BetterRequest[TestMailConnectionReq]) component.Response {
 	if req.Params.TestEmail == "" {
-		return component.FailResponse("请输入测试邮箱地址")
+		return component.FailResponseCode(component.MessageAdminTestEmailRequired, nil)
 	}
 
 	err := mailservice.SendTestEmailWithConfig(req.Params.Settings, req.Params.TestEmail)
 	if err != nil {
+		errText := err.Error()
 		return component.SuccessResponse(TestMailConnectionResp{
-			Success: false,
-			Message: fmt.Sprintf("邮件测试失败: %v", err),
+			Success:     false,
+			MessageCode: component.MessageAdminTestEmailFailed,
+			Params:      component.MessageParams{"error": errText},
 		})
 	}
 
 	return component.SuccessResponse(TestMailConnectionResp{
-		Success: true,
-		Message: "邮件配置测试成功！测试邮件已发送到 " + req.Params.TestEmail,
+		Success:     true,
+		MessageCode: component.MessageAdminTestEmailSuccess,
+		Params:      component.MessageParams{"email": req.Params.TestEmail},
 	})
 }
 
 // GetAnnouncement 获取公告设置
 func GetAnnouncement(req component.BetterRequest[component.Null]) component.Response {
-	config := pageConfig.GetConfigByPageType(pageConfig.Announcement, pageConfig.AnnouncementConfig{})
+	config := pageConfig.GetConfigByPageType(pageConfig.Announcement, defaultconfig.GetDefaultAnnouncementConfig())
 	return component.SuccessResponse(config)
 }
 

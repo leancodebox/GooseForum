@@ -191,11 +191,14 @@ GooseForum/
 ## 🛡 Admin Features
 
 ```bash
-# Reset admin password
-./GooseForum user:manage
+# Grant administrator role
+./GooseForum set-user-admin <userId>
 
 # Set user email
-./GooseForum user:set-email <email>
+./GooseForum set-user-email <userId> <email>
+
+# Set user password
+./GooseForum set-user-password <userId> <password>
 ```
 
 ### Admin Panel Features

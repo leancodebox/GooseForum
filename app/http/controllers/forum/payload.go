@@ -12,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
+	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
@@ -1263,6 +1264,7 @@ func buildLinksMeta(c *gin.Context) PageMeta {
 }
 
 func buildSponsorsPageProps(config pageConfig.SponsorsConfig) SponsorsPageProps {
+	defaultConfig := defaultconfig.GetDefaultSponsorsConfig()
 	sections := []SponsorSectionPayload{
 		{Key: "diamond", Label: "Diamond Partners", Tone: "diamond", Sponsors: buildSponsorPayloads(config.Sponsors.Level0)},
 		{Key: "gold", Label: "Gold Sponsors", Tone: "gold", Sponsors: buildSponsorPayloads(config.Sponsors.Level1)},
@@ -1282,14 +1284,14 @@ func buildSponsorsPageProps(config pageConfig.SponsorsConfig) SponsorsPageProps 
 		Sections:   visibleSections,
 		TotalCount: total,
 		Content: SponsorsPageIntroPayload{
-			Title:       sponsorText(config.Content.Title, "赞助"),
-			Description: sponsorText(config.Content.Description, "感谢这些赞助者帮助 GooseForum 持续变好。"),
+			Title:       sponsorText(config.Content.Title, defaultConfig.Content.Title),
+			Description: sponsorText(config.Content.Description, defaultConfig.Content.Description),
 		},
 		Contact: SponsorsContactPayload{
-			Title:       sponsorText(config.Contact.Title, "成为赞助者"),
-			Description: sponsorText(config.Contact.Description, "支持社区建设，赞助者可展示在赞助页，并获得更醒目的社区露出。"),
-			ButtonText:  sponsorText(config.Contact.ButtonText, "联系我们"),
-			ButtonLink:  sponsorText(config.Contact.ButtonLink, "mailto:contact@gooseforum.online"),
+			Title:       sponsorText(config.Contact.Title, defaultConfig.Contact.Title),
+			Description: sponsorText(config.Contact.Description, defaultConfig.Contact.Description),
+			ButtonText:  sponsorText(config.Contact.ButtonText, defaultConfig.Contact.ButtonText),
+			ButtonLink:  sponsorText(config.Contact.ButtonLink, defaultConfig.Contact.ButtonLink),
 		},
 		Rules: buildSponsorsRules(config.Rules),
 	}
@@ -1304,11 +1306,7 @@ func sponsorText(value string, fallback string) string {
 
 func buildSponsorsRules(items []pageConfig.SponsorsRule) []SponsorsRulePayload {
 	if len(items) == 0 {
-		items = []pageConfig.SponsorsRule{
-			{Content: "链接需稳定可访问。"},
-			{Content: "内容需适合公开社区展示。"},
-			{Content: "头像或 Logo 建议保持清晰。"},
-		}
+		items = defaultconfig.GetDefaultSponsorsConfig().Rules
 	}
 	res := make([]SponsorsRulePayload, 0, len(items))
 	for _, item := range items {

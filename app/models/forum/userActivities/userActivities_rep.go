@@ -35,19 +35,6 @@ func Record(userId uint64, action ActionType, subjectType string, subjectId uint
 	return builder().Create(entity).Error
 }
 
-// RecordWithTime 记录一条带有指定时间的用户行为（用于数据修复）
-func RecordWithTime(userId uint64, action ActionType, subjectType string, subjectId uint64, preview string, t time.Time) error {
-	entity := &Entity{
-		UserId:         userId,
-		Action:         int(action),
-		SubjectType:    subjectType,
-		SubjectId:      subjectId,
-		ContentPreview: preview,
-		CreatedAt:      t,
-	}
-	return builder().Create(entity).Error
-}
-
 // GetUserTimeline 获取用户的动态时间轴（基于主键的分页）
 func GetUserTimeline(userId uint64, lastId uint64, limit int) (entities []*Entity, err error) {
 	db := builder().Where("user_id = ?", userId)
@@ -57,19 +44,5 @@ func GetUserTimeline(userId uint64, lastId uint64, limit int) (entities []*Entit
 	err = db.Order("id DESC").
 		Limit(limit).
 		Find(&entities).Error
-	return
-}
-
-type ActionCount struct {
-	Action int
-	Count  int64
-}
-
-func CountActionsByUser(userId uint64) (items []ActionCount) {
-	builder().
-		Select("action, count(*) as count").
-		Where("user_id = ?", userId).
-		Group("action").
-		Find(&items)
 	return
 }

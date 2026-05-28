@@ -48,7 +48,7 @@ function notificationIcon(item: NotificationPayload) {
 function notificationText(item: NotificationPayload) {
   if (item.eventType === 'badge') {
     return item.payload.metadata?.badgeName
-      ? `获得了「${item.payload.metadata.badgeName}」徽章`
+      ? t('notifications.badgeEarned', { badge: item.payload.metadata.badgeName })
       : item.content || item.payload.content || t('notifications.fallback')
   }
   if (item.eventType === 'follow') {

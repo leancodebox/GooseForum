@@ -122,7 +122,7 @@ async function handleRegister() {
   error.value = ''
   try {
     const message = await register(registerForm.username, registerForm.email, registerForm.password, captchaId.value, registerForm.captcha)
-    queueFlashMessage(message || t('auth.validation.registerSuccess'), message.includes('邮箱') || message.includes('验证') ? 'info' : 'success')
+    queueFlashMessage(message || t('auth.validation.registerSuccess'), 'success')
     window.location.href = homeUrl.value
   } catch (err) {
     error.value = errorMessage(err, t('auth.validation.registerFailed'))
@@ -173,7 +173,7 @@ function errorMessage(err: unknown, fallback: string) {
         :class="{ 'bg-gray-900 text-white hover:bg-gray-900 hover:text-white': locale === item }"
         @click="switchLocale(item)"
       >
-        {{ item === 'zh' ? '中' : item === 'en' ? 'EN' : '日' }}
+        {{ t(`locale.short.${item}`) }}
       </button>
     </div>
 

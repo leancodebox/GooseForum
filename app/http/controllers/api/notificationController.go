@@ -27,11 +27,11 @@ type MarkAsReadReq struct {
 func MarkAsRead(req component.BetterRequest[MarkAsReadReq]) component.Response {
 	err := eventNotification.MarkAsRead(req.Params.NotificationId, req.UserId)
 	if err != nil {
-		return component.FailResponse("标记已读失败")
+		return component.FailResponseCode(component.MessageNotificationMarkReadFailed, nil)
 	}
 	unreadservice.Invalidate(req.UserId)
 
-	return component.SuccessResponse("标记已读成功")
+	return component.SuccessResponseCode("标记已读成功", component.MessageNotificationMarkReadSuccess, nil)
 }
 
 // MarkAllAsReadReq 标记所有通知已读请求
@@ -41,9 +41,9 @@ type MarkAllAsReadReq struct{}
 func MarkAllAsRead(req component.BetterRequest[MarkAllAsReadReq]) component.Response {
 	err := eventNotification.MarkAllAsRead(req.UserId)
 	if err != nil {
-		return component.FailResponse("标记全部已读失败")
+		return component.FailResponseCode(component.MessageNotificationMarkAllFailed, nil)
 	}
 	unreadservice.Invalidate(req.UserId)
 
-	return component.SuccessResponse("标记全部已读成功")
+	return component.SuccessResponseCode("标记全部已读成功", component.MessageNotificationMarkAllSuccess, nil)
 }

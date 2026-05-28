@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
 )
 
@@ -20,6 +22,14 @@ type EmailTask struct {
 	Username string `json:"username"`
 	Token    string `json:"token"`
 	Type     string `json:"type"`
+}
+
+var emailProcessor = struct {
+	once   sync.Once
+	stopCh chan struct{}
+	wg     sync.WaitGroup
+}{
+	stopCh: make(chan struct{}),
 }
 
 func init() {
@@ -49,59 +59,90 @@ func AddToQueue(task EmailTask) error {
 
 // StartEmailProcessor starts the background email queue worker.
 func StartEmailProcessor() {
-	go func() {
-		for {
-			tasks := taskQueue.GetPendingTasks(BatchSize)
-			if len(tasks) == 0 {
-				time.Sleep(time.Second * 5)
+	emailProcessor.once.Do(func() {
+		closer.Register(StopEmailProcessor)
+		emailProcessor.wg.Add(1)
+		go func() {
+			defer emailProcessor.wg.Done()
+			ticker := time.NewTicker(5 * time.Second)
+			defer ticker.Stop()
+
+			processPendingEmailTasks()
+
+			for {
+				select {
+				case <-ticker.C:
+					processPendingEmailTasks()
+				case <-emailProcessor.stopCh:
+					return
+				}
+			}
+		}()
+	})
+}
+
+// StopEmailProcessor stops the background email queue worker.
+func StopEmailProcessor() error {
+	select {
+	case <-emailProcessor.stopCh:
+	default:
+		close(emailProcessor.stopCh)
+	}
+	emailProcessor.wg.Wait()
+	return nil
+}
+
+func processPendingEmailTasks() {
+	for {
+		tasks := taskQueue.GetPendingTasks(BatchSize)
+		if len(tasks) == 0 {
+			return
+		}
+		slog.Debug("邮件队列拉取任务", "count", len(tasks))
+
+		for _, task := range tasks {
+			slog.Debug("邮件队列开始处理任务", "id", task.Id, "type", task.Type, "status", task.Status, "retryCount", task.RetryCount)
+			if err := taskQueue.UpdateStatus(task.Id, taskQueue.StatusRunning, nil); err != nil {
+				slog.Error("更新任务状态失败", "error", err)
 				continue
 			}
-			slog.Debug("邮件队列拉取任务", "count", len(tasks))
 
-			for _, task := range tasks {
-				slog.Debug("邮件队列开始处理任务", "id", task.Id, "type", task.Type, "status", task.Status, "retryCount", task.RetryCount)
-				if err := taskQueue.UpdateStatus(task.Id, taskQueue.StatusRunning, nil); err != nil {
-					slog.Error("更新任务状态失败", "error", err)
-					continue
-				}
+			var emailTask EmailTask
+			if err := json.Unmarshal([]byte(task.TaskJson), &emailTask); err != nil {
+				slog.Error("解析任务数据失败", "error", err)
+				taskQueue.UpdateStatus(task.Id, taskQueue.StatusFailed, err)
+				continue
+			}
 
-				var emailTask EmailTask
-				if err := json.Unmarshal([]byte(task.TaskJson), &emailTask); err != nil {
-					slog.Error("解析任务数据失败", "error", err)
-					taskQueue.UpdateStatus(task.Id, taskQueue.StatusFailed, err)
-					continue
-				}
-
-				err := processEmailTask(emailTask)
-				if err != nil {
-					slog.Error("处理邮件任务失败",
-						"id", task.Id,
-						"type", emailTask.Type,
-						"to", emailTask.To,
-						"retryCount", task.RetryCount,
-						"error", err,
-					)
-
-					if task.RetryCount < MaxRetries {
-						taskQueue.IncrementRetryCount(task.Id)
-						taskQueue.UpdateStatus(task.Id, taskQueue.StatusRetrying, err)
-						time.Sleep(RetryInterval)
-						continue
-					}
-
-					taskQueue.UpdateStatus(task.Id, taskQueue.StatusFailed, err)
-					continue
-				}
-
-				taskQueue.UpdateStatus(task.Id, taskQueue.StatusSuccess, nil)
-				slog.Info("邮件发送成功",
+			err := processEmailTask(emailTask)
+			if err != nil {
+				slog.Error("处理邮件任务失败",
 					"id", task.Id,
 					"type", emailTask.Type,
 					"to", emailTask.To,
+					"retryCount", task.RetryCount,
+					"error", err,
 				)
+
+				if task.RetryCount < MaxRetries {
+					taskQueue.IncrementRetryCount(task.Id)
+					taskQueue.UpdateStatus(task.Id, taskQueue.StatusRetrying, err)
+					time.Sleep(RetryInterval)
+					continue
+				}
+
+				taskQueue.UpdateStatus(task.Id, taskQueue.StatusFailed, err)
+				continue
 			}
+
+			taskQueue.UpdateStatus(task.Id, taskQueue.StatusSuccess, nil)
+			slog.Info("邮件发送成功",
+				"id", task.Id,
+				"type", emailTask.Type,
+				"to", emailTask.To,
+			)
 		}
-	}()
+	}
 }
 
 // processEmailTask dispatches an email task by type.

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { MessageSquare, Search, Sparkles, UsersRound } from '@lucide/vue'
 import { formatNumber, timeAgo } from '@/runtime/format'
 import { topicDescription } from '@/runtime/topic-description'
@@ -11,6 +12,7 @@ const page = defineProps<{
   layout: LayoutPayload
   props: SearchPageProps
 }>()
+const { t } = useI18n()
 
 const query = ref(page.props.query)
 const topics = computed(() => page.props.topics || [])
@@ -32,17 +34,17 @@ watch(
           <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div class="min-w-0">
               <div class="flex items-center gap-2">
-                <h1 class="text-2xl font-bold text-gray-950">搜索</h1>
-                <span class="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-bold uppercase text-gray-600">Discover</span>
+                <h1 class="text-2xl font-bold text-gray-950">{{ t('searchPage.title') }}</h1>
+                <span class="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-bold uppercase text-gray-600">{{ t('searchPage.label') }}</span>
               </div>
               <p class="mt-1 text-sm text-gray-500">
                 <template v-if="hasQuery">
                   “<span class="font-semibold text-gray-900">{{ page.props.query }}</span>”
                   <span class="text-gray-300"> · </span>
-                  <span><span class="font-semibold text-gray-900">{{ formatNumber(page.props.total) }}</span> 个结果</span>
+                  <span>{{ t('searchPage.resultCount', { count: formatNumber(page.props.total) }) }}</span>
                 </template>
                 <template v-else>
-                  搜索主题、关键词和社区讨论。
+                  {{ t('searchPage.emptyPrompt') }}
                 </template>
               </p>
             </div>
@@ -50,8 +52,8 @@ watch(
             <form action="/search" method="GET" class="w-full lg:max-w-xl">
               <label class="flex h-11 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-500 transition focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
                 <Search class="h-4 w-4 shrink-0" />
-                <input v-model="query" name="q" class="min-w-0 flex-1 bg-transparent text-gray-900 outline-none placeholder:text-gray-400" placeholder="搜索主题..." />
-                <button type="submit" class="shrink-0 rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800">搜索</button>
+                <input v-model="query" name="q" class="min-w-0 flex-1 bg-transparent text-gray-900 outline-none placeholder:text-gray-400" :placeholder="t('searchPage.inputPlaceholder')" />
+                <button type="submit" class="shrink-0 rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800">{{ t('common.search') }}</button>
               </label>
             </form>
           </div>
@@ -59,11 +61,11 @@ watch(
 
         <template v-if="hasResults">
           <div class="hidden grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] border-b border-gray-100 bg-gray-50/60 px-4 py-2 text-[11px] font-bold uppercase text-gray-600 lg:grid">
-            <div>Topic</div>
-            <div class="text-center">Users</div>
-            <div class="text-center">Replies</div>
-            <div class="text-center">Views</div>
-            <div class="text-right">Activity</div>
+            <div>{{ t('topicList.columns.topic') }}</div>
+            <div class="text-center">{{ t('topicList.columns.users') }}</div>
+            <div class="text-center">{{ t('topicList.columns.replies') }}</div>
+            <div class="text-center">{{ t('topicList.columns.views') }}</div>
+            <div class="text-right">{{ t('topicList.columns.activity') }}</div>
           </div>
 
           <div class="relative bg-white">
@@ -132,7 +134,7 @@ watch(
 
           <footer v-if="page.props.totalPages > 1" class="flex flex-col gap-3 border-t border-gray-100 bg-gray-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="text-sm text-gray-500">
-              第 <span class="font-semibold text-gray-900">{{ page.props.pagination.page }}</span> / <span class="font-semibold text-gray-900">{{ page.props.totalPages }}</span> 页
+              {{ t('common.page', { page: page.props.pagination.page, total: page.props.totalPages }) }}
             </div>
             <div class="flex items-center gap-2">
               <a
@@ -140,7 +142,7 @@ watch(
                 :href="`/search?q=${encodeURIComponent(page.props.query)}&page=${page.props.pagination.page - 1}`"
                 class="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-950"
               >
-                上一页
+                {{ t('common.previousPage') }}
               </a>
               <a
                 v-if="page.props.pagination.hasNext"
@@ -148,7 +150,7 @@ watch(
                 class="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 hover:text-gray-950"
                 rel="next"
               >
-                下一页
+                {{ t('common.nextPage') }}
               </a>
             </div>
           </footer>
@@ -156,14 +158,14 @@ watch(
 
         <div v-else-if="hasQuery" class="px-6 py-16 text-center">
           <UsersRound class="mx-auto h-8 w-8 text-gray-300" />
-          <h2 class="mt-3 text-base font-semibold text-gray-950">没有找到结果</h2>
-          <p class="mt-1 text-sm text-gray-500">换个关键词，或者缩短搜索词再试试。</p>
+          <h2 class="mt-3 text-base font-semibold text-gray-950">{{ t('searchPage.noResultsTitle') }}</h2>
+          <p class="mt-1 text-sm text-gray-500">{{ t('searchPage.noResultsDescription') }}</p>
         </div>
 
         <div v-else class="px-6 py-16 text-center">
           <Search class="mx-auto h-8 w-8 text-gray-300" />
-          <h2 class="mt-3 text-base font-semibold text-gray-950">开始搜索</h2>
-          <p class="mt-1 text-sm text-gray-500">输入主题标题、关键词或短语来搜索论坛。</p>
+          <h2 class="mt-3 text-base font-semibold text-gray-950">{{ t('searchPage.startTitle') }}</h2>
+          <p class="mt-1 text-sm text-gray-500">{{ t('searchPage.startDescription') }}</p>
         </div>
       </section>
     </main>

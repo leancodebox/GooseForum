@@ -58,7 +58,7 @@ var sponsorsConfigCache = &datacache.Cache[pageConfig.SponsorsConfig]{}
 
 func SponsorsConfigCache() pageConfig.SponsorsConfig {
 	data, _ := sponsorsConfigCache.GetOrLoadE("", func() (pageConfig.SponsorsConfig, error) {
-		return pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, pageConfig.SponsorsConfig{}), nil
+		return pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, defaultconfig.GetDefaultSponsorsConfig()), nil
 	}, time.Minute)
 	return data
 }
@@ -85,7 +85,7 @@ var announcementConfigCache = &datacache.Cache[pageConfig.AnnouncementConfig]{}
 
 func GetAnnouncementConfigCache() pageConfig.AnnouncementConfig {
 	data, _ := announcementConfigCache.GetOrLoadE("", func() (pageConfig.AnnouncementConfig, error) {
-		config := pageConfig.GetConfigByPageType(pageConfig.Announcement, pageConfig.AnnouncementConfig{})
+		config := pageConfig.GetConfigByPageType(pageConfig.Announcement, defaultconfig.GetDefaultAnnouncementConfig())
 		config.PrepareHTML()
 		return config, nil
 	}, time.Second*5)
@@ -138,9 +138,7 @@ var friendLinksConfigCache = &datacache.Cache[[]pageConfig.FriendLinksGroup]{}
 
 func GetFriendLinksConfigCache() []pageConfig.FriendLinksGroup {
 	data, _ := friendLinksConfigCache.GetOrLoadE("", func() ([]pageConfig.FriendLinksGroup, error) {
-		configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
-		res := jsonopt.Decode[[]pageConfig.FriendLinksGroup](configEntity.Config)
-		return res, nil
+		return pageConfig.GetConfigByPageType(pageConfig.FriendShipLinks, defaultconfig.GetDefaultFriendLinksConfig()), nil
 	}, time.Minute)
 	return data
 }

@@ -1,0 +1,16 @@
+{
+  "textControl": {
+    "minPostLength": 5,
+    "maxPostLength": 50000,
+    "minTitleLength": 5,
+    "maxTitleLength": 100,
+    "newUserPostCooldownMinutes": 0
+  },
+  "uploadControl": {
+    "allowAttachments": true,
+    "authorizedExtensions": [".jpg", ".jpeg", ".png", ".gif", ".webp"],
+    "maxAttachmentSizeKb": 5120,
+    "maxDailyUploadsPerUser": 10,
+    "newUserUploadCooldownMinutes": 1440
+  }
+}

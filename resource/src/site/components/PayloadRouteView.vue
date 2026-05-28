@@ -10,8 +10,14 @@ const props = defineProps<{
 
 const shellState = useShellState()
 const standaloneComponents = new Set(['auth.login', 'auth.resetPassword'])
+const stableViewComponents = new Set(['home.index', 'category.index', 'search.index'])
 const isStandalone = computed(() => standaloneComponents.has(props.page.payload.component))
 const hasRail = computed(() => props.page.payload.component === 'article.detail')
+const pageViewKey = computed(() => (
+  stableViewComponents.has(props.page.payload.component)
+    ? props.page.payload.component
+    : props.page.payload.url
+))
 </script>
 
 <template>
@@ -31,12 +37,14 @@ const hasRail = computed(() => props.page.payload.component === 'article.detail'
       :show-header-title="shellState.showHeaderTitle"
       :rail="hasRail"
     >
-      <component
-        :is="page.component"
-        :key="page.payload.url"
-        :layout="page.payload.layout"
-        :props="page.payload.props"
-      />
+      <Transition name="gf-page">
+        <component
+          :is="page.component"
+          :key="pageViewKey"
+          :layout="page.payload.layout"
+          :props="page.payload.props"
+        />
+      </Transition>
     </AppShell>
   </template>
 </template>

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -44,48 +43,72 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 
 	userEntity, err := req.GetUser()
 	if err != nil || userEntity.Id == 0 {
-		return component.FailResponse("获取用户信息失败")
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
 
 	// 统一权限检查
 	if err, _ := component.CheckUserPermission(&userEntity, "发帖"); err != nil {
-		return component.FailResponse(err.Error())
+		return component.FailResponseError(err)
 	}
 
 	if len(req.Params.Title) < postingConfig.TextControl.MinTitleLength {
-		return component.FailResponse(fmt.Sprintf("标题长度不能少于%d位", postingConfig.TextControl.MinTitleLength))
+		minLength := postingConfig.TextControl.MinTitleLength
+		return component.FailResponseCode(
+			component.MessageArticleTitleTooShort,
+
+			component.MessageParams{"minLength": minLength})
+
 	}
 
 	if len(req.Params.Title) > postingConfig.TextControl.MaxTitleLength {
-		return component.FailResponse(fmt.Sprintf("标题长度不能超过%d位", postingConfig.TextControl.MaxTitleLength))
+		maxLength := postingConfig.TextControl.MaxTitleLength
+		return component.FailResponseCode(
+			component.MessageArticleTitleTooLong,
+
+			component.MessageParams{"maxLength": maxLength})
+
 	}
 
 	if len(req.Params.Content) < postingConfig.TextControl.MinPostLength {
-		return component.FailResponse(fmt.Sprintf("正文长度不能少于%d位", postingConfig.TextControl.MinPostLength))
+		minLength := postingConfig.TextControl.MinPostLength
+		return component.FailResponseCode(
+			component.MessageArticleContentTooShort,
+
+			component.MessageParams{"minLength": minLength})
+
 	}
 
 	if len(req.Params.Content) > postingConfig.TextControl.MaxPostLength {
-		return component.FailResponse(fmt.Sprintf("正文长度不能超过%d位", postingConfig.TextControl.MaxPostLength))
+		maxLength := postingConfig.TextControl.MaxPostLength
+		return component.FailResponseCode(
+			component.MessageArticleContentTooLong,
+
+			component.MessageParams{"maxLength": maxLength})
+
 	}
 
 	// 检查新用户冷却时间
 	if postingConfig.TextControl.NewUserPostCooldownMinutes > 0 {
 		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.TextControl.NewUserPostCooldownMinutes) * time.Minute)
 		if time.Now().Before(cooldownTime) {
-			return component.FailResponse(fmt.Sprintf("新用户注册%d分钟后才能发帖，请在 %s 后再试",
-				postingConfig.TextControl.NewUserPostCooldownMinutes,
-				cooldownTime.Format("2006-01-02 15:04:05")))
+			minutes := postingConfig.TextControl.NewUserPostCooldownMinutes
+			availableAt := cooldownTime.Format("2006-01-02 15:04:05")
+			return component.FailResponseCode(
+				component.MessageArticlePostCooldown,
+
+				component.MessageParams{"minutes": minutes, "availableAt": availableAt})
+
 		}
 	}
 
 	if articles.CantWriteNew(req.UserId, 10) {
-		return component.FailResponse("您当天已发布较多，为保证质量，请明天再发布新文章")
+		return component.FailResponseCode(component.MessageArticleDailyLimit, nil)
 	}
 	var article articles.Entity
 	if req.Params.Id != 0 {
 		article = articles.Get(req.Params.Id)
 		if article.UserId != req.UserId {
-			return component.FailResponse("不要更改别人发出的帖子哦")
+			return component.FailResponseCode(component.MessageArticleOwnerMismatch, nil)
 		}
 	} else {
 		article.UserId = req.UserId
@@ -150,17 +173,17 @@ type ArticleStatusReq struct {
 func UpdateArticleStatus(req component.BetterRequest[ArticleStatusReq]) component.Response {
 	article := articles.Get(req.Params.Id)
 	if article.Id == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 	if article.UserId != req.UserId {
-		return component.FailResponse("不可操作")
+		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
 	}
 	if article.ArticleStatus == req.Params.ArticleStatus {
 		return component.SuccessResponse(true)
 	}
 	article.ArticleStatus = req.Params.ArticleStatus
 	if err := articles.Save(&article); err != nil {
-		return component.FailResponse("保存失败")
+		return component.FailResponseCode(component.MessageArticleSaveFailed, nil)
 	}
 	if article.ArticleStatus == 1 {
 		eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Article: &article})
@@ -180,40 +203,54 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 
 	userEntity, err := req.GetUser()
 	if err != nil || userEntity.Id == 0 {
-		return component.FailResponse("获取用户信息失败")
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
 	}
 
 	// 统一权限检查
 	if err, _ := component.CheckUserPermission(&userEntity, "评论"); err != nil {
-		return component.FailResponse(err.Error())
+		return component.FailResponseError(err)
 	}
 
 	content := strings.TrimSpace(req.Params.Content)
 	if len(content) < postingConfig.TextControl.MinPostLength {
-		return component.FailResponse(fmt.Sprintf("评论内容长度不能少于%d位", postingConfig.TextControl.MinPostLength))
+		minLength := postingConfig.TextControl.MinPostLength
+		return component.FailResponseCode(
+			component.MessageCommentContentTooShort,
+
+			component.MessageParams{"minLength": minLength})
+
 	}
 
 	if len(content) > postingConfig.TextControl.MaxPostLength {
-		return component.FailResponse(fmt.Sprintf("评论内容长度不能超过%d位", postingConfig.TextControl.MaxPostLength))
+		maxLength := postingConfig.TextControl.MaxPostLength
+		return component.FailResponseCode(
+			component.MessageCommentContentTooLong,
+
+			component.MessageParams{"maxLength": maxLength})
+
 	}
 
 	// 评论也受发帖冷却限制
 	if postingConfig.TextControl.NewUserPostCooldownMinutes > 0 {
 		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.TextControl.NewUserPostCooldownMinutes) * time.Minute)
 		if time.Now().Before(cooldownTime) {
-			return component.FailResponse(fmt.Sprintf("新用户注册%d分钟后才能发表内容，请在 %s 后再试",
-				postingConfig.TextControl.NewUserPostCooldownMinutes,
-				cooldownTime.Format("2006-01-02 15:04:05")))
+			minutes := postingConfig.TextControl.NewUserPostCooldownMinutes
+			availableAt := cooldownTime.Format("2006-01-02 15:04:05")
+			return component.FailResponseCode(
+				component.MessageCommentPostCooldown,
+
+				component.MessageParams{"minutes": minutes, "availableAt": availableAt})
+
 		}
 	}
 
 	articleEntity := articles.GetSimple(req.Params.ArticleId)
 	if articleEntity.Id == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
 	if req.Params.ReplyId > 0 && reply.Get(req.Params.ReplyId).Id == 0 {
-		return component.FailResponse("要回复的评论不存在")
+		return component.FailResponseCode(component.MessageCommentReplyTargetMissed, nil)
 	}
 
 	replyEntity := &reply.Entity{
@@ -227,7 +264,11 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 
 	err = reply.Create(replyEntity)
 	if err != nil {
-		return component.FailResponse("评论失败:" + err.Error())
+		return component.FailResponseCode(
+			component.MessageCommentCreateFailed,
+
+			component.MessageParams{"error": err.Error()})
+
 	}
 	userStatistics.WriteComment(req.UserId)
 	usercardservice.Invalidate(req.UserId)
@@ -270,19 +311,29 @@ func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 	replyEntity := reply.Get(req.Params.ReplyId)
 	if replyEntity.Id == 0 {
-		return component.FailResponse("回复不存在")
+		return component.FailResponseCode(component.MessageReplyNotFound, nil)
 	}
 	if replyEntity.UserId != req.UserId {
-		return component.FailResponse("不可操作")
+		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
 	}
 
 	content := strings.TrimSpace(req.Params.Content)
 	if len(content) < postingConfig.TextControl.MinPostLength {
-		return component.FailResponse(fmt.Sprintf("评论内容长度不能少于%d位", postingConfig.TextControl.MinPostLength))
+		minLength := postingConfig.TextControl.MinPostLength
+		return component.FailResponseCode(
+			component.MessageCommentContentTooShort,
+
+			component.MessageParams{"minLength": minLength})
+
 	}
 
 	if len(content) > postingConfig.TextControl.MaxPostLength {
-		return component.FailResponse(fmt.Sprintf("评论内容长度不能超过%d位", postingConfig.TextControl.MaxPostLength))
+		maxLength := postingConfig.TextControl.MaxPostLength
+		return component.FailResponseCode(
+			component.MessageCommentContentTooLong,
+
+			component.MessageParams{"maxLength": maxLength})
+
 	}
 
 	replyEntity.Content = content
@@ -290,7 +341,11 @@ func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response
 	replyEntity.RenderedVersion = markdown2html.GetCommentVersion()
 
 	if err := reply.Save(&replyEntity); err != nil {
-		return component.FailResponse("更新回复失败:" + err.Error())
+		return component.FailResponseCode(
+			component.MessageReplyUpdateFailed,
+
+			component.MessageParams{"error": err.Error()})
+
 	}
 
 	return component.SuccessResponse(map[string]any{
@@ -304,10 +359,10 @@ func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response
 func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response {
 	replyEntity := reply.Get(req.Params.ReplyId)
 	if replyEntity.Id == 0 {
-		return component.FailResponse("回复不存在")
+		return component.FailResponseCode(component.MessageReplyNotFound, nil)
 	}
 	if replyEntity.UserId != req.UserId {
-		return component.FailResponse("不可操作")
+		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
 	}
 	reply.DeleteEntity(&replyEntity)
 	articleEntity := articles.GetSimple(replyEntity.ArticleId)
@@ -353,7 +408,7 @@ type LikeArticleReq struct {
 func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response {
 	articleEntity := articles.Get(req.Params.Id)
 	if articleEntity.Id == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 	oldLike := articleLike.GetByArticleId(req.UserId, articleEntity.Id)
 	targetStatus := 0
@@ -407,7 +462,7 @@ type BookmarkArticleReq struct {
 func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.Response {
 	articleEntity := articles.Get(req.Params.Id)
 	if articleEntity.Id == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 	oldBookMark := articleBookmark.GetByArticleId(req.UserId, articleEntity.Id)
 	targetStatus := 0
@@ -439,7 +494,7 @@ type FollowUserReq struct {
 func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {
 	userEntity, _ := users.Get(req.Params.Id)
 	if userEntity.Id == 0 {
-		return component.FailResponse("用户不存在")
+		return component.FailResponseCode(component.MessageUserNotFound, nil)
 	}
 	userFollowEntity := userFollow.GetByUserId(req.UserId, req.Params.Id)
 	if userFollowEntity.Id == 0 {

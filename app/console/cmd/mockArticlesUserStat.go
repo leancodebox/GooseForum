@@ -14,7 +14,7 @@ import (
 
 func init() {
 	cmd := &cobra.Command{
-		Use:   "mockArticlesUserStat",
+		Use:   "mock-replies",
 		Short: "Mock replies for the last 1000 articles",
 		Run:   runMockArticlesUserStat,
 	}
@@ -70,7 +70,7 @@ func runMockArticlesUserStat(cmd *cobra.Command, args []string) {
 			resp := controllers.ArticleReply(req)
 
 			if resp.Code != 200 { // Assuming 200 is success code in component.Status or http.StatusOK
-				fmt.Printf("Error creating reply for article %d: %v\n", article.Id, resp.Data.Msg)
+				fmt.Printf("Error creating reply for article %d: %s\n", article.Id, resp.Data.MessageCode)
 			} else {
 				totalReplies++
 			}

@@ -48,8 +48,9 @@ export function installNavigation(initialPage: PreparedPage, routeComponent: Com
       navigation.setNavigating(false)
       return
     }
+    const url = new URL(to.fullPath, window.location.origin)
     onPage(loadedPage)
-    scrollAfterNavigation(new URL(to.fullPath, window.location.origin))
+    scrollAfterNavigation(url)
     navigation.setNavigating(false)
   })
 
@@ -101,7 +102,9 @@ export async function preparePayload(payload: PagePayload): Promise<PreparedPage
 
 function scrollAfterNavigation(url: URL) {
   if (!url.hash) {
-    window.scrollTo({ top: 0 })
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0 })
+    })
     return
   }
 

@@ -1,6 +1,7 @@
 export const motionDurations = {
   instant: 0.12,
   fast: 0.16,
+  content: 0.18,
   standard: 0.22,
   comfortable: 0.28,
 } as const
@@ -13,6 +14,10 @@ export const motionEase = {
 export const motionTransitions = {
   fast: {
     duration: motionDurations.fast,
+    ease: motionEase.standard,
+  },
+  content: {
+    duration: motionDurations.content,
     ease: motionEase.standard,
   },
   standard: {

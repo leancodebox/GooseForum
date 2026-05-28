@@ -154,26 +154,7 @@ func ExistEmail(email string) bool {
 	return builder().Select("1").Where("email = ?", email).Limit(1).Scan(&id).RowsAffected > 0
 }
 
-// GetAll 用于全量导出/修复数据，支持分页查询
-func GetAll(offset, limit int) ([]*EntityComplete, error) {
-	var entities []*EntityComplete
-	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
-	return entities, err
-}
-
-// GetCountGroupByDay 按天统计注册人数
-func GetCountGroupByDay() ([]map[string]any, error) {
-	var results []map[string]any
-	err := builder().Select("DATE(created_at) as date, count(*) as count").Group("date").Order("date ASC").Find(&results).Error
-	return results, err
-}
-
 func IncrementPrestige(addNumber int64, userId uint64) int64 {
 	result := builder().Exec("UPDATE users SET prestige = prestige+? where id = ?", addNumber, userId)
 	return result.RowsAffected
-}
-
-func QueryById(startId uint64, limit int) (entities []*EntityComplete) {
-	builder().Where(queryopt.Gt(pid, startId)).Limit(limit).Order(queryopt.Asc(pid)).Find(&entities)
-	return
 }

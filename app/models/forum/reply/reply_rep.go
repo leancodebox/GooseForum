@@ -32,29 +32,9 @@ func GetByIds(ids []uint64) (entities []*Entity) {
 	return
 }
 
-// GetAll 用于全量导出/修复数据，支持分页查询
-func GetAll(offset, limit int) ([]*Entity, error) {
-	var entities []*Entity
-	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
-	return entities, err
-}
-
 func QueryById(startId uint64, limit int) (entities []*Entity) {
 	builder().Where(queryopt.Gt(pid, startId)).Limit(limit).Order(queryopt.Asc(pid)).Find(&entities)
 	return
-}
-
-// GetCountGroupByDay 按天统计回复数
-func GetCountGroupByDay() ([]map[string]any, error) {
-	var results []map[string]any
-	err := builder().Select("DATE(created_at) as date, count(*) as count").Group("date").Order("date ASC").Find(&results).Error
-	return results, err
-}
-
-func GetCount() int64 {
-	var count int64
-	builder().Count(&count)
-	return count
 }
 
 func GetMaxId() uint64 {

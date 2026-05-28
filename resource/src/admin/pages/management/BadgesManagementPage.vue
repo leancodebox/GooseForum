@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Edit3, Plus, RefreshCw, Trash2 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -96,7 +97,7 @@ async function loadBadges() {
   try {
     badges.value = await getBadges()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '加载徽章失败'
+    error.value = err instanceof Error ? err.message : adminText('k0034')
   } finally {
     loading.value = false
   }
@@ -114,7 +115,7 @@ function openEdit(badge: AdminBadge) {
 
 async function submitBadge() {
   if (!form.name.trim()) {
-    adminToast.warning('徽章名称不能为空')
+    adminToast.warning(adminText('k0035'))
     return
   }
   saving.value = true
@@ -131,9 +132,9 @@ async function submitBadge() {
     })
     editing.value = null
     await loadBadges()
-    adminToast.success('保存成功')
+    adminToast.success(adminText('k000e'))
   } catch (err) {
-    adminToast.error(err, '保存徽章失败')
+    adminToast.error(err, adminText('k001d'))
   } finally {
     saving.value = false
   }
@@ -146,9 +147,9 @@ async function confirmDelete() {
     await deleteBadge(deletingBadge.value.code)
     deletingBadge.value = null
     await loadBadges()
-    adminToast.success('删除成功')
+    adminToast.success(adminText('k002u'))
   } catch (err) {
-    adminToast.error(err, '删除徽章失败')
+    adminToast.error(err, adminText('k001e'))
   } finally {
     deleting.value = false
   }
@@ -160,24 +161,24 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage title="徽章管理" description="管理系统默认徽章和自定义徽章。系统默认徽章只能编辑，不能删除。" sticky>
+  <BasicPage :title="adminText('k0058')" :description="adminText('k0059')" sticky>
     <template #actions>
       <div class="flex items-center gap-2">
         <Button variant="outline" type="button" @click="loadBadges">
           <RefreshCw class="size-4" />
-          刷新
+          {{ adminText('k004q') }}
         </Button>
         <Button type="button" @click="openCreate">
           <Plus class="size-4" />
-          新增徽章
+          {{ adminText('k005a') }}
         </Button>
       </div>
     </template>
 
       <div class="mb-3 flex flex-wrap gap-2 text-sm text-muted-foreground">
-        <Badge variant="secondary">系统默认 {{ stats.system }}</Badge>
-        <Badge variant="outline">自定义 {{ stats.custom }}</Badge>
-        <span v-if="loading">加载中...</span>
+        <Badge variant="secondary">{{ adminText('k00ba') }} {{ stats.system }}</Badge>
+        <Badge variant="outline">{{ adminText('k002n') }} {{ stats.custom }}</Badge>
+        <span v-if="loading">{{ adminText('k0046') }}</span>
       </div>
 
       <div v-if="error" class="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{{ error }}</div>
@@ -193,14 +194,14 @@ onMounted(() => {
               </span>
             </div>
             <div class="max-w-full truncate text-[10px] leading-4 text-muted-foreground">
-              {{ badge.grantMode === 'auto' ? '自动' : '手动' }} · {{ badge.isEnabled ? badge.level || 'bronze' : '停用' }}
+              {{ badge.grantMode === 'auto' ? adminText('k005b') : adminText('k005c') }} · {{ badge.isEnabled ? badge.level || 'bronze' : adminText('k005d') }}
             </div>
           </button>
           <div class="absolute right-0.5 top-0.5 flex gap-0.5 rounded-md bg-background/90 p-0.5 opacity-0 shadow-sm ring-1 ring-border transition-opacity group-hover:opacity-100">
-            <Button variant="ghost" size="icon-sm" title="编辑" type="button" @click="openEdit(badge)">
+            <Button variant="ghost" size="icon-sm" :title="adminText('k005j')" type="button" @click="openEdit(badge)">
               <Edit3 class="size-3.5" />
             </Button>
-            <Button v-if="badge.type !== 'system'" variant="ghost" size="icon-sm" class="text-destructive hover:text-destructive" title="删除" type="button" @click="deletingBadge = badge">
+            <Button v-if="badge.type !== 'system'" variant="ghost" size="icon-sm" class="text-destructive hover:text-destructive" :title="adminText('k005i')" type="button" @click="deletingBadge = badge">
               <Trash2 class="size-3.5" />
             </Button>
           </div>
@@ -210,57 +211,57 @@ onMounted(() => {
       <Dialog :open="editing !== null" @update:open="(open) => !open && (editing = null)">
         <DialogContent class="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{{ form.code ? '编辑徽章' : '新增徽章' }}</DialogTitle>
-            <DialogDescription>系统默认徽章会保存为覆盖配置，自定义徽章会保存为独立徽章。</DialogDescription>
+            <DialogTitle>{{ form.code ? adminText('k005e') : adminText('k005a') }}</DialogTitle>
+            <DialogDescription>{{ adminText('k00bb') }}</DialogDescription>
           </DialogHeader>
           <form class="grid max-h-[68vh] gap-4 overflow-y-auto pr-2 sm:grid-cols-2" @submit.prevent="submitBadge">
             <label class="grid gap-2 text-sm font-medium">
-              编码
-              <Input v-model="form.code" :disabled="Boolean(editing?.code)" placeholder="保存后自动生成" />
+              {{ adminText('k00bc') }}
+              <Input v-model="form.code" :disabled="Boolean(editing?.code)" :placeholder="adminText('k005k')" />
             </label>
             <label class="grid gap-2 text-sm font-medium">
-              名称
+              {{ adminText('k00af') }}
               <Input v-model="form.name" />
             </label>
             <label class="grid gap-2 text-sm font-medium sm:col-span-2">
-              描述
+              {{ adminText('k00ag') }}
               <Textarea v-model="form.description" />
             </label>
             <label class="grid gap-2 text-sm font-medium">
-              图标 URL
+              {{ adminText('k00bd') }}
               <Input v-model="form.iconUrl" />
             </label>
             <label class="grid gap-2 text-sm font-medium">
-              颜色
+              {{ adminText('k00ad') }}
               <select v-model="form.color" class="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <option v-for="color in colorOptions" :key="color" :value="color">{{ color }}</option>
               </select>
             </label>
             <label class="grid gap-2 text-sm font-medium">
-              等级
+              {{ adminText('k00be') }}
               <Input v-model="form.level" />
             </label>
             <label class="grid gap-2 text-sm font-medium">
-              排序
+              {{ adminText('k00bf') }}
               <Input v-model.number="form.sortOrder" type="number" />
             </label>
             <label class="grid gap-2 text-sm font-medium">
-              授予方式
+              {{ adminText('k00bg') }}
               <select v-model="form.grantMode" class="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring" :disabled="form.type === 'system'">
-                <option value="auto">自动</option>
-                <option value="manual">手动</option>
+                <option value="auto">{{ adminText('k005b') }}</option>
+                <option value="manual">{{ adminText('k005c') }}</option>
               </select>
             </label>
             <div class="grid gap-2 text-sm font-medium">
-              启用徽章
+              {{ adminText('k00bh') }}
               <div class="flex h-9 items-center justify-between rounded-md border bg-background px-3">
-                <span class="text-sm text-muted-foreground">停用后不展示也不可授予</span>
+                <span class="text-sm text-muted-foreground">{{ adminText('k00bi') }}</span>
                 <Switch v-model="form.isEnabled" />
               </div>
             </div>
             <DialogFooter class="sm:col-span-2">
-              <Button variant="outline" type="button" @click="editing = null">取消</Button>
-              <Button type="submit" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</Button>
+              <Button variant="outline" type="button" @click="editing = null">{{ adminText('k009q') }}</Button>
+              <Button type="submit" :disabled="saving">{{ saving ? adminText('k005f') : adminText('k005g') }}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -269,12 +270,12 @@ onMounted(() => {
       <Dialog :open="deletingBadge !== null" @update:open="(open) => !open && (deletingBadge = null)">
         <DialogContent class="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>删除徽章？</DialogTitle>
-            <DialogDescription>确认删除徽章「{{ deletingBadge?.name }}」吗？</DialogDescription>
+            <DialogTitle>{{ adminText('k00bj') }}</DialogTitle>
+            <DialogDescription>{{ adminText('k00bk') }}{{ deletingBadge?.name }}{{ adminText('k00bl') }}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" type="button" @click="deletingBadge = null">取消</Button>
-            <Button variant="destructive" type="button" :disabled="deleting" @click="confirmDelete">{{ deleting ? '删除中...' : '删除' }}</Button>
+            <Button variant="outline" type="button" @click="deletingBadge = null">{{ adminText('k009q') }}</Button>
+            <Button variant="destructive" type="button" :disabled="deleting" @click="confirmDelete">{{ deleting ? adminText('k005h') : adminText('k005i') }}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

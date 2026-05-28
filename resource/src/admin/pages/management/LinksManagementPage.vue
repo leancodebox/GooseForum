@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { computed, onMounted, reactive, ref } from 'vue'
 import Draggable from 'vuedraggable'
 import { ExternalLink, Eye, EyeOff, GripVertical, Link as LinkIcon, Pencil, Plus, RefreshCw, Send, ShieldCheck, Trash2 } from '@lucide/vue'
@@ -57,7 +58,7 @@ async function loadLinks() {
   try {
     groups.value = normalize(await getFriendLinks())
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '获取友情链接失败'
+    error.value = err instanceof Error ? err.message : adminText('k0018')
   } finally {
     loading.value = false
   }
@@ -69,9 +70,9 @@ async function persist(nextGroups = groups.value) {
     const normalized = normalize(nextGroups)
     groups.value = normalized
     await saveFriendLinks(normalized)
-    adminToast.success('保存成功')
+    adminToast.success(adminText('k000e'))
   } catch (err) {
-    adminToast.error(err, '保存友情链接失败')
+    adminToast.error(err, adminText('k0019'))
     await loadLinks()
   } finally {
     saving.value = false
@@ -90,7 +91,7 @@ function openEditGroup(group: FriendLinkGroup, index: number) {
 
 async function submitGroup() {
   if (!groupForm.name.trim()) {
-    adminToast.warning('分组名称不能为空')
+    adminToast.warning(adminText('k003k'))
     return
   }
   const next = normalize(groups.value)
@@ -115,7 +116,7 @@ function openEditLink(groupIndex: number, linkIndex: number, link: FriendLink) {
 
 async function submitLink() {
   if (!linkForm.name.trim() || !linkForm.url.trim()) {
-    adminToast.warning('名称和 URL 不能为空')
+    adminToast.warning(adminText('k003l'))
     return
   }
   if (!linkDialog.value) return
@@ -158,21 +159,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage title="友情链接管理" description="按前台友情链接页的展示形态管理站点链接。" sticky>
+  <BasicPage :title="adminText('k006u')" :description="adminText('k006v')" sticky>
     <template #actions>
       <div class="flex items-center gap-2">
         <Button variant="outline" type="button" @click="loadLinks">
           <RefreshCw class="size-4" />
-          刷新
+          {{ adminText('k004q') }}
         </Button>
         <Button type="button" @click="openAddGroup">
           <Plus class="size-4" />
-          添加分组
+          {{ adminText('k006w') }}
         </Button>
       </div>
     </template>
 
-      <div v-if="loading" class="flex h-64 items-center justify-center rounded-lg border text-muted-foreground">加载中...</div>
+      <div v-if="loading" class="flex h-64 items-center justify-center rounded-lg border text-muted-foreground">{{ adminText('k0046') }}</div>
       <div v-else-if="error" class="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{{ error }}</div>
       <div v-else class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
         <Draggable
@@ -201,7 +202,7 @@ onMounted(() => {
                 <div class="flex shrink-0 items-center gap-1">
                   <Button variant="ghost" size="sm" class="h-8 gap-1.5 px-2 text-xs" type="button" @click="openAddLink(groupIndex)">
                     <Plus class="size-3.5" />
-                    添加
+                    {{ adminText('k0094') }}
                   </Button>
                   <Button variant="ghost" size="icon" class="size-8 rounded-md" type="button" @click="openEditGroup(group, groupIndex)">
                     <Pencil class="size-4" />
@@ -239,7 +240,7 @@ onMounted(() => {
                           type="button"
                           class="absolute -bottom-1 -right-1 rounded-full border p-0.5 shadow-sm transition-all"
                           :class="(link.status ?? 1) === 0 ? 'bg-background text-muted-foreground hover:bg-muted' : 'bg-primary text-primary-foreground opacity-0 group-hover:opacity-100'"
-                          :title="(link.status ?? 1) === 0 ? '点击展示链接' : '点击隐藏链接'"
+                          :title="(link.status ?? 1) === 0 ? adminText('k006x') : adminText('k006y')"
                           @click="toggleLinkStatus(groupIndex, linkIndex, (link.status ?? 1) === 0)"
                         >
                           <EyeOff v-if="(link.status ?? 1) === 0" class="size-3" />
@@ -253,7 +254,7 @@ onMounted(() => {
                           rel="noopener noreferrer"
                           class="block truncate text-[13px] font-semibold text-foreground transition-colors hover:text-primary"
                           :class="(link.status ?? 1) === 0 && 'text-muted-foreground'"
-                          :title="`打开 ${link.name}`"
+                          :title="adminText('k0076', { name: link.name })"
                           @click.stop
                         >
                           {{ link.name }}
@@ -267,7 +268,7 @@ onMounted(() => {
                         target="_blank"
                         rel="noopener noreferrer"
                         class="grid size-6 place-items-center rounded-md border bg-background/95 text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-primary"
-                        title="打开链接"
+                        :title="adminText('k0077')"
                         @click.stop
                       >
                         <ExternalLink class="size-3.5" />
@@ -289,7 +290,7 @@ onMounted(() => {
                     @click="openAddLink(groupIndex)"
                   >
                     <LinkIcon class="mb-2 size-5" />
-                    添加这个分组的第一个链接
+                    {{ adminText('k00a2') }}
                   </button>
                 </template>
               </Draggable>
@@ -298,35 +299,35 @@ onMounted(() => {
         </Draggable>
         <aside class="space-y-3">
           <div class="rounded-lg border bg-background p-4">
-            <h2 class="text-sm font-semibold text-foreground">申请友链</h2>
-            <p class="mt-2 text-sm leading-6 text-muted-foreground">前台会引导用户发帖申请，管理员在这里审核后录入展示。</p>
+            <h2 class="text-sm font-semibold text-foreground">{{ adminText('k00a3') }}</h2>
+            <p class="mt-2 text-sm leading-6 text-muted-foreground">{{ adminText('k00a4') }}</p>
             <Button class="mt-4 h-9 gap-1.5" as="a" href="/publish" target="_blank" rel="noopener noreferrer">
               <Send class="size-4" />
-              查看申请入口
+              {{ adminText('k00a5') }}
             </Button>
           </div>
           <div class="rounded-lg border bg-background p-4">
-            <h2 class="text-sm font-semibold text-foreground">收录原则</h2>
+            <h2 class="text-sm font-semibold text-foreground">{{ adminText('k00a6') }}</h2>
             <div class="mt-3 space-y-2 text-sm text-muted-foreground">
-              <div class="flex gap-2"><ShieldCheck class="mt-0.5 size-4 shrink-0 text-emerald-600" /><span>内容健康、长期可访问。</span></div>
-              <div class="flex gap-2"><ShieldCheck class="mt-0.5 size-4 shrink-0 text-emerald-600" /><span>优先技术、开源、社区相关站点。</span></div>
-              <div class="flex gap-2"><ShieldCheck class="mt-0.5 size-4 shrink-0 text-emerald-600" /><span>站点信息清晰，Logo 可稳定加载。</span></div>
+              <div class="flex gap-2"><ShieldCheck class="mt-0.5 size-4 shrink-0 text-emerald-600" /><span>{{ adminText('k00a7') }}</span></div>
+              <div class="flex gap-2"><ShieldCheck class="mt-0.5 size-4 shrink-0 text-emerald-600" /><span>{{ adminText('k00a8') }}</span></div>
+              <div class="flex gap-2"><ShieldCheck class="mt-0.5 size-4 shrink-0 text-emerald-600" /><span>{{ adminText('k00a9') }}</span></div>
             </div>
           </div>
-          <Badge variant="secondary" class="rounded-md">共 {{ totalLinks }} 个链接</Badge>
+          <Badge variant="secondary" class="rounded-md">{{ adminText('k0054') }} {{ totalLinks }} {{ adminText('k00aa') }}</Badge>
         </aside>
       </div>
 
       <Dialog :open="groupDialog !== null" @update:open="(open) => !open && (groupDialog = null)">
         <DialogContent class="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{{ groupDialog?.mode === 'edit' ? '编辑分组' : '添加分组' }}</DialogTitle>
-            <DialogDescription>设置友情链接分组名称、Emoji 和颜色。</DialogDescription>
+            <DialogTitle>{{ groupDialog?.mode === 'edit' ? adminText('k006z') : adminText('k006w') }}</DialogTitle>
+            <DialogDescription>{{ adminText('k00ab') }}</DialogDescription>
           </DialogHeader>
           <form class="grid gap-4" @submit.prevent="submitGroup">
             <label class="grid gap-2 text-sm font-medium">
-              分组名称
-              <Input v-model="groupForm.name" placeholder="输入分组名称" />
+              {{ adminText('k00ac') }}
+              <Input v-model="groupForm.name" :placeholder="adminText('k0078')" />
             </label>
             <div class="grid gap-4 sm:grid-cols-2">
               <label class="grid gap-2 text-sm font-medium">
@@ -334,7 +335,7 @@ onMounted(() => {
                 <Input v-model="groupForm.emoji" />
               </label>
               <label class="grid gap-2 text-sm font-medium">
-                颜色
+                {{ adminText('k00ad') }}
                 <Input v-model="groupForm.color" />
               </label>
             </div>
@@ -345,8 +346,8 @@ onMounted(() => {
               <button v-for="color in presetColors" :key="color" class="size-7 rounded-full border" :style="{ backgroundColor: color }" type="button" @click="groupForm.color = color" />
             </div>
             <DialogFooter>
-              <Button variant="outline" type="button" @click="groupDialog = null">取消</Button>
-              <Button type="submit" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</Button>
+              <Button variant="outline" type="button" @click="groupDialog = null">{{ adminText('k009q') }}</Button>
+              <Button type="submit" :disabled="saving">{{ saving ? adminText('k005f') : adminText('k005g') }}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -355,24 +356,24 @@ onMounted(() => {
       <Dialog :open="linkDialog !== null" @update:open="(open) => !open && (linkDialog = null)">
         <DialogContent class="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{{ linkDialog?.mode === 'edit' ? '编辑链接' : '添加链接' }}</DialogTitle>
-            <DialogDescription>维护友情链接名称、URL、描述和 Logo。</DialogDescription>
+            <DialogTitle>{{ linkDialog?.mode === 'edit' ? adminText('k0070') : adminText('k0071') }}</DialogTitle>
+            <DialogDescription>{{ adminText('k00ae') }}</DialogDescription>
           </DialogHeader>
           <form class="grid gap-4" @submit.prevent="submitLink">
-            <label class="grid gap-2 text-sm font-medium">名称<Input v-model="linkForm.name" placeholder="链接名称" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k00af') }}<Input v-model="linkForm.name" :placeholder="adminText('k0079')" /></label>
             <label class="grid gap-2 text-sm font-medium">URL<Input v-model="linkForm.url" placeholder="https://..." /></label>
-            <label class="grid gap-2 text-sm font-medium">描述<Input v-model="linkForm.desc" placeholder="链接描述" /></label>
-            <label class="grid gap-2 text-sm font-medium">Logo URL<Input v-model="linkForm.logoUrl" placeholder="Logo 图片地址" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k00ag') }}<Input v-model="linkForm.desc" :placeholder="adminText('k007a')" /></label>
+            <label class="grid gap-2 text-sm font-medium">Logo URL<Input v-model="linkForm.logoUrl" :placeholder="adminText('k007b')" /></label>
             <div class="flex items-center justify-between rounded-lg border p-3">
               <div>
-                <div class="text-sm font-medium">展示状态</div>
-                <div class="text-xs text-muted-foreground">控制该链接是否在前端页面展示</div>
+                <div class="text-sm font-medium">{{ adminText('k00ah') }}</div>
+                <div class="text-xs text-muted-foreground">{{ adminText('k00ai') }}</div>
               </div>
               <Switch :model-value="linkForm.status === 1" @update:model-value="(checked: boolean) => linkForm.status = checked ? 1 : 0" />
             </div>
             <DialogFooter>
-              <Button variant="outline" type="button" @click="linkDialog = null">取消</Button>
-              <Button type="submit" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</Button>
+              <Button variant="outline" type="button" @click="linkDialog = null">{{ adminText('k009q') }}</Button>
+              <Button type="submit" :disabled="saving">{{ saving ? adminText('k005f') : adminText('k005g') }}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -381,14 +382,14 @@ onMounted(() => {
       <Dialog :open="deleteDialog !== null" @update:open="(open) => !open && (deleteDialog = null)">
         <DialogContent class="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{{ deleteDialog?.type === 'group' ? '删除分组' : '删除链接' }}</DialogTitle>
+            <DialogTitle>{{ deleteDialog?.type === 'group' ? adminText('k0072') : adminText('k0073') }}</DialogTitle>
             <DialogDescription>
-              {{ deleteDialog?.type === 'group' ? '确定要删除这个分组吗？分组下的所有链接也将被删除。' : '确定要删除这个友情链接吗？' }}
+              {{ deleteDialog?.type === 'group' ? adminText('k0074') : adminText('k0075') }}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" type="button" @click="deleteDialog = null">取消</Button>
-            <Button variant="destructive" type="button" :disabled="saving" @click="confirmDelete">删除</Button>
+            <Button variant="outline" type="button" @click="deleteDialog = null">{{ adminText('k009q') }}</Button>
+            <Button variant="destructive" type="button" :disabled="saving" @click="confirmDelete">{{ adminText('k005i') }}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

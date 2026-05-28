@@ -1,0 +1,10 @@
+{
+  "enableMail": false,
+  "smtpHost": "",
+  "smtpPort": 587,
+  "useSSL": false,
+  "smtpUsername": "",
+  "smtpPassword": "",
+  "fromName": "GooseForum",
+  "fromEmail": ""
+}

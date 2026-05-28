@@ -1,87 +1,135 @@
 package defaultconfig
 
-import "github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+import (
+	"embed"
+	"encoding/json"
+	"fmt"
+	"sync"
 
-var defaultSiteSettingsConfig = pageConfig.SiteSettingsConfig{
-	SiteName:        "GooseForum",
-	SiteLogo:        "/static/pic/icon.webp",
-	SiteDescription: "一个现代化的论坛系统",
-	SiteKeywords:    "forum,discussion,community",
-	SiteUrl:         "",
-	SiteEmail:       "example@example.example",
-	FooterInfo: pageConfig.FooterInfo{
-		Primary: []pageConfig.PItem{
-			{Content: `Providing reliable tech since 2025`},
-		},
-		List: []pageConfig.FooterItem{
-			{Name: "Github", Url: "https://github.com/leancodebox/GooseForum"},
-			{Name: "License", Url: "https://github.com/leancodebox/GooseForum/blob/main/LICENSE"},
-			{Name: "LeanCodeBox", Url: "https://github.com/leancodebox"},
-		},
-	},
-	BrandType:  "default",
-	BrandText:  "",
-	BrandImage: "",
+	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+)
+
+//go:embed pageconfig/*.json
+var defaultConfigFS embed.FS
+
+type pageConfigDefaults struct {
+	Announcement pageConfig.AnnouncementConfig
+	Email        pageConfig.MailSettingsConfig
+	FriendLinks  []pageConfig.FriendLinksGroup
+	Posting      pageConfig.PostingContent
+	Security     pageConfig.SecurityAndRegistration
+	Site         pageConfig.SiteSettingsConfig
+	Sponsors     pageConfig.SponsorsConfig
 }
 
-func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {
-	return defaultSiteSettingsConfig
+var (
+	loadPageConfigDefaultsOnce sync.Once
+	pageConfigDefaultsValue    pageConfigDefaults
+	pageConfigDefaultsErr      error
+)
+
+func loadPageConfigDefaults() (pageConfigDefaults, error) {
+	loadPageConfigDefaultsOnce.Do(func() {
+		pageConfigDefaultsErr = loadJSON("announcement.json", &pageConfigDefaultsValue.Announcement)
+		if pageConfigDefaultsErr != nil {
+			return
+		}
+		pageConfigDefaultsErr = loadJSON("email.json", &pageConfigDefaultsValue.Email)
+		if pageConfigDefaultsErr != nil {
+			return
+		}
+		pageConfigDefaultsErr = loadJSON("friend_links.json", &pageConfigDefaultsValue.FriendLinks)
+		if pageConfigDefaultsErr != nil {
+			return
+		}
+		pageConfigDefaultsErr = loadJSON("posting.json", &pageConfigDefaultsValue.Posting)
+		if pageConfigDefaultsErr != nil {
+			return
+		}
+		pageConfigDefaultsErr = loadJSON("security.json", &pageConfigDefaultsValue.Security)
+		if pageConfigDefaultsErr != nil {
+			return
+		}
+		pageConfigDefaultsErr = loadJSON("site.json", &pageConfigDefaultsValue.Site)
+		if pageConfigDefaultsErr != nil {
+			return
+		}
+		pageConfigDefaultsErr = loadJSON("sponsors.json", &pageConfigDefaultsValue.Sponsors)
+	})
+	return pageConfigDefaultsValue, pageConfigDefaultsErr
 }
 
-var defaultEmailSettingsConfig = pageConfig.MailSettingsConfig{
-	EnableMail:   false,
-	SmtpHost:     "",
-	SmtpPort:     587,
-	UseSSL:       false,
-	SmtpUsername: "",
-	SmtpPassword: "",
-	FromName:     "GooseForum",
-	FromEmail:    "",
+func mustPageConfigDefaults() pageConfigDefaults {
+	defaults, err := loadPageConfigDefaults()
+	if err != nil {
+		panic(err)
+	}
+	return defaults
+}
+
+func loadJSON(name string, out any) error {
+	data, err := defaultConfigFS.ReadFile("pageconfig/" + name)
+	if err != nil {
+		return fmt.Errorf("read default page config %s: %w", name, err)
+	}
+	if err := json.Unmarshal(data, out); err != nil {
+		return fmt.Errorf("decode default page config %s: %w", name, err)
+	}
+	return nil
+}
+
+func GetDefaultAnnouncementConfig() pageConfig.AnnouncementConfig {
+	return mustPageConfigDefaults().Announcement
 }
 
 func GetDefaultEmailSettingsConfig() pageConfig.MailSettingsConfig {
-	return defaultEmailSettingsConfig
+	return mustPageConfigDefaults().Email
 }
 
-var defaultSecuritySettingsConfig = pageConfig.SecurityAndRegistration{
-	EnableSignup:            true,
-	EnableEmailVerification: false,
-	AllowedDomains:          []string{},
-}
-
-func GetDefaultSecuritySettingsConfig() pageConfig.SecurityAndRegistration {
-	return defaultSecuritySettingsConfig
-}
-
-var defaultPostingSettingsConfig = pageConfig.PostingContent{
-	TextControl: struct {
-		MinPostLength              int `json:"minPostLength"`
-		MaxPostLength              int `json:"maxPostLength"`
-		MinTitleLength             int `json:"minTitleLength"`
-		MaxTitleLength             int `json:"maxTitleLength"`
-		NewUserPostCooldownMinutes int `json:"newUserPostCooldownMinutes"`
-	}{
-		MinPostLength:              5,
-		MaxPostLength:              50000,
-		MinTitleLength:             5,
-		MaxTitleLength:             100,
-		NewUserPostCooldownMinutes: 0,
-	},
-	UploadControl: struct {
-		AllowAttachments             bool     `json:"allowAttachments"`
-		AuthorizedExtensions         []string `json:"authorizedExtensions"`
-		MaxAttachmentSizeKb          int      `json:"maxAttachmentSizeKb"`
-		MaxDailyUploadsPerUser       int      `json:"maxDailyUploadsPerUser"`
-		NewUserUploadCooldownMinutes int      `json:"newUserUploadCooldownMinutes"`
-	}{
-		AllowAttachments:             true,
-		AuthorizedExtensions:         []string{".jpg", ".jpeg", ".png", ".gif", ".webp"},
-		MaxAttachmentSizeKb:          5120,
-		MaxDailyUploadsPerUser:       10,
-		NewUserUploadCooldownMinutes: 1440,
-	},
+func GetDefaultFriendLinksConfig() []pageConfig.FriendLinksGroup {
+	return cloneFriendLinks(mustPageConfigDefaults().FriendLinks)
 }
 
 func GetDefaultPostingSettingsConfig() pageConfig.PostingContent {
-	return defaultPostingSettingsConfig
+	config := mustPageConfigDefaults().Posting
+	config.UploadControl.AuthorizedExtensions = append([]string(nil), config.UploadControl.AuthorizedExtensions...)
+	return config
+}
+
+func GetDefaultSecuritySettingsConfig() pageConfig.SecurityAndRegistration {
+	config := mustPageConfigDefaults().Security
+	config.AllowedDomains = append([]string(nil), config.AllowedDomains...)
+	return config
+}
+
+func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {
+	config := mustPageConfigDefaults().Site
+	config.FooterInfo.Primary = append([]pageConfig.PItem(nil), config.FooterInfo.Primary...)
+	config.FooterInfo.List = append([]pageConfig.FooterItem(nil), config.FooterInfo.List...)
+	return config
+}
+
+func GetDefaultSponsorsConfig() pageConfig.SponsorsConfig {
+	return cloneSponsorsConfig(mustPageConfigDefaults().Sponsors)
+}
+
+func cloneFriendLinks(groups []pageConfig.FriendLinksGroup) []pageConfig.FriendLinksGroup {
+	if groups == nil {
+		return nil
+	}
+	cloned := make([]pageConfig.FriendLinksGroup, len(groups))
+	for i, group := range groups {
+		cloned[i] = group
+		cloned[i].Links = append([]pageConfig.LinkItem(nil), group.Links...)
+	}
+	return cloned
+}
+
+func cloneSponsorsConfig(config pageConfig.SponsorsConfig) pageConfig.SponsorsConfig {
+	config.Sponsors.Level0 = append([]pageConfig.SponsorItem(nil), config.Sponsors.Level0...)
+	config.Sponsors.Level1 = append([]pageConfig.SponsorItem(nil), config.Sponsors.Level1...)
+	config.Sponsors.Level2 = append([]pageConfig.SponsorItem(nil), config.Sponsors.Level2...)
+	config.Sponsors.Level3 = append([]pageConfig.SponsorItem(nil), config.Sponsors.Level3...)
+	config.Rules = append([]pageConfig.SponsorsRule(nil), config.Rules...)
+	return config
 }

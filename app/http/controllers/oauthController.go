@@ -33,7 +33,8 @@ func ProviderCallback(c *gin.Context) {
 		slog.Error("OAuth callback failed", "error", err)
 		// 如果 gothic 已经写入了响应，就不要再写了
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "OAuth 认证失败",
+			"error":       "OAuth 认证失败",
+			"messageCode": component.MessageOAuthCallbackFailed,
 		})
 		return
 	}
@@ -57,7 +58,8 @@ func ProviderCallback(c *gin.Context) {
 		if err != nil {
 			slog.Error("Process OAuth callback failed", "error", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "处理 OAuth 回调失败",
+				"error":       "处理 OAuth 回调失败",
+				"messageCode": component.MessageOAuthProcessFailed,
 			})
 			return
 		}
@@ -65,7 +67,8 @@ func ProviderCallback(c *gin.Context) {
 		// 检查用户状态
 		if user.IsFrozen == users.StatusFrozen {
 			c.JSON(http.StatusForbidden, gin.H{
-				"error": "您的账号已被禁用，如有疑问请联系管理员",
+				"error":       "您的账号已被禁用，如有疑问请联系管理员",
+				"messageCode": component.MessageOAuthAccountFrozen,
 			})
 			return
 		}
@@ -77,7 +80,8 @@ func ProviderCallback(c *gin.Context) {
 			if err != nil {
 				slog.Error("Update user activation status failed", "error", err)
 				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": "更新用户激活状态失败",
+					"error":       "更新用户激活状态失败",
+					"messageCode": component.MessageOAuthActivationUpdateFailed,
 				})
 				return
 			}
@@ -88,7 +92,8 @@ func ProviderCallback(c *gin.Context) {
 		if err != nil {
 			slog.Error("Generate JWT token failed", "error", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "生成 token 失败",
+				"error":       "生成 token 失败",
+				"messageCode": component.MessageOAuthTokenFailed,
 			})
 			return
 		}
@@ -108,9 +113,13 @@ func UnbindOAuth(req component.BetterRequest[null]) component.Response {
 	// 解绑OAuth账户
 	err := oauthservice.UnbindOAuth(userID, provider)
 	if err != nil {
-		return component.FailResponse(err.Error())
+		return component.FailResponseCode(
+			component.MessageOAuthUnbindFailed,
+
+			component.MessageParams{"error": err.Error(), "provider": provider})
+
 	}
-	return component.SuccessResponse("解绑成功")
+	return component.SuccessResponseCode("解绑成功", component.MessageOAuthUnbindSuccess, component.MessageParams{"provider": provider})
 }
 
 // GetOAuthBindings 获取用户的OAuth绑定状态

@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { computed, onMounted, reactive, ref } from 'vue'
 import Draggable from 'vuedraggable'
 import { GripVertical, Loader2, PenLine, Plus, RefreshCw, Save, Trash2, Upload } from '@lucide/vue'
@@ -16,6 +17,7 @@ import {
 } from '@/admin/components/ui/dialog'
 import { getSponsors, saveSponsors } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
+import { resolveApiMessage } from '@/runtime/api-message'
 import type { AdminPayload, ManageHomeProps, SponsorItem, SponsorsConfig } from '@/admin/types'
 
 defineProps<{
@@ -25,10 +27,10 @@ defineProps<{
 type SponsorLevel = keyof SponsorsConfig['sponsors']
 
 const levelNames: Record<SponsorLevel, string> = {
-  level0: '特别赞助商',
-  level1: '金牌赞助商',
-  level2: '银牌赞助商',
-  level3: '铜牌赞助商',
+  level0: adminText('k001v'),
+  level1: adminText('k001w'),
+  level2: adminText('k001x'),
+  level3: adminText('k001y'),
 }
 
 const levelMeta: Record<SponsorLevel, { level: string, tone: 'diamond' | 'gold' | 'silver' | 'bronze' }> = {
@@ -46,19 +48,19 @@ const defaultConfig: SponsorsConfig = {
     level3: [],
   },
   content: {
-    title: '赞助',
-    description: '感谢这些赞助者帮助 GooseForum 持续变好。',
+    title: adminText('k001z'),
+    description: adminText('k0020'),
   },
   contact: {
-    title: '成为赞助者',
-    description: '支持社区建设，赞助者可展示在赞助页，并获得更醒目的社区露出。',
-    buttonText: '联系我们',
+    title: adminText('k0021'),
+    description: adminText('k0022'),
+    buttonText: adminText('k0023'),
     buttonLink: 'mailto:contact@gooseforum.online',
   },
   rules: [
-    { content: '链接需稳定可访问。' },
-    { content: '内容需适合公开社区展示。' },
-    { content: '头像或 Logo 建议保持清晰。' },
+    { content: adminText('k0024') },
+    { content: adminText('k0025') },
+    { content: adminText('k0026') },
   ],
 }
 
@@ -120,7 +122,7 @@ async function loadSponsors() {
   try {
     config.value = normalize(await getSponsors())
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '获取赞助商失败'
+    error.value = err instanceof Error ? err.message : adminText('k0027')
   } finally {
     loading.value = false
   }
@@ -130,9 +132,9 @@ async function persist() {
   saving.value = true
   try {
     await saveSponsors(normalize(config.value))
-    adminToast.success('保存成功')
+    adminToast.success(adminText('k000e'))
   } catch (err) {
-    adminToast.error(err, '保存赞助配置失败')
+    adminToast.error(err, adminText('k001b'))
   } finally {
     saving.value = false
   }
@@ -147,7 +149,7 @@ function openSponsor(level: SponsorLevel, index: number | null) {
 function submitSponsor() {
   if (!sponsorDialog.value) return
   if (!sponsorForm.name.trim()) {
-    adminToast.warning('赞助商名称不能为空')
+    adminToast.warning(adminText('k0028'))
     return
   }
   const item = {
@@ -160,7 +162,7 @@ function submitSponsor() {
   if (sponsorDialog.value.index === null) list.push(item)
   else list[sponsorDialog.value.index] = item
   sponsorDialog.value = null
-  adminToast.success('赞助商已更新')
+  adminToast.success(adminText('k0029'))
 }
 
 function removeSponsor(level: SponsorLevel, index: number) {
@@ -186,12 +188,12 @@ async function uploadAvatar(event: Event) {
     const data = await response.json()
     if (data.code === 0) {
       sponsorForm.avatarUrl = data.result?.url || ''
-      adminToast.success('上传成功')
+      adminToast.success(adminText('k000b'))
     } else {
-      adminToast.error(new Error(data.msg || data.message || '上传失败'), '上传失败')
+      adminToast.error(new Error(resolveApiMessage(data, adminText('k000c'))), adminText('k000c'))
     }
   } catch (err) {
-    adminToast.error(err, '上传失败')
+    adminToast.error(err, adminText('k000c'))
   } finally {
     input.value = ''
   }
@@ -203,17 +205,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage title="赞助管理" description="按前台赞助页的展示层级管理赞助商。" sticky>
+  <BasicPage :title="adminText('k004o')" :description="adminText('k004p')" sticky>
     <template #actions>
       <div class="flex items-center gap-2">
         <Button variant="outline" type="button" @click="loadSponsors">
           <RefreshCw class="size-4" />
-          刷新
+          {{ adminText('k004q') }}
         </Button>
         <Button type="button" :disabled="saving" @click="persist">
           <Loader2 v-if="saving" class="size-4 animate-spin" />
           <Save v-else class="size-4" />
-          保存配置
+          {{ adminText('k004f') }}
         </Button>
       </div>
     </template>
@@ -227,13 +229,13 @@ onMounted(() => {
           <section class="border-b pb-4">
             <div class="flex flex-wrap items-center gap-2">
               <div class="group relative min-w-[180px] flex-1 rounded-md transition-colors hover:bg-muted/50 focus-within:bg-muted/50">
-                <Input v-model="config.content.title" aria-label="赞助页标题" class="h-auto border-0 bg-transparent px-2 py-1 pr-9 text-2xl font-bold tracking-tight shadow-none focus-visible:ring-1" />
+                <Input v-model="config.content.title" :aria-label="adminText('k004u')" class="h-auto border-0 bg-transparent px-2 py-1 pr-9 text-2xl font-bold tracking-tight shadow-none focus-visible:ring-1" />
                 <PenLine class="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100" />
               </div>
               <span class="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">{{ totalSponsors }}</span>
             </div>
             <div class="group relative mt-2 rounded-md transition-colors hover:bg-muted/50 focus-within:bg-muted/50">
-              <Input v-model="config.content.description" aria-label="赞助页描述" class="h-10 border-0 bg-transparent px-2 pr-9 text-sm text-muted-foreground shadow-none focus-visible:ring-1" />
+              <Input v-model="config.content.description" :aria-label="adminText('k004v')" class="h-10 border-0 bg-transparent px-2 pr-9 text-sm text-muted-foreground shadow-none focus-visible:ring-1" />
               <PenLine class="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100" />
             </div>
           </section>
@@ -246,7 +248,7 @@ onMounted(() => {
               </h2>
               <Button variant="ghost" type="button" @click="openSponsor(level, null)">
                 <Plus class="size-4" />
-                添加
+                {{ adminText('k0094') }}
               </Button>
             </div>
             <Draggable
@@ -269,11 +271,11 @@ onMounted(() => {
                       <div class="flex min-w-0 items-center gap-2">
                         <a :href="sponsor.link || '#'" target="_blank" rel="noreferrer" class="truncate text-sm font-semibold hover:text-primary hover:underline">{{ sponsor.name }}</a>
                       </div>
-                      <p class="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{{ sponsor.message || '感谢支持 GooseForum。' }}</p>
+                      <p class="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{{ sponsor.message || adminText('k004r') }}</p>
                     </div>
                   </div>
                   <div class="absolute right-1.5 top-1.5 flex shrink-0 items-center gap-1 rounded-md bg-background/90 p-0.5 opacity-0 shadow-sm ring-1 ring-border transition-opacity group-hover:opacity-100">
-                    <Button variant="ghost" size="sm" type="button" @click="openSponsor(level, index)">编辑</Button>
+                    <Button variant="ghost" size="sm" type="button" @click="openSponsor(level, index)">{{ adminText('k005j') }}</Button>
                     <Button variant="ghost" size="icon-sm" class="text-destructive hover:text-destructive" type="button" @click="removeSponsor(level, index)">
                       <Trash2 class="size-4" />
                     </Button>
@@ -287,7 +289,7 @@ onMounted(() => {
                   class="text-sm text-muted-foreground transition-colors hover:text-foreground"
                   @click="openSponsor(level, null)"
                 >
-                  暂无赞助商，点击添加
+                  {{ adminText('k009s') }}
                 </button>
               </template>
             </Draggable>
@@ -296,30 +298,30 @@ onMounted(() => {
 
         <aside class="space-y-3">
           <div class="rounded-lg border bg-background p-4">
-            <h2 class="text-sm font-semibold text-foreground">联系入口</h2>
+            <h2 class="text-sm font-semibold text-foreground">{{ adminText('k009t') }}</h2>
             <div class="mt-4 space-y-3">
-              <Input v-model="config.contact.title" class="border-0 bg-transparent px-2 text-sm font-semibold shadow-none focus-visible:ring-1" aria-label="联系入口标题" />
-              <Textarea v-model="config.contact.description" class="min-h-20 resize-none border-0 bg-transparent px-2 py-2 text-sm leading-6 text-muted-foreground shadow-none focus-visible:ring-1" aria-label="联系入口描述" />
+              <Input v-model="config.contact.title" class="border-0 bg-transparent px-2 text-sm font-semibold shadow-none focus-visible:ring-1" :aria-label="adminText('k004w')" />
+              <Textarea v-model="config.contact.description" class="min-h-20 resize-none border-0 bg-transparent px-2 py-2 text-sm leading-6 text-muted-foreground shadow-none focus-visible:ring-1" :aria-label="adminText('k004x')" />
               <label class="grid gap-1 text-[11px] font-semibold uppercase text-muted-foreground">
-                按钮文字
+                {{ adminText('k009u') }}
                 <Input v-model="config.contact.buttonText" class="border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-1" />
               </label>
               <label class="grid gap-1 text-[11px] font-semibold uppercase text-muted-foreground">
-                按钮链接
+                {{ adminText('k009v') }}
                 <Input v-model="config.contact.buttonLink" class="border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-1" placeholder="mailto:contact@example.com" />
               </label>
             </div>
           </div>
           <div class="rounded-lg border bg-background p-4">
             <div class="flex items-center justify-between gap-2">
-              <h2 class="text-sm font-semibold text-foreground">展示规则</h2>
-              <Button type="button" size="sm" variant="outline" @click="addRule">添加</Button>
+              <h2 class="text-sm font-semibold text-foreground">{{ adminText('k009w') }}</h2>
+              <Button type="button" size="sm" variant="outline" @click="addRule">{{ adminText('k0094') }}</Button>
             </div>
             <div class="mt-4 space-y-2">
-              <p v-if="config.rules.length === 0" class="text-sm text-muted-foreground">暂无展示规则，前台会隐藏该区块。</p>
+              <p v-if="config.rules.length === 0" class="text-sm text-muted-foreground">{{ adminText('k009x') }}</p>
               <div v-for="(rule, index) in config.rules" :key="index" class="flex gap-2">
-                <Input v-model="rule.content" class="border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-1" :aria-label="`展示规则 ${index + 1}`" />
-                <Button type="button" variant="ghost" size="sm" class="text-destructive hover:text-destructive" @click="removeRule(index)">删除</Button>
+                <Input v-model="rule.content" class="border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-1" :aria-label="adminText('k004y', { index: index + 1 })" />
+                <Button type="button" variant="ghost" size="sm" class="text-destructive hover:text-destructive" @click="removeRule(index)">{{ adminText('k005i') }}</Button>
               </div>
             </div>
           </div>
@@ -329,27 +331,27 @@ onMounted(() => {
       <Dialog :open="sponsorDialog !== null" @update:open="(open) => !open && (sponsorDialog = null)">
         <DialogContent class="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{{ sponsorDialog?.index === null ? '添加赞助商' : '编辑赞助商' }}</DialogTitle>
-            <DialogDescription>维护赞助商名称、Logo、描述和官网链接。</DialogDescription>
+            <DialogTitle>{{ sponsorDialog?.index === null ? adminText('k004s') : adminText('k004t') }}</DialogTitle>
+            <DialogDescription>{{ adminText('k009y') }}</DialogDescription>
           </DialogHeader>
           <form class="grid gap-4" @submit.prevent="submitSponsor">
-            <label class="grid gap-2 text-sm font-medium">赞助商名称<Input v-model="sponsorForm.name" placeholder="请输入赞助商名称" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k009z') }}<Input v-model="sponsorForm.name" :placeholder="adminText('k004z')" /></label>
             <label class="grid gap-2 text-sm font-medium">
               Logo
               <div class="flex gap-2">
-                <Input v-model="sponsorForm.avatarUrl" placeholder="请输入 Logo URL 或上传图片" />
+                <Input v-model="sponsorForm.avatarUrl" :placeholder="adminText('k0050')" />
                 <label class="relative inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border bg-background shadow-xs hover:bg-accent">
                   <Upload class="size-4" />
                   <input class="absolute inset-0 cursor-pointer opacity-0" type="file" accept="image/*" @change="uploadAvatar" />
                 </label>
               </div>
-              <img v-if="sponsorForm.avatarUrl" :src="sponsorForm.avatarUrl" class="h-16 w-auto rounded border object-contain" alt="Logo 预览" />
+              <img v-if="sponsorForm.avatarUrl" :src="sponsorForm.avatarUrl" class="h-16 w-auto rounded border object-contain" :alt="adminText('k0051')" />
             </label>
-            <label class="grid gap-2 text-sm font-medium">描述信息<Textarea v-model="sponsorForm.message" placeholder="请输入赞助商描述" /></label>
-            <label class="grid gap-2 text-sm font-medium">官网链接<Input v-model="sponsorForm.link" placeholder="请输入官网链接" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k00a0') }}<Textarea v-model="sponsorForm.message" :placeholder="adminText('k0052')" /></label>
+            <label class="grid gap-2 text-sm font-medium">{{ adminText('k00a1') }}<Input v-model="sponsorForm.link" :placeholder="adminText('k0053')" /></label>
             <DialogFooter>
-              <Button variant="outline" type="button" @click="sponsorDialog = null">取消</Button>
-              <Button type="submit">保存</Button>
+              <Button variant="outline" type="button" @click="sponsorDialog = null">{{ adminText('k009q') }}</Button>
+              <Button type="submit">{{ adminText('k005g') }}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

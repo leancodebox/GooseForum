@@ -66,15 +66,15 @@ type ArticleRepliesWindowReq struct {
 func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) component.Response {
 	articleID := req.Params.ArticleID
 	if articleID == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
 	articleEntity := articles.GetSimple(articleID)
 	if articleEntity.Id == 0 {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 	if !canViewArticleSimple(&articleEntity, req.UserId, false) {
-		return component.FailResponse("文章不存在")
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
 	limit := req.Params.Limit
@@ -90,7 +90,7 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 	case req.Params.AnchorReplyID > 0:
 		anchor := reply.Get(req.Params.AnchorReplyID)
 		if anchor.Id == 0 || anchor.ArticleId != articleID {
-			return component.FailResponse("回复不存在")
+			return component.FailResponseCode(component.MessageReplyNotFound, nil)
 		}
 		beforeLimit := min(5, limit/2)
 		afterLimit := limit - beforeLimit - 1

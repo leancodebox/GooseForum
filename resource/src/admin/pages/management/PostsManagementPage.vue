@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { computed, onMounted, ref } from 'vue'
 import { Ban, ExternalLink, Eye, FileText, Heart, MessageSquare, Pin, RefreshCw, Search, Tags, Undo2 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -61,14 +62,14 @@ const rangeStart = computed(() => (total.value === 0 ? 0 : (page.value - 1) * pa
 const rangeEnd = computed(() => Math.min(page.value * pageSize.value, total.value))
 
 const articleTypes: Record<number, { label: string, className: string }> = {
-  0: { label: '博文', className: 'bg-blue-50 text-blue-700 border-blue-100' },
-  1: { label: '分享', className: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-  2: { label: '问答', className: 'bg-amber-50 text-amber-700 border-amber-100' },
-  3: { label: '教程', className: 'bg-violet-50 text-violet-700 border-violet-100' },
+  0: { label: adminText('k003m'), className: 'bg-blue-50 text-blue-700 border-blue-100' },
+  1: { label: adminText('k003n'), className: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+  2: { label: adminText('k003o'), className: 'bg-amber-50 text-amber-700 border-amber-100' },
+  3: { label: adminText('k003p'), className: 'bg-violet-50 text-violet-700 border-violet-100' },
 }
 
 function typeInfo(type: number) {
-  return articleTypes[type] || { label: '文章', className: 'bg-slate-50 text-slate-700 border-slate-100' }
+  return articleTypes[type] || { label: adminText('k003g'), className: 'bg-slate-50 text-slate-700 border-slate-100' }
 }
 
 function avatarText(post: AdminArticle) {
@@ -91,8 +92,8 @@ function postTime(value?: string) {
 
 function articleStatusInfo(status: number) {
   return status === 1
-    ? { label: '发布', className: 'bg-slate-950 text-white' }
-    : { label: '草稿', className: 'bg-slate-100 text-slate-600' }
+    ? { label: adminText('k003q'), className: 'bg-slate-950 text-white' }
+    : { label: adminText('k003r'), className: 'bg-slate-100 text-slate-600' }
 }
 
 async function loadPosts() {
@@ -108,7 +109,7 @@ async function loadPosts() {
     categories.value = categoryList || []
     if (page.value > totalPages.value) page.value = totalPages.value
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '加载帖子失败'
+    error.value = err instanceof Error ? err.message : adminText('k003s')
   } finally {
     loading.value = false
   }
@@ -147,7 +148,7 @@ function toggleCategory(id: number) {
     return
   }
   if (selectedCategoryIds.value.length >= 3) {
-    adminToast.warning('最多选择 3 个分类')
+    adminToast.warning(adminText('k003t'))
     return
   }
   selectedCategoryIds.value = [...selectedCategoryIds.value, id]
@@ -156,7 +157,7 @@ function toggleCategory(id: number) {
 async function saveCategories() {
   if (!categoryDialogRow.value) return
   if (selectedCategoryIds.value.length === 0) {
-    adminToast.warning('至少选择一个分类')
+    adminToast.warning(adminText('k003u'))
     return
   }
   saving.value = true
@@ -164,9 +165,9 @@ async function saveCategories() {
     await editArticleCategories({ id: categoryDialogRow.value.id, categoryId: selectedCategoryIds.value })
     categoryDialogRow.value = null
     await loadPosts()
-    adminToast.success('分类已更新')
+    adminToast.success(adminText('k003v'))
   } catch (err) {
-    adminToast.error(err, '保存分类失败')
+    adminToast.error(err, adminText('k0010'))
   } finally {
     saving.value = false
   }
@@ -180,9 +181,9 @@ async function savePinWeight() {
     await editArticlePin({ id: pinDialogRow.value.id, pinWeight })
     pinDialogRow.value = null
     await loadPosts()
-    adminToast.success(pinWeight > 0 ? '置顶权重已更新' : '已取消置顶')
+    adminToast.success(pinWeight > 0 ? adminText('k003w') : adminText('k003x'))
   } catch (err) {
-    adminToast.error(err, '保存置顶权重失败')
+    adminToast.error(err, adminText('k0016'))
   } finally {
     saving.value = false
   }
@@ -195,7 +196,7 @@ async function openSource(post: AdminArticle) {
   try {
     source.value = await getArticleSource(post.id)
   } catch (err) {
-    adminToast.error(err, '原文加载失败')
+    adminToast.error(err, adminText('k003y'))
   } finally {
     sourceLoading.value = false
   }
@@ -209,9 +210,9 @@ async function copySource() {
   if (!source.value?.content) return
   try {
     await navigator.clipboard.writeText(source.value.content)
-    adminToast.success('已复制原文')
+    adminToast.success(adminText('k003z'))
   } catch (err) {
-    adminToast.error(err, '复制失败')
+    adminToast.error(err, adminText('k0040'))
   }
 }
 
@@ -226,9 +227,9 @@ async function toggleProcessStatus() {
     })
     actionRow.value = null
     await loadPosts()
-    adminToast.success(restoring ? '已恢复帖子' : '已封禁帖子')
+    adminToast.success(restoring ? adminText('k0041') : adminText('k0042'))
   } catch (err) {
-    adminToast.error(err, '操作失败')
+    adminToast.error(err, adminText('k001u'))
   } finally {
     saving.value = false
   }
@@ -240,11 +241,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage title="帖子管理" description="审核内容、调整分类、查看原文和处理异常帖子。" sticky>
+  <BasicPage :title="adminText('k005u')" :description="adminText('k005v')" sticky>
     <template #actions>
       <Button variant="outline" type="button" @click="loadPosts">
         <RefreshCw class="size-4" />
-        刷新
+        {{ adminText('k004q') }}
       </Button>
     </template>
 
@@ -253,11 +254,11 @@ onMounted(() => {
           <form class="flex min-w-0 flex-1 items-center gap-2" @submit.prevent="applySearch">
             <div class="relative min-w-64 max-w-xl flex-1">
               <Search class="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input v-model="search" class="h-9 pl-8 text-sm" placeholder="搜索标题、摘要或异常内容..." />
+              <Input v-model="search" class="h-9 pl-8 text-sm" :placeholder="adminText('k006a')" />
             </div>
-            <Button type="submit" size="sm" class="h-9 px-4">搜索</Button>
+            <Button type="submit" size="sm" class="h-9 px-4">{{ adminText('k00al') }}</Button>
             <Button v-if="appliedSearch" variant="ghost" size="sm" type="button" class="h-9" @click="search = ''; applySearch()">
-              清除
+              {{ adminText('k00at') }}
             </Button>
           </form>
           <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -265,21 +266,21 @@ onMounted(() => {
             <div class="h-4 w-px bg-border" />
             <div class="flex flex-wrap items-center gap-2">
               <select class="h-9 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :value="pageSize" @change="changePageSize">
-                <option :value="10">10 / 页</option>
-                <option :value="20">20 / 页</option>
-                <option :value="50">50 / 页</option>
+                <option :value="10">{{ adminText('k002x') }}</option>
+                <option :value="20">{{ adminText('k002y') }}</option>
+                <option :value="50">{{ adminText('k0030') }}</option>
               </select>
-              <Button variant="outline" size="sm" type="button" :disabled="page <= 1 || loading" @click="changePage(page - 1)">上一页</Button>
+              <Button variant="outline" size="sm" type="button" :disabled="page <= 1 || loading" @click="changePage(page - 1)">{{ adminText('k00au') }}</Button>
               <span class="whitespace-nowrap">{{ page }} / {{ totalPages }}</span>
-              <Button variant="outline" size="sm" type="button" :disabled="page >= totalPages || loading" @click="changePage(page + 1)">下一页</Button>
+              <Button variant="outline" size="sm" type="button" :disabled="page >= totalPages || loading" @click="changePage(page + 1)">{{ adminText('k00av') }}</Button>
             </div>
           </div>
         </div>
 
         <div class="md:hidden">
-          <div v-if="loading" class="px-3 py-10 text-center text-sm text-muted-foreground">加载中...</div>
+          <div v-if="loading" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k0046') }}</div>
           <div v-else-if="error" class="px-3 py-10 text-center text-sm text-destructive">{{ error }}</div>
-          <div v-else-if="rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">暂无帖子</div>
+          <div v-else-if="rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k00aw') }}</div>
           <div v-else class="divide-y">
             <article v-for="post in rows" :key="post.id" class="space-y-2 px-3 py-3">
               <div class="flex min-w-0 items-start justify-between gap-3">
@@ -291,11 +292,11 @@ onMounted(() => {
                     <span class="inline-flex h-5 shrink-0 items-center rounded-full border px-1.5 text-[11px] font-semibold" :class="typeInfo(post.type).className">
                       {{ typeInfo(post.type).label }}
                     </span>
-                    <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">封禁</Badge>
-                    <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">置顶 {{ post.pinWeight }}</Badge>
+                    <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
+                    <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
                   </div>
                   <p class="line-clamp-2 break-words text-[12px] leading-5 text-muted-foreground">
-                    {{ post.description || '暂无摘要' }}
+                    {{ post.description || adminText('k005w') }}
                   </p>
                 </div>
                 <span class="inline-flex h-6 shrink-0 items-center rounded-md px-2 text-xs font-semibold" :class="articleStatusInfo(post.articleStatus).className">
@@ -308,7 +309,7 @@ onMounted(() => {
                   <span class="size-1.5 shrink-0 rounded-full" :style="{ backgroundColor: category.color || '#64748b' }" />
                   <span class="truncate">{{ category.category }}</span>
                 </span>
-                <span v-if="postCategories(post).length === 0" class="inline-flex h-5 items-center rounded-full bg-muted px-1.5">未分类</span>
+                <span v-if="postCategories(post).length === 0" class="inline-flex h-5 items-center rounded-full bg-muted px-1.5">{{ adminText('k00ay') }}</span>
                 <span class="inline-flex items-center gap-1"><Eye class="size-3.5" />{{ post.viewCount }}</span>
                 <span class="inline-flex items-center gap-1"><MessageSquare class="size-3.5" />{{ post.replyCount }}</span>
                 <span class="inline-flex items-center gap-1"><Heart class="size-3.5" />{{ post.likeCount }}</span>
@@ -322,23 +323,23 @@ onMounted(() => {
                     <a :href="`/u/${post.userId}`" target="_blank" rel="noreferrer" class="block truncate text-[13px] font-semibold hover:text-primary hover:underline">
                       {{ post.username }}
                     </a>
-                    <div class="truncate text-xs text-muted-foreground">{{ postDate(post.createdAt) }} {{ postTime(post.createdAt) }} · {{ post.processStatus === 1 ? '已处理' : '正常' }}</div>
+                    <div class="truncate text-xs text-muted-foreground">{{ postDate(post.createdAt) }} {{ postTime(post.createdAt) }} · {{ post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}</div>
                   </div>
                 </div>
                 <div class="flex shrink-0 items-center gap-1">
-                  <Button variant="ghost" size="icon-sm" type="button" title="查看帖子" @click="openPost(post)">
+                  <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k006b')" @click="openPost(post)">
                     <ExternalLink class="size-4" />
                   </Button>
-                  <Button variant="ghost" size="icon-sm" type="button" title="查看原文" @click="openSource(post)">
+                  <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k006c')" @click="openSource(post)">
                     <FileText class="size-4" />
                   </Button>
-                  <Button variant="ghost" size="icon-sm" type="button" title="修改分类" @click="openCategoryDialog(post)">
+                  <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k006d')" @click="openCategoryDialog(post)">
                     <Tags class="size-4" />
                   </Button>
-                  <Button variant="ghost" size="icon-sm" type="button" :class="post.pinWeight > 0 ? 'text-primary hover:text-primary' : ''" title="置顶权重" @click="openPinDialog(post)">
+                  <Button variant="ghost" size="icon-sm" type="button" :class="post.pinWeight > 0 ? 'text-primary hover:text-primary' : ''" :title="adminText('k006e')" @click="openPinDialog(post)">
                     <Pin class="size-4" />
                   </Button>
-                  <Button variant="ghost" size="icon-sm" type="button" :class="post.processStatus === 1 ? 'text-emerald-600 hover:text-emerald-700' : 'text-destructive hover:text-destructive'" :title="post.processStatus === 1 ? '恢复帖子' : '封禁帖子'" @click="actionRow = post">
+                  <Button variant="ghost" size="icon-sm" type="button" :class="post.processStatus === 1 ? 'text-emerald-600 hover:text-emerald-700' : 'text-destructive hover:text-destructive'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
                     <Undo2 v-if="post.processStatus === 1" class="size-4" />
                     <Ban v-else class="size-4" />
                   </Button>
@@ -351,22 +352,22 @@ onMounted(() => {
           <Table class="hidden table-fixed md:table">
             <TableHeader class="bg-muted/30">
               <TableRow>
-                <TableHead class="px-3">帖子</TableHead>
-                <TableHead class="w-[190px]">作者</TableHead>
-                <TableHead class="w-[112px]">状态</TableHead>
-                <TableHead class="w-[118px]">时间</TableHead>
-                <TableHead class="w-[168px] text-right pr-3">操作</TableHead>
+                <TableHead class="px-3">{{ adminText('k00az') }}</TableHead>
+                <TableHead class="w-[190px]">{{ adminText('k00b0') }}</TableHead>
+                <TableHead class="w-[112px]">{{ adminText('k007j') }}</TableHead>
+                <TableHead class="w-[118px]">{{ adminText('k003b') }}</TableHead>
+                <TableHead class="w-[168px] text-right pr-3">{{ adminText('k007m') }}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow v-if="loading">
-                <TableCell colspan="5" class="h-28 text-center text-muted-foreground">加载中...</TableCell>
+                <TableCell colspan="5" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
               </TableRow>
               <TableRow v-else-if="error">
                 <TableCell colspan="5" class="h-28 text-center text-destructive">{{ error }}</TableCell>
               </TableRow>
               <TableRow v-else-if="rows.length === 0">
-                <TableCell colspan="5" class="h-28 text-center text-muted-foreground">暂无帖子</TableCell>
+                <TableCell colspan="5" class="h-28 text-center text-muted-foreground">{{ adminText('k00aw') }}</TableCell>
               </TableRow>
               <template v-else>
                 <TableRow v-for="post in rows" :key="post.id" class="group hover:bg-muted/20">
@@ -379,21 +380,21 @@ onMounted(() => {
                         <span class="inline-flex h-5 shrink-0 items-center rounded-full border px-1.5 text-[11px] font-semibold" :class="typeInfo(post.type).className">
                           {{ typeInfo(post.type).label }}
                         </span>
-                        <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">封禁</Badge>
-                        <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">置顶 {{ post.pinWeight }}</Badge>
+                        <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
+                        <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
                       </div>
                       <p class="truncate text-[12px] leading-4 text-muted-foreground">
-                        {{ post.description || '暂无摘要' }}
+                        {{ post.description || adminText('k005w') }}
                       </p>
                       <div class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] leading-4 text-muted-foreground">
                         <span v-for="category in postCategories(post)" :key="category.id" class="inline-flex h-5 max-w-32 items-center gap-1 rounded-full bg-muted px-1.5 font-medium">
                           <span class="size-1.5 shrink-0 rounded-full" :style="{ backgroundColor: category.color || '#64748b' }" />
                           <span class="truncate">{{ category.category }}</span>
                         </span>
-                        <span v-if="postCategories(post).length === 0" class="inline-flex h-5 items-center rounded-full bg-muted px-1.5">未分类</span>
-                        <span class="inline-flex items-center gap-1" title="浏览量"><Eye class="size-3.5" />{{ post.viewCount }}</span>
-                        <span class="inline-flex items-center gap-1" title="回复数"><MessageSquare class="size-3.5" />{{ post.replyCount }}</span>
-                        <span class="inline-flex items-center gap-1" title="点赞数"><Heart class="size-3.5" />{{ post.likeCount }}</span>
+                        <span v-if="postCategories(post).length === 0" class="inline-flex h-5 items-center rounded-full bg-muted px-1.5">{{ adminText('k00ay') }}</span>
+                        <span class="inline-flex items-center gap-1" :title="adminText('k006f')"><Eye class="size-3.5" />{{ post.viewCount }}</span>
+                        <span class="inline-flex items-center gap-1" :title="adminText('k006g')"><MessageSquare class="size-3.5" />{{ post.replyCount }}</span>
+                        <span class="inline-flex items-center gap-1" :title="adminText('k006h')"><Heart class="size-3.5" />{{ post.likeCount }}</span>
                       </div>
                     </div>
                   </TableCell>
@@ -412,7 +413,7 @@ onMounted(() => {
                         {{ articleStatusInfo(post.articleStatus).label }}
                       </span>
                       <span class="text-[11px]" :class="post.processStatus === 1 ? 'text-destructive' : 'text-muted-foreground'">
-                        {{ post.processStatus === 1 ? '已处理' : '正常' }}
+                        {{ post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}
                       </span>
                     </div>
                   </TableCell>
@@ -422,19 +423,19 @@ onMounted(() => {
                   </TableCell>
                   <TableCell class="pr-3">
                     <div class="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon-sm" type="button" title="查看帖子" @click="openPost(post)">
+                      <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k006b')" @click="openPost(post)">
                         <ExternalLink class="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon-sm" type="button" title="查看原文" @click="openSource(post)">
+                      <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k006c')" @click="openSource(post)">
                         <FileText class="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon-sm" type="button" title="修改分类" @click="openCategoryDialog(post)">
+                      <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k006d')" @click="openCategoryDialog(post)">
                         <Tags class="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon-sm" type="button" :class="post.pinWeight > 0 ? 'text-primary hover:text-primary' : ''" title="置顶权重" @click="openPinDialog(post)">
+                      <Button variant="ghost" size="icon-sm" type="button" :class="post.pinWeight > 0 ? 'text-primary hover:text-primary' : ''" :title="adminText('k006e')" @click="openPinDialog(post)">
                         <Pin class="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon-sm" type="button" :class="post.processStatus === 1 ? 'text-emerald-600 hover:text-emerald-700' : 'text-destructive hover:text-destructive'" :title="post.processStatus === 1 ? '恢复帖子' : '封禁帖子'" @click="actionRow = post">
+                      <Button variant="ghost" size="icon-sm" type="button" :class="post.processStatus === 1 ? 'text-emerald-600 hover:text-emerald-700' : 'text-destructive hover:text-destructive'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
                         <Undo2 v-if="post.processStatus === 1" class="size-4" />
                         <Ban v-else class="size-4" />
                       </Button>
@@ -450,9 +451,9 @@ onMounted(() => {
       <Dialog :open="categoryDialogRow !== null" @update:open="(open) => !open && (categoryDialogRow = null)">
         <DialogContent class="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>修改文章分类</DialogTitle>
+            <DialogTitle>{{ adminText('k00b1') }}</DialogTitle>
             <DialogDescription class="line-clamp-2">
-              为「{{ categoryDialogRow?.title }}」选择 1 到 3 个分类。
+              {{ adminText('k00b2', { title: categoryDialogRow?.title || '' }) }}
             </DialogDescription>
           </DialogHeader>
           <div class="grid gap-2 rounded-lg border bg-muted/20 p-3 sm:grid-cols-2">
@@ -470,8 +471,8 @@ onMounted(() => {
             </button>
           </div>
           <DialogFooter>
-            <Button variant="outline" type="button" @click="categoryDialogRow = null">取消</Button>
-            <Button type="button" :disabled="saving" @click="saveCategories">{{ saving ? '保存中...' : '保存分类' }}</Button>
+            <Button variant="outline" type="button" @click="categoryDialogRow = null">{{ adminText('k009q') }}</Button>
+            <Button type="button" :disabled="saving" @click="saveCategories">{{ saving ? adminText('k005f') : adminText('k0061') }}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -479,18 +480,18 @@ onMounted(() => {
       <Dialog :open="pinDialogRow !== null" @update:open="(open) => !open && (pinDialogRow = null)">
         <DialogContent class="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>设置全站置顶权重</DialogTitle>
+            <DialogTitle>{{ adminText('k00b4') }}</DialogTitle>
             <DialogDescription class="line-clamp-2">
-              「{{ pinDialogRow?.title }}」权重为 0 表示不置顶，数字越大越靠前。
+              {{ adminText('k00b5', { title: pinDialogRow?.title || '' }) }}
             </DialogDescription>
           </DialogHeader>
           <div class="space-y-2">
             <Input v-model.number="pinWeightInput" type="number" min="0" max="1000000" />
-            <p class="text-xs text-muted-foreground">建议从 100 开始设置，后续可用更大的数字调整顺序。</p>
+            <p class="text-xs text-muted-foreground">{{ adminText('k00b6') }}</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" type="button" @click="pinDialogRow = null">取消</Button>
-            <Button type="button" :disabled="saving" @click="savePinWeight">{{ saving ? '保存中...' : '保存' }}</Button>
+            <Button variant="outline" type="button" @click="pinDialogRow = null">{{ adminText('k009q') }}</Button>
+            <Button type="button" :disabled="saving" @click="savePinWeight">{{ saving ? adminText('k005f') : adminText('k005g') }}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -498,16 +499,16 @@ onMounted(() => {
       <Dialog :open="sourceDialogRow !== null" @update:open="(open) => !open && (sourceDialogRow = null)">
         <DialogContent class="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>查看帖子原文</DialogTitle>
+            <DialogTitle>{{ adminText('k00b7') }}</DialogTitle>
             <DialogDescription>{{ sourceDialogRow?.title }}</DialogDescription>
           </DialogHeader>
           <div class="max-h-[58vh] overflow-auto rounded-lg border bg-muted/20 p-4">
-            <pre v-if="sourceLoading" class="text-sm text-muted-foreground">加载中...</pre>
-            <pre v-else class="whitespace-pre-wrap break-words text-sm leading-6">{{ source?.content || '暂无内容' }}</pre>
+            <pre v-if="sourceLoading" class="text-sm text-muted-foreground">{{ adminText('k0046') }}</pre>
+            <pre v-else class="whitespace-pre-wrap break-words text-sm leading-6">{{ source?.content || adminText('k0062') }}</pre>
           </div>
           <DialogFooter>
-            <Button variant="outline" type="button" @click="sourceDialogRow = null">关闭</Button>
-            <Button type="button" :disabled="!source?.content" @click="copySource">复制原文</Button>
+            <Button variant="outline" type="button" @click="sourceDialogRow = null">{{ adminText('k00b8') }}</Button>
+            <Button type="button" :disabled="!source?.content" @click="copySource">{{ adminText('k00b9') }}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -515,15 +516,15 @@ onMounted(() => {
       <Dialog :open="actionRow !== null" @update:open="(open) => !open && (actionRow = null)">
         <DialogContent class="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{{ actionRow?.processStatus === 1 ? '确认恢复文章？' : '确认封禁文章？' }}</DialogTitle>
+            <DialogTitle>{{ actionRow?.processStatus === 1 ? adminText('k0063') : adminText('k0064') }}</DialogTitle>
             <DialogDescription>
-              {{ actionRow?.processStatus === 1 ? '恢复后用户可以重新查看该文章。' : '封禁后用户将无法查看该文章。' }}
+              {{ actionRow?.processStatus === 1 ? adminText('k0065') : adminText('k0066') }}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" type="button" @click="actionRow = null">取消</Button>
+            <Button variant="outline" type="button" @click="actionRow = null">{{ adminText('k009q') }}</Button>
             <Button :variant="actionRow?.processStatus === 1 ? 'default' : 'destructive'" type="button" :disabled="saving" @click="toggleProcessStatus">
-              {{ saving ? '处理中...' : (actionRow?.processStatus === 1 ? '恢复' : '封禁') }}
+              {{ saving ? adminText('k0067') : (actionRow?.processStatus === 1 ? adminText('k0068') : adminText('k0069')) }}
             </Button>
           </DialogFooter>
         </DialogContent>

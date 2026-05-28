@@ -1,4 +1,8 @@
-const unreadMessageAlerts = ['【新私信】', '【请查看】'] as const
+import { i18n } from './i18n'
+
+function unreadMessageAlerts() {
+  return [i18n.global.t('documentTitle.newMessage'), i18n.global.t('documentTitle.checkNow')]
+}
 const blinkIntervalMs = 1200
 
 let baseTitle = document.title
@@ -7,7 +11,8 @@ let unreadAlertIndex = 0
 let blinkTimer: number | undefined
 
 function applyDocumentTitle() {
-  document.title = hasUnreadMessages ? `${unreadMessageAlerts[unreadAlertIndex]} ${baseTitle}` : baseTitle
+  const alerts = unreadMessageAlerts()
+  document.title = hasUnreadMessages ? `${alerts[unreadAlertIndex]} ${baseTitle}` : baseTitle
 }
 
 function stopUnreadTitleBlink() {
@@ -22,7 +27,7 @@ function startUnreadTitleBlink() {
   if (blinkTimer !== undefined) return
   unreadAlertIndex = 0
   blinkTimer = window.setInterval(() => {
-    unreadAlertIndex = (unreadAlertIndex + 1) % unreadMessageAlerts.length
+    unreadAlertIndex = (unreadAlertIndex + 1) % unreadMessageAlerts().length
     applyDocumentTitle()
   }, blinkIntervalMs)
 }

@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { onMounted, ref } from 'vue'
 import { RefreshCw } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -19,20 +20,20 @@ const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 
-const columns = ['ID', '操作人', '操作类型', '目标类型', '目标 ID', '操作内容', '时间']
+const columns = ['ID', adminText('k0036'), adminText('k0037'), adminText('k0038'), adminText('k0039'), adminText('k003a'), adminText('k003b')]
 
 const optTypeMap: Record<number, string> = {
-  0: '操作用户',
-  1: '编辑文章',
+  0: adminText('k003c'),
+  1: adminText('k003d'),
 }
 
 const targetTypeMap: Record<number, string> = {
-  0: '系统',
-  1: '用户',
-  2: '文章',
-  3: '文档项目',
-  4: '文档版本',
-  5: '文档内容',
+  0: adminText('k003e'),
+  1: adminText('k003f'),
+  2: adminText('k003g'),
+  3: adminText('k003h'),
+  4: adminText('k003i'),
+  5: adminText('k003j'),
 }
 
 function pageResultSize(result: { pageSize?: number, size?: number }) {
@@ -49,7 +50,7 @@ async function loadRecords() {
     page.value = result.page + 1
     pageSize.value = pageResultSize(result)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '获取操作记录失败'
+    error.value = err instanceof Error ? err.message : adminText('k0013')
   } finally {
     loading.value = false
   }
@@ -67,11 +68,11 @@ function updatePageSize(value: number) {
 }
 
 function optTypeName(value: number) {
-  return optTypeMap[value] || `类型 ${value}`
+  return optTypeMap[value] || adminText('k00aj', { value })
 }
 
 function targetTypeName(value: number) {
-  return targetTypeMap[value] || `类型 ${value}`
+  return targetTypeMap[value] || adminText('k00ak', { value })
 }
 
 function formatTime(value: string) {
@@ -85,11 +86,11 @@ onMounted(loadRecords)
 </script>
 
 <template>
-  <BasicPage title="操作记录" description="查看后台关键管理操作的审计记录。" sticky>
+  <BasicPage :title="adminText('k007c')" :description="adminText('k007d')" sticky>
     <template #actions>
       <Button variant="outline" size="sm" type="button" :disabled="loading" @click="loadRecords">
         <RefreshCw class="size-4" :class="loading ? 'animate-spin' : ''" />
-        刷新
+        {{ adminText('k004q') }}
       </Button>
     </template>
 
@@ -97,7 +98,7 @@ onMounted(loadRecords)
         :columns="columns"
         :loading="loading"
         :error="error"
-        empty-text="暂无操作记录"
+        :empty-text="adminText('k007e')"
         :total="total"
         :page="page"
         :page-size="pageSize"
@@ -106,7 +107,7 @@ onMounted(loadRecords)
         @update:page-size="updatePageSize"
       >
         <tr v-if="rows.length === 0">
-          <td :colspan="columns.length" class="h-28 px-4 text-center text-muted-foreground">暂无操作记录</td>
+          <td :colspan="columns.length" class="h-28 px-4 text-center text-muted-foreground">{{ adminText('k007e') }}</td>
         </tr>
         <tr v-for="item in rows" v-else :key="item.id" class="transition-colors hover:bg-muted/35">
           <td class="px-4 py-3 font-mono text-xs text-muted-foreground">{{ item.id }}</td>

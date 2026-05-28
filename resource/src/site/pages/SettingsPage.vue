@@ -28,12 +28,14 @@ import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
 import FlashSpriteIcon from '@/site/components/FlashSpriteIcon.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
+import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
   layout: LayoutPayload
   props: SettingsPageProps
 }>()
 
+const { t } = useI18n()
 const tabKeys = ['profile', 'account', 'privacy', 'binding'] as const
 type TabKey = (typeof tabKeys)[number]
 
@@ -101,16 +103,16 @@ const privacy = reactive({
 })
 
 const displayName = computed(() => profileForm.nickname || usernameForm.username)
-const profileBioText = computed(() => profileForm.bio || profileForm.signature || '这个用户还没有留下简介。')
+const profileBioText = computed(() => profileForm.bio || profileForm.signature || t('user.emptyBio'))
 const hasStatus = computed(() => Boolean(status.value || error.value))
 const statsItems = computed(() => [
-  { label: '主题', value: page.props.stats.articleCount },
-  { label: '回复', value: page.props.stats.replyCount },
-  { label: '获赞', value: page.props.stats.likeReceivedCount },
-  { label: '点赞', value: page.props.stats.likeGivenCount },
-  { label: '粉丝', value: page.props.stats.followerCount },
-  { label: '关注', value: page.props.stats.followingCount },
-  { label: '收藏', value: page.props.stats.collectionCount },
+  { label: t('user.stats.topics'), value: page.props.stats.articleCount },
+  { label: t('user.stats.replies'), value: page.props.stats.replyCount },
+  { label: t('user.stats.likesReceived'), value: page.props.stats.likeReceivedCount },
+  { label: t('user.stats.likesGiven'), value: page.props.stats.likeGivenCount },
+  { label: t('user.stats.followers'), value: page.props.stats.followerCount },
+  { label: t('user.stats.following'), value: page.props.stats.followingCount },
+  { label: t('user.stats.bookmarks'), value: page.props.stats.collectionCount },
 ])
 const socialItems = computed(() => socialKeys.map((key) => ({
   key,
@@ -123,10 +125,10 @@ const providers = computed(() => [
 ])
 
 const easterEggMessages: Array<{ type: FlashMessageType; message: string }> = [
-  { type: 'success', message: '彩蛋触发成功：今天的头像也很有精神。' },
-  { type: 'info', message: '系统提示：这条消息只是来检查展示效果的。' },
-  { type: 'warning', message: '小提醒：你发现了设置页侧栏头像的隐藏开关。' },
-  { type: 'error', message: '模拟错误：别紧张，这只是消息框验收专用。' },
+  { type: 'success', message: t('settings.easterEgg.success') },
+  { type: 'info', message: t('settings.easterEgg.info') },
+  { type: 'warning', message: t('settings.easterEgg.warning') },
+  { type: 'error', message: t('settings.easterEgg.error') },
 ]
 
 watch(
@@ -193,9 +195,9 @@ async function saveProfile() {
   savingProfile.value = true
   try {
     await saveUserInfo({ ...profileForm })
-    showStatus('资料已保存')
+    showStatus(t('settings.status.profileSaved'))
   } catch (err) {
-    showError(err instanceof Error ? err.message : '资料保存失败')
+    showError(err instanceof Error ? err.message : t('api.profileSaveFailed'))
   } finally {
     savingProfile.value = false
   }
@@ -203,15 +205,15 @@ async function saveProfile() {
 
 async function saveUsername() {
   const username = usernameForm.username.trim()
-  if (!username) return showError('用户名不能为空')
+  if (!username) return showError(t('settings.validation.usernameRequired'))
 
   savingUsername.value = true
   try {
     await saveUserName(username)
     editingUsername.value = false
-    showStatus('用户名已更新')
+    showStatus(t('settings.status.usernameSaved'))
   } catch (err) {
-    showError(err instanceof Error ? err.message : '用户名保存失败')
+    showError(err instanceof Error ? err.message : t('api.usernameSaveFailed'))
   } finally {
     savingUsername.value = false
   }
@@ -224,15 +226,15 @@ function cancelUsernameEdit() {
 
 async function saveEmail() {
   const email = emailForm.email.trim()
-  if (!email) return showError('邮箱不能为空')
+  if (!email) return showError(t('settings.validation.emailRequired'))
 
   savingEmail.value = true
   try {
     await saveUserEmail(email)
     editingEmail.value = false
-    showStatus('邮箱已更新，请留意验证邮件')
+    showStatus(t('settings.status.emailSaved'))
   } catch (err) {
-    showError(err instanceof Error ? err.message : '邮箱保存失败')
+    showError(err instanceof Error ? err.message : t('api.emailSaveFailed'))
   } finally {
     savingEmail.value = false
   }
@@ -245,7 +247,7 @@ function cancelEmailEdit() {
 
 async function submitPassword() {
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    return showError('两次输入的新密码不一致')
+    return showError(t('auth.validation.passwordMismatch'))
   }
 
   savingPassword.value = true
@@ -254,9 +256,9 @@ async function submitPassword() {
     passwordForm.oldPassword = ''
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''
-    showStatus('密码已修改')
+    showStatus(t('settings.status.passwordChanged'))
   } catch (err) {
-    showError(err instanceof Error ? err.message : '密码修改失败')
+    showError(err instanceof Error ? err.message : t('api.passwordChangeFailed'))
   } finally {
     savingPassword.value = false
   }
@@ -264,7 +266,7 @@ async function submitPassword() {
 
 function savePrivacy() {
   localStorage.setItem('goose-privacy-settings', JSON.stringify(privacy))
-  showStatus('隐私偏好已保存')
+  showStatus(t('settings.status.privacySaved'))
 }
 
 async function loadBindings() {
@@ -272,7 +274,7 @@ async function loadBindings() {
   try {
     bindings.value = await getOAuthBindings()
   } catch (err) {
-    showError(err instanceof Error ? err.message : '绑定状态加载失败')
+    showError(err instanceof Error ? err.message : t('api.bindingsLoadFailed'))
   } finally {
     loadingBindings.value = false
   }
@@ -283,8 +285,8 @@ function isBound(provider: string) {
 }
 
 function providerActionLabel(provider: { key: string; supported: boolean }) {
-  if (!provider.supported) return '暂不支持'
-  return isBound(provider.key) ? '解除绑定' : '连接'
+  if (!provider.supported) return t('settings.binding.unsupported')
+  return isBound(provider.key) ? t('settings.binding.disconnect') : t('settings.binding.connect')
 }
 
 async function toggleBinding(provider: string) {
@@ -300,9 +302,9 @@ async function toggleBinding(provider: string) {
   try {
     await unbindOAuth(provider)
     await loadBindings()
-    showStatus('账号绑定已解除')
+    showStatus(t('settings.status.bindingDisconnected'))
   } catch (err) {
-    showError(err instanceof Error ? err.message : '解绑失败')
+    showError(err instanceof Error ? err.message : t('api.unbindFailed'))
   } finally {
     bindingAction.value = ''
   }
@@ -320,7 +322,7 @@ async function toggleBinding(provider: string) {
                 type="button"
                 class="group relative -mt-10 h-20 w-20 shrink-0 rounded-lg border-4 border-white bg-white shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-blue-100 sm:h-24 sm:w-24"
                 :disabled="uploadingAvatar"
-                aria-label="上传头像"
+                :aria-label="t('settings.avatar.upload')"
                 @click="chooseAvatar"
               >
                 <UserAvatar :src="avatarUrl" :alt="usernameForm.username" size="large" class="h-full w-full rounded object-cover transition group-hover:brightness-90" />
@@ -338,12 +340,12 @@ async function toggleBinding(provider: string) {
               <div class="min-w-0 pt-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
                   <h2 class="truncate text-2xl font-bold leading-tight text-gray-950">{{ displayName }}</h2>
-                  <span class="rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-blue-700">编辑中</span>
+                  <span class="rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-blue-700">{{ t('settings.editing') }}</span>
                   <button
                     type="button"
                     class="inline-flex h-7 w-7 items-center justify-center rounded-full outline-none transition hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-blue-100"
-                    aria-label="触发随机系统提示"
-                    title="触发彩蛋"
+                    :aria-label="t('settings.easterEgg.aria')"
+                    :title="t('settings.easterEgg.title')"
                     @click="triggerAvatarFlash"
                   >
                     <FlashSpriteIcon type="info" class="h-6 w-6" />
@@ -361,7 +363,7 @@ async function toggleBinding(provider: string) {
                 @click="chooseAvatar"
               >
                 <Camera class="h-4 w-4" />
-                更换头像
+                {{ t('settings.avatar.change') }}
               </button>
             </div>
           </div>
@@ -374,7 +376,7 @@ async function toggleBinding(provider: string) {
           </div>
 
           <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-gray-400">
-            <span class="inline-flex items-center gap-1.5"><CalendarDays class="h-3.5 w-3.5" /> 加入于 {{ formatDate(props.stats.createdAt) }}</span>
+            <span class="inline-flex items-center gap-1.5"><CalendarDays class="h-3.5 w-3.5" /> {{ t('user.joinedAt', { date: formatDate(props.stats.createdAt) }) }}</span>
             <span v-if="profileForm.website" class="inline-flex min-w-0 items-center gap-1.5">
               <LinkIcon class="h-3.5 w-3.5 shrink-0" />
               <span class="truncate">{{ profileForm.websiteName || profileForm.website }}</span>
@@ -410,14 +412,14 @@ async function toggleBinding(provider: string) {
             <div class="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
               <UserRound class="h-4 w-4 text-gray-400" />
               <div>
-                <h2 class="text-sm font-semibold text-gray-950">公开资料</h2>
-                <p class="mt-0.5 text-xs text-gray-400">这里的内容会展示在你的个人主页和悬停卡片中。</p>
+                <h2 class="text-sm font-semibold text-gray-950">{{ t('settings.profile.title') }}</h2>
+                <p class="mt-0.5 text-xs text-gray-400">{{ t('settings.profile.description') }}</p>
               </div>
             </div>
             <div class="space-y-6 p-4">
               <div class="grid gap-4 sm:grid-cols-2">
                 <label class="block min-w-0">
-                  <span class="text-sm font-medium text-gray-700">用户名</span>
+                  <span class="text-sm font-medium text-gray-700">{{ t('auth.username') }}</span>
                   <div v-if="!editingUsername" class="mt-1 flex min-w-0 items-center gap-2">
                     <div class="flex h-10 min-w-0 flex-1 items-center rounded-md border border-gray-100 bg-gray-50/70 px-3 text-sm font-medium text-gray-900">
                       <span class="truncate">{{ usernameForm.username }}</span>
@@ -428,19 +430,19 @@ async function toggleBinding(provider: string) {
                       @click="editingUsername = true"
                     >
                       <Pencil class="h-4 w-4" />
-                      编辑
+                      {{ t('common.edit') }}
                     </button>
                   </div>
                   <div v-else class="mt-1 flex min-w-0 gap-2">
                     <input v-model="usernameForm.username" class="h-10 min-w-0 flex-1 rounded-md border border-blue-300 px-3 text-sm outline-none ring-4 ring-blue-50 focus:border-blue-500" />
                     <button type="button" class="h-10 shrink-0 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60" :disabled="savingUsername" @click="saveUsername">
-                      {{ savingUsername ? '保存中' : '保存' }}
+                      {{ savingUsername ? t('settings.savingShort') : t('common.save') }}
                     </button>
-                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100" @click="cancelUsernameEdit">取消</button>
+                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100" @click="cancelUsernameEdit">{{ t('common.cancel') }}</button>
                   </div>
                 </label>
                 <label class="block min-w-0">
-                  <span class="text-sm font-medium text-gray-700">邮箱</span>
+                  <span class="text-sm font-medium text-gray-700">{{ t('auth.email') }}</span>
                   <div v-if="!editingEmail" class="mt-1 flex min-w-0 items-center gap-2">
                     <div class="flex h-10 min-w-0 flex-1 items-center rounded-md border border-gray-100 bg-gray-50/70 px-3 text-sm font-medium text-gray-900">
                       <span class="truncate">{{ emailForm.email }}</span>
@@ -451,44 +453,44 @@ async function toggleBinding(provider: string) {
                       @click="editingEmail = true"
                     >
                       <Pencil class="h-4 w-4" />
-                      编辑
+                      {{ t('common.edit') }}
                     </button>
                   </div>
                   <div v-else class="mt-1 flex min-w-0 gap-2">
                     <input v-model="emailForm.email" type="email" class="h-10 min-w-0 flex-1 rounded-md border border-blue-300 px-3 text-sm outline-none ring-4 ring-blue-50 focus:border-blue-500" />
                     <button type="button" class="h-10 shrink-0 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60" :disabled="savingEmail" @click="saveEmail">
-                      {{ savingEmail ? '保存中' : '保存' }}
+                      {{ savingEmail ? t('settings.savingShort') : t('common.save') }}
                     </button>
-                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100" @click="cancelEmailEdit">取消</button>
+                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100" @click="cancelEmailEdit">{{ t('common.cancel') }}</button>
                   </div>
                 </label>
                 <label class="block sm:col-span-2">
-                  <span class="text-sm font-medium text-gray-700">显示名称</span>
+                  <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.displayName') }}</span>
                   <input v-model="profileForm.nickname" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
                 </label>
                 <label class="block">
-                  <span class="text-sm font-medium text-gray-700">网站名称</span>
+                  <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.websiteName') }}</span>
                   <input v-model="profileForm.websiteName" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
                 </label>
                 <label class="block">
-                  <span class="text-sm font-medium text-gray-700">个人网站</span>
+                  <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.website') }}</span>
                   <input v-model="profileForm.website" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" placeholder="https://example.com" />
                 </label>
               </div>
 
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">简介</span>
+                <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.bio') }}</span>
                 <textarea v-model="profileForm.bio" class="mt-1 min-h-24 w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
               </label>
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">签名</span>
+                <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.signature') }}</span>
                 <textarea v-model="profileForm.signature" class="mt-1 min-h-20 w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
               </label>
 
               <div class="border-t border-gray-100 pt-5">
                 <div class="mb-3 flex items-center gap-2">
                   <LinkIcon class="h-4 w-4 text-gray-400" />
-                  <h3 class="text-sm font-semibold text-gray-950">社交资料</h3>
+                  <h3 class="text-sm font-semibold text-gray-950">{{ t('settings.profile.social') }}</h3>
                 </div>
                 <div class="grid gap-3 sm:grid-cols-2">
                   <label v-for="item in socialItems" :key="item.key" class="block">
@@ -513,7 +515,7 @@ async function toggleBinding(provider: string) {
                   @click="saveProfile"
                 >
                   <Loader2 v-if="savingProfile" class="h-4 w-4 animate-spin" />
-                  <span>{{ savingProfile ? '保存中' : '保存资料' }}</span>
+                  <span>{{ savingProfile ? t('settings.savingShort') : t('settings.profile.save') }}</span>
                 </button>
               </div>
             </div>
@@ -522,25 +524,25 @@ async function toggleBinding(provider: string) {
           <section v-show="activeTab === 'account'" class="p-4">
             <div class="mb-4 flex items-center gap-2">
               <KeyRound class="h-4 w-4 text-gray-400" />
-              <h2 class="text-sm font-semibold text-gray-950">账号安全</h2>
+              <h2 class="text-sm font-semibold text-gray-950">{{ t('settings.account.title') }}</h2>
             </div>
             <form class="max-w-xl space-y-4" @submit.prevent="submitPassword">
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">当前密码</span>
+                <span class="text-sm font-medium text-gray-700">{{ t('settings.account.currentPassword') }}</span>
                 <input v-model="passwordForm.oldPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
               </label>
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">新密码</span>
+                <span class="text-sm font-medium text-gray-700">{{ t('auth.newPassword') }}</span>
                 <input v-model="passwordForm.newPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
-                <span class="mt-1 block text-xs text-gray-400">至少 6 个字符。</span>
+                <span class="mt-1 block text-xs text-gray-400">{{ t('settings.account.passwordHint') }}</span>
               </label>
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">确认新密码</span>
+                <span class="text-sm font-medium text-gray-700">{{ t('auth.confirmPassword') }}</span>
                 <input v-model="passwordForm.confirmPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
               </label>
               <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70" :disabled="savingPassword">
                 <Loader2 v-if="savingPassword" class="h-4 w-4 animate-spin" />
-                修改密码
+                {{ t('settings.account.changePassword') }}
               </button>
             </form>
           </section>
@@ -548,27 +550,27 @@ async function toggleBinding(provider: string) {
           <section v-show="activeTab === 'privacy'" class="p-4">
             <div class="mb-2 flex items-center gap-2">
               <Shield class="h-4 w-4 text-gray-400" />
-              <h2 class="text-sm font-semibold text-gray-950">隐私偏好</h2>
+              <h2 class="text-sm font-semibold text-gray-950">{{ t('settings.privacy.title') }}</h2>
             </div>
             <div class="max-w-2xl divide-y divide-gray-100">
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
-                  <span class="block text-sm font-semibold text-gray-900">展示我的主题</span>
-                  <span class="text-sm text-gray-500">允许其他人从个人页查看公开主题。</span>
+                  <span class="block text-sm font-semibold text-gray-900">{{ t('settings.privacy.showArticles') }}</span>
+                  <span class="text-sm text-gray-500">{{ t('settings.privacy.showArticlesDescription') }}</span>
                 </span>
                 <input v-model="privacy.showArticles" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600" @change="savePrivacy" />
               </label>
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
-                  <span class="block text-sm font-semibold text-gray-900">展示关注关系</span>
-                  <span class="text-sm text-gray-500">允许其他人查看关注和粉丝信息。</span>
+                  <span class="block text-sm font-semibold text-gray-900">{{ t('settings.privacy.showFollowing') }}</span>
+                  <span class="text-sm text-gray-500">{{ t('settings.privacy.showFollowingDescription') }}</span>
                 </span>
                 <input v-model="privacy.showFollowing" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600" @change="savePrivacy" />
               </label>
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
-                  <span class="block text-sm font-semibold text-gray-900">邮件通知</span>
-                  <span class="text-sm text-gray-500">保留旧版本地偏好设置，后续可接入服务端策略。</span>
+                  <span class="block text-sm font-semibold text-gray-900">{{ t('settings.privacy.emailNotifications') }}</span>
+                  <span class="text-sm text-gray-500">{{ t('settings.privacy.emailNotificationsDescription') }}</span>
                 </span>
                 <input v-model="privacy.emailNotifications" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600" @change="savePrivacy" />
               </label>
@@ -579,13 +581,13 @@ async function toggleBinding(provider: string) {
             <div class="mb-4 flex items-center justify-between gap-3">
               <div class="flex items-center gap-2">
                 <Mail class="h-4 w-4 text-gray-400" />
-                <h2 class="text-sm font-semibold text-gray-950">账号绑定</h2>
+                <h2 class="text-sm font-semibold text-gray-950">{{ t('settings.binding.title') }}</h2>
               </div>
-              <button type="button" class="text-xs font-medium text-blue-600 hover:text-blue-700" @click="loadBindings">刷新</button>
+              <button type="button" class="text-xs font-medium text-blue-600 hover:text-blue-700" @click="loadBindings">{{ t('settings.binding.refresh') }}</button>
             </div>
             <div v-if="loadingBindings" class="py-8 text-center text-sm text-gray-500">
               <Loader2 class="mx-auto mb-2 h-5 w-5 animate-spin" />
-              正在加载绑定状态
+              {{ t('settings.binding.loading') }}
             </div>
             <div v-else class="space-y-3">
               <div
@@ -612,7 +614,7 @@ async function toggleBinding(provider: string) {
                   <div>
                     <h3 class="font-semibold text-gray-950">{{ provider.label }}</h3>
                     <p class="text-sm" :class="provider.supported ? 'text-gray-500' : 'text-gray-400'">
-                      {{ provider.supported ? (isBound(provider.key) ? '已连接' : '未连接') : '当前站点暂未开放' }}
+                      {{ provider.supported ? (isBound(provider.key) ? t('settings.binding.connected') : t('settings.binding.disconnected')) : t('settings.binding.siteUnsupported') }}
                     </p>
                   </div>
                 </div>
@@ -644,28 +646,28 @@ async function toggleBinding(provider: string) {
           <div class="flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
             <div class="flex items-center justify-between border-b border-gray-100 px-5 py-3">
               <div>
-                <h2 class="text-base font-semibold text-gray-950">裁切头像</h2>
-                <p class="mt-0.5 text-sm text-gray-500">拖动或缩放裁切框，确认后会自动压缩并优化格式。</p>
+                <h2 class="text-base font-semibold text-gray-950">{{ t('settings.avatar.cropTitle') }}</h2>
+                <p class="mt-0.5 text-sm text-gray-500">{{ t('settings.avatar.cropDescription') }}</p>
               </div>
               <button type="button" class="rounded-md px-2 py-1 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900" @click="closeCropModal">
-                关闭
+                {{ t('common.close') }}
               </button>
             </div>
 
             <div class="grid gap-4 overflow-y-auto p-4 md:grid-cols-[minmax(280px,420px)_180px] md:items-start md:justify-center">
               <div class="avatar-crop-workspace aspect-square w-full max-w-[420px] justify-self-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
-                <img ref="cropperImage" :src="cropImageUrl" alt="待裁切头像" class="block" />
+                <img ref="cropperImage" :src="cropImageUrl" :alt="t('settings.avatar.cropAlt')" class="block" />
               </div>
 
               <aside class="grid gap-4 sm:grid-cols-[128px_minmax(0,1fr)] md:block md:space-y-4">
                 <div class="min-w-0">
-                  <div class="mb-2 text-sm font-semibold text-gray-950">预览</div>
+                  <div class="mb-2 text-sm font-semibold text-gray-950">{{ t('settings.avatar.preview') }}</div>
                   <div class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-gray-100 bg-gray-50">
-                    <img v-if="cropPreviewUrl" :src="cropPreviewUrl" alt="头像预览" class="h-full w-full object-cover" />
+                    <img v-if="cropPreviewUrl" :src="cropPreviewUrl" :alt="t('settings.avatar.previewAlt')" class="h-full w-full object-cover" />
                   </div>
                 </div>
                 <div class="self-start rounded-lg bg-gray-50 p-3 text-sm leading-6 text-gray-500">
-                  建议让脸部或标识位于圆形中心。最终头像会导出为 300 x 300，并按浏览器支持优先转为 WebP。
+                  {{ t('settings.avatar.cropTip') }}
                 </div>
               </aside>
             </div>
@@ -676,7 +678,7 @@ async function toggleBinding(provider: string) {
 
             <div class="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50 px-5 py-3">
               <button type="button" class="h-10 rounded-md px-4 text-sm font-medium text-gray-600 hover:bg-gray-100" @click="closeCropModal">
-                取消
+                {{ t('common.cancel') }}
               </button>
               <button
                 type="button"
@@ -685,7 +687,7 @@ async function toggleBinding(provider: string) {
                 @click="uploadCroppedAvatar"
               >
                 <Loader2 v-if="uploadingAvatar" class="h-4 w-4 animate-spin" />
-                {{ uploadingAvatar ? '上传中' : '确认上传' }}
+                {{ uploadingAvatar ? t('settings.avatar.uploading') : t('settings.avatar.confirmUpload') }}
               </button>
             </div>
           </div>

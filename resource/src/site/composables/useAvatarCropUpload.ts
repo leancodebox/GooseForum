@@ -1,6 +1,7 @@
 import { nextTick, onBeforeUnmount, ref } from 'vue'
 import type Cropper from 'cropperjs'
 import { uploadAvatar } from '@/runtime/api'
+import { i18n } from '@/runtime/i18n'
 import { canvasToImageFile, validateImageFile } from '@/runtime/image'
 
 interface AvatarCropUploadOptions {
@@ -149,7 +150,7 @@ export function useAvatarCropUpload(options: AvatarCropUploadOptions) {
     cropError.value = ''
     try {
       const selection = cropper.getCropperSelection()
-      if (!selection) throw new Error('请选择裁切区域')
+      if (!selection) throw new Error(i18n.global.t('avatarCrop.selectArea'))
       const canvas = await selection.$toCanvas({
         width: 300,
         height: 300,
@@ -161,9 +162,9 @@ export function useAvatarCropUpload(options: AvatarCropUploadOptions) {
       const avatarFiles = await createAvatarUploadFiles(canvas, cropSourceFile.value.name)
       avatarUrl.value = await uploadAvatar(avatarFiles)
       closeCropModal()
-      options.onStatus('头像已更新')
+      options.onStatus(i18n.global.t('avatarCrop.updated'))
     } catch (err) {
-      const message = err instanceof Error ? err.message : '头像上传失败'
+      const message = err instanceof Error ? err.message : i18n.global.t('api.avatarUploadFailed')
       cropError.value = message
       options.onError(message)
     } finally {
@@ -223,7 +224,7 @@ function resizeAvatarCanvas(sourceCanvas: HTMLCanvasElement, size: number): HTML
   canvas.width = size
   canvas.height = size
   const context = canvas.getContext('2d')
-  if (!context) throw new Error('无法处理头像')
+  if (!context) throw new Error(i18n.global.t('avatarCrop.processFailed'))
 
   context.imageSmoothingEnabled = true
   context.imageSmoothingQuality = 'high'

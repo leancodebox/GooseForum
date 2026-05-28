@@ -10,8 +10,8 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "GooseForum",
-	Short: "A brief description of your application",
+	Use:   "gooseforum",
+	Short: "GooseForum command line tools",
 	Long:  `GooseForum`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		migration.M()

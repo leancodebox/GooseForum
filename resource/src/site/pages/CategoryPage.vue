@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Loader2, MessageSquare, Plus, UsersRound } from '@lucide/vue'
 import { formatNumber, timeAgo } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
@@ -12,6 +13,7 @@ const page = defineProps<{
   layout: LayoutPayload
   props: CategoryPageProps
 }>()
+const { t } = useI18n()
 
 const topics = ref<TopicPayload[]>([])
 const pagination = ref<CategoryPageProps['pagination']>(page.props.pagination)
@@ -42,7 +44,7 @@ async function loadMore() {
     topics.value = mergeTopics(topics.value, payload.props.topics)
     pagination.value = payload.props.pagination
   } catch (error) {
-    loadError.value = error instanceof Error ? error.message : '加载失败'
+    loadError.value = error instanceof Error ? error.message : t('common.loadFailed')
   } finally {
     loadingMore.value = false
   }
@@ -51,6 +53,14 @@ async function loadMore() {
 function mergeTopics(current: TopicPayload[], incoming: TopicPayload[]) {
   const seen = new Set(current.map((topic) => topic.id))
   return [...current, ...incoming.filter((topic) => !seen.has(topic.id))]
+}
+
+function sortTabLabel(key: string, fallback: string) {
+  if (key === 'latest') return t('topicList.tabs.latestReplies')
+  if (key === 'new') return t('topicList.tabs.latestPublished')
+  if (key === 'hot') return t('topicList.tabs.hot')
+  if (key === 'popular') return t('topicList.tabs.popular')
+  return fallback
 }
 
 function observeSentinel() {
@@ -80,7 +90,7 @@ onBeforeUnmount(() => {
           <div class="flex min-w-0 items-center gap-2">
             <h1 class="truncate text-xl font-bold text-gray-950">{{ page.props.category.name }}</h1>
             <span class="h-1.5 w-1.5 shrink-0 rounded-full" :style="{ backgroundColor: page.props.category.color || '#2563eb' }" />
-            <span class="text-xs font-semibold uppercase text-gray-600">Category</span>
+            <span class="text-xs font-semibold uppercase text-gray-600">{{ t('category.label') }}</span>
           </div>
           <p v-if="page.props.category.description" class="mt-1 max-w-3xl truncate text-sm text-gray-500">{{ page.props.category.description }}</p>
         </div>
@@ -96,21 +106,21 @@ onBeforeUnmount(() => {
               class="inline-flex h-8 shrink-0 items-center rounded-md px-3 text-sm font-semibold"
               :class="tab.active ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-950'"
             >
-              {{ tab.label }}
+              {{ sortTabLabel(tab.key, tab.label) }}
             </a>
           </div>
           <a href="/publish" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700">
             <Plus class="h-4 w-4" />
-            新建主题
+            {{ t('topicList.newTopic') }}
           </a>
         </div>
 
         <div class="hidden gap-3 grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] border-b border-gray-100 bg-gray-50/60 px-4 py-2 text-[11px] font-bold uppercase text-gray-600 lg:grid">
-          <div>Topic</div>
-          <div class="text-center">Users</div>
-          <div class="text-center">Replies</div>
-          <div class="text-center">Views</div>
-          <div class="text-right">Activity</div>
+          <div>{{ t('topicList.columns.topic') }}</div>
+          <div class="text-center">{{ t('topicList.columns.users') }}</div>
+          <div class="text-center">{{ t('topicList.columns.replies') }}</div>
+          <div class="text-center">{{ t('topicList.columns.views') }}</div>
+          <div class="text-right">{{ t('topicList.columns.activity') }}</div>
         </div>
 
         <div class="relative bg-white">
@@ -166,8 +176,8 @@ onBeforeUnmount(() => {
 
           <div v-if="!hasTopics" class="px-5 py-16 text-center">
             <UsersRound class="mx-auto h-8 w-8 text-gray-300" />
-            <h2 class="mt-3 text-base font-semibold text-gray-900">暂无主题</h2>
-            <p class="mt-1 text-sm text-gray-500">这个分类还没有公开主题。</p>
+            <h2 class="mt-3 text-base font-semibold text-gray-900">{{ t('topicList.emptyTitle') }}</h2>
+            <p class="mt-1 text-sm text-gray-500">{{ t('topicList.emptyCategoryDescription') }}</p>
           </div>
         </div>
 
@@ -180,11 +190,11 @@ onBeforeUnmount(() => {
             @click="loadMore"
           >
             <Loader2 v-if="loadingMore" class="h-4 w-4 animate-spin" />
-            {{ loadingMore ? '加载中...' : '加载更多' }}
+            {{ loadingMore ? t('common.loadFailed') : t('common.loadMore') }}
           </button>
-          <p v-else-if="hasTopics" class="text-xs font-medium text-gray-400">已显示全部主题</p>
-          <p v-if="loadError" class="mt-2 text-xs text-red-600">自动加载失败，可以稍后重试。</p>
-          <a v-if="pagination.hasNext" :href="pagination.nextUrl" rel="next" class="sr-only">下一页</a>
+          <p v-else-if="hasTopics" class="text-xs font-medium text-gray-400">{{ t('topicList.allShown') }}</p>
+          <p v-if="loadError" class="mt-2 text-xs text-red-600">{{ t('topicList.autoLoadFailed') }}</p>
+          <a v-if="pagination.hasNext" :href="pagination.nextUrl" rel="next" class="sr-only">{{ t('common.nextPage') }}</a>
         </div>
       </section>
     </div>

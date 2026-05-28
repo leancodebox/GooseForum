@@ -74,21 +74,6 @@ func SyncArticlePosters(articleId uint64) []uint64 {
 	return activeUserIDs
 }
 
-func FixStat(articleId, userId uint64, count uint32, lastReplyAt time.Time) error {
-	return builder().Clauses(clause.OnConflict{
-		Columns: []clause.Column{{Name: "article_id"}, {Name: "user_id"}},
-		DoUpdates: clause.Assignments(map[string]any{
-			"reply_count":   count,
-			"last_reply_at": lastReplyAt,
-		}),
-	}).Create(map[string]any{
-		"article_id":    articleId,
-		"user_id":       userId,
-		"reply_count":   count,
-		"last_reply_at": lastReplyAt,
-	}).Error
-}
-
 //func saveAll(entities []*Entity) int64 {
 //	result := builder().Save(entities)
 //	return result.RowsAffected

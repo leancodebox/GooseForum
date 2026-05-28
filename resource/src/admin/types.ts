@@ -16,8 +16,8 @@ export type ManageHomeProps = Record<string, never>
 
 export interface ApiEnvelope<T> {
   code?: number
-  msg?: string
-  message?: string
+  messageCode?: string
+  params?: Record<string, unknown>
   result?: T
   data?: T
 }

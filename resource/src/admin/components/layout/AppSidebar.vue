@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { adminText } from '@/admin/runtime/i18n-text'
 import {
   Award,
   FileText,
@@ -32,12 +33,14 @@ import {
 import { RouterLink, useRoute } from 'vue-router'
 import type { LayoutPayload } from '@/types/payload'
 import type { LucideIcon } from '@lucide/vue'
+import { useI18n } from 'vue-i18n'
 
 defineProps<{
   layout: LayoutPayload
 }>()
 
 const route = useRoute()
+const { locale } = useI18n()
 const currentPath = computed(() => route.path.replace(/\/+$/, '') || '/admin')
 
 interface NavItem {
@@ -54,32 +57,35 @@ interface NavGroup {
   items: NavItem[]
 }
 
-const navGroups: NavGroup[] = [
+const navGroups = computed<NavGroup[]>(() => {
+  locale.value
+  return [
   {
     title: 'GooseForum',
     items: [
-      { title: '站点统计', url: '/admin', icon: Monitor },
-      { title: '用户管理', url: '/admin/users', icon: UserCog },
-      { title: '角色管理', url: '/admin/roles', icon: ShieldCheck },
-      { title: '分类管理', url: '/admin/categories', icon: Tags },
-      { title: '帖子管理', url: '/admin/posts', icon: FileText },
-      { title: '友情链接', url: '/admin/links', icon: Link },
-      { title: '赞助管理', url: '/admin/sponsors', icon: Heart },
-      { title: '徽章管理', url: '/admin/badges', icon: Award },
-      { title: '操作记录', url: '/admin/opt-records', icon: ListChecks },
+      { title: adminText('k004c'), url: '/admin', icon: Monitor },
+      { title: adminText('k006i'), url: '/admin/users', icon: UserCog },
+      { title: adminText('k007f'), url: '/admin/roles', icon: ShieldCheck },
+      { title: adminText('k005l'), url: '/admin/categories', icon: Tags },
+      { title: adminText('k005u'), url: '/admin/posts', icon: FileText },
+      { title: adminText('k002j'), url: '/admin/links', icon: Link },
+      { title: adminText('k004o'), url: '/admin/sponsors', icon: Heart },
+      { title: adminText('k0058'), url: '/admin/badges', icon: Award },
+      { title: adminText('k007c'), url: '/admin/opt-records', icon: ListChecks },
     ],
   },
   {
-    title: '站点设置',
+    title: adminText('k007t'),
     items: [
-      { title: '基础信息', url: '/admin/settings/site-info', icon: PanelsTopLeft },
-      { title: '发信服务', url: '/admin/settings/mail', icon: Mail },
-      { title: '安全与注册', url: '/admin/settings/security', icon: ShieldCheck },
-      { title: '发布内容', url: '/admin/settings/posting', icon: FileText },
-      { title: '系统公告', url: '/admin/settings/announcement', icon: Megaphone },
+      { title: adminText('k007u'), url: '/admin/settings/site-info', icon: PanelsTopLeft },
+      { title: adminText('k007v'), url: '/admin/settings/mail', icon: Mail },
+      { title: adminText('k0005'), url: '/admin/settings/security', icon: ShieldCheck },
+      { title: adminText('k007w'), url: '/admin/settings/posting', icon: FileText },
+      { title: adminText('k0009'), url: '/admin/settings/announcement', icon: Megaphone },
     ],
   },
-]
+  ]
+})
 
 function isActive(item: NavItem) {
   return currentPath.value === item.url
@@ -96,7 +102,7 @@ function isActive(item: NavItem) {
             size="lg"
             class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <a href="/" target="_blank" rel="noopener noreferrer" title="打开前台首页">
+            <a href="/" target="_blank" rel="noopener noreferrer" :title="adminText('k007s')">
               <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <GalleryVerticalEnd class="size-4" />
               </div>
@@ -146,7 +152,7 @@ function isActive(item: NavItem) {
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-semibold">{{ layout.viewer.username || 'shadcn' }}</span>
-              <span class="truncate text-xs">{{ layout.viewer.email || '未设置邮箱' }}</span>
+              <span class="truncate text-xs">{{ layout.viewer.email || adminText('k007x') }}</span>
             </div>
           </SidebarMenuButton>
         </SidebarMenuItem>

@@ -16,6 +16,7 @@ var (
 	db     *badger.DB
 	once   sync.Once
 	stopGC = make(chan struct{})
+	gcWg   sync.WaitGroup
 
 	// ErrNotFound 键不存在
 	ErrNotFound = errors.New("kvstore: key not found")
@@ -62,6 +63,7 @@ func getDB() *badger.DB {
 		}
 
 		// 启动后台 GC 协程
+		gcWg.Add(1)
 		go runGC()
 
 		// 自动注册到全局关闭管理器
@@ -75,6 +77,7 @@ func getDB() *badger.DB {
 
 // runGC 定期执行 Value Log GC 以回收磁盘空间
 func runGC() {
+	defer gcWg.Done()
 	// 每 10 分钟检查一次是否需要 GC
 	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
@@ -85,6 +88,12 @@ func runGC() {
 			// RunValueLogGC 参数 0.5 表示如果一个 log 文件中超过 50% 的数据是过期的，则重写该文件
 			// 循环执行直到没有文件可以被 GC
 			for {
+				select {
+				case <-stopGC:
+					slog.Debug("kvstore: stop gc worker")
+					return
+				default:
+				}
 				if err := db.RunValueLogGC(0.5); err != nil {
 					break
 				}
@@ -105,6 +114,7 @@ func Close() {
 		default:
 			close(stopGC)
 		}
+		gcWg.Wait()
 		if err := db.Close(); err != nil {
 			slog.Error("kvstore: failed to close database", "error", err)
 		}

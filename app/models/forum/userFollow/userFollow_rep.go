@@ -28,18 +28,6 @@ func Get(id any) (entity Entity) {
 	return
 }
 
-func GetFollowingCount(userId uint64) int64 {
-	var count int64
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&count)
-	return count
-}
-
-func GetFollowerCount(userId uint64) int64 {
-	var count int64
-	builder().Where(queryopt.Eq(fieldFollowUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Count(&count)
-	return count
-}
-
 func GetByUserId(userId, followUserId uint64) (entity Entity) {
 	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldFollowUserId, followUserId)).First(&entity)
 	return
@@ -56,13 +44,6 @@ func IsFollowing(userId, followUserId uint64) bool {
 		Where(queryopt.Eq(fieldStatus, 1)).
 		Count(&count)
 	return count > 0
-}
-
-// GetAll returns paginated follow records for export and repair jobs.
-func GetAll(offset, limit int) ([]*Entity, error) {
-	var entities []*Entity
-	err := builder().Offset(offset).Limit(limit).Order("id ASC").Find(&entities).Error
-	return entities, err
 }
 
 // GetAllFollowingIds returns all followed user IDs.

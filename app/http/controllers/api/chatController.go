@@ -22,7 +22,11 @@ func SendMessage(req component.BetterRequest[SendMessageReq]) component.Response
 
 	convId, err := chatservice.SendMessage(req.UserId, req.Params.PeerId, req.Params.Content, msgType)
 	if err != nil {
-		return component.FailResponse(err.Error())
+		return component.FailResponseCode(
+			component.MessageChatSendFailed,
+
+			component.MessageParams{"error": err.Error()})
+
 	}
 	return successDataMap("convId", convId)
 }
@@ -38,7 +42,7 @@ type GetMessagesReq struct {
 func GetMessages(req component.BetterRequest[GetMessagesReq]) component.Response {
 	msgs, err := chatservice.GetMessages(req.UserId, req.Params.ConvId, req.Params.Page, req.Params.PageSize)
 	if err != nil {
-		return component.FailResponse("Failed to get messages")
+		return component.FailResponseCode(component.MessageChatGetMessagesFailed, nil)
 	}
 	return successDataMap("list", msgs)
 }
@@ -52,7 +56,7 @@ type MarkReadReq struct {
 func MarkChatRead(req component.BetterRequest[MarkReadReq]) component.Response {
 	err := chatservice.MarkRead(req.UserId, req.Params.ConvId)
 	if err != nil {
-		return component.FailResponse("Failed to mark read")
+		return component.FailResponseCode(component.MessageChatMarkReadFailed, nil)
 	}
 	return component.SuccessResponse(nil)
 }

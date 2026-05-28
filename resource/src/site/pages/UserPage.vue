@@ -16,26 +16,28 @@ import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/for
 import { topicDescription } from '@/runtime/topic-description'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '@/types/payload'
+import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
   layout: LayoutPayload
   props: UserProfileProps
 }>()
 
+const { t } = useI18n()
 const activeTab = ref<'topics' | 'activity' | 'following' | 'followers'>('topics')
 const isFollowing = ref(page.props.user.isFollowing)
 const followLoading = ref(false)
 const followError = ref('')
 
 const displayName = computed(() => page.props.user.nickname || page.props.user.username)
-const bioText = computed(() => page.props.user.bio || page.props.user.signature || '这个用户还没有留下简介。')
+const bioText = computed(() => page.props.user.bio || page.props.user.signature || t('user.emptyBio'))
 const visibleTopics = computed(() => page.props.topics)
 const visibleBadges = computed(() => page.props.badges.slice(0, 8))
 const tabItems = computed(() => [
-  { key: 'topics', label: '主题', count: page.props.topics.length },
-  { key: 'activity', label: '动态', count: page.props.activities.length },
-  { key: 'following', label: '关注', count: page.props.user.followingCount },
-  { key: 'followers', label: '粉丝', count: page.props.user.followerCount },
+  { key: 'topics', label: t('user.tabs.topics'), count: page.props.topics.length },
+  { key: 'activity', label: t('user.tabs.activity'), count: page.props.activities.length },
+  { key: 'following', label: t('user.tabs.following'), count: page.props.user.followingCount },
+  { key: 'followers', label: t('user.tabs.followers'), count: page.props.user.followerCount },
 ] as const)
 
 watch(
@@ -56,7 +58,7 @@ async function toggleFollow() {
     await followUser(page.props.user.userId, isFollowing.value)
     isFollowing.value = !isFollowing.value
   } catch (error) {
-    followError.value = error instanceof Error ? error.message : '关注操作失败'
+    followError.value = error instanceof Error ? error.message : t('api.followFailed')
   } finally {
     followLoading.value = false
   }
@@ -113,7 +115,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
                   <h1 class="truncate text-2xl font-bold leading-tight text-gray-950">{{ displayName }}</h1>
                   <span v-if="page.props.user.isAdmin" class="rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">Admin</span>
                   <span v-if="page.props.user.isOnline" class="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-                    <Radio class="h-3 w-3" /> 在线
+                    <Radio class="h-3 w-3" /> {{ t('user.online') }}
                   </span>
                 </div>
                 <p class="mt-1 text-sm font-medium text-gray-400">@{{ page.props.user.username }}</p>
@@ -128,7 +130,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
                 class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
               >
                 <Settings class="h-4 w-4" />
-                编辑资料
+                {{ t('user.editProfile') }}
               </a>
               <a
                 v-else-if="page.props.canMessage"
@@ -136,7 +138,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
                 class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
               >
                 <MessageSquare class="h-4 w-4" />
-                私信
+                {{ t('shell.nav.messages') }}
               </a>
               <button
                 v-if="page.props.canFollow"
@@ -147,7 +149,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
                 @click="toggleFollow"
               >
                 <UserPlus class="h-4 w-4" />
-                {{ followLoading ? '处理中...' : isFollowing ? '已关注' : '关注' }}
+                {{ followLoading ? t('common.loading') : isFollowing ? t('user.following') : t('user.follow') }}
               </button>
             </div>
           </div>
@@ -157,37 +159,37 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
           <div class="mt-5 grid grid-cols-4 border-y border-gray-100 py-3 lg:grid-cols-7 lg:py-4">
             <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
               <div class="text-lg font-bold tabular-nums text-gray-950 lg:text-xl">{{ formatNumber(page.props.user.articleCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">主题</div>
+              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">{{ t('user.stats.topics') }}</div>
             </div>
             <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
               <div class="text-lg font-bold tabular-nums text-gray-950 lg:text-xl">{{ formatNumber(page.props.user.replyCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">回复</div>
+              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">{{ t('user.stats.replies') }}</div>
             </div>
             <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
               <div class="text-lg font-bold tabular-nums text-gray-950 lg:text-xl">{{ formatNumber(page.props.user.likeReceivedCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">获赞</div>
+              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">{{ t('user.stats.likesReceived') }}</div>
             </div>
             <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
               <div class="text-lg font-bold tabular-nums text-gray-950 lg:text-xl">{{ formatNumber(page.props.user.likeGivenCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">点赞</div>
+              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">{{ t('user.stats.likesGiven') }}</div>
             </div>
             <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
               <div class="text-lg font-bold tabular-nums text-gray-950 lg:text-xl">{{ formatNumber(page.props.user.followerCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">粉丝</div>
+              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">{{ t('user.stats.followers') }}</div>
             </div>
             <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
               <div class="text-lg font-bold tabular-nums text-gray-950 lg:text-xl">{{ formatNumber(page.props.user.followingCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">关注</div>
+              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">{{ t('user.stats.following') }}</div>
             </div>
             <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
               <div class="text-lg font-bold tabular-nums text-gray-950 lg:text-xl">{{ formatNumber(page.props.user.collectionCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">收藏</div>
+              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">{{ t('user.stats.bookmarks') }}</div>
             </div>
           </div>
 
           <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-gray-400">
-            <span class="inline-flex items-center gap-1.5"><CalendarDays class="h-3.5 w-3.5" /> 加入于 {{ formatDate(page.props.user.createdAt) }}</span>
-            <span v-if="page.props.user.lastActiveTime">最后活跃 {{ timeAgo(page.props.user.lastActiveTime) }}</span>
+            <span class="inline-flex items-center gap-1.5"><CalendarDays class="h-3.5 w-3.5" /> {{ t('user.joinedAt', { date: formatDate(page.props.user.createdAt) }) }}</span>
+            <span v-if="page.props.user.lastActiveTime">{{ t('user.lastActive', { time: timeAgo(page.props.user.lastActiveTime) }) }}</span>
           </div>
 
           <div v-if="visibleBadges.length" class="mt-5 border-t border-gray-100 pt-4">
@@ -252,7 +254,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
             <span class="hidden text-center text-sm tabular-nums text-gray-500 sm:block">{{ formatNumber(topic.viewCount) }}</span>
             <span class="hidden text-right text-xs font-medium text-gray-400 sm:block">{{ timeAgo(topic.lastUpdateTime) }}</span>
           </a>
-          <div v-if="!visibleTopics.length" class="px-4 py-14 text-center text-sm text-gray-500">还没有发布主题。</div>
+          <div v-if="!visibleTopics.length" class="px-4 py-14 text-center text-sm text-gray-500">{{ t('user.emptyTopics') }}</div>
         </div>
 
         <div v-else-if="activeTab === 'activity'" class="p-4">
@@ -275,7 +277,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
                 <time class="mt-1 block text-xs text-gray-400">{{ formatDateTime(activity.createdAt) }}</time>
               </span>
             </a>
-            <div v-if="!page.props.activities.length" class="py-14 text-center text-sm text-gray-500">暂无动态。</div>
+            <div v-if="!page.props.activities.length" class="py-14 text-center text-sm text-gray-500">{{ t('user.emptyActivity') }}</div>
           </div>
         </div>
 
@@ -291,12 +293,12 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
               <span class="min-w-0">
                 <span class="block truncate text-sm font-semibold text-gray-900">{{ item.nickname || item.username }}</span>
                 <span class="block truncate text-xs text-gray-400">@{{ item.username }}</span>
-                <span class="mt-1 block truncate text-xs text-gray-500">{{ item.bio || '暂无简介' }}</span>
+                <span class="mt-1 block truncate text-xs text-gray-500">{{ item.bio || t('user.noBio') }}</span>
               </span>
             </a>
           </div>
           <div v-if="(activeTab === 'following' ? page.props.following : page.props.followers).length === 0" class="py-14 text-center text-sm text-gray-500">
-            暂无数据。
+            {{ t('user.emptyData') }}
           </div>
         </div>
       </section>

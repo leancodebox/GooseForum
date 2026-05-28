@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { FileText, Link as LinkIcon, MessageSquare, Users } from '@lucide/vue'
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -40,27 +41,27 @@ const startDate = ref(formatDate(addDays(new Date(), -7)))
 
 const summaryItems = computed(() => [
   {
-    label: '总用户数',
+    label: adminText('k002g'),
     value: stats.value?.userCount,
     delta: `+${stats.value?.userMonthCount ?? 0}`,
     icon: Users,
     visible: true,
   },
   {
-    label: '总文章数',
+    label: adminText('k002h'),
     value: stats.value?.articleCount,
     delta: `+${stats.value?.articleMonthCount ?? 0}`,
     icon: FileText,
     visible: true,
   },
   {
-    label: '总回复数',
+    label: adminText('k002i'),
     value: stats.value?.reply,
     icon: MessageSquare,
     visible: true,
   },
   {
-    label: '友情链接',
+    label: adminText('k002j'),
     value: stats.value?.linksCount,
     icon: LinkIcon,
     visible: true,
@@ -87,15 +88,15 @@ function formatNumber(value?: number) {
 function modeLabel(mode?: string) {
   switch (mode) {
     case 'release':
-      return '正式版'
+      return adminText('k002k')
     case 'snapshot':
-      return '快照版'
+      return adminText('k002l')
     case 'development':
-      return '开发版'
+      return adminText('k002m')
     case 'custom':
-      return '自定义'
+      return adminText('k002n')
     default:
-      return '未知'
+      return adminText('k002o')
   }
 }
 
@@ -137,7 +138,7 @@ async function loadReleases() {
     releases.value = await getGithubReleases()
   } catch (error) {
     console.error('Failed to fetch releases:', error)
-    releasesError.value = error instanceof Error ? error.message : '网络错误，无法连接到 GitHub'
+    releasesError.value = error instanceof Error ? error.message : adminText('k002p')
   } finally {
     releasesLoading.value = false
   }
@@ -153,16 +154,16 @@ onMounted(() => {
 
 <template>
   <BasicPage
-    title="站点统计"
-    description="查看论坛的实时运行数据和活跃度指标。"
+    :title="adminText('k004c')"
+    :description="adminText('k004d')"
     sticky
   >
     <template #actions>
       <div class="flex flex-wrap items-center gap-3">
         <div class="inline-flex max-w-full items-center gap-2 rounded-md border bg-muted/35 px-2.5 py-1 text-xs text-muted-foreground">
           <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-          <span class="shrink-0">服务端</span>
-          <span class="truncate font-semibold text-foreground">{{ serverVersionLoading ? '读取中...' : serverVersion?.version || 'dev' }}</span>
+          <span class="shrink-0">{{ adminText('k002q') }}</span>
+          <span class="truncate font-semibold text-foreground">{{ serverVersionLoading ? adminText('k004e') : serverVersion?.version || 'dev' }}</span>
           <span
             v-if="!serverVersionLoading"
             class="inline-flex h-5 shrink-0 items-center rounded-md bg-secondary px-1.5 text-[10px] font-medium text-secondary-foreground"

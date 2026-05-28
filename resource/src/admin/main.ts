@@ -5,6 +5,7 @@ import './styles/admin.css'
 import 'vue-sonner/style.css'
 import { readAdminPayload } from '@/admin/runtime/payload'
 import { adminRouter } from '@/admin/runtime/router'
+import { i18n } from '@/runtime/i18n'
 
 const payload = readAdminPayload()
 
@@ -25,5 +26,6 @@ const app = createApp({
 })
 
 app.use(adminRouter)
+app.use(i18n)
 await adminRouter.isReady()
 app.mount('#goose-admin-app')

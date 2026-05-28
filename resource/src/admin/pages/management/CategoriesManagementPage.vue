@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Pencil, Plus, RefreshCw, Search, Trash2 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -77,7 +78,7 @@ async function loadCategories() {
   try {
     rows.value = await getCategoryList()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '加载分类失败'
+    error.value = err instanceof Error ? err.message : adminText('k0043')
   } finally {
     loading.value = false
   }
@@ -106,7 +107,7 @@ function openEdit(row: AdminCategory) {
 
 async function submitCategory() {
   if (!form.category.trim()) {
-    adminToast.warning('分类名称不能为空')
+    adminToast.warning(adminText('k0044'))
     return
   }
   saving.value = true
@@ -124,9 +125,9 @@ async function submitCategory() {
     })
     dialogMode.value = null
     await loadCategories()
-    adminToast.success('保存成功')
+    adminToast.success(adminText('k000e'))
   } catch (err) {
-    adminToast.error(err, '保存分类失败')
+    adminToast.error(err, adminText('k0010'))
   } finally {
     saving.value = false
   }
@@ -139,9 +140,9 @@ async function confirmDelete() {
     await deleteCategory(deletingRow.value.id)
     deletingRow.value = null
     await loadCategories()
-    adminToast.success('删除成功')
+    adminToast.success(adminText('k002u'))
   } catch (err) {
-    adminToast.error(err, '删除分类失败')
+    adminToast.error(err, adminText('k0011'))
   } finally {
     deleting.value = false
   }
@@ -153,16 +154,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <BasicPage title="分类管理" description="管理论坛的文章分类、展示颜色、Slug 和排序。" sticky>
+  <BasicPage :title="adminText('k005l')" :description="adminText('k0045')" sticky>
     <template #actions>
       <div class="flex items-center gap-2">
         <Button variant="outline" type="button" @click="loadCategories">
           <RefreshCw class="size-4" />
-          刷新
+          {{ adminText('k004q') }}
         </Button>
         <Button type="button" @click="openCreate">
           <Plus class="size-4" />
-          新增分类
+          {{ adminText('k005m') }}
         </Button>
       </div>
     </template>
@@ -170,10 +171,10 @@ onMounted(() => {
       <div class="mb-4 flex items-center gap-2">
         <div class="relative w-full max-w-md">
           <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input v-model="search" class="pl-9" placeholder="搜索分类名称、Slug 或描述..." />
+          <Input v-model="search" class="pl-9" :placeholder="adminText('k005q')" />
         </div>
         <Badge variant="secondary" class="h-9 rounded-md px-3">
-          {{ filteredRows.length }} 个分类
+          {{ filteredRows.length }} {{ adminText('k00c1') }}
         </Badge>
       </div>
 
@@ -182,23 +183,23 @@ onMounted(() => {
           <TableHeader>
             <TableRow>
               <TableHead class="w-20">ID</TableHead>
-              <TableHead>分类名称</TableHead>
+              <TableHead>{{ adminText('k00c2') }}</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead>描述</TableHead>
-              <TableHead class="w-24">排序</TableHead>
-              <TableHead class="w-24">状态</TableHead>
-              <TableHead class="w-32 text-right">操作</TableHead>
+              <TableHead>{{ adminText('k00ag') }}</TableHead>
+              <TableHead class="w-24">{{ adminText('k00bf') }}</TableHead>
+              <TableHead class="w-24">{{ adminText('k007j') }}</TableHead>
+              <TableHead class="w-32 text-right">{{ adminText('k007m') }}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow v-if="loading">
-              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">加载中...</TableCell>
+              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
             </TableRow>
             <TableRow v-else-if="error">
               <TableCell colspan="7" class="h-28 text-center text-destructive">{{ error }}</TableCell>
             </TableRow>
             <TableRow v-else-if="filteredRows.length === 0">
-              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">暂无分类</TableCell>
+              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">{{ adminText('k00c3') }}</TableCell>
             </TableRow>
             <template v-else>
               <TableRow v-for="item in filteredRows" :key="item.id">
@@ -215,14 +216,14 @@ onMounted(() => {
                 <TableCell>{{ item.sort ?? 0 }}</TableCell>
                 <TableCell>
                   <Badge :variant="item.status === 0 ? 'secondary' : 'default'">
-                    {{ item.status === 0 ? '隐藏' : '启用' }}
+                    {{ item.status === 0 ? adminText('k005n') : adminText('k005o') }}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <div class="flex justify-end gap-2">
                     <Button variant="outline" size="sm" type="button" @click="openEdit(item)">
                       <Pencil class="size-3.5" />
-                      编辑
+                      {{ adminText('k005j') }}
                     </Button>
                     <Button variant="destructive" size="sm" type="button" @click="deletingRow = item">
                       <Trash2 class="size-3.5" />
@@ -238,15 +239,15 @@ onMounted(() => {
       <Dialog :open="dialogMode !== null" @update:open="(open) => !open && (dialogMode = null)">
         <DialogContent class="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{{ dialogMode === 'edit' ? '编辑分类' : '新增分类' }}</DialogTitle>
+            <DialogTitle>{{ dialogMode === 'edit' ? adminText('k005p') : adminText('k005m') }}</DialogTitle>
             <DialogDescription>
-              设置分类名称、Slug、图标和前台展示颜色。
+              {{ adminText('k00c4') }}
             </DialogDescription>
           </DialogHeader>
           <form class="grid gap-4" @submit.prevent="submitCategory">
             <label class="grid gap-2 text-sm font-medium">
-              分类名称
-              <Input v-model="form.category" placeholder="请输入分类名称" />
+              {{ adminText('k00c2') }}
+              <Input v-model="form.category" :placeholder="adminText('k005r')" />
             </label>
             <div class="grid gap-4 sm:grid-cols-2">
               <label class="grid gap-2 text-sm font-medium">
@@ -254,29 +255,29 @@ onMounted(() => {
                 <Input v-model="form.slug" placeholder="category-slug" />
               </label>
               <label class="grid gap-2 text-sm font-medium">
-                图标 / Emoji
-                <Input v-model="form.icon" placeholder="例如 🧠 或图标名" />
+                {{ adminText('k00c5') }}
+                <Input v-model="form.icon" :placeholder="adminText('k005s')" />
               </label>
             </div>
             <label class="grid gap-2 text-sm font-medium">
-              描述
-              <Input v-model="form.desc" placeholder="分类说明" />
+              {{ adminText('k00ag') }}
+              <Input v-model="form.desc" :placeholder="adminText('k005t')" />
             </label>
             <div class="grid gap-4 sm:grid-cols-2">
               <label class="grid gap-2 text-sm font-medium">
-                排序
+                {{ adminText('k00bf') }}
                 <Input v-model.number="form.sort" type="number" />
               </label>
               <label class="grid gap-2 text-sm font-medium">
-                状态
+                {{ adminText('k007j') }}
                 <select v-model.number="form.status" class="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <option :value="1">启用</option>
-                  <option :value="0">隐藏</option>
+                  <option :value="1">{{ adminText('k005o') }}</option>
+                  <option :value="0">{{ adminText('k005n') }}</option>
                 </select>
               </label>
             </div>
             <div class="grid gap-2 text-sm font-medium">
-              颜色
+              {{ adminText('k00ad') }}
               <div class="flex flex-wrap items-center gap-2">
                 <button
                   v-for="color in presetColors"
@@ -288,12 +289,12 @@ onMounted(() => {
                   @click="form.color = color"
                 />
                 <Input v-model="form.color" class="w-32 font-mono text-xs" placeholder="#64748b" />
-                <Button variant="outline" size="sm" type="button" @click="form.color = ''">清除</Button>
+                <Button variant="outline" size="sm" type="button" @click="form.color = ''">{{ adminText('k00at') }}</Button>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" type="button" @click="dialogMode = null">取消</Button>
-              <Button type="submit" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</Button>
+              <Button variant="outline" type="button" @click="dialogMode = null">{{ adminText('k009q') }}</Button>
+              <Button type="submit" :disabled="saving">{{ saving ? adminText('k005f') : adminText('k005g') }}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -302,15 +303,15 @@ onMounted(() => {
       <Dialog :open="deletingRow !== null" @update:open="(open) => !open && (deletingRow = null)">
         <DialogContent class="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>确认删除分类？</DialogTitle>
+            <DialogTitle>{{ adminText('k00c6') }}</DialogTitle>
             <DialogDescription>
-              此操作会删除分类「{{ deletingRow?.category }}」，请确认没有内容依赖它。
+              {{ adminText('k00c7') }}{{ deletingRow?.category }}{{ adminText('k00c8') }}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" type="button" @click="deletingRow = null">取消</Button>
+            <Button variant="outline" type="button" @click="deletingRow = null">{{ adminText('k009q') }}</Button>
             <Button variant="destructive" type="button" :disabled="deleting" @click="confirmDelete">
-              {{ deleting ? '删除中...' : '删除' }}
+              {{ deleting ? adminText('k005h') : adminText('k005i') }}
             </Button>
           </DialogFooter>
         </DialogContent>
