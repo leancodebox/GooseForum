@@ -8,6 +8,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/permission"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +39,7 @@ func runUserSetPassword(_ *cobra.Command, args []string) error {
 		return err
 	}
 	user.SetPassword(args[1])
-	if err := users.Save(&user); err != nil {
+	if err := userservice.SaveUser(&user); err != nil {
 		return fmt.Errorf("save user password: %w", err)
 	}
 	fmt.Printf("Password updated for user %d (%s).\n", user.Id, user.Username)
@@ -51,7 +52,7 @@ func runUserSetEmail(_ *cobra.Command, args []string) error {
 		return err
 	}
 	user.Email = args[1]
-	if err := users.Save(&user); err != nil {
+	if err := userservice.SaveUser(&user); err != nil {
 		return fmt.Errorf("save user email: %w", err)
 	}
 	fmt.Printf("Email updated for user %d (%s): %s\n", user.Id, user.Username, user.Email)
@@ -78,9 +79,10 @@ func runUserSetAdmin(_ *cobra.Command, args []string) error {
 		rs.Effective = 1
 		rolePermissionRs.SaveOrCreateById(&rs)
 	}
+	permission.InvalidateRole(roleEntity.Id)
 
 	user.RoleId = roleEntity.Id
-	if err := users.Save(&user); err != nil {
+	if err := userservice.SaveUser(&user); err != nil {
 		return fmt.Errorf("save user role: %w", err)
 	}
 	fmt.Printf("User %d (%s) is now an administrator.\n", user.Id, user.Username)

@@ -1,29 +1,19 @@
 package usercardservice
 
 import (
-	"context"
 	"strconv"
-	"time"
+	"sync/atomic"
 
-	"github.com/allegro/bigcache/v3"
-	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
+	"github.com/leancodebox/GooseForum/app/bundles/appcache"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
-const cardTTL = 2 * time.Minute
-
-var cardCache = newCardCache()
-
-func newCardCache() *bigcache.BigCache {
-	cache, err := bigcache.New(context.Background(), bigcache.DefaultConfig(cardTTL))
-	if err != nil {
-		return nil
-	}
-	return cache
-}
+// cardVersion scopes all user-card keys inside the shared app cache.
+// Bumping it invalidates every card key without resetting unrelated cache entries.
+var cardVersion atomic.Uint64
 
 func GetHoverCard(userID uint64) (*vo.UserHoverCard, bool) {
 	card, ok := getCached[vo.UserHoverCard](hoverKey(userID))
@@ -54,17 +44,18 @@ func GetCard(userID uint64) (*vo.UserCard, bool) {
 }
 
 func Invalidate(userID uint64) {
-	if userID == 0 || cardCache == nil {
+	if userID == 0 {
 		return
 	}
-	_ = cardCache.Delete(hoverKey(userID))
-	_ = cardCache.Delete(cardKey(userID))
+	appcache.Delete(hoverKey(userID))
+	appcache.Delete(cardKey(userID))
 }
 
 func Clear() {
-	if cardCache != nil {
-		_ = cardCache.Reset()
-	}
+	// The underlying app cache is shared by unread status and user summaries, so
+	// we cannot Reset it here. Versioned keys make old card entries unreachable
+	// and let bigcache remove them naturally when the TTL expires.
+	cardVersion.Add(1)
 }
 
 func loadUserStats(userID uint64) (users.EntityComplete, userStatistics.Entity, bool) {
@@ -76,28 +67,17 @@ func loadUserStats(userID uint64) (users.EntityComplete, userStatistics.Entity, 
 }
 
 func getCached[T any](key string) (T, bool) {
-	var zero T
-	if cardCache == nil {
-		return zero, false
-	}
-	data, err := cardCache.Get(key)
-	if err != nil {
-		return zero, false
-	}
-	return jsonopt.Decode[T](data), true
+	return appcache.GetJSON[T](key)
 }
 
 func setCached[T any](key string, value T) {
-	if cardCache == nil {
-		return
-	}
-	_ = cardCache.Set(key, []byte(jsonopt.Encode(value)))
+	_ = appcache.SetJSON(key, value)
 }
 
 func hoverKey(userID uint64) string {
-	return "user-hover-card:" + strconv.FormatUint(userID, 10)
+	return "user:card:v" + strconv.FormatUint(cardVersion.Load(), 10) + ":hover:" + strconv.FormatUint(userID, 10)
 }
 
 func cardKey(userID uint64) string {
-	return "user-card:" + strconv.FormatUint(userID, 10)
+	return "user:card:v" + strconv.FormatUint(cardVersion.Load(), 10) + ":full:" + strconv.FormatUint(userID, 10)
 }

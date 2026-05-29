@@ -72,7 +72,7 @@ func GetUserShowByUserId(userId uint64) *vo.UserInfoShow {
 	if userId == 0 {
 		return &vo.UserInfoShow{}
 	}
-	return hotdataserve.GetOrLoad(fmt.Sprintf("user:%v", userId), func() (*vo.UserInfoShow, error) {
+	return hotdataserve.GetOrLoad(hotdataserve.UserShowCacheKey(userId), func() (*vo.UserInfoShow, error) {
 		user, _ := users.Get(userId)
 		if user.Id == 0 {
 			return &vo.UserInfoShow{}, errors.New("no found")

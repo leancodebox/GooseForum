@@ -106,12 +106,6 @@ func GetByArticleIdBefore(articleId uint64, id uint64, limit int) (entities []*E
 	return
 }
 
-func CountByArticleId(articleId uint64) int64 {
-	var count int64
-	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Count(&count)
-	return count
-}
-
 func GetUserCount(userId uint64) int64 {
 	var count int64
 	builder().Where(queryopt.Eq(fieldUserId, userId)).Where("deleted_at IS NULL").Count(&count)

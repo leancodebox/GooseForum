@@ -1,73 +1,25 @@
 package hotdataserve
 
 import (
-	"context"
-	"errors"
-	"log/slog"
+	"strconv"
 	"time"
 
-	"github.com/allegro/bigcache/v3"
-	"github.com/leancodebox/GooseForum/app/bundles/closer"
+	"github.com/leancodebox/GooseForum/app/bundles/appcache"
 	"github.com/leancodebox/GooseForum/app/bundles/datacache"
-	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 )
 
-var cacheResp *bigcache.BigCache
-
-func init() {
-	config := bigcache.DefaultConfig(1 * time.Minute)
-	config.Shards = 16
-	config.MaxEntriesInWindow = 256
-	config.MaxEntrySize = 4096
-	config.HardMaxCacheSize = 8
-	config.Verbose = false
-
-	var err error
-	cacheResp, err = bigcache.New(context.Background(), config)
-	if err != nil {
-		slog.Error("hotdataserve cache init failed", "err", err)
-		return
-	}
-	closer.Register(func() error {
-		return cacheResp.Close()
-	})
+func UserShowCacheKey(userID uint64) string {
+	return "user:show:" + strconv.FormatUint(userID, 10)
 }
 
 func GetOrLoad[T any](key string, load func() (T, error)) T {
-	if cacheResp != nil {
-		if data, err := cacheResp.Get(key); err == nil {
-			slog.Debug("hotdataserve cache: hit", "key", key)
-			return jsonopt.Decode[T](data)
-		}
-	}
-	slog.Debug("hotdataserve cache: miss", "key", key)
-	res, err := load()
-	if err != nil {
-		slog.Debug("hotdataserve cache: loader error", "key", key, "err", err)
-		return res
-	}
-	if cacheResp != nil {
-		if setErr := cacheResp.Set(key, []byte(jsonopt.Encode(res))); setErr != nil {
-			slog.Debug("hotdataserve cache: store error", "key", key, "err", setErr)
-		} else {
-			slog.Debug("hotdataserve cache: stored", "key", key)
-		}
-	}
-	return res
+	return appcache.GetOrLoadJSON(key, load)
 }
 
 func Reload[T any](key string, dataObj T) error {
-	if cacheResp != nil {
-		if err := cacheResp.Set(key, []byte(jsonopt.Encode(dataObj))); err != nil {
-			slog.Debug("hotdataserve cache: reload error", "key", key, "err", err)
-			return err
-		}
-		slog.Debug("hotdataserve cache: reloaded", "key", key)
-		return nil
-	}
-	return errors.New("no cache")
+	return appcache.SetJSON(key, dataObj)
 }
 
 var sponsorsConfigCache = &datacache.Cache[pageConfig.SponsorsConfig]{}

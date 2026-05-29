@@ -29,6 +29,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/usercardservice"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
 )
 
@@ -370,7 +371,9 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 		opt = true
 	}
 	if opt {
-		users.Save(&user)
+		if err := userservice.SaveUser(&user); err != nil {
+			return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
+		}
 		optlogger.UserOpt(req.UserId, optlogger.EditUser, user.Id, msg)
 	}
 	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
@@ -719,6 +722,7 @@ func RoleSave(req component.BetterRequest[RoleSaveReq]) component.Response {
 		}
 		rolePermissionRs.SaveOrCreateById(&rsItem)
 	}
+	permission.InvalidateRole(roleEntity.Id)
 
 	return component.SuccessResponse(true)
 }
@@ -738,6 +742,7 @@ func RoleDel(req component.BetterRequest[RoleSaveDel]) component.Response {
 		rolePermissionRs.DeleteEntity(item)
 	})
 	role.DeleteEntity(&roleEntity)
+	permission.InvalidateRole(roleEntity.Id)
 	return component.SuccessResponse(true)
 }
 

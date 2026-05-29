@@ -123,7 +123,7 @@ func InitEventBus() {
 // Publish 发布事件
 func Publish(ctx context.Context, event any) error {
 	if eventBus == nil {
-		return fmt.Errorf("event bus not initialized")
+		return errors.New("event bus not initialized")
 	}
 	return eventBus.Publish(ctx, event)
 }
@@ -143,7 +143,7 @@ func AddHandlers(handlers ...cqrs.EventHandler) {
 func Start() error {
 	Init(eventhandlers.Handlers()...)
 	if router == nil {
-		return fmt.Errorf("router not initialized")
+		return errors.New("router not initialized")
 	}
 
 	var ctx context.Context

@@ -1,6 +1,7 @@
 package searchservice
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -69,7 +70,7 @@ func BuildSingleArticleSearchDocument(article *articles.Entity) (*meilisearch.Ta
 // BuildMeilisearchIndex rebuilds the Meilisearch article index.
 func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 	if !meiliconnect.IsAvailable() {
-		return nil, fmt.Errorf("Meilisearch 服务不可用，请检查配置或连接状态")
+		return nil, errors.New("Meilisearch 服务不可用，请检查配置或连接状态")
 	}
 
 	fmt.Println("开始构建 Meilisearch 文章索引...")

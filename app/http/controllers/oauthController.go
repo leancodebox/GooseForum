@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/markbates/goth/gothic"
 )
 
@@ -76,7 +77,7 @@ func ProviderCallback(c *gin.Context) {
 		if user.IsActivated == users.ActivationPending {
 			user.IsActivated = users.ActivationSuccess
 			// 更新用户状态
-			err = users.Save(user)
+			err = userservice.SaveUser(user)
 			if err != nil {
 				slog.Error("Update user activation status failed", "error", err)
 				c.JSON(http.StatusInternalServerError, gin.H{

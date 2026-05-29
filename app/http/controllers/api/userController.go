@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
-	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/leancodebox/GooseForum/app/service/usercardservice"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
@@ -93,7 +93,7 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 	userEntity.IsActivated = users.ActivationPending
 	userEntity.ActivatedAt = nil
 
-	err = SaveUser(&userEntity)
+	err = userservice.SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
 	}
@@ -123,7 +123,7 @@ func EditUsername(req component.BetterRequest[EditUsernameReq]) component.Respon
 		return component.FailResponseCode(component.MessageAuthUsernameExists, nil)
 	}
 	userEntity.Username = newUsername
-	err = SaveUser(&userEntity)
+	err = userservice.SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
 	}
@@ -158,7 +158,7 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 	userEntity.WebsiteName = req.Params.WebsiteName
 	userEntity.ExternalInformation = req.Params.ExternalInformation
 
-	err = SaveUser(&userEntity)
+	err = userservice.SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
 	}
@@ -247,10 +247,11 @@ func UploadAvatar(c *gin.Context) {
 		}
 		fileEntities = []*filedata.Entity{fileEntity}
 	} else {
-		uploads := []filedata.AvatarUpload{{
+		uploads := make([]filedata.AvatarUpload, 0, 2)
+		uploads = append(uploads, filedata.AvatarUpload{
 			Filename: files.Main.Filename,
 			Data:     mainData,
-		}}
+		})
 		fileData, err := readAvatarUploadFile(files.AvatarMedium, maxSize, allowedExts)
 		if err != nil {
 			c.JSON(200, component.FailDataError(err))
@@ -272,7 +273,7 @@ func UploadAvatar(c *gin.Context) {
 	}
 
 	userEntity.AvatarUrl = fileEntities[0].Name
-	if err := SaveUser(&userEntity); err != nil {
+	if err := userservice.SaveUser(&userEntity); err != nil {
 		c.JSON(200, component.FailDataCode(component.MessageUserUpdateFailed, nil))
 		return
 	}
@@ -334,7 +335,7 @@ func readAvatarUploadFile(file *multipart.FileHeader, maxSize int64, allowedExts
 			extensions := strings.Join(allowedExts, ", ")
 			return nil, component.NewMessageError(
 				component.MessageUploadUnsupportedExt,
-				fmt.Sprintf("不支持的文件格式，允许的格式为: %s", extensions),
+				"不支持的文件格式，允许的格式为: "+extensions,
 				component.MessageParams{"extensions": extensions},
 			)
 		}
@@ -390,23 +391,12 @@ func ChangePassword(req component.BetterRequest[ChangePasswordReq]) component.Re
 	}
 
 	userEntity.SetPassword(req.Params.NewPassword)
-	err = SaveUser(&userEntity)
+	err = userservice.SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponseCode(component.MessageAuthPasswordUpdateFailed, nil)
 	}
 
 	return component.SuccessResponseCode("密码修改成功", component.MessageAuthPasswordUpdateSuccess, nil)
-}
-
-func SaveUser(userEntity *users.EntityComplete) error {
-	err := users.Save(userEntity)
-	if err == nil {
-		if cacheErr := hotdataserve.Reload(fmt.Sprintf("user:%v", userEntity.Id), transform.User2userShow(*userEntity)); cacheErr != nil {
-			slog.Error(cacheErr.Error())
-		}
-		usercardservice.Invalidate(userEntity.Id)
-	}
-	return err
 }
 
 // ForgotPasswordReq is the password reset email request.
@@ -474,7 +464,7 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 	}
 
 	userEntity.SetPassword(req.Params.NewPassword)
-	err = SaveUser(&userEntity)
+	err = userservice.SaveUser(&userEntity)
 	if err != nil {
 		return component.FailResponseCode(component.MessageAuthResetFailed, nil)
 	}

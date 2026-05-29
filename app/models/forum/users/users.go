@@ -124,9 +124,8 @@ func (itself *EntityComplete) SetPassword(password string) *EntityComplete {
 	return itself
 }
 
-func (itself *EntityComplete) Activate() error {
+func (itself *EntityComplete) Activate() {
 	itself.IsActivated = ActivationSuccess
 	activatedAt := time.Now()
 	itself.ActivatedAt = &activatedAt
-	return Save(itself)
 }

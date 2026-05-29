@@ -9,7 +9,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/articleviewservice"
-	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
 
@@ -129,10 +128,19 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 		}
 	}
 
-	userIDs := lo.Map(replyEntities, func(item *reply.Entity, _ int) uint64 {
-		return item.UserId
-	})
-	userMap := users.GetMapByIds(lo.Uniq(userIDs))
+	userIDs := make([]uint64, 0, len(replyEntities))
+	seenUserIDs := make(map[uint64]struct{}, len(replyEntities))
+	for _, item := range replyEntities {
+		if item == nil {
+			continue
+		}
+		if _, seen := seenUserIDs[item.UserId]; seen {
+			continue
+		}
+		seenUserIDs[item.UserId] = struct{}{}
+		userIDs = append(userIDs, item.UserId)
+	}
+	userMap := users.GetMapByIds(userIDs)
 	payloadReplies := buildReplyPayloads(replyEntities, userMap, req.UserId)
 
 	var beforeCursor uint64
@@ -149,7 +157,7 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 		AfterCursor:   afterCursor,
 		HasBefore:     hasBefore,
 		HasAfter:      hasAfter,
-		Total:         reply.CountByArticleId(articleID),
+		Total:         int64(articleEntity.ReplyCount),
 	})
 }
 

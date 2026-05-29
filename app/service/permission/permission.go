@@ -65,6 +65,10 @@ func GetPermissionByRoleId(roleId uint64) []Enum {
 	}, 10*time.Minute) // 缓存 10 分钟
 }
 
+func InvalidateRole(roleId uint64) {
+	rolePermissionCache.Delete(fmt.Sprintf("role_permission:%d", roleId))
+}
+
 // CheckRole 检查某人是否有某权限
 func CheckRole(roleId uint64, permission Enum) bool {
 	pList := GetPermissionByRoleId(roleId)
@@ -76,7 +80,7 @@ func CheckRole(roleId uint64, permission Enum) bool {
 
 // GetPermission 获取权限 (兼容旧接口)
 func GetPermission(roleIds []uint64) []Enum {
-	var result []Enum
+	result := make([]Enum, 0, len(roleIds))
 	for _, rid := range roleIds {
 		result = append(result, GetPermissionByRoleId(rid)...)
 	}

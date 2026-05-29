@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/leancodebox/GooseForum/resource"
 )
 
@@ -46,8 +47,8 @@ func ActivateAccount(c *gin.Context) {
 	}
 
 	// 激活账号
-	err = user.Activate()
-	if err != nil {
+	user.Activate()
+	if err = userservice.SaveUser(&user); err != nil {
 		renderActivationPage(c, false, "激活失败")
 		return
 	}

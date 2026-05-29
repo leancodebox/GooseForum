@@ -1,6 +1,7 @@
 package filedata
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"strings"
@@ -74,7 +75,7 @@ func SaveFile(userId uint64, name string, fileType string, data []byte) (*Entity
 	}
 	affected := create(entity)
 	if affected == 0 {
-		return nil, fmt.Errorf("failed to save file, possibly duplicate name")
+		return nil, errors.New("failed to save file, possibly duplicate name")
 	}
 	return entity, nil
 }
@@ -82,7 +83,7 @@ func SaveFile(userId uint64, name string, fileType string, data []byte) (*Entity
 func GetFile(id uint64) (*Entity, error) {
 	entity := Get(id)
 	if entity.Id == 0 {
-		return nil, fmt.Errorf("file not found")
+		return nil, errors.New("file not found")
 	}
 	return &entity, nil
 }
@@ -90,7 +91,7 @@ func GetFile(id uint64) (*Entity, error) {
 func GetFileByName(name string) (*Entity, error) {
 	entity := GetByName(name)
 	if entity.Id == 0 {
-		return nil, fmt.Errorf("file not found")
+		return nil, errors.New("file not found")
 	}
 	return &entity, nil
 }
@@ -141,10 +142,10 @@ func SaveAvatar(userId uint64, fileData []byte, filename string) (*Entity, error
 
 func SaveAvatarSet(userId uint64, uploads []AvatarUpload) ([]*Entity, error) {
 	if len(uploads) == 0 {
-		return nil, fmt.Errorf("avatar files are required")
+		return nil, errors.New("avatar files are required")
 	}
 	if len(uploads) > 2 {
-		return nil, fmt.Errorf("avatar files exceed maximum limit of 2")
+		return nil, errors.New("avatar files exceed maximum limit of 2")
 	}
 
 	avatarPath := fmt.Sprintf("%s/%d/%d", AvatarPath, userId, time.Now().UnixNano())

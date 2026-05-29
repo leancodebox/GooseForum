@@ -39,9 +39,12 @@ func FirstUserInit(adminUser *users.EntityComplete) {
 		rp.PermissionId = permission.Admin.Id()
 		rp.Effective = 1
 		rolePermissionRs.SaveOrCreateById(&rp)
+		permission.InvalidateRole(roleEntity.Id)
 		slog.Info("created missing admin role permission relation")
 	}
 
 	adminUser.RoleId = roleEntity.Id
-	users.Save(adminUser)
+	if err := SaveUser(adminUser); err != nil {
+		slog.Error("save first admin user failed", "userId", adminUser.Id, "error", err)
+	}
 }

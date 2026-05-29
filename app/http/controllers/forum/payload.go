@@ -1,6 +1,7 @@
 package forum
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -745,9 +746,21 @@ func buildHomeMeta(c *gin.Context) PageMeta {
 func buildArticleDetailProps(c *gin.Context, entity *articles.Entity) ArticleDetailProps {
 	currentUserID := component.LoginUserId(c)
 	replyEntities := reply.GetFirstPageByArticleId(entity.Id)
-	userIDs := []uint64{entity.UserId}
-	userIDs = append(userIDs, lo.Map(replyEntities, func(item *reply.Entity, _ int) uint64 { return item.UserId })...)
-	userMap := users.GetMapByIds(lo.Uniq(userIDs))
+	userIDs := make([]uint64, 0, 1+len(replyEntities))
+	seenUserIDs := make(map[uint64]struct{}, 1+len(replyEntities))
+	userIDs = append(userIDs, entity.UserId)
+	seenUserIDs[entity.UserId] = struct{}{}
+	for _, item := range replyEntities {
+		if item == nil {
+			continue
+		}
+		if _, seen := seenUserIDs[item.UserId]; seen {
+			continue
+		}
+		seenUserIDs[item.UserId] = struct{}{}
+		userIDs = append(userIDs, item.UserId)
+	}
+	userMap := users.GetMapByIds(userIDs)
 
 	return ArticleDetailProps{
 		Article:   buildArticlePayload(c, entity, userMap),
@@ -761,38 +774,62 @@ func buildArticleDetailProps(c *gin.Context, entity *articles.Entity) ArticleDet
 }
 
 func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64) []ReplyPayload {
-	replyMap := lo.KeyBy(replyEntities, func(item *reply.Entity) uint64 { return item.Id })
+	replyMap := make(map[uint64]*reply.Entity, len(replyEntities))
+	for _, item := range replyEntities {
+		if item != nil {
+			replyMap[item.Id] = item
+		}
+	}
+
 	missingParentIDs := make([]uint64, 0)
+	seenMissingParentIDs := make(map[uint64]struct{})
 	for _, item := range replyEntities {
 		if item == nil || item.ReplyId == 0 {
 			continue
 		}
 		if _, ok := replyMap[item.ReplyId]; !ok {
+			if _, seen := seenMissingParentIDs[item.ReplyId]; seen {
+				continue
+			}
+			seenMissingParentIDs[item.ReplyId] = struct{}{}
 			missingParentIDs = append(missingParentIDs, item.ReplyId)
 		}
 	}
-	for _, parent := range reply.GetByIds(lo.Uniq(missingParentIDs)) {
+	for _, parent := range reply.GetByIds(missingParentIDs) {
 		if parent != nil {
 			replyMap[parent.Id] = parent
 		}
 	}
 
 	userIDs := make([]uint64, 0, len(replyEntities)+len(replyMap))
+	seenUserIDs := make(map[uint64]struct{}, len(replyEntities)+len(replyMap))
 	for _, item := range replyEntities {
-		if item != nil {
+		if item == nil {
+			continue
+		}
+		if _, seen := seenUserIDs[item.UserId]; !seen {
+			seenUserIDs[item.UserId] = struct{}{}
 			userIDs = append(userIDs, item.UserId)
 		}
 	}
 	for _, parent := range replyMap {
-		if parent != nil {
+		if parent == nil {
+			continue
+		}
+		if _, seen := seenUserIDs[parent.UserId]; !seen {
+			seenUserIDs[parent.UserId] = struct{}{}
 			userIDs = append(userIDs, parent.UserId)
 		}
 	}
-	for userID, user := range users.GetMapByIds(lo.Uniq(userIDs)) {
+	for userID, user := range users.GetMapByIds(userIDs) {
 		userMap[userID] = user
 	}
 
-	return lo.Map(replyEntities, func(item *reply.Entity, _ int) ReplyPayload {
+	res := make([]ReplyPayload, 0, len(replyEntities))
+	for _, item := range replyEntities {
+		if item == nil {
+			continue
+		}
 		author := userPayload(item.UserId, userMap)
 		replyToName, replyToUserID := "", uint64(0)
 		if item.ReplyId > 0 {
@@ -802,7 +839,7 @@ func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users
 				replyToUserID = parentAuthor.ID
 			}
 		}
-		return ReplyPayload{
+		res = append(res, ReplyPayload{
 			ID:              item.Id,
 			ArticleID:       item.ArticleId,
 			Content:         item.Content,
@@ -814,8 +851,9 @@ func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users
 			ReplyToUsername: replyToName,
 			IsOwnReply:      currentUserID == item.UserId,
 			UpdatedAt:       item.UpdatedAt.Format(time.DateTime),
-		}
-	})
+		})
+	}
+	return res
 }
 
 func buildArticleHotTopics(currentArticleID uint64) []TopicPayload {
@@ -1539,7 +1577,7 @@ func buildPublishPageProps(c *gin.Context, articleID uint64) (PublishPageProps, 
 
 	entity := articles.Get(articleID)
 	if entity.Id == 0 || entity.UserId != component.LoginUserId(c) {
-		return props, fmt.Errorf("article not found")
+		return props, errors.New("article not found")
 	}
 	props.Article = PublishArticlePayload{
 		Title:         entity.Title,

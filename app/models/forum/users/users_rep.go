@@ -29,6 +29,10 @@ func GetRoleId(userId uint64) (roleId uint64, err error) {
 	}, 30*time.Minute)
 }
 
+func InvalidateRoleCache(userId uint64) {
+	userRoleCache.Delete(fmt.Sprintf("user_role:%d", userId))
+}
+
 func Verify(usernameOrEmail string, password string) (*EntityComplete, error) {
 	var user EntityComplete
 	var err error

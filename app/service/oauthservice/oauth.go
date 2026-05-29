@@ -189,7 +189,9 @@ func createUserFromOAuth(gothUser goth.User, userInfo OAuthUserInfo) (*users.Ent
 	userEntity.Nickname = username
 	userEntity.Bio = userInfo.Bio
 	userEntity.Website = userInfo.Blog
-	users.Save(userEntity)
+	if err := userservice.SaveUser(userEntity); err != nil {
+		return nil, err
+	}
 
 	return userEntity, nil
 }
@@ -334,7 +336,7 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 	}
 
 	if len(avatarData) > maxFileSize {
-		return "", fmt.Errorf("头像文件过大，最大允许2MB")
+		return "", errors.New("头像文件过大，最大允许2MB")
 	}
 
 	filename := "avatar"

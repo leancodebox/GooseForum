@@ -60,9 +60,7 @@ func GetLatestArticlesSimpleVoPaginated(page int, sort string) []*vo.ArticlesSim
 			FilterStatus: true,
 			Sort:         sort,
 		})
-		return ArticlesSmallEntity2Vo(lo.Map(res.Data, func(item articles.SmallEntity, _ int) *articles.SmallEntity {
-			return &item
-		})), nil
+		return ArticlesSmallEntity2Vo(smallEntitiesToPointers(res.Data)), nil
 	}, time.Second*10)
 }
 
@@ -79,9 +77,7 @@ func GetArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) []*
 			FilterStatus: true,
 			Sort:         sort,
 		})
-		return ArticlesSmallEntity2Vo(lo.Map(res.Data, func(item articles.SmallEntity, _ int) *articles.SmallEntity {
-			return &item
-		})), nil
+		return ArticlesSmallEntity2Vo(smallEntitiesToPointers(res.Data)), nil
 	}, time.Second*10)
 }
 
@@ -108,9 +104,7 @@ func GetRecommendedArticles() []*articles.SmallEntity {
 		"GetRecommendedArticles",
 		func() ([]*articles.SmallEntity, error) {
 			res, err := articles.GetRecommendedArticles(4)
-			return lo.Map(res, func(item articles.SmallEntity, _ int) *articles.SmallEntity {
-				return &item
-			}), err
+			return smallEntitiesToPointers(res), err
 		},
 		5*time.Minute,
 	)
@@ -122,13 +116,19 @@ func GetLatestArticles() []*articles.SmallEntity {
 		"GetLatestArticles",
 		func() ([]*articles.SmallEntity, error) {
 			res, err := articles.GetLatestArticles(20)
-			return lo.Map(res, func(item articles.SmallEntity, _ int) *articles.SmallEntity {
-				return &item
-			}), err
+			return smallEntitiesToPointers(res), err
 		},
 		10*time.Second,
 	)
 	return data
+}
+
+func smallEntitiesToPointers(data []articles.SmallEntity) []*articles.SmallEntity {
+	res := make([]*articles.SmallEntity, 0, len(data))
+	for i := range data {
+		res = append(res, &data[i])
+	}
+	return res
 }
 
 func GetArticleCategory() []*articleCategory.Entity {
@@ -162,29 +162,45 @@ func GetCategoryById(id uint64) *articleCategory.Entity {
 }
 
 func ArticlesSmallEntity2Vo(data []*articles.SmallEntity) []*vo.ArticlesSimpleVo {
-	userIds := lo.Map(data, func(t *articles.SmallEntity, _ int) uint64 {
-		return t.UserId
-	})
-	// Collect all user IDs from posters
-	posterUserIds := lo.FlatMap(data, func(article *articles.SmallEntity, _ int) []uint64 {
-		return lo.Map(article.GetPosters(), func(poster articles.Poster, _ int) uint64 {
-			return poster.UserID
-		})
-	})
-	userIds = append(userIds, posterUserIds...)
-	userMap := users.GetMapByIds(lo.Uniq(userIds))
+	userIDs := make([]uint64, 0, len(data)*2)
+	seenUserIDs := make(map[uint64]struct{}, len(data)*2)
+	for _, article := range data {
+		if article == nil {
+			continue
+		}
+		if _, ok := seenUserIDs[article.UserId]; !ok {
+			seenUserIDs[article.UserId] = struct{}{}
+			userIDs = append(userIDs, article.UserId)
+		}
+		for _, poster := range article.GetPosters() {
+			if _, ok := seenUserIDs[poster.UserID]; ok {
+				continue
+			}
+			seenUserIDs[poster.UserID] = struct{}{}
+			userIDs = append(userIDs, poster.UserID)
+		}
+	}
+	userMap := users.GetMapByIds(userIDs)
 	return ArticlesSmallEntityWithUser2Vo(data, userMap)
 }
 
 func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[uint64]*users.EntityComplete) []*vo.ArticlesSimpleVo {
 	categoryMap := ArticleCategoryMap()
-	return lo.Map(data, func(t *articles.SmallEntity, _ int) *vo.ArticlesSimpleVo {
-		categoryNames := lo.Map(t.CategoryId, func(item uint64, _ int) string {
+	res := make([]*vo.ArticlesSimpleVo, 0, len(data))
+	for _, t := range data {
+		if t == nil {
+			continue
+		}
+
+		categoryNames := make([]string, 0, len(t.CategoryId))
+		for _, item := range t.CategoryId {
 			if category, ok := categoryMap[item]; ok && category != nil {
-				return category.Category
+				categoryNames = append(categoryNames, category.Category)
+				continue
 			}
-			return ""
-		})
+			categoryNames = append(categoryNames, "")
+		}
+
 		username := ""
 		avatarUrl := urlconfig.GetDefaultAvatar()
 		if user, ok := userMap[t.UserId]; ok {
@@ -192,22 +208,23 @@ func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[ui
 			avatarUrl = user.GetWebAvatarUrl()
 		}
 
-		// Map posters to Vo
-		postersVo := lo.Map(t.GetPosters(), func(poster articles.Poster, _ int) vo.PosterVo {
+		posters := t.GetPosters()
+		postersVo := make([]vo.PosterVo, 0, len(posters))
+		for _, poster := range posters {
 			posterUsername := ""
 			posterAvatarUrl := urlconfig.GetDefaultAvatar()
 			if user, ok := userMap[poster.UserID]; ok {
 				posterUsername = user.Username
 				posterAvatarUrl = user.GetWebAvatarUrl()
 			}
-			return vo.PosterVo{
+			postersVo = append(postersVo, vo.PosterVo{
 				Id:        poster.UserID,
 				Username:  posterUsername,
 				AvatarUrl: posterAvatarUrl,
-			}
-		})
+			})
+		}
 
-		return &vo.ArticlesSimpleVo{
+		res = append(res, &vo.ArticlesSimpleVo{
 			Id:             t.Id,
 			Title:          t.Title,
 			Description:    t.Description,
@@ -225,8 +242,9 @@ func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[ui
 			Type:           t.Type,
 			TypeStr:        articlesTypeMap[int(t.Type)].Name,
 			Posters:        postersVo,
-		}
-	})
+		})
+	}
+	return res
 }
 
 func ClearArticleListCache() {
