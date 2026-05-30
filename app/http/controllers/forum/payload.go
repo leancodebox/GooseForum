@@ -1394,24 +1394,24 @@ func buildSponsorsMeta(c *gin.Context) PageMeta {
 
 func buildNotificationsPageProps(c *gin.Context) NotificationsPageProps {
 	userID := component.LoginUserId(c)
-	total, notifications := notificationservice.GetNotificationItemList(userID, 20, 0, false)
+	notifications, nextCursor, hasNext, _ := notificationservice.GetNotificationCursorList(userID, notificationservice.DefaultNotificationPageSize, 0, false)
 	unreadCount, _ := eventNotification.GetUnreadCount(userID)
 	items := make([]NotificationPayload, 0, len(notifications))
 	for _, notification := range notifications {
 		if notification == nil {
 			continue
 		}
-		items = append(items, buildNotificationPayload(notification))
+		items = append(items, BuildNotificationPayload(notification))
 	}
 	return NotificationsPageProps{
-		Total:         total,
+		Total:         int64(len(items)),
 		UnreadCount:   unreadCount,
 		Notifications: items,
 		Pagination: PaginationPayload{
 			Page:     1,
-			NextPage: lo.Ternary(len(notifications) >= 20, 2, 0),
-			HasNext:  len(notifications) >= 20,
-			NextURL:  "",
+			NextPage: lo.Ternary(hasNext, 2, 0),
+			HasNext:  hasNext,
+			NextURL:  fmt.Sprintf("/api/forum/notifications?filter=all&cursor=%d&limit=%d", nextCursor, notificationservice.DefaultNotificationPageSize),
 		},
 	}
 }
@@ -1467,7 +1467,7 @@ func buildDraftsPageProps(c *gin.Context) DraftsPageProps {
 	}
 }
 
-func buildNotificationPayload(notification *eventNotification.Entity) NotificationPayload {
+func BuildNotificationPayload(notification *eventNotification.Entity) NotificationPayload {
 	payload := notification.Payload
 	item := NotificationPayload{
 		ID:        notification.Id,
@@ -1502,6 +1502,9 @@ func buildNotificationPayload(notification *eventNotification.Entity) Notificati
 func notificationTitle(eventType string, payload eventNotification.NotificationPayload) string {
 	if payload.Title != "" {
 		return payload.Title
+	}
+	if payload.TemplateKey != "" {
+		return ""
 	}
 	switch eventType {
 	case eventNotification.EventTypeComment:

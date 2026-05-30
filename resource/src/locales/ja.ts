@@ -110,7 +110,11 @@ export default {
   notifications: {
     title: '通知',
     unread: '{count} 未読',
-    summary: '全 {total} 件。返信、いいね、フォロー、システム通知をまとめて表示します。',
+    summary: '返信、いいね、フォロー、システム通知を含む {total} 件を読み込み済みです。',
+    tabs: {
+      all: 'すべて',
+      unread: '未読',
+    },
     markAllRead: 'すべて既読',
     markRead: '既読にする',
     table: {
@@ -119,6 +123,11 @@ export default {
     },
     emptyTitle: '通知はありません',
     emptyDescription: '返信、いいね、フォローがここに表示されます。',
+    unreadEmptyTitle: '未読通知はありません',
+    unreadEmptyDescription: '新しい未読通知がここに表示されます。',
+    loadMore: 'さらに読み込む',
+    loadingMore: '読み込み中...',
+    noMore: 'これ以上通知はありません',
     fallback: '通知を見る',
     actorFallback: 'ユーザー',
     markAllReadFailed: '既読にできませんでした',
@@ -129,6 +138,13 @@ export default {
     followDescription: '{actor} さんがあなたをフォローしました',
     badgeEarned: '「{badge}」バッジを獲得しました',
     viewProfile: 'プロフィールを見る',
+    templates: {
+      comment: 'あなたのトピックにコメントしました',
+      reply: 'あなたに返信しました',
+      articleComment: 'ウォッチ中の記事にコメントしました',
+      follow: 'あなたをフォローしました',
+      badge: '「{badge}」バッジを獲得しました',
+    },
     verb: {
       like: 'いいねしました',
       follow: 'あなたをフォローしました',
@@ -478,6 +494,7 @@ export default {
     replyUpdateFailed: '返信の更新に失敗しました',
     replyDeleteFailed: '返信の削除に失敗しました',
     repliesLoadFailed: '返信の読み込みに失敗しました',
+    notificationsLoadFailed: '通知の読み込みに失敗しました',
     likeFailed: 'いいねに失敗しました',
     bookmarkFailed: 'ブックマークに失敗しました',
     watchFailed: '記事のウォッチに失敗しました',

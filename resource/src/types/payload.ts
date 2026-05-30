@@ -399,6 +399,22 @@ export interface NotificationsPageProps {
   }
 }
 
+export type NotificationFilter = 'all' | 'unread'
+
+export interface NotificationListResponse {
+  items: NotificationPayload[]
+  nextCursor: number
+  hasNext: boolean
+  unreadCount: number
+}
+
+export type NotificationTemplateKey =
+  | 'notifications.templates.comment'
+  | 'notifications.templates.reply'
+  | 'notifications.templates.articleComment'
+  | 'notifications.templates.follow'
+  | 'notifications.templates.badge'
+
 export interface DraftsPageProps {
   total: number
   drafts: DraftPayload[]
@@ -441,8 +457,10 @@ export interface NotificationPayload {
     url: string
   }
   payload: {
-    title: string
-    content: string
+    title?: string
+    content?: string
+    templateKey?: NotificationTemplateKey
+    templateParams?: NotificationTemplateParams
     actorId: number
     actorName?: string
     articleId?: number
@@ -455,6 +473,13 @@ export interface NotificationPayload {
       profileUrl?: string
     }
   }
+}
+
+export interface NotificationTemplateParams {
+  preview?: string
+  followerName?: string
+  badgeCode?: string
+  badgeName?: string
 }
 
 export interface MessagesPageProps {

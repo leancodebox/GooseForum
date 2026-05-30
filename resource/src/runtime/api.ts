@@ -1,4 +1,4 @@
-import type { ReplyWindowPayload, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
+import type { NotificationFilter, NotificationListResponse, ReplyWindowPayload, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
 import { i18n } from './i18n'
 import { resolveApiMessage } from './api-message'
 
@@ -195,6 +195,20 @@ export async function markNotificationRead(notificationId: number): Promise<bool
     keepalive: true,
   })
   return readApiResponse<boolean>(response, t('api.markReadFailed'))
+}
+
+export async function fetchNotifications(filter: NotificationFilter, cursor = 0, limit = 20): Promise<NotificationListResponse> {
+  const params = new URLSearchParams({
+    filter,
+    cursor: String(cursor),
+    limit: String(limit),
+  })
+  const response = await fetch(`/api/forum/notifications?${params.toString()}`, {
+    headers: {
+      Accept: 'application/json',
+    },
+  })
+  return readApiResponse<NotificationListResponse>(response, t('api.notificationsLoadFailed'))
 }
 
 export async function getUserCard(userId: number): Promise<UserCardPayload> {

@@ -17,10 +17,20 @@ const (
 	EventTypeBadge          = "badge"           // 徽章通知
 )
 
+const (
+	TemplateComment        = "notifications.templates.comment"
+	TemplateReply          = "notifications.templates.reply"
+	TemplateArticleComment = "notifications.templates.articleComment"
+	TemplateFollow         = "notifications.templates.follow"
+	TemplateBadge          = "notifications.templates.badge"
+)
+
 // NotificationPayload 通知内容的基础结构
 type NotificationPayload struct {
-	Title   string `json:"title"`   // 通知标题
-	Content string `json:"content"` // 通知内容
+	Title          string                     `json:"title,omitempty"`          // 旧通知兼容
+	Content        string                     `json:"content,omitempty"`        // 旧通知兼容
+	TemplateKey    string                     `json:"templateKey,omitempty"`    // 前端 i18n 模板 key
+	TemplateParams NotificationTemplateParams `json:"templateParams,omitempty"` // 前端 i18n 模板参数
 	// 通用字段
 	ActorId   uint64 `json:"actorId"`             // 触发者ID
 	ActorName string `json:"actorName,omitempty"` // 触发者名称
@@ -31,6 +41,13 @@ type NotificationPayload struct {
 	CommentId uint64 `json:"commentId,omitempty"` // 评论ID
 	// 其他元数据
 	Extra Extra `json:"metadata"`
+}
+
+type NotificationTemplateParams struct {
+	Preview      string `json:"preview,omitempty"`
+	FollowerName string `json:"followerName,omitempty"`
+	BadgeCode    string `json:"badgeCode,omitempty"`
+	BadgeName    string `json:"badgeName,omitempty"`
 }
 
 type Extra struct {

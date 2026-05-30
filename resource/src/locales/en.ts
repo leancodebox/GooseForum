@@ -110,7 +110,11 @@ export default {
   notifications: {
     title: 'Notifications',
     unread: '{count} unread',
-    summary: '{total} notifications, including replies, likes, follows, and system messages.',
+    summary: '{total} loaded, including replies, likes, follows, and system messages.',
+    tabs: {
+      all: 'All',
+      unread: 'Unread',
+    },
     markAllRead: 'Mark all read',
     markRead: 'Mark read',
     table: {
@@ -119,6 +123,11 @@ export default {
     },
     emptyTitle: 'No notifications',
     emptyDescription: 'Replies, likes, and follows will show up here.',
+    unreadEmptyTitle: 'No unread notifications',
+    unreadEmptyDescription: 'New unread notifications will show up here.',
+    loadMore: 'Load more',
+    loadingMore: 'Loading...',
+    noMore: 'No more notifications',
     fallback: 'View notification',
     actorFallback: 'User',
     markAllReadFailed: 'Failed to mark notifications read',
@@ -129,6 +138,13 @@ export default {
     followDescription: '{actor} followed you',
     badgeEarned: 'Earned the "{badge}" badge',
     viewProfile: 'View profile',
+    templates: {
+      comment: 'commented on your topic',
+      reply: 'replied to you',
+      articleComment: 'commented on an article you watch',
+      follow: 'followed you',
+      badge: 'earned the "{badge}" badge',
+    },
     verb: {
       like: 'liked',
       follow: 'followed you',
@@ -478,6 +494,7 @@ export default {
     replyUpdateFailed: 'Failed to update reply',
     replyDeleteFailed: 'Failed to delete reply',
     repliesLoadFailed: 'Failed to load replies',
+    notificationsLoadFailed: 'Failed to load notifications',
     likeFailed: 'Failed to like',
     bookmarkFailed: 'Failed to bookmark',
     watchFailed: 'Failed to watch article',

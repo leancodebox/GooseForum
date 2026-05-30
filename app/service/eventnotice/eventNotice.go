@@ -9,8 +9,11 @@ import (
 // SendCommentNotification 发送评论通知
 func SendCommentNotification(userId uint64, articleId uint64, commentContent string, commenterId uint64, replyId uint64) error {
 	payload := eventNotification.NotificationPayload{
-		Title:     "收到新评论",
-		Content:   commentContent,
+		Content:     commentContent,
+		TemplateKey: eventNotification.TemplateComment,
+		TemplateParams: eventNotification.NotificationTemplateParams{
+			Preview: commentContent,
+		},
 		ActorId:   commenterId,
 		ArticleId: articleId,
 		CommentId: replyId,
@@ -32,8 +35,11 @@ func SendCommentNotification(userId uint64, articleId uint64, commentContent str
 // SendReplyNotification 发送回复通知
 func SendReplyNotification(userId uint64, commentId uint64, articleId uint64, replyContent string, replierId uint64) error {
 	payload := eventNotification.NotificationPayload{
-		Title:     "收到新回复",
-		Content:   replyContent,
+		Content:     replyContent,
+		TemplateKey: eventNotification.TemplateReply,
+		TemplateParams: eventNotification.NotificationTemplateParams{
+			Preview: replyContent,
+		},
 		ActorId:   replierId,
 		ArticleId: articleId,
 		CommentId: commentId,
@@ -66,8 +72,11 @@ func SendArticleCommentNotifications(userIds []uint64, articleId uint64, comment
 			UserId:    userId,
 			EventType: eventNotification.EventTypeArticleComment,
 			Payload: eventNotification.NotificationPayload{
-				Title:     "关注的文章有新评论",
-				Content:   commentContent,
+				Content:     commentContent,
+				TemplateKey: eventNotification.TemplateArticleComment,
+				TemplateParams: eventNotification.NotificationTemplateParams{
+					Preview: commentContent,
+				},
 				ActorId:   commenterId,
 				ArticleId: articleId,
 				CommentId: commentId,
@@ -88,11 +97,11 @@ func SendArticleCommentNotifications(userIds []uint64, articleId uint64, comment
 }
 
 // SendSystemNotification 发送系统通知
-func SendSystemNotification(userId uint64, title string, content string, extra map[string]any) error {
+func SendSystemNotification(userId uint64, title string, content string, extra eventNotification.Extra) error {
 	payload := eventNotification.NotificationPayload{
 		Title:   title,
 		Content: content,
-		Extra:   eventNotification.Extra{},
+		Extra:   extra,
 	}
 
 	notification := &eventNotification.Entity{
@@ -110,8 +119,11 @@ func SendSystemNotification(userId uint64, title string, content string, extra m
 
 func SendBadgeNotification(userId uint64, badgeCode string, badgeName string, badgeIconURL string) error {
 	payload := eventNotification.NotificationPayload{
-		Title:   "获得新徽章",
-		Content: "你获得了「" + badgeName + "」徽章",
+		TemplateKey: eventNotification.TemplateBadge,
+		TemplateParams: eventNotification.NotificationTemplateParams{
+			BadgeCode: badgeCode,
+			BadgeName: badgeName,
+		},
 		ActorId: userId,
 		Extra: eventNotification.Extra{
 			BadgeCode:    badgeCode,
@@ -137,8 +149,10 @@ func SendBadgeNotification(userId uint64, badgeCode string, badgeName string, ba
 // SendFollowNotification 发送关注通知
 func SendFollowNotification(userId uint64, followerId uint64, followerName string) error {
 	payload := eventNotification.NotificationPayload{
-		Title:   "新增关注者",
-		Content: followerName + " 关注了你",
+		TemplateKey: eventNotification.TemplateFollow,
+		TemplateParams: eventNotification.NotificationTemplateParams{
+			FollowerName: followerName,
+		},
 		ActorId: followerId,
 		Extra:   eventNotification.Extra{FollowerName: followerName},
 	}

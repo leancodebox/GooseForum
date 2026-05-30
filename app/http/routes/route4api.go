@@ -115,6 +115,7 @@ func apiRoute(ginApp *gin.Engine) {
 
 	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
 	forumLoginApi.GET("unread-status", middleware.NoUpdateUserActivity, UpButterReq(api.GetUnreadStatus))
+	forumLoginApi.GET("notifications", middleware.NoUpdateUserActivity, UpQueryReq(api.NotificationList))
 	forumLoginApi.POST("notification/mark-read", UpButterReq(api.MarkAsRead))
 	forumLoginApi.POST("notification/mark-all-read", UpButterReq(api.MarkAllAsRead))
 	forumLoginApi.POST("write-articles", UpButterReq(controllers.WriteArticles))
