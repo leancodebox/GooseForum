@@ -4,8 +4,11 @@ import (
 	"context"
 
 	"github.com/ThreeDotsLabs/watermill/components/cqrs"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleWatch"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 )
+
+const articleWatchNotifyBatchSize = 500
 
 // TakeUpTo64Chars 按字符数截取字符串，最多取 64 个字符
 func TakeUpTo64Chars(s string) string {
@@ -41,9 +44,44 @@ func NewCommentCreatedHandler() cqrs.EventHandler {
 			if event.ParentReplyId > 0 && event.ParentReplyAuthorId != event.UserId {
 				_ = eventnotice.SendReplyNotification(event.ParentReplyAuthorId, event.CommentId, event.ArticleId, contentPreview, event.UserId)
 			}
+			notifyArticleWatchers(event, contentPreview)
 			return nil
 		},
 	)
+}
+
+func notifyArticleWatchers(event *CommentCreatedEvent, contentPreview string) {
+	excludeUserIds := commentNotificationExcludeUserIds(event)
+	afterUserId := uint64(0)
+	for {
+		userIds := articleWatch.ListActiveUserIDsAfter(event.ArticleId, afterUserId, excludeUserIds, articleWatchNotifyBatchSize)
+		if len(userIds) == 0 {
+			return
+		}
+		_ = eventnotice.SendArticleCommentNotifications(userIds, event.ArticleId, event.CommentId, contentPreview, event.UserId)
+		afterUserId = userIds[len(userIds)-1]
+		if len(userIds) < articleWatchNotifyBatchSize {
+			return
+		}
+	}
+}
+
+func commentNotificationExcludeUserIds(event *CommentCreatedEvent) []uint64 {
+	excludeSet := map[uint64]struct{}{}
+	add := func(userId uint64) {
+		if userId > 0 {
+			excludeSet[userId] = struct{}{}
+		}
+	}
+	add(event.UserId)
+	add(event.ArticleAuthorId)
+	add(event.ParentReplyAuthorId)
+
+	userIds := make([]uint64, 0, len(excludeSet))
+	for userId := range excludeSet {
+		userIds = append(userIds, userId)
+	}
+	return userIds
 }
 
 // UserFollowedEvent 用户关注事件

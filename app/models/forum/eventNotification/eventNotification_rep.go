@@ -11,6 +11,16 @@ func Create(entity *Entity) error {
 	return builder().Create(entity).Error
 }
 
+func CreateBatch(entities []*Entity, batchSize int) error {
+	if len(entities) == 0 {
+		return nil
+	}
+	if batchSize <= 0 {
+		batchSize = 100
+	}
+	return builder().CreateInBatches(entities, batchSize).Error
+}
+
 // QueryByUserId 获取用户的通知列表
 func QueryByUserId(userId uint64, limit, startId int, unreadOnly bool) (notifications []*Entity, err error) {
 	db := builder().Where(queryopt.Eq("user_id", userId))

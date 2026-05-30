@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
-import { AlertTriangle, Bookmark, Check, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
-import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateReply } from '@/runtime/api'
+import { AlertTriangle, Bell, Bookmark, Check, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
+import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateReply, watchArticle } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
@@ -23,9 +23,11 @@ const currentReplyId = ref(0)
 const likeCount = ref(page.props.article.likeCount)
 const isLiked = ref(page.props.article.isLiked)
 const isBookmarked = ref(page.props.article.isBookmarked)
+const isWatched = ref(page.props.article.isWatched)
 const actionMessage = ref('')
 const actingLike = ref(false)
 const actingBookmark = ref(false)
+const actingWatch = ref(false)
 const submitting = ref(false)
 const deletingReplyId = ref(0)
 const editingReplyId = ref(0)
@@ -94,6 +96,7 @@ watch(
     likeCount.value = page.props.article.likeCount
     isLiked.value = page.props.article.isLiked
     isBookmarked.value = page.props.article.isBookmarked
+    isWatched.value = page.props.article.isWatched
     mobileHeaderTitleVisible.value = false
     if (typeof window !== 'undefined') {
       lastHeaderScrollY = window.scrollY
@@ -428,6 +431,25 @@ async function toggleBookmark() {
   }
 }
 
+async function toggleWatch() {
+  if (actingWatch.value) return
+
+  const nextWatched = !isWatched.value
+  const previousWatched = isWatched.value
+  actingWatch.value = true
+  actionMessage.value = ''
+  isWatched.value = nextWatched
+  try {
+    await watchArticle(page.props.article.id, nextWatched ? 1 : 2)
+    actionMessage.value = nextWatched ? t('article.watchAdded') : t('article.watchRemoved')
+  } catch (error) {
+    isWatched.value = previousWatched
+    actionMessage.value = error instanceof Error ? error.message : t('api.watchFailed')
+  } finally {
+    actingWatch.value = false
+  }
+}
+
 function toggleReplyForm(replyId: number) {
   openReplyId.value = openReplyId.value === replyId ? null : replyId
   editingReplyId.value = 0
@@ -675,7 +697,17 @@ async function removeReply(replyId: number) {
                 <Bookmark class="h-4 w-4" :fill="isBookmarked ? 'currentColor' : 'none'" />
                 {{ isBookmarked ? t('article.bookmarked') : t('article.bookmark') }}
               </button>
-              <span v-if="actionMessage" class="text-xs" :class="actionMessage === t('article.bookmarkAdded') || actionMessage === t('article.bookmarkRemoved') ? 'text-gray-600' : 'text-red-600'">{{ actionMessage }}</span>
+              <button
+                type="button"
+                class="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+                :class="isWatched ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'"
+                :disabled="actingWatch"
+                @click="toggleWatch"
+              >
+                <Bell class="h-4 w-4" :fill="isWatched ? 'currentColor' : 'none'" />
+                {{ isWatched ? t('article.watched') : t('article.watch') }}
+              </button>
+              <span v-if="actionMessage" class="text-xs" :class="actionMessage === t('article.bookmarkAdded') || actionMessage === t('article.bookmarkRemoved') || actionMessage === t('article.watchAdded') || actionMessage === t('article.watchRemoved') ? 'text-gray-600' : 'text-red-600'">{{ actionMessage }}</span>
             </div>
           </div>
         </div>

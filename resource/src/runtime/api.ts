@@ -147,6 +147,20 @@ export async function bookmarkArticle(id: number, action: 1 | 2): Promise<boolea
   return readApiResponse<boolean>(response, t('api.bookmarkFailed'))
 }
 
+export async function watchArticle(id: number, action: 1 | 2): Promise<boolean> {
+  const response = await fetch('/api/forum/watch-article', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id,
+      action,
+    }),
+  })
+  return readApiResponse<boolean>(response, t('api.watchFailed'))
+}
+
 export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Promise<boolean> {
   const response = await fetch('/api/forum/article-status', {
     method: 'POST',

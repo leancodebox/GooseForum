@@ -16,7 +16,7 @@ let inFlight: Promise<UnreadStatusPayload> | null = null
 let pollTimer: number | undefined
 
 const notificationMessage = computed(() => {
-  if (latestNotificationType.value === 'comment') return i18n.global.t('notifications.newComment')
+  if (latestNotificationType.value === 'comment' || latestNotificationType.value === 'article_comment') return i18n.global.t('notifications.newComment')
   if (notifications.value) return i18n.global.t('notifications.newNotification')
   return i18n.global.t('notifications.noUnread')
 })

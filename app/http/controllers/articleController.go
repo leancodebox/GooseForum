@@ -11,6 +11,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleWatch"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/articlesUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
@@ -483,6 +484,36 @@ func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.
 	}
 	oldBookMark.Status = targetStatus
 	articleBookmark.SaveOrCreateById(&oldBookMark)
+	return component.SuccessResponse(true)
+}
+
+type WatchArticleReq struct {
+	Id     uint64 `json:"id"`
+	Action int    `json:"action" validate:"min=1,max=2"` // 1 关注，2 取消
+}
+
+func WatchArticle(req component.BetterRequest[WatchArticleReq]) component.Response {
+	articleEntity := articles.Get(req.Params.Id)
+	if articleEntity.Id == 0 {
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+	}
+
+	watchEntity := articleWatch.GetByArticleId(req.UserId, articleEntity.Id)
+	if watchEntity.Id == 0 {
+		watchEntity.UserId = req.UserId
+		watchEntity.ArticleId = articleEntity.Id
+	}
+
+	targetStatus := 0
+	if req.Params.Action == 1 {
+		targetStatus = 1
+	}
+	if watchEntity.Status == targetStatus {
+		return component.SuccessResponse(true)
+	}
+
+	watchEntity.Status = targetStatus
+	articleWatch.SaveOrCreateById(&watchEntity)
 	return component.SuccessResponse(true)
 }
 

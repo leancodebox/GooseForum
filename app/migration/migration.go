@@ -18,6 +18,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCollection"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleWatch"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/articlesUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
@@ -58,6 +59,7 @@ func migration(migration bool) {
 		&articleCategoryRs.Entity{},
 		&articleCollection.Entity{},
 		&articleLike.Entity{},
+		&articleWatch.Entity{},
 		&articles.Entity{},
 		&articlesUserStat.Entity{},
 		&badges.Entity{},

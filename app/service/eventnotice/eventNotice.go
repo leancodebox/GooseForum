@@ -52,6 +52,41 @@ func SendReplyNotification(userId uint64, commentId uint64, articleId uint64, re
 	return err
 }
 
+func SendArticleCommentNotifications(userIds []uint64, articleId uint64, commentId uint64, commentContent string, commenterId uint64) error {
+	if len(userIds) == 0 {
+		return nil
+	}
+
+	notifications := make([]*eventNotification.Entity, 0, len(userIds))
+	for _, userId := range userIds {
+		if userId == 0 {
+			continue
+		}
+		notifications = append(notifications, &eventNotification.Entity{
+			UserId:    userId,
+			EventType: eventNotification.EventTypeArticleComment,
+			Payload: eventNotification.NotificationPayload{
+				Title:     "关注的文章有新评论",
+				Content:   commentContent,
+				ActorId:   commenterId,
+				ArticleId: articleId,
+				CommentId: commentId,
+			},
+		})
+	}
+	if len(notifications) == 0 {
+		return nil
+	}
+
+	err := eventNotification.CreateBatch(notifications, 100)
+	if err == nil {
+		for _, userId := range userIds {
+			unreadservice.Invalidate(userId)
+		}
+	}
+	return err
+}
+
 // SendSystemNotification 发送系统通知
 func SendSystemNotification(userId uint64, title string, content string, extra map[string]any) error {
 	payload := eventNotification.NotificationPayload{

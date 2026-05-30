@@ -8,12 +8,13 @@ const tableName = "event_notification"
 
 // Event Types
 const (
-	EventTypeComment = "comment" // 评论通知
-	EventTypeReply   = "reply"   // 回复通知
-	EventTypeSystem  = "system"  // 系统通知
-	EventTypeFollow  = "follow"  // 关注通知
-	EventTypeLike    = "like"    // 关注通知
-	EventTypeBadge   = "badge"   // 徽章通知
+	EventTypeComment        = "comment"         // 评论通知
+	EventTypeReply          = "reply"           // 回复通知
+	EventTypeArticleComment = "article_comment" // 关注文章评论通知
+	EventTypeSystem         = "system"          // 系统通知
+	EventTypeFollow         = "follow"          // 关注通知
+	EventTypeLike           = "like"            // 关注通知
+	EventTypeBadge          = "badge"           // 徽章通知
 )
 
 // NotificationPayload 通知内容的基础结构

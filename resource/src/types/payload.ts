@@ -156,6 +156,7 @@ export interface ArticlePayload {
   likeCount: number
   isLiked: boolean
   isBookmarked: boolean
+  isWatched: boolean
   createdAt: string
   updatedAt: string
 }

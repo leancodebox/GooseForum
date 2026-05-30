@@ -17,6 +17,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleWatch"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -249,6 +250,7 @@ type ArticlePayload struct {
 	LikeCount     uint64                 `json:"likeCount"`
 	IsLiked       bool                   `json:"isLiked"`
 	IsBookmarked  bool                   `json:"isBookmarked"`
+	IsWatched     bool                   `json:"isWatched"`
 	CreatedAt     string                 `json:"createdAt"`
 	UpdatedAt     string                 `json:"updatedAt"`
 }
@@ -892,9 +894,11 @@ func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[ui
 	currentUserID := component.LoginUserId(c)
 	isLiked := false
 	isBookmarked := false
+	isWatched := false
 	if currentUserID > 0 {
 		isLiked = articleLike.GetByArticleId(currentUserID, entity.Id).Status == 1
 		isBookmarked = articleBookmark.GetByArticleId(currentUserID, entity.Id).Status == 1
+		isWatched = articleWatch.GetByArticleId(currentUserID, entity.Id).Status == 1
 	}
 
 	return ArticlePayload{
@@ -913,6 +917,7 @@ func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[ui
 		LikeCount:     entity.LikeCount,
 		IsLiked:       isLiked,
 		IsBookmarked:  isBookmarked,
+		IsWatched:     isWatched,
 		CreatedAt:     entity.CreatedAt.Format(time.DateTime),
 		UpdatedAt:     entity.UpdatedAt.Format(time.DateTime),
 	}
@@ -1503,6 +1508,8 @@ func notificationTitle(eventType string, payload eventNotification.NotificationP
 		return "有人评论了你的主题"
 	case eventNotification.EventTypeReply:
 		return "有人回复了你"
+	case eventNotification.EventTypeArticleComment:
+		return "关注的文章有新评论"
 	case eventNotification.EventTypeLike:
 		return "有人喜欢了你的内容"
 	case eventNotification.EventTypeFollow:
