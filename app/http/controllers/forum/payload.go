@@ -95,9 +95,10 @@ type TwitterMeta struct {
 }
 
 type ErrorPageProps struct {
-	Code    string `json:"code"`
-	Title   string `json:"title"`
-	Message string `json:"message"`
+	Code        string                  `json:"code"`
+	Title       string                  `json:"title"`
+	MessageCode component.MessageCode   `json:"messageCode,omitempty"`
+	Params      component.MessageParams `json:"params,omitempty"`
 }
 
 type LoginPageProps struct {

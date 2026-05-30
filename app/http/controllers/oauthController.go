@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -32,11 +33,7 @@ func ProviderCallback(c *gin.Context) {
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		slog.Error("OAuth callback failed", "error", err)
-		// 如果 gothic 已经写入了响应，就不要再写了
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":       "OAuth 认证失败",
-			"messageCode": component.MessageOAuthCallbackFailed,
-		})
+		forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthCallbackFailed)
 		return
 	}
 
@@ -48,29 +45,23 @@ func ProviderCallback(c *gin.Context) {
 		// 绑定模式：处理OAuth绑定
 		err = oauthservice.ProcessOAuthBind(currentUserId, gothUser)
 		if err != nil {
-			c.Redirect(http.StatusTemporaryRedirect, "/settings?setting-tab=account&error="+err.Error())
+			c.Redirect(http.StatusTemporaryRedirect, "/settings?tab=binding")
 			return
 		}
 		// 绑定成功，重定向到账户设置页面
-		c.Redirect(http.StatusTemporaryRedirect, "/settings?setting-tab=account&success=bind_success")
+		c.Redirect(http.StatusTemporaryRedirect, "/settings?tab=binding")
 	} else {
 		// 登录模式：处理OAuth登录
 		user, err := oauthservice.ProcessOAuthCallback(gothUser)
 		if err != nil {
 			slog.Error("Process OAuth callback failed", "error", err)
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error":       "处理 OAuth 回调失败",
-				"messageCode": component.MessageOAuthProcessFailed,
-			})
+			forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthProcessFailed)
 			return
 		}
 
 		// 检查用户状态
 		if user.IsFrozen == users.StatusFrozen {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error":       "您的账号已被禁用，如有疑问请联系管理员",
-				"messageCode": component.MessageOAuthAccountFrozen,
-			})
+			forum.RenderOAuthErrorPage(c, http.StatusForbidden, component.MessageOAuthAccountFrozen)
 			return
 		}
 
@@ -80,10 +71,7 @@ func ProviderCallback(c *gin.Context) {
 			err = userservice.SaveUser(user)
 			if err != nil {
 				slog.Error("Update user activation status failed", "error", err)
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"error":       "更新用户激活状态失败",
-					"messageCode": component.MessageOAuthActivationUpdateFailed,
-				})
+				forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthActivationUpdateFailed)
 				return
 			}
 		}
@@ -92,10 +80,7 @@ func ProviderCallback(c *gin.Context) {
 		token, err := jwtopt.CreateNewTokenDefault(user.Id)
 		if err != nil {
 			slog.Error("Generate JWT token failed", "error", err)
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error":       "生成 token 失败",
-				"messageCode": component.MessageOAuthTokenFailed,
-			})
+			forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthTokenFailed)
 			return
 		}
 

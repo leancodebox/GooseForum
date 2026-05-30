@@ -1,9 +1,8 @@
 package forum
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/spf13/cast"
 )
@@ -12,7 +11,7 @@ func UserProfile(c *gin.Context) {
 	userID := cast.ToUint64(c.Param("userId"))
 	user, err := users.Get(userID)
 	if err != nil || user.Id == 0 {
-		c.String(http.StatusNotFound, "用户不存在")
+		RenderNotFoundPage(c, component.MessagePageNotFound)
 		return
 	}
 

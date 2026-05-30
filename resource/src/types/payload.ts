@@ -37,7 +37,8 @@ export interface PageMeta {
 export interface ErrorPageProps {
   code: string
   title: string
-  message: string
+  messageCode?: string
+  params?: Record<string, unknown>
 }
 
 export interface LoginPageProps {

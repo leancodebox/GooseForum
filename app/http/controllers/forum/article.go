@@ -186,16 +186,16 @@ func shouldCountArticleView(entity *articles.Entity) bool {
 }
 
 func renderNotFound(c *gin.Context) {
-	renderNotFoundWithMessage(c, "这个主题不存在，或已经被删除。")
+	renderNotFoundWithMessage(c, component.MessagePageNotFound)
 }
 
-func renderNotFoundWithMessage(c *gin.Context, message string) {
+func renderNotFoundWithMessage(c *gin.Context, messageCode component.MessageCode) {
 	payload := PagePayload{
 		Component: "error.notFound",
 		Props: ErrorPageProps{
-			Code:    "404",
-			Title:   "页面不存在",
-			Message: message,
+			Code:        "404",
+			Title:       "页面不存在",
+			MessageCode: messageCode,
 		},
 		Meta: PageMeta{
 			Title:  pageTitle("页面不存在"),

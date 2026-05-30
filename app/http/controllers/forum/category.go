@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
@@ -13,7 +14,7 @@ func Category(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
 	category := hotdataserve.GetCategoryById(id)
 	if category == nil {
-		renderNotFoundWithMessage(c, "这个分类不存在，或已经被删除。")
+		renderNotFoundWithMessage(c, component.MessagePageNotFound)
 		return
 	}
 

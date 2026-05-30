@@ -59,6 +59,11 @@ export default {
       ja: '日',
     },
   },
+  error: {
+    notFound: {
+      title: '页面不存在',
+    },
+  },
   auth: {
     loginTitle: '登录账号',
     registerTitle: '创建新账号',
@@ -753,6 +758,8 @@ export default {
     },
   },
   serverMessages: {
+    'page.notFound': '页面不存在，或已经被删除。',
+    'route.notFound': '路由未定义，请确认 URL 和请求方法是否正确。',
     'upload.dailyLimit': '您今日已上传 {count} 个文件，已达到每日限制',
     'upload.dailyLimit.avatar': '您今日已上传 {count} 个文件，上传头像需要 {fileCount} 个名额，已超过每日限制',
   },

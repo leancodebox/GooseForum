@@ -59,6 +59,11 @@ export default {
       ja: '日',
     },
   },
+  error: {
+    notFound: {
+      title: 'ページが見つかりません',
+    },
+  },
   auth: {
     loginTitle: 'アカウントにログイン',
     registerTitle: '新規アカウント作成',
@@ -753,6 +758,8 @@ export default {
     },
   },
   serverMessages: {
+    'page.notFound': 'ページが存在しないか、削除されています。',
+    'route.notFound': 'ルートが見つかりません。URL とリクエストメソッドを確認してください。',
     'upload.dailyLimit': '本日すでに {count} 個のファイルをアップロードし、上限に達しました',
     'upload.dailyLimit.avatar': '本日すでに {count} 個のファイルをアップロードしています。アバターのアップロードには {fileCount} 枠が必要で、上限を超えます',
   },

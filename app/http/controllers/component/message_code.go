@@ -32,6 +32,8 @@ const (
 	MessageRequestParseFailed   MessageCode = "common.request.parseFailed"   // 参数绑定失败，params.error 可带原始错误。
 	MessageOperationSuccess     MessageCode = "common.operation.success"     // 通用操作成功。
 	MessageOperationFailed      MessageCode = "common.operation.failed"      // 通用操作失败。
+	MessagePageNotFound         MessageCode = "page.notFound"                // 页面不存在。
+	MessageRouteNotFound        MessageCode = "route.notFound"               // 路由未定义。
 	MessageUserFetchFailed      MessageCode = "user.fetchFailed"             // 当前用户信息读取失败。
 	MessageUserNotFound         MessageCode = "user.notFound"                // 用户不存在。
 	MessageUserUpdateFailed     MessageCode = "user.updateFailed"            // 用户信息保存失败。

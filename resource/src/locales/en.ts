@@ -59,6 +59,11 @@ export default {
       ja: '日',
     },
   },
+  error: {
+    notFound: {
+      title: 'Page not found',
+    },
+  },
   auth: {
     loginTitle: 'Log in to your account',
     registerTitle: 'Create an account',
@@ -753,6 +758,8 @@ export default {
     },
   },
   serverMessages: {
+    'page.notFound': 'The page does not exist or has been deleted.',
+    'route.notFound': 'Route not found. Please check the URL and request method.',
     'upload.dailyLimit': 'You have uploaded {count} files today and reached the daily limit',
     'upload.dailyLimit.avatar': 'You have uploaded {count} files today. Uploading an avatar needs {fileCount} slots and would exceed the daily limit',
   },
