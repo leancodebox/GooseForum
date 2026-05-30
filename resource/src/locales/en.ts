@@ -146,7 +146,6 @@ export default {
       badge: 'earned the "{badge}" badge',
     },
     verb: {
-      like: 'liked',
       follow: 'followed you',
       reply: 'replied to',
       comment: 'commented on',
@@ -324,6 +323,14 @@ export default {
       following: 'Following',
       followers: 'Followers',
     },
+    activity: {
+      signup: 'Joined the forum',
+      post: 'Published a topic',
+      like: 'Liked content',
+      follow: 'Followed a user',
+      comment: 'Joined the discussion',
+      default: 'Activity',
+    },
     stats: {
       topics: 'Topics',
       replies: 'Replies',
@@ -414,6 +421,12 @@ export default {
   settings: {
     editing: 'Editing',
     savingShort: 'Saving',
+    tabs: {
+      profile: 'Profile',
+      account: 'Account',
+      privacy: 'Privacy',
+      binding: 'Bindings',
+    },
     status: {
       profileSaved: 'Profile saved',
       usernameSaved: 'Username updated',

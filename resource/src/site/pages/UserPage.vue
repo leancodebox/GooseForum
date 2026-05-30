@@ -65,7 +65,17 @@ async function toggleFollow() {
 }
 
 function activityText(activity: UserActivityPayload) {
-  return activity.contentPreview ? `${activity.label}：${activity.contentPreview}` : activity.label
+  const label = activityLabel(activity)
+  return activity.contentPreview ? `${label}: ${activity.contentPreview}` : label
+}
+
+function activityLabel(activity: UserActivityPayload) {
+  if (activity.action === 1 || activity.label === 'signup') return t('user.activity.signup')
+  if (activity.action === 2 || activity.label === 'post') return t('user.activity.post')
+  if (activity.action === 3 || activity.label === 'like') return t('user.activity.like')
+  if (activity.action === 4 || activity.label === 'follow') return t('user.activity.follow')
+  if (activity.action === 5 || activity.label === 'comment') return t('user.activity.comment')
+  return activity.label || t('user.activity.default')
 }
 
 function topicCategories(topic: TopicPayload) {

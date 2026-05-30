@@ -173,6 +173,14 @@ function setActiveTab(key: TabKey) {
   history.replaceState(history.state, '', url)
 }
 
+function settingsTabLabel(key: string, fallback?: string) {
+  if (key === 'profile') return t('settings.tabs.profile')
+  if (key === 'account') return t('settings.tabs.account')
+  if (key === 'privacy') return t('settings.tabs.privacy')
+  if (key === 'binding') return t('settings.tabs.binding')
+  return fallback || key
+}
+
 function triggerAvatarFlash() {
   const item = easterEggMessages[Math.floor(Math.random() * easterEggMessages.length)]
   pushFlash(item.message, item.type)
@@ -403,7 +411,7 @@ async function toggleBinding(provider: string) {
               :class="activeTab === tab.key ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-900'"
               @click="setActiveTab(tab.key as TabKey)"
             >
-              {{ tab.label }}
+              {{ settingsTabLabel(tab.key, tab.label) }}
             </button>
           </nav>
 

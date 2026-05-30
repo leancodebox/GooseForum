@@ -623,9 +623,9 @@ func buildLoginPageProps(c *gin.Context) LoginPageProps {
 
 func buildHomeTabs(sort string) []TabPayload {
 	return []TabPayload{
-		{Key: "latest", Label: "最新", URL: "/", Active: sort == "latest" || sort == ""},
-		{Key: "hot", Label: "热门", URL: "/?sort=hot", Active: sort == "hot"},
-		{Key: "popular", Label: "流行", URL: "/?sort=popular", Active: sort == "popular"},
+		{Key: "latest", URL: "/", Active: sort == "latest" || sort == ""},
+		{Key: "hot", URL: "/?sort=hot", Active: sort == "hot"},
+		{Key: "popular", URL: "/?sort=popular", Active: sort == "popular"},
 	}
 }
 
@@ -1129,12 +1129,17 @@ func buildUserActivities(activities []*userActivities.Entity) []UserActivityPayl
 		if activity == nil {
 			continue
 		}
+		contentPreview := activity.ContentPreview
+		switch userActivities.ActionType(activity.Action) {
+		case userActivities.ActionSignUp, userActivities.ActionFollow:
+			contentPreview = ""
+		}
 		res = append(res, UserActivityPayload{
 			ID:             activity.Id,
 			Action:         activity.Action,
 			SubjectType:    activity.SubjectType,
 			SubjectID:      activity.SubjectId,
-			ContentPreview: activity.ContentPreview,
+			ContentPreview: contentPreview,
 			URL:            userActivityURL(activity),
 			Label:          userActivityLabel(activity.Action),
 			CreatedAt:      activity.CreatedAt.Format(time.DateTime),
@@ -1160,17 +1165,17 @@ func userActivityURL(activity *userActivities.Entity) string {
 func userActivityLabel(action int) string {
 	switch userActivities.ActionType(action) {
 	case userActivities.ActionSignUp:
-		return "加入论坛"
+		return "signup"
 	case userActivities.ActionPost:
-		return "发布主题"
+		return "post"
 	case userActivities.ActionLike:
-		return "点赞内容"
+		return "like"
 	case userActivities.ActionFollow:
-		return "关注用户"
+		return "follow"
 	case userActivities.ActionComment:
-		return "参与回复"
+		return "comment"
 	default:
-		return "活动"
+		return "default"
 	}
 }
 
@@ -1235,8 +1240,8 @@ func buildCategoryPageProps(category *articleCategory.Entity, page int, sort str
 
 func buildCategoryTabs(category *articleCategory.Entity, sort string) []TabPayload {
 	return []TabPayload{
-		{Key: "latest", Label: "最新回复", URL: categorySortURL(category, "latest"), Active: sort == "" || sort == "latest"},
-		{Key: "new", Label: "最新发布", URL: categorySortURL(category, "new"), Active: sort == "new"},
+		{Key: "latest", URL: categorySortURL(category, "latest"), Active: sort == "" || sort == "latest"},
+		{Key: "new", URL: categorySortURL(category, "new"), Active: sort == "new"},
 	}
 }
 
@@ -1508,17 +1513,15 @@ func notificationTitle(eventType string, payload eventNotification.NotificationP
 	}
 	switch eventType {
 	case eventNotification.EventTypeComment:
-		return "有人评论了你的主题"
+		return ""
 	case eventNotification.EventTypeReply:
-		return "有人回复了你"
+		return ""
 	case eventNotification.EventTypeArticleComment:
-		return "关注的文章有新评论"
-	case eventNotification.EventTypeLike:
-		return "有人喜欢了你的内容"
+		return ""
 	case eventNotification.EventTypeFollow:
-		return "有新的关注者"
+		return ""
 	default:
-		return "系统通知"
+		return ""
 	}
 }
 
@@ -1563,10 +1566,10 @@ func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 			CreatedAt:         user.CreatedAt.Format(time.DateTime),
 		},
 		Tabs: []TabPayload{
-			{Key: "profile", Label: "资料", URL: "/settings", Active: true},
-			{Key: "account", Label: "账号", URL: "/settings?tab=account"},
-			{Key: "privacy", Label: "隐私", URL: "/settings?tab=privacy"},
-			{Key: "binding", Label: "绑定", URL: "/settings?tab=binding"},
+			{Key: "profile", URL: "/settings", Active: true},
+			{Key: "account", URL: "/settings?tab=account"},
+			{Key: "privacy", URL: "/settings?tab=privacy"},
+			{Key: "binding", URL: "/settings?tab=binding"},
 		},
 	}
 }

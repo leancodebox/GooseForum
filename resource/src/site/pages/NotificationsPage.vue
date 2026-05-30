@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { Award, Bell, Check, CheckCheck, Heart, Info, MessageCircle, UserPlus } from '@lucide/vue'
+import { Award, Bell, Check, CheckCheck, Info, MessageCircle, UserPlus } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { fetchNotifications, markAllNotificationsRead, markNotificationRead } from '@/runtime/api'
 import { formatDateTime } from '@/runtime/format'
@@ -173,7 +173,6 @@ function setActiveFilter(filter: NotificationFilter) {
 }
 
 function notificationIcon(item: NotificationPayload) {
-  if (item.eventType === 'like') return Heart
   if (item.eventType === 'follow') return UserPlus
   if (item.eventType === 'badge') return Award
   if (item.eventType === 'system') return Info
@@ -197,6 +196,10 @@ function notificationText(item: NotificationPayload) {
   return item.content || item.payload.content || t('notifications.fallback')
 }
 
+function notificationTitleText(item: NotificationPayload) {
+  return item.title || t('notifications.fallback')
+}
+
 function notificationTemplateText(item: NotificationPayload) {
   switch (item.payload.templateKey) {
     case 'notifications.templates.comment':
@@ -217,16 +220,14 @@ function notificationTemplateText(item: NotificationPayload) {
 function notificationVerb(item: NotificationPayload) {
   const templateText = notificationTemplateText(item)
   if (templateText && item.eventType !== 'badge') return templateText
-  if (item.eventType === 'like') return t('notifications.verb.like')
   if (item.eventType === 'follow') return t('notifications.verb.follow')
   if (item.eventType === 'badge') return ''
   if (item.eventType === 'reply') return t('notifications.verb.reply')
   if (item.eventType === 'comment' || item.eventType === 'article_comment') return t('notifications.verb.comment')
-  return item.title
+  return notificationTitleText(item)
 }
 
 function notificationTone(item: NotificationPayload) {
-  if (item.eventType === 'like') return item.isRead ? 'text-gray-400' : 'text-rose-600'
   if (item.eventType === 'follow') return item.isRead ? 'text-gray-400' : 'text-emerald-600'
   if (item.eventType === 'badge') return item.isRead ? 'text-gray-400' : 'text-amber-600'
   if (item.eventType === 'system') return item.isRead ? 'text-gray-400' : 'text-amber-600'
@@ -382,7 +383,7 @@ function markItemReadAndNavigate(item: NotificationPayload) {
               <a v-if="actorURL(item) && item.eventType !== 'badge'" :href="actorURL(item)" class="font-semibold text-gray-950 hover:text-blue-600" @click="markItemReadAndNavigate(item)">
                 {{ actorName(item) }}
               </a>
-              <span v-else class="font-semibold text-gray-950">{{ item.eventType === 'follow' ? actorName(item) : item.title }}</span>
+              <span v-else class="font-semibold text-gray-950">{{ item.eventType === 'follow' ? actorName(item) : notificationTitleText(item) }}</span>
               <span class="text-gray-500">{{ item.actor.id || item.eventType === 'follow' ? notificationVerb(item) : '' }}</span>
               <a
                 v-if="item.article"

@@ -113,7 +113,7 @@ export interface FooterPayload {
 
 export interface HomeProps {
   sort: string
-  tabs: Array<{ key: string; label: string; url: string; active: boolean }>
+  tabs: Array<{ key: string; label?: string; url: string; active: boolean }>
   topics: TopicPayload[]
   pagination: {
     page: number
@@ -320,7 +320,7 @@ export interface CategoryPageProps {
     url: string
   }
   sort: string
-  tabs: Array<{ key: string; label: string; url: string; active: boolean }>
+  tabs: Array<{ key: string; label?: string; url: string; active: boolean }>
   topics: TopicPayload[]
   pagination: {
     page: number
@@ -511,7 +511,7 @@ export interface SettingsPageProps {
     collectionCount: number
     createdAt: string
   }
-  tabs: Array<{ key: string; label: string; url: string; active: boolean }>
+  tabs: Array<{ key: string; label?: string; url: string; active: boolean }>
 }
 
 export interface SettingsUserPayload {

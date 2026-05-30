@@ -146,7 +146,6 @@ export default {
       badge: '「{badge}」バッジを獲得しました',
     },
     verb: {
-      like: 'いいねしました',
       follow: 'あなたをフォローしました',
       reply: '返信しました',
       comment: 'コメントしました',
@@ -324,6 +323,14 @@ export default {
       following: 'フォロー中',
       followers: 'フォロワー',
     },
+    activity: {
+      signup: 'フォーラムに参加しました',
+      post: 'トピックを投稿しました',
+      like: 'コンテンツにいいねしました',
+      follow: 'ユーザーをフォローしました',
+      comment: '返信に参加しました',
+      default: 'アクティビティ',
+    },
     stats: {
       topics: 'トピック',
       replies: '返信',
@@ -414,6 +421,12 @@ export default {
   settings: {
     editing: '編集中',
     savingShort: '保存中',
+    tabs: {
+      profile: 'プロフィール',
+      account: 'アカウント',
+      privacy: 'プライバシー',
+      binding: '連携',
+    },
     status: {
       profileSaved: 'プロフィールを保存しました',
       usernameSaved: 'ユーザー名を更新しました',

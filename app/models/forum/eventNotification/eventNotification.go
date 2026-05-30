@@ -13,7 +13,6 @@ const (
 	EventTypeArticleComment = "article_comment" // 关注文章评论通知
 	EventTypeSystem         = "system"          // 系统通知
 	EventTypeFollow         = "follow"          // 关注通知
-	EventTypeLike           = "like"            // 关注通知
 	EventTypeBadge          = "badge"           // 徽章通知
 )
 

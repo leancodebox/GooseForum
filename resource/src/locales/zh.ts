@@ -146,7 +146,6 @@ export default {
       badge: '获得了「{badge}」徽章',
     },
     verb: {
-      like: '点赞了',
       follow: '关注了你',
       reply: '回复了',
       comment: '评论了',
@@ -324,6 +323,14 @@ export default {
       following: '关注',
       followers: '粉丝',
     },
+    activity: {
+      signup: '加入论坛',
+      post: '发布主题',
+      like: '点赞内容',
+      follow: '关注用户',
+      comment: '参与回复',
+      default: '活动',
+    },
     stats: {
       topics: '主题',
       replies: '回复',
@@ -414,6 +421,12 @@ export default {
   settings: {
     editing: '编辑中',
     savingShort: '保存中',
+    tabs: {
+      profile: '资料',
+      account: '账号',
+      privacy: '隐私',
+      binding: '绑定',
+    },
     status: {
       profileSaved: '资料已保存',
       usernameSaved: '用户名已更新',

@@ -57,11 +57,11 @@ function mergeTopics(current: TopicPayload[], incoming: TopicPayload[]) {
   return [...current, ...incoming.filter((topic) => !seen.has(topic.id))]
 }
 
-function sortTabLabel(key: string, fallback: string) {
+function sortTabLabel(key: string, fallback?: string) {
   if (key === 'latest') return t('topicList.tabs.latest')
   if (key === 'hot') return t('topicList.tabs.hot')
   if (key === 'popular') return t('topicList.tabs.popular')
-  return fallback
+  return fallback || key
 }
 
 function observeSentinel() {
