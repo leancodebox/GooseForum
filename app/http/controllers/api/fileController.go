@@ -40,11 +40,6 @@ func GetFileByFileName(c *gin.Context) {
 func SaveImgByGinContext(c *gin.Context) {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 
-	if !postingConfig.UploadControl.AllowAttachments {
-		c.JSON(http.StatusForbidden, component.FailDataCode(component.MessageUploadAttachmentDisabled, nil))
-		return
-	}
-
 	userId := c.GetUint64(`userId`)
 	if userId == 0 {
 		c.JSON(http.StatusUnauthorized, component.FailDataCode(component.MessageAuthRequired, nil))
@@ -52,13 +47,19 @@ func SaveImgByGinContext(c *gin.Context) {
 	}
 
 	userEntity, _ := users.Get(userId)
+	isRoleUser := userEntity.RoleId > 0
+
+	if !isRoleUser && !postingConfig.UploadControl.AllowAttachments {
+		c.JSON(http.StatusForbidden, component.FailDataCode(component.MessageUploadAttachmentDisabled, nil))
+		return
+	}
 
 	if err, code := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
 		c.JSON(code, component.FailDataError(err))
 		return
 	}
 
-	if postingConfig.UploadControl.NewUserUploadCooldownMinutes > 0 {
+	if !isRoleUser && postingConfig.UploadControl.NewUserUploadCooldownMinutes > 0 {
 		cooldownTime := userEntity.CreatedAt.Add(time.Duration(postingConfig.UploadControl.NewUserUploadCooldownMinutes) * time.Minute)
 		if time.Now().Before(cooldownTime) {
 			minutes := postingConfig.UploadControl.NewUserUploadCooldownMinutes
@@ -71,7 +72,7 @@ func SaveImgByGinContext(c *gin.Context) {
 		}
 	}
 
-	if postingConfig.UploadControl.MaxDailyUploadsPerUser > 0 {
+	if !isRoleUser && postingConfig.UploadControl.MaxDailyUploadsPerUser > 0 {
 		count := filedata.CountDailyUploads(userId)
 		if count >= int64(postingConfig.UploadControl.MaxDailyUploadsPerUser) {
 			c.JSON(http.StatusBadRequest, component.FailDataCode(
@@ -95,7 +96,7 @@ func SaveImgByGinContext(c *gin.Context) {
 
 	configMaxSize := int64(postingConfig.UploadControl.MaxAttachmentSizeKb) * 1024
 	maxSize := int64(filedata.MaxFileSize)
-	if configMaxSize > 0 && configMaxSize < maxSize {
+	if !isRoleUser && configMaxSize > 0 && configMaxSize < maxSize {
 		maxSize = configMaxSize
 	}
 
