@@ -195,6 +195,50 @@ body {
     @apply my-3;
   }
 
+  .gf-prose-article > :first-child {
+    @apply mt-0;
+  }
+
+  .gf-prose-article > :last-child {
+    @apply mb-0;
+  }
+
+  .gf-prose-article h1 {
+    @apply mt-9 mb-4;
+  }
+
+  .gf-prose-article h2 {
+    @apply mt-8 mb-3;
+  }
+
+  .gf-prose-article h3 {
+    @apply mt-6 mb-2;
+  }
+
+  .gf-prose-article h4 {
+    @apply mt-5 mb-2;
+  }
+
+  .gf-prose-article :where(ul, ol) {
+    @apply my-3 pl-6;
+  }
+
+  .gf-prose-article li {
+    @apply my-1;
+  }
+
+  .gf-prose-article li > p {
+    @apply my-1;
+  }
+
+  .gf-prose-article hr {
+    @apply my-6 border-gray-200;
+  }
+
+  .gf-prose-article hr + :where(h1, h2, h3, h4) {
+    @apply mt-6;
+  }
+
   .gf-prose-comment {
     @apply max-w-none min-w-0 text-[15px] leading-relaxed text-gray-800;
   }
