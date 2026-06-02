@@ -23,6 +23,7 @@ const loadMoreSentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | undefined
 
 const hasTopics = computed(() => topics.value.length > 0)
+
 watch(
   () => [page.props.category.id, page.props.sort, page.props.pagination.page, page.props.topics],
   () => {
@@ -127,7 +128,7 @@ onBeforeUnmount(() => {
           <article
             v-for="topic in topics"
             :key="topic.id"
-            class="group relative isolate grid gap-3 bg-white px-4 py-3 transition before:absolute before:inset-0 before:-z-10 before:bg-white before:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-gray-100/70 after:content-[''] last:after:hidden hover:before:bg-gray-50 lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center"
+            class="group gf-topic-row"
           >
             <div class="min-w-0">
               <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">

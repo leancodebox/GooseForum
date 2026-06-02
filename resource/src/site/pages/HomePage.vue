@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Loader2, MessageSquare, Pin, Plus, Sparkles, UsersRound } from '@lucide/vue'
+import { Loader2, Mail, MessageSquare, Pin, Plus, Sparkles, UsersRound } from '@lucide/vue'
 import { formatNumber, timeAgo } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { topicDescription } from '@/runtime/topic-description'
@@ -86,6 +86,24 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="pb-12">
+      <aside
+        v-if="page.layout.viewer.requiresEmailVerification"
+        class="-mt-3 mb-3 rounded-b-lg border-x border-b border-amber-200/70 bg-amber-50"
+        :aria-label="t('topicList.emailVerification.title')"
+      >
+        <div class="flex items-center gap-2 px-4 py-2 text-sm leading-5 text-amber-800">
+          <Mail class="h-4 w-4 shrink-0 text-amber-600" />
+          <div class="min-w-0 flex-1">
+            <span class="font-semibold text-amber-950">{{ t('topicList.emailVerification.title') }}</span>
+            <span class="mx-1 text-amber-500">·</span>
+            <span>{{ t('topicList.emailVerification.description') }}</span>
+          </div>
+          <a href="/settings" class="shrink-0 font-semibold text-amber-700 hover:text-amber-900">
+            {{ t('topicList.emailVerification.action') }}
+          </a>
+        </div>
+      </aside>
+
       <aside v-if="page.props.announcement.enabled" class="mb-3 rounded-lg border border-gray-200/80 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.035)]" :aria-label="t('topicList.announcement')">
         <div class="border-l-[3px] border-blue-500 px-4 py-3">
           <div class="mb-2 flex items-center gap-2">
@@ -127,7 +145,8 @@ onBeforeUnmount(() => {
           <article
             v-for="topic in topics"
             :key="topic.id"
-            class="group relative isolate grid min-h-[96px] gap-3 bg-white px-4 py-3 transition before:absolute before:inset-0 before:-z-10 before:bg-white before:content-[''] after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-gray-100/70 after:content-[''] last:after:hidden hover:before:bg-gray-50 lg:min-h-[76px] lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center"
+            class="group gf-topic-row gf-topic-row-home"
+            :class="{ 'gf-topic-row-pinned': topic.pinWeight > 0 }"
           >
             <div class="min-w-0">
               <div class="flex min-h-6 min-w-0 flex-wrap items-center gap-x-2 gap-y-1">

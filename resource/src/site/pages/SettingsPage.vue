@@ -10,11 +10,13 @@ import {
   Mail,
   Pencil,
   Shield,
+  Sparkles,
   UserRound,
 } from '@lucide/vue'
 import {
   changePassword,
   getOAuthBindings,
+  resendActivationEmail,
   saveUserEmail,
   saveUserInfo,
   saveUserName,
@@ -25,7 +27,6 @@ import { formatDate, formatNumber } from '@/runtime/format'
 import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message'
 import { useAvatarCropUpload } from '@/site/composables/useAvatarCropUpload'
 import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
-import FlashSpriteIcon from '@/site/components/FlashSpriteIcon.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 import { useI18n } from 'vue-i18n'
@@ -45,6 +46,7 @@ const error = ref('')
 const savingProfile = ref(false)
 const savingUsername = ref(false)
 const savingEmail = ref(false)
+const sendingActivationEmail = ref(false)
 const savingPassword = ref(false)
 const loadingBindings = ref(false)
 const bindingAction = ref('')
@@ -253,6 +255,17 @@ function cancelEmailEdit() {
   editingEmail.value = false
 }
 
+async function sendActivationEmail() {
+  sendingActivationEmail.value = true
+  try {
+    showStatus(await resendActivationEmail())
+  } catch (err) {
+    showError(err instanceof Error ? err.message : t('api.activationEmailSendFailed'))
+  } finally {
+    sendingActivationEmail.value = false
+  }
+}
+
 async function submitPassword() {
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
     return showError(t('auth.validation.passwordMismatch'))
@@ -351,12 +364,12 @@ async function toggleBinding(provider: string) {
                   <span class="rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-blue-700">{{ t('settings.editing') }}</span>
                   <button
                     type="button"
-                    class="inline-flex h-7 w-7 items-center justify-center rounded-full outline-none transition hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-blue-100"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded outline-none transition hover:bg-gray-100 focus-visible:ring-4 focus-visible:ring-blue-100"
                     :aria-label="t('settings.easterEgg.aria')"
                     :title="t('settings.easterEgg.title')"
                     @click="triggerAvatarFlash"
                   >
-                    <FlashSpriteIcon type="info" class="h-6 w-6" />
+                    <Sparkles class="h-4 w-4 text-blue-600" />
                   </button>
                 </div>
                 <p class="mt-1 text-sm font-medium text-gray-400">@{{ usernameForm.username }}</p>
@@ -449,7 +462,7 @@ async function toggleBinding(provider: string) {
                     <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100" @click="cancelUsernameEdit">{{ t('common.cancel') }}</button>
                   </div>
                 </label>
-                <label class="block min-w-0">
+                <div class="block min-w-0">
                   <span class="text-sm font-medium text-gray-700">{{ t('auth.email') }}</span>
                   <div v-if="!editingEmail" class="mt-1 flex min-w-0 items-center gap-2">
                     <div class="flex h-10 min-w-0 flex-1 items-center rounded-md border border-gray-100 bg-gray-50/70 px-3 text-sm font-medium text-gray-900">
@@ -471,7 +484,23 @@ async function toggleBinding(provider: string) {
                     </button>
                     <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100" @click="cancelEmailEdit">{{ t('common.cancel') }}</button>
                   </div>
-                </label>
+                  <div v-if="layout.viewer.requiresEmailVerification" class="mt-2 flex flex-col gap-2 border-l-2 border-amber-400 bg-amber-50 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span class="min-w-0 text-sm text-amber-950">
+                      <span class="font-semibold">{{ t('settings.emailVerification.title') }}</span>
+                      <span class="ml-1 text-amber-800">{{ t('settings.emailVerification.description') }}</span>
+                    </span>
+                    <button
+                      type="button"
+                      class="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-amber-200 bg-white px-3 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:cursor-wait disabled:opacity-70"
+                      :disabled="sendingActivationEmail"
+                      @click="sendActivationEmail"
+                    >
+                      <Loader2 v-if="sendingActivationEmail" class="h-4 w-4 animate-spin" />
+                      <Mail v-else class="h-4 w-4" />
+                      {{ sendingActivationEmail ? t('settings.emailVerification.sending') : t('settings.emailVerification.action') }}
+                    </button>
+                  </div>
+                </div>
                 <label class="block sm:col-span-2">
                   <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.displayName') }}</span>
                   <input v-model="profileForm.nickname" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />

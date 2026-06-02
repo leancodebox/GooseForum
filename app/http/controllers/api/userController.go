@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -13,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/emailactivationservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -98,11 +100,46 @@ func EditUserEmail(req component.BetterRequest[EditUserEmailReq]) component.Resp
 		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
 	}
 
-	if err = component.SendAEmail4User(&userEntity); err != nil {
+	if err = emailactivationservice.SendActivationEmail(&userEntity); err != nil {
 		slog.Info("验证邮件发送失败", "error", err)
 	}
 
 	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
+}
+
+func ResendActivationEmail(req component.BetterRequest[component.Null]) component.Response {
+	userEntity, err := req.GetUser()
+	if err != nil || userEntity.Id == 0 {
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
+	}
+
+	result, err := emailactivationservice.Resend(userEntity)
+	if err != nil {
+		if errors.Is(err, emailactivationservice.ErrDisabled) {
+			return component.FailResponseCode(component.MessageAuthActivationDisabled, nil)
+		}
+		if errors.Is(err, emailactivationservice.ErrAlreadyVerified) {
+			return component.FailResponseCode(component.MessageAuthActivationAlreadyVerified, nil)
+		}
+		if errors.Is(err, emailactivationservice.ErrCooldown) {
+			return component.FailResponseCode(component.MessageAuthActivationResendCooldown, component.MessageParams{
+				"retryAfterSeconds": result.RetryAfterSeconds,
+			})
+		}
+		if errors.Is(err, emailactivationservice.ErrDailyLimit) {
+			return component.FailResponseCode(component.MessageAuthActivationResendDaily, component.MessageParams{
+				"limit": result.DailyLimit,
+			})
+		}
+		slog.Error("resend activation email failed", "userId", userEntity.Id, "err", err)
+		return component.FailResponseCode(component.MessageAuthActivationResendFailed, nil)
+	}
+
+	return component.SuccessResponseCode(map[string]any{
+		"remainingToday": result.RemainingToday,
+	}, component.MessageAuthActivationResendSuccess, component.MessageParams{
+		"remainingToday": result.RemainingToday,
+	})
 }
 
 type EditUsernameReq struct {

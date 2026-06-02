@@ -363,7 +363,7 @@ async function loadUserHoverCard() {
           </a>
 
           <div
-            class="relative hidden md:block"
+            class="relative"
             @mouseenter="setHoverMenu('lang', true)"
             @mouseleave="closeHoverMenuSoon('lang')"
             @focusin="setHoverMenu('lang', true)"
@@ -375,6 +375,7 @@ async function loadUserHoverCard() {
               :aria-label="t('shell.switchLanguage')"
               :title="t('shell.switchLanguage')"
               :aria-expanded="langMenuOpen"
+              @click="langMenuOpen = !langMenuOpen"
             >
               <Languages class="h-5 w-5" />
             </button>

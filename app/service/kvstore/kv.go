@@ -1,8 +1,8 @@
 package kvstore
 
 import (
-	"encoding/binary"
 	"errors"
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -13,262 +13,285 @@ import (
 )
 
 var (
-	db     *badger.DB
-	once   sync.Once
-	stopGC = make(chan struct{})
-	gcWg   sync.WaitGroup
+	currentMu   sync.RWMutex
+	current     *store
+	connectOnce = sync.OnceValues(connect)
 
 	// ErrNotFound 键不存在
 	ErrNotFound = errors.New("kvstore: key not found")
-
-	onlineUserPrefix = "online:user:"
+	// ErrInvalidKey key 为空或不合法
+	ErrInvalidKey = errors.New("kvstore: invalid key")
+	// ErrClosed 表示 kvstore 已关闭，应用生命周期内不应再次连接。
+	ErrClosed = errors.New("kvstore: closed")
 )
 
-// SetUserOnline 标记用户在线，设置 3 分钟 TTL
-// 每次用户活动时调用此方法续期
-func SetUserOnline(userId string) error {
-	key := onlineUserPrefix + userId
-	return SetBytes(key, []byte{1}, 3*time.Minute)
+const maxWriteConflictRetries = 32
+
+// UpdateAction 表示 UpdateBytes 回调希望对当前 key 执行的操作。
+type UpdateAction int
+
+const (
+	// UpdateKeep 保持当前值不变。
+	UpdateKeep UpdateAction = iota
+	// UpdateSet 写入回调返回的新值。
+	UpdateSet
+)
+
+// store 是包内部复用的 Badger-backed KV 连接。
+// Badger 推荐在应用生命周期内打开一次并复用；外部调用 Get/Set/UpdateBytes 时会懒加载同一个实例。
+type store struct {
+	db      *badger.DB
+	stopGC  chan struct{}
+	gcWg    sync.WaitGroup
+	closeMu sync.RWMutex
+	closed  bool
 }
 
-// GetOnlineUserCount 获取当前在线用户数
-// 通过遍历匹配前缀且未过期的 Key 数量来实现
-func GetOnlineUserCount() (int, error) {
-	count := 0
-	err := getDB().View(func(txn *badger.Txn) error {
-		opts := badger.DefaultIteratorOptions
-		opts.PrefetchValues = false // 只需要统计数量，不需要预取 Value
-		it := txn.NewIterator(opts)
-		defer it.Close()
+func connectStore() (*store, error) {
+	instance, err := connectOnce()
+	if err != nil {
+		return nil, err
+	}
+	if instance.isClosed() {
+		return nil, ErrClosed
+	}
+	return instance, nil
+}
 
-		prefix := []byte(onlineUserPrefix)
-		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-			count++
-		}
+func connect() (*store, error) {
+	path := preferences.Get("badger.path", "./storage/badger")
+	opts := badger.DefaultOptions(path).WithLogger(nil)
+	database, err := badger.Open(opts)
+	if err != nil {
+		slog.Error("kvstore: failed to open database", "path", path, "error", err)
+		return nil, fmt.Errorf("kvstore: open database: %w", err)
+	}
+
+	instance := &store{
+		db:     database,
+		stopGC: make(chan struct{}),
+	}
+	instance.gcWg.Add(1)
+	go instance.runGC()
+
+	currentMu.Lock()
+	current = instance
+	currentMu.Unlock()
+
+	closer.Register(func() error {
+		instance.close()
 		return nil
 	})
-	return count, err
+	return instance, nil
 }
 
-// getDB 获取 BadgerDB 实例
-func getDB() *badger.DB {
-	once.Do(func() {
-		path := preferences.Get("badger.path", "./storage/badger")
-		opts := badger.DefaultOptions(path).WithLogger(nil)
-		var err error
-		db, err = badger.Open(opts)
-		if err != nil {
-			slog.Error("kvstore: failed to open database", "path", path, "error", err)
-			panic(err)
+func (s *store) update(fn func(database *badger.DB) error) error {
+	var err error
+	for attempt := 0; attempt <= maxWriteConflictRetries; attempt++ {
+		err = s.withDB(fn)
+		if !errors.Is(err, badger.ErrConflict) {
+			return err
 		}
-
-		// 启动后台 GC 协程
-		gcWg.Add(1)
-		go runGC()
-
-		// 自动注册到全局关闭管理器
-		closer.Register(func() error {
-			Close()
-			return nil
-		})
-	})
-	return db
+		// Badger 的读改写事务在并发更新同一 key 时可能冲突，基础层统一短重试。
+		time.Sleep(time.Duration(attempt+1) * time.Millisecond)
+	}
+	return fmt.Errorf("kvstore: write conflict after %d retries: %w", maxWriteConflictRetries, err)
 }
 
-// runGC 定期执行 Value Log GC 以回收磁盘空间
-func runGC() {
-	defer gcWg.Done()
-	// 每 10 分钟检查一次是否需要 GC
+func (s *store) withDB(fn func(database *badger.DB) error) error {
+	s.closeMu.RLock()
+	if s.closed {
+		s.closeMu.RUnlock()
+		return ErrClosed
+	}
+	err := fn(s.db)
+	s.closeMu.RUnlock()
+	return err
+}
+
+func (s *store) isClosed() bool {
+	s.closeMu.RLock()
+	closed := s.closed
+	s.closeMu.RUnlock()
+	return closed
+}
+
+func validKey(key string) error {
+	if key == "" {
+		return ErrInvalidKey
+	}
+	return nil
+}
+
+func newEntry(key string, value []byte, ttl time.Duration) *badger.Entry {
+	entry := badger.NewEntry([]byte(key), append([]byte{}, value...))
+	if ttl > 0 {
+		entry.WithTTL(ttl)
+	}
+	return entry
+}
+
+func copyItemValue(item *badger.Item) ([]byte, error) {
+	var value []byte
+	err := item.Value(func(val []byte) error {
+		value = append([]byte{}, val...)
+		return nil
+	})
+	return value, err
+}
+
+func (s *store) runGC() {
+	defer s.gcWg.Done()
 	ticker := time.NewTicker(10 * time.Minute)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
-			// RunValueLogGC 参数 0.5 表示如果一个 log 文件中超过 50% 的数据是过期的，则重写该文件
-			// 循环执行直到没有文件可以被 GC
 			for {
 				select {
-				case <-stopGC:
+				case <-s.stopGC:
 					slog.Debug("kvstore: stop gc worker")
 					return
 				default:
 				}
-				if err := db.RunValueLogGC(0.5); err != nil {
+				if err := s.db.RunValueLogGC(0.5); err != nil {
 					break
 				}
 			}
-		case <-stopGC:
+		case <-s.stopGC:
 			slog.Debug("kvstore: stop gc worker")
 			return
 		}
 	}
 }
 
-// Close 关闭数据库连接并停止后台任务
+// Close 关闭当前已打开的 KV 连接；未连接时不做任何操作。
 func Close() {
-	if db != nil {
-		select {
-		case <-stopGC:
-			// 已经关闭
-		default:
-			close(stopGC)
-		}
-		gcWg.Wait()
-		if err := db.Close(); err != nil {
-			slog.Error("kvstore: failed to close database", "error", err)
-		}
-		db = nil
+	currentMu.RLock()
+	store := current
+	currentMu.RUnlock()
+	if store == nil {
+		return
 	}
+	store.close()
 }
 
-// Set 存储字符串
+func (s *store) close() {
+	s.closeMu.Lock()
+	if s.closed {
+		s.closeMu.Unlock()
+		return
+	}
+	s.closed = true
+	close(s.stopGC)
+	s.closeMu.Unlock()
+
+	s.gcWg.Wait()
+	if err := s.db.Close(); err != nil {
+		slog.Error("kvstore: failed to close database", "error", err)
+	}
+
+	currentMu.Lock()
+	if current == s {
+		current = nil
+	}
+	currentMu.Unlock()
+}
+
+// Set 存储字符串。
 func Set(key string, value string, ttl time.Duration) error {
 	return SetBytes(key, []byte(value), ttl)
 }
 
-// SetBytes 存储字节数组
+// SetBytes 存储字节数组。
 func SetBytes(key string, value []byte, ttl time.Duration) error {
-	return getDB().Update(func(txn *badger.Txn) error {
-		entry := badger.NewEntry([]byte(key), value)
-		if ttl > 0 {
-			entry.WithTTL(ttl)
-		}
-		return txn.SetEntry(entry)
+	if err := validKey(key); err != nil {
+		return err
+	}
+	instance, err := connectStore()
+	if err != nil {
+		return err
+	}
+	return instance.update(func(database *badger.DB) error {
+		return database.Update(func(txn *badger.Txn) error {
+			return txn.SetEntry(newEntry(key, value, ttl))
+		})
 	})
 }
 
-// Get 获取字符串值
+// Get 获取字符串值。
 func Get(key string) (string, error) {
-	val, err := GetBytes(key)
+	value, err := GetBytes(key)
 	if err != nil {
 		return "", err
 	}
-	return string(val), nil
+	return string(value), nil
 }
 
-// GetBytes 获取原始字节数组
+// GetBytes 获取原始字节数组。
 func GetBytes(key string) ([]byte, error) {
+	if err := validKey(key); err != nil {
+		return nil, err
+	}
+	instance, err := connectStore()
+	if err != nil {
+		return nil, err
+	}
 	var value []byte
-	err := getDB().View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(key))
-		if err != nil {
-			if errors.Is(err, badger.ErrKeyNotFound) {
-				return ErrNotFound
+	err = instance.withDB(func(database *badger.DB) error {
+		return database.View(func(txn *badger.Txn) error {
+			item, err := txn.Get([]byte(key))
+			if err != nil {
+				if errors.Is(err, badger.ErrKeyNotFound) {
+					return ErrNotFound
+				}
+				return err
 			}
+			value, err = copyItemValue(item)
 			return err
-		}
-		return item.Value(func(val []byte) error {
-			value = append([]byte{}, val...)
-			return nil
 		})
 	})
 	return value, err
 }
 
-// Exists 检查键是否存在
-func Exists(key string) bool {
-	err := getDB().View(func(txn *badger.Txn) error {
-		_, err := txn.Get([]byte(key))
+// UpdateBytes 在单个 Badger 事务内完成一个 key 的读改写。
+// updater 可能因事务冲突被重试，调用方应只基于 current/exists 计算返回值，避免在回调里执行外部副作用。
+func UpdateBytes(key string, ttl time.Duration, updater func(current []byte, exists bool) (UpdateAction, []byte, error)) error {
+	if err := validKey(key); err != nil {
 		return err
-	})
-	return err == nil
-}
-
-// Increment 增加（或减少）计数器的值并返回新值
-// 适用于统计在线人数 (delta 为 1 或 -1) 或帖子浏览量
-func Increment(key string, delta int64) (int64, error) {
-	var val int64
-	err := getDB().Update(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(key))
-		if err != nil {
-			if errors.Is(err, badger.ErrKeyNotFound) {
-				val = delta
-			} else {
-				return err
-			}
-		} else {
-			err = item.Value(func(v []byte) error {
-				if len(v) < 8 {
-					val = delta
-					return nil
-				}
-				val = int64(binary.BigEndian.Uint64(v)) + delta
-				return nil
-			})
-			if err != nil {
-				return err
-			}
-		}
-
-		buf := make([]byte, 8)
-		binary.BigEndian.PutUint64(buf, uint64(val))
-		return txn.Set([]byte(key), buf)
-	})
-	return val, err
-}
-
-// GetInt64 获取 int64 类型的计数器值
-func GetInt64(key string) (int64, error) {
-	var val int64
-	err := getDB().View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(key))
-		if err != nil {
-			if errors.Is(err, badger.ErrKeyNotFound) {
-				return ErrNotFound
-			}
-			return err
-		}
-		return item.Value(func(v []byte) error {
-			if len(v) < 8 {
-				return errors.New("kvstore: invalid data length for int64")
-			}
-			val = int64(binary.BigEndian.Uint64(v))
-			return nil
-		})
-	})
-	return val, err
-}
-
-// GetManyInt64 批量获取 int64 类型的计数器值
-// 适用于列表页展示（如批量获取一页帖子的浏览量）
-// 返回结果 map，key 为传入的 key，value 为计数值（不存在的 key 默认为 0）
-func GetManyInt64(keys []string) (map[string]int64, error) {
-	results := make(map[string]int64, len(keys))
-	err := getDB().View(func(txn *badger.Txn) error {
-		for _, key := range keys {
+	}
+	instance, err := connectStore()
+	if err != nil {
+		return err
+	}
+	return instance.update(func(database *badger.DB) error {
+		return database.Update(func(txn *badger.Txn) error {
+			var current []byte
+			exists := true
 			item, err := txn.Get([]byte(key))
 			if err != nil {
 				if errors.Is(err, badger.ErrKeyNotFound) {
-					results[key] = 0
-					continue
+					exists = false
+				} else {
+					return err
 				}
+			} else if current, err = copyItemValue(item); err != nil {
 				return err
 			}
-			err = item.Value(func(v []byte) error {
-				if len(v) >= 8 {
-					results[key] = int64(binary.BigEndian.Uint64(v))
-				} else {
-					results[key] = 0
-				}
-				return nil
-			})
+
+			action, next, err := updater(current, exists)
 			if err != nil {
 				return err
 			}
-		}
-		return nil
-	})
-	return results, err
-}
-
-// Delete 删除键
-func Delete(key string) error {
-	return getDB().Update(func(txn *badger.Txn) error {
-		err := txn.Delete([]byte(key))
-		if errors.Is(err, badger.ErrKeyNotFound) {
-			return nil
-		}
-		return err
+			switch action {
+			case UpdateKeep:
+				return nil
+			case UpdateSet:
+				return txn.SetEntry(newEntry(key, next, ttl))
+			default:
+				return fmt.Errorf("kvstore: unknown update action %d", action)
+			}
+		})
 	})
 }

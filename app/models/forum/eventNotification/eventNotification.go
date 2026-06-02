@@ -24,6 +24,28 @@ const (
 	TemplateBadge          = "notifications.templates.badge"
 )
 
+// Future unread-scope design:
+//
+// Notifications are event records, but unread indicators in the UI often belong
+// to a business scope instead of a single notification row. For example,
+// comment/reply/article_comment notifications can all point to the same article,
+// and closing one of them should be able to clear the article unread dot.
+//
+// When this is implemented, add a stable scope pair to Entity:
+//   ScopeType string // article, comment, user, badge, system, ...
+//   ScopeKey  string // article id, comment id, badge code, system batch key, ...
+//
+// Mark-as-read should stay permission anchored by notification id:
+//   1. Client sends only notificationId.
+//   2. Server loads id + current user id.
+//   3. If the notification has ScopeType/ScopeKey, mark unread rows with the
+//      same user_id + scope_type + scope_key as read.
+//   4. If no scope is present, mark only the current notification as read.
+//
+// This avoids trusting client-provided scope values, keeps non-article
+// notifications independent, and lets different event types share one unread
+// state when they point to the same business object.
+
 // NotificationPayload 通知内容的基础结构
 type NotificationPayload struct {
 	Title          string                     `json:"title,omitempty"`          // 旧通知兼容

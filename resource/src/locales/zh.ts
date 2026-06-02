@@ -205,6 +205,11 @@ export default {
     emptyCategoryDescription: '这个分类还没有公开主题。',
     allShown: '已显示全部主题',
     autoLoadFailed: '自动加载失败，可以稍后重试。',
+    emailVerification: {
+      title: '请完成邮箱验证',
+      description: '验证后即可正常发帖、回复和使用账号功能。',
+      action: '去设置',
+    },
   },
   category: {
     label: 'Category',
@@ -436,6 +441,7 @@ export default {
       profileSaved: '资料已保存',
       usernameSaved: '用户名已更新',
       emailSaved: '邮箱已更新，请留意验证邮件',
+      activationEmailSent: '验证邮件已发送，请查收邮箱',
       passwordChanged: '密码已修改',
       privacySaved: '隐私偏好已保存',
       bindingDisconnected: '账号绑定已解除',
@@ -443,6 +449,12 @@ export default {
     validation: {
       usernameRequired: '用户名不能为空',
       emailRequired: '邮箱不能为空',
+    },
+    emailVerification: {
+      title: '邮箱尚未验证',
+      description: '验证后可正常使用发帖、回复等账号功能。',
+      action: '发送验证邮件',
+      sending: '发送中',
     },
     easterEgg: {
       success: '彩蛋触发成功：今天的头像也很有精神。',
@@ -538,6 +550,7 @@ export default {
     loginFailed: '登录失败',
     registerFailed: '注册失败',
     resetEmailFailed: '重置邮件发送失败',
+    activationEmailSendFailed: '验证邮件发送失败',
     passwordResetFailed: '密码重置失败',
     secureLoginUnsupported: '当前浏览器不支持安全登录加密',
     loginKeyLoadFailed: '登录密钥加载失败',
@@ -610,6 +623,14 @@ export default {
         tokenInvalid: '重置链接已过期或无效',
         failed: '重置密码失败',
         success: '密码重置成功',
+      },
+      activation: {
+        resendSuccess: '验证邮件已重新发送，请查收邮箱',
+        alreadyVerified: '当前账号已完成邮箱验证',
+        disabled: '当前站点未启用邮箱验证',
+        resendCooldown: '发送太频繁，请 {retryAfterSeconds} 秒后再试',
+        resendDaily: '今天最多只能发送 {limit} 次验证邮件',
+        resendFailed: '验证邮件重新发送失败',
       },
     },
     permission: {

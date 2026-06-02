@@ -205,6 +205,11 @@ export default {
     emptyCategoryDescription: 'このカテゴリには公開トピックがまだありません。',
     allShown: 'すべてのトピックを表示しました',
     autoLoadFailed: '自動読み込みに失敗しました。あとでもう一度お試しください。',
+    emailVerification: {
+      title: 'メール認証を完了してください',
+      description: '認証後、投稿、返信、アカウント機能を通常どおり利用できます。',
+      action: '設定へ',
+    },
   },
   category: {
     label: 'Category',
@@ -436,6 +441,7 @@ export default {
       profileSaved: 'プロフィールを保存しました',
       usernameSaved: 'ユーザー名を更新しました',
       emailSaved: 'メールを更新しました。確認メールをご確認ください。',
+      activationEmailSent: '確認メールを送信しました。メールをご確認ください。',
       passwordChanged: 'パスワードを変更しました',
       privacySaved: 'プライバシー設定を保存しました',
       bindingDisconnected: 'アカウント連携を解除しました',
@@ -443,6 +449,12 @@ export default {
     validation: {
       usernameRequired: 'ユーザー名を入力してください',
       emailRequired: 'メールを入力してください',
+    },
+    emailVerification: {
+      title: 'メール未認証',
+      description: '認証すると投稿、返信、アカウント機能を通常どおり利用できます。',
+      action: '確認メールを送信',
+      sending: '送信中',
     },
     easterEgg: {
       success: 'イースターエッグ発動：今日のアバターも元気です。',
@@ -538,6 +550,7 @@ export default {
     loginFailed: 'ログインに失敗しました',
     registerFailed: '登録に失敗しました',
     resetEmailFailed: '再設定メールの送信に失敗しました',
+    activationEmailSendFailed: '確認メールの送信に失敗しました',
     passwordResetFailed: 'パスワード再設定に失敗しました',
     secureLoginUnsupported: 'このブラウザは安全なログイン暗号化に対応していません',
     loginKeyLoadFailed: 'ログインキーの読み込みに失敗しました',
@@ -610,6 +623,14 @@ export default {
         tokenInvalid: '再設定リンクは期限切れ、または無効です',
         failed: 'パスワード再設定に失敗しました',
         success: 'パスワードを再設定しました',
+      },
+      activation: {
+        resendSuccess: '確認メールを再送信しました。メールをご確認ください。',
+        alreadyVerified: 'このアカウントはすでにメール認証済みです。',
+        disabled: 'このサイトではメール認証が有効になっていません。',
+        resendCooldown: '{retryAfterSeconds} 秒後にもう一度お試しください。',
+        resendDaily: '確認メールは1日最大 {limit} 回まで送信できます。',
+        resendFailed: '確認メールの再送信に失敗しました。',
       },
     },
     permission: {

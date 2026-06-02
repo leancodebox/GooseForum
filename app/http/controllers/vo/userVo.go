@@ -19,6 +19,7 @@ type UserInfoShow struct {
 	UserPoint           int64                     `json:"userPoint"`
 	CreateTime          time.Time                 `json:"createTime"`
 	IsAdmin             bool                      `json:"isAdmin"`
+	IsActivated         int8                      `json:"isActivated"`
 	ExternalInformation users.ExternalInformation `json:"externalInformation"`
 }
 

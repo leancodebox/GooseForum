@@ -427,6 +427,16 @@ export async function saveUserEmail(email: string): Promise<boolean> {
   return true
 }
 
+export async function resendActivationEmail(): Promise<string> {
+  const response = await fetch('/api/resend-activation-email', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  return readApiSuccessMessage(response, t('settings.status.activationEmailSent'), t('api.activationEmailSendFailed'))
+}
+
 export async function saveUserName(username: string): Promise<boolean> {
   const response = await fetch('/api/set-user-name', {
     method: 'POST',

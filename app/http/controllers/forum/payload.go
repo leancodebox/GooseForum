@@ -138,12 +138,13 @@ type SitePayload struct {
 }
 
 type ViewerPayload struct {
-	ID              uint64 `json:"id"`
-	Username        string `json:"username"`
-	Email           string `json:"email"`
-	AvatarURL       string `json:"avatarUrl"`
-	IsAuthenticated bool   `json:"isAuthenticated"`
-	IsAdmin         bool   `json:"isAdmin"`
+	ID                        uint64 `json:"id"`
+	Username                  string `json:"username"`
+	Email                     string `json:"email"`
+	AvatarURL                 string `json:"avatarUrl"`
+	IsAuthenticated           bool   `json:"isAuthenticated"`
+	IsAdmin                   bool   `json:"isAdmin"`
+	RequiresEmailVerification bool   `json:"requiresEmailVerification"`
 }
 
 type NavItemPayload struct {
@@ -511,13 +512,15 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 	currentUser := component.GetLoginUser(c)
 	viewer := ViewerPayload{}
 	if currentUser != nil {
+		securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
 		viewer = ViewerPayload{
-			ID:              currentUser.UserId,
-			Username:        currentUser.Username,
-			Email:           currentUser.Email,
-			AvatarURL:       currentUser.AvatarUrl,
-			IsAuthenticated: currentUser.UserId > 0,
-			IsAdmin:         currentUser.IsAdmin,
+			ID:                        currentUser.UserId,
+			Username:                  currentUser.Username,
+			Email:                     currentUser.Email,
+			AvatarURL:                 currentUser.AvatarUrl,
+			IsAuthenticated:           currentUser.UserId > 0,
+			IsAdmin:                   currentUser.IsAdmin,
+			RequiresEmailVerification: currentUser.UserId > 0 && securityConfig.EnableEmailVerification && currentUser.IsActivated == users.ActivationPending,
 		}
 	}
 	unread := buildUnreadStatus(viewer.ID)

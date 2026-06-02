@@ -205,6 +205,11 @@ export default {
     emptyCategoryDescription: 'This category has no public topics yet.',
     allShown: 'All topics shown',
     autoLoadFailed: 'Auto loading failed. Please try again later.',
+    emailVerification: {
+      title: 'Verify your email',
+      description: 'After verification, you can post, reply, and use account features normally.',
+      action: 'Go to settings',
+    },
   },
   category: {
     label: 'Category',
@@ -436,6 +441,7 @@ export default {
       profileSaved: 'Profile saved',
       usernameSaved: 'Username updated',
       emailSaved: 'Email updated. Please check your verification email.',
+      activationEmailSent: 'Verification email sent. Please check your inbox.',
       passwordChanged: 'Password changed',
       privacySaved: 'Privacy preferences saved',
       bindingDisconnected: 'Account binding disconnected',
@@ -443,6 +449,12 @@ export default {
     validation: {
       usernameRequired: 'Username is required',
       emailRequired: 'Email is required',
+    },
+    emailVerification: {
+      title: 'Email not verified',
+      description: 'Verify it to use posting, replies, and account features normally.',
+      action: 'Send verification email',
+      sending: 'Sending',
     },
     easterEgg: {
       success: 'Easter egg triggered: your avatar is looking sharp today.',
@@ -538,6 +550,7 @@ export default {
     loginFailed: 'Login failed',
     registerFailed: 'Registration failed',
     resetEmailFailed: 'Failed to send reset email',
+    activationEmailSendFailed: 'Failed to send verification email',
     passwordResetFailed: 'Password reset failed',
     secureLoginUnsupported: 'This browser does not support secure login encryption',
     loginKeyLoadFailed: 'Failed to load login key',
@@ -610,6 +623,14 @@ export default {
         tokenInvalid: 'Reset link has expired or is invalid',
         failed: 'Failed to reset password',
         success: 'Password reset successfully',
+      },
+      activation: {
+        resendSuccess: 'Verification email sent. Please check your inbox.',
+        alreadyVerified: 'This account has already verified its email.',
+        disabled: 'Email verification is not enabled for this site.',
+        resendCooldown: 'Please wait {retryAfterSeconds} seconds before sending another email.',
+        resendDaily: 'You can send at most {limit} verification emails today.',
+        resendFailed: 'Failed to resend verification email.',
       },
     },
     permission: {

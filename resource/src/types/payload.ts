@@ -84,6 +84,7 @@ export interface ViewerPayload {
   avatarUrl: string
   isAuthenticated: boolean
   isAdmin: boolean
+  requiresEmailVerification: boolean
 }
 
 export interface CategoryNavPayload {

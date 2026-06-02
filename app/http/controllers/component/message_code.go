@@ -71,6 +71,12 @@ const (
 	MessageAuthResetTokenInvalid         MessageCode = "auth.passwordReset.tokenInvalid" // 重置链接过期或无效。
 	MessageAuthResetFailed               MessageCode = "auth.passwordReset.failed"       // 重置密码失败。
 	MessageAuthResetSuccess              MessageCode = "auth.passwordReset.success"      // 重置密码成功。
+	MessageAuthActivationResendSuccess   MessageCode = "auth.activation.resendSuccess"   // 验证邮件已重新发送。
+	MessageAuthActivationAlreadyVerified MessageCode = "auth.activation.alreadyVerified" // 当前账号已完成邮箱验证。
+	MessageAuthActivationDisabled        MessageCode = "auth.activation.disabled"        // 当前站点未启用邮箱验证。
+	MessageAuthActivationResendCooldown  MessageCode = "auth.activation.resendCooldown"  // 验证邮件发送过于频繁，params.retryAfterSeconds。
+	MessageAuthActivationResendDaily     MessageCode = "auth.activation.resendDaily"     // 验证邮件达到当天重发上限，params.limit。
+	MessageAuthActivationResendFailed    MessageCode = "auth.activation.resendFailed"    // 验证邮件重新发送失败。
 )
 
 const (

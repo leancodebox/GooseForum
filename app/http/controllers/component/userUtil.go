@@ -3,7 +3,6 @@ package component
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"regexp"
 	"slices"
 	"strings"
@@ -13,8 +12,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
-	"github.com/leancodebox/GooseForum/app/service/mailservice"
-	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 )
 
 var (
@@ -79,28 +76,6 @@ func GetUserShowByUserId(userId uint64) *vo.UserInfoShow {
 		}
 		return transform.User2userShow(user), nil
 	})
-}
-
-func SendAEmail4User(userEntity *users.EntityComplete) error {
-	token, err := tokenservice.GenerateActivationTokenByUser(*userEntity)
-	if err != nil {
-		slog.Debug("生成激活邮件 Token 失败", "userId", userEntity.Id, "email", userEntity.Email, "err", err)
-		return err
-	}
-
-	// 将邮件任务加入队列
-	err = mailservice.AddToQueue(mailservice.EmailTask{
-		To:       userEntity.Email,
-		Username: userEntity.Username,
-		Token:    token,
-		Type:     "activation",
-	})
-	if err != nil {
-		slog.Debug("激活邮件任务入队失败", "userId", userEntity.Id, "email", userEntity.Email, "err", err)
-		return err
-	}
-	slog.Debug("激活邮件任务入队成功", "userId", userEntity.Id, "email", userEntity.Email)
-	return nil
 }
 
 // CheckUserPermission 统一检查用户操作权限（封禁状态、邮箱验证等）
