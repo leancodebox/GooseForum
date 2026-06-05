@@ -140,7 +140,7 @@ connection = "sqlite"            # 数据库类型 (sqlite/mysql)
 path = "./storage/database/sqlite.db"
 ```
 
-📖 **详细配置说明**: [配置文档](docs/configuration.md)
+📖 **详细配置说明**: [配置文档](docs/user/configuration.md)
 
 ## 🏗 技术架构
 
@@ -262,11 +262,11 @@ CMD ["./GooseForum", "serve"]
 
 ## 📚 相关文档
 
-- [配置文档](docs/configuration.md) - 详细的配置选项说明
-- [Resource 前端设计](RESOURCE_DESIGN.md)
-- [Resource UI 规范](RESOURCE_UI_SPEC.md)
-- [文章置顶方案](docs/article-pinning.md)
-- [Resource 管理后台现状](docs/admin-resource-phase1.md)
+- [文档目录](docs/README.md)
+- [配置文档](docs/user/configuration.md) - 详细的配置选项说明
+- [Resource 前端设计](docs/architecture/resource-frontend.md)
+- [Resource UI 规范](docs/frontend/ui-spec.md)
+- [文章置顶方案](docs/features/article-pinning.md)
 - [English README](README.md)
 
 ## 🙏 致谢

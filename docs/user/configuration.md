@@ -185,5 +185,5 @@ type = "stdout"
 
 ## 📚 相关文档
 
-- [快速开始](../README_ZH.md#🚀-快速开始)
-- [英文配置文档](../README.md#🔧-configuration)
+- [快速开始](../../README_ZH.md#🚀-快速开始)
+- [英文配置文档](../../README.md#🔧-configuration)

@@ -140,7 +140,7 @@ connection = "sqlite"          # Database type (sqlite/mysql)
 path = "./storage/database/sqlite.db"
 ```
 
-📖 **Detailed Configuration**: [Configuration Documentation](docs/configuration.md)
+📖 **Detailed Configuration**: [Configuration Documentation](docs/user/configuration.md)
 
 ## 🏗 Technical Architecture
 
@@ -247,11 +247,11 @@ MIT License - see [LICENSE](LICENSE)
 
 ## 📚 Related Documentation
 
-- [Configuration Documentation](docs/configuration.md)
-- [Resource Frontend Design](RESOURCE_DESIGN.md)
-- [Resource UI Specification](RESOURCE_UI_SPEC.md)
-- [Article Pinning Design](docs/article-pinning.md)
-- [Resource Admin Current State](docs/admin-resource-phase1.md)
+- [Documentation Index](docs/README.md)
+- [Configuration Documentation](docs/user/configuration.md)
+- [Resource Frontend Design](docs/architecture/resource-frontend.md)
+- [Resource UI Specification](docs/frontend/ui-spec.md)
+- [Article Pinning Design](docs/features/article-pinning.md)
 - [Chinese README](README_ZH.md)
 
 ## 🙏 Acknowledgments

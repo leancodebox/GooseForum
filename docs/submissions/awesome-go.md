@@ -119,7 +119,7 @@ go run github.com/client9/misspell/cmd/misspell@latest -error $(git ls-files)
 Current local full-package coverage after recent focused tests:
 
 ```text
-total: (statements) 16.7%
+total: (statements) 18.4%
 ```
 
 Current local lint status:
