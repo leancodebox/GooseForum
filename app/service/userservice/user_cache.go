@@ -34,6 +34,7 @@ type UserInfo struct {
 	RoleId              uint64
 	Prestige            int64
 	AvatarUrl           string
+	ProfileCoverUrl     string
 	Bio                 string
 	Signature           string
 	WebsiteName         string
@@ -50,6 +51,7 @@ type UserPublicInfo struct {
 	Nickname            string
 	RoleId              uint64
 	AvatarUrl           string
+	ProfileCoverUrl     string
 	Bio                 string
 	Signature           string
 	WebsiteName         string
@@ -197,6 +199,7 @@ func userInfoFromEntity(user users.EntityComplete) UserInfo {
 		RoleId:              user.RoleId,
 		Prestige:            user.Prestige,
 		AvatarUrl:           user.AvatarUrl,
+		ProfileCoverUrl:     user.ProfileCoverUrl,
 		Bio:                 user.Bio,
 		Signature:           user.Signature,
 		WebsiteName:         user.WebsiteName,
@@ -214,6 +217,7 @@ func (user UserInfo) toPublicInfo() UserPublicInfo {
 		Nickname:            user.Nickname,
 		RoleId:              user.RoleId,
 		AvatarUrl:           user.AvatarUrl,
+		ProfileCoverUrl:     user.ProfileCoverUrl,
 		Bio:                 user.Bio,
 		Signature:           user.Signature,
 		WebsiteName:         user.WebsiteName,
@@ -235,6 +239,7 @@ func (user UserInfo) toEntity() users.EntityComplete {
 		RoleId:              user.RoleId,
 		Prestige:            user.Prestige,
 		AvatarUrl:           user.AvatarUrl,
+		ProfileCoverUrl:     user.ProfileCoverUrl,
 		Bio:                 user.Bio,
 		Signature:           user.Signature,
 		WebsiteName:         user.WebsiteName,
@@ -264,6 +269,7 @@ func buildUserCard(profile UserPublicProfile) vo.UserCard {
 		Username:          user.Username,
 		Nickname:          user.Nickname,
 		AvatarUrl:         user.webAvatarURL(),
+		ProfileCoverUrl:   user.ProfileCoverUrl,
 		Bio:               user.Bio,
 		Signature:         user.Signature,
 		WebsiteName:       user.WebsiteName,
@@ -295,6 +301,7 @@ func buildUserHoverCard(profile UserPublicProfile) vo.UserHoverCard {
 		Username:          user.Username,
 		Nickname:          user.Nickname,
 		AvatarUrl:         user.webAvatarURL(),
+		ProfileCoverUrl:   user.ProfileCoverUrl,
 		Bio:               user.Bio,
 		Signature:         user.Signature,
 		WebsiteName:       user.WebsiteName,

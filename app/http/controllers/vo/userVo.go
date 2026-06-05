@@ -30,6 +30,7 @@ type UserDetailedVo struct {
 	Email               string                    `json:"email"`
 	Nickname            string                    `json:"nickname"`
 	AvatarUrl           string                    `json:"avatarUrl"`
+	ProfileCoverUrl     string                    `json:"profileCoverUrl"`
 	Bio                 string                    `json:"bio"`
 	Signature           string                    `json:"signature"`
 	WebsiteName         string                    `json:"websiteName"`

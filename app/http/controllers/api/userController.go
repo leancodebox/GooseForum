@@ -201,6 +201,28 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
 }
 
+type EditUserProfileCoverReq struct {
+	ProfileCoverUrl string `json:"profileCoverUrl"`
+}
+
+// EditUserProfileCover updates the current user's profile cover.
+func EditUserProfileCover(req component.BetterRequest[EditUserProfileCoverReq]) component.Response {
+	userEntity, err := req.GetUser()
+	if err != nil {
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
+	}
+	if userEntity.RoleId == 0 {
+		return component.FailResponseCode(component.MessagePermissionDenied, nil)
+	}
+
+	userEntity.ProfileCoverUrl = strings.TrimSpace(req.Params.ProfileCoverUrl)
+	err = userservice.SaveUser(&userEntity)
+	if err != nil {
+		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
+	}
+	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
+}
+
 // UploadAvatar stores a new avatar for the current user.
 func UploadAvatar(c *gin.Context) {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()

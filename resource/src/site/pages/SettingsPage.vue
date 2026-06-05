@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Camera,
   Check,
+  Image,
   KeyRound,
   Link as LinkIcon,
   Loader2,
@@ -20,6 +21,7 @@ import {
   saveUserEmail,
   saveUserInfo,
   saveUserName,
+  saveUserProfileCover,
   unbindOAuth,
   type OAuthBindingsPayload,
 } from '@/runtime/api'
@@ -52,6 +54,10 @@ const loadingBindings = ref(false)
 const bindingAction = ref('')
 const editingUsername = ref(false)
 const editingEmail = ref(false)
+const editingCover = ref(false)
+const savingCover = ref(false)
+const coverUrl = ref(page.props.user.profileCoverUrl || '')
+const coverDraft = ref(page.props.user.profileCoverUrl || '')
 const bindings = ref<OAuthBindingsPayload>({})
 const { push: pushFlash } = useFlashMessages()
 const {
@@ -106,6 +112,18 @@ const privacy = reactive({
 
 const displayName = computed(() => profileForm.nickname || usernameForm.username)
 const profileBioText = computed(() => profileForm.bio || profileForm.signature || t('user.emptyBio'))
+const profileCoverStyle = computed(() => {
+  const activeCoverUrl = coverUrl.value.trim()
+  const defaultCover = 'linear-gradient(135deg, #f8fafc 0%, #eef4ff 52%, #f8fafc 100%)'
+  if (!activeCoverUrl) {
+    return {
+      backgroundImage: defaultCover,
+    }
+  }
+  return {
+    backgroundImage: `url(${JSON.stringify(activeCoverUrl)}), ${defaultCover}`,
+  }
+})
 const hasStatus = computed(() => Boolean(status.value || error.value))
 const statsItems = computed(() => [
   { label: t('user.stats.topics'), value: page.props.stats.articleCount },
@@ -145,6 +163,9 @@ watch(
     profileForm.websiteName = page.props.user.websiteName || ''
     profileForm.website = page.props.user.website || ''
     profileForm.externalInformation = buildExternalInfo()
+    coverUrl.value = page.props.user.profileCoverUrl || ''
+    coverDraft.value = page.props.user.profileCoverUrl || ''
+    editingCover.value = false
   },
 )
 
@@ -210,6 +231,30 @@ async function saveProfile() {
     showError(err instanceof Error ? err.message : t('api.profileSaveFailed'))
   } finally {
     savingProfile.value = false
+  }
+}
+
+function toggleCoverEditor() {
+  coverDraft.value = coverUrl.value
+  editingCover.value = !editingCover.value
+}
+
+function cancelCoverEditor() {
+  coverDraft.value = coverUrl.value
+  editingCover.value = false
+}
+
+async function saveCover() {
+  savingCover.value = true
+  try {
+    await saveUserProfileCover(coverDraft.value)
+    coverUrl.value = coverDraft.value.trim()
+    editingCover.value = false
+    showStatus(t('user.coverSaved'))
+  } catch (err) {
+    showError(err instanceof Error ? err.message : t('api.coverSaveFailed'))
+  } finally {
+    savingCover.value = false
   }
 }
 
@@ -335,13 +380,13 @@ async function toggleBinding(provider: string) {
 <template>
     <main class="min-w-0 pb-12">
       <section class="mb-4 overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div class="h-24 border-b border-gray-100 bg-[linear-gradient(135deg,#f8fafc_0%,#eff6ff_48%,#f8fafc_100%)]" />
+        <div class="h-32 border-b border-gray-100 bg-gray-100 bg-cover bg-center sm:h-36" :style="profileCoverStyle" />
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex min-w-0 gap-4">
               <button
                 type="button"
-                class="group relative -mt-10 h-20 w-20 shrink-0 rounded-lg border-4 border-white bg-white shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-blue-100 sm:h-24 sm:w-24"
+                class="group relative -mt-12 h-20 w-20 shrink-0 rounded-lg border-4 border-white bg-white shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-blue-100 sm:-mt-14 sm:h-24 sm:w-24"
                 :disabled="uploadingAvatar"
                 :aria-label="t('settings.avatar.upload')"
                 @click="chooseAvatar"
@@ -377,15 +422,61 @@ async function toggleBinding(provider: string) {
               </div>
             </div>
 
-            <div class="flex shrink-0 flex-wrap items-center gap-2">
-              <button
-                type="button"
-                class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                @click="chooseAvatar"
-              >
-                <Camera class="h-4 w-4" />
-                {{ t('settings.avatar.change') }}
-              </button>
+            <div class="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+              <div class="flex flex-wrap items-center gap-2">
+                <div v-if="layout.viewer.isAdmin" class="relative">
+                  <button
+                    type="button"
+                    class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                    :aria-expanded="editingCover"
+                    @click="toggleCoverEditor"
+                  >
+                    <Image class="h-4 w-4" />
+                    {{ t('user.editCover') }}
+                  </button>
+                  <form
+                    v-if="editingCover"
+                    class="absolute left-0 top-11 z-20 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-gray-200 bg-white p-3 shadow-lg sm:left-auto sm:right-0"
+                    @submit.prevent="saveCover"
+                  >
+                    <label class="block">
+                      <span class="text-xs font-semibold text-gray-500">{{ t('user.coverUrl') }}</span>
+                      <input
+                        v-model="coverDraft"
+                        type="url"
+                        class="mt-1 h-9 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        :placeholder="t('user.coverUrl')"
+                      />
+                    </label>
+                    <div class="mt-3 flex justify-end gap-2">
+                      <button
+                        type="button"
+                        class="inline-flex h-8 items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        :disabled="savingCover"
+                        @click="cancelCoverEditor"
+                      >
+                        {{ t('common.cancel') }}
+                      </button>
+                      <button
+                        type="submit"
+                        class="inline-flex h-8 min-w-16 items-center justify-center rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70"
+                        :disabled="savingCover"
+                      >
+                        <Loader2 v-if="savingCover" class="h-4 w-4 animate-spin" />
+                        <span v-else>{{ t('common.save') }}</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                <button
+                  type="button"
+                  class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  @click="chooseAvatar"
+                >
+                  <Camera class="h-4 w-4" />
+                  {{ t('settings.avatar.change') }}
+                </button>
+              </div>
             </div>
           </div>
 

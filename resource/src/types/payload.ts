@@ -215,6 +215,7 @@ export interface UserCardPayload {
   username: string
   nickname: string
   avatarUrl: string
+  profileCoverUrl: string
   bio: string
   signature: string
   websiteName: string
@@ -240,6 +241,7 @@ export interface UserHoverCardPayload {
   username: string
   nickname: string
   avatarUrl: string
+  profileCoverUrl: string
   bio: string
   signature: string
   websiteName: string
@@ -522,6 +524,7 @@ export interface SettingsUserPayload {
   email: string
   nickname: string
   avatarUrl: string
+  profileCoverUrl: string
   bio: string
   signature: string
   websiteName: string

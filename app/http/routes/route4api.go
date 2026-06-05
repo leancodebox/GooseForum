@@ -102,6 +102,7 @@ func apiRoute(ginApp *gin.Engine) {
 
 	loginApi := ginApp.Group("api").Use(middleware.JWTAuthCheck)
 	loginApi.POST("set-user-info", UpButterReq(api.EditUserInfo))
+	loginApi.POST("set-user-profile-cover", UpButterReq(api.EditUserProfileCover))
 	loginApi.POST("set-user-email", UpButterReq(api.EditUserEmail))
 	loginApi.POST("resend-activation-email", UpButterReq(api.ResendActivationEmail))
 	loginApi.POST("set-user-name", UpButterReq(api.EditUsername))

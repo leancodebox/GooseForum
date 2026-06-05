@@ -415,6 +415,18 @@ export async function saveUserInfo(input: SaveUserInfoInput): Promise<boolean> {
   return true
 }
 
+export async function saveUserProfileCover(profileCoverUrl: string): Promise<boolean> {
+  const response = await fetch('/api/set-user-profile-cover', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ profileCoverUrl }),
+  })
+  await readApiResponse<unknown>(response, t('api.coverSaveFailed'))
+  return true
+}
+
 export async function saveUserEmail(email: string): Promise<boolean> {
   const response = await fetch('/api/set-user-email', {
     method: 'POST',

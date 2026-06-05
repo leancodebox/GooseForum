@@ -32,6 +32,7 @@ func User2UserDetailedVo(user users.EntityComplete) *vo.UserDetailedVo {
 		Email:               user.Email,
 		Nickname:            user.Nickname,
 		AvatarUrl:           user.GetWebAvatarUrl(),
+		ProfileCoverUrl:     user.ProfileCoverUrl,
 		Bio:                 user.Bio,
 		Signature:           user.Signature,
 		WebsiteName:         user.WebsiteName,

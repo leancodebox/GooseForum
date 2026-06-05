@@ -13,6 +13,7 @@ type UserCard struct {
 	Username          string                    `json:"username"`
 	Nickname          string                    `json:"nickname"`
 	AvatarUrl         string                    `json:"avatarUrl"`
+	ProfileCoverUrl   string                    `json:"profileCoverUrl"`
 	Bio               string                    `json:"bio"`
 	Signature         string                    `json:"signature"`
 	WebsiteName       string                    `json:"websiteName"`
@@ -40,6 +41,7 @@ type UserHoverCard struct {
 	Username          string                    `json:"username"`
 	Nickname          string                    `json:"nickname"`
 	AvatarUrl         string                    `json:"avatarUrl"`
+	ProfileCoverUrl   string                    `json:"profileCoverUrl"`
 	Bio               string                    `json:"bio"`
 	Signature         string                    `json:"signature"`
 	WebsiteName       string                    `json:"websiteName"`

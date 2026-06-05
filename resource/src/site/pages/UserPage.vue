@@ -28,6 +28,7 @@ const activeTab = ref<'topics' | 'activity' | 'following' | 'followers'>('topics
 const isFollowing = ref(page.props.user.isFollowing)
 const followLoading = ref(false)
 const followError = ref('')
+const coverUrl = ref(page.props.user.profileCoverUrl || '')
 
 const displayName = computed(() => page.props.user.nickname || page.props.user.username)
 const bioText = computed(() => page.props.user.bio || page.props.user.signature || t('user.emptyBio'))
@@ -39,12 +40,25 @@ const tabItems = computed(() => [
   { key: 'following', label: t('user.tabs.following'), count: page.props.user.followingCount },
   { key: 'followers', label: t('user.tabs.followers'), count: page.props.user.followerCount },
 ] as const)
+const profileCoverStyle = computed(() => {
+  const activeCoverUrl = coverUrl.value.trim()
+  const defaultCover = 'linear-gradient(135deg, #f8fafc 0%, #eef4ff 52%, #f8fafc 100%)'
+  if (!activeCoverUrl) {
+    return {
+      backgroundImage: defaultCover,
+    }
+  }
+  return {
+    backgroundImage: `url(${JSON.stringify(activeCoverUrl)}), ${defaultCover}`,
+  }
+})
 
 watch(
   () => page.props.user.userId,
   () => {
     activeTab.value = 'topics'
     isFollowing.value = page.props.user.isFollowing
+    coverUrl.value = page.props.user.profileCoverUrl || ''
     followError.value = ''
   },
 )
@@ -110,7 +124,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
 <template>
     <article class="pb-12">
       <section class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div class="h-24 border-b border-gray-100 bg-[linear-gradient(135deg,#f8fafc_0%,#eff6ff_48%,#f8fafc_100%)]" />
+        <div class="h-32 border-b border-gray-100 bg-gray-100 bg-cover bg-center sm:h-36" :style="profileCoverStyle" />
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex min-w-0 gap-4">
@@ -118,7 +132,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
                 :src="page.props.user.avatarUrl"
                 :alt="page.props.user.username"
                 size="large"
-                class="-mt-10 h-20 w-20 rounded-lg border-4 border-white bg-white object-cover shadow-sm sm:h-24 sm:w-24"
+                class="-mt-12 h-20 w-20 rounded-lg border-4 border-white bg-white object-cover shadow-sm sm:-mt-14 sm:h-24 sm:w-24"
               />
               <div class="min-w-0 pt-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
