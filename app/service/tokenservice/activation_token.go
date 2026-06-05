@@ -4,7 +4,6 @@ package tokenservice
 import (
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -34,13 +33,13 @@ func GenerateActivationToken(userId uint64, email string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(preferences.Get("jwtopt.key")))
+	return token.SignedString(signingKey())
 }
 
 // ParseActivationToken parses and validates an activation token.
 func ParseActivationToken(tokenString string) (*ActivationClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &ActivationClaims{}, func(token *jwt.Token) (any, error) {
-		return []byte(preferences.Get("jwtopt.key")), nil
+		return signingKey(), nil
 	})
 
 	if err != nil {

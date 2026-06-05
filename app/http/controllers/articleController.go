@@ -423,7 +423,7 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 	oldLike := articleLike.GetByArticleId(req.UserId, articleEntity.Id)
-	targetStatus := 0
+	var targetStatus int
 	if req.Params.Action == 1 {
 		if oldLike.Id == 0 {
 			oldLike.UserId = req.UserId
@@ -555,7 +555,7 @@ func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {
 		userFollowEntity.UserId = req.UserId
 		userFollowEntity.FollowUserId = req.Params.Id
 	}
-	targetStatus := 0
+	var targetStatus int
 	if req.Params.Action == 1 {
 		targetStatus = 1
 	} else {

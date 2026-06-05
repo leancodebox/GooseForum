@@ -26,19 +26,19 @@ var v *viper.Viper
 //go:embed config.templ.toml
 var configTempl []byte
 
-func GenerateConfig() []byte {
+func GenerateConfig() ([]byte, error) {
+	signingKey := algorithm.SafeGenerateSigningKey(32)
+
 	var b bytes.Buffer
 	t := template.New("config.templ.toml")
 	t = template.Must(t.Parse(string(configTempl)))
 	err := t.Execute(&b, map[string]any{
-		"AppSigningKey": algorithm.SafeGenerateSigningKey(32),
-		"SigningKey":    algorithm.SafeGenerateSigningKey(32),
+		"SigningKey": signingKey,
 	})
-
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
-	return b.Bytes()
+	return b.Bytes(), nil
 }
 
 // 初始化配置信息，完成对环境变量以及 conf 信息的加载
@@ -53,17 +53,21 @@ func init() {
 		}
 		cfgPath = filepath.Join(dir, "config.toml")
 		if !fileopt.IsExist(cfgPath) {
-			if e := fileopt.PutContents(cfgPath, GenerateConfig()); e != nil {
+			configData, err := GenerateConfig()
+			if err != nil {
+				slog.Error("preferences.test.generate", "err", err)
+			} else if e := fileopt.PutContents(cfgPath, configData); e != nil {
 				slog.Error("preferences.test.init", "err", e)
 			} else {
 				slog.Info("preferences.test.init", "path", cfgPath)
 			}
 		}
-	} else {
-		if !fileopt.IsExist(cfgPath) {
-			if err := fileopt.PutContents(cfgPath, GenerateConfig()); err != nil {
-				panic(err)
-			}
+	} else if !fileopt.IsExist(cfgPath) {
+		configData, err := GenerateConfig()
+		if err != nil {
+			slog.Error("preferences.generate", "err", err)
+		} else if err := fileopt.PutContents(cfgPath, configData); err != nil {
+			slog.Error("preferences.init", "err", err)
 		}
 	}
 	v = viper.New()

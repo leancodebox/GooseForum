@@ -1,8 +1,6 @@
 package main
 
 import (
-	_ "net/http/pprof"
-
 	_ "github.com/leancodebox/GooseForum/app/bundles/logging"
 	"github.com/leancodebox/GooseForum/app/console"
 )

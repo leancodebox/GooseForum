@@ -4,6 +4,32 @@ run:
   timeout: 5m
 
 linters:
+  settings:
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+        - commentFormatting
+  enable:
+    - bodyclose
+    - copyloopvar
+    - durationcheck
+    - errchkjson
+    - sqlclosecheck
+    - rowserrcheck
+    - errorlint
+    - errname
+    - fatcontext
+    - gocritic
+    - loggercheck
+    - makezero
+    - misspell
+    - nilerr
+    - nilnesserr
+    - nosprintfhostport
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - wastedassign
   exclusions:
     rules:
       - path: ^app/models/

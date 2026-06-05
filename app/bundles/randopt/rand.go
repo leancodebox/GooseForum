@@ -7,8 +7,8 @@ import (
 	"github.com/samber/lo"
 )
 
-func RandTrue(Molecular int, Denominator int) bool {
-	return rand.Intn(Denominator) < Molecular
+func RandTrue(molecular int, denominator int) bool {
+	return rand.Intn(denominator) < molecular
 }
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

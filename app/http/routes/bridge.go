@@ -12,6 +12,7 @@ func RegisterByGin(ginApp *gin.Engine) {
 	// 基础中间件
 	ginApp.Use(gin.CustomRecoveryWithWriter(gin.DefaultErrorWriter, func(c *gin.Context, err any) {
 		slog.Error("panic", "err", err)
+		c.AbortWithStatus(500)
 	}))
 	ginApp.Use(middleware.SiteMaintenance)
 	ginApp.Use(middleware.SiteInfo)

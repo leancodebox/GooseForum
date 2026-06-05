@@ -152,7 +152,9 @@ func SaveImgByGinContext(c *gin.Context) {
 		return
 	}
 
-	fileData := append(header[:n], remainingData...)
+	fileData := make([]byte, n+len(remainingData))
+	copy(fileData, header[:n])
+	copy(fileData[n:], remainingData)
 
 	if int64(len(fileData)) > maxSize {
 		c.JSON(http.StatusBadRequest, component.FailDataCode(

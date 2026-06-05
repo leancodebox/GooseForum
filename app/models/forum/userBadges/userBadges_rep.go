@@ -151,7 +151,7 @@ func FirstActive(userID uint64, badgeCode string) (Entity, error) {
 		Where(queryopt.Eq("badge_code", badgeCode)).
 		Where("revoked_at IS NULL").
 		First(&entity).Error
-	if err == gorm.ErrRecordNotFound {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return entity, nil
 	}
 	return entity, err

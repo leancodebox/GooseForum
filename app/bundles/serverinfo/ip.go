@@ -8,7 +8,7 @@ import (
 func GetLocalIp() (string, error) {
 	ip, err := ExternalIP()
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	return ip.String(), nil
 
@@ -39,7 +39,7 @@ func ExternalIP() (net.IP, error) {
 			return ip, nil
 		}
 	}
-	return nil, errors.New("connected to the network")
+	return nil, errors.New("no external IP found")
 }
 
 // 获取ip

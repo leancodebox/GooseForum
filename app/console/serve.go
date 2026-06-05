@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"runtime"
 	"time"
@@ -39,22 +40,40 @@ func runWeb(_ *cobra.Command, _ []string) {
 	slog.Info("GooseForum:start")
 	slog.Info(fmt.Sprintf("GooseForum:useMem %d KB", m.Alloc/1024/8))
 
-	if setting.IsDebug() {
-		go pprofServe()
-	}
-
-	// 启动主服务
+	startDebugServices()
 	ginServe()
 }
 
-func pprofServe() {
+func startDebugServices() {
+	if !setting.IsDebug() {
+		return
+	}
+	go servePprof()
+}
+
+func servePprof() {
 	// go tool pprof http://localhost:19070/debug/pprof/profile
 	// go tool pprof -http=:9001 http://localhost:19070/debug/pprof/heap
 	// http://127.0.0.1:19070/debug/pprof/
-	err := http.ListenAndServe("127.0.0.1:19070", nil)
-	if err != nil {
+	const addr = "127.0.0.1:19070"
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           pprofMux(),
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("debug listen ", "err", err)
 	}
+}
+
+func pprofMux() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	return mux
 }
 
 func ginServe() {
@@ -66,16 +85,7 @@ func ginServe() {
 	job.Run()
 
 	port := preferences.GetString("server.port", 8080)
-	var engine *gin.Engine
-	if !setting.IsDebug() {
-		gin.DisableConsoleColor()
-		gin.SetMode(gin.ReleaseMode)
-		engine = gin.New()
-		engine.Use(gin.Recovery())
-	} else {
-		engine = gin.Default()
-	}
-
+	engine := newGinEngine()
 	routes.RegisterByGin(engine)
 	host := ``
 	if setting.IsLocal() {
@@ -114,4 +124,15 @@ func ginServe() {
 	}
 
 	slog.Info("Server exiting")
+}
+
+func newGinEngine() *gin.Engine {
+	if setting.IsDebug() {
+		gin.SetMode(gin.DebugMode)
+		return gin.Default()
+	} else {
+		gin.DisableConsoleColor()
+		gin.SetMode(gin.ReleaseMode)
+	}
+	return gin.New()
 }

@@ -24,7 +24,7 @@ func PutContents[DType string | []byte](filename string, data DType, isAppend ..
 // FilePutContents writes data to filename, creating parent directories as needed.
 func FilePutContents[DType string | []byte](filename string, data DType, isAppend ...bool) error {
 	if dir := filepath.Dir(filename); dir != "" && dir != "." {
-		err := os.MkdirAll(dir, 0755)
+		err := os.MkdirAll(dir, 0750)
 		if err != nil {
 			return err
 		}
@@ -33,10 +33,10 @@ func FilePutContents[DType string | []byte](filename string, data DType, isAppen
 	needAppend := len(isAppend) > 0 && isAppend[0]
 	// write to file
 	if !needAppend {
-		return os.WriteFile(filename, byteDate, 0644)
+		return os.WriteFile(filename, byteDate, 0600)
 	}
 	// append to file
-	fl, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	fl, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		return err
 	}
@@ -71,5 +71,5 @@ func DirExistOrCreate(dirPath string) error {
 		return nil
 	}
 
-	return os.MkdirAll(dirPath, 0755)
+	return os.MkdirAll(dirPath, 0750)
 }

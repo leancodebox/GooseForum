@@ -25,7 +25,7 @@ type templateData struct {
 }
 
 var currentRegistry = mustNewRegistry()
-var currentRegistryErr error
+var errCurrentRegistry error
 
 func ReloadTemplates() {
 	currentRegistry = mustNewRegistry()
@@ -34,7 +34,7 @@ func ReloadTemplates() {
 func mustNewRegistry() *templateRegistry {
 	registry, err := newRegistry(resource.GetTemplateFS())
 	if err != nil {
-		currentRegistryErr = err
+		errCurrentRegistry = err
 		slog.Error("failed to load resource templates", "err", err)
 	}
 	return registry
@@ -111,8 +111,8 @@ func renderPage(c *gin.Context, templateName string, payload PagePayload) {
 		return
 	}
 	if currentRegistry == nil {
-		if currentRegistryErr != nil {
-			c.String(http.StatusInternalServerError, currentRegistryErr.Error())
+		if errCurrentRegistry != nil {
+			c.String(http.StatusInternalServerError, errCurrentRegistry.Error())
 			return
 		}
 		c.String(http.StatusInternalServerError, "resource template registry is not initialized")

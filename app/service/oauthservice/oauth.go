@@ -106,13 +106,13 @@ func ProcessOAuthCallback(gothUser goth.User) (*users.EntityComplete, error) {
 	if existingOAuth != nil {
 		user, err := users.Get(existingOAuth.UserId)
 		if err != nil {
-			return nil, fmt.Errorf("获取用户信息失败: %v", err)
+			return nil, fmt.Errorf("获取用户信息失败: %w", err)
 		}
 		updateOAuthRecord(existingOAuth, gothUser)
 		return &user, nil
 	}
 
-	newUser, err := createUserFromOAuth(gothUser, userInfo)
+	newUser, err := createUserFromOAuth(userInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func parseOAuthUserInfo(gothUser goth.User) OAuthUserInfo {
 }
 
 // createUserFromOAuth creates a local account from OAuth user data.
-func createUserFromOAuth(gothUser goth.User, userInfo OAuthUserInfo) (*users.EntityComplete, error) {
+func createUserFromOAuth(userInfo OAuthUserInfo) (*users.EntityComplete, error) {
 	username := userInfo.Login
 	originalUsername := username
 	counter := 1
@@ -171,7 +171,7 @@ func createUserFromOAuth(gothUser goth.User, userInfo OAuthUserInfo) (*users.Ent
 
 	userEntity, err := userservice.CreateUser(username, randopt.RandomString(32), "", false)
 	if err != nil {
-		return nil, fmt.Errorf("创建用户失败: %v", err)
+		return nil, fmt.Errorf("创建用户失败: %w", err)
 	}
 
 	if userInfo.AvatarURL != "" {
@@ -255,7 +255,7 @@ func UnbindOAuth(userID uint64, provider string) error {
 func checkUnbindSafety(userID uint64, providerToUnbind string) error {
 	user, err := users.Get(userID)
 	if err != nil {
-		return fmt.Errorf("获取用户信息失败: %v", err)
+		return fmt.Errorf("获取用户信息失败: %w", err)
 	}
 
 	hasEmail := user.Email != ""
@@ -313,15 +313,15 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	req, err := http.NewRequestWithContext(ctx, "GET", avatarURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, avatarURL, nil)
 	if err != nil {
-		return "", fmt.Errorf("创建请求失败: %v", err)
+		return "", fmt.Errorf("创建请求失败: %w", err)
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("下载头像失败: %v", err)
+		return "", fmt.Errorf("下载头像失败: %w", err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
@@ -334,7 +334,7 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 
 	avatarData, err := io.ReadAll(limitedReader)
 	if err != nil {
-		return "", fmt.Errorf("读取头像数据失败: %v", err)
+		return "", fmt.Errorf("读取头像数据失败: %w", err)
 	}
 
 	if len(avatarData) > maxFileSize {
@@ -365,7 +365,7 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 
 	fileEntity, err := filedata.SaveAvatar(userID, avatarData, filename)
 	if err != nil {
-		return "", fmt.Errorf("保存头像失败: %v", err)
+		return "", fmt.Errorf("保存头像失败: %w", err)
 	}
 
 	return fileEntity.Name, nil

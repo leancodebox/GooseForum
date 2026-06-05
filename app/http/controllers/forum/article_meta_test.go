@@ -1,6 +1,7 @@
 package forum
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -13,7 +14,7 @@ import (
 func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	c, _ := gin.CreateTestContext(nil)
-	c.Request = httptest.NewRequest("GET", "https://example.com/p/post/1", nil)
+	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/1", nil)
 
 	meta := buildArticleMeta(c, ArticlePayload{
 		ID:          1,
@@ -44,7 +45,7 @@ func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 func TestArticleMetaJSONLDIncludesImageForImageOnlyArticle(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	c, _ := gin.CreateTestContext(nil)
-	c.Request = httptest.NewRequest("GET", "https://example.com/p/post/440", nil)
+	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/440", nil)
 
 	meta := buildArticleMeta(c, ArticlePayload{
 		ID:            440,

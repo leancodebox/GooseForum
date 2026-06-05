@@ -142,12 +142,14 @@ func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (stri
 	switch {
 	case err != nil && l.config.LogLevel >= gormLogger.Error && (!errors.Is(err, gormLogger.ErrRecordNotFound) || !l.config.IgnoreRecordNotFoundError):
 		// 错误日志
-		errorArgs := append(baseArgs, "error", err)
+		errorArgs := append([]any(nil), baseArgs...)
+		errorArgs = append(errorArgs, "error", err)
 		l.logger.ErrorContext(ctx, "GORM SQL Error", errorArgs...)
 
 	case elapsed > l.slowThreshold && l.slowThreshold != 0 && l.config.LogLevel >= gormLogger.Warn:
 		// 慢查询日志
-		slowArgs := append(baseArgs,
+		slowArgs := append([]any(nil), baseArgs...)
+		slowArgs = append(slowArgs,
 			"slow_threshold", l.slowThreshold,
 			"is_slow", true,
 		)

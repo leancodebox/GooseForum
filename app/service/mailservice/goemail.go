@@ -53,7 +53,7 @@ func normalizeSender(config pageConfig.MailSettingsConfig) (string, string) {
 func setMessageFrom(message *mail.Msg, config pageConfig.MailSettingsConfig) error {
 	fromName, fromEmail := normalizeSender(config)
 	if err := message.FromFormat(fromName, fromEmail); err != nil {
-		return fmt.Errorf("failed to set From address: %s", err)
+		return fmt.Errorf("failed to set From address: %w", err)
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func SendActivationEmail(to, username, token string) error {
 	}
 	message := mail.NewMsg()
 	if err := message.To(to); err != nil {
-		return fmt.Errorf("failed to set To address: %s", err)
+		return fmt.Errorf("failed to set To address: %w", err)
 	}
 	message.Subject("activation-email")
 	if err := setMessageFrom(message, config); err != nil {
@@ -75,19 +75,19 @@ func SendActivationEmail(to, username, token string) error {
 	}
 	body, err := generateActivationEmailBody(username, token)
 	if err != nil {
-		return fmt.Errorf("生成邮件内容失败: %v", err)
+		return fmt.Errorf("生成邮件内容失败: %w", err)
 	}
 	message.SetBodyString(mail.TypeTextHTML, body)
 
 	client, err := buildClientByConfig(config)
 	if err != nil {
-		return fmt.Errorf("failed to create mail client: %s", err)
+		return fmt.Errorf("failed to create mail client: %w", err)
 
 	}
 	defer func() { _ = client.Close() }()
 	if err = client.DialAndSend(message); err != nil {
 		slog.Debug("激活邮件 SMTP 发送失败", "to", to, "username", username, "err", err)
-		return fmt.Errorf("failed to send mail: %s", err)
+		return fmt.Errorf("failed to send mail: %w", err)
 	}
 	slog.Debug("激活邮件 SMTP 发送成功", "to", to, "username", username)
 	return nil
@@ -103,7 +103,7 @@ func SendPasswordResetEmail(to, username, token string) error {
 	}
 	message := mail.NewMsg()
 	if err := message.To(to); err != nil {
-		return fmt.Errorf("failed to set To address: %s", err)
+		return fmt.Errorf("failed to set To address: %w", err)
 	}
 	message.Subject("密码重置请求")
 	if err := setMessageFrom(message, config); err != nil {
@@ -111,18 +111,18 @@ func SendPasswordResetEmail(to, username, token string) error {
 	}
 	body, err := generatePasswordResetEmailBody(username, token)
 	if err != nil {
-		return fmt.Errorf("生成邮件内容失败: %v", err)
+		return fmt.Errorf("生成邮件内容失败: %w", err)
 	}
 	message.SetBodyString(mail.TypeTextHTML, body)
 
 	client, err := buildClientByConfig(config)
 	if err != nil {
-		return fmt.Errorf("failed to create mail client: %s", err)
+		return fmt.Errorf("failed to create mail client: %w", err)
 	}
 	defer func() { _ = client.Close() }()
 	if err = client.DialAndSend(message); err != nil {
 		slog.Debug("密码重置邮件 SMTP 发送失败", "to", to, "username", username, "err", err)
-		return fmt.Errorf("failed to send mail: %s", err)
+		return fmt.Errorf("failed to send mail: %w", err)
 	}
 	slog.Debug("密码重置邮件 SMTP 发送成功", "to", to, "username", username)
 	return nil
@@ -138,7 +138,7 @@ func SendTestEmailWithConfig(config pageConfig.MailSettingsConfig, testEmail str
 		return err
 	}
 	if err := message.To(testEmail); err != nil {
-		return fmt.Errorf("failed to set To address: %s", err)
+		return fmt.Errorf("failed to set To address: %w", err)
 	}
 	message.Subject("邮件配置测试")
 	message.SetBodyString(mail.TypeTextPlain,
@@ -146,13 +146,13 @@ func SendTestEmailWithConfig(config pageConfig.MailSettingsConfig, testEmail str
 
 	client, err := buildClientByConfig(config)
 	if err != nil {
-		return fmt.Errorf("failed to create mail client: %s", err)
+		return fmt.Errorf("failed to create mail client: %w", err)
 	}
 	defer func() { _ = client.Close() }()
 
 	if err = client.DialAndSend(message); err != nil {
 		slog.Debug("测试邮件 SMTP 发送失败", "to", testEmail, "err", err)
-		return fmt.Errorf("failed to send mail: %s", err)
+		return fmt.Errorf("failed to send mail: %w", err)
 	}
 	slog.Debug("测试邮件 SMTP 发送成功", "to", testEmail)
 

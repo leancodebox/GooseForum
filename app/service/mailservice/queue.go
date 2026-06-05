@@ -36,7 +36,7 @@ var emailProcessor = struct {
 func AddToQueue(task EmailTask) error {
 	taskJson, err := json.Marshal(task)
 	if err != nil {
-		return fmt.Errorf("序列化邮件任务失败: %v", err)
+		return fmt.Errorf("序列化邮件任务失败: %w", err)
 	}
 
 	queueTask := &taskQueue.Entity{

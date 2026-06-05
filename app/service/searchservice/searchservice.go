@@ -60,7 +60,7 @@ func SearchArticles(req SearchRequest) (*SearchResponse, error) {
 
 	searchResp, err := index.Search(req.Query, searchReq)
 	if err != nil {
-		return nil, fmt.Errorf("搜索失败: %v", err)
+		return nil, fmt.Errorf("搜索失败: %w", err)
 	}
 
 	results := lo.FilterMap(searchResp.Hits, func(hit meilisearch.Hit, _ int) (SearchResult, bool) {

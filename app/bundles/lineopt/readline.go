@@ -9,7 +9,7 @@ import (
 
 // ReadLine opens filePath and calls action for each scanned line.
 func ReadLine(filePath string, action func(item string)) error {
-	f, errF := os.OpenFile(filePath, os.O_RDONLY, 0666)
+	f, errF := os.Open(filePath)
 	if errF != nil {
 		return errF
 	}

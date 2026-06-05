@@ -54,14 +54,14 @@ func BuildSingleArticleSearchDocument(article *articles.Entity) (*meilisearch.Ta
 		task, err = index.AddDocuments(doc, &pk)
 		if err != nil {
 			slog.Warn(fmt.Sprintf("Meilisearch 处理文章 ID:%v 失败: %v\n", doc.ID, err))
-			return nil, nil
+			return nil, fmt.Errorf("add search document: %w", err)
 		}
 		slog.Info(fmt.Sprintf("处理文章 ID:%v, TaskUID: %v\n", doc.ID, getTaskUID(task)))
 	} else {
 		_, err = index.Delete(cast.ToString(article.Id))
 		if err != nil {
 			slog.Warn(fmt.Sprintf("Meilisearch 删除文档失败: %v, Error: %v\n", article.Id, err))
-			return nil, nil
+			return nil, fmt.Errorf("delete search document: %w", err)
 		}
 	}
 	return task, nil
@@ -81,7 +81,7 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 
 	fmt.Println("配置索引设置...")
 	if err := configureIndex(index); err != nil {
-		return nil, fmt.Errorf("配置索引失败: %v", err)
+		return nil, fmt.Errorf("配置索引失败: %w", err)
 	}
 
 	var articleStartId uint64 = 0
@@ -96,7 +96,12 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 			break
 		}
 		lo.ForEach(articleList, func(article *articles.Entity, _ int) {
-			task, _ := BuildSingleArticleSearchDocument(article)
+			task, err := BuildSingleArticleSearchDocument(article)
+			if err != nil {
+				failedCount++
+				slog.Warn("failed to build article search document", "articleId", article.Id, "err", err)
+				return
+			}
 			fmt.Printf("处理文章 ID:%v, TaskUID: %v\n", article.Id, getTaskUID(task))
 			processedCount++
 		})
@@ -132,7 +137,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 	}
 	_, err := index.UpdateSearchableAttributes(&searchableAttributes)
 	if err != nil {
-		return fmt.Errorf("设置可搜索字段失败: %v", err)
+		return fmt.Errorf("设置可搜索字段失败: %w", err)
 	}
 
 	filterableAttributes := []any{
@@ -142,7 +147,7 @@ func configureIndex(index meilisearch.IndexManager) error {
 	}
 	_, err = index.UpdateFilterableAttributes(&filterableAttributes)
 	if err != nil {
-		return fmt.Errorf("设置可过滤字段失败: %v", err)
+		return fmt.Errorf("设置可过滤字段失败: %w", err)
 	}
 
 	sortableAttributes := []string{
@@ -151,13 +156,13 @@ func configureIndex(index meilisearch.IndexManager) error {
 	}
 	_, err = index.UpdateSortableAttributes(&sortableAttributes)
 	if err != nil {
-		return fmt.Errorf("设置可排序字段失败: %v", err)
+		return fmt.Errorf("设置可排序字段失败: %w", err)
 	}
 
 	displayedAttributes := []string{"id", "title"}
 	_, err = index.UpdateDisplayedAttributes(&displayedAttributes)
 	if err != nil {
-		return fmt.Errorf("设置显示字段失败: %v", err)
+		return fmt.Errorf("设置显示字段失败: %w", err)
 	}
 
 	fmt.Println("索引配置完成:")

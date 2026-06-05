@@ -55,9 +55,7 @@ func InitEventBus() {
 		}
 
 		// 注册到全局关闭管理器
-		closer.Register(func() error {
-			return Close()
-		})
+		closer.Register(Close)
 
 		// 添加中间件
 		router.AddMiddleware(

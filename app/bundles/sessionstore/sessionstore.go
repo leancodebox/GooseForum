@@ -13,8 +13,14 @@ var once sync.Once
 
 func GetSession() *sessions.CookieStore {
 	once.Do(func() {
-		secretKey := preferences.GetString("app.signingKey", algorithm.SafeGenerateSigningKey(32))
-		store = sessions.NewCookieStore([]byte(secretKey))
+		store = sessions.NewCookieStore([]byte(sessionSigningKey()))
 	})
 	return store
+}
+
+func sessionSigningKey() string {
+	if signingKey := preferences.GetString("app.signingKey"); signingKey != "" {
+		return signingKey
+	}
+	return algorithm.SafeGenerateSigningKey(32)
 }

@@ -8,17 +8,17 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
-func withJWTKey(t *testing.T, key string) {
+func withAppSigningKey(t *testing.T, key string) {
 	t.Helper()
-	old := preferences.GetString("jwtopt.key", "")
-	preferences.Set("jwtopt.key", key)
+	old := preferences.GetString("app.signingKey", "")
+	preferences.Set("app.signingKey", key)
 	t.Cleanup(func() {
-		preferences.Set("jwtopt.key", old)
+		preferences.Set("app.signingKey", old)
 	})
 }
 
 func TestActivationTokenLifecycle(t *testing.T) {
-	withJWTKey(t, "activation-test-key")
+	withAppSigningKey(t, "activation-test-key")
 
 	token, err := GenerateActivationToken(12, "user@example.com")
 	if err != nil {
@@ -41,7 +41,7 @@ func TestActivationTokenLifecycle(t *testing.T) {
 }
 
 func TestGenerateActivationTokenByUser(t *testing.T) {
-	withJWTKey(t, "activation-user-key")
+	withAppSigningKey(t, "activation-user-key")
 
 	token, err := GenerateActivationTokenByUser(users.EntityComplete{
 		Id:    99,
@@ -61,7 +61,7 @@ func TestGenerateActivationTokenByUser(t *testing.T) {
 }
 
 func TestPasswordResetTokenLifecycle(t *testing.T) {
-	withJWTKey(t, "password-reset-test-key")
+	withAppSigningKey(t, "password-reset-test-key")
 
 	token, err := GeneratePasswordResetToken(34, "reset@example.com")
 	if err != nil {
@@ -84,7 +84,7 @@ func TestPasswordResetTokenLifecycle(t *testing.T) {
 }
 
 func TestTokenParsingRejectsInvalidInput(t *testing.T) {
-	withJWTKey(t, "reject-test-key")
+	withAppSigningKey(t, "reject-test-key")
 
 	if _, err := ParseActivationToken("not-a-token"); err == nil {
 		t.Fatalf("expected invalid activation token error")

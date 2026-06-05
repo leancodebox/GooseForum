@@ -293,11 +293,7 @@ func ExtractSearchContent(content string) string {
 			}
 
 		case *ast.CodeSpan:
-			if entering {
-				searchBuf.WriteString("`")
-			} else {
-				searchBuf.WriteString("`")
-			}
+			searchBuf.WriteString("`")
 
 		case *ast.Image:
 			if entering {

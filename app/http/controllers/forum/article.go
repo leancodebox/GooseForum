@@ -83,7 +83,7 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 
 	var replyEntities []*reply.Entity
 	hasBefore := false
-	hasAfter := false
+	var hasAfter bool
 
 	switch {
 	case req.Params.AnchorReplyID > 0:

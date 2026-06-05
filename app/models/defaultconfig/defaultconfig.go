@@ -25,38 +25,38 @@ type pageConfigDefaults struct {
 var (
 	loadPageConfigDefaultsOnce sync.Once
 	pageConfigDefaultsValue    pageConfigDefaults
-	pageConfigDefaultsErr      error
+	errPageConfigDefaults      error
 )
 
 func loadPageConfigDefaults() (pageConfigDefaults, error) {
 	loadPageConfigDefaultsOnce.Do(func() {
-		pageConfigDefaultsErr = loadJSON("announcement.json", &pageConfigDefaultsValue.Announcement)
-		if pageConfigDefaultsErr != nil {
+		errPageConfigDefaults = loadJSON("announcement.json", &pageConfigDefaultsValue.Announcement)
+		if errPageConfigDefaults != nil {
 			return
 		}
-		pageConfigDefaultsErr = loadJSON("email.json", &pageConfigDefaultsValue.Email)
-		if pageConfigDefaultsErr != nil {
+		errPageConfigDefaults = loadJSON("email.json", &pageConfigDefaultsValue.Email)
+		if errPageConfigDefaults != nil {
 			return
 		}
-		pageConfigDefaultsErr = loadJSON("friend_links.json", &pageConfigDefaultsValue.FriendLinks)
-		if pageConfigDefaultsErr != nil {
+		errPageConfigDefaults = loadJSON("friend_links.json", &pageConfigDefaultsValue.FriendLinks)
+		if errPageConfigDefaults != nil {
 			return
 		}
-		pageConfigDefaultsErr = loadJSON("posting.json", &pageConfigDefaultsValue.Posting)
-		if pageConfigDefaultsErr != nil {
+		errPageConfigDefaults = loadJSON("posting.json", &pageConfigDefaultsValue.Posting)
+		if errPageConfigDefaults != nil {
 			return
 		}
-		pageConfigDefaultsErr = loadJSON("security.json", &pageConfigDefaultsValue.Security)
-		if pageConfigDefaultsErr != nil {
+		errPageConfigDefaults = loadJSON("security.json", &pageConfigDefaultsValue.Security)
+		if errPageConfigDefaults != nil {
 			return
 		}
-		pageConfigDefaultsErr = loadJSON("site.json", &pageConfigDefaultsValue.Site)
-		if pageConfigDefaultsErr != nil {
+		errPageConfigDefaults = loadJSON("site.json", &pageConfigDefaultsValue.Site)
+		if errPageConfigDefaults != nil {
 			return
 		}
-		pageConfigDefaultsErr = loadJSON("sponsors.json", &pageConfigDefaultsValue.Sponsors)
+		errPageConfigDefaults = loadJSON("sponsors.json", &pageConfigDefaultsValue.Sponsors)
 	})
-	return pageConfigDefaultsValue, pageConfigDefaultsErr
+	return pageConfigDefaultsValue, errPageConfigDefaults
 }
 
 func mustPageConfigDefaults() pageConfigDefaults {

@@ -3,6 +3,7 @@ package validate
 
 import (
 	"bytes"
+	"errors"
 	"log/slog"
 
 	"github.com/go-playground/locales/zh"
@@ -34,8 +35,13 @@ func Valid(params any) error {
 
 // FormatError returns translated text for validator validation errors.
 func FormatError(err error) string {
+	var validationErrors validator.ValidationErrors
+	if !errors.As(err, &validationErrors) {
+		return err.Error()
+	}
+
 	var msg bytes.Buffer
-	for _, errItem := range err.(validator.ValidationErrors) {
+	for _, errItem := range validationErrors {
 		// 输出中文错误信息
 		msg.WriteString(errItem.Translate(trans))
 	}
