@@ -30,7 +30,7 @@ func FilePutContents[DType string | []byte](filename string, data DType, isAppen
 		}
 	}
 	byteDate := []byte(data)
-	needAppend := len(isAppend) > 0 && isAppend[0] == true
+	needAppend := len(isAppend) > 0 && isAppend[0]
 	// write to file
 	if !needAppend {
 		return os.WriteFile(filename, byteDate, 0644)

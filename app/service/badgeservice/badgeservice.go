@@ -179,25 +179,8 @@ func ResolveOne(code string) Badge {
 	return items[0]
 }
 
-func systemBadgeMap() map[string]Definition {
-	return lo.KeyBy(systemDefinitions(), func(item Definition) string { return item.Code })
-}
-
 func applyOverride(def Definition, override *badges.Entity) Badge {
-	item := Badge{
-		Code:        def.Code,
-		Type:        def.Type,
-		GrantMode:   def.GrantMode,
-		Name:        def.Name,
-		Description: def.Description,
-		IconType:    def.IconType,
-		IconKey:     def.IconKey,
-		IconURL:     def.IconURL,
-		Color:       def.Color,
-		Level:       def.Level,
-		IsEnabled:   def.IsEnabled,
-		SortOrder:   def.SortOrder,
-	}
+	item := Badge(def)
 	if override == nil {
 		return item
 	}

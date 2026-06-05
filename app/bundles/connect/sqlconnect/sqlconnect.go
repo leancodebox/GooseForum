@@ -59,15 +59,12 @@ func GetConnect(config Config) Connect {
 	case "sqlite":
 		slog.Info("use sqlite")
 		dbIns, err = connectSqlLiteDB(config.DbPath)
-		break
 	case "mysql":
 		slog.Info("use mysql")
 		dbIns, err = connectMysqlDB(config.DbUrl)
-		break
 	default:
 		slog.Info("use sqlite because unselect db")
 		dbIns, err = connectSqlLiteDB(config.DbPath)
-		break
 	}
 
 	if err != nil {

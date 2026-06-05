@@ -31,7 +31,7 @@ func (r *BetterRequest[T]) GetParams() T {
 }
 
 func (r *BetterRequest[T]) GetUser() (users.EntityComplete, error) {
-	if r.userSet != false {
+	if r.userSet {
 		return r.userInfo, nil
 	}
 	user, _ := users.Get(r.UserId)

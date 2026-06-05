@@ -14,12 +14,12 @@ func init() {
 
 // GetRunTime returns the duration since application startup.
 func GetRunTime() time.Duration {
-	return time.Now().Sub(start)
+	return time.Since(start)
 }
 
 // GetUnitTime returns the duration since the previous GetUnitTime call.
 func GetUnitTime() time.Duration {
-	unit := time.Now().Sub(unitTime)
+	unit := time.Since(unitTime)
 	unitTime = time.Now()
 	return unit
 }

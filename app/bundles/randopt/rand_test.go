@@ -56,3 +56,19 @@ func TestIdMakerP(t *testing.T) {
 		t.Fatalf("counter = %d, want %d", got, want)
 	}
 }
+
+func TestNewCounterAndClean(t *testing.T) {
+	counter := NewCounter(41)
+	if got := counter.Get(); got != 41 {
+		t.Fatalf("Get() = %d, want 41", got)
+	}
+	if got := counter.Add(); got != 42 {
+		t.Fatalf("Add() = %d, want 42", got)
+	}
+	if got := counter.Clean(); got != 0 {
+		t.Fatalf("Clean() = %d, want 0", got)
+	}
+	if got := counter.Get(); got != 0 {
+		t.Fatalf("Get() after Clean() = %d, want 0", got)
+	}
+}

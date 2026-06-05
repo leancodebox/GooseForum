@@ -445,7 +445,7 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 		lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) ArticlesInfoAdminVo {
 			username := ""
 			userAvatarUrl := ""
-			if user, _ := userMap[t.UserId]; user != nil {
+			if user := userMap[t.UserId]; user != nil {
 				username = user.Username
 				userAvatarUrl = user.GetWebAvatarUrl()
 			}

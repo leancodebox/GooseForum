@@ -12,11 +12,11 @@
 package redisManager
 
 import (
-	"github.com/leancodebox/GooseForum/app/bundles/goose/perferences"
+	"github.com/leancodebox/GooseForum/app/bundles/goose/preferences"
 )
 
 var (
-	config = perferences.GetExclusivePreferences()
+	config = preferences.GetExclusivePreferences()
 )
 
 var std *redisClient

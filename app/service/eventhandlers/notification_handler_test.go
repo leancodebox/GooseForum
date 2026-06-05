@@ -19,3 +19,19 @@ func TestCommentNotificationExcludeUserIds(t *testing.T) {
 		t.Fatalf("unexpected exclude user ids: %#v", userIds)
 	}
 }
+
+func TestTakeUpTo64Chars(t *testing.T) {
+	short := "短内容"
+	if got := TakeUpTo64Chars(short); got != short {
+		t.Fatalf("short content changed: %q", got)
+	}
+
+	long := ""
+	for i := 0; i < 70; i++ {
+		long += "鹅"
+	}
+	got := TakeUpTo64Chars(long)
+	if len([]rune(got)) != 64 {
+		t.Fatalf("TakeUpTo64Chars() length = %d, want 64", len([]rune(got)))
+	}
+}

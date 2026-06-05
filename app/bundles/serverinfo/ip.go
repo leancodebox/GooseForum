@@ -2,7 +2,6 @@ package serverinfo
 
 import (
 	"errors"
-	"fmt"
 	"net"
 )
 
@@ -11,7 +10,7 @@ func GetLocalIp() (string, error) {
 	if err != nil {
 		return "", nil
 	}
-	return fmt.Sprintf("%s", ip), nil
+	return ip.String(), nil
 
 }
 

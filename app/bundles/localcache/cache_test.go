@@ -10,15 +10,18 @@ import (
 func TestCache_GetOrLoad(t *testing.T) {
 	c := Cache[string]{}
 	defer stopTestCache(&c)
+	loads := 0
 	a, _ := c.GetOrLoadE("", func() (string, error) {
+		loads++
 		return "a", nil
 	}, time.Minute)
-	c.GetOrLoadE("", func() (string, error) {
-		return "a", nil
+	b := c.GetOrLoad("", func() (string, error) {
+		loads++
+		return "b", nil
 	}, time.Minute)
 
-	if a != "a" {
-		t.Fatalf("GetOrLoadE() = %q", a)
+	if a != "a" || b != "a" || loads != 1 {
+		t.Fatalf("expected cached value after first load, got %q/%q with %d loads", a, b, loads)
 	}
 }
 
@@ -125,6 +128,30 @@ func TestCache_UpdateIfPresent(t *testing.T) {
 	}, time.Minute)
 	if got != 2 {
 		t.Fatalf("UpdateIfPresent() value = %d, want 2", got)
+	}
+}
+
+func TestCache_DeleteAndClear(t *testing.T) {
+	c := Cache[string]{}
+	defer stopTestCache(&c)
+
+	c.Set("first", "a", time.Minute)
+	c.Set("second", "b", time.Minute)
+	c.Delete("first")
+
+	got := c.GetOrLoad("first", func() (string, error) {
+		return "loaded", nil
+	}, time.Minute)
+	if got != "loaded" {
+		t.Fatalf("Delete() did not remove key, got %q", got)
+	}
+
+	c.Clear()
+	got = c.GetOrLoad("second", func() (string, error) {
+		return "after-clear", nil
+	}, time.Minute)
+	if got != "after-clear" {
+		t.Fatalf("Clear() did not remove entries, got %q", got)
 	}
 }
 

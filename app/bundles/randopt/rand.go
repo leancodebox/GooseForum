@@ -13,8 +13,6 @@ func RandTrue(Molecular int, Denominator int) bool {
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-var lettersLen = len(letters)
-
 func RandomString(length int) string {
 	return lo.RandomString(length, []rune(letters))
 }

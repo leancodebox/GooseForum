@@ -35,7 +35,7 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 			}
 		}
 
-		if permission.CheckRole(roleId, permissionType) == false {
+		if !permission.CheckRole(roleId, permissionType) {
 			c.JSON(http.StatusForbidden, component.FailDataCode(
 				component.MessagePermissionDenied,
 				component.MessageParams{"permission": permissionType.Name()}))
@@ -68,7 +68,7 @@ func CheckPermissionOrNoUser(permissionType permission.Enum) gin.HandlerFunc {
 			}
 		}
 
-		if permission.CheckRole(roleId, permissionType) == false {
+		if !permission.CheckRole(roleId, permissionType) {
 			c.Redirect(http.StatusFound, "/")
 			c.Abort()
 			return

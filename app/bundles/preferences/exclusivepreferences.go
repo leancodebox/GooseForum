@@ -25,17 +25,6 @@ func (itself *ExclusivePreferences) Get(path string, defaultValue ...any) string
 	return GetString(itself.realPath(path), defaultValue...)
 }
 
-func (itself *ExclusivePreferences) internalGet(path string, defaultValue ...any) any {
-	path = itself.realPath(path)
-	if !v.IsSet(path) || v.Get(path) == nil {
-		if len(defaultValue) > 0 {
-			return defaultValue[0]
-		}
-		return nil
-	}
-	return v.Get(path)
-}
-
 // GetString returns a string setting below the namespace.
 func (itself *ExclusivePreferences) GetString(path string, defaultValue ...any) string {
 	return cast.ToString(internalGet(itself.realPath(path), defaultValue...))
