@@ -56,8 +56,7 @@ func InitEventBus() {
 
 		// 注册到全局关闭管理器
 		closer.Register(func() error {
-			Close()
-			return nil
+			return Close()
 		})
 
 		// 添加中间件

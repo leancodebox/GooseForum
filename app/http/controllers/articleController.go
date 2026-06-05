@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -48,7 +49,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	}
 
 	// 统一权限检查
-	if err, _ := component.CheckUserPermission(&userEntity, "发帖"); err != nil {
+	if _, err := component.CheckUserPermission(&userEntity, "发帖"); err != nil {
 		return component.FailResponseError(err)
 	}
 
@@ -125,7 +126,9 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	article.RenderedVersion = markdown2html.GetVersion()
 	article.RenderedHTML = "" // 用户提交后不用渲染，避免提交时间过长。
 	if article.Id > 0 {
-		articles.Save(&article)
+		if err := articles.Save(&article); err != nil {
+			return component.FailResponseCode(component.MessageOperationFailed, nil)
+		}
 		categoryIDMap := lo.SliceToMap(req.Params.CategoryId, func(id uint64) (uint64, bool) {
 			return id, true
 		})
@@ -208,7 +211,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	}
 
 	// 统一权限检查
-	if err, _ := component.CheckUserPermission(&userEntity, "评论"); err != nil {
+	if _, err := component.CheckUserPermission(&userEntity, "评论"); err != nil {
 		return component.FailResponseError(err)
 	}
 
@@ -375,9 +378,13 @@ func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response 
 
 func updateArticleStat(article articles.SmallEntity, userId uint64, isDelete bool) {
 	if isDelete {
-		articlesUserStat.DecrementUserReply(article.Id, userId)
+		if err := articlesUserStat.DecrementUserReply(article.Id, userId); err != nil {
+			slog.Error("failed to decrement user reply stat", "articleId", article.Id, "userId", userId, "err", err)
+		}
 	} else {
-		articlesUserStat.IncrementUserReply(article.Id, userId)
+		if err := articlesUserStat.IncrementUserReply(article.Id, userId); err != nil {
+			slog.Error("failed to increment user reply stat", "articleId", article.Id, "userId", userId, "err", err)
+		}
 	}
 	list := articlesUserStat.SyncArticlePosters(article.Id)
 
@@ -395,9 +402,13 @@ func updateArticleStat(article articles.SmallEntity, userId uint64, isDelete boo
 		}
 	})
 	if isDelete {
-		articles.DecrementReplyFast(article.Id, pList)
+		if err := articles.DecrementReplyFast(article.Id, pList); err != nil {
+			slog.Error("failed to decrement article reply count", "articleId", article.Id, "err", err)
+		}
 	} else {
-		articles.IncrementReplyFast(article.Id, pList)
+		if err := articles.IncrementReplyFast(article.Id, pList); err != nil {
+			slog.Error("failed to increment article reply count", "articleId", article.Id, "err", err)
+		}
 	}
 }
 

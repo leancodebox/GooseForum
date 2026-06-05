@@ -15,8 +15,8 @@ type CustomClaims struct {
 }
 
 var (
-	// TokenInvalid is returned when a token cannot be parsed into CustomClaims.
-	TokenInvalid = errors.New("Couldn't handle this token: ")
+	// ErrTokenInvalid is returned when a token cannot be parsed into CustomClaims.
+	ErrTokenInvalid = errors.New("couldn't handle this token")
 )
 
 // JWT signs and parses tokens with a fixed signing key.
@@ -61,5 +61,5 @@ func (itself *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 			return claims, nil
 		}
 	}
-	return nil, TokenInvalid
+	return nil, ErrTokenInvalid
 }

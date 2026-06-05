@@ -24,7 +24,7 @@ func TestAssetsGzipSwitch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open manifest: %v", err)
 	}
-	defer content.Close()
+	defer func() { _ = content.Close() }()
 
 	var manifest map[string]manifestItem
 	if err := json.NewDecoder(content).Decode(&manifest); err != nil {

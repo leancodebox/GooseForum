@@ -22,7 +22,10 @@ func SiteMaintenance(c *gin.Context) {
 
 		// 返回优化后的维护页面
 		c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-		c.Writer.Write(maintenanceHTML)
+		if _, err := c.Writer.Write(maintenanceHTML); err != nil {
+			c.Abort()
+			return
+		}
 		// 中止后续处理
 		c.Abort()
 		return

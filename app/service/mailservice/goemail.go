@@ -84,7 +84,7 @@ func SendActivationEmail(to, username, token string) error {
 		return fmt.Errorf("failed to create mail client: %s", err)
 
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 	if err = client.DialAndSend(message); err != nil {
 		slog.Debug("激活邮件 SMTP 发送失败", "to", to, "username", username, "err", err)
 		return fmt.Errorf("failed to send mail: %s", err)
@@ -119,7 +119,7 @@ func SendPasswordResetEmail(to, username, token string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create mail client: %s", err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 	if err = client.DialAndSend(message); err != nil {
 		slog.Debug("密码重置邮件 SMTP 发送失败", "to", to, "username", username, "err", err)
 		return fmt.Errorf("failed to send mail: %s", err)
@@ -148,7 +148,7 @@ func SendTestEmailWithConfig(config pageConfig.MailSettingsConfig, testEmail str
 	if err != nil {
 		return fmt.Errorf("failed to create mail client: %s", err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	if err = client.DialAndSend(message); err != nil {
 		slog.Debug("测试邮件 SMTP 发送失败", "to", testEmail, "err", err)

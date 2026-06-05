@@ -3,6 +3,7 @@ package lineopt
 
 import (
 	"bufio"
+	"errors"
 	"os"
 )
 
@@ -12,11 +13,10 @@ func ReadLine(filePath string, action func(item string)) error {
 	if errF != nil {
 		return errF
 	}
-	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		line := scanner.Text()
 		action(line)
 	}
-	return nil
+	return errors.Join(scanner.Err(), f.Close())
 }

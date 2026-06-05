@@ -69,31 +69,31 @@ func GetUserShowByUserId(userId uint64) *vo.UserInfoShow {
 }
 
 // CheckUserPermission 统一检查用户操作权限（封禁状态、邮箱验证等）
-func CheckUserPermission(userEntity *users.EntityComplete, action string) (error, int) {
+func CheckUserPermission(userEntity *users.EntityComplete, action string) (int, error) {
 	if userEntity == nil || userEntity.Id == 0 {
-		return NewMessageError(MessageAuthRequired, "用户不存在或未登录", nil), 401
+		return 401, NewMessageError(MessageAuthRequired, "用户不存在或未登录", nil)
 	}
 
 	// 1. 检查用户是否被冻结
 	if userEntity.IsFrozen == users.StatusFrozen {
-		return NewMessageError(
+		return 403, NewMessageError(
 			MessagePermissionUserFrozen,
 			fmt.Sprintf("您的账号已被封禁，无法进行%s操作", action),
 			permissionActionParams(action),
-		), 403
+		)
 	}
 
 	// 2. 检查邮箱验证（如果系统开启了强制要求）
 	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
 	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
-		return NewMessageError(
+		return 403, NewMessageError(
 			MessagePermissionEmailRequired,
 			fmt.Sprintf("请先完成邮箱验证后再进行%s操作", action),
 			permissionActionParams(action),
-		), 403
+		)
 	}
 
-	return nil, 200
+	return 200, nil
 }
 
 func permissionActionParams(action string) MessageParams {

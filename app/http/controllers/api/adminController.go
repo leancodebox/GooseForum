@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -531,7 +532,9 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 	}
 	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
 		fmt.Sprintf("文章%s操作:[%s]", status, article.Title))
-	searchservice.BuildSingleArticleSearchDocument(&article)
+	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
+		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
+	}
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
@@ -582,7 +585,9 @@ func EditArticleCategories(req component.BetterRequest[EditArticleCategoriesReq]
 	syncArticleCategoryRelations(article.Id, categoryIds)
 	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
 		fmt.Sprintf("文章分类调整:[%s] %v -> %v", article.Title, oldCategoryIds, categoryIds))
-	searchservice.BuildSingleArticleSearchDocument(&article)
+	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
+		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
+	}
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
@@ -695,7 +700,9 @@ func RoleSave(req component.BetterRequest[RoleSaveReq]) component.Response {
 		}
 	}
 	roleEntity.RoleName = req.Params.RoleName
-	role.SaveOrCreateById(&roleEntity)
+	if err := role.SaveOrCreateById(&roleEntity); err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
 
 	rsList := rolePermissionRs.GetRsByRoleId(roleEntity.Id)
 	canUpdateMap := lo.SliceToMap(req.Params.Permissions, func(id uint64) (uint64, bool) {

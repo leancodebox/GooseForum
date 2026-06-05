@@ -116,7 +116,9 @@ func processPendingEmailTasks(stopCh <-chan struct{}) bool {
 			var emailTask EmailTask
 			if err := json.Unmarshal([]byte(task.TaskJson), &emailTask); err != nil {
 				slog.Error("解析任务数据失败", "error", err)
-				taskQueue.UpdateStatus(task.Id, taskQueue.StatusFailed, err)
+				if updateErr := taskQueue.UpdateStatus(task.Id, taskQueue.StatusFailed, err); updateErr != nil {
+					slog.Error("更新任务状态失败", "id", task.Id, "error", updateErr)
+				}
 				continue
 			}
 
@@ -131,8 +133,12 @@ func processPendingEmailTasks(stopCh <-chan struct{}) bool {
 				)
 
 				if task.RetryCount < MaxRetries {
-					taskQueue.IncrementRetryCount(task.Id)
-					taskQueue.UpdateStatus(task.Id, taskQueue.StatusRetrying, err)
+					if updateErr := taskQueue.IncrementRetryCount(task.Id); updateErr != nil {
+						slog.Error("更新任务重试次数失败", "id", task.Id, "error", updateErr)
+					}
+					if updateErr := taskQueue.UpdateStatus(task.Id, taskQueue.StatusRetrying, err); updateErr != nil {
+						slog.Error("更新任务状态失败", "id", task.Id, "error", updateErr)
+					}
 					select {
 					case <-time.After(RetryInterval):
 					case <-stopCh:
@@ -141,11 +147,16 @@ func processPendingEmailTasks(stopCh <-chan struct{}) bool {
 					continue
 				}
 
-				taskQueue.UpdateStatus(task.Id, taskQueue.StatusFailed, err)
+				if updateErr := taskQueue.UpdateStatus(task.Id, taskQueue.StatusFailed, err); updateErr != nil {
+					slog.Error("更新任务状态失败", "id", task.Id, "error", updateErr)
+				}
 				continue
 			}
 
-			taskQueue.UpdateStatus(task.Id, taskQueue.StatusSuccess, nil)
+			if err := taskQueue.UpdateStatus(task.Id, taskQueue.StatusSuccess, nil); err != nil {
+				slog.Error("更新任务状态失败", "id", task.Id, "error", err)
+				continue
+			}
 			slog.Info("邮件发送成功",
 				"id", task.Id,
 				"type", emailTask.Type,

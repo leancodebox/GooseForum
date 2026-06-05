@@ -222,7 +222,7 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	if err, code := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
+	if code, err := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
 		c.JSON(code, component.FailDataError(err))
 		return
 	}
@@ -383,7 +383,7 @@ func readAvatarUploadFile(file *multipart.FileHeader, maxSize int64, allowedExts
 	if err != nil {
 		return nil, component.NewMessageError(component.MessageUploadOpenFailed, "打开文件失败", nil)
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	header := make([]byte, 512)
 	n, _ := io.ReadFull(src, header)

@@ -69,7 +69,9 @@ func runUserSetAdmin(_ *cobra.Command, args []string) error {
 	if roleEntity.Id == 0 {
 		roleEntity.RoleName = "管理员"
 		roleEntity.Effective = 1
-		role.SaveOrCreateById(&roleEntity)
+		if err := role.SaveOrCreateById(&roleEntity); err != nil {
+			return err
+		}
 	}
 
 	rs := rolePermissionRs.GetRsByRoleIdAndPermission(roleEntity.Id, permission.Admin.Id())

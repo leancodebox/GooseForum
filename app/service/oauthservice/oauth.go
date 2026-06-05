@@ -227,7 +227,9 @@ func updateOAuthRecord(oauthEntity *userOAuth.Entity, gothUser goth.User) {
 		oauthEntity.TokenExpiry = gothUser.ExpiresAt
 	}
 
-	userOAuth.Update(oauthEntity)
+	if err := userOAuth.Update(oauthEntity); err != nil {
+		slog.Error("failed to update OAuth record", "userId", oauthEntity.UserId, "provider", oauthEntity.Provider, "err", err)
+	}
 }
 
 // GetOAuthByUserID returns a user's OAuth binding for a provider.
@@ -321,7 +323,7 @@ func downloadAndSaveAvatar(userID uint64, avatarURL string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("下载头像失败: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("下载头像失败，状态码: %d", resp.StatusCode)

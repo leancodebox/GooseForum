@@ -58,7 +58,7 @@ func SaveImgByGinContext(c *gin.Context) {
 		return
 	}
 
-	if err, code := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
+	if code, err := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
 		c.JSON(code, component.FailDataError(err))
 		return
 	}
@@ -135,7 +135,7 @@ func SaveImgByGinContext(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, component.FailDataCode(component.MessageUploadReadFailed, nil))
 		return
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	header := make([]byte, 512)
 	n, _ := io.ReadFull(src, header)

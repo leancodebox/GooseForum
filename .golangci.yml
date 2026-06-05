@@ -1,0 +1,14 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  exclusions:
+    rules:
+      - path: ^app/models/
+        linters:
+          - unused
+      - path: ^app/bundles/setting/globalConfig\.go$
+        linters:
+          - unused

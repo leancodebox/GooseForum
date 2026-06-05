@@ -58,7 +58,7 @@ func TestCheckUserPermissionIncludesActionCode(t *testing.T) {
 		IsFrozen: users.StatusFrozen,
 	}
 
-	err, code := CheckUserPermission(user, "发帖")
+	code, err := CheckUserPermission(user, "发帖")
 	if code != 403 {
 		t.Fatalf("code = %d, want 403", code)
 	}

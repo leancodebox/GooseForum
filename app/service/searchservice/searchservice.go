@@ -2,6 +2,7 @@ package searchservice
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
@@ -64,7 +65,10 @@ func SearchArticles(req SearchRequest) (*SearchResponse, error) {
 
 	results := lo.FilterMap(searchResp.Hits, func(hit meilisearch.Hit, _ int) (SearchResult, bool) {
 		itemResult := SearchResult{}
-		hit.Decode(&itemResult)
+		if err := hit.Decode(&itemResult); err != nil {
+			slog.Error("failed to decode search hit", "err", err)
+			return SearchResult{}, false
+		}
 		return itemResult, itemResult.ID > 0
 	})
 
