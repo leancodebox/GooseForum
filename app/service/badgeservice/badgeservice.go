@@ -2,9 +2,9 @@ package badgeservice
 
 import (
 	"sort"
-	"sync"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
@@ -13,11 +13,7 @@ import (
 
 const definitionsTTL = 10 * time.Minute
 
-var (
-	definitionsMu        sync.RWMutex
-	cachedAdminBadges    []AdminBadge
-	cachedAdminBadgesExp time.Time
-)
+var adminBadgesCache = localcache.Cache[[]AdminBadge]{MaxEntries: 4}
 
 type Badge struct {
 	Code        string `json:"code"`
@@ -48,31 +44,14 @@ type UserBadge struct {
 }
 
 func AllForAdmin() []AdminBadge {
-	now := time.Now()
-	definitionsMu.RLock()
-	if now.Before(cachedAdminBadgesExp) && cachedAdminBadges != nil {
-		result := cloneAdminBadges(cachedAdminBadges)
-		definitionsMu.RUnlock()
-		return result
-	}
-	definitionsMu.RUnlock()
-
-	definitionsMu.Lock()
-	defer definitionsMu.Unlock()
-	now = time.Now()
-	if now.Before(cachedAdminBadgesExp) && cachedAdminBadges != nil {
-		return cloneAdminBadges(cachedAdminBadges)
-	}
-	cachedAdminBadges = buildAllForAdmin()
-	cachedAdminBadgesExp = now.Add(definitionsTTL)
-	return cloneAdminBadges(cachedAdminBadges)
+	items := adminBadgesCache.GetOrLoad("adminBadges", func() ([]AdminBadge, error) {
+		return buildAllForAdmin(), nil
+	}, definitionsTTL)
+	return cloneAdminBadges(items)
 }
 
 func InvalidateDefinitions() {
-	definitionsMu.Lock()
-	defer definitionsMu.Unlock()
-	cachedAdminBadges = nil
-	cachedAdminBadgesExp = time.Time{}
+	adminBadgesCache.Clear()
 }
 
 func buildAllForAdmin() []AdminBadge {

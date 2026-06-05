@@ -8,18 +8,20 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// PasswordResetClaims is the JWT payload used for password reset links.
 type PasswordResetClaims struct {
 	UserId uint64 `json:"userId"`
 	Email  string `json:"email"`
 	jwt.RegisteredClaims
 }
 
+// GeneratePasswordResetToken creates a signed password reset token.
 func GeneratePasswordResetToken(userId uint64, email string) (string, error) {
 	claims := PasswordResetClaims{
 		UserId: userId,
 		Email:  email,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)), // 30分钟有效期
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
@@ -28,6 +30,7 @@ func GeneratePasswordResetToken(userId uint64, email string) (string, error) {
 	return token.SignedString([]byte(preferences.Get("jwtopt.key")))
 }
 
+// ParsePasswordResetToken parses and validates a password reset token.
 func ParsePasswordResetToken(tokenString string) (*PasswordResetClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &PasswordResetClaims{}, func(token *jwt.Token) (any, error) {
 		return []byte(preferences.Get("jwtopt.key")), nil

@@ -191,5 +191,5 @@ func apiRoute(ginApp *gin.Engine) {
 func fileServer(ginApp *gin.Engine) {
 	r := ginApp.Group("file")
 	r.POST("/img-upload", middleware.JWTAuthCheck, api.SaveImgByGinContext)
-	r.GET("/img/*filename", middleware.BrowserCache, api.GetFileByFileName)
+	r.GET("/img/*filename", api.GetFileByFileName)
 }

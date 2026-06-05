@@ -1,3 +1,4 @@
+// Package buildinfo exposes release metadata compiled into the binary.
 package buildinfo
 
 import (
@@ -6,11 +7,15 @@ import (
 )
 
 var (
-	Version   = "dev"
-	Commit    = ""
+	// Version is the release version injected at build time.
+	Version = "dev"
+	// Commit is the source revision injected at build time.
+	Commit = ""
+	// BuildDate is the build timestamp injected at build time.
 	BuildDate = ""
 )
 
+// Info describes the compiled application version.
 type Info struct {
 	Version   string `json:"version"`
 	Commit    string `json:"commit"`
@@ -18,6 +23,7 @@ type Info struct {
 	Mode      string `json:"mode"`
 }
 
+// Get returns the current build metadata, falling back to Go build info.
 func Get() Info {
 	version := strings.TrimSpace(Version)
 	commit := strings.TrimSpace(Commit)

@@ -28,7 +28,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
-	"github.com/leancodebox/GooseForum/app/service/usercardservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
 )
@@ -267,7 +266,7 @@ func SaveBadge(req component.BetterRequest[BadgeSaveReq]) component.Response {
 		return component.FailResponseCode(component.MessageAdminBadgeSaveFailed, nil)
 	}
 	badgeservice.InvalidateDefinitions()
-	usercardservice.Clear()
+	userservice.ClearUserPublicProfileCache()
 	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
@@ -288,7 +287,7 @@ func DeleteBadge(req component.BetterRequest[BadgeDeleteReq]) component.Response
 		return component.FailResponseCode(component.MessageAdminBadgeDeleteFailed, nil)
 	}
 	badgeservice.InvalidateDefinitions()
-	usercardservice.Clear()
+	userservice.ClearUserPublicProfileCache()
 	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
@@ -336,7 +335,7 @@ func SaveUserBadges(req component.BetterRequest[SaveUserBadgesReq]) component.Re
 			_ = userBadges.Revoke(userID, active.Code)
 		}
 	}
-	usercardservice.Invalidate(userID)
+	userservice.InvalidateUserPublicProfileCache(userID)
 	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
@@ -835,6 +834,7 @@ func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Respon
 	entity.Slug = req.Params.Slug
 
 	articleCategory.SaveOrCreateById(&entity)
+	hotdataserve.ClearArticleCategoryCache()
 	return component.SuccessResponse(true)
 }
 
@@ -853,6 +853,7 @@ func DeleteCategory(req component.BetterRequest[struct {
 		return component.FailResponseCode(component.MessageAdminCategoryHasArticles, nil)
 	}
 	articleCategory.DeleteEntity(&entity)
+	hotdataserve.ClearArticleCategoryCache()
 	return component.SuccessResponse(true)
 }
 

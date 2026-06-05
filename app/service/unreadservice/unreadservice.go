@@ -2,11 +2,16 @@ package unreadservice
 
 import (
 	"strconv"
+	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/appcache"
+	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 )
+
+const statusTTL = 2 * time.Minute
+
+var statusCache = localcache.Cache[Status]{MaxEntries: 2048}
 
 type Status struct {
 	Notifications          bool   `json:"notifications"`
@@ -18,21 +23,16 @@ func GetStatus(userID uint64) Status {
 	if userID == 0 {
 		return Status{}
 	}
-	key := cacheKey(userID)
-	if status, ok := appcache.GetJSON[Status](key); ok {
-		return status
-	}
-
-	status := loadStatus(userID)
-	_ = appcache.SetJSON(key, status)
-	return status
+	return statusCache.GetOrLoad(cacheKey(userID), func() (Status, error) {
+		return loadStatus(userID), nil
+	}, statusTTL)
 }
 
 func Invalidate(userID uint64) {
 	if userID == 0 {
 		return
 	}
-	appcache.Delete(cacheKey(userID))
+	statusCache.Delete(cacheKey(userID))
 }
 
 func loadStatus(userID uint64) Status {

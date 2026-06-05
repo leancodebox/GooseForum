@@ -1,3 +1,4 @@
+// Package jwtopt creates and validates GooseForum access tokens.
 package jwtopt
 
 import (
@@ -7,40 +8,45 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// CustomClaims stores the GooseForum user ID in an access token.
 type CustomClaims struct {
 	UserId uint64
 	jwt.RegisteredClaims
 }
 
 var (
+	// TokenInvalid is returned when a token cannot be parsed into CustomClaims.
 	TokenInvalid = errors.New("Couldn't handle this token: ")
 )
 
+// JWT signs and parses tokens with a fixed signing key.
 type JWT struct {
 	SigningKey []byte
 }
 
+// NewJWT creates a JWT helper with signingKey.
 func NewJWT(signingKey []byte) *JWT {
 	return &JWT{
 		signingKey,
 	}
 }
 
+// GetBaseRegisteredClaims returns standard claims for a token lifetime.
 func GetBaseRegisteredClaims(expireTime time.Duration) jwt.RegisteredClaims {
 	return jwt.RegisteredClaims{
-		NotBefore: jwt.NewNumericDate(time.Now().Add(-10)),        // 签名生效时间
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(expireTime)), // 过期时间 7天  配置文件
-		Issuer:    "GooseForum",                                   // 签名的发行者
+		NotBefore: jwt.NewNumericDate(time.Now().Add(-10)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(expireTime)),
+		Issuer:    "GooseForum",
 	}
 }
 
-// CreateToken 创建一个token
+// CreateToken signs claims as a JWT string.
 func (itself *JWT) CreateToken(claims CustomClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(itself.SigningKey)
 }
 
-// ParseToken 解析 token
+// ParseToken parses tokenString into CustomClaims.
 func (itself *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{},
 		func(token *jwt.Token) (i any, e error) {

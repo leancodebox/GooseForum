@@ -128,54 +128,57 @@ func runEvent(e fsnotify.Event) {
 	}
 }
 
-// Get 获取配置项 允许使用点式获取，如：app.name
+// Get returns a string setting and supports dot-separated paths.
 func Get(path string, defaultValue ...any) string {
 	return GetString(path, defaultValue...)
 }
 
-// GetString 获取 String 类型的配置信息
+// GetString returns a string setting.
 func GetString(path string, defaultValue ...any) string {
 	return cast.ToString(internalGet(path, defaultValue...))
 }
 
-// GetInt 获取 Int 类型的配置信息
+// GetInt returns an int setting.
 func GetInt(path string, defaultValue ...any) int {
 	return cast.ToInt(internalGet(path, defaultValue...))
 }
 
-// GetFloat64 获取 float64 类型的配置信息
+// GetFloat64 returns a float64 setting.
 func GetFloat64(path string, defaultValue ...any) float64 {
 	return cast.ToFloat64(internalGet(path, defaultValue...))
 }
 
-// GetInt64 获取 Int64 类型的配置信息
+// GetInt64 returns an int64 setting.
 func GetInt64(path string, defaultValue ...any) int64 {
 	return cast.ToInt64(internalGet(path, defaultValue...))
 }
 
-// GetUint 获取 Uint 类型的配置信息
+// GetUint returns a uint setting.
 func GetUint(path string, defaultValue ...any) uint {
 	return cast.ToUint(internalGet(path, defaultValue...))
 }
 
-// GetBool 获取 Bool 类型的配置信息
+// GetBool returns a bool setting.
 func GetBool(path string, defaultValue ...any) bool {
 	return cast.ToBool(internalGet(path, defaultValue...))
 }
 
-// GetStringMapString 获取结构数据
+// GetStringMapString returns a string map setting.
 func GetStringMapString(path string) map[string]string {
 	return v.GetStringMapString(path)
 }
 
+// GetStringSlice returns a string slice setting.
 func GetStringSlice(path string) []string {
 	return v.GetStringSlice(path)
 }
 
+// GetIntSlice returns an int slice setting.
 func GetIntSlice(path string) []int {
 	return v.GetIntSlice(path)
 }
 
+// All returns all loaded settings.
 func All() map[string]any {
 	return v.AllSettings()
 }

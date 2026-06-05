@@ -1,3 +1,4 @@
+// Package closer stores process-wide shutdown callbacks.
 package closer
 
 import (
@@ -17,12 +18,12 @@ type closerEntry struct {
 	caller string
 }
 
-// Register 注册一个关闭函数
+// Register adds f to the process shutdown callback list.
 func Register(f func() error) {
 	register(1, f)
 }
 
-// Bind 绑定一个实现了 Close() error 接口的对象
+// Bind registers the Close method of c as a shutdown callback.
 func Bind(c interface{ Close() error }) {
 	register(1, c.Close)
 }
@@ -47,15 +48,13 @@ func register(skip int, f func() error) {
 	)
 }
 
-// CloseAll 执行所有已注册的关闭逻辑
-// 通常在 main 函数退出前或捕获到系统信号时调用
+// CloseAll runs all registered shutdown callbacks in reverse registration order.
 func CloseAll() {
 	mu.Lock()
 	defer mu.Unlock()
 
 	slog.Info("closer: starting to close all registered resources", "count", len(entries))
 
-	// 倒序执行（先初始化的后关闭，符合依赖关系）
 	for i := len(entries) - 1; i >= 0; i-- {
 		entry := entries[i]
 		slog.Info("closer: closing resource",
@@ -71,7 +70,6 @@ func CloseAll() {
 		}
 	}
 
-	// 执行完后清空，防止重复执行
 	entries = nil
 	slog.Info("closer: all resources closed")
 }

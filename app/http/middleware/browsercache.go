@@ -6,6 +6,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/httputil"
 )
 
+// BrowserCache applies long public cache headers in production.
 func BrowserCache(c *gin.Context) {
 	if !setting.IsProduction() {
 		c.Next()

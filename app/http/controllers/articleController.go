@@ -20,7 +20,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
-	"github.com/leancodebox/GooseForum/app/service/usercardservice"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
 )
 
@@ -154,7 +154,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		if article.ArticleStatus == 1 {
 			userStatistics.WriteArticle(req.UserId)
 		}
-		usercardservice.Invalidate(req.UserId)
+		userservice.InvalidateUserPublicProfileCache(req.UserId)
 		lo.ForEach(req.Params.CategoryId, func(item uint64, _ int) {
 			rs := articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: item, Effective: 1}
 			articleCategoryRs.SaveOrCreateById(&rs)
@@ -272,7 +272,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 
 	}
 	userStatistics.WriteComment(req.UserId)
-	usercardservice.Invalidate(req.UserId)
+	userservice.InvalidateUserPublicProfileCache(req.UserId)
 	updateArticleStat(articleEntity, req.UserId, false)
 
 	// 获取父评论作者ID
@@ -434,8 +434,8 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 			articles.IncrementLike(articleEntity)
 			userStatistics.LikeArticle(articleEntity.UserId)
 			userStatistics.GivenLike(req.UserId)
-			usercardservice.Invalidate(articleEntity.UserId)
-			usercardservice.Invalidate(req.UserId)
+			userservice.InvalidateUserPublicProfileCache(articleEntity.UserId)
+			userservice.InvalidateUserPublicProfileCache(req.UserId)
 
 			// 发送点赞事件
 			eventbus.Publish(context.Background(), &eventhandlers.ArticleLikedEvent{
@@ -448,8 +448,8 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 			articles.DecrementLike(articleEntity)
 			userStatistics.CancelLikeArticle(articleEntity.UserId)
 			userStatistics.CancelGivenLike(req.UserId)
-			usercardservice.Invalidate(articleEntity.UserId)
-			usercardservice.Invalidate(req.UserId)
+			userservice.InvalidateUserPublicProfileCache(articleEntity.UserId)
+			userservice.InvalidateUserPublicProfileCache(req.UserId)
 		}
 	}
 	return component.SuccessResponse(true)
@@ -465,26 +465,38 @@ func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.
 	if articleEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
-	oldBookMark := articleBookmark.GetByArticleId(req.UserId, articleEntity.Id)
-	targetStatus := 0
-	if req.Params.Action == 1 {
-		if oldBookMark.Id == 0 {
-			oldBookMark.UserId = req.UserId
-			oldBookMark.ArticleId = articleEntity.Id
-		}
-		targetStatus = 1
-	} else {
-		if oldBookMark.Id == 0 {
-			return component.SuccessResponse(true)
-		}
-		targetStatus = 0
-	}
-	if oldBookMark.Status == targetStatus {
+
+	bookmark := articleBookmark.GetByArticleId(req.UserId, articleEntity.Id)
+	targetStatus := bookmarkTargetStatus(req.Params.Action)
+	if bookmark.Id == 0 && targetStatus == 0 {
 		return component.SuccessResponse(true)
 	}
-	oldBookMark.Status = targetStatus
-	articleBookmark.SaveOrCreateById(&oldBookMark)
+	if bookmark.Id != 0 && bookmark.Status == targetStatus {
+		return component.SuccessResponse(true)
+	}
+
+	bookmark.UserId = req.UserId
+	bookmark.ArticleId = articleEntity.Id
+	bookmark.Status = targetStatus
+	articleBookmark.SaveOrCreateById(&bookmark)
+	updateBookmarkStats(req.UserId, targetStatus)
+	userservice.InvalidateUserPublicProfileCache(req.UserId)
 	return component.SuccessResponse(true)
+}
+
+func bookmarkTargetStatus(action int) int {
+	if action == 1 {
+		return 1
+	}
+	return 0
+}
+
+func updateBookmarkStats(userID uint64, targetStatus int) {
+	if targetStatus == 1 {
+		userStatistics.Collection(userID)
+		return
+	}
+	userStatistics.CancelCollection(userID)
 }
 
 type WatchArticleReq struct {
@@ -547,8 +559,8 @@ func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {
 		if req.Params.Action == 1 {
 			userStatistics.Following(req.UserId)
 			userStatistics.Follower(req.Params.Id)
-			usercardservice.Invalidate(req.UserId)
-			usercardservice.Invalidate(req.Params.Id)
+			userservice.InvalidateUserPublicProfileCache(req.UserId)
+			userservice.InvalidateUserPublicProfileCache(req.Params.Id)
 
 			// 发送关注通知
 			followerUser, _ := req.GetUser()
@@ -560,8 +572,8 @@ func FollowUser(req component.BetterRequest[FollowUserReq]) component.Response {
 		} else {
 			userStatistics.CancelFollowing(req.UserId)
 			userStatistics.CancelFollower(req.Params.Id)
-			usercardservice.Invalidate(req.UserId)
-			usercardservice.Invalidate(req.Params.Id)
+			userservice.InvalidateUserPublicProfileCache(req.UserId)
+			userservice.InvalidateUserPublicProfileCache(req.Params.Id)
 		}
 	}
 	return component.SuccessResponse(true)

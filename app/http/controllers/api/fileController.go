@@ -10,10 +10,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/httputil"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
 
 func GetFileByFileName(c *gin.Context) {
@@ -29,10 +29,14 @@ func GetFileByFileName(c *gin.Context) {
 
 	entity, err := filedata.GetFileByName(filename)
 	if err != nil {
-		c.Redirect(http.StatusFound, urlconfig.GetDefaultAvatar())
+		c.JSON(http.StatusNotFound, gin.H{
+			"error":       "File not found",
+			"messageCode": component.MessagePageNotFound,
+		})
 		return
 	}
 	c.Header("Content-Disposition", "inline")
+	httputil.SetLongPublic(c)
 	c.Data(http.StatusOK, entity.Type, entity.Data)
 }
 

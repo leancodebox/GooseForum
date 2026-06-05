@@ -53,7 +53,7 @@ func CacheMiddleware(c *gin.Context) {
 	}
 	// 如果浏览器支持 Gzip 那么就开启缓存，否则就直接执行下个中间件
 	if strings.Contains(c.Request.Header.Get("Accept-Encoding"), "gzip") {
-		key := c.Request.Method + ":" + c.Request.URL.RequestURI()
+		key := c.Request.Method + ":" + c.Request.URL.EscapedPath()
 		// 检查缓存
 		if val, ok := gzipCache.Load(key); ok {
 			if cachedResp, ok := val.(cachedResponse); ok {

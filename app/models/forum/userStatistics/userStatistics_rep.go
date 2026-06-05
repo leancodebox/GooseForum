@@ -85,6 +85,18 @@ func CancelFollower(userId uint64) int64 {
 	return result.RowsAffected
 }
 
+// Collection 增加收藏数
+func Collection(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET collection_count = collection_count+1 where user_id = ?", userId)
+	return result.RowsAffected
+}
+
+// CancelCollection 取消收藏数
+func CancelCollection(userId uint64) int64 {
+	result := builder().Exec("UPDATE user_statistics SET collection_count = CASE WHEN collection_count > 0 THEN collection_count-1 ELSE 0 END where user_id = ?", userId)
+	return result.RowsAffected
+}
+
 // UpdateUserActivity 更新活跃时间
 func UpdateUserActivity(userId uint64, lastActiveTime time.Time) int64 {
 	result := builder().Updates(Entity{UserId: userId, LastActiveTime: lastActiveTime})

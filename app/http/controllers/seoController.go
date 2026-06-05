@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"text/template"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/datacache"
+	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
@@ -26,9 +27,9 @@ var robotsTxt string
 //go:embed templ/sitemap.xml.tmpl
 var sitemapTpl string
 
-const seoXMLCacheTTL = 5 * time.Minute
+const seoXMLCacheTTL = 10 * time.Second
 
-var seoXMLCache = datacache.Cache[string]{}
+var seoXMLCache = localcache.Cache[string]{MaxEntries: 128}
 
 // RenderRobotsTxt renders robots.txt.
 func RenderRobotsTxt(c *gin.Context) {
@@ -46,6 +47,17 @@ type SitemapURL struct {
 // RenderSitemapXml renders sitemap.xml.
 func RenderSitemapXml(c *gin.Context) {
 	host := component.GetHost(c)
+	if !cacheableSEOHost(host) {
+		xml, err := buildSitemapXML(host)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Sitemap build error")
+			return
+		}
+		c.Header("Content-Type", "application/xml; charset=utf-8")
+		c.Header("Cache-Control", "public, max-age=10")
+		c.String(http.StatusOK, xml)
+		return
+	}
 	xml, err := seoXMLCache.GetOrLoadE("sitemap:"+host, func() (string, error) {
 		return buildSitemapXML(host)
 	}, seoXMLCacheTTL)
@@ -55,7 +67,7 @@ func RenderSitemapXml(c *gin.Context) {
 	}
 
 	c.Header("Content-Type", "application/xml; charset=utf-8")
-	c.Header("Cache-Control", "public, max-age=300")
+	c.Header("Cache-Control", "public, max-age=10")
 	c.String(http.StatusOK, xml)
 }
 
@@ -108,6 +120,17 @@ func buildSitemapXML(host string) (string, error) {
 
 func RenderRss(c *gin.Context) {
 	host := component.GetHost(c)
+	if !cacheableSEOHost(host) {
+		rssString, err := buildRSSXML(host)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error generating RSS feed")
+			return
+		}
+		c.Header("Content-Type", "application/xml; charset=utf-8")
+		c.Header("Cache-Control", "public, max-age=10")
+		c.String(http.StatusOK, rssString)
+		return
+	}
 	rssString, err := seoXMLCache.GetOrLoadE("rss:"+host, func() (string, error) {
 		return buildRSSXML(host)
 	}, seoXMLCacheTTL)
@@ -117,8 +140,19 @@ func RenderRss(c *gin.Context) {
 	}
 
 	c.Header("Content-Type", "application/xml; charset=utf-8")
-	c.Header("Cache-Control", "public, max-age=300")
+	c.Header("Cache-Control", "public, max-age=10")
 	c.String(http.StatusOK, rssString)
+}
+
+func cacheableSEOHost(host string) bool {
+	if len(host) == 0 || len(host) > 128 {
+		return false
+	}
+	if strings.ContainsAny(host, " \t\r\n") {
+		return false
+	}
+	parsed, err := url.Parse(host)
+	return err == nil && parsed.Scheme != "" && parsed.Host != ""
 }
 
 func buildRSSXML(host string) (string, error) {

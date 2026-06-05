@@ -4,33 +4,16 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/algorithm"
-	"github.com/leancodebox/GooseForum/app/bundles/datacache"
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/samber/lo"
 )
 
-var userRoleCache = datacache.Cache[uint64]{}
-
 func Get(id any) (entity EntityComplete, err error) {
 	err = builder().Where(pid, id).First(&entity).Error
 	return
-}
-
-func GetRoleId(userId uint64) (roleId uint64, err error) {
-	key := fmt.Sprintf("user_role:%d", userId)
-	return userRoleCache.GetOrLoadE(key, func() (uint64, error) {
-		var entity EntityComplete
-		err = builder().Select(fieldRoleId).Where(pid, userId).First(&entity).Error
-		return entity.RoleId, err
-	}, 30*time.Minute)
-}
-
-func InvalidateRoleCache(userId uint64) {
-	userRoleCache.Delete(fmt.Sprintf("user_role:%d", userId))
 }
 
 func Verify(usernameOrEmail string, password string) (*EntityComplete, error) {

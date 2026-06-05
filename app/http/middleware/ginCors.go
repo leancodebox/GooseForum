@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GinCors writes permissive CORS headers for API responses.
 func GinCors(context *gin.Context) {
 	method := context.Request.Method
 	context.Header("Access-Control-Allow-Origin", "*")

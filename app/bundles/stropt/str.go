@@ -1,4 +1,4 @@
-// Package stropt Package str 字符串辅助方法
+// Package stropt provides string case and pluralization helpers.
 package stropt
 
 import (
@@ -6,27 +6,27 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-// Plural 转为复数 user -> users
+// Plural returns the English plural form of word.
 func Plural(word string) string {
 	return pluralize.NewClient().Plural(word)
 }
 
-// Singular 转为单数 users -> user
+// Singular returns the English singular form of word.
 func Singular(word string) string {
 	return pluralize.NewClient().Singular(word)
 }
 
-// Snake 转为 snake_case，如 TopicComment -> topic_comment
+// Snake converts s to snake_case.
 func Snake(s string) string {
 	return strcase.ToSnake(s)
 }
 
-// Camel 转为 CamelCase，如 topic_comment -> TopicComment
+// Camel converts s to CamelCase.
 func Camel(s string) string {
 	return strcase.ToCamel(s)
 }
 
-// LowerCamel 转为 lowerCamelCase，如 TopicComment -> topicComment
+// LowerCamel converts s to lowerCamelCase.
 func LowerCamel(s string) string {
 	return strcase.ToLowerCamel(s)
 }

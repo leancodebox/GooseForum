@@ -1,80 +1,72 @@
 package hotdataserve
 
 import (
-	"strconv"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/bundles/appcache"
-	"github.com/leancodebox/GooseForum/app/bundles/datacache"
+	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 )
 
-func UserShowCacheKey(userID uint64) string {
-	return "user:show:" + strconv.FormatUint(userID, 10)
-}
+const (
+	configFastCacheTTL = 5 * time.Second
+	configSlowCacheTTL = time.Minute
+	configCacheEntries = 4
+)
 
-func GetOrLoad[T any](key string, load func() (T, error)) T {
-	return appcache.GetOrLoadJSON(key, load)
-}
-
-func Reload[T any](key string, dataObj T) error {
-	return appcache.SetJSON(key, dataObj)
-}
-
-var sponsorsConfigCache = &datacache.Cache[pageConfig.SponsorsConfig]{}
+var sponsorsConfigCache = &localcache.Cache[pageConfig.SponsorsConfig]{MaxEntries: configCacheEntries}
 
 func SponsorsConfigCache() pageConfig.SponsorsConfig {
 	data, _ := sponsorsConfigCache.GetOrLoadE("", func() (pageConfig.SponsorsConfig, error) {
 		return pageConfig.GetConfigByPageType(pageConfig.SponsorsPage, defaultconfig.GetDefaultSponsorsConfig()), nil
-	}, time.Minute)
+	}, configSlowCacheTTL)
 	return data
 }
 
-var siteSettingsConfigCache = &datacache.Cache[pageConfig.SiteSettingsConfig]{}
+var siteSettingsConfigCache = &localcache.Cache[pageConfig.SiteSettingsConfig]{MaxEntries: configCacheEntries}
 
 func GetSiteSettingsConfigCache() pageConfig.SiteSettingsConfig {
 	data, _ := siteSettingsConfigCache.GetOrLoadE("", func() (pageConfig.SiteSettingsConfig, error) {
 		return pageConfig.GetConfigByPageType(pageConfig.SiteSettings, defaultconfig.GetDefaultSiteSettingsConfig()), nil
-	}, time.Second*5)
+	}, configFastCacheTTL)
 	return data
 }
 
-var mailSettingsConfigCache = &datacache.Cache[pageConfig.MailSettingsConfig]{}
+var mailSettingsConfigCache = &localcache.Cache[pageConfig.MailSettingsConfig]{MaxEntries: configCacheEntries}
 
 func GetMailSettingsConfigCache() pageConfig.MailSettingsConfig {
 	data, _ := mailSettingsConfigCache.GetOrLoadE("", func() (pageConfig.MailSettingsConfig, error) {
 		return pageConfig.GetConfigByPageType(pageConfig.EmailSettings, defaultconfig.GetDefaultEmailSettingsConfig()), nil
-	}, time.Second*5)
+	}, configFastCacheTTL)
 	return data
 }
 
-var announcementConfigCache = &datacache.Cache[pageConfig.AnnouncementConfig]{}
+var announcementConfigCache = &localcache.Cache[pageConfig.AnnouncementConfig]{MaxEntries: configCacheEntries}
 
 func GetAnnouncementConfigCache() pageConfig.AnnouncementConfig {
 	data, _ := announcementConfigCache.GetOrLoadE("", func() (pageConfig.AnnouncementConfig, error) {
 		config := pageConfig.GetConfigByPageType(pageConfig.Announcement, defaultconfig.GetDefaultAnnouncementConfig())
 		config.PrepareHTML()
 		return config, nil
-	}, time.Second*5)
+	}, configFastCacheTTL)
 	return data
 }
 
-var securitySettingsConfigCache = &datacache.Cache[pageConfig.SecurityAndRegistration]{}
+var securitySettingsConfigCache = &localcache.Cache[pageConfig.SecurityAndRegistration]{MaxEntries: configCacheEntries}
 
 func GetSecuritySettingsConfigCache() pageConfig.SecurityAndRegistration {
 	data, _ := securitySettingsConfigCache.GetOrLoadE("", func() (pageConfig.SecurityAndRegistration, error) {
 		return pageConfig.GetConfigByPageType(pageConfig.SecuritySettings, defaultconfig.GetDefaultSecuritySettingsConfig()), nil
-	}, time.Second*5)
+	}, configFastCacheTTL)
 	return data
 }
 
-var postingSettingsConfigCache = &datacache.Cache[pageConfig.PostingContent]{}
+var postingSettingsConfigCache = &localcache.Cache[pageConfig.PostingContent]{MaxEntries: configCacheEntries}
 
 func GetPostingSettingsConfigCache() pageConfig.PostingContent {
 	data, _ := postingSettingsConfigCache.GetOrLoadE("", func() (pageConfig.PostingContent, error) {
 		return pageConfig.GetConfigByPageType(pageConfig.PostingSettings, defaultconfig.GetDefaultPostingSettingsConfig()), nil
-	}, time.Second*5)
+	}, configFastCacheTTL)
 	return data
 }
 
@@ -102,12 +94,12 @@ func ClearSponsorsConfigCache() {
 	sponsorsConfigCache.Clear()
 }
 
-var friendLinksConfigCache = &datacache.Cache[[]pageConfig.FriendLinksGroup]{}
+var friendLinksConfigCache = &localcache.Cache[[]pageConfig.FriendLinksGroup]{MaxEntries: configCacheEntries}
 
 func GetFriendLinksConfigCache() []pageConfig.FriendLinksGroup {
 	data, _ := friendLinksConfigCache.GetOrLoadE("", func() ([]pageConfig.FriendLinksGroup, error) {
 		return pageConfig.GetConfigByPageType(pageConfig.FriendShipLinks, defaultconfig.GetDefaultFriendLinksConfig()), nil
-	}, time.Minute)
+	}, configSlowCacheTTL)
 	return data
 }
 

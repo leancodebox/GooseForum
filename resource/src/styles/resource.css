@@ -286,6 +286,11 @@ body {
     @apply border-l-4 border-gray-200 bg-gray-50/70 py-1 pr-3 text-gray-600;
   }
 
+  .gf-prose blockquote p:first-of-type::before,
+  .gf-prose blockquote p:last-of-type::after {
+    content: none;
+  }
+
   .gf-prose table {
     @apply text-sm;
     display: block;

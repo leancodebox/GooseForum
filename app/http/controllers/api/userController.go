@@ -18,7 +18,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
-	"github.com/leancodebox/GooseForum/app/service/usercardservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +41,7 @@ type GetUserCardReq struct {
 
 func GetUserCard(req component.BetterRequest[GetUserCardReq]) component.Response {
 	userId := req.Params.UserId
-	card, ok := usercardservice.GetCard(userId)
+	card, ok := userservice.GetUserCard(userId)
 	if !ok {
 		return component.FailResponseCode(component.MessageUserNotFound, nil)
 	}
@@ -58,7 +57,7 @@ func GetUserCard(req component.BetterRequest[GetUserCardReq]) component.Response
 
 func GetUserHoverCard(req component.BetterRequest[GetUserCardReq]) component.Response {
 	userId := req.Params.UserId
-	card, ok := usercardservice.GetHoverCard(userId)
+	card, ok := userservice.GetUserHoverCard(userId)
 	if !ok {
 		return component.FailResponseCode(component.MessageUserNotFound, nil)
 	}

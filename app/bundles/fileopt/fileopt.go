@@ -1,3 +1,4 @@
+// Package fileopt provides small filesystem read, write, and creation helpers.
 package fileopt
 
 import (
@@ -5,19 +6,22 @@ import (
 	"path/filepath"
 )
 
+// GetContents reads filename and returns its contents.
 func GetContents(filename string) ([]byte, error) {
 	return os.ReadFile(filename)
 }
 
+// FileGetContents reads filename and returns its contents.
 func FileGetContents(filename string) ([]byte, error) {
 	return os.ReadFile(filename)
 }
 
+// PutContents writes data to filename, appending when isAppend is true.
 func PutContents[DType string | []byte](filename string, data DType, isAppend ...bool) error {
 	return FilePutContents(filename, data, isAppend...)
 }
 
-// FilePutContents file_put_contents
+// FilePutContents writes data to filename, creating parent directories as needed.
 func FilePutContents[DType string | []byte](filename string, data DType, isAppend ...bool) error {
 	if dir := filepath.Dir(filename); dir != "" && dir != "." {
 		err := os.MkdirAll(dir, 0755)
@@ -43,11 +47,13 @@ func FilePutContents[DType string | []byte](filename string, data DType, isAppen
 	return err
 }
 
+// IsExist reports whether path exists.
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }
 
+// IsExistOrCreate creates path with optional initial content when it is missing.
 func IsExistOrCreate[T string | []byte](path string, init ...T) error {
 	if IsExist(path) {
 		return nil
@@ -59,6 +65,7 @@ func IsExistOrCreate[T string | []byte](path string, init ...T) error {
 	return FilePutContents(path, initData)
 }
 
+// DirExistOrCreate creates dirPath and parent directories when they are missing.
 func DirExistOrCreate(dirPath string) error {
 	if IsExist(dirPath) {
 		return nil

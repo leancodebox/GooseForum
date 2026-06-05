@@ -1,17 +1,16 @@
 package component
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
 var (
@@ -66,16 +65,7 @@ func GetLoginUser(c *gin.Context) *vo.UserInfoShow {
 }
 
 func GetUserShowByUserId(userId uint64) *vo.UserInfoShow {
-	if userId == 0 {
-		return &vo.UserInfoShow{}
-	}
-	return hotdataserve.GetOrLoad(hotdataserve.UserShowCacheKey(userId), func() (*vo.UserInfoShow, error) {
-		user, _ := users.Get(userId)
-		if user.Id == 0 {
-			return &vo.UserInfoShow{}, errors.New("no found")
-		}
-		return transform.User2userShow(user), nil
-	})
+	return userservice.GetUserShow(userId)
 }
 
 // CheckUserPermission 统一检查用户操作权限（封禁状态、邮箱验证等）

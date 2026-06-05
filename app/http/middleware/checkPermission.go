@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/permission"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
 func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
@@ -24,11 +24,11 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 			roleId = val.(uint64)
 		}
 
-		// 如果 roleId 为 0，回退到查库
+		// 如果 roleId 为 0，回退到用户信息缓存
 		if roleId == 0 {
-			var err error
-			roleId, err = users.GetRoleId(userId)
-			if err != nil {
+			var ok bool
+			roleId, ok = userservice.GetUserRoleId(userId)
+			if !ok {
 				c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionResolveFailed, nil))
 				c.Abort()
 				return
@@ -59,9 +59,9 @@ func CheckPermissionOrNoUser(permissionType permission.Enum) gin.HandlerFunc {
 		}
 
 		if roleId == 0 {
-			var err error
-			roleId, err = users.GetRoleId(userId)
-			if err != nil {
+			var ok bool
+			roleId, ok = userservice.GetUserRoleId(userId)
+			if !ok {
 				c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionResolveFailed, nil))
 				c.Abort()
 				return

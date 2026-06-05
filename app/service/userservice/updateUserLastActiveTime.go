@@ -1,209 +1,149 @@
 package userservice
 
 import (
+	"context"
+	"log/slog"
 	"sync"
 	"time"
 
+	"github.com/jellydator/ttlcache/v3"
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 )
 
-const (
-	userActivityTickInterval = 5 * time.Second
-	userActivityIdleFlush    = 15 * time.Second
-	userActivityMaxDelay     = 45 * time.Second
-	userActivityQueueSize    = 1024
-)
+const userActivityCacheEntries = 8192
 
-// UserActivityTask tracks a pending last-active-time write.
-type UserActivityTask struct {
-	UserID         uint64
-	LastActiveTime time.Time
-	CreatedAt      time.Time
+type userActivity struct {
+	LastActiveAt  time.Time
+	LastFlushedAt time.Time
+	Dirty         bool
 }
 
-type userActivityRequest struct {
-	UserID     uint64
-	ActiveTime time.Time
+type userActivityStore struct {
+	once           sync.Once
+	cache          *ttlcache.Cache[uint64, userActivity]
+	flushFn        func(uint64, time.Time)
+	registerCloser bool
 }
 
-// UserActivityManager batches user activity writes.
-type UserActivityManager struct {
-	mu        sync.RWMutex
-	ticker    *time.Ticker
-	closed    bool
-	closeCh   chan struct{}
-	requestCh chan userActivityRequest
-	flushFn   func([]*UserActivityTask)
-	wg        sync.WaitGroup
+var activityStore = &userActivityStore{
+	flushFn:        flushUserActivity,
+	registerCloser: true,
 }
 
-var (
-	manager *UserActivityManager
-	once    sync.Once
-)
-
-// GetUserActivityManager returns the singleton activity manager.
-func GetUserActivityManager() *UserActivityManager {
-	once.Do(func() {
-		manager = &UserActivityManager{
-			ticker:    time.NewTicker(userActivityTickInterval),
-			closeCh:   make(chan struct{}),
-			requestCh: make(chan userActivityRequest, userActivityQueueSize),
-			flushFn:   flushUserActivityTasks,
-		}
-		manager.start()
-		closer.Register(CloseUpdateUserLastActiveTime)
-	})
-	return manager
-}
-
-// UpdateUserActivity queues a non-blocking user activity update.
-func (m *UserActivityManager) UpdateUserActivity(userID uint64) {
-	m.UpdateUserActivityAt(userID, time.Now())
-}
-
-func (m *UserActivityManager) UpdateUserActivityAt(userID uint64, activeTime time.Time) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	if m.closed {
-		return
-	}
-
-	select {
-	case m.requestCh <- userActivityRequest{UserID: userID, ActiveTime: activeTime}:
-	default:
-	}
-}
-
-// handleUserActivityRequest merges activity updates by user ID.
-func handleUserActivityRequest(tasks map[uint64]*UserActivityTask, req userActivityRequest) {
-	now := time.Now()
-	if req.ActiveTime.IsZero() {
-		req.ActiveTime = now
-	}
-	if task, exists := tasks[req.UserID]; exists {
-		if req.ActiveTime.After(task.LastActiveTime) {
-			task.LastActiveTime = req.ActiveTime
-		}
-	} else {
-		tasks[req.UserID] = &UserActivityTask{
-			UserID:         req.UserID,
-			LastActiveTime: req.ActiveTime,
-			CreatedAt:      now,
-		}
-	}
-}
-
-// start launches the activity queue worker.
-func (m *UserActivityManager) start() {
-	m.wg.Add(1)
-	go func() {
-		defer m.wg.Done()
-		tasks := make(map[uint64]*UserActivityTask)
-		for {
-			select {
-			case <-m.ticker.C:
-				tasks = m.processExpiredTasks(tasks)
-			case req := <-m.requestCh:
-				handleUserActivityRequest(tasks, req)
-			case <-m.closeCh:
-				m.drain(tasks)
-				m.flushTasks(mapValues(tasks))
+func (store *userActivityStore) init() {
+	store.once.Do(func() {
+		store.cache = ttlcache.New[uint64, userActivity](
+			ttlcache.WithCapacity[uint64, userActivity](userActivityCacheEntries),
+			ttlcache.WithDisableTouchOnHit[uint64, userActivity](),
+		)
+		store.cache.OnEviction(func(_ context.Context, reason ttlcache.EvictionReason, item *ttlcache.Item[uint64, userActivity]) {
+			if reason == ttlcache.EvictionReasonDeleted {
 				return
 			}
+			store.flushPending(item.Key(), item.Value())
+		})
+		go store.cache.Start()
+		if store.registerCloser {
+			closer.Register(CloseUpdateUserLastActiveTime)
 		}
-	}()
+	})
 }
 
-// processExpiredTasks flushes tasks old enough to write.
-func (m *UserActivityManager) processExpiredTasks(tasks map[uint64]*UserActivityTask) map[uint64]*UserActivityTask {
-	now := time.Now()
-	var expiredTasks []*UserActivityTask
-	activeTasks := make(map[uint64]*UserActivityTask, len(tasks))
-
-	for userID, task := range tasks {
-		if now.Sub(task.LastActiveTime) > userActivityIdleFlush || now.Sub(task.CreatedAt) > userActivityMaxDelay {
-			expiredTasks = append(expiredTasks, task)
-			continue
-		}
-		activeTasks[userID] = task
+func (store *userActivityStore) remember(userID uint64, activeTime time.Time) {
+	if userID == 0 {
+		return
 	}
-
-	if len(expiredTasks) > 0 {
-		m.flushTasks(expiredTasks)
+	if activeTime.IsZero() {
+		activeTime = time.Now()
 	}
-	return activeTasks
-}
-
-func (m *UserActivityManager) drain(tasks map[uint64]*UserActivityTask) {
-	for {
-		select {
-		case req := <-m.requestCh:
-			handleUserActivityRequest(tasks, req)
-		default:
+	store.init()
+	activity := userActivity{
+		LastActiveAt:  activeTime,
+		LastFlushedAt: activeTime,
+		Dirty:         true,
+	}
+	if item := store.cache.Get(userID); item != nil {
+		activity = item.Value()
+		if activity.LastActiveAt.After(activeTime) {
 			return
 		}
+		activity.LastActiveAt = activeTime
+		activity.Dirty = true
+		if shouldFlushUserActivity(activity) {
+			store.flush(userID, activity.LastActiveAt)
+			activity.LastFlushedAt = activity.LastActiveAt
+			activity.Dirty = false
+		}
 	}
+	store.cache.Set(userID, activity, userOnlineWindow)
 }
 
-// flushTasks writes activity tasks to storage.
-func (m *UserActivityManager) flushTasks(tasks []*UserActivityTask) {
-	if m.flushFn == nil {
+func (store *userActivityStore) get(userID uint64) (time.Time, bool) {
+	if userID == 0 {
+		return time.Time{}, false
+	}
+	store.init()
+	item := store.cache.Get(userID)
+	if item == nil {
+		return time.Time{}, false
+	}
+	return item.Value().LastActiveAt, true
+}
+
+func (store *userActivityStore) flush(userID uint64, activeTime time.Time) {
+	if userID == 0 || activeTime.IsZero() || store.flushFn == nil {
 		return
 	}
-	m.flushFn(tasks)
+	store.flushFn(userID, activeTime)
+	touchUserPublicProfileActivity(userID, activeTime)
 }
 
-func flushUserActivityTasks(tasks []*UserActivityTask) {
-	for _, task := range tasks {
-		userStatistics.UpdateUserActivity(task.UserID, task.LastActiveTime)
-	}
+func (store *userActivityStore) close() {
+	store.init()
+	store.cache.Range(func(item *ttlcache.Item[uint64, userActivity]) bool {
+		store.flushPending(item.Key(), item.Value())
+		return true
+	})
+	store.cache.Stop()
 }
 
-func mapValues(tasks map[uint64]*UserActivityTask) []*UserActivityTask {
-	values := make([]*UserActivityTask, 0, len(tasks))
-	for _, task := range tasks {
-		values = append(values, task)
-	}
-	return values
-}
-
-// Close stops the manager and flushes remaining activity updates.
-func (m *UserActivityManager) Close() {
-	m.mu.Lock()
-	if m.closed {
-		m.mu.Unlock()
+func (store *userActivityStore) flushPending(userID uint64, activity userActivity) {
+	if !activity.Dirty {
 		return
 	}
-	m.closed = true
+	store.flush(userID, activity.LastActiveAt)
+}
 
-	m.ticker.Stop()
-	close(m.closeCh)
-	m.mu.Unlock()
-
-	m.wg.Wait()
+func shouldFlushUserActivity(activity userActivity) bool {
+	return !activity.LastFlushedAt.IsZero() && activity.LastActiveAt.Sub(activity.LastFlushedAt) >= userOnlineWindow
 }
 
 // UpdateUserActivity queues a global user activity update.
 func UpdateUserActivity(userID uint64) {
-	if userID == 0 {
-		return
-	}
-	GetUserActivityManager().UpdateUserActivity(userID)
+	UpdateUserActivityAt(userID, time.Now())
 }
 
 func UpdateUserActivityAt(userID uint64, activeTime time.Time) {
-	if userID == 0 {
-		return
-	}
-	GetUserActivityManager().UpdateUserActivityAt(userID, activeTime)
+	rememberUserActivity(userID, activeTime)
 }
 
-// CloseUpdateUserLastActiveTime stops the global activity manager.
+// CloseUpdateUserLastActiveTime stops the global activity cache and flushes current activity.
 func CloseUpdateUserLastActiveTime() error {
-	if manager != nil {
-		manager.Close()
-	}
+	activityStore.close()
 	return nil
+}
+
+func rememberUserActivity(userID uint64, activeTime time.Time) {
+	activityStore.remember(userID, activeTime)
+}
+
+func recentUserActivity(userID uint64) (time.Time, bool) {
+	return activityStore.get(userID)
+}
+
+func flushUserActivity(userID uint64, activeTime time.Time) {
+	if rows := userStatistics.UpdateUserActivity(userID, activeTime); rows == 0 {
+		slog.Debug("user activity flush did not update a row", "userID", userID)
+	}
 }

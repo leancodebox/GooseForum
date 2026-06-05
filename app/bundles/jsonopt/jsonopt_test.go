@@ -2,12 +2,35 @@ package jsonopt
 
 import "testing"
 
+type jsonErrValue struct{}
+
+func (jsonErrValue) MarshalJSON() ([]byte, error) {
+	return nil, errJSONTest
+}
+
+var errJSONTest = &jsonTestError{}
+
+type jsonTestError struct{}
+
+func (jsonTestError) Error() string {
+	return "json test error"
+}
+
 func TestJsonEncode(t *testing.T) {
 	type tmp struct {
 		Name string
 	}
 	if got := Encode(tmp{Name: "name"}); got != `{"Name":"name"}` {
 		t.Fatalf("Encode() = %s", got)
+	}
+	if got := EncodeFormat(tmp{Name: "name"}); got != "{\n \"Name\": \"name\"\n}" {
+		t.Fatalf("EncodeFormat() = %s", got)
+	}
+	if _, err := EncodeE(jsonErrValue{}); err == nil {
+		t.Fatalf("expected EncodeE error")
+	}
+	if _, err := EncodeFormatE(jsonErrValue{}); err == nil {
+		t.Fatalf("expected EncodeFormatE error")
 	}
 }
 
@@ -17,6 +40,9 @@ func TestJsonDecode(t *testing.T) {
 	}
 	if got := Decode[tmp](`{"name":"name"}`); got.Name != "name" {
 		t.Fatalf("Decode().Name = %q", got.Name)
+	}
+	if _, err := DecodeE[tmp](`{"name":`); err == nil {
+		t.Fatalf("expected DecodeE error")
 	}
 	type Cat struct {
 		Id int `json:"id"`

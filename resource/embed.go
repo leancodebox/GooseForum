@@ -1,3 +1,4 @@
+// Package resource exposes embedded templates and static assets.
 package resource
 
 import (
@@ -11,6 +12,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
 
+// ThemeConfig describes the front-end resource bundle metadata.
 type ThemeConfig struct {
 	Name             string `json:"name"`
 	Description      string `json:"description"`
@@ -22,6 +24,7 @@ type ThemeConfig struct {
 //go:embed all:templates all:static
 var resources embed.FS
 
+// GetTemplateFS returns the template filesystem for the current environment.
 func GetTemplateFS() fs.FS {
 	if !setting.IsProduction() {
 		return os.DirFS(resourceDir())
@@ -29,6 +32,7 @@ func GetTemplateFS() fs.FS {
 	return resources
 }
 
+// GetAssetsFS returns the built asset filesystem for the current environment.
 func GetAssetsFS() (fs.FS, error) {
 	if !setting.IsProduction() {
 		return os.DirFS(filepath.Join(resourceDir(), "static", "dist")), nil
@@ -36,6 +40,7 @@ func GetAssetsFS() (fs.FS, error) {
 	return fs.Sub(resources, path.Join("static", "dist"))
 }
 
+// GetStaticFS returns the static asset filesystem for the current environment.
 func GetStaticFS() (fs.FS, error) {
 	if !setting.IsProduction() {
 		return os.DirFS(filepath.Join(resourceDir(), "static")), nil
@@ -61,6 +66,7 @@ func resourceDir() string {
 	}
 }
 
+// GetThemeConfig reads the theme metadata from the template filesystem.
 func GetThemeConfig() (*ThemeConfig, error) {
 	data, err := fs.ReadFile(GetTemplateFS(), "templates/goose.theme.json")
 	if err != nil {

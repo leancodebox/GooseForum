@@ -17,6 +17,7 @@ var (
 	validTime  = time.Duration(preferences.GetInt64("jwtopt.validTime", 86400*7)) * time.Second
 )
 
+// Std returns the process-wide JWT helper.
 func Std() *JWT {
 	once.Do(func() {
 		std = NewJWT([]byte(signingKey))
@@ -24,10 +25,12 @@ func Std() *JWT {
 	return std
 }
 
+// CreateNewTokenDefault creates an access token with the configured lifetime.
 func CreateNewTokenDefault(userId uint64) (string, error) {
 	return CreateNewToken(userId, validTime)
 }
 
+// CreateNewToken creates an access token with expireTime.
 func CreateNewToken(userId uint64, expireTime time.Duration) (string, error) {
 	cc := CustomClaims{
 		UserId:           userId,
@@ -36,7 +39,7 @@ func CreateNewToken(userId uint64, expireTime time.Duration) (string, error) {
 	return Std().CreateToken(cc)
 }
 
-// VerifyTokenWithFresh 验证token 并刷新， 如果token还有1天就过期则生成新的token，否则还是用原来的
+// VerifyTokenWithFresh verifies tokenStr and refreshes it when it is close to expiry.
 func VerifyTokenWithFresh(tokenStr string) (userId uint64, newToken string, err error) {
 	claims, err := Std().ParseToken(tokenStr)
 	if err != nil {
@@ -50,6 +53,7 @@ func VerifyTokenWithFresh(tokenStr string) (userId uint64, newToken string, err 
 	return claims.UserId, tokenStr, err
 }
 
+// VerifyToken verifies tokenStr and returns the user ID.
 func VerifyToken(tokenStr string) (userId uint64, err error) {
 	claims, err := Std().ParseToken(tokenStr)
 	if err != nil {
@@ -58,6 +62,7 @@ func VerifyToken(tokenStr string) (userId uint64, err error) {
 	return claims.UserId, err
 }
 
+// GetGinAccessToken returns the bearer token or access_token cookie from c.
 func GetGinAccessToken(c *gin.Context) string {
 	var token string
 	token = c.GetHeader("Authorization")
@@ -68,27 +73,29 @@ func GetGinAccessToken(c *gin.Context) string {
 	return token
 }
 
+// TokenSetting writes the refreshed token to headers and cookies.
 func TokenSetting(c *gin.Context, newToken string) {
 	c.Header("New-Token", newToken)
 	c.SetCookie(
 		"access_token",
 		newToken,
-		cast.ToInt(validTime/time.Second), // 24小时
+		cast.ToInt(validTime/time.Second),
 		"/",
-		"",    // 域名，为空表示当前域名
-		false, // 仅HTTPS
-		true,  // HttpOnly
+		"",
+		false,
+		true,
 	)
 }
 
+// TokenClean expires the access_token cookie.
 func TokenClean(c *gin.Context) {
 	c.SetCookie(
 		"access_token",
 		"",
-		-1, // 过期
+		-1,
 		"/",
-		"",    // 域名，为空表示当前域名
-		false, // 仅HTTPS
-		true,  // HttpOnly
+		"",
+		false,
+		true,
 	)
 }

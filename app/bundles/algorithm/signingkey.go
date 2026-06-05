@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// GenerateRandomBytes returns n cryptographically secure random bytes.
 func GenerateRandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
@@ -17,6 +18,7 @@ func GenerateRandomBytes(n int) ([]byte, error) {
 	return b, nil
 }
 
+// GenerateSigningKey returns a URL-safe base64 signing key with no padding.
 func GenerateSigningKey(keyLength int) (string, error) {
 	bytes, err := GenerateRandomBytes(keyLength)
 	if err != nil {
@@ -25,6 +27,7 @@ func GenerateSigningKey(keyLength int) (string, error) {
 	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(bytes), nil
 }
 
+// SafeGenerateSigningKey returns a signing key, falling back to math/rand on crypto errors.
 func SafeGenerateSigningKey(keyLength int) string {
 	signingKey, err := GenerateSigningKey(keyLength)
 	if err != nil {

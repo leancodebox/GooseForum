@@ -120,8 +120,15 @@ func InitEventBus() {
 	})
 }
 
-// Publish 发布事件
-func Publish(ctx context.Context, event any) error {
+// Publish 发布事件，并在失败时记录日志。
+func Publish(ctx context.Context, event any) {
+	if err := PublishE(ctx, event); err != nil {
+		slog.Error("eventbus: publish failed", "err", err, "event", fmt.Sprintf("%T", event))
+	}
+}
+
+// PublishE 发布事件，并把发布错误返回给调用方。
+func PublishE(ctx context.Context, event any) error {
 	if eventBus == nil {
 		return errors.New("event bus not initialized")
 	}

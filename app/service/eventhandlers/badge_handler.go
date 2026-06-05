@@ -5,7 +5,7 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill/components/cqrs"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
-	"github.com/leancodebox/GooseForum/app/service/usercardservice"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
 func NewBadgePostHandler() cqrs.EventHandler {
@@ -22,7 +22,7 @@ func checkAndInvalidateUserBadges(userID uint64, trigger badgeservice.Trigger) {
 	before := len(badgeservice.GetUserBadges(userID))
 	badgeservice.CheckAndGrant(userID, trigger)
 	if len(badgeservice.GetUserBadges(userID)) != before {
-		usercardservice.Invalidate(userID)
+		userservice.InvalidateUserPublicProfileCache(userID)
 	}
 }
 

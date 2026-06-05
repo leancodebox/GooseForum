@@ -1,3 +1,4 @@
+// Package validate wraps go-playground/validator with Chinese translations.
 package validate
 
 import (
@@ -26,10 +27,12 @@ func init() {
 	}
 }
 
+// Valid validates params using struct tags from go-playground/validator.
 func Valid(params any) error {
 	return validate.Struct(params)
 }
 
+// FormatError returns translated text for validator validation errors.
 func FormatError(err error) string {
 	var msg bytes.Buffer
 	for _, errItem := range err.(validator.ValidationErrors) {

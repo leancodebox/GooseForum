@@ -1,6 +1,7 @@
 package queryopt
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/glebarez/sqlite"
@@ -10,6 +11,69 @@ import (
 type testTask struct {
 	ID     uint64 `gorm:"primaryKey"`
 	Status uint8
+}
+
+func TestComparisonFragments(t *testing.T) {
+	tests := []struct {
+		name      string
+		gotQuery  string
+		gotValue  any
+		wantQuery string
+		wantValue any
+	}{
+		{name: "gt", gotQuery: first(Gt("score", 10)), gotValue: second(Gt("score", 10)), wantQuery: "score > ?", wantValue: 10},
+		{name: "ge", gotQuery: first(Ge("score", 10)), gotValue: second(Ge("score", 10)), wantQuery: "score >= ?", wantValue: 10},
+		{name: "lt", gotQuery: first(Lt("score", 10)), gotValue: second(Lt("score", 10)), wantQuery: "score < ?", wantValue: 10},
+		{name: "le", gotQuery: first(Le("score", 10)), gotValue: second(Le("score", 10)), wantQuery: "score <= ?", wantValue: 10},
+		{name: "eq", gotQuery: first(Eq("score", 10)), gotValue: second(Eq("score", 10)), wantQuery: "score = ?", wantValue: 10},
+		{name: "ne", gotQuery: first(Ne("score", 10)), gotValue: second(Ne("score", 10)), wantQuery: "score <> ?", wantValue: 10},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.gotQuery != tt.wantQuery {
+				t.Fatalf("query = %q, want %q", tt.gotQuery, tt.wantQuery)
+			}
+			if !reflect.DeepEqual(tt.gotValue, tt.wantValue) {
+				t.Fatalf("value = %#v, want %#v", tt.gotValue, tt.wantValue)
+			}
+		})
+	}
+}
+
+func TestLikeAndOrderFragments(t *testing.T) {
+	if query, value := Like("title", "goose"); query != "title like ?" || value != "%goose%" {
+		t.Fatalf("Like = (%q, %q)", query, value)
+	}
+	if query, value := LeftLike("title", "goose"); query != "title like ?" || value != "%goose" {
+		t.Fatalf("LeftLike = (%q, %q)", query, value)
+	}
+	if query, value := RightLike("title", "goose"); query != "title like ?" || value != "goose%" {
+		t.Fatalf("RightLike = (%q, %q)", query, value)
+	}
+	if got := Desc("created_at"); got != "created_at desc" {
+		t.Fatalf("Desc = %q", got)
+	}
+	if got := Asc("created_at"); got != "created_at asc" {
+		t.Fatalf("Asc = %q", got)
+	}
+}
+
+func TestNullFragments(t *testing.T) {
+	if got := IsNull("deleted_at"); got != "deleted_at IS NULL" {
+		t.Fatalf("IsNull = %q", got)
+	}
+	if got := IsNotNull("deleted_at"); got != "deleted_at IS NOT NULL" {
+		t.Fatalf("IsNotNull = %q", got)
+	}
+}
+
+func first(query string, _ any) string {
+	return query
+}
+
+func second(_ string, value any) any {
+	return value
 }
 
 func TestInWithIntSlice(t *testing.T) {

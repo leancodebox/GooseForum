@@ -1,14 +1,12 @@
+// Package transform maps model entities to API/view payload structs.
 package transform
 
 import (
-	"time"
-
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
-	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 )
 
+// User2userShow maps a user entity to the authenticated user summary payload.
 func User2userShow(user users.EntityComplete) *vo.UserInfoShow {
 	return &vo.UserInfoShow{
 		UserId:              user.Id,
@@ -26,58 +24,7 @@ func User2userShow(user users.EntityComplete) *vo.UserInfoShow {
 	}
 }
 
-func User2UserCard(user users.EntityComplete, stats userStatistics.Entity, isFollowing bool, currentUserId uint64) *vo.UserCard {
-	return &vo.UserCard{
-		UserId:            user.Id,
-		Username:          user.Username,
-		Nickname:          user.Nickname,
-		AvatarUrl:         user.GetWebAvatarUrl(),
-		Bio:               user.Bio,
-		Signature:         user.Signature,
-		WebsiteName:       user.WebsiteName,
-		Website:           user.Website,
-		ExternalInfo:      user.ExternalInformation,
-		IsAdmin:           user.RoleId > 0,
-		ArticleCount:      stats.ArticleCount,
-		ReplyCount:        stats.ReplyCount,
-		LikeReceivedCount: stats.LikeReceivedCount,
-		LikeGivenCount:    stats.LikeGivenCount,
-		FollowerCount:     stats.FollowerCount,
-		FollowingCount:    stats.FollowingCount,
-		CollectionCount:   stats.CollectionCount,
-		IsOnline:          time.Since(stats.LastActiveTime) < 120*time.Second,
-		IsFollowing:       isFollowing,
-		IsSelf:            currentUserId == user.Id,
-		Badges:            badgeservice.GetUserBadges(user.Id),
-		LastActiveTime:    stats.LastActiveTime,
-		CreatedAt:         user.CreatedAt,
-	}
-}
-
-func User2UserHoverCard(user users.EntityComplete, stats userStatistics.Entity, isFollowing bool) *vo.UserHoverCard {
-	return &vo.UserHoverCard{
-		UserId:            user.Id,
-		Username:          user.Username,
-		Nickname:          user.Nickname,
-		AvatarUrl:         user.GetWebAvatarUrl(),
-		Bio:               user.Bio,
-		Signature:         user.Signature,
-		WebsiteName:       user.WebsiteName,
-		Website:           user.Website,
-		ExternalInfo:      user.ExternalInformation,
-		IsAdmin:           user.RoleId > 0,
-		ArticleCount:      stats.ArticleCount,
-		ReplyCount:        stats.ReplyCount,
-		LikeReceivedCount: stats.LikeReceivedCount,
-		FollowerCount:     stats.FollowerCount,
-		IsOnline:          time.Since(stats.LastActiveTime) < 120*time.Second,
-		IsFollowing:       isFollowing,
-		Badges:            badgeservice.GetUserBadges(user.Id),
-		LastActiveTime:    stats.LastActiveTime,
-		CreatedAt:         user.CreatedAt,
-	}
-}
-
+// User2UserDetailedVo maps a user entity to the detailed profile payload.
 func User2UserDetailedVo(user users.EntityComplete) *vo.UserDetailedVo {
 	return &vo.UserDetailedVo{
 		Id:                  user.Id,

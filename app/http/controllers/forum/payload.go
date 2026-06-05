@@ -33,6 +33,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
 )
 
@@ -1105,16 +1106,20 @@ func parsePayloadTime(value string) time.Time {
 
 func buildUserProfileProps(c *gin.Context, user users.EntityComplete) UserProfileProps {
 	currentUserID := component.LoginUserId(c)
-	stats := userStatistics.Get(user.Id)
 	isFollowing := userFollow.IsFollowing(currentUserID, user.Id)
-	userCard := transform.User2UserCard(user, stats, isFollowing, currentUserID)
+	userCard, ok := userservice.GetUserCard(user.Id)
+	if !ok {
+		userCard = &vo.UserCard{}
+	}
+	userCard.IsFollowing = isFollowing
+	userCard.IsSelf = currentUserID == user.Id
 
 	latestArticles, _ := articles.GetLatestArticlesByUserId(user.Id, 8)
 	activities, _ := userActivities.GetUserTimeline(user.Id, 0, 20)
 
 	return UserProfileProps{
 		User:         userCard,
-		Badges:       badgeservice.GetUserBadges(user.Id),
+		Badges:       userCard.Badges,
 		Topics:       buildTopicPayloads(hotdataserve.ArticlesSmallEntity2Vo(latestArticles)),
 		Activities:   buildUserActivities(activities),
 		Following:    buildUserConnections(userFollow.GetFollowingList(user.Id, 1, 12)),
