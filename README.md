@@ -251,7 +251,6 @@ MIT License - see [LICENSE](LICENSE)
 - [Configuration Documentation](docs/user/configuration.md)
 - [Resource Frontend Design](docs/architecture/resource-frontend.md)
 - [Resource UI Specification](docs/frontend/ui-spec.md)
-- [Article Pinning Design](docs/features/article-pinning.md)
 - [Chinese README](README_ZH.md)
 
 ## 🙏 Acknowledgments

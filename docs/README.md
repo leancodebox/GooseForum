@@ -10,12 +10,3 @@
 
 - [Resource 前端架构](architecture/resource-frontend.md)：`resource/` 前端结构、渲染模型和 payload 约定。
 - [Resource UI 规范](frontend/ui-spec.md)：前端 UI 规则、布局约束和组件风格。
-
-## 功能设计
-
-- [文章置顶方案](features/article-pinning.md)：文章置顶的数据模型、接口和 UI 设计。
-- [头像尺寸设计](features/avatar-size-design.md)：头像多尺寸处理方案。
-
-## 提交与发布
-
-- [Awesome Go 提交准备](submissions/awesome-go.md)：提交 awesome-go 前的检查项和材料。

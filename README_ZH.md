@@ -266,7 +266,6 @@ CMD ["./GooseForum", "serve"]
 - [配置文档](docs/user/configuration.md) - 详细的配置选项说明
 - [Resource 前端设计](docs/architecture/resource-frontend.md)
 - [Resource UI 规范](docs/frontend/ui-spec.md)
-- [文章置顶方案](docs/features/article-pinning.md)
 - [English README](README.md)
 
 ## 🙏 致谢

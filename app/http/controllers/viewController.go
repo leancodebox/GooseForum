@@ -105,7 +105,7 @@ func Register(c *gin.Context) {
 		WriteArticles(component.BetterRequest[WriteArticleReq]{
 			Params: WriteArticleReq{
 				Id:            0,
-				Content:       userservice.GetInitBlog(),
+				Content:       userservice.GetWelcomeArticleContent(),
 				Title:         "Hi With GooseForum",
 				Type:          1,
 				CategoryId:    []uint64{1},
