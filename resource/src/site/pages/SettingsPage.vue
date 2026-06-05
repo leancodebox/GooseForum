@@ -380,13 +380,13 @@ async function toggleBinding(provider: string) {
 <template>
     <main class="min-w-0 pb-12">
       <section class="mb-4 overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div class="h-32 border-b border-gray-100 bg-gray-100 bg-cover bg-center sm:h-36" :style="profileCoverStyle" />
+        <div class="h-20 border-b border-gray-100 bg-gray-100 bg-cover bg-center sm:h-24" :style="profileCoverStyle" />
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex min-w-0 gap-4">
               <button
                 type="button"
-                class="group relative -mt-12 h-20 w-20 shrink-0 rounded-lg border-4 border-white bg-white shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-blue-100 sm:-mt-14 sm:h-24 sm:w-24"
+                class="group relative -mt-9 h-24 w-24 shrink-0 rounded-lg border-4 border-white bg-white shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-blue-100 sm:-mt-10 sm:h-28 sm:w-28"
                 :disabled="uploadingAvatar"
                 :aria-label="t('settings.avatar.upload')"
                 @click="chooseAvatar"

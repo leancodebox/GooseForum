@@ -124,7 +124,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
 <template>
     <article class="pb-12">
       <section class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div class="h-32 border-b border-gray-100 bg-gray-100 bg-cover bg-center sm:h-36" :style="profileCoverStyle" />
+        <div class="h-20 border-b border-gray-100 bg-gray-100 bg-cover bg-center sm:h-24" :style="profileCoverStyle" />
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex min-w-0 gap-4">
@@ -132,7 +132,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
                 :src="page.props.user.avatarUrl"
                 :alt="page.props.user.username"
                 size="large"
-                class="-mt-12 h-20 w-20 rounded-lg border-4 border-white bg-white object-cover shadow-sm sm:-mt-14 sm:h-24 sm:w-24"
+                class="-mt-9 h-24 w-24 rounded-lg border-4 border-white bg-white object-cover shadow-sm sm:-mt-10 sm:h-28 sm:w-28"
               />
               <div class="min-w-0 pt-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
