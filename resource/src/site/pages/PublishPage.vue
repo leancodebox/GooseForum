@@ -74,8 +74,8 @@ function syncSavedSnapshot() {
   savedSnapshot.value = editorSnapshot()
 }
 
-function typeLabel(item: { name: string, label?: string }) {
-  return item.label ? t(item.label) : item.name
+function typeLabel(item: { name: string }) {
+  return t(`publish.types.${item.name}`)
 }
 
 function toggleCategory(id: number) {
