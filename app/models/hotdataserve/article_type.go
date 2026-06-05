@@ -7,8 +7,8 @@ import (
 )
 
 var articlesType = []datastruct.Option[string, int]{
-	{Name: "分享", Value: int(articles.Share)},
-	{Name: "求助", Value: int(articles.Help)},
+	{Name: "Share", Label: "publish.types.share", Value: int(articles.Share)},
+	{Name: "Help", Label: "publish.types.help", Value: int(articles.Help)},
 }
 
 var articlesTypeMap = lo.KeyBy(articlesType, func(v datastruct.Option[string, int]) int {

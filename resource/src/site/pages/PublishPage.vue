@@ -74,6 +74,10 @@ function syncSavedSnapshot() {
   savedSnapshot.value = editorSnapshot()
 }
 
+function typeLabel(item: { name: string, label?: string }) {
+  return item.label ? t(item.label) : item.name
+}
+
 function toggleCategory(id: number) {
   if (categoryIds.value.includes(id)) {
     categoryIds.value = categoryIds.value.filter((item) => item !== id)
@@ -326,7 +330,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                   :class="type === item.value ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'"
                   @click="type = item.value"
                 >
-                  {{ item.name }}
+                  {{ typeLabel(item) }}
                 </button>
               </div>
             </div>

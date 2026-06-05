@@ -408,6 +408,10 @@ export default {
       category: 'カテゴリ',
       body: '本文',
     },
+    types: {
+      share: '共有',
+      help: '質問',
+    },
     toolbar: {
       bold: '太字',
       italic: '斜体',

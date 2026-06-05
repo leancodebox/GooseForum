@@ -553,6 +553,7 @@ export interface PublishCategoryPayload {
 
 export interface PublishTypePayload {
   name: string
+  label?: string
   value: number
 }
 

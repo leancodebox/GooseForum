@@ -408,6 +408,10 @@ export default {
       category: '分类',
       body: '正文',
     },
+    types: {
+      share: '分享',
+      help: '求助',
+    },
     toolbar: {
       bold: '加粗',
       italic: '斜体',

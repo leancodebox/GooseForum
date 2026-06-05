@@ -489,6 +489,7 @@ type PublishCategoryPayload struct {
 
 type PublishTypePayload struct {
 	Name  string `json:"name"`
+	Label string `json:"label,omitempty"`
 	Value int    `json:"value"`
 }
 
@@ -1631,7 +1632,7 @@ func buildPublishTypes() []PublishTypePayload {
 	items := hotdataserve.GetArticlesType()
 	res := make([]PublishTypePayload, 0, len(*items))
 	for _, item := range *items {
-		res = append(res, PublishTypePayload{Name: item.Name, Value: item.Value})
+		res = append(res, PublishTypePayload{Name: item.Name, Label: item.Label, Value: item.Value})
 	}
 	return res
 }

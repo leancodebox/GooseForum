@@ -408,6 +408,10 @@ export default {
       category: 'Category',
       body: 'Body',
     },
+    types: {
+      share: 'Share',
+      help: 'Help',
+    },
     toolbar: {
       bold: 'Bold',
       italic: 'Italic',
