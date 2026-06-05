@@ -49,7 +49,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	}
 
 	// 统一权限检查
-	if _, err := component.CheckUserPermission(&userEntity, "发帖"); err != nil {
+	if _, err := component.CheckUserPermission(&userEntity, component.PermissionActionPost); err != nil {
 		return component.FailResponseError(err)
 	}
 
@@ -211,7 +211,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	}
 
 	// 统一权限检查
-	if _, err := component.CheckUserPermission(&userEntity, "评论"); err != nil {
+	if _, err := component.CheckUserPermission(&userEntity, component.PermissionActionComment); err != nil {
 		return component.FailResponseError(err)
 	}
 

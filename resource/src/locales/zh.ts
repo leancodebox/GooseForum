@@ -778,6 +778,35 @@ export default {
       },
     },
   },
+  adminOptLog: {
+    optType: {
+      editUser: '操作用户',
+      editArticle: '编辑文章',
+    },
+    targetType: {
+      system: '系统',
+      user: '用户',
+      article: '文章',
+      docProject: '文档项目',
+      docVersion: '文档版本',
+      docContent: '文档内容',
+    },
+    messages: {
+      userUpdated: '更新用户 {userId}：{changedFields}',
+      articleStatusChanged: '文章「{title}」状态调整为{status}',
+      articlePinWeightChanged: '文章「{title}」置顶权重 {oldPinWeight} -> {pinWeight}',
+      articleCategoriesChanged: '文章「{title}」分类 {oldCategoryIds} -> {categoryIds}',
+    },
+    status: {
+      blocked: '封禁',
+      unblocked: '正常',
+    },
+    userField: {
+      status: '账号状态',
+      activation: '验证状态',
+      role: '角色',
+    },
+  },
   serverMessages: {
     'page.notFound': '页面不存在，或已经被删除。',
     'route.notFound': '路由未定义，请确认 URL 和请求方法是否正确。',

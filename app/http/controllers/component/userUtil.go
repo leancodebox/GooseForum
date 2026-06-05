@@ -17,10 +17,18 @@ var (
 	usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{6,32}$`)
 )
 
-var permissionActionCodes = map[string]string{
-	"上传附件": "uploadAttachment",
-	"发帖":   "post",
-	"评论":   "comment",
+type PermissionAction string
+
+const (
+	PermissionActionUploadAttachment PermissionAction = "uploadAttachment"
+	PermissionActionPost             PermissionAction = "post"
+	PermissionActionComment          PermissionAction = "comment"
+)
+
+var permissionActionFallbacks = map[PermissionAction]string{
+	PermissionActionUploadAttachment: "上传附件",
+	PermissionActionPost:             "发帖",
+	PermissionActionComment:          "评论",
 }
 
 func ValidateUsername(username string) bool {
@@ -69,17 +77,19 @@ func GetUserShowByUserId(userId uint64) *vo.UserInfoShow {
 }
 
 // CheckUserPermission 统一检查用户操作权限（封禁状态、邮箱验证等）
-func CheckUserPermission(userEntity *users.EntityComplete, action string) (int, error) {
+func CheckUserPermission(userEntity *users.EntityComplete, action PermissionAction) (int, error) {
 	if userEntity == nil || userEntity.Id == 0 {
 		return 401, NewMessageError(MessageAuthRequired, "用户不存在或未登录", nil)
 	}
+
+	actionText := permissionActionFallback(action)
 
 	// 1. 检查用户是否被冻结
 	if userEntity.IsFrozen == users.StatusFrozen {
 		return 403, NewMessageError(
 			MessagePermissionUserFrozen,
-			fmt.Sprintf("您的账号已被封禁，无法进行%s操作", action),
-			permissionActionParams(action),
+			fmt.Sprintf("您的账号已被封禁，无法进行%s操作", actionText),
+			permissionActionParams(action, actionText),
 		)
 	}
 
@@ -88,20 +98,26 @@ func CheckUserPermission(userEntity *users.EntityComplete, action string) (int, 
 	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
 		return 403, NewMessageError(
 			MessagePermissionEmailRequired,
-			fmt.Sprintf("请先完成邮箱验证后再进行%s操作", action),
-			permissionActionParams(action),
+			fmt.Sprintf("请先完成邮箱验证后再进行%s操作", actionText),
+			permissionActionParams(action, actionText),
 		)
 	}
 
 	return 200, nil
 }
 
-func permissionActionParams(action string) MessageParams {
-	params := MessageParams{"action": action}
-	if actionCode, ok := permissionActionCodes[action]; ok {
-		params["actionCode"] = actionCode
+func permissionActionFallback(action PermissionAction) string {
+	if text, ok := permissionActionFallbacks[action]; ok {
+		return text
 	}
-	return params
+	return string(action)
+}
+
+func permissionActionParams(action PermissionAction, fallback string) MessageParams {
+	return MessageParams{
+		"action":     fallback,
+		"actionCode": string(action),
+	}
 }
 
 // ValidateEmailDomain 验证邮箱域名是否符合白名单限制

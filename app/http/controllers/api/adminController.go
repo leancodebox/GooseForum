@@ -354,19 +354,22 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 		return component.FailResponseCode(component.MessageAdminTargetUserFetchFailed, nil)
 	}
 	opt := false
-	msg := "用户编辑"
+	changes := make([]string, 0, 3)
+	oldFrozen := user.IsFrozen
+	oldActivated := user.IsActivated
+	oldRoleID := user.RoleId
 	if user.IsFrozen != params.Status {
-		msg = msg + fmt.Sprintf("[用户状态调整:%v->%v]", user.IsFrozen, params.Status)
+		changes = append(changes, "status")
 		user.IsFrozen = params.Status
 		opt = true
 	}
 	if user.IsActivated != params.Validate {
-		msg = msg + fmt.Sprintf("[用户验证状态:%v->%v]", user.IsActivated, params.Validate)
+		changes = append(changes, "activation")
 		user.IsActivated = params.Validate
 		opt = true
 	}
 	if user.RoleId != params.RoleId {
-		msg = msg + fmt.Sprintf("[用户角色调整:%v->%v]", user.RoleId, params.RoleId)
+		changes = append(changes, "role")
 		user.RoleId = params.RoleId
 		opt = true
 	}
@@ -374,7 +377,17 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 		if err := userservice.SaveUser(&user); err != nil {
 			return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
 		}
-		optlogger.UserOpt(req.UserId, optlogger.EditUser, user.Id, msg)
+		optlogger.UserOptCode(req.UserId, optlogger.EditUser, user.Id, "admin.opt.user.updated", optlogger.MessageParams{
+			"userId":        user.Id,
+			"changes":       changes,
+			"oldFrozen":     oldFrozen,
+			"newFrozen":     user.IsFrozen,
+			"oldActivated":  oldActivated,
+			"newActivated":  user.IsActivated,
+			"oldRoleId":     oldRoleID,
+			"newRoleId":     user.RoleId,
+			"changedFields": strings.Join(changes, ", "),
+		})
 	}
 	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
@@ -526,12 +539,14 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 	}
 
 	// 记录操作日志
-	status := "解除封禁"
+	statusCode := "unblocked"
 	if req.Params.ProcessStatus == 1 {
-		status = "封禁"
+		statusCode = "blocked"
 	}
-	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
-		fmt.Sprintf("文章%s操作:[%s]", status, article.Title))
+	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, article.Id, "admin.opt.article.statusChanged", optlogger.MessageParams{
+		"title":  article.Title,
+		"status": statusCode,
+	})
 	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
 		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
 	}
@@ -551,8 +566,11 @@ func EditArticlePin(req component.BetterRequest[EditArticlePinReq]) component.Re
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	hotdataserve.ClearArticleListCache()
-	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
-		fmt.Sprintf("文章置顶权重调整:[%s] %d -> %d", article.Title, oldPinWeight, req.Params.PinWeight))
+	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, article.Id, "admin.opt.article.pinWeightChanged", optlogger.MessageParams{
+		"title":        article.Title,
+		"oldPinWeight": oldPinWeight,
+		"pinWeight":    req.Params.PinWeight,
+	})
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
@@ -583,8 +601,11 @@ func EditArticleCategories(req component.BetterRequest[EditArticleCategoriesReq]
 	}
 
 	syncArticleCategoryRelations(article.Id, categoryIds)
-	optlogger.UserOpt(req.UserId, optlogger.EditArticle, article.Id,
-		fmt.Sprintf("文章分类调整:[%s] %v -> %v", article.Title, oldCategoryIds, categoryIds))
+	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, article.Id, "admin.opt.article.categoriesChanged", optlogger.MessageParams{
+		"title":          article.Title,
+		"oldCategoryIds": oldCategoryIds,
+		"categoryIds":    categoryIds,
+	})
 	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
 		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
 	}

@@ -778,6 +778,35 @@ export default {
       },
     },
   },
+  adminOptLog: {
+    optType: {
+      editUser: 'User operation',
+      editArticle: 'Edit post',
+    },
+    targetType: {
+      system: 'System',
+      user: 'User',
+      article: 'Post',
+      docProject: 'Document project',
+      docVersion: 'Document version',
+      docContent: 'Document content',
+    },
+    messages: {
+      userUpdated: 'Updated user {userId}: {changedFields}',
+      articleStatusChanged: 'Post "{title}" status changed to {status}',
+      articlePinWeightChanged: 'Post "{title}" pin weight {oldPinWeight} -> {pinWeight}',
+      articleCategoriesChanged: 'Post "{title}" categories {oldCategoryIds} -> {categoryIds}',
+    },
+    status: {
+      blocked: 'blocked',
+      unblocked: 'normal',
+    },
+    userField: {
+      status: 'account status',
+      activation: 'activation status',
+      role: 'role',
+    },
+  },
   serverMessages: {
     'page.notFound': 'ページが存在しないか、削除されています。',
     'route.notFound': 'ルートが見つかりません。URL とリクエストメソッドを確認してください。',

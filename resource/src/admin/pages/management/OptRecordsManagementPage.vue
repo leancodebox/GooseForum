@@ -2,6 +2,7 @@
 
 import { onMounted, ref } from 'vue'
 import { RefreshCw } from '@lucide/vue'
+import { i18n } from '@/runtime/i18n'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Badge } from '@/admin/components/ui/badge'
 import { Button } from '@/admin/components/ui/button'
@@ -22,18 +23,25 @@ const total = ref(0)
 
 const columns = ['ID', adminText('k0036'), adminText('k0037'), adminText('k0038'), adminText('k0039'), adminText('k003a'), adminText('k003b')]
 
-const optTypeMap: Record<number, string> = {
-  0: adminText('k003c'),
-  1: adminText('k003d'),
+const optTypeCodeMap: Record<number, string> = {
+  0: 'editUser',
+  1: 'editArticle',
 }
 
-const targetTypeMap: Record<number, string> = {
-  0: adminText('k003e'),
-  1: adminText('k003f'),
-  2: adminText('k003g'),
-  3: adminText('k003h'),
-  4: adminText('k003i'),
-  5: adminText('k003j'),
+const targetTypeCodeMap: Record<number, string> = {
+  0: 'system',
+  1: 'user',
+  2: 'article',
+  3: 'docProject',
+  4: 'docVersion',
+  5: 'docContent',
+}
+
+const optInfoMessageKeyMap: Record<string, string> = {
+  'admin.opt.user.updated': 'adminOptLog.messages.userUpdated',
+  'admin.opt.article.statusChanged': 'adminOptLog.messages.articleStatusChanged',
+  'admin.opt.article.pinWeightChanged': 'adminOptLog.messages.articlePinWeightChanged',
+  'admin.opt.article.categoriesChanged': 'adminOptLog.messages.articleCategoriesChanged',
 }
 
 function pageResultSize(result: { pageSize?: number, size?: number }) {
@@ -68,11 +76,72 @@ function updatePageSize(value: number) {
 }
 
 function optTypeName(value: number) {
-  return optTypeMap[value] || adminText('k00aj', { value })
+  const code = optTypeCodeMap[value]
+  const key = code ? `adminOptLog.optType.${code}` : ''
+  return key && i18n.global.te(key) ? i18n.global.t(key) : adminText('k00aj', { value })
 }
 
 function targetTypeName(value: number) {
-  return targetTypeMap[value] || adminText('k00ak', { value })
+  const code = targetTypeCodeMap[value]
+  const key = code ? `adminOptLog.targetType.${code}` : ''
+  return key && i18n.global.te(key) ? i18n.global.t(key) : adminText('k00ak', { value })
+}
+
+function normalizeParam(value: unknown) {
+  if (Array.isArray(value)) return value.join(', ')
+  if (value === undefined || value === null) return ''
+  return String(value)
+}
+
+function localizeOptParams(params: Record<string, unknown>) {
+  const next: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(params)) {
+    next[key] = normalizeParam(value)
+  }
+
+  const status = typeof params.status === 'string' ? params.status : ''
+  if (status) {
+    const statusKey = `adminOptLog.status.${status}`
+    next.status = i18n.global.te(statusKey) ? i18n.global.t(statusKey) : status
+  }
+
+  const changedFields = Array.isArray(params.changes)
+    ? params.changes
+      .map((item) => {
+        const field = String(item)
+        const fieldKey = `adminOptLog.userField.${field}`
+        return i18n.global.te(fieldKey) ? i18n.global.t(fieldKey) : field
+      })
+      .join(', ')
+    : ''
+  if (changedFields) next.changedFields = changedFields
+
+  return next
+}
+
+function tryParseOptInfo(value: string) {
+  if (!value || value[0] !== '{') return undefined
+  try {
+    const parsed = JSON.parse(value) as { messageCode?: unknown, params?: unknown }
+    if (typeof parsed.messageCode !== 'string') return undefined
+    return {
+      messageCode: parsed.messageCode,
+      params: parsed.params && typeof parsed.params === 'object' && !Array.isArray(parsed.params)
+        ? parsed.params as Record<string, unknown>
+        : {},
+    }
+  } catch {
+    return undefined
+  }
+}
+
+function optInfoText(item: AdminOptRecord) {
+  const payload = item.optInfoPayload || tryParseOptInfo(item.optInfo)
+  if (!payload?.messageCode) return item.optInfo || '-'
+
+  const key = optInfoMessageKeyMap[payload.messageCode]
+  if (!i18n.global.te(key)) return item.optInfo || payload.messageCode
+  return i18n.global.t(key, localizeOptParams(payload.params || {}))
 }
 
 function formatTime(value: string) {
@@ -118,7 +187,7 @@ onMounted(loadRecords)
           <td class="px-4 py-3 text-muted-foreground">{{ targetTypeName(item.targetType) }}</td>
           <td class="px-4 py-3 font-mono text-xs text-muted-foreground">{{ item.targetId || '-' }}</td>
           <td class="max-w-xl px-4 py-3">
-            <div class="line-clamp-2 text-foreground">{{ item.optInfo || '-' }}</div>
+            <div class="line-clamp-2 text-foreground">{{ optInfoText(item) }}</div>
           </td>
           <td class="whitespace-nowrap px-4 py-3 text-muted-foreground">{{ formatTime(item.createdAt) }}</td>
         </tr>

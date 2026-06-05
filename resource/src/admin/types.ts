@@ -107,6 +107,10 @@ export interface AdminOptRecord {
   targetType: number
   targetId: string
   optInfo: string
+  optInfoPayload?: {
+    messageCode?: string
+    params?: Record<string, unknown>
+  }
   createdAt: string
 }
 

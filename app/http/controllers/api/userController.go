@@ -222,7 +222,7 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	if code, err := component.CheckUserPermission(&userEntity, "上传附件"); err != nil {
+	if code, err := component.CheckUserPermission(&userEntity, component.PermissionActionUploadAttachment); err != nil {
 		c.JSON(code, component.FailDataError(err))
 		return
 	}
