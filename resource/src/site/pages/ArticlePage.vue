@@ -58,6 +58,35 @@ const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const showFloatingReply = ref(false)
 const floatingReplyExpanded = ref(false)
+const floatingArticleActions = computed(() => [
+  {
+    key: 'like',
+    icon: Heart,
+    active: isLiked.value,
+    acting: actingLike.value,
+    title: t('article.like'),
+    activeClass: 'bg-red-50 text-red-600 hover:bg-red-100',
+    onClick: toggleLike,
+  },
+  {
+    key: 'bookmark',
+    icon: Bookmark,
+    active: isBookmarked.value,
+    acting: actingBookmark.value,
+    title: isBookmarked.value ? t('article.bookmarked') : t('article.bookmark'),
+    activeClass: 'bg-blue-50 text-blue-700 hover:bg-blue-100',
+    onClick: toggleBookmark,
+  },
+  {
+    key: 'watch',
+    icon: Bell,
+    active: isWatched.value,
+    acting: actingWatch.value,
+    title: isWatched.value ? t('article.watched') : t('article.watch'),
+    activeClass: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
+    onClick: toggleWatch,
+  },
+])
 const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
 let replyEditorObserver: IntersectionObserver | undefined
@@ -916,15 +945,33 @@ async function removeReply(replyId: number) {
     <Teleport v-if="page.props.permissions.canReply && showFloatingReply" to="body">
       <div class="pointer-events-none fixed inset-x-0 bottom-4 z-[80] px-3 sm:px-6">
         <Transition name="floating-reply" mode="out-in">
-          <button
+          <div
             v-if="!floatingReplyExpanded"
-            type="button"
-            class="pointer-events-auto mx-auto flex h-10 items-center gap-2 rounded-full border border-gray-200/80 bg-white/95 px-4 text-sm font-semibold text-gray-700 shadow-[0_14px_34px_-22px_rgba(15,23,42,0.55),0_4px_14px_-10px_rgba(15,23,42,0.35)] backdrop-blur transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-            @click="openFloatingReply"
+            class="pointer-events-auto mx-auto flex w-fit max-w-full items-center gap-1 rounded-full border border-gray-200/80 bg-white/95 p-1 shadow-[0_14px_34px_-22px_rgba(15,23,42,0.55),0_4px_14px_-10px_rgba(15,23,42,0.35)] backdrop-blur"
           >
-            <MessageSquare class="h-4 w-4" />
-            {{ t('article.joinDiscussion') }}
-          </button>
+            <button
+              v-for="action in floatingArticleActions"
+              :key="action.key"
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+              :class="action.active ? action.activeClass : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+              :disabled="action.acting"
+              :title="action.title"
+              @click="action.onClick"
+            >
+              <Loader2 v-if="action.acting" class="h-4 w-4 animate-spin" />
+              <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active ? 'currentColor' : 'none'" />
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
+              :title="t('article.joinDiscussion')"
+              @click="openFloatingReply"
+            >
+              <MessageSquare class="h-4 w-4" />
+              <span>{{ t('article.joinDiscussion') }}</span>
+            </button>
+          </div>
           <div
             v-else
             class="pointer-events-auto mx-auto w-full max-w-2xl rounded-lg border border-gray-200/80 bg-white/95 p-3 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.5),0_4px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur"
