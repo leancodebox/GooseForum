@@ -596,7 +596,7 @@ func EditArticleCategories(req component.BetterRequest[EditArticleCategoriesReq]
 
 	oldCategoryIds := append([]uint64(nil), article.CategoryId...)
 	article.CategoryId = categoryIds
-	if err := articles.Save(&article); err != nil {
+	if err := articles.SaveNoUpdate(&article); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 

@@ -456,18 +456,17 @@ onMounted(() => {
               {{ adminText('k00b2', { title: categoryDialogRow?.title || '' }) }}
             </DialogDescription>
           </DialogHeader>
-          <div class="grid gap-2 rounded-lg border bg-muted/20 p-3 sm:grid-cols-2">
+          <div class="flex max-h-[46vh] flex-wrap gap-2 overflow-y-auto pr-1">
             <button
               v-for="category in categories"
               :key="category.id"
-              class="flex min-h-12 items-center gap-3 rounded-md border bg-background px-3 py-2 text-left text-sm transition-colors hover:border-primary/50 hover:bg-primary/5"
-              :class="selectedCategoryIds.includes(category.id) ? 'border-primary bg-primary/10 text-primary' : ''"
+              class="inline-flex max-w-full items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-left text-sm font-medium transition-colors"
+              :class="selectedCategoryIds.includes(category.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-muted-foreground/30 hover:bg-muted/50'"
               type="button"
               @click="toggleCategory(category.id)"
             >
-              <span class="size-2.5 rounded-full" :style="{ backgroundColor: category.color || '#64748b' }" />
-              <span class="min-w-0 flex-1 truncate font-medium">{{ category.category }}</span>
-              <span class="grid size-5 place-items-center rounded-full border text-[11px] font-bold" :class="selectedCategoryIds.includes(category.id) ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30 text-transparent'">✓</span>
+              <span class="size-2 rounded-[3px]" :style="{ backgroundColor: category.color || '#64748b' }" />
+              <span class="max-w-48 truncate">{{ category.category }}</span>
             </button>
           </div>
           <DialogFooter>
