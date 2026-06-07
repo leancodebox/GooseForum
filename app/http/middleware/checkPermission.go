@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
@@ -34,6 +35,19 @@ func CheckAnyPermission(c *gin.Context) {
 	}
 	if !permission.CheckAnyRole(roleId) {
 		c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionDenied, nil))
+		c.Abort()
+		return
+	}
+	c.Next()
+}
+
+func CheckAnyPermissionOrNotFound(c *gin.Context) {
+	roleId, ok := resolveRoleId(c)
+	if !ok {
+		return
+	}
+	if !permission.CheckAnyRole(roleId) {
+		forum.RenderNotFoundPage(c, component.MessagePageNotFound)
 		c.Abort()
 		return
 	}

@@ -42,5 +42,23 @@ func RenderInternalOAuthErrorPage(c *gin.Context, messageCode component.MessageC
 }
 
 func RenderNotFoundPage(c *gin.Context, messageCode component.MessageCode) {
-	RenderErrorPage(c, http.StatusNotFound, "页面不存在", messageCode, nil)
+	payload := PagePayload{
+		Component: "error.notFound",
+		Props: ErrorPageProps{
+			Code:        "404",
+			Title:       "页面不存在",
+			MessageCode: messageCode,
+		},
+		Meta: PageMeta{
+			Title:  pageTitle("页面不存在"),
+			Robots: "noindex",
+		},
+		Layout:  buildLayout(c, ""),
+		URL:     buildPageURL(c),
+		Version: payloadVersion,
+	}
+
+	c.Header("Vary", "X-Goose-Page, Accept")
+	c.Status(http.StatusNotFound)
+	renderPage(c, "error.gohtml", payload)
 }
