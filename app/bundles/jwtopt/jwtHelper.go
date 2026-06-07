@@ -27,13 +27,24 @@ func Std() *JWT {
 
 // CreateNewTokenDefault creates an access token with the configured lifetime.
 func CreateNewTokenDefault(userId uint64) (string, error) {
-	return CreateNewToken(userId, validTime)
+	return CreateNewTokenWithVersion(userId, 0, validTime)
+}
+
+// CreateNewTokenDefaultWithVersion creates an access token with the configured lifetime and token version.
+func CreateNewTokenDefaultWithVersion(userId, tokenVersion uint64) (string, error) {
+	return CreateNewTokenWithVersion(userId, tokenVersion, validTime)
 }
 
 // CreateNewToken creates an access token with expireTime.
 func CreateNewToken(userId uint64, expireTime time.Duration) (string, error) {
+	return CreateNewTokenWithVersion(userId, 0, expireTime)
+}
+
+// CreateNewTokenWithVersion creates an access token with expireTime and token version.
+func CreateNewTokenWithVersion(userId, tokenVersion uint64, expireTime time.Duration) (string, error) {
 	cc := CustomClaims{
 		UserId:           userId,
+		TokenVersion:     tokenVersion,
 		RegisteredClaims: GetBaseRegisteredClaims(expireTime),
 	}
 	return Std().CreateToken(cc)
@@ -41,16 +52,25 @@ func CreateNewToken(userId uint64, expireTime time.Duration) (string, error) {
 
 // VerifyTokenWithFresh verifies tokenStr and refreshes it when it is close to expiry.
 func VerifyTokenWithFresh(tokenStr string) (userId uint64, newToken string, err error) {
-	claims, err := Std().ParseToken(tokenStr)
+	claims, newToken, err := VerifyTokenWithFreshClaims(tokenStr)
 	if err != nil {
 		return 0, "", err
+	}
+	return claims.UserId, newToken, nil
+}
+
+// VerifyTokenWithFreshClaims verifies tokenStr and returns claims, refreshing close-to-expiry tokens.
+func VerifyTokenWithFreshClaims(tokenStr string) (*CustomClaims, string, error) {
+	claims, err := Std().ParseToken(tokenStr)
+	if err != nil {
+		return nil, "", err
 	}
 	eTime, err := claims.GetExpirationTime()
 	if err == nil && time.Now().Add(time.Second*86400*1).After(eTime.Time) {
 		claims.RegisteredClaims = GetBaseRegisteredClaims(validTime)
 		tokenStr, err = Std().CreateToken(*claims)
 	}
-	return claims.UserId, tokenStr, err
+	return claims, tokenStr, err
 }
 
 // VerifyToken verifies tokenStr and returns the user ID.

@@ -115,7 +115,7 @@ func Register(c *gin.Context) {
 		})
 	}
 
-	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
+	token, err := jwt.CreateNewTokenDefaultWithVersion(userEntity.Id, userEntity.TokenVersion)
 	if err != nil {
 		c.JSON(200, component.FailDataCode(component.MessageAuthRegisterRetryLogin, nil))
 		return
@@ -205,7 +205,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.CreateNewTokenDefault(userEntity.Id)
+	token, err := jwt.CreateNewTokenDefaultWithVersion(userEntity.Id, userEntity.TokenVersion)
 	if err != nil {
 		slog.Error("生成 token 失败", "userId", userEntity.Id, "error", err)
 		c.JSON(200, component.FailDataCode(component.MessageAuthLoginFailed, nil))

@@ -10,6 +10,7 @@ import (
 	jwt "github.com/leancodebox/GooseForum/app/bundles/jwtopt"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
 const SkipUpdateUserActivity = "SkipUpdateUserActivity"
@@ -50,14 +51,18 @@ func JWTAuthGetUserId(c *gin.Context) uint64 {
 	if token == "" {
 		return 0
 	}
-	userId, newToken, err := jwt.VerifyTokenWithFresh(token)
+	claims, newToken, err := jwt.VerifyTokenWithFreshClaims(token)
 	if err != nil {
+		return 0
+	}
+	user, ok := userservice.GetUserInfo(claims.UserId)
+	if !ok || user.TokenVersion != claims.TokenVersion {
 		return 0
 	}
 	if token != newToken {
 		jwt.TokenSetting(c, newToken)
 	}
-	return userId
+	return claims.UserId
 }
 
 func NoUpdateUserActivity(c *gin.Context) {

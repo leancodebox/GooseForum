@@ -77,7 +77,7 @@ func ProviderCallback(c *gin.Context) {
 		}
 
 		// 生成JWT token
-		token, err := jwtopt.CreateNewTokenDefault(user.Id)
+		token, err := jwtopt.CreateNewTokenDefaultWithVersion(user.Id, user.TokenVersion)
 		if err != nil {
 			slog.Error("Generate JWT token failed", "error", err)
 			forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthTokenFailed)

@@ -55,6 +55,34 @@ func TestCreateNewTokenDefault(t *testing.T) {
 	}
 }
 
+func TestCreateNewTokenWithVersion(t *testing.T) {
+	const userID uint64 = 7
+	const tokenVersion uint64 = 3
+
+	token, err := CreateNewTokenWithVersion(userID, tokenVersion, 15*time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	claims, newToken, err := VerifyTokenWithFreshClaims(token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if claims.UserId != userID || claims.TokenVersion != tokenVersion {
+		t.Fatalf("claims = (%d, %d), want (%d, %d)", claims.UserId, claims.TokenVersion, userID, tokenVersion)
+	}
+	if newToken == token {
+		t.Fatal("expected refreshed token")
+	}
+
+	refreshedClaims, _, err := VerifyTokenWithFreshClaims(newToken)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if refreshedClaims.TokenVersion != tokenVersion {
+		t.Fatalf("refreshed tokenVersion = %d, want %d", refreshedClaims.TokenVersion, tokenVersion)
+	}
+}
+
 func TestGetGinAccessToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

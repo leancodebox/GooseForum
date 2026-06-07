@@ -28,6 +28,7 @@ type UserInfo struct {
 	Id                  uint64
 	Username            string
 	Email               string
+	TokenVersion        uint64
 	IsFrozen            int8
 	IsActivated         int8
 	ActivatedAt         *time.Time
@@ -193,6 +194,7 @@ func userInfoFromEntity(user users.EntityComplete) UserInfo {
 		Id:                  user.Id,
 		Username:            user.Username,
 		Email:               user.Email,
+		TokenVersion:        user.TokenVersion,
 		IsFrozen:            user.IsFrozen,
 		IsActivated:         user.IsActivated,
 		ActivatedAt:         user.ActivatedAt,
@@ -233,6 +235,7 @@ func (user UserInfo) toEntity() users.EntityComplete {
 		Id:                  user.Id,
 		Username:            user.Username,
 		Email:               user.Email,
+		TokenVersion:        user.TokenVersion,
 		IsFrozen:            user.IsFrozen,
 		IsActivated:         user.IsActivated,
 		ActivatedAt:         user.ActivatedAt,
