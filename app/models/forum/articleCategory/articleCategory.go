@@ -31,6 +31,9 @@ const fieldColor = "color"
 // fieldSlug
 const fieldSlug = "slug"
 
+// fieldSort
+const fieldSort = "sort"
+
 type Entity struct {
 	Id        uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                //
 	Category  string    `gorm:"column:category;type:varchar(64);not null;default:'';" json:"category"` //
@@ -38,7 +41,8 @@ type Entity struct {
 	Icon      string    `gorm:"column:icon;type:varchar(255);not null;default:'';" json:"icon"`        //
 	Color     string    `gorm:"column:color;type:varchar(255);not null;default:'';" json:"color"`      //
 	Slug      string    `gorm:"column:slug;type:varchar(255);not null;default:'';" json:"slug"`        //
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`          //
+	Sort      int       `gorm:"column:sort;type:int;not null;default:0;index:idx_article_category_sort,priority:1;" json:"sort"`
+	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"` //
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
 }
 

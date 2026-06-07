@@ -61,7 +61,6 @@ const form = reactive<AdminCategory>({
   color: '',
   slug: '',
   sort: 0,
-  status: 1,
 })
 
 const filteredRows = computed(() => {
@@ -92,7 +91,6 @@ function resetForm(row?: AdminCategory) {
   form.color = row?.color || ''
   form.slug = row?.slug || ''
   form.sort = row?.sort || 0
-  form.status = row?.status ?? 1
 }
 
 function openCreate() {
@@ -121,7 +119,6 @@ async function submitCategory() {
       color: form.color?.trim(),
       desc: form.desc?.trim(),
       sort: Number(form.sort || 0),
-      status: Number(form.status ?? 1),
     })
     dialogMode.value = null
     await loadCategories()
@@ -187,19 +184,18 @@ onMounted(() => {
               <TableHead>Slug</TableHead>
               <TableHead>{{ adminText('k00ag') }}</TableHead>
               <TableHead class="w-24">{{ adminText('k00bf') }}</TableHead>
-              <TableHead class="w-24">{{ adminText('k007j') }}</TableHead>
               <TableHead class="w-32 text-right">{{ adminText('k007m') }}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow v-if="loading">
-              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
+              <TableCell colspan="6" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
             </TableRow>
             <TableRow v-else-if="error">
-              <TableCell colspan="7" class="h-28 text-center text-destructive">{{ error }}</TableCell>
+              <TableCell colspan="6" class="h-28 text-center text-destructive">{{ error }}</TableCell>
             </TableRow>
             <TableRow v-else-if="filteredRows.length === 0">
-              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">{{ adminText('k00c3') }}</TableCell>
+              <TableCell colspan="6" class="h-28 text-center text-muted-foreground">{{ adminText('k00c3') }}</TableCell>
             </TableRow>
             <template v-else>
               <TableRow v-for="item in filteredRows" :key="item.id">
@@ -214,11 +210,6 @@ onMounted(() => {
                 <TableCell class="text-muted-foreground">{{ item.slug || '-' }}</TableCell>
                 <TableCell class="max-w-lg truncate text-muted-foreground">{{ item.desc || '-' }}</TableCell>
                 <TableCell>{{ item.sort ?? 0 }}</TableCell>
-                <TableCell>
-                  <Badge :variant="item.status === 0 ? 'secondary' : 'default'">
-                    {{ item.status === 0 ? adminText('k005n') : adminText('k005o') }}
-                  </Badge>
-                </TableCell>
                 <TableCell>
                   <div class="flex justify-end gap-2">
                     <Button variant="outline" size="sm" type="button" @click="openEdit(item)">
@@ -263,19 +254,10 @@ onMounted(() => {
               {{ adminText('k00ag') }}
               <Input v-model="form.desc" :placeholder="adminText('k005t')" />
             </label>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <label class="grid gap-2 text-sm font-medium">
-                {{ adminText('k00bf') }}
-                <Input v-model.number="form.sort" type="number" />
-              </label>
-              <label class="grid gap-2 text-sm font-medium">
-                {{ adminText('k007j') }}
-                <select v-model.number="form.status" class="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <option :value="1">{{ adminText('k005o') }}</option>
-                  <option :value="0">{{ adminText('k005n') }}</option>
-                </select>
-              </label>
-            </div>
+            <label class="grid gap-2 text-sm font-medium">
+              {{ adminText('k00bf') }}
+              <Input v-model.number="form.sort" type="number" />
+            </label>
             <div class="grid gap-2 text-sm font-medium">
               {{ adminText('k00ad') }}
               <div class="flex flex-wrap items-center gap-2">

@@ -38,7 +38,6 @@ export interface AdminCategory {
   color?: string
   slug?: string
   sort?: number
-  status?: number
 }
 
 export interface AdminUser {

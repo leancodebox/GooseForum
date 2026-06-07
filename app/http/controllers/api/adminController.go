@@ -814,7 +814,6 @@ type CategoryItem struct {
 	Color    string `json:"color"`
 	Slug     string `json:"slug"`
 	Sort     int    `json:"sort"`
-	Status   int8   `json:"status"`
 }
 
 // GetCategoryList 获取分类列表
@@ -828,8 +827,7 @@ func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Res
 			Icon:     t.Icon,
 			Color:    t.Color,
 			Slug:     t.Slug,
-			//Sort:     t.Sort,
-			//Status:   t.Status,
+			Sort:     t.Sort,
 		}
 	}))
 }
@@ -842,7 +840,6 @@ type CategorySaveReq struct {
 	Color    string `json:"color"`
 	Slug     string `json:"slug"`
 	Sort     int    `json:"sort"`
-	Status   int8   `json:"status"`
 }
 
 // SaveCategory 保存分类
@@ -860,6 +857,7 @@ func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Respon
 	entity.Icon = req.Params.Icon
 	entity.Color = req.Params.Color
 	entity.Slug = req.Params.Slug
+	entity.Sort = req.Params.Sort
 
 	articleCategory.SaveOrCreateById(&entity)
 	hotdataserve.ClearArticleCategoryCache()
