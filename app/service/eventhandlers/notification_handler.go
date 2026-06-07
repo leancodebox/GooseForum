@@ -37,17 +37,28 @@ func NewCommentCreatedHandler() cqrs.EventHandler {
 		func(ctx context.Context, event *CommentCreatedEvent) error {
 			contentPreview := TakeUpTo64Chars(event.Content)
 			// 如果不是文章作者自己评论，通知文章作者
-			if event.ArticleAuthorId != event.UserId {
+			if shouldNotifyArticleAuthor(event) {
 				_ = eventnotice.SendCommentNotification(event.ArticleAuthorId, event.ArticleId, contentPreview, event.UserId, event.CommentId)
 			}
 			// 如果是回复评论，且不是回复自己，通知原评论作者
-			if event.ParentReplyId > 0 && event.ParentReplyAuthorId != event.UserId {
+			if shouldNotifyParentReplyAuthor(event) {
 				_ = eventnotice.SendReplyNotification(event.ParentReplyAuthorId, event.CommentId, event.ArticleId, contentPreview, event.UserId)
 			}
 			notifyArticleWatchers(event, contentPreview)
 			return nil
 		},
 	)
+}
+
+func shouldNotifyArticleAuthor(event *CommentCreatedEvent) bool {
+	if event.ArticleAuthorId == 0 || event.ArticleAuthorId == event.UserId {
+		return false
+	}
+	return event.ParentReplyId == 0 || event.ArticleAuthorId != event.ParentReplyAuthorId
+}
+
+func shouldNotifyParentReplyAuthor(event *CommentCreatedEvent) bool {
+	return event.ParentReplyId > 0 && event.ParentReplyAuthorId > 0 && event.ParentReplyAuthorId != event.UserId
 }
 
 func notifyArticleWatchers(event *CommentCreatedEvent, contentPreview string) {

@@ -20,6 +20,117 @@ func TestCommentNotificationExcludeUserIds(t *testing.T) {
 	}
 }
 
+func TestShouldNotifyArticleAuthor(t *testing.T) {
+	tests := []struct {
+		name  string
+		event *CommentCreatedEvent
+		want  bool
+	}{
+		{
+			name: "root comment notifies article author",
+			event: &CommentCreatedEvent{
+				UserId:          1,
+				ArticleAuthorId: 2,
+			},
+			want: true,
+		},
+		{
+			name: "article author own comment does not notify",
+			event: &CommentCreatedEvent{
+				UserId:          2,
+				ArticleAuthorId: 2,
+			},
+			want: false,
+		},
+		{
+			name: "reply to another user still notifies article author",
+			event: &CommentCreatedEvent{
+				UserId:              1,
+				ArticleAuthorId:     2,
+				ParentReplyId:       10,
+				ParentReplyAuthorId: 3,
+			},
+			want: true,
+		},
+		{
+			name: "reply to article author only sends reply notification",
+			event: &CommentCreatedEvent{
+				UserId:              1,
+				ArticleAuthorId:     2,
+				ParentReplyId:       10,
+				ParentReplyAuthorId: 2,
+			},
+			want: false,
+		},
+		{
+			name: "missing article author does not notify",
+			event: &CommentCreatedEvent{
+				UserId: 1,
+			},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shouldNotifyArticleAuthor(tt.event); got != tt.want {
+				t.Fatalf("shouldNotifyArticleAuthor() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestShouldNotifyParentReplyAuthor(t *testing.T) {
+	tests := []struct {
+		name  string
+		event *CommentCreatedEvent
+		want  bool
+	}{
+		{
+			name: "root comment does not notify parent reply author",
+			event: &CommentCreatedEvent{
+				UserId:              1,
+				ParentReplyAuthorId: 2,
+			},
+			want: false,
+		},
+		{
+			name: "reply notifies parent reply author",
+			event: &CommentCreatedEvent{
+				UserId:              1,
+				ParentReplyId:       10,
+				ParentReplyAuthorId: 2,
+			},
+			want: true,
+		},
+		{
+			name: "self reply does not notify",
+			event: &CommentCreatedEvent{
+				UserId:              1,
+				ParentReplyId:       10,
+				ParentReplyAuthorId: 1,
+			},
+			want: false,
+		},
+		{
+			name: "missing parent reply author does not notify",
+			event: &CommentCreatedEvent{
+				UserId:        1,
+				ParentReplyId: 10,
+			},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shouldNotifyParentReplyAuthor(tt.event); got != tt.want {
+				t.Fatalf("shouldNotifyParentReplyAuthor() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestTakeUpTo64Chars(t *testing.T) {
 	short := "短内容"
 	if got := TakeUpTo64Chars(short); got != short {
