@@ -81,14 +81,43 @@ func TestArticleMetaJSONLDIncludesImageForImageOnlyArticle(t *testing.T) {
 func TestDraftArticleCanOnlyBeViewedByAuthor(t *testing.T) {
 	draft := &articles.Entity{Id: 1, UserId: 10, ArticleStatus: 0, ProcessStatus: 0}
 
-	if !canViewArticle(draft, 10, false) {
+	if !canViewArticle(draft, 10) {
 		t.Fatal("expected draft author to view draft article")
 	}
-	if canViewArticle(draft, 11, false) {
+	if canViewArticle(draft, 11) {
 		t.Fatal("expected other users to be blocked from draft article")
 	}
-	if canViewArticle(draft, 0, false) {
+	if canViewArticle(draft, 0) {
 		t.Fatal("expected guests to be blocked from draft article")
+	}
+}
+
+func TestProcessedArticleRequiresManagementPermission(t *testing.T) {
+	processed := &articles.Entity{Id: 1, UserId: 10, ArticleStatus: 1, ProcessStatus: 1}
+
+	denyProcessed := func(uint64) bool { return false }
+	allowProcessed := func(uint64) bool { return true }
+
+	if canViewArticleWithPermission(processed.ArticleStatus, processed.ProcessStatus, processed.UserId, 10, denyProcessed) {
+		t.Fatal("expected processed article author without role permission to be blocked")
+	}
+	if !canViewArticleWithPermission(processed.ArticleStatus, processed.ProcessStatus, processed.UserId, 11, allowProcessed) {
+		t.Fatal("expected user with management permission to view processed article")
+	}
+}
+
+func TestNormalArticleDoesNotCheckManagementPermission(t *testing.T) {
+	normal := &articles.Entity{Id: 1, UserId: 10, ArticleStatus: 1, ProcessStatus: 0}
+	called := false
+
+	if !canViewArticleWithPermission(normal.ArticleStatus, normal.ProcessStatus, normal.UserId, 11, func(uint64) bool {
+		called = true
+		return false
+	}) {
+		t.Fatal("expected normal published article to be visible")
+	}
+	if called {
+		t.Fatal("normal published article should not check management permission")
 	}
 }
 

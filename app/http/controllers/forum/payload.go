@@ -146,7 +146,7 @@ type ViewerPayload struct {
 	Email                     string   `json:"email"`
 	AvatarURL                 string   `json:"avatarUrl"`
 	IsAuthenticated           bool     `json:"isAuthenticated"`
-	IsAdmin                   bool     `json:"isAdmin"`
+	CanAccessAdmin            bool     `json:"canAccessAdmin"`
 	RequiresEmailVerification bool     `json:"requiresEmailVerification"`
 	AdminPermissions          []uint64 `json:"adminPermissions"`
 }
@@ -523,7 +523,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			Email:                     currentUser.Email,
 			AvatarURL:                 currentUser.AvatarUrl,
 			IsAuthenticated:           currentUser.UserId > 0,
-			IsAdmin:                   currentUser.IsAdmin,
+			CanAccessAdmin:            currentUser.CanAccessAdmin,
 			RequiresEmailVerification: currentUser.UserId > 0 && securityConfig.EnableEmailVerification && currentUser.IsActivated == users.ActivationPending,
 			AdminPermissions:          buildAdminPermissions(currentUser.UserId),
 		}

@@ -9,6 +9,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/articleviewservice"
+	"github.com/leancodebox/GooseForum/app/service/permission"
+	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/spf13/cast"
 )
 
@@ -27,7 +29,7 @@ func ArticleDetail(c *gin.Context) {
 		return
 	}
 	loginUser := component.GetLoginUser(c)
-	if !canViewArticle(&entity, loginUser.UserId, loginUser.IsAdmin) {
+	if !canViewArticle(&entity, loginUser.UserId) {
 		renderNotFound(c)
 		return
 	}
@@ -72,7 +74,7 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 	if articleEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
-	if !canViewArticleSimple(&articleEntity, req.UserId, false) {
+	if !canViewArticleSimple(&articleEntity, req.UserId) {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
@@ -161,24 +163,30 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 	})
 }
 
-func canViewArticle(entity *articles.Entity, userID uint64, isAdmin bool) bool {
-	if entity.ArticleStatus != 1 {
-		return userID != 0 && userID == entity.UserId
+func canViewArticle(entity *articles.Entity, userID uint64) bool {
+	return canViewArticleWithPermission(entity.ArticleStatus, entity.ProcessStatus, entity.UserId, userID, currentUserCanViewProcessedArticle)
+}
+
+func canViewArticleSimple(entity *articles.SmallEntity, userID uint64) bool {
+	return canViewArticleWithPermission(entity.ArticleStatus, entity.ProcessStatus, entity.UserId, userID, currentUserCanViewProcessedArticle)
+}
+
+func canViewArticleWithPermission(articleStatus, processStatus int8, authorID, userID uint64, canViewProcessed func(uint64) bool) bool {
+	if articleStatus != 1 {
+		return userID != 0 && userID == authorID
 	}
-	if entity.ProcessStatus != 0 && !isAdmin {
+	if processStatus != 0 && !canViewProcessed(userID) {
 		return false
 	}
 	return true
 }
 
-func canViewArticleSimple(entity *articles.SmallEntity, userID uint64, isAdmin bool) bool {
-	if entity.ArticleStatus != 1 {
-		return userID != 0 && userID == entity.UserId
-	}
-	if entity.ProcessStatus != 0 && !isAdmin {
+func currentUserCanViewProcessedArticle(userID uint64) bool {
+	if userID == 0 {
 		return false
 	}
-	return true
+	roleID, ok := userservice.GetUserRoleId(userID)
+	return ok && permission.CheckRole(roleID, permission.ArticlesManager)
 }
 
 func shouldCountArticleView(entity *articles.Entity) bool {

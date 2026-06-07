@@ -424,7 +424,7 @@ async function toggleBinding(provider: string) {
 
             <div class="flex shrink-0 flex-col items-start gap-2 sm:items-end">
               <div class="flex flex-wrap items-center gap-2">
-                <div v-if="layout.viewer.isAdmin" class="relative">
+                <div v-if="layout.viewer.canAccessAdmin" class="relative">
                   <button
                     type="button"
                     class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"

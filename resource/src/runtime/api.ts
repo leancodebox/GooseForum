@@ -659,7 +659,12 @@ async function getLoginPublicKey(): Promise<string> {
       headers: {
         Accept: 'application/json',
       },
-    }).then((response) => readApiResponse<{ publicKey: string }>(response, t('api.loginKeyLoadFailed')).then((data) => data.publicKey))
+    })
+      .then((response) => readApiResponse<{ publicKey: string }>(response, t('api.loginKeyLoadFailed')).then((data) => data.publicKey))
+      .catch((error) => {
+        publicKeyPromise = undefined
+        throw error
+      })
   }
   return publicKeyPromise
 }

@@ -83,7 +83,7 @@ export interface ViewerPayload {
   email: string
   avatarUrl: string
   isAuthenticated: boolean
-  isAdmin: boolean
+  canAccessAdmin: boolean
   requiresEmailVerification: boolean
   adminPermissions: number[]
 }

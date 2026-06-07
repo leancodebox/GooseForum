@@ -11,6 +11,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
+	"github.com/leancodebox/GooseForum/app/service/permission"
 )
 
 const (
@@ -275,7 +276,7 @@ func buildUserCard(profile UserPublicProfile) vo.UserCard {
 		WebsiteName:       user.WebsiteName,
 		Website:           user.Website,
 		ExternalInfo:      user.ExternalInformation,
-		IsAdmin:           user.RoleId > 0,
+		IsAdmin:           userIsAdmin(user.RoleId),
 		ArticleCount:      stats.ArticleCount,
 		ReplyCount:        stats.ReplyCount,
 		LikeReceivedCount: stats.LikeReceivedCount,
@@ -307,7 +308,7 @@ func buildUserHoverCard(profile UserPublicProfile) vo.UserHoverCard {
 		WebsiteName:       user.WebsiteName,
 		Website:           user.Website,
 		ExternalInfo:      user.ExternalInformation,
-		IsAdmin:           user.RoleId > 0,
+		IsAdmin:           userIsAdmin(user.RoleId),
 		ArticleCount:      stats.ArticleCount,
 		ReplyCount:        stats.ReplyCount,
 		LikeReceivedCount: stats.LikeReceivedCount,
@@ -318,6 +319,10 @@ func buildUserHoverCard(profile UserPublicProfile) vo.UserHoverCard {
 		LastActiveTime:    lastActiveTime,
 		CreatedAt:         user.CreatedAt,
 	}
+}
+
+func userIsAdmin(roleID uint64) bool {
+	return roleID > 0 && permission.CheckRole(roleID, permission.Admin)
 }
 
 func cloneUserBadges(items []badgeservice.UserBadge) []badgeservice.UserBadge {

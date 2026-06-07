@@ -18,7 +18,7 @@ func User2userShow(user users.EntityComplete) *vo.UserInfoShow {
 		Prestige:            user.Prestige,
 		AvatarUrl:           user.GetWebAvatarUrl(),
 		CreateTime:          user.CreatedAt,
-		IsAdmin:             user.RoleId > 0,
+		CanAccessAdmin:      user.RoleId > 0,
 		IsActivated:         user.IsActivated,
 		ExternalInformation: user.ExternalInformation,
 	}

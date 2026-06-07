@@ -33,8 +33,8 @@ func TestUser2userShow(t *testing.T) {
 	if got.AvatarUrl != "/file/img/avatar.webp" {
 		t.Fatalf("AvatarUrl = %q, want /file/img/avatar.webp", got.AvatarUrl)
 	}
-	if !got.IsAdmin {
-		t.Fatalf("expected admin user")
+	if !got.CanAccessAdmin {
+		t.Fatalf("expected user to access admin")
 	}
 	if !got.CreateTime.Equal(createdAt) {
 		t.Fatalf("CreateTime = %v, want %v", got.CreateTime, createdAt)
