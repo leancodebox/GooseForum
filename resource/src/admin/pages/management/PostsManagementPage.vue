@@ -1,7 +1,7 @@
 <script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, ref } from 'vue'
-import { Ban, ExternalLink, Eye, FileText, Heart, MessageSquare, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from '@lucide/vue'
+import { Ban, Eye, FileText, Heart, MessageSquare, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
@@ -248,10 +248,6 @@ async function openSource(post: AdminArticle) {
   }
 }
 
-function openPost(post: AdminArticle) {
-  window.open(`/p/post/${post.id}`, '_blank', 'noopener,noreferrer')
-}
-
 async function copySource() {
   if (!source.value?.content) return
   try {
@@ -388,9 +384,6 @@ onMounted(() => {
                   </div>
                 </div>
                 <div class="flex shrink-0 items-center gap-0.5">
-                  <Button variant="ghost" size="icon-sm" type="button" :class="actionButtonClass" :title="adminText('k006b')" @click="openPost(post)">
-                    <ExternalLink class="size-4" />
-                  </Button>
                   <Button variant="ghost" size="icon-sm" type="button" :class="actionButtonClass" :title="adminText('k006c')" @click="openSource(post)">
                     <FileText class="size-4" />
                   </Button>
@@ -483,9 +476,6 @@ onMounted(() => {
                   </TableCell>
                   <TableCell class="pr-3">
                     <div class="flex justify-end gap-0.5">
-                      <Button variant="ghost" size="icon-sm" type="button" :class="actionButtonClass" :title="adminText('k006b')" @click="openPost(post)">
-                        <ExternalLink class="size-4" />
-                      </Button>
                       <Button variant="ghost" size="icon-sm" type="button" :class="actionButtonClass" :title="adminText('k006c')" @click="openSource(post)">
                         <FileText class="size-4" />
                       </Button>
