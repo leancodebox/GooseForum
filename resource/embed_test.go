@@ -2,6 +2,7 @@ package resource
 
 import (
 	"encoding/json"
+	"errors"
 	"io/fs"
 	"testing"
 )
@@ -14,6 +15,9 @@ func TestAssetsFSMatchesViteManifestPaths(t *testing.T) {
 
 	content, err := fs.ReadFile(GetTemplateFS(), "static/dist/.vite/manifest.json")
 	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			t.Skip("vite manifest is missing; run pnpm -C resource build to enable asset path checks")
+		}
 		t.Fatalf("read manifest: %v", err)
 	}
 

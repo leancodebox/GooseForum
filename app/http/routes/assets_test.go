@@ -2,6 +2,8 @@ package routes
 
 import (
 	"encoding/json"
+	"errors"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -22,6 +24,9 @@ func TestAssetsGzipSwitch(t *testing.T) {
 
 	content, err := resource.GetTemplateFS().Open("static/dist/.vite/manifest.json")
 	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			t.Skip("vite manifest is missing; run pnpm -C resource build to enable asset gzip checks")
+		}
 		t.Fatalf("open manifest: %v", err)
 	}
 	defer func() { _ = content.Close() }()
