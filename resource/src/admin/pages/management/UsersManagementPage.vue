@@ -1,7 +1,7 @@
 <script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, reactive, ref } from 'vue'
-import { Award, ChevronLeft, ChevronRight, CheckCircle2, Loader2, Pencil, RefreshCw, Search, ShieldOff, XCircle } from '@lucide/vue'
+import { Award, ChevronLeft, ChevronRight, CheckCircle2, Loader2, RefreshCw, Search, ShieldOff, UserCog, XCircle } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
 import { Switch } from '@/admin/components/ui/switch'
@@ -270,7 +270,7 @@ onMounted(() => {
                   <div class="flex min-w-0 items-center justify-between gap-2">
                     <a :href="`/u/${user.userId}`" target="_blank" rel="noreferrer" class="truncate font-semibold hover:text-primary hover:underline">{{ user.username }}</a>
                     <button class="inline-flex size-8 shrink-0 items-center justify-center rounded-md hover:bg-muted" type="button" :title="adminText('k005j')" @click="openEdit(user)">
-                      <Pencil class="size-4" />
+                      <UserCog class="size-4" />
                     </button>
                   </div>
                   <div class="mt-0.5 truncate text-xs text-muted-foreground">{{ user.email || '-' }}</div>
@@ -354,7 +354,7 @@ onMounted(() => {
                 <td class="px-3 py-2 text-xs text-muted-foreground">{{ user.lastActiveTime || adminText('k006o') }}</td>
                 <td class="px-3 py-2 text-right">
                   <button class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" type="button" :title="adminText('k005j')" @click="openEdit(user)">
-                    <Pencil class="size-4" />
+                    <UserCog class="size-4" />
                   </button>
                 </td>
               </tr>
@@ -386,18 +386,18 @@ onMounted(() => {
                   <div class="mb-2 text-sm font-semibold">{{ adminText('k00br') }}</div>
                   <div class="divide-y">
                     <label class="flex items-center justify-between gap-3 py-2.5">
-                      <span class="min-w-0">
-                        <span class="block text-sm font-medium">{{ adminText('k00br') }}</span>
+                      <span class="text-sm font-medium">{{ adminText('k00br') }}</span>
+                      <span class="inline-flex items-center gap-2">
                         <span class="text-xs text-muted-foreground">{{ form.status === 0 ? adminText('k005y') : adminText('k006k') }}</span>
+                        <Switch :model-value="form.status === 0" @update:model-value="(checked: boolean) => form.status = checked ? 0 : 1" />
                       </span>
-                      <Switch :model-value="form.status === 0" @update:model-value="(checked: boolean) => form.status = checked ? 0 : 1" />
                     </label>
                     <label class="flex items-center justify-between gap-3 py-2.5">
-                      <span class="min-w-0">
-                        <span class="block text-sm font-medium">{{ adminText('k00bs') }}</span>
+                      <span class="text-sm font-medium">{{ adminText('k00bs') }}</span>
+                      <span class="inline-flex items-center gap-2">
                         <span class="text-xs text-muted-foreground">{{ form.validate === 1 ? adminText('k006l') : adminText('k006m') }}</span>
+                        <Switch :model-value="form.validate === 1" @update:model-value="(checked: boolean) => form.validate = checked ? 1 : 0" />
                       </span>
-                      <Switch :model-value="form.validate === 1" @update:model-value="(checked: boolean) => form.validate = checked ? 1 : 0" />
                     </label>
                     <div class="grid gap-1.5 py-2.5 text-sm font-medium">
                       {{ adminText('k00bt') }}
