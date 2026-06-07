@@ -166,10 +166,16 @@ func apiRoute(ginApp *gin.Engine) {
 	adminApi.Group("", middleware.CheckPermission(permission.Admin)).
 		POST("opt-record-page", UpButterReq(api.OptRecordPage))
 
-	adminApi.Group("", middleware.CheckPermission(permission.SiteManager)).
+	adminApi.Group("", middleware.CheckPermission(permission.PageManager)).
 		GET("friend-links", UpButterReq(api.GetFriendLinks)).
-		GET("server-version", UpButterReq(api.ServerVersion)).
 		POST("save-friend-links", UpButterReq(api.SaveFriendLinks)).
+		GET("sponsors", UpButterReq(api.GetSponsors)).
+		POST("save-sponsors", UpButterReq(api.SaveSponsors)).
+		GET("announcement", UpButterReq(api.GetAnnouncement)).
+		POST("save-announcement", UpButterReq(api.SaveAnnouncement))
+
+	adminApi.Group("", middleware.CheckPermission(permission.SiteManager)).
+		GET("server-version", UpButterReq(api.ServerVersion)).
 		GET("site-settings", UpButterReq(api.GetSiteSettings)).
 		POST("save-site-settings", UpButterReq(api.SaveSiteSettings)).
 		GET("mail-settings", UpButterReq(api.GetMailSettings)).
@@ -179,10 +185,6 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("save-security-settings", UpButterReq(api.SaveSecuritySettings)).
 		GET("posting-settings", UpButterReq(api.GetPostingSettings)).
 		POST("save-posting-settings", UpButterReq(api.SavePostingSettings)).
-		GET("sponsors", UpButterReq(api.GetSponsors)).
-		POST("save-sponsors", UpButterReq(api.SaveSponsors)).
-		GET("announcement", UpButterReq(api.GetAnnouncement)).
-		POST("save-announcement", UpButterReq(api.SaveAnnouncement)).
 		GET("badges", UpButterReq(api.BadgeList)).
 		POST("badge-save", UpButterReq(api.SaveBadge)).
 		POST("badge-delete", UpButterReq(api.DeleteBadge))

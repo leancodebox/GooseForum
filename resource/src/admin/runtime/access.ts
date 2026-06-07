@@ -13,15 +13,15 @@ const adminPathPermissions: Record<string, AdminPermission> = {
   '/admin/roles': AdminPermission.RoleManager,
   '/admin/categories': AdminPermission.ArticlesManager,
   '/admin/posts': AdminPermission.ArticlesManager,
-  '/admin/links': AdminPermission.SiteManager,
-  '/admin/sponsors': AdminPermission.SiteManager,
+  '/admin/links': AdminPermission.PageManager,
+  '/admin/sponsors': AdminPermission.PageManager,
   '/admin/badges': AdminPermission.SiteManager,
   '/admin/opt-records': AdminPermission.Admin,
   '/admin/settings/site-info': AdminPermission.SiteManager,
   '/admin/settings/mail': AdminPermission.SiteManager,
   '/admin/settings/security': AdminPermission.SiteManager,
   '/admin/settings/posting': AdminPermission.SiteManager,
-  '/admin/settings/announcement': AdminPermission.SiteManager,
+  '/admin/settings/announcement': AdminPermission.PageManager,
   '/admin/unknown': AdminPermission.PageManager,
 }
 
