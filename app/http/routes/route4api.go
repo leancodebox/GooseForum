@@ -151,6 +151,7 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("articles-list", UpButterReq(api.ArticlesList)).
 		POST("article-source", UpButterReq(api.ArticleSource)).
 		POST("article-edit", UpButterReq(api.EditArticle)).
+		POST("article-delete", UpButterReq(api.DeleteArticle)).
 		POST("article-pin-edit", UpButterReq(api.EditArticlePin)).
 		POST("article-categories-edit", UpButterReq(api.EditArticleCategories)).
 		POST("category-list", UpButterReq(api.GetCategoryList)).

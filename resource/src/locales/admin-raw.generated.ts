@@ -442,5 +442,9 @@ export default {
   "k00c9": "{count} 分钟前",
   "k00ca": "大约 {count} 小时前",
   "k00cb": "{count} 天前",
-  "k00cc": "已删除 #{id}"
+  "k00cc": "已删除 #{id}",
+  "k00cd": "删除帖子失败",
+  "k00ce": "帖子已删除",
+  "k00cf": "删除帖子？",
+  "k00cg": "确认删除「{title}」吗？删除后前台将不可访问。"
 } as const

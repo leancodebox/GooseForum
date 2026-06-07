@@ -776,6 +776,7 @@ export default {
       article: {
         categoryRequired: 'Select at least one category',
         categoryTooMany: 'Select at most 3 categories',
+        deleteFailed: 'Failed to delete article',
       },
       role: {
         notFound: 'Role not found',
@@ -805,6 +806,7 @@ export default {
       articleStatusChanged: 'Post "{title}" status changed to {status}',
       articlePinWeightChanged: 'Post "{title}" pin weight {oldPinWeight} -> {pinWeight}',
       articleCategoriesChanged: 'Post "{title}" categories {oldCategoryIds} -> {categoryIds}',
+      articleDeleted: 'Deleted post "{title}"',
     },
     status: {
       blocked: 'blocked',

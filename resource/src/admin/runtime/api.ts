@@ -169,6 +169,10 @@ export function editArticle(data: { id: number, processStatus: number }) {
   return postJson<unknown>('/api/admin/article-edit', data, adminText('k0015'))
 }
 
+export function deleteArticle(id: number) {
+  return postJson<unknown>('/api/admin/article-delete', { id }, adminText('k00cd'))
+}
+
 export function editArticlePin(data: { id: number, pinWeight: number }) {
   return postJson<unknown>('/api/admin/article-pin-edit', data, adminText('k0016'))
 }

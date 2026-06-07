@@ -42,6 +42,7 @@ const optInfoMessageKeyMap: Record<string, string> = {
   'admin.opt.article.statusChanged': 'adminOptLog.messages.articleStatusChanged',
   'admin.opt.article.pinWeightChanged': 'adminOptLog.messages.articlePinWeightChanged',
   'admin.opt.article.categoriesChanged': 'adminOptLog.messages.articleCategoriesChanged',
+  'admin.opt.article.deleted': 'adminOptLog.messages.articleDeleted',
 }
 
 function pageResultSize(result: { pageSize?: number, size?: number }) {

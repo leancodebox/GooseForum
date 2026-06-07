@@ -442,5 +442,9 @@ export default {
   "k00c9": "{count} minutes ago",
   "k00ca": "about {count} hours ago",
   "k00cb": "{count} days ago",
-  "k00cc": "Deleted #{id}"
+  "k00cc": "Deleted #{id}",
+  "k00cd": "Failed to delete post",
+  "k00ce": "Post deleted",
+  "k00cf": "Delete post?",
+  "k00cg": "Confirm deleting \"{title}\"? It will no longer be accessible publicly."
 } as const

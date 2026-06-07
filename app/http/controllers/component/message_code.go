@@ -159,6 +159,7 @@ const (
 	MessageAdminCategoryHasArticles    MessageCode = "admin.category.hasArticles"      // 分类下存在有效文章。
 	MessageAdminCategorySelectRequired MessageCode = "admin.article.categoryRequired"  // 文章至少需要一个分类。
 	MessageAdminCategorySelectTooMany  MessageCode = "admin.article.categoryTooMany"   // 文章最多选择三个分类。
+	MessageAdminArticleDeleteFailed    MessageCode = "admin.article.deleteFailed"      // 删除文章失败。
 	MessageAdminRoleNotFound           MessageCode = "admin.role.notFound"             // 角色不存在。
 	MessageAdminTestEmailRequired      MessageCode = "admin.mail.testEmailRequired"    // 测试邮箱不能为空。
 	MessageAdminTestEmailFailed        MessageCode = "admin.mail.testFailed"           // 邮件配置测试失败，params.error 可带原始错误。

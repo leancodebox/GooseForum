@@ -776,6 +776,7 @@ export default {
       article: {
         categoryRequired: 'カテゴリーを少なくとも1つ選択してください',
         categoryTooMany: 'カテゴリーは最大3つまで選択できます',
+        deleteFailed: '投稿の削除に失敗しました',
       },
       role: {
         notFound: 'ロールが見つかりません',
@@ -805,6 +806,7 @@ export default {
       articleStatusChanged: 'Post "{title}" status changed to {status}',
       articlePinWeightChanged: 'Post "{title}" pin weight {oldPinWeight} -> {pinWeight}',
       articleCategoriesChanged: 'Post "{title}" categories {oldCategoryIds} -> {categoryIds}',
+      articleDeleted: 'Deleted post "{title}"',
     },
     status: {
       blocked: 'blocked',

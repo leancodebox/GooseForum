@@ -524,6 +524,10 @@ type EditArticleCategoriesReq struct {
 	CategoryId []uint64 `json:"categoryId" validate:"min=1,max=3"`
 }
 
+type DeleteArticleReq struct {
+	Id uint64 `json:"id" validate:"required"`
+}
+
 // EditArticle 文章状态管理
 func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response {
 	article := articles.Get(req.Params.Id)
@@ -550,6 +554,27 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
 		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
 	}
+	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
+}
+
+func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Response {
+	article := articles.Get(req.Params.Id)
+	if article.Id == 0 {
+		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+	}
+
+	article.ProcessStatus = 1
+	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
+		slog.Error("failed to delete article search document", "articleId", article.Id, "err", err)
+	}
+	articleCategoryRs.DeleteByArticleId(article.Id)
+	if rows := articles.Delete(&article); rows == 0 {
+		return component.FailResponseCode(component.MessageAdminArticleDeleteFailed, nil)
+	}
+	hotdataserve.ClearArticleListCache()
+	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, article.Id, "admin.opt.article.deleted", optlogger.MessageParams{
+		"title": article.Title,
+	})
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 

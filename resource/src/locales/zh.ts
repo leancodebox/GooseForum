@@ -776,6 +776,7 @@ export default {
       article: {
         categoryRequired: '至少选择一个分类',
         categoryTooMany: '最多选择 3 个分类',
+        deleteFailed: '删除文章失败',
       },
       role: {
         notFound: '角色不存在',
@@ -805,6 +806,7 @@ export default {
       articleStatusChanged: '文章「{title}」状态调整为{status}',
       articlePinWeightChanged: '文章「{title}」置顶权重 {oldPinWeight} -> {pinWeight}',
       articleCategoriesChanged: '文章「{title}」分类 {oldCategoryIds} -> {categoryIds}',
+      articleDeleted: '删除文章「{title}」',
     },
     status: {
       blocked: '封禁',

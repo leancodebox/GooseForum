@@ -442,5 +442,9 @@ export default {
   "k00c9": "{count} minutes ago",
   "k00ca": "about {count} hours ago",
   "k00cb": "{count} days ago",
-  "k00cc": "Deleted #{id}"
+  "k00cc": "Deleted #{id}",
+  "k00cd": "投稿の削除に失敗しました",
+  "k00ce": "投稿を削除しました",
+  "k00cf": "投稿を削除しますか？",
+  "k00cg": "「{title}」を削除しますか？削除後は公開ページからアクセスできません。"
 } as const
