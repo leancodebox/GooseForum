@@ -441,5 +441,6 @@ export default {
   "k00c8": "」，请确认没有内容依赖它。",
   "k00c9": "{count} 分钟前",
   "k00ca": "大约 {count} 小时前",
-  "k00cb": "{count} 天前"
+  "k00cb": "{count} 天前",
+  "k00cc": "已删除 #{id}"
 } as const

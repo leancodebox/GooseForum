@@ -80,9 +80,8 @@ func initGoogleProvider() *google.Provider {
 	if clientID != "" && clientSecret != "" && callbackURL != "" {
 		// goth.UseProviders(googleProvider)
 		slog.Info("Google OAuth provider configuration found (implementation pending)")
-		return nil
 	}
-	return google.New(clientID, clientSecret, callbackURL)
+	return nil
 }
 
 // OAuthUserInfo is the normalized user data from an OAuth provider.

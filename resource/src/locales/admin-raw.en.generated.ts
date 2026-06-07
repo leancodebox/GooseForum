@@ -441,5 +441,6 @@ export default {
   "k00c8": "\". Make sure no content depends on it.",
   "k00c9": "{count} minutes ago",
   "k00ca": "about {count} hours ago",
-  "k00cb": "{count} days ago"
+  "k00cb": "{count} days ago",
+  "k00cc": "Deleted #{id}"
 } as const

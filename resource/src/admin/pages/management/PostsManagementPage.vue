@@ -56,8 +56,33 @@ const actionRow = ref<AdminArticle | null>(null)
 const pinDialogRow = ref<AdminArticle | null>(null)
 const pinWeightInput = ref(0)
 
+interface CategoryOption {
+  id: number
+  category: string
+  color: string
+  missing: boolean
+}
+
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
 const categoryMap = computed(() => new Map(categories.value.map(item => [item.id, item])))
+const categoryDialogOptions = computed<CategoryOption[]>(() => {
+  const options = categories.value.map(category => ({
+    id: category.id,
+    category: category.category,
+    color: category.color || '#64748b',
+    missing: false,
+  }))
+  const missingIds = selectedCategoryIds.value.filter(id => !categoryMap.value.has(id))
+  return [
+    ...options,
+    ...missingIds.map(id => ({
+      id,
+      category: adminText('k00cc', { id }),
+      color: '#94a3b8',
+      missing: true,
+    })),
+  ]
+})
 const rangeStart = computed(() => (total.value === 0 ? 0 : (page.value - 1) * pageSize.value + 1))
 const rangeEnd = computed(() => Math.min(page.value * pageSize.value, total.value))
 
@@ -77,7 +102,23 @@ function avatarText(post: AdminArticle) {
 }
 
 function postCategories(post: AdminArticle) {
-  return (post.categoryId || []).map(id => categoryMap.value.get(id)).filter(Boolean) as AdminCategory[]
+  return (post.categoryId || []).map((id) => {
+    const category = categoryMap.value.get(id)
+    if (category) {
+      return {
+        id: category.id,
+        category: category.category,
+        color: category.color || '#64748b',
+        missing: false,
+      }
+    }
+    return {
+      id,
+      category: adminText('k00cc', { id }),
+      color: '#94a3b8',
+      missing: true,
+    }
+  })
 }
 
 function postDate(value?: string) {
@@ -156,13 +197,14 @@ function toggleCategory(id: number) {
 
 async function saveCategories() {
   if (!categoryDialogRow.value) return
-  if (selectedCategoryIds.value.length === 0) {
+  const validCategoryIds = selectedCategoryIds.value.filter(id => categoryMap.value.has(id))
+  if (validCategoryIds.length === 0) {
     adminToast.warning(adminText('k003u'))
     return
   }
   saving.value = true
   try {
-    await editArticleCategories({ id: categoryDialogRow.value.id, categoryId: selectedCategoryIds.value })
+    await editArticleCategories({ id: categoryDialogRow.value.id, categoryId: validCategoryIds })
     categoryDialogRow.value = null
     await loadPosts()
     adminToast.success(adminText('k003v'))
@@ -305,7 +347,7 @@ onMounted(() => {
               </div>
 
               <div class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] leading-4 text-muted-foreground">
-                <span v-for="category in postCategories(post)" :key="category.id" class="inline-flex h-5 max-w-32 items-center gap-1 rounded-full bg-muted px-1.5 font-medium">
+                <span v-for="category in postCategories(post)" :key="category.id" class="inline-flex h-5 max-w-32 items-center gap-1 rounded-full bg-muted px-1.5 font-medium" :class="category.missing ? 'text-destructive' : ''">
                   <span class="size-1.5 shrink-0 rounded-full" :style="{ backgroundColor: category.color || '#64748b' }" />
                   <span class="truncate">{{ category.category }}</span>
                 </span>
@@ -387,7 +429,7 @@ onMounted(() => {
                         {{ post.description || adminText('k005w') }}
                       </p>
                       <div class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] leading-4 text-muted-foreground">
-                        <span v-for="category in postCategories(post)" :key="category.id" class="inline-flex h-5 max-w-32 items-center gap-1 rounded-full bg-muted px-1.5 font-medium">
+                        <span v-for="category in postCategories(post)" :key="category.id" class="inline-flex h-5 max-w-32 items-center gap-1 rounded-full bg-muted px-1.5 font-medium" :class="category.missing ? 'text-destructive' : ''">
                           <span class="size-1.5 shrink-0 rounded-full" :style="{ backgroundColor: category.color || '#64748b' }" />
                           <span class="truncate">{{ category.category }}</span>
                         </span>
@@ -458,10 +500,13 @@ onMounted(() => {
           </DialogHeader>
           <div class="flex max-h-[46vh] flex-wrap gap-2 overflow-y-auto pr-1">
             <button
-              v-for="category in categories"
+              v-for="category in categoryDialogOptions"
               :key="category.id"
               class="inline-flex max-w-full items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-left text-sm font-medium transition-colors"
-              :class="selectedCategoryIds.includes(category.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-muted-foreground/30 hover:bg-muted/50'"
+              :class="[
+                selectedCategoryIds.includes(category.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-muted-foreground/30 hover:bg-muted/50',
+                category.missing ? 'border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10' : '',
+              ]"
               type="button"
               @click="toggleCategory(category.id)"
             >
