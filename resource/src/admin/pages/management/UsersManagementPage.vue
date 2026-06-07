@@ -3,6 +3,8 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Award, ChevronLeft, ChevronRight, CheckCircle2, Loader2, Pencil, RefreshCw, Search, ShieldOff, XCircle } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
+import { Switch } from '@/admin/components/ui/switch'
 import { editUser, getAllRoleItem, getUserBadgeOptions, getUserList, saveUserBadges } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminBadge, AdminPayload, AdminUser, ManageHomeProps, UserBadge } from '@/admin/types'
@@ -183,6 +185,11 @@ function avatarText(user: AdminUser) {
   return user.username.slice(0, 2).toUpperCase()
 }
 
+function updateRoleId(value: unknown) {
+  if (value === null || value === undefined) return
+  form.roleId = Number(value)
+}
+
 onMounted(() => {
   void loadUsers()
 })
@@ -356,15 +363,15 @@ onMounted(() => {
         </div>
       </div>
 
-      <div v-if="editingUser" class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" @click.self="editingUser = null">
-        <form class="flex max-h-[min(760px,calc(100vh-2rem))] w-full max-w-5xl flex-col overflow-hidden rounded-lg border bg-background shadow-xl" @submit.prevent="saveUser">
-          <div class="flex items-center justify-between gap-4 border-b px-5 py-4">
+      <div v-if="editingUser" class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3" @click.self="editingUser = null">
+        <form class="flex max-h-[min(700px,calc(100vh-1.5rem))] w-full max-w-4xl flex-col overflow-hidden rounded-lg border bg-background shadow-xl" @submit.prevent="saveUser">
+          <div class="flex items-center justify-between gap-4 border-b px-4 py-3">
             <div class="flex min-w-0 items-center gap-3">
-              <img v-if="editingUser.avatarUrl" :src="editingUser.avatarUrl" class="size-11 rounded-full object-cover ring-1 ring-border" alt="" />
-              <span v-else class="flex size-11 items-center justify-center rounded-full bg-muted text-sm font-semibold">{{ avatarText(editingUser) }}</span>
+              <img v-if="editingUser.avatarUrl" :src="editingUser.avatarUrl" class="size-10 rounded-full object-cover ring-1 ring-border" alt="" />
+              <span v-else class="flex size-10 items-center justify-center rounded-full bg-muted text-sm font-semibold">{{ avatarText(editingUser) }}</span>
               <div class="min-w-0">
-                <h2 class="truncate text-lg font-semibold">{{ adminText('k00bq') }}</h2>
-                <p class="truncate text-sm text-muted-foreground">{{ editingUser.username }} · {{ editingUser.email || adminText('k006p') }}</p>
+                <h2 class="truncate text-base font-semibold">{{ adminText('k00bq') }}</h2>
+                <p class="truncate text-xs text-muted-foreground">{{ editingUser.username }} · {{ editingUser.email || adminText('k006p') }}</p>
               </div>
             </div>
             <button class="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground" type="button" @click="editingUser = null">
@@ -372,37 +379,44 @@ onMounted(() => {
             </button>
           </div>
 
-          <div class="min-h-0 flex-1 overflow-y-auto p-5">
-            <div class="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-              <aside class="space-y-4">
-                <section class="rounded-lg border bg-muted/10 p-4">
-                  <div class="mb-3 text-sm font-semibold">{{ adminText('k00br') }}</div>
-                  <div class="grid gap-3">
-                    <label class="grid gap-1.5 text-sm font-medium">
-                      {{ adminText('k00br') }}
-                      <select v-model.number="form.status" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                        <option :value="0">{{ adminText('k005y') }}</option>
-                        <option :value="1">{{ adminText('k006k') }}</option>
-                      </select>
+          <div class="min-h-0 flex-1 overflow-y-auto p-4">
+            <div class="grid gap-3 lg:grid-cols-[280px_minmax(0,1fr)]">
+              <aside class="space-y-3">
+                <section class="rounded-lg border bg-background p-3">
+                  <div class="mb-2 text-sm font-semibold">{{ adminText('k00br') }}</div>
+                  <div class="divide-y">
+                    <label class="flex items-center justify-between gap-3 py-2.5">
+                      <span class="min-w-0">
+                        <span class="block text-sm font-medium">{{ adminText('k00br') }}</span>
+                        <span class="text-xs text-muted-foreground">{{ form.status === 0 ? adminText('k005y') : adminText('k006k') }}</span>
+                      </span>
+                      <Switch :model-value="form.status === 0" @update:model-value="(checked: boolean) => form.status = checked ? 0 : 1" />
                     </label>
-                    <label class="grid gap-1.5 text-sm font-medium">
-                      {{ adminText('k00bs') }}
-                      <select v-model.number="form.validate" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                        <option :value="0">{{ adminText('k006m') }}</option>
-                        <option :value="1">{{ adminText('k006l') }}</option>
-                      </select>
+                    <label class="flex items-center justify-between gap-3 py-2.5">
+                      <span class="min-w-0">
+                        <span class="block text-sm font-medium">{{ adminText('k00bs') }}</span>
+                        <span class="text-xs text-muted-foreground">{{ form.validate === 1 ? adminText('k006l') : adminText('k006m') }}</span>
+                      </span>
+                      <Switch :model-value="form.validate === 1" @update:model-value="(checked: boolean) => form.validate = checked ? 1 : 0" />
                     </label>
-                    <label class="grid gap-1.5 text-sm font-medium">
+                    <div class="grid gap-1.5 py-2.5 text-sm font-medium">
                       {{ adminText('k00bt') }}
-                      <select v-model.number="form.roleId" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                        <option v-for="role in roles" :key="role.value" :value="role.value">{{ role.name }}</option>
-                      </select>
-                    </label>
+                      <Select :model-value="String(form.roleId)" @update:model-value="updateRoleId">
+                        <SelectTrigger class="h-9 w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem v-for="role in roles" :key="role.value" :value="String(role.value)">
+                            {{ role.name }}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </section>
 
-                <section class="rounded-lg border bg-muted/10 p-4">
-                  <div class="mb-3 text-sm font-semibold">{{ adminText('k00bu') }}</div>
+                <section class="rounded-lg border bg-background p-3">
+                  <div class="mb-2 text-sm font-semibold">{{ adminText('k00bu') }}</div>
                   <dl class="grid gap-2 text-sm">
                     <div class="flex justify-between gap-3">
                       <dt class="text-muted-foreground">{{ adminText('k00bv') }}</dt>
@@ -420,8 +434,8 @@ onMounted(() => {
                 </section>
               </aside>
 
-              <section class="rounded-lg border bg-muted/10">
-                <div class="flex items-center justify-between gap-3 border-b px-4 py-3">
+              <section class="rounded-lg border bg-background">
+                <div class="flex items-center justify-between gap-3 border-b px-3 py-2.5">
                   <div>
                     <div class="flex items-center gap-2 text-sm font-semibold">
                       <Award class="size-4 text-muted-foreground" />
@@ -432,11 +446,11 @@ onMounted(() => {
                   <Loader2 v-if="badgeLoading" class="size-4 animate-spin text-muted-foreground" />
                 </div>
 
-                <div class="space-y-4 p-4">
+                <div class="space-y-3 p-3">
                   <div v-if="autoBadges().length" class="space-y-2">
                     <div class="text-xs font-medium text-muted-foreground">{{ adminText('k00bz') }}</div>
                     <div class="flex flex-wrap gap-1.5">
-                      <span v-for="badge in autoBadges()" :key="badge.code" class="rounded-md bg-background px-2 py-1 text-xs text-muted-foreground ring-1 ring-border">
+                      <span v-for="badge in autoBadges()" :key="badge.code" class="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
                         {{ badge.name }}
                       </span>
                     </div>
@@ -448,8 +462,8 @@ onMounted(() => {
                       <button
                         v-for="badge in badgeOptions"
                         :key="badge.code"
-                        class="group relative flex min-h-24 min-w-0 flex-col items-center justify-center gap-1 rounded-md border bg-background p-2 text-center transition-colors hover:bg-muted/50"
-                        :class="selectedBadgeCodes.includes(badge.code) ? 'border-primary bg-primary/5 shadow-xs' : 'border-border'"
+                        class="group relative flex min-h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-md border p-2 text-center transition-colors hover:bg-muted/50"
+                        :class="selectedBadgeCodes.includes(badge.code) ? 'border-primary bg-primary/5 shadow-xs' : 'border-transparent bg-muted/40'"
                         type="button"
                         :title="badge.description || badge.code"
                         @click="toggleBadge(badge.code)"
@@ -465,7 +479,7 @@ onMounted(() => {
                         <span class="absolute right-1.5 top-1.5 grid size-4 place-items-center rounded-full border bg-background text-[10px] font-bold" :class="selectedBadgeCodes.includes(badge.code) ? 'border-primary bg-primary text-primary-foreground' : 'text-transparent'">✓</span>
                       </button>
                     </div>
-                    <div v-else class="rounded-md border border-dashed bg-background p-6 text-center text-sm text-muted-foreground">
+                    <div v-else class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
                       {{ badgeLoading ? adminText('k006q') : adminText('k006r') }}
                     </div>
                   </div>
@@ -474,7 +488,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="flex justify-end gap-2 border-t bg-muted/20 px-5 py-3">
+          <div class="flex justify-end gap-2 border-t bg-muted/20 px-4 py-3">
             <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="editingUser = null">{{ adminText('k009q') }}</button>
             <button class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" type="submit" :disabled="saving">
               {{ saving ? adminText('k005f') : adminText('k006s') }}

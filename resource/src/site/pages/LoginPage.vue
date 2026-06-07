@@ -237,12 +237,39 @@ function errorMessage(err: unknown, fallback: string) {
           </form>
 
           <form v-else-if="mode === 'register'" class="space-y-3.5" @submit.prevent="handleRegister">
-            <input v-model.trim="registerForm.username" class="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.username')" autocomplete="username" />
-            <input v-model.trim="registerForm.email" type="email" class="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.email')" autocomplete="email" />
-            <input v-model="registerForm.password" type="password" class="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.password')" autocomplete="new-password" />
-            <input v-model="registerForm.confirmPassword" type="password" class="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.confirmPassword')" autocomplete="new-password" />
+            <label class="block">
+              <span class="sr-only">{{ t('auth.username') }}</span>
+              <span class="relative block">
+                <UserRound class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input v-model.trim="registerForm.username" class="h-10 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.username')" autocomplete="username" />
+              </span>
+            </label>
+            <label class="block">
+              <span class="sr-only">{{ t('auth.email') }}</span>
+              <span class="relative block">
+                <Mail class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input v-model.trim="registerForm.email" type="email" class="h-10 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.email')" autocomplete="email" />
+              </span>
+            </label>
+            <label class="block">
+              <span class="sr-only">{{ t('auth.password') }}</span>
+              <span class="relative block">
+                <LockKeyhole class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input v-model="registerForm.password" type="password" class="h-10 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.password')" autocomplete="new-password" />
+              </span>
+            </label>
+            <label class="block">
+              <span class="sr-only">{{ t('auth.confirmPassword') }}</span>
+              <span class="relative block">
+                <LockKeyhole class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input v-model="registerForm.confirmPassword" type="password" class="h-10 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.confirmPassword')" autocomplete="new-password" />
+              </span>
+            </label>
             <div class="flex gap-3">
-              <input v-model.trim="registerForm.captcha" class="h-10 min-w-0 flex-1 rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.captcha')" />
+              <span class="relative min-w-0 flex-1">
+                <Languages class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input v-model.trim="registerForm.captcha" class="h-10 w-full rounded-xl border border-gray-200 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" :placeholder="t('auth.captcha')" />
+              </span>
               <button type="button" class="relative h-10 w-28 overflow-hidden rounded-xl border border-gray-200 bg-gray-50" @click="refreshCaptcha">
                 <LoaderCircle v-if="captchaLoading || !captchaImg" class="mx-auto h-5 w-5 animate-spin text-gray-400" />
                 <img v-else :src="captchaImg" :alt="t('auth.captchaAlt')" class="h-full w-full object-cover" />
