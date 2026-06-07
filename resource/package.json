@@ -25,6 +25,7 @@
     "markdown-it-anchor": "^9.2.0",
     "markdown-it-task-lists": "^2.1.1",
     "motion-v": "^2.2.1",
+    "node-forge": "^1.4.0",
     "reka-ui": "^2.9.8",
     "simple-icons": "^16.20.0",
     "sortablejs": "^1.15.7",
@@ -42,6 +43,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.2",
     "@types/markdown-it": "^14.1.2",
+    "@types/node-forge": "^1.3.14",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "vue-tsc": "^3.1.8"

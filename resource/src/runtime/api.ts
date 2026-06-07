@@ -605,11 +605,22 @@ export async function resetPassword(token: string, newPassword: string): Promise
 }
 
 async function encryptLoginPassword(password: string): Promise<string> {
-  if (!window.crypto?.subtle) {
-    throw new Error(t('api.secureLoginUnsupported'))
-  }
-
   const publicKey = await getLoginPublicKey()
+  const payload = JSON.stringify({
+    password,
+    ts: Date.now(),
+  })
+  if (!window.crypto?.subtle) {
+    return encryptLoginPasswordWithForge(publicKey, payload)
+  }
+  try {
+    return await encryptLoginPasswordWithWebCrypto(publicKey, payload)
+  } catch {
+    return encryptLoginPasswordWithForge(publicKey, payload)
+  }
+}
+
+async function encryptLoginPasswordWithWebCrypto(publicKey: string, payload: string): Promise<string> {
   const key = await window.crypto.subtle.importKey(
     'spki',
     pemToArrayBuffer(publicKey),
@@ -621,10 +632,6 @@ async function encryptLoginPassword(password: string): Promise<string> {
     ['encrypt'],
   )
 
-  const payload = JSON.stringify({
-    password,
-    ts: Date.now(),
-  })
   const encrypted = await window.crypto.subtle.encrypt(
     { name: 'RSA-OAEP' },
     key,
@@ -632,6 +639,18 @@ async function encryptLoginPassword(password: string): Promise<string> {
   )
 
   return arrayBufferToBase64(encrypted)
+}
+
+async function encryptLoginPasswordWithForge(publicKey: string, payload: string): Promise<string> {
+  const { default: forge } = await import('node-forge')
+  const key = forge.pki.publicKeyFromPem(publicKey)
+  const encrypted = key.encrypt(payload, 'RSA-OAEP', {
+    md: forge.md.sha256.create(),
+    mgf1: {
+      md: forge.md.sha256.create(),
+    },
+  })
+  return forge.util.encode64(encrypted)
 }
 
 async function getLoginPublicKey(): Promise<string> {
