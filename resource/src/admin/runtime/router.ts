@@ -1,4 +1,5 @@
 import { adminText } from '@/admin/runtime/i18n-text'
+import { canVisitAdminPath, firstAdminPath } from '@/admin/runtime/access'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const settingsPages = {
@@ -68,4 +69,13 @@ export const adminRouter = createRouter({
       redirect: '/admin',
     },
   ],
+})
+
+adminRouter.beforeEach((to) => {
+  const path = to.path.replace(/\/+$/, '') || '/admin'
+  if (canVisitAdminPath(path)) {
+    return true
+  }
+  const fallback = firstAdminPath()
+  return fallback === path ? true : fallback
 })

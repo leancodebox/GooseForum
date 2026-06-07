@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -30,6 +31,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
+	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -139,13 +141,14 @@ type SitePayload struct {
 }
 
 type ViewerPayload struct {
-	ID                        uint64 `json:"id"`
-	Username                  string `json:"username"`
-	Email                     string `json:"email"`
-	AvatarURL                 string `json:"avatarUrl"`
-	IsAuthenticated           bool   `json:"isAuthenticated"`
-	IsAdmin                   bool   `json:"isAdmin"`
-	RequiresEmailVerification bool   `json:"requiresEmailVerification"`
+	ID                        uint64   `json:"id"`
+	Username                  string   `json:"username"`
+	Email                     string   `json:"email"`
+	AvatarURL                 string   `json:"avatarUrl"`
+	IsAuthenticated           bool     `json:"isAuthenticated"`
+	IsAdmin                   bool     `json:"isAdmin"`
+	RequiresEmailVerification bool     `json:"requiresEmailVerification"`
+	AdminPermissions          []uint64 `json:"adminPermissions"`
 }
 
 type NavItemPayload struct {
@@ -522,6 +525,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			IsAuthenticated:           currentUser.UserId > 0,
 			IsAdmin:                   currentUser.IsAdmin,
 			RequiresEmailVerification: currentUser.UserId > 0 && securityConfig.EnableEmailVerification && currentUser.IsActivated == users.ActivationPending,
+			AdminPermissions:          buildAdminPermissions(currentUser.UserId),
 		}
 	}
 	unread := buildUnreadStatus(viewer.ID)
@@ -553,6 +557,24 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 		},
 		Unread: unread,
 	}
+}
+
+func buildAdminPermissions(userID uint64) []uint64 {
+	roleID, ok := userservice.GetUserRoleId(userID)
+	if !ok || roleID == 0 {
+		return []uint64{}
+	}
+	items := permission.GetPermissionByRoleId(roleID)
+	if slices.Contains(items, permission.Admin) {
+		items = permission.All()
+	}
+	all := permission.All()
+	items = lo.Filter(items, func(item permission.Enum, _ int) bool {
+		return slices.Contains(all, item)
+	})
+	return lo.Map(items, func(item permission.Enum, _ int) uint64 {
+		return item.Id()
+	})
 }
 
 func buildUnreadStatus(userID uint64) UnreadStatusPayload {

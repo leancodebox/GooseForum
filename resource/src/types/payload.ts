@@ -85,6 +85,7 @@ export interface ViewerPayload {
   isAuthenticated: boolean
   isAdmin: boolean
   requiresEmailVerification: boolean
+  adminPermissions: number[]
 }
 
 export interface CategoryNavPayload {

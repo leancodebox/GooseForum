@@ -34,6 +34,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import type { LayoutPayload } from '@/types/payload'
 import type { LucideIcon } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { AdminPermission, hasAdminPermission } from '@/admin/runtime/access'
 
 defineProps<{
   layout: LayoutPayload
@@ -47,6 +48,7 @@ interface NavItem {
   title: string
   url: string
   icon: LucideIcon
+  permission?: AdminPermission
   active?: boolean
   external?: boolean
   items?: NavItem[]
@@ -63,28 +65,31 @@ const navGroups = computed<NavGroup[]>(() => {
   {
     title: 'GooseForum',
     items: [
-      { title: adminText('k004c'), url: '/admin', icon: Monitor },
-      { title: adminText('k006i'), url: '/admin/users', icon: UserCog },
-      { title: adminText('k007f'), url: '/admin/roles', icon: ShieldCheck },
-      { title: adminText('k005l'), url: '/admin/categories', icon: Tags },
-      { title: adminText('k005u'), url: '/admin/posts', icon: FileText },
-      { title: adminText('k002j'), url: '/admin/links', icon: Link },
-      { title: adminText('k004o'), url: '/admin/sponsors', icon: Heart },
-      { title: adminText('k0058'), url: '/admin/badges', icon: Award },
-      { title: adminText('k007c'), url: '/admin/opt-records', icon: ListChecks },
+      { title: adminText('k004c'), url: '/admin', icon: Monitor, permission: AdminPermission.Admin },
+      { title: adminText('k006i'), url: '/admin/users', icon: UserCog, permission: AdminPermission.UserManager },
+      { title: adminText('k007f'), url: '/admin/roles', icon: ShieldCheck, permission: AdminPermission.RoleManager },
+      { title: adminText('k005l'), url: '/admin/categories', icon: Tags, permission: AdminPermission.ArticlesManager },
+      { title: adminText('k005u'), url: '/admin/posts', icon: FileText, permission: AdminPermission.ArticlesManager },
+      { title: adminText('k002j'), url: '/admin/links', icon: Link, permission: AdminPermission.SiteManager },
+      { title: adminText('k004o'), url: '/admin/sponsors', icon: Heart, permission: AdminPermission.SiteManager },
+      { title: adminText('k0058'), url: '/admin/badges', icon: Award, permission: AdminPermission.SiteManager },
+      { title: adminText('k007c'), url: '/admin/opt-records', icon: ListChecks, permission: AdminPermission.Admin },
     ],
   },
   {
     title: adminText('k007t'),
     items: [
-      { title: adminText('k007u'), url: '/admin/settings/site-info', icon: PanelsTopLeft },
-      { title: adminText('k007v'), url: '/admin/settings/mail', icon: Mail },
-      { title: adminText('k0005'), url: '/admin/settings/security', icon: ShieldCheck },
-      { title: adminText('k007w'), url: '/admin/settings/posting', icon: FileText },
-      { title: adminText('k0009'), url: '/admin/settings/announcement', icon: Megaphone },
+      { title: adminText('k007u'), url: '/admin/settings/site-info', icon: PanelsTopLeft, permission: AdminPermission.SiteManager },
+      { title: adminText('k007v'), url: '/admin/settings/mail', icon: Mail, permission: AdminPermission.SiteManager },
+      { title: adminText('k0005'), url: '/admin/settings/security', icon: ShieldCheck, permission: AdminPermission.SiteManager },
+      { title: adminText('k007w'), url: '/admin/settings/posting', icon: FileText, permission: AdminPermission.SiteManager },
+      { title: adminText('k0009'), url: '/admin/settings/announcement', icon: Megaphone, permission: AdminPermission.SiteManager },
     ],
   },
-  ]
+  ].map(group => ({
+    ...group,
+    items: group.items.filter(item => item.permission === undefined || hasAdminPermission(item.permission)),
+  })).filter(group => group.items.length > 0)
 })
 
 function isActive(item: NavItem) {

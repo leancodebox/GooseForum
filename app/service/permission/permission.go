@@ -53,6 +53,12 @@ func BuildOptions() []datastruct.Option[string, Enum] {
 	})
 }
 
+func All() []Enum {
+	return lo.Map(lo.RangeFrom(int(Admin), int(SiteManager-Admin+1)), func(i int, _ int) Enum {
+		return Enum(i)
+	})
+}
+
 // GetPermissionByRoleId 获取单个角色的权限（带缓存）
 func GetPermissionByRoleId(roleId uint64) []Enum {
 	key := fmt.Sprintf("role_permission:%d", roleId)
@@ -76,6 +82,16 @@ func CheckRole(roleId uint64, permission Enum) bool {
 		return false
 	}
 	return slices.Contains(pList, permission) || slices.Contains(pList, Admin)
+}
+
+func CheckAnyRole(roleId uint64) bool {
+	all := All()
+	for _, item := range GetPermissionByRoleId(roleId) {
+		if slices.Contains(all, item) {
+			return true
+		}
+	}
+	return false
 }
 
 // GetPermission 获取权限 (兼容旧接口)

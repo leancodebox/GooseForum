@@ -6,8 +6,10 @@ import 'vue-sonner/style.css'
 import { readAdminPayload } from '@/admin/runtime/payload'
 import { adminRouter } from '@/admin/runtime/router'
 import { i18n } from '@/runtime/i18n'
+import { configureAdminAccess } from '@/admin/runtime/access'
 
 const payload = readAdminPayload()
+configureAdminAccess(payload.layout.viewer.adminPermissions)
 
 document.documentElement.lang = document.documentElement.lang || 'zh-CN'
 

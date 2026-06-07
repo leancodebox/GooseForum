@@ -11,28 +11,9 @@ import (
 
 func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userId := c.GetUint64("userId")
-		if userId == 0 {
-			c.JSON(http.StatusUnauthorized, component.FailDataCode(component.MessageAuthRequired, nil))
-			c.Abort()
+		roleId, ok := resolveRoleId(c)
+		if !ok {
 			return
-		}
-
-		var roleId uint64
-		// 尝试从 Context 获取 RoleId
-		if val, exists := c.Get("roleId"); exists {
-			roleId = val.(uint64)
-		}
-
-		// 如果 roleId 为 0，回退到用户信息缓存
-		if roleId == 0 {
-			var ok bool
-			roleId, ok = userservice.GetUserRoleId(userId)
-			if !ok {
-				c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionResolveFailed, nil))
-				c.Abort()
-				return
-			}
 		}
 
 		if !permission.CheckRole(roleId, permissionType) {
@@ -44,6 +25,19 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+func CheckAnyPermission(c *gin.Context) {
+	roleId, ok := resolveRoleId(c)
+	if !ok {
+		return
+	}
+	if !permission.CheckAnyRole(roleId) {
+		c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionDenied, nil))
+		c.Abort()
+		return
+	}
+	c.Next()
 }
 
 func CheckPermissionOrNoUser(permissionType permission.Enum) gin.HandlerFunc {
@@ -75,4 +69,27 @@ func CheckPermissionOrNoUser(permissionType permission.Enum) gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+func resolveRoleId(c *gin.Context) (uint64, bool) {
+	userId := c.GetUint64("userId")
+	if userId == 0 {
+		c.JSON(http.StatusUnauthorized, component.FailDataCode(component.MessageAuthRequired, nil))
+		c.Abort()
+		return 0, false
+	}
+
+	if val, exists := c.Get("roleId"); exists {
+		if roleId, ok := val.(uint64); ok && roleId != 0 {
+			return roleId, true
+		}
+	}
+
+	roleId, ok := userservice.GetUserRoleId(userId)
+	if !ok {
+		c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionResolveFailed, nil))
+		c.Abort()
+		return 0, false
+	}
+	return roleId, true
 }

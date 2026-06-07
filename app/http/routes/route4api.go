@@ -70,8 +70,8 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/notifications", middleware.CheckLogin, forum.Notifications)
 	viewRouteApp.GET("/publish", middleware.CheckLogin, forum.Publish)
 	viewRouteApp.GET("/search", forum.Search)
-	viewRouteApp.GET("/admin", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), forum.Manage)
-	viewRouteApp.GET("/admin/*path", middleware.CheckLogin, middleware.CheckPermission(permission.Admin), forum.Manage)
+	viewRouteApp.GET("/admin", middleware.CheckLogin, middleware.CheckAnyPermission, forum.Manage)
+	viewRouteApp.GET("/admin/*path", middleware.CheckLogin, middleware.CheckAnyPermission, forum.Manage)
 	viewRouteApp.GET("/login", forum.Login)
 	viewRouteApp.GET("/reset-password", forum.ResetPassword)
 
@@ -137,7 +137,7 @@ func apiRoute(ginApp *gin.Engine) {
 
 	adminApi := baseApi.Group("admin", middleware.JWTAuthCheck)
 
-	adminApi.POST("traffic-overview", UpButterReq(api.GetTrafficOverview))
+	adminApi.POST("traffic-overview", middleware.CheckPermission(permission.Admin), UpButterReq(api.GetTrafficOverview))
 
 	adminApi.
 		Group("", middleware.CheckPermission(permission.UserManager)).
