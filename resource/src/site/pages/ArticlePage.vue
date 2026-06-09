@@ -54,10 +54,12 @@ const successMessage = ref('')
 const inlineReplyErrors = reactive<Record<number, string>>({})
 const editReplyContents = reactive<Record<number, string>>({})
 const editReplyErrors = reactive<Record<number, string>>({})
+const articleHeaderEl = ref<HTMLElement | null>(null)
 const titleEl = ref<HTMLElement | null>(null)
 const replyEditorEl = ref<HTMLTextAreaElement | null>(null)
 const replySectionEl = ref<HTMLElement | null>(null)
 const replyLoadMoreEl = ref<HTMLElement | null>(null)
+const articleRailTopOffset = ref(0)
 const showHeaderTitle = ref(false)
 const isMobileHeaderViewport = ref(false)
 const mobileHeaderTitleVisible = ref(false)
@@ -110,6 +112,7 @@ const floatingArticleActions = computed(() => [
 ])
 const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
+let articleHeaderResizeObserver: ResizeObserver | undefined
 let replyEditorObserver: IntersectionObserver | undefined
 let replyLoadObserver: IntersectionObserver | undefined
 let replyVisibilityObserver: IntersectionObserver | undefined
@@ -123,6 +126,26 @@ let replyVisibilityResumeTimer: number | undefined
 let replyBottomLoadFrame = 0
 let pendingReplyJumpNo: number | null = null
 const visibleReplyRatios = new Map<number, number>()
+
+function updateArticleRailTopOffset() {
+  if (!articleHeaderEl.value) {
+    articleRailTopOffset.value = 0
+    return
+  }
+
+  const style = window.getComputedStyle(articleHeaderEl.value)
+  articleRailTopOffset.value = Math.ceil(articleHeaderEl.value.offsetHeight + (Number.parseFloat(style.marginBottom) || 0))
+}
+
+function observeArticleHeader() {
+  articleHeaderResizeObserver?.disconnect()
+  updateArticleRailTopOffset()
+
+  if (!articleHeaderEl.value || !('ResizeObserver' in window)) return
+
+  articleHeaderResizeObserver = new ResizeObserver(updateArticleRailTopOffset)
+  articleHeaderResizeObserver.observe(articleHeaderEl.value)
+}
 
 function observeTitle() {
   titleObserver?.disconnect()
@@ -141,6 +164,7 @@ function observeTitle() {
 
 onMounted(() => {
   setupHeaderTitleBehavior()
+  void nextTick(observeArticleHeader)
   void nextTick(observeTitle)
   void nextTick(observeReplyEditor)
   void nextTick(observeReplyLoader)
@@ -162,6 +186,7 @@ watch(
     }
     resetRepliesFromProps()
     mobileReplyRailOpen.value = false
+    void nextTick(observeArticleHeader)
     void nextTick(observeTitle)
     void nextTick(observeReplyEditor)
     void nextTick(observeReplyLoader)
@@ -194,11 +219,13 @@ watch(
 
 onBeforeUnmount(() => {
   titleObserver?.disconnect()
+  articleHeaderResizeObserver?.disconnect()
   replyEditorObserver?.disconnect()
   replyLoadObserver?.disconnect()
   replyVisibilityObserver?.disconnect()
   window.removeEventListener('scroll', updateMobileHeaderTitle)
   window.removeEventListener('scroll', scheduleReplyBottomLoadCheck)
+  window.removeEventListener('resize', updateArticleRailTopOffset)
   window.removeEventListener('resize', updateHeaderViewport)
   window.removeEventListener('resize', scheduleReplyBottomLoadCheck)
   window.cancelAnimationFrame(headerScrollFrame)
@@ -215,6 +242,7 @@ function setupHeaderTitleBehavior() {
   lastHeaderScrollY = window.scrollY
   updateHeaderViewport()
   window.addEventListener('scroll', updateMobileHeaderTitle, { passive: true })
+  window.addEventListener('resize', updateArticleRailTopOffset)
   window.addEventListener('resize', updateHeaderViewport)
 }
 
@@ -1042,7 +1070,7 @@ async function removeReply(replyId: number) {
 <template>
   <div class="pb-20 xl:pb-0">
     <article class="min-w-0">
-      <header class="mb-4 border-b border-gray-200/70 pb-4">
+      <header ref="articleHeaderEl" class="relative z-10 mb-4 border-b border-gray-200/70 pb-4 xl:w-[calc(100%+292px)]">
         <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-gray-950 [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.article.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-gray-500">
           <a
@@ -1496,7 +1524,10 @@ async function removeReply(replyId: number) {
     </Teleport>
 
     <Teleport defer to="#goose-shell-rail">
-      <div class="sticky top-19 space-y-3">
+      <div
+        class="sticky top-19 space-y-3"
+        :style="{ marginTop: `${articleRailTopOffset}px` }"
+      >
         <div class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
           <div class="border-b border-gray-100 px-4 py-4">
             <h2 class="text-sm font-semibold text-gray-500">{{ t('article.overview') }}</h2>
