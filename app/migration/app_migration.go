@@ -24,5 +24,15 @@ func RunAppMigrations() {
 		pageConfig.SyncMigrationVersion(1)
 		currentVersion = 1
 	}
+	if currentVersion < 2 {
+		result := datamigration.BackfillReplySequence()
+		slog.Info("app migration backfill reply sequence done", "articles", result.Articles, "replies", result.Replies, "skipped", result.Skipped, "failed", result.Failed)
+		if result.Failed > 0 {
+			slog.Error("app migration backfill reply sequence has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(2)
+		currentVersion = 2
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

@@ -42,11 +42,13 @@ async function readApiSuccessMessage(response: Response, successFallback: string
 
 export interface PostReplyResult {
   id: number
+  replyNo?: number
   renderedContent: string
 }
 
 export interface UpdateReplyResult {
   id: number
+  replyNo?: number
   content: string
   renderedContent: string
   updatedAt: string
@@ -97,9 +99,13 @@ export async function deleteReply(replyId: number): Promise<boolean> {
 export interface ReplyWindowInput {
   articleId: number
   anchorReplyId?: number
+  anchorReplyNo?: number
   before?: number
   after?: number
+  beforeReplyNo?: number
+  afterReplyNo?: number
   limit?: number
+  tail?: boolean
 }
 
 export async function getArticleRepliesWindow(input: ReplyWindowInput): Promise<ReplyWindowPayload> {
@@ -107,9 +113,13 @@ export async function getArticleRepliesWindow(input: ReplyWindowInput): Promise<
     articleId: String(input.articleId),
   })
   if (input.anchorReplyId) params.set('anchorReplyId', String(input.anchorReplyId))
+  if (input.anchorReplyNo) params.set('anchorReplyNo', String(input.anchorReplyNo))
   if (input.before) params.set('before', String(input.before))
   if (input.after) params.set('after', String(input.after))
+  if (input.beforeReplyNo) params.set('beforeReplyNo', String(input.beforeReplyNo))
+  if (input.afterReplyNo) params.set('afterReplyNo', String(input.afterReplyNo))
   if (input.limit) params.set('limit', String(input.limit))
+  if (input.tail) params.set('tail', 'true')
 
   const response = await fetch(`/api/forum/article-replies-window?${params.toString()}`, {
     headers: {

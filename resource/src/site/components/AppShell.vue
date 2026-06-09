@@ -585,6 +585,11 @@ async function loadUserHoverCard() {
       <aside v-if="rail" id="goose-shell-rail" class="hidden min-w-0 xl:block">
         <slot name="rail" />
       </aside>
+
+      <section
+        id="goose-shell-wide-content"
+        class="min-w-0 empty:hidden lg:col-start-2 lg:row-start-2 xl:col-start-2 xl:col-span-2"
+      />
     </main>
 
     <MobileDrawer

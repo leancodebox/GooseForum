@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"log/slog"
 	"strings"
 	"time"
 
@@ -14,13 +13,13 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleWatch"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/GooseForum/app/models/forum/articlesUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
+	"github.com/leancodebox/GooseForum/app/service/replyservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
 )
@@ -253,8 +252,12 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	if req.Params.ReplyId > 0 && reply.Get(req.Params.ReplyId).Id == 0 {
-		return component.FailResponseCode(component.MessageCommentReplyTargetMissed, nil)
+	var parentReply reply.Entity
+	if req.Params.ReplyId > 0 {
+		parentReply = reply.Get(req.Params.ReplyId)
+		if parentReply.Id == 0 || parentReply.ArticleId != req.Params.ArticleId {
+			return component.FailResponseCode(component.MessageCommentReplyTargetMissed, nil)
+		}
 	}
 
 	replyEntity := &reply.Entity{
@@ -266,7 +269,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		ReplyId:         req.Params.ReplyId,
 	}
 
-	err = reply.Create(replyEntity)
+	err = replyservice.CreateArticleReply(replyEntity, articleEntity)
 	if err != nil {
 		return component.FailResponseCode(
 			component.MessageCommentCreateFailed,
@@ -276,12 +279,10 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	}
 	userStatistics.WriteComment(req.UserId)
 	userservice.InvalidateUserPublicProfileCache(req.UserId)
-	updateArticleStat(articleEntity, req.UserId, false)
 
 	// 获取父评论作者ID
 	var parentReplyAuthorId uint64
 	if req.Params.ReplyId > 0 {
-		parentReply := reply.Get(req.Params.ReplyId)
 		parentReplyAuthorId = parentReply.UserId
 	}
 
@@ -298,6 +299,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 
 	return component.SuccessResponse(map[string]any{
 		"id":              replyEntity.Id,
+		"replyNo":         replyEntity.ReplyNo,
 		"renderedContent": replyEntity.RenderedHTML,
 	})
 }
@@ -354,6 +356,7 @@ func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response
 
 	return component.SuccessResponse(map[string]any{
 		"id":              replyEntity.Id,
+		"replyNo":         replyEntity.ReplyNo,
 		"content":         replyEntity.Content,
 		"renderedContent": replyEntity.RenderedHTML,
 		"updatedAt":       replyEntity.UpdatedAt.Format(time.DateTime),
@@ -371,45 +374,9 @@ func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response 
 	reply.DeleteEntity(&replyEntity)
 	articleEntity := articles.GetSimple(replyEntity.ArticleId)
 	if articleEntity.Id > 0 {
-		updateArticleStat(articleEntity, req.UserId, true)
+		replyservice.SyncArticleReplyStats(articleEntity, req.UserId, true)
 	}
 	return component.SuccessResponse(true)
-}
-
-func updateArticleStat(article articles.SmallEntity, userId uint64, isDelete bool) {
-	if isDelete {
-		if err := articlesUserStat.DecrementUserReply(article.Id, userId); err != nil {
-			slog.Error("failed to decrement user reply stat", "articleId", article.Id, "userId", userId, "err", err)
-		}
-	} else {
-		if err := articlesUserStat.IncrementUserReply(article.Id, userId); err != nil {
-			slog.Error("failed to increment user reply stat", "articleId", article.Id, "userId", userId, "err", err)
-		}
-	}
-	list := articlesUserStat.SyncArticlePosters(article.Id)
-
-	// 过滤掉作者ID，避免重复
-	filteredList := lo.Filter(list, func(t uint64, _ int) bool {
-		return t != article.UserId
-	})
-
-	// 将作者ID放到第一位
-	finalList := append([]uint64{article.UserId}, filteredList...)
-
-	pList := lo.Map(finalList, func(t uint64, _ int) articles.Poster {
-		return articles.Poster{
-			UserID: t,
-		}
-	})
-	if isDelete {
-		if err := articles.DecrementReplyFast(article.Id, pList); err != nil {
-			slog.Error("failed to decrement article reply count", "articleId", article.Id, "err", err)
-		}
-	} else {
-		if err := articles.IncrementReplyFast(article.Id, pList); err != nil {
-			slog.Error("failed to increment article reply count", "articleId", article.Id, "err", err)
-		}
-	}
 }
 
 type LikeArticleReq struct {

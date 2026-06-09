@@ -252,6 +252,7 @@ type ArticlePayload struct {
 	Participants  []TopicAuthorPayload   `json:"participants"`
 	Categories    []TopicCategoryPayload `json:"categories"`
 	ReplyCount    uint64                 `json:"replyCount"`
+	MaxReplyNo    uint64                 `json:"maxReplyNo"`
 	ViewCount     uint64                 `json:"viewCount"`
 	LikeCount     uint64                 `json:"likeCount"`
 	IsLiked       bool                   `json:"isLiked"`
@@ -264,6 +265,7 @@ type ArticlePayload struct {
 type ReplyPayload struct {
 	ID              uint64             `json:"id"`
 	ArticleID       uint64             `json:"articleId"`
+	ReplyNo         uint64             `json:"replyNo"`
 	Content         string             `json:"content"`
 	RenderedContent string             `json:"renderedContent"`
 	Author          TopicAuthorPayload `json:"author"`
@@ -280,9 +282,12 @@ type ReplyWindowPayload struct {
 	AnchorReplyID uint64         `json:"anchorReplyId,omitempty"`
 	BeforeCursor  uint64         `json:"beforeCursor,omitempty"`
 	AfterCursor   uint64         `json:"afterCursor,omitempty"`
+	BeforeReplyNo uint64         `json:"beforeReplyNo,omitempty"`
+	AfterReplyNo  uint64         `json:"afterReplyNo,omitempty"`
 	HasBefore     bool           `json:"hasBefore"`
 	HasAfter      bool           `json:"hasAfter"`
 	Total         int64          `json:"total"`
+	MaxReplyNo    uint64         `json:"maxReplyNo"`
 }
 
 type ArticlePermissions struct {
@@ -871,6 +876,7 @@ func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users
 		res = append(res, ReplyPayload{
 			ID:              item.Id,
 			ArticleID:       item.ArticleId,
+			ReplyNo:         item.ReplyNo,
 			Content:         item.Content,
 			RenderedContent: item.RenderedHTML,
 			Author:          author,
@@ -940,6 +946,7 @@ func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[ui
 		Participants:  participants,
 		Categories:    categoryPayloads(entity.CategoryId),
 		ReplyCount:    entity.ReplyCount,
+		MaxReplyNo:    entity.ReplySeq,
 		ViewCount:     entity.ViewCount,
 		LikeCount:     entity.LikeCount,
 		IsLiked:       isLiked,

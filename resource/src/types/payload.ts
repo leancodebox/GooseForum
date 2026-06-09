@@ -155,6 +155,7 @@ export interface ArticlePayload {
   participants: Array<{ id: number; username: string; avatarUrl: string }>
   categories: Array<{ id: number; name: string; url: string; color: string }>
   replyCount: number
+  maxReplyNo: number
   viewCount: number
   likeCount: number
   isLiked: boolean
@@ -167,6 +168,7 @@ export interface ArticlePayload {
 export interface ReplyPayload {
   id: number
   articleId: number
+  replyNo: number
   content: string
   renderedContent: string
   author: {
@@ -187,9 +189,12 @@ export interface ReplyWindowPayload {
   anchorReplyId?: number
   beforeCursor?: number
   afterCursor?: number
+  beforeReplyNo?: number
+  afterReplyNo?: number
   hasBefore: boolean
   hasAfter: boolean
   total: number
+  maxReplyNo: number
 }
 
 export interface TopicPayload {

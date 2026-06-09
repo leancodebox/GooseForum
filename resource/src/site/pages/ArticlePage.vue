@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
-import { AlertTriangle, Bell, Bookmark, Check, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
+import { AlertTriangle, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
 import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateReply, watchArticle } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
+import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { ArticleDetailProps, LayoutPayload, ReplyPayload } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
@@ -39,8 +40,13 @@ const replyHasBefore = ref(false)
 const replyHasAfter = ref(hasMoreInitialReplies())
 const replyBeforeCursor = ref(firstReplyId(page.props.replies))
 const replyAfterCursor = ref(lastReplyId(page.props.replies))
+const replyBeforeReplyNo = ref(firstReplyNo(page.props.replies))
+const replyAfterReplyNo = ref(lastReplyNo(page.props.replies))
+const replyMaxNo = ref(initialMaxReplyNo())
+const replyTailLoaded = ref(!hasMoreInitialReplies())
+const replyAutoLoadAfter = ref(true)
 const loadingReplyWindow = ref(false)
-const loadingReplyDirection = ref<'before' | 'after' | 'anchor' | null>(null)
+const loadingReplyDirection = ref<'before' | 'after' | 'anchor' | 'tail' | null>(null)
 const replyWindowError = ref('')
 const deleteErrorMessage = ref('')
 const errorMessage = ref('')
@@ -58,6 +64,21 @@ const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const showFloatingReply = ref(false)
 const floatingReplyExpanded = ref(false)
+const mobileReplyRailOpen = ref(false)
+const activeReplyNo = ref(firstReplyNo(page.props.replies))
+const replyMaxRange = computed(() => Math.max(replyMaxNo.value, ...replies.value.map((reply) => reply.replyNo || 0)))
+const hasReplyRail = computed(() => page.props.article.replyCount > 0 && replyMaxRange.value > 0)
+const replyRailCurrentNo = computed(() => {
+  const fallback = firstReplyNo(replies.value) || 1
+  return clampReplyNo(activeReplyNo.value || fallback)
+})
+const replyRailCurrentLabel = computed(() => {
+  const activeReply = replies.value.find((reply) => reply.replyNo === replyRailCurrentNo.value)
+  return activeReply ? formatRailDate(activeReply.createdAt) : ''
+})
+const replyRailStartLabel = computed(() => formatRailDate(page.props.article.createdAt))
+const replyRailEndLabel = computed(() => formatRailDate(page.props.article.updatedAt))
+const replyRailBusy = computed(() => loadingReplyWindow.value && (loadingReplyDirection.value === 'anchor' || loadingReplyDirection.value === 'tail'))
 const floatingArticleActions = computed(() => [
   {
     key: 'like',
@@ -91,10 +112,17 @@ const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
 let replyEditorObserver: IntersectionObserver | undefined
 let replyLoadObserver: IntersectionObserver | undefined
+let replyVisibilityObserver: IntersectionObserver | undefined
 let lastHeaderScrollY = 0
 let headerScrollFrame = 0
 const highlightedReplyId = ref<number | null>(null)
 let highlightTimer: number | undefined
+let replyVisibilityFrame = 0
+let replyVisibilityPaused = false
+let replyVisibilityResumeTimer: number | undefined
+let replyBottomLoadFrame = 0
+let pendingReplyJumpNo: number | null = null
+const visibleReplyRatios = new Map<number, number>()
 
 function observeTitle() {
   titleObserver?.disconnect()
@@ -116,6 +144,8 @@ onMounted(() => {
   void nextTick(observeTitle)
   void nextTick(observeReplyEditor)
   void nextTick(observeReplyLoader)
+  void nextTick(scheduleObserveReplyVisibility)
+  setupReplyBottomLoadFallback()
   void syncReplyHash()
 })
 
@@ -131,9 +161,11 @@ watch(
       lastHeaderScrollY = window.scrollY
     }
     resetRepliesFromProps()
+    mobileReplyRailOpen.value = false
     void nextTick(observeTitle)
     void nextTick(observeReplyEditor)
     void nextTick(observeReplyLoader)
+    void nextTick(scheduleObserveReplyVisibility)
     void nextTick(syncReplyHash)
   },
   { immediate: true },
@@ -153,13 +185,26 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => replies.value.map((reply) => `${reply.id}:${reply.replyNo}`).join(','),
+  () => {
+    void nextTick(scheduleObserveReplyVisibility)
+  },
+)
+
 onBeforeUnmount(() => {
   titleObserver?.disconnect()
   replyEditorObserver?.disconnect()
   replyLoadObserver?.disconnect()
+  replyVisibilityObserver?.disconnect()
   window.removeEventListener('scroll', updateMobileHeaderTitle)
+  window.removeEventListener('scroll', scheduleReplyBottomLoadCheck)
   window.removeEventListener('resize', updateHeaderViewport)
+  window.removeEventListener('resize', scheduleReplyBottomLoadCheck)
   window.cancelAnimationFrame(headerScrollFrame)
+  window.cancelAnimationFrame(replyVisibilityFrame)
+  window.cancelAnimationFrame(replyBottomLoadFrame)
+  window.clearTimeout(replyVisibilityResumeTimer)
   window.clearTimeout(highlightTimer)
   shellState.headerTitle = ''
   shellState.headerTags = []
@@ -171,6 +216,42 @@ function setupHeaderTitleBehavior() {
   updateHeaderViewport()
   window.addEventListener('scroll', updateMobileHeaderTitle, { passive: true })
   window.addEventListener('resize', updateHeaderViewport)
+}
+
+function setupReplyBottomLoadFallback() {
+  window.addEventListener('scroll', scheduleReplyBottomLoadCheck, { passive: true })
+  window.addEventListener('resize', scheduleReplyBottomLoadCheck)
+}
+
+function scheduleReplyBottomLoadCheck() {
+  if (replyBottomLoadFrame) return
+  replyBottomLoadFrame = window.requestAnimationFrame(() => {
+    replyBottomLoadFrame = 0
+    void maybeLoadRepliesAtPageBottom()
+  })
+}
+
+function isNearDocumentBottom() {
+  const documentElement = document.documentElement
+  const fullHeight = Math.max(documentElement.scrollHeight, document.body?.scrollHeight || 0)
+  return fullHeight - (window.scrollY + window.innerHeight) <= 480
+}
+
+async function maybeLoadRepliesAtPageBottom() {
+  if (!replyHasAfter.value || loadingReplyWindow.value || replyWindowError.value) return
+  if (!isNearDocumentBottom()) return
+
+  replyAutoLoadAfter.value = true
+  await loadReplyWindow('after')
+  await nextTick()
+  if (replyHasAfter.value && isNearDocumentBottom()) {
+    scheduleReplyBottomLoadCheck()
+  }
+}
+
+async function loadMoreRepliesManually() {
+  replyAutoLoadAfter.value = true
+  await loadReplyWindow('after')
 }
 
 function updateHeaderViewport() {
@@ -221,17 +302,105 @@ function observeReplyEditor() {
 
 function observeReplyLoader() {
   replyLoadObserver?.disconnect()
-  if (!replyLoadMoreEl.value || !replyHasAfter.value || !('IntersectionObserver' in window)) return
+  if (!replyLoadMoreEl.value || !replyHasAfter.value || !replyAutoLoadAfter.value || !('IntersectionObserver' in window)) return
 
   replyLoadObserver = new IntersectionObserver(
     (entries) => {
-      if (entries[0]?.isIntersecting && replyHasAfter.value && !loadingReplyWindow.value && !replyWindowError.value) {
+      if (entries[0]?.isIntersecting && replyHasAfter.value && replyAutoLoadAfter.value && !loadingReplyWindow.value && !replyWindowError.value) {
         void loadReplyWindow('after')
       }
     },
     { rootMargin: '360px 0px' },
   )
   replyLoadObserver.observe(replyLoadMoreEl.value)
+}
+
+function scheduleObserveReplyVisibility() {
+  if (replyVisibilityPaused) return
+  if (replyVisibilityFrame) return
+  replyVisibilityFrame = window.requestAnimationFrame(() => {
+    replyVisibilityFrame = 0
+    observeReplyVisibility()
+  })
+}
+
+function observeReplyVisibility() {
+  if (replyVisibilityPaused) return
+  replyVisibilityObserver?.disconnect()
+  visibleReplyRatios.clear()
+  if (!('IntersectionObserver' in window)) {
+    activeReplyNo.value = firstReplyNo(replies.value)
+    return
+  }
+
+  const elements = document.querySelectorAll<HTMLElement>('[data-reply-no]')
+  if (!elements.length) {
+    activeReplyNo.value = 0
+    return
+  }
+
+  replyVisibilityObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const replyNo = Number((entry.target as HTMLElement).dataset.replyNo || 0)
+        if (!replyNo) continue
+        if (entry.isIntersecting) {
+          visibleReplyRatios.set(replyNo, entry.intersectionRatio)
+        } else {
+          visibleReplyRatios.delete(replyNo)
+        }
+      }
+
+      const bestReplyNo = findViewportReplyNo()
+      if (bestReplyNo > 0) {
+        activeReplyNo.value = bestReplyNo
+      }
+    },
+    { threshold: [0.05, 0.25, 0.5, 0.75], rootMargin: '-28% 0px -48% 0px' },
+  )
+
+  elements.forEach((element) => replyVisibilityObserver?.observe(element))
+}
+
+function pauseReplyVisibility(duration = 600) {
+  replyVisibilityPaused = true
+  window.clearTimeout(replyVisibilityResumeTimer)
+  replyVisibilityResumeTimer = window.setTimeout(() => {
+    replyVisibilityPaused = false
+    scheduleObserveReplyVisibility()
+  }, duration)
+}
+
+function findViewportReplyNo() {
+  const markerY = Math.min(window.innerHeight * 0.42, 360)
+  let coveringReplyNo = 0
+  let coveringDistance = Number.POSITIVE_INFINITY
+  let nearestReplyNo = 0
+  let nearestDistance = Number.POSITIVE_INFINITY
+
+  for (const replyNo of visibleReplyRatios.keys()) {
+    const element = document.querySelector<HTMLElement>(`[data-reply-no="${replyNo}"]`)
+    if (!element) continue
+    const rect = element.getBoundingClientRect()
+    if (rect.bottom <= 96 || rect.top >= window.innerHeight) continue
+
+    if (rect.top <= markerY && rect.bottom >= markerY) {
+      const distance = Math.abs(rect.top - markerY)
+      if (distance < coveringDistance) {
+        coveringReplyNo = replyNo
+        coveringDistance = distance
+      }
+      continue
+    }
+
+    const distance = Math.abs(rect.top - markerY)
+    if (distance < nearestDistance) {
+      nearestReplyNo = replyNo
+      nearestDistance = distance
+    }
+  }
+
+  return coveringReplyNo || nearestReplyNo
 }
 
 function resetRepliesFromProps() {
@@ -241,6 +410,12 @@ function resetRepliesFromProps() {
   replyHasAfter.value = hasMoreInitialReplies()
   replyBeforeCursor.value = firstReplyId(page.props.replies)
   replyAfterCursor.value = lastReplyId(page.props.replies)
+  replyBeforeReplyNo.value = firstReplyNo(page.props.replies)
+  replyAfterReplyNo.value = lastReplyNo(page.props.replies)
+  replyMaxNo.value = initialMaxReplyNo()
+  replyTailLoaded.value = !hasMoreInitialReplies()
+  replyAutoLoadAfter.value = true
+  activeReplyNo.value = firstReplyNo(page.props.replies)
   replyWindowError.value = ''
   editingReplyId.value = 0
 }
@@ -251,6 +426,48 @@ function firstReplyId(items: ReplyPayload[]) {
 
 function lastReplyId(items: ReplyPayload[]) {
   return items.length ? items[items.length - 1].id : 0
+}
+
+function firstReplyNo(items: ReplyPayload[]) {
+  return items.length ? items[0].replyNo || 0 : 0
+}
+
+function lastReplyNo(items: ReplyPayload[]) {
+  return items.length ? items[items.length - 1].replyNo || 0 : 0
+}
+
+function initialMaxReplyNo() {
+  return Math.max(page.props.article.maxReplyNo || 0, page.props.article.replyCount || 0, lastReplyNo(page.props.replies))
+}
+
+function clampReplyNo(replyNo: number) {
+  const maxReplyNo = Math.max(1, replyMaxRange.value || 1)
+  return Math.min(maxReplyNo, Math.max(1, Math.round(replyNo)))
+}
+
+function findClosestLoadedReply(replyNo: number) {
+  let closest: ReplyPayload | undefined
+  let closestDistance = Number.POSITIVE_INFINITY
+  for (const reply of replies.value) {
+    if (!reply.replyNo) continue
+    const distance = Math.abs(reply.replyNo - replyNo)
+    if (distance < closestDistance) {
+      closest = reply
+      closestDistance = distance
+    }
+  }
+  return closest
+}
+
+function formatRailDate(value: string) {
+  const normalized = value.replace(' ', 'T')
+  const date = new Date(normalized)
+  if (Number.isNaN(date.getTime())) return value.slice(0, 10)
+  const now = new Date()
+  const options: Intl.DateTimeFormatOptions = date.getFullYear() === now.getFullYear()
+    ? { month: 'short', day: 'numeric' }
+    : { year: 'numeric', month: 'short', day: 'numeric' }
+  return new Intl.DateTimeFormat(undefined, options).format(date)
 }
 
 function hasMoreInitialReplies() {
@@ -294,8 +511,46 @@ function mergeReplies(nextReplies: ReplyPayload[], mode: 'replace' | 'prepend' |
   replies.value = mode === 'prepend' ? [...filtered, ...replies.value] : [...replies.value, ...filtered]
 }
 
-async function loadReplyWindow(direction: 'before' | 'after' | 'anchor', anchorReplyId = 0) {
+function applyReplyWindowPayload(
+  payload: Awaited<ReturnType<typeof getArticleRepliesWindow>>,
+  mergeMode: 'replace' | 'prepend' | 'append',
+  forceWindowMode: boolean,
+) {
+  replyWindowMode.value = forceWindowMode || replyWindowMode.value
+  mergeReplies(payload.replies, mergeMode)
+  replyHasBefore.value = replyWindowMode.value ? payload.hasBefore : false
+  replyHasAfter.value = payload.hasAfter
+  replyBeforeCursor.value = payload.beforeCursor ?? firstReplyId(replies.value)
+  replyAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
+  replyBeforeReplyNo.value = payload.beforeReplyNo ?? firstReplyNo(replies.value)
+  replyAfterReplyNo.value = payload.afterReplyNo ?? lastReplyNo(replies.value)
+  replyMaxNo.value = Math.max(replyMaxNo.value, payload.maxReplyNo || 0)
+  if (mergeMode === 'replace') {
+    replyTailLoaded.value = payloadEndsAtTail(payload)
+  } else if (mergeMode === 'append' && payloadEndsAtTail(payload)) {
+    replyTailLoaded.value = true
+  }
+}
+
+function payloadEndsAtTail(payload: Awaited<ReturnType<typeof getArticleRepliesWindow>>) {
+  const afterReplyNo = payload.afterReplyNo || lastReplyNo(payload.replies)
+  const maxReplyNo = Math.max(replyMaxNo.value, payload.maxReplyNo || 0)
+  return payload.replies.length > 0 && !payload.hasAfter && afterReplyNo >= maxReplyNo
+}
+
+function disableReplyAutoLoadAfter() {
+  replyAutoLoadAfter.value = false
+  replyLoadObserver?.disconnect()
+}
+
+async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail', anchorValue = 0) {
   if (loadingReplyWindow.value) return
+  if (direction === 'after' && (!replyHasAfter.value || !replyAutoLoadAfter.value)) return
+  if (direction === 'tail' && replyTailLoaded.value) return
+
+  if (direction !== 'after') {
+    disableReplyAutoLoadAfter()
+  }
 
   const wasWindowMode = replyWindowMode.value
   loadingReplyWindow.value = true
@@ -304,26 +559,138 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor', anchorR
   try {
     const payload = await getArticleRepliesWindow({
       articleId: page.props.article.id,
-      anchorReplyId: direction === 'anchor' ? anchorReplyId : undefined,
-      before: direction === 'before' ? replyBeforeCursor.value : undefined,
-      after: direction === 'after' ? replyAfterCursor.value : undefined,
+      anchorReplyId: direction === 'anchor' ? anchorValue : undefined,
+      beforeReplyNo: direction === 'before' ? replyBeforeReplyNo.value : undefined,
+      afterReplyNo: direction === 'after' ? replyAfterReplyNo.value : undefined,
+      before: direction === 'before' && !replyBeforeReplyNo.value ? replyBeforeCursor.value : undefined,
+      after: direction === 'after' && !replyAfterReplyNo.value ? replyAfterCursor.value : undefined,
+      tail: direction === 'tail',
       limit: 20,
     })
 
-    replyWindowMode.value = direction === 'anchor' || direction === 'before' || wasWindowMode
-    mergeReplies(payload.replies, direction === 'before' ? 'prepend' : direction === 'after' ? 'append' : 'replace')
-    replyHasBefore.value = replyWindowMode.value ? payload.hasBefore : false
-    replyHasAfter.value = payload.hasAfter
-    replyBeforeCursor.value = payload.beforeCursor ?? firstReplyId(replies.value)
-    replyAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
+    applyReplyWindowPayload(
+      payload,
+      direction === 'before' ? 'prepend' : direction === 'after' ? 'append' : 'replace',
+      direction === 'anchor' || direction === 'tail' || direction === 'before' || wasWindowMode,
+    )
+    if (direction === 'after' && !payload.hasAfter) {
+      replyTailLoaded.value = true
+      disableReplyAutoLoadAfter()
+    }
+    if (direction === 'tail') {
+      replyTailLoaded.value = true
+      replyHasAfter.value = false
+      disableReplyAutoLoadAfter()
+    }
+    if (direction === 'before') {
+      activeReplyNo.value = firstReplyNo(payload.replies) || firstReplyNo(replies.value)
+      pauseReplyVisibility(250)
+    } else if (direction === 'tail') {
+      activeReplyNo.value = lastReplyNo(payload.replies) || lastReplyNo(replies.value) || replyMaxRange.value
+      pauseReplyVisibility()
+    }
     await nextTick()
-    observeReplyLoader()
+    if (replyAutoLoadAfter.value) {
+      observeReplyLoader()
+      scheduleObserveReplyVisibility()
+    }
   } catch (error) {
     replyWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
   } finally {
     loadingReplyWindow.value = false
     loadingReplyDirection.value = null
+    flushPendingReplyJump()
   }
+}
+
+async function jumpToReplyNo(replyNo: number) {
+  const target = clampReplyNo(replyNo)
+  if (loadingReplyWindow.value) {
+    pendingReplyJumpNo = target
+    activeReplyNo.value = target
+    return
+  }
+
+  disableReplyAutoLoadAfter()
+  activeReplyNo.value = target
+  pauseReplyVisibility()
+  const loaded = replies.value.find((reply) => reply.replyNo === target)
+  if (loaded) {
+    activeReplyNo.value = loaded.replyNo
+    await nextTick()
+    document.getElementById(`reply-${loaded.id}`)?.scrollIntoView({ block: 'center' })
+    return
+  }
+
+  loadingReplyWindow.value = true
+  loadingReplyDirection.value = 'anchor'
+  replyWindowError.value = ''
+  try {
+    const payload = await getArticleRepliesWindow({
+      articleId: page.props.article.id,
+      anchorReplyNo: target,
+      limit: 20,
+    })
+    applyReplyWindowPayload(payload, 'replace', true)
+    await nextTick()
+    const closest = findClosestLoadedReply(target)
+    if (closest) {
+      activeReplyNo.value = closest.replyNo
+      document.getElementById(`reply-${closest.id}`)?.scrollIntoView({ block: 'center' })
+      pauseReplyVisibility()
+    }
+  } catch (error) {
+    replyWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
+  } finally {
+    loadingReplyWindow.value = false
+    loadingReplyDirection.value = null
+    flushPendingReplyJump()
+  }
+}
+
+async function jumpToLatestReply() {
+  if (!replyMaxRange.value) return
+  if (loadingReplyWindow.value) {
+    pendingReplyJumpNo = replyMaxRange.value
+    activeReplyNo.value = replyMaxRange.value
+    return
+  }
+  disableReplyAutoLoadAfter()
+  activeReplyNo.value = replyMaxRange.value
+  pauseReplyVisibility()
+  if (replyTailLoaded.value) {
+    const latest = replies.value[replies.value.length - 1]
+    if (latest) {
+      activeReplyNo.value = latest.replyNo
+      await nextTick()
+      document.getElementById(`reply-${latest.id}`)?.scrollIntoView({ block: 'center' })
+      pauseReplyVisibility()
+    }
+    return
+  }
+  const loadedLatest = replies.value.find((reply) => reply.replyNo === replyMaxRange.value)
+  if (loadedLatest) {
+    await jumpToReplyNo(loadedLatest.replyNo)
+    return
+  }
+  await loadReplyWindow('tail')
+  await nextTick()
+  const latest = replies.value[replies.value.length - 1]
+  if (latest) {
+    activeReplyNo.value = latest.replyNo
+    document.getElementById(`reply-${latest.id}`)?.scrollIntoView({ block: 'center' })
+  }
+}
+
+function flushPendingReplyJump() {
+  if (!pendingReplyJumpNo || loadingReplyWindow.value) return
+  const replyNo = pendingReplyJumpNo
+  pendingReplyJumpNo = null
+  void jumpToReplyNo(replyNo)
+}
+
+function jumpToArticleBody() {
+  titleEl.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
 }
 
 function focusReplyEditor() {
@@ -332,12 +699,37 @@ function focusReplyEditor() {
 }
 
 function openFloatingReply() {
+  mobileReplyRailOpen.value = false
   floatingReplyExpanded.value = true
   openReplyId.value = null
 }
 
 function closeFloatingReply() {
   floatingReplyExpanded.value = false
+}
+
+function toggleMobileReplyRail() {
+  floatingReplyExpanded.value = false
+  mobileReplyRailOpen.value = !mobileReplyRailOpen.value
+}
+
+function closeMobileReplyRail() {
+  mobileReplyRailOpen.value = false
+}
+
+async function selectReplyFromRail(replyNo: number) {
+  closeMobileReplyRail()
+  await jumpToReplyNo(replyNo)
+}
+
+async function jumpToLatestReplyFromRail() {
+  closeMobileReplyRail()
+  await jumpToLatestReply()
+}
+
+function jumpToArticleBodyFromRail() {
+  closeMobileReplyRail()
+  jumpToArticleBody()
 }
 
 function isElementMostlyVisible(element: HTMLElement) {
@@ -359,7 +751,10 @@ async function revealCreatedReply(reply: ReplyPayload) {
   mergeReplies([reply], 'append')
   replyHasAfter.value = false
   replyAfterCursor.value = Math.max(replyAfterCursor.value, reply.id)
+  replyAfterReplyNo.value = Math.max(replyAfterReplyNo.value, reply.replyNo || 0)
+  replyMaxNo.value = Math.max(replyMaxNo.value, reply.replyNo || 0)
   await nextTick()
+  scheduleObserveReplyVisibility()
   highlightReply(reply.id)
   const element = document.getElementById(`reply-${reply.id}`)
   if (element && !isElementMostlyVisible(element)) {
@@ -367,12 +762,13 @@ async function revealCreatedReply(reply: ReplyPayload) {
   }
 }
 
-function buildCreatedReply(replyId: number, content: string, renderedContent: string, replyToId: number): ReplyPayload {
+function buildCreatedReply(replyId: number, replyNo: number, content: string, renderedContent: string, replyToId: number): ReplyPayload {
   const parentReply = replyToId > 0 ? replies.value.find((reply) => reply.id === replyToId) : undefined
   const viewer = page.layout.viewer
   return {
     id: replyId,
     articleId: page.props.article.id,
+    replyNo,
     content,
     renderedContent,
     author: {
@@ -409,10 +805,9 @@ async function fetchAndRevealCreatedReply(replyId: number) {
     anchorReplyId: replyId,
     limit: 3,
   })
-  mergeReplies(payload.replies, 'append')
-  replyHasAfter.value = payload.hasAfter
-  replyAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
+  applyReplyWindowPayload(payload, 'append', replyWindowMode.value)
   await nextTick()
+  scheduleObserveReplyVisibility()
   highlightReply(replyId)
   const element = document.getElementById(`reply-${replyId}`)
   if (element && !isElementMostlyVisible(element)) {
@@ -583,10 +978,11 @@ async function submitReply(replyId = 0) {
       successMessage.value = t('article.replyPosted')
     }
     const createdReplyId = typeof createdReply === 'object' && createdReply !== null ? createdReply.id : createdReply
+    const createdReplyNo = typeof createdReply === 'object' && createdReply !== null ? createdReply.replyNo || 0 : 0
     const renderedContent = typeof createdReply === 'object' && createdReply !== null ? createdReply.renderedContent : escapePlainText(content)
     if (typeof createdReplyId === 'number') {
       if (page.layout.viewer.isAuthenticated) {
-        await revealCreatedReply(buildCreatedReply(createdReplyId, content, renderedContent, replyId))
+        await revealCreatedReply(buildCreatedReply(createdReplyId, createdReplyNo || replyMaxRange.value + 1, content, renderedContent, replyId))
       } else {
         await fetchAndRevealCreatedReply(createdReplyId)
       }
@@ -644,8 +1040,8 @@ async function removeReply(replyId: number) {
 </script>
 
 <template>
-  <div>
-    <article class="min-w-0 pb-12">
+  <div class="pb-20 xl:pb-0">
+    <article class="min-w-0">
       <header class="mb-4 border-b border-gray-200/70 pb-4">
         <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-gray-950 [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.article.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-gray-500">
@@ -747,11 +1143,12 @@ async function removeReply(replyId: number) {
           <button
             v-if="replyHasBefore"
             type="button"
-            class="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-50 hover:text-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="loadingReplyWindow"
             @click="loadReplyWindow('before')"
           >
             <Loader2 v-if="loadingReplyDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
+            <ChevronsUp v-else class="h-3.5 w-3.5" />
             {{ t('article.loadEarlierReplies') }}
           </button>
         </div>
@@ -760,6 +1157,7 @@ async function removeReply(replyId: number) {
           v-for="reply in replies"
           :id="`reply-${reply.id}`"
           :key="reply.id"
+          :data-reply-no="reply.replyNo"
           class="group grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-gray-100 px-3 py-4 transition hover:bg-gray-50/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
           :class="{ 'bg-blue-50/50 ring-1 ring-inset ring-blue-100': highlightedReplyId === reply.id }"
         >
@@ -773,43 +1171,49 @@ async function removeReply(replyId: number) {
           <div class="min-w-0">
             <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
               <div class="min-w-0">
-                <a :href="`/u/${reply.author.id}`" class="min-w-0 truncate font-semibold text-gray-950 hover:text-blue-600">{{ reply.author.username }}</a>
-                <time class="mt-0.5 block truncate text-xs text-gray-400 sm:hidden">{{ formatDateTime(reply.createdAt) }}</time>
+                <div class="flex min-w-0 items-center gap-2">
+                  <a :href="`/u/${reply.author.id}`" class="min-w-0 truncate font-semibold text-gray-950 hover:text-blue-600">{{ reply.author.username }}</a>
+                  <span v-if="reply.replyNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-gray-400 sm:inline">#{{ formatNumber(reply.replyNo) }}</span>
+                </div>
+                <div class="mt-0.5 flex items-center gap-2 text-xs text-gray-400 sm:hidden">
+                  <span v-if="reply.replyNo" class="font-semibold tabular-nums text-gray-500">#{{ formatNumber(reply.replyNo) }}</span>
+                  <time class="truncate">{{ formatDateTime(reply.createdAt) }}</time>
+                </div>
               </div>
-              <div class="flex shrink-0 items-center gap-0.5 sm:gap-3">
-                <button
-                  v-if="page.props.permissions.canReply"
-                  type="button"
-                  class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-600 opacity-100 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
-                  :title="t('article.reply')"
-                  @click="toggleReplyForm(reply.id)"
-                >
-                  <CornerDownLeft class="h-3.5 w-3.5" />
-                  <span class="sr-only sm:not-sr-only">{{ t('article.reply') }}</span>
-                </button>
+              <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
                 <button
                   v-if="reply.isOwnReply"
                   type="button"
-                  class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-500 opacity-100 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                  class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   :disabled="savingEditReplyId === reply.id || deletingReplyId === reply.id"
                   :title="t('common.edit')"
                   @click="startEditReply(reply)"
                 >
                   <PencilLine class="h-3.5 w-3.5" />
-                  <span class="sr-only sm:not-sr-only">{{ t('common.edit') }}</span>
+                  <span class="sr-only">{{ t('common.edit') }}</span>
                 </button>
                 <button
                   v-if="reply.isOwnReply"
                   type="button"
-                  class="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold text-gray-500 opacity-100 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:px-3 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                  class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   :disabled="deletingReplyId === reply.id"
                   :title="deletingReplyId === reply.id ? t('article.deleting') : t('article.delete')"
                   @click="requestDeleteReply(reply)"
                 >
                   <Trash2 class="h-3.5 w-3.5" />
-                  <span class="sr-only sm:not-sr-only">{{ deletingReplyId === reply.id ? t('article.deleting') : t('article.delete') }}</span>
+                  <span class="sr-only">{{ deletingReplyId === reply.id ? t('article.deleting') : t('article.delete') }}</span>
                 </button>
-                <time class="hidden shrink-0 text-xs text-gray-400 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
+                <button
+                  v-if="page.props.permissions.canReply"
+                  type="button"
+                  class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-500 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                  :title="t('article.reply')"
+                  @click="toggleReplyForm(reply.id)"
+                >
+                  <CornerDownLeft class="h-3.5 w-3.5" />
+                  <span class="sr-only">{{ t('article.reply') }}</span>
+                </button>
+                <time class="hidden w-36 shrink-0 text-right text-xs text-gray-400 sm:-ml-1 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
               </div>
             </div>
             <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-gray-50 px-2 py-1 text-sm text-gray-500">
@@ -885,7 +1289,7 @@ async function removeReply(replyId: number) {
           </div>
         </div>
 
-        <div v-if="replyHasAfter || loadingReplyDirection === 'after' || replyWindowError || replies.length" ref="replyLoadMoreEl" class="border-t border-gray-100 px-4 py-3 text-center">
+        <div v-if="replyHasAfter || loadingReplyDirection === 'after' || replyWindowError || (!replyHasAfter && replies.length)" ref="replyLoadMoreEl" class="border-t border-gray-100 px-4 py-3 text-center">
           <button
             v-if="replyHasAfter && replyWindowError"
             type="button"
@@ -901,6 +1305,15 @@ async function removeReply(replyId: number) {
             <Loader2 class="h-3.5 w-3.5 animate-spin" />
             {{ t('article.loadingMoreReplies') }}
           </p>
+          <button
+            v-else-if="replyHasAfter"
+            type="button"
+            class="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-gray-600 transition hover:bg-gray-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            :disabled="loadingReplyWindow"
+            @click="loadMoreRepliesManually"
+          >
+            {{ t('article.loadMoreReplies') }}
+          </button>
           <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-gray-400">{{ t('article.allRepliesShown') }}</p>
         </div>
       </section>
@@ -940,75 +1353,145 @@ async function removeReply(replyId: number) {
           </div>
         </template>
       </section>
+
     </article>
 
-    <Teleport v-if="page.props.permissions.canReply && showFloatingReply" to="body">
-      <div class="pointer-events-none fixed inset-x-0 bottom-4 z-[80] px-3 sm:px-6">
-        <Transition name="floating-reply" mode="out-in">
-          <div
-            v-if="!floatingReplyExpanded"
-            class="pointer-events-auto mx-auto flex w-fit max-w-full items-center gap-1 rounded-full border border-gray-200/80 bg-white/95 p-1 shadow-[0_14px_34px_-22px_rgba(15,23,42,0.55),0_4px_14px_-10px_rgba(15,23,42,0.35)] backdrop-blur"
+    <Teleport defer to="#goose-shell-wide-content">
+      <section v-if="page.props.hotTopics.length" class="w-full rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+        <div class="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-4 sm:px-5">
+          <h2 class="text-base font-bold text-gray-950">{{ t('article.hotContent') }}</h2>
+          <a href="/?sort=hot" class="text-sm font-semibold text-blue-600 hover:text-blue-700">{{ t('article.more') }}</a>
+        </div>
+        <div class="divide-y divide-gray-100">
+          <a
+            v-for="topic in page.props.hotTopics"
+            :key="topic.id"
+            :href="topic.url"
+            class="block px-4 py-4 transition hover:bg-gray-50 sm:px-5"
           >
-            <button
-              v-for="action in floatingArticleActions"
-              :key="action.key"
-              type="button"
-              class="inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
-              :class="action.active ? action.activeClass : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
-              :disabled="action.acting"
-              :title="action.title"
-              @click="action.onClick"
-            >
-              <Loader2 v-if="action.acting" class="h-4 w-4 animate-spin" />
-              <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active ? 'currentColor' : 'none'" />
-            </button>
-            <button
-              type="button"
-              class="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
-              :title="t('article.joinDiscussion')"
-              @click="openFloatingReply"
-            >
-              <MessageSquare class="h-4 w-4" />
-              <span>{{ t('article.joinDiscussion') }}</span>
-            </button>
-          </div>
-          <div
-            v-else
-            class="pointer-events-auto mx-auto w-full max-w-2xl rounded-lg border border-gray-200/80 bg-white/95 p-3 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.5),0_4px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur"
-          >
-            <div class="mb-2 flex items-center justify-between">
-              <div class="text-sm font-semibold text-gray-950">{{ t('article.joinDiscussion') }}</div>
-              <button type="button" class="rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700" @click="closeFloatingReply">
-                <X class="h-4 w-4" />
-              </button>
+            <div class="line-clamp-2 text-base font-bold leading-snug text-gray-950">{{ topic.title }}</div>
+            <p v-if="topic.description" class="mt-1 line-clamp-2 text-sm leading-6 text-gray-500">{{ topic.description }}</p>
+            <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-gray-500">
+              <span>{{ topic.author.username }}</span>
+              <span class="tabular-nums">{{ t('article.replyCountValue', { count: formatNumber(topic.replyCount) }) }}</span>
+              <span class="tabular-nums">{{ formatNumber(topic.viewCount) }} {{ t('article.viewCount') }}</span>
             </div>
-            <textarea
-              v-model="replyContent"
-              rows="3"
-              class="min-h-24 w-full resize-y rounded-md border border-gray-200 bg-white p-3 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              :placeholder="t('article.replyPlaceholder')"
-              @focus="openReplyId = null"
-              @input="clearReplyValidation()"
-            />
-            <p v-if="errorMessage" class="mt-2 text-sm text-red-600">{{ errorMessage }}</p>
-            <p v-if="successMessage" class="mt-2 text-sm text-green-600">{{ successMessage }}</p>
-            <div class="mt-3 flex justify-end gap-2">
-              <button type="button" class="h-9 rounded-md px-3 text-sm font-semibold text-gray-500 transition hover:bg-gray-100 hover:text-gray-800" @click="focusReplyEditor">
-                {{ t('article.fullEditor') }}
-              </button>
+          </a>
+        </div>
+      </section>
+    </Teleport>
+
+    <Teleport v-if="hasReplyRail || (page.props.permissions.canReply && showFloatingReply)" to="body">
+      <div class="pointer-events-none fixed inset-x-0 bottom-4 z-[90] px-3 sm:px-6">
+        <div class="relative mx-auto flex w-fit max-w-full justify-center">
+          <Transition name="floating-reply">
+            <div
+              v-if="mobileReplyRailOpen"
+              class="pointer-events-auto absolute bottom-full left-0 mb-2 w-[min(18rem,calc(100vw-1.5rem))] rounded-lg border border-gray-200/80 bg-white/95 p-2 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.55),0_4px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur xl:hidden"
+            >
+              <div class="mb-1 flex items-center justify-between gap-3 px-1">
+                <div class="text-xs font-semibold text-gray-500">{{ t('article.replyPosition') }}</div>
+                <button
+                  type="button"
+                  class="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+                  :aria-label="t('common.close')"
+                  @click="closeMobileReplyRail"
+                >
+                  <X class="h-4 w-4" />
+                </button>
+              </div>
+              <ReplyPositionRail
+                :current="replyRailCurrentNo"
+                :max="replyMaxRange"
+                :start-label="replyRailStartLabel"
+                :end-label="replyRailEndLabel"
+                :current-label="replyRailCurrentLabel"
+                :busy="replyRailBusy"
+                @earliest="jumpToArticleBodyFromRail"
+                @latest="jumpToLatestReplyFromRail"
+                @select="selectReplyFromRail"
+              />
+            </div>
+          </Transition>
+
+          <Transition name="floating-reply" mode="out-in">
+            <div
+              v-if="!floatingReplyExpanded || !page.props.permissions.canReply || !showFloatingReply"
+              class="pointer-events-auto flex w-fit max-w-full items-center gap-1 rounded-full border border-gray-200/80 bg-white/95 p-1 shadow-[0_14px_34px_-22px_rgba(15,23,42,0.55),0_4px_14px_-10px_rgba(15,23,42,0.35)] backdrop-blur"
+            >
               <button
+                v-if="hasReplyRail"
                 type="button"
-                class="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                :disabled="submitting"
-                @click="submitReply()"
+                class="inline-flex h-9 items-center rounded-full px-2.5 text-sm font-black tabular-nums text-blue-600 transition hover:bg-blue-50 hover:text-blue-700 xl:hidden"
+                :aria-expanded="mobileReplyRailOpen"
+                :aria-label="t('article.replyPosition')"
+                @click="toggleMobileReplyRail"
               >
-                <Loader2 v-if="submitting && currentReplyId === 0" class="h-4 w-4 animate-spin" />
-                <Send v-else class="h-4 w-4" />
-                {{ submitting && currentReplyId === 0 ? t('article.publishing') : t('article.publishReply') }}
+                {{ replyRailCurrentNo }} / {{ formatNumber(replyMaxRange) }}
               </button>
+              <template v-if="page.props.permissions.canReply && showFloatingReply">
+                <button
+                  v-for="action in floatingArticleActions"
+                  :key="action.key"
+                  type="button"
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+                  :class="action.active ? action.activeClass : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+                  :disabled="action.acting"
+                  :title="action.title"
+                  @click="action.onClick"
+                >
+                  <Loader2 v-if="action.acting" class="h-4 w-4 animate-spin" />
+                  <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active ? 'currentColor' : 'none'" />
+                </button>
+                <button
+                  type="button"
+                  class="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
+                  :title="t('article.joinDiscussion')"
+                  @click="openFloatingReply"
+                >
+                  <MessageSquare class="h-4 w-4" />
+                  <span>{{ t('article.joinDiscussion') }}</span>
+                </button>
+              </template>
             </div>
-          </div>
-        </Transition>
+            <div
+              v-else-if="page.props.permissions.canReply && showFloatingReply"
+              class="pointer-events-auto w-[min(42rem,calc(100vw-1.5rem))] rounded-lg border border-gray-200/80 bg-white/95 p-3 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.5),0_4px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur"
+            >
+              <div class="mb-2 flex items-center justify-between">
+                <div class="text-sm font-semibold text-gray-950">{{ t('article.joinDiscussion') }}</div>
+                <button type="button" class="rounded-md p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700" @click="closeFloatingReply">
+                  <X class="h-4 w-4" />
+                </button>
+              </div>
+              <textarea
+                v-model="replyContent"
+                rows="3"
+                class="min-h-24 w-full resize-y rounded-md border border-gray-200 bg-white p-3 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                :placeholder="t('article.replyPlaceholder')"
+                @focus="openReplyId = null"
+                @input="clearReplyValidation()"
+              />
+              <p v-if="errorMessage" class="mt-2 text-sm text-red-600">{{ errorMessage }}</p>
+              <p v-if="successMessage" class="mt-2 text-sm text-green-600">{{ successMessage }}</p>
+              <div class="mt-3 flex justify-end gap-2">
+                <button type="button" class="h-9 rounded-md px-3 text-sm font-semibold text-gray-500 transition hover:bg-gray-100 hover:text-gray-800" @click="focusReplyEditor">
+                  {{ t('article.fullEditor') }}
+                </button>
+                <button
+                  type="button"
+                  class="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  :disabled="submitting"
+                  @click="submitReply()"
+                >
+                  <Loader2 v-if="submitting && currentReplyId === 0" class="h-4 w-4 animate-spin" />
+                  <Send v-else class="h-4 w-4" />
+                  {{ submitting && currentReplyId === 0 ? t('article.publishing') : t('article.publishReply') }}
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
       </div>
     </Teleport>
 
@@ -1020,14 +1503,6 @@ async function removeReply(replyId: number) {
           </div>
 
           <dl class="space-y-4 px-4 py-5 text-sm">
-            <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-gray-500">{{ t('article.createdAt') }}</dt>
-              <dd class="text-right font-semibold tabular-nums text-gray-950">{{ formatDateTime(page.props.article.createdAt) }}</dd>
-            </div>
-            <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-gray-500">{{ t('article.lastReply') }}</dt>
-              <dd class="text-right font-semibold tabular-nums text-gray-950">{{ formatDateTime(page.props.article.updatedAt) }}</dd>
-            </div>
             <div class="flex items-center justify-between gap-4">
               <dt class="font-semibold text-gray-500">{{ t('article.replyCount') }}</dt>
               <dd class="text-right font-semibold tabular-nums text-gray-950">{{ formatNumber(page.props.article.replyCount) }}</dd>
@@ -1058,26 +1533,18 @@ async function removeReply(replyId: number) {
           </div>
         </div>
 
-        <div v-if="page.props.hotTopics.length" class="rounded-lg border border-gray-200/70 bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-          <div class="mb-2 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-950">{{ t('article.hotContent') }}</h2>
-            <a href="/?sort=hot" class="text-xs font-medium text-blue-600 hover:text-blue-700">{{ t('article.more') }}</a>
-          </div>
-          <div class="space-y-0.5">
-            <a
-              v-for="topic in page.props.hotTopics"
-              :key="topic.id"
-              :href="topic.url"
-              class="block rounded-md px-2 py-2 hover:bg-gray-50"
-            >
-              <div class="line-clamp-2 text-sm font-semibold leading-snug text-gray-900">{{ topic.title }}</div>
-              <div class="mt-1 flex items-center gap-2 text-xs font-medium text-gray-600">
-                <span class="truncate">{{ topic.author.username }}</span>
-                <span class="shrink-0 tabular-nums">{{ t('article.replyCountValue', { count: formatNumber(topic.replyCount) }) }}</span>
-              </div>
-            </a>
-          </div>
-        </div>
+        <ReplyPositionRail
+          v-if="page.props.article.replyCount > 0 && replyMaxRange > 0"
+          :current="replyRailCurrentNo"
+          :max="replyMaxRange"
+          :start-label="replyRailStartLabel"
+          :end-label="replyRailEndLabel"
+          :current-label="replyRailCurrentLabel"
+          :busy="replyRailBusy"
+          @earliest="jumpToArticleBodyFromRail"
+          @latest="jumpToLatestReplyFromRail"
+          @select="selectReplyFromRail"
+        />
 
       </div>
     </Teleport>

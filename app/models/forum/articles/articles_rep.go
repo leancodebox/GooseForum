@@ -194,6 +194,25 @@ func DecrementReplyFast(articleId uint64, posters []Poster) error {
 	}).Error
 }
 
+func ReserveReplySequence(articleId uint64) (uint64, error) {
+	result := builder().
+		Where("id = ?", articleId).
+		Update(fieldReplySeq, gorm.Expr(fieldReplySeq+" + 1"))
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return 0, gorm.ErrRecordNotFound
+	}
+
+	var replySeq uint64
+	err := builder().
+		Select(fieldReplySeq).
+		Where("id = ?", articleId).
+		Scan(&replySeq).Error
+	return replySeq, err
+}
+
 func IncrementReply(entity Entity) int64 {
 	result := builder().Exec("UPDATE articles SET reply_count = reply_count+1 where id = ?", entity.Id)
 	return result.RowsAffected
