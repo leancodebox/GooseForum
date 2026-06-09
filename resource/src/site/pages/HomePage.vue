@@ -104,13 +104,16 @@ onBeforeUnmount(() => {
         </div>
       </aside>
 
-      <aside v-if="page.props.announcement.enabled" class="mb-3 rounded-lg border border-gray-200/80 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.035)]" :aria-label="t('topicList.announcement')">
-        <div class="border-l-[3px] border-blue-500 px-4 py-3">
-          <div class="mb-2 flex items-center gap-2">
-            <span class="h-1.5 w-1.5 rounded-full bg-blue-500" />
-            <span class="text-[11px] font-bold uppercase text-gray-600">{{ t('topicList.announcement') }}</span>
+      <aside v-if="page.props.announcement.enabled" class="mb-3 overflow-hidden rounded-lg border border-gray-200/80 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.035)]" :aria-label="t('topicList.announcement')">
+        <div class="grid grid-cols-[3px_minmax(0,1fr)]">
+          <div class="bg-blue-500" aria-hidden="true" />
+          <div class="px-4 py-3">
+            <div class="mb-2 flex items-center gap-2">
+              <span class="h-1.5 w-1.5 rounded-full bg-blue-500" />
+              <span class="text-[11px] font-bold uppercase text-gray-600">{{ t('topicList.announcement') }}</span>
+            </div>
+            <div class="gf-prose gf-prose-announcement" v-html="page.props.announcement.html" />
           </div>
-          <div class="gf-prose gf-prose-announcement" v-html="page.props.announcement.html" />
         </div>
       </aside>
 
