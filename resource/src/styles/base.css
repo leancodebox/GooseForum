@@ -1,0 +1,10 @@
+html,
+body,
+#goose-app {
+  min-height: 100%;
+  background: var(--gf-color-base-200);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Segoe UI", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
+}

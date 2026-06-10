@@ -1,0 +1,235 @@
+@layer components {
+  .gf-prose {
+    @apply prose max-w-none min-w-0;
+    --tw-prose-body: color-mix(in oklch, var(--gf-color-base-content) 82%, transparent);
+    --tw-prose-headings: var(--gf-color-base-content);
+    --tw-prose-lead: color-mix(in oklch, var(--gf-color-base-content) 72%, transparent);
+    --tw-prose-links: var(--gf-color-primary);
+    --tw-prose-bold: var(--gf-color-base-content);
+    --tw-prose-counters: color-mix(in oklch, var(--gf-color-base-content) 58%, transparent);
+    --tw-prose-bullets: color-mix(in oklch, var(--gf-color-base-content) 48%, transparent);
+    --tw-prose-hr: var(--gf-color-line);
+    --tw-prose-quotes: var(--gf-color-base-content);
+    --tw-prose-quote-borders: var(--gf-color-line);
+    --tw-prose-captions: color-mix(in oklch, var(--gf-color-base-content) 58%, transparent);
+    --tw-prose-code: var(--gf-color-error);
+    --tw-prose-pre-code: var(--gf-color-base-content);
+    --tw-prose-pre-bg: var(--gf-color-base-200);
+    --tw-prose-th-borders: var(--gf-color-line);
+    --tw-prose-td-borders: var(--gf-color-line);
+  }
+
+  .gf-prose > * {
+    max-width: 100%;
+  }
+
+  .gf-prose :where(p, li, blockquote, h1, h2, h3, h4, h5, h6, a, strong, em) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .gf-prose-compact {
+    @apply text-[13px];
+  }
+
+  .gf-prose-compact p {
+    @apply my-1;
+  }
+
+  .gf-prose-announcement {
+    @apply text-[14px] leading-7 text-base-content/75;
+  }
+
+  .gf-prose-announcement p {
+    @apply my-1;
+  }
+
+  .gf-prose-announcement > :first-child {
+    @apply mt-0;
+  }
+
+  .gf-prose-announcement > :last-child {
+    @apply mb-0;
+  }
+
+  .gf-prose-announcement strong {
+    @apply font-semibold text-base-content;
+  }
+
+  .gf-prose-announcement a {
+    @apply font-medium text-primary no-underline hover:text-primary;
+  }
+
+  .gf-prose-article {
+    @apply min-w-0 text-[15px] leading-relaxed text-base-content;
+  }
+
+  .gf-prose-article p {
+    @apply my-3;
+  }
+
+  .gf-prose-article > :first-child {
+    @apply mt-0;
+  }
+
+  .gf-prose-article > :last-child {
+    @apply mb-0;
+  }
+
+  .gf-prose-article h1 {
+    @apply mt-9 mb-4 text-base-content;
+  }
+
+  .gf-prose-article h2 {
+    @apply mt-8 mb-3 text-base-content;
+  }
+
+  .gf-prose-article h3 {
+    @apply mt-6 mb-2 text-base-content;
+  }
+
+  .gf-prose-article h4 {
+    @apply mt-5 mb-2 text-base-content;
+  }
+
+  .gf-prose-article :where(ul, ol) {
+    @apply my-3 pl-6;
+  }
+
+  .gf-prose-article li {
+    @apply my-1;
+  }
+
+  .gf-prose-article li > p {
+    @apply my-1;
+  }
+
+  .gf-prose-article hr {
+    @apply my-6 border-line;
+  }
+
+  .gf-prose-article hr + :where(h1, h2, h3, h4) {
+    @apply mt-6;
+  }
+
+  .gf-prose-comment {
+    @apply max-w-none min-w-0 text-[15px] leading-relaxed text-base-content;
+  }
+
+  .gf-prose-comment p {
+    @apply my-2;
+  }
+
+  .gf-prose-comment > :first-child {
+    @apply mt-0;
+  }
+
+  .gf-prose-comment > :last-child {
+    @apply mb-0;
+  }
+
+  .gf-prose code {
+    @apply rounded bg-base-200 px-1 py-0.5 font-mono text-error;
+  }
+
+  .gf-prose :not(pre) > code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .gf-prose code::before,
+  .gf-prose code::after {
+    content: none;
+  }
+
+  .gf-prose pre {
+    @apply my-3 overflow-x-auto rounded-lg border border-line bg-base-200 p-3 text-base-content;
+    max-width: 100%;
+  }
+
+  .gf-prose pre code {
+    @apply bg-transparent p-0 text-inherit;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: pre;
+  }
+
+  .gf-prose blockquote {
+    @apply border-l-4 border-line bg-base-200/70 py-1 pr-3 text-base-content/75;
+  }
+
+  .gf-prose blockquote p:first-of-type::before,
+  .gf-prose blockquote p:last-of-type::after {
+    content: none;
+  }
+
+  .gf-prose table {
+    @apply text-sm;
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .gf-prose :where(thead, tbody, tr) {
+    border-color: var(--gf-color-line);
+  }
+
+  .gf-prose :where(th, td) {
+    border-color: var(--gf-color-line);
+  }
+
+  .gf-prose :where(th) {
+    color: var(--gf-color-base-content);
+  }
+
+  .gf-prose img {
+    @apply my-3 max-w-full rounded-lg border border-line object-contain;
+  }
+
+  .gf-prose-comment ul,
+  .gf-prose-comment ol {
+    @apply my-2 pl-5;
+  }
+
+  .gf-prose-comment li {
+    @apply my-0.5;
+  }
+
+  .gf-prose-comment blockquote {
+    @apply my-2 border-l-4 border-line bg-base-200/70 py-1 pl-3 pr-3 text-base-content/75;
+  }
+
+  .gf-prose-comment code {
+    @apply rounded bg-base-200 px-1 py-0.5 font-mono text-error;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .gf-prose-comment code::before,
+  .gf-prose-comment code::after {
+    content: none;
+  }
+
+  .gf-prose-comment pre {
+    @apply my-2 overflow-x-auto rounded-lg border border-line bg-base-200 p-3 text-base-content;
+  }
+
+  .gf-prose-comment pre code {
+    @apply bg-transparent p-0 text-inherit;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: pre;
+  }
+
+  .gf-prose-comment a {
+    @apply font-medium text-primary no-underline hover:text-primary;
+    overflow-wrap: anywhere;
+  }
+
+  .gf-prose-comment img {
+    @apply my-2 max-w-full rounded-lg border border-line object-contain;
+    max-height: min(360px, 70vh);
+  }
+}

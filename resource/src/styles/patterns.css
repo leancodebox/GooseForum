@@ -1,0 +1,38 @@
+@layer components {
+  .gf-home-topic-toolbar {
+    @apply flex flex-col gap-3 border-y border-line bg-base-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:border-t-0;
+  }
+
+  .gf-home-topic-tabs {
+    @apply flex min-w-0 items-center gap-2 overflow-x-auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .gf-home-topic-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gf-home-topic-action {
+    @apply inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary sm:h-8 sm:w-auto;
+  }
+
+  .gf-topic-row {
+    @apply relative isolate grid gap-3 bg-base-100 px-4 py-3 transition;
+    @apply before:absolute before:inset-0 before:-z-10 before:bg-base-100 before:content-[''];
+    @apply after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-line/70 after:content-[''];
+    @apply last:after:hidden hover:before:bg-base-200 lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center;
+  }
+
+  .gf-topic-row-home {
+    @apply min-h-[96px] lg:min-h-[76px];
+  }
+
+  .gf-topic-row-pinned::before {
+    border-left: 3px solid rgb(244 63 94 / 0.82);
+  }
+
+  .gf-topic-row-pinned:hover::before {
+    border-left-color: rgb(244 63 94);
+  }
+}
