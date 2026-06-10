@@ -573,11 +573,11 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 }
 
 func buildThemePayload() ThemePayload {
-	config := normalizeSiteThemeConfig(hotdataserve.GetSiteThemeConfigCache())
+	runtimeTheme := getRuntimeSiteTheme()
 	return ThemePayload{
-		Enabled: config.Enabled,
-		Href:    siteThemeHref(config),
-		Colors:  siteThemeColors(config),
+		Enabled: runtimeTheme.Config.Enabled,
+		Href:    runtimeTheme.Href,
+		Colors:  runtimeTheme.Colors,
 	}
 }
 

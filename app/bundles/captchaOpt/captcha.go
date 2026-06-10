@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
+	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/mojocn/base64Captcha"
 )
 
@@ -87,6 +88,7 @@ func StartCleanup() {
 		cleanupWg.Add(1)
 		go func() {
 			defer cleanupWg.Done()
+			defer paniclog.Recover("captcha_cleanup")
 			ticker := time.NewTicker(time.Minute) // 每分钟清理一次
 			defer ticker.Stop()
 			for {

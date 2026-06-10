@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
 )
@@ -60,6 +61,7 @@ func StartEmailProcessor() {
 		emailProcessor.wg.Add(1)
 		go func() {
 			defer emailProcessor.wg.Done()
+			defer paniclog.Recover("mail_processor")
 			ticker := time.NewTicker(5 * time.Second)
 			defer ticker.Stop()
 

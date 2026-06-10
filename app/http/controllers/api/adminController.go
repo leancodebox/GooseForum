@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
@@ -1016,6 +1017,11 @@ type SaveSiteThemeReq struct {
 	Settings pageConfig.SiteThemeConfig `json:"settings" validate:"required"`
 }
 
+func clearSiteThemeCaches() {
+	hotdataserve.ClearSiteThemeConfigCache()
+	forum.ClearSiteThemeRuntimeCache()
+}
+
 func SaveSiteTheme(req component.BetterRequest[SaveSiteThemeReq]) component.Response {
 	config := pageConfig.GetConfigByPageType(pageConfig.SiteTheme, defaultconfig.GetDefaultSiteThemeConfig())
 	config = normalizeSiteThemeForSave(config)
@@ -1026,7 +1032,7 @@ func SaveSiteTheme(req component.BetterRequest[SaveSiteThemeReq]) component.Resp
 		Label:     "draft",
 	}
 	config = normalizeSiteThemeForSave(config)
-	savePageConfig(pageConfig.SiteTheme, config, hotdataserve.ClearSiteThemeConfigCache)
+	savePageConfig(pageConfig.SiteTheme, config, clearSiteThemeCaches)
 	return component.SuccessResponse(config)
 }
 
@@ -1056,7 +1062,7 @@ func PublishSiteTheme(req component.BetterRequest[component.Null]) component.Res
 		Label:     "published",
 	}
 	config = normalizeSiteThemeForSave(config)
-	savePageConfig(pageConfig.SiteTheme, config, hotdataserve.ClearSiteThemeConfigCache)
+	savePageConfig(pageConfig.SiteTheme, config, clearSiteThemeCaches)
 	return component.SuccessResponse(config)
 }
 
@@ -1079,7 +1085,7 @@ func RollbackSiteTheme(req component.BetterRequest[component.Null]) component.Re
 		Label:     "rollback",
 	}
 	config = normalizeSiteThemeForSave(config)
-	savePageConfig(pageConfig.SiteTheme, config, hotdataserve.ClearSiteThemeConfigCache)
+	savePageConfig(pageConfig.SiteTheme, config, clearSiteThemeCaches)
 	return component.SuccessResponse(config)
 }
 

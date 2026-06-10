@@ -13,6 +13,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
 	"github.com/leancodebox/GooseForum/app/console/job"
@@ -52,6 +53,7 @@ func startDebugServices() {
 }
 
 func servePprof() {
+	defer paniclog.Recover("pprof_server")
 	// go tool pprof http://localhost:19070/debug/pprof/profile
 	// go tool pprof -http=:9001 http://localhost:19070/debug/pprof/heap
 	// http://127.0.0.1:19070/debug/pprof/
@@ -103,6 +105,7 @@ func ginServe() {
 	quit := make(chan os.Signal, 1)
 	signalwatch.ListenSignal(quit)
 	go func() {
+		defer paniclog.Recover("http_server")
 		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("http serve ", "err", err)
 			fmt.Println("http serve ", "err", err)

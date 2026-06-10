@@ -13,6 +13,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
+	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 )
 
@@ -154,6 +155,7 @@ func Start() error {
 	ctx, cancelFunc = context.WithCancel(context.Background())
 
 	stopWg.Go(func() {
+		defer paniclog.Recover("eventbus_router")
 		slog.Info("starting event bus...")
 		err := router.Run(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {

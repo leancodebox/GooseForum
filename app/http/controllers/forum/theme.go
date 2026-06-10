@@ -3,30 +3,31 @@ package forum
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"net/http"
 	"net/url"
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
-type siteThemeCSSCacheEntry struct {
-	key  string
-	css  string
-	etag string
+const siteThemeRuntimeCacheTTL = 5 * time.Second
+
+type runtimeSiteTheme struct {
+	Config pageConfig.SiteThemeConfig
+	Colors map[string]string
+	CSS    string
+	ETag   string
+	Href   string
 }
 
-var siteThemeCSSCache struct {
-	sync.RWMutex
-	entry siteThemeCSSCacheEntry
-}
+var siteThemeRuntimeCache = &localcache.Cache[runtimeSiteTheme]{MaxEntries: 1}
 
 var allowedThemeTokens = map[string]bool{
 	"color-base-100":          true,
@@ -85,35 +86,71 @@ func ThemePreview(c *gin.Context) {
 }
 
 func SiteThemeCSS(c *gin.Context) {
-	config := normalizeSiteThemeConfig(hotdataserve.GetSiteThemeConfigCache())
-	if !config.Enabled {
+	runtimeTheme := getRuntimeSiteTheme()
+	if !runtimeTheme.Config.Enabled {
 		c.Status(http.StatusNotFound)
 		return
 	}
-
-	cached := getSiteThemeCSS(config)
-	if cached.css == "" {
+	if runtimeTheme.CSS == "" {
 		c.Status(http.StatusNotFound)
 		return
 	}
 
 	c.Header("Content-Type", "text/css; charset=utf-8")
 	c.Header("Cache-Control", "public, max-age=31536000, immutable")
-	c.Header("ETag", cached.etag)
-	if match := c.GetHeader("If-None-Match"); match != "" && match == cached.etag {
+	c.Header("ETag", runtimeTheme.ETag)
+	if match := c.GetHeader("If-None-Match"); match != "" && match == runtimeTheme.ETag {
 		c.Status(http.StatusNotModified)
 		return
 	}
-	c.String(http.StatusOK, cached.css)
+	c.String(http.StatusOK, runtimeTheme.CSS)
+}
+
+func getRuntimeSiteTheme() runtimeSiteTheme {
+	data, _ := siteThemeRuntimeCache.GetOrLoadE("", func() (runtimeSiteTheme, error) {
+		return buildRuntimeSiteTheme(hotdataserve.GetSiteThemeConfigCache()), nil
+	}, siteThemeRuntimeCacheTTL)
+	return data
+}
+
+func ClearSiteThemeRuntimeCache() {
+	siteThemeRuntimeCache.Clear()
+}
+
+func buildRuntimeSiteTheme(rawConfig pageConfig.SiteThemeConfig) runtimeSiteTheme {
+	config := normalizeSiteThemeConfig(rawConfig)
+	css := buildSiteThemeCSS(config)
+	colors := siteThemeColors(config)
+	etag := ""
+	if css != "" {
+		sum := sha256.Sum256([]byte(css))
+		etag = `"` + hex.EncodeToString(sum[:8]) + `"`
+	}
+	href := ""
+	if config.Enabled && css != "" {
+		version := config.PublishedAt
+		if version == "" {
+			version = strconv.Itoa(config.Version)
+		}
+		href = "/site-theme.css?v=" + url.QueryEscape(version)
+	}
+	return runtimeSiteTheme{
+		Config: config,
+		Colors: colors,
+		CSS:    css,
+		ETag:   etag,
+		Href:   href,
+	}
 }
 
 func normalizeSiteThemeConfig(config pageConfig.SiteThemeConfig) pageConfig.SiteThemeConfig {
+	config = cloneSiteThemeConfig(config)
 	defaultConfig := defaultconfig.GetDefaultSiteThemeConfig()
 	if config.Version <= 0 {
 		config.Version = defaultConfig.Version
 	}
 	if len(config.Themes) == 0 {
-		config.Themes = defaultConfig.Themes
+		config.Themes = cloneSiteThemeDefinitions(defaultConfig.Themes)
 	}
 
 	defaultThemes := map[string]pageConfig.SiteThemeDefinition{}
@@ -224,6 +261,34 @@ func cloneSiteThemeDefinitions(themes []pageConfig.SiteThemeDefinition) []pageCo
 	return cloned
 }
 
+func cloneSiteThemeSnapshot(snapshot *pageConfig.SiteThemeSnapshot) *pageConfig.SiteThemeSnapshot {
+	if snapshot == nil {
+		return nil
+	}
+	cloned := *snapshot
+	cloned.Themes = cloneSiteThemeDefinitions(snapshot.Themes)
+	return &cloned
+}
+
+func cloneSiteThemeSnapshots(snapshots []pageConfig.SiteThemeSnapshot) []pageConfig.SiteThemeSnapshot {
+	if snapshots == nil {
+		return nil
+	}
+	cloned := make([]pageConfig.SiteThemeSnapshot, len(snapshots))
+	for index, snapshot := range snapshots {
+		cloned[index] = snapshot
+		cloned[index].Themes = cloneSiteThemeDefinitions(snapshot.Themes)
+	}
+	return cloned
+}
+
+func cloneSiteThemeConfig(config pageConfig.SiteThemeConfig) pageConfig.SiteThemeConfig {
+	config.Themes = cloneSiteThemeDefinitions(config.Themes)
+	config.Draft = cloneSiteThemeSnapshot(config.Draft)
+	config.History = cloneSiteThemeSnapshots(config.History)
+	return config
+}
+
 func buildSiteThemeCSS(config pageConfig.SiteThemeConfig) string {
 	if !config.Enabled {
 		return ""
@@ -266,21 +331,6 @@ func buildSiteThemeCSS(config pageConfig.SiteThemeConfig) string {
 	return sb.String()
 }
 
-func siteThemeHref(config pageConfig.SiteThemeConfig) string {
-	if !config.Enabled {
-		return ""
-	}
-	cached := getSiteThemeCSS(config)
-	if cached.css == "" {
-		return ""
-	}
-	version := config.PublishedAt
-	if version == "" {
-		version = strconv.Itoa(config.Version)
-	}
-	return "/site-theme.css?v=" + url.QueryEscape(version)
-}
-
 func siteThemeColors(config pageConfig.SiteThemeConfig) map[string]string {
 	colors := map[string]string{}
 	if !config.Enabled {
@@ -297,48 +347,6 @@ func siteThemeColors(config pageConfig.SiteThemeConfig) map[string]string {
 		}
 	}
 	return colors
-}
-
-func getSiteThemeCSS(config pageConfig.SiteThemeConfig) siteThemeCSSCacheEntry {
-	key := siteThemeCSSCacheKey(config)
-
-	siteThemeCSSCache.RLock()
-	if siteThemeCSSCache.entry.key == key {
-		entry := siteThemeCSSCache.entry
-		siteThemeCSSCache.RUnlock()
-		return entry
-	}
-	siteThemeCSSCache.RUnlock()
-
-	css := buildSiteThemeCSS(config)
-	sum := sha256.Sum256([]byte(css))
-	entry := siteThemeCSSCacheEntry{
-		key:  key,
-		css:  css,
-		etag: `"` + hex.EncodeToString(sum[:8]) + `"`,
-	}
-
-	siteThemeCSSCache.Lock()
-	siteThemeCSSCache.entry = entry
-	siteThemeCSSCache.Unlock()
-	return entry
-}
-
-func siteThemeCSSCacheKey(config pageConfig.SiteThemeConfig) string {
-	payload := struct {
-		Enabled     bool                             `json:"enabled"`
-		Themes      []pageConfig.SiteThemeDefinition `json:"themes"`
-		PublishedAt string                           `json:"publishedAt,omitempty"`
-	}{
-		Enabled:     config.Enabled,
-		Themes:      config.Themes,
-		PublishedAt: config.PublishedAt,
-	}
-	data, err := json.Marshal(payload)
-	if err != nil {
-		return config.PublishedAt
-	}
-	return string(data)
 }
 
 func sanitizeThemeName(value string) string {
