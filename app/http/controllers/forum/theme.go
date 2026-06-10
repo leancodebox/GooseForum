@@ -16,14 +16,38 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
-const siteThemeRuntimeCacheTTL = 5 * time.Second
+const (
+	siteThemeRuntimeCacheTTL = 5 * time.Second
+	siteThemeHistoryLimit    = 5
+	siteThemeLightName       = "gf-light"
+	siteThemeDarkName        = "gf-dark"
+)
 
 type runtimeSiteTheme struct {
 	Config pageConfig.SiteThemeConfig
-	Colors map[string]string
+	Colors runtimeSiteThemeColors
 	CSS    string
 	ETag   string
 	Href   string
+}
+
+type runtimeSiteThemeColors struct {
+	Light string
+	Dark  string
+}
+
+func (colors runtimeSiteThemeColors) Payload() map[string]string {
+	if colors.Light == "" && colors.Dark == "" {
+		return nil
+	}
+	payload := make(map[string]string, 2)
+	if colors.Light != "" {
+		payload[siteThemeLightName] = colors.Light
+	}
+	if colors.Dark != "" {
+		payload[siteThemeDarkName] = colors.Dark
+	}
+	return payload
 }
 
 var siteThemeRuntimeCache = &localcache.Cache[runtimeSiteTheme]{MaxEntries: 1}
@@ -112,32 +136,11 @@ func buildRuntimeSiteTheme(rawConfig pageConfig.SiteThemeConfig) runtimeSiteThem
 func normalizeSiteThemeConfig(config pageConfig.SiteThemeConfig) pageConfig.SiteThemeConfig {
 	config = cloneSiteThemeConfig(config)
 	defaultConfig := defaultconfig.GetDefaultSiteThemeConfig()
+	fallbackTheme := pageConfig.FirstSiteThemeDefinition(defaultConfig.Themes)
 	if config.Version <= 0 {
 		config.Version = defaultConfig.Version
 	}
-	if len(config.Themes) == 0 {
-		config.Themes = cloneSiteThemeDefinitions(defaultConfig.Themes)
-	}
-
-	defaultThemes := map[string]pageConfig.SiteThemeDefinition{}
-	for _, theme := range defaultConfig.Themes {
-		defaultThemes[theme.Name] = theme
-	}
-
-	for index := range config.Themes {
-		theme := &config.Themes[index]
-		if theme.Name == "" {
-			theme.Name = defaultConfig.Themes[0].Name
-		}
-		defaultTheme := defaultThemes[theme.Name]
-		if theme.Label == "" {
-			theme.Label = defaultTheme.Label
-		}
-		if theme.ColorScheme != "dark" && theme.ColorScheme != "light" {
-			theme.ColorScheme = defaultTheme.ColorScheme
-		}
-		normalizeThemeTokens(&theme.Tokens, defaultTheme.Tokens)
-	}
+	config.Themes = pageConfig.NormalizeSiteThemeDefinitions(config.Themes, defaultConfig.Themes, fallbackTheme)
 	if config.Draft == nil {
 		config.Draft = &pageConfig.SiteThemeSnapshot{
 			Enabled: config.Enabled,
@@ -145,66 +148,14 @@ func normalizeSiteThemeConfig(config pageConfig.SiteThemeConfig) pageConfig.Site
 			Label:   "published",
 		}
 	}
-	config.Draft.Themes = normalizeSiteThemeDefinitions(config.Draft.Themes, defaultConfig, defaultThemes)
-	if len(config.History) > 5 {
-		config.History = config.History[len(config.History)-5:]
-	}
-	for index := range config.History {
-		config.History[index].Themes = normalizeSiteThemeDefinitions(config.History[index].Themes, defaultConfig, defaultThemes)
-	}
-
+	config.Draft.Themes = pageConfig.NormalizeSiteThemeDefinitions(config.Draft.Themes, defaultConfig.Themes, fallbackTheme)
+	config.History = pageConfig.NormalizeSiteThemeSnapshots(config.History, defaultConfig.Themes, fallbackTheme, siteThemeHistoryLimit)
 	return config
-}
-
-func normalizeSiteThemeDefinitions(themes []pageConfig.SiteThemeDefinition, defaultConfig pageConfig.SiteThemeConfig, defaultThemes map[string]pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeDefinition {
-	if len(themes) == 0 {
-		themes = cloneSiteThemeDefinitions(defaultConfig.Themes)
-	}
-	for index := range themes {
-		theme := &themes[index]
-		if theme.Name == "" {
-			theme.Name = defaultConfig.Themes[0].Name
-		}
-		defaultTheme := defaultThemes[theme.Name]
-		if theme.Label == "" {
-			theme.Label = defaultTheme.Label
-		}
-		if theme.ColorScheme != "dark" && theme.ColorScheme != "light" {
-			theme.ColorScheme = defaultTheme.ColorScheme
-		}
-		normalizeThemeTokens(&theme.Tokens, defaultTheme.Tokens)
-	}
-	return themes
-}
-
-func normalizeThemeTokens(tokens *pageConfig.SiteThemeTokens, defaults pageConfig.SiteThemeTokens) {
-	for _, key := range pageConfig.SiteThemeTokenKeys() {
-		value := strings.TrimSpace(tokens.Get(key))
-		if value == "" {
-			value = defaults.Get(key)
-		}
-		if strings.ContainsAny(value, "{};<>") {
-			value = defaults.Get(key)
-		}
-		tokens.Set(key, normalizeLegacySiteThemeToken(key, value))
-	}
-}
-
-func normalizeLegacySiteThemeToken(key pageConfig.SiteThemeTokenKey, value string) string {
-	if key == pageConfig.SiteThemeTokenRadiusField {
-		switch strings.TrimSpace(value) {
-		case "0.375rem", "6px":
-			return "0.5rem"
-		}
-	}
-	return value
 }
 
 func cloneSiteThemeDefinitions(themes []pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeDefinition {
 	cloned := make([]pageConfig.SiteThemeDefinition, len(themes))
-	for index, theme := range themes {
-		cloned[index] = theme
-	}
+	copy(cloned, themes)
 	return cloned
 }
 
@@ -255,24 +206,14 @@ func buildSiteThemeCSS(config pageConfig.SiteThemeConfig) string {
 			sb.WriteString(theme.ColorScheme)
 			sb.WriteByte(';')
 		}
-		for _, key := range pageConfig.SiteThemeTokenKeys() {
-			value := sanitizeThemeValue(theme.Tokens.Get(key))
-			if value == "" {
-				continue
-			}
-			sb.WriteString("--gf-")
-			sb.WriteString(string(key))
-			sb.WriteByte(':')
-			sb.WriteString(value)
-			sb.WriteByte(';')
-		}
+		theme.Tokens.AppendCSSVariables(&sb)
 		sb.WriteString("}\n")
 	}
 	return sb.String()
 }
 
-func siteThemeColors(config pageConfig.SiteThemeConfig) map[string]string {
-	colors := map[string]string{}
+func siteThemeColors(config pageConfig.SiteThemeConfig) runtimeSiteThemeColors {
+	var colors runtimeSiteThemeColors
 	if !config.Enabled {
 		return colors
 	}
@@ -281,9 +222,14 @@ func siteThemeColors(config pageConfig.SiteThemeConfig) map[string]string {
 		if name == "" {
 			continue
 		}
-		color := sanitizeThemeValue(theme.Tokens.Get(pageConfig.SiteThemeTokenColorBase100))
+		color := theme.Tokens.BaseColor()
 		if color != "" {
-			colors[name] = color
+			switch name {
+			case siteThemeLightName:
+				colors.Light = color
+			case siteThemeDarkName:
+				colors.Dark = color
+			}
 		}
 	}
 	return colors
@@ -291,15 +237,7 @@ func siteThemeColors(config pageConfig.SiteThemeConfig) map[string]string {
 
 func sanitizeThemeName(value string) string {
 	value = strings.TrimSpace(value)
-	if value != "gf-light" && value != "gf-dark" {
-		return ""
-	}
-	return value
-}
-
-func sanitizeThemeValue(value string) string {
-	value = strings.TrimSpace(value)
-	if value == "" || strings.ContainsAny(value, "{};<>") {
+	if value != siteThemeLightName && value != siteThemeDarkName {
 		return ""
 	}
 	return value

@@ -577,7 +577,7 @@ func buildThemePayload() ThemePayload {
 	return ThemePayload{
 		Enabled: runtimeTheme.Config.Enabled,
 		Href:    runtimeTheme.Href,
-		Colors:  runtimeTheme.Colors,
+		Colors:  runtimeTheme.Colors.Payload(),
 	}
 }
 

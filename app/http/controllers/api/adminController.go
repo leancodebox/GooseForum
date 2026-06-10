@@ -1091,21 +1091,14 @@ func RollbackSiteTheme(req component.BetterRequest[component.Null]) component.Re
 
 func normalizeSiteThemeForSave(config pageConfig.SiteThemeConfig) pageConfig.SiteThemeConfig {
 	defaultConfig := defaultconfig.GetDefaultSiteThemeConfig()
+	fallbackTheme := pageConfig.FirstSiteThemeDefinition(defaultConfig.Themes)
 	if config.Version <= 0 {
 		config.Version = defaultConfig.Version
 	}
 	if len(config.Themes) == 0 {
-		config.Themes = defaultConfig.Themes
+		config.Themes = cloneThemeDefinitions(defaultConfig.Themes)
 	}
-
-	defaultThemes := map[string]pageConfig.SiteThemeDefinition{}
-	for _, theme := range defaultConfig.Themes {
-		defaultThemes[theme.Name] = theme
-	}
-
-	for index := range config.Themes {
-		normalizeThemeDefinition(&config.Themes[index], defaultConfig.Themes[0], defaultThemes)
-	}
+	config.Themes = pageConfig.NormalizeSiteThemeDefinitions(config.Themes, defaultConfig.Themes, fallbackTheme)
 	if config.Draft == nil {
 		config.Draft = &pageConfig.SiteThemeSnapshot{
 			Enabled: config.Enabled,
@@ -1113,70 +1106,14 @@ func normalizeSiteThemeForSave(config pageConfig.SiteThemeConfig) pageConfig.Sit
 			Label:   "published",
 		}
 	}
-	config.Draft.Themes = normalizeThemeDefinitions(config.Draft.Themes, defaultConfig, defaultThemes)
-	config.History = normalizeThemeHistory(config.History, defaultConfig, defaultThemes)
+	config.Draft.Themes = pageConfig.NormalizeSiteThemeDefinitions(config.Draft.Themes, defaultConfig.Themes, fallbackTheme)
+	config.History = pageConfig.NormalizeSiteThemeSnapshots(config.History, defaultConfig.Themes, fallbackTheme, 5)
 	return config
-}
-
-func normalizeThemeDefinitions(themes []pageConfig.SiteThemeDefinition, defaultConfig pageConfig.SiteThemeConfig, defaultThemes map[string]pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeDefinition {
-	if len(themes) == 0 {
-		themes = cloneThemeDefinitions(defaultConfig.Themes)
-	}
-	for index := range themes {
-		normalizeThemeDefinition(&themes[index], defaultConfig.Themes[0], defaultThemes)
-	}
-	return themes
-}
-
-func normalizeThemeDefinition(theme *pageConfig.SiteThemeDefinition, fallback pageConfig.SiteThemeDefinition, defaultThemes map[string]pageConfig.SiteThemeDefinition) {
-	defaultTheme := defaultThemes[theme.Name]
-	if defaultTheme.Name == "" {
-		defaultTheme = fallback
-		theme.Name = defaultTheme.Name
-	}
-	if theme.Label == "" {
-		theme.Label = defaultTheme.Label
-	}
-	if theme.ColorScheme != "dark" && theme.ColorScheme != "light" {
-		theme.ColorScheme = defaultTheme.ColorScheme
-	}
-	for _, key := range pageConfig.SiteThemeTokenKeys() {
-		value := strings.TrimSpace(theme.Tokens.Get(key))
-		if value == "" {
-			value = defaultTheme.Tokens.Get(key)
-		}
-		if strings.ContainsAny(value, "{};<>") {
-			value = defaultTheme.Tokens.Get(key)
-		}
-		theme.Tokens.Set(key, normalizeLegacyThemeToken(key, value))
-	}
-}
-
-func normalizeLegacyThemeToken(key pageConfig.SiteThemeTokenKey, value string) string {
-	if key == pageConfig.SiteThemeTokenRadiusField {
-		switch strings.TrimSpace(value) {
-		case "0.375rem", "6px":
-			return "0.5rem"
-		}
-	}
-	return value
-}
-
-func normalizeThemeHistory(history []pageConfig.SiteThemeSnapshot, defaultConfig pageConfig.SiteThemeConfig, defaultThemes map[string]pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeSnapshot {
-	if len(history) > 5 {
-		history = history[len(history)-5:]
-	}
-	for index := range history {
-		history[index].Themes = normalizeThemeDefinitions(history[index].Themes, defaultConfig, defaultThemes)
-	}
-	return history
 }
 
 func cloneThemeDefinitions(themes []pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeDefinition {
 	cloned := make([]pageConfig.SiteThemeDefinition, len(themes))
-	for index, theme := range themes {
-		cloned[index] = theme
-	}
+	copy(cloned, themes)
 	return cloned
 }
 
