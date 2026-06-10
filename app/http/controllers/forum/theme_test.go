@@ -14,9 +14,9 @@ func TestNormalizeSiteThemeConfigDoesNotMutateInput(t *testing.T) {
 			{
 				Name:        "gf-light",
 				ColorScheme: "light",
-				Tokens: map[string]string{
-					"color-base-100": "oklch(100% 0 0)",
-					"unknown-token":  "remove-me",
+				Tokens: pageConfig.SiteThemeTokens{
+					ColorBase100: "oklch(100% 0 0)",
+					RadiusField:  "6px",
 				},
 			},
 		},
@@ -26,8 +26,8 @@ func TestNormalizeSiteThemeConfigDoesNotMutateInput(t *testing.T) {
 				{
 					Name:        "gf-dark",
 					ColorScheme: "dark",
-					Tokens: map[string]string{
-						"color-base-100": "oklch(20% 0 0)",
+					Tokens: pageConfig.SiteThemeTokens{
+						ColorBase100: "oklch(20% 0 0)",
 					},
 				},
 			},
@@ -39,8 +39,8 @@ func TestNormalizeSiteThemeConfigDoesNotMutateInput(t *testing.T) {
 					{
 						Name:        "gf-light",
 						ColorScheme: "light",
-						Tokens: map[string]string{
-							"color-base-100": "oklch(99% 0 0)",
+						Tokens: pageConfig.SiteThemeTokens{
+							ColorBase100: "oklch(99% 0 0)",
 						},
 					},
 				},
@@ -54,7 +54,7 @@ func TestNormalizeSiteThemeConfigDoesNotMutateInput(t *testing.T) {
 	if !reflect.DeepEqual(input, original) {
 		t.Fatal("normalizeSiteThemeConfig should not mutate the input config")
 	}
-	if _, ok := normalized.Themes[0].Tokens["unknown-token"]; ok {
-		t.Fatal("normalized theme should drop unknown tokens")
+	if normalized.Themes[0].Tokens.RadiusField != "0.5rem" {
+		t.Fatalf("expected radius-field legacy value to be normalized, got %q", normalized.Themes[0].Tokens.RadiusField)
 	}
 }

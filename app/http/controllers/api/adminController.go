@@ -1103,15 +1103,8 @@ func normalizeSiteThemeForSave(config pageConfig.SiteThemeConfig) pageConfig.Sit
 		defaultThemes[theme.Name] = theme
 	}
 
-	allowedTokens := map[string]bool{}
-	for _, theme := range defaultConfig.Themes {
-		for key := range theme.Tokens {
-			allowedTokens[key] = true
-		}
-	}
-
 	for index := range config.Themes {
-		normalizeThemeDefinition(&config.Themes[index], defaultConfig.Themes[0], defaultThemes, allowedTokens)
+		normalizeThemeDefinition(&config.Themes[index], defaultConfig.Themes[0], defaultThemes)
 	}
 	if config.Draft == nil {
 		config.Draft = &pageConfig.SiteThemeSnapshot{
@@ -1120,22 +1113,22 @@ func normalizeSiteThemeForSave(config pageConfig.SiteThemeConfig) pageConfig.Sit
 			Label:   "published",
 		}
 	}
-	config.Draft.Themes = normalizeThemeDefinitions(config.Draft.Themes, defaultConfig, defaultThemes, allowedTokens)
-	config.History = normalizeThemeHistory(config.History, defaultConfig, defaultThemes, allowedTokens)
+	config.Draft.Themes = normalizeThemeDefinitions(config.Draft.Themes, defaultConfig, defaultThemes)
+	config.History = normalizeThemeHistory(config.History, defaultConfig, defaultThemes)
 	return config
 }
 
-func normalizeThemeDefinitions(themes []pageConfig.SiteThemeDefinition, defaultConfig pageConfig.SiteThemeConfig, defaultThemes map[string]pageConfig.SiteThemeDefinition, allowedTokens map[string]bool) []pageConfig.SiteThemeDefinition {
+func normalizeThemeDefinitions(themes []pageConfig.SiteThemeDefinition, defaultConfig pageConfig.SiteThemeConfig, defaultThemes map[string]pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeDefinition {
 	if len(themes) == 0 {
 		themes = cloneThemeDefinitions(defaultConfig.Themes)
 	}
 	for index := range themes {
-		normalizeThemeDefinition(&themes[index], defaultConfig.Themes[0], defaultThemes, allowedTokens)
+		normalizeThemeDefinition(&themes[index], defaultConfig.Themes[0], defaultThemes)
 	}
 	return themes
 }
 
-func normalizeThemeDefinition(theme *pageConfig.SiteThemeDefinition, fallback pageConfig.SiteThemeDefinition, defaultThemes map[string]pageConfig.SiteThemeDefinition, allowedTokens map[string]bool) {
+func normalizeThemeDefinition(theme *pageConfig.SiteThemeDefinition, fallback pageConfig.SiteThemeDefinition, defaultThemes map[string]pageConfig.SiteThemeDefinition) {
 	defaultTheme := defaultThemes[theme.Name]
 	if defaultTheme.Name == "" {
 		defaultTheme = fallback
@@ -1147,25 +1140,20 @@ func normalizeThemeDefinition(theme *pageConfig.SiteThemeDefinition, fallback pa
 	if theme.ColorScheme != "dark" && theme.ColorScheme != "light" {
 		theme.ColorScheme = defaultTheme.ColorScheme
 	}
-	if theme.Tokens == nil {
-		theme.Tokens = map[string]string{}
-	}
-	for key, value := range defaultTheme.Tokens {
-		if strings.TrimSpace(theme.Tokens[key]) == "" {
-			theme.Tokens[key] = value
+	for _, key := range pageConfig.SiteThemeTokenKeys() {
+		value := strings.TrimSpace(theme.Tokens.Get(key))
+		if value == "" {
+			value = defaultTheme.Tokens.Get(key)
 		}
-	}
-	for key, value := range theme.Tokens {
-		if !allowedTokens[key] || strings.ContainsAny(value, "{};<>") {
-			delete(theme.Tokens, key)
-			continue
+		if strings.ContainsAny(value, "{};<>") {
+			value = defaultTheme.Tokens.Get(key)
 		}
-		theme.Tokens[key] = normalizeLegacyThemeToken(key, value)
+		theme.Tokens.Set(key, normalizeLegacyThemeToken(key, value))
 	}
 }
 
-func normalizeLegacyThemeToken(key string, value string) string {
-	if key == "radius-field" {
+func normalizeLegacyThemeToken(key pageConfig.SiteThemeTokenKey, value string) string {
+	if key == pageConfig.SiteThemeTokenRadiusField {
 		switch strings.TrimSpace(value) {
 		case "0.375rem", "6px":
 			return "0.5rem"
@@ -1174,12 +1162,12 @@ func normalizeLegacyThemeToken(key string, value string) string {
 	return value
 }
 
-func normalizeThemeHistory(history []pageConfig.SiteThemeSnapshot, defaultConfig pageConfig.SiteThemeConfig, defaultThemes map[string]pageConfig.SiteThemeDefinition, allowedTokens map[string]bool) []pageConfig.SiteThemeSnapshot {
+func normalizeThemeHistory(history []pageConfig.SiteThemeSnapshot, defaultConfig pageConfig.SiteThemeConfig, defaultThemes map[string]pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeSnapshot {
 	if len(history) > 5 {
 		history = history[len(history)-5:]
 	}
 	for index := range history {
-		history[index].Themes = normalizeThemeDefinitions(history[index].Themes, defaultConfig, defaultThemes, allowedTokens)
+		history[index].Themes = normalizeThemeDefinitions(history[index].Themes, defaultConfig, defaultThemes)
 	}
 	return history
 }
@@ -1188,10 +1176,6 @@ func cloneThemeDefinitions(themes []pageConfig.SiteThemeDefinition) []pageConfig
 	cloned := make([]pageConfig.SiteThemeDefinition, len(themes))
 	for index, theme := range themes {
 		cloned[index] = theme
-		cloned[index].Tokens = map[string]string{}
-		for key, value := range theme.Tokens {
-			cloned[index].Tokens[key] = value
-		}
 	}
 	return cloned
 }

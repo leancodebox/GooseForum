@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"net/http"
 	"net/url"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -28,39 +27,6 @@ type runtimeSiteTheme struct {
 }
 
 var siteThemeRuntimeCache = &localcache.Cache[runtimeSiteTheme]{MaxEntries: 1}
-
-var allowedThemeTokens = map[string]bool{
-	"color-base-100":          true,
-	"color-base-200":          true,
-	"color-base-300":          true,
-	"color-base-content":      true,
-	"color-icon-muted":        true,
-	"color-line":              true,
-	"color-primary":           true,
-	"color-primary-content":   true,
-	"color-secondary":         true,
-	"color-secondary-content": true,
-	"color-accent":            true,
-	"color-accent-content":    true,
-	"color-neutral":           true,
-	"color-neutral-content":   true,
-	"color-info":              true,
-	"color-info-content":      true,
-	"color-success":           true,
-	"color-success-content":   true,
-	"color-warning":           true,
-	"color-warning-content":   true,
-	"color-error":             true,
-	"color-error-content":     true,
-	"radius-selector":         true,
-	"radius-field":            true,
-	"radius-box":              true,
-	"size-selector":           true,
-	"size-field":              true,
-	"border":                  true,
-	"depth":                   true,
-	"noise":                   true,
-}
 
 type ThemePreviewProps struct {
 	Theme    pageConfig.SiteThemeConfig `json:"theme"`
@@ -170,21 +136,7 @@ func normalizeSiteThemeConfig(config pageConfig.SiteThemeConfig) pageConfig.Site
 		if theme.ColorScheme != "dark" && theme.ColorScheme != "light" {
 			theme.ColorScheme = defaultTheme.ColorScheme
 		}
-		if theme.Tokens == nil {
-			theme.Tokens = map[string]string{}
-		}
-		for key, value := range defaultTheme.Tokens {
-			if strings.TrimSpace(theme.Tokens[key]) == "" {
-				theme.Tokens[key] = value
-			}
-		}
-		for key := range theme.Tokens {
-			if !allowedThemeTokens[key] {
-				delete(theme.Tokens, key)
-				continue
-			}
-			theme.Tokens[key] = normalizeLegacySiteThemeToken(key, theme.Tokens[key])
-		}
+		normalizeThemeTokens(&theme.Tokens, defaultTheme.Tokens)
 	}
 	if config.Draft == nil {
 		config.Draft = &pageConfig.SiteThemeSnapshot{
@@ -220,27 +172,26 @@ func normalizeSiteThemeDefinitions(themes []pageConfig.SiteThemeDefinition, defa
 		if theme.ColorScheme != "dark" && theme.ColorScheme != "light" {
 			theme.ColorScheme = defaultTheme.ColorScheme
 		}
-		if theme.Tokens == nil {
-			theme.Tokens = map[string]string{}
-		}
-		for key, value := range defaultTheme.Tokens {
-			if strings.TrimSpace(theme.Tokens[key]) == "" {
-				theme.Tokens[key] = value
-			}
-		}
-		for key := range theme.Tokens {
-			if !allowedThemeTokens[key] {
-				delete(theme.Tokens, key)
-				continue
-			}
-			theme.Tokens[key] = normalizeLegacySiteThemeToken(key, theme.Tokens[key])
-		}
+		normalizeThemeTokens(&theme.Tokens, defaultTheme.Tokens)
 	}
 	return themes
 }
 
-func normalizeLegacySiteThemeToken(key string, value string) string {
-	if key == "radius-field" {
+func normalizeThemeTokens(tokens *pageConfig.SiteThemeTokens, defaults pageConfig.SiteThemeTokens) {
+	for _, key := range pageConfig.SiteThemeTokenKeys() {
+		value := strings.TrimSpace(tokens.Get(key))
+		if value == "" {
+			value = defaults.Get(key)
+		}
+		if strings.ContainsAny(value, "{};<>") {
+			value = defaults.Get(key)
+		}
+		tokens.Set(key, normalizeLegacySiteThemeToken(key, value))
+	}
+}
+
+func normalizeLegacySiteThemeToken(key pageConfig.SiteThemeTokenKey, value string) string {
+	if key == pageConfig.SiteThemeTokenRadiusField {
 		switch strings.TrimSpace(value) {
 		case "0.375rem", "6px":
 			return "0.5rem"
@@ -253,10 +204,6 @@ func cloneSiteThemeDefinitions(themes []pageConfig.SiteThemeDefinition) []pageCo
 	cloned := make([]pageConfig.SiteThemeDefinition, len(themes))
 	for index, theme := range themes {
 		cloned[index] = theme
-		cloned[index].Tokens = map[string]string{}
-		for key, value := range theme.Tokens {
-			cloned[index].Tokens[key] = value
-		}
 	}
 	return cloned
 }
@@ -308,20 +255,13 @@ func buildSiteThemeCSS(config pageConfig.SiteThemeConfig) string {
 			sb.WriteString(theme.ColorScheme)
 			sb.WriteByte(';')
 		}
-		keys := make([]string, 0, len(theme.Tokens))
-		for key := range theme.Tokens {
-			if allowedThemeTokens[key] {
-				keys = append(keys, key)
-			}
-		}
-		sort.Strings(keys)
-		for _, key := range keys {
-			value := sanitizeThemeValue(theme.Tokens[key])
+		for _, key := range pageConfig.SiteThemeTokenKeys() {
+			value := sanitizeThemeValue(theme.Tokens.Get(key))
 			if value == "" {
 				continue
 			}
 			sb.WriteString("--gf-")
-			sb.WriteString(key)
+			sb.WriteString(string(key))
 			sb.WriteByte(':')
 			sb.WriteString(value)
 			sb.WriteByte(';')
@@ -341,7 +281,7 @@ func siteThemeColors(config pageConfig.SiteThemeConfig) map[string]string {
 		if name == "" {
 			continue
 		}
-		color := sanitizeThemeValue(theme.Tokens["color-base-100"])
+		color := sanitizeThemeValue(theme.Tokens.Get(pageConfig.SiteThemeTokenColorBase100))
 		if color != "" {
 			colors[name] = color
 		}

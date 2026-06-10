@@ -21,7 +21,17 @@ import {
 } from '@lucide/vue'
 import { publishSiteTheme, rollbackSiteTheme, saveSiteTheme } from '@/runtime/api'
 import { applySiteThemeCss, applySiteThemePayload, setTheme, type SiteTheme } from '@/runtime/site-theme'
-import type { LayoutPayload, SiteThemeConfig, SiteThemeDefinition, ThemePayload, ThemePreviewProps } from '@/types/payload'
+import {
+  cloneSiteThemeTokens,
+  createEmptySiteThemeTokens,
+  siteThemeTokenKeys,
+  type LayoutPayload,
+  type SiteThemeConfig,
+  type SiteThemeDefinition,
+  type SiteThemeTokenKey,
+  type ThemePayload,
+  type ThemePreviewProps,
+} from '@/types/payload'
 import ThemeColorPicker from '@/site/components/ThemeColorPicker.vue'
 
 type PreviewMode = 'forum' | 'components' | 'code'
@@ -104,44 +114,18 @@ const radiusOptions = [
   ['xl', 24],
 ] as const
 
+const statusTokens = [
+  ['color-info', 'Info'],
+  ['color-success', 'Success'],
+  ['color-warning', 'Warning'],
+  ['color-error', 'Error'],
+] as const
+
 const previewModes = [
   ['forum', 'Forum', FileText],
   ['components', 'Components', Circle],
   ['code', 'CSS', Code2],
 ] as const
-
-const allowedThemeTokens = new Set([
-  'color-base-100',
-  'color-base-200',
-  'color-base-300',
-  'color-base-content',
-  'color-icon-muted',
-  'color-line',
-  'color-primary',
-  'color-primary-content',
-  'color-secondary',
-  'color-secondary-content',
-  'color-accent',
-  'color-accent-content',
-  'color-neutral',
-  'color-neutral-content',
-  'color-info',
-  'color-info-content',
-  'color-success',
-  'color-success-content',
-  'color-warning',
-  'color-warning-content',
-  'color-error',
-  'color-error-content',
-  'radius-selector',
-  'radius-field',
-  'radius-box',
-  'size-selector',
-  'size-field',
-  'border',
-  'depth',
-  'noise',
-])
 
 const selectedTheme = ref<SiteTheme>('gf-light')
 const previewMode = ref<PreviewMode>('forum')
@@ -196,7 +180,7 @@ function cloneConfig(config: SiteThemeConfig): SiteThemeConfig {
       name: theme.name,
       label: theme.label,
       colorScheme: theme.colorScheme,
-      tokens: { ...theme.tokens },
+      tokens: cloneSiteThemeTokens(theme.tokens),
     })),
     draft: config.draft
       ? {
@@ -207,7 +191,7 @@ function cloneConfig(config: SiteThemeConfig): SiteThemeConfig {
             name: theme.name,
             label: theme.label,
             colorScheme: theme.colorScheme,
-            tokens: { ...theme.tokens },
+            tokens: cloneSiteThemeTokens(theme.tokens),
           })),
         }
       : undefined,
@@ -219,7 +203,7 @@ function cloneConfig(config: SiteThemeConfig): SiteThemeConfig {
         name: theme.name,
         label: theme.label,
         colorScheme: theme.colorScheme,
-        tokens: { ...theme.tokens },
+        tokens: cloneSiteThemeTokens(theme.tokens),
       })),
     })) || [],
     publishedAt: config.publishedAt,
@@ -234,7 +218,7 @@ function configFromDraft(config: SiteThemeConfig): SiteThemeConfig {
       name: theme.name,
       label: theme.label,
       colorScheme: theme.colorScheme,
-      tokens: { ...theme.tokens },
+      tokens: cloneSiteThemeTokens(theme.tokens),
     }))
   }
   return cloned
@@ -249,13 +233,13 @@ function themeByName(name: SiteTheme): SiteThemeDefinition {
           name: fallback.name,
           label: fallback.label,
           colorScheme: fallback.colorScheme,
-          tokens: { ...fallback.tokens },
+          tokens: cloneSiteThemeTokens(fallback.tokens),
         }
       : {
           name,
           label: name === 'gf-dark' ? 'Dark' : 'Light',
           colorScheme: name === 'gf-dark' ? 'dark' : 'light',
-          tokens: {},
+          tokens: createEmptySiteThemeTokens(),
         }
     draft.themes.push(theme)
   }
@@ -267,28 +251,27 @@ function selectTheme(name: SiteTheme) {
   setTheme(name)
 }
 
-function tokenValue(key: string) {
+function tokenValue(key: SiteThemeTokenKey) {
   return activeTheme.value.tokens[key] || selectedDefaultTheme.value?.tokens[key] || ''
 }
 
-function setToken(key: string, value: string) {
-  if (!allowedThemeTokens.has(key)) return
+function setToken(key: SiteThemeTokenKey, value: string) {
   activeTheme.value.tokens[key] = value
 }
 
-function fromRange(key: string, value: number) {
+function fromRange(key: SiteThemeTokenKey, value: number) {
   if (key === 'border') return `${value}px`
   return `${value / 16}rem`
 }
 
-function toRange(key: string, value: string) {
+function toRange(key: SiteThemeTokenKey, value: string) {
   const numeric = Number.parseFloat(value)
   if (!Number.isFinite(numeric)) return key === 'border' ? 1 : 8
   if (value.endsWith('rem')) return Math.round(numeric * 16)
   return numeric
 }
 
-function isRadiusSelected(key: string, value: number) {
+function isRadiusSelected(key: SiteThemeTokenKey, value: number) {
   return toRange(key, tokenValue(key)) === value
 }
 
@@ -319,10 +302,12 @@ function buildThemeCss(config: SiteThemeConfig) {
   return config.themes.map((theme) => {
     const name = sanitizeThemeName(theme.name)
     if (!name) return ''
-    const declarations = Object.entries(theme.tokens)
-      .filter(([key, value]) => allowedThemeTokens.has(key) && sanitizeThemeValue(value))
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `--gf-${key}:${sanitizeThemeValue(value)}`)
+    const declarations = siteThemeTokenKeys
+      .map((key) => {
+        const value = sanitizeThemeValue(theme.tokens[key])
+        return value ? `--gf-${key}:${value}` : ''
+      })
+      .filter(Boolean)
       .join(';')
     const colorScheme = theme.colorScheme === 'dark' || theme.colorScheme === 'light' ? `color-scheme:${theme.colorScheme};` : ''
     return `[data-theme="${name}"]{${colorScheme}${declarations}}`
@@ -358,7 +343,7 @@ function themeEditSignature(config: SiteThemeConfig) {
       name: theme.name,
       label: theme.label,
       colorScheme: theme.colorScheme,
-      tokens: Object.fromEntries(Object.entries(theme.tokens).sort(([a], [b]) => a.localeCompare(b))),
+      tokens: Object.fromEntries(siteThemeTokenKeys.map((key) => [key, theme.tokens[key]])),
     })),
   })
 }
@@ -430,7 +415,7 @@ function resetSelectedThemeToDefault() {
   const theme = themeByName(selectedTheme.value)
   theme.label = defaultTheme.label
   theme.colorScheme = defaultTheme.colorScheme
-  theme.tokens = { ...defaultTheme.tokens }
+  theme.tokens = cloneSiteThemeTokens(defaultTheme.tokens)
   message.value = `${defaultTheme.label} 已恢复内置默认`
   error.value = ''
 }
@@ -833,11 +818,7 @@ function hexToRgb(value: string) {
             </div>
 
             <div class="mt-3 grid gap-3 md:grid-cols-4">
-              <div
-                v-for="[key, label] in [['color-info', 'Info'], ['color-success', 'Success'], ['color-warning', 'Warning'], ['color-error', 'Error']]"
-                :key="key"
-                class="rounded-box border border-line bg-base-100 p-3"
-              >
+              <div v-for="[key, label] in statusTokens" :key="key" class="rounded-box border border-line bg-base-100 p-3">
                 <div class="h-2 rounded-full" :style="{ backgroundColor: tokenValue(key) }" />
                 <div class="mt-3 text-sm font-semibold text-base-content">{{ label }}</div>
                 <div class="mt-1 truncate font-mono text-xs text-base-content/55">{{ tokenValue(key) }}</div>

@@ -156,10 +156,6 @@ func cloneSiteThemeDefinitions(items []pageConfig.SiteThemeDefinition) []pageCon
 	cloned := make([]pageConfig.SiteThemeDefinition, len(items))
 	for i, item := range items {
 		cloned[i] = item
-		cloned[i].Tokens = map[string]string{}
-		for key, value := range item.Tokens {
-			cloned[i].Tokens[key] = value
-		}
 	}
 	return cloned
 }

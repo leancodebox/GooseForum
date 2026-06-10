@@ -67,6 +67,113 @@ export interface ThemePayload {
   colors?: Record<string, string>
 }
 
+export const siteThemeTokenKeys = [
+  'color-base-100',
+  'color-base-200',
+  'color-base-300',
+  'color-base-content',
+  'color-icon-muted',
+  'color-line',
+  'color-primary',
+  'color-primary-content',
+  'color-secondary',
+  'color-secondary-content',
+  'color-accent',
+  'color-accent-content',
+  'color-neutral',
+  'color-neutral-content',
+  'color-info',
+  'color-info-content',
+  'color-success',
+  'color-success-content',
+  'color-warning',
+  'color-warning-content',
+  'color-error',
+  'color-error-content',
+  'radius-selector',
+  'radius-field',
+  'radius-box',
+  'size-selector',
+  'size-field',
+  'border',
+  'depth',
+  'noise',
+] as const
+
+export type SiteThemeTokenKey = typeof siteThemeTokenKeys[number]
+
+export interface SiteThemeTokens {
+  'color-base-100': string
+  'color-base-200': string
+  'color-base-300': string
+  'color-base-content': string
+  'color-icon-muted': string
+  'color-line': string
+  'color-primary': string
+  'color-primary-content': string
+  'color-secondary': string
+  'color-secondary-content': string
+  'color-accent': string
+  'color-accent-content': string
+  'color-neutral': string
+  'color-neutral-content': string
+  'color-info': string
+  'color-info-content': string
+  'color-success': string
+  'color-success-content': string
+  'color-warning': string
+  'color-warning-content': string
+  'color-error': string
+  'color-error-content': string
+  'radius-selector': string
+  'radius-field': string
+  'radius-box': string
+  'size-selector': string
+  'size-field': string
+  border: string
+  depth: string
+  noise: string
+}
+
+export function createEmptySiteThemeTokens(): SiteThemeTokens {
+  return {
+    'color-base-100': '',
+    'color-base-200': '',
+    'color-base-300': '',
+    'color-base-content': '',
+    'color-icon-muted': '',
+    'color-line': '',
+    'color-primary': '',
+    'color-primary-content': '',
+    'color-secondary': '',
+    'color-secondary-content': '',
+    'color-accent': '',
+    'color-accent-content': '',
+    'color-neutral': '',
+    'color-neutral-content': '',
+    'color-info': '',
+    'color-info-content': '',
+    'color-success': '',
+    'color-success-content': '',
+    'color-warning': '',
+    'color-warning-content': '',
+    'color-error': '',
+    'color-error-content': '',
+    'radius-selector': '',
+    'radius-field': '',
+    'radius-box': '',
+    'size-selector': '',
+    'size-field': '',
+    border: '',
+    depth: '',
+    noise: '',
+  }
+}
+
+export function cloneSiteThemeTokens(tokens: SiteThemeTokens): SiteThemeTokens {
+  return { ...tokens }
+}
+
 export interface SiteThemeConfig {
   version: number
   enabled: boolean
@@ -80,7 +187,7 @@ export interface SiteThemeDefinition {
   name: 'gf-light' | 'gf-dark'
   label: string
   colorScheme: 'light' | 'dark'
-  tokens: Record<string, string>
+  tokens: SiteThemeTokens
 }
 
 export interface SiteThemeSnapshot {
