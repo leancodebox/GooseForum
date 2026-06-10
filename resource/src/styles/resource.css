@@ -4,13 +4,107 @@
 @source "../runtime/**/*.{ts,vue}";
 @source "../types/**/*.{ts,vue}";
 @source "../../templates/layout/app.gohtml";
+@source "../../templates/pages/**/*.gohtml";
+@source "../../templates/partials/**/*.gohtml";
 @source "../../templates/view/**/*.gohtml";
+
+:root,
+[data-theme="gf-light"] {
+  color-scheme: light;
+  --gf-color-base-100: oklch(100% 0 0);
+  --gf-color-base-200: oklch(98.5% 0.003 247.858);
+  --gf-color-base-300: oklch(96.7% 0.003 264.542);
+  --gf-color-base-content: oklch(12.9% 0.042 264.695);
+  --gf-color-icon-muted: oklch(55.4% 0.046 257.417);
+  --gf-color-line: oklch(92.9% 0.013 255.508);
+  --gf-color-primary: oklch(54.6% 0.215 262.88);
+  --gf-color-primary-content: oklch(98.4% 0.003 247.858);
+  --gf-color-secondary: oklch(96.8% 0.007 247.896);
+  --gf-color-secondary-content: oklch(20.8% 0.042 265.755);
+  --gf-color-accent: oklch(69.6% 0.17 162.48);
+  --gf-color-accent-content: oklch(16.9% 0.029 166.113);
+  --gf-color-neutral: oklch(20.8% 0.042 265.755);
+  --gf-color-neutral-content: oklch(98.4% 0.003 247.858);
+  --gf-color-info: oklch(62.3% 0.188 259.815);
+  --gf-color-info-content: oklch(97% 0.014 254.604);
+  --gf-color-success: oklch(62.7% 0.194 149.214);
+  --gf-color-success-content: oklch(98.2% 0.018 155.826);
+  --gf-color-warning: oklch(76.9% 0.188 70.08);
+  --gf-color-warning-content: oklch(98.7% 0.022 95.277);
+  --gf-color-error: oklch(57.7% 0.245 27.325);
+  --gf-color-error-content: oklch(97.1% 0.013 17.38);
+  --gf-radius-selector: 0.5rem;
+  --gf-radius-field: 0.5rem;
+  --gf-radius-box: 0.5rem;
+  --gf-size-selector: 0.25rem;
+  --gf-size-field: 0.25rem;
+  --gf-border: 1px;
+  --gf-depth: 1;
+  --gf-noise: 0;
+}
+
+[data-theme="gf-dark"] {
+  color-scheme: dark;
+  --gf-color-base-100: oklch(17.5% 0 0);
+  --gf-color-base-200: oklch(12.8% 0 0);
+  --gf-color-base-300: oklch(24% 0 0);
+  --gf-color-base-content: oklch(92.5% 0 0);
+  --gf-color-icon-muted: oklch(73% 0 0);
+  --gf-color-line: oklch(31% 0 0);
+  --gf-color-primary: oklch(68% 0.16 252);
+  --gf-color-primary-content: oklch(12.8% 0 0);
+  --gf-color-secondary: oklch(24% 0 0);
+  --gf-color-secondary-content: oklch(92.5% 0 0);
+  --gf-color-accent: oklch(72.3% 0.219 149.579);
+  --gf-color-accent-content: oklch(12.8% 0 0);
+  --gf-color-neutral: oklch(92.5% 0 0);
+  --gf-color-neutral-content: oklch(12.8% 0 0);
+  --gf-color-info: oklch(73% 0.12 240);
+  --gf-color-info-content: oklch(12.8% 0 0);
+  --gf-color-success: oklch(76.8% 0.177 163.223);
+  --gf-color-success-content: oklch(12.8% 0 0);
+  --gf-color-warning: oklch(82.8% 0.189 84.429);
+  --gf-color-warning-content: oklch(12.8% 0 0);
+  --gf-color-error: oklch(71.2% 0.194 13.428);
+  --gf-color-error-content: oklch(12.8% 0 0);
+}
+
+@theme inline {
+  --color-base-100: var(--gf-color-base-100);
+  --color-base-200: var(--gf-color-base-200);
+  --color-base-300: var(--gf-color-base-300);
+  --color-base-content: var(--gf-color-base-content);
+  --color-icon-muted: var(--gf-color-icon-muted);
+  --color-line: var(--gf-color-line);
+  --color-primary: var(--gf-color-primary);
+  --color-primary-content: var(--gf-color-primary-content);
+  --color-secondary: var(--gf-color-secondary);
+  --color-secondary-content: var(--gf-color-secondary-content);
+  --color-accent: var(--gf-color-accent);
+  --color-accent-content: var(--gf-color-accent-content);
+  --color-neutral: var(--gf-color-neutral);
+  --color-neutral-content: var(--gf-color-neutral-content);
+  --color-info: var(--gf-color-info);
+  --color-info-content: var(--gf-color-info-content);
+  --color-success: var(--gf-color-success);
+  --color-success-content: var(--gf-color-success-content);
+  --color-warning: var(--gf-color-warning);
+  --color-warning-content: var(--gf-color-warning-content);
+  --color-error: var(--gf-color-error);
+  --color-error-content: var(--gf-color-error-content);
+  --radius-selector: var(--gf-radius-selector);
+  --radius-field: var(--gf-radius-field);
+  --radius-box: var(--gf-radius-box);
+  --spacing-selector: var(--gf-size-selector);
+  --spacing-field: var(--gf-size-field);
+  --border-width-gf: var(--gf-border);
+}
 
 html,
 body,
 #goose-app {
   min-height: 100%;
-  background: #f9fafb;
+  background: var(--gf-color-base-200);
 }
 
 body {
@@ -143,7 +237,23 @@ body {
 
 @layer components {
   .gf-prose {
-    @apply prose prose-slate max-w-none min-w-0;
+    @apply prose max-w-none min-w-0;
+    --tw-prose-body: color-mix(in oklch, var(--gf-color-base-content) 82%, transparent);
+    --tw-prose-headings: var(--gf-color-base-content);
+    --tw-prose-lead: color-mix(in oklch, var(--gf-color-base-content) 72%, transparent);
+    --tw-prose-links: var(--gf-color-primary);
+    --tw-prose-bold: var(--gf-color-base-content);
+    --tw-prose-counters: color-mix(in oklch, var(--gf-color-base-content) 58%, transparent);
+    --tw-prose-bullets: color-mix(in oklch, var(--gf-color-base-content) 48%, transparent);
+    --tw-prose-hr: var(--gf-color-line);
+    --tw-prose-quotes: var(--gf-color-base-content);
+    --tw-prose-quote-borders: var(--gf-color-line);
+    --tw-prose-captions: color-mix(in oklch, var(--gf-color-base-content) 58%, transparent);
+    --tw-prose-code: var(--gf-color-error);
+    --tw-prose-pre-code: var(--gf-color-base-content);
+    --tw-prose-pre-bg: var(--gf-color-base-200);
+    --tw-prose-th-borders: var(--gf-color-line);
+    --tw-prose-td-borders: var(--gf-color-line);
   }
 
   .gf-prose > * {
@@ -164,7 +274,7 @@ body {
   }
 
   .gf-prose-announcement {
-    @apply text-[14px] leading-7 text-gray-700;
+    @apply text-[14px] leading-7 text-base-content/75;
   }
 
   .gf-prose-announcement p {
@@ -180,15 +290,15 @@ body {
   }
 
   .gf-prose-announcement strong {
-    @apply font-semibold text-gray-950;
+    @apply font-semibold text-base-content;
   }
 
   .gf-prose-announcement a {
-    @apply font-medium text-blue-600 no-underline hover:text-blue-700;
+    @apply font-medium text-primary no-underline hover:text-primary;
   }
 
   .gf-prose-article {
-    @apply min-w-0 text-[15px] leading-relaxed text-gray-800;
+    @apply min-w-0 text-[15px] leading-relaxed text-base-content;
   }
 
   .gf-prose-article p {
@@ -204,19 +314,19 @@ body {
   }
 
   .gf-prose-article h1 {
-    @apply mt-9 mb-4;
+    @apply mt-9 mb-4 text-base-content;
   }
 
   .gf-prose-article h2 {
-    @apply mt-8 mb-3;
+    @apply mt-8 mb-3 text-base-content;
   }
 
   .gf-prose-article h3 {
-    @apply mt-6 mb-2;
+    @apply mt-6 mb-2 text-base-content;
   }
 
   .gf-prose-article h4 {
-    @apply mt-5 mb-2;
+    @apply mt-5 mb-2 text-base-content;
   }
 
   .gf-prose-article :where(ul, ol) {
@@ -232,7 +342,7 @@ body {
   }
 
   .gf-prose-article hr {
-    @apply my-6 border-gray-200;
+    @apply my-6 border-line;
   }
 
   .gf-prose-article hr + :where(h1, h2, h3, h4) {
@@ -240,7 +350,7 @@ body {
   }
 
   .gf-prose-comment {
-    @apply max-w-none min-w-0 text-[15px] leading-relaxed text-gray-800;
+    @apply max-w-none min-w-0 text-[15px] leading-relaxed text-base-content;
   }
 
   .gf-prose-comment p {
@@ -256,7 +366,7 @@ body {
   }
 
   .gf-prose code {
-    @apply rounded bg-gray-50 px-1 py-0.5 font-mono text-pink-600;
+    @apply rounded bg-base-200 px-1 py-0.5 font-mono text-error;
   }
 
   .gf-prose :not(pre) > code {
@@ -271,7 +381,7 @@ body {
   }
 
   .gf-prose pre {
-    @apply my-3 overflow-x-auto rounded-lg border border-gray-100 bg-gray-50 p-3 text-gray-800;
+    @apply my-3 overflow-x-auto rounded-lg border border-line bg-base-200 p-3 text-base-content;
     max-width: 100%;
   }
 
@@ -283,7 +393,7 @@ body {
   }
 
   .gf-prose blockquote {
-    @apply border-l-4 border-gray-200 bg-gray-50/70 py-1 pr-3 text-gray-600;
+    @apply border-l-4 border-line bg-base-200/70 py-1 pr-3 text-base-content/75;
   }
 
   .gf-prose blockquote p:first-of-type::before,
@@ -298,8 +408,20 @@ body {
     overflow-x: auto;
   }
 
+  .gf-prose :where(thead, tbody, tr) {
+    border-color: var(--gf-color-line);
+  }
+
+  .gf-prose :where(th, td) {
+    border-color: var(--gf-color-line);
+  }
+
+  .gf-prose :where(th) {
+    color: var(--gf-color-base-content);
+  }
+
   .gf-prose img {
-    @apply my-3 max-w-full rounded-lg border border-gray-100 object-contain;
+    @apply my-3 max-w-full rounded-lg border border-line object-contain;
   }
 
   .gf-prose-comment ul,
@@ -312,11 +434,11 @@ body {
   }
 
   .gf-prose-comment blockquote {
-    @apply my-2 border-l-4 border-gray-200 bg-gray-50/70 py-1 pl-3 pr-3 text-gray-600;
+    @apply my-2 border-l-4 border-line bg-base-200/70 py-1 pl-3 pr-3 text-base-content/75;
   }
 
   .gf-prose-comment code {
-    @apply rounded bg-gray-50 px-1 py-0.5 font-mono text-pink-600;
+    @apply rounded bg-base-200 px-1 py-0.5 font-mono text-error;
     overflow-wrap: anywhere;
     word-break: break-word;
     white-space: normal;
@@ -328,7 +450,7 @@ body {
   }
 
   .gf-prose-comment pre {
-    @apply my-2 overflow-x-auto rounded-lg border border-gray-100 bg-gray-50 p-3 text-gray-800;
+    @apply my-2 overflow-x-auto rounded-lg border border-line bg-base-200 p-3 text-base-content;
   }
 
   .gf-prose-comment pre code {
@@ -339,12 +461,12 @@ body {
   }
 
   .gf-prose-comment a {
-    @apply font-medium text-blue-600 no-underline hover:text-blue-700;
+    @apply font-medium text-primary no-underline hover:text-primary;
     overflow-wrap: anywhere;
   }
 
   .gf-prose-comment img {
-    @apply my-2 max-w-full rounded-lg border border-gray-100 object-contain;
+    @apply my-2 max-w-full rounded-lg border border-line object-contain;
     max-height: min(360px, 70vh);
   }
 
@@ -367,7 +489,7 @@ body {
   }
 
   .gf-home-topic-toolbar {
-    @apply flex flex-col gap-3 border-y border-gray-100 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:border-t-0;
+    @apply flex flex-col gap-3 border-y border-line bg-base-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:border-t-0;
   }
 
   .gf-home-topic-tabs {
@@ -381,14 +503,14 @@ body {
   }
 
   .gf-home-topic-action {
-    @apply inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 sm:h-8 sm:w-auto;
+    @apply inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary sm:h-8 sm:w-auto;
   }
 
   .gf-topic-row {
-    @apply relative isolate grid gap-3 bg-white px-4 py-3 transition;
-    @apply before:absolute before:inset-0 before:-z-10 before:bg-white before:content-[''];
-    @apply after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-gray-100/70 after:content-[''];
-    @apply last:after:hidden hover:before:bg-gray-50 lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center;
+    @apply relative isolate grid gap-3 bg-base-100 px-4 py-3 transition;
+    @apply before:absolute before:inset-0 before:-z-10 before:bg-base-100 before:content-[''];
+    @apply after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-line/70 after:content-[''];
+    @apply last:after:hidden hover:before:bg-base-200 lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center;
   }
 
   .gf-topic-row-home {

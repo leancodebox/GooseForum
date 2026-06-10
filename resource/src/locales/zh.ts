@@ -565,6 +565,7 @@ export default {
     resetEmailFailed: '重置邮件发送失败',
     activationEmailSendFailed: '验证邮件发送失败',
     passwordResetFailed: '密码重置失败',
+    themeSaveFailed: '主题配置保存失败',
     secureLoginUnsupported: '当前浏览器不支持安全登录加密',
     loginKeyLoadFailed: '登录密钥加载失败',
   },

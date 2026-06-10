@@ -114,7 +114,7 @@ const displayName = computed(() => profileForm.nickname || usernameForm.username
 const profileBioText = computed(() => profileForm.bio || profileForm.signature || t('user.emptyBio'))
 const profileCoverStyle = computed(() => {
   const activeCoverUrl = coverUrl.value.trim()
-  const defaultCover = 'linear-gradient(135deg, #f8fafc 0%, #eef4ff 52%, #f8fafc 100%)'
+  const defaultCover = 'linear-gradient(135deg, var(--gf-color-base-200) 0%, var(--gf-color-info-content) 52%, var(--gf-color-base-200) 100%)'
   if (!activeCoverUrl) {
     return {
       backgroundImage: defaultCover,
@@ -379,24 +379,24 @@ async function toggleBinding(provider: string) {
 
 <template>
     <main class="min-w-0 pb-12">
-      <section class="mb-4 overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div class="h-20 border-b border-gray-100 bg-gray-100 bg-cover bg-center sm:h-24" :style="profileCoverStyle" />
+      <section class="mb-4 overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+        <div class="h-20 border-b border-line bg-base-300 bg-cover bg-center sm:h-24" :style="profileCoverStyle" />
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex min-w-0 gap-4">
               <button
                 type="button"
-                class="group relative -mt-9 h-24 w-24 shrink-0 rounded-lg border-4 border-white bg-white shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-blue-100 sm:-mt-10 sm:h-28 sm:w-28"
+                class="group relative -mt-9 h-24 w-24 shrink-0 rounded-lg border-4 border-base-100 bg-base-100 shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-primary/20 sm:-mt-10 sm:h-28 sm:w-28"
                 :disabled="uploadingAvatar"
                 :aria-label="t('settings.avatar.upload')"
                 @click="chooseAvatar"
               >
                 <UserAvatar :src="avatarUrl" :alt="usernameForm.username" size="large" class="h-full w-full rounded object-cover transition group-hover:brightness-90" />
-                <span class="absolute inset-0 flex items-center justify-center rounded bg-gray-950/0 text-white transition group-hover:bg-gray-950/20">
+                <span class="absolute inset-0 flex items-center justify-center rounded bg-neutral/0 text-neutral-content transition group-hover:bg-neutral/20">
                   <Loader2 v-if="uploadingAvatar" class="h-6 w-6 animate-spin opacity-100" />
                   <Camera v-else class="h-6 w-6 opacity-0 transition group-hover:opacity-100" />
                 </span>
-                <span class="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-white shadow-sm ring-2 ring-white">
+                <span class="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-neutral text-neutral-content shadow-sm ring-2 ring-base-100">
                   <Loader2 v-if="uploadingAvatar" class="h-4 w-4 animate-spin" />
                   <Camera v-else class="h-4 w-4" />
                 </span>
@@ -405,20 +405,20 @@ async function toggleBinding(provider: string) {
 
               <div class="min-w-0 pt-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
-                  <h2 class="truncate text-2xl font-bold leading-tight text-gray-950">{{ displayName }}</h2>
-                  <span class="rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-blue-700">{{ t('settings.editing') }}</span>
+                  <h2 class="truncate text-2xl font-bold leading-tight text-base-content">{{ displayName }}</h2>
+                  <span class="rounded bg-info/10 px-1.5 py-0.5 text-[11px] font-semibold text-primary">{{ t('settings.editing') }}</span>
                   <button
                     type="button"
-                    class="inline-flex h-7 w-7 items-center justify-center rounded outline-none transition hover:bg-gray-100 focus-visible:ring-4 focus-visible:ring-blue-100"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded outline-none transition hover:bg-base-300 focus-visible:ring-4 focus-visible:ring-primary/20"
                     :aria-label="t('settings.easterEgg.aria')"
                     :title="t('settings.easterEgg.title')"
                     @click="triggerAvatarFlash"
                   >
-                    <Sparkles class="h-4 w-4 text-blue-600" />
+                    <Sparkles class="h-4 w-4 text-primary" />
                   </button>
                 </div>
-                <p class="mt-1 text-sm font-medium text-gray-400">@{{ usernameForm.username }}</p>
-                <p class="mt-2 max-w-3xl text-sm leading-relaxed text-gray-600">{{ profileBioText }}</p>
+                <p class="mt-1 text-sm font-medium text-base-content/55">@{{ usernameForm.username }}</p>
+                <p class="mt-2 max-w-3xl text-sm leading-relaxed text-base-content/75">{{ profileBioText }}</p>
               </div>
             </div>
 
@@ -427,7 +427,7 @@ async function toggleBinding(provider: string) {
                 <div v-if="layout.viewer.canAccessAdmin" class="relative">
                   <button
                     type="button"
-                    class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                    class="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200"
                     :aria-expanded="editingCover"
                     @click="toggleCoverEditor"
                   >
@@ -436,22 +436,22 @@ async function toggleBinding(provider: string) {
                   </button>
                   <form
                     v-if="editingCover"
-                    class="absolute left-0 top-11 z-20 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-gray-200 bg-white p-3 shadow-lg sm:left-auto sm:right-0"
+                    class="absolute left-0 top-11 z-20 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-line bg-base-100 p-3 shadow-lg sm:left-auto sm:right-0"
                     @submit.prevent="saveCover"
                   >
                     <label class="block">
-                      <span class="text-xs font-semibold text-gray-500">{{ t('user.coverUrl') }}</span>
+                      <span class="text-xs font-semibold text-base-content/55">{{ t('user.coverUrl') }}</span>
                       <input
                         v-model="coverDraft"
                         type="url"
-                        class="mt-1 h-9 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        class="mt-1 h-9 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
                         :placeholder="t('user.coverUrl')"
                       />
                     </label>
                     <div class="mt-3 flex justify-end gap-2">
                       <button
                         type="button"
-                        class="inline-flex h-8 items-center justify-center rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        class="inline-flex h-8 items-center justify-center rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200"
                         :disabled="savingCover"
                         @click="cancelCoverEditor"
                       >
@@ -459,7 +459,7 @@ async function toggleBinding(provider: string) {
                       </button>
                       <button
                         type="submit"
-                        class="inline-flex h-8 min-w-16 items-center justify-center rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70"
+                        class="inline-flex h-8 min-w-16 items-center justify-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-wait disabled:opacity-70"
                         :disabled="savingCover"
                       >
                         <Loader2 v-if="savingCover" class="h-4 w-4 animate-spin" />
@@ -470,7 +470,7 @@ async function toggleBinding(provider: string) {
                 </div>
                 <button
                   type="button"
-                  class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  class="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200"
                   @click="chooseAvatar"
                 >
                   <Camera class="h-4 w-4" />
@@ -480,14 +480,14 @@ async function toggleBinding(provider: string) {
             </div>
           </div>
 
-          <div class="mt-5 grid grid-cols-4 border-y border-gray-100 py-3 lg:grid-cols-7 lg:py-4">
+          <div class="mt-5 grid grid-cols-4 border-y border-line py-3 lg:grid-cols-7 lg:py-4">
             <div v-for="item in statsItems" :key="item.label" class="px-1 py-1 text-center lg:px-0 lg:text-left">
-              <div class="text-lg font-bold tabular-nums text-gray-950 lg:text-xl">{{ formatNumber(item.value) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-gray-400 lg:text-xs">{{ item.label }}</div>
+              <div class="text-lg font-bold tabular-nums text-base-content lg:text-xl">{{ formatNumber(item.value) }}</div>
+              <div class="mt-0.5 text-[11px] font-medium text-base-content/55 lg:text-xs">{{ item.label }}</div>
             </div>
           </div>
 
-          <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-gray-400">
+          <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-base-content/55">
             <span class="inline-flex items-center gap-1.5"><CalendarDays class="h-3.5 w-3.5" /> {{ t('user.joinedAt', { date: formatDate(props.stats.createdAt) }) }}</span>
             <span v-if="profileForm.website" class="inline-flex min-w-0 items-center gap-1.5">
               <LinkIcon class="h-3.5 w-3.5 shrink-0" />
@@ -500,19 +500,19 @@ async function toggleBinding(provider: string) {
       <p
         v-if="hasStatus"
         class="mb-3 rounded-md px-3 py-2 text-sm font-medium"
-        :class="error ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'"
+        :class="error ? 'bg-error/10 text-error' : 'bg-success/10 text-success'"
       >
         {{ error || status }}
       </p>
 
-      <section class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-        <nav class="flex overflow-x-auto border-b border-gray-100 px-3">
+      <section class="overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+        <nav class="flex overflow-x-auto border-b border-line px-3">
             <button
               v-for="tab in props.tabs"
               :key="tab.key"
               type="button"
               class="inline-flex h-11 shrink-0 items-center border-b-2 px-4 text-sm font-semibold"
-              :class="activeTab === tab.key ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-900'"
+              :class="activeTab === tab.key ? 'border-primary text-primary' : 'border-transparent text-base-content/55 hover:text-base-content'"
               @click="setActiveTab(tab.key as TabKey)"
             >
               {{ settingsTabLabel(tab.key, tab.label) }}
@@ -521,24 +521,24 @@ async function toggleBinding(provider: string) {
 
         <div class="space-y-3">
           <section v-show="activeTab === 'profile'">
-            <div class="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
-              <UserRound class="h-4 w-4 text-gray-400" />
+            <div class="flex items-center gap-2 border-b border-line px-4 py-3">
+              <UserRound class="h-4 w-4 text-base-content/55" />
               <div>
-                <h2 class="text-sm font-semibold text-gray-950">{{ t('settings.profile.title') }}</h2>
-                <p class="mt-0.5 text-xs text-gray-400">{{ t('settings.profile.description') }}</p>
+                <h2 class="text-sm font-semibold text-base-content">{{ t('settings.profile.title') }}</h2>
+                <p class="mt-0.5 text-xs text-base-content/55">{{ t('settings.profile.description') }}</p>
               </div>
             </div>
             <div class="space-y-6 p-4">
               <div class="grid gap-4 sm:grid-cols-2">
                 <label class="block min-w-0">
-                  <span class="text-sm font-medium text-gray-700">{{ t('auth.username') }}</span>
+                  <span class="text-sm font-medium text-base-content/75">{{ t('auth.username') }}</span>
                   <div v-if="!editingUsername" class="mt-1 flex min-w-0 items-center gap-2">
-                    <div class="flex h-10 min-w-0 flex-1 items-center rounded-md border border-gray-100 bg-gray-50/70 px-3 text-sm font-medium text-gray-900">
+                    <div class="flex h-10 min-w-0 flex-1 items-center rounded-md border border-line bg-base-200/70 px-3 text-sm font-medium text-base-content">
                       <span class="truncate">{{ usernameForm.username }}</span>
                     </div>
                     <button
                       type="button"
-                      class="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-blue-100 bg-blue-50 px-3 text-sm font-semibold text-blue-700 hover:border-blue-200 hover:bg-blue-100"
+                      class="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-primary/20 bg-info/10 px-3 text-sm font-semibold text-primary hover:border-primary/20 hover:bg-info/10"
                       @click="editingUsername = true"
                     >
                       <Pencil class="h-4 w-4" />
@@ -546,22 +546,22 @@ async function toggleBinding(provider: string) {
                     </button>
                   </div>
                   <div v-else class="mt-1 flex min-w-0 gap-2">
-                    <input v-model="usernameForm.username" class="h-10 min-w-0 flex-1 rounded-md border border-blue-300 px-3 text-sm outline-none ring-4 ring-blue-50 focus:border-blue-500" />
-                    <button type="button" class="h-10 shrink-0 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60" :disabled="savingUsername" @click="saveUsername">
+                    <input v-model="usernameForm.username" class="h-10 min-w-0 flex-1 rounded-md border border-primary/40 px-3 text-sm outline-none ring-4 ring-primary/20 focus:border-primary" />
+                    <button type="button" class="h-10 shrink-0 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary disabled:opacity-60" :disabled="savingUsername" @click="saveUsername">
                       {{ savingUsername ? t('settings.savingShort') : t('common.save') }}
                     </button>
-                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100" @click="cancelUsernameEdit">{{ t('common.cancel') }}</button>
+                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-base-content/55 hover:bg-base-300" @click="cancelUsernameEdit">{{ t('common.cancel') }}</button>
                   </div>
                 </label>
                 <div class="block min-w-0">
-                  <span class="text-sm font-medium text-gray-700">{{ t('auth.email') }}</span>
+                  <span class="text-sm font-medium text-base-content/75">{{ t('auth.email') }}</span>
                   <div v-if="!editingEmail" class="mt-1 flex min-w-0 items-center gap-2">
-                    <div class="flex h-10 min-w-0 flex-1 items-center rounded-md border border-gray-100 bg-gray-50/70 px-3 text-sm font-medium text-gray-900">
+                    <div class="flex h-10 min-w-0 flex-1 items-center rounded-md border border-line bg-base-200/70 px-3 text-sm font-medium text-base-content">
                       <span class="truncate">{{ emailForm.email }}</span>
                     </div>
                     <button
                       type="button"
-                      class="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-blue-100 bg-blue-50 px-3 text-sm font-semibold text-blue-700 hover:border-blue-200 hover:bg-blue-100"
+                      class="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-primary/20 bg-info/10 px-3 text-sm font-semibold text-primary hover:border-primary/20 hover:bg-info/10"
                       @click="editingEmail = true"
                     >
                       <Pencil class="h-4 w-4" />
@@ -569,20 +569,20 @@ async function toggleBinding(provider: string) {
                     </button>
                   </div>
                   <div v-else class="mt-1 flex min-w-0 gap-2">
-                    <input v-model="emailForm.email" type="email" class="h-10 min-w-0 flex-1 rounded-md border border-blue-300 px-3 text-sm outline-none ring-4 ring-blue-50 focus:border-blue-500" />
-                    <button type="button" class="h-10 shrink-0 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60" :disabled="savingEmail" @click="saveEmail">
+                    <input v-model="emailForm.email" type="email" class="h-10 min-w-0 flex-1 rounded-md border border-primary/40 px-3 text-sm outline-none ring-4 ring-primary/20 focus:border-primary" />
+                    <button type="button" class="h-10 shrink-0 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary disabled:opacity-60" :disabled="savingEmail" @click="saveEmail">
                       {{ savingEmail ? t('settings.savingShort') : t('common.save') }}
                     </button>
-                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100" @click="cancelEmailEdit">{{ t('common.cancel') }}</button>
+                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-base-content/55 hover:bg-base-300" @click="cancelEmailEdit">{{ t('common.cancel') }}</button>
                   </div>
-                  <div v-if="layout.viewer.requiresEmailVerification" class="mt-2 flex flex-col gap-2 border-l-2 border-amber-400 bg-amber-50 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-                    <span class="min-w-0 text-sm text-amber-950">
+                  <div v-if="layout.viewer.requiresEmailVerification" class="mt-2 flex flex-col gap-2 border-l-2 border-warning bg-warning/10 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span class="min-w-0 text-sm text-warning">
                       <span class="font-semibold">{{ t('settings.emailVerification.title') }}</span>
-                      <span class="ml-1 text-amber-800">{{ t('settings.emailVerification.description') }}</span>
+                      <span class="ml-1 text-warning">{{ t('settings.emailVerification.description') }}</span>
                     </span>
                     <button
                       type="button"
-                      class="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-amber-200 bg-white px-3 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:cursor-wait disabled:opacity-70"
+                      class="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-warning/30 bg-base-100 px-3 text-sm font-semibold text-warning hover:bg-warning/15 disabled:cursor-wait disabled:opacity-70"
                       :disabled="sendingActivationEmail"
                       @click="sendActivationEmail"
                     >
@@ -593,52 +593,52 @@ async function toggleBinding(provider: string) {
                   </div>
                 </div>
                 <label class="block sm:col-span-2">
-                  <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.displayName') }}</span>
-                  <input v-model="profileForm.nickname" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                  <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.displayName') }}</span>
+                  <input v-model="profileForm.nickname" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
                 </label>
                 <label class="block">
-                  <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.websiteName') }}</span>
-                  <input v-model="profileForm.websiteName" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                  <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.websiteName') }}</span>
+                  <input v-model="profileForm.websiteName" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
                 </label>
                 <label class="block">
-                  <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.website') }}</span>
-                  <input v-model="profileForm.website" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" placeholder="https://example.com" />
+                  <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.website') }}</span>
+                  <input v-model="profileForm.website" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" placeholder="https://example.com" />
                 </label>
               </div>
 
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.bio') }}</span>
-                <textarea v-model="profileForm.bio" class="mt-1 min-h-24 w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.bio') }}</span>
+                <textarea v-model="profileForm.bio" class="mt-1 min-h-24 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
               </label>
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">{{ t('settings.profile.signature') }}</span>
-                <textarea v-model="profileForm.signature" class="mt-1 min-h-20 w-full rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.signature') }}</span>
+                <textarea v-model="profileForm.signature" class="mt-1 min-h-20 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
               </label>
 
-              <div class="border-t border-gray-100 pt-5">
+              <div class="border-t border-line pt-5">
                 <div class="mb-3 flex items-center gap-2">
-                  <LinkIcon class="h-4 w-4 text-gray-400" />
-                  <h3 class="text-sm font-semibold text-gray-950">{{ t('settings.profile.social') }}</h3>
+                  <LinkIcon class="h-4 w-4 text-base-content/55" />
+                  <h3 class="text-sm font-semibold text-base-content">{{ t('settings.profile.social') }}</h3>
                 </div>
                 <div class="grid gap-3 sm:grid-cols-2">
                   <label v-for="item in socialItems" :key="item.key" class="block">
-                    <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
-                      <span class="inline-flex h-5 w-5 items-center justify-center text-gray-500">
+                    <span class="inline-flex items-center gap-2 text-sm font-medium text-base-content/75">
+                      <span class="inline-flex h-5 w-5 items-center justify-center text-base-content/55">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                           <path :d="item.icon.path" />
                         </svg>
                       </span>
                       {{ item.label }}
                     </span>
-                    <input v-model="profileForm.externalInformation[item.key].link" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                    <input v-model="profileForm.externalInformation[item.key].link" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
                   </label>
                 </div>
               </div>
 
-              <div class="border-t border-gray-100 pt-5">
+              <div class="border-t border-line pt-5">
                 <button
                   type="button"
-                  class="inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-wait disabled:bg-blue-600"
+                  class="inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-wait disabled:bg-primary"
                   :disabled="savingProfile"
                   @click="saveProfile"
                 >
@@ -651,24 +651,24 @@ async function toggleBinding(provider: string) {
 
           <section v-show="activeTab === 'account'" class="p-4">
             <div class="mb-4 flex items-center gap-2">
-              <KeyRound class="h-4 w-4 text-gray-400" />
-              <h2 class="text-sm font-semibold text-gray-950">{{ t('settings.account.title') }}</h2>
+              <KeyRound class="h-4 w-4 text-base-content/55" />
+              <h2 class="text-sm font-semibold text-base-content">{{ t('settings.account.title') }}</h2>
             </div>
             <form class="max-w-xl space-y-4" @submit.prevent="submitPassword">
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">{{ t('settings.account.currentPassword') }}</span>
-                <input v-model="passwordForm.oldPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                <span class="text-sm font-medium text-base-content/75">{{ t('settings.account.currentPassword') }}</span>
+                <input v-model="passwordForm.oldPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
               </label>
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">{{ t('auth.newPassword') }}</span>
-                <input v-model="passwordForm.newPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
-                <span class="mt-1 block text-xs text-gray-400">{{ t('settings.account.passwordHint') }}</span>
+                <span class="text-sm font-medium text-base-content/75">{{ t('auth.newPassword') }}</span>
+                <input v-model="passwordForm.newPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+                <span class="mt-1 block text-xs text-base-content/55">{{ t('settings.account.passwordHint') }}</span>
               </label>
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">{{ t('auth.confirmPassword') }}</span>
-                <input v-model="passwordForm.confirmPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                <span class="text-sm font-medium text-base-content/75">{{ t('auth.confirmPassword') }}</span>
+                <input v-model="passwordForm.confirmPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
               </label>
-              <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70" :disabled="savingPassword">
+              <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-wait disabled:opacity-70" :disabled="savingPassword">
                 <Loader2 v-if="savingPassword" class="h-4 w-4 animate-spin" />
                 {{ t('settings.account.changePassword') }}
               </button>
@@ -677,30 +677,30 @@ async function toggleBinding(provider: string) {
 
           <section v-show="activeTab === 'privacy'" class="p-4">
             <div class="mb-2 flex items-center gap-2">
-              <Shield class="h-4 w-4 text-gray-400" />
-              <h2 class="text-sm font-semibold text-gray-950">{{ t('settings.privacy.title') }}</h2>
+              <Shield class="h-4 w-4 text-base-content/55" />
+              <h2 class="text-sm font-semibold text-base-content">{{ t('settings.privacy.title') }}</h2>
             </div>
-            <div class="max-w-2xl divide-y divide-gray-100">
+            <div class="max-w-2xl divide-y divide-line">
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
-                  <span class="block text-sm font-semibold text-gray-900">{{ t('settings.privacy.showArticles') }}</span>
-                  <span class="text-sm text-gray-500">{{ t('settings.privacy.showArticlesDescription') }}</span>
+                  <span class="block text-sm font-semibold text-base-content">{{ t('settings.privacy.showArticles') }}</span>
+                  <span class="text-sm text-base-content/55">{{ t('settings.privacy.showArticlesDescription') }}</span>
                 </span>
-                <input v-model="privacy.showArticles" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600" @change="savePrivacy" />
+                <input v-model="privacy.showArticles" type="checkbox" class="h-5 w-5 rounded border-line text-primary" @change="savePrivacy" />
               </label>
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
-                  <span class="block text-sm font-semibold text-gray-900">{{ t('settings.privacy.showFollowing') }}</span>
-                  <span class="text-sm text-gray-500">{{ t('settings.privacy.showFollowingDescription') }}</span>
+                  <span class="block text-sm font-semibold text-base-content">{{ t('settings.privacy.showFollowing') }}</span>
+                  <span class="text-sm text-base-content/55">{{ t('settings.privacy.showFollowingDescription') }}</span>
                 </span>
-                <input v-model="privacy.showFollowing" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600" @change="savePrivacy" />
+                <input v-model="privacy.showFollowing" type="checkbox" class="h-5 w-5 rounded border-line text-primary" @change="savePrivacy" />
               </label>
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
-                  <span class="block text-sm font-semibold text-gray-900">{{ t('settings.privacy.emailNotifications') }}</span>
-                  <span class="text-sm text-gray-500">{{ t('settings.privacy.emailNotificationsDescription') }}</span>
+                  <span class="block text-sm font-semibold text-base-content">{{ t('settings.privacy.emailNotifications') }}</span>
+                  <span class="text-sm text-base-content/55">{{ t('settings.privacy.emailNotificationsDescription') }}</span>
                 </span>
-                <input v-model="privacy.emailNotifications" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600" @change="savePrivacy" />
+                <input v-model="privacy.emailNotifications" type="checkbox" class="h-5 w-5 rounded border-line text-primary" @change="savePrivacy" />
               </label>
             </div>
           </section>
@@ -708,12 +708,12 @@ async function toggleBinding(provider: string) {
           <section v-show="activeTab === 'binding'" class="p-4">
             <div class="mb-4 flex items-center justify-between gap-3">
               <div class="flex items-center gap-2">
-                <Mail class="h-4 w-4 text-gray-400" />
-                <h2 class="text-sm font-semibold text-gray-950">{{ t('settings.binding.title') }}</h2>
+                <Mail class="h-4 w-4 text-base-content/55" />
+                <h2 class="text-sm font-semibold text-base-content">{{ t('settings.binding.title') }}</h2>
               </div>
-              <button type="button" class="text-xs font-medium text-blue-600 hover:text-blue-700" @click="loadBindings">{{ t('settings.binding.refresh') }}</button>
+              <button type="button" class="text-xs font-medium text-primary hover:text-primary" @click="loadBindings">{{ t('settings.binding.refresh') }}</button>
             </div>
-            <div v-if="loadingBindings" class="py-8 text-center text-sm text-gray-500">
+            <div v-if="loadingBindings" class="py-8 text-center text-sm text-base-content/55">
               <Loader2 class="mx-auto mb-2 h-5 w-5 animate-spin" />
               {{ t('settings.binding.loading') }}
             </div>
@@ -722,14 +722,14 @@ async function toggleBinding(provider: string) {
                 v-for="provider in providers"
                 :key="provider.key"
                 class="flex items-center justify-between gap-4 rounded-lg border p-4"
-                :class="provider.supported ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50/70'"
+                :class="provider.supported ? 'border-line bg-base-100' : 'border-line bg-base-200/70'"
               >
                 <div class="flex min-w-0 items-center gap-3">
                   <div
                     class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border"
-                    :class="provider.supported ? 'border-gray-100 bg-white shadow-sm' : 'border-gray-100 bg-gray-100 opacity-60'"
+                    :class="provider.supported ? 'border-line bg-base-100 shadow-sm' : 'border-line bg-base-300 opacity-60'"
                   >
-                    <svg v-if="provider.key === 'github'" class="h-6 w-6 text-gray-950" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <svg v-if="provider.key === 'github'" class="h-6 w-6 text-base-content" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23A11.5 11.5 0 0 1 12 5.8c1.02.01 2.05.14 3.01.4 2.29-1.55 3.3-1.23 3.3-1.23.65 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.82.58A12.01 12.01 0 0 0 24 12c0-6.63-5.37-12-12-12Z" />
                     </svg>
                     <svg v-else class="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true">
@@ -740,8 +740,8 @@ async function toggleBinding(provider: string) {
                     </svg>
                   </div>
                   <div>
-                    <h3 class="font-semibold text-gray-950">{{ provider.label }}</h3>
-                    <p class="text-sm" :class="provider.supported ? 'text-gray-500' : 'text-gray-400'">
+                    <h3 class="font-semibold text-base-content">{{ provider.label }}</h3>
+                    <p class="text-sm" :class="provider.supported ? 'text-base-content/55' : 'text-base-content/55'">
                       {{ provider.supported ? (isBound(provider.key) ? t('settings.binding.connected') : t('settings.binding.disconnected')) : t('settings.binding.siteUnsupported') }}
                     </p>
                   </div>
@@ -751,10 +751,10 @@ async function toggleBinding(provider: string) {
                   class="inline-flex h-9 min-w-24 items-center justify-center gap-2 rounded-md border px-3 text-sm font-semibold disabled:cursor-not-allowed"
                   :class="[
                     !provider.supported
-                      ? 'border-gray-200 bg-gray-100 text-gray-400'
+                      ? 'border-line bg-base-300 text-base-content/55'
                       : isBound(provider.key)
-                        ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
-                        : 'border-gray-900 bg-gray-900 text-white hover:bg-gray-800',
+                        ? 'border-error/30 bg-error/10 text-error hover:bg-error/10'
+                        : 'border-neutral bg-neutral text-neutral-content hover:bg-neutral/90',
                   ]"
                   :disabled="bindingAction === provider.key || !provider.supported"
                   @click="toggleBinding(provider.key)"
@@ -769,48 +769,48 @@ async function toggleBinding(provider: string) {
         </div>
       </section>
 
-      <div v-if="cropModalOpen" class="fixed inset-0 z-[100] overflow-y-auto bg-gray-950/50 px-3 py-4 backdrop-blur-sm sm:px-4" role="dialog" aria-modal="true">
+      <div v-if="cropModalOpen" class="fixed inset-0 z-[100] overflow-y-auto bg-neutral/50 px-3 py-4 backdrop-blur-sm sm:px-4" role="dialog" aria-modal="true">
         <div class="mx-auto flex min-h-full max-w-[760px] items-center justify-center">
-          <div class="flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-            <div class="flex items-center justify-between border-b border-gray-100 px-5 py-3">
+          <div class="flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-xl bg-base-100 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-line px-5 py-3">
               <div>
-                <h2 class="text-base font-semibold text-gray-950">{{ t('settings.avatar.cropTitle') }}</h2>
-                <p class="mt-0.5 text-sm text-gray-500">{{ t('settings.avatar.cropDescription') }}</p>
+                <h2 class="text-base font-semibold text-base-content">{{ t('settings.avatar.cropTitle') }}</h2>
+                <p class="mt-0.5 text-sm text-base-content/55">{{ t('settings.avatar.cropDescription') }}</p>
               </div>
-              <button type="button" class="rounded-md px-2 py-1 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900" @click="closeCropModal">
+              <button type="button" class="rounded-md px-2 py-1 text-sm font-medium text-base-content/55 hover:bg-base-300 hover:text-base-content" @click="closeCropModal">
                 {{ t('common.close') }}
               </button>
             </div>
 
             <div class="grid gap-4 overflow-y-auto p-4 md:grid-cols-[minmax(280px,420px)_180px] md:items-start md:justify-center">
-              <div class="avatar-crop-workspace aspect-square w-full max-w-[420px] justify-self-center overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+              <div class="avatar-crop-workspace aspect-square w-full max-w-[420px] justify-self-center overflow-hidden rounded-lg border border-line bg-base-200">
                 <img ref="cropperImage" :src="cropImageUrl" :alt="t('settings.avatar.cropAlt')" class="block" />
               </div>
 
               <aside class="grid gap-4 sm:grid-cols-[128px_minmax(0,1fr)] md:block md:space-y-4">
                 <div class="min-w-0">
-                  <div class="mb-2 text-sm font-semibold text-gray-950">{{ t('settings.avatar.preview') }}</div>
-                  <div class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-gray-100 bg-gray-50">
+                  <div class="mb-2 text-sm font-semibold text-base-content">{{ t('settings.avatar.preview') }}</div>
+                  <div class="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-line bg-base-200">
                     <img v-if="cropPreviewUrl" :src="cropPreviewUrl" :alt="t('settings.avatar.previewAlt')" class="h-full w-full object-cover" />
                   </div>
                 </div>
-                <div class="self-start rounded-lg bg-gray-50 p-3 text-sm leading-6 text-gray-500">
+                <div class="self-start rounded-lg bg-base-200 p-3 text-sm leading-6 text-base-content/55">
                   {{ t('settings.avatar.cropTip') }}
                 </div>
               </aside>
             </div>
 
-            <div v-if="cropError" class="border-t border-red-100 bg-red-50 px-5 py-3 text-sm font-medium text-red-600">
+            <div v-if="cropError" class="border-t border-error/20 bg-error/10 px-5 py-3 text-sm font-medium text-error">
               {{ cropError }}
             </div>
 
-            <div class="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50 px-5 py-3">
-              <button type="button" class="h-10 rounded-md px-4 text-sm font-medium text-gray-600 hover:bg-gray-100" @click="closeCropModal">
+            <div class="flex items-center justify-end gap-2 border-t border-line bg-base-200 px-5 py-3">
+              <button type="button" class="h-10 rounded-md px-4 text-sm font-medium text-base-content/75 hover:bg-base-300" @click="closeCropModal">
                 {{ t('common.cancel') }}
               </button>
               <button
                 type="button"
-                class="inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-wait disabled:bg-blue-600"
+                class="inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-wait disabled:bg-primary"
                 :disabled="uploadingAvatar"
                 @click="uploadCroppedAvatar"
               >

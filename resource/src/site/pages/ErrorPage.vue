@@ -28,20 +28,20 @@ function goBack() {
 
 <template>
     <main class="min-w-0 pb-12">
-      <section class="rounded-lg border border-gray-200/70 bg-white px-6 py-12 text-center shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-        <div class="text-sm font-bold uppercase tracking-wide text-gray-400">{{ page.props.code }}</div>
-        <h1 class="mt-2 text-2xl font-bold text-gray-950">{{ localizedTitle }}</h1>
-        <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">{{ localizedMessage }}</p>
+      <section class="rounded-lg border border-line/70 bg-base-100 px-6 py-12 text-center shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+        <div class="text-sm font-bold uppercase tracking-wide text-base-content/55">{{ page.props.code }}</div>
+        <h1 class="mt-2 text-2xl font-bold text-base-content">{{ localizedTitle }}</h1>
+        <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-base-content/55">{{ localizedMessage }}</p>
         <div class="mt-6 flex flex-wrap justify-center gap-2">
           <button
             type="button"
-            class="inline-flex h-9 items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            class="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200"
             @click="goBack"
           >
             <ArrowLeft class="h-4 w-4" />
             {{ t('common.back') }}
           </button>
-          <a href="/" class="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700">
+          <a href="/" class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary">
             <Home class="h-4 w-4" />
             {{ t('common.home') }}
           </a>

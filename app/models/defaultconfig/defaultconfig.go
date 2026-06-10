@@ -19,6 +19,7 @@ type pageConfigDefaults struct {
 	Posting      pageConfig.PostingContent
 	Security     pageConfig.SecurityAndRegistration
 	Site         pageConfig.SiteSettingsConfig
+	SiteTheme    pageConfig.SiteThemeConfig
 	Sponsors     pageConfig.SponsorsConfig
 }
 
@@ -51,6 +52,10 @@ func loadPageConfigDefaults() (pageConfigDefaults, error) {
 			return
 		}
 		errPageConfigDefaults = loadJSON("site.json", &pageConfigDefaultsValue.Site)
+		if errPageConfigDefaults != nil {
+			return
+		}
+		errPageConfigDefaults = loadJSON("site_theme.json", &pageConfigDefaultsValue.SiteTheme)
 		if errPageConfigDefaults != nil {
 			return
 		}
@@ -109,6 +114,16 @@ func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {
 	return config
 }
 
+func GetDefaultSiteThemeConfig() pageConfig.SiteThemeConfig {
+	config := mustPageConfigDefaults().SiteTheme
+	config.Themes = cloneSiteThemeDefinitions(config.Themes)
+	if config.Draft != nil {
+		config.Draft = cloneSiteThemeSnapshot(config.Draft)
+	}
+	config.History = cloneSiteThemeSnapshots(config.History)
+	return config
+}
+
 func GetDefaultSponsorsConfig() pageConfig.SponsorsConfig {
 	return cloneSponsorsConfig(mustPageConfigDefaults().Sponsors)
 }
@@ -132,4 +147,40 @@ func cloneSponsorsConfig(config pageConfig.SponsorsConfig) pageConfig.SponsorsCo
 	config.Sponsors.Level3 = append([]pageConfig.SponsorItem(nil), config.Sponsors.Level3...)
 	config.Rules = append([]pageConfig.SponsorsRule(nil), config.Rules...)
 	return config
+}
+
+func cloneSiteThemeDefinitions(items []pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeDefinition {
+	if items == nil {
+		return nil
+	}
+	cloned := make([]pageConfig.SiteThemeDefinition, len(items))
+	for i, item := range items {
+		cloned[i] = item
+		cloned[i].Tokens = map[string]string{}
+		for key, value := range item.Tokens {
+			cloned[i].Tokens[key] = value
+		}
+	}
+	return cloned
+}
+
+func cloneSiteThemeSnapshot(item *pageConfig.SiteThemeSnapshot) *pageConfig.SiteThemeSnapshot {
+	if item == nil {
+		return nil
+	}
+	cloned := *item
+	cloned.Themes = cloneSiteThemeDefinitions(item.Themes)
+	return &cloned
+}
+
+func cloneSiteThemeSnapshots(items []pageConfig.SiteThemeSnapshot) []pageConfig.SiteThemeSnapshot {
+	if items == nil {
+		return nil
+	}
+	cloned := make([]pageConfig.SiteThemeSnapshot, len(items))
+	for index := range items {
+		cloned[index] = items[index]
+		cloned[index].Themes = cloneSiteThemeDefinitions(items[index].Themes)
+	}
+	return cloned
 }

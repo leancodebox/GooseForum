@@ -40,6 +40,7 @@ const (
 	Announcement     = `announcement`
 	SecuritySettings = `securitySettings`
 	PostingSettings  = `postingSettings`
+	SiteTheme        = `siteTheme`
 	Version          = `version`
 	Migration        = `migration`
 )
@@ -182,4 +183,27 @@ type PostingContent struct {
 		MaxDailyUploadsPerUser       int      `json:"maxDailyUploadsPerUser"`
 		NewUserUploadCooldownMinutes int      `json:"newUserUploadCooldownMinutes"`
 	} `json:"uploadControl"`
+}
+
+type SiteThemeConfig struct {
+	Version     int                   `json:"version"`
+	Enabled     bool                  `json:"enabled"`
+	Themes      []SiteThemeDefinition `json:"themes"`
+	Draft       *SiteThemeSnapshot    `json:"draft,omitempty"`
+	History     []SiteThemeSnapshot   `json:"history,omitempty"`
+	PublishedAt string                `json:"publishedAt,omitempty"`
+}
+
+type SiteThemeDefinition struct {
+	Name        string            `json:"name"`
+	Label       string            `json:"label"`
+	ColorScheme string            `json:"colorScheme"`
+	Tokens      map[string]string `json:"tokens"`
+}
+
+type SiteThemeSnapshot struct {
+	Enabled   bool                  `json:"enabled"`
+	Themes    []SiteThemeDefinition `json:"themes"`
+	CreatedAt string                `json:"createdAt,omitempty"`
+	Label     string                `json:"label,omitempty"`
 }

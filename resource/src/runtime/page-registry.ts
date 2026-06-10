@@ -11,6 +11,7 @@ export const pageLoaders = {
   'messages.index': () => import('@/site/pages/MessagesPage.vue'),
   'drafts.index': () => import('@/site/pages/DraftsPage.vue'),
   'settings.index': () => import('@/site/pages/SettingsPage.vue'),
+  'theme.preview': () => import('@/site/pages/ThemePreviewPage.vue'),
   'publish.index': () => import('@/site/pages/PublishPage.vue'),
   'search.index': () => import('@/site/pages/SearchPage.vue'),
   'auth.login': () => import('@/site/pages/LoginPage.vue'),

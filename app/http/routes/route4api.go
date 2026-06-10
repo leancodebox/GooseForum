@@ -67,6 +67,7 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/messages", middleware.CheckLogin, forum.Messages)
 	viewRouteApp.GET("/drafts", middleware.CheckLogin, forum.Drafts)
 	viewRouteApp.GET("/settings", middleware.CheckLogin, forum.Settings)
+	viewRouteApp.GET("/theme-preview", middleware.CheckLogin, middleware.CheckAnyPermissionOrNotFound, forum.ThemePreview)
 	viewRouteApp.GET("/notifications", middleware.CheckLogin, forum.Notifications)
 	viewRouteApp.GET("/publish", middleware.CheckLogin, forum.Publish)
 	viewRouteApp.GET("/search", forum.Search)
@@ -76,6 +77,8 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/reset-password", forum.ResetPassword)
 
 	viewRouteApp.GET("/activate", controllers.ActivateAccount)
+
+	ginApp.GET("/site-theme.css", forum.SiteThemeCSS)
 }
 
 func siteInfoRoute(ginApp *gin.Engine) {
@@ -179,6 +182,10 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("server-version", UpButterReq(api.ServerVersion)).
 		GET("site-settings", UpButterReq(api.GetSiteSettings)).
 		POST("save-site-settings", UpButterReq(api.SaveSiteSettings)).
+		GET("site-theme", UpButterReq(api.GetSiteTheme)).
+		POST("save-site-theme", UpButterReq(api.SaveSiteTheme)).
+		POST("publish-site-theme", UpButterReq(api.PublishSiteTheme)).
+		POST("rollback-site-theme", UpButterReq(api.RollbackSiteTheme)).
 		GET("mail-settings", UpButterReq(api.GetMailSettings)).
 		POST("save-mail-settings", UpButterReq(api.SaveMailSettings)).
 		POST("test-mail-connection", UpButterReq(api.TestMailConnection)).

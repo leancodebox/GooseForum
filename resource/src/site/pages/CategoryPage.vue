@@ -89,34 +89,34 @@ onBeforeUnmount(() => {
       <section class="mb-3 px-1 pb-2">
         <div class="min-w-0">
           <div class="flex min-w-0 items-center gap-2">
-            <h1 class="truncate text-xl font-bold text-gray-950">{{ page.props.category.name }}</h1>
-            <span class="h-1.5 w-1.5 shrink-0 rounded-full" :style="{ backgroundColor: page.props.category.color || '#2563eb' }" />
-            <span class="text-xs font-semibold uppercase text-gray-600">{{ t('category.label') }}</span>
+            <h1 class="truncate text-xl font-bold text-base-content">{{ page.props.category.name }}</h1>
+            <span class="h-1.5 w-1.5 shrink-0 rounded-full" :style="{ backgroundColor: page.props.category.color || 'var(--gf-color-primary)' }" />
+            <span class="text-xs font-semibold uppercase text-base-content/75">{{ t('category.label') }}</span>
           </div>
-          <p v-if="page.props.category.description" class="mt-1 max-w-3xl truncate text-sm text-gray-500">{{ page.props.category.description }}</p>
+          <p v-if="page.props.category.description" class="mt-1 max-w-3xl truncate text-sm text-base-content/55">{{ page.props.category.description }}</p>
         </div>
       </section>
 
-      <section class="overflow-hidden rounded-lg border border-gray-200/70 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div class="flex flex-col gap-3 border-b border-gray-100 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <section class="overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+        <div class="flex flex-col gap-3 border-b border-line bg-base-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex min-w-0 items-center gap-2 overflow-x-auto">
             <a
               v-for="tab in page.props.tabs"
               :key="tab.key"
               :href="tab.url"
               class="inline-flex h-8 shrink-0 items-center rounded-md px-3 text-sm font-semibold"
-              :class="tab.active ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-950'"
+              :class="tab.active ? 'bg-neutral text-neutral-content' : 'text-base-content/55 hover:bg-base-300 hover:text-base-content'"
             >
               {{ sortTabLabel(tab.key, tab.label) }}
             </a>
           </div>
-          <a href="/publish" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-700">
+          <a href="/publish" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary">
             <Plus class="h-4 w-4" />
             {{ t('topicList.newTopic') }}
           </a>
         </div>
 
-        <div class="hidden gap-3 grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] border-b border-gray-100 bg-gray-50/60 px-4 py-2 text-[11px] font-bold uppercase text-gray-600 lg:grid">
+        <div class="hidden gap-3 grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] border-b border-line bg-base-200/60 px-4 py-2 text-[11px] font-bold uppercase text-base-content/75 lg:grid">
           <div>{{ t('topicList.columns.topic') }}</div>
           <div class="text-center">{{ t('topicList.columns.users') }}</div>
           <div class="text-center">{{ t('topicList.columns.replies') }}</div>
@@ -124,7 +124,7 @@ onBeforeUnmount(() => {
           <div class="text-right">{{ t('topicList.columns.activity') }}</div>
         </div>
 
-        <div class="relative bg-white">
+        <div class="relative bg-base-100">
           <article
             v-for="topic in topics"
             :key="topic.id"
@@ -132,19 +132,19 @@ onBeforeUnmount(() => {
           >
             <div class="min-w-0">
               <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                <a :href="topic.url" class="truncate text-[15px] font-semibold leading-snug text-gray-950 group-hover:text-blue-600 sm:text-base">
+                <a :href="topic.url" class="truncate text-[15px] font-semibold leading-snug text-base-content group-hover:text-primary sm:text-base">
                   {{ topic.title }}
                 </a>
               </div>
-              <p class="mt-1 truncate text-[13px] leading-relaxed text-gray-500">{{ topicDescription(topic) }}</p>
-              <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 lg:hidden">
+              <p class="mt-1 truncate text-[13px] leading-relaxed text-base-content/55">{{ topicDescription(topic) }}</p>
+              <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55 lg:hidden">
                 <div class="flex -space-x-2">
                   <a
                     v-for="participant in topic.participants"
                     :key="participant.id"
                     :href="`/u/${participant.id}`"
                     :title="participant.username"
-                    class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
+                    class="rounded-full ring-2 ring-base-100 transition hover:z-10 hover:scale-110"
                     @click="showUserCard(participant, $event)"
                   >
                     <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
@@ -163,38 +163,38 @@ onBeforeUnmount(() => {
                   :key="participant.id"
                   :href="`/u/${participant.id}`"
                   :title="participant.username"
-                  class="rounded-full ring-2 ring-white transition hover:z-10 hover:scale-110"
+                  class="rounded-full ring-2 ring-base-100 transition hover:z-10 hover:scale-110"
                   @click="showUserCard(participant, $event)"
                 >
                   <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
                 </a>
               </div>
             </div>
-            <div class="hidden text-center text-sm font-semibold tabular-nums text-gray-700 lg:block">{{ formatNumber(topic.replyCount) }}</div>
-            <div class="hidden text-center text-sm tabular-nums text-gray-500 lg:block">{{ formatNumber(topic.viewCount) }}</div>
-            <div class="hidden text-right text-[13px] font-medium tabular-nums text-gray-400 lg:block">{{ timeAgo(topic.lastUpdateTime) }}</div>
+            <div class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 lg:block">{{ formatNumber(topic.replyCount) }}</div>
+            <div class="hidden text-center text-sm tabular-nums text-base-content/55 lg:block">{{ formatNumber(topic.viewCount) }}</div>
+            <div class="hidden text-right text-[13px] font-medium tabular-nums text-base-content/55 lg:block">{{ timeAgo(topic.lastUpdateTime) }}</div>
           </article>
 
           <div v-if="!hasTopics" class="px-5 py-16 text-center">
-            <UsersRound class="mx-auto h-8 w-8 text-gray-300" />
-            <h2 class="mt-3 text-base font-semibold text-gray-900">{{ t('topicList.emptyTitle') }}</h2>
-            <p class="mt-1 text-sm text-gray-500">{{ t('topicList.emptyCategoryDescription') }}</p>
+            <UsersRound class="mx-auto h-8 w-8 text-base-content/35" />
+            <h2 class="mt-3 text-base font-semibold text-base-content">{{ t('topicList.emptyTitle') }}</h2>
+            <p class="mt-1 text-sm text-base-content/55">{{ t('topicList.emptyCategoryDescription') }}</p>
           </div>
         </div>
 
-        <div ref="loadMoreSentinel" class="border-t border-gray-100 bg-gray-50/50 p-3 text-center">
+        <div ref="loadMoreSentinel" class="border-t border-line bg-base-200/50 p-3 text-center">
           <button
             v-if="pagination.hasNext"
             type="button"
-            class="inline-flex h-8 items-center gap-2 rounded-md px-3 text-sm font-semibold text-blue-600 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-wait disabled:opacity-70"
+            class="inline-flex h-8 items-center gap-2 rounded-md px-3 text-sm font-semibold text-primary hover:bg-info/10 hover:text-primary disabled:cursor-wait disabled:opacity-70"
             :disabled="loadingMore"
             @click="loadMore"
           >
             <Loader2 v-if="loadingMore" class="h-4 w-4 animate-spin" />
             {{ loadingMore ? t('common.loadFailed') : t('common.loadMore') }}
           </button>
-          <p v-else-if="hasTopics" class="text-xs font-medium text-gray-400">{{ t('topicList.allShown') }}</p>
-          <p v-if="loadError" class="mt-2 text-xs text-red-600">{{ t('topicList.autoLoadFailed') }}</p>
+          <p v-else-if="hasTopics" class="text-xs font-medium text-base-content/55">{{ t('topicList.allShown') }}</p>
+          <p v-if="loadError" class="mt-2 text-xs text-error">{{ t('topicList.autoLoadFailed') }}</p>
           <a v-if="pagination.hasNext" :href="pagination.nextUrl" rel="next" class="sr-only">{{ t('common.nextPage') }}</a>
         </div>
       </section>

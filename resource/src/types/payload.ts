@@ -58,6 +58,41 @@ export interface LayoutPayload {
   sidebar: SidebarPayload
   footer: FooterPayload
   unread: UnreadStatusPayload
+  theme: ThemePayload
+}
+
+export interface ThemePayload {
+  enabled: boolean
+  href?: string
+  colors?: Record<string, string>
+}
+
+export interface SiteThemeConfig {
+  version: number
+  enabled: boolean
+  themes: SiteThemeDefinition[]
+  draft?: SiteThemeSnapshot
+  history?: SiteThemeSnapshot[]
+  publishedAt?: string
+}
+
+export interface SiteThemeDefinition {
+  name: 'gf-light' | 'gf-dark'
+  label: string
+  colorScheme: 'light' | 'dark'
+  tokens: Record<string, string>
+}
+
+export interface SiteThemeSnapshot {
+  enabled: boolean
+  themes: SiteThemeDefinition[]
+  createdAt?: string
+  label?: string
+}
+
+export interface ThemePreviewProps {
+  theme: SiteThemeConfig
+  defaults: SiteThemeConfig
 }
 
 export interface UnreadStatusPayload {

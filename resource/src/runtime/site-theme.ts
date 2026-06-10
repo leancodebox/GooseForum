@@ -1,0 +1,111 @@
+import { computed, ref } from 'vue'
+import type { ThemePayload } from '@/types/payload'
+
+export type SiteTheme = 'gf-light' | 'gf-dark'
+
+const STORAGE_KEY = 'goose-site-theme'
+const themes: SiteTheme[] = ['gf-light', 'gf-dark']
+const THEME_LINK_ID = 'goose-site-theme-link'
+const THEME_PREVIEW_STYLE_ID = 'goose-site-theme-preview'
+const themeColors: Record<SiteTheme, string> = {
+  'gf-light': '#ffffff',
+  'gf-dark': '#1b1b1b',
+}
+const currentTheme = ref<SiteTheme>(resolveInitialTheme())
+
+export function useSiteTheme() {
+  const isDark = computed(() => currentTheme.value === 'gf-dark')
+
+  return {
+    theme: currentTheme,
+    isDark,
+    toggleTheme,
+  }
+}
+
+export function applyStoredTheme() {
+  applyTheme(currentTheme.value)
+}
+
+export function applySiteThemePayload(theme?: ThemePayload) {
+  for (const name of themes) {
+    const color = theme?.enabled ? theme.colors?.[name] : undefined
+    themeColors[name] = normalizeThemeColor(color) || (name === 'gf-dark' ? '#1b1b1b' : '#ffffff')
+  }
+  applySiteThemeLink(theme?.enabled ? theme.href : '')
+  applyTheme(currentTheme.value)
+}
+
+export function applySiteThemeCss(css: string) {
+  let el = document.getElementById(THEME_PREVIEW_STYLE_ID) as HTMLStyleElement | null
+  if (!css) {
+    el?.remove()
+    return
+  }
+  if (!el) {
+    el = document.createElement('style')
+    el.id = THEME_PREVIEW_STYLE_ID
+  }
+  document.head.appendChild(el)
+  el.textContent = css
+}
+
+function applySiteThemeLink(href?: string) {
+  let el = document.getElementById(THEME_LINK_ID) as HTMLLinkElement | null
+  if (!href) {
+    el?.remove()
+    return
+  }
+  if (!el) {
+    el = document.createElement('link')
+    el.id = THEME_LINK_ID
+    el.rel = 'stylesheet'
+  }
+  if (el.href !== new URL(href, window.location.origin).href) {
+    el.href = href
+  }
+  document.head.appendChild(el)
+}
+
+export function toggleTheme() {
+  setTheme(currentTheme.value === 'gf-dark' ? 'gf-light' : 'gf-dark')
+}
+
+export function setTheme(theme: SiteTheme) {
+  currentTheme.value = theme
+  applyTheme(theme)
+  try {
+    window.localStorage.setItem(STORAGE_KEY, theme)
+  } catch {
+    // Ignore storage failures in private or restricted browsing contexts.
+  }
+}
+
+function resolveInitialTheme(): SiteTheme {
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY)
+    if (isSiteTheme(stored)) return stored
+  } catch {
+    // Fall through to system preference.
+  }
+
+  if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+    return 'gf-dark'
+  }
+
+  return 'gf-light'
+}
+
+function applyTheme(theme: SiteTheme) {
+  document.documentElement.dataset.theme = theme
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[theme])
+}
+
+function isSiteTheme(value: string | null): value is SiteTheme {
+  return themes.includes(value as SiteTheme)
+}
+
+function normalizeThemeColor(value?: string) {
+  if (!value) return ''
+  return /^#[0-9a-fA-F]{6}$/.test(value) ? value : ''
+}

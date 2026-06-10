@@ -565,6 +565,7 @@ export default {
     resetEmailFailed: 'Failed to send reset email',
     activationEmailSendFailed: 'Failed to send verification email',
     passwordResetFailed: 'Password reset failed',
+    themeSaveFailed: 'Failed to save theme settings',
     secureLoginUnsupported: 'This browser does not support secure login encryption',
     loginKeyLoadFailed: 'Failed to load login key',
   },

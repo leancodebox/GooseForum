@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "pnpm typecheck && vite build",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "audit:site-colors": "node scripts/audit-site-colors.mjs"
   },
   "dependencies": {
     "@internationalized/date": "^3.12.1",

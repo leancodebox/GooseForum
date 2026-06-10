@@ -1007,6 +1007,189 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 	return savePageConfig(pageConfig.SiteSettings, req.Params.Settings, hotdataserve.ClearSiteSettingsConfigCache)
 }
 
+func GetSiteTheme(req component.BetterRequest[component.Null]) component.Response {
+	config := pageConfig.GetConfigByPageType(pageConfig.SiteTheme, defaultconfig.GetDefaultSiteThemeConfig())
+	return component.SuccessResponse(normalizeSiteThemeForSave(config))
+}
+
+type SaveSiteThemeReq struct {
+	Settings pageConfig.SiteThemeConfig `json:"settings" validate:"required"`
+}
+
+func SaveSiteTheme(req component.BetterRequest[SaveSiteThemeReq]) component.Response {
+	config := pageConfig.GetConfigByPageType(pageConfig.SiteTheme, defaultconfig.GetDefaultSiteThemeConfig())
+	config = normalizeSiteThemeForSave(config)
+	config.Draft = &pageConfig.SiteThemeSnapshot{
+		Enabled:   req.Params.Settings.Enabled,
+		Themes:    cloneThemeDefinitions(req.Params.Settings.Themes),
+		CreatedAt: time.Now().Format(time.RFC3339),
+		Label:     "draft",
+	}
+	config = normalizeSiteThemeForSave(config)
+	savePageConfig(pageConfig.SiteTheme, config, hotdataserve.ClearSiteThemeConfigCache)
+	return component.SuccessResponse(config)
+}
+
+func PublishSiteTheme(req component.BetterRequest[component.Null]) component.Response {
+	config := pageConfig.GetConfigByPageType(pageConfig.SiteTheme, defaultconfig.GetDefaultSiteThemeConfig())
+	config = normalizeSiteThemeForSave(config)
+	if config.Draft == nil {
+		return component.SuccessResponse(config)
+	}
+	now := time.Now().Format(time.RFC3339)
+	config.History = append(config.History, pageConfig.SiteThemeSnapshot{
+		Enabled:   config.Enabled,
+		Themes:    cloneThemeDefinitions(config.Themes),
+		CreatedAt: now,
+		Label:     "before publish",
+	})
+	if len(config.History) > 5 {
+		config.History = config.History[len(config.History)-5:]
+	}
+	config.Enabled = config.Draft.Enabled
+	config.Themes = cloneThemeDefinitions(config.Draft.Themes)
+	config.PublishedAt = now
+	config.Draft = &pageConfig.SiteThemeSnapshot{
+		Enabled:   config.Enabled,
+		Themes:    cloneThemeDefinitions(config.Themes),
+		CreatedAt: now,
+		Label:     "published",
+	}
+	config = normalizeSiteThemeForSave(config)
+	savePageConfig(pageConfig.SiteTheme, config, hotdataserve.ClearSiteThemeConfigCache)
+	return component.SuccessResponse(config)
+}
+
+func RollbackSiteTheme(req component.BetterRequest[component.Null]) component.Response {
+	config := pageConfig.GetConfigByPageType(pageConfig.SiteTheme, defaultconfig.GetDefaultSiteThemeConfig())
+	config = normalizeSiteThemeForSave(config)
+	if len(config.History) == 0 {
+		return component.SuccessResponse(config)
+	}
+	previous := config.History[len(config.History)-1]
+	config.History = config.History[:len(config.History)-1]
+	now := time.Now().Format(time.RFC3339)
+	config.Enabled = previous.Enabled
+	config.Themes = cloneThemeDefinitions(previous.Themes)
+	config.PublishedAt = now
+	config.Draft = &pageConfig.SiteThemeSnapshot{
+		Enabled:   config.Enabled,
+		Themes:    cloneThemeDefinitions(config.Themes),
+		CreatedAt: now,
+		Label:     "rollback",
+	}
+	config = normalizeSiteThemeForSave(config)
+	savePageConfig(pageConfig.SiteTheme, config, hotdataserve.ClearSiteThemeConfigCache)
+	return component.SuccessResponse(config)
+}
+
+func normalizeSiteThemeForSave(config pageConfig.SiteThemeConfig) pageConfig.SiteThemeConfig {
+	defaultConfig := defaultconfig.GetDefaultSiteThemeConfig()
+	if config.Version <= 0 {
+		config.Version = defaultConfig.Version
+	}
+	if len(config.Themes) == 0 {
+		config.Themes = defaultConfig.Themes
+	}
+
+	defaultThemes := map[string]pageConfig.SiteThemeDefinition{}
+	for _, theme := range defaultConfig.Themes {
+		defaultThemes[theme.Name] = theme
+	}
+
+	allowedTokens := map[string]bool{}
+	for _, theme := range defaultConfig.Themes {
+		for key := range theme.Tokens {
+			allowedTokens[key] = true
+		}
+	}
+
+	for index := range config.Themes {
+		normalizeThemeDefinition(&config.Themes[index], defaultConfig.Themes[0], defaultThemes, allowedTokens)
+	}
+	if config.Draft == nil {
+		config.Draft = &pageConfig.SiteThemeSnapshot{
+			Enabled: config.Enabled,
+			Themes:  cloneThemeDefinitions(config.Themes),
+			Label:   "published",
+		}
+	}
+	config.Draft.Themes = normalizeThemeDefinitions(config.Draft.Themes, defaultConfig, defaultThemes, allowedTokens)
+	config.History = normalizeThemeHistory(config.History, defaultConfig, defaultThemes, allowedTokens)
+	return config
+}
+
+func normalizeThemeDefinitions(themes []pageConfig.SiteThemeDefinition, defaultConfig pageConfig.SiteThemeConfig, defaultThemes map[string]pageConfig.SiteThemeDefinition, allowedTokens map[string]bool) []pageConfig.SiteThemeDefinition {
+	if len(themes) == 0 {
+		themes = cloneThemeDefinitions(defaultConfig.Themes)
+	}
+	for index := range themes {
+		normalizeThemeDefinition(&themes[index], defaultConfig.Themes[0], defaultThemes, allowedTokens)
+	}
+	return themes
+}
+
+func normalizeThemeDefinition(theme *pageConfig.SiteThemeDefinition, fallback pageConfig.SiteThemeDefinition, defaultThemes map[string]pageConfig.SiteThemeDefinition, allowedTokens map[string]bool) {
+	defaultTheme := defaultThemes[theme.Name]
+	if defaultTheme.Name == "" {
+		defaultTheme = fallback
+		theme.Name = defaultTheme.Name
+	}
+	if theme.Label == "" {
+		theme.Label = defaultTheme.Label
+	}
+	if theme.ColorScheme != "dark" && theme.ColorScheme != "light" {
+		theme.ColorScheme = defaultTheme.ColorScheme
+	}
+	if theme.Tokens == nil {
+		theme.Tokens = map[string]string{}
+	}
+	for key, value := range defaultTheme.Tokens {
+		if strings.TrimSpace(theme.Tokens[key]) == "" {
+			theme.Tokens[key] = value
+		}
+	}
+	for key, value := range theme.Tokens {
+		if !allowedTokens[key] || strings.ContainsAny(value, "{};<>") {
+			delete(theme.Tokens, key)
+			continue
+		}
+		theme.Tokens[key] = normalizeLegacyThemeToken(key, value)
+	}
+}
+
+func normalizeLegacyThemeToken(key string, value string) string {
+	if key == "radius-field" {
+		switch strings.TrimSpace(value) {
+		case "0.375rem", "6px":
+			return "0.5rem"
+		}
+	}
+	return value
+}
+
+func normalizeThemeHistory(history []pageConfig.SiteThemeSnapshot, defaultConfig pageConfig.SiteThemeConfig, defaultThemes map[string]pageConfig.SiteThemeDefinition, allowedTokens map[string]bool) []pageConfig.SiteThemeSnapshot {
+	if len(history) > 5 {
+		history = history[len(history)-5:]
+	}
+	for index := range history {
+		history[index].Themes = normalizeThemeDefinitions(history[index].Themes, defaultConfig, defaultThemes, allowedTokens)
+	}
+	return history
+}
+
+func cloneThemeDefinitions(themes []pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeDefinition {
+	cloned := make([]pageConfig.SiteThemeDefinition, len(themes))
+	for index, theme := range themes {
+		cloned[index] = theme
+		cloned[index].Tokens = map[string]string{}
+		for key, value := range theme.Tokens {
+			cloned[index].Tokens[key] = value
+		}
+	}
+	return cloned
+}
+
 // GetMailSettings 获取邮件设置
 func GetMailSettings(req component.BetterRequest[component.Null]) component.Response {
 	// 获取当前站点设置

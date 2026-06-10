@@ -194,22 +194,22 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
       <div
         v-if="visible"
         ref="cardEl"
-        class="fixed z-[90] w-[min(20rem,calc(100vw-1.5rem))] rounded-lg border border-gray-200 bg-white p-3 text-gray-900 shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45),0_8px_24px_-16px_rgba(15,23,42,0.25)]"
+        class="fixed z-[90] w-[min(20rem,calc(100vw-1.5rem))] rounded-lg border border-line bg-base-100 p-3 text-base-content shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45),0_8px_24px_-16px_rgba(15,23,42,0.25)]"
         :style="{ left: `${position.left}px`, top: `${position.top}px` }"
         @click.stop
       >
       <div class="flex items-start gap-3">
-        <a :href="profileUrl" class="shrink-0 rounded-full ring-2 ring-white">
-          <UserAvatar :src="avatarUrl" :alt="username" size="medium" class="h-14 w-14 rounded-full object-cover ring-1 ring-gray-100" />
+        <a :href="profileUrl" class="shrink-0 rounded-full ring-2 ring-base-100">
+          <UserAvatar :src="avatarUrl" :alt="username" size="medium" class="h-14 w-14 rounded-full object-cover ring-1 ring-line" />
         </a>
         <div class="min-w-0 flex-1">
           <div class="flex min-w-0 items-center gap-2">
-            <a :href="profileUrl" class="truncate text-base font-bold text-gray-950 hover:text-blue-600">{{ displayName }}</a>
-            <span v-if="card?.isAdmin" class="shrink-0 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">Admin</span>
+            <a :href="profileUrl" class="truncate text-base font-bold text-base-content hover:text-primary">{{ displayName }}</a>
+            <span v-if="card?.isAdmin" class="shrink-0 rounded bg-warning/10 px-1.5 py-0.5 text-[11px] font-semibold text-warning">Admin</span>
           </div>
-          <div class="mt-0.5 flex items-center gap-2 text-xs text-gray-400">
+          <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55">
             <span class="truncate">@{{ username }}</span>
-            <span v-if="card?.isOnline" class="inline-flex items-center gap-1 text-emerald-600">
+            <span v-if="card?.isOnline" class="inline-flex items-center gap-1 text-success">
               <Radio class="h-3 w-3" />
               {{ t('userCard.online') }}
             </span>
@@ -221,26 +221,26 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
         <Transition name="user-card-content" mode="out-in">
           <div v-if="loading" key="loading" class="mt-3 min-h-[164px]">
             <div class="space-y-2">
-              <div class="h-4 w-full rounded bg-gray-100" />
-              <div class="h-4 w-3/4 rounded bg-gray-100" />
+              <div class="h-4 w-full rounded bg-base-300" />
+              <div class="h-4 w-3/4 rounded bg-base-300" />
             </div>
-            <div class="mt-3 grid grid-cols-4 divide-x divide-gray-100 border-y border-gray-100 py-2">
+            <div class="mt-3 grid grid-cols-4 divide-x divide-line border-y border-line py-2">
               <div v-for="item in 4" :key="item" class="px-2 text-center">
-                <div class="mx-auto h-4 w-7 rounded bg-gray-100" />
-                <div class="mx-auto mt-1 h-3 w-8 rounded bg-gray-100" />
+                <div class="mx-auto h-4 w-7 rounded bg-base-300" />
+                <div class="mx-auto mt-1 h-3 w-8 rounded bg-base-300" />
               </div>
             </div>
             <div class="mt-3 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-1.5 text-xs text-gray-400">
+              <div class="flex items-center gap-1.5 text-xs text-base-content/55">
                 <Loader2 class="h-3.5 w-3.5 animate-spin" />
                 {{ t('userCard.loading') }}
               </div>
-              <div class="h-8 w-24 rounded-md bg-gray-100" />
+              <div class="h-8 w-24 rounded-md bg-base-300" />
             </div>
           </div>
-          <div v-else-if="error" key="error" class="mt-3 flex min-h-[164px] items-center rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{{ error }}</div>
+          <div v-else-if="error" key="error" class="mt-3 flex min-h-[164px] items-center rounded-md bg-error/10 px-3 py-2 text-sm text-error">{{ error }}</div>
           <div v-else key="content">
-        <p v-if="bioText" class="mt-3 line-clamp-2 text-sm leading-relaxed text-gray-600">{{ bioText }}</p>
+        <p v-if="bioText" class="mt-3 line-clamp-2 text-sm leading-relaxed text-base-content/75">{{ bioText }}</p>
 
         <div v-if="visibleBadges.length" class="mt-3 flex gap-2">
           <span
@@ -262,40 +262,40 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
             </span>
             <span
               v-if="activeBadgeCode === badge.code"
-              class="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-max max-w-48 -translate-x-1/2 rounded-md bg-gray-950 px-2 py-1 text-xs font-medium leading-5 text-white shadow-lg"
+              class="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-max max-w-48 -translate-x-1/2 rounded-md bg-neutral px-2 py-1 text-xs font-medium leading-5 text-neutral-content shadow-lg"
             >
               {{ badgeTooltip(badge) }}
             </span>
           </span>
         </div>
 
-        <div class="mt-3 grid grid-cols-4 divide-x divide-gray-100 border-y border-gray-100 py-2">
+        <div class="mt-3 grid grid-cols-4 divide-x divide-line border-y border-line py-2">
           <div class="px-2 text-center">
-            <div class="text-sm font-bold tabular-nums text-gray-950">{{ formatNumber(card?.articleCount || 0) }}</div>
-            <div class="mt-0.5 text-[11px] text-gray-400">{{ t('userCard.stats.topics') }}</div>
+            <div class="text-sm font-bold tabular-nums text-base-content">{{ formatNumber(card?.articleCount || 0) }}</div>
+            <div class="mt-0.5 text-[11px] text-base-content/55">{{ t('userCard.stats.topics') }}</div>
           </div>
           <div class="px-2 text-center">
-            <div class="text-sm font-bold tabular-nums text-gray-950">{{ formatNumber(card?.replyCount || 0) }}</div>
-            <div class="mt-0.5 text-[11px] text-gray-400">{{ t('userCard.stats.replies') }}</div>
+            <div class="text-sm font-bold tabular-nums text-base-content">{{ formatNumber(card?.replyCount || 0) }}</div>
+            <div class="mt-0.5 text-[11px] text-base-content/55">{{ t('userCard.stats.replies') }}</div>
           </div>
           <div class="px-2 text-center">
-            <div class="text-sm font-bold tabular-nums text-gray-950">{{ formatNumber(card?.likeReceivedCount || 0) }}</div>
-            <div class="mt-0.5 text-[11px] text-gray-400">{{ t('userCard.stats.likes') }}</div>
+            <div class="text-sm font-bold tabular-nums text-base-content">{{ formatNumber(card?.likeReceivedCount || 0) }}</div>
+            <div class="mt-0.5 text-[11px] text-base-content/55">{{ t('userCard.stats.likes') }}</div>
           </div>
           <div class="px-2 text-center">
-            <div class="text-sm font-bold tabular-nums text-gray-950">{{ formatNumber(card?.followerCount || 0) }}</div>
-            <div class="mt-0.5 text-[11px] text-gray-400">{{ t('userCard.stats.followers') }}</div>
+            <div class="text-sm font-bold tabular-nums text-base-content">{{ formatNumber(card?.followerCount || 0) }}</div>
+            <div class="mt-0.5 text-[11px] text-base-content/55">{{ t('userCard.stats.followers') }}</div>
           </div>
         </div>
 
-        <div v-if="externalLinks.length" class="mt-3 flex items-center gap-2 border-b border-gray-100 pb-3">
+        <div v-if="externalLinks.length" class="mt-3 flex items-center gap-2 border-b border-line pb-3">
           <a
             v-for="link in externalLinks.slice(0, 8)"
             :key="`${link.key}-${link.url}`"
             :href="link.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="group relative inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-50 hover:text-blue-600"
+            class="group relative inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-200 hover:text-primary"
             :title="link.label"
             :aria-label="link.label"
           >
@@ -310,20 +310,20 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
               <path :d="link.icon.path" />
             </svg>
             <ExternalLink v-else class="h-4 w-4" />
-            <span class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate rounded-md bg-gray-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+            <span class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate rounded-md bg-neutral px-2 py-1 text-xs font-medium text-neutral-content opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
               {{ link.label }}
             </span>
           </a>
         </div>
 
         <div class="mt-3 flex items-center justify-between gap-3">
-          <div class="inline-flex items-center gap-1.5 text-xs text-gray-400">
+          <div class="inline-flex items-center gap-1.5 text-xs text-base-content/55">
             <CalendarDays class="h-3.5 w-3.5" />
             {{ t('userCard.joinedAt', { date: card?.createdAt ? formatDate(card.createdAt) : '-' }) }}
           </div>
           <a
             :href="profileUrl"
-            class="inline-flex h-8 items-center gap-1.5 rounded-md bg-gray-900 px-3 text-sm font-semibold text-white hover:bg-gray-800"
+            class="inline-flex h-8 items-center gap-1.5 rounded-md bg-neutral px-3 text-sm font-semibold text-neutral-content hover:bg-neutral/90"
           >
             <UserPlus class="h-4 w-4" />
             {{ card?.isFollowing ? t('userCard.following') : t('userCard.viewProfile') }}

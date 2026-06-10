@@ -121,6 +121,13 @@ type LayoutPayload struct {
 	Sidebar SidebarPayload      `json:"sidebar"`
 	Footer  FooterPayload       `json:"footer"`
 	Unread  UnreadStatusPayload `json:"unread"`
+	Theme   ThemePayload        `json:"theme"`
+}
+
+type ThemePayload struct {
+	Enabled bool              `json:"enabled"`
+	Href    string            `json:"href,omitempty"`
+	Colors  map[string]string `json:"colors,omitempty"`
 }
 
 type UnreadStatusPayload struct {
@@ -561,6 +568,16 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			Primary: footerPrimary,
 		},
 		Unread: unread,
+		Theme:  buildThemePayload(),
+	}
+}
+
+func buildThemePayload() ThemePayload {
+	config := normalizeSiteThemeConfig(hotdataserve.GetSiteThemeConfigCache())
+	return ThemePayload{
+		Enabled: config.Enabled,
+		Href:    siteThemeHref(config),
+		Colors:  siteThemeColors(config),
 	}
 }
 

@@ -5,6 +5,7 @@ import { readInitialPayload, updateDocumentMeta } from '@/runtime/payload'
 import { installNavigation, preparePayload } from '@/runtime/router'
 import { currentLocale, i18n } from '@/runtime/i18n'
 import { hydrateFlashMessages } from '@/runtime/flash-message'
+import { applySiteThemePayload, applyStoredTheme } from '@/runtime/site-theme'
 import PayloadRouteView from '@/site/components/PayloadRouteView.vue'
 
 const initialPayload = readInitialPayload()
@@ -12,9 +13,12 @@ const initialPage = await preparePayload(initialPayload)
 const currentPage = shallowRef(initialPage)
 
 document.documentElement.lang = currentLocale()
+applySiteThemePayload(initialPayload.layout.theme)
+applyStoredTheme()
 
 function commitPage(nextPage: typeof initialPage) {
   currentPage.value = nextPage
+  applySiteThemePayload(nextPage.payload.layout.theme)
   updateDocumentMeta(nextPage.payload)
 }
 

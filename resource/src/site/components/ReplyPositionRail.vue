@@ -96,7 +96,7 @@ function removePointerListeners() {
   <div class="px-3 py-2">
     <button
       type="button"
-      class="mb-3 block max-w-full truncate text-left text-base font-semibold leading-tight text-gray-400 transition hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+      class="mb-3 block max-w-full truncate text-left text-base font-semibold leading-tight text-base-content/55 transition hover:text-base-content/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
       :title="t('article.earliestContent')"
       @click="emit('earliest')"
     >
@@ -109,7 +109,7 @@ function removePointerListeners() {
     >
       <div
         ref="railEl"
-        class="relative h-48 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+        class="relative h-48 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
         role="slider"
         tabindex="0"
         :aria-label="t('article.replyPosition')"
@@ -121,9 +121,9 @@ function removePointerListeners() {
         @keydown.home.prevent="selectReplyNo(1)"
         @keydown.end.prevent="emit('latest')"
       >
-        <div class="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gray-200" />
+        <div class="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-line" />
         <div
-          class="absolute left-1/2 w-1.5 -translate-x-1/2 rounded-full bg-emerald-500 transition-[top,box-shadow]"
+          class="absolute left-1/2 w-1.5 -translate-x-1/2 rounded-full bg-success/100 transition-[top,box-shadow]"
           :class="{ 'transition-none shadow-[0_0_0_4px_rgba(16,185,129,0.16)]': dragging, 'opacity-70': busy }"
           :style="thumbStyle"
         />
@@ -131,10 +131,10 @@ function removePointerListeners() {
 
       <div class="relative min-w-0">
         <div class="absolute left-0 min-w-0" :style="indicatorStyle">
-          <div class="whitespace-nowrap text-base font-black leading-none tabular-nums text-gray-950">
+          <div class="whitespace-nowrap text-base font-black leading-none tabular-nums text-base-content">
             {{ displayNo }} / {{ formatNumber(max) }}
           </div>
-          <div v-if="currentLabel && !dragging && !busy" class="mt-2 truncate text-sm font-semibold leading-tight text-gray-400">
+          <div v-if="currentLabel && !dragging && !busy" class="mt-2 truncate text-sm font-semibold leading-tight text-base-content/55">
             {{ currentLabel }}
           </div>
         </div>
@@ -143,7 +143,7 @@ function removePointerListeners() {
 
     <button
       type="button"
-      class="mt-3 block max-w-full truncate text-left text-base font-semibold leading-tight text-gray-400 transition hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+      class="mt-3 block max-w-full truncate text-left text-base font-semibold leading-tight text-base-content/55 transition hover:text-base-content/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
       :title="t('article.latestReply')"
       @click="emit('latest')"
     >

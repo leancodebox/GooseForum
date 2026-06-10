@@ -12,13 +12,13 @@ const visibleMessages = computed(() => messages.value)
 function accentClass(type: FlashMessageType) {
   switch (type) {
     case 'success':
-      return 'bg-emerald-500'
+      return 'bg-success/100'
     case 'warning':
-      return 'bg-amber-500'
+      return 'bg-warning/100'
     case 'error':
-      return 'bg-red-500'
+      return 'bg-error/100'
     default:
-      return 'bg-blue-500'
+      return 'bg-primary'
   }
 }
 
@@ -38,13 +38,13 @@ function iconFor(type: FlashMessageType) {
 function iconClass(type: FlashMessageType) {
   switch (type) {
     case 'success':
-      return 'text-emerald-600'
+      return 'text-success'
     case 'warning':
-      return 'text-amber-600'
+      return 'text-warning'
     case 'error':
-      return 'text-red-600'
+      return 'text-error'
     default:
-      return 'text-blue-600'
+      return 'text-primary'
   }
 }
 
@@ -74,7 +74,7 @@ function labelFor(type: FlashMessageType) {
       <div
         v-for="item in visibleMessages"
         :key="item.id"
-        class="pointer-events-auto relative flex min-h-[72px] w-full max-w-[380px] items-start gap-3 overflow-hidden border border-gray-200 bg-white/95 px-3.5 py-3 pr-2.5 text-sm text-gray-800 shadow-[0_14px_42px_-32px_rgba(15,23,42,0.65)] backdrop-blur"
+        class="pointer-events-auto relative flex min-h-[72px] w-full max-w-[380px] items-start gap-3 overflow-hidden border border-line bg-base-100/95 px-3.5 py-3 pr-2.5 text-sm text-base-content shadow-[0_14px_42px_-32px_rgba(15,23,42,0.65)] backdrop-blur"
         role="status"
       >
         <span
@@ -84,12 +84,12 @@ function labelFor(type: FlashMessageType) {
         />
         <component :is="iconFor(item.type)" class="mt-0.5 h-5 w-5 shrink-0" :class="iconClass(item.type)" aria-hidden="true" />
         <div class="min-w-0 flex-1">
-          <div class="mb-1 text-[11px] font-bold text-gray-400">{{ labelFor(item.type) }}</div>
-          <p class="leading-5 text-gray-800">{{ item.message }}</p>
+          <div class="mb-1 text-[11px] font-bold text-base-content/55">{{ labelFor(item.type) }}</div>
+          <p class="leading-5 text-base-content">{{ item.message }}</p>
         </div>
         <button
           type="button"
-          class="-mr-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+          class="-mr-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-300 hover:text-base-content"
           :aria-label="t('flash.close')"
           @click="dismiss(item.id)"
         >

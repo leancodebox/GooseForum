@@ -302,32 +302,32 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 
 <template>
     <main class="min-w-0 pb-12">
-      <header class="mb-4 border-b border-gray-200/70 pb-4">
-        <h1 class="text-2xl font-bold text-gray-950">{{ props.isEditing ? t('publish.editTitle') : t('publish.createTitle') }}</h1>
-        <p class="mt-1 text-sm text-gray-500">{{ t('publish.subtitle') }}</p>
+      <header class="mb-4 border-b border-line/70 pb-4">
+        <h1 class="text-2xl font-bold text-base-content">{{ props.isEditing ? t('publish.editTitle') : t('publish.createTitle') }}</h1>
+        <p class="mt-1 text-sm text-base-content/55">{{ t('publish.subtitle') }}</p>
       </header>
 
       <div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <section class="rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] sm:p-5">
+        <section class="rounded-lg border border-line/70 bg-base-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] sm:p-5">
           <div class="space-y-5">
             <label class="block">
-              <span class="text-sm font-semibold text-gray-700">{{ t('publish.fields.title') }}</span>
+              <span class="text-sm font-semibold text-base-content/75">{{ t('publish.fields.title') }}</span>
               <input
                 v-model="title"
-                class="mt-1 h-11 w-full rounded-md border border-gray-200 px-3 text-lg font-semibold outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                class="mt-1 h-11 w-full rounded-md border border-line px-3 text-lg font-semibold outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
                 :placeholder="t('publish.titlePlaceholder')"
               />
             </label>
 
             <div>
-              <div class="mb-2 text-sm font-semibold text-gray-700">{{ t('publish.fields.type') }}</div>
+              <div class="mb-2 text-sm font-semibold text-base-content/75">{{ t('publish.fields.type') }}</div>
               <div class="flex flex-wrap gap-2">
                 <button
                   v-for="item in props.types"
                   :key="item.value"
                   type="button"
                   class="rounded-md border px-3 py-1.5 text-sm font-medium transition"
-                  :class="type === item.value ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'"
+                  :class="type === item.value ? 'border-primary bg-info/10 text-primary' : 'border-line text-base-content/75 hover:border-line hover:bg-base-200'"
                   @click="type = item.value"
                 >
                   {{ typeLabel(item) }}
@@ -337,8 +337,8 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 
             <div>
               <div class="mb-2 flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-700">{{ t('publish.fields.category') }}</span>
-                <span class="text-xs text-gray-400">{{ t('publish.maxCategories') }}</span>
+                <span class="text-sm font-semibold text-base-content/75">{{ t('publish.fields.category') }}</span>
+                <span class="text-xs text-base-content/55">{{ t('publish.maxCategories') }}</span>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button
@@ -346,7 +346,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                   :key="category.id"
                   type="button"
                   class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
-                  :class="categoryIds.includes(category.id) ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'"
+                  :class="categoryIds.includes(category.id) ? 'border-primary bg-info/10 text-primary' : 'border-line text-base-content/75 hover:border-line hover:bg-base-200'"
                   :disabled="!categoryIds.includes(category.id) && categoryIds.length >= 3"
                   @click="toggleCategory(category.id)"
                 >
@@ -358,27 +358,27 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 
             <div>
               <div class="mb-2 flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-700">{{ t('publish.fields.body') }}</span>
-                <div class="inline-flex rounded-md border border-gray-200 p-0.5 text-xs font-semibold">
-                  <button type="button" class="rounded px-2 py-1" :class="!preview ? 'bg-gray-900 text-white' : 'text-gray-500'" @click="preview = false">{{ t('common.edit') }}</button>
-                  <button type="button" class="rounded px-2 py-1" :class="preview ? 'bg-gray-900 text-white' : 'text-gray-500'" @click="preview = true">{{ t('publish.preview') }}</button>
+                <span class="text-sm font-semibold text-base-content/75">{{ t('publish.fields.body') }}</span>
+                <div class="inline-flex rounded-md border border-line p-0.5 text-xs font-semibold">
+                  <button type="button" class="rounded px-2 py-1" :class="!preview ? 'bg-neutral text-neutral-content' : 'text-base-content/55'" @click="preview = false">{{ t('common.edit') }}</button>
+                  <button type="button" class="rounded px-2 py-1" :class="preview ? 'bg-neutral text-neutral-content' : 'text-base-content/55'" @click="preview = true">{{ t('publish.preview') }}</button>
                 </div>
               </div>
 
               <div
                 v-if="!preview"
                 class="overflow-hidden rounded-lg border transition"
-                :class="dragOver ? 'border-blue-500 bg-blue-50/50 shadow-[0_0_0_4px_rgba(59,130,246,0.12)]' : 'border-gray-200 bg-white'"
+                :class="dragOver ? 'border-primary bg-info/10 shadow-[0_0_0_4px_rgba(59,130,246,0.12)]' : 'border-line bg-base-100'"
               >
-                <div class="flex flex-wrap items-center gap-1 border-b border-gray-100 bg-gray-50 px-2 py-2">
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.bold')" @click="insert('**', '**', t('publish.placeholder.bold'))"><Bold class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.italic')" @click="insert('*', '*', t('publish.placeholder.italic'))"><Italic class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.link')" @click="insert('[', '](https://)', t('publish.placeholder.link'))"><Link class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.quote')" @click="insert('\\n> ', '', t('publish.placeholder.quote'))"><MessageSquareQuote class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-gray-500 hover:bg-white hover:text-gray-900" :title="t('publish.toolbar.code')" @click="insert('\\n```\\n', '\\n```\\n', 'code')"><Code2 class="h-4 w-4" /></button>
-                  <span v-if="uploadText" class="ml-auto rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">{{ uploadText }}</span>
+                <div class="flex flex-wrap items-center gap-1 border-b border-line bg-base-200 px-2 py-2">
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.bold')" @click="insert('**', '**', t('publish.placeholder.bold'))"><Bold class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.italic')" @click="insert('*', '*', t('publish.placeholder.italic'))"><Italic class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.link')" @click="insert('[', '](https://)', t('publish.placeholder.link'))"><Link class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.quote')" @click="insert('\\n> ', '', t('publish.placeholder.quote'))"><MessageSquareQuote class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.code')" @click="insert('\\n```\\n', '\\n```\\n', 'code')"><Code2 class="h-4 w-4" /></button>
+                  <span v-if="uploadText" class="ml-auto rounded bg-info/10 px-2 py-1 text-xs font-semibold text-primary">{{ uploadText }}</span>
                   <label
-                    class="rounded p-1.5 text-gray-500 transition hover:bg-white hover:text-gray-900"
+                    class="rounded p-1.5 text-base-content/55 transition hover:bg-base-100 hover:text-base-content"
                     :class="uploadText ? '' : 'ml-auto'"
                     :title="t('publish.uploadImageTitle')"
                   >
@@ -400,27 +400,27 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                   />
                   <div
                     v-if="dragOver"
-                    class="pointer-events-none absolute inset-3 grid place-items-center rounded-lg border-2 border-dashed border-blue-400 bg-blue-50/80 text-sm font-semibold text-blue-700"
+                    class="pointer-events-none absolute inset-3 grid place-items-center rounded-lg border-2 border-dashed border-primary/60 bg-info/10 text-sm font-semibold text-primary"
                   >
                     {{ t('publish.dropToUpload') }}
                   </div>
                 </div>
               </div>
 
-              <div v-else class="gf-prose gf-prose-article min-h-96 rounded-lg border border-gray-200 bg-gray-50/50 p-5">
+              <div v-else class="gf-prose gf-prose-article min-h-96 rounded-lg border border-line bg-base-200/50 p-5">
                 <div v-if="content.trim()" v-html="renderedPreview" />
-                <p v-else class="text-sm text-gray-400">{{ t('publish.emptyPreview') }}</p>
+                <p v-else class="text-sm text-base-content/55">{{ t('publish.emptyPreview') }}</p>
               </div>
             </div>
 
-            <p v-if="error" class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{{ error }}</p>
-            <p v-if="message" class="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">{{ message }}</p>
+            <p v-if="error" class="rounded-md bg-error/10 px-3 py-2 text-sm text-error">{{ error }}</p>
+            <p v-if="message" class="rounded-md bg-success/10 px-3 py-2 text-sm text-success">{{ message }}</p>
 
-            <div class="flex items-center justify-end gap-2 border-t border-gray-100 pt-4">
-              <a href="/" class="inline-flex h-10 items-center rounded-md px-3 text-sm font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-900">{{ t('common.cancel') }}</a>
+            <div class="flex items-center justify-end gap-2 border-t border-line pt-4">
+              <a href="/" class="inline-flex h-10 items-center rounded-md px-3 text-sm font-semibold text-base-content/55 hover:bg-base-300 hover:text-base-content">{{ t('common.cancel') }}</a>
               <button
                 type="button"
-                class="inline-flex h-10 items-center rounded-md border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                class="inline-flex h-10 items-center rounded-md border border-line bg-base-100 px-4 text-sm font-semibold text-base-content/75 hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-50"
                 :disabled="!isValid || submitting || uploading"
                 @click="saveDraft"
               >
@@ -428,7 +428,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               </button>
               <button
                 type="button"
-                class="inline-flex h-10 items-center gap-1.5 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                class="inline-flex h-10 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
                 :disabled="!isValid || submitting || uploading"
                 @click="save"
               >
@@ -440,26 +440,26 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
         </section>
 
         <aside class="space-y-3">
-          <section class="rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+          <section class="rounded-lg border border-line/70 bg-base-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
             <div class="flex items-center gap-2">
-              <ListChecks class="h-4 w-4 text-gray-400" />
-              <h2 class="text-sm font-semibold text-gray-950">{{ t('publish.checklist.title') }}</h2>
+              <ListChecks class="h-4 w-4 text-base-content/55" />
+              <h2 class="text-sm font-semibold text-base-content">{{ t('publish.checklist.title') }}</h2>
             </div>
-            <ul class="mt-3 space-y-2 text-sm text-gray-600">
-              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.title') }}</span><span :class="title.trim() ? 'text-green-600' : 'text-gray-400'">{{ title.trim() ? t('publish.checklist.done') : t('publish.checklist.pending') }}</span></li>
-              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.category') }}</span><span :class="categoryIds.length ? 'text-green-600' : 'text-gray-400'">{{ categoryIds.length }}/3</span></li>
-              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.body') }}</span><span :class="content.trim() ? 'text-green-600' : 'text-gray-400'">{{ t('publish.checklist.characters', { count: content.trim().length }) }}</span></li>
+            <ul class="mt-3 space-y-2 text-sm text-base-content/75">
+              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.title') }}</span><span :class="title.trim() ? 'text-success' : 'text-base-content/55'">{{ title.trim() ? t('publish.checklist.done') : t('publish.checklist.pending') }}</span></li>
+              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.category') }}</span><span :class="categoryIds.length ? 'text-success' : 'text-base-content/55'">{{ categoryIds.length }}/3</span></li>
+              <li class="flex items-center justify-between gap-3"><span>{{ t('publish.fields.body') }}</span><span :class="content.trim() ? 'text-success' : 'text-base-content/55'">{{ t('publish.checklist.characters', { count: content.trim().length }) }}</span></li>
             </ul>
           </section>
 
-          <section v-if="selectedCategories.length" class="rounded-lg border border-gray-200/70 bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-            <h2 class="text-sm font-semibold text-gray-950">{{ t('publish.selectedCategories') }}</h2>
+          <section v-if="selectedCategories.length" class="rounded-lg border border-line/70 bg-base-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+            <h2 class="text-sm font-semibold text-base-content">{{ t('publish.selectedCategories') }}</h2>
             <div class="mt-3 flex flex-wrap gap-2">
               <button
                 v-for="category in selectedCategories"
                 :key="category.id"
                 type="button"
-                class="inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-2 py-1 text-sm text-gray-600 hover:bg-gray-50"
+                class="inline-flex items-center gap-1.5 rounded-md border border-line px-2 py-1 text-sm text-base-content/75 hover:bg-base-200"
                 @click="toggleCategory(category.id)"
               >
                 <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
@@ -471,29 +471,29 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
         </aside>
       </div>
 
-      <div v-if="leavePromptOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-950/50 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-        <div class="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl">
-          <div class="border-b border-gray-100 px-5 py-4">
-            <h2 class="text-base font-semibold text-gray-950">{{ t('publish.leaveTitle') }}</h2>
-            <p class="mt-1 text-sm leading-6 text-gray-500">
+      <div v-if="leavePromptOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-neutral/50 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+        <div class="w-full max-w-md overflow-hidden rounded-xl bg-base-100 shadow-2xl">
+          <div class="border-b border-line px-5 py-4">
+            <h2 class="text-base font-semibold text-base-content">{{ t('publish.leaveTitle') }}</h2>
+            <p class="mt-1 text-sm leading-6 text-base-content/55">
               {{ t('publish.leaveDescription') }}
             </p>
           </div>
 
-          <div v-if="!isValid" class="border-b border-amber-100 bg-amber-50 px-5 py-3 text-sm font-medium text-amber-700">
+          <div v-if="!isValid" class="border-b border-warning/20 bg-warning/10 px-5 py-3 text-sm font-medium text-warning">
             {{ t('publish.draftRequirement') }}
           </div>
 
-          <div class="flex flex-wrap items-center justify-end gap-2 bg-gray-50 px-5 py-4">
-            <button type="button" class="h-10 rounded-md px-3 text-sm font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-900" @click="closeLeavePrompt">
+          <div class="flex flex-wrap items-center justify-end gap-2 bg-base-200 px-5 py-4">
+            <button type="button" class="h-10 rounded-md px-3 text-sm font-semibold text-base-content/55 hover:bg-base-300 hover:text-base-content" @click="closeLeavePrompt">
               {{ t('publish.continueEditing') }}
             </button>
-            <button type="button" class="h-10 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 hover:bg-gray-50" @click="discardAndLeave">
+            <button type="button" class="h-10 rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200" @click="discardAndLeave">
               {{ t('publish.leaveWithoutSaving') }}
             </button>
             <button
               type="button"
-              class="inline-flex h-10 min-w-28 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              class="inline-flex h-10 min-w-28 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
               :disabled="!draftSaveable"
               @click="saveDraftAndLeave"
             >

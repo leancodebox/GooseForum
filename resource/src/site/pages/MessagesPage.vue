@@ -184,16 +184,16 @@ async function startChat(user: UserConnectionPayload) {
 
 <template>
     <main class="-mx-3 -my-3 h-[calc(100dvh-4rem)] min-h-0 min-w-0 overflow-hidden sm:-mx-5 md:mx-0 md:my-0 md:h-[calc(100dvh-5.5rem)] md:min-h-[620px] md:pb-3">
-      <section class="grid h-full overflow-hidden bg-white md:grid-cols-[300px_minmax(0,1fr)] md:rounded-lg md:border md:border-gray-200/70 md:shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+      <section class="grid h-full overflow-hidden bg-base-100 md:grid-cols-[300px_minmax(0,1fr)] md:rounded-lg md:border md:border-line/70 md:shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         <aside
-          class="flex min-h-0 flex-col border-gray-100 bg-white md:border-r md:bg-gray-50/50"
+          class="flex min-h-0 flex-col border-line bg-base-100 md:border-r md:bg-base-200/50"
           :class="active ? 'hidden md:flex' : 'flex'"
         >
-          <div class="flex h-14 shrink-0 items-center justify-between border-b border-gray-100 bg-white px-4 md:h-15">
-            <h1 class="text-base font-bold text-gray-950 md:text-lg">{{ t('messages.title') }}</h1>
+          <div class="flex h-14 shrink-0 items-center justify-between border-b border-line bg-base-100 px-4 md:h-15">
+            <h1 class="text-base font-bold text-base-content md:text-lg">{{ t('messages.title') }}</h1>
             <button
               type="button"
-              class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted hover:bg-base-300 hover:text-base-content"
               :title="t('messages.newMessage')"
               @click="showNewChat = true"
             >
@@ -201,8 +201,8 @@ async function startChat(user: UserConnectionPayload) {
             </button>
           </div>
 
-          <div class="border-b border-gray-100 p-3 md:bg-transparent">
-            <label class="flex h-9 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-500 md:bg-white">
+          <div class="border-b border-line p-3 md:bg-transparent">
+            <label class="flex h-9 items-center gap-2 rounded-md border border-line bg-base-200 px-3 text-sm text-base-content/55 md:bg-base-100">
               <Search class="h-4 w-4" />
               <input v-model="search" class="min-w-0 flex-1 bg-transparent outline-none" :placeholder="t('messages.searchConversations')" />
             </label>
@@ -213,25 +213,25 @@ async function startChat(user: UserConnectionPayload) {
               v-for="conversation in filteredConversations"
               :key="conversation.peerId"
               type="button"
-              class="flex w-full gap-3 border-b border-gray-100 px-4 py-3 text-left transition hover:bg-gray-50 md:hover:bg-white"
-              :class="active?.peerId === conversation.peerId ? 'bg-blue-50/50 shadow-[inset_3px_0_0_#2563eb] md:bg-white' : ''"
+              class="flex w-full gap-3 border-b border-line px-4 py-3 text-left transition hover:bg-base-200 md:hover:bg-base-100"
+              :class="active?.peerId === conversation.peerId ? 'bg-info/10 shadow-[inset_3px_0_0_var(--gf-color-primary)] md:bg-base-100' : ''"
               @click="selectConversation(conversation)"
             >
               <span class="relative h-10 w-10 shrink-0">
-                <UserAvatar :src="conversation.peerAvatar" :alt="conversation.peerUsername" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-100" />
+                <UserAvatar :src="conversation.peerAvatar" :alt="conversation.peerUsername" class="h-10 w-10 rounded-full object-cover ring-1 ring-line" />
                 <span
                   v-if="conversation.unreadCount"
-                  class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"
+                  class="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-error/100 ring-2 ring-base-100"
                   aria-hidden="true"
                 />
               </span>
               <div class="min-w-0 flex-1">
                 <div class="flex items-baseline justify-between gap-2">
-                  <span class="truncate text-sm font-semibold text-gray-950">{{ conversation.peerUsername }}</span>
-                  <time class="shrink-0 text-[11px] text-gray-400">{{ conversation.lastMsgTime ? formatChatTime(conversation.lastMsgTime) : '' }}</time>
+                  <span class="truncate text-sm font-semibold text-base-content">{{ conversation.peerUsername }}</span>
+                  <time class="shrink-0 text-[11px] text-base-content/55">{{ conversation.lastMsgTime ? formatChatTime(conversation.lastMsgTime) : '' }}</time>
                 </div>
                 <div class="mt-1 flex items-center gap-2">
-                  <p class="min-w-0 flex-1 truncate text-sm" :class="conversation.unreadCount ? 'font-semibold text-gray-900' : 'text-gray-500'">
+                  <p class="min-w-0 flex-1 truncate text-sm" :class="conversation.unreadCount ? 'font-semibold text-base-content' : 'text-base-content/55'">
                     {{ conversation.lastMsg || t('messages.noMessagesYet') }}
                   </p>
                 </div>
@@ -240,39 +240,39 @@ async function startChat(user: UserConnectionPayload) {
           </div>
 
           <div v-else class="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center">
-            <MessageSquare class="h-10 w-10 text-gray-300" />
-            <h2 class="mt-3 text-base font-semibold text-gray-950">{{ t('messages.emptyConversationsTitle') }}</h2>
-            <p class="mt-1 text-sm text-gray-500">{{ t('messages.emptyConversationsDescription') }}</p>
-            <button type="button" class="mt-4 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700" @click="showNewChat = true">
+            <MessageSquare class="h-10 w-10 text-base-content/35" />
+            <h2 class="mt-3 text-base font-semibold text-base-content">{{ t('messages.emptyConversationsTitle') }}</h2>
+            <p class="mt-1 text-sm text-base-content/55">{{ t('messages.emptyConversationsDescription') }}</p>
+            <button type="button" class="mt-4 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-content hover:bg-primary" @click="showNewChat = true">
               {{ t('messages.newMessage') }}
             </button>
           </div>
         </aside>
 
-        <section class="relative min-h-0 min-w-0 bg-white" :class="active ? 'flex' : 'hidden md:flex'">
+        <section class="relative min-h-0 min-w-0 bg-base-100" :class="active ? 'flex' : 'hidden md:flex'">
           <div v-if="active" class="flex min-h-0 w-full flex-col">
-            <header class="flex h-14 shrink-0 items-center justify-between border-b border-gray-100 px-3 md:h-15 md:px-4">
+            <header class="flex h-14 shrink-0 items-center justify-between border-b border-line px-3 md:h-15 md:px-4">
               <div class="flex min-w-0 items-center gap-3">
-                <button type="button" class="-ml-2 inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 md:hidden" @click="active = null">
+                <button type="button" class="-ml-2 inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted hover:bg-base-300 hover:text-base-content md:hidden" @click="active = null">
                   <ArrowLeft class="h-5 w-5" />
                 </button>
-                <UserAvatar :src="active.peerAvatar" :alt="active.peerUsername" class="h-9 w-9 rounded-full object-cover ring-1 ring-gray-100" />
+                <UserAvatar :src="active.peerAvatar" :alt="active.peerUsername" class="h-9 w-9 rounded-full object-cover ring-1 ring-line" />
                 <div class="min-w-0">
-                  <a :href="active.peerUrl" class="truncate text-sm font-bold text-gray-950 hover:text-blue-600">{{ active.peerUsername }}</a>
-                  <p class="text-xs text-gray-400">{{ t('messages.conversation') }}</p>
+                  <a :href="active.peerUrl" class="truncate text-sm font-bold text-base-content hover:text-primary">{{ active.peerUsername }}</a>
+                  <p class="text-xs text-base-content/55">{{ t('messages.conversation') }}</p>
                 </div>
               </div>
-              <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700">
+              <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted hover:bg-base-300 hover:text-base-content">
                 <MoreVertical class="h-4 w-4" />
               </button>
             </header>
 
             <div ref="messagesEl" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3 md:space-y-4 md:px-4 md:py-4">
               <div class="flex justify-center">
-                <span class="rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400">{{ t('messages.today') }}</span>
+                <span class="rounded-full bg-base-200 px-2 py-1 text-xs font-medium text-base-content/55">{{ t('messages.today') }}</span>
               </div>
 
-              <div v-if="active.loading" class="py-12 text-center text-sm text-gray-400">{{ t('messages.loading') }}</div>
+              <div v-if="active.loading" class="py-12 text-center text-sm text-base-content/55">{{ t('messages.loading') }}</div>
               <template v-else-if="active.messages.length">
                 <div
                   v-for="message in active.messages"
@@ -280,66 +280,66 @@ async function startChat(user: UserConnectionPayload) {
                   class="flex max-w-[88%] gap-2 md:max-w-[82%]"
                   :class="message.isSelf ? 'ml-auto flex-row-reverse' : ''"
                 >
-                  <UserAvatar v-if="!message.isSelf" :src="active.peerAvatar" :alt="active.peerUsername" class="mt-auto h-8 w-8 rounded-full object-cover ring-1 ring-gray-100" />
+                  <UserAvatar v-if="!message.isSelf" :src="active.peerAvatar" :alt="active.peerUsername" class="mt-auto h-8 w-8 rounded-full object-cover ring-1 ring-line" />
                   <div class="group relative min-w-0">
                     <div
                       class="whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-sm leading-relaxed shadow-sm md:px-4"
-                      :class="message.isSelf ? 'rounded-br-sm bg-blue-600 text-white' : 'rounded-bl-sm bg-gray-100 text-gray-900'"
+                      :class="message.isSelf ? 'rounded-br-sm bg-primary text-primary-content' : 'rounded-bl-sm bg-base-300 text-base-content'"
                     >
                       {{ message.content }}
                     </div>
-                    <time class="mt-1 block text-[11px] text-gray-400" :class="message.isSelf ? 'text-right' : ''">{{ formatChatTime(message.createdAt) }}</time>
+                    <time class="mt-1 block text-[11px] text-base-content/55" :class="message.isSelf ? 'text-right' : ''">{{ formatChatTime(message.createdAt) }}</time>
                   </div>
                 </div>
               </template>
               <div v-else class="flex h-full flex-col items-center justify-center text-center">
-                <MessageSquare class="h-10 w-10 text-gray-300" />
-                <h2 class="mt-3 text-base font-semibold text-gray-950">{{ t('messages.startChat') }}</h2>
-                <p class="mt-1 text-sm text-gray-500">{{ t('messages.firstMessageTo', { user: active.peerUsername }) }}</p>
+                <MessageSquare class="h-10 w-10 text-base-content/35" />
+                <h2 class="mt-3 text-base font-semibold text-base-content">{{ t('messages.startChat') }}</h2>
+                <p class="mt-1 text-sm text-base-content/55">{{ t('messages.firstMessageTo', { user: active.peerUsername }) }}</p>
               </div>
             </div>
 
-            <footer class="shrink-0 border-t border-gray-100 bg-white/95 px-3 py-2 md:px-4 md:py-3">
+            <footer class="shrink-0 border-t border-line bg-base-100/95 px-3 py-2 md:px-4 md:py-3">
               <div class="mx-auto max-w-4xl">
-                <p v-if="error" class="mb-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{{ error }}</p>
-                <div class="rounded-xl border border-gray-200 bg-gray-50/80 p-2 transition focus-within:border-blue-300 focus-within:bg-white focus-within:shadow-[0_10px_28px_rgba(37,99,235,0.08)] md:rounded-2xl">
+                <p v-if="error" class="mb-2 rounded-md bg-error/10 px-3 py-2 text-sm text-error">{{ error }}</p>
+                <div class="rounded-xl border border-line bg-base-200/80 p-2 transition focus-within:border-primary/40 focus-within:bg-base-100 focus-within:shadow-[0_10px_28px_rgba(37,99,235,0.08)] md:rounded-2xl">
                   <textarea
                     ref="messageInput"
                     v-model="newMessage"
                     rows="1"
-                    class="block max-h-36 min-h-11 w-full resize-none bg-transparent px-2 py-2 text-[15px] leading-relaxed text-gray-900 outline-none placeholder:text-gray-400"
+                    class="block max-h-36 min-h-11 w-full resize-none bg-transparent px-2 py-2 text-[15px] leading-relaxed text-base-content outline-none placeholder:text-base-content/55"
                     :placeholder="t('messages.inputPlaceholder')"
                     @input="resizeMessageInput"
                     @keydown.enter="handleEnter"
                   />
-                  <div class="mt-1 flex items-center justify-between gap-3 border-t border-gray-200/70 px-1 pt-2">
+                  <div class="mt-1 flex items-center justify-between gap-3 border-t border-line/70 px-1 pt-2">
                     <div class="flex min-w-0 items-center gap-2">
                       <div class="relative">
                         <button
                           type="button"
-                          class="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-white hover:text-blue-600 hover:shadow-sm"
+                          class="inline-flex h-8 w-8 items-center justify-center rounded-full text-icon-muted transition hover:bg-base-100 hover:text-primary hover:shadow-sm"
                           :title="t('messages.emoji')"
                           @click="showEmoji = !showEmoji"
                         >
                           <Smile class="h-5 w-5" />
                         </button>
-                        <div v-if="showEmoji" class="absolute bottom-full left-0 z-20 mb-3 grid w-48 grid-cols-4 gap-1 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl">
+                        <div v-if="showEmoji" class="absolute bottom-full left-0 z-20 mb-3 grid w-48 grid-cols-4 gap-1 rounded-2xl border border-line bg-base-100 p-2 shadow-xl">
                           <button
                             v-for="emoji in emojis"
                             :key="emoji"
                             type="button"
-                            class="rounded-lg p-1.5 text-xl hover:bg-gray-50"
+                            class="rounded-lg p-1.5 text-xl hover:bg-base-200"
                             @click="appendEmoji(emoji)"
                           >
                             {{ emoji }}
                           </button>
                         </div>
                       </div>
-                      <span class="hidden truncate text-[11px] font-medium text-gray-400 sm:inline">{{ t('messages.enterHint') }}</span>
+                      <span class="hidden truncate text-[11px] font-medium text-base-content/55 sm:inline">{{ t('messages.enterHint') }}</span>
                     </div>
                     <button
                       type="button"
-                      class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-blue-600 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none"
+                      class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-semibold text-primary-content shadow-sm transition hover:bg-primary disabled:cursor-not-allowed disabled:bg-base-300 disabled:text-base-content/55 disabled:shadow-none"
                       :disabled="!newMessage.trim() || sending"
                       @click="submitMessage"
                     >
@@ -353,26 +353,26 @@ async function startChat(user: UserConnectionPayload) {
           </div>
 
           <div v-else class="hidden flex-1 flex-col items-center justify-center p-8 text-center md:flex">
-            <MessageSquare class="h-12 w-12 text-gray-300" />
-            <h2 class="mt-3 text-lg font-semibold text-gray-950">{{ t('messages.selectConversation') }}</h2>
-            <p class="mt-1 text-sm text-gray-500">{{ t('messages.selectConversationDescription') }}</p>
-            <button type="button" class="mt-4 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700" @click="showNewChat = true">
+            <MessageSquare class="h-12 w-12 text-base-content/35" />
+            <h2 class="mt-3 text-lg font-semibold text-base-content">{{ t('messages.selectConversation') }}</h2>
+            <p class="mt-1 text-sm text-base-content/55">{{ t('messages.selectConversationDescription') }}</p>
+            <button type="button" class="mt-4 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-content hover:bg-primary" @click="showNewChat = true">
               {{ t('messages.startChat') }}
             </button>
           </div>
         </section>
       </section>
 
-      <div v-if="showNewChat" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/20 px-4 backdrop-blur-sm" @click.self="showNewChat = false">
-        <div class="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-xl">
-          <div class="flex h-13 items-center justify-between border-b border-gray-100 px-4">
-            <h2 class="text-sm font-semibold text-gray-950">{{ t('messages.newMessage') }}</h2>
-            <button type="button" class="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700" @click="showNewChat = false">
+      <div v-if="showNewChat" class="fixed inset-0 z-[80] flex items-center justify-center bg-neutral/20 px-4 backdrop-blur-sm" @click.self="showNewChat = false">
+        <div class="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-line bg-base-100 shadow-xl">
+          <div class="flex h-13 items-center justify-between border-b border-line px-4">
+            <h2 class="text-sm font-semibold text-base-content">{{ t('messages.newMessage') }}</h2>
+            <button type="button" class="rounded-md p-1.5 text-icon-muted hover:bg-base-300 hover:text-base-content" @click="showNewChat = false">
               <X class="h-4 w-4" />
             </button>
           </div>
-          <div class="border-b border-gray-100 p-3">
-            <label class="flex h-9 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-500">
+          <div class="border-b border-line p-3">
+            <label class="flex h-9 items-center gap-2 rounded-md border border-line bg-base-200 px-3 text-sm text-base-content/55">
               <Search class="h-4 w-4" />
               <input v-model="userSearch" class="min-w-0 flex-1 bg-transparent outline-none" :placeholder="t('messages.searchUsers')" />
             </label>
@@ -382,16 +382,16 @@ async function startChat(user: UserConnectionPayload) {
               v-for="user in filteredUsers"
               :key="user.id"
               type="button"
-              class="flex w-full items-center gap-3 rounded-md p-3 text-left hover:bg-gray-50"
+              class="flex w-full items-center gap-3 rounded-md p-3 text-left hover:bg-base-200"
               @click="startChat(user)"
             >
-              <UserAvatar :src="user.avatarUrl" :alt="user.username" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-100" />
+              <UserAvatar :src="user.avatarUrl" :alt="user.username" class="h-10 w-10 rounded-full object-cover ring-1 ring-line" />
               <div class="min-w-0">
-                <div class="truncate text-sm font-semibold text-gray-950">{{ user.nickname || user.username }}</div>
-                <div class="truncate text-xs text-gray-400">@{{ user.username }}</div>
+                <div class="truncate text-sm font-semibold text-base-content">{{ user.nickname || user.username }}</div>
+                <div class="truncate text-xs text-base-content/55">@{{ user.username }}</div>
               </div>
             </button>
-            <p v-if="!filteredUsers.length" class="px-4 py-8 text-center text-sm text-gray-500">{{ t('messages.noContactableUsers') }}</p>
+            <p v-if="!filteredUsers.length" class="px-4 py-8 text-center text-sm text-base-content/55">{{ t('messages.noContactableUsers') }}</p>
           </div>
         </div>
       </div>

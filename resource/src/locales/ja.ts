@@ -565,6 +565,7 @@ export default {
     resetEmailFailed: '再設定メールの送信に失敗しました',
     activationEmailSendFailed: '確認メールの送信に失敗しました',
     passwordResetFailed: 'パスワード再設定に失敗しました',
+    themeSaveFailed: 'テーマ設定の保存に失敗しました',
     secureLoginUnsupported: 'このブラウザは安全なログイン暗号化に対応していません',
     loginKeyLoadFailed: 'ログインキーの読み込みに失敗しました',
   },
