@@ -116,7 +116,7 @@ onBeforeUnmount(() => {
           </a>
         </div>
 
-        <div class="hidden gap-3 grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] border-b border-line bg-base-200/60 px-4 py-2 text-[11px] font-bold uppercase text-base-content/75 lg:grid">
+        <div class="gf-topic-list-header">
           <div>{{ t('topicList.columns.topic') }}</div>
           <div class="text-center">{{ t('topicList.columns.users') }}</div>
           <div class="text-center">{{ t('topicList.columns.replies') }}</div>

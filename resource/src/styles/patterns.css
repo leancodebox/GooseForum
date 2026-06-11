@@ -13,6 +13,10 @@
     display: none;
   }
 
+  .gf-topic-list-header {
+    @apply hidden grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] gap-3 border-b border-line/70 bg-base-100/70 px-4 py-1.5 text-[11px] font-semibold text-base-content/45 lg:grid;
+  }
+
   .gf-topic-row {
     @apply relative isolate grid gap-3 bg-base-100 px-4 py-3 transition;
     @apply before:absolute before:inset-0 before:-z-10 before:bg-base-100 before:content-[''];
