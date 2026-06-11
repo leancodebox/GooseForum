@@ -235,7 +235,7 @@ async function startChat(user: UserConnectionPayload) {
 
 <template>
     <main class="-mx-3 -my-3 h-[calc(100dvh-4rem)] min-h-0 min-w-0 overflow-hidden sm:-mx-5 md:mx-0 md:my-0 md:h-[calc(100dvh-5.5rem)] md:min-h-[620px] md:pb-3">
-      <section class="grid h-full overflow-hidden bg-base-100 md:grid-cols-[300px_minmax(0,1fr)] md:rounded-lg md:border md:border-line/70 md:shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+      <section class="grid h-full overflow-hidden bg-base-100 md:grid-cols-[300px_minmax(0,1fr)] md:[border-radius:var(--gf-radius-box)] md:border md:border-line/70 md:shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         <aside
           class="flex min-h-0 flex-col border-line bg-base-100 md:border-r md:bg-base-200/50"
           :class="active ? 'hidden md:flex' : 'flex'"
@@ -244,7 +244,7 @@ async function startChat(user: UserConnectionPayload) {
             <h1 class="text-base font-bold text-base-content md:text-lg">{{ t('messages.title') }}</h1>
             <button
               type="button"
-              class="inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted hover:bg-base-300 hover:text-base-content"
+              class="gf-icon-button h-8 w-8 hover:bg-base-300 hover:text-base-content"
               :title="t('messages.newMessage')"
               @click="showNewChat = true"
             >
@@ -253,7 +253,7 @@ async function startChat(user: UserConnectionPayload) {
           </div>
 
           <div class="border-b border-line p-3 md:bg-transparent">
-            <label class="flex h-9 items-center gap-2 rounded-md border border-line bg-base-200 px-3 text-sm text-base-content/55 md:bg-base-100">
+            <label class="flex h-9 items-center gap-2 border border-line bg-base-200 px-3 text-sm text-base-content/55 [border-radius:var(--gf-radius-field)] md:bg-base-100">
               <Search class="h-4 w-4" />
               <input v-model="search" class="min-w-0 flex-1 bg-transparent outline-none" :placeholder="t('messages.searchConversations')" />
             </label>
@@ -304,7 +304,7 @@ async function startChat(user: UserConnectionPayload) {
           <div v-if="active" class="flex min-h-0 w-full flex-col">
             <header class="flex h-14 shrink-0 items-center justify-between border-b border-line px-3 md:h-15 md:px-4">
               <div class="flex min-w-0 items-center gap-3">
-                <button type="button" class="-ml-2 inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted hover:bg-base-300 hover:text-base-content md:hidden" @click="active = null">
+                <button type="button" class="gf-icon-button -ml-2 h-8 w-8 hover:bg-base-300 hover:text-base-content md:hidden" @click="active = null">
                   <ArrowLeft class="h-5 w-5" />
                 </button>
                 <UserAvatar :src="active.peerAvatar" :alt="active.peerUsername" class="h-9 w-9 rounded-full object-cover ring-1 ring-line" />
@@ -313,14 +313,14 @@ async function startChat(user: UserConnectionPayload) {
                   <p class="text-xs text-base-content/55">{{ t('messages.conversation') }}</p>
                 </div>
               </div>
-              <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted hover:bg-base-300 hover:text-base-content">
+              <button type="button" class="gf-icon-button h-8 w-8 hover:bg-base-300 hover:text-base-content">
                 <MoreVertical class="h-4 w-4" />
               </button>
             </header>
 
             <div ref="messagesEl" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3 md:space-y-4 md:px-4 md:py-4" @scroll.passive="handleMessagesScroll">
               <div class="flex justify-center">
-                <span class="rounded-full bg-base-200 px-2 py-1 text-xs font-medium text-base-content/55">{{ t('messages.today') }}</span>
+                <span class="bg-base-200 px-2 py-1 text-xs font-medium text-base-content/55 [border-radius:var(--gf-radius-selector)]">{{ t('messages.today') }}</span>
               </div>
 
               <div v-if="active.loading" class="py-12 text-center text-sm text-base-content/55">{{ t('messages.loading') }}</div>
@@ -335,7 +335,7 @@ async function startChat(user: UserConnectionPayload) {
                   <UserAvatar v-if="!message.isSelf" :src="active.peerAvatar" :alt="active.peerUsername" class="mt-auto h-8 w-8 rounded-full object-cover ring-1 ring-line" />
                   <div class="group relative min-w-0">
                     <div
-                      class="whitespace-pre-wrap break-words rounded-box px-3 py-2 text-sm leading-relaxed shadow-sm md:px-4"
+                      class="whitespace-pre-wrap break-words px-3 py-2 text-sm leading-relaxed shadow-sm [border-radius:var(--gf-radius-box)] md:px-4"
                       :class="message.isSelf ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content'"
                     >
                       {{ message.content }}
@@ -369,7 +369,7 @@ async function startChat(user: UserConnectionPayload) {
                       <div class="relative">
                         <button
                           type="button"
-                          class="gf-icon-button h-8 w-8 rounded-full hover:bg-base-100 hover:text-primary"
+                          class="gf-icon-button h-8 w-8 hover:bg-base-100 hover:text-primary"
                           :title="t('messages.emoji')"
                           @click="showEmoji = !showEmoji"
                         >
@@ -380,7 +380,7 @@ async function startChat(user: UserConnectionPayload) {
                             v-for="emoji in emojis"
                             :key="emoji"
                             type="button"
-                            class="rounded-lg p-1.5 text-xl hover:bg-base-200"
+                            class="p-1.5 text-xl hover:bg-base-200 [border-radius:var(--gf-radius-field)]"
                             @click="appendEmoji(emoji)"
                           >
                             {{ emoji }}
@@ -391,7 +391,7 @@ async function startChat(user: UserConnectionPayload) {
                     </div>
                     <button
                       type="button"
-                      class="gf-button gf-button-sm gf-button-primary shrink-0 rounded-full disabled:bg-base-300 disabled:text-base-content/55"
+                      class="gf-button gf-button-sm gf-button-primary shrink-0 disabled:bg-base-300 disabled:text-base-content/55"
                       :disabled="!newMessage.trim() || sending"
                       @click="submitMessage"
                     >
@@ -419,12 +419,12 @@ async function startChat(user: UserConnectionPayload) {
         <div class="gf-menu-surface flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden">
           <div class="flex h-13 items-center justify-between border-b border-line px-4">
             <h2 class="text-sm font-semibold text-base-content">{{ t('messages.newMessage') }}</h2>
-            <button type="button" class="rounded-md p-1.5 text-icon-muted hover:bg-base-300 hover:text-base-content" @click="showNewChat = false">
+            <button type="button" class="gf-icon-button p-1.5 hover:bg-base-300 hover:text-base-content" @click="showNewChat = false">
               <X class="h-4 w-4" />
             </button>
           </div>
           <div class="border-b border-line p-3">
-            <label class="flex h-9 items-center gap-2 rounded-md border border-line bg-base-200 px-3 text-sm text-base-content/55">
+            <label class="flex h-9 items-center gap-2 border border-line bg-base-200 px-3 text-sm text-base-content/55 [border-radius:var(--gf-radius-field)]">
               <Search class="h-4 w-4" />
               <input v-model="userSearch" class="min-w-0 flex-1 bg-transparent outline-none" :placeholder="t('messages.searchUsers')" />
             </label>
@@ -434,7 +434,7 @@ async function startChat(user: UserConnectionPayload) {
               v-for="user in filteredUsers"
               :key="user.id"
               type="button"
-              class="flex w-full items-center gap-3 rounded-md p-3 text-left hover:bg-base-200"
+              class="flex w-full items-center gap-3 p-3 text-left hover:bg-base-200 [border-radius:var(--gf-radius-field)]"
               @click="startChat(user)"
             >
               <UserAvatar :src="user.avatarUrl" :alt="user.username" class="h-10 w-10 rounded-full object-cover ring-1 ring-line" />
