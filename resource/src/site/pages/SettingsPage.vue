@@ -379,7 +379,7 @@ async function toggleBinding(provider: string) {
 
 <template>
     <main class="min-w-0 pb-12">
-      <section class="mb-4 overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+      <section class="gf-card mb-4 overflow-hidden">
         <div class="h-20 border-b border-line bg-base-300 bg-cover bg-center sm:h-24" :style="profileCoverStyle" />
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -406,7 +406,7 @@ async function toggleBinding(provider: string) {
               <div class="min-w-0 pt-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
                   <h2 class="truncate text-2xl font-bold leading-tight text-base-content">{{ displayName }}</h2>
-                  <span class="rounded bg-info/10 px-1.5 py-0.5 text-[11px] font-semibold text-primary">{{ t('settings.editing') }}</span>
+                  <span class="gf-badge gf-badge-info rounded text-[11px]">{{ t('settings.editing') }}</span>
                   <button
                     type="button"
                     class="inline-flex h-7 w-7 items-center justify-center rounded outline-none transition hover:bg-base-300 focus-visible:ring-4 focus-visible:ring-primary/20"
@@ -427,7 +427,7 @@ async function toggleBinding(provider: string) {
                 <div v-if="layout.viewer.canAccessAdmin" class="relative">
                   <button
                     type="button"
-                    class="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200"
+                    class="gf-button gf-button-md gf-button-secondary"
                     :aria-expanded="editingCover"
                     @click="toggleCoverEditor"
                   >
@@ -436,7 +436,7 @@ async function toggleBinding(provider: string) {
                   </button>
                   <form
                     v-if="editingCover"
-                    class="absolute left-0 top-11 z-20 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-line bg-base-100 p-3 shadow-lg sm:left-auto sm:right-0"
+                    class="gf-menu-surface absolute left-0 top-11 z-20 w-80 max-w-[calc(100vw-2rem)] p-3 sm:left-auto sm:right-0"
                     @submit.prevent="saveCover"
                   >
                     <label class="block">
@@ -444,14 +444,14 @@ async function toggleBinding(provider: string) {
                       <input
                         v-model="coverDraft"
                         type="url"
-                        class="mt-1 h-9 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20"
+                        class="gf-input mt-1 h-9"
                         :placeholder="t('user.coverUrl')"
                       />
                     </label>
                     <div class="mt-3 flex justify-end gap-2">
                       <button
                         type="button"
-                        class="inline-flex h-8 items-center justify-center rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200"
+                        class="gf-button gf-button-sm gf-button-secondary"
                         :disabled="savingCover"
                         @click="cancelCoverEditor"
                       >
@@ -459,7 +459,7 @@ async function toggleBinding(provider: string) {
                       </button>
                       <button
                         type="submit"
-                        class="inline-flex h-8 min-w-16 items-center justify-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-wait disabled:opacity-70"
+                        class="gf-button gf-button-sm gf-button-primary min-w-16 disabled:cursor-wait"
                         :disabled="savingCover"
                       >
                         <Loader2 v-if="savingCover" class="h-4 w-4 animate-spin" />
@@ -470,7 +470,7 @@ async function toggleBinding(provider: string) {
                 </div>
                 <button
                   type="button"
-                  class="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200"
+                  class="gf-button gf-button-md gf-button-secondary"
                   @click="chooseAvatar"
                 >
                   <Camera class="h-4 w-4" />
@@ -505,7 +505,7 @@ async function toggleBinding(provider: string) {
         {{ error || status }}
       </p>
 
-      <section class="overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+      <section class="gf-card overflow-hidden">
         <nav class="flex overflow-x-auto border-b border-line px-3">
             <button
               v-for="tab in props.tabs"
@@ -546,11 +546,11 @@ async function toggleBinding(provider: string) {
                     </button>
                   </div>
                   <div v-else class="mt-1 flex min-w-0 gap-2">
-                    <input v-model="usernameForm.username" class="h-10 min-w-0 flex-1 rounded-md border border-primary/40 px-3 text-sm outline-none ring-4 ring-primary/20 focus:border-primary" />
-                    <button type="button" class="h-10 shrink-0 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary disabled:opacity-60" :disabled="savingUsername" @click="saveUsername">
+                    <input v-model="usernameForm.username" class="gf-input min-w-0 flex-1 border-primary/40 ring-4 ring-primary/20" />
+                    <button type="button" class="gf-button gf-button-lg gf-button-primary shrink-0" :disabled="savingUsername" @click="saveUsername">
                       {{ savingUsername ? t('settings.savingShort') : t('common.save') }}
                     </button>
-                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-base-content/55 hover:bg-base-300" @click="cancelUsernameEdit">{{ t('common.cancel') }}</button>
+                    <button type="button" class="gf-button gf-button-lg gf-button-muted shrink-0 px-2.5 font-medium" @click="cancelUsernameEdit">{{ t('common.cancel') }}</button>
                   </div>
                 </label>
                 <div class="block min-w-0">
@@ -569,11 +569,11 @@ async function toggleBinding(provider: string) {
                     </button>
                   </div>
                   <div v-else class="mt-1 flex min-w-0 gap-2">
-                    <input v-model="emailForm.email" type="email" class="h-10 min-w-0 flex-1 rounded-md border border-primary/40 px-3 text-sm outline-none ring-4 ring-primary/20 focus:border-primary" />
-                    <button type="button" class="h-10 shrink-0 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary disabled:opacity-60" :disabled="savingEmail" @click="saveEmail">
+                    <input v-model="emailForm.email" type="email" class="gf-input min-w-0 flex-1 border-primary/40 ring-4 ring-primary/20" />
+                    <button type="button" class="gf-button gf-button-lg gf-button-primary shrink-0" :disabled="savingEmail" @click="saveEmail">
                       {{ savingEmail ? t('settings.savingShort') : t('common.save') }}
                     </button>
-                    <button type="button" class="h-10 shrink-0 rounded-md px-2.5 text-sm font-medium text-base-content/55 hover:bg-base-300" @click="cancelEmailEdit">{{ t('common.cancel') }}</button>
+                    <button type="button" class="gf-button gf-button-lg gf-button-muted shrink-0 px-2.5 font-medium" @click="cancelEmailEdit">{{ t('common.cancel') }}</button>
                   </div>
                   <div v-if="layout.viewer.requiresEmailVerification" class="mt-2 flex flex-col gap-2 border-l-2 border-warning bg-warning/10 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                     <span class="min-w-0 text-sm text-warning">
@@ -594,25 +594,25 @@ async function toggleBinding(provider: string) {
                 </div>
                 <label class="block sm:col-span-2">
                   <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.displayName') }}</span>
-                  <input v-model="profileForm.nickname" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+                  <input v-model="profileForm.nickname" class="gf-input mt-1" />
                 </label>
                 <label class="block">
                   <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.websiteName') }}</span>
-                  <input v-model="profileForm.websiteName" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+                  <input v-model="profileForm.websiteName" class="gf-input mt-1" />
                 </label>
                 <label class="block">
                   <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.website') }}</span>
-                  <input v-model="profileForm.website" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" placeholder="https://example.com" />
+                  <input v-model="profileForm.website" class="gf-input mt-1" placeholder="https://example.com" />
                 </label>
               </div>
 
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.bio') }}</span>
-                <textarea v-model="profileForm.bio" class="mt-1 min-h-24 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+                <textarea v-model="profileForm.bio" class="gf-textarea mt-1 min-h-24 py-2" />
               </label>
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.signature') }}</span>
-                <textarea v-model="profileForm.signature" class="mt-1 min-h-20 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+                <textarea v-model="profileForm.signature" class="gf-textarea mt-1 min-h-20 py-2" />
               </label>
 
               <div class="border-t border-line pt-5">
@@ -630,7 +630,7 @@ async function toggleBinding(provider: string) {
                       </span>
                       {{ item.label }}
                     </span>
-                    <input v-model="profileForm.externalInformation[item.key].link" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+                    <input v-model="profileForm.externalInformation[item.key].link" class="gf-input mt-1" />
                   </label>
                 </div>
               </div>
@@ -638,7 +638,7 @@ async function toggleBinding(provider: string) {
               <div class="border-t border-line pt-5">
                 <button
                   type="button"
-                  class="inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-wait disabled:bg-primary"
+                  class="gf-button gf-button-lg gf-button-primary min-w-28 disabled:cursor-wait"
                   :disabled="savingProfile"
                   @click="saveProfile"
                 >
@@ -657,18 +657,18 @@ async function toggleBinding(provider: string) {
             <form class="max-w-xl space-y-4" @submit.prevent="submitPassword">
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('settings.account.currentPassword') }}</span>
-                <input v-model="passwordForm.oldPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+                <input v-model="passwordForm.oldPassword" required type="password" class="gf-input mt-1" />
               </label>
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('auth.newPassword') }}</span>
-                <input v-model="passwordForm.newPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+                <input v-model="passwordForm.newPassword" required type="password" class="gf-input mt-1" />
                 <span class="mt-1 block text-xs text-base-content/55">{{ t('settings.account.passwordHint') }}</span>
               </label>
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('auth.confirmPassword') }}</span>
-                <input v-model="passwordForm.confirmPassword" required type="password" class="mt-1 h-10 w-full rounded-md border border-line px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" />
+                <input v-model="passwordForm.confirmPassword" required type="password" class="gf-input mt-1" />
               </label>
-              <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-wait disabled:opacity-70" :disabled="savingPassword">
+              <button type="submit" class="gf-button gf-button-lg gf-button-primary disabled:cursor-wait" :disabled="savingPassword">
                 <Loader2 v-if="savingPassword" class="h-4 w-4 animate-spin" />
                 {{ t('settings.account.changePassword') }}
               </button>
@@ -771,7 +771,7 @@ async function toggleBinding(provider: string) {
 
       <div v-if="cropModalOpen" class="fixed inset-0 z-[100] overflow-y-auto bg-neutral/50 px-3 py-4 backdrop-blur-sm sm:px-4" role="dialog" aria-modal="true">
         <div class="mx-auto flex min-h-full max-w-[760px] items-center justify-center">
-          <div class="flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-xl bg-base-100 shadow-2xl">
+          <div class="gf-menu-surface flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden">
             <div class="flex items-center justify-between border-b border-line px-5 py-3">
               <div>
                 <h2 class="text-base font-semibold text-base-content">{{ t('settings.avatar.cropTitle') }}</h2>
@@ -805,12 +805,12 @@ async function toggleBinding(provider: string) {
             </div>
 
             <div class="flex items-center justify-end gap-2 border-t border-line bg-base-200 px-5 py-3">
-              <button type="button" class="h-10 rounded-md px-4 text-sm font-medium text-base-content/75 hover:bg-base-300" @click="closeCropModal">
+              <button type="button" class="gf-button gf-button-lg gf-button-muted font-medium" @click="closeCropModal">
                 {{ t('common.cancel') }}
               </button>
               <button
                 type="button"
-                class="inline-flex h-10 min-w-28 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-wait disabled:bg-primary"
+                class="gf-button gf-button-lg gf-button-primary min-w-28 disabled:cursor-wait"
                 :disabled="uploadingAvatar"
                 @click="uploadCroppedAvatar"
               >

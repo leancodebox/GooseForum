@@ -319,7 +319,7 @@ function markItemReadAndNavigate(item: NotificationPayload) {
           <h1 class="text-xl font-bold text-base-content">{{ t('notifications.title') }}</h1>
           <span
             v-if="unreadCount"
-            class="inline-flex h-5 items-center rounded-full bg-info/10 px-2 text-xs font-semibold tabular-nums text-primary"
+            class="gf-badge gf-badge-info h-5 tabular-nums"
           >
             {{ t('notifications.unread', { count: unreadCount }) }}
           </span>
@@ -329,7 +329,7 @@ function markItemReadAndNavigate(item: NotificationPayload) {
       </div>
       <button
         type="button"
-        class="inline-flex h-8 w-fit items-center gap-1.5 rounded-md border border-line bg-base-100 px-2.5 text-xs font-semibold text-base-content/75 hover:bg-base-200 hover:text-base-content disabled:cursor-not-allowed disabled:opacity-45"
+        class="gf-button gf-button-sm gf-button-secondary w-fit text-xs disabled:opacity-45"
         :disabled="!hasUnread || markingAllRead"
         @click="markAllRead"
       >
@@ -338,11 +338,11 @@ function markItemReadAndNavigate(item: NotificationPayload) {
       </button>
     </header>
 
-    <section class="overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+    <section class="gf-card overflow-hidden">
       <div class="flex items-center gap-1 border-b border-line bg-base-200/60 p-2">
         <button
           type="button"
-          class="inline-flex h-8 items-center rounded-md px-3 text-sm font-semibold transition"
+          class="gf-tab"
           :class="activeFilter === 'all' ? 'bg-base-100 text-base-content shadow-sm ring-1 ring-line' : 'text-base-content/55 hover:bg-base-100/70 hover:text-base-content'"
           @click="setActiveFilter('all')"
         >
@@ -350,12 +350,12 @@ function markItemReadAndNavigate(item: NotificationPayload) {
         </button>
         <button
           type="button"
-          class="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-semibold transition"
+          class="gf-tab gap-1.5"
           :class="activeFilter === 'unread' ? 'bg-base-100 text-base-content shadow-sm ring-1 ring-line' : 'text-base-content/55 hover:bg-base-100/70 hover:text-base-content'"
           @click="setActiveFilter('unread')"
         >
           {{ t('notifications.tabs.unread') }}
-          <span v-if="unreadCount" class="rounded-full bg-info/10 px-1.5 text-[11px] font-bold tabular-nums text-primary">{{ unreadCount }}</span>
+          <span v-if="unreadCount" class="gf-badge gf-badge-info px-1.5 text-[11px] font-bold tabular-nums">{{ unreadCount }}</span>
         </button>
       </div>
 
@@ -444,7 +444,7 @@ function markItemReadAndNavigate(item: NotificationPayload) {
         <button
           v-if="activeList.hasNext"
           type="button"
-          class="inline-flex h-8 items-center rounded-md px-3 transition hover:bg-base-200 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+          class="gf-button gf-button-sm gf-button-ghost"
           :disabled="activeList.loading"
           @click="loadNotifications(activeFilter)"
         >

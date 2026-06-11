@@ -190,8 +190,7 @@ type SiteThemeConfig struct {
 	Version     int                   `json:"version"`
 	Enabled     bool                  `json:"enabled"`
 	Themes      []SiteThemeDefinition `json:"themes"`
-	Draft       *SiteThemeSnapshot    `json:"draft,omitempty"`
-	History     []SiteThemeSnapshot   `json:"history,omitempty"`
+	Prepublish  *SiteThemePrepublish  `json:"prepublish,omitempty"`
 	PublishedAt string                `json:"publishedAt,omitempty"`
 }
 
@@ -342,11 +341,10 @@ type SiteThemeDefinition struct {
 	Tokens      SiteThemeTokens `json:"tokens"`
 }
 
-type SiteThemeSnapshot struct {
+type SiteThemePrepublish struct {
 	Enabled   bool                  `json:"enabled"`
 	Themes    []SiteThemeDefinition `json:"themes"`
-	CreatedAt string                `json:"createdAt,omitempty"`
-	Label     string                `json:"label,omitempty"`
+	UpdatedAt string                `json:"updatedAt,omitempty"`
 }
 
 func FirstSiteThemeDefinition(themes []SiteThemeDefinition) SiteThemeDefinition {
@@ -378,16 +376,6 @@ func NormalizeSiteThemeDefinition(theme *SiteThemeDefinition, defaults []SiteThe
 		theme.ColorScheme = defaultTheme.ColorScheme
 	}
 	theme.Tokens.NormalizeFrom(defaultTheme.Tokens)
-}
-
-func NormalizeSiteThemeSnapshots(snapshots []SiteThemeSnapshot, defaults []SiteThemeDefinition, fallback SiteThemeDefinition, limit int) []SiteThemeSnapshot {
-	if limit > 0 && len(snapshots) > limit {
-		snapshots = snapshots[len(snapshots)-limit:]
-	}
-	for index := range snapshots {
-		snapshots[index].Themes = NormalizeSiteThemeDefinitions(snapshots[index].Themes, defaults, fallback)
-	}
-	return snapshots
 }
 
 func cloneSiteThemeDefinitions(themes []SiteThemeDefinition) []SiteThemeDefinition {

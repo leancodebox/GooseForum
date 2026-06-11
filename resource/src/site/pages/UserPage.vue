@@ -123,7 +123,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
 
 <template>
     <article class="pb-12">
-      <section class="overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+      <section class="gf-card overflow-hidden">
         <div class="h-20 border-b border-line bg-base-300 bg-cover bg-center sm:h-24" :style="profileCoverStyle" />
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -137,8 +137,8 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
               <div class="min-w-0 pt-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
                   <h1 class="truncate text-2xl font-bold leading-tight text-base-content">{{ displayName }}</h1>
-                  <span v-if="page.props.user.isAdmin" class="rounded bg-warning/10 px-1.5 py-0.5 text-[11px] font-semibold text-warning">Admin</span>
-                  <span v-if="page.props.user.isOnline" class="inline-flex items-center gap-1 rounded bg-success/10 px-1.5 py-0.5 text-[11px] font-semibold text-success">
+                  <span v-if="page.props.user.isAdmin" class="gf-badge gf-badge-warning rounded text-[11px]">Admin</span>
+                  <span v-if="page.props.user.isOnline" class="gf-badge gf-badge-success rounded text-[11px]">
                     <Radio class="h-3 w-3" /> {{ t('user.online') }}
                   </span>
                 </div>
@@ -151,7 +151,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
               <a
                 v-if="page.props.isOwnProfile"
                 :href="page.props.settingsUrl"
-                class="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200"
+                class="gf-button gf-button-md gf-button-secondary"
               >
                 <Settings class="h-4 w-4" />
                 {{ t('user.editProfile') }}
@@ -159,7 +159,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
               <a
                 v-else-if="page.props.canMessage"
                 :href="page.props.messageUrl"
-                class="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200"
+                class="gf-button gf-button-md gf-button-secondary"
               >
                 <MessageSquare class="h-4 w-4" />
                 {{ t('shell.nav.messages') }}
@@ -167,7 +167,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
               <button
                 v-if="page.props.canFollow"
                 type="button"
-                class="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm font-semibold"
+                class="gf-button gf-button-md"
                 :class="isFollowing ? 'bg-base-300 text-base-content hover:bg-base-300' : 'bg-primary text-primary-content hover:bg-primary'"
                 :disabled="followLoading"
                 @click="toggleFollow"
@@ -238,7 +238,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
         </div>
       </section>
 
-      <section class="mt-3 overflow-hidden rounded-lg border border-line/70 bg-base-100">
+      <section class="gf-panel mt-3 overflow-hidden">
         <div class="flex overflow-x-auto border-b border-line px-3">
           <button
             v-for="tab in tabItems"
@@ -266,7 +266,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
                 <span
                   v-for="category in topicCategories(topic)"
                   :key="category.id"
-                  class="inline-flex h-5 items-center gap-1 rounded-full bg-base-300 px-2 text-[11px] text-base-content/55"
+                  class="gf-badge gf-badge-muted h-5 gap-1 text-[11px] font-normal"
                 >
                   <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
                   {{ category.name }}

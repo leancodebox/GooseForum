@@ -33,6 +33,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/themeservice"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -573,9 +574,9 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 }
 
 func buildThemePayload() ThemePayload {
-	runtimeTheme := getRuntimeSiteTheme()
+	runtimeTheme := themeservice.Runtime()
 	return ThemePayload{
-		Enabled: runtimeTheme.Config.Enabled,
+		Enabled: runtimeTheme.Enabled,
 		Href:    runtimeTheme.Href,
 		Colors:  runtimeTheme.Colors.Payload(),
 	}

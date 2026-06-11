@@ -4,8 +4,9 @@
 @import "./base.css";
 @import "./motion.css";
 @import "./prose.css";
-@import "./utilities.css";
+@import "./components.css";
 @import "./patterns.css";
+@import "./utilities.css";
 @source "../site/**/*.{ts,vue}";
 @source "../runtime/**/*.{ts,vue}";
 @source "../types/**/*.{ts,vue}";

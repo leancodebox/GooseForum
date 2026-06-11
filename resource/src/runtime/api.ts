@@ -549,16 +549,6 @@ export async function publishSiteTheme(): Promise<SiteThemeConfig> {
   return readApiResponse<SiteThemeConfig>(response, t('api.themeSaveFailed'))
 }
 
-export async function rollbackSiteTheme(): Promise<SiteThemeConfig> {
-  const response = await fetch('/api/admin/rollback-site-theme', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-  return readApiResponse<SiteThemeConfig>(response, t('api.themeSaveFailed'))
-}
-
 interface CaptchaPayload {
   captchaId: string
   captchaImg: string

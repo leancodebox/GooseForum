@@ -243,7 +243,7 @@ async function startChat(user: UserConnectionPayload) {
             <MessageSquare class="h-10 w-10 text-base-content/35" />
             <h2 class="mt-3 text-base font-semibold text-base-content">{{ t('messages.emptyConversationsTitle') }}</h2>
             <p class="mt-1 text-sm text-base-content/55">{{ t('messages.emptyConversationsDescription') }}</p>
-            <button type="button" class="mt-4 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-content hover:bg-primary" @click="showNewChat = true">
+            <button type="button" class="gf-button gf-button-md gf-button-primary mt-4" @click="showNewChat = true">
               {{ t('messages.newMessage') }}
             </button>
           </div>
@@ -283,8 +283,8 @@ async function startChat(user: UserConnectionPayload) {
                   <UserAvatar v-if="!message.isSelf" :src="active.peerAvatar" :alt="active.peerUsername" class="mt-auto h-8 w-8 rounded-full object-cover ring-1 ring-line" />
                   <div class="group relative min-w-0">
                     <div
-                      class="whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-sm leading-relaxed shadow-sm md:px-4"
-                      :class="message.isSelf ? 'rounded-br-sm bg-primary text-primary-content' : 'rounded-bl-sm bg-base-300 text-base-content'"
+                      class="whitespace-pre-wrap break-words rounded-box px-3 py-2 text-sm leading-relaxed shadow-sm md:px-4"
+                      :class="message.isSelf ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content'"
                     >
                       {{ message.content }}
                     </div>
@@ -301,8 +301,8 @@ async function startChat(user: UserConnectionPayload) {
 
             <footer class="shrink-0 border-t border-line bg-base-100/95 px-3 py-2 md:px-4 md:py-3">
               <div class="mx-auto max-w-4xl">
-                <p v-if="error" class="mb-2 rounded-md bg-error/10 px-3 py-2 text-sm text-error">{{ error }}</p>
-                <div class="rounded-xl border border-line bg-base-200/80 p-2 transition focus-within:border-primary/40 focus-within:bg-base-100 focus-within:shadow-[0_10px_28px_rgba(37,99,235,0.08)] md:rounded-2xl">
+                <p v-if="error" class="gf-status-message gf-status-message-error mb-2">{{ error }}</p>
+                <div class="gf-panel bg-base-200/80 p-2 transition focus-within:border-primary/40 focus-within:bg-base-100 focus-within:shadow-[0_10px_28px_rgba(37,99,235,0.08)]">
                   <textarea
                     ref="messageInput"
                     v-model="newMessage"
@@ -317,13 +317,13 @@ async function startChat(user: UserConnectionPayload) {
                       <div class="relative">
                         <button
                           type="button"
-                          class="inline-flex h-8 w-8 items-center justify-center rounded-full text-icon-muted transition hover:bg-base-100 hover:text-primary hover:shadow-sm"
+                          class="gf-icon-button h-8 w-8 rounded-full hover:bg-base-100 hover:text-primary"
                           :title="t('messages.emoji')"
                           @click="showEmoji = !showEmoji"
                         >
                           <Smile class="h-5 w-5" />
                         </button>
-                        <div v-if="showEmoji" class="absolute bottom-full left-0 z-20 mb-3 grid w-48 grid-cols-4 gap-1 rounded-2xl border border-line bg-base-100 p-2 shadow-xl">
+                        <div v-if="showEmoji" class="gf-menu-surface absolute bottom-full left-0 z-20 mb-3 grid w-48 grid-cols-4 gap-1 p-2">
                           <button
                             v-for="emoji in emojis"
                             :key="emoji"
@@ -339,7 +339,7 @@ async function startChat(user: UserConnectionPayload) {
                     </div>
                     <button
                       type="button"
-                      class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 text-sm font-semibold text-primary-content shadow-sm transition hover:bg-primary disabled:cursor-not-allowed disabled:bg-base-300 disabled:text-base-content/55 disabled:shadow-none"
+                      class="gf-button gf-button-sm gf-button-primary shrink-0 rounded-full disabled:bg-base-300 disabled:text-base-content/55"
                       :disabled="!newMessage.trim() || sending"
                       @click="submitMessage"
                     >
@@ -356,7 +356,7 @@ async function startChat(user: UserConnectionPayload) {
             <MessageSquare class="h-12 w-12 text-base-content/35" />
             <h2 class="mt-3 text-lg font-semibold text-base-content">{{ t('messages.selectConversation') }}</h2>
             <p class="mt-1 text-sm text-base-content/55">{{ t('messages.selectConversationDescription') }}</p>
-            <button type="button" class="mt-4 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-content hover:bg-primary" @click="showNewChat = true">
+            <button type="button" class="gf-button gf-button-md gf-button-primary mt-4" @click="showNewChat = true">
               {{ t('messages.startChat') }}
             </button>
           </div>
@@ -364,7 +364,7 @@ async function startChat(user: UserConnectionPayload) {
       </section>
 
       <div v-if="showNewChat" class="fixed inset-0 z-[80] flex items-center justify-center bg-neutral/20 px-4 backdrop-blur-sm" @click.self="showNewChat = false">
-        <div class="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-lg border border-line bg-base-100 shadow-xl">
+        <div class="gf-menu-surface flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden">
           <div class="flex h-13 items-center justify-between border-b border-line px-4">
             <h2 class="text-sm font-semibold text-base-content">{{ t('messages.newMessage') }}</h2>
             <button type="button" class="rounded-md p-1.5 text-icon-muted hover:bg-base-300 hover:text-base-content" @click="showNewChat = false">

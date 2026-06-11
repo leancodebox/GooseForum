@@ -1097,7 +1097,7 @@ async function removeReply(replyId: number) {
         </div>
       </header>
 
-      <section class="rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+      <section class="gf-card">
         <div class="grid grid-cols-[44px_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5">
           <a
             :href="`/u/${page.props.article.author.id}`"
@@ -1121,7 +1121,7 @@ async function removeReply(replyId: number) {
                 <a
                   v-if="page.props.permissions.isOwnArticle"
                   :href="`/publish?id=${page.props.article.id}`"
-                  class="inline-flex h-7 items-center gap-1.5 rounded-md border border-line bg-base-100 px-2 text-xs font-semibold text-base-content/75 transition hover:border-primary/20 hover:bg-info/10 hover:text-primary"
+                  class="gf-button gf-button-secondary h-7 px-2 text-xs hover:border-primary/20 hover:bg-info/10 hover:text-primary"
                 >
                   <PencilLine class="h-3.5 w-3.5" />
                   {{ t('common.edit') }}
@@ -1132,7 +1132,7 @@ async function removeReply(replyId: number) {
             <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-4">
               <button
                 type="button"
-                class="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+                class="gf-button gf-button-sm px-2.5"
                 :class="isLiked ? 'bg-error/10 text-error hover:bg-error/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
                 :disabled="actingLike"
                 @click="toggleLike"
@@ -1142,7 +1142,7 @@ async function removeReply(replyId: number) {
               </button>
               <button
                 type="button"
-                class="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+                class="gf-button gf-button-sm px-2.5"
                 :class="isBookmarked ? 'bg-info/10 text-primary hover:bg-info/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
                 :disabled="actingBookmark"
                 @click="toggleBookmark"
@@ -1152,7 +1152,7 @@ async function removeReply(replyId: number) {
               </button>
               <button
                 type="button"
-                class="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+                class="gf-button gf-button-sm px-2.5"
                 :class="isWatched ? 'bg-success/10 text-success hover:bg-success/15' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
                 :disabled="actingWatch"
                 @click="toggleWatch"
@@ -1223,7 +1223,7 @@ async function removeReply(replyId: number) {
                 <button
                   v-if="reply.isOwnReply"
                   type="button"
-                  class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   :disabled="deletingReplyId === reply.id"
                   :title="deletingReplyId === reply.id ? t('article.deleting') : t('article.delete')"
                   @click="requestDeleteReply(reply)"
@@ -1258,16 +1258,16 @@ async function removeReply(replyId: number) {
                 </div>
                 <textarea
                   v-model="editReplyContents[reply.id]"
-                  class="min-h-24 w-full resize-y rounded-md border border-primary/20 bg-base-100 p-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
+                  class="gf-textarea min-h-24 border-primary/20"
                   :placeholder="t('article.editReplyPlaceholder')"
                   @input="clearEditReplyValidation(reply.id)"
                 />
                 <p v-if="editReplyErrors[reply.id]" class="mt-2 text-sm text-error">{{ editReplyErrors[reply.id] }}</p>
                 <div class="mt-2 flex justify-end gap-2">
-                  <button type="button" class="h-8 rounded-md px-3 text-xs font-semibold text-base-content/55 hover:bg-base-100" @click="cancelEditReply(reply.id)">{{ t('common.cancel') }}</button>
+                  <button type="button" class="gf-button gf-button-sm gf-button-muted text-xs hover:bg-base-100" @click="cancelEditReply(reply.id)">{{ t('common.cancel') }}</button>
                   <button
                     type="button"
-                    class="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-primary-content hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+                    class="gf-button gf-button-sm gf-button-primary text-xs"
                     :disabled="savingEditReplyId === reply.id"
                     @click="saveReplyEdit(reply)"
                   >
@@ -1295,16 +1295,16 @@ async function removeReply(replyId: number) {
                 </div>
                 <textarea
                   v-model="replyContents[reply.id]"
-                  class="min-h-20 w-full resize-y rounded-md border border-line bg-base-100 p-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
+                  class="gf-textarea min-h-20"
                   :placeholder="t('article.replyPlaceholder')"
                   @input="clearReplyValidation(reply.id)"
                 />
                 <p v-if="inlineReplyErrors[reply.id]" class="mt-2 text-sm text-error">{{ inlineReplyErrors[reply.id] }}</p>
                 <div class="mt-2 flex justify-end gap-2">
-                  <button type="button" class="h-8 rounded-md px-3 text-xs font-semibold text-base-content/55 hover:bg-base-300" @click="openReplyId = null">{{ t('common.cancel') }}</button>
+                  <button type="button" class="gf-button gf-button-sm gf-button-muted text-xs" @click="openReplyId = null">{{ t('common.cancel') }}</button>
                   <button
                     type="button"
-                    class="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-primary-content hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+                    class="gf-button gf-button-sm gf-button-primary text-xs"
                     :disabled="submitting"
                     @click="submitReply(reply.id)"
                   >
@@ -1321,7 +1321,7 @@ async function removeReply(replyId: number) {
           <button
             v-if="replyHasAfter && replyWindowError"
             type="button"
-            class="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-base-content/75 transition hover:bg-base-200 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+            class="gf-button gf-button-sm gf-button-secondary text-xs"
             :disabled="loadingReplyWindow"
             @click="loadReplyWindow('after')"
           >
@@ -1336,7 +1336,7 @@ async function removeReply(replyId: number) {
           <button
             v-else-if="replyHasAfter"
             type="button"
-            class="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-base-content/75 transition hover:bg-base-200 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+            class="gf-button gf-button-sm gf-button-secondary text-xs"
             :disabled="loadingReplyWindow"
             @click="loadMoreRepliesManually"
           >
@@ -1346,7 +1346,7 @@ async function removeReply(replyId: number) {
         </div>
       </section>
 
-      <section ref="replySectionEl" class="mt-4 rounded-lg border border-line/70 bg-base-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] sm:p-5">
+      <section ref="replySectionEl" class="gf-card mt-4 p-4 sm:p-5">
         <template v-if="page.props.permissions.canReply">
           <div class="mb-3 flex items-center justify-between">
             <label class="text-sm font-semibold text-base-content" for="reply-content">{{ t('article.joinDiscussion') }}</label>
@@ -1356,7 +1356,7 @@ async function removeReply(replyId: number) {
             id="reply-content"
             ref="replyEditorEl"
             v-model="replyContent"
-            class="min-h-28 w-full resize-y rounded-md border border-line p-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
+            class="gf-textarea min-h-28"
             :placeholder="t('article.replyPlaceholder')"
             @input="clearReplyValidation()"
           />
@@ -1364,7 +1364,7 @@ async function removeReply(replyId: number) {
           <p v-if="successMessage" class="mt-2 text-sm text-success">{{ successMessage }}</p>
           <div class="mt-3 flex justify-end">
             <button
-              class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+              class="gf-button gf-button-md gf-button-primary"
               :disabled="submitting"
               @click="submitReply()"
             >
@@ -1377,7 +1377,7 @@ async function removeReply(replyId: number) {
           <div class="text-center">
             <h2 class="text-base font-semibold text-base-content">{{ t('article.joinDiscussion') }}</h2>
             <p class="mt-1 text-sm text-base-content/55">{{ t('article.loginToReply') }}</p>
-            <a href="/login" class="mt-4 inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary">{{ t('auth.loginTitle') }}</a>
+            <a href="/login" class="gf-button gf-button-md gf-button-primary mt-4">{{ t('auth.loginTitle') }}</a>
           </div>
         </template>
       </section>
@@ -1385,7 +1385,7 @@ async function removeReply(replyId: number) {
     </article>
 
     <Teleport defer to="#goose-shell-wide-content">
-      <section v-if="page.props.hotTopics.length" class="w-full rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+      <section v-if="page.props.hotTopics.length" class="gf-card w-full">
         <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-4 sm:px-5">
           <h2 class="text-base font-bold text-base-content">{{ t('article.hotContent') }}</h2>
           <a href="/?sort=hot" class="text-sm font-semibold text-primary hover:text-primary">{{ t('article.more') }}</a>
@@ -1415,7 +1415,7 @@ async function removeReply(replyId: number) {
           <Transition name="floating-reply">
             <div
               v-if="mobileReplyRailOpen"
-              class="pointer-events-auto absolute bottom-full left-0 mb-2 w-[min(18rem,calc(100vw-1.5rem))] rounded-lg border border-line/80 bg-base-100/95 p-2 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.55),0_4px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur xl:hidden"
+              class="gf-floating-surface pointer-events-auto absolute bottom-full left-0 mb-2 w-[min(18rem,calc(100vw-1.5rem))] p-2 xl:hidden"
             >
               <div class="mb-1 flex items-center justify-between gap-3 px-1">
                 <div class="text-xs font-semibold text-base-content/55">{{ t('article.replyPosition') }}</div>
@@ -1445,7 +1445,7 @@ async function removeReply(replyId: number) {
           <Transition name="floating-reply" mode="out-in">
             <div
               v-if="!floatingReplyExpanded || !page.props.permissions.canReply || !showFloatingReply"
-              class="pointer-events-auto flex w-fit max-w-full items-center gap-1 rounded-full border border-line/80 bg-base-100/95 p-1 shadow-[0_14px_34px_-22px_rgba(15,23,42,0.55),0_4px_14px_-10px_rgba(15,23,42,0.35)] backdrop-blur"
+              class="gf-floating-surface pointer-events-auto flex w-fit max-w-full items-center gap-1 rounded-full p-1"
             >
               <button
                 v-if="hasReplyRail"
@@ -1484,7 +1484,7 @@ async function removeReply(replyId: number) {
             </div>
             <div
               v-else-if="page.props.permissions.canReply && showFloatingReply"
-              class="pointer-events-auto w-[min(42rem,calc(100vw-1.5rem))] rounded-lg border border-line/80 bg-base-100/95 p-3 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.5),0_4px_16px_-12px_rgba(15,23,42,0.35)] backdrop-blur"
+              class="gf-floating-surface pointer-events-auto w-[min(42rem,calc(100vw-1.5rem))] p-3"
             >
               <div class="mb-2 flex items-center justify-between">
                 <div class="text-sm font-semibold text-base-content">{{ t('article.joinDiscussion') }}</div>
@@ -1495,7 +1495,7 @@ async function removeReply(replyId: number) {
               <textarea
                 v-model="replyContent"
                 rows="3"
-                class="min-h-24 w-full resize-y rounded-md border border-line bg-base-100 p-3 text-sm leading-6 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
+                class="gf-textarea min-h-24 leading-6"
                 :placeholder="t('article.replyPlaceholder')"
                 @focus="openReplyId = null"
                 @input="clearReplyValidation()"
@@ -1503,12 +1503,12 @@ async function removeReply(replyId: number) {
               <p v-if="errorMessage" class="mt-2 text-sm text-error">{{ errorMessage }}</p>
               <p v-if="successMessage" class="mt-2 text-sm text-success">{{ successMessage }}</p>
               <div class="mt-3 flex justify-end gap-2">
-                <button type="button" class="h-9 rounded-md px-3 text-sm font-semibold text-base-content/55 transition hover:bg-base-300 hover:text-base-content" @click="focusReplyEditor">
+                <button type="button" class="gf-button gf-button-md gf-button-muted" @click="focusReplyEditor">
                   {{ t('article.fullEditor') }}
                 </button>
                 <button
                   type="button"
-                  class="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content transition hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  class="gf-button gf-button-md gf-button-primary"
                   :disabled="submitting"
                   @click="submitReply()"
                 >
@@ -1528,7 +1528,7 @@ async function removeReply(replyId: number) {
         class="sticky top-19 space-y-3"
         :style="{ marginTop: `${articleRailTopOffset}px` }"
       >
-        <div class="overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+        <div class="gf-card overflow-hidden">
           <div class="border-b border-line px-4 py-4">
             <h2 class="text-sm font-semibold text-base-content/55">{{ t('article.overview') }}</h2>
           </div>
@@ -1590,7 +1590,7 @@ async function removeReply(replyId: number) {
           aria-labelledby="delete-reply-title"
           @click.self="closeDeleteDialog"
         >
-          <div class="w-full max-w-sm rounded-lg border border-line bg-base-100 p-4 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.55),0_10px_32px_-18px_rgba(15,23,42,0.28)]">
+          <div class="gf-menu-surface w-full max-w-sm p-4">
             <div class="flex items-start gap-3">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error">
                 <AlertTriangle class="h-5 w-5" />
@@ -1619,7 +1619,7 @@ async function removeReply(replyId: number) {
             <div class="mt-4 flex justify-end gap-2">
               <button
                 type="button"
-                class="h-9 rounded-md px-3 text-sm font-semibold text-base-content/75 transition hover:bg-base-300 disabled:cursor-not-allowed disabled:opacity-50"
+                class="gf-button gf-button-md gf-button-muted"
                 :disabled="Boolean(deletingReplyId)"
                 @click="closeDeleteDialog"
               >
@@ -1627,7 +1627,7 @@ async function removeReply(replyId: number) {
               </button>
               <button
                 type="button"
-                class="inline-flex h-9 items-center gap-1.5 rounded-md bg-error px-3 text-sm font-semibold text-error-content transition hover:bg-error/90 disabled:cursor-not-allowed disabled:opacity-60"
+                class="gf-button gf-button-md gf-button-danger"
                 :disabled="Boolean(deletingReplyId)"
                 @click="removeReply(pendingDeleteReply.id)"
               >
@@ -1642,25 +1642,3 @@ async function removeReply(replyId: number) {
     </Teleport>
   </div>
 </template>
-
-<style scoped>
-.floating-reply-enter-active,
-.floating-reply-leave-active {
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease;
-}
-
-.floating-reply-enter-from,
-.floating-reply-leave-to {
-  opacity: 0;
-  transform: translateY(10px) scale(0.98);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .floating-reply-enter-active,
-  .floating-reply-leave-active {
-    transition: none;
-  }
-}
-</style>

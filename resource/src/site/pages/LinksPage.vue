@@ -15,7 +15,7 @@ const { t } = useI18n()
       <header class="mb-3 border-b border-line/70 pb-4">
         <div class="flex flex-wrap items-center gap-2">
           <h1 class="text-2xl font-bold text-base-content">{{ t('linksPage.title') }}</h1>
-          <span class="rounded-full bg-base-300 px-2 py-0.5 text-xs font-semibold text-base-content/55">{{ props.totalCount }}</span>
+          <span class="gf-badge gf-badge-muted">{{ props.totalCount }}</span>
         </div>
         <p class="mt-2 max-w-2xl text-sm leading-6 text-base-content/55">{{ t('linksPage.subtitle') }}</p>
       </header>
@@ -33,7 +33,7 @@ const { t } = useI18n()
                 </span>
                 <span class="truncate">{{ group.name }}</span>
               </h2>
-              <span class="rounded-full bg-base-300 px-2 py-0.5 text-[11px] font-semibold text-base-content/55">{{ group.links.length }}</span>
+              <span class="gf-badge gf-badge-muted text-[11px]">{{ group.links.length }}</span>
             </div>
 
             <div class="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
@@ -43,7 +43,7 @@ const { t } = useI18n()
                 :href="link.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group rounded-md border border-line bg-base-100 px-2.5 py-2 transition hover:border-primary/20 hover:bg-info/10"
+                class="gf-panel group px-2.5 py-2 transition hover:border-primary/20 hover:bg-info/10"
               >
                 <div class="flex items-center gap-2">
                   <div class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-base-200">
@@ -68,7 +68,7 @@ const { t } = useI18n()
             </div>
           </section>
 
-          <div v-if="!props.groups.length" class="rounded-lg border border-line bg-base-100 px-5 py-16 text-center">
+          <div v-if="!props.groups.length" class="gf-panel px-5 py-16 text-center">
             <Link class="mx-auto h-8 w-8 text-base-content/35" />
             <h2 class="mt-3 text-base font-semibold text-base-content">{{ t('linksPage.emptyTitle') }}</h2>
             <p class="mt-1 text-sm text-base-content/55">{{ t('linksPage.emptyDescription') }}</p>
@@ -76,16 +76,16 @@ const { t } = useI18n()
         </div>
 
         <aside class="space-y-3">
-          <div class="rounded-lg border border-line/70 bg-base-100 p-4">
+          <div class="gf-panel p-4">
             <h2 class="text-sm font-semibold text-base-content">{{ t('linksPage.applyTitle') }}</h2>
             <p class="mt-2 text-sm leading-6 text-base-content/55">{{ t('linksPage.applyDescription') }}</p>
-            <a href="/publish" class="mt-4 inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary">
+            <a href="/publish" class="gf-button gf-button-md gf-button-primary mt-4">
               <Send class="h-4 w-4" />
               {{ t('linksPage.applyAction') }}
             </a>
           </div>
 
-          <div class="rounded-lg border border-line/70 bg-base-100 p-4">
+          <div class="gf-panel p-4">
             <h2 class="text-sm font-semibold text-base-content">{{ t('linksPage.principlesTitle') }}</h2>
             <div class="mt-3 space-y-2 text-sm text-base-content/75">
               <div class="flex gap-2">

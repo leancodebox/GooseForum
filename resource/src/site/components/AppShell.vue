@@ -404,7 +404,7 @@ async function loadUserHoverCard() {
                 v-if="langMenuOpen"
                 class="absolute right-0 top-full z-[70] w-36 pt-2"
               >
-                <div class="rounded-md border border-line bg-base-100 py-1 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)]">
+                <div class="gf-menu-surface overflow-hidden py-1">
                   <button
                     v-for="item in supportedLocales"
                     :key="item"
@@ -445,44 +445,44 @@ async function loadUserHoverCard() {
                   v-if="userMenuOpen"
                   class="absolute right-0 top-full z-[70] w-56 pt-2"
                 >
-                  <div class="overflow-hidden rounded-lg border border-line bg-base-100 shadow-[0_18px_40px_-24px_rgba(15,23,42,0.45)]">
+                  <div class="gf-menu-surface overflow-hidden">
                     <div class="border-b border-line/70 px-3 py-2.5">
                       <div class="truncate text-sm font-semibold text-base-content">{{ layout.viewer.username }}</div>
                     </div>
                     <div class="py-1">
-                      <a :href="`/u/${layout.viewer.id}`" class="flex h-9 items-center gap-2.5 px-3 text-sm font-medium text-base-content/75 transition-colors duration-150 hover:bg-base-200 hover:text-base-content">
+                      <a :href="`/u/${layout.viewer.id}`" class="gf-menu-item">
                         <UserRound class="h-4 w-4 text-icon-muted" /> {{ t('shell.profile') }}
                       </a>
-                      <a href="/messages" class="flex h-9 items-center gap-2.5 px-3 text-sm font-medium text-base-content/75 transition-colors duration-150 hover:bg-base-200 hover:text-base-content">
+                      <a href="/messages" class="gf-menu-item">
                         <Inbox class="h-4 w-4 text-icon-muted" />
                         <span class="min-w-0 flex-1">{{ t('shell.nav.messages') }}</span>
                         <span v-show="hasUnreadMessage" class="h-2 w-2 rounded-full bg-error" />
                       </a>
-                      <a href="/notifications" class="flex h-9 items-center gap-2.5 px-3 text-sm font-medium text-base-content/75 transition-colors duration-150 hover:bg-base-200 hover:text-base-content" :title="notificationTitle">
+                      <a href="/notifications" class="gf-menu-item" :title="notificationTitle">
                         <Bell class="h-4 w-4 text-icon-muted" />
                         <span class="min-w-0 flex-1">{{ t('shell.nav.notifications') }}</span>
                         <span v-show="hasUnreadNotification" class="h-2 w-2 rounded-full bg-error" />
                       </a>
-                      <a href="/drafts" class="flex h-9 items-center gap-2.5 px-3 text-sm font-medium text-base-content/75 transition-colors duration-150 hover:bg-base-200 hover:text-base-content">
+                      <a href="/drafts" class="gf-menu-item">
                         <FileText class="h-4 w-4 text-icon-muted" /> {{ t('shell.nav.drafts') }}
                       </a>
                     </div>
                     <div class="border-t border-line/70 py-1">
-                      <a href="/publish" class="flex h-9 items-center gap-2.5 px-3 text-sm font-semibold text-primary transition-colors duration-150 hover:bg-info/10">
+                      <a href="/publish" class="gf-menu-item-primary">
                         <PenSquare class="h-4 w-4" /> {{ t('shell.publish') }}
                       </a>
-                      <a href="/settings" class="flex h-9 items-center gap-2.5 px-3 text-sm font-medium text-base-content/75 transition-colors duration-150 hover:bg-base-200 hover:text-base-content">
+                      <a href="/settings" class="gf-menu-item">
                         <Settings class="h-4 w-4 text-icon-muted" /> {{ t('shell.settings') }}
                       </a>
-                      <a v-if="layout.viewer.canAccessAdmin" href="/theme-preview" class="flex h-9 items-center gap-2.5 px-3 text-sm font-medium text-base-content/75 transition-colors duration-150 hover:bg-base-200 hover:text-base-content">
-                        <Palette class="h-4 w-4 text-icon-muted" /> 主题预览
+                      <a v-if="layout.viewer.canAccessAdmin" href="/theme-preview" class="gf-menu-item">
+                        <Palette class="h-4 w-4 text-icon-muted" /> {{ t('shell.themePreview') }}
                       </a>
-                      <a v-if="layout.viewer.canAccessAdmin" href="/admin" class="flex h-9 items-center gap-2.5 px-3 text-sm font-medium text-warning transition-colors duration-150 hover:bg-warning/10">
+                      <a v-if="layout.viewer.canAccessAdmin" href="/admin" class="gf-menu-item-warning">
                         <Shield class="h-4 w-4" /> {{ t('shell.admin') }}
                       </a>
                     </div>
                     <div class="border-t border-line/70 py-1">
-                      <button class="flex h-9 w-full items-center gap-2.5 px-3 text-left text-sm font-medium text-error transition-colors duration-150 hover:bg-error/10" type="button" @click="logout">
+                      <button class="gf-menu-item-danger" type="button" @click="logout">
                         <LogOut class="h-4 w-4" /> {{ t('shell.logout') }}
                       </button>
                     </div>
@@ -493,7 +493,7 @@ async function loadUserHoverCard() {
           </template>
           <template v-else>
             <a href="/login" class="rounded-md px-3 py-2 text-sm font-medium text-base-content/75 hover:bg-base-300">{{ t('shell.login') }}</a>
-            <a href="/login?register=true" class="hidden rounded-md bg-neutral px-3 py-2 text-sm font-semibold text-neutral-content hover:bg-neutral/90 sm:inline-flex">{{ t('shell.register') }}</a>
+            <a href="/login?register=true" class="gf-button gf-button-md gf-button-neutral hidden sm:inline-flex">{{ t('shell.register') }}</a>
           </template>
         </div>
       </div>

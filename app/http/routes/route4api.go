@@ -185,7 +185,6 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("site-theme", UpButterReq(api.GetSiteTheme)).
 		POST("save-site-theme", UpButterReq(api.SaveSiteTheme)).
 		POST("publish-site-theme", UpButterReq(api.PublishSiteTheme)).
-		POST("rollback-site-theme", UpButterReq(api.RollbackSiteTheme)).
 		GET("mail-settings", UpButterReq(api.GetMailSettings)).
 		POST("save-mail-settings", UpButterReq(api.SaveMailSettings)).
 		POST("test-mail-connection", UpButterReq(api.TestMailConnection)).

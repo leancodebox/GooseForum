@@ -308,7 +308,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
       </header>
 
       <div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <section class="rounded-lg border border-line/70 bg-base-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] sm:p-5">
+        <section class="gf-card p-4 sm:p-5">
           <div class="space-y-5">
             <label class="block">
               <span class="text-sm font-semibold text-base-content/75">{{ t('publish.fields.title') }}</span>
@@ -376,7 +376,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                   <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.link')" @click="insert('[', '](https://)', t('publish.placeholder.link'))"><Link class="h-4 w-4" /></button>
                   <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.quote')" @click="insert('\\n> ', '', t('publish.placeholder.quote'))"><MessageSquareQuote class="h-4 w-4" /></button>
                   <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.code')" @click="insert('\\n```\\n', '\\n```\\n', 'code')"><Code2 class="h-4 w-4" /></button>
-                  <span v-if="uploadText" class="ml-auto rounded bg-info/10 px-2 py-1 text-xs font-semibold text-primary">{{ uploadText }}</span>
+                  <span v-if="uploadText" class="gf-badge gf-badge-info ml-auto rounded">{{ uploadText }}</span>
                   <label
                     class="rounded p-1.5 text-base-content/55 transition hover:bg-base-100 hover:text-base-content"
                     :class="uploadText ? '' : 'ml-auto'"
@@ -413,14 +413,14 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               </div>
             </div>
 
-            <p v-if="error" class="rounded-md bg-error/10 px-3 py-2 text-sm text-error">{{ error }}</p>
-            <p v-if="message" class="rounded-md bg-success/10 px-3 py-2 text-sm text-success">{{ message }}</p>
+            <p v-if="error" class="gf-status-message gf-status-message-error">{{ error }}</p>
+            <p v-if="message" class="gf-status-message gf-status-message-success">{{ message }}</p>
 
             <div class="flex items-center justify-end gap-2 border-t border-line pt-4">
-              <a href="/" class="inline-flex h-10 items-center rounded-md px-3 text-sm font-semibold text-base-content/55 hover:bg-base-300 hover:text-base-content">{{ t('common.cancel') }}</a>
+              <a href="/" class="gf-button gf-button-lg gf-button-muted">{{ t('common.cancel') }}</a>
               <button
                 type="button"
-                class="inline-flex h-10 items-center rounded-md border border-line bg-base-100 px-4 text-sm font-semibold text-base-content/75 hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-50"
+                class="gf-button gf-button-lg gf-button-secondary"
                 :disabled="!isValid || submitting || uploading"
                 @click="saveDraft"
               >
@@ -428,7 +428,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               </button>
               <button
                 type="button"
-                class="inline-flex h-10 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+                class="gf-button gf-button-lg gf-button-primary"
                 :disabled="!isValid || submitting || uploading"
                 @click="save"
               >
@@ -440,7 +440,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
         </section>
 
         <aside class="space-y-3">
-          <section class="rounded-lg border border-line/70 bg-base-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+          <section class="gf-card p-4">
             <div class="flex items-center gap-2">
               <ListChecks class="h-4 w-4 text-base-content/55" />
               <h2 class="text-sm font-semibold text-base-content">{{ t('publish.checklist.title') }}</h2>
@@ -452,7 +452,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
             </ul>
           </section>
 
-          <section v-if="selectedCategories.length" class="rounded-lg border border-line/70 bg-base-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+          <section v-if="selectedCategories.length" class="gf-card p-4">
             <h2 class="text-sm font-semibold text-base-content">{{ t('publish.selectedCategories') }}</h2>
             <div class="mt-3 flex flex-wrap gap-2">
               <button
@@ -472,7 +472,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
       </div>
 
       <div v-if="leavePromptOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-neutral/50 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-        <div class="w-full max-w-md overflow-hidden rounded-xl bg-base-100 shadow-2xl">
+        <div class="gf-menu-surface w-full max-w-md overflow-hidden">
           <div class="border-b border-line px-5 py-4">
             <h2 class="text-base font-semibold text-base-content">{{ t('publish.leaveTitle') }}</h2>
             <p class="mt-1 text-sm leading-6 text-base-content/55">
@@ -485,15 +485,15 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
           </div>
 
           <div class="flex flex-wrap items-center justify-end gap-2 bg-base-200 px-5 py-4">
-            <button type="button" class="h-10 rounded-md px-3 text-sm font-semibold text-base-content/55 hover:bg-base-300 hover:text-base-content" @click="closeLeavePrompt">
+            <button type="button" class="gf-button gf-button-lg gf-button-muted" @click="closeLeavePrompt">
               {{ t('publish.continueEditing') }}
             </button>
-            <button type="button" class="h-10 rounded-md border border-line bg-base-100 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-200" @click="discardAndLeave">
+            <button type="button" class="gf-button gf-button-lg gf-button-secondary" @click="discardAndLeave">
               {{ t('publish.leaveWithoutSaving') }}
             </button>
             <button
               type="button"
-              class="inline-flex h-10 min-w-28 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+              class="gf-button gf-button-lg gf-button-primary min-w-28"
               :disabled="!draftSaveable"
               @click="saveDraftAndLeave"
             >

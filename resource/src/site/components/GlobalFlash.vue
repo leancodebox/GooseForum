@@ -74,7 +74,7 @@ function labelFor(type: FlashMessageType) {
       <div
         v-for="item in visibleMessages"
         :key="item.id"
-        class="pointer-events-auto relative flex min-h-[72px] w-full max-w-[380px] items-start gap-3 overflow-hidden border border-line bg-base-100/95 px-3.5 py-3 pr-2.5 text-sm text-base-content shadow-[0_14px_42px_-32px_rgba(15,23,42,0.65)] backdrop-blur"
+        class="gf-alert pointer-events-auto relative flex min-h-[72px] w-full max-w-[380px] items-start gap-3 overflow-hidden px-3.5 py-3 pr-2.5 text-sm backdrop-blur"
         role="status"
       >
         <span

@@ -1,4 +1,4 @@
-package forum
+package themeservice
 
 import (
 	"reflect"
@@ -7,12 +7,12 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 )
 
-func TestNormalizeSiteThemeConfigDoesNotMutateInput(t *testing.T) {
+func TestNormalizeConfigDoesNotMutateInput(t *testing.T) {
 	input := pageConfig.SiteThemeConfig{
 		Enabled: true,
 		Themes: []pageConfig.SiteThemeDefinition{
 			{
-				Name:        "gf-light",
+				Name:        LightName,
 				ColorScheme: "light",
 				Tokens: pageConfig.SiteThemeTokens{
 					ColorBase100: "oklch(100% 0 0)",
@@ -20,11 +20,11 @@ func TestNormalizeSiteThemeConfigDoesNotMutateInput(t *testing.T) {
 				},
 			},
 		},
-		Draft: &pageConfig.SiteThemeSnapshot{
+		Prepublish: &pageConfig.SiteThemePrepublish{
 			Enabled: true,
 			Themes: []pageConfig.SiteThemeDefinition{
 				{
-					Name:        "gf-dark",
+					Name:        DarkName,
 					ColorScheme: "dark",
 					Tokens: pageConfig.SiteThemeTokens{
 						ColorBase100: "oklch(20% 0 0)",
@@ -32,29 +32,28 @@ func TestNormalizeSiteThemeConfigDoesNotMutateInput(t *testing.T) {
 				},
 			},
 		},
-		History: []pageConfig.SiteThemeSnapshot{
-			{
-				Enabled: true,
-				Themes: []pageConfig.SiteThemeDefinition{
-					{
-						Name:        "gf-light",
-						ColorScheme: "light",
-						Tokens: pageConfig.SiteThemeTokens{
-							ColorBase100: "oklch(99% 0 0)",
-						},
-					},
-				},
-			},
-		},
 	}
-	original := cloneSiteThemeConfig(input)
+	original := CloneConfig(input)
 
-	normalized := normalizeSiteThemeConfig(input)
+	normalized := NormalizeConfig(input)
 
 	if !reflect.DeepEqual(input, original) {
-		t.Fatal("normalizeSiteThemeConfig should not mutate the input config")
+		t.Fatal("NormalizeConfig should not mutate the input config")
 	}
 	if normalized.Themes[0].Tokens.RadiusField != "0.5rem" {
 		t.Fatalf("expected radius-field legacy value to be normalized, got %q", normalized.Themes[0].Tokens.RadiusField)
+	}
+}
+
+func TestNormalizeConfigIgnoresInvalidPrepublish(t *testing.T) {
+	normalized := NormalizeConfig(pageConfig.SiteThemeConfig{
+		Enabled: true,
+		Prepublish: &pageConfig.SiteThemePrepublish{
+			Enabled: true,
+		},
+	})
+
+	if normalized.Prepublish != nil {
+		t.Fatal("expected empty prepublish themes to be treated as missing")
 	}
 }

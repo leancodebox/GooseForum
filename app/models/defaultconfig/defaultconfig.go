@@ -117,10 +117,7 @@ func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {
 func GetDefaultSiteThemeConfig() pageConfig.SiteThemeConfig {
 	config := mustPageConfigDefaults().SiteTheme
 	config.Themes = cloneSiteThemeDefinitions(config.Themes)
-	if config.Draft != nil {
-		config.Draft = cloneSiteThemeSnapshot(config.Draft)
-	}
-	config.History = cloneSiteThemeSnapshots(config.History)
+	config.Prepublish = cloneSiteThemePrepublish(config.Prepublish)
 	return config
 }
 
@@ -154,29 +151,15 @@ func cloneSiteThemeDefinitions(items []pageConfig.SiteThemeDefinition) []pageCon
 		return nil
 	}
 	cloned := make([]pageConfig.SiteThemeDefinition, len(items))
-	for i, item := range items {
-		cloned[i] = item
-	}
+	copy(cloned, items)
 	return cloned
 }
 
-func cloneSiteThemeSnapshot(item *pageConfig.SiteThemeSnapshot) *pageConfig.SiteThemeSnapshot {
+func cloneSiteThemePrepublish(item *pageConfig.SiteThemePrepublish) *pageConfig.SiteThemePrepublish {
 	if item == nil {
 		return nil
 	}
 	cloned := *item
 	cloned.Themes = cloneSiteThemeDefinitions(item.Themes)
 	return &cloned
-}
-
-func cloneSiteThemeSnapshots(items []pageConfig.SiteThemeSnapshot) []pageConfig.SiteThemeSnapshot {
-	if items == nil {
-		return nil
-	}
-	cloned := make([]pageConfig.SiteThemeSnapshot, len(items))
-	for index := range items {
-		cloned[index] = items[index]
-		cloned[index].Themes = cloneSiteThemeDefinitions(items[index].Themes)
-	}
-	return cloned
 }

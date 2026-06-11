@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   AlertTriangle,
   Check,
@@ -16,10 +17,11 @@ import {
   Save,
   Search,
   SlidersHorizontal,
+  Sparkles,
   Sun,
-  Undo2,
 } from '@lucide/vue'
-import { publishSiteTheme, rollbackSiteTheme, saveSiteTheme } from '@/runtime/api'
+import { publishSiteTheme, saveSiteTheme } from '@/runtime/api'
+import { useFlashMessages } from '@/runtime/flash-message'
 import { applySiteThemeCss, applySiteThemePayload, setTheme, type SiteTheme } from '@/runtime/site-theme'
 import {
   cloneSiteThemeTokens,
@@ -33,6 +35,7 @@ import {
   type ThemePreviewProps,
 } from '@/types/payload'
 import ThemeColorPicker from '@/site/components/ThemeColorPicker.vue'
+import { themePresets, type SiteThemePreset } from '@/site/theme-presets'
 
 type PreviewMode = 'forum' | 'components' | 'code'
 
@@ -42,6 +45,8 @@ const props = defineProps<{
 }>()
 
 const SITE_MANAGER_PERMISSION = 5
+const { push: pushFlash } = useFlashMessages()
+const { t } = useI18n()
 
 const colorGroups = [
   {
@@ -131,18 +136,17 @@ const selectedTheme = ref<SiteTheme>('gf-light')
 const previewMode = ref<PreviewMode>('forum')
 const saving = ref(false)
 const publishing = ref(false)
-const rollingBack = ref(false)
 const copying = ref(false)
 const message = ref('')
 const error = ref('')
-const draft = reactive<SiteThemeConfig>(configFromDraft(props.props.theme))
+const prepublish = reactive<SiteThemeConfig>(configFromPrepublish(props.props.theme))
 const savedConfig = ref<SiteThemeConfig>(cloneConfig(props.props.theme))
 
 const activeTheme = computed(() => themeByName(selectedTheme.value))
 const previewTitle = computed(() => selectedTheme.value === 'gf-dark' ? 'Dark preview' : 'Light preview')
 const canManageSiteTheme = computed(() => props.layout.viewer.adminPermissions.includes(SITE_MANAGER_PERMISSION))
-const activeThemeCss = computed(() => buildThemeCss(draft))
-const dirty = computed(() => themeEditSignature(configFromDraft(savedConfig.value)) !== themeEditSignature(draft))
+const activeThemeCss = computed(() => buildThemeCss(prepublish))
+const dirty = computed(() => themeEditSignature(configFromPrepublish(savedConfig.value)) !== themeEditSignature(prepublish))
 const selectedDefaultTheme = computed(() => props.props.defaults.themes.find((theme) => theme.name === selectedTheme.value))
 const themeAccentLabel = computed(() => selectedTheme.value === 'gf-dark' ? 'Dark' : 'Light')
 
@@ -156,7 +160,7 @@ const contrastScores = computed(() => contrastPairs.map(([label, foreground, bac
 }))
 
 watch(
-  draft,
+  prepublish,
   () => {
     applySiteThemeCss(activeThemeCss.value)
   },
@@ -182,12 +186,11 @@ function cloneConfig(config: SiteThemeConfig): SiteThemeConfig {
       colorScheme: theme.colorScheme,
       tokens: cloneSiteThemeTokens(theme.tokens),
     })),
-    draft: config.draft
+    prepublish: config.prepublish
       ? {
-          enabled: Boolean(config.draft.enabled),
-          createdAt: config.draft.createdAt,
-          label: config.draft.label,
-          themes: config.draft.themes.map((theme) => ({
+          enabled: Boolean(config.prepublish.enabled),
+          updatedAt: config.prepublish.updatedAt,
+          themes: config.prepublish.themes.map((theme) => ({
             name: theme.name,
             label: theme.label,
             colorScheme: theme.colorScheme,
@@ -195,26 +198,15 @@ function cloneConfig(config: SiteThemeConfig): SiteThemeConfig {
           })),
         }
       : undefined,
-    history: config.history?.map((item) => ({
-      enabled: Boolean(item.enabled),
-      createdAt: item.createdAt,
-      label: item.label,
-      themes: item.themes.map((theme) => ({
-        name: theme.name,
-        label: theme.label,
-        colorScheme: theme.colorScheme,
-        tokens: cloneSiteThemeTokens(theme.tokens),
-      })),
-    })) || [],
     publishedAt: config.publishedAt,
   }
 }
 
-function configFromDraft(config: SiteThemeConfig): SiteThemeConfig {
+function configFromPrepublish(config: SiteThemeConfig): SiteThemeConfig {
   const cloned = cloneConfig(config)
-  if (cloned.draft) {
-    cloned.enabled = cloned.draft.enabled
-    cloned.themes = cloned.draft.themes.map((theme) => ({
+  if (cloned.prepublish) {
+    cloned.enabled = cloned.prepublish.enabled
+    cloned.themes = cloned.prepublish.themes.map((theme) => ({
       name: theme.name,
       label: theme.label,
       colorScheme: theme.colorScheme,
@@ -225,7 +217,7 @@ function configFromDraft(config: SiteThemeConfig): SiteThemeConfig {
 }
 
 function themeByName(name: SiteTheme): SiteThemeDefinition {
-  let theme = draft.themes.find((item) => item.name === name)
+  let theme = prepublish.themes.find((item) => item.name === name)
   if (!theme) {
     const fallback = props.props.defaults.themes.find((item) => item.name === name)
     theme = fallback
@@ -241,7 +233,7 @@ function themeByName(name: SiteTheme): SiteThemeDefinition {
           colorScheme: name === 'gf-dark' ? 'dark' : 'light',
           tokens: createEmptySiteThemeTokens(),
         }
-    draft.themes.push(theme)
+    prepublish.themes.push(theme)
   }
   return theme
 }
@@ -257,6 +249,28 @@ function tokenValue(key: SiteThemeTokenKey) {
 
 function setToken(key: SiteThemeTokenKey, value: string) {
   activeTheme.value.tokens[key] = value
+}
+
+function presetLabel(preset: SiteThemePreset) {
+  return t(`themePreview.presets.${preset.key}.label`)
+}
+
+function presetDescription(preset: SiteThemePreset) {
+  return t(`themePreview.presets.${preset.key}.description`)
+}
+
+function applyPreset(preset: SiteThemePreset) {
+  ;(['gf-light', 'gf-dark'] as const).forEach((name) => {
+    const theme = themeByName(name)
+    siteThemeTokenKeys.forEach((key) => {
+      const value = preset.themes[name][key]
+      if (value) theme.tokens[key] = value
+    })
+  })
+  setTheme(selectedTheme.value)
+  message.value = t('themePreview.presetApplied', { name: presetLabel(preset) })
+  error.value = ''
+  pushFlash(message.value, 'success')
 }
 
 function fromRange(key: SiteThemeTokenKey, value: number) {
@@ -349,62 +363,47 @@ function themeEditSignature(config: SiteThemeConfig) {
 }
 
 async function save() {
-  if (!canManageSiteTheme.value) return
+  if (saving.value || !canManageSiteTheme.value) return
   saving.value = true
   message.value = ''
   error.value = ''
   try {
-    const config = await saveSiteTheme(cloneConfig(draft))
+    const config = await saveSiteTheme(cloneConfig(prepublish))
     savedConfig.value = cloneConfig(config)
-    applyDraftConfig(configFromDraft(config))
-    message.value = '草稿已保存，发布后才会影响全站'
+    applyPrepublishConfig(configFromPrepublish(config))
+    message.value = '预发布已保存，发布后才会影响全站'
+    pushFlash(message.value, 'success')
   } catch (err) {
     error.value = err instanceof Error ? err.message : '主题配置保存失败'
+    pushFlash(error.value, 'error')
   } finally {
     saving.value = false
   }
 }
 
 async function publish() {
-  if (!canManageSiteTheme.value) return
+  if (publishing.value || !canManageSiteTheme.value) return
   publishing.value = true
   message.value = ''
   error.value = ''
   try {
     const config = await publishSiteTheme()
     savedConfig.value = cloneConfig(config)
-    applyDraftConfig(configFromDraft(config))
+    applyPrepublishConfig(configFromPrepublish(config))
     applySiteThemeCss('')
     applySiteThemePayload(buildThemePayload(config))
-    message.value = '草稿已发布'
+    message.value = '预发布已发布'
+    pushFlash(message.value, 'success')
   } catch (err) {
     error.value = err instanceof Error ? err.message : '主题配置发布失败'
+    pushFlash(error.value, 'error')
   } finally {
     publishing.value = false
   }
 }
 
-async function rollback() {
-  if (!canManageSiteTheme.value) return
-  rollingBack.value = true
-  message.value = ''
-  error.value = ''
-  try {
-    const config = await rollbackSiteTheme()
-    savedConfig.value = cloneConfig(config)
-    applyDraftConfig(configFromDraft(config))
-    applySiteThemeCss('')
-    applySiteThemePayload(buildThemePayload(config))
-    message.value = '已回滚到上一版'
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : '主题配置回滚失败'
-  } finally {
-    rollingBack.value = false
-  }
-}
-
-function resetDraft() {
-  applyDraftConfig(configFromDraft(savedConfig.value))
+function resetPrepublish() {
+  applyPrepublishConfig(configFromPrepublish(savedConfig.value))
   message.value = '已还原到已保存配置'
   error.value = ''
 }
@@ -422,13 +421,12 @@ function resetSelectedThemeToDefault() {
 
 function resetAllThemesToDefault() {
   const defaults = cloneConfig(props.props.defaults)
-  draft.version = defaults.version
-  draft.enabled = defaults.enabled
-  draft.themes.splice(0, draft.themes.length, ...defaults.themes)
-  draft.draft = undefined
-  draft.history = savedConfig.value.history
-  draft.publishedAt = savedConfig.value.publishedAt
-  message.value = '已恢复为内置默认主题，保存草稿后可发布到全站'
+  prepublish.version = defaults.version
+  prepublish.enabled = defaults.enabled
+  prepublish.themes.splice(0, prepublish.themes.length, ...defaults.themes)
+  prepublish.prepublish = undefined
+  prepublish.publishedAt = savedConfig.value.publishedAt
+  message.value = '已恢复为内置默认主题，保存预发布后可发布到全站'
   error.value = ''
 }
 
@@ -448,13 +446,12 @@ async function copyThemeCss() {
   }
 }
 
-function applyDraftConfig(next: SiteThemeConfig) {
-  draft.version = next.version
-  draft.enabled = next.enabled
-  draft.themes.splice(0, draft.themes.length, ...next.themes)
-  draft.draft = next.draft
-  draft.history = next.history
-  draft.publishedAt = next.publishedAt
+function applyPrepublishConfig(next: SiteThemeConfig) {
+  prepublish.version = next.version
+  prepublish.enabled = next.enabled
+  prepublish.themes.splice(0, prepublish.themes.length, ...next.themes)
+  prepublish.prepublish = next.prepublish
+  prepublish.publishedAt = next.publishedAt
 }
 
 function contrastRatio(foreground: string, background: string) {
@@ -489,7 +486,7 @@ function hexToRgb(value: string) {
 
 <template>
   <div class="grid gap-3 lg:h-[calc(100vh-5.5rem)] lg:min-h-0 lg:grid-cols-[minmax(280px,330px)_minmax(0,1fr)] lg:overflow-hidden">
-    <section class="rounded-lg border border-line bg-base-100 lg:flex lg:min-h-0 lg:flex-col lg:overflow-hidden">
+    <section class="overflow-hidden rounded-box border border-line bg-base-100 lg:flex lg:min-h-0 lg:flex-col">
       <div class="sticky top-0 z-10 border-b border-line bg-base-100 p-3">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
@@ -498,36 +495,36 @@ function hexToRgb(value: string) {
               <h1 class="truncate text-base font-semibold text-base-content">主题预览设置</h1>
             </div>
             <div class="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold">
-              <span class="rounded-full bg-base-200 px-2 py-1 text-base-content/65">v{{ draft.version || 1 }}</span>
-              <span class="rounded-full px-2 py-1" :class="draft.enabled ? 'bg-success/10 text-success' : 'bg-base-200 text-base-content/55'">{{ draft.enabled ? 'Enabled' : 'Disabled' }}</span>
-              <span v-if="dirty" class="rounded-full bg-warning/10 px-2 py-1 text-warning">Unsaved</span>
-              <span v-if="!canManageSiteTheme" class="rounded-full bg-error/10 px-2 py-1 text-error">Read only</span>
+              <span class="rounded-full bg-base-200 px-2 py-1 text-base-content/65">v{{ prepublish.version || 1 }}</span>
+              <span class="rounded-full px-2 py-1" :class="prepublish.enabled ? 'bg-success/10 text-success' : 'bg-base-200 text-base-content/55'">{{ prepublish.enabled ? 'Enabled' : 'Disabled' }}</span>
+              <span v-if="dirty" class="gf-badge gf-badge-warning py-1">Unsaved</span>
+              <span v-if="!canManageSiteTheme" class="gf-badge gf-badge-error py-1">Read only</span>
             </div>
           </div>
           <div class="flex shrink-0 items-center gap-1.5">
-            <button type="button" class="inline-flex h-8 items-center gap-1.5 rounded-md bg-base-200 px-2 text-xs font-semibold text-base-content/65 hover:bg-base-300 hover:text-base-content" @click="resetAllThemesToDefault">
+            <button type="button" class="gf-button gf-button-sm gf-button-secondary text-xs" @click="resetAllThemesToDefault">
               默认
             </button>
-            <button type="button" class="grid h-8 w-8 place-items-center rounded-md bg-base-200 text-icon-muted hover:bg-base-300 hover:text-base-content" title="还原到已保存配置" @click="resetDraft">
+            <button type="button" class="gf-icon-button h-8 w-8 bg-base-200" title="还原到已保存配置" @click="resetPrepublish">
               <RotateCcw class="h-4 w-4" />
             </button>
           </div>
         </div>
 
         <div class="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-          <div class="inline-grid grid-cols-2 rounded-md border border-line bg-base-200 p-0.5">
+          <div class="gf-segmented grid-cols-2">
             <button
               type="button"
-              class="inline-flex h-8 items-center justify-center gap-1.5 rounded px-2 text-sm font-semibold"
-              :class="selectedTheme === 'gf-light' ? 'bg-base-100 text-primary shadow-sm ring-1 ring-line' : 'text-base-content/55 hover:text-base-content'"
+              class="gf-segmented-item"
+              :class="selectedTheme === 'gf-light' ? 'gf-segmented-item-active' : 'gf-segmented-item-idle'"
               @click="selectTheme('gf-light')"
             >
               <Sun class="h-4 w-4" /> Light
             </button>
             <button
               type="button"
-              class="inline-flex h-8 items-center justify-center gap-1.5 rounded px-2 text-sm font-semibold"
-              :class="selectedTheme === 'gf-dark' ? 'bg-base-100 text-primary shadow-sm ring-1 ring-line' : 'text-base-content/55 hover:text-base-content'"
+              class="gf-segmented-item"
+              :class="selectedTheme === 'gf-dark' ? 'gf-segmented-item-active' : 'gf-segmented-item-idle'"
               @click="selectTheme('gf-dark')"
             >
               <Moon class="h-4 w-4" /> Dark
@@ -535,29 +532,60 @@ function hexToRgb(value: string) {
           </div>
           <label class="inline-flex cursor-pointer items-center gap-2 rounded-md bg-base-200 px-2 text-sm font-semibold text-base-content/75">
             <span>启用</span>
-            <span class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition" :class="draft.enabled ? 'bg-primary' : 'bg-base-300'">
-              <input v-model="draft.enabled" type="checkbox" class="peer sr-only" />
-              <span class="absolute left-0.5 h-4 w-4 rounded-full bg-primary-content transition" :class="draft.enabled ? 'translate-x-4' : 'translate-x-0 bg-base-100'" />
+            <span class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition" :class="prepublish.enabled ? 'bg-primary' : 'bg-base-300'">
+              <input v-model="prepublish.enabled" type="checkbox" class="peer sr-only" />
+              <span class="absolute left-0.5 h-4 w-4 rounded-full bg-primary-content transition" :class="prepublish.enabled ? 'translate-x-4' : 'translate-x-0 bg-base-100'" />
             </span>
           </label>
         </div>
       </div>
 
-      <div class="min-h-full space-y-3 bg-base-100 p-3 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+      <div class="min-h-full space-y-4 bg-base-100 p-3 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        <section class="space-y-2">
+          <div class="flex items-center gap-2">
+            <Sparkles class="h-4 w-4 text-icon-muted" />
+            <h2 class="text-sm font-semibold text-base-content">{{ t('themePreview.presetsTitle') }}</h2>
+            <span class="h-px flex-1 bg-line" />
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              v-for="preset in themePresets"
+              :key="preset.key"
+              type="button"
+              class="min-w-0 rounded-md border border-line bg-base-100 p-2 text-left transition hover:border-primary/30 hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-55"
+              :disabled="!canManageSiteTheme"
+              @click="applyPreset(preset)"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <span class="truncate text-xs font-bold text-base-content">{{ presetLabel(preset) }}</span>
+                <span class="flex shrink-0 -space-x-1">
+                  <span
+                    v-for="color in preset.swatches"
+                    :key="color"
+                    class="h-3.5 w-3.5 rounded-full border border-base-100"
+                    :style="{ backgroundColor: color }"
+                  />
+                </span>
+              </div>
+              <div class="mt-1 truncate text-[11px] text-base-content/45">{{ presetDescription(preset) }}</div>
+            </button>
+          </div>
+        </section>
+
         <section class="space-y-3">
           <div class="flex items-center gap-2">
             <PaintBucket class="h-4 w-4 text-icon-muted" />
             <h2 class="text-sm font-semibold text-base-content">Change Colors</h2>
             <span class="h-px flex-1 bg-line" />
-            <button type="button" class="h-7 rounded-md bg-base-200 px-2 text-xs font-semibold text-base-content/65 hover:bg-base-300 hover:text-base-content" @click="resetSelectedThemeToDefault">
+            <button type="button" class="gf-button gf-button-sm gf-button-secondary h-7 text-xs" @click="resetSelectedThemeToDefault">
               默认
             </button>
           </div>
 
-          <div v-for="group in colorGroups" :key="group.key" class="rounded-lg border border-line bg-base-100">
-            <div class="flex items-center justify-between gap-3 border-b border-line bg-base-200/60 px-3 py-2">
+          <div v-for="group in colorGroups" :key="group.key" class="border-b border-line pb-3 last:border-b-0">
+            <div class="flex items-center justify-between gap-3">
               <div>
-                <div class="text-xs font-bold uppercase text-base-content">{{ group.label }}</div>
+                <div class="text-xs font-bold uppercase tracking-wide text-base-content/70">{{ group.label }}</div>
                 <div class="text-[11px] text-base-content/45">{{ group.description }}</div>
               </div>
               <div class="flex -space-x-1">
@@ -569,7 +597,7 @@ function hexToRgb(value: string) {
                 />
               </div>
             </div>
-            <div class="grid grid-cols-4 gap-x-2 gap-y-2 p-3">
+            <div class="mt-2 grid grid-cols-4 gap-x-2 gap-y-2">
               <ThemeColorPicker
                 v-for="[key, label] in group.tokens"
                 :key="key"
@@ -580,9 +608,9 @@ function hexToRgb(value: string) {
             </div>
           </div>
 
-          <div class="rounded-lg border border-line bg-base-100 p-2.5">
+          <div class="border-t border-line pt-3">
             <div class="mb-2 flex items-center justify-between gap-3">
-              <h3 class="text-xs font-bold uppercase text-base-content">Contrast</h3>
+              <h3 class="text-xs font-bold uppercase tracking-wide text-base-content/70">Contrast</h3>
               <span class="text-[11px] font-semibold text-base-content/45">{{ themeAccentLabel }}</span>
             </div>
             <div class="grid gap-1.5">
@@ -600,7 +628,7 @@ function hexToRgb(value: string) {
           </div>
         </section>
 
-        <section class="rounded-lg border border-line bg-base-100 p-2.5">
+        <section class="border-t border-line pt-4">
           <div class="mb-2.5 flex items-center gap-2">
             <SlidersHorizontal class="h-4 w-4 text-icon-muted" />
             <h2 class="text-sm font-semibold text-base-content">Radius</h2>
@@ -636,7 +664,7 @@ function hexToRgb(value: string) {
           </div>
         </section>
 
-        <section class="rounded-lg border border-line bg-base-100 p-2.5">
+        <section class="border-t border-line pt-4">
           <div class="mb-2.5 flex items-center gap-2">
             <SlidersHorizontal class="h-4 w-4 text-icon-muted" />
             <h2 class="text-sm font-semibold text-base-content">Effects & Options</h2>
@@ -660,7 +688,7 @@ function hexToRgb(value: string) {
       </div>
     </section>
 
-    <section class="rounded-lg border border-line bg-base-100 lg:flex lg:min-h-0 lg:flex-col lg:overflow-hidden">
+    <section class="overflow-hidden rounded-box border border-line bg-base-100 lg:flex lg:min-h-0 lg:flex-col">
       <div class="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-line bg-base-100 p-3">
         <div class="flex items-center gap-2">
           <Eye class="h-4 w-4 text-icon-muted" />
@@ -670,26 +698,37 @@ function hexToRgb(value: string) {
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <div class="inline-flex rounded-md border border-line bg-base-200 p-0.5">
+          <div class="gf-segmented grid-cols-3">
             <button
               v-for="[mode, label, Icon] in previewModes"
               :key="mode"
               type="button"
-              class="inline-flex h-8 items-center gap-1.5 rounded px-2 text-xs font-semibold sm:text-sm"
-              :class="previewMode === mode ? 'bg-base-100 text-primary shadow-sm ring-1 ring-line' : 'text-base-content/55 hover:text-base-content'"
+              class="gf-segmented-item text-xs sm:text-sm"
+              :class="previewMode === mode ? 'gf-segmented-item-active' : 'gf-segmented-item-idle'"
               @click="previewMode = mode"
             >
               <component :is="Icon" class="h-4 w-4" /> {{ label }}
             </button>
           </div>
-          <button type="button" class="inline-flex h-8 items-center gap-1.5 rounded-md bg-base-200 px-2.5 text-sm font-semibold text-base-content/75 hover:bg-base-300 disabled:cursor-not-allowed disabled:text-base-content/55" :disabled="rollingBack || !(savedConfig.history?.length) || !canManageSiteTheme" @click="rollback">
-            <Undo2 class="h-4 w-4" /> {{ rollingBack ? '回滚中' : '回滚' }}
+          <button
+            type="button"
+            class="gf-button gf-button-sm gf-button-secondary w-32 whitespace-nowrap disabled:bg-base-100 disabled:text-base-content/75 disabled:opacity-100"
+            :class="saving ? 'cursor-wait bg-base-200 ring-2 ring-primary/20' : ''"
+            :aria-busy="saving"
+            :disabled="!canManageSiteTheme"
+            @click="save"
+          >
+            <Save class="h-4 w-4" :class="saving ? 'animate-pulse text-primary' : ''" /> 保存预发布
           </button>
-          <button type="button" class="inline-flex h-8 items-center gap-1.5 rounded-md bg-base-200 px-2.5 text-sm font-semibold text-base-content/75 hover:bg-base-300 disabled:cursor-not-allowed disabled:text-base-content/55" :disabled="saving || !canManageSiteTheme" @click="save">
-            <Save class="h-4 w-4" /> {{ saving ? '保存中' : '保存草稿' }}
-          </button>
-          <button type="button" class="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-2.5 text-sm font-semibold text-primary-content disabled:cursor-not-allowed disabled:bg-base-300 disabled:text-base-content/55" :disabled="publishing || !canManageSiteTheme" @click="publish">
-            <Rocket class="h-4 w-4" /> {{ publishing ? '发布中' : '发布' }}
+          <button
+            type="button"
+            class="gf-button gf-button-sm gf-button-primary w-24 whitespace-nowrap disabled:bg-primary disabled:text-primary-content disabled:opacity-100"
+            :class="publishing ? 'cursor-wait brightness-95 ring-2 ring-primary/25' : ''"
+            :aria-busy="publishing"
+            :disabled="!canManageSiteTheme"
+            @click="publish"
+          >
+            <Rocket class="h-4 w-4" :class="publishing ? 'animate-pulse' : ''" /> 发布
           </button>
         </div>
       </div>
@@ -697,14 +736,14 @@ function hexToRgb(value: string) {
       <div class="min-h-full bg-base-200/60 p-3 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         <div v-if="previewMode === 'forum'" class="grid gap-3 2xl:grid-cols-[minmax(0,1fr)_248px]">
           <div class="space-y-3">
-            <section class="overflow-hidden rounded-lg border border-line bg-base-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <section class="gf-card overflow-hidden">
               <header class="flex flex-col gap-2 border-b border-line bg-base-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex min-w-0 items-center gap-2 overflow-x-auto">
-                  <button class="h-8 shrink-0 rounded-md bg-neutral px-2.5 text-sm font-semibold text-neutral-content">最新</button>
-                  <button class="h-8 shrink-0 rounded-md px-2.5 text-sm font-semibold text-base-content/55 hover:bg-base-300">热门</button>
-                  <button class="h-8 shrink-0 rounded-md px-2.5 text-sm font-semibold text-base-content/55 hover:bg-base-300">精华</button>
+                  <button class="gf-tab gf-tab-active">最新</button>
+                  <button class="gf-tab gf-tab-idle">热门</button>
+                  <button class="gf-tab gf-tab-idle">精华</button>
                 </div>
-                <button class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-2.5 text-sm font-semibold text-primary-content">
+                <button class="gf-button gf-button-sm gf-button-primary">
                   <Rocket class="h-4 w-4" /> 发布主题
                 </button>
               </header>
@@ -722,7 +761,7 @@ function hexToRgb(value: string) {
                       <a href="#" class="min-w-0 truncate text-[15px] font-semibold leading-6 text-base-content hover:text-primary sm:text-base">
                         {{ index === 1 ? '主题系统重构讨论：颜色、圆角和组件状态' : index === 2 ? 'Markdown 正文在深色模式下的可读性' : '新用户引导和消息通知的视觉检查' }}
                       </a>
-                      <span class="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full bg-base-300 px-2 text-[11px] font-medium text-base-content/55">
+                      <span class="gf-topic-chip">
                         <span class="h-1.5 w-1.5 rounded-full bg-primary" /> design
                       </span>
                       <span v-if="index === 1" class="inline-flex h-6 items-center gap-1 text-[11px] font-semibold text-warning">
@@ -745,10 +784,10 @@ function hexToRgb(value: string) {
               </div>
             </section>
 
-            <article class="rounded-lg border border-line bg-base-100 p-3 shadow-[0_2px_12px_rgba(0,0,0,0.035)]">
+            <article class="gf-card p-3">
               <div class="flex flex-wrap items-center gap-2">
-                <span class="rounded-full bg-info/10 px-2 py-0.5 text-xs font-semibold text-primary">Preview</span>
-                <span class="rounded-full bg-base-300 px-2 py-0.5 text-xs font-semibold text-base-content/55">Theme</span>
+                <span class="gf-badge gf-badge-info">Preview</span>
+                <span class="gf-badge gf-badge-muted">Theme</span>
               </div>
               <h3 class="mt-3 text-xl font-semibold leading-tight text-base-content">一篇主题帖的标题</h3>
               <div class="gf-prose gf-prose-article mt-2 text-sm">
@@ -760,21 +799,21 @@ function hexToRgb(value: string) {
           </div>
 
           <aside class="grid gap-3 md:grid-cols-3 2xl:block 2xl:space-y-3">
-            <section class="rounded-lg border border-line bg-base-100 p-3">
+            <section class="gf-panel p-3">
               <h3 class="text-sm font-semibold text-base-content">Search</h3>
               <label class="mt-3 flex h-9 items-center gap-2 rounded-md border border-line bg-base-200 px-3 text-sm text-base-content/55 transition focus-within:border-primary focus-within:bg-base-100 focus-within:ring-4 focus-within:ring-primary/20">
                 <Search class="h-4 w-4" />
                 <input class="min-w-0 flex-1 bg-transparent text-base-content outline-none" value="theme preview" />
               </label>
             </section>
-            <section class="rounded-lg border border-line bg-base-100 p-3">
+            <section class="gf-panel p-3">
               <h3 class="text-sm font-semibold text-base-content">Messages</h3>
               <div class="mt-3 space-y-3">
-                <div class="rounded-2xl rounded-bl-sm bg-base-300 px-3 py-2 text-sm text-base-content">这个背景还舒服吗？</div>
-                <div class="rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-sm text-primary-content">对比度需要稳。</div>
+                <div class="rounded-box bg-base-300 px-3 py-2 text-sm text-base-content">这个背景还舒服吗？</div>
+                <div class="rounded-box bg-primary px-3 py-2 text-sm text-primary-content">对比度需要稳。</div>
               </div>
             </section>
-            <section class="rounded-lg border border-line bg-base-100 p-3">
+            <section class="gf-panel p-3">
               <h3 class="text-sm font-semibold text-base-content">Status</h3>
               <div class="mt-3 grid gap-2">
                 <div class="rounded-md bg-info/10 px-3 py-1.5 text-sm font-medium text-primary">Info notification</div>
@@ -787,7 +826,7 @@ function hexToRgb(value: string) {
         </div>
 
         <div v-else-if="previewMode === 'components'" class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <section class="rounded-lg border border-line bg-base-100 p-4">
+          <section class="gf-panel p-4">
             <div class="grid gap-3 md:grid-cols-2">
               <div class="rounded-box border border-line bg-base-100 p-4 shadow-[0_10px_24px_-20px_rgba(0,0,0,calc(var(--gf-depth)*0.35))]">
                 <div class="h-28 rounded-box bg-base-300" />
@@ -799,17 +838,17 @@ function hexToRgb(value: string) {
                   <span class="rounded-selector bg-accent px-2 py-1 text-xs font-bold text-accent-content">NEW</span>
                 </div>
                 <div class="mt-4 flex flex-wrap gap-2">
-                  <button class="rounded-field bg-primary px-3 py-2 text-sm font-semibold text-primary-content">Primary</button>
-                  <button class="rounded-field border border-line bg-base-100 px-3 py-2 text-sm font-semibold text-base-content/75">Secondary</button>
+                  <button class="gf-button gf-button-sm gf-button-primary">Primary</button>
+                  <button class="gf-button gf-button-sm gf-button-secondary">Secondary</button>
                 </div>
               </div>
 
               <div class="rounded-box border border-line bg-base-100 p-4">
                 <h3 class="font-semibold text-base-content">Form states</h3>
                 <label class="mt-3 block text-xs font-medium text-base-content/55">Input</label>
-                <input class="mt-1 h-10 w-full rounded-field border border-line bg-base-200 px-3 text-sm text-base-content outline-none focus:border-primary focus:ring-4 focus:ring-primary/20" value="GooseForum" />
+                <input class="gf-input mt-1 bg-base-200" value="GooseForum" />
                 <label class="mt-3 block text-xs font-medium text-base-content/55">Textarea</label>
-                <textarea class="mt-1 min-h-20 w-full resize-none rounded-field border border-line bg-base-200 px-3 py-2 text-sm text-base-content outline-none focus:border-primary focus:ring-4 focus:ring-primary/20">主题变量覆盖输入、焦点和正文。</textarea>
+                <textarea class="gf-textarea mt-1 min-h-20 resize-none bg-base-200">主题变量覆盖输入、焦点和正文。</textarea>
                 <div class="mt-3 flex items-center justify-between rounded-selector bg-base-200 px-3 py-2">
                   <span class="text-sm font-medium text-base-content/75">Selector</span>
                   <span class="h-5 w-9 rounded-full bg-primary p-0.5"><span class="block h-4 w-4 translate-x-4 rounded-full bg-primary-content" /></span>
@@ -826,7 +865,7 @@ function hexToRgb(value: string) {
             </div>
           </section>
 
-          <aside class="rounded-lg border border-line bg-base-100 p-4">
+          <aside class="gf-panel p-4">
             <h3 class="text-sm font-semibold text-base-content">Admin table</h3>
             <div class="mt-3 overflow-hidden rounded-md border border-line">
               <div class="grid grid-cols-[1fr_72px_80px] border-b border-line bg-base-200 px-3 py-2 text-xs font-bold uppercase text-base-content/65">
@@ -836,7 +875,7 @@ function hexToRgb(value: string) {
               </div>
               <div v-for="item in ['Users', 'Posts', 'Badges']" :key="item" class="grid grid-cols-[1fr_72px_80px] items-center border-b border-line px-3 py-2 text-sm last:border-b-0">
                 <div class="font-medium text-base-content">{{ item }}</div>
-                <div><span class="rounded-full bg-success/10 px-2 py-0.5 text-xs font-semibold text-success">OK</span></div>
+                <div><span class="gf-badge gf-badge-success">OK</span></div>
                 <div class="text-right"><button class="rounded-md px-2 py-1 text-xs font-semibold text-primary hover:bg-info/10">Edit</button></div>
               </div>
             </div>
@@ -849,13 +888,13 @@ function hexToRgb(value: string) {
           </aside>
         </div>
 
-        <div v-else class="rounded-lg border border-line bg-base-100">
+        <div v-else class="gf-panel">
           <header class="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
             <div class="flex items-center gap-2">
               <Code2 class="h-4 w-4 text-icon-muted" />
               <h3 class="text-sm font-semibold text-base-content">Generated CSS</h3>
             </div>
-            <button type="button" class="inline-flex h-8 items-center gap-1.5 rounded-md bg-base-200 px-3 text-sm font-semibold text-base-content/75 hover:bg-base-300" @click="copyThemeCss">
+            <button type="button" class="gf-button gf-button-sm gf-button-secondary" @click="copyThemeCss">
               <Clipboard class="h-4 w-4" /> {{ copying ? 'Copied' : 'Copy' }}
             </button>
           </header>

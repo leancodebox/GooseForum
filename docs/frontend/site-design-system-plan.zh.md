@@ -15,6 +15,8 @@
 
 长期目标是建立 GooseForum 自己的 C 端 UI 组件层：借鉴 daisyUI 的 token 和语义组件思想，但不照搬 daisyUI 的完整模型。
 
+当前主题能力已经进入“可配置、可预发布、可发布”的阶段：管理员在主题预览设置页编辑 `gf-light` / `gf-dark`，保存为预发布配置，发布后才影响全站。后续设计系统建设应围绕这个流程继续增强真实组件覆盖，而不是扩展一套脱离真实页面的主题演示。
+
 ## 设计目标
 
 - 主题变量必须真实影响公共站点的高频 UI，而不是只影响 theme-preview。
@@ -78,9 +80,11 @@ depth
 - `size-field`、`size-selector`：如果要保留，应先定义清楚它们影响的是控件高度、内部 padding，还是控件密度。
 - `noise`：如果没有明确的站点背景策略，建议不暴露。噪点容易和内容优先的产品气质冲突。
 
+当前公开 token 数量已经不算少，后续不应为了对齐 daisyUI 而机械增加变量。判断标准应始终是：变量是否有真实消费点、是否能在 preview 中清楚验收、是否能被管理员理解。
+
 ### 2. CSS Component Layer
 
-在 `resource/src/styles/resource.css` 中建立公共站点的语义类。页面优先使用这些类表达视觉组件，避免每个页面重复拼装视觉规则。
+在 `resource/src/styles/components.css` 中建立公共站点的语义类。页面优先使用这些类表达视觉组件，避免每个页面重复拼装视觉规则。
 
 建议起步类：
 
@@ -193,9 +197,9 @@ Vue 页面和组件仍然可以使用 Tailwind，但分工应清晰：
 
 ## CSS 文件组织
 
-当前 `resource/src/styles/resource.css` 同时承担了 Tailwind 入口、主题变量、动效、prose、滚动条和若干页面组件样式。长期继续扩大后会降低可读性，也会让新增组件时不知道应该放在哪里。
+当前公共站点 CSS 已经从单一 `resource.css` 拆分为多个职责文件。这个阶段已经完成，不应在后续路线中重复作为待办。
 
-建议拆分为公共站点样式目录：
+当前结构：
 
 ```text
 resource/src/styles/
@@ -209,7 +213,7 @@ resource/src/styles/
   utilities.css         gf-scrollbar-none 等少量工具
 ```
 
-`resource.css` 只保留：
+`resource.css` 保持类似下面的 import 顺序：
 
 ```css
 @import "tailwindcss";
@@ -233,7 +237,7 @@ resource/src/styles/
 - `prose.css` 单独维护，因为文章正文和评论正文有独立排版规则。
 - 新增 CSS 前先判断属于 token、component、pattern 还是 utility。
 
-迁移时可以先拆文件不改样式，再逐步替换页面 class。这样风险最小，diff 也更容易 review。
+后续迁移时不再需要先做“拆文件”步骤，应直接从扩展 `components.css` 的最小基础语义类开始。
 
 ## 视觉决策
 
@@ -292,6 +296,14 @@ density: compact | comfortable
 
 theme-preview 应从“主题编辑页”升级为“真实组件验收页”。
 
+当前实现应保持以下边界：
+
+- 主题预览设置页仅管理员可见。
+- 编辑态存入 `pageConfig.siteTheme.prepublish`，不直接污染已发布主题。
+- 发布时将 `prepublish` 提升为正式主题配置，并清空预发布配置。
+- 不保留历史版本列表；当前模型表达的是“一个待发布版本”，不是版本管理系统。
+- 右侧预览应优先模拟真实 C 端组件，不应受后台管理端样式变量影响。
+
 它需要覆盖：
 
 - topic list 行。
@@ -319,16 +331,17 @@ theme-preview 应从“主题编辑页”升级为“真实组件验收页”。
 - 明确 `border` 和 `depth` 的消费规则。
 - 隐藏或暂缓 `noise`。
 - 重新评估 `size-field`、`size-selector`，没有清晰语义前不扩大使用。
+- 主题编辑流程保持“预发布 -> 发布”单向模型，不再引入历史回滚数组。
 
-### 阶段二：拆分公共 CSS 文件
+### 阶段二：扩展基础组件 CSS 文件
 
-先把 `resource.css` 按职责拆成 `tokens.css`、`base.css`、`motion.css`、`prose.css`、`components.css`、`patterns.css`、`utilities.css`。
+当前 CSS 职责拆分和独立 `components.css` 已经建立。下一步应继续补齐 `gf-input`、`gf-select`、`gf-alert` 等通用类，只放通用 UI 组件类，不放页面专属模式。
 
-这一阶段只移动代码，不改变视觉。完成后再开始引入新的 `gf-*` 组件类，避免“拆文件”和“改视觉”混在一个 diff 里。
+这一阶段继续小步扩展最小类集合，不一次性迁移所有页面。避免“扩展组件层”和“大面积改页面视觉”混在一个 diff 里。
 
 ### 阶段三：建立基础语义类
 
-先在 `resource.css` 中实现最少但稳定的一组类：
+先在 `components.css` 中实现最少但稳定的一组类：
 
 ```text
 gf-card

@@ -29,7 +29,7 @@ watch(
 
 <template>
     <main class="min-w-0 pb-12">
-      <section class="overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+      <section class="gf-card overflow-hidden">
         <header class="border-b border-line px-4 py-4">
           <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div class="min-w-0">
@@ -53,7 +53,7 @@ watch(
               <label class="flex h-11 items-center gap-2 rounded-md border border-line bg-base-200 px-3 text-sm text-base-content/55 transition focus-within:border-primary focus-within:bg-base-100 focus-within:ring-4 focus-within:ring-primary/20">
                 <Search class="h-4 w-4 shrink-0" />
                 <input v-model="query" name="q" class="min-w-0 flex-1 bg-transparent text-base-content outline-none placeholder:text-base-content/55" :placeholder="t('searchPage.inputPlaceholder')" />
-                <button type="submit" class="shrink-0 rounded-md bg-neutral px-3 py-1.5 text-sm font-semibold text-neutral-content hover:bg-neutral/90">{{ t('common.search') }}</button>
+                <button type="submit" class="gf-button gf-button-sm gf-button-neutral shrink-0">{{ t('common.search') }}</button>
               </label>
             </form>
           </div>
@@ -83,7 +83,7 @@ watch(
                     v-for="category in topic.categories"
                     :key="category.id"
                     :href="category.url"
-                    class="inline-flex h-6 items-center gap-1.5 rounded-full bg-base-300 px-2 text-[11px] font-medium text-base-content/55 hover:bg-info/10 hover:text-primary"
+                    class="gf-topic-chip"
                   >
                     <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
                     {{ category.name }}
@@ -140,14 +140,14 @@ watch(
               <a
                 v-if="page.props.pagination.page > 1"
                 :href="`/search?q=${encodeURIComponent(page.props.query)}&page=${page.props.pagination.page - 1}`"
-                class="rounded-md border border-line bg-base-100 px-3 py-1.5 text-sm font-semibold text-base-content/75 hover:bg-base-200 hover:text-base-content"
+                class="gf-button gf-button-sm gf-button-secondary"
               >
                 {{ t('common.previousPage') }}
               </a>
               <a
                 v-if="page.props.pagination.hasNext"
                 :href="page.props.pagination.nextUrl"
-                class="rounded-md border border-line bg-base-100 px-3 py-1.5 text-sm font-semibold text-base-content/75 hover:bg-base-200 hover:text-base-content"
+                class="gf-button gf-button-sm gf-button-secondary"
                 rel="next"
               >
                 {{ t('common.nextPage') }}

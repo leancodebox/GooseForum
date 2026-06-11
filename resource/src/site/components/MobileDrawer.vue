@@ -56,7 +56,7 @@ function close() {
       />
       <Motion
         as="nav"
-        class="relative h-full w-80 max-w-[85vw] overflow-y-auto bg-base-100 p-3 shadow-xl"
+        class="gf-drawer-surface relative h-full w-80 max-w-[85vw] overflow-y-auto p-3"
         v-bind="mobileDrawerMotion"
         :transition="motionTransitions.comfortable"
       >

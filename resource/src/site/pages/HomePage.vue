@@ -104,7 +104,7 @@ onBeforeUnmount(() => {
         </div>
       </aside>
 
-      <aside v-if="page.props.announcement.enabled" class="mb-3 overflow-hidden rounded-lg border border-line/80 bg-base-100 shadow-[0_2px_12px_rgba(0,0,0,0.035)]" :aria-label="t('topicList.announcement')">
+      <aside v-if="page.props.announcement.enabled" class="gf-card mb-3 overflow-hidden" :aria-label="t('topicList.announcement')">
         <div class="grid grid-cols-[3px_minmax(0,1fr)]">
           <div class="bg-primary" aria-hidden="true" />
           <div class="px-4 py-3">
@@ -117,20 +117,20 @@ onBeforeUnmount(() => {
         </div>
       </aside>
 
-      <section class="overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-        <div class="flex flex-col gap-3 border-b border-line bg-base-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex min-w-0 items-center gap-2 overflow-x-auto">
+      <section class="gf-card overflow-hidden">
+        <div class="gf-home-topic-toolbar">
+          <div class="gf-home-topic-tabs">
             <a
               v-for="tab in page.props.tabs"
               :key="tab.key"
               :href="tab.url"
-              class="inline-flex h-8 shrink-0 items-center rounded-md px-3 text-sm font-semibold"
-              :class="tab.active ? 'bg-neutral text-neutral-content' : 'text-base-content/55 hover:bg-base-300 hover:text-base-content'"
+              class="gf-tab"
+              :class="tab.active ? 'gf-tab-active' : 'gf-tab-idle'"
             >
               {{ sortTabLabel(tab.key, tab.label) }}
             </a>
           </div>
-          <a href="/publish" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-primary-content hover:bg-primary">
+          <a href="/publish" class="gf-button gf-button-md gf-button-primary shrink-0 whitespace-nowrap px-3 sm:h-8">
             <Plus class="h-4 w-4" />
             {{ t('topicList.newTopic') }}
           </a>
@@ -165,7 +165,7 @@ onBeforeUnmount(() => {
                   v-for="category in topic.categories"
                   :key="category.id"
                   :href="category.url"
-                  class="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full bg-base-300 px-2 text-[11px] font-medium text-base-content/55 hover:bg-info/10 hover:text-primary"
+                  class="gf-topic-chip"
                 >
                   <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
                   {{ category.name }}
@@ -224,7 +224,7 @@ onBeforeUnmount(() => {
           <button
             v-if="pagination.hasNext"
             type="button"
-            class="inline-flex h-8 items-center gap-2 rounded-md px-3 text-sm font-semibold text-primary hover:bg-info/10 hover:text-primary disabled:cursor-wait disabled:opacity-70"
+            class="gf-button gf-button-sm gf-button-ghost gap-2 disabled:cursor-wait"
             :disabled="loadingMore"
             @click="loadMore"
           >

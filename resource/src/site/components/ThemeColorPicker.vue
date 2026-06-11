@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { Check, Grid3X3, SlidersHorizontal, X } from '@lucide/vue'
+import { Box, Check, ChevronDown, Database, Grid3X3, Mountain, SlidersHorizontal, X } from '@lucide/vue'
 
 type PickerMode = 'palette' | 'picker'
+type ColorFormat = 'oklch' | 'hsl' | 'rgb' | 'hex'
 
 const props = defineProps<{
   modelValue: string
@@ -16,11 +17,21 @@ const emit = defineEmits<{
 const isOpen = ref(false)
 const mode = ref<PickerMode>('palette')
 const localHex = ref(toHex(props.modelValue))
+const colorFormat = ref<ColorFormat>('hex')
+const formatOpen = ref(false)
 
 const rgb = computed(() => hexToRgb(localHex.value))
 const paletteRows = computed(() => buildPaletteRows())
 const activeLabel = computed(() => props.tokenLabel.replace(/-/g, ' '))
 const displayLabel = computed(() => props.tokenLabel.replace(/-content$/, ' content'))
+const formatOptions = [
+  ['oklch', 'OKLCH', Mountain],
+  ['hsl', 'HSL', Database],
+  ['rgb', 'RGB', Box],
+  ['hex', 'Hex', Box],
+] as const
+const activeFormatLabel = computed(() => formatOptions.find(([value]) => value === colorFormat.value)?.[1] || 'Hex')
+const formattedColorValue = computed(() => formatColorValue(localHex.value, colorFormat.value))
 
 watch(
   () => props.modelValue,
@@ -36,6 +47,7 @@ function openPicker() {
 
 function closePicker() {
   isOpen.value = false
+  formatOpen.value = false
 }
 
 function choose(value: string) {
@@ -47,6 +59,20 @@ function updateHex(value: string) {
   const normalized = normalizeHex(value)
   localHex.value = normalized
   emit('update:modelValue', normalized)
+}
+
+function updateColorValue(value: string) {
+  if (colorFormat.value === 'hex') {
+    updateHex(value)
+    return
+  }
+  const parsed = parseFormattedColor(value, colorFormat.value)
+  if (parsed) updateHex(parsed)
+}
+
+function selectFormat(format: ColorFormat) {
+  colorFormat.value = format
+  formatOpen.value = false
 }
 
 function updateChannel(channel: 'r' | 'g' | 'b', value: number) {
@@ -80,6 +106,77 @@ function hexToRgb(value: string) {
 
 function rgbToHex(r: number, g: number, b: number) {
   return `#${[r, g, b].map((item) => clamp(item, 0, 255).toString(16).padStart(2, '0')).join('')}`
+}
+
+function rgbToHsl({ r, g, b }: { r: number, g: number, b: number }) {
+  const red = r / 255
+  const green = g / 255
+  const blue = b / 255
+  const max = Math.max(red, green, blue)
+  const min = Math.min(red, green, blue)
+  const delta = max - min
+  let hue = 0
+  if (delta !== 0) {
+    if (max === red) hue = ((green - blue) / delta) % 6
+    else if (max === green) hue = (blue - red) / delta + 2
+    else hue = (red - green) / delta + 4
+    hue *= 60
+    if (hue < 0) hue += 360
+  }
+  const lightness = (max + min) / 2
+  const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1))
+  return {
+    h: Math.round(hue),
+    s: Math.round(saturation * 100),
+    l: Math.round(lightness * 100),
+  }
+}
+
+function rgbToOklch({ r, g, b }: { r: number, g: number, b: number }) {
+  const toLinear = (channel: number) => {
+    const normalized = channel / 255
+    return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4
+  }
+  const red = toLinear(r)
+  const green = toLinear(g)
+  const blue = toLinear(b)
+  const l = Math.cbrt(0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue)
+  const m = Math.cbrt(0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue)
+  const s = Math.cbrt(0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue)
+  const okL = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s
+  const a = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s
+  const b2 = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s
+  const chroma = Math.sqrt(a * a + b2 * b2)
+  const hue = (Math.atan2(b2, a) * 180 / Math.PI + 360) % 360
+  return {
+    l: Math.round(okL * 1000) / 10,
+    c: Math.round(chroma * 1000) / 1000,
+    h: Math.round(hue * 10) / 10,
+  }
+}
+
+function formatColorValue(value: string, format: ColorFormat) {
+  const current = hexToRgb(value)
+  if (format === 'hex') return normalizeHex(value)
+  if (format === 'rgb') return `rgb(${current.r} ${current.g} ${current.b})`
+  if (format === 'hsl') {
+    const hsl = rgbToHsl(current)
+    return `hsl(${hsl.h} ${hsl.s}% ${hsl.l}%)`
+  }
+  const oklch = rgbToOklch(current)
+  return `oklch(${oklch.l}% ${oklch.c} ${oklch.h})`
+}
+
+function parseFormattedColor(value: string, format: ColorFormat) {
+  if (format === 'hex') return normalizeHex(value)
+  const numbers = value.match(/-?\d*\.?\d+/g)?.map(Number) || []
+  if (format === 'rgb' && numbers.length >= 3) {
+    return rgbToHex(numbers[0], numbers[1], numbers[2])
+  }
+  if (format === 'hsl' && numbers.length >= 3) {
+    return hslToHex(((numbers[0] % 360) + 360) % 360, clamp(numbers[1], 0, 100), clamp(numbers[2], 0, 100))
+  }
+  return ''
 }
 
 function hslToHex(hue: number, saturation: number, lightness: number) {
@@ -159,7 +256,13 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') closePicker()
+  if (event.key === 'Escape') {
+    if (formatOpen.value) {
+      formatOpen.value = false
+      return
+    }
+    closePicker()
+  }
 }
 
 onMounted(() => {
@@ -188,51 +291,51 @@ onBeforeUnmount(() => {
     </span>
 
     <Teleport to="body">
-      <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-neutral/50 p-3" @click.self="closePicker">
-        <section class="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-line bg-base-100" role="dialog" aria-modal="true">
-          <header class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-            <div class="flex min-w-0 items-center gap-3">
-              <span class="grid h-10 w-14 shrink-0 place-items-center rounded-md border border-line bg-base-200 text-lg font-black text-base-content">A</span>
-              <span class="h-px w-6 shrink-0 bg-line" />
-              <h2 class="min-w-0 truncate text-sm text-base-content/55">
+      <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-neutral/45 p-3" @click.self="closePicker">
+        <section class="gf-menu-surface flex max-h-[84vh] w-full max-w-[736px] flex-col overflow-hidden" role="dialog" aria-modal="true">
+          <header class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
+            <div class="flex min-w-0 items-center gap-2.5">
+              <span class="grid h-8 w-12 shrink-0 place-items-center rounded-md border border-line bg-base-200 text-base font-black text-base-content">A</span>
+              <span class="h-px w-5 shrink-0 bg-line" />
+              <h2 class="min-w-0 truncate text-xs text-base-content/55">
                 Pick a color for <span class="font-semibold text-base-content">{{ activeLabel }}</span>
               </h2>
             </div>
             <div class="flex items-center gap-2">
-              <div class="inline-flex rounded-md border border-line bg-base-100 p-0.5">
+              <div class="gf-segmented grid-cols-2">
                 <button
                   type="button"
-                  class="inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-sm font-semibold"
-                  :class="mode === 'palette' ? 'bg-base-200 text-base-content' : 'text-base-content/55 hover:text-base-content'"
+                  class="gf-segmented-item h-6 min-w-20 text-xs leading-none"
+                  :class="mode === 'palette' ? 'gf-segmented-item-active text-base-content' : 'gf-segmented-item-idle'"
                   @click="mode = 'palette'"
                 >
-                  <Grid3X3 class="h-4 w-4" /> Palette
+                  <Grid3X3 class="h-3.5 w-3.5" /> Palette
                 </button>
                 <button
                   type="button"
-                  class="inline-flex h-8 items-center gap-1.5 rounded px-2.5 text-sm font-semibold"
-                  :class="mode === 'picker' ? 'bg-base-200 text-base-content' : 'text-base-content/55 hover:text-base-content'"
+                  class="gf-segmented-item h-6 min-w-20 text-xs leading-none"
+                  :class="mode === 'picker' ? 'gf-segmented-item-active text-base-content' : 'gf-segmented-item-idle'"
                   @click="mode = 'picker'"
                 >
-                  <SlidersHorizontal class="h-4 w-4" /> Picker
+                  <SlidersHorizontal class="h-3.5 w-3.5" /> Picker
                 </button>
               </div>
-              <button type="button" class="grid h-8 w-8 place-items-center rounded-md text-icon-muted hover:bg-base-200 hover:text-base-content" aria-label="Close" @click="closePicker">
-                <X class="h-5 w-5" />
+              <button type="button" class="gf-icon-button h-7 w-7" aria-label="Close" @click="closePicker">
+                <X class="h-4 w-4" />
               </button>
             </div>
           </header>
 
-          <div class="min-h-0 flex-1 overflow-y-auto p-4">
+          <div class="min-h-0 flex-1 overflow-y-auto p-3">
             <div v-if="mode === 'palette'" class="overflow-x-auto">
-              <div class="grid w-max gap-1.5" :style="{ gridTemplateRows: `repeat(${paletteRows.length}, minmax(0, 1fr))` }">
-                <div v-for="(row, rowIndex) in paletteRows" :key="rowIndex" class="flex gap-1.5">
+              <div class="grid w-max gap-1" :style="{ gridTemplateRows: `repeat(${paletteRows.length}, minmax(0, 1fr))` }">
+                <div v-for="(row, rowIndex) in paletteRows" :key="rowIndex" class="flex gap-1">
                   <button
                     v-for="(color, columnIndex) in row"
                     :key="`${rowIndex}-${columnIndex}`"
                     type="button"
-                    class="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line text-[9px] font-black transition hover:scale-105"
-                    :class="toHex(modelValue) === color.value ? 'ring-2 ring-primary ring-offset-2 ring-offset-base-100' : ''"
+                    class="relative grid h-7 w-7 shrink-0 place-items-center rounded-full border border-line/75 text-[8px] font-black transition hover:scale-105"
+                    :class="toHex(modelValue) === color.value ? 'ring-2 ring-primary ring-offset-1 ring-offset-base-100' : ''"
                     :style="{ backgroundColor: color.value, color: readableTextColor(color.value) }"
                     :aria-label="color.value"
                     @click="choose(color.value)"
@@ -243,11 +346,11 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div v-else class="mx-auto max-w-3xl space-y-6 py-3">
+            <div v-else class="mx-auto max-w-2xl space-y-4 py-2">
               <label v-for="channel in ['r', 'g', 'b']" :key="channel" class="block">
-                <span class="mb-1.5 block text-sm font-semibold capitalize text-base-content">{{ channel === 'r' ? 'Red' : channel === 'g' ? 'Green' : 'Blue' }}</span>
+                <span class="mb-1 block text-xs font-semibold capitalize text-base-content">{{ channel === 'r' ? 'Red' : channel === 'g' ? 'Green' : 'Blue' }}</span>
                 <input
-                  class="h-8 w-full cursor-pointer appearance-none rounded-full border border-line bg-base-200 accent-primary"
+                  class="h-6 w-full cursor-pointer appearance-none rounded-full border border-line bg-base-200 accent-primary"
                   type="range"
                   min="0"
                   max="255"
@@ -259,21 +362,43 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <footer class="flex flex-wrap items-center justify-between gap-3 border-t border-line bg-base-200 px-4 py-2.5">
-            <label class="min-w-0 flex-1">
-              <span class="mb-1 block text-xs font-semibold text-base-content/55">Color value</span>
-              <span class="flex max-w-xl overflow-hidden rounded-md border border-line bg-base-100">
-                <span class="grid h-9 w-14 place-items-center border-r border-line text-sm font-semibold text-base-content/75">Hex</span>
+          <footer class="grid items-end gap-2 border-t border-line bg-base-200 px-3 py-2 md:grid-cols-[minmax(260px,1fr)_auto]">
+            <label class="relative min-w-0">
+              <span class="mb-1 block text-[11px] font-semibold text-base-content/55">Color value</span>
+              <span class="gf-input flex h-8 w-full overflow-hidden p-0">
+                <span class="shrink-0">
+                  <button
+                    type="button"
+                    class="gf-button h-full w-24 rounded-none border-r border-line px-2 text-xs text-base-content/75 hover:bg-base-200 hover:text-base-content"
+                    @click="formatOpen = !formatOpen"
+                  >
+                    {{ activeFormatLabel }}
+                    <ChevronDown class="h-3.5 w-3.5" />
+                  </button>
+                </span>
                 <input
-                  class="h-9 min-w-0 flex-1 bg-base-100 px-3 text-sm font-semibold text-base-content outline-none"
-                  :value="localHex"
-                  @input="updateHex(($event.target as HTMLInputElement).value)"
+                  class="h-full min-w-0 flex-1 bg-base-100 px-2.5 text-xs font-semibold text-base-content outline-none"
+                  :value="formattedColorValue"
+                  @change="updateColorValue(($event.target as HTMLInputElement).value)"
                 />
               </span>
+              <div v-if="formatOpen" class="gf-menu-surface absolute bottom-9 left-0 z-20 w-36 overflow-hidden p-1">
+                <div class="px-2.5 py-1.5 text-[11px] font-bold text-base-content/45">Convert format</div>
+                <button
+                  v-for="[format, label, Icon] in formatOptions"
+                  :key="format"
+                  type="button"
+                  class="flex h-8 w-full items-center gap-2 rounded px-2.5 text-xs font-semibold"
+                  :class="colorFormat === format ? 'bg-neutral text-neutral-content' : 'text-base-content hover:bg-base-200'"
+                  @click="selectFormat(format)"
+                >
+                  <component :is="Icon" class="h-3.5 w-3.5" /> {{ label }}
+                </button>
+              </div>
             </label>
-            <div class="flex items-center gap-3">
-              <span class="rounded-full border border-dashed border-base-content px-2.5 py-1 text-xs font-black text-base-content">AAA</span>
-              <span class="grid h-6 w-6 place-items-center rounded-full bg-neutral text-neutral-content">
+            <div class="flex h-8 items-center justify-end gap-2.5">
+              <span class="inline-flex h-7 items-center rounded-full border border-dashed border-base-content px-2.5 text-[11px] font-black text-base-content">AAA</span>
+              <span class="grid h-7 w-7 place-items-center rounded-full bg-neutral text-neutral-content">
                 <Check class="h-3.5 w-3.5" />
               </span>
               <span class="h-7 w-16 rounded-full border border-line" :style="{ backgroundColor: localHex }" />

@@ -32,6 +32,7 @@ export default {
     userMenu: '用户菜单',
     profile: '个人主页',
     settings: '设置',
+    themePreview: '主题预览',
     admin: '管理后台',
     logout: '退出登录',
     login: '登录',
@@ -530,6 +531,28 @@ export default {
     selectArea: '请选择裁切区域',
     updated: '头像已更新',
     processFailed: '无法处理头像',
+  },
+  themePreview: {
+    presetsTitle: '预设',
+    presetApplied: '已应用 {name} 预设，保存预发布后生效',
+    presets: {
+      goose: {
+        label: 'Goose',
+        description: '当前默认，干净稳妥',
+      },
+      clean: {
+        label: 'Clean',
+        description: '偏产品后台，低饱和蓝绿',
+      },
+      warm: {
+        label: 'Warm',
+        description: '柔和暖色，社区感更强',
+      },
+      deep: {
+        label: 'Deep',
+        description: '黑为主，强调更深邃',
+      },
+    },
   },
   api: {
     replyFailed: '回复失败',

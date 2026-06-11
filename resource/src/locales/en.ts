@@ -32,6 +32,7 @@ export default {
     userMenu: 'User menu',
     profile: 'Profile',
     settings: 'Settings',
+    themePreview: 'Theme preview',
     admin: 'Admin',
     logout: 'Log out',
     login: 'Log in',
@@ -530,6 +531,28 @@ export default {
     selectArea: 'Please select a crop area',
     updated: 'Avatar updated',
     processFailed: 'Unable to process avatar',
+  },
+  themePreview: {
+    presetsTitle: 'Presets',
+    presetApplied: '{name} preset applied. Save the prepublish draft to keep it.',
+    presets: {
+      goose: {
+        label: 'Goose',
+        description: 'Current default, clean and steady',
+      },
+      clean: {
+        label: 'Clean',
+        description: 'Product-minded, muted blue and teal',
+      },
+      warm: {
+        label: 'Warm',
+        description: 'Softer warmth for community spaces',
+      },
+      deep: {
+        label: 'Deep',
+        description: 'Black-led with deeper contrast',
+      },
+    },
   },
   api: {
     replyFailed: 'Failed to reply',

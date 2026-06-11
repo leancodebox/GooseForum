@@ -194,7 +194,7 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
       <div
         v-if="visible"
         ref="cardEl"
-        class="fixed z-[90] w-[min(20rem,calc(100vw-1.5rem))] rounded-lg border border-line bg-base-100 p-3 text-base-content shadow-[0_18px_50px_-24px_rgba(15,23,42,0.45),0_8px_24px_-16px_rgba(15,23,42,0.25)]"
+        class="gf-menu-surface fixed z-[90] w-[min(20rem,calc(100vw-1.5rem))] p-3 text-base-content"
         :style="{ left: `${position.left}px`, top: `${position.top}px` }"
         @click.stop
       >
@@ -205,7 +205,7 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
         <div class="min-w-0 flex-1">
           <div class="flex min-w-0 items-center gap-2">
             <a :href="profileUrl" class="truncate text-base font-bold text-base-content hover:text-primary">{{ displayName }}</a>
-            <span v-if="card?.isAdmin" class="shrink-0 rounded bg-warning/10 px-1.5 py-0.5 text-[11px] font-semibold text-warning">Admin</span>
+            <span v-if="card?.isAdmin" class="gf-badge gf-badge-warning shrink-0 rounded text-[11px]">Admin</span>
           </div>
           <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55">
             <span class="truncate">@{{ username }}</span>
@@ -238,7 +238,7 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
               <div class="h-8 w-24 rounded-md bg-base-300" />
             </div>
           </div>
-          <div v-else-if="error" key="error" class="mt-3 flex min-h-[164px] items-center rounded-md bg-error/10 px-3 py-2 text-sm text-error">{{ error }}</div>
+          <div v-else-if="error" key="error" class="gf-status-message gf-status-message-error mt-3 flex min-h-[164px] items-center">{{ error }}</div>
           <div v-else key="content">
         <p v-if="bioText" class="mt-3 line-clamp-2 text-sm leading-relaxed text-base-content/75">{{ bioText }}</p>
 
@@ -262,7 +262,7 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
             </span>
             <span
               v-if="activeBadgeCode === badge.code"
-              class="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-max max-w-48 -translate-x-1/2 rounded-md bg-neutral px-2 py-1 text-xs font-medium leading-5 text-neutral-content shadow-lg"
+              class="gf-tooltip pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-max max-w-48 -translate-x-1/2 leading-5"
             >
               {{ badgeTooltip(badge) }}
             </span>
@@ -310,7 +310,7 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
               <path :d="link.icon.path" />
             </svg>
             <ExternalLink v-else class="h-4 w-4" />
-            <span class="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate rounded-md bg-neutral px-2 py-1 text-xs font-medium text-neutral-content opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+            <span class="gf-tooltip pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
               {{ link.label }}
             </span>
           </a>
@@ -323,7 +323,7 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
           </div>
           <a
             :href="profileUrl"
-            class="inline-flex h-8 items-center gap-1.5 rounded-md bg-neutral px-3 text-sm font-semibold text-neutral-content hover:bg-neutral/90"
+            class="gf-button gf-button-sm gf-button-neutral"
           >
             <UserPlus class="h-4 w-4" />
             {{ card?.isFollowing ? t('userCard.following') : t('userCard.viewProfile') }}
@@ -335,41 +335,3 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
     </Transition>
   </Teleport>
 </template>
-
-<style scoped>
-.user-card-pop-enter-active,
-.user-card-pop-leave-active {
-  transition:
-    opacity 140ms ease,
-    transform 140ms ease;
-  transform-origin: top left;
-}
-
-.user-card-pop-enter-from,
-.user-card-pop-leave-to {
-  opacity: 0;
-  transform: translateY(4px) scale(0.98);
-}
-
-.user-card-content-enter-active,
-.user-card-content-leave-active {
-  transition:
-    opacity 120ms ease,
-    transform 120ms ease;
-}
-
-.user-card-content-enter-from,
-.user-card-content-leave-to {
-  opacity: 0;
-  transform: translateY(3px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .user-card-pop-enter-active,
-  .user-card-pop-leave-active,
-  .user-card-content-enter-active,
-  .user-card-content-leave-active {
-    transition: none;
-  }
-}
-</style>

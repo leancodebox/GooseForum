@@ -10,7 +10,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/randopt"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
@@ -30,6 +29,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/themeservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
 )
@@ -1009,112 +1009,38 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 }
 
 func GetSiteTheme(req component.BetterRequest[component.Null]) component.Response {
-	config := pageConfig.GetConfigByPageType(pageConfig.SiteTheme, defaultconfig.GetDefaultSiteThemeConfig())
-	return component.SuccessResponse(normalizeSiteThemeForSave(config))
+	return component.SuccessResponse(themeservice.LoadConfig())
 }
 
 type SaveSiteThemeReq struct {
 	Settings pageConfig.SiteThemeConfig `json:"settings" validate:"required"`
 }
 
-func clearSiteThemeCaches() {
-	hotdataserve.ClearSiteThemeConfigCache()
-	forum.ClearSiteThemeRuntimeCache()
-}
-
 func SaveSiteTheme(req component.BetterRequest[SaveSiteThemeReq]) component.Response {
-	config := pageConfig.GetConfigByPageType(pageConfig.SiteTheme, defaultconfig.GetDefaultSiteThemeConfig())
-	config = normalizeSiteThemeForSave(config)
-	config.Draft = &pageConfig.SiteThemeSnapshot{
+	config := themeservice.LoadConfig()
+	config.Prepublish = &pageConfig.SiteThemePrepublish{
 		Enabled:   req.Params.Settings.Enabled,
-		Themes:    cloneThemeDefinitions(req.Params.Settings.Themes),
-		CreatedAt: time.Now().Format(time.RFC3339),
-		Label:     "draft",
+		Themes:    themeservice.CloneDefinitions(req.Params.Settings.Themes),
+		UpdatedAt: time.Now().Format(time.RFC3339),
 	}
-	config = normalizeSiteThemeForSave(config)
-	savePageConfig(pageConfig.SiteTheme, config, clearSiteThemeCaches)
+	config = themeservice.NormalizeConfig(config)
+	savePageConfig(pageConfig.SiteTheme, config, themeservice.ClearCaches)
 	return component.SuccessResponse(config)
 }
 
 func PublishSiteTheme(req component.BetterRequest[component.Null]) component.Response {
-	config := pageConfig.GetConfigByPageType(pageConfig.SiteTheme, defaultconfig.GetDefaultSiteThemeConfig())
-	config = normalizeSiteThemeForSave(config)
-	if config.Draft == nil {
+	config := themeservice.LoadConfig()
+	if config.Prepublish == nil {
 		return component.SuccessResponse(config)
 	}
 	now := time.Now().Format(time.RFC3339)
-	config.History = append(config.History, pageConfig.SiteThemeSnapshot{
-		Enabled:   config.Enabled,
-		Themes:    cloneThemeDefinitions(config.Themes),
-		CreatedAt: now,
-		Label:     "before publish",
-	})
-	if len(config.History) > 5 {
-		config.History = config.History[len(config.History)-5:]
-	}
-	config.Enabled = config.Draft.Enabled
-	config.Themes = cloneThemeDefinitions(config.Draft.Themes)
+	config.Enabled = config.Prepublish.Enabled
+	config.Themes = themeservice.CloneDefinitions(config.Prepublish.Themes)
 	config.PublishedAt = now
-	config.Draft = &pageConfig.SiteThemeSnapshot{
-		Enabled:   config.Enabled,
-		Themes:    cloneThemeDefinitions(config.Themes),
-		CreatedAt: now,
-		Label:     "published",
-	}
-	config = normalizeSiteThemeForSave(config)
-	savePageConfig(pageConfig.SiteTheme, config, clearSiteThemeCaches)
+	config.Prepublish = nil
+	config = themeservice.NormalizeConfig(config)
+	savePageConfig(pageConfig.SiteTheme, config, themeservice.ClearCaches)
 	return component.SuccessResponse(config)
-}
-
-func RollbackSiteTheme(req component.BetterRequest[component.Null]) component.Response {
-	config := pageConfig.GetConfigByPageType(pageConfig.SiteTheme, defaultconfig.GetDefaultSiteThemeConfig())
-	config = normalizeSiteThemeForSave(config)
-	if len(config.History) == 0 {
-		return component.SuccessResponse(config)
-	}
-	previous := config.History[len(config.History)-1]
-	config.History = config.History[:len(config.History)-1]
-	now := time.Now().Format(time.RFC3339)
-	config.Enabled = previous.Enabled
-	config.Themes = cloneThemeDefinitions(previous.Themes)
-	config.PublishedAt = now
-	config.Draft = &pageConfig.SiteThemeSnapshot{
-		Enabled:   config.Enabled,
-		Themes:    cloneThemeDefinitions(config.Themes),
-		CreatedAt: now,
-		Label:     "rollback",
-	}
-	config = normalizeSiteThemeForSave(config)
-	savePageConfig(pageConfig.SiteTheme, config, clearSiteThemeCaches)
-	return component.SuccessResponse(config)
-}
-
-func normalizeSiteThemeForSave(config pageConfig.SiteThemeConfig) pageConfig.SiteThemeConfig {
-	defaultConfig := defaultconfig.GetDefaultSiteThemeConfig()
-	fallbackTheme := pageConfig.FirstSiteThemeDefinition(defaultConfig.Themes)
-	if config.Version <= 0 {
-		config.Version = defaultConfig.Version
-	}
-	if len(config.Themes) == 0 {
-		config.Themes = cloneThemeDefinitions(defaultConfig.Themes)
-	}
-	config.Themes = pageConfig.NormalizeSiteThemeDefinitions(config.Themes, defaultConfig.Themes, fallbackTheme)
-	if config.Draft == nil {
-		config.Draft = &pageConfig.SiteThemeSnapshot{
-			Enabled: config.Enabled,
-			Themes:  cloneThemeDefinitions(config.Themes),
-			Label:   "published",
-		}
-	}
-	config.Draft.Themes = pageConfig.NormalizeSiteThemeDefinitions(config.Draft.Themes, defaultConfig.Themes, fallbackTheme)
-	config.History = pageConfig.NormalizeSiteThemeSnapshots(config.History, defaultConfig.Themes, fallbackTheme, 5)
-	return config
-}
-
-func cloneThemeDefinitions(themes []pageConfig.SiteThemeDefinition) []pageConfig.SiteThemeDefinition {
-	cloned := make([]pageConfig.SiteThemeDefinition, len(themes))
-	copy(cloned, themes)
-	return cloned
 }
 
 // GetMailSettings 获取邮件设置

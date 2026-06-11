@@ -1,6 +1,7 @@
 <script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import Draggable from 'vuedraggable'
 import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload } from '@lucide/vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -49,6 +50,7 @@ const props = defineProps<{
   kind: Kind
 }>()
 
+const { locale } = useI18n()
 const loading = ref(false)
 const saving = ref(false)
 const testing = ref(false)
@@ -113,15 +115,17 @@ const announcementForm = reactive<AnnouncementConfig>({
   content: '',
 })
 
-const meta: Record<Kind, { title: string, description: string }> = {
-  'site-info': { title: adminText('k0001'), description: adminText('k0002') },
-  mail: { title: adminText('k0003'), description: adminText('k0004') },
-  security: { title: adminText('k0005'), description: adminText('k0006') },
-  posting: { title: adminText('k0007'), description: adminText('k0008') },
-  announcement: { title: adminText('k0009'), description: adminText('k000a') },
-}
-
-const pageMeta = computed(() => meta[props.kind])
+const pageMeta = computed(() => {
+  locale.value
+  const meta: Record<Kind, { title: string, description: string }> = {
+    'site-info': { title: adminText('k0001'), description: adminText('k0002') },
+    mail: { title: adminText('k0003'), description: adminText('k0004') },
+    security: { title: adminText('k0005'), description: adminText('k0006') },
+    posting: { title: adminText('k0007'), description: adminText('k0008') },
+    announcement: { title: adminText('k0009'), description: adminText('k000a') },
+  }
+  return meta[props.kind]
+})
 const allowedDomains = computed(() => {
   return securityForm.allowedDomains
 })
@@ -395,6 +399,25 @@ onMounted(load)
         <div class="grid gap-10 md:grid-cols-2">
           <section class="space-y-6">
             <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><Globe class="size-5 text-muted-foreground" />{{ adminText('k007z') }}</div>
+            <div class="space-y-4">
+              <div class="flex items-center gap-2 border-b pb-2 text-base font-medium">{{ adminText('k0085') }}</div>
+              <div class="flex flex-wrap gap-4 text-sm">
+                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="default" />{{ adminText('k0086') }}</label>
+                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="text" />{{ adminText('k0087') }}</label>
+                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="image" />{{ adminText('k0088') }}</label>
+              </div>
+              <label v-if="siteForm.brandType === 'default'" class="grid gap-2 text-sm font-medium">{{ adminText('k0086') }}<Input model-value="GooseForum" disabled /></label>
+              <label v-if="siteForm.brandType === 'text'" class="grid gap-2 text-sm font-medium">{{ adminText('k0089') }}<Input v-model="siteForm.brandText" placeholder="MyBrand" /></label>
+              <label v-if="siteForm.brandType === 'image'" class="grid gap-2 text-sm font-medium">{{ adminText('k008a') }}
+                <div class="flex gap-2">
+                  <Input v-model="siteForm.brandImage" placeholder="Brand Image URL" />
+                  <label class="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border bg-background shadow-xs hover:bg-accent">
+                    <Upload class="size-4" />
+                    <input class="hidden" type="file" accept="image/*" @change="uploadImage('brandImage', $event)" />
+                  </label>
+                </div>
+              </label>
+            </div>
             <label class="grid gap-2 text-sm font-medium">{{ adminText('k0080') }}<Input v-model="siteForm.siteName" placeholder="GooseForum" /></label>
             <label class="grid gap-2 text-sm font-medium">{{ adminText('k0081') }}<Input v-model="siteForm.siteUrl" placeholder="https://example.com" /></label>
             <label class="grid gap-2 text-sm font-medium">{{ adminText('k0082') }}<Input v-model="siteForm.siteEmail" placeholder="contact@example.com" /></label>
@@ -413,24 +436,6 @@ onMounted(load)
                 </div>
               </div>
             </label>
-            <div class="space-y-4">
-              <div class="flex items-center gap-2 border-b pb-2 text-base font-medium">{{ adminText('k0085') }}</div>
-              <div class="flex flex-wrap gap-4 text-sm">
-                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="default" />{{ adminText('k0086') }}</label>
-                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="text" />{{ adminText('k0087') }}</label>
-                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="image" />{{ adminText('k0088') }}</label>
-              </div>
-              <label v-if="siteForm.brandType === 'text'" class="grid gap-2 text-sm font-medium">{{ adminText('k0089') }}<Input v-model="siteForm.brandText" placeholder="MyBrand" /></label>
-              <label v-if="siteForm.brandType === 'image'" class="grid gap-2 text-sm font-medium">{{ adminText('k008a') }}
-                <div class="flex gap-2">
-                  <Input v-model="siteForm.brandImage" placeholder="Brand Image URL" />
-                  <label class="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border bg-background shadow-xs hover:bg-accent">
-                    <Upload class="size-4" />
-                    <input class="hidden" type="file" accept="image/*" @change="uploadImage('brandImage', $event)" />
-                  </label>
-                </div>
-              </label>
-            </div>
           </section>
           <section class="space-y-6">
             <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><FileText class="size-5 text-muted-foreground" />{{ adminText('k008b') }}</div>

@@ -178,8 +178,7 @@ export interface SiteThemeConfig {
   version: number
   enabled: boolean
   themes: SiteThemeDefinition[]
-  draft?: SiteThemeSnapshot
-  history?: SiteThemeSnapshot[]
+  prepublish?: SiteThemePrepublish
   publishedAt?: string
 }
 
@@ -190,11 +189,10 @@ export interface SiteThemeDefinition {
   tokens: SiteThemeTokens
 }
 
-export interface SiteThemeSnapshot {
+export interface SiteThemePrepublish {
   enabled: boolean
   themes: SiteThemeDefinition[]
-  createdAt?: string
-  label?: string
+  updatedAt?: string
 }
 
 export interface ThemePreviewProps {

@@ -22,7 +22,7 @@ function isBlocked(draft: DraftPayload) {
       <div class="min-w-0">
         <div class="flex min-w-0 items-center gap-2">
           <h1 class="text-xl font-bold text-base-content">{{ t('drafts.title') }}</h1>
-          <span class="inline-flex h-5 items-center rounded-full bg-base-300 px-2 text-xs font-semibold tabular-nums text-base-content/75">
+          <span class="gf-badge gf-badge-muted h-5 tabular-nums text-base-content/75">
             {{ t('drafts.total', { count: props.total }) }}
           </span>
         </div>
@@ -30,14 +30,14 @@ function isBlocked(draft: DraftPayload) {
       </div>
       <a
         href="/publish"
-        class="inline-flex h-8 w-fit items-center gap-1.5 rounded-md border border-line bg-base-100 px-2.5 text-xs font-semibold text-base-content/75 hover:bg-base-200 hover:text-base-content"
+        class="gf-button gf-button-sm gf-button-secondary w-fit text-xs"
       >
         <PenSquare class="h-4 w-4" />
         {{ t('drafts.newDraft') }}
       </a>
     </header>
 
-    <section class="overflow-hidden rounded-lg border border-line/70 bg-base-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+    <section class="gf-card overflow-hidden">
       <div class="hidden grid-cols-[minmax(0,1fr)_152px_132px] gap-4 border-b border-line bg-base-200/60 px-4 py-2 text-[11px] font-bold uppercase text-base-content/75 md:grid">
         <div>{{ t('drafts.table.draft') }}</div>
         <div class="text-right">{{ t('drafts.table.updatedAt') }}</div>
@@ -65,7 +65,7 @@ function isBlocked(draft: DraftPayload) {
               </span>
               <span
                 v-if="isBlocked(draft)"
-                class="inline-flex shrink-0 items-center gap-1 rounded-full bg-error/10 px-2 py-0.5 text-[11px] font-semibold text-error"
+                class="gf-badge gf-badge-error shrink-0 text-[11px]"
               >
                 <ShieldAlert class="h-3.5 w-3.5" />
                 {{ t('drafts.blocked') }}
@@ -84,7 +84,7 @@ function isBlocked(draft: DraftPayload) {
           <div class="flex flex-wrap items-center gap-2 md:flex-nowrap md:justify-end">
             <a
               :href="draft.editUrl"
-              class="inline-flex h-8 shrink-0 items-center gap-1 rounded-md bg-primary px-2.5 text-xs font-semibold text-primary-content hover:bg-primary"
+              class="gf-button gf-button-sm gf-button-primary shrink-0 text-xs"
             >
               <FileText class="h-4 w-4" />
               {{ t('drafts.edit') }}
@@ -97,7 +97,7 @@ function isBlocked(draft: DraftPayload) {
         <FileText class="h-8 w-8 text-base-content/35" />
         <h2 class="mt-2 text-base font-semibold text-base-content">{{ t('drafts.emptyTitle') }}</h2>
         <p class="mt-1 text-sm text-base-content/55">{{ t('drafts.emptyHint') }}</p>
-        <a href="/publish" class="mt-4 inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-content hover:bg-primary">
+        <a href="/publish" class="gf-button gf-button-md gf-button-primary mt-4 px-4">
           {{ t('drafts.newDraft') }}
         </a>
       </div>

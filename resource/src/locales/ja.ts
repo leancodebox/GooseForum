@@ -32,6 +32,7 @@ export default {
     userMenu: 'ユーザーメニュー',
     profile: 'プロフィール',
     settings: '設定',
+    themePreview: 'テーマプレビュー',
     admin: '管理画面',
     logout: 'ログアウト',
     login: 'ログイン',
@@ -530,6 +531,28 @@ export default {
     selectArea: '切り抜き範囲を選択してください',
     updated: 'アバターを更新しました',
     processFailed: 'アバターを処理できません',
+  },
+  themePreview: {
+    presetsTitle: 'プリセット',
+    presetApplied: '{name} プリセットを適用しました。事前公開を保存すると反映されます',
+    presets: {
+      goose: {
+        label: 'Goose',
+        description: '現在の標準、すっきり安定',
+      },
+      clean: {
+        label: 'Clean',
+        description: 'プロダクト向けの低彩度ブルーとティール',
+      },
+      warm: {
+        label: 'Warm',
+        description: 'コミュニティ向けの柔らかい暖色',
+      },
+      deep: {
+        label: 'Deep',
+        description: '黒を基調にした深いコントラスト',
+      },
+    },
   },
   api: {
     replyFailed: '返信に失敗しました',
