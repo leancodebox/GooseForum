@@ -46,7 +46,7 @@ export default {
       messages: 'Messages',
       notifications: 'Notifications',
       drafts: 'Drafts',
-      links: 'Links',
+      links: 'Friend Links',
       sponsors: 'Sponsors',
     },
   },

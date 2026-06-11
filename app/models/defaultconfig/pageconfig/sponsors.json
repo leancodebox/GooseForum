@@ -6,12 +6,12 @@
     "level3": []
   },
   "content": {
-    "title": "赞助",
-    "description": "感谢这些赞助者帮助 GooseForum 持续变好。"
+    "title": "赞助商",
+    "description": "感谢这些赞助商帮助 GooseForum 持续变好。"
   },
   "contact": {
-    "title": "成为赞助者",
-    "description": "支持社区建设，赞助者可展示在赞助页，并获得更醒目的社区露出。",
+    "title": "成为赞助商",
+    "description": "支持社区建设，赞助商可展示在赞助页，并获得更醒目的社区露出。",
     "buttonText": "联系我们",
     "buttonLink": "mailto:contact@gooseforum.online"
   },

@@ -1447,8 +1447,8 @@ func sponsorAvatar(avatar string) string {
 
 func buildSponsorsMeta(c *gin.Context) PageMeta {
 	return PageMeta{
-		Title:       pageTitle("赞助"),
-		Description: "感谢支持 " + siteTitle() + " 的赞助者与社区伙伴。",
+		Title:       pageTitle("赞助商"),
+		Description: "感谢支持 " + siteTitle() + " 的赞助商与社区伙伴。",
 		Canonical:   component.GetBaseUri(c) + "/sponsors",
 	}
 }

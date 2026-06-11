@@ -46,7 +46,7 @@ export default {
       messages: 'メッセージ',
       notifications: '通知',
       drafts: '下書き',
-      links: 'リンク',
+      links: '相互リンク',
       sponsors: 'スポンサー',
     },
   },

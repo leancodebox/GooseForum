@@ -320,7 +320,7 @@ async function loadUserHoverCard() {
               v-for="item in headerResourceItems"
               :key="item.key"
               :href="item.url"
-              class="inline-flex h-7 items-center rounded-md px-2 text-[13px] font-medium text-base-content/75 transition-colors duration-150 hover:bg-base-300 hover:text-base-content"
+              class="inline-flex h-7 items-center rounded-md px-2 text-sm font-medium text-base-content/75 transition-colors duration-150 hover:bg-base-300 hover:text-base-content"
             >
               {{ item.label }}
             </a>

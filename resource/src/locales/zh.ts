@@ -46,8 +46,8 @@ export default {
       messages: '私信',
       notifications: '通知',
       drafts: '草稿箱',
-      links: '链接',
-      sponsors: '赞助',
+      links: '友情链接',
+      sponsors: '赞助商',
     },
   },
   locale: {
@@ -243,7 +243,7 @@ export default {
   },
   sponsors: {
     defaultMessage: '感谢支持 GooseForum。',
-    emptyTitle: '暂无赞助者',
+    emptyTitle: '暂无赞助商',
     emptyDescription: '站点还没有配置赞助信息。',
     rulesTitle: '展示规则',
   },
