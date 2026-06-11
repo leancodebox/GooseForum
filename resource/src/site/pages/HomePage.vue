@@ -149,14 +149,16 @@ onBeforeUnmount(() => {
           >
             <div class="min-w-0">
               <div class="flex min-h-6 min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                <Pin
-                  v-if="showPinnedLabels && topic.pinWeight > 0"
-                  class="h-3.5 w-3.5 shrink-0 rotate-45 text-error"
-                  :aria-label="t('topicList.pinned')"
-                />
-                <a :href="topic.url" class="min-w-0 max-w-full truncate text-[15px] font-semibold leading-6 text-base-content group-hover:text-primary sm:text-base">
-                  {{ topic.title }}
-                </a>
+                <span class="inline-flex min-w-0 max-w-full items-center gap-2">
+                  <Pin
+                    v-if="showPinnedLabels && topic.pinWeight > 0"
+                    class="h-3.5 w-3.5 shrink-0 rotate-45 text-error"
+                    :aria-label="t('topicList.pinned')"
+                  />
+                  <a :href="topic.url" class="min-w-0 truncate text-[15px] font-semibold leading-6 text-base-content group-hover:text-primary sm:text-base">
+                    {{ topic.title }}
+                  </a>
+                </span>
                 <a
                   v-for="category in topic.categories"
                   :key="category.id"

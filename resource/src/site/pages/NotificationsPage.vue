@@ -369,7 +369,7 @@ function markItemReadAndNavigate(item: NotificationPayload) {
         <article
           v-for="item in notifications"
           :key="item.id"
-          class="relative grid gap-3 px-3 py-2.5 transition hover:bg-base-200/70 md:grid-cols-[34px_minmax(0,1fr)_116px_40px] md:items-start"
+          class="relative grid grid-cols-[34px_minmax(0,1fr)] gap-3 px-3 py-2.5 transition hover:bg-base-200/70 md:grid-cols-[34px_minmax(0,1fr)_116px_40px] md:items-start"
           :class="{ 'bg-info/10 before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-primary': !item.isRead }"
         >
           <div
@@ -379,12 +379,12 @@ function markItemReadAndNavigate(item: NotificationPayload) {
             <component :is="notificationIcon(item)" class="h-4 w-4" :class="notificationTone(item)" />
           </div>
           <div class="min-w-0">
-            <div class="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-sm leading-5">
-              <a v-if="actorURL(item) && item.eventType !== 'badge'" :href="actorURL(item)" class="font-semibold text-base-content hover:text-primary" @click="markItemReadAndNavigate(item)">
+            <div class="flex min-w-0 items-center gap-1.5 text-sm leading-5">
+              <a v-if="actorURL(item) && item.eventType !== 'badge'" :href="actorURL(item)" class="max-w-[42%] shrink-0 truncate font-semibold text-base-content hover:text-primary" @click="markItemReadAndNavigate(item)">
                 {{ actorName(item) }}
               </a>
-              <span v-else class="font-semibold text-base-content">{{ item.eventType === 'follow' ? actorName(item) : notificationTitleText(item) }}</span>
-              <span class="text-base-content/55">{{ item.actor.id || item.eventType === 'follow' ? notificationVerb(item) : '' }}</span>
+              <span v-else class="max-w-[42%] shrink-0 truncate font-semibold text-base-content">{{ item.eventType === 'follow' ? actorName(item) : notificationTitleText(item) }}</span>
+              <span class="shrink-0 text-base-content/55">{{ item.actor.id || item.eventType === 'follow' ? notificationVerb(item) : '' }}</span>
               <a
                 v-if="item.article"
                 :href="item.article.url"
