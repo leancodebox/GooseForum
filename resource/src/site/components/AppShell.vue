@@ -2,7 +2,6 @@
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import {
   Bell,
-  ChevronDown,
   FileText,
   Flame,
   Heart,
@@ -70,7 +69,6 @@ const unreadStatus = useUnreadStatus()
 const hasUnreadNotification = computed(() => unreadStatus.notifications.value)
 const hasUnreadMessage = computed(() => unreadStatus.messages.value)
 const notificationTitle = computed(() => unreadStatus.notificationMessage.value)
-const currentLocaleLabel = computed(() => String(locale.value).slice(0, 2).toUpperCase())
 const asArray = <T>(value: T[] | null | undefined): T[] => (Array.isArray(value) ? value : [])
 const activeSidebarKey = computed(() => props.layout.sidebar.activeKey || 'topics')
 const primaryItems = computed<SidebarNavItem[]>(() => {
@@ -389,15 +387,13 @@ async function loadUserHoverCard() {
           >
             <button
               type="button"
-              class="inline-flex h-9 items-center justify-center gap-1 rounded-full px-2 text-[13px] font-semibold text-icon-muted transition-colors duration-150 hover:bg-base-300 hover:text-base-content sm:min-w-12"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full text-icon-muted transition-colors duration-150 hover:bg-base-300 hover:text-base-content"
               :aria-label="t('shell.switchLanguage')"
               :title="t('shell.switchLanguage')"
               :aria-expanded="langMenuOpen"
               @click="langMenuOpen = !langMenuOpen"
             >
-              <Languages class="h-5 w-5 sm:hidden" />
-              <span class="hidden sm:inline">{{ currentLocaleLabel }}</span>
-              <ChevronDown class="hidden h-3.5 w-3.5 sm:block" />
+              <Languages class="h-5 w-5" />
             </button>
             <Transition name="gf-menu">
               <div
