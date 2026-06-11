@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Loader2, Mail, MessageSquare, Pin, Plus, Sparkles, UsersRound } from '@lucide/vue'
+import { Bell, Loader2, Mail, MessageSquare, Pin, Plus, Sparkles, UsersRound } from '@lucide/vue'
 import { formatNumber, timeAgo } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { topicDescription } from '@/runtime/topic-description'
@@ -125,7 +125,7 @@ onBeforeUnmount(() => {
 
         <aside v-if="page.props.announcement.enabled" class="border-b border-line/70 bg-base-100 px-4 py-2.5" :aria-label="t('topicList.announcement')">
           <div class="flex items-start gap-2.5">
-            <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+            <Bell class="mt-[3px] h-[18px] w-[18px] shrink-0 text-primary" aria-hidden="true" />
             <div class="min-w-0">
               <div class="gf-prose gf-prose-announcement" v-html="page.props.announcement.html" />
             </div>

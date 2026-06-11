@@ -37,11 +37,15 @@
   }
 
   .gf-prose-announcement {
-    @apply text-[14px] leading-7 text-base-content/75;
+    @apply text-[14px] leading-6 text-base-content/75;
   }
 
   .gf-prose-announcement p {
-    @apply my-1;
+    @apply my-0.5;
+  }
+
+  .gf-prose-announcement :where(h1, h2, h3, h4) {
+    @apply my-1 text-base font-semibold leading-6 text-base-content;
   }
 
   .gf-prose-announcement > :first-child {
@@ -65,7 +69,7 @@
   }
 
   .gf-prose-article p {
-    @apply my-3;
+    @apply my-2;
   }
 
   .gf-prose-article > :first-child {
@@ -77,23 +81,23 @@
   }
 
   .gf-prose-article h1 {
-    @apply mt-9 mb-4 text-base-content;
+    @apply mt-7 mb-3 text-base-content;
   }
 
   .gf-prose-article h2 {
-    @apply mt-8 mb-3 text-base-content;
+    @apply mt-6 mb-2.5 text-base-content;
   }
 
   .gf-prose-article h3 {
-    @apply mt-6 mb-2 text-base-content;
-  }
-
-  .gf-prose-article h4 {
     @apply mt-5 mb-2 text-base-content;
   }
 
+  .gf-prose-article h4 {
+    @apply mt-4 mb-1.5 text-base-content;
+  }
+
   .gf-prose-article :where(ul, ol) {
-    @apply my-3 pl-6;
+    @apply my-2 pl-6;
   }
 
   .gf-prose-article li {
@@ -105,11 +109,11 @@
   }
 
   .gf-prose-article hr {
-    @apply my-6 border-line;
+    @apply my-5 border-line;
   }
 
   .gf-prose-article hr + :where(h1, h2, h3, h4) {
-    @apply mt-6;
+    @apply mt-5;
   }
 
   .gf-prose-comment {
@@ -117,7 +121,7 @@
   }
 
   .gf-prose-comment p {
-    @apply my-2;
+    @apply my-1.5;
   }
 
   .gf-prose-comment > :first-child {
@@ -144,7 +148,7 @@
   }
 
   .gf-prose pre {
-    @apply my-3 overflow-x-auto rounded-lg border border-line bg-base-200 p-3 text-base-content;
+    @apply my-2.5 overflow-x-auto rounded-lg border border-line bg-base-200 p-3 text-base-content;
     max-width: 100%;
   }
 
@@ -184,12 +188,12 @@
   }
 
   .gf-prose img {
-    @apply my-3 max-w-full rounded-lg border border-line object-contain;
+    @apply my-2.5 max-w-full rounded-lg border border-line object-contain;
   }
 
   .gf-prose-comment ul,
   .gf-prose-comment ol {
-    @apply my-2 pl-5;
+    @apply my-1.5 pl-5;
   }
 
   .gf-prose-comment li {
@@ -197,7 +201,7 @@
   }
 
   .gf-prose-comment blockquote {
-    @apply my-2 border-l-4 border-line bg-base-200/70 py-1 pl-3 pr-3 text-base-content/75;
+    @apply my-1.5 border-l-4 border-line bg-base-200/70 py-1 pl-3 pr-3 text-base-content/75;
   }
 
   .gf-prose-comment code {
@@ -213,7 +217,7 @@
   }
 
   .gf-prose-comment pre {
-    @apply my-2 overflow-x-auto rounded-lg border border-line bg-base-200 p-3 text-base-content;
+    @apply my-1.5 overflow-x-auto rounded-lg border border-line bg-base-200 p-3 text-base-content;
   }
 
   .gf-prose-comment pre code {
@@ -229,7 +233,7 @@
   }
 
   .gf-prose-comment img {
-    @apply my-2 max-w-full rounded-lg border border-line object-contain;
+    @apply my-1.5 max-w-full rounded-lg border border-line object-contain;
     max-height: min(360px, 70vh);
   }
 }
