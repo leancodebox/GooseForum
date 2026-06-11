@@ -28,14 +28,6 @@
     @apply min-h-[88px] lg:min-h-[64px];
   }
 
-  .gf-topic-row-pinned::before {
-    border-left: 3px solid rgb(244 63 94 / 0.82);
-  }
-
-  .gf-topic-row-pinned:hover::before {
-    border-left-color: rgb(244 63 94);
-  }
-
   .gf-topic-chip {
     @apply inline-flex h-5 shrink-0 items-center gap-1.5 rounded-full bg-base-300 px-1.5 text-[11px] font-medium text-base-content/55 hover:bg-info/10 hover:text-primary;
     border-radius: var(--gf-radius-selector);
