@@ -127,7 +127,6 @@ onBeforeUnmount(() => {
           <div class="flex items-start gap-2.5">
             <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
             <div class="min-w-0">
-              <div class="mb-1 text-[11px] font-semibold text-base-content/55">{{ t('topicList.announcement') }}</div>
               <div class="gf-prose gf-prose-announcement" v-html="page.props.announcement.html" />
             </div>
           </div>
