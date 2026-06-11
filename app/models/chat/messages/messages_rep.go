@@ -29,6 +29,24 @@ func GetByConvId(convId uint64, offset, limit int) []Entity {
 	return entities
 }
 
+func GetLatestByConvId(convId uint64, limit int) []Entity {
+	var entities []Entity
+	builder().Where("conv_id = ?", convId).Order("id DESC").Limit(limit).Find(&entities)
+	return entities
+}
+
+func GetBeforeId(convId uint64, beforeId uint64, limit int) []Entity {
+	var entities []Entity
+	builder().Where("conv_id = ? AND id < ?", convId, beforeId).Order("id DESC").Limit(limit).Find(&entities)
+	return entities
+}
+
+func GetAfterId(convId uint64, afterId uint64, limit int) []Entity {
+	var entities []Entity
+	builder().Where("conv_id = ? AND id > ?", convId, afterId).Order("id ASC").Limit(limit).Find(&entities)
+	return entities
+}
+
 func MarkMessagesRead(convId, readerId uint64) {
 	builder().Where("conv_id = ? AND sender_id != ? AND is_read = 0", convId, readerId).Update("is_read", 1)
 }

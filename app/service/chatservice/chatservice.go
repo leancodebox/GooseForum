@@ -13,6 +13,19 @@ import (
 	"github.com/samber/lo"
 )
 
+const (
+	defaultMessageLimit = 30
+	maxMessageLimit     = 100
+)
+
+type MessageCursorResult struct {
+	List          []*vo.MessageVo `json:"list"`
+	HasMoreBefore bool            `json:"hasMoreBefore"`
+	HasMoreAfter  bool            `json:"hasMoreAfter"`
+	NextBeforeId  uint64          `json:"nextBeforeId"`
+	LatestId      uint64          `json:"latestId"`
+}
+
 // SendMessage creates or updates a direct conversation and stores a message.
 func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64, error) {
 	if senderId == peerId {
@@ -73,6 +86,8 @@ func SendMessage(senderId, peerId uint64, content string, msgType int8) (uint64,
 		CreatedAt: time.Now(),
 	}
 	messages.SaveOrCreateById(msg)
+	imUserChatConfigs.InvalidateConversationAccess(senderId, convId)
+	imUserChatConfigs.InvalidateConversationAccess(peerId, convId)
 	unreadservice.Invalidate(peerId)
 
 	return convId, nil
@@ -124,12 +139,41 @@ func GetChatList(userId uint64) ([]*vo.ChatItemVo, error) {
 	return list, nil
 }
 
-// GetMessages returns paginated messages for a conversation.
-func GetMessages(userId, convId uint64, page, pageSize int) ([]*vo.MessageVo, error) {
-	offset := (page - 1) * pageSize
-	msgs := messages.GetByConvId(convId, offset, pageSize)
+// GetMessages returns cursor-paginated messages for a conversation.
+func GetMessages(userId, convId uint64, beforeId, afterId uint64, limit int) (*MessageCursorResult, error) {
+	if !imUserChatConfigs.CanAccessConversation(userId, convId) {
+		return nil, errors.New("conversation not found")
+	}
+	if beforeId > 0 && afterId > 0 {
+		return nil, errors.New("beforeId and afterId cannot be used together")
+	}
+	if limit <= 0 {
+		limit = defaultMessageLimit
+	}
+	if limit > maxMessageLimit {
+		limit = maxMessageLimit
+	}
 
-	return lo.Map(msgs, func(m messages.Entity, _ int) *vo.MessageVo {
+	queryLimit := limit + 1
+	var msgs []messages.Entity
+	switch {
+	case beforeId > 0:
+		msgs = messages.GetBeforeId(convId, beforeId, queryLimit)
+	case afterId > 0:
+		msgs = messages.GetAfterId(convId, afterId, queryLimit)
+	default:
+		msgs = messages.GetLatestByConvId(convId, queryLimit)
+	}
+
+	hasMore := len(msgs) > limit
+	if hasMore {
+		msgs = msgs[:limit]
+	}
+	if afterId == 0 {
+		reverseMessages(msgs)
+	}
+
+	list := lo.Map(msgs, func(m messages.Entity, _ int) *vo.MessageVo {
 		return &vo.MessageVo{
 			Id:        m.Id,
 			SenderId:  m.SenderId,
@@ -139,7 +183,27 @@ func GetMessages(userId, convId uint64, page, pageSize int) ([]*vo.MessageVo, er
 			CreatedAt: m.CreatedAt.Format("2006-01-02 15:04:05"),
 			IsSelf:    m.SenderId == userId,
 		}
-	}), nil
+	})
+
+	result := &MessageCursorResult{
+		List: list,
+	}
+	if len(list) > 0 {
+		result.NextBeforeId = list[0].Id
+		result.LatestId = list[len(list)-1].Id
+	}
+	if afterId > 0 {
+		result.HasMoreAfter = hasMore
+	} else {
+		result.HasMoreBefore = hasMore
+	}
+	return result, nil
+}
+
+func reverseMessages(msgs []messages.Entity) {
+	for left, right := 0, len(msgs)-1; left < right; left, right = left+1, right-1 {
+		msgs[left], msgs[right] = msgs[right], msgs[left]
+	}
 }
 
 // MarkRead clears unread state for a conversation.

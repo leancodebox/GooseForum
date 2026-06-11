@@ -34,17 +34,18 @@ func SendMessage(req component.BetterRequest[SendMessageReq]) component.Response
 // GetMessagesReq 获取消息记录请求
 type GetMessagesReq struct {
 	ConvId   uint64 `json:"convId" validate:"required"`
-	Page     int    `json:"page" validate:"required,min=1"`
-	PageSize int    `json:"pageSize" validate:"required,min=1,max=100"`
+	BeforeId uint64 `json:"beforeId"`
+	AfterId  uint64 `json:"afterId"`
+	Limit    int    `json:"limit" validate:"omitempty,min=1,max=100"`
 }
 
 // GetMessages 获取消息记录
 func GetMessages(req component.BetterRequest[GetMessagesReq]) component.Response {
-	msgs, err := chatservice.GetMessages(req.UserId, req.Params.ConvId, req.Params.Page, req.Params.PageSize)
+	result, err := chatservice.GetMessages(req.UserId, req.Params.ConvId, req.Params.BeforeId, req.Params.AfterId, req.Params.Limit)
 	if err != nil {
 		return component.FailResponseCode(component.MessageChatGetMessagesFailed, nil)
 	}
-	return successDataMap("list", msgs)
+	return component.SuccessResponse(result)
 }
 
 // MarkReadReq 标记已读请求

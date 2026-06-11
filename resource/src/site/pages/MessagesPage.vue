@@ -11,6 +11,11 @@ import { useI18n } from 'vue-i18n'
 type ChatConversation = MessageConversationPayload & {
   messages: ChatMessagePayload[]
   loading?: boolean
+  loadingOlder?: boolean
+  messagesLoaded?: boolean
+  hasMoreBefore?: boolean
+  nextBeforeId?: number
+  latestId?: number
 }
 
 const page = defineProps<{
@@ -31,6 +36,7 @@ const error = ref('')
 const messagesEl = ref<HTMLElement | null>(null)
 const messageInput = ref<HTMLTextAreaElement | null>(null)
 const unreadStatus = useUnreadStatus()
+const messagePageLimit = 30
 const emojis = ['😀', '😂', '😍', '😊', '😭', '👍', '🙏', '🔥', '✨', '🎉', '🤔', '👀', '❤️', '🙌', '👏', '✅']
 
 const filteredConversations = computed(() => {
@@ -73,16 +79,8 @@ async function selectConversation(conversation: ChatConversation) {
   active.value = conversation
   error.value = ''
   showNewChat.value = false
-  if (conversation.convId && conversation.messages.length === 0) {
-    conversation.loading = true
-    try {
-      const messages = await getChatMessages(conversation.convId)
-      conversation.messages = messages.reverse()
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : t('api.messagesLoadFailed')
-    } finally {
-      conversation.loading = false
-    }
+  if (conversation.convId && !conversation.messagesLoaded) {
+    await loadInitialMessages(conversation)
   }
   if (conversation.unreadCount > 0 && conversation.convId) {
     conversation.unreadCount = 0
@@ -92,6 +90,54 @@ async function selectConversation(conversation: ChatConversation) {
     void markChatRead(conversation.convId).catch(() => undefined)
   }
   await scrollToBottom()
+}
+
+async function loadInitialMessages(conversation: ChatConversation) {
+  if (!conversation.convId || conversation.loading) return
+  conversation.loading = true
+  try {
+    const result = await getChatMessages({ convId: conversation.convId, limit: messagePageLimit })
+    conversation.messages = result.list
+    conversation.hasMoreBefore = result.hasMoreBefore
+    conversation.nextBeforeId = result.nextBeforeId
+    conversation.latestId = result.latestId
+    conversation.messagesLoaded = true
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : t('api.messagesLoadFailed')
+  } finally {
+    conversation.loading = false
+  }
+}
+
+async function loadOlderMessages() {
+  const conversation = active.value
+  const el = messagesEl.value
+  if (!conversation?.convId || !el || conversation.loading || conversation.loadingOlder || !conversation.hasMoreBefore) return
+  const beforeId = conversation.nextBeforeId || conversation.messages[0]?.id || 0
+  if (!beforeId) return
+
+  conversation.loadingOlder = true
+  const oldScrollHeight = el.scrollHeight
+  try {
+    const result = await getChatMessages({ convId: conversation.convId, beforeId, limit: messagePageLimit })
+    const existingIds = new Set(conversation.messages.map((message) => message.id))
+    const olderMessages = result.list.filter((message) => !existingIds.has(message.id))
+    conversation.messages = [...olderMessages, ...conversation.messages]
+    conversation.hasMoreBefore = result.hasMoreBefore
+    conversation.nextBeforeId = result.nextBeforeId || conversation.nextBeforeId
+    if (result.latestId) conversation.latestId = Math.max(conversation.latestId || 0, result.latestId)
+    await nextTick()
+    el.scrollTop = el.scrollHeight - oldScrollHeight
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : t('api.messagesLoadFailed')
+  } finally {
+    conversation.loadingOlder = false
+  }
+}
+
+function handleMessagesScroll() {
+  if (!messagesEl.value || messagesEl.value.scrollTop > 48) return
+  void loadOlderMessages()
 }
 
 async function scrollToBottom() {
@@ -125,6 +171,7 @@ async function submitMessage() {
     active.value.messages.push(message)
     active.value.lastMsg = content
     active.value.lastMsgTime = message.createdAt
+    active.value.messagesLoaded = true
     conversations.value = [active.value, ...conversations.value.filter((item) => item.peerId !== active.value?.peerId)]
     newMessage.value = ''
     resizeMessageInput()
@@ -176,6 +223,10 @@ async function startChat(user: UserConnectionPayload) {
     convId: 0,
     peerUrl: user.url,
     messages: [],
+    messagesLoaded: true,
+    hasMoreBefore: false,
+    nextBeforeId: 0,
+    latestId: 0,
   }
   conversations.value = [conversation, ...conversations.value]
   await selectConversation(conversation)
@@ -267,13 +318,14 @@ async function startChat(user: UserConnectionPayload) {
               </button>
             </header>
 
-            <div ref="messagesEl" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3 md:space-y-4 md:px-4 md:py-4">
+            <div ref="messagesEl" class="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3 md:space-y-4 md:px-4 md:py-4" @scroll.passive="handleMessagesScroll">
               <div class="flex justify-center">
                 <span class="rounded-full bg-base-200 px-2 py-1 text-xs font-medium text-base-content/55">{{ t('messages.today') }}</span>
               </div>
 
               <div v-if="active.loading" class="py-12 text-center text-sm text-base-content/55">{{ t('messages.loading') }}</div>
               <template v-else-if="active.messages.length">
+                <div v-if="active.loadingOlder" class="py-1 text-center text-xs text-base-content/45">{{ t('messages.loading') }}</div>
                 <div
                   v-for="message in active.messages"
                   :key="message.id"

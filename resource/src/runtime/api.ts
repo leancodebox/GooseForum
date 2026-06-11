@@ -347,23 +347,50 @@ export interface ChatMessagePayload {
   isSelf: boolean
 }
 
-export async function getChatMessages(convId: number, page = 1, pageSize = 50): Promise<ChatMessagePayload[]> {
+export interface ChatMessagesResponse {
+  list: ChatMessagePayload[]
+  hasMoreBefore: boolean
+  hasMoreAfter: boolean
+  nextBeforeId: number
+  latestId: number
+}
+
+export interface ChatMessagesInput {
+  convId: number
+  beforeId?: number
+  afterId?: number
+  limit?: number
+}
+
+export async function getChatMessages(input: ChatMessagesInput): Promise<ChatMessagesResponse> {
   const response = await fetch('/api/forum/chat/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ convId, page, pageSize }),
+    body: JSON.stringify({
+      convId: input.convId,
+      beforeId: input.beforeId || 0,
+      afterId: input.afterId || 0,
+      limit: input.limit || 30,
+    }),
   })
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`)
   }
 
-  const data = (await response.json()) as ApiResponse<{ list: ChatMessagePayload[] }>
+  const data = (await response.json()) as ApiResponse<ChatMessagesResponse>
   if (data.code !== undefined && data.code !== 0) {
     throw new Error(responseMessage(data, t('api.messagesLoadFailed')))
   }
-  return data.result?.list ?? data.data?.list ?? []
+  const result = data.result ?? data.data
+  return {
+    list: result?.list ?? [],
+    hasMoreBefore: Boolean(result?.hasMoreBefore),
+    hasMoreAfter: Boolean(result?.hasMoreAfter),
+    nextBeforeId: result?.nextBeforeId ?? 0,
+    latestId: result?.latestId ?? 0,
+  }
 }
 
 export async function sendChatMessage(peerId: number, content: string): Promise<number> {

@@ -1,10 +1,16 @@
 package imUserChatConfigs
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"gorm.io/gorm"
 )
+
+const conversationAccessTTL = 2 * time.Minute
+
+var conversationAccessCache = localcache.Cache[bool]{MaxEntries: 4096}
 
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)
@@ -36,6 +42,28 @@ func GetConfig(userId, peerId uint64) *Entity {
 		return nil
 	}
 	return &entity
+}
+
+func CanAccessConversation(userId, convId uint64) bool {
+	if userId == 0 || convId == 0 {
+		return false
+	}
+	return conversationAccessCache.GetOrLoad(conversationAccessCacheKey(userId, convId), func() (bool, error) {
+		var entity Entity
+		err := builder().Select("id").Where("user_id = ? AND conv_id = ? AND is_deleted = 0", userId, convId).First(&entity).Error
+		return err == nil && entity.Id != 0, nil
+	}, conversationAccessTTL)
+}
+
+func InvalidateConversationAccess(userId, convId uint64) {
+	if userId == 0 || convId == 0 {
+		return
+	}
+	conversationAccessCache.Delete(conversationAccessCacheKey(userId, convId))
+}
+
+func conversationAccessCacheKey(userId, convId uint64) string {
+	return fmt.Sprintf("chat:conversation:access:%d:%d", userId, convId)
 }
 
 func GetUserConfigs(userId uint64) []Entity {
@@ -70,4 +98,5 @@ func ClearUnread(convId, userId uint64) {
 
 func DeleteConfig(convId, userId uint64) {
 	builder().Where("conv_id = ? AND user_id = ?", convId, userId).Update("is_deleted", 1)
+	InvalidateConversationAccess(userId, convId)
 }
