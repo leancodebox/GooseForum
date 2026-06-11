@@ -126,9 +126,10 @@ type LayoutPayload struct {
 }
 
 type ThemePayload struct {
-	Enabled bool              `json:"enabled"`
-	Href    string            `json:"href,omitempty"`
-	Colors  map[string]string `json:"colors,omitempty"`
+	Enabled    bool              `json:"enabled"`
+	Href       string            `json:"href,omitempty"`
+	Colors     map[string]string `json:"colors,omitempty"`
+	ThemeColor string            `json:"themeColor"`
 }
 
 type UnreadStatusPayload struct {
@@ -575,11 +576,20 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 
 func buildThemePayload() ThemePayload {
 	runtimeTheme := themeservice.Runtime()
+	colors := runtimeTheme.Colors.Payload()
 	return ThemePayload{
-		Enabled: runtimeTheme.Enabled,
-		Href:    runtimeTheme.Href,
-		Colors:  runtimeTheme.Colors.Payload(),
+		Enabled:    runtimeTheme.Enabled,
+		Href:       runtimeTheme.Href,
+		Colors:     colors,
+		ThemeColor: themeColor(colors),
 	}
+}
+
+func themeColor(colors map[string]string) string {
+	if color := colors[themeservice.LightName]; color != "" {
+		return color
+	}
+	return "#ffffff"
 }
 
 func buildAdminPermissions(userID uint64) []uint64 {

@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#ffffff" data-goose-theme-color>
+    <meta name="theme-color" content="{{.Payload.Layout.Theme.ThemeColor}}" data-goose-theme-color>
     <script>
       (() => {
-        const themeColors = {
+        const themeColors = Object.assign({
           'gf-light': '#ffffff',
           'gf-dark': '#1b1b1b',
-        }
+        }, {{json .Payload.Layout.Theme.Colors}})
         const applyThemeColor = (theme) => {
           document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[theme] || themeColors['gf-light'])
         }

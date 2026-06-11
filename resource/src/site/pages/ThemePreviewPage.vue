@@ -329,10 +329,12 @@ function buildThemeCss(config: SiteThemeConfig) {
 }
 
 function buildThemePayload(config: SiteThemeConfig): ThemePayload {
+  const colors = themeColors(config)
   return {
     enabled: config.enabled,
     href: themeHref(config),
-    colors: themeColors(config),
+    colors,
+    themeColor: colors['gf-light'] || '#ffffff',
   }
 }
 
