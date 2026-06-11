@@ -399,8 +399,8 @@ onMounted(load)
         <div class="grid gap-10 md:grid-cols-2">
           <section class="space-y-6">
             <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><Globe class="size-5 text-muted-foreground" />{{ adminText('k007z') }}</div>
-            <div class="space-y-4">
-              <div class="flex items-center gap-2 border-b pb-2 text-base font-medium">{{ adminText('k0085') }}</div>
+            <div class="space-y-3">
+              <div class="text-sm font-semibold text-foreground">{{ adminText('k0085') }}</div>
               <div class="flex flex-wrap gap-4 text-sm">
                 <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="default" />{{ adminText('k0086') }}</label>
                 <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="text" />{{ adminText('k0087') }}</label>
