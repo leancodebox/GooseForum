@@ -18,14 +18,14 @@
   }
 
   .gf-topic-row {
-    @apply relative isolate grid gap-3 bg-base-100 px-4 py-3 transition;
+    @apply relative isolate grid gap-2.5 bg-base-100 px-4 py-2.5 transition;
     @apply before:absolute before:inset-0 before:-z-10 before:bg-base-100 before:content-[''];
     @apply after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-line/70 after:content-[''];
     @apply last:after:hidden hover:before:bg-base-200 lg:grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] lg:items-center;
   }
 
   .gf-topic-row-home {
-    @apply min-h-[96px] lg:min-h-[76px];
+    @apply min-h-[88px] lg:min-h-[64px];
   }
 
   .gf-topic-row-pinned::before {
@@ -37,7 +37,7 @@
   }
 
   .gf-topic-chip {
-    @apply inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full bg-base-300 px-2 text-[11px] font-medium text-base-content/55 hover:bg-info/10 hover:text-primary;
+    @apply inline-flex h-5 shrink-0 items-center gap-1.5 rounded-full bg-base-300 px-1.5 text-[11px] font-medium text-base-content/55 hover:bg-info/10 hover:text-primary;
     border-radius: var(--gf-radius-selector);
   }
 }

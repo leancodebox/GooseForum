@@ -104,19 +104,6 @@ onBeforeUnmount(() => {
         </div>
       </aside>
 
-      <aside v-if="page.props.announcement.enabled" class="gf-card mb-3 overflow-hidden" :aria-label="t('topicList.announcement')">
-        <div class="grid grid-cols-[3px_minmax(0,1fr)]">
-          <div class="bg-primary" aria-hidden="true" />
-          <div class="px-4 py-3">
-            <div class="mb-2 flex items-center gap-2">
-              <span class="h-1.5 w-1.5 rounded-full bg-primary" />
-              <span class="text-[11px] font-bold uppercase text-base-content/75">{{ t('topicList.announcement') }}</span>
-            </div>
-            <div class="gf-prose gf-prose-announcement" v-html="page.props.announcement.html" />
-          </div>
-        </div>
-      </aside>
-
       <section class="gf-card overflow-hidden">
         <div class="gf-home-topic-toolbar">
           <div class="gf-home-topic-tabs">
@@ -135,6 +122,16 @@ onBeforeUnmount(() => {
             {{ t('topicList.newTopic') }}
           </a>
         </div>
+
+        <aside v-if="page.props.announcement.enabled" class="border-b border-line/70 bg-base-100 px-4 py-2.5" :aria-label="t('topicList.announcement')">
+          <div class="flex items-start gap-2.5">
+            <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+            <div class="min-w-0">
+              <div class="mb-1 text-[11px] font-semibold text-base-content/55">{{ t('topicList.announcement') }}</div>
+              <div class="gf-prose gf-prose-announcement" v-html="page.props.announcement.html" />
+            </div>
+          </div>
+        </aside>
 
         <div class="gf-topic-list-header">
           <div>{{ t('topicList.columns.topic') }}</div>
@@ -170,12 +167,12 @@ onBeforeUnmount(() => {
                   <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
                   {{ category.name }}
                 </a>
-                <span v-if="topic.viewCount > 500" class="inline-flex h-6 items-center gap-1 text-[11px] font-semibold text-warning">
+                <span v-if="topic.viewCount > 500" class="inline-flex h-5 items-center gap-1 text-[11px] font-semibold text-warning">
                   <Sparkles class="h-3 w-3" /> hot
                 </span>
               </div>
               <p class="mt-1 min-h-5 truncate text-[13px] leading-5 text-base-content/55">{{ topicDescription(topic) }}</p>
-              <div class="mt-2 flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55 lg:hidden">
+              <div class="mt-1.5 flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55 lg:hidden">
                 <div class="flex h-6 min-w-6 -space-x-2">
                   <a
                     v-for="participant in topic.participants"
