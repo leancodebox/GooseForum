@@ -2,6 +2,8 @@
 import { FileText, PenSquare, ShieldAlert } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { formatDateTime } from '@/runtime/format'
+import EmptyState from '@/site/components/EmptyState.vue'
+import PageHeader from '@/site/components/PageHeader.vue'
 import type { DraftPayload, DraftsPageProps, LayoutPayload } from '@/types/payload'
 
 defineProps<{
@@ -18,24 +20,19 @@ function isBlocked(draft: DraftPayload) {
 
 <template>
   <main class="min-w-0 pb-8">
-    <header class="flex flex-col gap-2 px-4 py-3 sm:mb-3 sm:flex-row sm:items-center sm:justify-between sm:border-b sm:border-line/70 sm:px-0 sm:py-0 sm:pb-3">
-      <div class="min-w-0">
-        <div class="flex min-w-0 items-center gap-2">
-          <h1 class="text-xl font-bold text-base-content">{{ t('drafts.title') }}</h1>
-          <span class="gf-badge gf-badge-muted h-5 tabular-nums text-base-content/75">
-            {{ t('drafts.total', { count: props.total }) }}
-          </span>
-        </div>
-        <p class="mt-0.5 text-xs text-base-content/55">{{ t('drafts.summary') }}</p>
-      </div>
-      <a
-        href="/publish"
-        class="gf-button gf-button-sm gf-button-secondary w-fit text-xs"
-      >
-        <PenSquare class="h-4 w-4" />
-        {{ t('drafts.newDraft') }}
-      </a>
-    </header>
+    <PageHeader :title="t('drafts.title')" :description="t('drafts.summary')" compact>
+      <template #badge>
+        <span class="gf-badge gf-badge-muted h-5 tabular-nums text-base-content/75">
+          {{ t('drafts.total', { count: props.total }) }}
+        </span>
+      </template>
+      <template #actions>
+        <a href="/publish" class="gf-button gf-button-sm gf-button-secondary w-fit text-xs">
+          <PenSquare class="h-4 w-4" />
+          {{ t('drafts.newDraft') }}
+        </a>
+      </template>
+    </PageHeader>
 
     <section class="gf-card overflow-hidden">
       <div class="hidden grid-cols-[minmax(0,1fr)_152px_132px] gap-4 border-b border-line bg-base-200/60 px-4 py-2 text-[11px] font-bold uppercase text-base-content/75 md:grid">
@@ -93,14 +90,11 @@ function isBlocked(draft: DraftPayload) {
         </article>
       </div>
 
-      <div v-else class="flex min-h-56 flex-col items-center justify-center px-6 text-center">
-        <FileText class="h-8 w-8 text-base-content/35" />
-        <h2 class="mt-2 text-base font-semibold text-base-content">{{ t('drafts.emptyTitle') }}</h2>
-        <p class="mt-1 text-sm text-base-content/55">{{ t('drafts.emptyHint') }}</p>
-        <a href="/publish" class="gf-button gf-button-md gf-button-primary mt-4 px-4">
+      <EmptyState v-else :icon="FileText" :title="t('drafts.emptyTitle')" :description="t('drafts.emptyHint')">
+        <a href="/publish" class="gf-button gf-button-md gf-button-primary px-4">
           {{ t('drafts.newDraft') }}
         </a>
-      </div>
+      </EmptyState>
     </section>
   </main>
 </template>

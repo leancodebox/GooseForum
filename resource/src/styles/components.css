@@ -12,6 +12,10 @@
     box-shadow: 0 2px 12px rgb(0 0 0 / calc(var(--gf-depth) * 0.04));
   }
 
+  .gf-page-header {
+    @apply flex flex-col gap-2 border-b border-line/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-0 sm:py-0 sm:pb-4;
+  }
+
   @media (max-width: 639.98px) {
     .gf-shell-content {
       min-height: calc(100dvh - 4rem);

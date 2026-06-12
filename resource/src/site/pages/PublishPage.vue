@@ -7,6 +7,7 @@ import taskLists from 'markdown-it-task-lists'
 import { submitArticle, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { useUnsavedDraftGuard } from '@/site/composables/useUnsavedDraftGuard'
+import PageHeader from '@/site/components/PageHeader.vue'
 import type { LayoutPayload, PublishPageProps } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
@@ -302,10 +303,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 
 <template>
     <main class="min-w-0 pb-12">
-      <header class="border-b border-line/70 px-4 py-3 sm:mb-4 sm:px-0 sm:py-0 sm:pb-4">
-        <h1 class="text-2xl font-bold text-base-content">{{ props.isEditing ? t('publish.editTitle') : t('publish.createTitle') }}</h1>
-        <p class="mt-1 text-sm text-base-content/55">{{ t('publish.subtitle') }}</p>
-      </header>
+      <PageHeader :title="props.isEditing ? t('publish.editTitle') : t('publish.createTitle')" :description="t('publish.subtitle')" />
 
       <div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
         <section class="gf-card p-4 sm:p-5">

@@ -6,6 +6,7 @@ import { formatNumber, timeAgo } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { topicDescription } from '@/runtime/topic-description'
 import { showUserCard } from '@/runtime/user-card-events'
+import PageHeader from '@/site/components/PageHeader.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { CategoryPageProps, LayoutPayload, PagePayload, TopicPayload } from '@/types/payload'
 
@@ -86,16 +87,12 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="pb-12">
-      <section class="px-4 py-3 sm:mb-3 sm:px-1 sm:py-0 sm:pb-2">
-        <div class="min-w-0">
-          <div class="flex min-w-0 items-center gap-2">
-            <h1 class="truncate text-xl font-bold text-base-content">{{ page.props.category.name }}</h1>
-            <span class="h-1.5 w-1.5 shrink-0 rounded-full" :style="{ backgroundColor: page.props.category.color || 'var(--gf-color-primary)' }" />
-            <span class="text-xs font-semibold uppercase text-base-content/75">{{ t('category.label') }}</span>
-          </div>
-          <p v-if="page.props.category.description" class="mt-1 max-w-3xl truncate text-sm text-base-content/55">{{ page.props.category.description }}</p>
-        </div>
-      </section>
+      <PageHeader :title="page.props.category.name" :description="page.props.category.description" compact>
+        <template #badge>
+          <span class="h-1.5 w-1.5 shrink-0 rounded-full" :style="{ backgroundColor: page.props.category.color || 'var(--gf-color-primary)' }" />
+          <span class="text-xs font-semibold uppercase text-base-content/75">{{ t('category.label') }}</span>
+        </template>
+      </PageHeader>
 
       <section class="gf-card overflow-hidden">
         <div class="gf-home-topic-toolbar">

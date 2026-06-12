@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { ExternalLink, Link, Send, ShieldCheck } from '@lucide/vue'
+import EmptyState from '@/site/components/EmptyState.vue'
+import PageHeader from '@/site/components/PageHeader.vue'
 import type { LayoutPayload, LinksPageProps } from '@/types/payload'
 
 defineProps<{
@@ -12,13 +14,11 @@ const { t } = useI18n()
 
 <template>
     <div class="pb-12">
-      <header class="border-b border-line/70 px-4 py-3 sm:mb-3 sm:px-0 sm:py-0 sm:pb-4">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1 class="text-2xl font-bold text-base-content">{{ t('linksPage.title') }}</h1>
+      <PageHeader :title="t('linksPage.title')" :description="t('linksPage.subtitle')" compact>
+        <template #badge>
           <span class="gf-badge gf-badge-muted">{{ props.totalCount }}</span>
-        </div>
-        <p class="mt-2 max-w-2xl text-sm leading-6 text-base-content/55">{{ t('linksPage.subtitle') }}</p>
-      </header>
+        </template>
+      </PageHeader>
 
       <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
         <div class="space-y-5">
@@ -68,11 +68,7 @@ const { t } = useI18n()
             </div>
           </section>
 
-          <div v-if="!props.groups.length" class="gf-panel px-5 py-16 text-center">
-            <Link class="mx-auto h-8 w-8 text-base-content/35" />
-            <h2 class="mt-3 text-base font-semibold text-base-content">{{ t('linksPage.emptyTitle') }}</h2>
-            <p class="mt-1 text-sm text-base-content/55">{{ t('linksPage.emptyDescription') }}</p>
-          </div>
+          <EmptyState v-if="!props.groups.length" class="gf-panel" :icon="Link" :title="t('linksPage.emptyTitle')" :description="t('linksPage.emptyDescription')" />
         </div>
 
         <aside class="space-y-3">

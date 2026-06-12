@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ExternalLink, HeartHandshake, Mail, ShieldCheck } from '@lucide/vue'
+import EmptyState from '@/site/components/EmptyState.vue'
+import PageHeader from '@/site/components/PageHeader.vue'
 import type { LayoutPayload, SponsorPayload, SponsorSectionPayload, SponsorsPageProps } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
@@ -38,13 +40,11 @@ function showMessage(sponsor: SponsorPayload) {
 
 <template>
     <div class="pb-12">
-      <header class="border-b border-line/70 px-4 py-3 sm:mb-4 sm:px-0 sm:py-0 sm:pb-4">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1 class="text-2xl font-bold text-base-content">{{ props.content.title }}</h1>
+      <PageHeader :title="props.content.title" :description="props.content.description">
+        <template #badge>
           <span class="gf-badge gf-badge-muted">{{ props.totalCount }}</span>
-        </div>
-        <p class="mt-2 max-w-2xl text-sm leading-6 text-base-content/55">{{ props.content.description }}</p>
-      </header>
+        </template>
+      </PageHeader>
 
       <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
         <div class="space-y-5">
@@ -85,11 +85,7 @@ function showMessage(sponsor: SponsorPayload) {
             </div>
           </section>
 
-          <div v-if="!hasSponsors" class="gf-panel px-5 py-16 text-center">
-            <HeartHandshake class="mx-auto h-8 w-8 text-base-content/35" />
-            <h2 class="mt-3 text-base font-semibold text-base-content">{{ t('sponsors.emptyTitle') }}</h2>
-            <p class="mt-1 text-sm text-base-content/55">{{ t('sponsors.emptyDescription') }}</p>
-          </div>
+          <EmptyState v-if="!hasSponsors" class="gf-panel" :icon="HeartHandshake" :title="t('sponsors.emptyTitle')" :description="t('sponsors.emptyDescription')" />
         </div>
 
         <aside class="space-y-3">

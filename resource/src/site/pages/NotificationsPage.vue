@@ -5,6 +5,8 @@ import { useI18n } from 'vue-i18n'
 import { fetchNotifications, markAllNotificationsRead, markNotificationRead } from '@/runtime/api'
 import { formatDateTime } from '@/runtime/format'
 import { useUnreadStatus } from '@/runtime/unread-status'
+import EmptyState from '@/site/components/EmptyState.vue'
+import PageHeader from '@/site/components/PageHeader.vue'
 import type { LayoutPayload, NotificationFilter, NotificationPayload, NotificationsPageProps } from '@/types/payload'
 
 const page = defineProps<{
@@ -313,30 +315,27 @@ function markItemReadAndNavigate(item: NotificationPayload) {
 
 <template>
   <main class="min-w-0 pb-8">
-    <header class="flex flex-col gap-2 px-4 py-3 sm:mb-3 sm:flex-row sm:items-center sm:justify-between sm:border-b sm:border-line/70 sm:px-0 sm:py-0 sm:pb-3">
-      <div class="min-w-0">
-        <div class="flex min-w-0 items-center gap-2">
-          <h1 class="text-xl font-bold text-base-content">{{ t('notifications.title') }}</h1>
-          <span
-            v-if="unreadCount"
-            class="gf-badge gf-badge-info h-5 tabular-nums"
-          >
-            {{ t('notifications.unread', { count: unreadCount }) }}
-          </span>
-        </div>
-        <p class="mt-0.5 text-xs text-base-content/55">{{ t('notifications.summary', { total: loadedCount }) }}</p>
+    <PageHeader :title="t('notifications.title')" :description="t('notifications.summary', { total: loadedCount })" compact>
+      <template #badge>
+        <span v-if="unreadCount" class="gf-badge gf-badge-info h-5 tabular-nums">
+          {{ t('notifications.unread', { count: unreadCount }) }}
+        </span>
+      </template>
+      <template #meta>
         <p v-if="actionError" class="mt-1 text-xs text-error">{{ actionError }}</p>
-      </div>
-      <button
-        type="button"
-        class="gf-button gf-button-sm gf-button-secondary w-fit text-xs disabled:opacity-45"
-        :disabled="!hasUnread || markingAllRead"
-        @click="markAllRead"
-      >
-        <CheckCheck class="h-4 w-4" />
-        {{ markingAllRead ? t('common.loading') : t('notifications.markAllRead') }}
-      </button>
-    </header>
+      </template>
+      <template #actions>
+        <button
+          type="button"
+          class="gf-button gf-button-sm gf-button-secondary w-fit text-xs disabled:opacity-45"
+          :disabled="!hasUnread || markingAllRead"
+          @click="markAllRead"
+        >
+          <CheckCheck class="h-4 w-4" />
+          {{ markingAllRead ? t('common.loading') : t('notifications.markAllRead') }}
+        </button>
+      </template>
+    </PageHeader>
 
     <section class="gf-card overflow-hidden">
       <div class="flex items-center gap-1 border-b border-line bg-base-200/60 p-2">
@@ -429,16 +428,9 @@ function markItemReadAndNavigate(item: NotificationPayload) {
         </article>
       </div>
 
-      <div v-else-if="activeList.loading" class="flex min-h-56 flex-col items-center justify-center px-6 text-center">
-        <Bell class="h-8 w-8 text-base-content/35" />
-        <h2 class="mt-2 text-base font-semibold text-base-content">{{ t('notifications.loadingMore') }}</h2>
-      </div>
+      <EmptyState v-else-if="activeList.loading" :icon="Bell" :title="t('notifications.loadingMore')" loading />
 
-      <div v-else class="flex min-h-56 flex-col items-center justify-center px-6 text-center">
-        <Bell class="h-8 w-8 text-base-content/35" />
-        <h2 class="mt-2 text-base font-semibold text-base-content">{{ emptyTitle }}</h2>
-        <p class="mt-1 text-sm text-base-content/55">{{ emptyDescription }}</p>
-      </div>
+      <EmptyState v-else :icon="Bell" :title="emptyTitle" :description="emptyDescription" />
 
       <div ref="loadMoreEl" class="border-t border-line px-4 py-3 text-center text-xs font-semibold text-base-content/55">
         <button
