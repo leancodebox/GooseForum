@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import {
+  Bird,
   CalendarDays,
   FileText,
   Heart,
@@ -15,6 +16,7 @@ import { followUser } from '@/runtime/api'
 import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/format'
 import { topicDescription } from '@/runtime/topic-description'
 import UserAvatar from '@/site/components/UserAvatar.vue'
+import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
@@ -34,6 +36,7 @@ const displayName = computed(() => page.props.user.nickname || page.props.user.u
 const bioText = computed(() => page.props.user.bio || page.props.user.signature || t('user.emptyBio'))
 const visibleTopics = computed(() => page.props.topics)
 const visibleBadges = computed(() => page.props.badges.slice(0, 8))
+const socialKeys = ['github', 'twitter', 'linkedIn', 'weibo', 'bilibili', 'zhihu'] as const
 const tabItems = computed(() => [
   { key: 'topics', label: t('user.tabs.topics'), count: page.props.topics.length },
   { key: 'activity', label: t('user.tabs.activity'), count: page.props.activities.length },
@@ -52,6 +55,30 @@ const profileCoverStyle = computed(() => {
     backgroundImage: `url(${JSON.stringify(activeCoverUrl)}), ${defaultCover}`,
   }
 })
+const profileStats = computed(() => [
+  { label: t('user.stats.reputation'), value: page.props.user.prestige, featured: true },
+  { label: t('user.stats.topics'), value: page.props.user.articleCount },
+  { label: t('user.stats.replies'), value: page.props.user.replyCount },
+  { label: t('user.stats.likesReceived'), value: page.props.user.likeReceivedCount },
+  { label: t('user.stats.likesGiven'), value: page.props.user.likeGivenCount },
+  { label: t('user.stats.followers'), value: page.props.user.followerCount },
+  { label: t('user.stats.following'), value: page.props.user.followingCount },
+  { label: t('user.stats.bookmarks'), value: page.props.user.collectionCount },
+])
+const websiteUrl = computed(() => safeProfileUrl(page.props.user.website))
+const socialProfileLinks = computed(() => socialKeys
+  .map((key) => {
+    const href = safeProfileUrl(page.props.user.externalInformation?.[key]?.link)
+    return href
+      ? {
+          key,
+          href,
+          label: socialLabels[key],
+          icon: socialIcons[key],
+        }
+      : null
+  })
+  .filter((item): item is NonNullable<typeof item> => Boolean(item)))
 
 watch(
   () => page.props.user.userId,
@@ -94,6 +121,18 @@ function activityLabel(activity: UserActivityPayload) {
 
 function topicCategories(topic: TopicPayload) {
   return topic.categories.slice(0, 2)
+}
+
+function safeProfileUrl(value?: string) {
+  const rawValue = value?.trim()
+  if (!rawValue) return ''
+
+  try {
+    const parsed = new URL(rawValue)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.toString() : ''
+  } catch {
+    return ''
+  }
 }
 
 function badgeClass(color: string, level: string) {
@@ -180,58 +219,70 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
 
           <p v-if="followError" class="mt-3 text-sm text-error">{{ followError }}</p>
 
-          <div class="mt-5 grid grid-cols-4 border-y border-line py-3 lg:grid-cols-7 lg:py-4">
-            <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
-              <div class="text-lg font-bold tabular-nums text-base-content lg:text-xl">{{ formatNumber(page.props.user.articleCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-base-content/55 lg:text-xs">{{ t('user.stats.topics') }}</div>
-            </div>
-            <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
-              <div class="text-lg font-bold tabular-nums text-base-content lg:text-xl">{{ formatNumber(page.props.user.replyCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-base-content/55 lg:text-xs">{{ t('user.stats.replies') }}</div>
-            </div>
-            <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
-              <div class="text-lg font-bold tabular-nums text-base-content lg:text-xl">{{ formatNumber(page.props.user.likeReceivedCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-base-content/55 lg:text-xs">{{ t('user.stats.likesReceived') }}</div>
-            </div>
-            <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
-              <div class="text-lg font-bold tabular-nums text-base-content lg:text-xl">{{ formatNumber(page.props.user.likeGivenCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-base-content/55 lg:text-xs">{{ t('user.stats.likesGiven') }}</div>
-            </div>
-            <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
-              <div class="text-lg font-bold tabular-nums text-base-content lg:text-xl">{{ formatNumber(page.props.user.followerCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-base-content/55 lg:text-xs">{{ t('user.stats.followers') }}</div>
-            </div>
-            <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
-              <div class="text-lg font-bold tabular-nums text-base-content lg:text-xl">{{ formatNumber(page.props.user.followingCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-base-content/55 lg:text-xs">{{ t('user.stats.following') }}</div>
-            </div>
-            <div class="px-1 py-2 text-center lg:px-0 lg:py-0 lg:text-left">
-              <div class="text-lg font-bold tabular-nums text-base-content lg:text-xl">{{ formatNumber(page.props.user.collectionCount) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium text-base-content/55 lg:text-xs">{{ t('user.stats.bookmarks') }}</div>
+          <div class="mt-5 grid grid-cols-4 border-b border-t border-line/70 py-2.5 lg:grid-cols-8">
+            <div v-for="item in profileStats" :key="item.label" class="px-1 py-2 text-center lg:px-0 lg:py-0">
+              <div class="text-base font-bold tabular-nums lg:text-lg" :class="item.featured ? 'text-primary' : 'text-base-content'">{{ formatNumber(item.value) }}</div>
+              <div class="mt-0.5 text-[11px] font-medium lg:text-xs" :class="item.featured ? 'text-primary/80' : 'text-base-content/55'">{{ item.label }}</div>
             </div>
           </div>
 
-          <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-base-content/55">
-            <span class="inline-flex items-center gap-1.5"><CalendarDays class="h-3.5 w-3.5" /> {{ t('user.joinedAt', { date: formatDate(page.props.user.createdAt) }) }}</span>
-            <span v-if="page.props.user.lastActiveTime">{{ t('user.lastActive', { time: timeAgo(page.props.user.lastActiveTime) }) }}</span>
+          <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-base-content/55">
+              <span class="inline-flex items-center gap-1.5"><CalendarDays class="h-3.5 w-3.5" /> {{ t('user.joinedAt', { date: formatDate(page.props.user.createdAt) }) }}</span>
+              <span v-if="page.props.user.lastActiveTime">{{ t('user.lastActive', { time: timeAgo(page.props.user.lastActiveTime) }) }}</span>
+            </div>
+
+            <div v-if="websiteUrl || socialProfileLinks.length" class="flex flex-wrap items-center gap-0.5 sm:justify-end">
+              <a
+                v-if="websiteUrl"
+                :href="websiteUrl"
+                target="_blank"
+                rel="noopener noreferrer ugc"
+                class="group relative inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-200 hover:text-primary"
+                :title="page.props.user.websiteName || page.props.user.website"
+                :aria-label="page.props.user.websiteName || page.props.user.website"
+              >
+                <Bird class="h-5 w-5" />
+                <span class="gf-tooltip pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  {{ page.props.user.websiteName || page.props.user.website }}
+                </span>
+              </a>
+              <a
+                v-for="item in socialProfileLinks"
+                :key="item.key"
+                :href="item.href"
+                target="_blank"
+                rel="noopener noreferrer ugc"
+                class="group relative inline-flex h-8 w-8 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-200 hover:text-primary"
+                :title="item.label"
+                :aria-label="item.label"
+              >
+                <svg class="h-4 w-4 fill-current" role="img" viewBox="0 0 24 24" aria-hidden="true">
+                  <path :d="item.icon.path" />
+                </svg>
+                <span class="gf-tooltip pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-40 -translate-x-1/2 truncate opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  {{ item.label }}
+                </span>
+              </a>
+            </div>
           </div>
 
-          <div v-if="visibleBadges.length" class="mt-5 border-t border-line pt-4">
-            <div class="flex flex-wrap gap-3">
+          <div v-if="visibleBadges.length" class="mt-3 border-t border-line/60 pt-3">
+            <div class="flex flex-wrap gap-x-2.5 gap-y-2">
               <div
                 v-for="badge in visibleBadges"
                 :key="badge.code"
-                class="group flex w-16 flex-col items-center gap-1.5"
+                class="group flex w-14 flex-col items-center gap-1"
                 :title="badge.description"
               >
                 <span
-                  class="flex h-12 w-12 items-center justify-center ring-1 ring-inset transition group-hover:-translate-y-0.5 group-hover:shadow-sm"
+                  class="flex h-10 w-10 items-center justify-center ring-1 ring-inset transition group-hover:-translate-y-0.5 group-hover:shadow-sm"
                   :class="badgeClass(badge.color, badge.level)"
                   style="clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)"
                 >
-                  <img :src="badgeIconURL(badge)" :alt="badge.name" class="h-6 w-6 object-contain" />
+                  <img :src="badgeIconURL(badge)" :alt="badge.name" class="h-5 w-5 object-contain" />
                 </span>
-                <span class="w-full truncate text-center text-[11px] font-semibold text-base-content/75">{{ badge.name }}</span>
+                <span class="w-full truncate text-center text-[10px] font-semibold text-base-content/75">{{ badge.name }}</span>
               </div>
             </div>
           </div>

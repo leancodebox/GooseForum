@@ -367,6 +367,7 @@ export interface UserCardPayload {
   signature: string
   websiteName: string
   website: string
+  prestige: number
   externalInformation: Record<string, { link?: string }>
   isAdmin: boolean
   articleCount: number
@@ -393,6 +394,7 @@ export interface UserHoverCardPayload {
   signature: string
   websiteName: string
   website: string
+  prestige: number
   externalInformation: Record<string, { link?: string }>
   isAdmin: boolean
   articleCount: number

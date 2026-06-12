@@ -549,27 +549,27 @@ function hexToRgb(value: string) {
             <h2 class="text-sm font-semibold text-base-content">{{ t('themePreview.presetsTitle') }}</h2>
             <span class="h-px flex-1 bg-line" />
           </div>
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-3 gap-1.5">
             <button
               v-for="preset in themePresets"
               :key="preset.key"
               type="button"
-              class="min-w-0 rounded-md border border-line bg-base-100 p-2 text-left transition hover:border-primary/30 hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-55"
+              class="min-w-0 rounded-md border border-line bg-base-100 px-2 py-1.5 text-left transition hover:border-primary/30 hover:bg-base-200 disabled:cursor-not-allowed disabled:opacity-55"
               :disabled="!canManageSiteTheme"
+              :title="presetDescription(preset)"
               @click="applyPreset(preset)"
             >
-              <div class="flex items-center justify-between gap-2">
-                <span class="truncate text-xs font-bold text-base-content">{{ presetLabel(preset) }}</span>
-                <span class="flex shrink-0 -space-x-1">
+              <div class="flex min-w-0 items-center justify-between gap-1">
+                <span class="min-w-0 truncate text-[11px] font-bold leading-4 text-base-content">{{ presetLabel(preset) }}</span>
+                <span class="flex shrink-0 -space-x-1" aria-hidden="true">
                   <span
                     v-for="color in preset.swatches"
                     :key="color"
-                    class="h-3.5 w-3.5 rounded-full border border-base-100"
+                    class="h-3 w-3 rounded-full border border-base-100"
                     :style="{ backgroundColor: color }"
                   />
                 </span>
               </div>
-              <div class="mt-1 truncate text-[11px] text-base-content/45">{{ presetDescription(preset) }}</div>
             </button>
           </div>
         </section>

@@ -18,6 +18,7 @@ type UserCard struct {
 	Signature         string                    `json:"signature"`
 	WebsiteName       string                    `json:"websiteName"`
 	Website           string                    `json:"website"`
+	Prestige          int64                     `json:"prestige"`
 	IsAdmin           bool                      `json:"isAdmin"`
 	ArticleCount      uint                      `json:"articleCount"`
 	ReplyCount        uint                      `json:"replyCount"`
@@ -46,6 +47,7 @@ type UserHoverCard struct {
 	Signature         string                    `json:"signature"`
 	WebsiteName       string                    `json:"websiteName"`
 	Website           string                    `json:"website"`
+	Prestige          int64                     `json:"prestige"`
 	ExternalInfo      users.ExternalInformation `json:"externalInformation"`
 	IsAdmin           bool                      `json:"isAdmin"`
 	ArticleCount      uint                      `json:"articleCount"`

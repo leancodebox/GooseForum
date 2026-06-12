@@ -352,6 +352,7 @@ export default {
     stats: {
       topics: '主题',
       replies: '回复',
+      reputation: '声望',
       likesReceived: '获赞',
       likesGiven: '点赞',
       followers: '粉丝',
@@ -551,6 +552,26 @@ export default {
       deep: {
         label: 'Deep',
         description: '黑为主，强调更深邃',
+      },
+      cupcake: {
+        label: 'Cupcake',
+        description: '粉色甜点感，柔和轻盈',
+      },
+      retro: {
+        label: 'Retro',
+        description: '复古暖调，适合轻松社区',
+      },
+      synthwave: {
+        label: 'Synthwave',
+        description: '霓虹紫蓝，更有视觉张力',
+      },
+      aqua: {
+        label: 'Aqua',
+        description: '清爽水色，明快通透',
+      },
+      forest: {
+        label: 'Forest',
+        description: '墨绿层级，适合知识社区',
       },
     },
   },

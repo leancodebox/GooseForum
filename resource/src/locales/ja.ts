@@ -352,6 +352,7 @@ export default {
     stats: {
       topics: 'トピック',
       replies: '返信',
+      reputation: '評判',
       likesReceived: 'いいね',
       likesGiven: 'いいね済み',
       followers: 'フォロワー',
@@ -551,6 +552,26 @@ export default {
       deep: {
         label: 'Deep',
         description: '黒を基調にした深いコントラスト',
+      },
+      cupcake: {
+        label: 'Cupcake',
+        description: 'やわらかく軽いピンク系',
+      },
+      retro: {
+        label: 'Retro',
+        description: '気軽なコミュニティ向けの温かいレトロ調',
+      },
+      synthwave: {
+        label: 'Synthwave',
+        description: '存在感のあるネオン紫とシアン',
+      },
+      aqua: {
+        label: 'Aqua',
+        description: '明るく透明感のあるシアン系',
+      },
+      forest: {
+        label: 'Forest',
+        description: '知識コミュニティ向けの深いグリーン',
       },
     },
   },

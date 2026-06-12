@@ -52,6 +52,7 @@ type UserPublicInfo struct {
 	Username            string
 	Nickname            string
 	RoleId              uint64
+	Prestige            int64
 	AvatarUrl           string
 	ProfileCoverUrl     string
 	Bio                 string
@@ -219,6 +220,7 @@ func (user UserInfo) toPublicInfo() UserPublicInfo {
 		Username:            user.Username,
 		Nickname:            user.Nickname,
 		RoleId:              user.RoleId,
+		Prestige:            user.Prestige,
 		AvatarUrl:           user.AvatarUrl,
 		ProfileCoverUrl:     user.ProfileCoverUrl,
 		Bio:                 user.Bio,
@@ -278,6 +280,7 @@ func buildUserCard(profile UserPublicProfile) vo.UserCard {
 		Signature:         user.Signature,
 		WebsiteName:       user.WebsiteName,
 		Website:           user.Website,
+		Prestige:          user.Prestige,
 		ExternalInfo:      user.ExternalInformation,
 		IsAdmin:           userIsAdmin(user.RoleId),
 		ArticleCount:      stats.ArticleCount,
@@ -310,6 +313,7 @@ func buildUserHoverCard(profile UserPublicProfile) vo.UserHoverCard {
 		Signature:         user.Signature,
 		WebsiteName:       user.WebsiteName,
 		Website:           user.Website,
+		Prestige:          user.Prestige,
 		ExternalInfo:      user.ExternalInformation,
 		IsAdmin:           userIsAdmin(user.RoleId),
 		ArticleCount:      stats.ArticleCount,

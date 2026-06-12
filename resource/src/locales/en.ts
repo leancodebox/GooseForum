@@ -352,6 +352,7 @@ export default {
     stats: {
       topics: 'Topics',
       replies: 'Replies',
+      reputation: 'Reputation',
       likesReceived: 'Likes',
       likesGiven: 'Liked',
       followers: 'Followers',
@@ -551,6 +552,26 @@ export default {
       deep: {
         label: 'Deep',
         description: 'Black-led with deeper contrast',
+      },
+      cupcake: {
+        label: 'Cupcake',
+        description: 'Soft pink, light and sweet',
+      },
+      retro: {
+        label: 'Retro',
+        description: 'Warm vintage tones for casual communities',
+      },
+      synthwave: {
+        label: 'Synthwave',
+        description: 'Neon purple and cyan with stronger presence',
+      },
+      aqua: {
+        label: 'Aqua',
+        description: 'Fresh cyan with bright contrast',
+      },
+      forest: {
+        label: 'Forest',
+        description: 'Layered green for knowledge communities',
       },
     },
   },
