@@ -334,7 +334,8 @@ function buildThemePayload(config: SiteThemeConfig): ThemePayload {
     enabled: config.enabled,
     href: themeHref(config),
     colors,
-    themeColor: colors['gf-light'] || '#ffffff',
+    current: selectedTheme.value,
+    themeColor: colors[selectedTheme.value] || colors['gf-light'] || '#ffffff',
   }
 }
 

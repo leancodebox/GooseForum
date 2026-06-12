@@ -129,6 +129,7 @@ type ThemePayload struct {
 	Enabled    bool              `json:"enabled"`
 	Href       string            `json:"href,omitempty"`
 	Colors     map[string]string `json:"colors,omitempty"`
+	Current    string            `json:"current"`
 	ThemeColor string            `json:"themeColor"`
 }
 
@@ -570,22 +571,40 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			Primary: footerPrimary,
 		},
 		Unread: unread,
-		Theme:  buildThemePayload(),
+		Theme:  buildThemePayload(c),
 	}
 }
 
-func buildThemePayload() ThemePayload {
+func buildThemePayload(c *gin.Context) ThemePayload {
 	runtimeTheme := themeservice.Runtime()
 	colors := runtimeTheme.Colors.Payload()
+	current := currentThemeFromCookie(c)
 	return ThemePayload{
 		Enabled:    runtimeTheme.Enabled,
 		Href:       runtimeTheme.Href,
 		Colors:     colors,
-		ThemeColor: themeColor(colors),
+		Current:    current,
+		ThemeColor: themeColor(colors, current),
 	}
 }
 
-func themeColor(colors map[string]string) string {
+func currentThemeFromCookie(c *gin.Context) string {
+	if c != nil {
+		if value, err := c.Cookie("goose-site-theme"); err == nil && isSiteTheme(value) {
+			return value
+		}
+	}
+	return themeservice.LightName
+}
+
+func isSiteTheme(value string) bool {
+	return value == themeservice.LightName || value == themeservice.DarkName
+}
+
+func themeColor(colors map[string]string, current string) string {
+	if color := colors[current]; color != "" {
+		return color
+	}
 	if color := colors[themeservice.LightName]; color != "" {
 		return color
 	}

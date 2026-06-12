@@ -4,6 +4,7 @@ import type { ThemePayload } from '@/types/payload'
 export type SiteTheme = 'gf-light' | 'gf-dark'
 
 const STORAGE_KEY = 'goose-site-theme'
+const COOKIE_KEY = 'goose-site-theme'
 const themes: SiteTheme[] = ['gf-light', 'gf-dark']
 const THEME_LINK_ID = 'goose-site-theme-link'
 const THEME_PREVIEW_STYLE_ID = 'goose-site-theme-preview'
@@ -74,6 +75,7 @@ export function toggleTheme() {
 export function setTheme(theme: SiteTheme) {
   currentTheme.value = theme
   applyTheme(theme)
+  writeThemeCookie(theme)
   try {
     window.localStorage.setItem(STORAGE_KEY, theme)
   } catch {
@@ -82,15 +84,24 @@ export function setTheme(theme: SiteTheme) {
 }
 
 function resolveInitialTheme(): SiteTheme {
+  const documentTheme = document.documentElement.dataset.theme || null
+  if (isSiteTheme(documentTheme)) return documentTheme
+
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY)
-    if (isSiteTheme(stored)) return stored
+    const cookieTheme = readThemeCookie()
+    if (isSiteTheme(cookieTheme)) return cookieTheme
   } catch {
-    // Fall through to system preference.
+    // Fall through to local storage compatibility.
   }
 
-  if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
-    return 'gf-dark'
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY)
+    if (isSiteTheme(stored)) {
+      writeThemeCookie(stored)
+      return stored
+    }
+  } catch {
+    // Fall through to light theme.
   }
 
   return 'gf-light'
@@ -103,6 +114,19 @@ function applyTheme(theme: SiteTheme) {
 
 function isSiteTheme(value: string | null): value is SiteTheme {
   return themes.includes(value as SiteTheme)
+}
+
+function readThemeCookie() {
+  return document.cookie
+    .split('; ')
+    .find((item) => item.startsWith(`${COOKIE_KEY}=`))
+    ?.split('=')
+    .slice(1)
+    .join('=') || ''
+}
+
+function writeThemeCookie(theme: SiteTheme) {
+  document.cookie = `${COOKIE_KEY}=${theme}; path=/; max-age=31536000; samesite=lax`
 }
 
 function normalizeThemeColor(value?: string) {

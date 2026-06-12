@@ -1,34 +1,11 @@
 {{define "layout/app.gohtml"}}
 <!DOCTYPE html>
-<html lang="{{.Lang}}" data-goose-resource data-theme="gf-light">
+<html lang="{{.Lang}}" data-goose-resource data-theme="{{.Payload.Layout.Theme.Current}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="{{.Payload.Layout.Theme.ThemeColor}}" data-goose-theme-color>
-    <script>
-      (() => {
-        const themeColors = Object.assign({
-          'gf-light': '#ffffff',
-          'gf-dark': '#1b1b1b',
-        }, {{json .Payload.Layout.Theme.Colors}})
-        const applyThemeColor = (theme) => {
-          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[theme] || themeColors['gf-light'])
-        }
-
-        try {
-          const stored = localStorage.getItem('goose-site-theme')
-          const theme = stored === 'gf-dark' || stored === 'gf-light'
-            ? stored
-            : (matchMedia('(prefers-color-scheme: dark)').matches ? 'gf-dark' : 'gf-light')
-          document.documentElement.dataset.theme = theme
-          applyThemeColor(theme)
-        } catch {
-          document.documentElement.dataset.theme = 'gf-light'
-          applyThemeColor('gf-light')
-        }
-      })()
-    </script>
     <title>{{.Payload.Meta.Title}}</title>
     {{if .Payload.Meta.Description}}<meta name="description" content="{{.Payload.Meta.Description}}">{{end}}
     {{if .Payload.Meta.Canonical}}<link rel="canonical" href="{{.Payload.Meta.Canonical}}">{{end}}

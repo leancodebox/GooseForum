@@ -65,6 +65,7 @@ export interface ThemePayload {
   enabled: boolean
   href?: string
   colors?: Record<string, string>
+  current: 'gf-light' | 'gf-dark'
   themeColor: string
 }
 
