@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { MessageSquare, Search, Sparkles, UsersRound } from '@lucide/vue'
-import { formatNumber, timeAgo } from '@/runtime/format'
-import { topicDescription } from '@/runtime/topic-description'
-import { showUserCard } from '@/runtime/user-card-events'
-import UserAvatar from '@/site/components/UserAvatar.vue'
+import { Search, UsersRound } from '@lucide/vue'
+import { formatNumber } from '@/runtime/format'
+import TopicList from '@/site/components/TopicList.vue'
 import type { LayoutPayload, SearchPageProps } from '@/types/payload'
 
 const page = defineProps<{
@@ -60,77 +58,7 @@ watch(
         </header>
 
         <template v-if="hasResults">
-          <div class="hidden grid-cols-[minmax(0,1fr)_112px_72px_72px_88px] border-b border-line bg-base-200/60 px-4 py-2 text-[11px] font-bold uppercase text-base-content/75 lg:grid">
-            <div>{{ t('topicList.columns.topic') }}</div>
-            <div class="text-center">{{ t('topicList.columns.users') }}</div>
-            <div class="text-center">{{ t('topicList.columns.replies') }}</div>
-            <div class="text-center">{{ t('topicList.columns.views') }}</div>
-            <div class="text-right">{{ t('topicList.columns.activity') }}</div>
-          </div>
-
-          <div class="relative bg-base-100">
-            <article
-              v-for="topic in topics"
-              :key="topic.id"
-              class="group gf-topic-row"
-            >
-              <div class="min-w-0">
-                <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                  <a :href="topic.url" class="truncate text-[15px] font-semibold leading-snug text-base-content group-hover:text-primary sm:text-base">
-                    {{ topic.title }}
-                  </a>
-                  <a
-                    v-for="category in topic.categories"
-                    :key="category.id"
-                    :href="category.url"
-                    class="gf-topic-chip"
-                  >
-                    <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
-                    {{ category.name }}
-                  </a>
-                  <span v-if="topic.viewCount > 500" class="inline-flex h-6 items-center gap-1 text-[11px] font-semibold text-warning">
-                    <Sparkles class="h-3 w-3" /> hot
-                  </span>
-                </div>
-                <p class="mt-1 truncate text-[13px] leading-relaxed text-base-content/55">{{ topicDescription(topic) }}</p>
-                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55 lg:hidden">
-                  <div class="flex -space-x-2">
-                    <a
-                      v-for="participant in topic.participants"
-                      :key="participant.id"
-                      :href="`/u/${participant.id}`"
-                      :title="participant.username"
-                      class="rounded-full ring-2 ring-base-100 transition hover:z-10 hover:scale-110"
-                      @click="showUserCard(participant, $event)"
-                    >
-                      <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
-                    </a>
-                  </div>
-                  <span>{{ timeAgo(topic.lastUpdateTime) }}</span>
-                  <span class="inline-flex items-center gap-1">
-                    <MessageSquare class="h-3.5 w-3.5" /> {{ formatNumber(topic.replyCount) }}
-                  </span>
-                </div>
-              </div>
-              <div class="hidden justify-center lg:flex">
-                <div class="flex -space-x-3">
-                  <a
-                    v-for="participant in topic.participants"
-                    :key="participant.id"
-                    :href="`/u/${participant.id}`"
-                    :title="participant.username"
-                    class="rounded-full ring-2 ring-base-100 transition hover:z-10 hover:scale-110"
-                    @click="showUserCard(participant, $event)"
-                  >
-                    <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
-                  </a>
-                </div>
-              </div>
-              <div class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 lg:block">{{ formatNumber(topic.replyCount) }}</div>
-              <div class="hidden text-center text-sm tabular-nums text-base-content/55 lg:block">{{ formatNumber(topic.viewCount) }}</div>
-              <div class="hidden text-right text-[13px] font-medium tabular-nums text-base-content/55 lg:block">{{ timeAgo(topic.lastUpdateTime) }}</div>
-            </article>
-          </div>
+          <TopicList :topics="topics" />
 
           <footer v-if="page.props.totalPages > 1" class="flex flex-col gap-3 border-t border-line bg-base-200/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="text-sm text-base-content/55">

@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Loader2, MessageSquare, Plus, UsersRound } from '@lucide/vue'
-import { formatNumber, timeAgo } from '@/runtime/format'
+import { Loader2, Plus, UsersRound } from '@lucide/vue'
 import { fetchPage } from '@/runtime/router'
-import { topicDescription } from '@/runtime/topic-description'
-import { showUserCard } from '@/runtime/user-card-events'
+import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
-import UserAvatar from '@/site/components/UserAvatar.vue'
+import TopicList from '@/site/components/TopicList.vue'
 import type { CategoryPageProps, LayoutPayload, PagePayload, TopicPayload } from '@/types/payload'
 
 const page = defineProps<{
@@ -113,71 +111,11 @@ onBeforeUnmount(() => {
           </a>
         </div>
 
-        <div class="gf-topic-list-header">
-          <div>{{ t('topicList.columns.topic') }}</div>
-          <div class="text-center">{{ t('topicList.columns.users') }}</div>
-          <div class="text-center">{{ t('topicList.columns.replies') }}</div>
-          <div class="text-center">{{ t('topicList.columns.views') }}</div>
-          <div class="text-right">{{ t('topicList.columns.activity') }}</div>
-        </div>
-
-        <div class="relative bg-base-100">
-          <article
-            v-for="topic in topics"
-            :key="topic.id"
-            class="group gf-topic-row"
-          >
-            <div class="min-w-0">
-              <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                <a :href="topic.url" class="truncate text-[15px] font-semibold leading-snug text-base-content group-hover:text-primary sm:text-base">
-                  {{ topic.title }}
-                </a>
-              </div>
-              <p class="mt-1 truncate text-[13px] leading-relaxed text-base-content/55">{{ topicDescription(topic) }}</p>
-              <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55 lg:hidden">
-                <div class="flex -space-x-2">
-                  <a
-                    v-for="participant in topic.participants"
-                    :key="participant.id"
-                    :href="`/u/${participant.id}`"
-                    :title="participant.username"
-                    class="rounded-full ring-2 ring-base-100 transition hover:z-10 hover:scale-110"
-                    @click="showUserCard(participant, $event)"
-                  >
-                    <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
-                  </a>
-                </div>
-                <span>{{ timeAgo(topic.lastUpdateTime) }}</span>
-                <span class="inline-flex items-center gap-1">
-                  <MessageSquare class="h-3.5 w-3.5" /> {{ formatNumber(topic.replyCount) }}
-                </span>
-              </div>
-            </div>
-            <div class="hidden justify-center lg:flex">
-              <div class="flex -space-x-3">
-                <a
-                  v-for="participant in topic.participants"
-                  :key="participant.id"
-                  :href="`/u/${participant.id}`"
-                  :title="participant.username"
-                  class="rounded-full ring-2 ring-base-100 transition hover:z-10 hover:scale-110"
-                  @click="showUserCard(participant, $event)"
-                >
-                  <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
-                </a>
-              </div>
-            </div>
-            <div class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 lg:block">{{ formatNumber(topic.replyCount) }}</div>
-            <div class="hidden text-center text-sm tabular-nums text-base-content/55 lg:block">{{ formatNumber(topic.viewCount) }}</div>
-            <div class="hidden text-right text-[13px] font-medium tabular-nums text-base-content/55 lg:block">{{ timeAgo(topic.lastUpdateTime) }}</div>
-          </article>
-
-          <div v-if="!hasTopics" class="px-5 py-16 text-center">
-            <UsersRound class="mx-auto h-8 w-8 text-base-content/35" />
-            <h2 class="mt-3 text-base font-semibold text-base-content">{{ t('topicList.emptyTitle') }}</h2>
-            <p class="mt-1 text-sm text-base-content/55">{{ t('topicList.emptyCategoryDescription') }}</p>
-          </div>
-        </div>
+        <TopicList :topics="topics" :show-categories="false" :show-hot="false">
+          <template #empty>
+            <EmptyState v-if="!hasTopics" :icon="UsersRound" :title="t('topicList.emptyTitle')" :description="t('topicList.emptyCategoryDescription')" />
+          </template>
+        </TopicList>
 
         <div ref="loadMoreSentinel" class="border-t border-line bg-base-200/50 p-3 text-center">
           <button
