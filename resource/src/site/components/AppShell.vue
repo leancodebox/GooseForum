@@ -498,7 +498,7 @@ async function loadUserHoverCard() {
     <GlobalFlash />
 
     <main
-      class="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-3 px-3 py-3 sm:px-5 lg:grid-cols-[210px_minmax(0,1fr)] lg:px-8 xl:grid-cols-[224px_minmax(0,1fr)]"
+      class="gf-shell-main mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-0 px-0 py-0 sm:gap-3 sm:px-5 sm:py-3 lg:grid-cols-[210px_minmax(0,1fr)] lg:px-8 xl:grid-cols-[224px_minmax(0,1fr)]"
       :class="{ 'xl:grid-cols-[224px_minmax(0,1fr)_280px]': rail }"
     >
       <aside class="gf-scrollbar-none sticky top-16 -my-3 hidden h-[calc(100vh-4rem)] overflow-y-auto self-start lg:block" aria-label="Sidebar">
@@ -591,7 +591,7 @@ async function loadUserHoverCard() {
         </nav>
       </aside>
 
-      <section class="min-w-0">
+      <section class="gf-shell-content min-w-0">
         <slot />
       </section>
 

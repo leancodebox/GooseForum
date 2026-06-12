@@ -313,7 +313,7 @@ function markItemReadAndNavigate(item: NotificationPayload) {
 
 <template>
   <main class="min-w-0 pb-8">
-    <header class="mb-3 flex flex-col gap-2 border-b border-line/70 pb-3 sm:flex-row sm:items-center sm:justify-between">
+    <header class="flex flex-col gap-2 px-4 py-3 sm:mb-3 sm:flex-row sm:items-center sm:justify-between sm:border-b sm:border-line/70 sm:px-0 sm:py-0 sm:pb-3">
       <div class="min-w-0">
         <div class="flex min-w-0 items-center gap-2">
           <h1 class="text-xl font-bold text-base-content">{{ t('notifications.title') }}</h1>

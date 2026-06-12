@@ -12,6 +12,45 @@
     box-shadow: 0 2px 12px rgb(0 0 0 / calc(var(--gf-depth) * 0.04));
   }
 
+  @media (max-width: 639.98px) {
+    .gf-shell-content {
+      min-height: calc(100dvh - 4rem);
+      background: var(--gf-color-base-100);
+    }
+
+    .gf-shell-content > :is(article, div, main) {
+      padding-bottom: 0;
+    }
+
+    .gf-shell-main .gf-card {
+      border-top: 0;
+      border-left: 0;
+      border-right: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .gf-shell-main .gf-panel {
+      border-left: 0;
+      border-right: 0;
+      border-radius: 0;
+    }
+
+    .gf-shell-main .gf-card + .gf-card,
+    .gf-shell-main .gf-card + .gf-panel,
+    .gf-shell-main .gf-panel + .gf-card,
+    .gf-shell-main .gf-panel + .gf-panel {
+      margin-top: 0 !important;
+    }
+
+    .gf-shell-main .gf-card:has(+ .gf-card),
+    .gf-shell-main .gf-card:has(+ .gf-panel),
+    .gf-shell-main .gf-panel:has(+ .gf-card),
+    .gf-shell-main .gf-panel:has(+ .gf-panel) {
+      border-bottom-color: transparent;
+    }
+  }
+
   .gf-button {
     @apply inline-flex items-center justify-center gap-1.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60;
     min-height: 2rem;

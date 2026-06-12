@@ -234,7 +234,7 @@ async function startChat(user: UserConnectionPayload) {
 </script>
 
 <template>
-    <main class="-mx-3 -my-3 h-[calc(100dvh-4rem)] min-h-0 min-w-0 overflow-hidden sm:-mx-5 md:mx-0 md:my-0 md:h-[calc(100dvh-5.5rem)] md:min-h-[620px] md:pb-3">
+    <main class="h-[calc(100dvh-4rem)] min-h-0 min-w-0 overflow-hidden sm:-mx-5 sm:-my-3 md:mx-0 md:my-0 md:h-[calc(100dvh-5.5rem)] md:min-h-[620px] md:pb-3">
       <section class="grid h-full overflow-hidden bg-base-100 md:grid-cols-[300px_minmax(0,1fr)] md:[border-radius:var(--gf-radius-box)] md:border md:border-line/70 md:shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         <aside
           class="flex min-h-0 flex-col border-line bg-base-100 md:border-r md:bg-base-200/50"

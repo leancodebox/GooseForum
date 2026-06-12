@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
-import { AlertTriangle, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
+import { AlertTriangle, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Sparkles, Trash2, X } from '@lucide/vue'
 import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateReply, watchArticle } from '@/runtime/api'
-import { formatDateTime, formatNumber } from '@/runtime/format'
+import { formatDateTime, formatNumber, timeAgo } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
+import { topicDescription } from '@/runtime/topic-description'
 import { showUserCard } from '@/runtime/user-card-events'
 import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
@@ -1070,7 +1071,7 @@ async function removeReply(replyId: number) {
 <template>
   <div class="pb-20 xl:pb-0">
     <article class="min-w-0">
-      <header ref="articleHeaderEl" class="relative z-10 mb-4 border-b border-line/70 pb-4 xl:w-[calc(100%+292px)]">
+      <header ref="articleHeaderEl" class="relative z-10 border-b border-line/70 px-4 py-4 sm:mb-4 sm:px-0 sm:pb-4 sm:pt-0 xl:w-[calc(100%+292px)]">
         <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-base-content [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.article.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-base-content/55">
           <a
@@ -1097,7 +1098,7 @@ async function removeReply(replyId: number) {
         </div>
       </header>
 
-      <section class="gf-card">
+      <section class="gf-card overflow-hidden">
         <div class="grid grid-cols-[44px_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5">
           <a
             :href="`/u/${page.props.article.author.id}`"
@@ -1385,26 +1386,84 @@ async function removeReply(replyId: number) {
     </article>
 
     <Teleport defer to="#goose-shell-wide-content">
-      <section v-if="page.props.hotTopics.length" class="gf-card w-full">
-        <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-4 sm:px-5">
+      <section v-if="page.props.hotTopics.length" class="gf-card w-full overflow-hidden">
+        <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
           <h2 class="text-base font-bold text-base-content">{{ t('article.hotContent') }}</h2>
           <a href="/?sort=hot" class="text-sm font-semibold text-primary hover:text-primary">{{ t('article.more') }}</a>
         </div>
-        <div class="divide-y divide-line">
-          <a
+
+        <div class="gf-topic-list-header">
+          <div>{{ t('topicList.columns.topic') }}</div>
+          <div class="text-center">{{ t('topicList.columns.users') }}</div>
+          <div class="text-center">{{ t('topicList.columns.replies') }}</div>
+          <div class="text-center">{{ t('topicList.columns.views') }}</div>
+          <div class="text-right">{{ t('topicList.columns.activity') }}</div>
+        </div>
+
+        <div class="relative bg-base-100">
+          <article
             v-for="topic in page.props.hotTopics"
             :key="topic.id"
-            :href="topic.url"
-            class="block px-4 py-4 transition hover:bg-base-200 sm:px-5"
+            class="group gf-topic-row gf-topic-row-home"
           >
-            <div class="line-clamp-2 text-base font-bold leading-snug text-base-content">{{ topic.title }}</div>
-            <p v-if="topic.description" class="mt-1 line-clamp-2 text-sm leading-6 text-base-content/55">{{ topic.description }}</p>
-            <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-base-content/55">
-              <span>{{ topic.author.username }}</span>
-              <span class="tabular-nums">{{ t('article.replyCountValue', { count: formatNumber(topic.replyCount) }) }}</span>
-              <span class="tabular-nums">{{ formatNumber(topic.viewCount) }} {{ t('article.viewCount') }}</span>
+            <div class="min-w-0">
+              <div class="flex min-h-6 min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                <span class="inline-flex min-w-0 max-w-full items-center gap-2">
+                  <a :href="topic.url" class="min-w-0 truncate text-[15px] font-semibold leading-6 text-base-content group-hover:text-primary sm:text-base">
+                    {{ topic.title }}
+                  </a>
+                </span>
+                <a
+                  v-for="category in topic.categories"
+                  :key="category.id"
+                  :href="category.url"
+                  class="gf-topic-chip"
+                >
+                  <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
+                  {{ category.name }}
+                </a>
+                <span v-if="topic.viewCount > 500" class="inline-flex h-5 items-center gap-1 text-[11px] font-semibold text-warning">
+                  <Sparkles class="h-3 w-3" /> hot
+                </span>
+              </div>
+              <p class="mt-1 min-h-5 truncate text-[13px] leading-5 text-base-content/55">{{ topicDescription(topic) }}</p>
+              <div class="mt-1.5 flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55 lg:hidden">
+                <div class="flex h-6 min-w-6 -space-x-2">
+                  <a
+                    v-for="participant in topic.participants"
+                    :key="participant.id"
+                    :href="`/u/${participant.id}`"
+                    :title="participant.username"
+                    class="h-6 w-6 rounded-full ring-2 ring-base-100 transition hover:z-10 hover:scale-110"
+                    @click="showUserCard(participant, $event)"
+                  >
+                    <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-6 w-6 rounded-full object-cover" />
+                  </a>
+                </div>
+                <span>{{ timeAgo(topic.lastUpdateTime) }}</span>
+                <span class="inline-flex items-center gap-1">
+                  <MessageSquare class="h-3.5 w-3.5" /> {{ formatNumber(topic.replyCount) }}
+                </span>
+              </div>
             </div>
-          </a>
+            <div class="hidden justify-center lg:flex">
+              <div class="flex h-8 min-w-8 -space-x-3">
+                <a
+                  v-for="participant in topic.participants"
+                  :key="participant.id"
+                  :href="`/u/${participant.id}`"
+                  :title="participant.username"
+                  class="h-8 w-8 rounded-full ring-2 ring-base-100 transition hover:z-10 hover:scale-110"
+                  @click="showUserCard(participant, $event)"
+                >
+                  <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover" />
+                </a>
+              </div>
+            </div>
+            <div class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 lg:block">{{ formatNumber(topic.replyCount) }}</div>
+            <div class="hidden text-center text-sm tabular-nums text-base-content/55 lg:block">{{ formatNumber(topic.viewCount) }}</div>
+            <div class="hidden text-right text-[13px] font-medium tabular-nums text-base-content/55 lg:block">{{ timeAgo(topic.lastUpdateTime) }}</div>
+          </article>
         </div>
       </section>
     </Teleport>

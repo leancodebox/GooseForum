@@ -1,6 +1,6 @@
 @layer components {
   .gf-home-topic-toolbar {
-    @apply flex flex-col gap-3 border-y border-line bg-base-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:border-t-0;
+    @apply flex flex-col gap-3 border-b border-line bg-base-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:border-y sm:border-t-0;
   }
 
   .gf-home-topic-tabs {
