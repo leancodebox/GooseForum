@@ -1098,7 +1098,7 @@ async function removeReply(replyId: number) {
         </div>
       </header>
 
-      <section class="gf-card overflow-hidden">
+      <section class="gf-card">
         <div class="grid grid-cols-[44px_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5">
           <a
             :href="`/u/${page.props.article.author.id}`"

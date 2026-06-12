@@ -50,10 +50,10 @@ async function submit() {
 </script>
 
 <template>
-  <main class="min-h-screen bg-base-200 px-4 py-8 text-base-content sm:px-6 lg:px-8">
-    <section class="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[880px] items-center justify-center">
-      <div class="gf-card grid w-full overflow-hidden md:grid-cols-2">
-        <div class="flex min-h-[470px] flex-col justify-center px-5 py-6 sm:px-8">
+  <main class="min-h-screen bg-base-100 text-base-content sm:bg-base-200 sm:px-6 sm:py-8 lg:px-8">
+    <section class="mx-auto flex min-h-screen w-full max-w-[880px] items-stretch justify-center sm:min-h-[calc(100vh-4rem)] sm:items-center">
+      <div class="gf-card grid w-full overflow-hidden border-0 shadow-none sm:border sm:shadow-[0_2px_12px_rgb(0_0_0/calc(var(--gf-depth)*0.04))] md:grid-cols-2">
+        <div class="flex min-h-screen flex-col justify-center px-4 py-12 sm:min-h-[470px] sm:px-8 sm:py-6">
           <a href="/" class="mb-6 inline-flex items-baseline text-[27px] font-semibold leading-none tracking-[-0.04em] text-primary">
             <span v-if="page.layout.site.brandType === 'image' && page.layout.site.brandImage">
               <img :src="page.layout.site.brandImage" :alt="page.layout.site.name" class="h-8 w-auto object-contain" />
@@ -95,7 +95,7 @@ async function submit() {
           </form>
         </div>
 
-        <aside class="border-t border-line bg-base-200/70 px-5 py-6 sm:px-8 md:border-l md:border-t-0">
+        <aside class="border-t border-line bg-base-200/70 px-4 py-6 sm:px-8 md:border-l md:border-t-0">
           <div class="flex h-full flex-col justify-center">
             <h2 class="text-lg font-bold text-base-content">{{ t('auth.passwordAdviceTitle') }}</h2>
             <p class="mt-3 text-sm leading-6 text-base-content/55">{{ t('auth.passwordAdviceDescription') }}</p>

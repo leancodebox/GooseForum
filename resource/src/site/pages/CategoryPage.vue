@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="pb-12">
-      <section class="mb-3 px-1 pb-2">
+      <section class="px-4 py-3 sm:mb-3 sm:px-1 sm:py-0 sm:pb-2">
         <div class="min-w-0">
           <div class="flex min-w-0 items-center gap-2">
             <h1 class="truncate text-xl font-bold text-base-content">{{ page.props.category.name }}</h1>

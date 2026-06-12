@@ -302,7 +302,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 
 <template>
     <main class="min-w-0 pb-12">
-      <header class="mb-4 border-b border-line/70 pb-4">
+      <header class="border-b border-line/70 px-4 py-3 sm:mb-4 sm:px-0 sm:py-0 sm:pb-4">
         <h1 class="text-2xl font-bold text-base-content">{{ props.isEditing ? t('publish.editTitle') : t('publish.createTitle') }}</h1>
         <p class="mt-1 text-sm text-base-content/55">{{ t('publish.subtitle') }}</p>
       </header>

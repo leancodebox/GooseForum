@@ -38,7 +38,7 @@ function showMessage(sponsor: SponsorPayload) {
 
 <template>
     <div class="pb-12">
-      <header class="mb-4 border-b border-line/70 pb-4">
+      <header class="border-b border-line/70 px-4 py-3 sm:mb-4 sm:px-0 sm:py-0 sm:pb-4">
         <div class="flex flex-wrap items-center gap-2">
           <h1 class="text-2xl font-bold text-base-content">{{ props.content.title }}</h1>
           <span class="gf-badge gf-badge-muted">{{ props.totalCount }}</span>

@@ -163,8 +163,8 @@ function errorMessage(err: unknown, fallback: string) {
 </script>
 
 <template>
-  <main class="relative min-h-screen bg-base-200 px-4 py-8 text-base-content sm:px-6 lg:px-8">
-    <div class="gf-locale-switch absolute right-4 top-4 z-10">
+  <main class="relative min-h-screen bg-base-100 text-base-content sm:bg-base-200 sm:px-6 sm:py-8 lg:px-8">
+    <div class="gf-locale-switch absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
       <button
         v-for="item in supportedLocales"
         :key="item"
@@ -177,9 +177,9 @@ function errorMessage(err: unknown, fallback: string) {
       </button>
     </div>
 
-    <section class="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[880px] items-center justify-center">
-      <div class="gf-card grid w-full overflow-hidden md:grid-cols-2">
-        <div class="flex min-h-[470px] flex-col justify-center px-5 py-6 sm:px-8">
+    <section class="mx-auto flex min-h-screen w-full max-w-[880px] items-stretch justify-center sm:min-h-[calc(100vh-4rem)] sm:items-center">
+      <div class="gf-card grid w-full overflow-hidden border-0 shadow-none sm:border sm:shadow-[0_2px_12px_rgb(0_0_0/calc(var(--gf-depth)*0.04))] md:grid-cols-2">
+        <div class="flex min-h-screen flex-col justify-center px-4 py-12 sm:min-h-[470px] sm:px-8 sm:py-6">
           <a href="/" class="mb-6 inline-flex items-baseline text-[27px] font-semibold leading-none tracking-[-0.04em] text-primary">
             <span v-if="page.layout.site.brandType === 'image' && page.layout.site.brandImage" class="inline-flex">
               <img :src="page.layout.site.brandImage" :alt="page.layout.site.name" class="h-8 w-auto object-contain" />
@@ -205,7 +205,7 @@ function errorMessage(err: unknown, fallback: string) {
           <p v-if="error" class="gf-status-message gf-status-message-error mb-4">{{ error }}</p>
           <p v-if="notice" class="gf-status-message gf-status-message-success mb-4">{{ notice }}</p>
 
-          <form v-if="mode === 'login'" class="space-y-3.5" @submit.prevent="handleLogin">
+          <form v-if="mode === 'login'" class="space-y-3" @submit.prevent="handleLogin">
             <label class="block">
               <span class="sr-only">{{ t('auth.usernameOrEmail') }}</span>
               <span class="relative block">
@@ -236,7 +236,7 @@ function errorMessage(err: unknown, fallback: string) {
             </button>
           </form>
 
-          <form v-else-if="mode === 'register'" class="space-y-3.5" @submit.prevent="handleRegister">
+          <form v-else-if="mode === 'register'" class="space-y-3" @submit.prevent="handleRegister">
             <label class="block">
               <span class="sr-only">{{ t('auth.username') }}</span>
               <span class="relative block">
@@ -305,9 +305,24 @@ function errorMessage(err: unknown, fallback: string) {
             </button>
             <button type="button" class="w-full text-sm font-medium text-primary hover:text-primary" @click="switchMode('login')">{{ t('auth.backToLogin') }}</button>
           </form>
+
+          <div v-if="showSocial" class="mt-5 border-t border-line pt-4 md:hidden">
+            <h2 class="mb-2 text-xs font-bold uppercase text-base-content/45">{{ t('auth.continueWith') }}</h2>
+            <div class="grid grid-cols-2 gap-2">
+              <a :href="page.props.githubUrl" class="gf-button gf-button-md gf-button-secondary w-full">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.79-.26.79-.58v-2.03c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.08 1.85 1.24 1.85 1.24 1.07 1.83 2.81 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.31-5.47-1.34-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23A11.5 11.5 0 0 1 12 6c1.02 0 2.05.14 3.01.4 2.29-1.55 3.3-1.23 3.3-1.23.65 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.19.69.8.58A12.01 12.01 0 0 0 24 12c0-6.63-5.37-12-12-12Z" />
+                </svg>
+                GitHub
+              </a>
+              <button type="button" class="gf-button gf-button-md gf-button-secondary w-full cursor-not-allowed opacity-70">
+                {{ t('auth.googleUnavailable') }}
+              </button>
+            </div>
+          </div>
         </div>
 
-        <aside class="border-t border-line bg-base-200/70 px-5 py-6 sm:px-8 md:border-l md:border-t-0">
+        <aside class="hidden border-t border-line bg-base-200/70 px-4 py-6 sm:px-8 md:block md:border-l md:border-t-0">
           <div class="flex h-full flex-col justify-center">
             <div v-if="showSocial">
               <h2 class="text-sm font-bold text-base-content">{{ t('auth.continueWith') }}</h2>
