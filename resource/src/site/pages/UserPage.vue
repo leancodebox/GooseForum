@@ -15,6 +15,7 @@ import {
 import { followUser } from '@/runtime/api'
 import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/format'
 import { topicDescription } from '@/runtime/topic-description'
+import EmptyState from '@/site/components/EmptyState.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '@/types/payload'
@@ -329,7 +330,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
             <span class="hidden text-center text-sm tabular-nums text-base-content/55 sm:block">{{ formatNumber(topic.viewCount) }}</span>
             <span class="hidden text-right text-xs font-medium text-base-content/55 sm:block">{{ timeAgo(topic.lastUpdateTime) }}</span>
           </a>
-          <div v-if="!visibleTopics.length" class="px-4 py-14 text-center text-sm text-base-content/55">{{ t('user.emptyTopics') }}</div>
+          <EmptyState v-if="!visibleTopics.length" :icon="FileText" :title="t('user.emptyTopics')" />
         </div>
 
         <div v-else-if="activeTab === 'activity'" class="p-4">
@@ -352,7 +353,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
                 <time class="mt-1 block text-xs text-base-content/55">{{ formatDateTime(activity.createdAt) }}</time>
               </span>
             </a>
-            <div v-if="!page.props.activities.length" class="py-14 text-center text-sm text-base-content/55">{{ t('user.emptyActivity') }}</div>
+            <EmptyState v-if="!page.props.activities.length" :icon="MessageCircle" :title="t('user.emptyActivity')" />
           </div>
         </div>
 
@@ -372,9 +373,7 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
               </span>
             </a>
           </div>
-          <div v-if="(activeTab === 'following' ? page.props.following : page.props.followers).length === 0" class="py-14 text-center text-sm text-base-content/55">
-            {{ t('user.emptyData') }}
-          </div>
+          <EmptyState v-if="(activeTab === 'following' ? page.props.following : page.props.followers).length === 0" :icon="UserPlus" :title="t('user.emptyData')" />
         </div>
       </section>
     </article>

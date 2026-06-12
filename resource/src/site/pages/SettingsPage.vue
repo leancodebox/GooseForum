@@ -28,9 +28,11 @@ import {
 import { formatDate, formatNumber } from '@/runtime/format'
 import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message'
 import { useAvatarCropUpload } from '@/site/composables/useAvatarCropUpload'
-import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
+import PageHeader from '@/site/components/PageHeader.vue'
+import SectionHeader from '@/site/components/SectionHeader.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
+import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
@@ -378,8 +380,10 @@ async function toggleBinding(provider: string) {
 </script>
 
 <template>
-    <main class="min-w-0 pb-12">
-      <section class="gf-card mb-4 overflow-hidden">
+    <main class="min-w-0 pb-8">
+      <PageHeader :title="t('shell.settings')" :description="t('settings.profile.description')" compact />
+
+      <section class="gf-card overflow-hidden">
         <div class="h-20 border-b border-line bg-base-300 bg-cover bg-center sm:h-24" :style="profileCoverStyle" />
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -499,13 +503,13 @@ async function toggleBinding(provider: string) {
 
       <p
         v-if="hasStatus"
-        class="mb-3 rounded-md px-3 py-2 text-sm font-medium"
+        class="my-3 rounded-md px-3 py-2 text-sm font-medium"
         :class="error ? 'bg-error/10 text-error' : 'bg-success/10 text-success'"
       >
         {{ error || status }}
       </p>
 
-      <section class="gf-card overflow-hidden">
+      <section class="gf-card mt-3 overflow-hidden">
         <nav class="flex overflow-x-auto border-b border-line px-3">
             <button
               v-for="tab in props.tabs"
@@ -521,13 +525,7 @@ async function toggleBinding(provider: string) {
 
         <div class="space-y-3">
           <section v-show="activeTab === 'profile'">
-            <div class="flex items-center gap-2 border-b border-line px-4 py-3">
-              <UserRound class="h-4 w-4 text-base-content/55" />
-              <div>
-                <h2 class="text-sm font-semibold text-base-content">{{ t('settings.profile.title') }}</h2>
-                <p class="mt-0.5 text-xs text-base-content/55">{{ t('settings.profile.description') }}</p>
-              </div>
-            </div>
+            <SectionHeader :icon="UserRound" :title="t('settings.profile.title')" :description="t('settings.profile.description')" />
             <div class="space-y-6 p-4">
               <div class="grid gap-4 sm:grid-cols-2">
                 <label class="block min-w-0">
@@ -649,12 +647,9 @@ async function toggleBinding(provider: string) {
             </div>
           </section>
 
-          <section v-show="activeTab === 'account'" class="p-4">
-            <div class="mb-4 flex items-center gap-2">
-              <KeyRound class="h-4 w-4 text-base-content/55" />
-              <h2 class="text-sm font-semibold text-base-content">{{ t('settings.account.title') }}</h2>
-            </div>
-            <form class="max-w-xl space-y-4" @submit.prevent="submitPassword">
+          <section v-show="activeTab === 'account'">
+            <SectionHeader :icon="KeyRound" :title="t('settings.account.title')" />
+            <form class="max-w-xl space-y-4 p-4" @submit.prevent="submitPassword">
               <label class="block">
                 <span class="text-sm font-medium text-base-content/75">{{ t('settings.account.currentPassword') }}</span>
                 <input v-model="passwordForm.oldPassword" required type="password" class="gf-input mt-1" />
@@ -675,12 +670,9 @@ async function toggleBinding(provider: string) {
             </form>
           </section>
 
-          <section v-show="activeTab === 'privacy'" class="p-4">
-            <div class="mb-2 flex items-center gap-2">
-              <Shield class="h-4 w-4 text-base-content/55" />
-              <h2 class="text-sm font-semibold text-base-content">{{ t('settings.privacy.title') }}</h2>
-            </div>
-            <div class="max-w-2xl divide-y divide-line">
+          <section v-show="activeTab === 'privacy'">
+            <SectionHeader :icon="Shield" :title="t('settings.privacy.title')" />
+            <div class="max-w-2xl divide-y divide-line p-4">
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
                   <span class="block text-sm font-semibold text-base-content">{{ t('settings.privacy.showArticles') }}</span>
@@ -705,19 +697,17 @@ async function toggleBinding(provider: string) {
             </div>
           </section>
 
-          <section v-show="activeTab === 'binding'" class="p-4">
-            <div class="mb-4 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <Mail class="h-4 w-4 text-base-content/55" />
-                <h2 class="text-sm font-semibold text-base-content">{{ t('settings.binding.title') }}</h2>
-              </div>
-              <button type="button" class="text-xs font-medium text-primary hover:text-primary" @click="loadBindings">{{ t('settings.binding.refresh') }}</button>
-            </div>
-            <div v-if="loadingBindings" class="py-8 text-center text-sm text-base-content/55">
+          <section v-show="activeTab === 'binding'">
+            <SectionHeader :icon="Mail" :title="t('settings.binding.title')">
+              <template #actions>
+                <button type="button" class="text-xs font-medium text-primary hover:text-primary" @click="loadBindings">{{ t('settings.binding.refresh') }}</button>
+              </template>
+            </SectionHeader>
+            <div v-if="loadingBindings" class="p-4 py-8 text-center text-sm text-base-content/55">
               <Loader2 class="mx-auto mb-2 h-5 w-5 animate-spin" />
               {{ t('settings.binding.loading') }}
             </div>
-            <div v-else class="space-y-3">
+            <div v-else class="space-y-3 p-4">
               <div
                 v-for="provider in providers"
                 :key="provider.key"

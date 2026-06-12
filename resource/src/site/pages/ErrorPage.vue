@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { ArrowLeft, Home } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { resolveApiMessage } from '@/runtime/api-message'
+import EmptyState from '@/site/components/EmptyState.vue'
 import type { ErrorPageProps, LayoutPayload } from '@/types/payload'
 
 const page = defineProps<{
@@ -27,12 +28,9 @@ function goBack() {
 </script>
 
 <template>
-    <main class="min-w-0 pb-12">
-      <section class="gf-card px-6 py-12 text-center">
-        <div class="text-sm font-bold uppercase tracking-wide text-base-content/55">{{ page.props.code }}</div>
-        <h1 class="mt-2 text-2xl font-bold text-base-content">{{ localizedTitle }}</h1>
-        <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-base-content/55">{{ localizedMessage }}</p>
-        <div class="mt-6 flex flex-wrap justify-center gap-2">
+    <main class="min-w-0 pb-8">
+      <section class="gf-card overflow-hidden">
+        <EmptyState :title="`${page.props.code} · ${localizedTitle}`" :description="localizedMessage">
           <button
             type="button"
             class="gf-button gf-button-md gf-button-secondary"
@@ -45,7 +43,7 @@ function goBack() {
             <Home class="h-4 w-4" />
             {{ t('common.home') }}
           </a>
-        </div>
+        </EmptyState>
       </section>
     </main>
 </template>

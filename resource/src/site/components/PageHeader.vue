@@ -19,7 +19,7 @@ defineProps<{
       <p v-if="description" class="mt-1 max-w-2xl text-sm leading-6 text-base-content/55">{{ description }}</p>
       <slot name="meta" />
     </div>
-    <div v-if="$slots.actions" class="flex shrink-0 flex-wrap items-center gap-2">
+    <div v-if="$slots.actions" class="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto">
       <slot name="actions" />
     </div>
   </header>

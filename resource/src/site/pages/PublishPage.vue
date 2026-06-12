@@ -302,7 +302,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
 </script>
 
 <template>
-    <main class="min-w-0 pb-12">
+    <main class="min-w-0 pb-8">
       <PageHeader :title="props.isEditing ? t('publish.editTitle') : t('publish.createTitle')" :description="t('publish.subtitle')" />
 
       <div class="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
