@@ -3,6 +3,7 @@ package closer
 import (
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -126,5 +127,31 @@ func TestCloseAllTimesOutBlockedCallback(t *testing.T) {
 	CloseAll()
 	if !ran {
 		t.Fatalf("CloseAll should continue working after a timed out callback")
+	}
+}
+
+func TestCloseWithTimeoutIncludesEntryDetails(t *testing.T) {
+	resetCloserForTest(t)
+	t.Cleanup(func() {
+		resetCloserForTest(t)
+	})
+
+	closeTimeout = time.Millisecond
+	err := closeWithTimeout(closerEntry{
+		f: func() error {
+			select {}
+		},
+		caller:   "test.go:42",
+		priority: PriorityFlush,
+	})
+	if err == nil {
+		t.Fatal("expected timeout error")
+	}
+
+	message := err.Error()
+	for _, want := range []string{"close timed out after", "priority=200", "registered_at=test.go:42"} {
+		if !strings.Contains(message, want) {
+			t.Fatalf("timeout error %q does not contain %q", message, want)
+		}
 	}
 }

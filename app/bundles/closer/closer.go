@@ -125,6 +125,6 @@ func closeWithTimeout(entry closerEntry) error {
 	case err := <-done:
 		return err
 	case <-time.After(closeTimeout):
-		return fmt.Errorf("close timed out after %s", closeTimeout)
+		return fmt.Errorf("close timed out after %s: priority=%d registered_at=%s", closeTimeout, entry.priority, entry.caller)
 	}
 }
