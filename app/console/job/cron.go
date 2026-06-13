@@ -20,7 +20,7 @@ var scheduler = cron.New(
 var running = false
 
 func Run() {
-	closer.Register(Stop)
+	closer.RegisterPriority(closer.PriorityProducer, Stop)
 	slog.Info("start cron")
 	backupSpec := preferences.Get("db.spec", "0 3 * * *")
 	entryID, err := scheduler.AddFunc(backupSpec, upCmd(func() {

@@ -84,7 +84,7 @@ var (
 // StartCleanup starts the expired captcha cleanup worker.
 func StartCleanup() {
 	cleanupOnce.Do(func() {
-		closer.Register(StopCleanup)
+		closer.RegisterPriority(closer.PriorityCache, StopCleanup)
 		cleanupWg.Add(1)
 		go func() {
 			defer cleanupWg.Done()

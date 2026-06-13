@@ -30,7 +30,7 @@ func (c *Cache[V]) init() {
 			ttlcache.WithDisableTouchOnHit[string, V](),
 		)
 		go c.cache.Start()
-		closer.Register(func() error {
+		closer.RegisterPriority(closer.PriorityCache, func() error {
 			c.cache.Stop()
 			return nil
 		})

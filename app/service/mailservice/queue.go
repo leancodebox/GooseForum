@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
+	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
 )
 
@@ -57,7 +57,7 @@ func AddToQueue(task EmailTask) error {
 // StartEmailProcessor starts the background email queue worker.
 func StartEmailProcessor() {
 	emailProcessor.once.Do(func() {
-		closer.Register(StopEmailProcessor)
+		closer.RegisterPriority(closer.PriorityProducer, StopEmailProcessor)
 		emailProcessor.wg.Add(1)
 		go func() {
 			defer emailProcessor.wg.Done()

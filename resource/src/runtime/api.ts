@@ -702,7 +702,7 @@ async function encryptLoginPasswordWithWebCrypto(publicKey: string, payload: str
 async function encryptLoginPasswordWithForge(publicKey: string, payload: string): Promise<string> {
   const { default: forge } = await import('node-forge')
   const key = forge.pki.publicKeyFromPem(publicKey)
-  const encrypted = key.encrypt(payload, 'RSA-OAEP', {
+  const encrypted = key.encrypt(forge.util.encodeUtf8(payload), 'RSA-OAEP', {
     md: forge.md.sha256.create(),
     mgf1: {
       md: forge.md.sha256.create(),

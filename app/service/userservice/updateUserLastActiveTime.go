@@ -24,6 +24,8 @@ type userActivityStore struct {
 	cache          *ttlcache.Cache[uint64, userActivity]
 	flushFn        func(uint64, time.Time)
 	registerCloser bool
+	closeMu        sync.RWMutex
+	closed         bool
 }
 
 var activityStore = &userActivityStore{
@@ -41,11 +43,14 @@ func (store *userActivityStore) init() {
 			if reason == ttlcache.EvictionReasonDeleted {
 				return
 			}
+			if store.isClosed() {
+				return
+			}
 			store.flushPending(item.Key(), item.Value())
 		})
 		go store.cache.Start()
 		if store.registerCloser {
-			closer.Register(CloseUpdateUserLastActiveTime)
+			closer.RegisterPriority(closer.PriorityFlush, CloseUpdateUserLastActiveTime)
 		}
 	})
 }
@@ -58,6 +63,11 @@ func (store *userActivityStore) remember(userID uint64, activeTime time.Time) {
 		activeTime = time.Now()
 	}
 	store.init()
+	store.closeMu.Lock()
+	defer store.closeMu.Unlock()
+	if store.closed {
+		return
+	}
 	activity := userActivity{
 		LastActiveAt:  activeTime,
 		LastFlushedAt: activeTime,
@@ -84,6 +94,11 @@ func (store *userActivityStore) get(userID uint64) (time.Time, bool) {
 		return time.Time{}, false
 	}
 	store.init()
+	store.closeMu.RLock()
+	defer store.closeMu.RUnlock()
+	if store.closed {
+		return time.Time{}, false
+	}
 	item := store.cache.Get(userID)
 	if item == nil {
 		return time.Time{}, false
@@ -101,11 +116,24 @@ func (store *userActivityStore) flush(userID uint64, activeTime time.Time) {
 
 func (store *userActivityStore) close() {
 	store.init()
+	store.closeMu.Lock()
+	if store.closed {
+		store.closeMu.Unlock()
+		return
+	}
+	store.closed = true
+	pending := make(map[uint64]userActivity)
 	store.cache.Range(func(item *ttlcache.Item[uint64, userActivity]) bool {
-		store.flushPending(item.Key(), item.Value())
+		pending[item.Key()] = item.Value()
 		return true
 	})
+	store.closeMu.Unlock()
+
 	store.cache.Stop()
+
+	for userID, activity := range pending {
+		store.flushPending(userID, activity)
+	}
 }
 
 func (store *userActivityStore) flushPending(userID uint64, activity userActivity) {
@@ -117,6 +145,13 @@ func (store *userActivityStore) flushPending(userID uint64, activity userActivit
 
 func shouldFlushUserActivity(activity userActivity) bool {
 	return !activity.LastFlushedAt.IsZero() && activity.LastActiveAt.Sub(activity.LastFlushedAt) >= userOnlineWindow
+}
+
+func (store *userActivityStore) isClosed() bool {
+	store.closeMu.RLock()
+	closed := store.closed
+	store.closeMu.RUnlock()
+	return closed
 }
 
 // UpdateUserActivity queues a global user activity update.

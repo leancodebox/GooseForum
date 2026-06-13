@@ -56,7 +56,7 @@ func InitEventBus() {
 		}
 
 		// 注册到全局关闭管理器
-		closer.Register(Close)
+		closer.RegisterPriority(closer.PriorityProducer, Close)
 
 		// 添加中间件
 		router.AddMiddleware(

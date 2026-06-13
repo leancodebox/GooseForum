@@ -39,7 +39,7 @@ func GetViewCounter() *ViewCounter {
 			flushFn:   articles.IncrementViews,
 		}
 		counter.start()
-		closer.Register(CloseViewCounter)
+		closer.RegisterPriority(closer.PriorityFlush, CloseViewCounter)
 		slog.Info("article view counter started", "flushInterval", viewFlushInterval.String(), "queueSize", viewQueueSize)
 	})
 	return counter

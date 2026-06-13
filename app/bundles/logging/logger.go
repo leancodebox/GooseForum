@@ -122,7 +122,7 @@ func Init() {
 	slog.SetDefault(logger)
 
 	// 注册到全局关闭管理器
-	closer.Register(func() error {
+	closer.RegisterPriority(closer.PriorityLogger, func() error {
 		Shutdown()
 		return nil
 	})

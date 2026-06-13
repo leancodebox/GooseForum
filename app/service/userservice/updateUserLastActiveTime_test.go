@@ -102,6 +102,36 @@ func TestUserActivityStoreDoesNotFlushCleanActivityOnClose(t *testing.T) {
 	}
 }
 
+func TestUserActivityStoreIgnoresActivityAfterClose(t *testing.T) {
+	store := newTestActivityStore(t)
+	store.close()
+
+	store.remember(13, time.Now())
+	if _, ok := store.get(13); ok {
+		t.Fatal("activity store should ignore activity after close")
+	}
+}
+
+func TestUserActivityStoreCloseDoesNotBlockReentrantRemember(t *testing.T) {
+	store := newTestActivityStore(t)
+	store.remember(14, time.Now())
+	store.flushFn = func(uint64, time.Time) {
+		store.remember(15, time.Now())
+	}
+
+	done := make(chan struct{})
+	go func() {
+		store.close()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("activity store close blocked on reentrant remember")
+	}
+}
+
 func newTestActivityStore(t *testing.T) *userActivityStore {
 	t.Helper()
 	store := &userActivityStore{}

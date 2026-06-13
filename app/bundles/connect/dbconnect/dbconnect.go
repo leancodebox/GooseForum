@@ -25,7 +25,7 @@ func Connect() *gorm.DB {
 		dbConfig := preferences.GetExclusivePreferences("db.default")
 		dbConnect = sqlconnect.GetConnectByPreferences(dbConfig)
 		// 注册到全局关闭管理器
-		closer.Register(func() error {
+		closer.RegisterPriority(closer.PriorityDatabase, func() error {
 			dbConnect.Close()
 			return nil
 		})

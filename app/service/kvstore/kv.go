@@ -78,7 +78,7 @@ func connect() (*store, error) {
 	current = instance
 	currentMu.Unlock()
 
-	closer.Register(func() error {
+	closer.RegisterPriority(closer.PriorityDatabase, func() error {
 		instance.close()
 		return nil
 	})
