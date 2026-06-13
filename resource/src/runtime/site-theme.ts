@@ -9,7 +9,7 @@ const themes: SiteTheme[] = ['gf-light', 'gf-dark']
 const THEME_LINK_ID = 'goose-site-theme-link'
 const THEME_PREVIEW_STYLE_ID = 'goose-site-theme-preview'
 const themeColors: Record<SiteTheme, string> = {
-  'gf-light': '#ffffff',
+  'gf-light': '#fbfdff',
   'gf-dark': '#101010',
 }
 const currentTheme = ref<SiteTheme>(resolveInitialTheme())
@@ -31,7 +31,7 @@ export function applyStoredTheme() {
 export function applySiteThemePayload(theme?: ThemePayload) {
   for (const name of themes) {
     const color = theme?.enabled ? theme.colors?.[name] : undefined
-    themeColors[name] = normalizeThemeColor(color) || (name === 'gf-dark' ? '#101010' : '#ffffff')
+    themeColors[name] = normalizeThemeColor(color) || (name === 'gf-dark' ? '#101010' : '#fbfdff')
   }
   applySiteThemeLink(theme?.enabled ? theme.href : '')
   applyTheme(currentTheme.value)

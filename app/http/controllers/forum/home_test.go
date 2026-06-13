@@ -26,6 +26,9 @@ func TestHomePageRequestReturnsPayload(t *testing.T) {
 	if recorder.Header().Get("Content-Type") == "" {
 		t.Fatal("expected JSON content type")
 	}
+	if got := recorder.Header().Get("Cache-Control"); got != "no-store" {
+		t.Fatalf("expected page payload response to avoid browser cache, got %q", got)
+	}
 }
 
 func TestHomeHTMLReturnsNoJSContent(t *testing.T) {

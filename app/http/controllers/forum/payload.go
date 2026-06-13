@@ -611,7 +611,7 @@ func themeColor(colors map[string]string, current string) string {
 	if current == themeservice.DarkName {
 		return "#101010"
 	}
-	return "#ffffff"
+	return "#fbfdff"
 }
 
 func buildAdminPermissions(userID uint64) []uint64 {

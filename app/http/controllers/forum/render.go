@@ -107,6 +107,7 @@ func (r *templateRegistry) render(w io.Writer, name string, data any) error {
 
 func renderPage(c *gin.Context, templateName string, payload PagePayload) {
 	if isPageRequest(c) {
+		c.Header("Cache-Control", "no-store")
 		c.JSON(http.StatusOK, payload)
 		return
 	}
