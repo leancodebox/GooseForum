@@ -593,12 +593,7 @@ interface CaptchaPayload {
 
 interface LoginPublicKeyPayload {
   publicKey: string
-  keyTs: number
-}
-
-interface EncryptedLoginPassword {
-  encryptedPassword: string
-  publicKeyTs: number
+  serverTs: number
 }
 
 const loginInvalidRequestCode = 'auth.login.invalidRequest'
@@ -616,19 +611,19 @@ export async function getCaptcha(): Promise<CaptchaPayload> {
 
 export async function login(username: string, password: string, captchaId: string, captchaCode: string): Promise<boolean> {
   try {
-    await submitLogin(username, password, captchaId, captchaCode)
+    await submitLogin(username, password, captchaId, captchaCode, true)
   } catch (error) {
     if (!(error instanceof ApiResponseError) || error.messageCode !== loginInvalidRequestCode) {
       throw error
     }
     clearLoginPublicKey()
-    await submitLogin(username, password, captchaId, captchaCode)
+    await submitLogin(username, password, captchaId, captchaCode, true)
   }
   return true
 }
 
-async function submitLogin(username: string, password: string, captchaId: string, captchaCode: string): Promise<void> {
-  const { encryptedPassword, publicKeyTs } = await encryptLoginPassword(password)
+async function submitLogin(username: string, password: string, captchaId: string, captchaCode: string, refreshKey = false): Promise<void> {
+  const encryptedPassword = await encryptLoginPassword(password, refreshKey)
   const response = await fetch('/api/login', {
     method: 'POST',
     headers: {
@@ -637,7 +632,6 @@ async function submitLogin(username: string, password: string, captchaId: string
     body: JSON.stringify({
       username,
       encryptedPassword,
-      publicKeyTs,
       captchaId,
       captchaCode,
     }),
@@ -697,28 +691,19 @@ export async function resetPassword(token: string, newPassword: string): Promise
   return readApiSuccessMessage(response, t('server.auth.passwordReset.success'), t('api.passwordResetFailed'))
 }
 
-async function encryptLoginPassword(password: string): Promise<EncryptedLoginPassword> {
-  const key = await getLoginPublicKey()
+async function encryptLoginPassword(password: string, refreshKey = false): Promise<string> {
+  const key = await getLoginPublicKey(refreshKey)
   const payload = JSON.stringify({
     password,
-    ts: Date.now(),
+    ts: key.serverTs,
   })
   if (!window.crypto?.subtle) {
-    return {
-      encryptedPassword: await encryptLoginPasswordWithForge(key.publicKey, payload),
-      publicKeyTs: key.keyTs,
-    }
+    return encryptLoginPasswordWithForge(key.publicKey, payload)
   }
   try {
-    return {
-      encryptedPassword: await encryptLoginPasswordWithWebCrypto(key.publicKey, payload),
-      publicKeyTs: key.keyTs,
-    }
+    return await encryptLoginPasswordWithWebCrypto(key.publicKey, payload)
   } catch {
-    return {
-      encryptedPassword: await encryptLoginPasswordWithForge(key.publicKey, payload),
-      publicKeyTs: key.keyTs,
-    }
+    return encryptLoginPasswordWithForge(key.publicKey, payload)
   }
 }
 
@@ -755,7 +740,10 @@ async function encryptLoginPasswordWithForge(publicKey: string, payload: string)
   return forge.util.encode64(encrypted)
 }
 
-async function getLoginPublicKey(): Promise<LoginPublicKeyPayload> {
+async function getLoginPublicKey(refresh = false): Promise<LoginPublicKeyPayload> {
+  if (refresh) {
+    clearLoginPublicKey()
+  }
   if (!publicKeyPromise) {
     publicKeyPromise = fetch('/api/login-public-key', {
       headers: {
