@@ -10,6 +10,16 @@ interface ApiResponse<T> {
   data?: T
 }
 
+class ApiResponseError extends Error {
+  readonly messageCode?: string
+
+  constructor(message: string, messageCode?: string) {
+    super(message)
+    this.name = 'ApiResponseError'
+    this.messageCode = messageCode
+  }
+}
+
 function responseMessage(data: ApiResponse<unknown>, fallback: string) {
   return resolveApiMessage(data, fallback)
 }
@@ -24,7 +34,7 @@ async function readApiResponse<T>(response: Response, fallback: string): Promise
   }
   const data = (await response.json()) as ApiResponse<T>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(responseMessage(data, fallback))
+    throw new ApiResponseError(responseMessage(data, fallback), data.messageCode)
   }
   return (data.result ?? data.data) as T
 }
@@ -35,7 +45,7 @@ async function readApiSuccessMessage(response: Response, successFallback: string
   }
   const data = (await response.json()) as ApiResponse<unknown>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(responseMessage(data, errorFallback))
+    throw new ApiResponseError(responseMessage(data, errorFallback), data.messageCode)
   }
   return responseMessage(data, successFallback)
 }
@@ -581,7 +591,19 @@ interface CaptchaPayload {
   captchaImg: string
 }
 
-let publicKeyPromise: Promise<string> | undefined
+interface LoginPublicKeyPayload {
+  publicKey: string
+  keyTs: number
+}
+
+interface EncryptedLoginPassword {
+  encryptedPassword: string
+  publicKeyTs: number
+}
+
+const loginInvalidRequestCode = 'auth.login.invalidRequest'
+
+let publicKeyPromise: Promise<LoginPublicKeyPayload> | undefined
 
 export async function getCaptcha(): Promise<CaptchaPayload> {
   const response = await fetch('/api/get-captcha', {
@@ -593,7 +615,20 @@ export async function getCaptcha(): Promise<CaptchaPayload> {
 }
 
 export async function login(username: string, password: string, captchaId: string, captchaCode: string): Promise<boolean> {
-  const encryptedPassword = await encryptLoginPassword(password)
+  try {
+    await submitLogin(username, password, captchaId, captchaCode)
+  } catch (error) {
+    if (!(error instanceof ApiResponseError) || error.messageCode !== loginInvalidRequestCode) {
+      throw error
+    }
+    clearLoginPublicKey()
+    await submitLogin(username, password, captchaId, captchaCode)
+  }
+  return true
+}
+
+async function submitLogin(username: string, password: string, captchaId: string, captchaCode: string): Promise<void> {
+  const { encryptedPassword, publicKeyTs } = await encryptLoginPassword(password)
   const response = await fetch('/api/login', {
     method: 'POST',
     headers: {
@@ -602,12 +637,12 @@ export async function login(username: string, password: string, captchaId: strin
     body: JSON.stringify({
       username,
       encryptedPassword,
+      publicKeyTs,
       captchaId,
       captchaCode,
     }),
   })
   await readApiResponse<unknown>(response, t('api.loginFailed'))
-  return true
 }
 
 export async function register(
@@ -662,19 +697,28 @@ export async function resetPassword(token: string, newPassword: string): Promise
   return readApiSuccessMessage(response, t('server.auth.passwordReset.success'), t('api.passwordResetFailed'))
 }
 
-async function encryptLoginPassword(password: string): Promise<string> {
-  const publicKey = await getLoginPublicKey()
+async function encryptLoginPassword(password: string): Promise<EncryptedLoginPassword> {
+  const key = await getLoginPublicKey()
   const payload = JSON.stringify({
     password,
     ts: Date.now(),
   })
   if (!window.crypto?.subtle) {
-    return encryptLoginPasswordWithForge(publicKey, payload)
+    return {
+      encryptedPassword: await encryptLoginPasswordWithForge(key.publicKey, payload),
+      publicKeyTs: key.keyTs,
+    }
   }
   try {
-    return await encryptLoginPasswordWithWebCrypto(publicKey, payload)
+    return {
+      encryptedPassword: await encryptLoginPasswordWithWebCrypto(key.publicKey, payload),
+      publicKeyTs: key.keyTs,
+    }
   } catch {
-    return encryptLoginPasswordWithForge(publicKey, payload)
+    return {
+      encryptedPassword: await encryptLoginPasswordWithForge(key.publicKey, payload),
+      publicKeyTs: key.keyTs,
+    }
   }
 }
 
@@ -711,20 +755,24 @@ async function encryptLoginPasswordWithForge(publicKey: string, payload: string)
   return forge.util.encode64(encrypted)
 }
 
-async function getLoginPublicKey(): Promise<string> {
+async function getLoginPublicKey(): Promise<LoginPublicKeyPayload> {
   if (!publicKeyPromise) {
     publicKeyPromise = fetch('/api/login-public-key', {
       headers: {
         Accept: 'application/json',
       },
     })
-      .then((response) => readApiResponse<{ publicKey: string }>(response, t('api.loginKeyLoadFailed')).then((data) => data.publicKey))
+      .then((response) => readApiResponse<LoginPublicKeyPayload>(response, t('api.loginKeyLoadFailed')))
       .catch((error) => {
         publicKeyPromise = undefined
         throw error
       })
   }
   return publicKeyPromise
+}
+
+function clearLoginPublicKey() {
+  publicKeyPromise = undefined
 }
 
 function pemToArrayBuffer(pem: string): ArrayBuffer {

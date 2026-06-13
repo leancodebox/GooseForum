@@ -27,6 +27,22 @@ func TestDecryptPassword(t *testing.T) {
 	}
 }
 
+func TestPublicKeyIncludesCurrentTimestamp(t *testing.T) {
+	publicKey, keyTs := PublicKey()
+	if publicKey == "" {
+		t.Fatal("public key is empty")
+	}
+	if keyTs <= 0 {
+		t.Fatalf("public key timestamp = %d, want positive", keyTs)
+	}
+	if !IsCurrentPublicKeyTs(keyTs) {
+		t.Fatal("current public key timestamp was not accepted")
+	}
+	if IsCurrentPublicKeyTs(keyTs - 1) {
+		t.Fatal("stale public key timestamp was accepted")
+	}
+}
+
 func TestDecryptPasswordRejectsExpiredPayload(t *testing.T) {
 	encrypted := encryptForTest(t, PasswordPayload{
 		Password: "secret123",

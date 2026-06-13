@@ -20,9 +20,10 @@ const (
 )
 
 var (
-	keyMu      sync.RWMutex
-	privateKey *rsa.PrivateKey
-	publicPEM  string
+	keyMu       sync.RWMutex
+	privateKey  *rsa.PrivateKey
+	publicPEM   string
+	publicKeyTs int64
 )
 
 type PasswordPayload struct {
@@ -40,6 +41,18 @@ func PublicKeyPEM() string {
 	keyMu.RLock()
 	defer keyMu.RUnlock()
 	return publicPEM
+}
+
+func PublicKey() (string, int64) {
+	keyMu.RLock()
+	defer keyMu.RUnlock()
+	return publicPEM, publicKeyTs
+}
+
+func IsCurrentPublicKeyTs(keyTs int64) bool {
+	keyMu.RLock()
+	defer keyMu.RUnlock()
+	return keyTs > 0 && keyTs == publicKeyTs
 }
 
 func DecryptPassword(encryptedPassword string) (string, error) {
@@ -103,6 +116,7 @@ func rotateKey() error {
 	keyMu.Lock()
 	privateKey = key
 	publicPEM = string(block)
+	publicKeyTs = time.Now().UnixMilli()
 	keyMu.Unlock()
 	return nil
 }

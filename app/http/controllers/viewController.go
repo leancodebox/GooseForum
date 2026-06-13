@@ -137,13 +137,16 @@ func Register(c *gin.Context) {
 type LoginReq struct {
 	Username          string `json:"username" validate:"required"` // 可以是用户名或邮箱
 	EncryptedPassword string `json:"encryptedPassword" validate:"required"`
+	PublicKeyTs       int64  `json:"publicKeyTs"`
 	CaptchaId         string `json:"captchaId"`
 	CaptchaCode       string `json:"captchaCode"`
 }
 
 func LoginPublicKey(c *gin.Context) {
-	c.JSON(http.StatusOK, component.SuccessData(map[string]string{
-		"publicKey": logincrypto.PublicKeyPEM(),
+	publicKey, keyTs := logincrypto.PublicKey()
+	c.JSON(http.StatusOK, component.SuccessData(map[string]any{
+		"publicKey": publicKey,
+		"keyTs":     keyTs,
 		"algorithm": "RSA-OAEP-256",
 	}))
 }
@@ -167,6 +170,12 @@ func Login(c *gin.Context) {
 
 	if username == "" {
 		c.JSON(200, component.FailDataCode(component.MessageRequestInvalidParams, nil))
+		return
+	}
+
+	if !logincrypto.IsCurrentPublicKeyTs(req.PublicKeyTs) {
+		slog.Info("登录公钥已过期", "username", username, "publicKeyTs", req.PublicKeyTs)
+		c.JSON(200, component.FailDataCode(component.MessageAuthLoginInvalidRequest, nil))
 		return
 	}
 
