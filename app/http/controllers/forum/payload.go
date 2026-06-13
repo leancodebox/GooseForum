@@ -608,6 +608,9 @@ func themeColor(colors map[string]string, current string) string {
 	if color := colors[themeservice.LightName]; color != "" {
 		return color
 	}
+	if current == themeservice.DarkName {
+		return "#101010"
+	}
 	return "#ffffff"
 }
 
