@@ -48,7 +48,7 @@ func MakeUser(name string, password string, email string) *EntityComplete {
 }
 
 func RandAvatarUrl() string {
-	randomNum := rand.Intn(8) + 1
+	randomNum := rand.Intn(12) + 1
 	return fmt.Sprintf("/static/pic/%d.webp", randomNum)
 }
 
