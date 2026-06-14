@@ -20,13 +20,13 @@ const { t } = useI18n()
         </template>
       </PageHeader>
 
-      <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
-        <div class="space-y-5">
-          <section v-for="group in props.groups" :key="group.name" class="space-y-3">
-            <div class="flex items-center justify-between gap-3 border-b border-line pb-2">
+      <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
+        <div class="space-y-6">
+          <section v-for="group in props.groups" :key="group.name" class="space-y-2.5">
+            <div class="flex items-center justify-between gap-3">
               <h2 class="flex min-w-0 items-center gap-2 text-base font-bold text-base-content">
                 <span
-                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-base-200 text-sm"
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--gf-radius-field)] bg-base-200 text-sm"
                   :style="{ color: group.color || 'var(--gf-color-base-content)' }"
                 >
                   {{ group.emoji || '↗' }}
@@ -43,10 +43,10 @@ const { t } = useI18n()
                 :href="link.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="gf-panel group px-2.5 py-2 transition hover:border-primary/20 hover:bg-info/10"
+                class="group rounded-[var(--gf-radius-box)] border border-line/70 bg-base-200/45 p-2 transition hover:border-primary/25 hover:bg-info/10 sm:bg-base-100"
               >
                 <div class="flex items-center gap-2">
-                  <div class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-base-200">
+                  <div class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[var(--gf-radius-field)] border border-line bg-base-100 sm:bg-base-200">
                     <img
                       v-if="link.logoUrl"
                       :src="link.logoUrl"
@@ -57,7 +57,7 @@ const { t } = useI18n()
                     <Link v-else class="h-4 w-4 text-base-content/55" />
                   </div>
                   <div class="min-w-0 flex-1">
-                    <div class="flex min-w-0 items-center gap-2">
+                    <div class="flex min-w-0 items-center gap-1.5">
                       <h3 class="truncate text-[13px] font-semibold text-base-content group-hover:text-primary">{{ link.name }}</h3>
                       <ExternalLink class="h-3 w-3 shrink-0 text-base-content/35 group-hover:text-primary" />
                     </div>
@@ -72,7 +72,7 @@ const { t } = useI18n()
         </div>
 
         <aside class="space-y-3">
-          <div class="gf-panel p-4">
+          <div class="rounded-[var(--gf-radius-box)] border border-line/70 bg-base-200/45 p-4 sm:bg-base-100">
             <h2 class="text-sm font-semibold text-base-content">{{ t('linksPage.applyTitle') }}</h2>
             <p class="mt-2 text-sm leading-6 text-base-content/55">{{ t('linksPage.applyDescription') }}</p>
             <a href="/publish" class="gf-button gf-button-md gf-button-primary mt-4">
@@ -81,7 +81,7 @@ const { t } = useI18n()
             </a>
           </div>
 
-          <div class="gf-panel p-4">
+          <div class="rounded-[var(--gf-radius-box)] border border-line/70 bg-base-200/45 p-4 sm:bg-base-100">
             <h2 class="text-sm font-semibold text-base-content">{{ t('linksPage.principlesTitle') }}</h2>
             <div class="mt-3 space-y-2 text-sm text-base-content/75">
               <div class="flex gap-2">

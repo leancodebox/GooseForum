@@ -28,9 +28,19 @@ function sectionBadgeClass(section: SponsorSectionPayload) {
 }
 
 function sponsorCardClass(section: SponsorSectionPayload) {
-  if (section.tone === 'diamond') return 'p-4'
-  if (section.tone === 'gold') return 'p-3'
-  return 'p-2.5'
+  if (section.tone === 'diamond') return 'p-3.5 bg-base-100'
+  if (section.tone === 'gold') return 'p-3 bg-base-100'
+  return 'p-2.5 bg-base-200/45 sm:bg-base-100'
+}
+
+function sponsorBodyClass(section: SponsorSectionPayload) {
+  return 'flex items-start gap-2.5'
+}
+
+function sponsorAvatarClass(section: SponsorSectionPayload) {
+  if (section.tone === 'diamond') return 'h-11 w-11'
+  if (section.tone === 'gold') return 'h-10 w-10'
+  return 'h-8 w-8'
 }
 
 function showMessage(sponsor: SponsorPayload) {
@@ -46,10 +56,10 @@ function showMessage(sponsor: SponsorPayload) {
         </template>
       </PageHeader>
 
-      <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
-        <div class="space-y-5">
-          <section v-for="section in props.sections" :key="section.key" class="space-y-3">
-            <div class="flex items-center justify-between gap-3 border-b border-line pb-2">
+      <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
+        <div class="space-y-6">
+          <section v-for="section in props.sections" :key="section.key" class="space-y-2.5">
+            <div class="flex items-center justify-between gap-3">
               <h2 class="flex min-w-0 items-center gap-2 text-base font-bold text-base-content">
                 <span class="rounded px-1.5 py-0.5 text-[11px] font-semibold" :class="sectionBadgeClass(section)">{{ section.label }}</span>
               </h2>
@@ -63,22 +73,23 @@ function showMessage(sponsor: SponsorPayload) {
                 :href="sponsor.link || '#'"
                 :target="sponsor.link ? '_blank' : undefined"
                 :rel="sponsor.link ? 'noopener noreferrer' : undefined"
-                class="gf-panel group relative transition hover:border-primary/20 hover:bg-info/10"
+                class="group relative rounded-[var(--gf-radius-box)] border border-line/70 transition hover:border-primary/25 hover:bg-info/10"
                 :class="sponsorCardClass(section)"
               >
-                <div class="flex items-start gap-3">
+                <div :class="sponsorBodyClass(section)">
                   <img
                     :src="sponsor.avatarUrl"
                     :alt="sponsor.name"
-                    class="h-11 w-11 shrink-0 rounded-md border border-line object-cover"
+                    class="shrink-0 rounded-[var(--gf-radius-field)] border border-line object-cover"
+                    :class="sponsorAvatarClass(section)"
                     loading="lazy"
                   />
                   <div class="min-w-0 flex-1">
-                    <div class="flex min-w-0 items-center gap-2">
-                      <h3 class="truncate text-sm font-semibold text-base-content group-hover:text-primary">{{ sponsor.name }}</h3>
-                      <ExternalLink v-if="sponsor.link" class="h-3.5 w-3.5 shrink-0 text-base-content/35 group-hover:text-primary" />
+                    <div class="flex min-w-0 items-center gap-1.5">
+                      <h3 class="truncate text-[13px] font-semibold text-base-content group-hover:text-primary sm:text-sm">{{ sponsor.name }}</h3>
+                      <ExternalLink v-if="sponsor.link" class="h-3 w-3 shrink-0 text-base-content/35 group-hover:text-primary sm:h-3.5 sm:w-3.5" />
                     </div>
-                    <p class="mt-1 line-clamp-2 text-xs leading-5 text-base-content/55">{{ showMessage(sponsor) }}</p>
+                    <p class="mt-0.5 line-clamp-2 text-[11px] leading-4 text-base-content/55 sm:mt-1 sm:text-xs sm:leading-5">{{ showMessage(sponsor) }}</p>
                   </div>
                 </div>
               </a>
@@ -89,7 +100,7 @@ function showMessage(sponsor: SponsorPayload) {
         </div>
 
         <aside class="space-y-3">
-          <div class="gf-panel p-4">
+          <div class="rounded-[var(--gf-radius-box)] border border-line/70 bg-base-200/45 p-4 sm:bg-base-100">
             <h2 class="text-sm font-semibold text-base-content">{{ props.contact.title }}</h2>
             <p class="mt-2 text-sm leading-6 text-base-content/55">{{ props.contact.description }}</p>
             <a :href="props.contact.buttonLink" class="gf-button gf-button-md gf-button-primary mt-4">
@@ -98,7 +109,7 @@ function showMessage(sponsor: SponsorPayload) {
             </a>
           </div>
 
-          <div v-if="props.rules.length" class="gf-panel p-4">
+          <div v-if="props.rules.length" class="rounded-[var(--gf-radius-box)] border border-line/70 bg-base-200/45 p-4 sm:bg-base-100">
             <h2 class="text-sm font-semibold text-base-content">{{ t('sponsors.rulesTitle') }}</h2>
             <div class="mt-3 space-y-2 text-sm text-base-content/75">
               <div v-for="rule in props.rules" :key="rule.content" class="flex gap-2">
