@@ -1,3 +1,4 @@
+// GooseForum is a self-hosted forum platform built with Go, Vue, and Tailwind CSS.
 package main
 
 import (
