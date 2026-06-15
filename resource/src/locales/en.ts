@@ -458,6 +458,7 @@ export default {
       passwordChanged: 'Password changed',
       privacySaved: 'Privacy preferences saved',
       bindingDisconnected: 'Account binding disconnected',
+      avatarSaved: 'Avatar updated',
     },
     validation: {
       usernameRequired: 'Username is required',
@@ -488,6 +489,11 @@ export default {
       cropTip: 'Keep the face or mark centered in the circle. The final avatar exports at 300 x 300 and uses WebP when supported.',
       uploading: 'Uploading',
       confirmUpload: 'Confirm upload',
+      presetsTitle: 'Preset avatars',
+      presetsDescription: 'You can also pick one of the built-in avatars.',
+      uploadCustom: 'Upload custom',
+      selectPreset: 'Select preset avatar',
+      applyPreset: 'Apply avatar',
     },
     profile: {
       title: 'Public profile',
@@ -609,6 +615,8 @@ export default {
     passwordChangeFailed: 'Failed to change password',
     avatarUploadFailed: 'Failed to upload avatar',
     avatarUploadEmpty: 'Avatar upload returned empty',
+    avatarPresetFailed: 'Failed to save preset avatar',
+    avatarPresetEmpty: 'Preset avatar response is empty',
     bindingsLoadFailed: 'Failed to load binding status',
     unbindFailed: 'Failed to unbind',
     captchaLoadFailed: 'Failed to load captcha',

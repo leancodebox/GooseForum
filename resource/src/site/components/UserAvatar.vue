@@ -17,7 +17,7 @@ const resolvedSrc = computed(() => {
 function avatarVariantUrl(src: string): string {
   try {
     const url = new URL(src, window.location.origin)
-    const staticMatch = url.pathname.match(/^(\/static\/pic\/(?:[1-8]|default-avatar))\.webp$/)
+    const staticMatch = url.pathname.match(/^(\/static\/pic\/(?:(?:[1-9]|1[0-2])|default-avatar))\.webp$/)
     if (staticMatch) {
       url.pathname = `${staticMatch[1]}_medium.webp`
       return formatAvatarUrl(src, url)

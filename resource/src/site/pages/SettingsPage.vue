@@ -18,6 +18,7 @@ import {
   changePassword,
   getOAuthBindings,
   resendActivationEmail,
+  savePresetAvatar,
   saveUserEmail,
   saveUserInfo,
   saveUserName,
@@ -28,7 +29,6 @@ import {
 import { formatDate, formatNumber } from '@/runtime/format'
 import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message'
 import { useAvatarCropUpload } from '@/site/composables/useAvatarCropUpload'
-import PageHeader from '@/site/components/PageHeader.vue'
 import SectionHeader from '@/site/components/SectionHeader.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
@@ -58,6 +58,8 @@ const editingUsername = ref(false)
 const editingEmail = ref(false)
 const editingCover = ref(false)
 const savingCover = ref(false)
+const savingPresetAvatar = ref('')
+const presetAvatarDraft = ref(page.props.user.avatarUrl)
 const coverUrl = ref(page.props.user.profileCoverUrl || '')
 const coverDraft = ref(page.props.user.profileCoverUrl || '')
 const bindings = ref<OAuthBindingsPayload>({})
@@ -145,6 +147,8 @@ const providers = computed(() => [
   { key: 'github', label: 'GitHub', supported: true },
   { key: 'google', label: 'Google', supported: false },
 ])
+const presetAvatars = Array.from({ length: 12 }, (_, index) => `/static/pic/${index + 1}.webp`)
+const presetAvatarChanged = computed(() => presetAvatarDraft.value !== avatarUrl.value)
 
 const easterEggMessages: Array<{ type: FlashMessageType; message: string }> = [
   { type: 'success', message: t('settings.easterEgg.success') },
@@ -157,6 +161,7 @@ watch(
   () => page.props.user.id,
   () => {
     avatarUrl.value = page.props.user.avatarUrl
+    presetAvatarDraft.value = page.props.user.avatarUrl
     usernameForm.username = page.props.user.username
     emailForm.email = page.props.user.email
     profileForm.nickname = page.props.user.nickname || ''
@@ -222,6 +227,25 @@ function showStatus(message: string) {
 function showError(message: string) {
   status.value = ''
   error.value = message
+}
+
+function selectPresetAvatar(url: string) {
+  if (savingPresetAvatar.value || uploadingAvatar.value) return
+  presetAvatarDraft.value = url
+}
+
+async function applyPresetAvatar() {
+  if (savingPresetAvatar.value || uploadingAvatar.value || !presetAvatarChanged.value) return
+  savingPresetAvatar.value = presetAvatarDraft.value
+  try {
+    avatarUrl.value = await savePresetAvatar(presetAvatarDraft.value)
+    presetAvatarDraft.value = avatarUrl.value
+    showStatus(t('settings.status.avatarSaved'))
+  } catch (err) {
+    showError(err instanceof Error ? err.message : t('api.avatarPresetFailed'))
+  } finally {
+    savingPresetAvatar.value = ''
+  }
 }
 
 async function saveProfile() {
@@ -381,8 +405,6 @@ async function toggleBinding(provider: string) {
 
 <template>
     <main class="min-w-0 pb-8">
-      <PageHeader :title="t('shell.settings')" :description="t('settings.profile.description')" compact />
-
       <section class="gf-card overflow-hidden">
         <div class="h-20 border-b border-line bg-base-300 bg-cover bg-center sm:h-24" :style="profileCoverStyle" />
         <div class="px-4 pb-4 sm:px-5">
@@ -498,6 +520,57 @@ async function toggleBinding(provider: string) {
               <span class="truncate">{{ profileForm.websiteName || profileForm.website }}</span>
             </span>
           </div>
+
+          <section class="mt-4 border-t border-line pt-3">
+            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-semibold text-base-content/75">{{ t('settings.avatar.presetsTitle') }}</h3>
+                <p class="mt-0.5 text-xs text-base-content/50">{{ t('settings.avatar.presetsDescription') }}</p>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button
+                  v-if="presetAvatarChanged"
+                  type="button"
+                  class="gf-button gf-button-sm gf-button-primary h-8 text-sm"
+                  :disabled="Boolean(savingPresetAvatar) || uploadingAvatar"
+                  @click="applyPresetAvatar"
+                >
+                  <Loader2 v-if="savingPresetAvatar" class="h-3.5 w-3.5 animate-spin" />
+                  <Check v-else class="h-3.5 w-3.5" />
+                  {{ t('settings.avatar.applyPreset') }}
+                </button>
+                <button
+                  type="button"
+                  class="gf-button gf-button-sm gf-button-secondary h-8 text-sm"
+                  :disabled="uploadingAvatar"
+                  @click="chooseAvatar"
+                >
+                  <Camera class="h-3.5 w-3.5" />
+                  {{ t('settings.avatar.uploadCustom') }}
+                </button>
+              </div>
+            </div>
+            <div class="flex gap-1.5 overflow-x-auto pb-1">
+              <button
+                v-for="url in presetAvatars"
+                :key="url"
+                type="button"
+                class="relative h-11 w-11 shrink-0 rounded-md border bg-base-100 p-0.5 transition hover:border-primary/50 hover:bg-base-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-wait disabled:opacity-70"
+                :class="presetAvatarDraft === url ? 'border-primary ring-2 ring-primary/15' : 'border-line'"
+                :disabled="Boolean(savingPresetAvatar) || uploadingAvatar"
+                :aria-label="t('settings.avatar.selectPreset')"
+                @click="selectPresetAvatar(url)"
+              >
+                <UserAvatar :src="url" :alt="t('settings.avatar.selectPreset')" class="h-full w-full rounded object-cover" />
+                <span v-if="avatarUrl === url" class="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-content ring-2 ring-base-100">
+                  <Check class="h-3 w-3" />
+                </span>
+                <span v-else-if="savingPresetAvatar === url" class="absolute inset-0 flex items-center justify-center rounded-md bg-base-100/70">
+                  <Loader2 class="h-3.5 w-3.5 animate-spin text-primary" />
+                </span>
+              </button>
+            </div>
+          </section>
         </div>
       </section>
 

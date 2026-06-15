@@ -458,6 +458,7 @@ export default {
       passwordChanged: 'パスワードを変更しました',
       privacySaved: 'プライバシー設定を保存しました',
       bindingDisconnected: 'アカウント連携を解除しました',
+      avatarSaved: 'アバターを更新しました',
     },
     validation: {
       usernameRequired: 'ユーザー名を入力してください',
@@ -488,6 +489,11 @@ export default {
       cropTip: '顔やロゴが円の中心に来るようにしてください。最終アバターは 300 x 300 で出力され、対応ブラウザでは WebP を優先します。',
       uploading: 'アップロード中',
       confirmUpload: 'アップロードを確定',
+      presetsTitle: 'プリセットアバター',
+      presetsDescription: 'システム標準のアバターからも選択できます。',
+      uploadCustom: 'カスタムをアップロード',
+      selectPreset: 'プリセットアバターを選択',
+      applyPreset: 'アバターを適用',
     },
     profile: {
       title: '公開プロフィール',
@@ -609,6 +615,8 @@ export default {
     passwordChangeFailed: 'パスワード変更に失敗しました',
     avatarUploadFailed: 'アバターアップロードに失敗しました',
     avatarUploadEmpty: 'アバターアップロードの戻り値が空です',
+    avatarPresetFailed: 'プリセットアバターの保存に失敗しました',
+    avatarPresetEmpty: 'プリセットアバターの戻り値が空です',
     bindingsLoadFailed: '連携状態の読み込みに失敗しました',
     unbindFailed: '連携解除に失敗しました',
     captchaLoadFailed: '認証コードの読み込みに失敗しました',

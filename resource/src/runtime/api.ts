@@ -474,6 +474,19 @@ export async function saveUserProfileCover(profileCoverUrl: string): Promise<boo
   return true
 }
 
+export async function savePresetAvatar(avatarUrl: string): Promise<string> {
+  const response = await fetch('/api/set-preset-avatar', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ avatarUrl }),
+  })
+  const result = await readApiResponse<{ avatarUrl?: string }>(response, t('api.avatarPresetFailed'))
+  if (!result.avatarUrl) throw new Error(t('api.avatarPresetEmpty'))
+  return result.avatarUrl
+}
+
 export async function saveUserEmail(email: string): Promise<boolean> {
   const response = await fetch('/api/set-user-email', {
     method: 'POST',

@@ -223,6 +223,40 @@ func EditUserProfileCover(req component.BetterRequest[EditUserProfileCoverReq]) 
 	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
 }
 
+type SetPresetAvatarReq struct {
+	AvatarUrl string `json:"avatarUrl" validate:"required"`
+}
+
+// SetPresetAvatar switches the current user to a built-in avatar.
+func SetPresetAvatar(req component.BetterRequest[SetPresetAvatarReq]) component.Response {
+	userEntity, err := req.GetUser()
+	if err != nil {
+		return component.FailResponseCode(component.MessageUserFetchFailed, nil)
+	}
+
+	avatarUrl := strings.TrimSpace(req.Params.AvatarUrl)
+	if !isAllowedPresetAvatar(avatarUrl) {
+		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+	}
+
+	userEntity.AvatarUrl = avatarUrl
+	if err := userservice.SaveUser(&userEntity); err != nil {
+		return component.FailResponseCode(component.MessageUserUpdateFailed, nil)
+	}
+	return component.SuccessResponse(map[string]string{
+		"avatarUrl": userEntity.GetWebAvatarUrl(),
+	})
+}
+
+func isAllowedPresetAvatar(avatarUrl string) bool {
+	for i := 1; i <= 12; i++ {
+		if avatarUrl == fmt.Sprintf("/static/pic/%d.webp", i) {
+			return true
+		}
+	}
+	return false
+}
+
 // UploadAvatar stores a new avatar for the current user.
 func UploadAvatar(c *gin.Context) {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()

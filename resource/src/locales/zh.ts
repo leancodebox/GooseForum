@@ -458,6 +458,7 @@ export default {
       passwordChanged: '密码已修改',
       privacySaved: '隐私偏好已保存',
       bindingDisconnected: '账号绑定已解除',
+      avatarSaved: '头像已更新',
     },
     validation: {
       usernameRequired: '用户名不能为空',
@@ -488,6 +489,11 @@ export default {
       cropTip: '建议让脸部或标识位于圆形中心。最终头像会导出为 300 x 300，并按浏览器支持优先转为 WebP。',
       uploading: '上传中',
       confirmUpload: '确认上传',
+      presetsTitle: '预设头像',
+      presetsDescription: '也可以直接选择一枚系统预设头像。',
+      uploadCustom: '上传自定义',
+      selectPreset: '选择预设头像',
+      applyPreset: '应用头像',
     },
     profile: {
       title: '公开资料',
@@ -609,6 +615,8 @@ export default {
     passwordChangeFailed: '密码修改失败',
     avatarUploadFailed: '头像上传失败',
     avatarUploadEmpty: '头像上传返回为空',
+    avatarPresetFailed: '预设头像保存失败',
+    avatarPresetEmpty: '预设头像返回为空',
     bindingsLoadFailed: '绑定状态加载失败',
     unbindFailed: '解绑失败',
     captchaLoadFailed: '验证码加载失败',
