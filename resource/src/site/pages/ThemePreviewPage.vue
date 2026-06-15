@@ -366,18 +366,16 @@ function themeEditSignature(config: SiteThemeConfig) {
 }
 
 async function save() {
-  if (saving.value || !canManageSiteTheme.value) return
+  if (saving.value || publishing.value || !canManageSiteTheme.value) return
   saving.value = true
   message.value = ''
   error.value = ''
   try {
-    const config = await saveSiteTheme(cloneConfig(prepublish))
-    savedConfig.value = cloneConfig(config)
-    applyPrepublishConfig(configFromPrepublish(config))
-    message.value = '预发布已保存，发布后才会影响全站'
+    await persistThemeDraft()
+    message.value = t('themePreview.draftSaved')
     pushFlash(message.value, 'success')
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '主题配置保存失败'
+    error.value = err instanceof Error ? err.message : t('themePreview.saveFailed')
     pushFlash(error.value, 'error')
   } finally {
     saving.value = false
@@ -385,24 +383,32 @@ async function save() {
 }
 
 async function publish() {
-  if (publishing.value || !canManageSiteTheme.value) return
+  if (saving.value || publishing.value || !canManageSiteTheme.value) return
   publishing.value = true
   message.value = ''
   error.value = ''
   try {
+    await persistThemeDraft()
     const config = await publishSiteTheme()
     savedConfig.value = cloneConfig(config)
     applyPrepublishConfig(configFromPrepublish(config))
     applySiteThemeCss('')
     applySiteThemePayload(buildThemePayload(config))
-    message.value = '预发布已发布'
+    message.value = t('themePreview.published')
     pushFlash(message.value, 'success')
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '主题配置发布失败'
+    error.value = err instanceof Error ? err.message : t('themePreview.publishFailed')
     pushFlash(error.value, 'error')
   } finally {
     publishing.value = false
   }
+}
+
+async function persistThemeDraft() {
+  const config = await saveSiteTheme(cloneConfig(prepublish))
+  savedConfig.value = cloneConfig(config)
+  applyPrepublishConfig(configFromPrepublish(config))
+  return config
 }
 
 function resetPrepublish() {
@@ -718,25 +724,29 @@ function hexToRgb(value: string) {
             class="gf-button gf-button-sm gf-button-secondary w-32 whitespace-nowrap disabled:bg-base-100 disabled:text-base-content/75 disabled:opacity-100"
             :class="saving ? 'cursor-wait bg-base-200 ring-2 ring-primary/20' : ''"
             :aria-busy="saving"
-            :disabled="!canManageSiteTheme"
+            :disabled="!canManageSiteTheme || saving || publishing"
             @click="save"
           >
-            <Save class="h-4 w-4" :class="saving ? 'animate-pulse text-primary' : ''" /> 保存预发布
+            <Save class="h-4 w-4" :class="saving ? 'animate-pulse text-primary' : ''" /> {{ t('themePreview.saveDraft') }}
           </button>
           <button
             type="button"
-            class="gf-button gf-button-sm gf-button-primary w-24 whitespace-nowrap disabled:bg-primary disabled:text-primary-content disabled:opacity-100"
+            class="gf-button gf-button-sm gf-button-primary w-28 whitespace-nowrap disabled:bg-primary disabled:text-primary-content disabled:opacity-100"
             :class="publishing ? 'cursor-wait brightness-95 ring-2 ring-primary/25' : ''"
             :aria-busy="publishing"
-            :disabled="!canManageSiteTheme"
+            :disabled="!canManageSiteTheme || saving || publishing"
             @click="publish"
           >
-            <Rocket class="h-4 w-4" :class="publishing ? 'animate-pulse' : ''" /> 发布
+            <Rocket class="h-4 w-4" :class="publishing ? 'animate-pulse' : ''" /> {{ t('themePreview.publishSite') }}
           </button>
         </div>
       </div>
 
       <div class="min-h-full bg-base-200/60 p-3 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        <div class="mb-3 rounded-md border border-info/20 bg-info/5 px-3 py-2 text-xs leading-relaxed text-base-content/65">
+          <span class="font-semibold text-info">{{ t('themePreview.workflowTitle') }}</span>
+          <span class="ml-1">{{ t('themePreview.workflowDescription') }}</span>
+        </div>
         <div v-if="previewMode === 'forum'" class="grid gap-3 2xl:grid-cols-[minmax(0,1fr)_248px]">
           <div class="space-y-3">
             <section class="gf-card overflow-hidden">

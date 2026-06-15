@@ -535,7 +535,15 @@ export default {
   },
   themePreview: {
     presetsTitle: 'プリセット',
-    presetApplied: '{name} プリセットを適用しました。事前公開を保存すると反映されます',
+    presetApplied: '{name} プリセットを適用しました。草稿を保存すると保持されます',
+    saveDraft: '草稿を保存',
+    publishSite: '全体に公開',
+    workflowTitle: '使い方:',
+    workflowDescription: '現在編集しているのはテーマ草稿です。草稿の保存だけではサイト全体には反映されません。公開後、左側の有効化スイッチがオンのときだけカスタムテーマが適用されます。',
+    draftSaved: 'テーマ草稿を保存しました。サイト全体にはまだ反映されません。',
+    published: 'テーマをサイト全体に公開しました。',
+    saveFailed: 'テーマ草稿の保存に失敗しました',
+    publishFailed: 'テーマの公開に失敗しました',
     presets: {
       goose: {
         label: 'Goose',

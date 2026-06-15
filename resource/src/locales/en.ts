@@ -535,7 +535,15 @@ export default {
   },
   themePreview: {
     presetsTitle: 'Presets',
-    presetApplied: '{name} preset applied. Save the prepublish draft to keep it.',
+    presetApplied: '{name} preset applied. Save the draft to keep it.',
+    saveDraft: 'Save draft',
+    publishSite: 'Publish site',
+    workflowTitle: 'How it works:',
+    workflowDescription: 'You are editing a theme draft. Saving the draft does not affect the live site; after publishing, the custom theme takes over only when the enable switch on the left is on.',
+    draftSaved: 'Theme draft saved. The live site is unchanged.',
+    published: 'Theme published to the live site.',
+    saveFailed: 'Failed to save theme draft',
+    publishFailed: 'Failed to publish theme',
     presets: {
       goose: {
         label: 'Goose',

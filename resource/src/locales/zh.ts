@@ -535,7 +535,15 @@ export default {
   },
   themePreview: {
     presetsTitle: '预设',
-    presetApplied: '已应用 {name} 预设，保存预发布后生效',
+    presetApplied: '已应用 {name} 预设，保存草稿后保留',
+    saveDraft: '保存草稿',
+    publishSite: '发布到全站',
+    workflowTitle: '使用说明：',
+    workflowDescription: '当前编辑的是主题草稿。保存草稿不会影响全站；发布到全站后，只有左侧启用开关打开时，自定义主题才会接管站点。',
+    draftSaved: '主题草稿已保存，不会影响全站。',
+    published: '主题已发布到全站。',
+    saveFailed: '主题草稿保存失败',
+    publishFailed: '主题发布失败',
     presets: {
       goose: {
         label: 'Goose',
