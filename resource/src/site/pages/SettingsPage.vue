@@ -73,7 +73,7 @@ const {
   cropImageUrl,
   cropPreviewUrl,
   cropError,
-  chooseAvatar,
+  chooseAvatar: openAvatarPicker,
   handleAvatarChange,
   closeCropModal,
   uploadCroppedAvatar,
@@ -149,6 +149,7 @@ const providers = computed(() => [
 ])
 const presetAvatars = Array.from({ length: 12 }, (_, index) => `/static/pic/${index + 1}.webp`)
 const presetAvatarChanged = computed(() => presetAvatarDraft.value !== avatarUrl.value)
+const avatarPreviewUrl = computed(() => presetAvatarChanged.value ? presetAvatarDraft.value : avatarUrl.value)
 
 const easterEggMessages: Array<{ type: FlashMessageType; message: string }> = [
   { type: 'success', message: t('settings.easterEgg.success') },
@@ -175,6 +176,10 @@ watch(
     editingCover.value = false
   },
 )
+
+watch(avatarUrl, (next) => {
+  presetAvatarDraft.value = next
+})
 
 onMounted(() => {
   const urlTab = new URL(window.location.href).searchParams.get('tab')
@@ -232,6 +237,11 @@ function showError(message: string) {
 function selectPresetAvatar(url: string) {
   if (savingPresetAvatar.value || uploadingAvatar.value) return
   presetAvatarDraft.value = url
+}
+
+function chooseCustomAvatar() {
+  presetAvatarDraft.value = avatarUrl.value
+  openAvatarPicker()
 }
 
 async function applyPresetAvatar() {
@@ -415,9 +425,9 @@ async function toggleBinding(provider: string) {
                 class="group relative -mt-9 h-24 w-24 shrink-0 rounded-lg border-4 border-base-100 bg-base-100 shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-primary/20 sm:-mt-10 sm:h-28 sm:w-28"
                 :disabled="uploadingAvatar"
                 :aria-label="t('settings.avatar.upload')"
-                @click="chooseAvatar"
+                @click="chooseCustomAvatar"
               >
-                <UserAvatar :src="avatarUrl" :alt="usernameForm.username" size="large" class="h-full w-full rounded object-cover transition group-hover:brightness-90" />
+                <UserAvatar :src="avatarPreviewUrl" :alt="usernameForm.username" size="large" class="h-full w-full rounded object-cover transition group-hover:brightness-90" />
                 <span class="absolute inset-0 flex items-center justify-center rounded bg-neutral/0 text-neutral-content transition group-hover:bg-neutral/20">
                   <Loader2 v-if="uploadingAvatar" class="h-6 w-6 animate-spin opacity-100" />
                   <Camera v-else class="h-6 w-6 opacity-0 transition group-hover:opacity-100" />
@@ -497,7 +507,7 @@ async function toggleBinding(provider: string) {
                 <button
                   type="button"
                   class="gf-button gf-button-md gf-button-secondary"
-                  @click="chooseAvatar"
+                  @click="chooseCustomAvatar"
                 >
                   <Camera class="h-4 w-4" />
                   {{ t('settings.avatar.change') }}
@@ -543,7 +553,7 @@ async function toggleBinding(provider: string) {
                   type="button"
                   class="gf-button gf-button-sm gf-button-secondary h-8 text-sm"
                   :disabled="uploadingAvatar"
-                  @click="chooseAvatar"
+                  @click="chooseCustomAvatar"
                 >
                   <Camera class="h-3.5 w-3.5" />
                   {{ t('settings.avatar.uploadCustom') }}
