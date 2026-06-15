@@ -240,7 +240,6 @@ function selectPresetAvatar(url: string) {
 }
 
 function chooseCustomAvatar() {
-  presetAvatarDraft.value = avatarUrl.value
   openAvatarPicker()
 }
 
