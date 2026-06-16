@@ -9,7 +9,7 @@
         "desc": "简单的社区构建软件 / Easy forum software for building friendly communities.",
         "url": "https://gooseforum.online",
         "logoUrl": "/static/pic/default-avatar.webp",
-        "status": 0
+        "status": 1
       }
     ]
   },
@@ -23,7 +23,7 @@
         "desc": "简单的社区构建软件 / Easy forum software for building friendly communities.",
         "url": "https://gooseforum.online",
         "logoUrl": "/static/pic/default-avatar.webp",
-        "status": 0
+        "status": 1
       }
     ]
   },
@@ -37,7 +37,7 @@
         "desc": "简单的社区构建软件 / Easy forum software for building friendly communities.",
         "url": "https://gooseforum.online",
         "logoUrl": "/static/pic/default-avatar.webp",
-        "status": 0
+        "status": 1
       }
     ]
   }
