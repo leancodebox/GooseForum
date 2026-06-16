@@ -16,6 +16,7 @@ type ArticlesSimpleVo struct {
 	PinWeight      int        `json:"pinWeight"`
 	Type           int8       `json:"type,omitempty"`
 	TypeStr        string     `json:"typeStr,omitempty"`
+	ProcessStatus  int8       `json:"processStatus"`
 	Categories     []string   `json:"categories,omitempty"`
 	CategoriesId   []uint64   `json:"categoriesId,omitempty"`
 	AvatarUrl      string     `json:"avatarUrl,omitempty"`

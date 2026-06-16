@@ -7,7 +7,7 @@ defineProps<LayoutHeaderProps>()
 </script>
 
 <template>
-  <main>
+  <main class="space-y-4">
     <BasicHeader
       :title="title"
       :description="description"
@@ -18,7 +18,7 @@ defineProps<LayoutHeaderProps>()
       </template>
     </BasicHeader>
 
-    <main class="py-4">
+    <main>
       <slot />
     </main>
   </main>

@@ -28,45 +28,50 @@ function switchLocale(nextLocale: Locale) {
     <SidebarTrigger class="-ml-1" />
     <Separator orientation="vertical" class="h-6" />
 
-    <button
+    <Button
+      variant="outline"
       type="button"
-      class="hidden h-10 w-72 items-center gap-3 rounded-md border bg-background px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground md:flex"
+      class="hidden h-10 w-72 justify-start px-3 text-muted-foreground md:inline-flex"
     >
       <Search class="size-4" />
       <span class="flex-1 text-left">Search Menu</span>
       <kbd class="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
         ⌘ + K
       </kbd>
-    </button>
+    </Button>
 
     <div class="flex-1" />
 
     <div class="ml-auto flex items-center space-x-4">
       <div class="relative">
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           type="button"
-          class="inline-flex h-9 items-center gap-2 rounded-md border bg-background px-2.5 text-sm font-medium text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+          class="text-muted-foreground"
           :aria-label="t('shell.switchLanguage')"
           :title="t('shell.switchLanguage')"
           @click="languageMenuOpen = !languageMenuOpen"
         >
           <Languages class="size-4" />
           <span class="min-w-5 text-center">{{ currentLanguageLabel }}</span>
-        </button>
+        </Button>
         <div
           v-if="languageMenuOpen"
           class="absolute right-0 z-50 mt-2 w-36 overflow-hidden rounded-md border bg-popover py-1 text-popover-foreground shadow-lg"
         >
-          <button
+          <Button
             v-for="item in supportedLocales"
             :key="item"
+            variant="ghost"
+            size="sm"
             type="button"
-            class="block w-full px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-            :class="locale === item ? 'font-semibold text-primary' : 'text-popover-foreground'"
+            class="w-full justify-start rounded-none"
+            :class="locale === item ? 'font-semibold text-primary hover:text-primary' : 'text-popover-foreground'"
             @click="switchLocale(item)"
           >
             {{ t(`locale.${item}`) }}
-          </button>
+          </Button>
         </div>
       </div>
       <Button as-child class="hidden md:inline-flex">

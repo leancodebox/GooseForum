@@ -3,6 +3,8 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import Draggable from 'vuedraggable'
 import { ExternalLink, Eye, EyeOff, GripVertical, Link as LinkIcon, Pencil, Plus, RefreshCw, Send, ShieldCheck, Trash2 } from '@lucide/vue'
+import AdminActionButton from '@/admin/components/AdminActionButton.vue'
+import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
@@ -204,12 +206,12 @@ onMounted(() => {
                     <Plus class="size-3.5" />
                     {{ adminText('k0094') }}
                   </Button>
-                  <Button variant="ghost" size="icon" class="size-8 rounded-md" type="button" @click="openEditGroup(group, groupIndex)">
+                  <AdminActionButton compact :title="adminText('k005j')" @click="openEditGroup(group, groupIndex)">
                     <Pencil class="size-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" class="size-8 rounded-md text-destructive hover:text-destructive" type="button" @click="deleteDialog = { type: 'group', groupIndex }">
+                  </AdminActionButton>
+                  <AdminActionButton compact tone="danger" :title="adminText('k005i')" @click="deleteDialog = { type: 'group', groupIndex }">
                     <Trash2 class="size-4" />
-                  </Button>
+                  </AdminActionButton>
                 </div>
               </header>
 
@@ -273,12 +275,12 @@ onMounted(() => {
                       >
                         <ExternalLink class="size-3.5" />
                       </a>
-                      <Button variant="ghost" size="icon" class="size-6 rounded-md border bg-background/95 shadow-sm" type="button" @click="openEditLink(groupIndex, linkIndex, link)">
+                      <AdminActionButton compact :title="adminText('k005j')" @click="openEditLink(groupIndex, linkIndex, link)">
                         <Pencil class="size-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" class="size-6 rounded-md border bg-background/95 text-destructive shadow-sm hover:text-destructive" type="button" @click="deleteDialog = { type: 'link', groupIndex, linkIndex }">
+                      </AdminActionButton>
+                      <AdminActionButton compact tone="danger" :title="adminText('k005i')" @click="deleteDialog = { type: 'link', groupIndex, linkIndex }">
                         <Trash2 class="size-3.5" />
-                      </Button>
+                      </AdminActionButton>
                     </div>
                   </article>
                 </template>
@@ -379,19 +381,13 @@ onMounted(() => {
         </DialogContent>
       </Dialog>
 
-      <Dialog :open="deleteDialog !== null" @update:open="(open) => !open && (deleteDialog = null)">
-        <DialogContent class="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{{ deleteDialog?.type === 'group' ? adminText('k0072') : adminText('k0073') }}</DialogTitle>
-            <DialogDescription>
-              {{ deleteDialog?.type === 'group' ? adminText('k0074') : adminText('k0075') }}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" type="button" @click="deleteDialog = null">{{ adminText('k009q') }}</Button>
-            <Button variant="destructive" type="button" :disabled="saving" @click="confirmDelete">{{ adminText('k005i') }}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AdminConfirmDialog
+        :open="deleteDialog !== null"
+        :title="deleteDialog?.type === 'group' ? adminText('k0072') : adminText('k0073')"
+        :description="deleteDialog?.type === 'group' ? adminText('k0074') : adminText('k0075')"
+        :loading="saving"
+        @update:open="(open) => !open && (deleteDialog = null)"
+        @confirm="confirmDelete"
+      />
     </BasicPage>
 </template>

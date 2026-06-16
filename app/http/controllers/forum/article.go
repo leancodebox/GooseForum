@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/articleviewservice"
+	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/spf13/cast"
@@ -222,11 +223,23 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 }
 
 func canViewArticle(entity *articles.Entity, userID uint64) bool {
-	return canViewArticleWithPermission(entity.ArticleStatus, entity.ProcessStatus, entity.UserId, userID, currentUserCanViewProcessedArticle)
+	if entity.ArticleStatus != 1 {
+		return userID != 0 && userID == entity.UserId
+	}
+	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedArticle(userID) && !moderatorservice.CanModerateAnyCategory(userID, entity.CategoryId) {
+		return false
+	}
+	return true
 }
 
 func canViewArticleSimple(entity *articles.SmallEntity, userID uint64) bool {
-	return canViewArticleWithPermission(entity.ArticleStatus, entity.ProcessStatus, entity.UserId, userID, currentUserCanViewProcessedArticle)
+	if entity.ArticleStatus != 1 {
+		return userID != 0 && userID == entity.UserId
+	}
+	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedArticle(userID) && !moderatorservice.CanModerateAnyCategory(userID, entity.CategoryId) {
+		return false
+	}
+	return true
 }
 
 func canViewArticleWithPermission(articleStatus, processStatus int8, authorID, userID uint64, canViewProcessed func(uint64) bool) bool {

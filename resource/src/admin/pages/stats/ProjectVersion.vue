@@ -1,14 +1,8 @@
 <script setup lang="ts">
 import { adminText } from '@/admin/runtime/i18n-text'
 import { AlertCircle, ChevronRight, Code2, ExternalLink, Loader2, Tag } from '@lucide/vue'
+import AdminSection from '@/admin/components/AdminSection.vue'
 import { Button } from '@/admin/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/admin/components/ui/card'
 import type { GithubRelease } from '@/admin/types'
 
 defineProps<{
@@ -31,14 +25,15 @@ function releaseTime(value: string) {
 </script>
 
 <template>
-  <Card class="flex h-full flex-col overflow-hidden">
-    <CardHeader class="flex flex-row items-start justify-between gap-4 border-b px-5 py-3.5">
+  <AdminSection class="flex h-full flex-col" body-class="flex min-h-0 flex-1 flex-col p-0">
+    <template #header>
+      <div class="flex items-start justify-between gap-4">
       <div class="space-y-1">
-        <CardTitle class="flex items-center gap-2 text-base font-semibold">
+        <h2 class="flex items-center gap-2 text-base font-semibold">
           <Code2 class="h-4 w-4" />
           {{ adminText('k0047') }}
-        </CardTitle>
-        <CardDescription>{{ adminText('k002a') }}</CardDescription>
+        </h2>
+        <p class="text-sm text-muted-foreground">{{ adminText('k002a') }}</p>
       </div>
       <Button variant="ghost" size="sm" as-child>
         <a
@@ -50,8 +45,8 @@ function releaseTime(value: string) {
           {{ adminText('k0048') }} <ExternalLink class="h-3 w-3" />
         </a>
       </Button>
-    </CardHeader>
-    <CardContent class="flex min-h-0 flex-1 flex-col p-0">
+      </div>
+    </template>
       <div class="min-h-0 flex-1 overflow-y-auto" style="max-height: 383px">
         <div v-if="loading" class="flex h-full w-full flex-col items-center justify-center space-y-2 text-muted-foreground">
           <Loader2 class="h-6 w-6 animate-spin" />
@@ -101,6 +96,5 @@ function releaseTime(value: string) {
           <p class="text-sm">{{ adminText('k002c') }}</p>
         </div>
       </div>
-    </CardContent>
-  </Card>
+  </AdminSection>
 </template>

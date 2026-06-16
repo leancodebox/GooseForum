@@ -2,14 +2,8 @@
 
 import { VisArea, VisAxis, VisLine, VisXYContainer } from '@unovis/vue'
 import { computed } from 'vue'
+import AdminSection from '@/admin/components/AdminSection.vue'
 import type { ChartConfig } from '@/admin/components/ui/chart'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/admin/components/ui/card'
 import {
   ChartContainer,
   ChartCrosshair,
@@ -73,17 +67,18 @@ const svgDefs = `
 </script>
 
 <template>
-  <Card class="h-full overflow-hidden pt-0">
-    <CardHeader class="grid gap-3 space-y-0 border-b px-4 py-4 sm:flex sm:flex-row sm:items-center sm:px-5">
+  <AdminSection class="h-full" body-class="px-3 pb-3 pt-4 sm:px-5">
+    <template #header>
+      <div class="grid gap-3 sm:flex sm:items-center">
       <div class="grid min-w-0 flex-1 gap-1">
-        <CardTitle>{{ adminText('k001s') }}</CardTitle>
-        <CardDescription>{{ adminText('k001t') }}</CardDescription>
+        <h2 class="text-base font-semibold">{{ adminText('k001s') }}</h2>
+        <p class="text-sm text-muted-foreground">{{ adminText('k001t') }}</p>
       </div>
       <div class="min-w-0 sm:shrink-0">
         <slot name="headerAction" />
       </div>
-    </CardHeader>
-    <CardContent class="px-3 pb-3 pt-4 sm:px-5">
+      </div>
+    </template>
       <div v-if="loading" class="flex h-[260px] items-center justify-center text-muted-foreground sm:h-[320px]">
         {{ adminText('k0046') }}
       </div>
@@ -147,6 +142,5 @@ const svgDefs = `
         </VisXYContainer>
         <ChartLegendContent />
       </ChartContainer>
-    </CardContent>
-  </Card>
+  </AdminSection>
 </template>

@@ -85,6 +85,13 @@ type PageQuery struct {
 	Sort           string
 }
 
+type ModerationPageQuery struct {
+	Page, PageSize      int
+	FilterProcessStatus bool
+	ProcessStatus       int8
+	CategoryIDs         []uint64
+}
+
 func Page[ResType SmallEntity](q PageQuery) struct {
 	Page     int
 	PageSize int
@@ -131,6 +138,51 @@ WHERE rs.article_id = articles.id AND rs.article_category_id IN (?) AND rs.effec
 		Total    int64
 		Data     []ResType
 	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, Total: total}
+}
+
+func PageForModeration(q ModerationPageQuery) struct {
+	Page     int
+	PageSize int
+	Total    int64
+	HasNext  bool
+	Data     []SmallEntity
+} {
+	var list []SmallEntity
+	q.Page = max(q.Page-1, 0)
+	q.PageSize = pageutil.BoundPageSize(q.PageSize)
+	queryLimit := q.PageSize + 1
+	b := builder().
+		Where(queryopt.Eq(fieldArticleStatus, 1))
+	if q.FilterProcessStatus {
+		b.Where(queryopt.Eq(fieldProcessStatus, q.ProcessStatus))
+	}
+	if len(q.CategoryIDs) > 0 {
+		categoryScopeSQL := `EXISTS (SELECT 1 FROM article_category_rs rs WHERE rs.article_id = articles.id AND rs.article_category_id IN (?) AND rs.effective = ?)`
+		b.Where(categoryScopeSQL, q.CategoryIDs, 1)
+	}
+	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Order(queryopt.Desc(fieldUpdatedAt)).Order(queryopt.Desc(pid)).Find(&list)
+	hasNext := len(list) > q.PageSize
+	if hasNext {
+		list = list[:q.PageSize]
+	}
+	total := int64(q.Page*q.PageSize + len(list))
+	if hasNext {
+		total++
+	}
+	return struct {
+		Page     int
+		PageSize int
+		Total    int64
+		HasNext  bool
+		Data     []SmallEntity
+	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, Total: total, HasNext: hasNext}
+}
+
+func UpdateProcessStatus(id uint64, processStatus int8) error {
+	return builder().Where(queryopt.Eq(pid, id)).Updates(map[string]any{
+		fieldProcessStatus: processStatus,
+		fieldUpdatedAt:     time.Now(),
+	}).Error
 }
 
 func applyPageSort(b *gorm.DB, sort string) {

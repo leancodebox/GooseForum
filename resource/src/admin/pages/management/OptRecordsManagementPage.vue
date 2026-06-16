@@ -26,6 +26,7 @@ const columns = ['ID', adminText('k0036'), adminText('k0037'), adminText('k0038'
 const optTypeCodeMap: Record<number, string> = {
   0: 'editUser',
   1: 'editArticle',
+  2: 'editCategory',
 }
 
 const targetTypeCodeMap: Record<number, string> = {
@@ -35,6 +36,7 @@ const targetTypeCodeMap: Record<number, string> = {
   3: 'docProject',
   4: 'docVersion',
   5: 'docContent',
+  6: 'category',
 }
 
 const optInfoMessageKeyMap: Record<string, string> = {
@@ -43,6 +45,9 @@ const optInfoMessageKeyMap: Record<string, string> = {
   'admin.opt.article.pinWeightChanged': 'adminOptLog.messages.articlePinWeightChanged',
   'admin.opt.article.categoriesChanged': 'adminOptLog.messages.articleCategoriesChanged',
   'admin.opt.article.deleted': 'adminOptLog.messages.articleDeleted',
+  'moderator.opt.article.statusChanged': 'adminOptLog.messages.moderatorArticleStatusChanged',
+  'admin.opt.category.moderatorAdded': 'adminOptLog.messages.categoryModeratorAdded',
+  'admin.opt.category.moderatorRemoved': 'adminOptLog.messages.categoryModeratorRemoved',
 }
 
 function pageResultSize(result: { pageSize?: number, size?: number }) {

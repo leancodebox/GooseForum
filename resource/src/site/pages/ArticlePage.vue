@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
-import { AlertTriangle, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Trash2, X } from '@lucide/vue'
-import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateReply, watchArticle } from '@/runtime/api'
+import { AlertTriangle, Ban, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
+import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateModerationArticleStatus, updateReply, watchArticle } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
@@ -29,12 +29,15 @@ const actionMessage = ref('')
 const actingLike = ref(false)
 const actingBookmark = ref(false)
 const actingWatch = ref(false)
+const actingModeration = ref(false)
 const submitting = ref(false)
 const deletingReplyId = ref(0)
 const editingReplyId = ref(0)
 const savingEditReplyId = ref(0)
 const pendingDeleteReply = ref<ReplyPayload | null>(null)
+const pendingModerationAction = ref<'ban' | 'unban' | null>(null)
 const replies = ref<ReplyPayload[]>([...page.props.replies])
+const articleProcessStatus = ref(page.props.article.processStatus)
 const replyTarget = computed(() => replies.value.find((reply) => reply.id === replyTargetId.value))
 const replyWindowMode = ref(false)
 const replyHasBefore = ref(false)
@@ -179,6 +182,9 @@ watch(
     isLiked.value = page.props.article.isLiked
     isBookmarked.value = page.props.article.isBookmarked
     isWatched.value = page.props.article.isWatched
+    articleProcessStatus.value = page.props.article.processStatus
+    pendingModerationAction.value = null
+    actingModeration.value = false
     mobileHeaderTitleVisible.value = false
     if (typeof window !== 'undefined') {
       lastHeaderScrollY = window.scrollY
@@ -988,6 +994,33 @@ function closeDeleteDialog() {
   deleteErrorMessage.value = ''
 }
 
+function requestArticleModeration(action: 'ban' | 'unban') {
+  actionMessage.value = ''
+  pendingModerationAction.value = action
+}
+
+function closeArticleModerationDialog() {
+  if (actingModeration.value) return
+  pendingModerationAction.value = null
+}
+
+async function updateArticleModerationFromDetail() {
+  if (actingModeration.value || !pendingModerationAction.value) return
+  actingModeration.value = true
+  actionMessage.value = ''
+  const action = pendingModerationAction.value
+  try {
+    await updateModerationArticleStatus(page.props.article.id, action)
+    articleProcessStatus.value = action === 'ban' ? 1 : 0
+    pendingModerationAction.value = null
+    actionMessage.value = action === 'ban' ? t('article.moderationBanSuccess') : t('article.moderationUnbanSuccess')
+  } catch (error) {
+    actionMessage.value = error instanceof Error ? error.message : t('api.moderationActionFailed')
+  } finally {
+    actingModeration.value = false
+  }
+}
+
 async function removeReply(replyId: number) {
   if (deletingReplyId.value || savingEditReplyId.value === replyId) return
 
@@ -1101,7 +1134,27 @@ async function removeReply(replyId: number) {
                 <Bell class="h-4 w-4" :fill="isWatched ? 'currentColor' : 'none'" />
                 {{ isWatched ? t('article.watched') : t('article.watch') }}
               </button>
-              <span v-if="actionMessage" class="text-xs" :class="actionMessage === t('article.bookmarkAdded') || actionMessage === t('article.bookmarkRemoved') || actionMessage === t('article.watchAdded') || actionMessage === t('article.watchRemoved') ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
+              <button
+                v-if="page.props.permissions.canModerateArticle && articleProcessStatus === 0"
+                type="button"
+                class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
+                :disabled="actingModeration"
+                @click="requestArticleModeration('ban')"
+              >
+                <Ban class="h-4 w-4" />
+                {{ t('article.moderationBan') }}
+              </button>
+              <button
+                v-else-if="page.props.permissions.canModerateArticle && articleProcessStatus === 1"
+                type="button"
+                class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
+                :disabled="actingModeration"
+                @click="requestArticleModeration('unban')"
+              >
+                <RotateCcw class="h-4 w-4" />
+                {{ t('article.moderationUnban') }}
+              </button>
+              <span v-if="actionMessage" class="text-xs" :class="actionMessage === t('article.bookmarkAdded') || actionMessage === t('article.bookmarkRemoved') || actionMessage === t('article.watchAdded') || actionMessage === t('article.watchRemoved') || actionMessage === t('article.moderationBanSuccess') || actionMessage === t('article.moderationUnbanSuccess') ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
             </div>
           </div>
         </div>
@@ -1412,6 +1465,62 @@ async function removeReply(replyId: number) {
                 <Loader2 v-if="deletingReplyId === pendingDeleteReply.id" class="h-4 w-4 animate-spin" />
                 <Trash2 v-else class="h-4 w-4" />
                 {{ deletingReplyId === pendingDeleteReply.id ? t('article.deleting') : t('article.confirmDelete') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <Transition name="gf-modal">
+        <div
+          v-if="pendingModerationAction"
+          class="fixed inset-0 z-[110] flex items-center justify-center bg-neutral/45 px-4 py-6 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ban-article-title"
+          @click.self="closeArticleModerationDialog"
+        >
+          <div class="gf-menu-surface w-full max-w-sm p-4">
+            <div class="flex items-start gap-3">
+              <AlertTriangle class="mt-0.5 h-5 w-5 shrink-0 text-error" />
+              <div class="min-w-0 flex-1">
+                <h2 id="ban-article-title" class="text-base font-bold text-base-content">
+                  {{ pendingModerationAction === 'ban' ? t('article.moderationBanTitle') : t('article.moderationUnbanTitle') }}
+                </h2>
+                <p class="mt-1 text-sm leading-6 text-base-content/55">
+                  {{ pendingModerationAction === 'ban' ? t('article.moderationBanDescription') : t('article.moderationUnbanDescription') }}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75 disabled:cursor-not-allowed disabled:opacity-50"
+                :disabled="actingModeration"
+                @click="closeArticleModerationDialog"
+              >
+                <X class="h-4 w-4" />
+              </button>
+            </div>
+
+            <div class="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                class="gf-button gf-button-md gf-button-muted"
+                :disabled="actingModeration"
+                @click="closeArticleModerationDialog"
+              >
+                {{ t('common.cancel') }}
+              </button>
+              <button
+                type="button"
+                class="gf-button gf-button-md gf-button-danger"
+                :disabled="actingModeration"
+                @click="updateArticleModerationFromDetail"
+              >
+                <Loader2 v-if="actingModeration" class="h-4 w-4 animate-spin" />
+                <component :is="pendingModerationAction === 'ban' ? Ban : RotateCcw" v-else class="h-4 w-4" />
+                {{ actingModeration ? t('common.loadingShort') : (pendingModerationAction === 'ban' ? t('article.confirmModerationBan') : t('article.confirmModerationUnban')) }}
               </button>
             </div>
           </div>

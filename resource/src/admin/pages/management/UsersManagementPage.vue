@@ -1,8 +1,13 @@
-<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+<script setup lang="ts">
+import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, reactive, ref } from 'vue'
-import { Award, ChevronLeft, ChevronRight, CheckCircle2, Loader2, RefreshCw, Search, ShieldOff, UserCog, XCircle } from '@lucide/vue'
+import { Award, ChevronLeft, ChevronRight, CheckCircle2, Loader2, RefreshCw, Search, ShieldOff, UserCog } from '@lucide/vue'
+import AdminSection from '@/admin/components/AdminSection.vue'
+import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import { BasicPage } from '@/admin/components/global-layout'
+import { Button } from '@/admin/components/ui/button'
+import { Dialog, DialogContent } from '@/admin/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/admin/components/ui/select'
 import { Switch } from '@/admin/components/ui/switch'
 import { editUser, getAllRoleItem, getUserBadgeOptions, getUserList, saveUserBadges } from '@/admin/runtime/api'
@@ -198,14 +203,15 @@ onMounted(() => {
 <template>
   <BasicPage :title="adminText('k006i')" :description="adminText('k006j')" sticky>
     <template #actions>
-      <button class="inline-flex h-9 items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium shadow-xs hover:bg-muted" type="button" @click="loadUsers">
+      <Button variant="outline" type="button" @click="loadUsers">
         <RefreshCw class="size-4" />
         {{ adminText('k004q') }}
-      </button>
+      </Button>
     </template>
 
-      <div class="overflow-hidden rounded-lg border bg-card">
-        <div class="flex flex-col gap-2 border-b bg-muted/10 px-3 py-2 lg:flex-row lg:items-center lg:justify-between">
+      <AdminSection>
+        <template #header>
+        <AdminToolbar class="-mx-3 -my-2 border-b-0">
           <form class="flex min-w-0 flex-1 items-center gap-2" @submit.prevent="applySearch">
             <div class="relative min-w-0 flex-1 sm:max-w-md">
               <Search class="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -215,10 +221,10 @@ onMounted(() => {
                 :placeholder="adminText('k006t')"
               />
             </div>
-            <button class="h-9 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90" type="submit">{{ adminText('k00al') }}</button>
-            <button v-if="appliedSearch" class="h-9 rounded-md px-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground" type="button" @click="search = ''; applySearch()">
+            <Button size="sm" type="submit" class="h-9 px-4">{{ adminText('k00al') }}</Button>
+            <Button v-if="appliedSearch" variant="ghost" size="sm" type="button" class="h-9" @click="search = ''; applySearch()">
               {{ adminText('k00at') }}
-            </button>
+            </Button>
           </form>
           <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span class="whitespace-nowrap">{{ rangeStart }}-{{ rangeEnd }} / {{ total }}</span>
@@ -232,31 +238,34 @@ onMounted(() => {
               <option :value="30">{{ adminText('k002z') }}</option>
               <option :value="50">{{ adminText('k0030') }}</option>
             </select>
-            <button
-              class="inline-flex size-9 items-center justify-center rounded-md border bg-background text-foreground disabled:cursor-not-allowed disabled:opacity-45"
+            <Button
+              variant="outline"
+              size="icon"
               type="button"
               :disabled="page <= 1 || loading"
               @click="changePage(page - 1)"
             >
               <ChevronLeft class="size-4" />
-            </button>
+            </Button>
             <span class="min-w-14 text-center">{{ page }} / {{ totalPages }}</span>
-            <button
-              class="inline-flex size-9 items-center justify-center rounded-md border bg-background text-foreground disabled:cursor-not-allowed disabled:opacity-45"
+            <Button
+              variant="outline"
+              size="icon"
               type="button"
               :disabled="page >= totalPages || loading"
               @click="changePage(page + 1)"
             >
               <ChevronRight class="size-4" />
-            </button>
+            </Button>
           </div>
-        </div>
+        </AdminToolbar>
+        </template>
 
         <div class="md:hidden">
           <div v-if="loading" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k0046') }}</div>
           <div v-else-if="error" class="px-3 py-10 text-center">
             <div class="text-sm text-destructive">{{ error }}</div>
-            <button class="mt-2 text-sm font-medium underline underline-offset-4" type="button" @click="loadUsers">{{ adminText('k002w') }}</button>
+            <Button variant="link" size="sm" class="mt-2 h-auto px-0 text-destructive" type="button" @click="loadUsers">{{ adminText('k002w') }}</Button>
           </div>
           <div v-else-if="rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k00bm') }}</div>
           <div v-else class="divide-y">
@@ -269,9 +278,9 @@ onMounted(() => {
                 <div class="min-w-0 flex-1">
                   <div class="flex min-w-0 items-center justify-between gap-2">
                     <a :href="`/u/${user.userId}`" target="_blank" rel="noreferrer" class="truncate font-semibold hover:text-primary hover:underline">{{ user.username }}</a>
-                    <button class="inline-flex size-8 shrink-0 items-center justify-center rounded-md hover:bg-muted" type="button" :title="adminText('k005j')" @click="openEdit(user)">
+                    <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k005j')" @click="openEdit(user)">
                       <UserCog class="size-4" />
-                    </button>
+                    </Button>
                   </div>
                   <div class="mt-0.5 truncate text-xs text-muted-foreground">{{ user.email || '-' }}</div>
                   <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
@@ -311,7 +320,7 @@ onMounted(() => {
                 <td colspan="6" class="h-28 px-3 text-center">
                   <div class="inline-flex items-center gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-destructive">
                     <span>{{ error }}</span>
-                    <button class="text-sm font-medium underline underline-offset-4" type="button" @click="loadUsers">{{ adminText('k002w') }}</button>
+                    <Button variant="link" size="sm" class="h-auto px-0 text-destructive" type="button" @click="loadUsers">{{ adminText('k002w') }}</Button>
                   </div>
                 </td>
               </tr>
@@ -353,18 +362,19 @@ onMounted(() => {
                 <td class="px-3 py-2 text-xs text-muted-foreground">{{ user.createTime || '-' }}</td>
                 <td class="px-3 py-2 text-xs text-muted-foreground">{{ user.lastActiveTime || adminText('k006o') }}</td>
                 <td class="px-3 py-2 text-right">
-                  <button class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" type="button" :title="adminText('k005j')" @click="openEdit(user)">
+                  <Button variant="ghost" size="icon-sm" type="button" :title="adminText('k005j')" @click="openEdit(user)">
                     <UserCog class="size-4" />
-                  </button>
+                  </Button>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </AdminSection>
 
-      <div v-if="editingUser" class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3" @click.self="editingUser = null">
-        <form class="flex max-h-[min(700px,calc(100vh-1.5rem))] w-full max-w-4xl flex-col overflow-hidden rounded-lg border bg-background shadow-xl" @submit.prevent="saveUser">
+      <Dialog :open="editingUser !== null" @update:open="(open) => !open && (editingUser = null)">
+        <DialogContent class="flex max-h-[min(700px,calc(100vh-1.5rem))] gap-0 overflow-hidden p-0 sm:max-w-4xl">
+        <form v-if="editingUser" class="flex min-h-0 w-full flex-col" @submit.prevent="saveUser">
           <div class="flex items-center justify-between gap-4 border-b px-4 py-3">
             <div class="flex min-w-0 items-center gap-3">
               <img v-if="editingUser.avatarUrl" :src="editingUser.avatarUrl" class="size-10 rounded-full object-cover ring-1 ring-border" alt="" />
@@ -374,9 +384,6 @@ onMounted(() => {
                 <p class="truncate text-xs text-muted-foreground">{{ editingUser.username }} · {{ editingUser.email || adminText('k006p') }}</p>
               </div>
             </div>
-            <button class="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground" type="button" @click="editingUser = null">
-              <XCircle class="size-5" />
-            </button>
           </div>
 
           <div class="min-h-0 flex-1 overflow-y-auto p-4">
@@ -489,12 +496,13 @@ onMounted(() => {
           </div>
 
           <div class="flex justify-end gap-2 border-t bg-muted/20 px-4 py-3">
-            <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="editingUser = null">{{ adminText('k009q') }}</button>
-            <button class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" type="submit" :disabled="saving">
+            <Button variant="outline" type="button" @click="editingUser = null">{{ adminText('k009q') }}</Button>
+            <Button type="submit" :disabled="saving">
               {{ saving ? adminText('k005f') : adminText('k006s') }}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+        </DialogContent>
+      </Dialog>
     </BasicPage>
 </template>

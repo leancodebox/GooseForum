@@ -40,6 +40,11 @@ func GetByEmail(email string) (entity EntityComplete, err error) {
 	return
 }
 
+func GetByUsername(username string) (entity EntityComplete, err error) {
+	err = builder().Where("username = ?", username).First(&entity).Error
+	return
+}
+
 func MakeUser(name string, password string, email string) *EntityComplete {
 	user := EntityComplete{Username: name, Email: email}
 	user.SetPassword(password)

@@ -1,8 +1,21 @@
-<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+<script setup lang="ts">
+import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, reactive, ref } from 'vue'
-import { Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, XCircle } from '@lucide/vue'
+import { Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2 } from '@lucide/vue'
+import AdminActionButton from '@/admin/components/AdminActionButton.vue'
+import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
+import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import { BasicPage } from '@/admin/components/global-layout'
+import { Button } from '@/admin/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/admin/components/ui/dialog'
 import { deleteRole, getPermissionList, getRoleList, saveRole } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import type { AdminPayload, AdminRole, ManageHomeProps } from '@/admin/types'
@@ -144,31 +157,16 @@ onMounted(() => {
   <BasicPage :title="adminText('k007f')" :description="adminText('k007g')" sticky>
     <template #actions>
       <div class="flex items-center gap-2">
-        <button class="inline-flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm font-medium shadow-sm hover:bg-muted" type="button" @click="loadRoles">
+        <Button variant="outline" type="button" @click="loadRoles">
           <RefreshCw class="size-4" />
           {{ adminText('k004q') }}
-        </button>
-        <button class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90" type="button" @click="openAdd">
+        </Button>
+        <Button type="button" @click="openAdd">
           <Plus class="size-4" />
           {{ adminText('k007h') }}
-        </button>
+        </Button>
       </div>
     </template>
-
-      <div class="mb-4 flex flex-wrap items-center gap-2">
-        <form class="flex min-w-64 flex-1 gap-2 sm:flex-none" @submit.prevent="applySearch">
-          <div class="relative flex-1">
-            <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input v-model="search" class="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :placeholder="adminText('k007q')" />
-          </div>
-          <button class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" type="submit">{{ adminText('k00al') }}</button>
-        </form>
-        <select v-model="effectiveFilter" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" @change="page = 1">
-          <option value="">{{ adminText('k00am') }}</option>
-          <option value="1">{{ adminText('k007n') }}</option>
-          <option value="0">{{ adminText('k007o') }}</option>
-        </select>
-      </div>
 
       <ManagementTable
         :columns="['ID', adminText('k007i'), adminText('k007j'), adminText('k007k'), adminText('k007l'), adminText('k007m')]"
@@ -181,6 +179,22 @@ onMounted(() => {
         @update:page="page = $event"
         @update:page-size="changePageSize"
       >
+        <template #header>
+          <AdminToolbar class="-mx-3 -my-2 border-b-0">
+            <form class="flex min-w-64 flex-1 gap-2 sm:flex-none" @submit.prevent="applySearch">
+              <div class="relative flex-1">
+                <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <input v-model="search" class="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :placeholder="adminText('k007q')" />
+              </div>
+              <Button type="submit">{{ adminText('k00al') }}</Button>
+            </form>
+            <select v-model="effectiveFilter" class="h-10 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" @change="page = 1">
+              <option value="">{{ adminText('k00am') }}</option>
+              <option value="1">{{ adminText('k007n') }}</option>
+              <option value="0">{{ adminText('k007o') }}</option>
+            </select>
+          </AdminToolbar>
+        </template>
         <tr v-if="pagedRows.length === 0">
           <td colspan="6" class="h-28 px-4 text-center text-muted-foreground">{{ adminText('k00an') }}</td>
         </tr>
@@ -201,30 +215,26 @@ onMounted(() => {
           <td class="px-4 py-3 text-xs text-muted-foreground">{{ role.createTime || '-' }}</td>
           <td class="px-4 py-3">
             <div class="flex gap-2">
-              <button class="inline-flex items-center gap-1.5 rounded-md border bg-background px-2.5 py-1.5 text-xs font-medium hover:bg-muted" type="button" @click="openEdit(role)">
+              <AdminActionButton @click="openEdit(role)">
                 <Pencil class="size-3.5" />
                 {{ adminText('k005j') }}
-              </button>
-              <button class="inline-flex items-center gap-1.5 rounded-md border border-destructive/30 bg-background px-2.5 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/5" type="button" @click="deletingRole = role">
+              </AdminActionButton>
+              <AdminActionButton tone="danger" @click="deletingRole = role">
                 <Trash2 class="size-3.5" />
                 {{ adminText('k005i') }}
-              </button>
+              </AdminActionButton>
             </div>
           </td>
         </tr>
       </ManagementTable>
 
-      <div v-if="dialogMode" class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" @click.self="dialogMode = null">
-        <form class="w-full max-w-lg rounded-lg border bg-background p-6 shadow-xl" @submit.prevent="submitRole">
-          <div class="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-lg font-semibold">{{ dialogMode === 'add' ? adminText('k007h') : adminText('k007p') }}</h2>
-              <p class="mt-1 text-sm text-muted-foreground">{{ adminText('k00ao') }}</p>
-            </div>
-            <button class="rounded-md p-1 text-muted-foreground hover:bg-muted" type="button" @click="dialogMode = null">
-              <XCircle class="size-5" />
-            </button>
-          </div>
+      <Dialog :open="dialogMode !== null" @update:open="(open) => !open && (dialogMode = null)">
+        <DialogContent class="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{{ dialogMode === 'add' ? adminText('k007h') : adminText('k007p') }}</DialogTitle>
+            <DialogDescription>{{ adminText('k00ao') }}</DialogDescription>
+          </DialogHeader>
+          <form class="grid gap-5" @submit.prevent="submitRole">
           <div class="space-y-5">
             <label class="grid gap-2 text-sm font-medium">
               {{ adminText('k007i') }}
@@ -245,26 +255,23 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div class="mt-6 flex justify-end gap-2">
-            <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="dialogMode = null">{{ adminText('k009q') }}</button>
-            <button class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60" type="submit" :disabled="saving">
+          <DialogFooter>
+            <Button variant="outline" type="button" @click="dialogMode = null">{{ adminText('k009q') }}</Button>
+            <Button type="submit" :disabled="saving">
               {{ saving ? adminText('k005f') : adminText('k005g') }}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
+        </DialogContent>
+      </Dialog>
 
-      <div v-if="deletingRole" class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4" @click.self="deletingRole = null">
-        <div class="w-full max-w-md rounded-lg border bg-background p-6 shadow-xl">
-          <h2 class="text-lg font-semibold">{{ adminText('k00aq') }}</h2>
-          <p class="mt-2 text-sm text-muted-foreground">{{ adminText('k00ar') }} <span class="font-semibold text-foreground">{{ deletingRole.roleName }}</span>{{ adminText('k00as') }}</p>
-          <div class="mt-6 flex justify-end gap-2">
-            <button class="rounded-md border bg-background px-4 py-2 text-sm font-medium hover:bg-muted" type="button" @click="deletingRole = null">{{ adminText('k009q') }}</button>
-            <button class="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground disabled:opacity-60" type="button" :disabled="deleting" @click="confirmDelete">
-              {{ deleting ? adminText('k005h') : adminText('k005i') }}
-            </button>
-          </div>
-        </div>
-      </div>
+      <AdminConfirmDialog
+        :open="deletingRole !== null"
+        :title="adminText('k00aq')"
+        :description="`${adminText('k00ar')} ${deletingRole?.roleName || ''}${adminText('k00as')}`"
+        :loading="deleting"
+        @update:open="(open) => !open && (deletingRole = null)"
+        @confirm="confirmDelete"
+      />
     </BasicPage>
 </template>

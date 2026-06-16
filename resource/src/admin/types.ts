@@ -38,6 +38,15 @@ export interface AdminCategory {
   color?: string
   slug?: string
   sort?: number
+  moderators?: AdminCategoryModerator[]
+}
+
+export interface AdminCategoryModerator {
+  id: number
+  userId: number
+  username: string
+  avatarUrl?: string
+  status: number
 }
 
 export interface AdminUser {

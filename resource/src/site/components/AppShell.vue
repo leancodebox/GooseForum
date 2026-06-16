@@ -13,6 +13,7 @@ import {
   Menu,
   Palette,
   PenSquare,
+  Scale,
   TrendingUp,
   Search,
   Settings,
@@ -84,6 +85,9 @@ const primaryItems = computed<SidebarNavItem[]>(() => {
       sidebarItem('drafts', t('shell.nav.drafts'), '/drafts'),
     )
   }
+  if (props.layout.viewer.isModerator) {
+    items.push(sidebarItem('moderation', t('shell.nav.moderation'), '/moderation'))
+  }
   return [...items, ...serverSidebarItems(props.layout.sidebar.main)]
 })
 const resourceItems = computed<SidebarNavItem[]>(() => [
@@ -122,6 +126,7 @@ const sidebarIconMap = {
   messages: Inbox,
   notifications: Bell,
   drafts: FileText,
+  moderation: Scale,
   links: Link,
   sponsors: Heart,
 } as const

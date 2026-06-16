@@ -1,6 +1,9 @@
-<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+<script setup lang="ts">
+import { adminText } from '@/admin/runtime/i18n-text'
 
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
+import AdminSection from '@/admin/components/AdminSection.vue'
+import { Button } from '@/admin/components/ui/button'
 
 withDefaults(defineProps<{
   loading?: boolean
@@ -27,7 +30,10 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-lg border bg-card shadow-sm">
+  <AdminSection>
+    <template v-if="$slots.header" #header>
+      <slot name="header" />
+    </template>
     <div class="overflow-x-auto">
       <table class="w-full min-w-[760px] text-sm">
         <thead class="border-b bg-muted/45 text-xs font-medium text-muted-foreground">
@@ -51,7 +57,7 @@ const emit = defineEmits<{
             <td :colspan="columns.length" class="h-28 px-4 text-center">
               <div class="inline-flex items-center gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-destructive">
                 <span>{{ error }}</span>
-                <button class="text-sm font-medium underline underline-offset-4" type="button" @click="emit('retry')">{{ adminText('k002w') }}</button>
+                <Button variant="link" size="sm" class="h-auto px-0 text-destructive" type="button" @click="emit('retry')">{{ adminText('k002w') }}</Button>
               </div>
             </td>
           </tr>
@@ -62,7 +68,7 @@ const emit = defineEmits<{
 
     <div
       v-if="showPagination"
-      class="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-sm text-muted-foreground"
+      class="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/10 px-4 py-3 text-sm text-muted-foreground"
     >
       <div>{{ adminText('k0054') }} {{ total }} {{ adminText('k0055') }}</div>
       <div class="flex items-center gap-2">
@@ -76,24 +82,26 @@ const emit = defineEmits<{
           <option :value="30">{{ adminText('k002z') }}</option>
           <option :value="50">{{ adminText('k0030') }}</option>
         </select>
-        <button
-          class="inline-flex size-9 items-center justify-center rounded-md border bg-background text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        <Button
+          variant="outline"
+          size="icon"
           type="button"
           :disabled="page <= 1"
           @click="emit('update:page', page - 1)"
         >
           <ChevronLeft class="size-4" />
-        </button>
+        </Button>
         <span class="min-w-16 text-center">{{ adminText('k0056') }} {{ page }} / {{ Math.max(1, Math.ceil(total / pageSize)) }} {{ adminText('k0057') }}</span>
-        <button
-          class="inline-flex size-9 items-center justify-center rounded-md border bg-background text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+        <Button
+          variant="outline"
+          size="icon"
           type="button"
           :disabled="page >= Math.max(1, Math.ceil(total / pageSize))"
           @click="emit('update:page', page + 1)"
         >
           <ChevronRight class="size-4" />
-        </button>
+        </Button>
       </div>
     </div>
-  </div>
+  </AdminSection>
 </template>

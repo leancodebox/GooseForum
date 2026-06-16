@@ -10,6 +10,8 @@ func (receiver OptEnum) TargetTypeEnum() TargetTypeEnum {
 		return User
 	case EditArticle:
 		return Article
+	case EditCategory:
+		return Category
 	}
 	return System
 }
@@ -20,6 +22,8 @@ func (receiver OptEnum) Name() string {
 		return "操作用户"
 	case EditArticle:
 		return "编辑文章"
+	case EditCategory:
+		return "编辑分类"
 	}
 	return ""
 }
@@ -31,6 +35,7 @@ func (receiver OptEnum) toInt() int {
 const (
 	EditUser OptEnum = iota
 	EditArticle
+	EditCategory
 )
 
 type TargetTypeEnum int
@@ -47,6 +52,8 @@ func (receiver TargetTypeEnum) Name() string {
 		return "文档版本"
 	case DocContent:
 		return "文档内容"
+	case Category:
+		return "分类"
 	default:
 		return ""
 	}
@@ -63,4 +70,5 @@ const (
 	DocProject                = iota
 	DocVersion                = iota
 	DocContent                = iota
+	Category                  = iota
 )

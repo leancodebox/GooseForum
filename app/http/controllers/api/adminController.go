@@ -16,6 +16,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
+	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
@@ -26,6 +27,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
+	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
@@ -833,29 +835,142 @@ type CategoryListReq struct {
 }
 
 type CategoryItem struct {
-	Id       uint64 `json:"id"`
-	Category string `json:"category"`
-	Desc     string `json:"desc"`
-	Icon     string `json:"icon"`
-	Color    string `json:"color"`
-	Slug     string `json:"slug"`
-	Sort     int    `json:"sort"`
+	Id         uint64                  `json:"id"`
+	Category   string                  `json:"category"`
+	Desc       string                  `json:"desc"`
+	Icon       string                  `json:"icon"`
+	Color      string                  `json:"color"`
+	Slug       string                  `json:"slug"`
+	Sort       int                     `json:"sort"`
+	Moderators []CategoryModeratorItem `json:"moderators"`
+}
+
+type CategoryModeratorItem struct {
+	Id        uint64 `json:"id"`
+	UserId    uint64 `json:"userId"`
+	Username  string `json:"username"`
+	AvatarUrl string `json:"avatarUrl"`
+	Status    int    `json:"status"`
 }
 
 // GetCategoryList 获取分类列表
 func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Response {
 	categories := articleCategory.All()
+	categoryIds := lo.Map(categories, func(item *articleCategory.Entity, _ int) uint64 {
+		return item.Id
+	})
+	moderatorList := moderators.GetByCategoryIds(categoryIds)
+	moderatorUserIds := lo.Uniq(lo.Map(moderatorList, func(item *moderators.Entity, _ int) uint64 {
+		return item.UserId
+	}))
+	userMap := users.GetMapByIds(moderatorUserIds)
+	moderatorGroup := lo.GroupBy(moderatorList, func(item *moderators.Entity) uint64 {
+		return item.ScopeId
+	})
+
 	return component.SuccessResponse(lo.Map(categories, func(t *articleCategory.Entity, _ int) CategoryItem {
+		moderatorItems := lo.Map(moderatorGroup[t.Id], func(item *moderators.Entity, _ int) CategoryModeratorItem {
+			user := userMap[item.UserId]
+			username := ""
+			avatarURL := ""
+			if user != nil {
+				username = user.Username
+				avatarURL = user.GetWebAvatarUrl()
+			}
+			return CategoryModeratorItem{
+				Id:        item.Id,
+				UserId:    item.UserId,
+				Username:  username,
+				AvatarUrl: avatarURL,
+				Status:    item.Status,
+			}
+		})
 		return CategoryItem{
-			Id:       t.Id,
-			Category: t.Category,
-			Desc:     t.Desc,
-			Icon:     t.Icon,
-			Color:    t.Color,
-			Slug:     t.Slug,
-			Sort:     t.Sort,
+			Id:         t.Id,
+			Category:   t.Category,
+			Desc:       t.Desc,
+			Icon:       t.Icon,
+			Color:      t.Color,
+			Slug:       t.Slug,
+			Sort:       t.Sort,
+			Moderators: moderatorItems,
 		}
 	}))
+}
+
+type AddCategoryModeratorReq struct {
+	CategoryId uint64 `json:"categoryId" validate:"required"`
+	UserId     uint64 `json:"userId"`
+	Username   string `json:"username"`
+}
+
+func resolveModeratorUser(params AddCategoryModeratorReq) (users.EntityComplete, bool) {
+	if params.UserId != 0 {
+		user, err := users.Get(params.UserId)
+		return user, err == nil && user.Id != 0
+	}
+	username := strings.TrimSpace(params.Username)
+	if username == "" {
+		return users.EntityComplete{}, false
+	}
+	user, err := users.GetByUsername(username)
+	return user, err == nil && user.Id != 0
+}
+
+func AddCategoryModerator(req component.BetterRequest[AddCategoryModeratorReq]) component.Response {
+	category := articleCategory.Get(req.Params.CategoryId)
+	if category.Id == 0 {
+		return component.FailResponseCode(component.MessageAdminCategoryNotFound, nil)
+	}
+	if req.Params.UserId == 0 && strings.TrimSpace(req.Params.Username) == "" {
+		return component.FailResponseCode(component.MessageAdminModeratorUserRequired, nil)
+	}
+	user, ok := resolveModeratorUser(req.Params)
+	if !ok {
+		return component.FailResponseCode(component.MessageAdminModeratorUserNotFound, nil)
+	}
+
+	entity := moderators.GetByUserScope(user.Id, moderators.ScopeCategory, category.Id)
+	entity.UserId = user.Id
+	entity.ScopeType = moderators.ScopeCategory
+	entity.ScopeId = category.Id
+	entity.Status = moderators.StatusEnabled
+	if entity.CreatedBy == 0 {
+		entity.CreatedBy = req.UserId
+	}
+	if err := moderators.Save(&entity); err != nil {
+		slog.Error("save category moderator failed", "categoryId", category.Id, "userId", user.Id, "err", err)
+		return component.FailResponse()
+	}
+	moderatorservice.Invalidate()
+	optlogger.UserOptCode(req.UserId, optlogger.EditCategory, category.Id, "admin.opt.category.moderatorAdded", optlogger.MessageParams{
+		"categoryId":   category.Id,
+		"categoryName": category.Category,
+		"userId":       user.Id,
+		"username":     user.Username,
+	})
+	return component.SuccessResponse(true)
+}
+
+func DeleteCategoryModerator(req component.BetterRequest[struct {
+	Id uint64 `json:"id" validate:"required"`
+}]) component.Response {
+	entity := moderators.Get(req.Params.Id)
+	if entity.Id == 0 || entity.ScopeType != moderators.ScopeCategory {
+		return component.FailResponseCode(component.MessageAdminModeratorNotFound, nil)
+	}
+	category := articleCategory.Get(entity.ScopeId)
+	if err := moderators.Delete(&entity); err != nil {
+		slog.Error("delete category moderator failed", "moderatorId", entity.Id, "err", err)
+		return component.FailResponse()
+	}
+	moderatorservice.Invalidate()
+	optlogger.UserOptCode(req.UserId, optlogger.EditCategory, entity.ScopeId, "admin.opt.category.moderatorRemoved", optlogger.MessageParams{
+		"categoryId":   entity.ScopeId,
+		"categoryName": category.Category,
+		"userId":       entity.UserId,
+	})
+	return component.SuccessResponse(true)
 }
 
 type CategorySaveReq struct {

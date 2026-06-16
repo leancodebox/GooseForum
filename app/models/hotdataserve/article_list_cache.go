@@ -172,6 +172,7 @@ func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[ui
 			CategoriesId:   t.CategoryId,
 			Type:           t.Type,
 			TypeStr:        articlesTypeMap[int(t.Type)].Name,
+			ProcessStatus:  t.ProcessStatus,
 			Posters:        postersVo,
 		})
 	}

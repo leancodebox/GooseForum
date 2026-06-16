@@ -157,6 +157,9 @@ const (
 	MessageAdminCategoryDataNotFound   MessageCode = "admin.category.dataNotFound"     // 分类数据不存在。
 	MessageAdminCategoryKeepOne        MessageCode = "admin.category.keepOne"          // 至少保留一个分类。
 	MessageAdminCategoryHasArticles    MessageCode = "admin.category.hasArticles"      // 分类下存在有效文章。
+	MessageAdminModeratorUserRequired  MessageCode = "admin.moderator.userRequired"    // 版主用户不能为空。
+	MessageAdminModeratorUserNotFound  MessageCode = "admin.moderator.userNotFound"    // 版主用户不存在。
+	MessageAdminModeratorNotFound      MessageCode = "admin.moderator.notFound"        // 版主记录不存在。
 	MessageAdminCategorySelectRequired MessageCode = "admin.article.categoryRequired"  // 文章至少需要一个分类。
 	MessageAdminCategorySelectTooMany  MessageCode = "admin.article.categoryTooMany"   // 文章最多选择三个分类。
 	MessageAdminArticleDeleteFailed    MessageCode = "admin.article.deleteFailed"      // 删除文章失败。

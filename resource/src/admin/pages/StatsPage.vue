@@ -2,6 +2,7 @@
 
 import { FileText, Link as LinkIcon, MessageSquare, Users } from '@lucide/vue'
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
+import AdminSection from '@/admin/components/AdminSection.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import {
   getGithubReleases,
@@ -177,7 +178,8 @@ onMounted(() => {
       </div>
     </template>
 
-      <div class="mb-4 grid overflow-hidden rounded-lg border bg-card shadow-sm sm:grid-cols-2 xl:grid-cols-4">
+      <AdminSection class="mb-4">
+        <div class="grid sm:grid-cols-2 xl:grid-cols-4">
         <div
           v-for="(item, index) in summaryItems"
           :key="item.label"
@@ -195,7 +197,8 @@ onMounted(() => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </AdminSection>
 
       <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div class="min-w-0">

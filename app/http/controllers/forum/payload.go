@@ -30,6 +30,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
+	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
@@ -157,6 +158,7 @@ type ViewerPayload struct {
 	AvatarURL                 string   `json:"avatarUrl"`
 	IsAuthenticated           bool     `json:"isAuthenticated"`
 	CanAccessAdmin            bool     `json:"canAccessAdmin"`
+	IsModerator               bool     `json:"isModerator"`
 	RequiresEmailVerification bool     `json:"requiresEmailVerification"`
 	AdminPermissions          []uint64 `json:"adminPermissions"`
 }
@@ -221,6 +223,7 @@ type TopicPayload struct {
 	FirstImageURL  string                 `json:"firstImageUrl,omitempty"`
 	URL            string                 `json:"url"`
 	PinWeight      int                    `json:"pinWeight"`
+	ProcessStatus  int8                   `json:"processStatus"`
 	Author         TopicAuthorPayload     `json:"author"`
 	Participants   []TopicAuthorPayload   `json:"participants"`
 	Categories     []TopicCategoryPayload `json:"categories"`
@@ -258,6 +261,7 @@ type ArticlePayload struct {
 	URL           string                 `json:"url"`
 	HTML          string                 `json:"html"`
 	ArticleStatus int8                   `json:"articleStatus"`
+	ProcessStatus int8                   `json:"processStatus"`
 	Author        TopicAuthorPayload     `json:"author"`
 	Participants  []TopicAuthorPayload   `json:"participants"`
 	Categories    []TopicCategoryPayload `json:"categories"`
@@ -301,8 +305,9 @@ type ReplyWindowPayload struct {
 }
 
 type ArticlePermissions struct {
-	IsOwnArticle bool `json:"isOwnArticle"`
-	CanReply     bool `json:"canReply"`
+	IsOwnArticle       bool `json:"isOwnArticle"`
+	CanReply           bool `json:"canReply"`
+	CanModerateArticle bool `json:"canModerateArticle"`
 }
 
 type UserProfileProps struct {
@@ -510,6 +515,12 @@ type PublishTypePayload struct {
 	Value int    `json:"value"`
 }
 
+type ModerationPageProps struct {
+	CategoryTabs []TabPayload      `json:"categoryTabs"`
+	Topics       []TopicPayload    `json:"topics"`
+	Pagination   PaginationPayload `json:"pagination"`
+}
+
 type PublishArticlePayload struct {
 	Title         string   `json:"title"`
 	Content       string   `json:"content"`
@@ -539,6 +550,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			AvatarURL:                 currentUser.AvatarUrl,
 			IsAuthenticated:           currentUser.UserId > 0,
 			CanAccessAdmin:            currentUser.CanAccessAdmin,
+			IsModerator:               moderatorservice.CanAccessModeration(currentUser.UserId),
 			RequiresEmailVerification: currentUser.UserId > 0 && securityConfig.EnableEmailVerification && currentUser.IsActivated == users.ActivationPending,
 			AdminPermissions:          buildAdminPermissions(currentUser.UserId),
 		}
@@ -747,6 +759,7 @@ func buildTopicPayloads(topics []*vo.ArticlesSimpleVo) []TopicPayload {
 			FirstImageURL: topic.FirstImageURL,
 			URL:           urlconfig.PostDetail(topic.Id),
 			PinWeight:     topic.PinWeight,
+			ProcessStatus: topic.ProcessStatus,
 			Author: TopicAuthorPayload{
 				ID:        topic.AuthorId,
 				Username:  topic.Username,
@@ -851,8 +864,9 @@ func buildArticleDetailProps(c *gin.Context, entity *articles.Entity) ArticleDet
 		Replies:   buildReplyPayloads(replyEntities, userMap, currentUserID),
 		HotTopics: buildArticleHotTopics(entity.Id),
 		Permissions: ArticlePermissions{
-			IsOwnArticle: currentUserID == entity.UserId,
-			CanReply:     currentUserID > 0,
+			IsOwnArticle:       currentUserID == entity.UserId,
+			CanReply:           currentUserID > 0,
+			CanModerateArticle: moderatorservice.CanModerateAnyCategory(currentUserID, entity.CategoryId),
 		},
 	}
 }
@@ -992,6 +1006,7 @@ func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[ui
 		URL:           urlconfig.PostDetail(entity.Id),
 		HTML:          entity.RenderedHTML,
 		ArticleStatus: entity.ArticleStatus,
+		ProcessStatus: entity.ProcessStatus,
 		Author:        userPayload(entity.UserId, userMap),
 		Participants:  participants,
 		Categories:    categoryPayloads(entity.CategoryId),

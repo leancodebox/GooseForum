@@ -1,8 +1,10 @@
-<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+<script setup lang="ts">
+import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, reactive, ref } from 'vue'
 import Draggable from 'vuedraggable'
 import { GripVertical, Loader2, PenLine, Plus, RefreshCw, Save, Trash2, Upload } from '@lucide/vue'
+import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Input } from '@/admin/components/ui/input'
@@ -275,10 +277,10 @@ onMounted(() => {
                     </div>
                   </div>
                   <div class="absolute right-1.5 top-1.5 flex shrink-0 items-center gap-1 rounded-md bg-background/90 p-0.5 opacity-0 shadow-sm ring-1 ring-border transition-opacity group-hover:opacity-100">
-                    <Button variant="ghost" size="sm" type="button" @click="openSponsor(level, index)">{{ adminText('k005j') }}</Button>
-                    <Button variant="ghost" size="icon-sm" class="text-destructive hover:text-destructive" type="button" @click="removeSponsor(level, index)">
+                    <AdminActionButton @click="openSponsor(level, index)">{{ adminText('k005j') }}</AdminActionButton>
+                    <AdminActionButton compact tone="danger" :title="adminText('k005i')" @click="removeSponsor(level, index)">
                       <Trash2 class="size-4" />
-                    </Button>
+                    </AdminActionButton>
                   </div>
                 </article>
               </template>
@@ -321,7 +323,10 @@ onMounted(() => {
               <p v-if="config.rules.length === 0" class="text-sm text-muted-foreground">{{ adminText('k009x') }}</p>
               <div v-for="(rule, index) in config.rules" :key="index" class="flex gap-2">
                 <Input v-model="rule.content" class="border-0 bg-transparent px-2 text-sm shadow-none focus-visible:ring-1" :aria-label="adminText('k004y', { index: index + 1 })" />
-                <Button type="button" variant="ghost" size="sm" class="text-destructive hover:text-destructive" @click="removeRule(index)">{{ adminText('k005i') }}</Button>
+                <AdminActionButton tone="danger" @click="removeRule(index)">
+                  <Trash2 class="size-3.5" />
+                  {{ adminText('k005i') }}
+                </AdminActionButton>
               </div>
             </div>
           </div>

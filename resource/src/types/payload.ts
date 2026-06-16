@@ -226,6 +226,7 @@ export interface ViewerPayload {
   avatarUrl: string
   isAuthenticated: boolean
   canAccessAdmin: boolean
+  isModerator: boolean
   requiresEmailVerification: boolean
   adminPermissions: number[]
 }
@@ -279,6 +280,7 @@ export interface ArticleDetailProps {
   permissions: {
     isOwnArticle: boolean
     canReply: boolean
+    canModerateArticle: boolean
   }
 }
 
@@ -289,6 +291,7 @@ export interface ArticlePayload {
   url: string
   html: string
   articleStatus: number
+  processStatus: number
   author: {
     id: number
     username: string
@@ -354,8 +357,20 @@ export interface TopicPayload {
   replyCount: number
   viewCount: number
   pinWeight: number
+  processStatus: number
   activityText: string
   lastUpdateTime: string
+}
+
+export interface ModerationPageProps {
+  categoryTabs: Array<{ key: string; label?: string; url: string; active: boolean }>
+  topics: TopicPayload[]
+  pagination: {
+    page: number
+    nextPage: number
+    hasNext: boolean
+    nextUrl: string
+  }
 }
 
 export interface UserCardPayload {

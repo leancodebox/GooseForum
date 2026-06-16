@@ -105,7 +105,7 @@ export async function getGithubReleases(): Promise<GithubRelease[]> {
   return (await response.json()) as GithubRelease[]
 }
 
-export function getUserList(params: { page?: number, pageSize?: number, username?: string }) {
+export function getUserList(params: { page?: number, pageSize?: number, username?: string, userId?: number, email?: string }) {
   return postJson<PageResult<AdminUser>>('/api/admin/user-list', params, adminText('k000q'))
 }
 
@@ -151,6 +151,14 @@ export function saveCategory(data: AdminCategory & { id: number }) {
 
 export function deleteCategory(id: number) {
   return postJson<unknown>('/api/admin/category-delete', { id }, adminText('k0011'))
+}
+
+export function addCategoryModerator(data: { categoryId: number, userId?: number, username?: string }) {
+  return postJson<unknown>('/api/admin/category-moderator-add', data, '添加版主失败')
+}
+
+export function deleteCategoryModerator(id: number) {
+  return postJson<unknown>('/api/admin/category-moderator-delete', { id }, '移除版主失败')
 }
 
 export function getArticlesList(params: { page?: number, pageSize?: number, search?: string }) {

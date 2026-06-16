@@ -2,6 +2,8 @@
 
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Edit3, Plus, RefreshCw, Trash2 } from '@lucide/vue'
+import AdminActionButton from '@/admin/components/AdminActionButton.vue'
+import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
@@ -198,12 +200,12 @@ onMounted(() => {
             </div>
           </button>
           <div class="absolute right-0.5 top-0.5 flex gap-0.5 rounded-md bg-background/90 p-0.5 opacity-0 shadow-sm ring-1 ring-border transition-opacity group-hover:opacity-100">
-            <Button variant="ghost" size="icon-sm" :title="adminText('k005j')" type="button" @click="openEdit(badge)">
+            <AdminActionButton compact :title="adminText('k005j')" @click="openEdit(badge)">
               <Edit3 class="size-3.5" />
-            </Button>
-            <Button v-if="badge.type !== 'system'" variant="ghost" size="icon-sm" class="text-destructive hover:text-destructive" :title="adminText('k005i')" type="button" @click="deletingBadge = badge">
+            </AdminActionButton>
+            <AdminActionButton v-if="badge.type !== 'system'" compact tone="danger" :title="adminText('k005i')" @click="deletingBadge = badge">
               <Trash2 class="size-3.5" />
-            </Button>
+            </AdminActionButton>
           </div>
         </div>
       </div>
@@ -267,17 +269,13 @@ onMounted(() => {
         </DialogContent>
       </Dialog>
 
-      <Dialog :open="deletingBadge !== null" @update:open="(open) => !open && (deletingBadge = null)">
-        <DialogContent class="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{{ adminText('k00bj') }}</DialogTitle>
-            <DialogDescription>{{ adminText('k00bk') }}{{ deletingBadge?.name }}{{ adminText('k00bl') }}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" type="button" @click="deletingBadge = null">{{ adminText('k009q') }}</Button>
-            <Button variant="destructive" type="button" :disabled="deleting" @click="confirmDelete">{{ deleting ? adminText('k005h') : adminText('k005i') }}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AdminConfirmDialog
+        :open="deletingBadge !== null"
+        :title="adminText('k00bj')"
+        :description="`${adminText('k00bk')}${deletingBadge?.name || ''}${adminText('k00bl')}`"
+        :loading="deleting"
+        @update:open="(open) => !open && (deletingBadge = null)"
+        @confirm="confirmDelete"
+      />
     </BasicPage>
 </template>

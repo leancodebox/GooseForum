@@ -10,6 +10,7 @@ export const pageLoaders = {
   'notifications.index': () => import('@/site/pages/NotificationsPage.vue'),
   'messages.index': () => import('@/site/pages/MessagesPage.vue'),
   'drafts.index': () => import('@/site/pages/DraftsPage.vue'),
+  'moderation.index': () => import('@/site/pages/ModerationPage.vue'),
   'settings.index': () => import('@/site/pages/SettingsPage.vue'),
   'theme.preview': () => import('@/site/pages/ThemePreviewPage.vue'),
   'publish.index': () => import('@/site/pages/PublishPage.vue'),

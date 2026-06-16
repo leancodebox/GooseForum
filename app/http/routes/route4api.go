@@ -66,6 +66,7 @@ func viewRoute(ginApp *gin.Engine) {
 	viewRouteApp.GET("/sponsors", forum.Sponsors)
 	viewRouteApp.GET("/messages", middleware.CheckLogin, forum.Messages)
 	viewRouteApp.GET("/drafts", middleware.CheckLogin, forum.Drafts)
+	viewRouteApp.GET("/moderation", middleware.CheckLogin, forum.Moderation)
 	viewRouteApp.GET("/settings", middleware.CheckLogin, forum.Settings)
 	viewRouteApp.GET("/theme-preview", middleware.CheckLogin, middleware.CheckAnyPermissionOrNotFound, forum.ThemePreview)
 	viewRouteApp.GET("/notifications", middleware.CheckLogin, forum.Notifications)
@@ -133,6 +134,7 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("bookmark-article", UpButterReq(controllers.BookmarkArticle))
 	forumLoginApi.POST("watch-article", UpButterReq(controllers.WatchArticle))
 	forumLoginApi.POST("follow-user", UpButterReq(controllers.FollowUser))
+	forumLoginApi.POST("moderation/article-status", UpButterReq(forum.UpdateModerationArticleStatus))
 
 	chatApi := forumApi.Group("chat", middleware.JWTAuthCheck)
 	chatApi.POST("send", UpButterReq(api.SendMessage))
@@ -160,7 +162,9 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("article-categories-edit", UpButterReq(api.EditArticleCategories)).
 		POST("category-list", UpButterReq(api.GetCategoryList)).
 		POST("category-save", UpButterReq(api.SaveCategory)).
-		POST("category-delete", UpButterReq(api.DeleteCategory))
+		POST("category-delete", UpButterReq(api.DeleteCategory)).
+		POST("category-moderator-add", UpButterReq(api.AddCategoryModerator)).
+		POST("category-moderator-delete", UpButterReq(api.DeleteCategoryModerator))
 
 	adminApi.Group("", middleware.CheckPermission(permission.RoleManager)).
 		POST("get-permission-list", UpButterReq(api.GetPermissionList)).

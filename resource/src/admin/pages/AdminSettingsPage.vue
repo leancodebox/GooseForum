@@ -1,9 +1,11 @@
-<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+<script setup lang="ts">
+import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Draggable from 'vuedraggable'
 import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload } from '@lucide/vue'
+import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
@@ -566,7 +568,9 @@ onMounted(load)
             <span v-if="allowedDomains.length === 0" class="text-sm italic text-muted-foreground">{{ adminText('k0095') }}</span>
             <Badge v-for="domain in allowedDomains" :key="domain" variant="secondary" class="gap-2 px-3 py-1.5 text-sm font-normal">
               {{ domain }}
-              <button type="button" @click="removeAllowedDomain(domain)"><Trash2 class="size-3.5 text-muted-foreground hover:text-destructive" /></button>
+              <AdminActionButton compact tone="danger" class="-mr-1 size-5" :title="adminText('k005i')" @click="removeAllowedDomain(domain)">
+                <Trash2 class="size-3.5" />
+              </AdminActionButton>
             </Badge>
           </div>
         </div>
@@ -603,7 +607,9 @@ onMounted(load)
             <div class="flex flex-wrap gap-2">
               <Badge v-for="ext in postingForm.uploadControl.authorizedExtensions" :key="ext" variant="secondary" class="gap-2 px-3 py-1.5 text-sm font-normal">
                 {{ ext }}
-                <button type="button" @click="removeExtension(ext)"><Trash2 class="size-3.5 text-muted-foreground hover:text-destructive" /></button>
+                <AdminActionButton compact tone="danger" class="-mr-1 size-5" :title="adminText('k005i')" @click="removeExtension(ext)">
+                  <Trash2 class="size-3.5" />
+                </AdminActionButton>
               </Badge>
             </div>
           </div>

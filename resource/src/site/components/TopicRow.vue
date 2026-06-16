@@ -62,6 +62,7 @@ const { t } = useI18n()
         <span class="inline-flex items-center gap-1">
           <MessageSquare class="h-3.5 w-3.5" /> {{ formatNumber(topic.replyCount) }}
         </span>
+        <slot name="mobile-action" :topic="topic" />
       </div>
     </div>
     <div class="hidden justify-center lg:flex">
@@ -69,6 +70,10 @@ const { t } = useI18n()
     </div>
     <div class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 lg:block">{{ formatNumber(topic.replyCount) }}</div>
     <div class="hidden text-center text-sm tabular-nums text-base-content/55 lg:block">{{ formatNumber(topic.viewCount) }}</div>
-    <div class="hidden text-right text-[13px] font-medium tabular-nums text-base-content/55 lg:block">{{ timeAgo(topic.lastUpdateTime) }}</div>
+    <div class="hidden text-right text-[13px] font-medium tabular-nums text-base-content/55 lg:block">
+      <slot name="activity" :topic="topic">
+        {{ timeAgo(topic.lastUpdateTime) }}
+      </slot>
+    </div>
   </article>
 </template>

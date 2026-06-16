@@ -1,7 +1,11 @@
 <script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
 
-import { computed, onMounted, reactive, ref } from 'vue'
-import { Pencil, Plus, RefreshCw, Search, Trash2 } from '@lucide/vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, UserPlus, X } from '@lucide/vue'
+import AdminActionButton from '@/admin/components/AdminActionButton.vue'
+import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
+import AdminSection from '@/admin/components/AdminSection.vue'
+import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
@@ -22,9 +26,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/admin/components/ui/table'
-import { deleteCategory, getCategoryList, saveCategory } from '@/admin/runtime/api'
+import { addCategoryModerator, deleteCategory, deleteCategoryModerator, getCategoryList, getUserList, saveCategory } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
-import type { AdminCategory, AdminPayload, ManageHomeProps } from '@/admin/types'
+import type { AdminCategory, AdminPayload, AdminUser, ManageHomeProps } from '@/admin/types'
 
 defineProps<{
   payload: AdminPayload<ManageHomeProps>
@@ -53,6 +57,13 @@ const rows = ref<AdminCategory[]>([])
 const search = ref('')
 const dialogMode = ref<'create' | 'edit' | null>(null)
 const deletingRow = ref<AdminCategory | null>(null)
+const moderatorRow = ref<AdminCategory | null>(null)
+const moderatorSaving = ref(false)
+const moderatorUserInput = ref('')
+const moderatorSearching = ref(false)
+const moderatorCandidates = ref<AdminUser[]>([])
+const selectedModeratorUser = ref<AdminUser | null>(null)
+let moderatorSearchTimer: ReturnType<typeof setTimeout> | undefined
 const form = reactive<AdminCategory>({
   id: 0,
   category: '',
@@ -145,6 +156,106 @@ async function confirmDelete() {
   }
 }
 
+function openModerators(row: AdminCategory) {
+  moderatorRow.value = row
+  moderatorUserInput.value = ''
+  selectedModeratorUser.value = null
+  moderatorCandidates.value = []
+}
+
+function moderatorInitial(name: string) {
+  return (name || '?').slice(0, 1).toUpperCase()
+}
+
+function visibleModerators(row: AdminCategory) {
+  return (row.moderators || []).slice(0, 3)
+}
+
+function isAlreadyModerator(userId: number) {
+  return Boolean(moderatorRow.value?.moderators?.some(item => item.userId === userId))
+}
+
+async function searchModeratorUsers(keyword: string) {
+  const value = keyword.trim()
+  selectedModeratorUser.value = null
+  if (!value) {
+    moderatorCandidates.value = []
+    return
+  }
+  moderatorSearching.value = true
+  try {
+    const params = /^\d+$/.test(value)
+      ? { userId: Number(value), page: 1, pageSize: 8 }
+      : { username: value, page: 1, pageSize: 8 }
+    const result = await getUserList(params)
+    moderatorCandidates.value = result.list || []
+  } catch {
+    moderatorCandidates.value = []
+  } finally {
+    moderatorSearching.value = false
+  }
+}
+
+function selectModeratorCandidate(user: AdminUser) {
+  if (isAlreadyModerator(user.userId)) return
+  selectedModeratorUser.value = user
+  moderatorUserInput.value = user.username || String(user.userId)
+  moderatorCandidates.value = []
+}
+
+async function addModerator() {
+  if (!moderatorRow.value) return
+  const value = moderatorUserInput.value.trim()
+  if (!value) {
+    adminToast.warning('请输入用户名或用户 ID')
+    return
+  }
+  moderatorSaving.value = true
+  try {
+    const userId = selectedModeratorUser.value?.userId || (/^\d+$/.test(value) ? Number(value) : undefined)
+    await addCategoryModerator({
+      categoryId: moderatorRow.value.id,
+      userId,
+      username: userId ? undefined : value,
+    })
+    await loadCategories()
+    const freshRow = rows.value.find(item => item.id === moderatorRow.value?.id)
+    moderatorRow.value = freshRow || moderatorRow.value
+    moderatorUserInput.value = ''
+    selectedModeratorUser.value = null
+    moderatorCandidates.value = []
+    adminToast.success('版主已添加')
+  } catch (err) {
+    adminToast.error(err, '添加版主失败')
+  } finally {
+    moderatorSaving.value = false
+  }
+}
+
+watch(moderatorUserInput, (value) => {
+  if (!moderatorRow.value) return
+  if (moderatorSearchTimer) clearTimeout(moderatorSearchTimer)
+  moderatorSearchTimer = setTimeout(() => {
+    void searchModeratorUsers(value)
+  }, 220)
+})
+
+async function removeModerator(id: number) {
+  if (!moderatorRow.value) return
+  moderatorSaving.value = true
+  try {
+    await deleteCategoryModerator(id)
+    await loadCategories()
+    const freshRow = rows.value.find(item => item.id === moderatorRow.value?.id)
+    moderatorRow.value = freshRow || moderatorRow.value
+    adminToast.success('版主已移除')
+  } catch (err) {
+    adminToast.error(err, '移除版主失败')
+  } finally {
+    moderatorSaving.value = false
+  }
+}
+
 onMounted(() => {
   void loadCategories()
 })
@@ -165,7 +276,9 @@ onMounted(() => {
       </div>
     </template>
 
-      <div class="mb-4 flex items-center gap-2">
+      <AdminSection>
+        <template #header>
+      <AdminToolbar class="-mx-3 -my-2 border-b-0">
         <div class="relative w-full max-w-md">
           <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input v-model="search" class="pl-9" :placeholder="adminText('k005q')" />
@@ -173,9 +286,9 @@ onMounted(() => {
         <Badge variant="secondary" class="h-9 rounded-md px-3">
           {{ filteredRows.length }} {{ adminText('k00c1') }}
         </Badge>
-      </div>
+      </AdminToolbar>
+        </template>
 
-      <div class="overflow-hidden rounded-lg border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -183,19 +296,20 @@ onMounted(() => {
               <TableHead>{{ adminText('k00c2') }}</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>{{ adminText('k00ag') }}</TableHead>
+              <TableHead class="w-48">版主</TableHead>
               <TableHead class="w-24">{{ adminText('k00bf') }}</TableHead>
               <TableHead class="w-32 text-right">{{ adminText('k007m') }}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow v-if="loading">
-              <TableCell colspan="6" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
+              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
             </TableRow>
             <TableRow v-else-if="error">
-              <TableCell colspan="6" class="h-28 text-center text-destructive">{{ error }}</TableCell>
+              <TableCell colspan="7" class="h-28 text-center text-destructive">{{ error }}</TableCell>
             </TableRow>
             <TableRow v-else-if="filteredRows.length === 0">
-              <TableCell colspan="6" class="h-28 text-center text-muted-foreground">{{ adminText('k00c3') }}</TableCell>
+              <TableCell colspan="7" class="h-28 text-center text-muted-foreground">{{ adminText('k00c3') }}</TableCell>
             </TableRow>
             <template v-else>
               <TableRow v-for="item in filteredRows" :key="item.id">
@@ -209,23 +323,47 @@ onMounted(() => {
                 </TableCell>
                 <TableCell class="text-muted-foreground">{{ item.slug || '-' }}</TableCell>
                 <TableCell class="max-w-lg truncate text-muted-foreground">{{ item.desc || '-' }}</TableCell>
+                <TableCell>
+                  <button
+                    class="inline-flex max-w-full items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                    type="button"
+                    @click="openModerators(item)"
+                  >
+                    <ShieldCheck class="size-3.5" />
+                    <span v-if="item.moderators?.length" class="flex min-w-0 items-center">
+                      <span class="mr-1 flex -space-x-1">
+                        <span
+                          v-for="moderator in visibleModerators(item)"
+                          :key="moderator.id"
+                          class="grid size-5 place-items-center rounded-full border bg-muted text-[10px] font-semibold text-muted-foreground"
+                          :title="moderator.username || `#${moderator.userId}`"
+                        >
+                          {{ moderatorInitial(moderator.username) }}
+                        </span>
+                      </span>
+                      <span class="truncate">{{ item.moderators.length }} 人</span>
+                    </span>
+                    <span v-else>设置版主</span>
+                  </button>
+                </TableCell>
                 <TableCell>{{ item.sort ?? 0 }}</TableCell>
                 <TableCell>
                   <div class="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" type="button" @click="openEdit(item)">
+                    <AdminActionButton @click="openEdit(item)">
                       <Pencil class="size-3.5" />
                       {{ adminText('k005j') }}
-                    </Button>
-                    <Button variant="destructive" size="sm" type="button" @click="deletingRow = item">
+                    </AdminActionButton>
+                    <AdminActionButton tone="danger" @click="deletingRow = item">
                       <Trash2 class="size-3.5" />
-                    </Button>
+                      {{ adminText('k005i') }}
+                    </AdminActionButton>
                   </div>
                 </TableCell>
               </TableRow>
             </template>
           </TableBody>
         </Table>
-      </div>
+      </AdminSection>
 
       <Dialog :open="dialogMode !== null" @update:open="(open) => !open && (dialogMode = null)">
         <DialogContent class="sm:max-w-lg">
@@ -282,19 +420,86 @@ onMounted(() => {
         </DialogContent>
       </Dialog>
 
-      <Dialog :open="deletingRow !== null" @update:open="(open) => !open && (deletingRow = null)">
-        <DialogContent class="sm:max-w-md">
+      <AdminConfirmDialog
+        :open="deletingRow !== null"
+        :title="adminText('k00c6')"
+        :description="`${adminText('k00c7')}${deletingRow?.category || ''}${adminText('k00c8')}`"
+        :loading="deleting"
+        @update:open="(open) => !open && (deletingRow = null)"
+        @confirm="confirmDelete"
+      />
+
+      <Dialog :open="moderatorRow !== null" @update:open="(open) => !open && (moderatorRow = null)">
+        <DialogContent class="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{{ adminText('k00c6') }}</DialogTitle>
+            <DialogTitle>分类版主</DialogTitle>
             <DialogDescription>
-              {{ adminText('k00c7') }}{{ deletingRow?.category }}{{ adminText('k00c8') }}
+              为「{{ moderatorRow?.category }}」添加或移除前台治理版主。版主不会获得后台权限。
             </DialogDescription>
           </DialogHeader>
+          <div class="space-y-4">
+            <form class="flex gap-2" @submit.prevent="addModerator">
+              <div class="relative min-w-0 flex-1">
+                <Input v-model="moderatorUserInput" placeholder="搜索用户名或输入用户 ID" autocomplete="off" />
+                <div
+                  v-if="moderatorUserInput.trim() && (moderatorCandidates.length || moderatorSearching)"
+                  class="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-md border bg-popover shadow-md"
+                >
+                  <div v-if="moderatorSearching" class="px-3 py-2 text-sm text-muted-foreground">搜索中...</div>
+                  <button
+                    v-for="user in moderatorCandidates"
+                    v-else
+                    :key="user.userId"
+                    class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
+                    :class="isAlreadyModerator(user.userId) ? 'cursor-default opacity-55' : 'hover:bg-muted'"
+                    type="button"
+                    :disabled="isAlreadyModerator(user.userId)"
+                    @click="selectModeratorCandidate(user)"
+                  >
+                    <img v-if="user.avatarUrl" :src="user.avatarUrl" class="size-7 rounded-full object-cover ring-1 ring-border" alt="" />
+                    <span v-else class="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ moderatorInitial(user.username) }}</span>
+                    <span class="min-w-0 flex-1 truncate">{{ user.username }}</span>
+                    <span v-if="isAlreadyModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">已添加</span>
+                    <span class="shrink-0 font-mono text-xs text-muted-foreground">#{{ user.userId }}</span>
+                  </button>
+                </div>
+              </div>
+              <Button type="submit" :disabled="moderatorSaving">
+                <UserPlus class="size-4" />
+                添加
+              </Button>
+            </form>
+            <div class="overflow-hidden rounded-lg border">
+              <div class="flex items-center justify-between border-b bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+                <span>当前版主</span>
+                <span>{{ moderatorRow?.moderators?.length || 0 }} 人</span>
+              </div>
+              <div v-if="!moderatorRow?.moderators?.length" class="px-4 py-8 text-center text-sm text-muted-foreground">
+                暂无版主
+              </div>
+              <div v-else class="max-h-72 divide-y overflow-y-auto">
+                <div
+                  v-for="moderator in moderatorRow.moderators"
+                  :key="moderator.id"
+                  class="flex items-center justify-between gap-3 px-3 py-2"
+                >
+                  <div class="flex min-w-0 items-center gap-2">
+                    <img v-if="moderator.avatarUrl" :src="moderator.avatarUrl" class="size-8 rounded-full object-cover ring-1 ring-border" alt="" />
+                    <span v-else class="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ moderatorInitial(moderator.username) }}</span>
+                    <div class="min-w-0">
+                      <div class="truncate text-sm font-medium">{{ moderator.username || `#${moderator.userId}` }}</div>
+                      <div class="text-xs text-muted-foreground">ID {{ moderator.userId }}</div>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon-sm" type="button" :disabled="moderatorSaving" @click="removeModerator(moderator.id)">
+                    <X class="size-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
           <DialogFooter>
-            <Button variant="outline" type="button" @click="deletingRow = null">{{ adminText('k009q') }}</Button>
-            <Button variant="destructive" type="button" :disabled="deleting" @click="confirmDelete">
-              {{ deleting ? adminText('k005h') : adminText('k005i') }}
-            </Button>
+            <Button variant="outline" type="button" @click="moderatorRow = null">{{ adminText('k009q') }}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

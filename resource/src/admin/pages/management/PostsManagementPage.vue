@@ -1,7 +1,12 @@
-<script setup lang="ts">import { adminText } from '@/admin/runtime/i18n-text'
+<script setup lang="ts">
+import { adminText } from '@/admin/runtime/i18n-text'
 
 import { computed, onMounted, ref } from 'vue'
 import { Ban, Eye, FileText, Heart, MessageSquare, Pin, RefreshCw, Search, Tags, Trash2, Undo2 } from '@lucide/vue'
+import AdminActionButton from '@/admin/components/AdminActionButton.vue'
+import AdminConfirmDialog from '@/admin/components/AdminConfirmDialog.vue'
+import AdminSection from '@/admin/components/AdminSection.vue'
+import AdminToolbar from '@/admin/components/AdminToolbar.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
 import { Badge } from '@/admin/components/ui/badge'
@@ -94,8 +99,6 @@ const articleTypes: Record<number, { label: string, className: string }> = {
   2: { label: adminText('k003o'), className: 'bg-amber-50 text-amber-700 border-amber-100' },
   3: { label: adminText('k003p'), className: 'bg-violet-50 text-violet-700 border-violet-100' },
 }
-
-const actionButtonClass = 'size-7 rounded-md p-0'
 
 function typeInfo(type: number) {
   return articleTypes[type] || { label: adminText('k003g'), className: 'bg-slate-50 text-slate-700 border-slate-100' }
@@ -306,8 +309,9 @@ onMounted(() => {
       </Button>
     </template>
 
-      <div class="overflow-hidden rounded-lg border bg-card">
-        <div class="flex flex-col gap-2 border-b bg-muted/10 px-3 py-2 lg:flex-row lg:items-center lg:justify-between">
+      <AdminSection>
+        <template #header>
+        <AdminToolbar class="-mx-3 -my-2 border-b-0">
           <form class="flex min-w-0 flex-1 items-center gap-2" @submit.prevent="applySearch">
             <div class="relative min-w-64 max-w-xl flex-1">
               <Search class="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -332,7 +336,8 @@ onMounted(() => {
               <Button variant="outline" size="sm" type="button" :disabled="page >= totalPages || loading" @click="changePage(page + 1)">{{ adminText('k00av') }}</Button>
             </div>
           </div>
-        </div>
+        </AdminToolbar>
+        </template>
 
         <div class="md:hidden">
           <div v-if="loading" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k0046') }}</div>
@@ -384,22 +389,22 @@ onMounted(() => {
                   </div>
                 </div>
                 <div class="flex shrink-0 items-center gap-0.5">
-                  <Button variant="ghost" size="icon-sm" type="button" :class="actionButtonClass" :title="adminText('k006c')" @click="openSource(post)">
+                  <AdminActionButton compact :title="adminText('k006c')" @click="openSource(post)">
                     <FileText class="size-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon-sm" type="button" :class="actionButtonClass" :title="adminText('k006d')" @click="openCategoryDialog(post)">
+                  </AdminActionButton>
+                  <AdminActionButton compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
                     <Tags class="size-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon-sm" type="button" :class="[actionButtonClass, post.pinWeight > 0 ? 'text-primary hover:text-primary' : '']" :title="adminText('k006e')" @click="openPinDialog(post)">
+                  </AdminActionButton>
+                  <AdminActionButton compact :tone="post.pinWeight > 0 ? 'primary' : 'default'" :title="adminText('k006e')" @click="openPinDialog(post)">
                     <Pin class="size-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon-sm" type="button" :class="[actionButtonClass, post.processStatus === 1 ? 'text-emerald-600 hover:text-emerald-700' : 'text-destructive hover:text-destructive']" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
+                  </AdminActionButton>
+                  <AdminActionButton compact :tone="post.processStatus === 1 ? 'success' : 'danger'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
                     <Undo2 v-if="post.processStatus === 1" class="size-4" />
                     <Ban v-else class="size-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon-sm" type="button" :class="[actionButtonClass, 'text-destructive hover:text-destructive']" :title="adminText('k005i')" @click="deleteRow = post">
+                  </AdminActionButton>
+                  <AdminActionButton compact tone="danger" :title="adminText('k005i')" @click="deleteRow = post">
                     <Trash2 class="size-4" />
-                  </Button>
+                  </AdminActionButton>
                 </div>
               </div>
             </article>
@@ -476,22 +481,22 @@ onMounted(() => {
                   </TableCell>
                   <TableCell class="pr-3">
                     <div class="flex justify-end gap-0.5">
-                      <Button variant="ghost" size="icon-sm" type="button" :class="actionButtonClass" :title="adminText('k006c')" @click="openSource(post)">
+                      <AdminActionButton compact :title="adminText('k006c')" @click="openSource(post)">
                         <FileText class="size-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon-sm" type="button" :class="actionButtonClass" :title="adminText('k006d')" @click="openCategoryDialog(post)">
+                      </AdminActionButton>
+                      <AdminActionButton compact :title="adminText('k006d')" @click="openCategoryDialog(post)">
                         <Tags class="size-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon-sm" type="button" :class="[actionButtonClass, post.pinWeight > 0 ? 'text-primary hover:text-primary' : '']" :title="adminText('k006e')" @click="openPinDialog(post)">
+                      </AdminActionButton>
+                      <AdminActionButton compact :tone="post.pinWeight > 0 ? 'primary' : 'default'" :title="adminText('k006e')" @click="openPinDialog(post)">
                         <Pin class="size-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon-sm" type="button" :class="[actionButtonClass, post.processStatus === 1 ? 'text-emerald-600 hover:text-emerald-700' : 'text-destructive hover:text-destructive']" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
+                      </AdminActionButton>
+                      <AdminActionButton compact :tone="post.processStatus === 1 ? 'success' : 'danger'" :title="post.processStatus === 1 ? adminText('k005z') : adminText('k0060')" @click="actionRow = post">
                         <Undo2 v-if="post.processStatus === 1" class="size-4" />
                         <Ban v-else class="size-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon-sm" type="button" :class="[actionButtonClass, 'text-destructive hover:text-destructive']" :title="adminText('k005i')" @click="deleteRow = post">
+                      </AdminActionButton>
+                      <AdminActionButton compact tone="danger" :title="adminText('k005i')" @click="deleteRow = post">
                         <Trash2 class="size-4" />
-                      </Button>
+                      </AdminActionButton>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -499,7 +504,7 @@ onMounted(() => {
             </TableBody>
           </Table>
 
-      </div>
+      </AdminSection>
 
       <Dialog :open="categoryDialogRow !== null" @update:open="(open) => !open && (categoryDialogRow = null)">
         <DialogContent class="sm:max-w-xl">
@@ -585,21 +590,13 @@ onMounted(() => {
         </DialogContent>
       </Dialog>
 
-      <Dialog :open="deleteRow !== null" @update:open="(open) => !open && (deleteRow = null)">
-        <DialogContent class="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{{ adminText('k00cf') }}</DialogTitle>
-            <DialogDescription>
-              {{ adminText('k00cg', { title: deleteRow?.title || '' }) }}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" type="button" @click="deleteRow = null">{{ adminText('k009q') }}</Button>
-            <Button variant="destructive" type="button" :disabled="saving" @click="confirmDeleteArticle">
-              {{ saving ? adminText('k005h') : adminText('k005i') }}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AdminConfirmDialog
+        :open="deleteRow !== null"
+        :title="adminText('k00cf')"
+        :description="adminText('k00cg', { title: deleteRow?.title || '' })"
+        :loading="saving"
+        @update:open="(open) => !open && (deleteRow = null)"
+        @confirm="confirmDeleteArticle"
+      />
     </BasicPage>
 </template>

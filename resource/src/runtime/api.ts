@@ -195,6 +195,17 @@ export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Pro
   return readApiResponse<boolean>(response, t('api.articleStatusFailed'))
 }
 
+export async function updateModerationArticleStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
+  const response = await fetch('/api/forum/moderation/article-status', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id, action }),
+  })
+  return readApiResponse<boolean>(response, t('api.moderationActionFailed'))
+}
+
 export async function markAllNotificationsRead(): Promise<boolean> {
   const response = await fetch('/api/forum/notification/mark-all-read', {
     method: 'POST',
