@@ -171,12 +171,12 @@ func ExtractDescription(content string, maxLength int) string {
 	err := ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch node := n.(type) {
-			case *ast.Text:
-				textContent := string(node.Segment.Value(reader.Source()))
-				textContent = strings.TrimSpace(textContent)
-				if textContent != "" && len(textContent) > 3 {
+			case *ast.Heading, *ast.Paragraph, *ast.ListItem:
+				textContent := extractDescriptionBlockText(node, reader.Source())
+				if textContent != "" && utf8.RuneCountInString(textContent) > 3 {
 					textParts = append(textParts, textContent)
 				}
+				return ast.WalkSkipChildren, nil
 			case *ast.CodeBlock, *ast.FencedCodeBlock:
 				return ast.WalkSkipChildren, nil
 			case *ast.Image:
@@ -206,6 +206,32 @@ func ExtractDescription(content string, maxLength int) string {
 	}
 
 	return description
+}
+
+func extractDescriptionBlockText(node ast.Node, source []byte) string {
+	var builder strings.Builder
+	_ = ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		switch typed := n.(type) {
+		case *ast.Text:
+			builder.Write(typed.Segment.Value(source))
+			if typed.SoftLineBreak() || typed.HardLineBreak() {
+				builder.WriteByte(' ')
+			}
+		case *ast.CodeBlock, *ast.FencedCodeBlock, *ast.Image:
+			return ast.WalkSkipChildren, nil
+		}
+		return ast.WalkContinue, nil
+	})
+
+	textContent := strings.ReplaceAll(builder.String(), "\n", " ")
+	textContent = strings.ReplaceAll(textContent, "\t", " ")
+	for strings.Contains(textContent, "  ") {
+		textContent = strings.ReplaceAll(textContent, "  ", " ")
+	}
+	return strings.TrimSpace(textContent)
 }
 
 // fallbackExtractDescription strips common Markdown markers without parsing.

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
-import { AlertTriangle, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Send, Trash2, X } from '@lucide/vue'
+import { AlertTriangle, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, Trash2, X } from '@lucide/vue'
 import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateReply, watchArticle } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
+import ArticleReplyComposer from '@/site/components/ArticleReplyComposer.vue'
 import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
@@ -19,9 +20,7 @@ const page = defineProps<{
 
 const { t } = useI18n()
 const replyContent = ref('')
-const replyContents = reactive<Record<number, string>>({})
-const openReplyId = ref<number | null>(null)
-const currentReplyId = ref(0)
+const replyTargetId = ref(0)
 const likeCount = ref(page.props.article.likeCount)
 const isLiked = ref(page.props.article.isLiked)
 const isBookmarked = ref(page.props.article.isBookmarked)
@@ -36,6 +35,7 @@ const editingReplyId = ref(0)
 const savingEditReplyId = ref(0)
 const pendingDeleteReply = ref<ReplyPayload | null>(null)
 const replies = ref<ReplyPayload[]>([...page.props.replies])
+const replyTarget = computed(() => replies.value.find((reply) => reply.id === replyTargetId.value))
 const replyWindowMode = ref(false)
 const replyHasBefore = ref(false)
 const replyHasAfter = ref(hasMoreInitialReplies())
@@ -52,13 +52,11 @@ const replyWindowError = ref('')
 const deleteErrorMessage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
-const inlineReplyErrors = reactive<Record<number, string>>({})
 const editReplyContents = reactive<Record<number, string>>({})
 const editReplyErrors = reactive<Record<number, string>>({})
 const articleHeaderEl = ref<HTMLElement | null>(null)
 const titleEl = ref<HTMLElement | null>(null)
-const replyEditorEl = ref<HTMLTextAreaElement | null>(null)
-const replySectionEl = ref<HTMLElement | null>(null)
+const replyComposerRef = ref<InstanceType<typeof ArticleReplyComposer> | null>(null)
 const replyLoadMoreEl = ref<HTMLElement | null>(null)
 const articleRailTopOffset = ref(0)
 const showHeaderTitle = ref(false)
@@ -66,7 +64,7 @@ const isMobileHeaderViewport = ref(false)
 const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const showFloatingReply = ref(false)
-const floatingReplyExpanded = ref(false)
+const composerOpen = ref(false)
 const mobileReplyRailOpen = ref(false)
 const activeReplyNo = ref(firstReplyNo(page.props.replies))
 const replyMaxRange = computed(() => Math.max(replyMaxNo.value, ...replies.value.map((reply) => reply.replyNo || 0)))
@@ -317,8 +315,8 @@ function applyMobileHeaderTitle() {
 
 function observeReplyEditor() {
   replyEditorObserver?.disconnect()
-  showFloatingReply.value = false
-  if (!replySectionEl.value || !page.props.permissions.canReply || !('IntersectionObserver' in window)) return
+  const footerEl = replyComposerRef.value?.footerEl
+  if (!footerEl || !page.props.permissions.canReply || !('IntersectionObserver' in window)) return
 
   replyEditorObserver = new IntersectionObserver(
     (entries) => {
@@ -326,7 +324,7 @@ function observeReplyEditor() {
     },
     { threshold: 0.08, rootMargin: '0px 0px -96px 0px' },
   )
-  replyEditorObserver.observe(replySectionEl.value)
+  replyEditorObserver.observe(footerEl)
 }
 
 function observeReplyLoader() {
@@ -723,23 +721,13 @@ function jumpToArticleBody() {
 }
 
 function focusReplyEditor() {
-  replyEditorEl.value?.focus()
-  replyEditorEl.value?.scrollIntoView({ block: 'center' })
+  mobileReplyRailOpen.value = false
+  composerOpen.value = true
 }
 
 function openFloatingReply() {
-  mobileReplyRailOpen.value = false
-  floatingReplyExpanded.value = true
-  openReplyId.value = null
-}
-
-function closeFloatingReply() {
-  floatingReplyExpanded.value = false
-}
-
-function toggleMobileReplyRail() {
-  floatingReplyExpanded.value = false
-  mobileReplyRailOpen.value = !mobileReplyRailOpen.value
+  replyTargetId.value = 0
+  focusReplyEditor()
 }
 
 function closeMobileReplyRail() {
@@ -774,74 +762,42 @@ function scrollReplyIntoComfortView(element: HTMLElement) {
   })
 }
 
-async function revealCreatedReply(reply: ReplyPayload) {
-  if (!reply.id) return
+function waitForAnimationFrame() {
+  return new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => resolve())
+  })
+}
 
-  mergeReplies([reply], 'append')
-  replyHasAfter.value = false
-  replyAfterCursor.value = Math.max(replyAfterCursor.value, reply.id)
-  replyAfterReplyNo.value = Math.max(replyAfterReplyNo.value, reply.replyNo || 0)
-  replyMaxNo.value = Math.max(replyMaxNo.value, reply.replyNo || 0)
-  await nextTick()
-  scheduleObserveReplyVisibility()
-  highlightReply(reply.id)
-  const element = document.getElementById(`reply-${reply.id}`)
-  if (element && !isElementMostlyVisible(element)) {
-    scrollReplyIntoComfortView(element)
+async function findReplyElementAfterLayout(replyId: number) {
+  for (let attempts = 0; attempts < 4; attempts += 1) {
+    await nextTick()
+    await waitForAnimationFrame()
+    const element = document.getElementById(`reply-${replyId}`)
+    if (element) return element
   }
+  return null
 }
 
-function buildCreatedReply(replyId: number, replyNo: number, content: string, renderedContent: string, replyToId: number): ReplyPayload {
-  const parentReply = replyToId > 0 ? replies.value.find((reply) => reply.id === replyToId) : undefined
-  const viewer = page.layout.viewer
-  return {
-    id: replyId,
-    articleId: page.props.article.id,
-    replyNo,
-    content,
-    renderedContent,
-    author: {
-      id: viewer.id,
-      username: viewer.username,
-      avatarUrl: viewer.avatarUrl,
-    },
-    createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    replyToId: replyToId || undefined,
-    replyToUserId: parentReply?.author.id,
-    replyToUsername: parentReply?.author.username,
-    isOwnReply: true,
-    updatedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-  }
-}
-
-function escapePlainText(content: string) {
-  return content
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .replace(/\n/g, '<br>\n')
-}
-
-async function fetchAndRevealCreatedReply(replyId: number) {
+async function revealCreatedReply(replyId: number) {
   if (!replyId) return
 
+  pauseReplyVisibility()
   const payload = await getArticleRepliesWindow({
     articleId: page.props.article.id,
     anchorReplyId: replyId,
-    limit: 3,
+    limit: 20,
   })
-  applyReplyWindowPayload(payload, 'append', replyWindowMode.value)
-  await nextTick()
-  scheduleObserveReplyVisibility()
+  applyReplyWindowPayload(payload, 'replace', true)
+  const createdReply = payload.replies.find((reply) => reply.id === replyId)
+  if (createdReply?.replyNo) {
+    activeReplyNo.value = createdReply.replyNo
+  }
   highlightReply(replyId)
-  const element = document.getElementById(`reply-${replyId}`)
+  const element = await findReplyElementAfterLayout(replyId)
   if (element && !isElementMostlyVisible(element)) {
     scrollReplyIntoComfortView(element)
   }
+  scheduleObserveReplyVisibility()
 }
 
 async function toggleLike() {
@@ -903,27 +859,35 @@ async function toggleWatch() {
   }
 }
 
-function toggleReplyForm(replyId: number) {
-  openReplyId.value = openReplyId.value === replyId ? null : replyId
+function replyTo(reply: ReplyPayload) {
+  replyTargetId.value = reply.id
   editingReplyId.value = 0
-  if (replyContents[replyId] === undefined) {
-    replyContents[replyId] = ''
-  }
-  inlineReplyErrors[replyId] = ''
+  errorMessage.value = ''
+  successMessage.value = ''
+  focusReplyEditor()
 }
 
-function clearReplyValidation(replyId = 0) {
-  if (replyId > 0) {
-    inlineReplyErrors[replyId] = ''
-    return
-  }
+function cancelReplyTarget() {
+  replyTargetId.value = 0
+  errorMessage.value = ''
+}
 
+function clearReplyValidation() {
   errorMessage.value = ''
   successMessage.value = ''
 }
 
+function handleReplyImageInserted(count: number) {
+  errorMessage.value = ''
+  successMessage.value = count > 1 ? t('publish.imagesInserted', { count }) : t('publish.imageInserted')
+}
+
+function handleReplyImageError(message: string) {
+  errorMessage.value = message
+}
+
 function startEditReply(reply: ReplyPayload) {
-  openReplyId.value = null
+  replyTargetId.value = 0
   editingReplyId.value = reply.id
   editReplyContents[reply.id] = reply.content
   editReplyErrors[reply.id] = ''
@@ -975,59 +939,35 @@ async function saveReplyEdit(reply: ReplyPayload) {
   }
 }
 
-async function submitReply(replyId = 0) {
-  const content = replyId > 0 ? (replyContents[replyId] || '').trim() : replyContent.value.trim()
+async function submitReply() {
+  const replyId = replyTarget.value?.id || 0
+  const content = replyContent.value.trim()
   if (submitting.value) return
 
   if (!content) {
-    if (replyId > 0) {
-      inlineReplyErrors[replyId] = t('article.replyRequired')
-    } else {
-      errorMessage.value = t('article.replyRequired')
-      successMessage.value = ''
-    }
+    errorMessage.value = t('article.replyRequired')
+    successMessage.value = ''
     return
   }
 
   submitting.value = true
-  currentReplyId.value = replyId
   errorMessage.value = ''
   successMessage.value = ''
-  if (replyId > 0) {
-    inlineReplyErrors[replyId] = ''
-  }
   try {
     const createdReply = await postReply(page.props.article.id, content, replyId)
-    if (replyId > 0) {
-      replyContents[replyId] = ''
-      openReplyId.value = null
-    } else {
-      replyContent.value = ''
-      closeFloatingReply()
-      successMessage.value = t('article.replyPosted')
-    }
+    replyContent.value = ''
+    replyTargetId.value = 0
+    successMessage.value = t('article.replyPosted')
     const createdReplyId = typeof createdReply === 'object' && createdReply !== null ? createdReply.id : createdReply
-    const createdReplyNo = typeof createdReply === 'object' && createdReply !== null ? createdReply.replyNo || 0 : 0
-    const renderedContent = typeof createdReply === 'object' && createdReply !== null ? createdReply.renderedContent : escapePlainText(content)
     if (typeof createdReplyId === 'number') {
-      if (page.layout.viewer.isAuthenticated) {
-        await revealCreatedReply(buildCreatedReply(createdReplyId, createdReplyNo || replyMaxRange.value + 1, content, renderedContent, replyId))
-      } else {
-        await fetchAndRevealCreatedReply(createdReplyId)
-      }
+      await revealCreatedReply(createdReplyId)
     } else {
       await refreshCurrentPage()
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : t('api.replyFailed')
-    if (replyId > 0) {
-      inlineReplyErrors[replyId] = message
-    } else {
-      errorMessage.value = message
-    }
+    errorMessage.value = error instanceof Error ? error.message : t('api.replyFailed')
   } finally {
     submitting.value = false
-    currentReplyId.value = 0
   }
 }
 
@@ -1237,7 +1177,7 @@ async function removeReply(replyId: number) {
                   type="button"
                   class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   :title="t('article.reply')"
-                  @click="toggleReplyForm(reply.id)"
+                  @click="replyTo(reply)"
                 >
                   <CornerDownLeft class="h-3.5 w-3.5" />
                   <span class="sr-only">{{ t('article.reply') }}</span>
@@ -1285,36 +1225,6 @@ async function removeReply(replyId: number) {
                 {{ t('article.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
               </div>
             </template>
-
-            <Transition name="gf-local-expand">
-              <div v-if="openReplyId === reply.id" class="mt-4 border-l-2 border-primary/20 pl-3">
-                <div class="mb-2 flex items-center justify-between">
-                  <div class="text-xs font-medium text-base-content/55">{{ t('article.replyTo', { user: `@${reply.author.username}` }) }}</div>
-                  <button type="button" class="rounded-md p-1 text-base-content/55 hover:bg-base-300 hover:text-base-content/75" @click="openReplyId = null">
-                    <X class="h-4 w-4" />
-                  </button>
-                </div>
-                <textarea
-                  v-model="replyContents[reply.id]"
-                  class="gf-textarea min-h-20"
-                  :placeholder="t('article.replyPlaceholder')"
-                  @input="clearReplyValidation(reply.id)"
-                />
-                <p v-if="inlineReplyErrors[reply.id]" class="mt-2 text-sm text-error">{{ inlineReplyErrors[reply.id] }}</p>
-                <div class="mt-2 flex justify-end gap-2">
-                  <button type="button" class="gf-button gf-button-sm gf-button-muted text-xs" @click="openReplyId = null">{{ t('common.cancel') }}</button>
-                  <button
-                    type="button"
-                    class="gf-button gf-button-sm gf-button-primary text-xs"
-                    :disabled="submitting"
-                    @click="submitReply(reply.id)"
-                  >
-                    <Send class="h-3.5 w-3.5" />
-                    {{ submitting && currentReplyId === reply.id ? t('article.publishing') : t('article.reply') }}
-                  </button>
-                </div>
-              </div>
-            </Transition>
           </div>
         </div>
 
@@ -1347,41 +1257,36 @@ async function removeReply(replyId: number) {
         </div>
       </section>
 
-      <section ref="replySectionEl" class="gf-card mt-4 p-4 sm:p-5">
-        <template v-if="page.props.permissions.canReply">
-          <div class="mb-3 flex items-center justify-between">
-            <label class="text-sm font-semibold text-base-content" for="reply-content">{{ t('article.joinDiscussion') }}</label>
-            <span class="text-xs text-base-content/55">{{ t('article.markdownSoon') }}</span>
-          </div>
-          <textarea
-            id="reply-content"
-            ref="replyEditorEl"
-            v-model="replyContent"
-            class="gf-textarea min-h-28"
-            :placeholder="t('article.replyPlaceholder')"
-            @input="clearReplyValidation()"
-          />
-          <p v-if="errorMessage" class="mt-2 text-sm text-error">{{ errorMessage }}</p>
-          <p v-if="successMessage" class="mt-2 text-sm text-success">{{ successMessage }}</p>
-          <div class="mt-3 flex justify-end">
-            <button
-              class="gf-button gf-button-md gf-button-primary"
-              :disabled="submitting"
-              @click="submitReply()"
-            >
-              <Send class="h-4 w-4" />
-              {{ submitting ? t('article.publishing') : t('article.publishReply') }}
-            </button>
-          </div>
-        </template>
-        <template v-else>
-          <div class="text-center">
-            <h2 class="text-base font-semibold text-base-content">{{ t('article.joinDiscussion') }}</h2>
-            <p class="mt-1 text-sm text-base-content/55">{{ t('article.loginToReply') }}</p>
-            <a href="/login" class="gf-button gf-button-md gf-button-primary mt-4">{{ t('auth.loginTitle') }}</a>
-          </div>
-        </template>
-      </section>
+      <ArticleReplyComposer
+        ref="replyComposerRef"
+        v-model="replyContent"
+        v-model:mobile-rail-open="mobileReplyRailOpen"
+        v-model:open="composerOpen"
+        :actions="floatingArticleActions"
+        :can-reply="page.props.permissions.canReply"
+        :current-label="replyRailCurrentLabel"
+        :current-no="replyRailCurrentNo"
+        :end-label="replyRailEndLabel"
+        :error-message="errorMessage"
+        :has-rail="hasReplyRail"
+        :max-no="replyMaxRange"
+        :rail-busy="replyRailBusy"
+        :reply-count="formatNumber(page.props.article.replyCount)"
+        :show-floating="showFloatingReply"
+        :start-label="replyRailStartLabel"
+        :submitting="submitting"
+        :success-message="successMessage"
+        :target="replyTarget"
+        @clear-target="cancelReplyTarget"
+        @clear-validation="clearReplyValidation"
+        @earliest="jumpToArticleBodyFromRail"
+        @image-error="handleReplyImageError"
+        @image-inserted="handleReplyImageInserted"
+        @latest="jumpToLatestReplyFromRail"
+        @open-reply="openFloatingReply"
+        @select-rail="selectReplyFromRail"
+        @submit="submitReply"
+      />
 
     </article>
 
@@ -1394,120 +1299,6 @@ async function removeReply(replyId: number) {
 
         <TopicList :topics="page.props.hotTopics" home />
       </section>
-    </Teleport>
-
-    <Teleport v-if="hasReplyRail || (page.props.permissions.canReply && showFloatingReply)" to="body">
-      <div class="pointer-events-none fixed inset-x-0 bottom-4 z-[90] px-3 sm:px-6">
-        <div class="relative mx-auto flex w-fit max-w-full justify-center">
-          <Transition name="floating-reply">
-            <div
-              v-if="mobileReplyRailOpen"
-              class="gf-floating-surface pointer-events-auto absolute bottom-full left-0 mb-2 w-[min(18rem,calc(100vw-1.5rem))] p-2 xl:hidden"
-            >
-              <div class="mb-1 flex items-center justify-between gap-3 px-1">
-                <div class="text-xs font-semibold text-base-content/55">{{ t('article.replyPosition') }}</div>
-                <button
-                  type="button"
-                  class="inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-300 hover:text-base-content"
-                  :aria-label="t('common.close')"
-                  @click="closeMobileReplyRail"
-                >
-                  <X class="h-4 w-4" />
-                </button>
-              </div>
-              <ReplyPositionRail
-                :current="replyRailCurrentNo"
-                :max="replyMaxRange"
-                :start-label="replyRailStartLabel"
-                :end-label="replyRailEndLabel"
-                :current-label="replyRailCurrentLabel"
-                :busy="replyRailBusy"
-                @earliest="jumpToArticleBodyFromRail"
-                @latest="jumpToLatestReplyFromRail"
-                @select="selectReplyFromRail"
-              />
-            </div>
-          </Transition>
-
-          <Transition name="floating-reply" mode="out-in">
-            <div
-              v-if="!floatingReplyExpanded || !page.props.permissions.canReply || !showFloatingReply"
-              class="gf-floating-surface pointer-events-auto flex w-fit max-w-full items-center gap-1 rounded-full p-1"
-            >
-              <button
-                v-if="hasReplyRail"
-                type="button"
-                class="inline-flex h-9 items-center rounded-full px-2.5 text-sm font-black tabular-nums text-primary transition hover:bg-info/10 hover:text-primary xl:hidden"
-                :aria-expanded="mobileReplyRailOpen"
-                :aria-label="t('article.replyPosition')"
-                @click="toggleMobileReplyRail"
-              >
-                {{ replyRailCurrentNo }} / {{ formatNumber(replyMaxRange) }}
-              </button>
-              <template v-if="page.props.permissions.canReply && showFloatingReply">
-                <button
-                  v-for="action in floatingArticleActions"
-                  :key="action.key"
-                  type="button"
-                  class="inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
-                  :class="action.active ? action.activeClass : 'text-base-content/75 hover:bg-base-200 hover:text-base-content'"
-                  :disabled="action.acting"
-                  :title="action.title"
-                  @click="action.onClick"
-                >
-                  <Loader2 v-if="action.acting" class="h-4 w-4 animate-spin" />
-                  <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active ? 'currentColor' : 'none'" />
-                </button>
-                <button
-                  type="button"
-                  class="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-base-content/75 transition hover:bg-info/10 hover:text-primary"
-                  :title="t('article.joinDiscussion')"
-                  @click="openFloatingReply"
-                >
-                  <MessageSquare class="h-4 w-4" />
-                  <span>{{ t('article.joinDiscussion') }}</span>
-                </button>
-              </template>
-            </div>
-            <div
-              v-else-if="page.props.permissions.canReply && showFloatingReply"
-              class="gf-floating-surface pointer-events-auto w-[min(42rem,calc(100vw-1.5rem))] p-3"
-            >
-              <div class="mb-2 flex items-center justify-between">
-                <div class="text-sm font-semibold text-base-content">{{ t('article.joinDiscussion') }}</div>
-                <button type="button" class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75" @click="closeFloatingReply">
-                  <X class="h-4 w-4" />
-                </button>
-              </div>
-              <textarea
-                v-model="replyContent"
-                rows="3"
-                class="gf-textarea min-h-24 leading-6"
-                :placeholder="t('article.replyPlaceholder')"
-                @focus="openReplyId = null"
-                @input="clearReplyValidation()"
-              />
-              <p v-if="errorMessage" class="mt-2 text-sm text-error">{{ errorMessage }}</p>
-              <p v-if="successMessage" class="mt-2 text-sm text-success">{{ successMessage }}</p>
-              <div class="mt-3 flex justify-end gap-2">
-                <button type="button" class="gf-button gf-button-md gf-button-muted" @click="focusReplyEditor">
-                  {{ t('article.fullEditor') }}
-                </button>
-                <button
-                  type="button"
-                  class="gf-button gf-button-md gf-button-primary"
-                  :disabled="submitting"
-                  @click="submitReply()"
-                >
-                  <Loader2 v-if="submitting && currentReplyId === 0" class="h-4 w-4 animate-spin" />
-                  <Send v-else class="h-4 w-4" />
-                  {{ submitting && currentReplyId === 0 ? t('article.publishing') : t('article.publishReply') }}
-                </button>
-              </div>
-            </div>
-          </Transition>
-        </div>
-      </div>
     </Teleport>
 
     <Teleport defer to="#goose-shell-rail">

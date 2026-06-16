@@ -113,7 +113,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		}
 	} else {
 		article.UserId = req.UserId
-		article.Type = req.Params.Type
+		article.Type = normalizeWriteArticleType(req.Params.Type)
 	}
 	article.CategoryId = req.Params.CategoryId
 	article.ArticleStatus = req.Params.ArticleStatus
@@ -166,6 +166,15 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		}
 	}
 	return component.SuccessResponse(article.Id)
+}
+
+func normalizeWriteArticleType(articleType int8) int8 {
+	switch articles.Type(articleType) {
+	case articles.Share, articles.Help:
+		return articleType
+	default:
+		return int8(articles.Share)
+	}
 }
 
 type ArticleStatusReq struct {

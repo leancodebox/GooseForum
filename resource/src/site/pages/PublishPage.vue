@@ -75,10 +75,6 @@ function syncSavedSnapshot() {
   savedSnapshot.value = editorSnapshot()
 }
 
-function typeLabel(item: { name: string }) {
-  return t(`publish.types.${item.name}`)
-}
-
 function toggleCategory(id: number) {
   if (categoryIds.value.includes(id)) {
     categoryIds.value = categoryIds.value.filter((item) => item !== id)
@@ -316,22 +312,6 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                 :placeholder="t('publish.titlePlaceholder')"
               />
             </label>
-
-            <div>
-              <div class="mb-2 text-sm font-semibold text-base-content/75">{{ t('publish.fields.type') }}</div>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="item in props.types"
-                  :key="item.value"
-                  type="button"
-                  class="rounded-md border px-3 py-1.5 text-sm font-medium transition"
-                  :class="type === item.value ? 'border-primary bg-info/10 text-primary' : 'border-line text-base-content/75 hover:border-line hover:bg-base-200'"
-                  @click="type = item.value"
-                >
-                  {{ typeLabel(item) }}
-                </button>
-              </div>
-            </div>
 
             <div>
               <div class="mb-2 flex items-center justify-between">

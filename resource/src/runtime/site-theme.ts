@@ -57,12 +57,16 @@ function applySiteThemeLink(href?: string) {
     el?.remove()
     return
   }
+  const absoluteHref = new URL(href, window.location.origin).href
   if (!el) {
     el = document.createElement('link')
     el.id = THEME_LINK_ID
     el.rel = 'stylesheet'
   }
-  if (el.href !== new URL(href, window.location.origin).href) {
+  if (el.href === absoluteHref && el.isConnected) {
+    return
+  }
+  if (el.href !== absoluteHref) {
     el.href = href
   }
   document.head.appendChild(el)

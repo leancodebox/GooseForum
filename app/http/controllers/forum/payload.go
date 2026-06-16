@@ -1720,7 +1720,7 @@ func defaultPublishType() int8 {
 	if items != nil && len(*items) > 0 {
 		return int8((*items)[0].Value)
 	}
-	return 0
+	return int8(articles.Share)
 }
 
 func buildSearchPageProps(query string, page int) SearchPageProps {

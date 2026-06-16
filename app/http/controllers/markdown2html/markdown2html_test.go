@@ -117,6 +117,15 @@ func TestExtractDescriptionUsesDefaultAndTruncatesRunes(t *testing.T) {
 	}
 }
 
+func TestExtractDescriptionRt(t *testing.T) {
+	input := "rt,xxxx121"
+	got := ExtractDescription(input, 0)
+
+	if got != input {
+		t.Fatalf("ExtractDescription() = %q, want %q", got, input)
+	}
+}
+
 func TestFallbackExtractDescription(t *testing.T) {
 	got := fallbackExtractDescription(`# Title
 
