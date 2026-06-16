@@ -57,6 +57,7 @@ interface SidebarCategoryItem extends SidebarNavItem {
 const MobileDrawer = defineAsyncComponent(() => import('./MobileDrawer.vue'))
 const UserHoverCard = shallowRef<typeof UserHoverCardComponent | null>(null)
 const drawerOpen = ref(false)
+const headerElevated = ref(false)
 const langMenuOpen = ref(false)
 const userMenuOpen = ref(false)
 const closeTimers: Record<'lang' | 'user', number | undefined> = {
@@ -145,10 +146,13 @@ onMounted(() => {
   if (props.layout.viewer.isAuthenticated) {
     unreadStatus.startPolling(props.layout.unread)
   }
+  updateHeaderElevated()
+  window.addEventListener('scroll', updateHeaderElevated, { passive: true })
   window.addEventListener('goose:user-card-show', ensureUserHoverCardForEvent)
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('scroll', updateHeaderElevated)
   window.removeEventListener('goose:user-card-show', ensureUserHoverCardForEvent)
 })
 
@@ -207,6 +211,10 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+function updateHeaderElevated() {
+  headerElevated.value = window.scrollY > 8
+}
+
 function setHoverMenu(menu: 'lang' | 'user', open: boolean) {
   window.clearTimeout(closeTimers[menu])
   closeTimers[menu] = undefined
@@ -256,7 +264,12 @@ async function loadUserHoverCard() {
       <div class="h-full w-24 animate-[gf-loading-bar_1s_ease-in-out_infinite] rounded-r-full bg-primary sm:w-36" />
     </div>
 
-    <header class="sticky top-0 z-50 border-b border-line bg-base-100/95 backdrop-blur-sm">
+    <header
+      class="sticky top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-200"
+      :class="headerElevated
+        ? 'border-line bg-base-100/95 shadow-[0_1px_10px_rgb(15_23_42/0.04)] backdrop-blur-sm'
+        : 'border-transparent bg-base-100/0 shadow-none backdrop-blur-none'"
+    >
       <div class="mx-auto grid h-16 w-full max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:gap-4 sm:px-5 md:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-8 lg:px-8">
         <div class="flex min-w-0 items-center gap-2 sm:gap-4 lg:gap-8">
           <button
