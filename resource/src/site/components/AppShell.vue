@@ -256,7 +256,7 @@ async function loadUserHoverCard() {
       <div class="h-full w-24 animate-[gf-loading-bar_1s_ease-in-out_infinite] rounded-r-full bg-primary sm:w-36" />
     </div>
 
-    <header class="sticky top-0 z-50 border-b border-line/70 bg-base-100/95 backdrop-blur">
+    <header class="sticky top-0 z-50 border-b border-line bg-base-100/95 backdrop-blur-sm">
       <div class="mx-auto grid h-16 w-full max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:gap-4 sm:px-5 md:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-8 lg:px-8">
         <div class="flex min-w-0 items-center gap-2 sm:gap-4 lg:gap-8">
           <button
