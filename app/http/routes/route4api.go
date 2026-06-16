@@ -135,6 +135,7 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("watch-article", UpButterReq(controllers.WatchArticle))
 	forumLoginApi.POST("follow-user", UpButterReq(controllers.FollowUser))
 	forumLoginApi.POST("moderation/article-status", UpButterReq(forum.UpdateModerationArticleStatus))
+	forumLoginApi.POST("moderation/logs", middleware.NoUpdateUserActivity, UpButterReq(forum.ModerationLogList))
 
 	chatApi := forumApi.Group("chat", middleware.JWTAuthCheck)
 	chatApi.POST("send", UpButterReq(api.SendMessage))

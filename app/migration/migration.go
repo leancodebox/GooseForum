@@ -24,6 +24,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
+	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -65,6 +66,7 @@ func migration(migration bool) {
 		&articlesUserStat.Entity{},
 		&badges.Entity{},
 		&eventNotification.Entity{},
+		&moderationLog.Entity{},
 		&moderators.Entity{},
 		&optRecord.Entity{},
 		&pageConfig.Entity{},

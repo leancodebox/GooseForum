@@ -27,6 +27,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
+	"github.com/leancodebox/GooseForum/app/service/moderationlogservice"
 	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
@@ -538,12 +539,14 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	// 更新文章状态
-	article.ProcessStatus = req.Params.ProcessStatus
-	err := articles.Save(&article)
-	if err != nil {
+	if article.ProcessStatus == req.Params.ProcessStatus {
+		return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
+	}
+
+	if err := articles.UpdateProcessStatus(article.Id, req.Params.ProcessStatus); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
+	article.ProcessStatus = req.Params.ProcessStatus
 
 	// 记录操作日志
 	statusCode := "unblocked"
@@ -554,6 +557,7 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 		"title":  article.Title,
 		"status": statusCode,
 	})
+	moderationlogservice.ArticleStatusChanged(req.UserId, article.Id, article.Title, req.Params.ProcessStatus == 1)
 	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
 		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
 	}
@@ -949,6 +953,7 @@ func AddCategoryModerator(req component.BetterRequest[AddCategoryModeratorReq]) 
 		"userId":       user.Id,
 		"username":     user.Username,
 	})
+	moderationlogservice.CategoryModeratorAdded(req.UserId, category.Id, category.Category, user.Id, user.Username)
 	return component.SuccessResponse(true)
 }
 
@@ -970,6 +975,7 @@ func DeleteCategoryModerator(req component.BetterRequest[struct {
 		"categoryName": category.Category,
 		"userId":       entity.UserId,
 	})
+	moderationlogservice.CategoryModeratorRemoved(req.UserId, entity.ScopeId, category.Category, entity.UserId)
 	return component.SuccessResponse(true)
 }
 

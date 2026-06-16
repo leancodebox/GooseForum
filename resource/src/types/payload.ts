@@ -373,6 +373,35 @@ export interface ModerationPageProps {
   }
 }
 
+export interface ModerationLogSubject {
+  type: 'article' | 'category' | 'user' | 'system' | string
+  id: number
+  title: string
+  url?: string
+  excerpt?: string
+}
+
+export interface ModerationLogItem {
+  id: number
+  action: string
+  actor: {
+    id: number
+    username: string
+    avatarUrl: string
+  }
+  subject: ModerationLogSubject
+  categories: Array<{ id: number; name: string; url: string; color: string }>
+  messageCode: string
+  params: Record<string, unknown>
+  createdAt: string
+}
+
+export interface ModerationLogListResponse {
+  items: ModerationLogItem[]
+  nextCursor: number
+  hasNext: boolean
+}
+
 export interface UserCardPayload {
   userId: number
   username: string

@@ -1,18 +1,23 @@
 package forum
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/moderationlogservice"
 	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
-	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
 
 const moderationPageSize = 20
@@ -89,6 +94,36 @@ type ModerationArticleStatusReq struct {
 	Action string `json:"action" validate:"oneof=ban unban"`
 }
 
+type ModerationLogListReq struct {
+	Cursor   uint64 `json:"cursor"`
+	PageSize int    `json:"pageSize"`
+}
+
+type ModerationLogListResponse struct {
+	Items      []ModerationLogItem `json:"items"`
+	NextCursor uint64              `json:"nextCursor"`
+	HasNext    bool                `json:"hasNext"`
+}
+
+type ModerationLogItem struct {
+	ID          uint64                 `json:"id"`
+	Action      string                 `json:"action"`
+	Actor       TopicAuthorPayload     `json:"actor"`
+	Subject     ModerationLogSubject   `json:"subject"`
+	Categories  []TopicCategoryPayload `json:"categories"`
+	MessageCode string                 `json:"messageCode"`
+	Params      map[string]any         `json:"params"`
+	CreatedAt   string                 `json:"createdAt"`
+}
+
+type ModerationLogSubject struct {
+	Type    string `json:"type"`
+	ID      uint64 `json:"id"`
+	Title   string `json:"title"`
+	URL     string `json:"url,omitempty"`
+	Excerpt string `json:"excerpt,omitempty"`
+}
+
 func UpdateModerationArticleStatus(req component.BetterRequest[ModerationArticleStatusReq]) component.Response {
 	article := articles.Get(req.Params.Id)
 	if article.Id == 0 {
@@ -109,15 +144,32 @@ func UpdateModerationArticleStatus(req component.BetterRequest[ModerationArticle
 	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
 		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
 	}
-	statusCode := "unblocked"
-	if nextStatus == 1 {
-		statusCode = "blocked"
-	}
-	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, article.Id, "moderator.opt.article.statusChanged", optlogger.MessageParams{
-		"title":  article.Title,
-		"status": statusCode,
-	})
+	moderationlogservice.ArticleStatusChanged(req.UserId, article.Id, article.Title, nextStatus == 1)
 	return component.SuccessResponse(true)
+}
+
+func ModerationLogList(req component.BetterRequest[ModerationLogListReq]) component.Response {
+	if !moderatorservice.CanAccessModeration(req.UserId) {
+		return component.FailResponseCode(component.MessagePermissionDenied, nil)
+	}
+	pageSize := component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50)
+	records := moderationLog.CursorPage(moderationLog.CursorPageQuery{
+		Cursor:   req.Params.Cursor,
+		PageSize: uint64(pageSize + 1),
+	})
+	hasNext := len(records) > pageSize
+	if hasNext {
+		records = records[:pageSize]
+	}
+	nextCursor := uint64(0)
+	if hasNext && len(records) > 0 {
+		nextCursor = records[len(records)-1].Id
+	}
+	return component.SuccessResponse(ModerationLogListResponse{
+		Items:      buildModerationLogItems(records),
+		NextCursor: nextCursor,
+		HasNext:    hasNext,
+	})
 }
 
 func moderationTargetStatus(actionType string) int8 {
@@ -201,4 +253,92 @@ func moderationEntityPointers(data []articles.SmallEntity) []*articles.SmallEnti
 		res = append(res, &data[i])
 	}
 	return res
+}
+
+func buildModerationLogItems(records []moderationLog.Entity) []ModerationLogItem {
+	if len(records) == 0 {
+		return []ModerationLogItem{}
+	}
+	actorIDs := make([]uint64, 0, len(records))
+	articleIDs := make([]uint64, 0, len(records))
+	for _, record := range records {
+		actorIDs = appendUniqueUint64(actorIDs, record.ActorUserId)
+		if record.SubjectType != moderationLog.SubjectArticle {
+			continue
+		}
+		articleIDs = appendUniqueUint64(articleIDs, record.SubjectId)
+	}
+	userMap := users.GetMapByIds(actorIDs)
+	articleMap := articles.GetMapByIds(articleIDs)
+	items := make([]ModerationLogItem, 0, len(records))
+	for _, record := range records {
+		payload := record.Payload
+		if payload.Params == nil {
+			payload.Params = map[string]any{}
+		}
+		subject := moderationLogSubject(record, payload.Params, articleMap)
+		items = append(items, ModerationLogItem{
+			ID:          record.Id,
+			Action:      record.Action,
+			Actor:       userPayload(record.ActorUserId, userMap),
+			Subject:     subject,
+			Categories:  moderationLogCategories(subject.ID, articleMap),
+			MessageCode: payload.MessageCode,
+			Params:      payload.Params,
+			CreatedAt:   record.CreatedAt.Format(time.DateTime),
+		})
+	}
+	return items
+}
+
+func moderationLogSubject(record moderationLog.Entity, params map[string]any, articleMap map[uint64]*articles.SmallEntity) ModerationLogSubject {
+	switch record.SubjectType {
+	case moderationLog.SubjectArticle:
+		subject := ModerationLogSubject{Type: record.SubjectType, ID: record.SubjectId, Title: fmt.Sprint(params["title"])}
+		if article := articleMap[record.SubjectId]; article != nil {
+			subject.Title = article.Title
+			subject.URL = urlconfig.PostDetail(article.Id)
+			subject.Excerpt = article.Description
+		} else if subject.ID > 0 {
+			subject.URL = urlconfig.PostDetail(subject.ID)
+		}
+		if subject.Title == "" || subject.Title == "<nil>" {
+			subject.Title = fmt.Sprintf("#%d", subject.ID)
+		}
+		return subject
+	case moderationLog.SubjectCategory:
+		title := fmt.Sprint(params["categoryName"])
+		if title == "" || title == "<nil>" {
+			title = fmt.Sprintf("#%d", record.SubjectId)
+		}
+		return ModerationLogSubject{Type: record.SubjectType, ID: record.SubjectId, Title: title}
+	case moderationLog.SubjectUser:
+		title := fmt.Sprint(params["username"])
+		if title == "" || title == "<nil>" {
+			title = fmt.Sprintf("#%d", record.SubjectId)
+		}
+		return ModerationLogSubject{Type: record.SubjectType, ID: record.SubjectId, Title: title}
+	default:
+		return ModerationLogSubject{Type: moderationLog.SubjectSystem, ID: record.SubjectId, Title: fmt.Sprintf("#%d", record.SubjectId)}
+	}
+}
+
+func moderationLogCategories(articleID uint64, articleMap map[uint64]*articles.SmallEntity) []TopicCategoryPayload {
+	article := articleMap[articleID]
+	if article == nil {
+		return []TopicCategoryPayload{}
+	}
+	return categoryPayloads(article.CategoryId)
+}
+
+func appendUniqueUint64(items []uint64, item uint64) []uint64 {
+	if item == 0 {
+		return items
+	}
+	for _, current := range items {
+		if current == item {
+			return items
+		}
+	}
+	return append(items, item)
 }

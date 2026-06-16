@@ -1,29 +1,37 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Ban, CircleAlert, RotateCcw, Scale } from '@lucide/vue'
+import { Ban, CircleAlert, History, RotateCcw, Scale } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
-import { updateModerationArticleStatus } from '@/runtime/api'
+import { fetchModerationLogs, updateModerationArticleStatus } from '@/runtime/api'
+import { formatDateTime } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import TopicList from '@/site/components/TopicList.vue'
-import type { LayoutPayload, ModerationPageProps, PagePayload, TopicPayload } from '@/types/payload'
+import type { LayoutPayload, ModerationLogItem, ModerationPageProps, PagePayload, TopicPayload } from '@/types/payload'
 
 const page = defineProps<{
   layout: LayoutPayload
   props: ModerationPageProps
 }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const currentProps = ref<ModerationPageProps>(page.props)
 const topics = ref<TopicPayload[]>([...page.props.topics])
 const busyIds = ref<number[]>([])
 const actionError = ref('')
 const loadingList = ref(false)
-const activeConsoleTab = ref<'ban' | 'guidance'>('ban')
+const activeConsoleTab = ref<'ban' | 'logs' | 'guidance'>('ban')
+const logItems = ref<ModerationLogItem[]>([])
+const logNextCursor = ref(0)
+const logHasNext = ref(true)
+const logLoading = ref(false)
+const logLoaded = ref(false)
+const logError = ref('')
 
 const managementTabs = [
   { key: 'ban', icon: Ban },
+  { key: 'logs', icon: History },
   { key: 'guidance', icon: Scale },
 ]
 
@@ -38,6 +46,12 @@ watch(
   },
   { immediate: true },
 )
+
+watch(activeConsoleTab, (tab) => {
+  if (tab === 'logs' && !logLoaded.value) {
+    void loadModerationLogs(true)
+  }
+})
 
 function isBusy(id: number) {
   return busyIds.value.includes(id)
@@ -70,11 +84,42 @@ async function moderateTopic(topic: TopicPayload) {
   try {
     await updateModerationArticleStatus(topic.id, 'unban')
     topics.value = topics.value.filter(item => item.id !== topic.id)
+    logLoaded.value = false
+    logItems.value = []
+    logNextCursor.value = 0
+    logHasNext.value = true
   } catch (error) {
     actionError.value = error instanceof Error ? error.message : t('api.moderationActionFailed')
   } finally {
     busyIds.value = busyIds.value.filter(id => id !== topic.id)
   }
+}
+
+async function loadModerationLogs(reset = false) {
+  if (logLoading.value) return
+  logLoading.value = true
+  logError.value = ''
+  try {
+    const payload = await fetchModerationLogs(reset ? 0 : logNextCursor.value, 20)
+    logItems.value = reset ? payload.items : mergeModerationLogs(logItems.value, payload.items)
+    logNextCursor.value = payload.nextCursor
+    logHasNext.value = payload.hasNext
+    logLoaded.value = true
+  } catch (error) {
+    logError.value = error instanceof Error ? error.message : t('api.moderationLogsFailed')
+  } finally {
+    logLoading.value = false
+  }
+}
+
+function mergeModerationLogs(current: ModerationLogItem[], incoming: ModerationLogItem[]) {
+  const seen = new Set(current.map(item => item.id))
+  return [...current, ...incoming.filter(item => !seen.has(item.id))]
+}
+
+function logActionLabel(item: ModerationLogItem) {
+  const key = `moderation.logs.actions.${item.action}`
+  return te(key) ? t(key) : t('moderation.logs.actions.operation')
 }
 </script>
 
@@ -89,7 +134,7 @@ async function moderateTopic(topic: TopicPayload) {
         type="button"
         class="-mb-px inline-flex h-10 items-center gap-2 border-b-2 px-1 text-sm font-semibold transition"
         :class="activeConsoleTab === tab.key ? 'border-primary text-primary' : 'border-transparent text-base-content/55 hover:text-base-content'"
-        @click="activeConsoleTab = tab.key as 'ban' | 'guidance'"
+        @click="activeConsoleTab = tab.key as 'ban' | 'logs' | 'guidance'"
       >
         <component :is="tab.icon" class="h-4 w-4" />
         {{ t(`moderation.managementTabs.${tab.key}`) }}
@@ -97,15 +142,6 @@ async function moderateTopic(topic: TopicPayload) {
     </div>
 
     <section v-if="activeConsoleTab === 'ban'" class="space-y-3">
-      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h2 class="text-base font-semibold text-base-content">{{ t('moderation.blockedTitle') }}</h2>
-          <p class="mt-1 text-sm leading-6 text-base-content/60">
-            {{ t('moderation.blockedDescription') }}
-          </p>
-        </div>
-      </div>
-
       <div class="flex flex-wrap gap-2">
         <a
           v-for="tab in currentProps.categoryTabs"
@@ -170,12 +206,78 @@ async function moderateTopic(topic: TopicPayload) {
       </div>
     </section>
 
-    <section v-else class="space-y-3 px-4 sm:px-0">
-      <div>
-        <h2 class="text-base font-semibold text-base-content">{{ t('moderation.guidanceTitle') }}</h2>
-        <p class="mt-1 text-sm leading-6 text-base-content/60">{{ t('moderation.guidanceDescription') }}</p>
-      </div>
+    <section v-else-if="activeConsoleTab === 'logs'" class="space-y-3">
+      <p v-if="logError" class="rounded border border-error/25 bg-error/10 px-3 py-2 text-sm text-error">
+        {{ logError }}
+      </p>
 
+      <div class="gf-card overflow-hidden">
+        <div class="hidden grid-cols-[34px_minmax(0,1fr)_116px] gap-3 border-b border-line bg-base-200/60 px-3 py-2 text-[11px] font-bold uppercase text-base-content/75 md:grid">
+          <div />
+          <div>{{ t('moderation.logs.table.operation') }}</div>
+          <div class="text-right">{{ t('moderation.logs.table.time') }}</div>
+        </div>
+
+        <div v-if="logItems.length" class="divide-y divide-line">
+          <article
+            v-for="item in logItems"
+            :key="item.id"
+            class="grid grid-cols-[34px_minmax(0,1fr)] gap-3 px-3 py-2.5 transition hover:bg-base-200/70 md:grid-cols-[34px_minmax(0,1fr)_116px] md:items-start"
+          >
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-base-200 text-base-content/55">
+              <History class="h-4 w-4" />
+            </div>
+            <div class="min-w-0">
+              <div class="flex min-w-0 items-center gap-1.5 text-sm leading-5">
+                <span class="max-w-[42%] shrink-0 truncate font-semibold text-base-content">{{ item.actor.username }}</span>
+                <span class="shrink-0 text-base-content/55">{{ logActionLabel(item) }}</span>
+                <a
+                  v-if="item.subject.url"
+                  :href="item.subject.url"
+                  class="min-w-0 max-w-full truncate font-semibold text-primary hover:text-primary"
+                >
+                  {{ item.subject.title }}
+                </a>
+                <span v-else class="min-w-0 max-w-full truncate font-semibold text-base-content/75">{{ item.subject.title }}</span>
+              </div>
+              <p v-if="item.subject.excerpt" class="mt-0.5 line-clamp-1 text-xs text-base-content/55">
+                {{ item.subject.excerpt }}
+              </p>
+              <time class="mt-1 block text-xs text-base-content/55 md:hidden">{{ formatDateTime(item.createdAt) }}</time>
+            </div>
+            <time class="hidden text-right text-xs font-medium tabular-nums text-base-content/55 md:block">{{ formatDateTime(item.createdAt) }}</time>
+          </article>
+        </div>
+
+        <EmptyState
+          v-else-if="logLoading"
+          :icon="History"
+          :title="t('moderation.logs.loading')"
+          loading
+        />
+        <EmptyState
+          v-else
+          :icon="History"
+          :title="t('moderation.logs.emptyTitle')"
+          :description="t('moderation.logs.emptyDescription')"
+        />
+
+        <footer v-if="logLoaded && (logItems.length || logHasNext)" class="border-t border-line px-4 py-3 text-center text-xs font-semibold text-base-content/55">
+          <button
+            v-if="logHasNext"
+            type="button"
+            class="gf-button gf-button-sm gf-button-ghost"
+            :disabled="logLoading"
+            @click="loadModerationLogs(false)"
+          >
+            {{ logLoading ? t('moderation.logs.loading') : t('moderation.logs.loadMore') }}
+          </button>
+          <span v-else-if="logItems.length" class="text-xs text-base-content/45">{{ t('moderation.logs.noMore') }}</span>
+        </footer>
+      </div>
+    </section>
+
+    <section v-else class="space-y-3 px-4 sm:px-0">
       <div class="border-y border-line">
         <div class="flex items-start gap-3 border-b border-line py-3">
           <CircleAlert class="mt-0.5 h-4 w-4 shrink-0 text-warning" />

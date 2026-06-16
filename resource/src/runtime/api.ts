@@ -1,4 +1,4 @@
-import type { NotificationFilter, NotificationListResponse, ReplyWindowPayload, SiteThemeConfig, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
+import type { ModerationLogListResponse, NotificationFilter, NotificationListResponse, ReplyWindowPayload, SiteThemeConfig, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
 import { i18n } from './i18n'
 import { resolveApiMessage } from './api-message'
 
@@ -204,6 +204,17 @@ export async function updateModerationArticleStatus(id: number, action: 'ban' | 
     body: JSON.stringify({ id, action }),
   })
   return readApiResponse<boolean>(response, t('api.moderationActionFailed'))
+}
+
+export async function fetchModerationLogs(cursor = 0, pageSize = 20): Promise<ModerationLogListResponse> {
+  const response = await fetch('/api/forum/moderation/logs', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ cursor, pageSize }),
+  })
+  return readApiResponse<ModerationLogListResponse>(response, t('api.moderationLogsFailed'))
 }
 
 export async function markAllNotificationsRead(): Promise<boolean> {

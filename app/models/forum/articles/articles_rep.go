@@ -179,10 +179,7 @@ func PageForModeration(q ModerationPageQuery) struct {
 }
 
 func UpdateProcessStatus(id uint64, processStatus int8) error {
-	return builder().Where(queryopt.Eq(pid, id)).Updates(map[string]any{
-		fieldProcessStatus: processStatus,
-		fieldUpdatedAt:     time.Now(),
-	}).Error
+	return builder().Where(queryopt.Eq(pid, id)).UpdateColumn(fieldProcessStatus, processStatus).Error
 }
 
 func applyPageSort(b *gorm.DB, sort string) {
