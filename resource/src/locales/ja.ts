@@ -37,8 +37,8 @@ export default {
     logout: 'ログアウト',
     login: 'ログイン',
     register: '登録',
-    resources: 'Resources',
-    categories: 'Categories',
+    resources: 'リソース',
+    categories: 'カテゴリ',
     nav: {
       topics: 'トピック',
       hot: '人気',

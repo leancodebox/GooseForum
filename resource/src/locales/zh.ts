@@ -37,8 +37,8 @@ export default {
     logout: '退出登录',
     login: '登录',
     register: '注册',
-    resources: 'Resources',
-    categories: 'Categories',
+    resources: '资源',
+    categories: '分类',
     nav: {
       topics: '主题',
       hot: '热门',
