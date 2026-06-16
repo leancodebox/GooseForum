@@ -265,10 +265,10 @@ async function loadUserHoverCard() {
     </div>
 
     <header
-      class="sticky top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-200"
+      class="sticky top-0 z-50 border-b border-line bg-base-100/95 backdrop-blur-sm transition-[background-color,border-color,box-shadow,backdrop-filter] duration-200"
       :class="headerElevated
-        ? 'border-line bg-base-100/95 shadow-[0_1px_10px_rgb(15_23_42/0.04)] backdrop-blur-sm'
-        : 'border-transparent bg-base-100/0 shadow-none backdrop-blur-none'"
+        ? 'sm:border-line sm:bg-base-100/95 sm:shadow-[0_1px_10px_rgb(15_23_42/0.04)] sm:backdrop-blur-sm'
+        : 'sm:border-transparent sm:bg-base-100/0 sm:shadow-none sm:backdrop-blur-none'"
     >
       <div class="mx-auto grid h-16 w-full max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 sm:gap-4 sm:px-5 md:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-8 lg:px-8">
         <div class="flex min-w-0 items-center gap-2 sm:gap-4 lg:gap-8">
