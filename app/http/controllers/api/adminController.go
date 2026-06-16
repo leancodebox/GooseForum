@@ -953,7 +953,6 @@ func AddCategoryModerator(req component.BetterRequest[AddCategoryModeratorReq]) 
 		"userId":       user.Id,
 		"username":     user.Username,
 	})
-	moderationlogservice.CategoryModeratorAdded(req.UserId, category.Id, category.Category, user.Id, user.Username)
 	return component.SuccessResponse(true)
 }
 
@@ -975,7 +974,6 @@ func DeleteCategoryModerator(req component.BetterRequest[struct {
 		"categoryName": category.Category,
 		"userId":       entity.UserId,
 	})
-	moderationlogservice.CategoryModeratorRemoved(req.UserId, entity.ScopeId, category.Category, entity.UserId)
 	return component.SuccessResponse(true)
 }
 
