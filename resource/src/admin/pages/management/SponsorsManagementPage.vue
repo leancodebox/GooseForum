@@ -277,7 +277,9 @@ onMounted(() => {
                     </div>
                   </div>
                   <div class="absolute right-1.5 top-1.5 flex shrink-0 items-center gap-1 rounded-md bg-background/90 p-0.5 opacity-0 shadow-sm ring-1 ring-border transition-opacity group-hover:opacity-100">
-                    <AdminActionButton @click="openSponsor(level, index)">{{ adminText('k005j') }}</AdminActionButton>
+                    <AdminActionButton compact :title="adminText('k005j')" @click="openSponsor(level, index)">
+                      <PenLine class="size-4" />
+                    </AdminActionButton>
                     <AdminActionButton compact tone="danger" :title="adminText('k005i')" @click="removeSponsor(level, index)">
                       <Trash2 class="size-4" />
                     </AdminActionButton>

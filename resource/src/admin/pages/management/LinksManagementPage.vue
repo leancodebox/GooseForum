@@ -190,8 +190,7 @@ onMounted(() => {
           <template #item="{ element: group, index: groupIndex }">
             <section class="relative space-y-3">
               <header class="group/header flex cursor-grab items-center justify-between gap-3 border-b border-border/70 pb-2 active:cursor-grabbing js-group-handle">
-                <div class="flex min-w-0 items-center gap-2">
-                  <GripVertical class="size-4 shrink-0 text-muted-foreground/30 opacity-0 transition-opacity group-hover/header:opacity-100" />
+                <div class="flex min-w-0 items-center gap-1.5">
                   <span
                     class="grid size-7 shrink-0 place-items-center rounded-md border text-sm"
                     :style="{ color: groupColor(group), borderColor: groupTint(group, 0.28), backgroundColor: groupTint(group, 0.1) }"
