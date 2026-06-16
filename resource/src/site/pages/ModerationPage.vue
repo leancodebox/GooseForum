@@ -125,7 +125,7 @@ function logActionLabel(item: ModerationLogItem) {
 
 <template>
   <main class="min-w-0 pb-8">
-    <PageHeader :title="t('moderation.title')" :description="t('moderation.description')" compact />
+    <PageHeader :title="t('moderation.title')" :description="t('moderation.description')" compact class="border-b-0 !mb-2 sm:!mb-2 !pb-2 sm:!pb-2" />
 
     <div class="mb-4 flex flex-wrap gap-2 border-b border-line">
       <button
@@ -278,21 +278,21 @@ function logActionLabel(item: ModerationLogItem) {
     </section>
 
     <section v-else class="space-y-3 px-4 sm:px-0">
-      <div class="border-y border-line">
-        <div class="flex items-start gap-3 border-b border-line py-3">
-          <CircleAlert class="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+      <div>
+        <div class="flex items-start gap-3 py-2.5">
+          <CircleAlert class="mt-1 h-4 w-4 shrink-0 text-warning" />
           <p class="text-sm leading-6 text-base-content/70">{{ t('moderation.notice') }}</p>
         </div>
-        <div class="divide-y divide-line">
-          <div class="py-3">
+        <div class="space-y-3 pt-1">
+          <div class="py-2">
             <h3 class="text-sm font-semibold text-base-content">{{ t('moderation.guidanceItems.rule.title') }}</h3>
             <p class="mt-1 text-sm leading-6 text-base-content/60">{{ t('moderation.guidanceItems.rule.description') }}</p>
           </div>
-          <div class="py-3">
+          <div class="py-2">
             <h3 class="text-sm font-semibold text-base-content">{{ t('moderation.guidanceItems.context.title') }}</h3>
             <p class="mt-1 text-sm leading-6 text-base-content/60">{{ t('moderation.guidanceItems.context.description') }}</p>
           </div>
-          <div class="py-3">
+          <div class="py-2">
             <h3 class="text-sm font-semibold text-base-content">{{ t('moderation.guidanceItems.restraint.title') }}</h3>
             <p class="mt-1 text-sm leading-6 text-base-content/60">{{ t('moderation.guidanceItems.restraint.description') }}</p>
           </div>
