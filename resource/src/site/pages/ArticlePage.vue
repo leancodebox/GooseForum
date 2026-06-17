@@ -1271,7 +1271,8 @@ async function removeReply(replyId: number) {
 
             <span v-if="replies.length" id="replies" class="block scroll-mt-20" aria-hidden="true" />
 
-            <div v-if="replyHasBefore" class="border-t border-line px-4 py-3 text-center xl:mx-5 xl:px-0">
+            <div v-if="replyHasBefore" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
+              <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
               <button
                 v-if="replyHasBefore"
                 type="button"
@@ -1290,9 +1291,10 @@ async function removeReply(replyId: number) {
               :id="`reply-${reply.id}`"
               :key="reply.id"
               :data-reply-no="reply.replyNo"
-              class="group grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-line px-3 py-4 transition hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5 xl:mx-5 xl:px-0"
+              class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-line px-3 py-4 transition hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5 xl:border-t-transparent"
               :class="{ 'bg-info/10 ring-1 ring-inset ring-primary/20': highlightedReplyId === reply.id }"
             >
+              <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
               <a
                 :href="`/u/${reply.author.id}`"
                 class="sticky top-19 self-start pt-1"
@@ -1391,7 +1393,8 @@ async function removeReply(replyId: number) {
               </div>
             </div>
 
-            <div v-if="replyHasAfter || loadingReplyDirection === 'after' || replyWindowError || (!replyHasAfter && replies.length)" ref="replyLoadMoreEl" class="border-t border-line px-4 py-3 text-center xl:mx-5 xl:px-0">
+            <div v-if="replyHasAfter || loadingReplyDirection === 'after' || replyWindowError || (!replyHasAfter && replies.length)" ref="replyLoadMoreEl" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
+              <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
               <button
                 v-if="replyHasAfter && replyWindowError"
                 type="button"
@@ -1429,7 +1432,7 @@ async function removeReply(replyId: number) {
                 <h2 class="text-sm font-semibold text-base-content/55">{{ t('article.overview') }}</h2>
               </div>
 
-              <dl class="space-y-4 border-t border-line px-4 py-5 text-sm xl:mx-4 xl:px-0">
+              <dl class="space-y-4 border-t border-line px-4 py-5 text-sm">
                 <div class="flex items-center justify-between gap-4">
                   <dt class="font-semibold text-base-content/55">{{ t('article.replyCount') }}</dt>
                   <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.article.replyCount) }}</dd>
@@ -1444,7 +1447,7 @@ async function removeReply(replyId: number) {
                 </div>
               </dl>
 
-              <div v-if="page.props.article.participants.length" class="border-t border-line px-4 py-4 xl:mx-4 xl:px-0">
+              <div v-if="page.props.article.participants.length" class="border-t border-line px-4 py-4">
                 <h3 class="mb-3 text-sm font-semibold text-base-content/55">{{ t('article.activeParticipants') }}</h3>
                 <div class="flex flex-wrap gap-1.5">
                   <a
@@ -1461,7 +1464,7 @@ async function removeReply(replyId: number) {
 
               <ReplyPositionRail
                 v-if="page.props.article.replyCount > 0 && replyMaxRange > 0"
-                class="border-t border-line xl:mx-4"
+                class="border-t border-line"
                 :current="replyRailCurrentNo"
                 :max="replyMaxRange"
                 :start-label="replyRailStartLabel"
@@ -1479,12 +1482,9 @@ async function removeReply(replyId: number) {
           </aside>
 
           <section v-if="page.props.hotTopics.length" class="border-t border-line xl:col-span-2">
-            <div class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
-              <h2 class="text-base font-bold text-base-content">{{ t('article.hotContent') }}</h2>
-              <a href="/?sort=hot" class="text-sm font-semibold text-primary hover:text-primary">{{ t('article.more') }}</a>
+            <div class="overflow-hidden bg-base-100 [border-bottom-left-radius:calc(var(--gf-radius-box)-1px)] [border-bottom-right-radius:calc(var(--gf-radius-box)-1px)]">
+              <TopicList :topics="page.props.hotTopics" home />
             </div>
-
-            <TopicList :topics="page.props.hotTopics" home />
           </section>
         </div>
       </section>
