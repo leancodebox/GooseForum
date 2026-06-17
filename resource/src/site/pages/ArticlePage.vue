@@ -63,7 +63,6 @@ const articleHeaderEl = ref<HTMLElement | null>(null)
 const titleEl = ref<HTMLElement | null>(null)
 const replyLoadMoreEl = ref<HTMLElement | null>(null)
 const replyListEndEl = ref<HTMLElement | null>(null)
-const replyRailSlotEl = ref<HTMLElement | null>(null)
 const articleRailTopOffset = ref(0)
 const showHeaderTitle = ref(false)
 const isMobileHeaderViewport = ref(false)
@@ -71,7 +70,10 @@ const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const composerOpen = ref(false)
 const mobileReplyRailOpen = ref(false)
-const activeReplyNo = ref(firstReplyNo(page.props.replies))
+const activeReplyNo = ref(firstReplyNo(page.props.replies) || 1)
+const replyRailProgressCurrent = ref(0)
+const replyRailProgressStart = ref(0)
+const replyRailProgressEnd = ref(0)
 const replyMaxRange = computed(() => Math.max(replyMaxNo.value, ...replies.value.map((reply) => reply.replyNo || 0)))
 const hasReplyRail = computed(() => page.props.article.replyCount > 0 && replyMaxRange.value > 0)
 const replyRailCurrentNo = computed(() => {
@@ -149,17 +151,18 @@ const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
 let articleHeaderResizeObserver: ResizeObserver | undefined
 let replyLoadObserver: IntersectionObserver | undefined
-let replyVisibilityObserver: IntersectionObserver | undefined
 let lastHeaderScrollY = 0
 let headerScrollFrame = 0
 const highlightedReplyId = ref<number | null>(null)
 let highlightTimer: number | undefined
-let replyVisibilityFrame = 0
-let replyVisibilityPaused = false
-let replyVisibilityResumeTimer: number | undefined
 let replyBottomLoadFrame = 0
 let activeReplyScrollFrame = 0
 let pendingReplyJumpNo: number | null = null
+let replyRailSyncPaused = false
+let replyRailResumeFrame = 0
+let replyRailResumeLastScrollY = 0
+let replyRailResumeStableFrames = 0
+let replyElements: HTMLElement[] = []
 
 function updateArticleRailTopOffset() {
   if (!articleHeaderEl.value) {
@@ -201,7 +204,8 @@ onMounted(() => {
   void nextTick(observeArticleHeader)
   void nextTick(observeTitle)
   void nextTick(observeReplyLoader)
-  void nextTick(scheduleObserveReplyVisibility)
+  void nextTick(collectReplyElements)
+  void nextTick(scheduleActiveReplyFromScroll)
   setupReplyBottomLoadFallback()
   void syncReplyHash()
 })
@@ -225,7 +229,8 @@ watch(
     void nextTick(observeArticleHeader)
     void nextTick(observeTitle)
     void nextTick(observeReplyLoader)
-    void nextTick(scheduleObserveReplyVisibility)
+    void nextTick(collectReplyElements)
+    void nextTick(scheduleActiveReplyFromScroll)
     void nextTick(syncReplyHash)
   },
   { immediate: true },
@@ -248,7 +253,10 @@ watch(
 watch(
   () => replies.value.map((reply) => `${reply.id}:${reply.replyNo}`).join(','),
   () => {
-    void nextTick(scheduleObserveReplyVisibility)
+    void nextTick(() => {
+      collectReplyElements()
+      scheduleActiveReplyFromScroll()
+    })
   },
 )
 
@@ -256,18 +264,17 @@ onBeforeUnmount(() => {
   titleObserver?.disconnect()
   articleHeaderResizeObserver?.disconnect()
   replyLoadObserver?.disconnect()
-  replyVisibilityObserver?.disconnect()
   window.removeEventListener('scroll', updateMobileHeaderTitle)
   window.removeEventListener('scroll', scheduleActiveReplyFromScroll)
   window.removeEventListener('scroll', scheduleReplyBottomLoadCheck)
   window.removeEventListener('resize', updateArticleRailTopOffset)
   window.removeEventListener('resize', updateHeaderViewport)
+  window.removeEventListener('resize', scheduleActiveReplyFromScroll)
   window.removeEventListener('resize', scheduleReplyBottomLoadCheck)
   window.cancelAnimationFrame(headerScrollFrame)
-  window.cancelAnimationFrame(replyVisibilityFrame)
   window.cancelAnimationFrame(replyBottomLoadFrame)
   window.cancelAnimationFrame(activeReplyScrollFrame)
-  window.clearTimeout(replyVisibilityResumeTimer)
+  window.cancelAnimationFrame(replyRailResumeFrame)
   window.clearTimeout(highlightTimer)
   shellState.headerTitle = ''
   shellState.headerTags = []
@@ -281,6 +288,7 @@ function setupHeaderTitleBehavior() {
   window.addEventListener('scroll', scheduleActiveReplyFromScroll, { passive: true })
   window.addEventListener('resize', updateArticleRailTopOffset)
   window.addEventListener('resize', updateHeaderViewport)
+  window.addEventListener('resize', scheduleActiveReplyFromScroll)
 }
 
 function setupReplyBottomLoadFallback() {
@@ -366,87 +374,86 @@ function observeReplyLoader() {
   replyLoadObserver.observe(replyLoadMoreEl.value)
 }
 
-function scheduleObserveReplyVisibility() {
-  if (replyVisibilityPaused) return
-  if (replyVisibilityFrame) return
-  replyVisibilityFrame = window.requestAnimationFrame(() => {
-    replyVisibilityFrame = 0
-    observeReplyVisibility()
-  })
+function collectReplyElements() {
+  replyElements = Array.from(document.querySelectorAll<HTMLElement>('[data-reply-no]'))
 }
 
-function observeReplyVisibility() {
-  if (replyVisibilityPaused) return
-  replyVisibilityObserver?.disconnect()
-  if (!('IntersectionObserver' in window)) {
-    activeReplyNo.value = firstReplyNo(replies.value)
-    return
-  }
-
-  const elements = document.querySelectorAll<HTMLElement>('[data-reply-no]')
-  if (!elements.length) {
-    activeReplyNo.value = 0
-    return
-  }
-
-  replyVisibilityObserver = new IntersectionObserver(
-    () => {
-      const bestReplyNo = findViewportReplyNo()
-      if (bestReplyNo > 0) {
-        activeReplyNo.value = bestReplyNo
-      }
-    },
-    { threshold: [0.01, 0.1, 0.25, 0.5, 0.75], rootMargin: '-96px 0px -112px 0px' },
-  )
-
-  elements.forEach((element) => replyVisibilityObserver?.observe(element))
+function pauseReplyRailSync() {
+  replyRailSyncPaused = true
+  window.cancelAnimationFrame(replyRailResumeFrame)
+  replyRailResumeFrame = 0
+  replyRailResumeLastScrollY = window.scrollY
+  replyRailResumeStableFrames = 0
 }
 
-function pauseReplyVisibility(duration = 600) {
-  replyVisibilityPaused = true
-  window.clearTimeout(replyVisibilityResumeTimer)
-  replyVisibilityResumeTimer = window.setTimeout(() => {
-    replyVisibilityPaused = false
-    scheduleObserveReplyVisibility()
-  }, duration)
-}
-
-function findViewportReplyNo() {
-  if (isReplyListEndAnchored()) {
-    return lastReplyNo(replies.value) || replyMaxRange.value
+function resumeReplyRailSyncWhenSettled() {
+  pauseReplyRailSync()
+  const startedAt = performance.now()
+  const settle = () => {
+    const currentY = window.scrollY
+    if (Math.abs(currentY - replyRailResumeLastScrollY) < 1) {
+      replyRailResumeStableFrames += 1
+    } else {
+      replyRailResumeStableFrames = 0
+      replyRailResumeLastScrollY = currentY
+    }
+    if (replyRailResumeStableFrames >= 4 || performance.now() - startedAt > 1600) {
+      replyRailSyncPaused = false
+      replyRailResumeFrame = 0
+      syncReplyRailProgress()
+      return
+    }
+    replyRailResumeFrame = window.requestAnimationFrame(settle)
   }
-
-  return findReplyNoNearViewportMarker()
+  replyRailResumeFrame = window.requestAnimationFrame(settle)
 }
 
 function scheduleActiveReplyFromScroll() {
-  if (replyVisibilityPaused || activeReplyScrollFrame) return
+  if (replyRailSyncPaused || activeReplyScrollFrame) return
   activeReplyScrollFrame = window.requestAnimationFrame(() => {
     activeReplyScrollFrame = 0
-    const bestReplyNo = findViewportReplyNo()
-    if (bestReplyNo > 0) {
-      activeReplyNo.value = bestReplyNo
-    }
+    syncReplyRailProgress()
   })
 }
 
-function findReplyNoNearViewportMarker() {
+function syncReplyRailProgress() {
+  const progress = measureReplyViewportProgress()
+  if (progress.replyNo >= 0) {
+    activeReplyNo.value = progress.replyNo
+    replyRailProgressCurrent.value = progress.current
+    replyRailProgressStart.value = progress.start
+    replyRailProgressEnd.value = progress.end
+  }
+}
+
+function measureReplyViewportProgress() {
   const markerY = Math.min(window.innerHeight * 0.38, 340)
-  let coveringReplyNo = 0
+  const viewportTop = 88
+  const viewportBottom = window.innerHeight - 96
+  const firstVisibleReplyNo = firstReplyNo(replies.value) || 1
+
+  let coveringReplyNo: number | null = null
+  let coveringProgress = 0
   let coveringDistance = Number.POSITIVE_INFINITY
-  let nearestReplyNo = 0
+  let nearestReplyNo: number | null = null
+  let nearestProgress = 0
   let nearestDistance = Number.POSITIVE_INFINITY
 
-  for (const element of document.querySelectorAll<HTMLElement>('[data-reply-no]')) {
+  for (const element of replyElements) {
     const replyNo = Number(element.dataset.replyNo || 0)
     if (!replyNo) continue
     const rect = element.getBoundingClientRect()
-    if (rect.bottom <= 88 || rect.top >= window.innerHeight - 96) continue
+    if (rect.bottom <= viewportTop || rect.top >= viewportBottom) continue
+
+    const visibleTop = Math.max(viewportTop, rect.top)
+    const visibleBottom = Math.min(viewportBottom, rect.bottom)
+    if (visibleBottom <= visibleTop) continue
 
     if (rect.top <= markerY && rect.bottom >= markerY) {
       const distance = Math.abs(rect.top - markerY)
       if (distance < coveringDistance) {
         coveringReplyNo = replyNo
+        coveringProgress = progressForReplyNoFraction(replyNo, (markerY - rect.top) / Math.max(1, rect.height))
         coveringDistance = distance
       }
       continue
@@ -455,18 +462,24 @@ function findReplyNoNearViewportMarker() {
     const distance = Math.abs(rect.top - markerY)
     if (distance < nearestDistance) {
       nearestReplyNo = replyNo
+      nearestProgress = progressForReplyNoFraction(replyNo, rect.top > markerY ? 0 : 1)
       nearestDistance = distance
     }
   }
 
-  return coveringReplyNo || nearestReplyNo
-}
-
-function isReplyListEndAnchored() {
-  if (replyHasAfter.value || !replyTailLoaded.value || !replyListEndEl.value) return false
-  const rect = replyListEndEl.value.getBoundingClientRect()
-  const railBottom = replyRailSlotEl.value?.getBoundingClientRect().bottom ?? window.innerHeight - 120
-  return rect.top <= railBottom
+  const fallbackReplyNo = firstVisibleReplyNo
+  const replyNo = coveringReplyNo ?? nearestReplyNo ?? fallbackReplyNo
+  const current = coveringReplyNo !== null
+    ? coveringProgress
+    : nearestReplyNo !== null
+      ? nearestProgress
+      : 0
+  return {
+    replyNo,
+    current,
+    start: Math.max(0, current - visibleSlotSize() / 2),
+    end: Math.min(1, current + visibleSlotSize() / 2),
+  }
 }
 
 function resetRepliesFromProps() {
@@ -481,7 +494,8 @@ function resetRepliesFromProps() {
   replyMaxNo.value = initialMaxReplyNo()
   replyTailLoaded.value = !hasMoreInitialReplies()
   replyAutoLoadAfter.value = true
-  activeReplyNo.value = firstReplyNo(page.props.replies)
+  activeReplyNo.value = firstReplyNo(page.props.replies) || 1
+  syncProgressForReplyNo(activeReplyNo.value)
   replyWindowError.value = ''
   editingReplyId.value = 0
 }
@@ -509,6 +523,27 @@ function initialMaxReplyNo() {
 function clampReplyNo(replyNo: number) {
   const maxReplyNo = Math.max(1, replyMaxRange.value || 1)
   return Math.min(maxReplyNo, Math.max(1, Math.round(replyNo)))
+}
+
+function progressForReplyNo(replyNo: number) {
+  return progressForReplyNoFraction(replyNo, 0.5)
+}
+
+function progressForReplyNoFraction(replyNo: number, fraction: number) {
+  const maxReplyNo = Math.max(1, replyMaxRange.value || 1)
+  if (maxReplyNo <= 1) return Math.min(1, Math.max(0, fraction))
+  return Math.min(1, Math.max(0, (Math.max(1, replyNo) - 1 + Math.min(1, Math.max(0, fraction))) / maxReplyNo))
+}
+
+function visibleSlotSize() {
+  return 1 / Math.max(1, replyMaxRange.value || 1)
+}
+
+function syncProgressForReplyNo(replyNo: number) {
+  const progress = progressForReplyNo(replyNo)
+  replyRailProgressCurrent.value = progress
+  replyRailProgressStart.value = Math.max(0, progress - visibleSlotSize() / 2)
+  replyRailProgressEnd.value = Math.min(1, progress + visibleSlotSize() / 2)
 }
 
 function findClosestLoadedReply(replyNo: number) {
@@ -650,16 +685,18 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail'
     }
     if (direction === 'before') {
       activeReplyNo.value = firstReplyNo(payload.replies) || firstReplyNo(replies.value)
-      pauseReplyVisibility(250)
+      syncProgressForReplyNo(activeReplyNo.value || 1)
     } else if (direction === 'tail') {
       activeReplyNo.value = lastReplyNo(payload.replies) || lastReplyNo(replies.value) || replyMaxRange.value
-      pauseReplyVisibility()
+      syncProgressForReplyNo(activeReplyNo.value || 1)
     }
     await nextTick()
+    collectReplyElements()
     if (replyAutoLoadAfter.value) {
       observeReplyLoader()
-      scheduleObserveReplyVisibility()
     }
+    replyRailSyncPaused = false
+    scheduleActiveReplyFromScroll()
   } catch (error) {
     replyWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
   } finally {
@@ -679,17 +716,21 @@ async function jumpToReplyNo(replyNo: number) {
   if (loadingReplyWindow.value) {
     pendingReplyJumpNo = target
     activeReplyNo.value = target
+    syncProgressForReplyNo(target)
     return
   }
 
   disableReplyAutoLoadAfter()
   activeReplyNo.value = target
-  pauseReplyVisibility()
+  syncProgressForReplyNo(target)
+  pauseReplyRailSync()
   const loaded = replies.value.find((reply) => reply.replyNo === target)
   if (loaded) {
     activeReplyNo.value = loaded.replyNo
+    syncProgressForReplyNo(loaded.replyNo)
     await nextTick()
-    document.getElementById(`reply-${loaded.id}`)?.scrollIntoView({ block: 'center' })
+    document.getElementById(`reply-${loaded.id}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    resumeReplyRailSyncWhenSettled()
     return
   }
 
@@ -707,8 +748,10 @@ async function jumpToReplyNo(replyNo: number) {
     const closest = findClosestLoadedReply(target)
     if (closest) {
       activeReplyNo.value = closest.replyNo
-      document.getElementById(`reply-${closest.id}`)?.scrollIntoView({ block: 'center' })
-      pauseReplyVisibility()
+      syncProgressForReplyNo(closest.replyNo)
+      collectReplyElements()
+      document.getElementById(`reply-${closest.id}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      resumeReplyRailSyncWhenSettled()
     }
   } catch (error) {
     replyWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
@@ -724,27 +767,31 @@ async function jumpToLatestReply() {
   if (loadingReplyWindow.value) {
     pendingReplyJumpNo = replyMaxRange.value
     activeReplyNo.value = replyMaxRange.value
+    syncProgressForReplyNo(replyMaxRange.value)
     return
   }
   disableReplyAutoLoadAfter()
   activeReplyNo.value = replyMaxRange.value
-  pauseReplyVisibility()
+  syncProgressForReplyNo(replyMaxRange.value)
+  pauseReplyRailSync()
   if (replyTailLoaded.value) {
     const latest = replies.value[replies.value.length - 1]
     if (latest) {
       activeReplyNo.value = latest.replyNo
+      syncProgressForReplyNo(latest.replyNo)
       await nextTick()
       scrollReplyListEndIntoView()
-      pauseReplyVisibility()
+      resumeReplyRailSyncWhenSettled()
     }
     return
   }
   const loadedLatest = replies.value.find((reply) => reply.replyNo === replyMaxRange.value)
   if (loadedLatest) {
     activeReplyNo.value = loadedLatest.replyNo
+    syncProgressForReplyNo(loadedLatest.replyNo)
     await nextTick()
     scrollReplyListEndIntoView()
-    pauseReplyVisibility()
+    resumeReplyRailSyncWhenSettled()
     return
   }
   await loadReplyWindow('tail')
@@ -752,8 +799,9 @@ async function jumpToLatestReply() {
   const latest = replies.value[replies.value.length - 1]
   if (latest) {
     activeReplyNo.value = latest.replyNo
+    syncProgressForReplyNo(latest.replyNo)
     scrollReplyListEndIntoView()
-    pauseReplyVisibility()
+    resumeReplyRailSyncWhenSettled()
   }
 }
 
@@ -777,7 +825,7 @@ function flushPendingReplyJump() {
 }
 
 function jumpToArticleBody() {
-  titleEl.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  void jumpToReplyNo(1)
 }
 
 function focusReplyEditor() {
@@ -841,7 +889,7 @@ async function findReplyElementAfterLayout(replyId: number) {
 async function revealCreatedReply(replyId: number) {
   if (!replyId) return
 
-  pauseReplyVisibility()
+  pauseReplyRailSync()
   const payload = await getArticleRepliesWindow({
     articleId: page.props.article.id,
     anchorReplyId: replyId,
@@ -851,13 +899,18 @@ async function revealCreatedReply(replyId: number) {
   const createdReply = payload.replies.find((reply) => reply.id === replyId)
   if (createdReply?.replyNo) {
     activeReplyNo.value = createdReply.replyNo
+    syncProgressForReplyNo(createdReply.replyNo)
   }
   highlightReply(replyId)
   const element = await findReplyElementAfterLayout(replyId)
   if (element && !isElementMostlyVisible(element)) {
     scrollReplyIntoComfortView(element)
+    resumeReplyRailSyncWhenSettled()
+    return
   }
-  scheduleObserveReplyVisibility()
+  replyRailSyncPaused = false
+  collectReplyElements()
+  scheduleActiveReplyFromScroll()
 }
 
 async function toggleLike() {
@@ -1378,6 +1431,9 @@ async function removeReply(replyId: number) {
         :error-message="errorMessage"
         :has-rail="hasReplyRail"
         :max-no="replyMaxRange"
+        :progress-current="replyRailProgressCurrent"
+        :progress-end="replyRailProgressEnd"
+        :progress-start="replyRailProgressStart"
         :rail-busy="replyRailBusy"
         :start-label="replyRailStartLabel"
         :submitting="submitting"
@@ -1448,20 +1504,21 @@ async function removeReply(replyId: number) {
           </div>
         </div>
 
-        <div ref="replyRailSlotEl">
-          <ReplyPositionRail
-            v-if="page.props.article.replyCount > 0 && replyMaxRange > 0"
-            :current="replyRailCurrentNo"
-            :max="replyMaxRange"
-            :start-label="replyRailStartLabel"
-            :end-label="replyRailEndLabel"
-            :current-label="replyRailCurrentLabel"
-            :busy="replyRailBusy"
-            @earliest="jumpToArticleBodyFromRail"
-            @latest="jumpToLatestReplyFromRail"
-            @select="selectReplyFromRail"
-          />
-        </div>
+        <ReplyPositionRail
+          v-if="page.props.article.replyCount > 0 && replyMaxRange > 0"
+          :current="replyRailCurrentNo"
+          :max="replyMaxRange"
+          :start-label="replyRailStartLabel"
+          :end-label="replyRailEndLabel"
+          :current-label="replyRailCurrentLabel"
+          :busy="replyRailBusy"
+          :progress-current="replyRailProgressCurrent"
+          :progress-end="replyRailProgressEnd"
+          :progress-start="replyRailProgressStart"
+          @earliest="jumpToArticleBodyFromRail"
+          @latest="jumpToLatestReplyFromRail"
+          @select="selectReplyFromRail"
+        />
 
       </div>
     </Teleport>

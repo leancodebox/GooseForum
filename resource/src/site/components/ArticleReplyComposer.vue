@@ -31,6 +31,9 @@ const props = defineProps<{
   maxNo: number
   mobileRailOpen: boolean
   open: boolean
+  progressCurrent?: number
+  progressEnd?: number
+  progressStart?: number
   railBusy: boolean
   startLabel: string
   submitting: boolean
@@ -234,6 +237,9 @@ function submit() {
               :end-label="endLabel"
               :current-label="currentLabel"
               :busy="railBusy"
+              :progress-current="progressCurrent"
+              :progress-end="progressEnd"
+              :progress-start="progressStart"
               @earliest="emit('earliest')"
               @latest="emit('latest')"
               @select="emit('selectRail', $event)"
@@ -252,7 +258,7 @@ function submit() {
                 :aria-label="t('article.replyPosition')"
                 @click="toggleMobileRail"
               >
-                {{ currentNo }} / {{ formatNumber(maxNo) }}
+                {{ `${currentNo} / ${formatNumber(maxNo)}` }}
               </button>
               <button
                 v-for="action in actions"

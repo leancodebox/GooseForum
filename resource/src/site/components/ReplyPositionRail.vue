@@ -10,6 +10,9 @@ const props = defineProps<{
   endLabel: string
   currentLabel?: string
   busy?: boolean
+  progressCurrent?: number
+  progressEnd?: number
+  progressStart?: number
 }>()
 
 const emit = defineEmits<{
@@ -22,20 +25,22 @@ const { t } = useI18n()
 const railEl = ref<HTMLElement | null>(null)
 const dragging = ref(false)
 const previewNo = ref<number | null>(null)
-const thumbHeight = 32
+const railHeight = 192
+const thumbHeight = 28
 const thumbNo = computed(() => clampReplyNo(previewNo.value ?? props.current ?? 1))
 const displayNo = computed(() => thumbNo.value)
-const progress = computed(() => {
-  if (props.max <= 1) return 0
-  return ((thumbNo.value - 1) / (props.max - 1)) * 100
-})
+const normalizedCurrent = computed(() => dragging.value ? progressForReplyNo(thumbNo.value) : clampProgress(props.progressCurrent ?? progressForReplyNo(props.current)))
 const thumbStyle = computed(() => ({
-  top: `clamp(0px, calc(${progress.value}% - ${thumbHeight / 2}px), calc(100% - ${thumbHeight}px))`,
+  top: `${thumbTopPx.value}px`,
   height: `${thumbHeight}px`,
 }))
+const thumbCenterPx = computed(() => thumbTopPx.value + thumbHeight / 2)
 const indicatorStyle = computed(() => ({
-  top: `clamp(0px, calc(${progress.value}% - 18px), calc(100% - 36px))`,
+  top: `${Math.min(railHeight - 36, Math.max(0, thumbCenterPx.value - 18))}px`,
 }))
+const thumbTopPx = computed(() => {
+  return Math.min(railHeight - thumbHeight, Math.max(0, normalizedCurrent.value * railHeight - thumbHeight / 2))
+})
 
 onBeforeUnmount(() => {
   removePointerListeners()
@@ -43,6 +48,16 @@ onBeforeUnmount(() => {
 
 function clampReplyNo(replyNo: number) {
   return Math.min(Math.max(1, props.max || 1), Math.max(1, Math.round(replyNo)))
+}
+
+function clampProgress(value: number) {
+  if (!Number.isFinite(value)) return 0
+  return Math.min(1, Math.max(0, value))
+}
+
+function progressForReplyNo(replyNo: number) {
+  if (props.max <= 1) return 0
+  return clampProgress((replyNo - 1) / (props.max - 1))
 }
 
 function replyNoFromPointer(event: PointerEvent) {
@@ -123,7 +138,7 @@ function removePointerListeners() {
       >
         <div class="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-line" />
         <div
-          class="absolute left-1/2 w-1.5 -translate-x-1/2 rounded-full bg-success/100 transition-[top,box-shadow]"
+          class="absolute left-1/2 w-1.5 -translate-x-1/2 rounded-full bg-success/100 transition-[box-shadow]"
           :class="{ 'transition-none shadow-[0_0_0_4px_rgba(16,185,129,0.16)]': dragging, 'opacity-70': busy }"
           :style="thumbStyle"
         />
@@ -132,7 +147,7 @@ function removePointerListeners() {
       <div class="relative min-w-0">
         <div class="absolute left-0 min-w-0" :style="indicatorStyle">
           <div class="whitespace-nowrap text-base font-black leading-none tabular-nums text-base-content">
-            {{ displayNo }} / {{ formatNumber(max) }}
+            {{ `${displayNo} / ${formatNumber(max)}` }}
           </div>
           <div v-if="currentLabel && !dragging && !busy" class="mt-2 truncate text-sm font-semibold leading-tight text-base-content/55">
             {{ currentLabel }}
