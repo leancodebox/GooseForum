@@ -1179,244 +1179,314 @@ async function removeReply(replyId: number) {
         </div>
       </header>
 
-      <section class="gf-card">
-        <div class="grid grid-cols-[44px_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5">
-          <a
-            :href="`/u/${page.props.article.author.id}`"
-            class="sticky top-19 self-start pt-1"
-            @click="showUserCard(page.props.article.author, $event)"
-          >
-            <UserAvatar :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" class="h-11 w-11 rounded-full object-cover ring-1 ring-line" />
-          </a>
+      <section class="gf-card xl:w-[calc(100%+292px)]">
+        <div class="min-w-0 xl:grid xl:grid-cols-[minmax(0,1fr)_256px]">
           <div class="min-w-0">
-            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <a :href="`/u/${page.props.article.author.id}`" class="font-semibold text-base-content hover:text-primary">{{ page.props.article.author.username }}</a>
-                <div class="text-xs font-medium text-base-content/75">{{ t('article.body') }}</div>
-              </div>
-              <div class="flex flex-wrap items-center justify-end gap-3 text-xs font-medium text-base-content/75">
-                <div class="flex items-center gap-3">
-                  <span class="inline-flex items-center gap-1"><MessageSquare class="h-3.5 w-3.5" />{{ formatNumber(page.props.article.replyCount) }}</span>
-                  <span class="inline-flex items-center gap-1"><Eye class="h-3.5 w-3.5" />{{ formatNumber(page.props.article.viewCount) }}</span>
-                  <span class="inline-flex items-center gap-1"><Heart class="h-3.5 w-3.5" />{{ formatNumber(likeCount) }}</span>
-                </div>
-                <a
-                  v-if="page.props.permissions.isOwnArticle"
-                  :href="`/publish?id=${page.props.article.id}`"
-                  class="gf-button gf-button-secondary h-7 px-2 text-xs hover:border-primary/20 hover:bg-info/10 hover:text-primary"
-                >
-                  <PencilLine class="h-3.5 w-3.5" />
-                  {{ t('common.edit') }}
-                </a>
-              </div>
-            </div>
-            <div class="gf-prose gf-prose-article" v-html="page.props.article.html" />
-            <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-4">
-              <button
-                type="button"
-                class="gf-button gf-button-sm px-2.5"
-                :class="isLiked ? 'bg-error/10 text-error hover:bg-error/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
-                :disabled="actingLike"
-                @click="toggleLike"
+            <div class="grid grid-cols-[44px_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5">
+              <a
+                :href="`/u/${page.props.article.author.id}`"
+                class="sticky top-19 self-start pt-1"
+                @click="showUserCard(page.props.article.author, $event)"
               >
-                <Heart class="h-4 w-4" :fill="isLiked ? 'currentColor' : 'none'" />
-                {{ likeCount ? formatNumber(likeCount) : t('article.like') }}
-              </button>
-              <button
-                type="button"
-                class="gf-button gf-button-sm px-2.5"
-                :class="isBookmarked ? 'bg-info/10 text-primary hover:bg-info/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
-                :disabled="actingBookmark"
-                @click="toggleBookmark"
-              >
-                <Bookmark class="h-4 w-4" :fill="isBookmarked ? 'currentColor' : 'none'" />
-                {{ isBookmarked ? t('article.bookmarked') : t('article.bookmark') }}
-              </button>
-              <button
-                type="button"
-                class="gf-button gf-button-sm px-2.5"
-                :class="isWatched ? 'bg-success/10 text-success hover:bg-success/15' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
-                :disabled="actingWatch"
-                @click="toggleWatch"
-              >
-                <Bell class="h-4 w-4" :fill="isWatched ? 'currentColor' : 'none'" />
-                {{ isWatched ? t('article.watched') : t('article.watch') }}
-              </button>
-              <button
-                v-if="page.props.permissions.canModerateArticle && articleProcessStatus === 0"
-                type="button"
-                class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
-                :disabled="actingModeration"
-                @click="requestArticleModeration('ban')"
-              >
-                <Ban class="h-4 w-4" />
-                {{ t('article.moderationBan') }}
-              </button>
-              <button
-                v-else-if="page.props.permissions.canModerateArticle && articleProcessStatus === 1"
-                type="button"
-                class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
-                :disabled="actingModeration"
-                @click="requestArticleModeration('unban')"
-              >
-                <RotateCcw class="h-4 w-4" />
-                {{ t('article.moderationUnban') }}
-              </button>
-              <span v-if="actionMessage" class="text-xs" :class="actionMessageSuccess ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
-            </div>
-          </div>
-        </div>
-
-        <span v-if="replies.length" id="replies" class="block scroll-mt-20" aria-hidden="true" />
-
-        <div v-if="replyHasBefore" class="border-t border-line px-4 py-3 text-center">
-          <button
-            v-if="replyHasBefore"
-            type="button"
-            class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-semibold text-primary transition hover:bg-info/10 hover:text-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-            :disabled="loadingReplyWindow"
-            @click="loadReplyWindow('before')"
-          >
-            <Loader2 v-if="loadingReplyDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
-            <ChevronsUp v-else class="h-3.5 w-3.5" />
-            {{ t('article.loadEarlierReplies') }}
-          </button>
-        </div>
-
-        <div
-          v-for="reply in replies"
-          :id="`reply-${reply.id}`"
-          :key="reply.id"
-          :data-reply-no="reply.replyNo"
-          class="group grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-line px-3 py-4 transition hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
-          :class="{ 'bg-info/10 ring-1 ring-inset ring-primary/20': highlightedReplyId === reply.id }"
-        >
-          <a
-            :href="`/u/${reply.author.id}`"
-            class="sticky top-19 self-start pt-1"
-            @click="showUserCard(reply.author, $event)"
-          >
-            <UserAvatar :src="reply.author.avatarUrl" :alt="reply.author.username" class="h-9 w-9 rounded-full object-cover ring-1 ring-line sm:h-10 sm:w-10" />
-          </a>
-          <div class="min-w-0">
-            <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
+                <UserAvatar :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" class="h-11 w-11 rounded-full object-cover ring-1 ring-line" />
+              </a>
               <div class="min-w-0">
-                <div class="flex min-w-0 items-center gap-2">
-                  <a :href="`/u/${reply.author.id}`" class="min-w-0 truncate font-semibold text-base-content hover:text-primary">{{ reply.author.username }}</a>
-                  <span v-if="reply.replyNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 sm:inline">#{{ formatNumber(reply.replyNo) }}</span>
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <a :href="`/u/${page.props.article.author.id}`" class="font-semibold text-base-content hover:text-primary">{{ page.props.article.author.username }}</a>
+                    <div class="text-xs font-medium text-base-content/75">{{ t('article.body') }}</div>
+                  </div>
+                  <div class="flex flex-wrap items-center justify-end gap-3 text-xs font-medium text-base-content/75">
+                    <div class="flex items-center gap-3">
+                      <span class="inline-flex items-center gap-1"><MessageSquare class="h-3.5 w-3.5" />{{ formatNumber(page.props.article.replyCount) }}</span>
+                      <span class="inline-flex items-center gap-1"><Eye class="h-3.5 w-3.5" />{{ formatNumber(page.props.article.viewCount) }}</span>
+                      <span class="inline-flex items-center gap-1"><Heart class="h-3.5 w-3.5" />{{ formatNumber(likeCount) }}</span>
+                    </div>
+                    <a
+                      v-if="page.props.permissions.isOwnArticle"
+                      :href="`/publish?id=${page.props.article.id}`"
+                      class="gf-button gf-button-secondary h-7 px-2 text-xs hover:border-primary/20 hover:bg-info/10 hover:text-primary"
+                    >
+                      <PencilLine class="h-3.5 w-3.5" />
+                      {{ t('common.edit') }}
+                    </a>
+                  </div>
                 </div>
-                <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55 sm:hidden">
-                  <span v-if="reply.replyNo" class="font-semibold tabular-nums text-base-content/55">#{{ formatNumber(reply.replyNo) }}</span>
-                  <time class="truncate">{{ formatDateTime(reply.createdAt) }}</time>
-                </div>
-              </div>
-              <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
-                <button
-                  v-if="reply.isOwnReply"
-                  type="button"
-                  class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="savingEditReplyId === reply.id || deletingReplyId === reply.id"
-                  :title="t('common.edit')"
-                  @click="startEditReply(reply)"
-                >
-                  <PencilLine class="h-3.5 w-3.5" />
-                  <span class="sr-only">{{ t('common.edit') }}</span>
-                </button>
-                <button
-                  v-if="reply.isOwnReply"
-                  type="button"
-                  class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="deletingReplyId === reply.id"
-                  :title="deletingReplyId === reply.id ? t('article.deleting') : t('article.delete')"
-                  @click="requestDeleteReply(reply)"
-                >
-                  <Trash2 class="h-3.5 w-3.5" />
-                  <span class="sr-only">{{ deletingReplyId === reply.id ? t('article.deleting') : t('article.delete') }}</span>
-                </button>
-                <button
-                  v-if="page.props.permissions.canReply"
-                  type="button"
-                  class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                  :title="t('article.reply')"
-                  @click="replyTo(reply)"
-                >
-                  <CornerDownLeft class="h-3.5 w-3.5" />
-                  <span class="sr-only">{{ t('article.reply') }}</span>
-                </button>
-                <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
-              </div>
-            </div>
-            <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-base-200 px-2 py-1 text-sm text-base-content/55">
-              <span class="shrink-0">{{ t('article.reply') }}</span>
-              <a :href="`/u/${reply.replyToUserId}`" class="min-w-0 truncate font-medium text-base-content/75 hover:text-primary">@{{ reply.replyToUsername }}</a>
-            </p>
-            <Transition name="gf-local-expand">
-              <div v-if="editingReplyId === reply.id" class="mt-3 rounded-lg border border-primary/20 bg-info/10 p-3">
-                <div class="mb-2 flex items-center justify-between">
-                  <div class="text-xs font-semibold text-primary">{{ t('article.editOwnReply') }}</div>
-                  <button type="button" class="rounded-md p-1 text-base-content/55 hover:bg-base-100 hover:text-base-content/75" @click="cancelEditReply(reply.id)">
-                    <X class="h-4 w-4" />
-                  </button>
-                </div>
-                <textarea
-                  v-model="editReplyContents[reply.id]"
-                  class="gf-textarea min-h-24 border-primary/20"
-                  :placeholder="t('article.editReplyPlaceholder')"
-                  @input="clearEditReplyValidation(reply.id)"
-                />
-                <p v-if="editReplyErrors[reply.id]" class="mt-2 text-sm text-error">{{ editReplyErrors[reply.id] }}</p>
-                <div class="mt-2 flex justify-end gap-2">
-                  <button type="button" class="gf-button gf-button-sm gf-button-muted text-xs hover:bg-base-100" @click="cancelEditReply(reply.id)">{{ t('common.cancel') }}</button>
+                <div class="gf-prose gf-prose-article" v-html="page.props.article.html" />
+                <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-4">
                   <button
                     type="button"
-                    class="gf-button gf-button-sm gf-button-primary text-xs"
-                    :disabled="savingEditReplyId === reply.id"
-                    @click="saveReplyEdit(reply)"
+                    class="gf-button gf-button-sm px-2.5"
+                    :class="isLiked ? 'bg-error/10 text-error hover:bg-error/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
+                    :disabled="actingLike"
+                    @click="toggleLike"
                   >
-                    <Loader2 v-if="savingEditReplyId === reply.id" class="h-3.5 w-3.5 animate-spin" />
-                    <Check v-else class="h-3.5 w-3.5" />
-                    {{ savingEditReplyId === reply.id ? t('common.saving') : t('common.save') }}
+                    <Heart class="h-4 w-4" :fill="isLiked ? 'currentColor' : 'none'" />
+                    {{ likeCount ? formatNumber(likeCount) : t('article.like') }}
                   </button>
+                  <button
+                    type="button"
+                    class="gf-button gf-button-sm px-2.5"
+                    :class="isBookmarked ? 'bg-info/10 text-primary hover:bg-info/10' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
+                    :disabled="actingBookmark"
+                    @click="toggleBookmark"
+                  >
+                    <Bookmark class="h-4 w-4" :fill="isBookmarked ? 'currentColor' : 'none'" />
+                    {{ isBookmarked ? t('article.bookmarked') : t('article.bookmark') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="gf-button gf-button-sm px-2.5"
+                    :class="isWatched ? 'bg-success/10 text-success hover:bg-success/15' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'"
+                    :disabled="actingWatch"
+                    @click="toggleWatch"
+                  >
+                    <Bell class="h-4 w-4" :fill="isWatched ? 'currentColor' : 'none'" />
+                    {{ isWatched ? t('article.watched') : t('article.watch') }}
+                  </button>
+                  <button
+                    v-if="page.props.permissions.canModerateArticle && articleProcessStatus === 0"
+                    type="button"
+                    class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
+                    :disabled="actingModeration"
+                    @click="requestArticleModeration('ban')"
+                  >
+                    <Ban class="h-4 w-4" />
+                    {{ t('article.moderationBan') }}
+                  </button>
+                  <button
+                    v-else-if="page.props.permissions.canModerateArticle && articleProcessStatus === 1"
+                    type="button"
+                    class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
+                    :disabled="actingModeration"
+                    @click="requestArticleModeration('unban')"
+                  >
+                    <RotateCcw class="h-4 w-4" />
+                    {{ t('article.moderationUnban') }}
+                  </button>
+                  <span v-if="actionMessage" class="text-xs" :class="actionMessageSuccess ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
                 </div>
               </div>
-            </Transition>
-            <template v-if="editingReplyId !== reply.id">
-              <div class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
-              <div v-if="reply.updatedAt && reply.updatedAt !== reply.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
-                {{ t('article.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
-              </div>
-            </template>
-          </div>
-        </div>
+            </div>
 
-        <div v-if="replyHasAfter || loadingReplyDirection === 'after' || replyWindowError || (!replyHasAfter && replies.length)" ref="replyLoadMoreEl" class="border-t border-line px-4 py-3 text-center">
-          <button
-            v-if="replyHasAfter && replyWindowError"
-            type="button"
-            class="gf-button gf-button-sm gf-button-secondary text-xs"
-            :disabled="loadingReplyWindow"
-            @click="loadReplyWindow('after')"
-          >
-            <Loader2 v-if="loadingReplyDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
-            {{ t('article.retryLoadReplies') }}
-          </button>
-          <p v-else-if="replyWindowError" class="text-xs text-error">{{ replyWindowError }}</p>
-          <p v-else-if="replyHasAfter && loadingReplyDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-base-content/55">
-            <Loader2 class="h-3.5 w-3.5 animate-spin" />
-            {{ t('article.loadingMoreReplies') }}
-          </p>
-          <button
-            v-else-if="replyHasAfter"
-            type="button"
-            class="gf-button gf-button-sm gf-button-secondary text-xs"
-            :disabled="loadingReplyWindow"
-            @click="loadMoreRepliesManually"
-          >
-            {{ t('article.loadMoreReplies') }}
-          </button>
-          <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-base-content/55">{{ t('article.allRepliesShown') }}</p>
+            <span v-if="replies.length" id="replies" class="block scroll-mt-20" aria-hidden="true" />
+
+            <div v-if="replyHasBefore" class="border-t border-line px-4 py-3 text-center xl:mx-5 xl:px-0">
+              <button
+                v-if="replyHasBefore"
+                type="button"
+                class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-semibold text-primary transition hover:bg-info/10 hover:text-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                :disabled="loadingReplyWindow"
+                @click="loadReplyWindow('before')"
+              >
+                <Loader2 v-if="loadingReplyDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
+                <ChevronsUp v-else class="h-3.5 w-3.5" />
+                {{ t('article.loadEarlierReplies') }}
+              </button>
+            </div>
+
+            <div
+              v-for="reply in replies"
+              :id="`reply-${reply.id}`"
+              :key="reply.id"
+              :data-reply-no="reply.replyNo"
+              class="group grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-line px-3 py-4 transition hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5 xl:mx-5 xl:px-0"
+              :class="{ 'bg-info/10 ring-1 ring-inset ring-primary/20': highlightedReplyId === reply.id }"
+            >
+              <a
+                :href="`/u/${reply.author.id}`"
+                class="sticky top-19 self-start pt-1"
+                @click="showUserCard(reply.author, $event)"
+              >
+                <UserAvatar :src="reply.author.avatarUrl" :alt="reply.author.username" class="h-9 w-9 rounded-full object-cover ring-1 ring-line sm:h-10 sm:w-10" />
+              </a>
+              <div class="min-w-0">
+                <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="flex min-w-0 items-center gap-2">
+                      <a :href="`/u/${reply.author.id}`" class="min-w-0 truncate font-semibold text-base-content hover:text-primary">{{ reply.author.username }}</a>
+                      <span v-if="reply.replyNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 sm:inline">#{{ formatNumber(reply.replyNo) }}</span>
+                    </div>
+                    <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55 sm:hidden">
+                      <span v-if="reply.replyNo" class="font-semibold tabular-nums text-base-content/55">#{{ formatNumber(reply.replyNo) }}</span>
+                      <time class="truncate">{{ formatDateTime(reply.createdAt) }}</time>
+                    </div>
+                  </div>
+                  <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
+                    <button
+                      v-if="reply.isOwnReply"
+                      type="button"
+                      class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      :disabled="savingEditReplyId === reply.id || deletingReplyId === reply.id"
+                      :title="t('common.edit')"
+                      @click="startEditReply(reply)"
+                    >
+                      <PencilLine class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ t('common.edit') }}</span>
+                    </button>
+                    <button
+                      v-if="reply.isOwnReply"
+                      type="button"
+                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      :disabled="deletingReplyId === reply.id"
+                      :title="deletingReplyId === reply.id ? t('article.deleting') : t('article.delete')"
+                      @click="requestDeleteReply(reply)"
+                    >
+                      <Trash2 class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ deletingReplyId === reply.id ? t('article.deleting') : t('article.delete') }}</span>
+                    </button>
+                    <button
+                      v-if="page.props.permissions.canReply"
+                      type="button"
+                      class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                      :title="t('article.reply')"
+                      @click="replyTo(reply)"
+                    >
+                      <CornerDownLeft class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ t('article.reply') }}</span>
+                    </button>
+                    <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
+                  </div>
+                </div>
+                <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-base-200 px-2 py-1 text-sm text-base-content/55">
+                  <span class="shrink-0">{{ t('article.reply') }}</span>
+                  <a :href="`/u/${reply.replyToUserId}`" class="min-w-0 truncate font-medium text-base-content/75 hover:text-primary">@{{ reply.replyToUsername }}</a>
+                </p>
+                <Transition name="gf-local-expand">
+                  <div v-if="editingReplyId === reply.id" class="mt-3 rounded-lg border border-primary/20 bg-info/10 p-3">
+                    <div class="mb-2 flex items-center justify-between">
+                      <div class="text-xs font-semibold text-primary">{{ t('article.editOwnReply') }}</div>
+                      <button type="button" class="rounded-md p-1 text-base-content/55 hover:bg-base-100 hover:text-base-content/75" @click="cancelEditReply(reply.id)">
+                        <X class="h-4 w-4" />
+                      </button>
+                    </div>
+                    <textarea
+                      v-model="editReplyContents[reply.id]"
+                      class="gf-textarea min-h-24 border-primary/20"
+                      :placeholder="t('article.editReplyPlaceholder')"
+                      @input="clearEditReplyValidation(reply.id)"
+                    />
+                    <p v-if="editReplyErrors[reply.id]" class="mt-2 text-sm text-error">{{ editReplyErrors[reply.id] }}</p>
+                    <div class="mt-2 flex justify-end gap-2">
+                      <button type="button" class="gf-button gf-button-sm gf-button-muted text-xs hover:bg-base-100" @click="cancelEditReply(reply.id)">{{ t('common.cancel') }}</button>
+                      <button
+                        type="button"
+                        class="gf-button gf-button-sm gf-button-primary text-xs"
+                        :disabled="savingEditReplyId === reply.id"
+                        @click="saveReplyEdit(reply)"
+                      >
+                        <Loader2 v-if="savingEditReplyId === reply.id" class="h-3.5 w-3.5 animate-spin" />
+                        <Check v-else class="h-3.5 w-3.5" />
+                        {{ savingEditReplyId === reply.id ? t('common.saving') : t('common.save') }}
+                      </button>
+                    </div>
+                  </div>
+                </Transition>
+                <template v-if="editingReplyId !== reply.id">
+                  <div class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
+                  <div v-if="reply.updatedAt && reply.updatedAt !== reply.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
+                    {{ t('article.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <div v-if="replyHasAfter || loadingReplyDirection === 'after' || replyWindowError || (!replyHasAfter && replies.length)" ref="replyLoadMoreEl" class="border-t border-line px-4 py-3 text-center xl:mx-5 xl:px-0">
+              <button
+                v-if="replyHasAfter && replyWindowError"
+                type="button"
+                class="gf-button gf-button-sm gf-button-secondary text-xs"
+                :disabled="loadingReplyWindow"
+                @click="loadReplyWindow('after')"
+              >
+                <Loader2 v-if="loadingReplyDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
+                {{ t('article.retryLoadReplies') }}
+              </button>
+              <p v-else-if="replyWindowError" class="text-xs text-error">{{ replyWindowError }}</p>
+              <p v-else-if="replyHasAfter && loadingReplyDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-base-content/55">
+                <Loader2 class="h-3.5 w-3.5 animate-spin" />
+                {{ t('article.loadingMoreReplies') }}
+              </p>
+              <button
+                v-else-if="replyHasAfter"
+                type="button"
+                class="gf-button gf-button-sm gf-button-secondary text-xs"
+                :disabled="loadingReplyWindow"
+                @click="loadMoreRepliesManually"
+              >
+                {{ t('article.loadMoreReplies') }}
+              </button>
+              <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-base-content/55">{{ t('article.allRepliesShown') }}</p>
+            </div>
+            <span ref="replyListEndEl" class="block h-px scroll-mb-28" aria-hidden="true" />
+          </div>
+
+          <aside class="hidden min-w-0 xl:block">
+            <div
+              class="sticky top-19"
+            >
+              <div class="px-4 py-4">
+                <h2 class="text-sm font-semibold text-base-content/55">{{ t('article.overview') }}</h2>
+              </div>
+
+              <dl class="space-y-4 border-t border-line px-4 py-5 text-sm xl:mx-4 xl:px-0">
+                <div class="flex items-center justify-between gap-4">
+                  <dt class="font-semibold text-base-content/55">{{ t('article.replyCount') }}</dt>
+                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.article.replyCount) }}</dd>
+                </div>
+                <div class="flex items-center justify-between gap-4">
+                  <dt class="font-semibold text-base-content/55">{{ t('article.viewCount') }}</dt>
+                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.article.viewCount) }}</dd>
+                </div>
+                <div class="flex items-center justify-between gap-4">
+                  <dt class="font-semibold text-base-content/55">{{ t('article.participants') }}</dt>
+                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ page.props.article.participants.length }}</dd>
+                </div>
+              </dl>
+
+              <div v-if="page.props.article.participants.length" class="border-t border-line px-4 py-4 xl:mx-4 xl:px-0">
+                <h3 class="mb-3 text-sm font-semibold text-base-content/55">{{ t('article.activeParticipants') }}</h3>
+                <div class="flex flex-wrap gap-1.5">
+                  <a
+                    v-for="participant in page.props.article.participants"
+                    :key="participant.id"
+                    :href="`/u/${participant.id}`"
+                    class="rounded-full"
+                    @click="showUserCard(participant, $event)"
+                  >
+                    <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover ring-1 ring-line transition hover:ring-primary/40" />
+                  </a>
+                </div>
+              </div>
+
+              <ReplyPositionRail
+                v-if="page.props.article.replyCount > 0 && replyMaxRange > 0"
+                class="border-t border-line xl:mx-4"
+                :current="replyRailCurrentNo"
+                :max="replyMaxRange"
+                :start-label="replyRailStartLabel"
+                :end-label="replyRailEndLabel"
+                :current-label="replyRailCurrentLabel"
+                :busy="replyRailBusy"
+                :progress-current="replyRailProgressCurrent"
+                :progress-end="replyRailProgressEnd"
+                :progress-start="replyRailProgressStart"
+                @earliest="jumpToArticleBodyFromRail"
+                @latest="jumpToLatestReplyFromRail"
+                @select="selectReplyFromRail"
+              />
+            </div>
+          </aside>
+
+          <section v-if="page.props.hotTopics.length" class="border-t border-line xl:col-span-2">
+            <div class="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
+              <h2 class="text-base font-bold text-base-content">{{ t('article.hotContent') }}</h2>
+              <a href="/?sort=hot" class="text-sm font-semibold text-primary hover:text-primary">{{ t('article.more') }}</a>
+            </div>
+
+            <TopicList :topics="page.props.hotTopics" home />
+          </section>
         </div>
-        <span ref="replyListEndEl" class="block h-px scroll-mb-28" aria-hidden="true" />
       </section>
 
       <ArticleReplyComposer
@@ -1452,77 +1522,6 @@ async function removeReply(replyId: number) {
       />
 
     </article>
-
-    <Teleport defer to="#goose-shell-wide-content">
-      <section v-if="page.props.hotTopics.length" class="gf-card w-full overflow-hidden">
-        <div class="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
-          <h2 class="text-base font-bold text-base-content">{{ t('article.hotContent') }}</h2>
-          <a href="/?sort=hot" class="text-sm font-semibold text-primary hover:text-primary">{{ t('article.more') }}</a>
-        </div>
-
-        <TopicList :topics="page.props.hotTopics" home />
-      </section>
-    </Teleport>
-
-    <Teleport defer to="#goose-shell-rail">
-      <div
-        class="sticky top-19 space-y-3"
-        :style="{ marginTop: `${articleRailTopOffset}px` }"
-      >
-        <div class="gf-card overflow-hidden">
-          <div class="border-b border-line px-4 py-4">
-            <h2 class="text-sm font-semibold text-base-content/55">{{ t('article.overview') }}</h2>
-          </div>
-
-          <dl class="space-y-4 px-4 py-5 text-sm">
-            <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-base-content/55">{{ t('article.replyCount') }}</dt>
-              <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.article.replyCount) }}</dd>
-            </div>
-            <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-base-content/55">{{ t('article.viewCount') }}</dt>
-              <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.article.viewCount) }}</dd>
-            </div>
-            <div class="flex items-center justify-between gap-4">
-              <dt class="font-semibold text-base-content/55">{{ t('article.participants') }}</dt>
-              <dd class="text-right font-semibold tabular-nums text-base-content">{{ page.props.article.participants.length }}</dd>
-            </div>
-          </dl>
-
-          <div v-if="page.props.article.participants.length" class="border-t border-line px-4 py-4">
-            <h3 class="mb-3 text-sm font-semibold text-base-content/55">{{ t('article.activeParticipants') }}</h3>
-            <div class="flex flex-wrap gap-1.5">
-              <a
-                v-for="participant in page.props.article.participants"
-                :key="participant.id"
-                :href="`/u/${participant.id}`"
-                class="rounded-full"
-                @click="showUserCard(participant, $event)"
-              >
-                <UserAvatar :src="participant.avatarUrl" :alt="participant.username" class="h-8 w-8 rounded-full object-cover ring-1 ring-line transition hover:ring-primary/40" />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <ReplyPositionRail
-          v-if="page.props.article.replyCount > 0 && replyMaxRange > 0"
-          :current="replyRailCurrentNo"
-          :max="replyMaxRange"
-          :start-label="replyRailStartLabel"
-          :end-label="replyRailEndLabel"
-          :current-label="replyRailCurrentLabel"
-          :busy="replyRailBusy"
-          :progress-current="replyRailProgressCurrent"
-          :progress-end="replyRailProgressEnd"
-          :progress-start="replyRailProgressStart"
-          @earliest="jumpToArticleBodyFromRail"
-          @latest="jumpToLatestReplyFromRail"
-          @select="selectReplyFromRail"
-        />
-
-      </div>
-    </Teleport>
 
     <Teleport to="body">
       <Transition name="gf-modal">
