@@ -1424,6 +1424,7 @@ async function removeReply(replyId: number) {
         v-model:mobile-rail-open="mobileReplyRailOpen"
         v-model:open="composerOpen"
         :actions="floatingArticleActions"
+        :authenticated="page.layout.viewer.isAuthenticated"
         :can-reply="page.props.permissions.canReply"
         :current-label="replyRailCurrentLabel"
         :current-no="replyRailCurrentNo"
