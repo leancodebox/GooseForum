@@ -48,7 +48,7 @@ const saving = ref(false)
 const sourceLoading = ref(false)
 const error = ref('')
 const rows = ref<AdminArticle[]>([])
-const total = ref(0)
+const hasNext = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
 const search = ref('')
@@ -70,7 +70,6 @@ interface CategoryOption {
   missing: boolean
 }
 
-const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
 const categoryMap = computed(() => new Map(categories.value.map(item => [item.id, item])))
 const categoryDialogOptions = computed<CategoryOption[]>(() => {
   const options = categories.value.map(category => ({
@@ -90,8 +89,8 @@ const categoryDialogOptions = computed<CategoryOption[]>(() => {
     })),
   ]
 })
-const rangeStart = computed(() => (total.value === 0 ? 0 : (page.value - 1) * pageSize.value + 1))
-const rangeEnd = computed(() => Math.min(page.value * pageSize.value, total.value))
+const rangeStart = computed(() => (rows.value.length === 0 ? 0 : (page.value - 1) * pageSize.value + 1))
+const rangeEnd = computed(() => rows.value.length === 0 ? 0 : rangeStart.value + rows.value.length - 1)
 
 const articleTypes: Record<number, { label: string, className: string }> = {
   0: { label: adminText('k003m'), className: 'bg-blue-50 text-blue-700 border-blue-100' },
@@ -153,9 +152,8 @@ async function loadPosts() {
       categories.value.length ? Promise.resolve(categories.value) : getCategoryList(),
     ])
     rows.value = postPage.list || []
-    total.value = postPage.total || 0
+    hasNext.value = Boolean(postPage.hasNext)
     categories.value = categoryList || []
-    if (page.value > totalPages.value) page.value = totalPages.value
   } catch (err) {
     error.value = err instanceof Error ? err.message : adminText('k003s')
   } finally {
@@ -323,7 +321,7 @@ onMounted(() => {
             </Button>
           </form>
           <div class="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <span class="whitespace-nowrap">{{ rangeStart }}-{{ rangeEnd }} / {{ total }}</span>
+            <span class="whitespace-nowrap">{{ rangeStart }}-{{ rangeEnd }}</span>
             <div class="h-4 w-px bg-border" />
             <div class="flex flex-wrap items-center gap-2">
               <select class="h-9 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" :value="pageSize" @change="changePageSize">
@@ -332,8 +330,8 @@ onMounted(() => {
                 <option :value="50">{{ adminText('k0030') }}</option>
               </select>
               <Button variant="outline" size="sm" type="button" :disabled="page <= 1 || loading" @click="changePage(page - 1)">{{ adminText('k00au') }}</Button>
-              <span class="whitespace-nowrap">{{ page }} / {{ totalPages }}</span>
-              <Button variant="outline" size="sm" type="button" :disabled="page >= totalPages || loading" @click="changePage(page + 1)">{{ adminText('k00av') }}</Button>
+              <span class="whitespace-nowrap">{{ adminText('k0056') }} {{ page }} {{ adminText('k0057') }}</span>
+              <Button variant="outline" size="sm" type="button" :disabled="!hasNext || loading" @click="changePage(page + 1)">{{ adminText('k00av') }}</Button>
             </div>
           </div>
         </AdminToolbar>

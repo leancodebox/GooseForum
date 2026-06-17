@@ -25,6 +25,7 @@ export interface ApiEnvelope<T> {
 export interface PageResult<T> {
   list: T[]
   total: number
+  hasNext?: boolean
   page: number
   pageSize?: number
   size?: number

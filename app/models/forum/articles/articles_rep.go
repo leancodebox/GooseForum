@@ -7,7 +7,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/pageutil"
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
 	"github.com/samber/lo"
-	"github.com/spf13/cast"
 	"gorm.io/gorm"
 )
 
@@ -81,7 +80,7 @@ type PageQuery struct {
 	Search         string
 	UserId         uint64
 	FilterStatus   bool
-	Categories     []int
+	CategoryId     uint64
 	Sort           string
 }
 
@@ -95,12 +94,13 @@ type ModerationPageQuery struct {
 func Page[ResType SmallEntity](q PageQuery) struct {
 	Page     int
 	PageSize int
-	Total    int64
+	HasNext  bool
 	Data     []ResType
 } {
 	var list []ResType
 	q.Page = max(q.Page-1, 0)
 	q.PageSize = pageutil.BoundPageSize(q.PageSize)
+	queryLimit := q.PageSize + 1
 	b := builder()
 	if q.Search != "" {
 		b.Where(queryopt.Like(fieldContent, q.Search))
@@ -112,32 +112,27 @@ func Page[ResType SmallEntity](q PageQuery) struct {
 		b.Where(queryopt.Eq(fieldArticleStatus, 1))
 		b.Where(queryopt.Eq(fieldProcessStatus, 0))
 	}
-	if len(q.Categories) > 0 {
-		if len(q.Categories) == 1 {
-			b.Where(`EXISTS (SELECT 1 FROM article_category_rs rs 
-WHERE rs.article_id = articles.id AND rs.article_category_id = ?  AND rs.effective = ? )`,
-				q.Categories[0], 1)
-		} else {
-			b.Where(`EXISTS (SELECT 1 FROM article_category_rs rs 
-WHERE rs.article_id = articles.id AND rs.article_category_id IN (?) AND rs.effective = ? )`,
-				q.Categories, 1)
-		}
+	if q.CategoryId != 0 {
+		b.Where(
+			`EXISTS (SELECT 1 FROM article_category_rs rs WHERE rs.article_id = articles.id AND rs.article_category_id = ? AND rs.effective = ?)`,
+			q.CategoryId,
+			1,
+		)
 	}
 
 	applyPageSort(b, q.Sort)
 
-	b.Limit(q.PageSize).Offset(q.PageSize * q.Page).Find(&list)
-	var total int64
-	total = 1200
-	if len(list) < q.PageSize {
-		total = cast.ToInt64(q.Page*q.PageSize + len(list))
+	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Find(&list)
+	hasNext := len(list) > q.PageSize
+	if hasNext {
+		list = list[:q.PageSize]
 	}
 	return struct {
 		Page     int
 		PageSize int
-		Total    int64
+		HasNext  bool
 		Data     []ResType
-	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, Total: total}
+	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
 }
 
 func PageForModeration(q ModerationPageQuery) struct {

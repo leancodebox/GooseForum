@@ -13,10 +13,10 @@ func Home(c *gin.Context) {
 	sort, _ := lo.Coalesce(c.Query("sort"), "latest")
 	page := lo.Ternary(cast.ToInt(c.Query("page")) <= 0, 1, cast.ToInt(c.Query("page")))
 
-	topics := hotdataserve.GetLatestArticlesSimpleVoPaginated(page, sort)
+	topicPage := hotdataserve.GetLatestArticlesSimpleVoPaginated(page, sort)
 	payload := PagePayload{
 		Component: "home.index",
-		Props:     buildHomeProps(page, sort, topics),
+		Props:     buildHomeProps(page, sort, topicPage.Topics, topicPage.HasNext),
 		Meta:      buildHomeMeta(c),
 		Layout:    buildLayout(c, activeKeyForHome(sort)),
 		URL:       buildPageURL(c),

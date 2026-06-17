@@ -459,8 +459,8 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
-	return component.SuccessPage(
-		lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) ArticlesInfoAdminVo {
+	return component.SuccessResponse(component.Page[ArticlesInfoAdminVo]{
+		List: lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) ArticlesInfoAdminVo {
 			username := ""
 			userAvatarUrl := ""
 			if user := userMap[t.UserId]; user != nil {
@@ -486,10 +486,10 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 				UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
 			}
 		}),
-		pageData.Page,
-		pageData.PageSize,
-		pageData.Total,
-	)
+		Page:    pageData.Page,
+		Size:    pageData.PageSize,
+		HasNext: pageData.HasNext,
+	})
 }
 
 func ArticleSource(req component.BetterRequest[ArticleSourceReq]) component.Response {

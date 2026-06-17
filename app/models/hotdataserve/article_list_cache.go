@@ -17,28 +17,33 @@ const (
 	articleListEntries   = 512
 )
 
-var articleSimpleVoCache = &localcache.Cache[[]*vo.ArticlesSimpleVo]{MaxEntries: articleListEntries}
+type ArticleSimpleVoPage struct {
+	Topics  []*vo.ArticlesSimpleVo
+	HasNext bool
+}
 
-func GetLatestArticlesSimpleVoPaginated(page int, sort string) []*vo.ArticlesSimpleVo {
+var articleSimpleVoCache = &localcache.Cache[ArticleSimpleVoPage]{MaxEntries: articleListEntries}
+
+func GetLatestArticlesSimpleVoPaginated(page int, sort string) ArticleSimpleVoPage {
 	page = normalizeArticlePage(page)
 	sort = normalizeArticleSort(sort)
 	if !shouldCacheArticlePage(page) {
 		return loadLatestArticlesSimpleVoPaginated(page, sort)
 	}
 	key := "home:GetLatestArticles:" + sort + ":" + strconv.Itoa(page)
-	return articleSimpleVoCache.GetOrLoad(key, func() ([]*vo.ArticlesSimpleVo, error) {
+	return articleSimpleVoCache.GetOrLoad(key, func() (ArticleSimpleVoPage, error) {
 		return loadLatestArticlesSimpleVoPaginated(page, sort), nil
 	}, articleListCacheTTL)
 }
 
-func GetArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) []*vo.ArticlesSimpleVo {
+func GetArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) ArticleSimpleVoPage {
 	page = normalizeArticlePage(page)
 	sort = normalizeArticleSort(sort)
 	if !shouldCacheArticlePage(page) {
 		return loadArticlesByCategorySimpleVo(categoryId, sort, page)
 	}
 	key := "GetArticlesByCategory:" + strconv.FormatUint(categoryId, 10) + ":" + sort + ":" + strconv.Itoa(page)
-	return articleSimpleVoCache.GetOrLoad(key, func() ([]*vo.ArticlesSimpleVo, error) {
+	return articleSimpleVoCache.GetOrLoad(key, func() (ArticleSimpleVoPage, error) {
 		return loadArticlesByCategorySimpleVo(categoryId, sort, page), nil
 	}, articleListCacheTTL)
 }
@@ -63,25 +68,31 @@ func shouldCacheArticlePage(page int) bool {
 	return page <= maxCachedArticlePage
 }
 
-func loadLatestArticlesSimpleVoPaginated(page int, sort string) []*vo.ArticlesSimpleVo {
+func loadLatestArticlesSimpleVoPaginated(page int, sort string) ArticleSimpleVoPage {
 	res := articles.Page[articles.SmallEntity](articles.PageQuery{
 		Page:         page,
 		PageSize:     20,
 		FilterStatus: true,
 		Sort:         sort,
 	})
-	return ArticlesSmallEntity2Vo(smallEntitiesToPointers(res.Data))
+	return ArticleSimpleVoPage{
+		Topics:  ArticlesSmallEntity2Vo(smallEntitiesToPointers(res.Data)),
+		HasNext: res.HasNext,
+	}
 }
 
-func loadArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) []*vo.ArticlesSimpleVo {
+func loadArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) ArticleSimpleVoPage {
 	res := articles.Page[articles.SmallEntity](articles.PageQuery{
 		Page:         page,
 		PageSize:     20,
-		Categories:   []int{int(categoryId)},
+		CategoryId:   categoryId,
 		FilterStatus: true,
 		Sort:         sort,
 	})
-	return ArticlesSmallEntity2Vo(smallEntitiesToPointers(res.Data))
+	return ArticleSimpleVoPage{
+		Topics:  ArticlesSmallEntity2Vo(smallEntitiesToPointers(res.Data)),
+		HasNext: res.HasNext,
+	}
 }
 
 func smallEntitiesToPointers(data []articles.SmallEntity) []*articles.SmallEntity {

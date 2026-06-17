@@ -673,9 +673,9 @@ func buildSidebarPayload(categories []*articleCategory.Entity, activeKey string)
 	}
 }
 
-func buildHomeProps(page int, sort string, topics []*vo.ArticlesSimpleVo) HomeProps {
+func buildHomeProps(page int, sort string, topics []*vo.ArticlesSimpleVo, hasNext bool) HomeProps {
 	nextPage := 0
-	if len(topics) == 20 {
+	if hasNext {
 		nextPage = page + 1
 	}
 
@@ -956,9 +956,9 @@ func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users
 }
 
 func buildArticleHotTopics(currentArticleID uint64) []TopicPayload {
-	topics := hotdataserve.GetLatestArticlesSimpleVoPaginated(1, "hot")
+	topicPage := hotdataserve.GetLatestArticlesSimpleVoPaginated(1, "hot")
 	filtered := make([]*vo.ArticlesSimpleVo, 0, 6)
-	for _, topic := range topics {
+	for _, topic := range topicPage.Topics {
 		if topic == nil || topic.Id == currentArticleID {
 			continue
 		}
@@ -1315,9 +1315,9 @@ func buildUserMeta(c *gin.Context, user *vo.UserCard) PageMeta {
 	}
 }
 
-func buildCategoryPageProps(category *articleCategory.Entity, page int, sort string, topics []*vo.ArticlesSimpleVo) CategoryPageProps {
+func buildCategoryPageProps(category *articleCategory.Entity, page int, sort string, topics []*vo.ArticlesSimpleVo, hasNext bool) CategoryPageProps {
 	nextPage := 0
-	if len(topics) == 20 {
+	if hasNext {
 		nextPage = page + 1
 	}
 	return CategoryPageProps{
