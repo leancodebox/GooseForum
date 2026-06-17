@@ -12,6 +12,10 @@ const initialPayload = readInitialPayload()
 const initialPage = await preparePayload(initialPayload)
 const currentPage = shallowRef(initialPage)
 
+if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual'
+}
+
 document.documentElement.lang = currentLocale()
 applySiteThemePayload(initialPayload.layout.theme)
 applyStoredTheme()

@@ -22,6 +22,24 @@ export function installNavigation(initialPage: PreparedPage, routeComponent: Com
         component: routeComponent,
       },
     ],
+    scrollBehavior(to, _from, savedPosition) {
+      return new Promise((resolve) => {
+        requestAnimationFrame(() => {
+          if (savedPosition) {
+            resolve(savedPosition)
+            return
+          }
+          if (to.hash) {
+            resolve({
+              el: decodeURIComponent(to.hash),
+              top: 0,
+            })
+            return
+          }
+          resolve({ top: 0 })
+        })
+      })
+    },
   })
 
   router.beforeEach(async (to) => {
@@ -43,14 +61,12 @@ export function installNavigation(initialPage: PreparedPage, routeComponent: Com
     }
   })
 
-  router.afterEach((to, _from, failure) => {
+  router.afterEach((_to, _from, failure) => {
     if (failure && isNavigationFailure(failure)) {
       navigation.setNavigating(false)
       return
     }
-    const url = new URL(to.fullPath, window.location.origin)
     onPage(loadedPage)
-    scrollAfterNavigation(url)
     navigation.setNavigating(false)
   })
 
@@ -98,24 +114,6 @@ export async function preparePayload(payload: PagePayload): Promise<PreparedPage
     throw new Error(`Unknown page component: ${payload.component}`)
   }
   return { payload, component }
-}
-
-function scrollAfterNavigation(url: URL) {
-  if (!url.hash) {
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0 })
-    })
-    return
-  }
-
-  requestAnimationFrame(() => {
-    const target = document.getElementById(decodeURIComponent(url.hash.slice(1)))
-    if (target) {
-      target.scrollIntoView({ block: 'start' })
-      return
-    }
-    window.scrollTo({ top: 0 })
-  })
 }
 
 function isRoutablePath(pathname: string) {

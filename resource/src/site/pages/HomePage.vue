@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Bell, Mail, Plus, UsersRound } from '@lucide/vue'
 import { fetchPage } from '@/runtime/router'
@@ -13,6 +13,7 @@ import type { HomeProps, LayoutPayload, PagePayload, TopicPayload } from '@/type
 const page = defineProps<{
   layout: LayoutPayload
   props: HomeProps
+  pageUrl: string
 }>()
 const { t } = useI18n()
 const { mode: listMode, setMode: setListMode } = useTopicListMode()
@@ -29,7 +30,7 @@ const showPinnedLabels = computed(() => page.props.sort === '' || page.props.sor
 const isWaterfallMode = computed(() => listMode.value === 'waterfall')
 
 watch(
-  () => [page.props.sort, page.props.pagination.page, page.props.topics],
+  () => page.pageUrl,
   () => {
     topics.value = [...page.props.topics]
     pagination.value = page.props.pagination
@@ -90,6 +91,12 @@ function observeSentinel() {
 }
 
 onMounted(observeSentinel)
+onActivated(() => {
+  void nextTick(observeSentinel)
+})
+onDeactivated(() => {
+  observer?.disconnect()
+})
 
 onBeforeUnmount(() => {
   observer?.disconnect()

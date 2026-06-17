@@ -11,6 +11,7 @@ import type { LayoutPayload, SearchPageProps } from '@/types/payload'
 const page = defineProps<{
   layout: LayoutPayload
   props: SearchPageProps
+  pageUrl: string
 }>()
 const { t } = useI18n()
 
