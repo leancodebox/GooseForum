@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport
 import { AlertTriangle, Ban, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
 import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateModerationArticleStatus, updateReply, watchArticle } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
+import { useFlashMessages } from '@/runtime/flash-message'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
@@ -19,6 +20,7 @@ const page = defineProps<{
 }>()
 
 const { t } = useI18n()
+const { push: pushFlash } = useFlashMessages()
 const replyContent = ref('')
 const replyTargetId = ref(0)
 const likeCount = ref(page.props.article.likeCount)
@@ -59,14 +61,14 @@ const editReplyContents = reactive<Record<number, string>>({})
 const editReplyErrors = reactive<Record<number, string>>({})
 const articleHeaderEl = ref<HTMLElement | null>(null)
 const titleEl = ref<HTMLElement | null>(null)
-const replyComposerRef = ref<InstanceType<typeof ArticleReplyComposer> | null>(null)
 const replyLoadMoreEl = ref<HTMLElement | null>(null)
+const replyListEndEl = ref<HTMLElement | null>(null)
+const replyRailSlotEl = ref<HTMLElement | null>(null)
 const articleRailTopOffset = ref(0)
 const showHeaderTitle = ref(false)
 const isMobileHeaderViewport = ref(false)
 const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
-const showFloatingReply = ref(false)
 const composerOpen = ref(false)
 const mobileReplyRailOpen = ref(false)
 const activeReplyNo = ref(firstReplyNo(page.props.replies))
@@ -81,41 +83,71 @@ const replyRailCurrentLabel = computed(() => {
   return activeReply ? formatRailDate(activeReply.createdAt) : ''
 })
 const replyRailStartLabel = computed(() => formatRailDate(page.props.article.createdAt))
-const replyRailEndLabel = computed(() => formatRailDate(page.props.article.updatedAt))
+const replyRailEndLabel = computed(() => formatRailDate(replyTailLoaded.value ? replies.value[replies.value.length - 1]?.createdAt || page.props.article.updatedAt : page.props.article.updatedAt))
 const replyRailBusy = computed(() => loadingReplyWindow.value && (loadingReplyDirection.value === 'anchor' || loadingReplyDirection.value === 'tail'))
-const floatingArticleActions = computed(() => [
-  {
-    key: 'like',
-    icon: Heart,
-    active: isLiked.value,
-    acting: actingLike.value,
-    title: t('article.like'),
-    activeClass: 'bg-error/10 text-error hover:bg-error/10',
-    onClick: toggleLike,
-  },
-  {
-    key: 'bookmark',
-    icon: Bookmark,
-    active: isBookmarked.value,
-    acting: actingBookmark.value,
-    title: isBookmarked.value ? t('article.bookmarked') : t('article.bookmark'),
-    activeClass: 'bg-info/10 text-primary hover:bg-info/10',
-    onClick: toggleBookmark,
-  },
-  {
-    key: 'watch',
-    icon: Bell,
-    active: isWatched.value,
-    acting: actingWatch.value,
-    title: isWatched.value ? t('article.watched') : t('article.watch'),
-    activeClass: 'bg-success/10 text-success hover:bg-success/15',
-    onClick: toggleWatch,
-  },
-])
+const actionMessageSuccess = computed(() =>
+  [
+    t('article.bookmarkAdded'),
+    t('article.bookmarkRemoved'),
+    t('article.watchAdded'),
+    t('article.watchRemoved'),
+    t('article.moderationBanSuccess'),
+    t('article.moderationUnbanSuccess'),
+  ].includes(actionMessage.value),
+)
+const floatingArticleActions = computed(() => {
+  const actions = [
+    {
+      key: 'like',
+      icon: Heart,
+      active: isLiked.value,
+      acting: actingLike.value,
+      fill: true,
+      title: t('article.like'),
+      activeClass: 'bg-error/10 text-error hover:bg-error/10',
+      onClick: toggleLike,
+    },
+    {
+      key: 'bookmark',
+      icon: Bookmark,
+      active: isBookmarked.value,
+      acting: actingBookmark.value,
+      fill: true,
+      title: isBookmarked.value ? t('article.bookmarked') : t('article.bookmark'),
+      activeClass: 'bg-info/10 text-primary hover:bg-info/10',
+      onClick: toggleBookmark,
+    },
+    {
+      key: 'watch',
+      icon: Bell,
+      active: isWatched.value,
+      acting: actingWatch.value,
+      fill: true,
+      title: isWatched.value ? t('article.watched') : t('article.watch'),
+      activeClass: 'bg-success/10 text-success hover:bg-success/15',
+      onClick: toggleWatch,
+    },
+  ]
+
+  if (page.props.permissions.canModerateArticle) {
+    const isBanned = articleProcessStatus.value === 1
+    actions.push({
+      key: isBanned ? 'unban' : 'ban',
+      icon: isBanned ? RotateCcw : Ban,
+      active: false,
+      acting: actingModeration.value,
+      fill: false,
+      title: isBanned ? t('article.moderationUnban') : t('article.moderationBan'),
+      activeClass: 'text-base-content/75 hover:bg-base-200 hover:text-base-content',
+      onClick: async () => requestArticleModeration(isBanned ? 'unban' : 'ban'),
+    })
+  }
+
+  return actions
+})
 const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
 let articleHeaderResizeObserver: ResizeObserver | undefined
-let replyEditorObserver: IntersectionObserver | undefined
 let replyLoadObserver: IntersectionObserver | undefined
 let replyVisibilityObserver: IntersectionObserver | undefined
 let lastHeaderScrollY = 0
@@ -126,8 +158,8 @@ let replyVisibilityFrame = 0
 let replyVisibilityPaused = false
 let replyVisibilityResumeTimer: number | undefined
 let replyBottomLoadFrame = 0
+let activeReplyScrollFrame = 0
 let pendingReplyJumpNo: number | null = null
-const visibleReplyRatios = new Map<number, number>()
 
 function updateArticleRailTopOffset() {
   if (!articleHeaderEl.value) {
@@ -168,7 +200,6 @@ onMounted(() => {
   setupHeaderTitleBehavior()
   void nextTick(observeArticleHeader)
   void nextTick(observeTitle)
-  void nextTick(observeReplyEditor)
   void nextTick(observeReplyLoader)
   void nextTick(scheduleObserveReplyVisibility)
   setupReplyBottomLoadFallback()
@@ -193,7 +224,6 @@ watch(
     mobileReplyRailOpen.value = false
     void nextTick(observeArticleHeader)
     void nextTick(observeTitle)
-    void nextTick(observeReplyEditor)
     void nextTick(observeReplyLoader)
     void nextTick(scheduleObserveReplyVisibility)
     void nextTick(syncReplyHash)
@@ -225,10 +255,10 @@ watch(
 onBeforeUnmount(() => {
   titleObserver?.disconnect()
   articleHeaderResizeObserver?.disconnect()
-  replyEditorObserver?.disconnect()
   replyLoadObserver?.disconnect()
   replyVisibilityObserver?.disconnect()
   window.removeEventListener('scroll', updateMobileHeaderTitle)
+  window.removeEventListener('scroll', scheduleActiveReplyFromScroll)
   window.removeEventListener('scroll', scheduleReplyBottomLoadCheck)
   window.removeEventListener('resize', updateArticleRailTopOffset)
   window.removeEventListener('resize', updateHeaderViewport)
@@ -236,6 +266,7 @@ onBeforeUnmount(() => {
   window.cancelAnimationFrame(headerScrollFrame)
   window.cancelAnimationFrame(replyVisibilityFrame)
   window.cancelAnimationFrame(replyBottomLoadFrame)
+  window.cancelAnimationFrame(activeReplyScrollFrame)
   window.clearTimeout(replyVisibilityResumeTimer)
   window.clearTimeout(highlightTimer)
   shellState.headerTitle = ''
@@ -247,6 +278,7 @@ function setupHeaderTitleBehavior() {
   lastHeaderScrollY = window.scrollY
   updateHeaderViewport()
   window.addEventListener('scroll', updateMobileHeaderTitle, { passive: true })
+  window.addEventListener('scroll', scheduleActiveReplyFromScroll, { passive: true })
   window.addEventListener('resize', updateArticleRailTopOffset)
   window.addEventListener('resize', updateHeaderViewport)
 }
@@ -319,20 +351,6 @@ function applyMobileHeaderTitle() {
   lastHeaderScrollY = scrollY
 }
 
-function observeReplyEditor() {
-  replyEditorObserver?.disconnect()
-  const footerEl = replyComposerRef.value?.footerEl
-  if (!footerEl || !page.props.permissions.canReply || !('IntersectionObserver' in window)) return
-
-  replyEditorObserver = new IntersectionObserver(
-    (entries) => {
-      showFloatingReply.value = !entries[0]?.isIntersecting
-    },
-    { threshold: 0.08, rootMargin: '0px 0px -96px 0px' },
-  )
-  replyEditorObserver.observe(footerEl)
-}
-
 function observeReplyLoader() {
   replyLoadObserver?.disconnect()
   if (!replyLoadMoreEl.value || !replyHasAfter.value || !replyAutoLoadAfter.value || !('IntersectionObserver' in window)) return
@@ -360,7 +378,6 @@ function scheduleObserveReplyVisibility() {
 function observeReplyVisibility() {
   if (replyVisibilityPaused) return
   replyVisibilityObserver?.disconnect()
-  visibleReplyRatios.clear()
   if (!('IntersectionObserver' in window)) {
     activeReplyNo.value = firstReplyNo(replies.value)
     return
@@ -373,23 +390,13 @@ function observeReplyVisibility() {
   }
 
   replyVisibilityObserver = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        const replyNo = Number((entry.target as HTMLElement).dataset.replyNo || 0)
-        if (!replyNo) continue
-        if (entry.isIntersecting) {
-          visibleReplyRatios.set(replyNo, entry.intersectionRatio)
-        } else {
-          visibleReplyRatios.delete(replyNo)
-        }
-      }
-
+    () => {
       const bestReplyNo = findViewportReplyNo()
       if (bestReplyNo > 0) {
         activeReplyNo.value = bestReplyNo
       }
     },
-    { threshold: [0.05, 0.25, 0.5, 0.75], rootMargin: '-28% 0px -48% 0px' },
+    { threshold: [0.01, 0.1, 0.25, 0.5, 0.75], rootMargin: '-96px 0px -112px 0px' },
   )
 
   elements.forEach((element) => replyVisibilityObserver?.observe(element))
@@ -405,17 +412,36 @@ function pauseReplyVisibility(duration = 600) {
 }
 
 function findViewportReplyNo() {
-  const markerY = Math.min(window.innerHeight * 0.42, 360)
+  if (isReplyListEndAnchored()) {
+    return lastReplyNo(replies.value) || replyMaxRange.value
+  }
+
+  return findReplyNoNearViewportMarker()
+}
+
+function scheduleActiveReplyFromScroll() {
+  if (replyVisibilityPaused || activeReplyScrollFrame) return
+  activeReplyScrollFrame = window.requestAnimationFrame(() => {
+    activeReplyScrollFrame = 0
+    const bestReplyNo = findViewportReplyNo()
+    if (bestReplyNo > 0) {
+      activeReplyNo.value = bestReplyNo
+    }
+  })
+}
+
+function findReplyNoNearViewportMarker() {
+  const markerY = Math.min(window.innerHeight * 0.38, 340)
   let coveringReplyNo = 0
   let coveringDistance = Number.POSITIVE_INFINITY
   let nearestReplyNo = 0
   let nearestDistance = Number.POSITIVE_INFINITY
 
-  for (const replyNo of visibleReplyRatios.keys()) {
-    const element = document.querySelector<HTMLElement>(`[data-reply-no="${replyNo}"]`)
-    if (!element) continue
+  for (const element of document.querySelectorAll<HTMLElement>('[data-reply-no]')) {
+    const replyNo = Number(element.dataset.replyNo || 0)
+    if (!replyNo) continue
     const rect = element.getBoundingClientRect()
-    if (rect.bottom <= 96 || rect.top >= window.innerHeight) continue
+    if (rect.bottom <= 88 || rect.top >= window.innerHeight - 96) continue
 
     if (rect.top <= markerY && rect.bottom >= markerY) {
       const distance = Math.abs(rect.top - markerY)
@@ -434,6 +460,13 @@ function findViewportReplyNo() {
   }
 
   return coveringReplyNo || nearestReplyNo
+}
+
+function isReplyListEndAnchored() {
+  if (replyHasAfter.value || !replyTailLoaded.value || !replyListEndEl.value) return false
+  const rect = replyListEndEl.value.getBoundingClientRect()
+  const railBottom = replyRailSlotEl.value?.getBoundingClientRect().bottom ?? window.innerHeight - 120
+  return rect.top <= railBottom
 }
 
 function resetRepliesFromProps() {
@@ -638,6 +671,11 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail'
 
 async function jumpToReplyNo(replyNo: number) {
   const target = clampReplyNo(replyNo)
+  if (target >= replyMaxRange.value) {
+    await jumpToLatestReply()
+    return
+  }
+
   if (loadingReplyWindow.value) {
     pendingReplyJumpNo = target
     activeReplyNo.value = target
@@ -696,14 +734,17 @@ async function jumpToLatestReply() {
     if (latest) {
       activeReplyNo.value = latest.replyNo
       await nextTick()
-      document.getElementById(`reply-${latest.id}`)?.scrollIntoView({ block: 'center' })
+      scrollReplyListEndIntoView()
       pauseReplyVisibility()
     }
     return
   }
   const loadedLatest = replies.value.find((reply) => reply.replyNo === replyMaxRange.value)
   if (loadedLatest) {
-    await jumpToReplyNo(loadedLatest.replyNo)
+    activeReplyNo.value = loadedLatest.replyNo
+    await nextTick()
+    scrollReplyListEndIntoView()
+    pauseReplyVisibility()
     return
   }
   await loadReplyWindow('tail')
@@ -711,7 +752,20 @@ async function jumpToLatestReply() {
   const latest = replies.value[replies.value.length - 1]
   if (latest) {
     activeReplyNo.value = latest.replyNo
-    document.getElementById(`reply-${latest.id}`)?.scrollIntoView({ block: 'center' })
+    scrollReplyListEndIntoView()
+    pauseReplyVisibility()
+  }
+}
+
+function scrollReplyListEndIntoView() {
+  if (replyListEndEl.value) {
+    replyListEndEl.value.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    return
+  }
+
+  const latest = replies.value[replies.value.length - 1]
+  if (latest) {
+    document.getElementById(`reply-${latest.id}`)?.scrollIntoView({ block: 'end', behavior: 'smooth' })
   }
 }
 
@@ -1014,8 +1068,10 @@ async function updateArticleModerationFromDetail() {
     articleProcessStatus.value = action === 'ban' ? 1 : 0
     pendingModerationAction.value = null
     actionMessage.value = action === 'ban' ? t('article.moderationBanSuccess') : t('article.moderationUnbanSuccess')
+    pushFlash(actionMessage.value, 'success')
   } catch (error) {
     actionMessage.value = error instanceof Error ? error.message : t('api.moderationActionFailed')
+    pushFlash(actionMessage.value, 'error')
   } finally {
     actingModeration.value = false
   }
@@ -1042,7 +1098,6 @@ async function removeReply(replyId: number) {
 </script>
 
 <template>
-  <div class="pb-20 xl:pb-0">
     <article class="min-w-0">
       <header ref="articleHeaderEl" class="relative z-10 border-b border-line/70 px-4 py-4 sm:mb-4 sm:px-0 sm:pb-4 sm:pt-0 xl:w-[calc(100%+292px)]">
         <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-base-content [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.article.title }}</h1>
@@ -1154,7 +1209,7 @@ async function removeReply(replyId: number) {
                 <RotateCcw class="h-4 w-4" />
                 {{ t('article.moderationUnban') }}
               </button>
-              <span v-if="actionMessage" class="text-xs" :class="actionMessage === t('article.bookmarkAdded') || actionMessage === t('article.bookmarkRemoved') || actionMessage === t('article.watchAdded') || actionMessage === t('article.watchRemoved') || actionMessage === t('article.moderationBanSuccess') || actionMessage === t('article.moderationUnbanSuccess') ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
+              <span v-if="actionMessage" class="text-xs" :class="actionMessageSuccess ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
             </div>
           </div>
         </div>
@@ -1308,10 +1363,10 @@ async function removeReply(replyId: number) {
           </button>
           <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-base-content/55">{{ t('article.allRepliesShown') }}</p>
         </div>
+        <span ref="replyListEndEl" class="block h-px scroll-mb-28" aria-hidden="true" />
       </section>
 
       <ArticleReplyComposer
-        ref="replyComposerRef"
         v-model="replyContent"
         v-model:mobile-rail-open="mobileReplyRailOpen"
         v-model:open="composerOpen"
@@ -1324,8 +1379,6 @@ async function removeReply(replyId: number) {
         :has-rail="hasReplyRail"
         :max-no="replyMaxRange"
         :rail-busy="replyRailBusy"
-        :reply-count="formatNumber(page.props.article.replyCount)"
-        :show-floating="showFloatingReply"
         :start-label="replyRailStartLabel"
         :submitting="submitting"
         :success-message="successMessage"
@@ -1395,18 +1448,20 @@ async function removeReply(replyId: number) {
           </div>
         </div>
 
-        <ReplyPositionRail
-          v-if="page.props.article.replyCount > 0 && replyMaxRange > 0"
-          :current="replyRailCurrentNo"
-          :max="replyMaxRange"
-          :start-label="replyRailStartLabel"
-          :end-label="replyRailEndLabel"
-          :current-label="replyRailCurrentLabel"
-          :busy="replyRailBusy"
-          @earliest="jumpToArticleBodyFromRail"
-          @latest="jumpToLatestReplyFromRail"
-          @select="selectReplyFromRail"
-        />
+        <div ref="replyRailSlotEl">
+          <ReplyPositionRail
+            v-if="page.props.article.replyCount > 0 && replyMaxRange > 0"
+            :current="replyRailCurrentNo"
+            :max="replyMaxRange"
+            :start-label="replyRailStartLabel"
+            :end-label="replyRailEndLabel"
+            :current-label="replyRailCurrentLabel"
+            :busy="replyRailBusy"
+            @earliest="jumpToArticleBodyFromRail"
+            @latest="jumpToLatestReplyFromRail"
+            @select="selectReplyFromRail"
+          />
+        </div>
 
       </div>
     </Teleport>
@@ -1527,5 +1582,4 @@ async function removeReply(replyId: number) {
         </div>
       </Transition>
     </Teleport>
-  </div>
 </template>

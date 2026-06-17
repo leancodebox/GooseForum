@@ -14,6 +14,7 @@ type ArticleReplyAction = {
   icon: Component
   active: boolean
   acting: boolean
+  fill?: boolean
   title: string
   activeClass: string
   onClick: () => void | Promise<void>
@@ -30,9 +31,7 @@ const props = defineProps<{
   maxNo: number
   mobileRailOpen: boolean
   open: boolean
-  replyCount: string
   railBusy: boolean
-  showFloating: boolean
   startLabel: string
   submitting: boolean
   successMessage: string
@@ -55,14 +54,11 @@ const emit = defineEmits<{
 
 const content = defineModel<string>({ default: '' })
 const { t } = useI18n()
-const footerEl = ref<HTMLElement | null>(null)
 const editorEl = ref<HTMLTextAreaElement | null>(null)
 const uploadingImage = ref(false)
 const dragOver = ref(false)
 const composerBusy = computed(() => props.submitting || uploadingImage.value)
-const showFloatingComposer = computed(() => props.canReply && (props.showFloating || props.open))
-
-defineExpose({ footerEl })
+const showFloatingControls = computed(() => props.actions.length > 0 || props.canReply)
 
 watch(
   () => props.open,
@@ -212,45 +208,7 @@ function submit() {
 </script>
 
 <template>
-  <section ref="footerEl" class="gf-card mt-4 p-4 sm:p-5">
-    <template v-if="canReply">
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 class="text-base font-semibold text-base-content">{{ t('article.joinDiscussion') }}</h2>
-          <p class="mt-1 text-sm text-base-content/55">{{ replyCount }} {{ t('article.replyCount') }}</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button
-            v-for="action in actions"
-            :key="action.key"
-            type="button"
-            class="gf-button gf-button-md shrink-0"
-            :class="action.active ? action.activeClass : 'gf-button-secondary'"
-            :disabled="action.acting"
-            :title="action.title"
-            @click="action.onClick"
-          >
-            <Loader2 v-if="action.acting" class="h-4 w-4 animate-spin" />
-            <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active ? 'currentColor' : 'none'" />
-            {{ action.title }}
-          </button>
-          <button type="button" class="gf-button gf-button-md gf-button-primary shrink-0" @click="openReply">
-            <MessageSquare class="h-4 w-4" />
-            {{ t('article.joinDiscussion') }}
-          </button>
-        </div>
-      </div>
-    </template>
-    <template v-else>
-      <div class="text-center">
-        <h2 class="text-base font-semibold text-base-content">{{ t('article.joinDiscussion') }}</h2>
-        <p class="mt-1 text-sm text-base-content/55">{{ t('article.loginToReply') }}</p>
-        <a href="/login" class="gf-button gf-button-md gf-button-primary mt-4">{{ t('auth.loginTitle') }}</a>
-      </div>
-    </template>
-  </section>
-
-  <Teleport v-if="hasRail || showFloatingComposer" to="body">
+  <Teleport v-if="hasRail || showFloatingControls || open" to="body">
     <div class="pointer-events-none fixed inset-x-0 bottom-4 z-[90] px-3 sm:px-6">
       <div class="relative mx-auto flex w-fit max-w-full justify-center">
         <Transition name="floating-reply">
@@ -284,18 +242,18 @@ function submit() {
         </Transition>
 
         <Transition name="floating-reply" mode="out-in">
-          <div v-if="!open" class="gf-floating-surface pointer-events-auto flex w-fit max-w-full items-center gap-1 rounded-full p-1">
-            <button
-              v-if="hasRail"
-              type="button"
-              class="inline-flex h-9 items-center rounded-full px-2.5 text-sm font-black tabular-nums text-primary transition hover:bg-info/10 hover:text-primary xl:hidden"
-              :aria-expanded="mobileRailOpen"
-              :aria-label="t('article.replyPosition')"
-              @click="toggleMobileRail"
-            >
-              {{ currentNo }} / {{ formatNumber(maxNo) }}
-            </button>
-            <template v-if="showFloatingComposer">
+          <div v-if="!open" class="pointer-events-auto flex max-w-full flex-col items-center gap-2">
+            <div class="gf-floating-surface flex w-fit max-w-full items-center gap-1 rounded-full p-1">
+              <button
+                v-if="hasRail"
+                type="button"
+                class="inline-flex h-9 items-center rounded-full px-2.5 text-sm font-black tabular-nums text-primary transition hover:bg-info/10 hover:text-primary xl:hidden"
+                :aria-expanded="mobileRailOpen"
+                :aria-label="t('article.replyPosition')"
+                @click="toggleMobileRail"
+              >
+                {{ currentNo }} / {{ formatNumber(maxNo) }}
+              </button>
               <button
                 v-for="action in actions"
                 :key="action.key"
@@ -307,9 +265,10 @@ function submit() {
                 @click="action.onClick"
               >
                 <Loader2 v-if="action.acting" class="h-4 w-4 animate-spin" />
-                <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active ? 'currentColor' : 'none'" />
+                <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active && action.fill !== false ? 'currentColor' : 'none'" />
               </button>
               <button
+                v-if="canReply"
                 type="button"
                 class="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-base-content/75 transition hover:bg-info/10 hover:text-primary"
                 :title="t('article.joinDiscussion')"
@@ -318,7 +277,7 @@ function submit() {
                 <MessageSquare class="h-4 w-4" />
                 <span>{{ t('article.joinDiscussion') }}</span>
               </button>
-            </template>
+            </div>
           </div>
           <div v-else class="gf-floating-surface pointer-events-auto relative w-[min(42rem,calc(100vw-1.5rem))] p-3">
             <div class="mb-2 flex items-center justify-between gap-3">
