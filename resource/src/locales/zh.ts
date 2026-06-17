@@ -18,6 +18,7 @@ export default {
     search: '搜索',
     previousPage: '上一页',
     nextPage: '下一页',
+    currentPage: '第 {page} 页',
     page: '第 {page} / {total} 页',
   },
   shell: {
@@ -194,6 +195,13 @@ export default {
       popular: '流行',
       latestReplies: '最新回复',
       latestPublished: '最新发布',
+    },
+    mode: {
+      label: '列表显示模式',
+      waterfall: '瀑布流',
+      pagination: '分页',
+      switchTo: '切换到{mode}模式',
+      changed: '已切换到{mode}模式',
     },
     columns: {
       topic: '主题',

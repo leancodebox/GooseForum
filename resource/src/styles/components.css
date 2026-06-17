@@ -120,6 +120,15 @@
     @apply text-base-content/55 hover:bg-base-300 hover:text-base-content;
   }
 
+  .gf-list-mode-switch {
+    @apply inline-flex h-8 shrink-0 items-center border-l border-line/70 pl-2;
+  }
+
+  .gf-list-mode-button {
+    @apply inline-grid h-8 w-8 place-items-center text-base-content/55 transition hover:bg-base-300 hover:text-base-content;
+    border-radius: var(--gf-radius-field);
+  }
+
   .gf-menu-surface {
     border: var(--gf-border) solid var(--gf-color-line);
     border-radius: var(--gf-radius-box);

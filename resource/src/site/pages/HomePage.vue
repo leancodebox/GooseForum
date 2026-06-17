@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Bell, Loader2, Mail, Plus, UsersRound } from '@lucide/vue'
+import { Bell, Mail, Plus, UsersRound } from '@lucide/vue'
 import { fetchPage } from '@/runtime/router'
 import EmptyState from '@/site/components/EmptyState.vue'
+import TopicListFooter from '@/site/components/TopicListFooter.vue'
+import TopicListModeSwitch from '@/site/components/TopicListModeSwitch.vue'
 import TopicList from '@/site/components/TopicList.vue'
+import { useTopicListMode } from '@/site/composables/useTopicListMode'
 import type { HomeProps, LayoutPayload, PagePayload, TopicPayload } from '@/types/payload'
 
 const page = defineProps<{
@@ -12,6 +15,7 @@ const page = defineProps<{
   props: HomeProps
 }>()
 const { t } = useI18n()
+const { mode: listMode, setMode: setListMode } = useTopicListMode()
 
 const topics = ref<TopicPayload[]>([])
 const pagination = ref<HomeProps['pagination']>(page.props.pagination)
@@ -22,6 +26,7 @@ let observer: IntersectionObserver | undefined
 
 const hasTopics = computed(() => topics.value.length > 0)
 const showPinnedLabels = computed(() => page.props.sort === '' || page.props.sort === 'latest')
+const isWaterfallMode = computed(() => listMode.value === 'waterfall')
 
 watch(
   () => [page.props.sort, page.props.pagination.page, page.props.topics],
@@ -34,8 +39,18 @@ watch(
   { immediate: true },
 )
 
+watch(listMode, (mode) => {
+  if (mode === 'pagination') {
+    observer?.disconnect()
+    topics.value = [...page.props.topics]
+    pagination.value = page.props.pagination
+    return
+  }
+  void nextTick(observeSentinel)
+})
+
 async function loadMore() {
-  if (loadingMore.value || !pagination.value.hasNext || !pagination.value.nextUrl) return
+  if (!isWaterfallMode.value || loadingMore.value || !pagination.value.hasNext || !pagination.value.nextUrl) return
 
   loadingMore.value = true
   loadError.value = ''
@@ -64,7 +79,7 @@ function sortTabLabel(key: string, fallback?: string) {
 
 function observeSentinel() {
   observer?.disconnect()
-  if (!loadMoreSentinel.value || !('IntersectionObserver' in window)) return
+  if (!isWaterfallMode.value || !loadMoreSentinel.value || !('IntersectionObserver' in window)) return
   observer = new IntersectionObserver(
     (entries) => {
       if (entries.some((entry) => entry.isIntersecting)) void loadMore()
@@ -104,16 +119,19 @@ onBeforeUnmount(() => {
 
       <section class="gf-card overflow-hidden">
         <div class="gf-home-topic-toolbar">
-          <div class="gf-home-topic-tabs">
-            <a
-              v-for="tab in page.props.tabs"
-              :key="tab.key"
-              :href="tab.url"
-              class="gf-tab"
-              :class="tab.active ? 'gf-tab-active' : 'gf-tab-idle'"
-            >
-              {{ sortTabLabel(tab.key, tab.label) }}
-            </a>
+          <div class="gf-home-topic-tools">
+            <div class="gf-home-topic-tabs">
+              <a
+                v-for="tab in page.props.tabs"
+                :key="tab.key"
+                :href="tab.url"
+                class="gf-tab"
+                :class="tab.active ? 'gf-tab-active' : 'gf-tab-idle'"
+              >
+                {{ sortTabLabel(tab.key, tab.label) }}
+              </a>
+            </div>
+            <TopicListModeSwitch :model-value="listMode" @update:model-value="setListMode" />
           </div>
           <a href="/publish" class="gf-button gf-button-md gf-button-primary shrink-0 whitespace-nowrap px-3 sm:h-8">
             <Plus class="h-4 w-4" />
@@ -136,20 +154,15 @@ onBeforeUnmount(() => {
           </template>
         </TopicList>
 
-        <div ref="loadMoreSentinel" class="border-t border-line bg-base-200/50 p-3 text-center">
-          <button
-            v-if="pagination.hasNext"
-            type="button"
-            class="gf-button gf-button-sm gf-button-ghost gap-2 disabled:cursor-wait"
-            :disabled="loadingMore"
-            @click="loadMore"
-          >
-            <Loader2 v-if="loadingMore" class="h-4 w-4 animate-spin" />
-            {{ loadingMore ? t('common.loadFailed') : t('common.loadMore') }}
-          </button>
-          <p v-else-if="hasTopics" class="text-xs font-medium text-base-content/55">{{ t('topicList.allShown') }}</p>
-          <p v-if="loadError" class="mt-2 text-xs text-error">{{ t('topicList.autoLoadFailed') }}</p>
-          <a v-if="pagination.hasNext" :href="pagination.nextUrl" rel="next" class="sr-only">{{ t('common.nextPage') }}</a>
+        <div ref="loadMoreSentinel">
+          <TopicListFooter
+            :pagination="pagination"
+            :mode="listMode"
+            :loading-more="loadingMore"
+            :has-topics="hasTopics"
+            :load-error="loadError"
+            @load-more="loadMore"
+          />
         </div>
       </section>
     </div>

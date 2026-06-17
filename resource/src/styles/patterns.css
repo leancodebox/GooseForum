@@ -3,6 +3,10 @@
     @apply flex flex-col gap-3 border-b border-line bg-base-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:border-y sm:border-t-0;
   }
 
+  .gf-home-topic-tools {
+    @apply flex min-w-0 flex-wrap items-center gap-2;
+  }
+
   .gf-home-topic-tabs {
     @apply flex min-w-0 items-center gap-2 overflow-x-auto;
     -ms-overflow-style: none;

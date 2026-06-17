@@ -18,6 +18,7 @@ export default {
     search: '検索',
     previousPage: '前へ',
     nextPage: '次へ',
+    currentPage: '{page} ページ目',
     page: '{page} / {total} ページ',
   },
   shell: {
@@ -194,6 +195,13 @@ export default {
       popular: '注目',
       latestReplies: '最新返信',
       latestPublished: '新規投稿',
+    },
+    mode: {
+      label: 'トピック一覧の表示モード',
+      waterfall: '自動',
+      pagination: 'ページ',
+      switchTo: '{mode}表示に切り替え',
+      changed: '{mode}表示に切り替えました',
     },
     columns: {
       topic: 'トピック',

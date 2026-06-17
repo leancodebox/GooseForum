@@ -18,6 +18,7 @@ export default {
     search: 'Search',
     previousPage: 'Previous',
     nextPage: 'Next',
+    currentPage: 'Page {page}',
     page: 'Page {page} / {total}',
   },
   shell: {
@@ -194,6 +195,13 @@ export default {
       popular: 'Popular',
       latestReplies: 'Latest replies',
       latestPublished: 'Newest posts',
+    },
+    mode: {
+      label: 'Topic list display mode',
+      waterfall: 'Flow',
+      pagination: 'Pages',
+      switchTo: 'Switch to {mode} mode',
+      changed: 'Switched to {mode} mode',
     },
     columns: {
       topic: 'Topic',
