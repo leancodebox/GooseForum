@@ -16,10 +16,6 @@ const navigationEntry = typeof window !== 'undefined'
   : undefined
 const isReloadNavigation = navigationEntry?.type === 'reload'
 
-if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
-  window.history.scrollRestoration = 'manual'
-}
-
 document.documentElement.lang = currentLocale()
 applySiteThemePayload(initialPayload.layout.theme)
 applyStoredTheme()
