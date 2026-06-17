@@ -11,6 +11,10 @@ import PayloadRouteView from '@/site/components/PayloadRouteView.vue'
 const initialPayload = readInitialPayload()
 const initialPage = await preparePayload(initialPayload)
 const currentPage = shallowRef(initialPage)
+const navigationEntry = typeof window !== 'undefined'
+  ? performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
+  : undefined
+const isReloadNavigation = navigationEntry?.type === 'reload'
 
 if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
   window.history.scrollRestoration = 'manual'
@@ -42,6 +46,13 @@ app.use(i18n)
 app.use(router)
 await router.isReady()
 app.mount('#goose-app')
+
+if (isReloadNavigation && typeof window !== 'undefined' && !window.location.hash) {
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  })
+}
+
 hydrateFlashMessages()
 
 window.addEventListener('goose:page', async (event) => {
