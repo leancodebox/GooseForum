@@ -58,9 +58,7 @@ func AddToQueue(task EmailTask) error {
 func StartEmailProcessor() {
 	emailProcessor.once.Do(func() {
 		closer.RegisterPriority(closer.PriorityProducer, StopEmailProcessor)
-		emailProcessor.wg.Add(1)
-		go func() {
-			defer emailProcessor.wg.Done()
+		emailProcessor.wg.Go(func() {
 			defer paniclog.Recover("mail_processor")
 			ticker := time.NewTicker(5 * time.Second)
 			defer ticker.Stop()
@@ -79,7 +77,7 @@ func StartEmailProcessor() {
 					return
 				}
 			}
-		}()
+		})
 	})
 }
 

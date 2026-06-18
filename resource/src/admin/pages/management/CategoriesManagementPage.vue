@@ -302,7 +302,7 @@ onMounted(() => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-if="loading">
+            <TableRow v-if="loading && rows.length === 0">
               <TableCell colspan="7" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
             </TableRow>
             <TableRow v-else-if="error">

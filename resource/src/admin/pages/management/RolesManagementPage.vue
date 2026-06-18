@@ -170,7 +170,7 @@ onMounted(() => {
 
       <ManagementTable
         :columns="['ID', adminText('k007i'), adminText('k007j'), adminText('k007k'), adminText('k007l'), adminText('k007m')]"
-        :loading="loading"
+        :loading="loading && rows.length === 0"
         :error="error"
         :total="total"
         :page="page"

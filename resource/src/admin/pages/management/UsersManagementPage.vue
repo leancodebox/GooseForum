@@ -262,7 +262,7 @@ onMounted(() => {
         </template>
 
         <div class="md:hidden">
-          <div v-if="loading" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k0046') }}</div>
+          <div v-if="loading && rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k0046') }}</div>
           <div v-else-if="error" class="px-3 py-10 text-center">
             <div class="text-sm text-destructive">{{ error }}</div>
             <Button variant="link" size="sm" class="mt-2 h-auto px-0 text-destructive" type="button" @click="loadUsers">{{ adminText('k002w') }}</Button>
@@ -313,7 +313,7 @@ onMounted(() => {
               </tr>
             </thead>
             <tbody class="divide-y">
-              <tr v-if="loading">
+              <tr v-if="loading && rows.length === 0">
                 <td colspan="6" class="h-28 px-3 text-center text-muted-foreground">{{ adminText('k0046') }}</td>
               </tr>
               <tr v-else-if="error">

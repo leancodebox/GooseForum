@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"maps"
 	"path/filepath"
 	"strings"
 
@@ -115,9 +116,7 @@ func dedupeStrings(values []string) []string {
 
 func templateFuncs() template.FuncMap {
 	funcs := template.FuncMap{}
-	for key, fn := range templateFuncMap {
-		funcs[key] = fn
-	}
+	maps.Copy(funcs, templateFuncMap)
 	funcs["ResourceEntry"] = resourceEntry
 	funcs["ResourceAsset"] = resourceAsset
 	return funcs

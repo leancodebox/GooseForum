@@ -171,7 +171,7 @@ onMounted(loadRecords)
 
       <ManagementTable
         :columns="columns"
-        :loading="loading"
+        :loading="loading && rows.length === 0"
         :error="error"
         :empty-text="adminText('k007e')"
         :total="total"

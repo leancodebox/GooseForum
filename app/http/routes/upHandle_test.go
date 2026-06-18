@@ -19,8 +19,8 @@ func CatAction(req CatActionReq) Response {
 
 func upCatAction(params any) func(string) string {
 	m0 := reflect.TypeOf(params)
-	for i := 0; i < m0.NumIn(); i++ {
-		_ = reflect.New(m0.In(i))
+	for in := range m0.Ins() {
+		_ = reflect.New(in)
 	}
 	return func(s string) string {
 		return s

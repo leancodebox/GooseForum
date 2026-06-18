@@ -85,9 +85,7 @@ var (
 func StartCleanup() {
 	cleanupOnce.Do(func() {
 		closer.RegisterPriority(closer.PriorityCache, StopCleanup)
-		cleanupWg.Add(1)
-		go func() {
-			defer cleanupWg.Done()
+		cleanupWg.Go(func() {
 			defer paniclog.Recover("captcha_cleanup")
 			ticker := time.NewTicker(time.Minute) // 每分钟清理一次
 			defer ticker.Stop()
@@ -99,7 +97,7 @@ func StartCleanup() {
 					return
 				}
 			}
-		}()
+		})
 	})
 }
 

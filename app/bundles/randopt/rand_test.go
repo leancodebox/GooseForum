@@ -43,13 +43,11 @@ func TestIdMakerP(t *testing.T) {
 	const goroutines = 10
 	const increments = 10000
 	for i := 1; i <= goroutines; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			for start := 1; start <= increments; start++ {
 				counter.Add()
 			}
-		}()
+		})
 	}
 	wg.Wait()
 	if got, want := counter.Get(), int64(goroutines*increments); got != want {

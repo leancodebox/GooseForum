@@ -1,6 +1,7 @@
 package moderatorservice
 
 import (
+	"slices"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -70,10 +71,8 @@ func CanModerateAnyCategory(userID uint64, categoryIDs []uint64) bool {
 		if grant.ScopeType != moderators.ScopeCategory {
 			continue
 		}
-		for _, categoryID := range categoryIDs {
-			if grant.ScopeID == categoryID {
-				return true
-			}
+		if slices.Contains(categoryIDs, grant.ScopeID) {
+			return true
 		}
 	}
 	return false
@@ -140,13 +139,7 @@ func loadSnapshot() Snapshot {
 func uniqueUint64(values []uint64) []uint64 {
 	res := make([]uint64, 0, len(values))
 	for _, value := range values {
-		seen := false
-		for _, item := range res {
-			if item == value {
-				seen = true
-				break
-			}
-		}
+		seen := slices.Contains(res, value)
 		if !seen {
 			res = append(res, value)
 		}

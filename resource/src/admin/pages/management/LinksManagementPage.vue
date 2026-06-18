@@ -30,6 +30,7 @@ const presetColors = ['#3b82f6', '#22c55e', '#a855f7', '#64748b', '#ef4444', '#f
 const presetEmojis = ['🔗', '👥', '✍️', '📁', '⭐', '🔥', '💡', '🛠️', '🎨', '💬', '📢', '🏠', '🚀', '🎁']
 
 const loading = ref(false)
+const loaded = ref(false)
 const saving = ref(false)
 const error = ref('')
 const groups = ref<FriendLinkGroup[]>([])
@@ -62,6 +63,7 @@ async function loadLinks() {
   } catch (err) {
     error.value = err instanceof Error ? err.message : adminText('k0018')
   } finally {
+    loaded.value = true
     loading.value = false
   }
 }
@@ -175,7 +177,7 @@ onMounted(() => {
       </div>
     </template>
 
-      <div v-if="loading" class="flex h-64 items-center justify-center rounded-lg border text-muted-foreground">{{ adminText('k0046') }}</div>
+      <div v-if="loading && !loaded" class="flex h-64 items-center justify-center rounded-lg border text-muted-foreground">{{ adminText('k0046') }}</div>
       <div v-else-if="error" class="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{{ error }}</div>
       <div v-else class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
         <Draggable

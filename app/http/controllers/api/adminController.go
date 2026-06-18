@@ -207,7 +207,7 @@ func BadgeList(req component.BetterRequest[component.Null]) component.Response {
 }
 
 func generateCustomBadgeCode() string {
-	for i := 0; i < 16; i++ {
+	for range 16 {
 		code := "custom_" + strings.ToLower(randopt.RandomString(10))
 		if badges.GetByCode(code).Id == 0 {
 			return code

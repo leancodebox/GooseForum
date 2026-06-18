@@ -67,9 +67,7 @@ func (c *ViewCounter) Count(articleID uint64) {
 }
 
 func (c *ViewCounter) start() {
-	c.wg.Add(1)
-	go func() {
-		defer c.wg.Done()
+	c.wg.Go(func() {
 		pending := make(map[uint64]uint64)
 		for {
 			select {
@@ -84,7 +82,7 @@ func (c *ViewCounter) start() {
 				return
 			}
 		}
-	}()
+	})
 }
 
 func (c *ViewCounter) drain(pending map[uint64]uint64) {

@@ -158,9 +158,7 @@ func TestConcurrentUpdateBytes(t *testing.T) {
 	var wg sync.WaitGroup
 	errs := make(chan error, workers)
 	for range workers {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			for range increments {
 				err := UpdateBytes("concurrent", 0, func(current []byte, exists bool) (UpdateAction, []byte, error) {
 					var value uint64
@@ -177,7 +175,7 @@ func TestConcurrentUpdateBytes(t *testing.T) {
 					return
 				}
 			}
-		}()
+		})
 	}
 	wg.Wait()
 	close(errs)

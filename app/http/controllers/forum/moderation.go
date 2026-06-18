@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"time"
 
@@ -335,10 +336,8 @@ func appendUniqueUint64(items []uint64, item uint64) []uint64 {
 	if item == 0 {
 		return items
 	}
-	for _, current := range items {
-		if current == item {
-			return items
-		}
+	if slices.Contains(items, item) {
+		return items
 	}
 	return append(items, item)
 }

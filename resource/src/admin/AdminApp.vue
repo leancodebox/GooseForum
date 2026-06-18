@@ -13,7 +13,6 @@ const props = defineProps<{
     <RouterView v-slot="{ Component, route }">
       <component
         :is="Component"
-        :key="route.fullPath"
         :payload="props.payload as AdminPayload<ManageHomeProps>"
         v-bind="route.meta.pageProps || {}"
       />

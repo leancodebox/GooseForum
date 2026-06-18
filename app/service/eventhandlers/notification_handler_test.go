@@ -1,6 +1,9 @@
 package eventhandlers
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestCommentNotificationExcludeUserIds(t *testing.T) {
 	event := &CommentCreatedEvent{
@@ -137,11 +140,11 @@ func TestTakeUpTo64Chars(t *testing.T) {
 		t.Fatalf("short content changed: %q", got)
 	}
 
-	long := ""
-	for i := 0; i < 70; i++ {
-		long += "鹅"
+	var long strings.Builder
+	for range 70 {
+		long.WriteString("鹅")
 	}
-	got := TakeUpTo64Chars(long)
+	got := TakeUpTo64Chars(long.String())
 	if len([]rune(got)) != 64 {
 		t.Fatalf("TakeUpTo64Chars() length = %d, want 64", len([]rune(got)))
 	}

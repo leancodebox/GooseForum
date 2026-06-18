@@ -28,7 +28,7 @@ func TestCache_GetOrLoad(t *testing.T) {
 func TestCache_LimitsEntries(t *testing.T) {
 	c := Cache[int]{}
 	defer stopTestCache(&c)
-	for i := 0; i < int(defaultMaxEntries)+10; i++ {
+	for i := range int(defaultMaxEntries) + 10 {
 		key := "key-" + strconv.Itoa(i)
 		_, _ = c.GetOrLoadE(key, func() (int, error) {
 			return i, nil
@@ -44,7 +44,7 @@ func TestCache_LimitsEntries(t *testing.T) {
 func TestCache_UsesCustomMaxEntries(t *testing.T) {
 	c := Cache[int]{MaxEntries: 3}
 	defer stopTestCache(&c)
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		key := "key-" + strconv.Itoa(i)
 		_, _ = c.GetOrLoadE(key, func() (int, error) {
 			return i, nil

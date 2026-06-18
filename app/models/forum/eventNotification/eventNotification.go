@@ -48,10 +48,10 @@ const (
 
 // NotificationPayload 通知内容的基础结构
 type NotificationPayload struct {
-	Title          string                     `json:"title,omitempty"`          // 旧通知兼容
-	Content        string                     `json:"content,omitempty"`        // 旧通知兼容
-	TemplateKey    string                     `json:"templateKey,omitempty"`    // 前端 i18n 模板 key
-	TemplateParams NotificationTemplateParams `json:"templateParams,omitempty"` // 前端 i18n 模板参数
+	Title          string                     `json:"title,omitempty"`       // 旧通知兼容
+	Content        string                     `json:"content,omitempty"`     // 旧通知兼容
+	TemplateKey    string                     `json:"templateKey,omitempty"` // 前端 i18n 模板 key
+	TemplateParams NotificationTemplateParams `json:"templateParams"`        // 前端 i18n 模板参数
 	// 通用字段
 	ActorId   uint64 `json:"actorId"`             // 触发者ID
 	ActorName string `json:"actorName,omitempty"` // 触发者名称

@@ -3,6 +3,7 @@ package forum
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"net/url"
 	"slices"
 	"strconv"
@@ -919,9 +920,7 @@ func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users
 			userIDs = append(userIDs, parent.UserId)
 		}
 	}
-	for userID, user := range users.GetMapByIds(userIDs) {
-		userMap[userID] = user
-	}
+	maps.Copy(userMap, users.GetMapByIds(userIDs))
 
 	res := make([]ReplyPayload, 0, len(replyEntities))
 	for _, item := range replyEntities {

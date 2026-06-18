@@ -67,6 +67,7 @@ const defaultConfig: SponsorsConfig = {
 }
 
 const loading = ref(false)
+const loaded = ref(false)
 const saving = ref(false)
 const error = ref('')
 const config = ref<SponsorsConfig>(structuredClone(defaultConfig))
@@ -126,6 +127,7 @@ async function loadSponsors() {
   } catch (err) {
     error.value = err instanceof Error ? err.message : adminText('k0027')
   } finally {
+    loaded.value = true
     loading.value = false
   }
 }
@@ -222,7 +224,7 @@ onMounted(() => {
       </div>
     </template>
 
-      <div v-if="loading" class="flex h-64 items-center justify-center rounded-lg border">
+      <div v-if="loading && !loaded" class="flex h-64 items-center justify-center rounded-lg border">
         <Loader2 class="size-8 animate-spin text-primary" />
       </div>
       <div v-else-if="error" class="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{{ error }}</div>

@@ -59,7 +59,7 @@ func assertAssetGzip(t *testing.T, path string, enabled bool) {
 	router := gin.New()
 	assertRouter(router)
 
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		request := httptest.NewRequest(http.MethodGet, path, nil)
 		request.Header.Set("Accept-Encoding", "gzip")
 		response := httptest.NewRecorder()

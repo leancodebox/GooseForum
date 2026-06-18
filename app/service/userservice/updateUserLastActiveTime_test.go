@@ -1,6 +1,7 @@
 package userservice
 
 import (
+	"maps"
 	"sync"
 	"testing"
 	"time"
@@ -169,9 +170,7 @@ func waitForFlush(t *testing.T, store *userActivityStore, run func()) map[uint64
 	mu.Lock()
 	defer mu.Unlock()
 	result := make(map[uint64]time.Time, len(flushed))
-	for userID, activeTime := range flushed {
-		result[userID] = activeTime
-	}
+	maps.Copy(result, flushed)
 	return result
 }
 

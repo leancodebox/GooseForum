@@ -73,10 +73,7 @@ func consumeQuota(userID uint64, now time.Time) (ResendResult, error) {
 		if state.LastSentAt > 0 {
 			nextAllowedAt := time.Unix(state.LastSentAt, 0).Add(resendInterval)
 			if now.Before(nextAllowedAt) {
-				result.RetryAfterSeconds = int64(nextAllowedAt.Sub(now).Seconds())
-				if result.RetryAfterSeconds < 1 {
-					result.RetryAfterSeconds = 1
-				}
+				result.RetryAfterSeconds = max(int64(nextAllowedAt.Sub(now).Seconds()), 1)
 				return kvstore.UpdateKeep, nil, ErrCooldown
 			}
 		}
@@ -98,9 +95,6 @@ func consumeQuota(userID uint64, now time.Time) (ResendResult, error) {
 func resendKey(userID uint64, now time.Time) (string, time.Duration) {
 	day := now.Format("20060102")
 	tomorrow := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
-	ttl := time.Until(tomorrow) + time.Hour
-	if ttl < time.Hour {
-		ttl = time.Hour
-	}
+	ttl := max(time.Until(tomorrow)+time.Hour, time.Hour)
 	return "activation-email:resend:" + strconv.FormatUint(userID, 10) + ":" + day, ttl
 }

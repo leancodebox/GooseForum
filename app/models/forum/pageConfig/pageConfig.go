@@ -117,7 +117,7 @@ type SiteSettingsConfig struct {
 	SiteUrl         string     `json:"siteUrl"`
 	SiteEmail       string     `json:"siteEmail"`
 	ExternalLinks   string     `json:"externalLinks"`
-	FooterInfo      FooterInfo `json:"footerInfo,omitempty"`
+	FooterInfo      FooterInfo `json:"footerInfo"`
 	// 品牌标识类型: default(默认样式), text(自定义文字), image(图片)
 	BrandType  string `json:"brandType"`
 	BrandText  string `json:"brandText"`

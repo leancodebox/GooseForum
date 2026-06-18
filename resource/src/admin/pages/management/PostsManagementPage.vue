@@ -338,7 +338,7 @@ onMounted(() => {
         </template>
 
         <div class="md:hidden">
-          <div v-if="loading" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k0046') }}</div>
+          <div v-if="loading && rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k0046') }}</div>
           <div v-else-if="error" class="px-3 py-10 text-center text-sm text-destructive">{{ error }}</div>
           <div v-else-if="rows.length === 0" class="px-3 py-10 text-center text-sm text-muted-foreground">{{ adminText('k00aw') }}</div>
           <div v-else class="divide-y">
@@ -419,7 +419,7 @@ onMounted(() => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-if="loading">
+              <TableRow v-if="loading && rows.length === 0">
                 <TableCell colspan="4" class="h-28 text-center text-muted-foreground">{{ adminText('k0046') }}</TableCell>
               </TableRow>
               <TableRow v-else-if="error">
