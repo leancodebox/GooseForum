@@ -13,218 +13,125 @@
     <a href="LICENSE"><img src="https://img.shields.io/github/license/leancodebox/GooseForum.svg" alt="License"></a>
     <a href="https://github.com/leancodebox/GooseForum/stargazers"><img src="https://img.shields.io/github/stars/leancodebox/GooseForum.svg?style=social" alt="GitHub stars"></a>
   </p>
+
+  <p><a href="README_ZH.md">中文</a> | <a href="README.md">English</a></p>
 </div>
 
-## 🌐 Language / 语言
+![GooseForum interface preview](https://github.com/leancodebox/assert/blob/main/gooseforum-readme-poster.png?raw=true)
 
-[🇨🇳 中文](README_ZH.md) | [🇺🇸 English](README.md)
+## Quick Start
 
-## 📖 Project Overview
+### Download and Run
 
-GooseForum is a modern technical community platform built with Go + Vue 3 + TailwindCSS. It keeps deployment simple while using a payload-driven SPA experience with no-js HTML rendering for SEO and graceful fallback.
-
-🌐 **Live Demo**: [GooseForum](https://gooseforum.online/)
-
-## ✨ Core Features
-
-### 🎯 User System
-- **User Registration/Login** - Email activation support
-- **Permission Management** - Role-based access control
-- **User Center** - Profile management, avatar upload
-- **Points System** - Check-in, posting, reply rewards
-- **Admin Panel** - Complete backend management
-
-### 📝 Content Management
-- **Article Publishing** - Markdown editor with preview
-- **Comment System** - Multi-level replies
-- **Article Categories** - Flexible category management
-- **Real-time Notifications** - WebSocket-powered notifications
-- **Chat System** - Real-time messaging
-
-### 🛠 Technical Features
-- **Single File Deployment** - Single executable after compilation
-- **SQLite/MySQL Support** - Default SQLite, MySQL optional
-- **Auto Backup** - Scheduled database backup
-- **Responsive Design** - Perfect mobile support
-- **Brand Customization** - Custom logo/text/image support
-- **Payload-driven SPA** - Smooth in-app navigation with server-provided page payloads
-- **SEO Friendly** - Lightweight no-js GoHTML rendering for crawlers and fallback
-
-## 🚀 Quick Start
-
-### Method 1: Download Pre-compiled Version (Recommended)
-
-1. Download pre-compiled version from [GitHub Releases](https://github.com/leancodebox/GooseForum/releases)
-2. Extract and start:
+Download the latest prebuilt binary from [GitHub Releases](https://github.com/leancodebox/GooseForum/releases), then start it:
 
 ```bash
-# Extract
 tar -zxvf GooseForum_Linux_x86_64.tar.gz
-
-# Grant permission
 chmod +x ./GooseForum
-
-# Start service
 ./GooseForum serve
 ```
 
-### Build with GoReleaser
+Open `http://localhost:5234`. The first registered user automatically becomes the administrator.
 
-```bash
-# Install GoReleaser
-go install github.com/goreleaser/goreleaser@latest
+### Build from Source
 
-# Build all platforms
-goreleaser build --snapshot --clean
+Requirements:
 
-# Build current platform
-goreleaser build --snapshot --clean --single-target
-```
-
-3. Visit `http://localhost:5234`
-
-> 💡 **Tip**: First registered account becomes administrator
-
-### Method 2: Build from Source
-
-#### Requirements
 - Go 1.26+
 - Node.js 18+
 - pnpm
 
-#### Build Steps
-
 ```bash
-# Clone project
 git clone https://github.com/leancodebox/GooseForum.git
 cd GooseForum
 
-# Build frontend
 cd resource && pnpm install && pnpm build && cd ..
-
-# Build backend
 go mod tidy
 go build -ldflags="-w -s" .
 
-# Start service
 ./GooseForum serve
 ```
 
-### Development Mode
+### Configuration
+
+GooseForum creates `config.toml` on first startup. The default database is SQLite.
+
+```toml
+[app]
+env = "production"
+
+[server]
+port = 5234
+url = "http://localhost"
+
+[db.default]
+connection = "sqlite"
+path = "./storage/database/sqlite.db"
+```
+
+See [configuration documentation](docs/user/configuration.md) for MySQL, mail, backup, security, and site settings.
+
+### Admin Commands
+
+```bash
+./GooseForum set-user-admin <userId>
+./GooseForum set-user-email <userId> <email>
+./GooseForum set-user-password <userId> <password>
+```
+
+## What Is GooseForum?
+
+GooseForum is a technical community platform built with Go, Gin, GORM, Vue 3, TypeScript, Vite, and TailwindCSS. It ships as a single executable, supports SQLite/MySQL, and provides a payload-driven SPA experience with server-rendered fallback pages for SEO and no-js access.
+
+Live demo: [gooseforum.online](https://gooseforum.online/)
+
+## Features
+
+- Markdown topics, replies, categories, notifications, chat, drafts, and user profiles.
+- Role and permission management with a full admin console.
+- Responsive public UI for desktop and mobile.
+- Theme workbench for light/dark theme preview and publishing.
+- SQLite by default, optional MySQL, scheduled backups.
+- Payload-driven navigation with no-js GoHTML templates.
+- Brand customization for logo, text, footer, and site assets.
+
+## Development
 
 ```bash
 # Backend with hot reload
 air
 
-# Public site and admin console frontend
+# Public site and admin console
 cd resource && pnpm dev
 ```
 
-The current admin console is served by the `resource` Vue app under `/admin`. It does not require a separate admin frontend service.
+The admin console is served by the same Vue app under `/admin`; it does not require a separate frontend service.
 
-## 🔧 Configuration
+## Project Structure
 
-GooseForum auto-creates `config.toml` on first startup:
-
-```toml
-[app]
-env = "production"              # local or production
-# debug is optional; local defaults to true, other environments default to false
-
-[server]
-port = 5234                    # Service port
-url = "http://localhost"       # Site URL
-
-[db.default]
-connection = "sqlite"          # Database type (sqlite/mysql)
-path = "./storage/database/sqlite.db"
-```
-
-📖 **Detailed Configuration**: [Configuration Documentation](docs/user/configuration.md)
-
-## 🏗 Technical Architecture
-
-### Backend Tech Stack
-- **Go 1.26+** - Main language
-- **Gin** - Web framework
-- **GORM** - ORM
-- **SQLite/MySQL** - Database
-- **JWT** - Authentication
-- **Cobra** - CLI
-
-### Frontend Tech Stack
-- **Vue 3** - Public site and admin UI framework
-- **TypeScript** - Type-safe frontend code
-- **Payload SPA Runtime** - Client-side navigation via `X-Goose-Page` JSON payloads
-- **TailwindCSS 4** - CSS framework
-- **GoHTML** - Lightweight no-js/SEO templates
-- **Vite** - Build tool
-
-### Admin Panel Tech Stack
-- **Vue 3 + TypeScript** - Admin UI inside `resource/src/admin`
-- **TailwindCSS 4** - Admin-scoped styling and design tokens
-- **Reka UI / VueUse** - Accessible primitives and interaction utilities where needed
-- **Unovis** - Admin charts and statistics visualization
-- **SortableJS / vuedraggable** - Drag sorting for operational lists
-
-## 📁 Project Structure
-
-```
+```text
 GooseForum/
 ├── app/                    # Backend code
-│   ├── bundles/           # Utilities (JWT, cache, events)
-│   ├── console/           # CLI commands
-│   ├── http/              # Controllers, middleware, routes
-│   ├── models/            # GORM models
-│   └── service/           # Business services
-├── resource/              # Frontend resources
-│   ├── src/
-│   │   ├── site/          # Public Vue app
-│   │   ├── admin/         # Admin Vue app
-│   │   ├── runtime/       # Shared payload runtime
-│   │   ├── styles/        # Public-site styles
-│   │   └── types/         # Shared frontend types
-│   ├── static/            # Static assets
-│   └── templates/         # No-js/SEO GoHTML templates
-├── docs/                  # Documentation
-├── main.go               # Entry point
-└── config.toml           # Configuration
+│   ├── console/            # CLI commands
+│   ├── http/               # Controllers, middleware, routes
+│   ├── models/             # GORM models
+│   └── service/            # Business services
+├── resource/               # Vue 3 frontend, templates, static assets
+│   ├── src/site/           # Public site
+│   ├── src/admin/          # Admin console
+│   ├── src/runtime/        # Payload runtime and shared browser helpers
+│   └── templates/          # GoHTML fallback templates
+├── docs/                   # Documentation
+├── main.go
+└── config.toml
 ```
 
-## 🛡 Admin Features
+## Deployment Notes
 
-```bash
-# Grant administrator role
-./GooseForum set-user-admin <userId>
+For production, place GooseForum behind a reverse proxy such as Nginx or Caddy, enable HTTPS, and configure database backups.
 
-# Set user email
-./GooseForum set-user-email <userId> <email>
+Minimal container image:
 
-# Set user password
-./GooseForum set-user-password <userId> <password>
-```
-
-### Admin Panel Features
-- **User Management** - Search, filter, ban, delete users
-- **Site Settings** - General, brand, footer, mail, security, posting
-- **Category Management** - Create, edit, delete categories
-- **Sponsorship Management** - Sponsor tiers and user sponsors
-- **Dashboard** - Traffic stats, daily analytics
-
-### Data Backup
-- Automatic scheduled SQLite backup
-- Configurable frequency and retention
-- Backup in `./storage/databasebackup/`
-
-## 📦 Deployment
-
-### Production
-1. Use reverse proxy (Nginx/Apache)
-2. Configure HTTPS
-3. Set up scheduled backups
-4. Monitor logs
-
-### Docker
 ```dockerfile
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
@@ -233,33 +140,14 @@ COPY GooseForum .
 CMD ["./GooseForum", "serve"]
 ```
 
-## 🤝 Contributing
-
-1. Fork this project
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push branch (`git push origin feature/AmazingFeature`)
-5. Create Pull Request
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE)
-
-## 📚 Related Documentation
+## Documentation
 
 - [Documentation Index](docs/README.md)
-- [Configuration Documentation](docs/user/configuration.md)
-- [Resource Frontend Design](docs/architecture/resource-frontend.md)
-- [Resource UI Specification](docs/frontend/ui-spec.md)
-- [Chinese README](README_ZH.md)
+- [Configuration](docs/user/configuration.md)
+- [Frontend Architecture](docs/architecture/resource-frontend.md)
+- [UI Specification](docs/frontend/ui-spec.md)
+- [中文 README](README_ZH.md)
 
-## 🙏 Acknowledgments
+## License
 
-Thanks to all contributors!
-
----
-
-<div align="center">
-  <p>If this project helps you, please give us a ⭐️</p>
-  <p>Made with ❤️ by <a href="https://github.com/leancodebox">LeanCodeBox</a></p>
-</div>
+MIT License. See [LICENSE](LICENSE).
