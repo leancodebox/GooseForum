@@ -38,7 +38,7 @@ const { t } = useI18n()
             class="h-3.5 w-3.5 shrink-0 rotate-45 text-error"
             :aria-label="t('topicList.pinned')"
           />
-          <a :href="topic.url" class="min-w-0 truncate text-[15px] font-semibold leading-6 text-base-content group-hover:text-primary sm:text-base">
+          <a :href="topic.url" class="min-w-0 truncate text-[15px] font-medium leading-6 text-base-content group-hover:text-primary sm:text-base">
             {{ topic.title }}
           </a>
         </span>
