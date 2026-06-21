@@ -108,6 +108,9 @@ type EntityComplete struct {
 }
 
 func (itself *EntityComplete) GetWebAvatarUrl() string {
+	if itself.IsFrozen == StatusFrozen {
+		return urlconfig.GetBannedAvatar()
+	}
 	if itself.AvatarUrl == "" {
 		return urlconfig.GetDefaultAvatar()
 	}

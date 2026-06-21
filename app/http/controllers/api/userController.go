@@ -551,6 +551,13 @@ func ResetPassword(req component.BetterRequest[ResetPasswordReq]) component.Resp
 		return component.FailResponseCode(component.MessageAuthResetTokenInvalid, nil)
 	}
 
+	if userEntity.IsFrozen == users.StatusFrozen {
+		return component.FailResponseCode(component.MessagePermissionUserFrozen, component.MessageParams{
+			"action":     "写入",
+			"actionCode": string(component.PermissionActionWrite),
+		})
+	}
+
 	if err = component.ValidatePassword(req.Params.NewPassword, 6); err != nil {
 		return component.FailResponseError(err)
 	}

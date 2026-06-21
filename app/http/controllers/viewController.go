@@ -196,11 +196,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if userEntity.IsFrozen == users.StatusFrozen {
-		c.JSON(200, component.FailDataCode(component.MessageAuthAccountFrozen, nil))
-		return
-	}
-
 	securityConfig := hotdataserve.GetSecuritySettingsConfigCache()
 	if securityConfig.EnableEmailVerification && userEntity.IsActivated == users.ActivationPending {
 		c.JSON(200, component.FailDataCode(component.MessageAuthEmailUnverified, nil))

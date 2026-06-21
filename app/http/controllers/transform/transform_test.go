@@ -71,3 +71,17 @@ func TestUser2UserDetailedVo(t *testing.T) {
 		t.Fatalf("CreatedAt = %v, want %v", got.CreatedAt, createdAt)
 	}
 }
+
+func TestFrozenUserUsesBannedAvatar(t *testing.T) {
+	user := users.EntityComplete{
+		Id:        9,
+		Username:  "blocked",
+		AvatarUrl: "/static/pic/1.webp",
+		IsFrozen:  users.StatusFrozen,
+	}
+
+	got := User2userShow(user)
+	if got.AvatarUrl != "/static/pic/banned-avatar.png" {
+		t.Fatalf("AvatarUrl = %q, want banned avatar", got.AvatarUrl)
+	}
+}

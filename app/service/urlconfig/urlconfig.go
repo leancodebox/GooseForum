@@ -17,6 +17,15 @@ func GetDefaultAvatar() string {
 	return `/static/pic/default-avatar.webp`
 }
 
+// GetBannedAvatar returns the fixed avatar shown for frozen accounts.
+func GetBannedAvatar() string {
+	cdnURL := setting.GetCDNURL()
+	if cdnURL != "" {
+		return cdnURL + `/static/pic/banned-avatar.png`
+	}
+	return `/static/pic/banned-avatar.png`
+}
+
 // FilePath returns the public image route for filename.
 func FilePath(filename string) string {
 	return path.Join("/file/img", filename)

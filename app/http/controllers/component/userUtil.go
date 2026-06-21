@@ -23,12 +23,14 @@ const (
 	PermissionActionUploadAttachment PermissionAction = "uploadAttachment"
 	PermissionActionPost             PermissionAction = "post"
 	PermissionActionComment          PermissionAction = "comment"
+	PermissionActionWrite            PermissionAction = "write"
 )
 
 var permissionActionFallbacks = map[PermissionAction]string{
 	PermissionActionUploadAttachment: "上传附件",
 	PermissionActionPost:             "发帖",
 	PermissionActionComment:          "评论",
+	PermissionActionWrite:            "写入",
 }
 
 func ValidateUsername(username string) bool {

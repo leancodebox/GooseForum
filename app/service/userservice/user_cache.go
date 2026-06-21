@@ -51,6 +51,7 @@ type UserPublicInfo struct {
 	Id                  uint64
 	Username            string
 	Nickname            string
+	IsFrozen            int8
 	RoleId              uint64
 	Prestige            int64
 	AvatarUrl           string
@@ -219,6 +220,7 @@ func (user UserInfo) toPublicInfo() UserPublicInfo {
 		Id:                  user.Id,
 		Username:            user.Username,
 		Nickname:            user.Nickname,
+		IsFrozen:            user.IsFrozen,
 		RoleId:              user.RoleId,
 		Prestige:            user.Prestige,
 		AvatarUrl:           user.AvatarUrl,
@@ -261,6 +263,7 @@ func (user UserPublicInfo) webAvatarURL() string {
 		Id:        user.Id,
 		Username:  user.Username,
 		Nickname:  user.Nickname,
+		IsFrozen:  user.IsFrozen,
 		AvatarUrl: user.AvatarUrl,
 	}
 	return entity.GetWebAvatarUrl()

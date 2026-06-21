@@ -23,6 +23,23 @@ func TestDefaultAvatarUsesCDNWhenConfigured(t *testing.T) {
 	}
 }
 
+func TestBannedAvatarUsesCDNWhenConfigured(t *testing.T) {
+	old := preferences.GetString("app.cdn_url", "")
+	t.Cleanup(func() {
+		preferences.Set("app.cdn_url", old)
+	})
+
+	preferences.Set("app.cdn_url", "")
+	if got := GetBannedAvatar(); got != "/static/pic/banned-avatar.png" {
+		t.Fatalf("banned avatar = %q, want local path", got)
+	}
+
+	preferences.Set("app.cdn_url", "https://cdn.example.com")
+	if got := GetBannedAvatar(); got != "https://cdn.example.com/static/pic/banned-avatar.png" {
+		t.Fatalf("cdn banned avatar = %q, want CDN path", got)
+	}
+}
+
 func TestFilePath(t *testing.T) {
 	if got := FilePath("avatar.webp"); got != "/file/img/avatar.webp" {
 		t.Fatalf("FilePath = %q, want /file/img/avatar.webp", got)

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/forum"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
@@ -48,6 +49,34 @@ func CheckAnyPermissionOrNotFound(c *gin.Context) {
 	}
 	if !permission.CheckAnyRole(roleId) {
 		forum.RenderNotFoundPage(c, component.MessagePageNotFound)
+		c.Abort()
+		return
+	}
+	c.Next()
+}
+
+func CheckWritableAccount(c *gin.Context) {
+	userId := c.GetUint64("userId")
+	if userId == 0 {
+		c.JSON(http.StatusUnauthorized, component.FailDataCode(component.MessageAuthRequired, nil))
+		c.Abort()
+		return
+	}
+
+	user, ok := userservice.GetUserInfo(userId)
+	if !ok {
+		c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionResolveFailed, nil))
+		c.Abort()
+		return
+	}
+	if user.IsFrozen == users.StatusFrozen {
+		c.JSON(http.StatusForbidden, component.FailDataCode(
+			component.MessagePermissionUserFrozen,
+			component.MessageParams{
+				"action":     "写入",
+				"actionCode": string(component.PermissionActionWrite),
+			},
+		))
 		c.Abort()
 		return
 	}

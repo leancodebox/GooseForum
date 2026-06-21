@@ -42,6 +42,11 @@ func ProviderCallback(c *gin.Context) {
 	currentUserId := currentUserInfo.UserId
 
 	if currentUserId > 0 {
+		if user, ok := userservice.GetUserInfo(currentUserId); !ok || user.IsFrozen == users.StatusFrozen {
+			forum.RenderOAuthErrorPage(c, http.StatusForbidden, component.MessagePermissionUserFrozen)
+			return
+		}
+
 		// 绑定模式：处理OAuth绑定
 		err = oauthservice.ProcessOAuthBind(currentUserId, gothUser)
 		if err != nil {
@@ -56,12 +61,6 @@ func ProviderCallback(c *gin.Context) {
 		if err != nil {
 			slog.Error("Process OAuth callback failed", "error", err)
 			forum.RenderInternalOAuthErrorPage(c, component.MessageOAuthProcessFailed)
-			return
-		}
-
-		// 检查用户状态
-		if user.IsFrozen == users.StatusFrozen {
-			forum.RenderOAuthErrorPage(c, http.StatusForbidden, component.MessageOAuthAccountFrozen)
 			return
 		}
 
