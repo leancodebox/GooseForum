@@ -636,6 +636,7 @@ async function loadUserHoverCard() {
       :has-moderation-reports="hasModerationReports"
       :close-label="t('shell.closeMenu')"
       :menu-label="t('shell.menu')"
+      :resources-label="t('shell.resources')"
       :categories-label="t('shell.categories')"
       :sidebar-icon="sidebarIcon"
       @close="closeDrawer"

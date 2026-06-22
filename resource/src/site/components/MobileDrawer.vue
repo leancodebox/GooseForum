@@ -29,6 +29,7 @@ const props = defineProps<{
   hasModerationReports?: boolean
   closeLabel: string
   menuLabel: string
+  resourcesLabel: string
   categoriesLabel: string
   sidebarIcon: (key: string) => unknown
 }>()
@@ -69,7 +70,7 @@ function close() {
         </div>
         <div class="space-y-0.5">
           <a
-            v-for="item in [...primaryItems, ...resourceItems]"
+            v-for="item in primaryItems"
             :key="item.key"
             :href="item.url"
             class="flex h-9 items-center gap-2 rounded-md px-2 text-sm font-medium"
@@ -90,16 +91,36 @@ function close() {
             />
           </a>
         </div>
-        <div v-if="categoryItems.length" class="mt-5 space-y-0.5">
+        <div v-if="resourceItems.length" class="mt-4 space-y-0.5">
+          <div class="px-2 text-[10px] font-bold uppercase tracking-wide text-base-content/55">{{ resourcesLabel }}</div>
+          <a
+            v-for="item in resourceItems"
+            :key="item.key"
+            :href="item.url"
+            class="flex h-9 items-center gap-2 rounded-md px-2 text-sm font-medium"
+            :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
+          >
+            <component
+              :is="sidebarIcon(item.key)"
+              v-if="sidebarIcon(item.key)"
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
+            <span v-else-if="item.icon" class="flex w-4 justify-center opacity-80" aria-hidden="true">{{ item.icon }}</span>
+            <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+          </a>
+        </div>
+        <div v-if="categoryItems.length" class="mt-4 space-y-0.5">
           <div class="px-2 text-[10px] font-bold uppercase tracking-wide text-base-content/55">{{ categoriesLabel }}</div>
           <a
             v-for="category in categoryItems"
             :key="category.key"
             :href="category.url"
-            class="flex h-9 items-center gap-2 rounded-md px-2 text-sm font-medium text-base-content/75 hover:bg-base-300"
+            class="flex h-9 items-center gap-2 rounded-md px-2 text-sm font-medium"
+            :class="category.active ? 'bg-base-300 text-base-content' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
           >
             <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
-            <span>{{ category.label }}</span>
+            <span class="min-w-0 flex-1 truncate">{{ category.label }}</span>
           </a>
         </div>
         <footer v-if="hasFooter" class="mt-2 border-t border-line px-2 pt-2 text-xs leading-5 text-base-content/75">
