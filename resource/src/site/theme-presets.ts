@@ -506,7 +506,6 @@ export const themePresets: SiteThemePreset[] = [
       'size-field': '0.25rem',
       border: '1px',
       depth: '1',
-      noise: '0',
     },
     'gf-dark': {
       ...preset.themes['gf-dark'],
@@ -517,7 +516,6 @@ export const themePresets: SiteThemePreset[] = [
       'size-field': '0.25rem',
       border: '1px',
       depth: '1',
-      noise: '0',
     },
   },
 }))

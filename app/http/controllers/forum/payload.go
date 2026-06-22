@@ -31,6 +31,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
+	"github.com/leancodebox/GooseForum/app/service/moderationstatusservice"
 	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
@@ -138,6 +139,7 @@ type ThemePayload struct {
 type UnreadStatusPayload struct {
 	Notifications          bool   `json:"notifications"`
 	Messages               bool   `json:"messages"`
+	ModerationReports      bool   `json:"moderationReports"`
 	LatestNotificationType string `json:"latestNotificationType,omitempty"`
 }
 
@@ -283,6 +285,9 @@ type ReplyPayload struct {
 	ReplyNo         uint64             `json:"replyNo"`
 	Content         string             `json:"content"`
 	RenderedContent string             `json:"renderedContent"`
+	ProcessStatus   int8               `json:"processStatus"`
+	IsHidden        bool               `json:"isHidden"`
+	CanModerate     bool               `json:"canModerate"`
 	Author          TopicAuthorPayload `json:"author"`
 	CreatedAt       string             `json:"createdAt"`
 	ReplyToID       uint64             `json:"replyToId,omitempty"`
@@ -650,6 +655,7 @@ func buildUnreadStatus(userID uint64) UnreadStatusPayload {
 	return UnreadStatusPayload{
 		Notifications:          status.Notifications,
 		Messages:               status.Messages,
+		ModerationReports:      moderationstatusservice.HasOpenReports(userID),
 		LatestNotificationType: status.LatestNotificationType,
 	}
 }
@@ -862,7 +868,7 @@ func buildArticleDetailProps(c *gin.Context, entity *articles.Entity) ArticleDet
 
 	return ArticleDetailProps{
 		Article:   buildArticlePayload(c, entity, userMap),
-		Replies:   buildReplyPayloads(replyEntities, userMap, currentUserID),
+		Replies:   buildReplyPayloads(replyEntities, userMap, currentUserID, moderatorservice.CanModerateAnyCategory(currentUserID, entity.CategoryId)),
 		HotTopics: buildArticleHotTopics(entity.Id),
 		Permissions: ArticlePermissions{
 			IsOwnArticle:       currentUserID == entity.UserId,
@@ -872,7 +878,7 @@ func buildArticleDetailProps(c *gin.Context, entity *articles.Entity) ArticleDet
 	}
 }
 
-func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64) []ReplyPayload {
+func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) []ReplyPayload {
 	replyMap := make(map[uint64]*reply.Entity, len(replyEntities))
 	for _, item := range replyEntities {
 		if item != nil {
@@ -936,12 +942,22 @@ func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users
 				replyToUserID = parentAuthor.ID
 			}
 		}
+		content := item.Content
+		renderedContent := item.RenderedHTML
+		isHidden := item.ProcessStatus != 0
+		if isHidden && !canModerate {
+			content = ""
+			renderedContent = ""
+		}
 		res = append(res, ReplyPayload{
 			ID:              item.Id,
 			ArticleID:       item.ArticleId,
 			ReplyNo:         item.ReplyNo,
-			Content:         item.Content,
-			RenderedContent: item.RenderedHTML,
+			Content:         content,
+			RenderedContent: renderedContent,
+			ProcessStatus:   item.ProcessStatus,
+			IsHidden:        isHidden,
+			CanModerate:     canModerate,
 			Author:          author,
 			CreatedAt:       item.CreatedAt.Format(time.DateTime),
 			ReplyToID:       item.ReplyId,

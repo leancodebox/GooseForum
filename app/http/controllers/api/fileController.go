@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 )
 
 func GetFileByFileName(c *gin.Context) {
@@ -42,6 +43,14 @@ func GetFileByFileName(c *gin.Context) {
 
 // SaveImgByGinContext handles image uploads with size and content checks.
 func SaveImgByGinContext(c *gin.Context) {
+	saveImgByGinContext(c, false)
+}
+
+func SaveAdminImgByGinContext(c *gin.Context) {
+	saveImgByGinContext(c, true)
+}
+
+func saveImgByGinContext(c *gin.Context, adminUpload bool) {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 
 	userId := c.GetUint64(`userId`)
@@ -173,6 +182,9 @@ func SaveImgByGinContext(c *gin.Context) {
 
 			component.MessageParams{"error": err.Error()}))
 		return
+	}
+	if adminUpload {
+		fileusageservice.AddAdminUpload(userId, entity.Name)
 	}
 
 	c.JSON(http.StatusOK, component.SuccessDataCode(map[string]any{

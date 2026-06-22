@@ -908,7 +908,12 @@ type AddCategoryModeratorReq struct {
 	Username   string `json:"username"`
 }
 
-func resolveModeratorUser(params AddCategoryModeratorReq) (users.EntityComplete, bool) {
+type ModeratorUserReq struct {
+	UserId   uint64 `json:"userId"`
+	Username string `json:"username"`
+}
+
+func resolveModeratorUser(params ModeratorUserReq) (users.EntityComplete, bool) {
 	if params.UserId != 0 {
 		user, err := users.Get(params.UserId)
 		return user, err == nil && user.Id != 0
@@ -929,7 +934,7 @@ func AddCategoryModerator(req component.BetterRequest[AddCategoryModeratorReq]) 
 	if req.Params.UserId == 0 && strings.TrimSpace(req.Params.Username) == "" {
 		return component.FailResponseCode(component.MessageAdminModeratorUserRequired, nil)
 	}
-	user, ok := resolveModeratorUser(req.Params)
+	user, ok := resolveModeratorUser(ModeratorUserReq{UserId: req.Params.UserId, Username: req.Params.Username})
 	if !ok {
 		return component.FailResponseCode(component.MessageAdminModeratorUserNotFound, nil)
 	}
@@ -953,6 +958,69 @@ func AddCategoryModerator(req component.BetterRequest[AddCategoryModeratorReq]) 
 		"userId":       user.Id,
 		"username":     user.Username,
 	})
+	return component.SuccessResponse(true)
+}
+
+func GetGlobalModeratorList(req component.BetterRequest[struct{}]) component.Response {
+	moderatorList := moderators.GetByScope(moderators.ScopeGlobal, 0)
+	moderatorUserIds := lo.Uniq(lo.Map(moderatorList, func(item *moderators.Entity, _ int) uint64 {
+		return item.UserId
+	}))
+	userMap := users.GetMapByIds(moderatorUserIds)
+	return component.SuccessResponse(lo.Map(moderatorList, func(item *moderators.Entity, _ int) CategoryModeratorItem {
+		user := userMap[item.UserId]
+		username := ""
+		avatarURL := ""
+		if user != nil {
+			username = user.Username
+			avatarURL = user.GetWebAvatarUrl()
+		}
+		return CategoryModeratorItem{
+			Id:        item.Id,
+			UserId:    item.UserId,
+			Username:  username,
+			AvatarUrl: avatarURL,
+			Status:    item.Status,
+		}
+	}))
+}
+
+func AddGlobalModerator(req component.BetterRequest[ModeratorUserReq]) component.Response {
+	if req.Params.UserId == 0 && strings.TrimSpace(req.Params.Username) == "" {
+		return component.FailResponseCode(component.MessageAdminModeratorUserRequired, nil)
+	}
+	user, ok := resolveModeratorUser(req.Params)
+	if !ok {
+		return component.FailResponseCode(component.MessageAdminModeratorUserNotFound, nil)
+	}
+	entity := moderators.GetByUserScope(user.Id, moderators.ScopeGlobal, 0)
+	entity.UserId = user.Id
+	entity.ScopeType = moderators.ScopeGlobal
+	entity.ScopeId = 0
+	entity.Status = moderators.StatusEnabled
+	if entity.CreatedBy == 0 {
+		entity.CreatedBy = req.UserId
+	}
+	if err := moderators.Save(&entity); err != nil {
+		slog.Error("save global moderator failed", "userId", user.Id, "err", err)
+		return component.FailResponse()
+	}
+	moderatorservice.Invalidate()
+	return component.SuccessResponse(true)
+}
+
+func DeleteGlobalModerator(req component.BetterRequest[struct {
+	Id uint64 `json:"id" validate:"required"`
+}]) component.Response {
+	entity := moderators.Get(req.Params.Id)
+	if entity.Id == 0 || entity.ScopeType != moderators.ScopeGlobal {
+		return component.FailResponseCode(component.MessageAdminModeratorNotFound, nil)
+	}
+	if err := moderators.Delete(&entity); err != nil {
+		slog.Error("delete global moderator failed", "moderatorId", entity.Id, "err", err)
+		return component.FailResponse()
+	}
+	moderatorservice.Invalidate()
 	return component.SuccessResponse(true)
 }
 

@@ -1,4 +1,4 @@
-import type { ModerationLogListResponse, NotificationFilter, NotificationListResponse, ReplyWindowPayload, SiteThemeConfig, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
+import type { ModerationLogListResponse, ModerationReportListResponse, NotificationFilter, NotificationListResponse, ReplyWindowPayload, SiteThemeConfig, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
 import { i18n } from './i18n'
 import { resolveApiMessage } from './api-message'
 
@@ -197,6 +197,50 @@ export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Pro
 
 export async function updateModerationArticleStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
   const response = await fetch('/api/forum/moderation/article-status', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id, action }),
+  })
+  return readApiResponse<boolean>(response, t('api.moderationActionFailed'))
+}
+
+export async function submitReport(targetType: 'article' | 'reply', targetId: number, reason: string, note: string): Promise<boolean> {
+  const response = await fetch('/api/forum/report', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ targetType, targetId, reason, note }),
+  })
+  return readApiResponse<boolean>(response, t('api.reportFailed'))
+}
+
+export async function updateModerationReplyStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
+  const response = await fetch('/api/forum/moderation/reply-status', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id, action }),
+  })
+  return readApiResponse<boolean>(response, t('api.moderationActionFailed'))
+}
+
+export async function fetchModerationReports(cursor = 0, pageSize = 20, status = 'open'): Promise<ModerationReportListResponse> {
+  const response = await fetch('/api/forum/moderation/reports', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ cursor, pageSize, status }),
+  })
+  return readApiResponse<ModerationReportListResponse>(response, t('api.moderationReportsFailed'))
+}
+
+export async function updateModerationReportStatus(id: number, action: 'ban' | 'resolve' | 'reject'): Promise<boolean> {
+  const response = await fetch('/api/forum/moderation/report-status', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

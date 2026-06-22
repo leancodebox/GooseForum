@@ -10,13 +10,7 @@ export function formatDateTime(value: string): string {
   if (!value) return ''
   const date = parseDate(value)
   if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  return `${formatDate(value)} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 export function formatChatTime(value: string): string {

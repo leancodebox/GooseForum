@@ -22,6 +22,10 @@ func SaveNoUpdate(entity *Entity) error {
 	return result.Error
 }
 
+func UpdateProcessStatus(id uint64, processStatus int8) error {
+	return builder().Where(queryopt.Eq(pid, id)).Update(fieldProcessStatus, processStatus).Error
+}
+
 func Get(id any) (entity Entity) {
 	builder().Where(pid, id).First(&entity)
 	return

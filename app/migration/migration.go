@@ -24,12 +24,14 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
+	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pointsRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/taskQueue"
@@ -66,11 +68,13 @@ func migration(migration bool) {
 		&articlesUserStat.Entity{},
 		&badges.Entity{},
 		&eventNotification.Entity{},
+		&fileUsage.Entity{},
 		&moderationLog.Entity{},
 		&moderators.Entity{},
 		&optRecord.Entity{},
 		&pageConfig.Entity{},
 		&pointsRecord.Entity{},
+		&reports.Entity{},
 		&reply.Entity{},
 		&role.Entity{},
 		&rolePermissionRs.Entity{},

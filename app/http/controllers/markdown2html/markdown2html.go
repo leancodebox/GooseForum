@@ -122,12 +122,20 @@ func GetParser() goldmark.Markdown {
 
 // ExtractFirstImageURL returns the first public image destination from Markdown.
 func ExtractFirstImageURL(content string) string {
+	urls := ExtractImageURLs(content)
+	if len(urls) == 0 {
+		return ""
+	}
+	return urls[0]
+}
+
+func ExtractImageURLs(content string) []string {
 	reader := text.NewReader([]byte(content))
 	doc := GetParser().Parser().Parse(reader)
 
-	firstImageURL := ""
+	imageURLs := make([]string, 0)
 	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
-		if !entering || firstImageURL != "" {
+		if !entering {
 			return ast.WalkContinue, nil
 		}
 		image, ok := n.(*ast.Image)
@@ -136,12 +144,11 @@ func ExtractFirstImageURL(content string) string {
 		}
 		imageURL := strings.TrimSpace(string(image.Destination))
 		if isPublicImageURL(imageURL) {
-			firstImageURL = imageURL
-			return ast.WalkStop, nil
+			imageURLs = append(imageURLs, imageURL)
 		}
 		return ast.WalkContinue, nil
 	})
-	return firstImageURL
+	return imageURLs
 }
 
 func isPublicImageURL(value string) bool {

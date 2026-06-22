@@ -99,7 +99,6 @@ export const siteThemeTokenKeys = [
   'size-field',
   'border',
   'depth',
-  'noise',
 ] as const
 
 export type SiteThemeTokenKey = typeof siteThemeTokenKeys[number]
@@ -134,7 +133,6 @@ export interface SiteThemeTokens {
   'size-field': string
   border: string
   depth: string
-  noise: string
 }
 
 export function createEmptySiteThemeTokens(): SiteThemeTokens {
@@ -168,7 +166,6 @@ export function createEmptySiteThemeTokens(): SiteThemeTokens {
     'size-field': '',
     border: '',
     depth: '',
-    noise: '',
   }
 }
 
@@ -205,6 +202,7 @@ export interface ThemePreviewProps {
 export interface UnreadStatusPayload {
   notifications: boolean
   messages: boolean
+  moderationReports?: boolean
   latestNotificationType?: string
 }
 
@@ -316,6 +314,9 @@ export interface ReplyPayload {
   replyNo: number
   content: string
   renderedContent: string
+  processStatus: number
+  isHidden: boolean
+  canModerate: boolean
   author: {
     id: number
     username: string
@@ -398,6 +399,38 @@ export interface ModerationLogItem {
 
 export interface ModerationLogListResponse {
   items: ModerationLogItem[]
+  nextCursor: number
+  hasNext: boolean
+}
+
+export interface ModerationReportItem {
+  id: number
+  targetType: 'article' | 'reply'
+  targetId: number
+  targetUrl: string
+  title: string
+  excerpt: string
+  reason: string
+  note: string
+  status: string
+  resolution: string
+  reporter: {
+    id: number
+    username: string
+    avatarUrl: string
+  }
+  handler: {
+    id: number
+    username: string
+    avatarUrl: string
+  }
+  categories: Array<{ id: number; name: string; url: string; color: string }>
+  createdAt: string
+  handledAt?: string
+}
+
+export interface ModerationReportListResponse {
+  items: ModerationReportItem[]
   nextCursor: number
   hasNext: boolean
 }

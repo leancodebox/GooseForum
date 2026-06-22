@@ -122,6 +122,11 @@ const (
 	MessageCommentCreateFailed      MessageCode = "comment.createFailed"      // 评论创建失败，params.error 可带原始错误。
 	MessageReplyNotFound            MessageCode = "reply.notFound"            // 回复不存在。
 	MessageReplyUpdateFailed        MessageCode = "reply.updateFailed"        // 回复更新失败，params.error 可带原始错误。
+	MessageReportNotFound           MessageCode = "report.notFound"           // 举报不存在。
+	MessageReportTargetInvalid      MessageCode = "report.targetInvalid"      // 举报对象无效。
+	MessageReportOwnContent         MessageCode = "report.ownContent"         // 不能举报自己的内容。
+	MessageReportDuplicate          MessageCode = "report.duplicate"          // 已举报，等待处理。
+	MessageReportCreateFailed       MessageCode = "report.createFailed"       // 举报提交失败。
 )
 
 const (

@@ -39,6 +39,19 @@ func GetByCategoryIds(categoryIds []uint64) (entities []*Entity) {
 	return
 }
 
+func GetByScope(scopeType string, scopeId uint64) (entities []*Entity) {
+	if scopeType == "" {
+		return
+	}
+	builder().
+		Where(queryopt.Eq(fieldScopeType, scopeType)).
+		Where(queryopt.Eq(fieldScopeId, scopeId)).
+		Where(queryopt.Eq(fieldStatus, StatusEnabled)).
+		Order("id ASC").
+		Find(&entities)
+	return
+}
+
 func AllEnabled() (entities []*Entity) {
 	builder().
 		Where(queryopt.Eq(fieldStatus, StatusEnabled)).

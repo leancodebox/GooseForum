@@ -30,7 +30,6 @@
   --gf-size-field: 0.25rem;
   --gf-border: 1px;
   --gf-depth: 1;
-  --gf-noise: 0;
 }
 
 [data-theme="gf-dark"] {

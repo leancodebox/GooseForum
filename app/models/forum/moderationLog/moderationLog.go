@@ -7,6 +7,8 @@ const tableName = "moderation_logs"
 const (
 	SubjectArticle  = "article"
 	SubjectCategory = "category"
+	SubjectReply    = "reply"
+	SubjectReport   = "report"
 	SubjectUser     = "user"
 	SubjectSystem   = "system"
 )
@@ -14,6 +16,10 @@ const (
 const (
 	ActionArticleBlocked           = "articleBlocked"
 	ActionArticleUnblocked         = "articleUnblocked"
+	ActionReplyBlocked             = "replyBlocked"
+	ActionReplyUnblocked           = "replyUnblocked"
+	ActionReportResolved           = "reportResolved"
+	ActionReportRejected           = "reportRejected"
 	ActionCategoryModeratorAdded   = "categoryModeratorAdded"
 	ActionCategoryModeratorRemoved = "categoryModeratorRemoved"
 )

@@ -5,6 +5,7 @@ import type {
   AdminArticle,
   AdminBadge,
   AdminCategory,
+  AdminCategoryModerator,
   AdminOptRecord,
   AdminPermissionOption,
   AdminRole,
@@ -58,6 +59,17 @@ async function postJson<T>(url: string, body?: unknown, fallback = adminText('k0
   return readApiResponse<T>(response, fallback)
 }
 
+async function postForm<T>(url: string, body: FormData, fallback = adminText('k000l')): Promise<T> {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+    },
+    body,
+  })
+  return readApiResponse<T>(response, fallback)
+}
+
 async function postEnvelope<T>(url: string, body?: unknown, fallback = adminText('k000l')): Promise<ApiEnvelope<T>> {
   const response = await fetch(url, {
     method: 'POST',
@@ -82,6 +94,18 @@ export async function getSiteStatistics(): Promise<SiteStatistics> {
     headers: { Accept: 'application/json' },
   })
   return readApiResponse<SiteStatistics>(response, adminText('k000m'))
+}
+
+export interface AdminImageUploadResult {
+  url?: string
+  filename?: string
+  size?: number
+}
+
+export function uploadAdminImage(file: File) {
+  const body = new FormData()
+  body.append('file', file)
+  return postForm<AdminImageUploadResult>('/api/admin/img-upload', body, adminText('k000c'))
 }
 
 export async function getTrafficOverview(startDate?: string, endDate?: string): Promise<DailyTraffic[]> {
@@ -151,6 +175,18 @@ export function saveCategory(data: AdminCategory & { id: number }) {
 
 export function deleteCategory(id: number) {
   return postJson<unknown>('/api/admin/category-delete', { id }, adminText('k0011'))
+}
+
+export function getGlobalModeratorList() {
+  return postJson<AdminCategoryModerator[]>('/api/admin/global-moderator-list', {}, '获取全站版主失败')
+}
+
+export function addGlobalModerator(data: { userId?: number, username?: string }) {
+  return postJson<unknown>('/api/admin/global-moderator-add', data, '添加全站版主失败')
+}
+
+export function deleteGlobalModerator(id: number) {
+  return postJson<unknown>('/api/admin/global-moderator-delete', { id }, '移除全站版主失败')
 }
 
 export function addCategoryModerator(data: { categoryId: number, userId?: number, username?: string }) {

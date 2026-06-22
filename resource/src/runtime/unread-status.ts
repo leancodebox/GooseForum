@@ -10,6 +10,7 @@ const POLL_INTERVAL = 30_000
 
 const notifications = ref(false)
 const messages = ref(false)
+const moderationReports = ref(false)
 const latestNotificationType = ref('')
 const checked = ref(false)
 let inFlight: Promise<UnreadStatusPayload> | null = null
@@ -25,6 +26,7 @@ function normalizeStatus(data: Partial<UnreadStatusPayload> | null | undefined):
   return {
     notifications: Boolean(data?.notifications),
     messages: Boolean(data?.messages),
+    moderationReports: Boolean(data?.moderationReports),
     latestNotificationType: data?.latestNotificationType || '',
   }
 }
@@ -56,6 +58,7 @@ function applyUnread(data: Partial<UnreadStatusPayload> | null | undefined) {
   const status = normalizeStatus(data)
   notifications.value = status.notifications
   messages.value = status.messages
+  moderationReports.value = status.moderationReports || false
   latestNotificationType.value = status.latestNotificationType || ''
   checked.value = true
   setUnreadMessagesDocumentTitle(status.messages)
@@ -118,6 +121,7 @@ function clearNotifications() {
   applyUnread({
     notifications: false,
     messages: messages.value,
+    moderationReports: moderationReports.value,
   })
 }
 
@@ -125,6 +129,7 @@ function setNotifications(hasUnread: boolean) {
   applyUnread({
     notifications: hasUnread,
     messages: messages.value,
+    moderationReports: moderationReports.value,
     latestNotificationType: hasUnread ? latestNotificationType.value : '',
   })
 }
@@ -133,6 +138,7 @@ function clearMessages() {
   applyUnread({
     notifications: notifications.value,
     messages: false,
+    moderationReports: moderationReports.value,
     latestNotificationType: latestNotificationType.value,
   })
 }
@@ -141,6 +147,7 @@ export function useUnreadStatus() {
   return {
     notifications: readonly(notifications),
     messages: readonly(messages),
+    moderationReports: readonly(moderationReports),
     latestNotificationType: readonly(latestNotificationType),
     checked: readonly(checked),
     notificationMessage,

@@ -70,6 +70,7 @@ const { isDark, toggleTheme } = useSiteTheme()
 const unreadStatus = useUnreadStatus()
 const hasUnreadNotification = computed(() => unreadStatus.notifications.value)
 const hasUnreadMessage = computed(() => unreadStatus.messages.value)
+const hasModerationReports = computed(() => unreadStatus.moderationReports.value)
 const notificationTitle = computed(() => unreadStatus.notificationMessage.value)
 const asArray = <T>(value: T[] | null | undefined): T[] => (Array.isArray(value) ? value : [])
 const activeSidebarKey = computed(() => props.layout.sidebar.activeKey || 'topics')
@@ -539,7 +540,7 @@ async function loadUserHoverCard() {
                 <span v-else-if="item.icon" class="flex w-4 justify-center text-[13px] opacity-80" aria-hidden="true">{{ item.icon }}</span>
                 <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
                 <span
-                  v-if="(item.key === 'messages' && hasUnreadMessage) || (item.key === 'notifications' && hasUnreadNotification)"
+                  v-if="(item.key === 'messages' && hasUnreadMessage) || (item.key === 'notifications' && hasUnreadNotification) || (item.key === 'moderation' && hasModerationReports)"
                   class="h-2 w-2 shrink-0 rounded-full bg-error/100"
                   aria-hidden="true"
                 />
@@ -632,6 +633,7 @@ async function loadUserHoverCard() {
       :footer="layout.footer"
       :has-unread-messages="hasUnreadMessage"
       :has-unread-notifications="hasUnreadNotification"
+      :has-moderation-reports="hasModerationReports"
       :close-label="t('shell.closeMenu')"
       :menu-label="t('shell.menu')"
       :categories-label="t('shell.categories')"

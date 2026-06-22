@@ -15,6 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/emailactivationservice"
+	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -369,6 +370,14 @@ func UploadAvatar(c *gin.Context) {
 		c.JSON(200, component.FailDataCode(component.MessageUserUpdateFailed, nil))
 		return
 	}
+
+	fileNames := make([]string, 0, len(fileEntities))
+	for _, fileEntity := range fileEntities {
+		if fileEntity != nil {
+			fileNames = append(fileNames, fileEntity.Name)
+		}
+	}
+	fileusageservice.ReplaceAvatar(userId, fileNames)
 
 	response := map[string]string{
 		"avatarUrl": urlconfig.FilePath(fileEntities[0].Name),

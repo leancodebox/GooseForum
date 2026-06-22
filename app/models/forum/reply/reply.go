@@ -26,6 +26,9 @@ const fieldTargetId = "target_id"
 // fieldContent
 const fieldContent = "content"
 
+// fieldProcessStatus 管理状态：0 正常 1 封禁
+const fieldProcessStatus = "process_status"
+
 // fieldCreatedAt
 const fieldCreatedAt = "created_at"
 
@@ -41,6 +44,7 @@ type Entity struct {
 	Content         string    `gorm:"column:content;type:text;" json:"content"`                                                                                                                                                //
 	RenderedHTML    string    `gorm:"column:rendered_html;type:text;" json:"renderedHTML"`                                                                                                                                     // md 渲染后数据
 	RenderedVersion uint32    `gorm:"column:rendered_version;type:bigint unsigned;not null;default:0;" json:"renderedVersion"`                                                                                                 // md 的渲染器版本
+	ProcessStatus   int8      `gorm:"column:process_status;type:tinyint;not null;default:0;index:idx_reply_article_process,priority:2;" json:"processStatus"`                                                                  // 管理状态：0 正常 1 封禁
 	ReplyId         uint64    `gorm:"column:reply_id;type:bigint;not null;default:0;" json:"replyId"`                                                                                                                          //
 	CreatedAt       time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;index:idx_reply_article_created;" json:"createdAt"`                                                                                      //
 	UpdatedAt       time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`

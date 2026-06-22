@@ -19,6 +19,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
+	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/replyservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/samber/lo"
@@ -128,6 +129,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		if err := articles.Save(&article); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
+		fileusageservice.ReplaceArticle(article.Id, req.UserId, article.Content)
 		categoryIDMap := lo.SliceToMap(req.Params.CategoryId, func(id uint64) (uint64, bool) {
 			return id, true
 		})
@@ -153,6 +155,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		}
 	} else {
 		articles.Create(&article)
+		fileusageservice.ReplaceArticle(article.Id, req.UserId, article.Content)
 		if article.ArticleStatus == 1 {
 			userStatistics.WriteArticle(req.UserId)
 		}
@@ -286,6 +289,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 			component.MessageParams{"error": err.Error()})
 
 	}
+	fileusageservice.ReplaceReply(replyEntity.Id, req.UserId, replyEntity.Content)
 	userStatistics.WriteComment(req.UserId)
 	userservice.InvalidateUserPublicProfileCache(req.UserId)
 
@@ -362,6 +366,7 @@ func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response
 			component.MessageParams{"error": err.Error()})
 
 	}
+	fileusageservice.ReplaceReply(replyEntity.Id, req.UserId, replyEntity.Content)
 
 	return component.SuccessResponse(map[string]any{
 		"id":              replyEntity.Id,

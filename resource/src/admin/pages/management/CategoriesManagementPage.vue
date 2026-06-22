@@ -26,9 +26,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/admin/components/ui/table'
-import { addCategoryModerator, deleteCategory, deleteCategoryModerator, getCategoryList, getUserList, saveCategory } from '@/admin/runtime/api'
+import { addCategoryModerator, addGlobalModerator, deleteCategory, deleteCategoryModerator, deleteGlobalModerator, getCategoryList, getGlobalModeratorList, getUserList, saveCategory } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
-import type { AdminCategory, AdminPayload, AdminUser, ManageHomeProps } from '@/admin/types'
+import type { AdminCategory, AdminCategoryModerator, AdminPayload, AdminUser, ManageHomeProps } from '@/admin/types'
 
 defineProps<{
   payload: AdminPayload<ManageHomeProps>
@@ -64,6 +64,13 @@ const moderatorSearching = ref(false)
 const moderatorCandidates = ref<AdminUser[]>([])
 const selectedModeratorUser = ref<AdminUser | null>(null)
 let moderatorSearchTimer: ReturnType<typeof setTimeout> | undefined
+const globalModerators = ref<AdminCategoryModerator[]>([])
+const globalModeratorInput = ref('')
+const globalModeratorSaving = ref(false)
+const globalModeratorSearching = ref(false)
+const globalModeratorCandidates = ref<AdminUser[]>([])
+const selectedGlobalModeratorUser = ref<AdminUser | null>(null)
+let globalModeratorSearchTimer: ReturnType<typeof setTimeout> | undefined
 const form = reactive<AdminCategory>({
   id: 0,
   category: '',
@@ -91,6 +98,14 @@ async function loadCategories() {
     error.value = err instanceof Error ? err.message : adminText('k0043')
   } finally {
     loading.value = false
+  }
+}
+
+async function loadGlobalModerators() {
+  try {
+    globalModerators.value = await getGlobalModeratorList()
+  } catch (err) {
+    adminToast.error(err, '全站版主加载失败')
   }
 }
 
@@ -175,6 +190,10 @@ function isAlreadyModerator(userId: number) {
   return Boolean(moderatorRow.value?.moderators?.some(item => item.userId === userId))
 }
 
+function isAlreadyGlobalModerator(userId: number) {
+  return globalModerators.value.some(item => item.userId === userId)
+}
+
 async function searchModeratorUsers(keyword: string) {
   const value = keyword.trim()
   selectedModeratorUser.value = null
@@ -196,11 +215,64 @@ async function searchModeratorUsers(keyword: string) {
   }
 }
 
+async function searchGlobalModeratorUsers(keyword: string) {
+  const value = keyword.trim()
+  selectedGlobalModeratorUser.value = null
+  if (!value) {
+    globalModeratorCandidates.value = []
+    return
+  }
+  globalModeratorSearching.value = true
+  try {
+    const params = /^\d+$/.test(value)
+      ? { userId: Number(value), page: 1, pageSize: 8 }
+      : { username: value, page: 1, pageSize: 8 }
+    const result = await getUserList(params)
+    globalModeratorCandidates.value = result.list || []
+  } catch {
+    globalModeratorCandidates.value = []
+  } finally {
+    globalModeratorSearching.value = false
+  }
+}
+
 function selectModeratorCandidate(user: AdminUser) {
   if (isAlreadyModerator(user.userId)) return
   selectedModeratorUser.value = user
   moderatorUserInput.value = user.username || String(user.userId)
   moderatorCandidates.value = []
+}
+
+function selectGlobalModeratorCandidate(user: AdminUser) {
+  if (isAlreadyGlobalModerator(user.userId)) return
+  selectedGlobalModeratorUser.value = user
+  globalModeratorInput.value = user.username || String(user.userId)
+  globalModeratorCandidates.value = []
+}
+
+async function addGlobalModeratorUser() {
+  const value = globalModeratorInput.value.trim()
+  if (!value) {
+    adminToast.warning('请输入用户名或用户 ID')
+    return
+  }
+  globalModeratorSaving.value = true
+  try {
+    const userId = selectedGlobalModeratorUser.value?.userId || (/^\d+$/.test(value) ? Number(value) : undefined)
+    await addGlobalModerator({
+      userId,
+      username: userId ? undefined : value,
+    })
+    await loadGlobalModerators()
+    globalModeratorInput.value = ''
+    selectedGlobalModeratorUser.value = null
+    globalModeratorCandidates.value = []
+    adminToast.success('全站版主已添加')
+  } catch (err) {
+    adminToast.error(err, '添加全站版主失败')
+  } finally {
+    globalModeratorSaving.value = false
+  }
 }
 
 async function addModerator() {
@@ -240,6 +312,26 @@ watch(moderatorUserInput, (value) => {
   }, 220)
 })
 
+watch(globalModeratorInput, (value) => {
+  if (globalModeratorSearchTimer) clearTimeout(globalModeratorSearchTimer)
+  globalModeratorSearchTimer = setTimeout(() => {
+    void searchGlobalModeratorUsers(value)
+  }, 220)
+})
+
+async function removeGlobalModerator(id: number) {
+  globalModeratorSaving.value = true
+  try {
+    await deleteGlobalModerator(id)
+    await loadGlobalModerators()
+    adminToast.success('全站版主已移除')
+  } catch (err) {
+    adminToast.error(err, '移除全站版主失败')
+  } finally {
+    globalModeratorSaving.value = false
+  }
+}
+
 async function removeModerator(id: number) {
   if (!moderatorRow.value) return
   moderatorSaving.value = true
@@ -258,6 +350,7 @@ async function removeModerator(id: number) {
 
 onMounted(() => {
   void loadCategories()
+  void loadGlobalModerators()
 })
 </script>
 
@@ -278,15 +371,75 @@ onMounted(() => {
 
       <AdminSection>
         <template #header>
-      <AdminToolbar class="-mx-3 -my-2 border-b-0">
-        <div class="relative w-full max-w-md">
-          <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input v-model="search" class="pl-9" :placeholder="adminText('k005q')" />
-        </div>
-        <Badge variant="secondary" class="h-9 rounded-md px-3">
-          {{ filteredRows.length }} {{ adminText('k00c1') }}
-        </Badge>
-      </AdminToolbar>
+          <div class="-mx-3 -my-2 divide-y">
+            <AdminToolbar class="border-b-0">
+              <div class="relative w-full max-w-md">
+                <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input v-model="search" class="pl-9" :placeholder="adminText('k005q')" />
+              </div>
+              <Badge variant="secondary" class="h-9 rounded-md px-3">
+                {{ filteredRows.length }} {{ adminText('k00c1') }}
+              </Badge>
+            </AdminToolbar>
+            <div class="grid gap-2 px-3 py-2 lg:grid-cols-[auto_minmax(0,1fr)_20rem] lg:items-start">
+              <div class="flex h-8 min-w-0 items-center gap-2 text-sm">
+                <ShieldCheck class="size-4 shrink-0 text-muted-foreground" />
+                <span class="shrink-0 font-medium">全站版主</span>
+              </div>
+              <div class="flex min-h-8 min-w-0 flex-wrap content-start gap-1">
+                <span v-if="!globalModerators.length" class="inline-flex h-7 items-center text-sm text-muted-foreground">暂无</span>
+                <span
+                  v-for="moderator in globalModerators"
+                  v-else
+                  :key="moderator.id"
+                  class="inline-flex h-7 max-w-40 items-center gap-1 rounded-md border bg-background px-1.5 text-xs"
+                >
+                  <img v-if="moderator.avatarUrl" :src="moderator.avatarUrl" class="size-4 rounded-full object-cover" alt="" />
+                  <span v-else class="grid size-4 place-items-center rounded-full bg-muted text-[9px] font-semibold">{{ moderatorInitial(moderator.username) }}</span>
+                  <span class="truncate">{{ moderator.username || `#${moderator.userId}` }}</span>
+                  <button
+                    class="-mr-1 grid size-5 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                    type="button"
+                    :disabled="globalModeratorSaving"
+                    @click="removeGlobalModerator(moderator.id)"
+                  >
+                    <X class="size-3" />
+                  </button>
+                </span>
+              </div>
+              <form class="flex gap-1.5" @submit.prevent="addGlobalModeratorUser">
+                <div class="relative min-w-0 flex-1">
+                  <Input v-model="globalModeratorInput" class="h-8" placeholder="用户名或用户 ID" autocomplete="off" />
+                  <div
+                    v-if="globalModeratorInput.trim() && (globalModeratorCandidates.length || globalModeratorSearching)"
+                    class="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-md border bg-popover shadow-md"
+                  >
+                    <div v-if="globalModeratorSearching" class="px-3 py-2 text-sm text-muted-foreground">搜索中...</div>
+                    <button
+                      v-for="user in globalModeratorCandidates"
+                      v-else
+                      :key="user.userId"
+                      class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
+                      :class="isAlreadyGlobalModerator(user.userId) ? 'cursor-default opacity-55' : 'hover:bg-muted'"
+                      type="button"
+                      :disabled="isAlreadyGlobalModerator(user.userId)"
+                      @click="selectGlobalModeratorCandidate(user)"
+                    >
+                      <img v-if="user.avatarUrl" :src="user.avatarUrl" class="size-7 rounded-full object-cover ring-1 ring-border" alt="" />
+                      <span v-else class="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ moderatorInitial(user.username) }}</span>
+                      <span class="min-w-0 flex-1 truncate">{{ user.username }}</span>
+                      <span v-if="isAlreadyGlobalModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">已添加</span>
+                      <span class="shrink-0 font-mono text-xs text-muted-foreground">#{{ user.userId }}</span>
+                    </button>
+                  </div>
+                </div>
+                <Button type="submit" variant="outline" size="sm" :disabled="globalModeratorSaving">
+                  <UserPlus class="size-3.5" />
+                  添加
+                </Button>
+              </form>
+            </div>
+          </div>
         </template>
 
         <Table>

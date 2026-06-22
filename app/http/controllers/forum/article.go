@@ -191,7 +191,8 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 		userIDs = append(userIDs, item.UserId)
 	}
 	userMap := users.GetMapByIds(userIDs)
-	payloadReplies := buildReplyPayloads(replyEntities, userMap, req.UserId)
+	canModerateReplies := moderatorservice.CanModerateAnyCategory(req.UserId, articleEntity.CategoryId)
+	payloadReplies := buildReplyPayloads(replyEntities, userMap, req.UserId, canModerateReplies)
 
 	var beforeCursor uint64
 	var afterCursor uint64

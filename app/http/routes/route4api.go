@@ -134,7 +134,11 @@ func apiRoute(ginApp *gin.Engine) {
 	forumLoginApi.POST("bookmark-article", middleware.CheckWritableAccount, UpButterReq(controllers.BookmarkArticle))
 	forumLoginApi.POST("watch-article", middleware.CheckWritableAccount, UpButterReq(controllers.WatchArticle))
 	forumLoginApi.POST("follow-user", middleware.CheckWritableAccount, UpButterReq(controllers.FollowUser))
+	forumLoginApi.POST("report", middleware.CheckWritableAccount, UpButterReq(forum.CreateReport))
 	forumLoginApi.POST("moderation/article-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationArticleStatus))
+	forumLoginApi.POST("moderation/reply-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationReplyStatus))
+	forumLoginApi.POST("moderation/reports", middleware.NoUpdateUserActivity, UpButterReq(forum.ModerationReportList))
+	forumLoginApi.POST("moderation/report-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationReportStatus))
 	forumLoginApi.POST("moderation/logs", middleware.NoUpdateUserActivity, UpButterReq(forum.ModerationLogList))
 
 	chatApi := forumApi.Group("chat", middleware.JWTAuthCheck)
@@ -164,6 +168,9 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("category-list", UpButterReq(api.GetCategoryList)).
 		POST("category-save", UpButterReq(api.SaveCategory)).
 		POST("category-delete", UpButterReq(api.DeleteCategory)).
+		POST("global-moderator-list", UpButterReq(api.GetGlobalModeratorList)).
+		POST("global-moderator-add", UpButterReq(api.AddGlobalModerator)).
+		POST("global-moderator-delete", UpButterReq(api.DeleteGlobalModerator)).
 		POST("category-moderator-add", UpButterReq(api.AddCategoryModerator)).
 		POST("category-moderator-delete", UpButterReq(api.DeleteCategoryModerator))
 
@@ -200,7 +207,8 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("save-posting-settings", UpButterReq(api.SavePostingSettings)).
 		GET("badges", UpButterReq(api.BadgeList)).
 		POST("badge-save", UpButterReq(api.SaveBadge)).
-		POST("badge-delete", UpButterReq(api.DeleteBadge))
+		POST("badge-delete", UpButterReq(api.DeleteBadge)).
+		POST("img-upload", api.SaveAdminImgByGinContext)
 
 }
 

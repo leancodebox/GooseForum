@@ -684,14 +684,6 @@ function hexToRgb(value: string) {
               <span>Depth Effect</span>
               <input type="checkbox" class="h-4 w-4 accent-primary" :checked="tokenValue('depth') === '1'" @change="setToken('depth', ($event.target as HTMLInputElement).checked ? '1' : '0')" />
             </label>
-            <label class="flex items-center justify-between rounded-md bg-base-200 px-2.5 py-1.5 text-sm font-medium text-base-content/75">
-              <span>Noise Effect</span>
-              <input type="checkbox" class="h-4 w-4 accent-primary" :checked="tokenValue('noise') === '1'" @change="setToken('noise', ($event.target as HTMLInputElement).checked ? '1' : '0')" />
-            </label>
-            <label class="flex items-center justify-between rounded-md bg-base-200 px-2.5 py-1.5 text-sm font-medium text-base-content/75">
-              <span>Dark color scheme</span>
-              <input type="checkbox" class="h-4 w-4 accent-primary" :checked="activeTheme.colorScheme === 'dark'" @change="activeTheme.colorScheme = ($event.target as HTMLInputElement).checked ? 'dark' : 'light'" />
-            </label>
           </div>
         </section>
       </div>

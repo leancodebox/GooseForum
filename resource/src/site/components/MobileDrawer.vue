@@ -26,6 +26,7 @@ const props = defineProps<{
   footer: FooterPayload
   hasUnreadMessages?: boolean
   hasUnreadNotifications?: boolean
+  hasModerationReports?: boolean
   closeLabel: string
   menuLabel: string
   categoriesLabel: string
@@ -83,7 +84,7 @@ function close() {
             <span v-else-if="item.icon" class="flex w-4 justify-center opacity-80" aria-hidden="true">{{ item.icon }}</span>
             <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
             <span
-              v-if="(item.key === 'messages' && hasUnreadMessages) || (item.key === 'notifications' && hasUnreadNotifications)"
+              v-if="(item.key === 'messages' && hasUnreadMessages) || (item.key === 'notifications' && hasUnreadNotifications) || (item.key === 'moderation' && hasModerationReports)"
               class="h-2 w-2 shrink-0 rounded-full bg-error/100"
               aria-hidden="true"
             />

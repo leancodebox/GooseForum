@@ -224,7 +224,6 @@ type SiteThemeTokens struct {
 	SizeField             string `json:"size-field"`
 	Border                string `json:"border"`
 	Depth                 string `json:"depth"`
-	Noise                 string `json:"noise"`
 }
 
 func (tokens *SiteThemeTokens) NormalizeFrom(defaults SiteThemeTokens) {
@@ -257,7 +256,6 @@ func (tokens *SiteThemeTokens) NormalizeFrom(defaults SiteThemeTokens) {
 	tokens.SizeField = normalizeSiteThemeTokenValue(tokens.SizeField, defaults.SizeField)
 	tokens.Border = normalizeSiteThemeTokenValue(tokens.Border, defaults.Border)
 	tokens.Depth = normalizeSiteThemeTokenValue(tokens.Depth, defaults.Depth)
-	tokens.Noise = normalizeSiteThemeTokenValue(tokens.Noise, defaults.Noise)
 }
 
 func (tokens SiteThemeTokens) BaseColor() string {
@@ -294,7 +292,6 @@ func (tokens SiteThemeTokens) AppendCSSVariables(sb *strings.Builder) {
 	appendSiteThemeCSSVar(sb, "size-field", tokens.SizeField)
 	appendSiteThemeCSSVar(sb, "border", tokens.Border)
 	appendSiteThemeCSSVar(sb, "depth", tokens.Depth)
-	appendSiteThemeCSSVar(sb, "noise", tokens.Noise)
 }
 
 func normalizeSiteThemeTokenValue(value string, defaultValue string) string {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
-import { AlertTriangle, Ban, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
-import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, updateModerationArticleStatus, updateReply, watchArticle } from '@/runtime/api'
+import { AlertTriangle, Ban, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Flag, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
+import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, submitReport, updateModerationArticleStatus, updateModerationReplyStatus, updateReply, watchArticle } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { useFlashMessages } from '@/runtime/flash-message'
 import { fetchPage } from '@/runtime/router'
@@ -38,6 +38,12 @@ const editingReplyId = ref(0)
 const savingEditReplyId = ref(0)
 const pendingDeleteReply = ref<ReplyPayload | null>(null)
 const pendingModerationAction = ref<'ban' | 'unban' | null>(null)
+const pendingReport = ref<{ targetType: 'article' | 'reply'; targetId: number; title: string; excerpt: string } | null>(null)
+const reportReason = ref('spam')
+const reportNote = ref('')
+const reportSubmitting = ref(false)
+const reportError = ref('')
+const moderatingReplyIds = ref<number[]>([])
 const replies = ref<ReplyPayload[]>([...page.props.replies])
 const articleProcessStatus = ref(page.props.article.processStatus)
 const replyTarget = computed(() => replies.value.find((reply) => reply.id === replyTargetId.value))
@@ -97,6 +103,7 @@ const actionMessageSuccess = computed(() =>
     t('article.moderationUnbanSuccess'),
   ].includes(actionMessage.value),
 )
+const reportReasons = ['spam', 'abuse', 'illegal', 'irrelevant', 'other']
 const floatingArticleActions = computed(() => {
   const actions = [
     {
@@ -1130,6 +1137,79 @@ async function updateArticleModerationFromDetail() {
   }
 }
 
+function openLogin() {
+  window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}`
+}
+
+function requestReport(target: { targetType: 'article' | 'reply'; targetId: number; title: string; excerpt: string }) {
+  if (!page.layout.viewer.isAuthenticated) {
+    openLogin()
+    return
+  }
+  pendingReport.value = target
+  reportReason.value = 'spam'
+  reportNote.value = ''
+  reportError.value = ''
+}
+
+function requestArticleReport() {
+  requestReport({
+    targetType: 'article',
+    targetId: page.props.article.id,
+    title: page.props.article.title,
+    excerpt: page.props.article.description,
+  })
+}
+
+function requestReplyReport(reply: ReplyPayload) {
+  requestReport({
+    targetType: 'reply',
+    targetId: reply.id,
+    title: t('article.replyReportTitle', { no: reply.replyNo || reply.id }),
+    excerpt: reply.content,
+  })
+}
+
+function closeReportDialog() {
+  if (reportSubmitting.value) return
+  pendingReport.value = null
+  reportError.value = ''
+}
+
+async function submitCurrentReport() {
+  if (!pendingReport.value || reportSubmitting.value) return
+  reportSubmitting.value = true
+  reportError.value = ''
+  try {
+    await submitReport(pendingReport.value.targetType, pendingReport.value.targetId, reportReason.value, reportNote.value)
+    pendingReport.value = null
+    pushFlash(t('article.reportSubmitted'), 'success')
+  } catch (error) {
+    reportError.value = error instanceof Error ? error.message : t('api.reportFailed')
+  } finally {
+    reportSubmitting.value = false
+  }
+}
+
+function replyModerationBusy(replyId: number) {
+  return moderatingReplyIds.value.includes(replyId)
+}
+
+async function moderateReply(reply: ReplyPayload, action: 'ban' | 'unban') {
+  if (replyModerationBusy(reply.id)) return
+  moderatingReplyIds.value = [...moderatingReplyIds.value, reply.id]
+  try {
+    await updateModerationReplyStatus(reply.id, action)
+    reply.processStatus = action === 'ban' ? 1 : 0
+    reply.isHidden = action === 'ban'
+    pushFlash(action === 'ban' ? t('article.replyModerationBanSuccess') : t('article.replyModerationUnbanSuccess'), 'success')
+  } catch (error) {
+    pushFlash(error instanceof Error ? error.message : t('api.moderationActionFailed'), 'error')
+  } finally {
+    moderatingReplyIds.value = moderatingReplyIds.value.filter(id => id !== reply.id)
+  }
+}
+
 async function removeReply(replyId: number) {
   if (deletingReplyId.value || savingEditReplyId.value === replyId) return
 
@@ -1245,6 +1325,15 @@ async function removeReply(replyId: number) {
                     {{ isWatched ? t('article.watched') : t('article.watch') }}
                   </button>
                   <button
+                    v-if="!page.props.permissions.isOwnArticle"
+                    type="button"
+                    class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-warning/10 hover:text-warning"
+                    @click="requestArticleReport"
+                  >
+                    <Flag class="h-4 w-4" />
+                    {{ t('article.report') }}
+                  </button>
+                  <button
                     v-if="page.props.permissions.canModerateArticle && articleProcessStatus === 0"
                     type="button"
                     class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
@@ -1316,7 +1405,7 @@ async function removeReply(replyId: number) {
                   </div>
                   <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
                     <button
-                      v-if="reply.isOwnReply"
+                      v-if="reply.isOwnReply && !reply.isHidden"
                       type="button"
                       class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       :disabled="savingEditReplyId === reply.id || deletingReplyId === reply.id"
@@ -1327,7 +1416,7 @@ async function removeReply(replyId: number) {
                       <span class="sr-only">{{ t('common.edit') }}</span>
                     </button>
                     <button
-                      v-if="reply.isOwnReply"
+                      v-if="reply.isOwnReply && !reply.isHidden"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       :disabled="deletingReplyId === reply.id"
@@ -1338,7 +1427,7 @@ async function removeReply(replyId: number) {
                       <span class="sr-only">{{ deletingReplyId === reply.id ? t('article.deleting') : t('article.delete') }}</span>
                     </button>
                     <button
-                      v-if="page.props.permissions.canReply"
+                      v-if="page.props.permissions.canReply && !reply.isHidden"
                       type="button"
                       class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       :title="t('article.reply')"
@@ -1346,6 +1435,38 @@ async function removeReply(replyId: number) {
                     >
                       <CornerDownLeft class="h-3.5 w-3.5" />
                       <span class="sr-only">{{ t('article.reply') }}</span>
+                    </button>
+                    <button
+                      v-if="!reply.isOwnReply && !reply.isHidden"
+                      type="button"
+                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
+                      :title="t('article.report')"
+                      @click="requestReplyReport(reply)"
+                    >
+                      <Flag class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ t('article.report') }}</span>
+                    </button>
+                    <button
+                      v-if="reply.canModerate && reply.processStatus === 0"
+                      type="button"
+                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:opacity-50"
+                      :disabled="replyModerationBusy(reply.id)"
+                      :title="t('article.moderationBan')"
+                      @click="moderateReply(reply, 'ban')"
+                    >
+                      <Ban class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ t('article.moderationBan') }}</span>
+                    </button>
+                    <button
+                      v-else-if="reply.canModerate && reply.processStatus === 1"
+                      type="button"
+                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
+                      :disabled="replyModerationBusy(reply.id)"
+                      :title="t('article.moderationUnban')"
+                      @click="moderateReply(reply, 'unban')"
+                    >
+                      <RotateCcw class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ t('article.moderationUnban') }}</span>
                     </button>
                     <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
                   </div>
@@ -1385,7 +1506,13 @@ async function removeReply(replyId: number) {
                   </div>
                 </Transition>
                 <template v-if="editingReplyId !== reply.id">
-                  <div class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
+                  <div v-if="reply.isHidden && !reply.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
+                    {{ t('article.hiddenReplyPlaceholder') }}
+                  </div>
+                  <div v-else class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
+                  <div v-if="reply.isHidden && reply.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
+                    {{ t('article.hiddenReplyBadge') }}
+                  </div>
                   <div v-if="reply.updatedAt && reply.updatedAt !== reply.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
                     {{ t('article.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
                   </div>
@@ -1577,6 +1704,75 @@ async function removeReply(replyId: number) {
                 <Loader2 v-if="deletingReplyId === pendingDeleteReply.id" class="h-4 w-4 animate-spin" />
                 <Trash2 v-else class="h-4 w-4" />
                 {{ deletingReplyId === pendingDeleteReply.id ? t('article.deleting') : t('article.confirmDelete') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <Transition name="gf-modal">
+        <div
+          v-if="pendingReport"
+          class="fixed inset-0 z-[110] flex items-center justify-center bg-neutral/45 px-4 py-6 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="report-title"
+          @click.self="closeReportDialog"
+        >
+          <div class="gf-menu-surface w-full max-w-sm p-4">
+            <div class="flex items-start gap-3">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-warning/10 text-warning">
+                <Flag class="h-5 w-5" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h2 id="report-title" class="text-base font-bold text-base-content">{{ t('article.reportTitle') }}</h2>
+                <p class="mt-1 line-clamp-2 text-sm leading-6 text-base-content/55">{{ pendingReport.title }}</p>
+              </div>
+              <button
+                type="button"
+                class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75 disabled:cursor-not-allowed disabled:opacity-50"
+                :disabled="reportSubmitting"
+                @click="closeReportDialog"
+              >
+                <X class="h-4 w-4" />
+              </button>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              <label v-for="reason in reportReasons" :key="reason" class="flex cursor-pointer items-center gap-2 text-sm text-base-content/75">
+                <input v-model="reportReason" class="radio radio-sm" type="radio" name="report-reason" :value="reason" />
+                <span>{{ t(`article.reportReasons.${reason}`) }}</span>
+              </label>
+              <textarea
+                v-model="reportNote"
+                class="gf-textarea min-h-24"
+                maxlength="300"
+                :placeholder="t('article.reportNotePlaceholder')"
+              />
+            </div>
+
+            <p v-if="reportError" class="mt-3 text-sm text-error">{{ reportError }}</p>
+
+            <div class="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                class="gf-button gf-button-md gf-button-muted"
+                :disabled="reportSubmitting"
+                @click="closeReportDialog"
+              >
+                {{ t('common.cancel') }}
+              </button>
+              <button
+                type="button"
+                class="gf-button gf-button-md gf-button-primary"
+                :disabled="reportSubmitting"
+                @click="submitCurrentReport"
+              >
+                <Loader2 v-if="reportSubmitting" class="h-4 w-4 animate-spin" />
+                <Flag v-else class="h-4 w-4" />
+                {{ reportSubmitting ? t('common.loadingShort') : t('article.submitReport') }}
               </button>
             </div>
           </div>

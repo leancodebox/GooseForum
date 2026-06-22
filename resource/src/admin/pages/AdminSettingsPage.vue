@@ -32,6 +32,7 @@ import {
   saveSecuritySettings,
   saveSiteSettings,
   testMailConnection,
+  uploadAdminImage,
 } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
 import { resolveApiMessage } from '@/runtime/api-message'
@@ -224,17 +225,10 @@ async function uploadImage(target: 'siteLogo' | 'brandImage', event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
-  const body = new FormData()
-  body.append('file', file)
   try {
-    const response = await fetch('/file/img-upload', { method: 'POST', body })
-    const data = await response.json()
-    if (data.code === 0) {
-      siteForm[target] = data.result?.url || ''
-      adminToast.success(adminText('k000b'))
-    } else {
-      adminToast.error(new Error(resolveApiMessage(data, adminText('k000c'))), adminText('k000c'))
-    }
+    const data = await uploadAdminImage(file)
+    siteForm[target] = data.url || ''
+    adminToast.success(adminText('k000b'))
   } catch (err) {
     adminToast.error(err, adminText('k000c'))
   } finally {
