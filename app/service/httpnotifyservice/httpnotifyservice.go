@@ -48,7 +48,7 @@ type Envelope struct {
 
 func Notify(eventName string, data any) {
 	config := hotdataserve.GetHttpNotifyConfigCache()
-	if !config.Enabled {
+	if !shouldNotify(config, eventName) {
 		return
 	}
 	now := time.Now().Unix()
@@ -68,6 +68,22 @@ func Notify(eventName string, data any) {
 		endpoint := endpoint
 		go deliver(endpoint, eventName, now, body)
 	}
+}
+
+func ShouldNotify(eventName string) bool {
+	return shouldNotify(hotdataserve.GetHttpNotifyConfigCache(), eventName)
+}
+
+func shouldNotify(config pageConfig.HttpNotifyConfig, eventName string) bool {
+	if !config.Enabled {
+		return false
+	}
+	for _, endpoint := range config.Endpoints {
+		if endpointAccepts(endpoint, eventName) {
+			return true
+		}
+	}
+	return false
 }
 
 func endpointAccepts(endpoint pageConfig.HttpNotifyEndpoint, eventName string) bool {

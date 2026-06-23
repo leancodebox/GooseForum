@@ -20,6 +20,25 @@ func TestEndpointAcceptsSelectedEvent(t *testing.T) {
 	}
 }
 
+func TestShouldNotifyConfig(t *testing.T) {
+	config := pageConfig.HttpNotifyConfig{Enabled: true, Endpoints: []pageConfig.HttpNotifyEndpoint{{
+		Enabled: true,
+		URL:     "http://example.com/hook",
+		Events:  []string{"article.published"},
+	}}}
+
+	if !shouldNotify(config, "article.published") {
+		t.Fatal("expected enabled matching endpoint to notify")
+	}
+	if shouldNotify(config, "comment.created") {
+		t.Fatal("expected unmatched event to skip notification")
+	}
+	config.Enabled = false
+	if shouldNotify(config, "article.published") {
+		t.Fatal("expected disabled config to skip notification")
+	}
+}
+
 func TestBuildSignedRequest(t *testing.T) {
 	body := []byte(`{"event":"article.published"}`)
 	req, err := buildRequest(pageConfig.HttpNotifyEndpoint{

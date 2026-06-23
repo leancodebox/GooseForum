@@ -26,6 +26,9 @@ type ReportCreatedEvent struct {
 
 func NewHttpNotifyArticlePublishedHandler() cqrs.EventHandler {
 	return cqrs.NewEventHandler("HttpNotifyArticlePublishedHandler", func(ctx context.Context, event *ArticlePublishedEvent) error {
+		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticlePublished) {
+			return nil
+		}
 		httpnotifyservice.Notify(httpnotifyservice.EventArticlePublished, articleNotifyPayload(event.Article))
 		return nil
 	})
@@ -33,6 +36,9 @@ func NewHttpNotifyArticlePublishedHandler() cqrs.EventHandler {
 
 func NewHttpNotifyArticleUpdatedHandler() cqrs.EventHandler {
 	return cqrs.NewEventHandler("HttpNotifyArticleUpdatedHandler", func(ctx context.Context, event *ArticleUpdatedEvent) error {
+		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticleUpdated) {
+			return nil
+		}
 		httpnotifyservice.Notify(httpnotifyservice.EventArticleUpdated, articleNotifyPayload(event.Article))
 		return nil
 	})
@@ -40,6 +46,9 @@ func NewHttpNotifyArticleUpdatedHandler() cqrs.EventHandler {
 
 func NewHttpNotifyCommentCreatedHandler() cqrs.EventHandler {
 	return cqrs.NewEventHandler("HttpNotifyCommentCreatedHandler", func(ctx context.Context, event *CommentCreatedEvent) error {
+		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventCommentCreated) {
+			return nil
+		}
 		article := articles.GetSimple(event.ArticleId)
 		articlePayload := articleNotifyPayloadFromSmall(article)
 		commenter := userNotifyPayload(event.UserId)
@@ -72,6 +81,9 @@ func NewHttpNotifyCommentCreatedHandler() cqrs.EventHandler {
 
 func NewHttpNotifyUserSignUpHandler() cqrs.EventHandler {
 	return cqrs.NewEventHandler("HttpNotifyUserSignUpHandler", func(ctx context.Context, event *UserSignUpEvent) error {
+		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventUserSignup) {
+			return nil
+		}
 		user := userNotifyPayload(event.UserId)
 		httpnotifyservice.Notify(httpnotifyservice.EventUserSignup, notifyEventData{
 			BaseURI: baseURI(),
@@ -83,6 +95,9 @@ func NewHttpNotifyUserSignUpHandler() cqrs.EventHandler {
 
 func NewHttpNotifyReportCreatedHandler() cqrs.EventHandler {
 	return cqrs.NewEventHandler("HttpNotifyReportCreatedHandler", func(ctx context.Context, event *ReportCreatedEvent) error {
+		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventReportCreated) {
+			return nil
+		}
 		article := articles.GetSimple(event.ArticleId)
 		articlePayload := articleNotifyPayloadFromSmall(article)
 		reporter := userNotifyPayload(event.ReporterId)
@@ -275,7 +290,6 @@ func moderationTargetURL(event *ReportCreatedEvent) string {
 func uintToString(value uint64) string {
 	return strconv.FormatUint(value, 10)
 }
-
 
 func baseURI() string {
 	return strings.TrimRight(hotdataserve.GetSiteSettingsConfigCache().SiteUrl, "/")
