@@ -278,11 +278,49 @@ function normalizeEndpoint(endpoint: Partial<HttpNotifyEndpoint> = {}) {
     url: endpoint.url?.trim() ?? '',
     secret: endpoint.secret ?? '',
     events,
-    timeoutSeconds: Math.min(Math.max(Number(endpoint.timeoutSeconds ?? 5), 1), 15),
+    timeoutSeconds: Math.min(Math.max(Number(endpoint.timeoutSeconds ?? 2), 1), 15),
     failureCount: enabled ? 0 : Number(endpoint.failureCount ?? 0),
     lastError: enabled ? '' : endpoint.lastError ?? '',
     abnormalTerminated: enabled ? false : toBool(endpoint.abnormalTerminated, false),
   } satisfies HttpNotifyEndpoint
+}
+
+function isHttpUrl(value: string) {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+function validateHttpNotify(settings: HttpNotifySettings) {
+  if (!settings.enabled) return true
+  const enabledEndpoints = settings.endpoints.filter(endpoint => endpoint.enabled)
+  if (enabledEndpoints.length === 0) {
+    adminToast.warning(adminText('k00d2'))
+    return false
+  }
+  for (const endpoint of enabledEndpoints) {
+    const name = endpoint.name || endpoint.url || adminText('k00cw')
+    if (!endpoint.url) {
+      adminToast.warning(adminText('k00d3', { name }))
+      return false
+    }
+    if (!isHttpUrl(endpoint.url)) {
+      adminToast.warning(adminText('k00d4', { name }))
+      return false
+    }
+    if (!endpoint.events.length) {
+      adminToast.warning(adminText('k00d5', { name }))
+      return false
+    }
+    if (!Number.isFinite(endpoint.timeoutSeconds) || endpoint.timeoutSeconds < 1 || endpoint.timeoutSeconds > 15) {
+      adminToast.warning(adminText('k00d6', { name }))
+      return false
+    }
+  }
+  return true
 }
 
 function normalizeAnnouncement(settings: Partial<AnnouncementConfig> = {}) {
@@ -325,13 +363,16 @@ async function load() {
 }
 
 async function save() {
+  const httpNotifySettings = props.kind === 'http-notify' ? normalizeHttpNotify(httpNotifyForm) : null
+  if (httpNotifySettings && !validateHttpNotify(httpNotifySettings)) return
+
   saving.value = true
   try {
     if (props.kind === 'site-info') await saveSiteSettings(normalizeSite(siteForm))
     else if (props.kind === 'mail') await saveMailSettings(normalizeMail(mailForm))
     else if (props.kind === 'security') await saveSecuritySettings(normalizeSecurity(securityForm))
     else if (props.kind === 'posting') await savePostingSettings(normalizePosting(postingForm))
-    else if (props.kind === 'http-notify') await saveHttpNotifySettings(normalizeHttpNotify(httpNotifyForm))
+    else if (props.kind === 'http-notify') await saveHttpNotifySettings(httpNotifySettings!)
     else await saveAnnouncement(normalizeAnnouncement(announcementForm))
     adminToast.success(adminText('k000e'))
   } catch (err) {
@@ -395,7 +436,7 @@ function addHttpEndpoint() {
     url: '',
     secret: '',
     events: ['article.published'],
-    timeoutSeconds: 5,
+    timeoutSeconds: 2,
     failureCount: 0,
     lastError: '',
     abnormalTerminated: false,
@@ -765,7 +806,7 @@ onMounted(load)
                   <div class="grid gap-3 md:grid-cols-[minmax(140px,220px)_minmax(0,1fr)_120px]">
                     <label class="grid gap-2 text-sm font-medium">
                       {{ adminText('k0079') }}
-                      <Input v-model="endpoint.name" :disabled="!httpNotifyForm.enabled" placeholder="Feishu" />
+                      <Input v-model="endpoint.name" :disabled="!httpNotifyForm.enabled" placeholder="Webhook" />
                     </label>
                     <label class="grid gap-2 text-sm font-medium">
                       URL

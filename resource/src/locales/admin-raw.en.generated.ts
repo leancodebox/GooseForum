@@ -467,5 +467,10 @@ export default {
   "k00cy": "Notification events",
   "k00cz": "Abnormally stopped",
   "k00d0": "Callbacks",
-  "k00d1": "Guide"
+  "k00d1": "Guide",
+  "k00d2": "Enable at least one callback URL when HTTP notifications are enabled",
+  "k00d3": "Callback \"{name}\" is missing a URL",
+  "k00d4": "Callback \"{name}\" must use an http or https URL",
+  "k00d5": "Callback \"{name}\" needs at least one notification event",
+  "k00d6": "Callback \"{name}\" timeout must be between 1 and 15 seconds"
 } as const

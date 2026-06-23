@@ -27,7 +27,7 @@ const (
 	EventCommentCreated   = "comment.created"
 	EventUserSignup       = "user.signup"
 	EventReportCreated    = "moderation.report.created"
-	defaultTimeoutSeconds = 5
+	defaultTimeoutSeconds = 2
 	maxTimeoutSeconds     = 15
 	contentTypeJSON       = "application/json"
 	disableAfterFailures  = 3
