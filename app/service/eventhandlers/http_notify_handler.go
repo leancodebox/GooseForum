@@ -88,11 +88,11 @@ func NewHttpNotifyReportCreatedHandler() cqrs.EventHandler {
 		reporter := userNotifyPayload(event.ReporterId)
 		payload := notifyEventData{
 			BaseURI:       baseURI(),
-			ReportID:      uint64Ptr(event.ReportId),
+			ReportID:      new(event.ReportId),
 			TargetType:    event.TargetType,
-			TargetID:      uint64Ptr(event.TargetId),
-			ReporterID:    uint64Ptr(event.ReporterId),
-			Reason:        stringPtr(event.Reason),
+			TargetID:      new(event.TargetId),
+			ReporterID:    new(event.ReporterId),
+			Reason:        new(event.Reason),
 			Article:       &articlePayload,
 			Reporter:      &reporter,
 			ModerationURL: moderationTargetURL(event),
@@ -276,13 +276,6 @@ func uintToString(value uint64) string {
 	return strconv.FormatUint(value, 10)
 }
 
-func uint64Ptr(value uint64) *uint64 {
-	return &value
-}
-
-func stringPtr(value string) *string {
-	return &value
-}
 
 func baseURI() string {
 	return strings.TrimRight(hotdataserve.GetSiteSettingsConfigCache().SiteUrl, "/")

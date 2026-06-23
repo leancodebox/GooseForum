@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -73,12 +74,7 @@ func endpointAccepts(endpoint pageConfig.HttpNotifyEndpoint, eventName string) b
 	if !endpoint.Enabled || endpoint.AbnormalTerminated || strings.TrimSpace(endpoint.URL) == "" {
 		return false
 	}
-	for _, item := range endpoint.Events {
-		if item == eventName {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(endpoint.Events, eventName)
 }
 
 func deliver(endpoint pageConfig.HttpNotifyEndpoint, eventName string, timestamp int64, body []byte) {
