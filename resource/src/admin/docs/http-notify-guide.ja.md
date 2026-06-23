@@ -28,12 +28,40 @@ X-Goose-Signature: sha256=...
   "event": "article.published",
   "timestamp": 1710000000,
   "data": {
-    "articleId": 123,
-    "title": "Hello GooseForum",
-    "userId": 1
+    "baseUri": "http://localhost:5234",
+    "article": {
+      "id": 123,
+      "title": "Hello GooseForum",
+      "url": "/p/post/123",
+      "description": "Article summary",
+      "firstImageUrl": "",
+      "userId": 1,
+      "user": {
+        "id": 1,
+        "username": "alice",
+        "nickname": "Alice",
+        "displayName": "Alice",
+        "avatarUrl": "/static/pic/1.webp",
+        "url": "/u/1"
+      },
+      "categoryIds": [2],
+      "categories": [
+        { "id": 2, "name": "Announcements", "slug": "announcements" }
+      ]
+    },
+    "user": {
+      "id": 1,
+      "username": "alice",
+      "nickname": "Alice",
+      "displayName": "Alice",
+      "avatarUrl": "/static/pic/1.webp",
+      "url": "/u/1"
+    }
   }
 }
 ```
+
+`baseUri` は `article.url`、`user.url`、`comment.url` などのサイト内パスを絶対 URL にするために使えます。新しい連携では、重複するトップレベルのミラーフィールドではなく、`article`、`user`、`comment`、`reporter` などの構造化オブジェクトを優先して使ってください。コメントイベントにはコメント本文のプレビュー、投稿者情報、コメント URL も含まれます。返信への通報イベントには、通報対象のコメント情報も含まれます。
 
 ### 署名検証
 

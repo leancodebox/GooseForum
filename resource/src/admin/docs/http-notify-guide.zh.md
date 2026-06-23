@@ -28,12 +28,40 @@ X-Goose-Signature: sha256=...
   "event": "article.published",
   "timestamp": 1710000000,
   "data": {
-    "articleId": 123,
-    "title": "Hello GooseForum",
-    "userId": 1
+    "baseUri": "http://localhost:5234",
+    "article": {
+      "id": 123,
+      "title": "Hello GooseForum",
+      "url": "/p/post/123",
+      "description": "Article summary",
+      "firstImageUrl": "",
+      "userId": 1,
+      "user": {
+        "id": 1,
+        "username": "alice",
+        "nickname": "Alice",
+        "displayName": "Alice",
+        "avatarUrl": "/static/pic/1.webp",
+        "url": "/u/1"
+      },
+      "categoryIds": [2],
+      "categories": [
+        { "id": 2, "name": "Announcements", "slug": "announcements" }
+      ]
+    },
+    "user": {
+      "id": 1,
+      "username": "alice",
+      "nickname": "Alice",
+      "displayName": "Alice",
+      "avatarUrl": "/static/pic/1.webp",
+      "url": "/u/1"
+    }
   }
 }
 ```
+
+`baseUri` 可用于把 `article.url`、`user.url`、`comment.url` 这类站内路径拼成完整 URL；新接入建议优先使用 `article`、`user`、`comment`、`reporter` 等结构化对象，避免重复解析顶层镜像字段。评论事件会额外包含评论内容预览、评论人信息和评论 URL；举报评论时也会包含被举报评论信息。
 
 ### 签名校验
 

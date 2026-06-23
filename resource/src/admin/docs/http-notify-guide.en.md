@@ -28,12 +28,40 @@ X-Goose-Signature: sha256=...
   "event": "article.published",
   "timestamp": 1710000000,
   "data": {
-    "articleId": 123,
-    "title": "Hello GooseForum",
-    "userId": 1
+    "baseUri": "http://localhost:5234",
+    "article": {
+      "id": 123,
+      "title": "Hello GooseForum",
+      "url": "/p/post/123",
+      "description": "Article summary",
+      "firstImageUrl": "",
+      "userId": 1,
+      "user": {
+        "id": 1,
+        "username": "alice",
+        "nickname": "Alice",
+        "displayName": "Alice",
+        "avatarUrl": "/static/pic/1.webp",
+        "url": "/u/1"
+      },
+      "categoryIds": [2],
+      "categories": [
+        { "id": 2, "name": "Announcements", "slug": "announcements" }
+      ]
+    },
+    "user": {
+      "id": 1,
+      "username": "alice",
+      "nickname": "Alice",
+      "displayName": "Alice",
+      "avatarUrl": "/static/pic/1.webp",
+      "url": "/u/1"
+    }
   }
 }
 ```
+
+`baseUri` can be used to turn site paths such as `article.url`, `user.url`, and `comment.url` into absolute URLs. New integrations should prefer structured objects such as `article`, `user`, `comment`, and `reporter`, avoiding duplicate top-level mirror fields. Comment events also include the comment preview, commenter profile, and comment URL; report events for replies include the reported comment details.
 
 ### Signature verification
 
