@@ -6,6 +6,7 @@ import anchor from 'markdown-it-anchor'
 import taskLists from 'markdown-it-task-lists'
 import { submitArticle, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
+import { markdownFromClipboard } from '@/runtime/rich-paste'
 import { useUnsavedDraftGuard } from '@/site/composables/useUnsavedDraftGuard'
 import PageHeader from '@/site/components/PageHeader.vue'
 import type { LayoutPayload, PublishPageProps } from '@/types/payload'
@@ -205,9 +206,16 @@ async function handleImage(event: Event) {
 
 async function handlePaste(event: ClipboardEvent) {
   const files = imageFilesFromClipboard(event.clipboardData)
-  if (!files.length) return
+  if (files.length) {
+    event.preventDefault()
+    await uploadImageFiles(files)
+    return
+  }
+
+  const markdown = markdownFromClipboard(event.clipboardData)
+  if (!markdown) return
   event.preventDefault()
-  await uploadImageFiles(files)
+  insertMarkdownBlock(markdown)
 }
 
 async function handleDrop(event: DragEvent) {

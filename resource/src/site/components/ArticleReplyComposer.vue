@@ -5,6 +5,7 @@ import { Image, Loader2, MessageSquare, Send, X } from '@lucide/vue'
 import { uploadImage } from '@/runtime/api'
 import { formatNumber } from '@/runtime/format'
 import { processImageFile, validateImageFile } from '@/runtime/image'
+import { markdownFromClipboard } from '@/runtime/rich-paste'
 import type { ReplyPayload } from '@/types/payload'
 import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
 import { useI18n } from 'vue-i18n'
@@ -186,9 +187,16 @@ async function handleImageInput(event: Event) {
 
 async function handlePaste(event: ClipboardEvent) {
   const files = imageFilesFromClipboard(event.clipboardData)
-  if (!files.length) return
+  if (files.length) {
+    event.preventDefault()
+    await uploadImageFiles(files)
+    return
+  }
+
+  const markdown = markdownFromClipboard(event.clipboardData)
+  if (!markdown) return
   event.preventDefault()
-  await uploadImageFiles(files)
+  insertMarkdown(markdown)
 }
 
 async function handleDrop(event: DragEvent) {

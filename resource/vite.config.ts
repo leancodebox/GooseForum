@@ -7,7 +7,7 @@ const vendorChunkGroups = {
   'vue-core': ['/vue/', '/vue-router/', '/vue-i18n/'],
   'ui-vendor': ['/@lucide/', '/reka-ui/', '/motion-v/', '/@vueuse/'],
   'charts-vendor': ['/@unovis/', '/simple-icons/'],
-  'editor-vendor': ['/markdown-it', '/cropperjs/', '/compressorjs/', '/sortablejs/', '/vuedraggable/'],
+  'editor-vendor': ['/markdown-it', '/turndown/', '/cropperjs/', '/compressorjs/', '/sortablejs/', '/vuedraggable/'],
   'utils-vendor': [
     '/node-forge/',
     '/universal-cookie/',
