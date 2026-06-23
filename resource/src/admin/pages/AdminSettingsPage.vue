@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { adminText } from '@/admin/runtime/i18n-text'
+import httpNotifyGuideZh from '@/admin/docs/http-notify-guide.zh.md?raw'
+import httpNotifyGuideEn from '@/admin/docs/http-notify-guide.en.md?raw'
+import httpNotifyGuideJa from '@/admin/docs/http-notify-guide.ja.md?raw'
 
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import MarkdownIt from 'markdown-it'
 import Draggable from 'vuedraggable'
-import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload } from '@lucide/vue'
+import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload, Webhook } from '@lucide/vue'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import { BasicPage } from '@/admin/components/global-layout'
 import { Button } from '@/admin/components/ui/button'
@@ -12,6 +16,7 @@ import { Badge } from '@/admin/components/ui/badge'
 import { Input } from '@/admin/components/ui/input'
 import { Textarea } from '@/admin/components/ui/textarea'
 import { Switch } from '@/admin/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/admin/components/ui/tabs'
 import {
   Dialog,
   DialogContent,
@@ -22,11 +27,13 @@ import {
 } from '@/admin/components/ui/dialog'
 import {
   getAnnouncement,
+  getHttpNotifySettings,
   getMailSettings,
   getPostingSettings,
   getSecuritySettings,
   getSiteSettings,
   saveAnnouncement,
+  saveHttpNotifySettings,
   saveMailSettings,
   savePostingSettings,
   saveSecuritySettings,
@@ -39,6 +46,8 @@ import { resolveApiMessage } from '@/runtime/api-message'
 import type {
   AdminPayload,
   AnnouncementConfig,
+  HttpNotifyEndpoint,
+  HttpNotifySettings,
   MailSettings,
   ManageHomeProps,
   PostingSettings,
@@ -46,7 +55,7 @@ import type {
   SiteSettings,
 } from '@/admin/types'
 
-type Kind = 'site-info' | 'mail' | 'security' | 'posting' | 'announcement'
+type Kind = 'site-info' | 'mail' | 'security' | 'posting' | 'http-notify' | 'announcement'
 
 const props = defineProps<{
   payload: AdminPayload<ManageHomeProps>
@@ -57,6 +66,7 @@ const { locale } = useI18n()
 const loading = ref(false)
 const saving = ref(false)
 const testing = ref(false)
+const httpNotifyTab = ref('config')
 const error = ref('')
 const testEmail = ref('')
 const newAllowedDomain = ref('')
@@ -113,6 +123,28 @@ const postingForm = reactive<PostingSettings>({
   },
 })
 
+const httpNotifyEvents = computed(() => {
+  locale.value
+  return [
+    { value: 'article.published', label: adminText('k00ck') },
+    { value: 'article.updated', label: adminText('k00cl') },
+    { value: 'comment.created', label: adminText('k00cm') },
+    { value: 'user.signup', label: adminText('k00cn') },
+    { value: 'moderation.report.created', label: adminText('k00co') },
+  ]
+})
+
+const httpNotifyForm = reactive<HttpNotifySettings>({
+  enabled: false,
+  endpoints: [],
+})
+
+const guideMarkdown = new MarkdownIt({
+  html: false,
+  linkify: true,
+  typographer: true,
+})
+
 const announcementForm = reactive<AnnouncementConfig>({
   enabled: false,
   content: '',
@@ -125,12 +157,23 @@ const pageMeta = computed(() => {
     mail: { title: adminText('k0003'), description: adminText('k0004') },
     security: { title: adminText('k0005'), description: adminText('k0006') },
     posting: { title: adminText('k0007'), description: adminText('k0008') },
+    'http-notify': { title: adminText('k00cj'), description: adminText('k00cp') },
     announcement: { title: adminText('k0009'), description: adminText('k000a') },
   }
   return meta[props.kind]
 })
 const allowedDomains = computed(() => {
   return securityForm.allowedDomains
+})
+
+const httpNotifyGuideHtml = computed(() => {
+  const guideLocale = String(locale.value).split(/[-_]/)[0]
+  const guides = {
+    zh: httpNotifyGuideZh,
+    en: httpNotifyGuideEn,
+    ja: httpNotifyGuideJa,
+  }
+  return guideMarkdown.render(guides[guideLocale as keyof typeof guides] || httpNotifyGuideZh)
 })
 
 function toBool(value: unknown, fallback = false) {
@@ -214,6 +257,34 @@ function normalizePosting(settings: Partial<PostingSettings> = {}) {
   } satisfies PostingSettings
 }
 
+function normalizeHttpNotify(settings: Partial<HttpNotifySettings> = {}) {
+  return {
+    enabled: toBool(settings.enabled, false),
+    endpoints: Array.isArray(settings.endpoints)
+      ? settings.endpoints.map(endpoint => normalizeEndpoint(endpoint)).filter(endpoint => endpoint.url)
+      : [],
+  } satisfies HttpNotifySettings
+}
+
+function normalizeEndpoint(endpoint: Partial<HttpNotifyEndpoint> = {}) {
+  const events = Array.isArray(endpoint.events)
+    ? endpoint.events.map(item => String(item).trim()).filter(Boolean)
+    : []
+  const enabled = toBool(endpoint.enabled, true)
+  return {
+    id: endpoint.id || crypto.randomUUID(),
+    name: endpoint.name ?? '',
+    enabled,
+    url: endpoint.url?.trim() ?? '',
+    secret: endpoint.secret ?? '',
+    events,
+    timeoutSeconds: Math.min(Math.max(Number(endpoint.timeoutSeconds ?? 5), 1), 15),
+    failureCount: enabled ? 0 : Number(endpoint.failureCount ?? 0),
+    lastError: enabled ? '' : endpoint.lastError ?? '',
+    abnormalTerminated: enabled ? false : toBool(endpoint.abnormalTerminated, false),
+  } satisfies HttpNotifyEndpoint
+}
+
 function normalizeAnnouncement(settings: Partial<AnnouncementConfig> = {}) {
   return {
     enabled: toBool(settings.enabled, false),
@@ -244,6 +315,7 @@ async function load() {
     else if (props.kind === 'mail') Object.assign(mailForm, normalizeMail(await getMailSettings()))
     else if (props.kind === 'security') Object.assign(securityForm, normalizeSecurity(await getSecuritySettings()))
     else if (props.kind === 'posting') Object.assign(postingForm, normalizePosting(await getPostingSettings()))
+    else if (props.kind === 'http-notify') Object.assign(httpNotifyForm, normalizeHttpNotify(await getHttpNotifySettings()))
     else Object.assign(announcementForm, normalizeAnnouncement(await getAnnouncement()))
   } catch (err) {
     error.value = err instanceof Error ? err.message : adminText('k000d')
@@ -259,6 +331,7 @@ async function save() {
     else if (props.kind === 'mail') await saveMailSettings(normalizeMail(mailForm))
     else if (props.kind === 'security') await saveSecuritySettings(normalizeSecurity(securityForm))
     else if (props.kind === 'posting') await savePostingSettings(normalizePosting(postingForm))
+    else if (props.kind === 'http-notify') await saveHttpNotifySettings(normalizeHttpNotify(httpNotifyForm))
     else await saveAnnouncement(normalizeAnnouncement(announcementForm))
     adminToast.success(adminText('k000e'))
   } catch (err) {
@@ -312,6 +385,38 @@ function addExtension() {
 
 function removeExtension(ext: string) {
   postingForm.uploadControl.authorizedExtensions = postingForm.uploadControl.authorizedExtensions.filter(item => item !== ext)
+}
+
+function addHttpEndpoint() {
+  httpNotifyForm.endpoints.push({
+    id: crypto.randomUUID(),
+    name: '',
+    enabled: true,
+    url: '',
+    secret: '',
+    events: ['article.published'],
+    timeoutSeconds: 5,
+    failureCount: 0,
+    lastError: '',
+    abnormalTerminated: false,
+  })
+}
+
+function removeHttpEndpoint(index: number) {
+  httpNotifyForm.endpoints.splice(index, 1)
+}
+
+function toggleEndpointEvent(endpoint: HttpNotifyEndpoint, eventName: string, checked: boolean) {
+  if (checked && !endpoint.events.includes(eventName)) {
+    endpoint.events.push(eventName)
+  }
+  if (!checked) {
+    endpoint.events = endpoint.events.filter(item => item !== eventName)
+  }
+}
+
+function onEndpointEventChange(endpoint: HttpNotifyEndpoint, eventName: string, event: Event) {
+  toggleEndpointEvent(endpoint, eventName, (event.target as HTMLInputElement).checked)
 }
 
 function addFooterPrimary() {
@@ -610,6 +715,98 @@ onMounted(load)
         </section>
       </form>
 
+      <div v-else-if="kind === 'http-notify'" class="max-w-5xl">
+        <Tabs :key="String(locale)" v-model="httpNotifyTab" class="gap-5">
+          <TabsList class="w-fit">
+            <TabsTrigger value="config">{{ adminText('k00d0') }}</TabsTrigger>
+            <TabsTrigger value="guide">{{ adminText('k00d1') }}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="config">
+            <form class="space-y-5" @submit.prevent="save">
+              <div class="flex items-center justify-between border-b pb-4">
+                <div>
+                  <div class="flex items-center gap-2 text-base font-medium"><Webhook class="size-4" />{{ adminText('k00cq') }}</div>
+                  <p class="text-sm text-muted-foreground">{{ adminText('k00cr') }}</p>
+                </div>
+                <Switch v-model="httpNotifyForm.enabled" />
+              </div>
+
+              <section class="space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div class="text-lg font-medium">{{ adminText('k00cs') }}</div>
+                    <p class="text-sm text-muted-foreground">{{ adminText('k00ct') }}</p>
+                  </div>
+                  <Button type="button" variant="secondary" @click="addHttpEndpoint"><Plus class="size-4" />{{ adminText('k00cu') }}</Button>
+                </div>
+
+                <div v-if="httpNotifyForm.endpoints.length === 0" class="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+                  {{ adminText('k00cv') }}
+                </div>
+
+                <div v-for="(endpoint, index) in httpNotifyForm.endpoints" :key="endpoint.id || index" class="space-y-3 rounded-lg border bg-background p-3">
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex min-w-0 items-center gap-3">
+                      <Switch v-model="endpoint.enabled" :disabled="!httpNotifyForm.enabled" />
+                      <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <span class="font-medium">{{ endpoint.name || adminText('k00cw') }}</span>
+                          <Badge v-if="endpoint.abnormalTerminated" variant="destructive" class="px-2 py-0 text-xs">{{ adminText('k00cz') }}</Badge>
+                        </div>
+                        <div v-if="endpoint.lastError" class="mt-0.5 truncate text-xs text-muted-foreground">{{ endpoint.lastError }}</div>
+                      </div>
+                    </div>
+                    <AdminActionButton compact tone="danger" :title="adminText('k005i')" @click="removeHttpEndpoint(index)">
+                      <Trash2 class="size-4" />
+                    </AdminActionButton>
+                  </div>
+
+                  <div class="grid gap-3 md:grid-cols-[minmax(140px,220px)_minmax(0,1fr)_120px]">
+                    <label class="grid gap-2 text-sm font-medium">
+                      {{ adminText('k0079') }}
+                      <Input v-model="endpoint.name" :disabled="!httpNotifyForm.enabled" placeholder="Feishu" />
+                    </label>
+                    <label class="grid gap-2 text-sm font-medium">
+                      URL
+                      <Input v-model="endpoint.url" :disabled="!httpNotifyForm.enabled" placeholder="http://example.com/webhook" />
+                    </label>
+                    <label class="grid gap-2 text-sm font-medium">
+                      {{ adminText('k00cx') }}
+                      <Input v-model.number="endpoint.timeoutSeconds" :disabled="!httpNotifyForm.enabled" type="number" min="1" max="15" />
+                    </label>
+                  </div>
+
+                  <label class="grid gap-2 text-sm font-medium">
+                    Secret
+                    <Input v-model="endpoint.secret" :disabled="!httpNotifyForm.enabled" type="password" autocomplete="new-password" />
+                  </label>
+
+                  <div class="space-y-2">
+                    <div class="text-sm font-medium">{{ adminText('k00cy') }}</div>
+                    <div class="flex flex-wrap gap-2">
+                      <label v-for="item in httpNotifyEvents" :key="item.value" class="inline-flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm">
+                        <input
+                          type="checkbox"
+                          :disabled="!httpNotifyForm.enabled"
+                          :checked="endpoint.events.includes(item.value)"
+                          @change="onEndpointEventChange(endpoint, item.value, $event)"
+                        />
+                        {{ item.label }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="guide">
+            <div class="gf-admin-markdown rounded-lg border bg-background p-5" v-html="httpNotifyGuideHtml" />
+          </TabsContent>
+        </Tabs>
+      </div>
+
       <form v-else class="max-w-3xl space-y-6" @submit.prevent="save">
         <div class="flex items-center justify-between">
           <div><div class="text-base font-medium">{{ adminText('k009j') }}</div><p class="text-sm text-muted-foreground">{{ adminText('k009k') }}</p></div>
@@ -659,3 +856,53 @@ onMounted(load)
       </Dialog>
     </BasicPage>
 </template>
+
+<style scoped>
+.gf-admin-markdown {
+  color: var(--foreground);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.gf-admin-markdown :deep(h2) {
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.gf-admin-markdown :deep(h3) {
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.gf-admin-markdown :deep(p),
+.gf-admin-markdown :deep(ul) {
+  margin-bottom: 0.75rem;
+}
+
+.gf-admin-markdown :deep(ul) {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.gf-admin-markdown :deep(code) {
+  border-radius: 0.25rem;
+  background: var(--muted);
+  padding: 0.125rem 0.25rem;
+  font-size: 0.8125rem;
+}
+
+.gf-admin-markdown :deep(pre) {
+  margin: 0.75rem 0 1rem;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  background: var(--muted);
+  padding: 0.875rem;
+}
+
+.gf-admin-markdown :deep(pre code) {
+  background: transparent;
+  padding: 0;
+}
+</style>

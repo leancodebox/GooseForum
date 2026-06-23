@@ -224,6 +224,24 @@ export interface PostingSettings {
   }
 }
 
+export interface HttpNotifyEndpoint {
+  id: string
+  name: string
+  enabled: boolean
+  url: string
+  secret: string
+  events: string[]
+  timeoutSeconds: number
+  failureCount: number
+  lastError: string
+  abnormalTerminated: boolean
+}
+
+export interface HttpNotifySettings {
+  enabled: boolean
+  endpoints: HttpNotifyEndpoint[]
+}
+
 export interface AnnouncementConfig {
   enabled: boolean
   content: string

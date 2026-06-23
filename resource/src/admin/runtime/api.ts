@@ -15,6 +15,7 @@ import type {
   DailyTraffic,
   FriendLinkGroup,
   GithubRelease,
+  HttpNotifySettings,
   MailSettings,
   PageResult,
   PostingSettings,
@@ -269,6 +270,10 @@ export function getPostingSettings() {
   return getJson<PostingSettings>('/api/admin/posting-settings', adminText('k001i'))
 }
 
+export function getHttpNotifySettings() {
+  return getJson<HttpNotifySettings>('/api/admin/http-notify-settings', adminText('k00ch'))
+}
+
 export function getAnnouncement() {
   return getJson<AnnouncementConfig>('/api/admin/announcement', adminText('k001j'))
 }
@@ -291,6 +296,10 @@ export function saveSecuritySettings(settings: SecuritySettings) {
 
 export function savePostingSettings(settings: PostingSettings) {
   return postJson<unknown>('/api/admin/save-posting-settings', { settings }, adminText('k001n'))
+}
+
+export function saveHttpNotifySettings(settings: HttpNotifySettings) {
+  return postJson<unknown>('/api/admin/save-http-notify-settings', { settings }, adminText('k00ci'))
 }
 
 export function saveAnnouncement(settings: AnnouncementConfig) {

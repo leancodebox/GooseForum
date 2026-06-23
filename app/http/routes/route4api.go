@@ -205,6 +205,8 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("save-security-settings", UpButterReq(api.SaveSecuritySettings)).
 		GET("posting-settings", UpButterReq(api.GetPostingSettings)).
 		POST("save-posting-settings", UpButterReq(api.SavePostingSettings)).
+		GET("http-notify-settings", UpButterReq(api.GetHttpNotifySettings)).
+		POST("save-http-notify-settings", UpButterReq(api.SaveHttpNotifySettings)).
 		GET("badges", UpButterReq(api.BadgeList)).
 		POST("badge-save", UpButterReq(api.SaveBadge)).
 		POST("badge-delete", UpButterReq(api.DeleteBadge)).

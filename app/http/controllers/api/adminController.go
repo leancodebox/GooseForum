@@ -1327,3 +1327,16 @@ type SavePostingSettingsReq struct {
 func SavePostingSettings(req component.BetterRequest[SavePostingSettingsReq]) component.Response {
 	return savePageConfig(pageConfig.PostingSettings, req.Params.Settings, hotdataserve.ClearPostingSettingsConfigCache)
 }
+
+func GetHttpNotifySettings(req component.BetterRequest[component.Null]) component.Response {
+	config := pageConfig.GetConfigByPageType(pageConfig.HttpNotify, defaultconfig.GetDefaultHttpNotifyConfig())
+	return component.SuccessResponse(config)
+}
+
+type SaveHttpNotifySettingsReq struct {
+	Settings pageConfig.HttpNotifyConfig `json:"settings" validate:"required"`
+}
+
+func SaveHttpNotifySettings(req component.BetterRequest[SaveHttpNotifySettingsReq]) component.Response {
+	return savePageConfig(pageConfig.HttpNotify, req.Params.Settings, hotdataserve.ClearHttpNotifyConfigCache)
+}

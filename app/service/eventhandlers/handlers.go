@@ -32,5 +32,12 @@ func Handlers() []cqrs.EventHandler {
 		NewBadgeCommentHandler(),
 		NewBadgeLikeHandler(),
 		NewBadgeFollowHandler(),
+
+		// HTTP 事件通知
+		NewHttpNotifyArticlePublishedHandler(),
+		NewHttpNotifyArticleUpdatedHandler(),
+		NewHttpNotifyCommentCreatedHandler(),
+		NewHttpNotifyUserSignUpHandler(),
+		NewHttpNotifyReportCreatedHandler(),
 	}
 }

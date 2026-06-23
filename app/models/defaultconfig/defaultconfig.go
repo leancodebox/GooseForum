@@ -101,6 +101,10 @@ func GetDefaultPostingSettingsConfig() pageConfig.PostingContent {
 	return config
 }
 
+func GetDefaultHttpNotifyConfig() pageConfig.HttpNotifyConfig {
+	return pageConfig.HttpNotifyConfig{Endpoints: []pageConfig.HttpNotifyEndpoint{}}
+}
+
 func GetDefaultSecuritySettingsConfig() pageConfig.SecurityAndRegistration {
 	config := mustPageConfigDefaults().Security
 	config.AllowedDomains = append([]string(nil), config.AllowedDomains...)

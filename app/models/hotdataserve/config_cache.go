@@ -11,6 +11,7 @@ import (
 const (
 	configFastCacheTTL = 5 * time.Second
 	configSlowCacheTTL = time.Minute
+	configRareCacheTTL = time.Hour
 	configCacheEntries = 4
 )
 
@@ -79,12 +80,25 @@ func GetPostingSettingsConfigCache() pageConfig.PostingContent {
 	return data
 }
 
+var httpNotifyConfigCache = &localcache.Cache[pageConfig.HttpNotifyConfig]{MaxEntries: configCacheEntries}
+
+func GetHttpNotifyConfigCache() pageConfig.HttpNotifyConfig {
+	data, _ := httpNotifyConfigCache.GetOrLoadE("", func() (pageConfig.HttpNotifyConfig, error) {
+		return pageConfig.GetConfigByPageType(pageConfig.HttpNotify, defaultconfig.GetDefaultHttpNotifyConfig()), nil
+	}, configRareCacheTTL)
+	return data
+}
+
 func ClearSecuritySettingsConfigCache() {
 	securitySettingsConfigCache.Clear()
 }
 
 func ClearPostingSettingsConfigCache() {
 	postingSettingsConfigCache.Clear()
+}
+
+func ClearHttpNotifyConfigCache() {
+	httpNotifyConfigCache.Clear()
 }
 
 func ClearSiteSettingsConfigCache() {

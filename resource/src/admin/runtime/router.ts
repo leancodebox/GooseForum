@@ -8,6 +8,7 @@ const settingsPages = {
   '/admin/settings/security': 'security',
   '/admin/settings/posting': 'posting',
   '/admin/settings/announcement': 'announcement',
+  '/admin/settings/http-notify': 'http-notify',
 } as const
 
 export const adminRouter = createRouter({

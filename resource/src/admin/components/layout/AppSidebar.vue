@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Tags,
   UserCog,
+  Webhook,
 } from '@lucide/vue'
 import { computed } from 'vue'
 import { Avatar, AvatarFallback, AvatarImage } from '@/admin/components/ui/avatar'
@@ -84,6 +85,7 @@ const navGroups = computed<NavGroup[]>(() => {
       { title: adminText('k0005'), url: '/admin/settings/security', icon: ShieldCheck, permission: AdminPermission.SiteManager },
       { title: adminText('k007w'), url: '/admin/settings/posting', icon: FileText, permission: AdminPermission.SiteManager },
       { title: adminText('k0009'), url: '/admin/settings/announcement', icon: Megaphone, permission: AdminPermission.PageManager },
+      { title: adminText('k00cj'), url: '/admin/settings/http-notify', icon: Webhook, permission: AdminPermission.SiteManager },
     ],
   },
   ].map(group => ({

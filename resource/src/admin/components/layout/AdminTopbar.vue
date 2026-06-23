@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { adminText } from '@/admin/runtime/i18n-text'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { ArrowLeft, Languages, Search } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/admin/components/ui/button'
@@ -15,7 +15,6 @@ defineProps<{
 
 const { t, locale } = useI18n()
 const languageMenuOpen = ref(false)
-const currentLanguageLabel = computed(() => t(`locale.short.${locale.value}`))
 
 function switchLocale(nextLocale: Locale) {
   setLocale(nextLocale)
@@ -54,7 +53,6 @@ function switchLocale(nextLocale: Locale) {
           @click="languageMenuOpen = !languageMenuOpen"
         >
           <Languages class="size-4" />
-          <span class="min-w-5 text-center">{{ currentLanguageLabel }}</span>
         </Button>
         <div
           v-if="languageMenuOpen"

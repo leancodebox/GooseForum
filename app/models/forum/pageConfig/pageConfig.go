@@ -41,6 +41,7 @@ const (
 	Announcement     = `announcement`
 	SecuritySettings = `securitySettings`
 	PostingSettings  = `postingSettings`
+	HttpNotify       = `httpNotify`
 	SiteTheme        = `siteTheme`
 	Version          = `version`
 	Migration        = `migration`
@@ -184,6 +185,24 @@ type PostingContent struct {
 		MaxDailyUploadsPerUser       int      `json:"maxDailyUploadsPerUser"`
 		NewUserUploadCooldownMinutes int      `json:"newUserUploadCooldownMinutes"`
 	} `json:"uploadControl"`
+}
+
+type HttpNotifyConfig struct {
+	Enabled   bool                 `json:"enabled"`
+	Endpoints []HttpNotifyEndpoint `json:"endpoints"`
+}
+
+type HttpNotifyEndpoint struct {
+	Id                 string   `json:"id"`
+	Name               string   `json:"name"`
+	Enabled            bool     `json:"enabled"`
+	URL                string   `json:"url"`
+	Secret             string   `json:"secret"`
+	Events             []string `json:"events"`
+	TimeoutSeconds     int      `json:"timeoutSeconds"`
+	FailureCount       int      `json:"failureCount"`
+	LastError          string   `json:"lastError"`
+	AbnormalTerminated bool     `json:"abnormalTerminated"`
 }
 
 type SiteThemeConfig struct {

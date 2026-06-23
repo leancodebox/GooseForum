@@ -1,6 +1,7 @@
 package forum
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
@@ -18,6 +20,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/moderationlogservice"
 	"github.com/leancodebox/GooseForum/app/service/moderationstatusservice"
 	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
@@ -209,7 +212,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 	if target.UserID == req.UserId {
 		return component.FailResponseCode(component.MessageReportOwnContent, nil)
 	}
-	_, created, err := reports.CreateOpen(reports.Entity{
+	report, created, err := reports.CreateOpen(reports.Entity{
 		TargetType: req.Params.TargetType,
 		TargetId:   req.Params.TargetId,
 		ArticleId:  target.ArticleID,
@@ -224,6 +227,14 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 		return component.FailResponseCode(component.MessageReportDuplicate, nil)
 	}
 	moderationstatusservice.InvalidateArticle(target.ArticleID)
+	eventbus.Publish(context.Background(), &eventhandlers.ReportCreatedEvent{
+		ReportId:   report.Id,
+		TargetType: report.TargetType,
+		TargetId:   report.TargetId,
+		ArticleId:  report.ArticleId,
+		ReporterId: report.ReporterId,
+		Reason:     report.Reason,
+	})
 	return component.SuccessResponse(true)
 }
 
