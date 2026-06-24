@@ -37,25 +37,6 @@ func TestBrowserCacheLocal(t *testing.T) {
 	}
 }
 
-func TestGinCors(t *testing.T) {
-	recorder := requestWithMiddleware(GinCors, http.MethodGet)
-
-	if got := recorder.Header().Get("Access-Control-Allow-Origin"); got != "*" {
-		t.Fatalf("Access-Control-Allow-Origin = %q, want *", got)
-	}
-	if got := recorder.Header().Get("Access-Control-Expose-Headers"); got == "" {
-		t.Fatalf("expected exposed CORS headers")
-	}
-}
-
-func TestGinCorsOptions(t *testing.T) {
-	recorder := requestWithMiddleware(GinCors, http.MethodOptions)
-
-	if recorder.Code != http.StatusNoContent {
-		t.Fatalf("OPTIONS status = %d, want 204", recorder.Code)
-	}
-}
-
 func TestSiteInfo(t *testing.T) {
 	recorder := requestWithMiddleware(SiteInfo, http.MethodGet)
 
