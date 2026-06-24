@@ -27,11 +27,6 @@ func Get(id any) (entity Entity) {
 	return
 }
 
-func GetByRoleIds(roleIds []uint64) (entities []*Entity) {
-	builder().Where(queryopt.In(pid, roleIds)).Find(&entities)
-	return
-}
-
 func AllEffective() (entities []*Entity) {
 	builder().Find(&entities)
 	return

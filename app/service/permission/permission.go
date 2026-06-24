@@ -93,12 +93,3 @@ func CheckAnyRole(roleId uint64) bool {
 	}
 	return false
 }
-
-// GetPermission 获取权限 (兼容旧接口)
-func GetPermission(roleIds []uint64) []Enum {
-	result := make([]Enum, 0, len(roleIds))
-	for _, rid := range roleIds {
-		result = append(result, GetPermissionByRoleId(rid)...)
-	}
-	return lo.Uniq(result)
-}

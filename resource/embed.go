@@ -8,7 +8,6 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 )
 
@@ -64,13 +63,4 @@ func resourceDir() string {
 		}
 		wd = parent
 	}
-}
-
-// GetThemeConfig reads the theme metadata from the template filesystem.
-func GetThemeConfig() (*ThemeConfig, error) {
-	data, err := fs.ReadFile(GetTemplateFS(), "templates/goose.theme.json")
-	if err != nil {
-		return nil, err
-	}
-	return jsonopt.Decode[*ThemeConfig](data), nil
 }

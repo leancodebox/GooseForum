@@ -45,22 +45,6 @@ func InitStats(date time.Time, key StatType) error {
 	}).Error
 }
 
-// SetValue 直接设置统计值 (用于修复数据)
-func SetValue(date time.Time, key StatType, value int64) error {
-	dateStr := date.Format("2006-01-02")
-
-	return builder().Clauses(clause.OnConflict{
-		Columns: []clause.Column{{Name: "stat_date"}, {Name: "stat_key"}},
-		DoUpdates: clause.Assignments(map[string]any{
-			"stat_value": value,
-		}),
-	}).Create(map[string]any{
-		"stat_date":  dateStr,
-		"stat_key":   string(key),
-		"stat_value": value,
-	}).Error
-}
-
 // GetStatsInRange 获取指定时间范围内的统计项列表
 func GetStatsInRange(keys []StatType, startDate, endDate string) ([]*Entity, error) {
 	var results []*Entity
@@ -71,18 +55,6 @@ func GetStatsInRange(keys []StatType, startDate, endDate string) ([]*Entity, err
 		Order("stat_date ASC").
 		Find(&results).Error
 	return results, err
-}
-
-// GetSumInRange 获取指定统计项在一段时间内的总和
-func GetSumInRange(key StatType, days int) int64 {
-	var sum int64
-	startDate := time.Now().AddDate(0, 0, -days).Format("2006-01-02")
-	builder().
-		Where("stat_key = ?", string(key)).
-		Where("stat_date >= ?", startDate).
-		Select("COALESCE(SUM(stat_value), 0)").
-		Scan(&sum)
-	return sum
 }
 
 // GetCurrentMonthSum 获取指定统计项在本月内的总和

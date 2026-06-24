@@ -23,11 +23,6 @@ func SaveOrCreateById(entity *Entity) int64 {
 	return save(entity)
 }
 
-func Get(id any) (entity Entity) {
-	builder().First(&entity, id)
-	return
-}
-
 func GetByUserId(userId, followUserId uint64) (entity Entity) {
 	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldFollowUserId, followUserId)).First(&entity)
 	return
@@ -44,16 +39,6 @@ func IsFollowing(userId, followUserId uint64) bool {
 		Where(queryopt.Eq(fieldStatus, 1)).
 		Count(&count)
 	return count > 0
-}
-
-// GetAllFollowingIds returns all followed user IDs.
-func GetAllFollowingIds(userId uint64) []uint64 {
-	if userId == 0 {
-		return make([]uint64, 0)
-	}
-	var followUserIds []uint64
-	builder().Select(fieldFollowUserId).Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Eq(fieldStatus, 1)).Pluck(fieldFollowUserId, &followUserIds)
-	return followUserIds
 }
 
 // GetFollowingList returns followed users for a page.

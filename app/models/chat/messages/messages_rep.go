@@ -18,17 +18,6 @@ func SaveOrCreateById(entity *Entity) int64 {
 	}
 }
 
-func Get(id any) (entity Entity) {
-	builder().First(&entity, id)
-	return
-}
-
-func GetByConvId(convId uint64, offset, limit int) []Entity {
-	var entities []Entity
-	builder().Where("conv_id = ?", convId).Order("created_at DESC").Offset(offset).Limit(limit).Find(&entities)
-	return entities
-}
-
 func GetLatestByConvId(convId uint64, limit int) []Entity {
 	var entities []Entity
 	builder().Where("conv_id = ?", convId).Order("id DESC").Limit(limit).Find(&entities)

@@ -96,27 +96,6 @@ func SendArticleCommentNotifications(userIds []uint64, articleId uint64, comment
 	return err
 }
 
-// SendSystemNotification 发送系统通知
-func SendSystemNotification(userId uint64, title string, content string, extra eventNotification.Extra) error {
-	payload := eventNotification.NotificationPayload{
-		Title:   title,
-		Content: content,
-		Extra:   extra,
-	}
-
-	notification := &eventNotification.Entity{
-		UserId:    userId,
-		EventType: eventNotification.EventTypeSystem,
-		Payload:   payload,
-	}
-
-	err := eventNotification.Create(notification)
-	if err == nil {
-		unreadservice.Invalidate(userId)
-	}
-	return err
-}
-
 func SendBadgeNotification(userId uint64, badgeCode string, badgeName string, badgeIconURL string) error {
 	payload := eventNotification.NotificationPayload{
 		TemplateKey: eventNotification.TemplateBadge,

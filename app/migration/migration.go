@@ -13,7 +13,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCollection"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/articlesUserStat"
@@ -37,7 +36,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/userOAuth"
 	"github.com/leancodebox/GooseForum/app/models/forum/userPoints"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
-	"github.com/leancodebox/GooseForum/app/models/forum/userUnreadCounts"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
@@ -56,7 +54,6 @@ func migrateSchema() {
 	if err = db.AutoMigrate(
 		&articleCategory.Entity{},
 		&articleCategoryRs.Entity{},
-		&articleCollection.Entity{},
 		&articleUserAction.Entity{},
 		&articles.Entity{},
 		&articlesUserStat.Entity{},
@@ -79,7 +76,6 @@ func migrateSchema() {
 		&userPoints.Entity{},
 		&users.EntityComplete{},
 		&userStatistics.Entity{},
-		&userUnreadCounts.Entity{},
 		&imConversations.Entity{},
 		&imUserChatConfigs.Entity{},
 		&messages.Entity{},

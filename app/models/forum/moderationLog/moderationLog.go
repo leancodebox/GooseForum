@@ -14,14 +14,12 @@ const (
 )
 
 const (
-	ActionArticleBlocked           = "articleBlocked"
-	ActionArticleUnblocked         = "articleUnblocked"
-	ActionReplyBlocked             = "replyBlocked"
-	ActionReplyUnblocked           = "replyUnblocked"
-	ActionReportResolved           = "reportResolved"
-	ActionReportRejected           = "reportRejected"
-	ActionCategoryModeratorAdded   = "categoryModeratorAdded"
-	ActionCategoryModeratorRemoved = "categoryModeratorRemoved"
+	ActionArticleBlocked   = "articleBlocked"
+	ActionArticleUnblocked = "articleUnblocked"
+	ActionReplyBlocked     = "replyBlocked"
+	ActionReplyUnblocked   = "replyUnblocked"
+	ActionReportResolved   = "reportResolved"
+	ActionReportRejected   = "reportRejected"
 )
 
 const (

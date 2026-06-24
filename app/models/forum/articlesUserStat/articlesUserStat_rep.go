@@ -7,29 +7,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func create(entity *Entity) int64 {
-	result := builder().Create(entity)
-	return result.RowsAffected
-}
-
-func save(entity *Entity) int64 {
-	result := builder().Save(entity)
-	return result.RowsAffected
-}
-
-func SaveOrCreateById(entity *Entity) int64 {
-	if entity.ArticleId == 0 {
-		return create(entity)
-	}
-
-	return save(entity)
-}
-
-func Get(id any) (entity Entity) {
-	builder().First(&entity, id)
-	return
-}
-
 // IncrementUserReply 增加评论计数
 func IncrementUserReply(articleId, userId uint64) error {
 	now := time.Now()

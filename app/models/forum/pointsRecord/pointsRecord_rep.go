@@ -1,10 +1,5 @@
 package pointsRecord
 
-func Create(entity *Entity) int64 {
-	result := builder().Create(entity)
-	return result.RowsAffected
-}
-
 func Save(entity *Entity) int64 {
 	result := builder().Save(entity)
 	return result.RowsAffected

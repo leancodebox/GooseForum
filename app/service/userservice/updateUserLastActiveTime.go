@@ -154,11 +154,6 @@ func (store *userActivityStore) isClosed() bool {
 	return closed
 }
 
-// UpdateUserActivity queues a global user activity update.
-func UpdateUserActivity(userID uint64) {
-	UpdateUserActivityAt(userID, time.Now())
-}
-
 func UpdateUserActivityAt(userID uint64, activeTime time.Time) {
 	rememberUserActivity(userID, activeTime)
 }

@@ -64,11 +64,6 @@ func GetLast(limit int) (entities []*Entity) {
 	return
 }
 
-func GetBatch(minId uint64, limit int) (entities []*Entity) {
-	builder().Where(queryopt.Gt(pid, minId)).Order(queryopt.Asc(pid)).Limit(limit).Find(&entities)
-	return
-}
-
 func CantWriteNew(userId uint64, maxCount int64) bool {
 	var count int64
 	builder().Where(queryopt.Eq(fieldUserId, userId)).Where(queryopt.Gt(fieldCreatedAt, time.Now().Format("2006-01-02"))).Count(&count)
@@ -200,11 +195,6 @@ func DecrementLike(entity Entity) int64 {
 	return result.RowsAffected
 }
 
-func IncrementView(entity Entity) int64 {
-	result := builder().Exec("UPDATE articles SET view_count = view_count+1 where id = ?", entity.Id)
-	return result.RowsAffected
-}
-
 func IncrementViews(counts map[uint64]uint64) error {
 	for articleID, count := range counts {
 		if articleID == 0 || count == 0 {
@@ -257,11 +247,6 @@ func ReserveReplySequence(articleId uint64) (uint64, error) {
 	return replySeq, err
 }
 
-func IncrementReply(entity Entity) int64 {
-	result := builder().Exec("UPDATE articles SET reply_count = reply_count+1 where id = ?", entity.Id)
-	return result.RowsAffected
-}
-
 // GetLatestArticles 获取最新的n篇文章
 func GetLatestArticles(limit int) ([]SmallEntity, error) {
 	var articles []SmallEntity
@@ -282,31 +267,6 @@ func GetLatestArticlesWithContent(limit int) ([]Entity, error) {
 	b.Where(queryopt.Eq(fieldProcessStatus, 0))
 	err := b.
 		Order(queryopt.Desc(pid)).
-		Limit(limit).
-		Find(&articles).Error
-	return articles, err
-}
-
-func GetRecommendedArticles(limit int) ([]SmallEntity, error) {
-	var articles []SmallEntity
-	b := builder()
-	b.Where(queryopt.Eq(fieldArticleStatus, 1))
-	b.Where(queryopt.Eq(fieldProcessStatus, 0))
-	err := b.
-		Order(queryopt.Desc(fieldReplyCount)).
-		Limit(limit).
-		Find(&articles).Error
-	return articles, err
-}
-
-func GetRecommendedArticlesByAuthorId(authorId uint64, limit int) ([]*SmallEntity, error) {
-	var articles []*SmallEntity
-	b := builder()
-	b.Where(queryopt.Eq(fieldUserId, authorId))
-	b.Where(queryopt.Eq(fieldArticleStatus, 1))
-	b.Where(queryopt.Eq(fieldProcessStatus, 0))
-	err := b.
-		Order(queryopt.Desc(fieldReplyCount)).
 		Limit(limit).
 		Find(&articles).Error
 	return articles, err
@@ -335,12 +295,6 @@ func GetDraftArticlesByUserId(userId uint64, limit int) ([]*SmallEntity, error) 
 		Limit(limit).
 		Find(&articles).Error
 	return articles, err
-}
-
-func GetUserCount(userId uint64) int64 {
-	var count int64
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where("deleted_at IS NULL").Count(&count)
-	return count
 }
 
 // QueryById 根据ID批量查询文章

@@ -10,10 +10,6 @@ func Create(entity *Entity) error {
 	return builder().Create(entity).Error
 }
 
-func Save(entity *Entity) error {
-	return builder().Save(entity).Error
-}
-
 // GetPendingTasks 获取待处理的任务
 func GetPendingTasks(limit int) (tasks []*Entity) {
 	builder().Where(queryopt.In("status", []int{StatusPending, StatusRetrying})).

@@ -119,14 +119,3 @@ type ArticleLikedEvent struct {
 	Title     string
 	LikierId  uint64
 }
-
-// ArticleLikedHandler 文章点赞处理器
-func NewArticleLikedHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler(
-		"ArticleLikedHandler",
-		func(ctx context.Context, event *ArticleLikedEvent) error {
-			// 目前点赞暂不发送通知，仅预留
-			return nil
-		},
-	)
-}

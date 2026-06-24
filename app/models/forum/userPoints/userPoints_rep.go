@@ -10,11 +10,6 @@ func Create(entity *Entity) int64 {
 	return result.RowsAffected
 }
 
-func Save(entity *Entity) int64 {
-	result := builder().Save(entity)
-	return result.RowsAffected
-}
-
 func Get(id any) (entity Entity) {
 	builder().First(&entity, id)
 	return

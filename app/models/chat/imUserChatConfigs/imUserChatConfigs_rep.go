@@ -30,11 +30,6 @@ func SaveOrCreateById(entity *Entity) int64 {
 	}
 }
 
-func Get(id any) (entity Entity) {
-	builder().First(&entity, id)
-	return
-}
-
 func GetConfig(userId, peerId uint64) *Entity {
 	var entity Entity
 	err := builder().Where("user_id = ? AND peer_id = ?", userId, peerId).First(&entity).Error
@@ -94,9 +89,4 @@ func Touch(convId, userId uint64) {
 
 func ClearUnread(convId, userId uint64) {
 	builder().Where("conv_id = ? AND user_id = ?", convId, userId).Update("unread_count", 0)
-}
-
-func DeleteConfig(convId, userId uint64) {
-	builder().Where("conv_id = ? AND user_id = ?", convId, userId).Update("is_deleted", 1)
-	InvalidateConversationAccess(userId, convId)
 }

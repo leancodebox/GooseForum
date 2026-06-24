@@ -24,11 +24,6 @@ func SaveOrCreateById(entity *Entity) int64 {
 	}
 }
 
-func Get(id any) (entity Entity) {
-	builder().First(&entity, id)
-	return
-}
-
 func UpdateLastMsg(id uint64, content string) {
 	builder().Where("id = ?", id).Updates(map[string]any{
 		"last_msg_content": content,

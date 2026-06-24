@@ -110,41 +110,6 @@ func ReportStatusChanged(actorUserId uint64, snapshot ReportSnapshot, status str
 	})
 }
 
-func CategoryModeratorAdded(actorUserId uint64, categoryId uint64, categoryName string, userId uint64, username string) {
-	create(moderationLog.Entity{
-		ActorUserId: actorUserId,
-		Action:      moderationLog.ActionCategoryModeratorAdded,
-		SubjectType: moderationLog.SubjectCategory,
-		SubjectId:   categoryId,
-		Payload: moderationLog.Payload{
-			MessageCode: "moderation.log.category.moderatorAdded",
-			Params: map[string]any{
-				"categoryId":   categoryId,
-				"categoryName": categoryName,
-				"userId":       userId,
-				"username":     username,
-			},
-		},
-	})
-}
-
-func CategoryModeratorRemoved(actorUserId uint64, categoryId uint64, categoryName string, userId uint64) {
-	create(moderationLog.Entity{
-		ActorUserId: actorUserId,
-		Action:      moderationLog.ActionCategoryModeratorRemoved,
-		SubjectType: moderationLog.SubjectCategory,
-		SubjectId:   categoryId,
-		Payload: moderationLog.Payload{
-			MessageCode: "moderation.log.category.moderatorRemoved",
-			Params: map[string]any{
-				"categoryId":   categoryId,
-				"categoryName": categoryName,
-				"userId":       userId,
-			},
-		},
-	})
-}
-
 func create(entity moderationLog.Entity) {
 	if err := moderationLog.Create(&entity); err != nil {
 		slog.Error("create moderation log failed", "action", entity.Action, "subjectType", entity.SubjectType, "subjectId", entity.SubjectId, "err", err)

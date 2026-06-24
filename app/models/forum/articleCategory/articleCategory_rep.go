@@ -36,11 +36,6 @@ func GetOne() (entity Entity) {
 	return
 }
 
-func SaveAll(entities *[]Entity) int64 {
-	result := builder().Save(entities)
-	return result.RowsAffected
-}
-
 func DeleteEntity(entity *Entity) int64 {
 	result := builder().Delete(entity)
 	return result.RowsAffected

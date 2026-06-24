@@ -70,30 +70,10 @@ func DeleteEntity(entity *Entity) int64 {
 //	return
 //}
 
-func GetByMaxIdPage(articleId uint64, id uint64, pageSize int) (entities []Entity) {
-	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Where(queryopt.Gt(pid, id)).Limit(pageSize).Find(&entities)
-	return
-}
-
 func GetFirstPageByArticleId(articleId uint64) (entities []*Entity) {
 	builder().
 		Where(queryopt.Eq(fieldArticleId, articleId)).
 		Limit(20).
-		Order(queryopt.Asc(fieldReplyNo)).
-		Order(queryopt.Asc(pid)).
-		Find(&entities)
-	return
-}
-
-func GetAllByArticleId(articleId uint64) (entities []*Entity) {
-	builder().Where(queryopt.Eq(fieldArticleId, articleId)).Find(&entities)
-	return
-}
-
-func GetByArticleIdAsc(articleId uint64, limit int) (entities []*Entity) {
-	builder().
-		Where(queryopt.Eq(fieldArticleId, articleId)).
-		Limit(limit).
 		Order(queryopt.Asc(fieldReplyNo)).
 		Order(queryopt.Asc(pid)).
 		Find(&entities)

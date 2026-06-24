@@ -89,17 +89,6 @@ func GrantManual(userID uint64, badgeCode string, source string, reason string, 
 	return result.RowsAffected > 0, result.Error
 }
 
-func HasActive(userID uint64, badgeCode string) bool {
-	var entity Entity
-	return builder().
-		Select("id").
-		Where(queryopt.Eq("user_id", userID)).
-		Where(queryopt.Eq("badge_code", badgeCode)).
-		Where("revoked_at IS NULL").
-		Limit(1).
-		First(&entity).Error == nil && entity.Id != 0
-}
-
 func Exists(userID uint64, badgeCode string) bool {
 	var entity Entity
 	return builder().
@@ -119,18 +108,6 @@ func GetActiveByUserID(userID uint64) (entities []*Entity) {
 	return
 }
 
-func GetActiveByUserIDs(userIDs []uint64) (entities []*Entity) {
-	if len(userIDs) == 0 {
-		return
-	}
-	builder().
-		Where("user_id IN ?", userIDs).
-		Where("revoked_at IS NULL").
-		Order("granted_at DESC, id DESC").
-		Find(&entities)
-	return
-}
-
 func Revoke(userID uint64, badgeCode string) error {
 	now := time.Now()
 	return builder().
@@ -138,21 +115,4 @@ func Revoke(userID uint64, badgeCode string) error {
 		Where(queryopt.Eq("badge_code", badgeCode)).
 		Where("revoked_at IS NULL").
 		Update("revoked_at", now).Error
-}
-
-func Save(entity *Entity) error {
-	return builder().Save(entity).Error
-}
-
-func FirstActive(userID uint64, badgeCode string) (Entity, error) {
-	var entity Entity
-	err := builder().
-		Where(queryopt.Eq("user_id", userID)).
-		Where(queryopt.Eq("badge_code", badgeCode)).
-		Where("revoked_at IS NULL").
-		First(&entity).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return entity, nil
-	}
-	return entity, err
 }

@@ -29,19 +29,6 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 	}
 }
 
-func CheckAnyPermission(c *gin.Context) {
-	roleId, ok := resolveRoleId(c)
-	if !ok {
-		return
-	}
-	if !permission.CheckAnyRole(roleId) {
-		c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionDenied, nil))
-		c.Abort()
-		return
-	}
-	c.Next()
-}
-
 func CheckAnyPermissionOrNotFound(c *gin.Context) {
 	roleId, ok := resolveRoleId(c)
 	if !ok {
@@ -81,37 +68,6 @@ func CheckWritableAccount(c *gin.Context) {
 		return
 	}
 	c.Next()
-}
-
-func CheckPermissionOrNoUser(permissionType permission.Enum) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		userId := c.GetUint64("userId")
-		if userId == 0 {
-			return
-		}
-
-		var roleId uint64
-		if val, exists := c.Get("roleId"); exists {
-			roleId = val.(uint64)
-		}
-
-		if roleId == 0 {
-			var ok bool
-			roleId, ok = userservice.GetUserRoleId(userId)
-			if !ok {
-				c.JSON(http.StatusForbidden, component.FailDataCode(component.MessagePermissionResolveFailed, nil))
-				c.Abort()
-				return
-			}
-		}
-
-		if !permission.CheckRole(roleId, permissionType) {
-			c.Redirect(http.StatusFound, "/")
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
 }
 
 func resolveRoleId(c *gin.Context) (uint64, bool) {

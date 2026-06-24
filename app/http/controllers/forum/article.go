@@ -241,16 +241,6 @@ func canViewArticleSimple(entity *articles.SmallEntity, userID uint64) bool {
 	return true
 }
 
-func canViewArticleWithPermission(articleStatus, processStatus int8, authorID, userID uint64, canViewProcessed func(uint64) bool) bool {
-	if articleStatus != 1 {
-		return userID != 0 && userID == authorID
-	}
-	if processStatus != 0 && !canViewProcessed(userID) {
-		return false
-	}
-	return true
-}
-
 func currentUserCanViewProcessedArticle(userID uint64) bool {
 	if userID == 0 {
 		return false

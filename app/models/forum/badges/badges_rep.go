@@ -9,23 +9,6 @@ func All() (entities []*Entity) {
 	return
 }
 
-func GetByCodes(codes []string) (entities []*Entity) {
-	if len(codes) == 0 {
-		return
-	}
-	builder().Where("code IN ?", codes).Find(&entities)
-	return
-}
-
-func GetEnabledCustom() (entities []*Entity) {
-	builder().
-		Where(queryopt.Eq("type", TypeCustom)).
-		Where(queryopt.Eq("is_enabled", true)).
-		Order("sort_order ASC, id ASC").
-		Find(&entities)
-	return
-}
-
 func GetByCode(code string) (entity Entity) {
 	builder().Where(queryopt.Eq("code", code)).First(&entity)
 	return

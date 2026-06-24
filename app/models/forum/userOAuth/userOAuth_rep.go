@@ -1,15 +1,5 @@
 package userOAuth
 
-func create(entity *Entity) int64 {
-	result := builder().Create(entity)
-	return result.RowsAffected
-}
-
-func save(entity *Entity) int64 {
-	result := builder().Save(entity)
-	return result.RowsAffected
-}
-
 // Create 创建OAuth记录
 func Create(entity *Entity) error {
 	return builder().Create(entity).Error
@@ -23,14 +13,6 @@ func Update(entity *Entity) error {
 // Delete 删除OAuth记录
 func Delete(id uint64) error {
 	return builder().Delete(&Entity{}, id).Error
-}
-
-func SaveOrCreateById(entity *Entity) int64 {
-	if entity.Id == 0 {
-		return create(entity)
-	}
-
-	return save(entity)
 }
 
 // GetByProviderAndUID 根据提供商和UID获取OAuth记录
@@ -51,11 +33,6 @@ func GetByUserIDAndProvider(userID uint64, provider string) *Entity {
 		return nil
 	}
 	return &entity
-}
-
-func Get(id any) (entity Entity) {
-	builder().First(&entity, id)
-	return
 }
 
 //func saveAll(entities []*Entity) int64 {

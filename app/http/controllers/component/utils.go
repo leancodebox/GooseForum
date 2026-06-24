@@ -9,21 +9,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
-var (
-	minPageSize int = 10
-	maxPageSize int = 30
-)
-
-func BoundPageSize(pageSize int) int {
-	return BoundPageSizeWithRange(pageSize, minPageSize, maxPageSize)
-}
-
 func BoundPageSizeWithRange[T cmp.Ordered](pageSize T, minN, maxN T) T {
 	return min(max(pageSize, minN), maxN)
-}
-
-func BuildCanonicalHref(c *gin.Context) string {
-	return GetBaseUri(c) + c.Request.URL.String()
 }
 
 func GetBaseUri(c *gin.Context) string {
