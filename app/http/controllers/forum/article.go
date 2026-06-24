@@ -49,8 +49,6 @@ func ArticleDetail(c *gin.Context) {
 		payload.Meta.Robots = "noindex"
 	}
 
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "article.gohtml", payload)
 	if shouldCountArticleView(&entity) {
 		articleviewservice.Count(entity.Id)
@@ -286,9 +284,7 @@ func renderNotFoundWithMessage(c *gin.Context, messageCode component.MessageCode
 		Version: payloadVersion,
 	}
 
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusNotFound)
-	renderPage(c, "error.gohtml", payload)
+	renderPageWithStatus(c, http.StatusNotFound, "error.gohtml", payload)
 }
 
 func activeKeyForArticle(article ArticlePayload) string {

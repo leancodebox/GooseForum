@@ -25,8 +25,6 @@ func ThemePreview(c *gin.Context) {
 		URL:     buildPageURL(c),
 		Version: payloadVersion,
 	}
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "theme.gohtml", payload)
 }
 

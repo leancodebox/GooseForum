@@ -1,8 +1,6 @@
 package forum
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,7 +19,5 @@ func Manage(c *gin.Context) {
 		Version: payloadVersion,
 	}
 
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "admin.gohtml", payload)
 }

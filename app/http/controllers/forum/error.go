@@ -28,9 +28,7 @@ func RenderErrorPage(c *gin.Context, status int, title string, messageCode compo
 		Version: payloadVersion,
 	}
 
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(status)
-	renderPage(c, "error.gohtml", payload)
+	renderPageWithStatus(c, status, "error.gohtml", payload)
 }
 
 func RenderOAuthErrorPage(c *gin.Context, status int, messageCode component.MessageCode) {
@@ -58,7 +56,5 @@ func RenderNotFoundPage(c *gin.Context, messageCode component.MessageCode) {
 		Version: payloadVersion,
 	}
 
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusNotFound)
-	renderPage(c, "error.gohtml", payload)
+	renderPageWithStatus(c, http.StatusNotFound, "error.gohtml", payload)
 }

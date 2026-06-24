@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"net/url"
 	"slices"
 	"strconv"
@@ -84,8 +83,6 @@ func Moderation(c *gin.Context) {
 		URL:     buildPageURL(c),
 		Version: payloadVersion,
 	}
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "home.gohtml", payload)
 }
 

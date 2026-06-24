@@ -18,8 +18,6 @@ func Notifications(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "notifications.gohtml", payload)
 }
 
@@ -32,8 +30,6 @@ func Messages(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "messages.gohtml", payload)
 }
 
@@ -46,8 +42,6 @@ func Drafts(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "drafts.gohtml", payload)
 }
 
@@ -65,8 +59,6 @@ func Settings(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "settings.gohtml", payload)
 }
 
@@ -89,8 +81,6 @@ func Publish(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "publish.gohtml", payload)
 }
 
@@ -108,8 +98,6 @@ func Login(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "login.gohtml", payload)
 }
 
@@ -122,8 +110,6 @@ func ResetPassword(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	c.Header("Vary", "X-Goose-Page, Accept")
-	c.Status(http.StatusOK)
 	renderPage(c, "reset_password.gohtml", payload)
 }
 

@@ -106,9 +106,15 @@ func (r *templateRegistry) render(w io.Writer, name string, data any) error {
 }
 
 func renderPage(c *gin.Context, templateName string, payload PagePayload) {
+	renderPageWithStatus(c, http.StatusOK, templateName, payload)
+}
+
+func renderPageWithStatus(c *gin.Context, status int, templateName string, payload PagePayload) {
+	c.Status(status)
+	c.Header("Vary", "X-Goose-Page, Accept")
 	if isPageRequest(c) {
 		c.Header("Cache-Control", "no-store")
-		c.JSON(http.StatusOK, payload)
+		c.JSON(status, payload)
 		return
 	}
 	if currentRegistry == nil {
