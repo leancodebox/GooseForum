@@ -8,10 +8,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleWatch"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
@@ -403,25 +401,15 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 	if articleEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
-	oldLike := articleLike.GetByArticleId(req.UserId, articleEntity.Id)
-	var targetStatus int
-	if req.Params.Action == 1 {
-		if oldLike.Id == 0 {
-			oldLike.UserId = req.UserId
-			oldLike.ArticleId = articleEntity.Id
-		}
-		targetStatus = 1
-	} else {
-		if oldLike.Id == 0 {
-			return component.SuccessResponse(true)
-		}
-		targetStatus = 0
-	}
-	if oldLike.Status == targetStatus {
+	state := articleUserAction.GetByArticleId(req.UserId, articleEntity.Id)
+	targetLiked := req.Params.Action == 1
+	if state.Id == 0 && !targetLiked {
 		return component.SuccessResponse(true)
 	}
-	oldLike.Status = targetStatus
-	if articleLike.SaveOrCreateById(&oldLike) > 0 {
+	if state.Id != 0 && (state.LikedAt != nil) == targetLiked {
+		return component.SuccessResponse(true)
+	}
+	if articleUserAction.SetLiked(req.UserId, articleEntity.Id, targetLiked) {
 		if req.Params.Action == 1 {
 			articles.IncrementLike(articleEntity)
 			userStatistics.LikeArticle(articleEntity.UserId)
@@ -458,33 +446,24 @@ func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	bookmark := articleBookmark.GetByArticleId(req.UserId, articleEntity.Id)
-	targetStatus := bookmarkTargetStatus(req.Params.Action)
-	if bookmark.Id == 0 && targetStatus == 0 {
+	state := articleUserAction.GetByArticleId(req.UserId, articleEntity.Id)
+	targetBookmarked := req.Params.Action == 1
+	if state.Id == 0 && !targetBookmarked {
 		return component.SuccessResponse(true)
 	}
-	if bookmark.Id != 0 && bookmark.Status == targetStatus {
+	if state.Id != 0 && (state.BookmarkedAt != nil) == targetBookmarked {
 		return component.SuccessResponse(true)
 	}
 
-	bookmark.UserId = req.UserId
-	bookmark.ArticleId = articleEntity.Id
-	bookmark.Status = targetStatus
-	articleBookmark.SaveOrCreateById(&bookmark)
-	updateBookmarkStats(req.UserId, targetStatus)
-	userservice.InvalidateUserPublicProfileCache(req.UserId)
+	if articleUserAction.SetBookmarked(req.UserId, articleEntity.Id, targetBookmarked) {
+		updateBookmarkStats(req.UserId, targetBookmarked)
+		userservice.InvalidateUserPublicProfileCache(req.UserId)
+	}
 	return component.SuccessResponse(true)
 }
 
-func bookmarkTargetStatus(action int) int {
-	if action == 1 {
-		return 1
-	}
-	return 0
-}
-
-func updateBookmarkStats(userID uint64, targetStatus int) {
-	if targetStatus == 1 {
+func updateBookmarkStats(userID uint64, bookmarked bool) {
+	if bookmarked {
 		userStatistics.Collection(userID)
 		return
 	}
@@ -502,22 +481,16 @@ func WatchArticle(req component.BetterRequest[WatchArticleReq]) component.Respon
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	watchEntity := articleWatch.GetByArticleId(req.UserId, articleEntity.Id)
-	if watchEntity.Id == 0 {
-		watchEntity.UserId = req.UserId
-		watchEntity.ArticleId = articleEntity.Id
+	state := articleUserAction.GetByArticleId(req.UserId, articleEntity.Id)
+	targetWatched := req.Params.Action == 1
+	if state.Id == 0 && !targetWatched {
+		return component.SuccessResponse(true)
 	}
-
-	targetStatus := 0
-	if req.Params.Action == 1 {
-		targetStatus = 1
-	}
-	if watchEntity.Status == targetStatus {
+	if state.Id != 0 && (state.WatchedAt != nil) == targetWatched {
 		return component.SuccessResponse(true)
 	}
 
-	watchEntity.Status = targetStatus
-	articleWatch.SaveOrCreateById(&watchEntity)
+	articleUserAction.SetWatched(req.UserId, articleEntity.Id, targetWatched)
 	return component.SuccessResponse(true)
 }
 

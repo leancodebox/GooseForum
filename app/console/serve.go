@@ -18,7 +18,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/signalwatch"
 	"github.com/leancodebox/GooseForum/app/console/job"
 	"github.com/leancodebox/GooseForum/app/http/routes"
-	"github.com/leancodebox/GooseForum/app/migration"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
 	"github.com/leancodebox/GooseForum/app/service/oauthservice"
 	"github.com/spf13/cast"
@@ -79,7 +78,6 @@ func pprofMux() *http.ServeMux {
 }
 
 func ginServe() {
-	migration.RunAppMigrations()
 	// 初始化OAuth配置
 	oauthservice.InitOAuth()
 	captchaOpt.StartCleanup()

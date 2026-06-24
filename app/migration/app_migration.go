@@ -7,7 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/datamigration"
 )
 
-func RunAppMigrations() {
+func runVersionedDataMigrations() {
 	currentVersion := pageConfig.GetMigrationVersion()
 	if currentVersion >= pageConfig.AppMigrationVersion {
 		return
@@ -15,6 +15,7 @@ func RunAppMigrations() {
 
 	slog.Info("app migration start", "currentVersion", currentVersion, "targetVersion", pageConfig.AppMigrationVersion)
 	if currentVersion < 1 {
+		datamigration.EnsureDefaultData()
 		result := datamigration.RebuildReplyMarkdown()
 		slog.Info("app migration rebuild reply markdown done", "processed", result.Processed, "skipped", result.Skipped, "failed", result.Failed)
 		if result.Failed > 0 {
@@ -33,6 +34,16 @@ func RunAppMigrations() {
 		}
 		pageConfig.SyncMigrationVersion(2)
 		currentVersion = 2
+	}
+	if currentVersion < 3 {
+		result := datamigration.BackfillArticleUserAction()
+		slog.Info("app migration backfill article user action done", "processed", result.Processed, "skipped", result.Skipped, "failed", result.Failed)
+		if result.Failed > 0 {
+			slog.Error("app migration backfill article user action has failures", "failed", result.Failed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(3)
+		currentVersion = 3
 	}
 	slog.Info("app migration end", "version", currentVersion)
 }

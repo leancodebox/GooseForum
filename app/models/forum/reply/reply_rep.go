@@ -204,9 +204,3 @@ func reverseReplies(entities []*Entity) {
 		entities[i], entities[j] = entities[j], entities[i]
 	}
 }
-
-func GetUserCount(userId uint64) int64 {
-	var count int64
-	builder().Where(queryopt.Eq(fieldUserId, userId)).Where("deleted_at IS NULL").Count(&count)
-	return count
-}

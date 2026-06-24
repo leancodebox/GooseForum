@@ -6,19 +6,15 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
 	"github.com/leancodebox/GooseForum/app/models/chat/imConversations"
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/chat/messages"
-	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCollection"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleWatch"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/articlesUserStat"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
@@ -46,24 +42,22 @@ import (
 )
 
 func M() {
-	migration(setting.UseMigration())
-	initData()
-}
-
-func migration(migration bool) {
-	if !migration {
+	if !setting.UseMigration() {
 		return
 	}
+	migrateSchema()
+	runVersionedDataMigrations()
+}
+
+func migrateSchema() {
 	var err error
 
 	db := dbconnect.Connect()
 	if err = db.AutoMigrate(
-		&articleBookmark.Entity{},
 		&articleCategory.Entity{},
 		&articleCategoryRs.Entity{},
 		&articleCollection.Entity{},
-		&articleLike.Entity{},
-		&articleWatch.Entity{},
+		&articleUserAction.Entity{},
 		&articles.Entity{},
 		&articlesUserStat.Entity{},
 		&badges.Entity{},
@@ -106,21 +100,4 @@ func migration(migration bool) {
 		slog.Info("db4fileconnect migration end")
 	}
 
-}
-
-func initData() {
-	category := articleCategory.GetOne()
-	if category.Id == 0 {
-		category.Category = "GooseForum"
-		category.Desc = "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆"
-		articleCategory.SaveOrCreateById(&category)
-		slog.Info("created default article category")
-	}
-
-	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)
-	if configEntity.Id == 0 {
-		configEntity.PageType = pageConfig.FriendShipLinks
-		configEntity.Config = jsonopt.Encode(defaultconfig.GetDefaultFriendLinksConfig())
-		pageConfig.CreateOrSave(&configEntity)
-	}
 }

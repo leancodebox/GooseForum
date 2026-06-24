@@ -16,10 +16,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleBookmark"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleLike"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleWatch"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -1008,9 +1006,10 @@ func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[ui
 	isBookmarked := false
 	isWatched := false
 	if currentUserID > 0 {
-		isLiked = articleLike.GetByArticleId(currentUserID, entity.Id).Status == 1
-		isBookmarked = articleBookmark.GetByArticleId(currentUserID, entity.Id).Status == 1
-		isWatched = articleWatch.GetByArticleId(currentUserID, entity.Id).Status == 1
+		state := articleUserAction.GetByArticleId(currentUserID, entity.Id)
+		isLiked = state.LikedAt != nil
+		isBookmarked = state.BookmarkedAt != nil
+		isWatched = state.WatchedAt != nil
 	}
 
 	return ArticlePayload{

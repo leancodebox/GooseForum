@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/ThreeDotsLabs/watermill/components/cqrs"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleWatch"
+	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 )
 
@@ -65,7 +65,7 @@ func notifyArticleWatchers(event *CommentCreatedEvent, contentPreview string) {
 	excludeUserIds := commentNotificationExcludeUserIds(event)
 	afterUserId := uint64(0)
 	for {
-		userIds := articleWatch.ListActiveUserIDsAfter(event.ArticleId, afterUserId, excludeUserIds, articleWatchNotifyBatchSize)
+		userIds := articleUserAction.ListActiveWatchUserIDsAfter(event.ArticleId, afterUserId, excludeUserIds, articleWatchNotifyBatchSize)
 		if len(userIds) == 0 {
 			return
 		}
