@@ -7,37 +7,37 @@ import (
 // Handlers 返回所有事件处理器
 func Handlers() []cqrs.EventHandler {
 	return []cqrs.EventHandler{
-		NewCommentCreatedHandler(),
-		NewUserFollowedHandler(),
-		NewArticlePublishedHandler(),
-		NewArticleUpdatedHandler(),
-		NewPointArticlePublishedHandler(),
-		NewPointCommentCreatedHandler(),
-		NewUserLastActiveUpdatedHandler(),
+		cqrs.NewEventHandler("CommentCreatedHandler", handleCommentCreated),
+		cqrs.NewEventHandler("UserFollowedHandler", handleUserFollowed),
+		cqrs.NewEventHandler("ArticlePublishedHandler", handleArticlePublished),
+		cqrs.NewEventHandler("ArticleUpdatedHandler", handleArticleUpdated),
+		cqrs.NewEventHandler("PointArticlePublishedHandler", handlePointArticlePublished),
+		cqrs.NewEventHandler("PointCommentCreatedHandler", handlePointCommentCreated),
+		cqrs.NewEventHandler("UserLastActiveUpdatedHandler", handleUserLastActiveUpdated),
 
 		// 用户行为记录处理器
-		NewActivitySignUpHandler(),
-		NewActivityPostHandler(),
-		NewActivityLikeHandler(),
-		NewActivityFollowHandler(),
-		NewActivityReplyHandler(),
+		cqrs.NewEventHandler("ActivitySignUpHandler", handleActivitySignUp),
+		cqrs.NewEventHandler("ActivityPostHandler", handleActivityPost),
+		cqrs.NewEventHandler("ActivityLikeHandler", handleActivityLike),
+		cqrs.NewEventHandler("ActivityFollowHandler", handleActivityFollow),
+		cqrs.NewEventHandler("ActivityReplyHandler", handleActivityReply),
 
 		// 每日统计处理器
-		NewStatsSignUpHandler(),
-		NewStatsPostHandler(),
-		NewStatsReplyHandler(),
+		cqrs.NewEventHandler("StatsSignUpHandler", handleStatsSignUp),
+		cqrs.NewEventHandler("StatsPostHandler", handleStatsPost),
+		cqrs.NewEventHandler("StatsReplyHandler", handleStatsReply),
 
 		// 徽章自动授予处理器
-		NewBadgePostHandler(),
-		NewBadgeCommentHandler(),
-		NewBadgeLikeHandler(),
-		NewBadgeFollowHandler(),
+		cqrs.NewEventHandler("BadgePostHandler", handleBadgePost),
+		cqrs.NewEventHandler("BadgeCommentHandler", handleBadgeComment),
+		cqrs.NewEventHandler("BadgeLikeHandler", handleBadgeLike),
+		cqrs.NewEventHandler("BadgeFollowHandler", handleBadgeFollow),
 
 		// HTTP 事件通知
-		NewHttpNotifyArticlePublishedHandler(),
-		NewHttpNotifyArticleUpdatedHandler(),
-		NewHttpNotifyCommentCreatedHandler(),
-		NewHttpNotifyUserSignUpHandler(),
-		NewHttpNotifyReportCreatedHandler(),
+		cqrs.NewEventHandler("HttpNotifyArticlePublishedHandler", handleHttpNotifyArticlePublished),
+		cqrs.NewEventHandler("HttpNotifyArticleUpdatedHandler", handleHttpNotifyArticleUpdated),
+		cqrs.NewEventHandler("HttpNotifyCommentCreatedHandler", handleHttpNotifyCommentCreated),
+		cqrs.NewEventHandler("HttpNotifyUserSignUpHandler", handleHttpNotifyUserSignUp),
+		cqrs.NewEventHandler("HttpNotifyReportCreatedHandler", handleHttpNotifyReportCreated),
 	}
 }

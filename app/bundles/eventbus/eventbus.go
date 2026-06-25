@@ -14,7 +14,6 @@ import (
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
 	paniclog "github.com/leancodebox/GooseForum/app/bundles/recovery"
-	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 )
 
 var (
@@ -145,10 +144,11 @@ func AddHandlers(handlers ...cqrs.EventHandler) {
 }
 
 // Start 启动事件处理器
-func Start() error {
-	Init(eventhandlers.Handlers()...)
+func Start(handlers ...cqrs.EventHandler) {
+	Init(handlers...)
 	if router == nil {
-		return errors.New("router not initialized")
+		slog.Error("event bus start failed", "err", errors.New("router not initialized"))
+		return
 	}
 
 	var ctx context.Context
@@ -163,7 +163,6 @@ func Start() error {
 		}
 	})
 
-	return nil
 }
 
 // Close 关闭事件总线

@@ -3,7 +3,6 @@ package eventhandlers
 import (
 	"context"
 
-	"github.com/ThreeDotsLabs/watermill/components/cqrs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 )
@@ -30,24 +29,19 @@ type CommentCreatedEvent struct {
 	ParentReplyAuthorId uint64 // 父评论作者ID
 }
 
-// CommentCreatedHandler 评论/回复创建处理器
-func NewCommentCreatedHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler(
-		"CommentCreatedHandler",
-		func(ctx context.Context, event *CommentCreatedEvent) error {
-			contentPreview := TakeUpTo64Chars(event.Content)
-			// 如果不是文章作者自己评论，通知文章作者
-			if shouldNotifyArticleAuthor(event) {
-				_ = eventnotice.SendCommentNotification(event.ArticleAuthorId, event.ArticleId, contentPreview, event.UserId, event.CommentId)
-			}
-			// 如果是回复评论，且不是回复自己，通知原评论作者
-			if shouldNotifyParentReplyAuthor(event) {
-				_ = eventnotice.SendReplyNotification(event.ParentReplyAuthorId, event.CommentId, event.ArticleId, contentPreview, event.UserId)
-			}
-			notifyArticleWatchers(event, contentPreview)
-			return nil
-		},
-	)
+// handleCommentCreated 发送评论/回复通知
+func handleCommentCreated(ctx context.Context, event *CommentCreatedEvent) error {
+	contentPreview := TakeUpTo64Chars(event.Content)
+	// 如果不是文章作者自己评论，通知文章作者
+	if shouldNotifyArticleAuthor(event) {
+		_ = eventnotice.SendCommentNotification(event.ArticleAuthorId, event.ArticleId, contentPreview, event.UserId, event.CommentId)
+	}
+	// 如果是回复评论，且不是回复自己，通知原评论作者
+	if shouldNotifyParentReplyAuthor(event) {
+		_ = eventnotice.SendReplyNotification(event.ParentReplyAuthorId, event.CommentId, event.ArticleId, contentPreview, event.UserId)
+	}
+	notifyArticleWatchers(event, contentPreview)
+	return nil
 }
 
 func shouldNotifyArticleAuthor(event *CommentCreatedEvent) bool {
@@ -102,14 +96,9 @@ type UserFollowedEvent struct {
 	FollowerName string
 }
 
-// UserFollowedHandler 用户关注处理器
-func NewUserFollowedHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler(
-		"UserFollowedHandler",
-		func(ctx context.Context, event *UserFollowedEvent) error {
-			return eventnotice.SendFollowNotification(event.UserId, event.FollowerId, event.FollowerName)
-		},
-	)
+// handleUserFollowed 发送关注通知
+func handleUserFollowed(ctx context.Context, event *UserFollowedEvent) error {
+	return eventnotice.SendFollowNotification(event.UserId, event.FollowerId, event.FollowerName)
 }
 
 // ArticleLikedEvent 文章点赞事件

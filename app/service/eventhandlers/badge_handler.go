@@ -3,19 +3,13 @@ package eventhandlers
 import (
 	"context"
 
-	"github.com/ThreeDotsLabs/watermill/components/cqrs"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
-func NewBadgePostHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler(
-		"BadgePostHandler",
-		func(ctx context.Context, event *ArticlePublishedEvent) error {
-			checkAndInvalidateUserBadges(event.Article.UserId, badgeservice.TriggerPost)
-			return nil
-		},
-	)
+func handleBadgePost(ctx context.Context, event *ArticlePublishedEvent) error {
+	checkAndInvalidateUserBadges(event.Article.UserId, badgeservice.TriggerPost)
+	return nil
 }
 
 func checkAndInvalidateUserBadges(userID uint64, trigger badgeservice.Trigger) {
@@ -26,33 +20,18 @@ func checkAndInvalidateUserBadges(userID uint64, trigger badgeservice.Trigger) {
 	}
 }
 
-func NewBadgeCommentHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler(
-		"BadgeCommentHandler",
-		func(ctx context.Context, event *CommentCreatedEvent) error {
-			checkAndInvalidateUserBadges(event.UserId, badgeservice.TriggerComment)
-			return nil
-		},
-	)
+func handleBadgeComment(ctx context.Context, event *CommentCreatedEvent) error {
+	checkAndInvalidateUserBadges(event.UserId, badgeservice.TriggerComment)
+	return nil
 }
 
-func NewBadgeLikeHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler(
-		"BadgeLikeHandler",
-		func(ctx context.Context, event *ArticleLikedEvent) error {
-			checkAndInvalidateUserBadges(event.LikierId, badgeservice.TriggerLike)
-			checkAndInvalidateUserBadges(event.UserId, badgeservice.TriggerLike)
-			return nil
-		},
-	)
+func handleBadgeLike(ctx context.Context, event *ArticleLikedEvent) error {
+	checkAndInvalidateUserBadges(event.LikierId, badgeservice.TriggerLike)
+	checkAndInvalidateUserBadges(event.UserId, badgeservice.TriggerLike)
+	return nil
 }
 
-func NewBadgeFollowHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler(
-		"BadgeFollowHandler",
-		func(ctx context.Context, event *UserFollowedEvent) error {
-			checkAndInvalidateUserBadges(event.UserId, badgeservice.TriggerFollow)
-			return nil
-		},
-	)
+func handleBadgeFollow(ctx context.Context, event *UserFollowedEvent) error {
+	checkAndInvalidateUserBadges(event.UserId, badgeservice.TriggerFollow)
+	return nil
 }

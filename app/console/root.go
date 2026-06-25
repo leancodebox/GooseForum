@@ -5,6 +5,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/console/cmd"
 	"github.com/leancodebox/GooseForum/app/migration"
+	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +17,7 @@ var rootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		migration.M()
 		// 初始化并启动事件总线
-		_ = eventbus.Start()
+		eventbus.Start(eventhandlers.Handlers()...)
 	},
 	// Run: runWeb,
 }

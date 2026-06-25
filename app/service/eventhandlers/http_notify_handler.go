@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ThreeDotsLabs/watermill/components/cqrs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
@@ -24,108 +23,98 @@ type ReportCreatedEvent struct {
 	Reason     string
 }
 
-func NewHttpNotifyArticlePublishedHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler("HttpNotifyArticlePublishedHandler", func(ctx context.Context, event *ArticlePublishedEvent) error {
-		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticlePublished) {
-			return nil
-		}
-		httpnotifyservice.Notify(httpnotifyservice.EventArticlePublished, articleNotifyPayload(event.Article))
+func handleHttpNotifyArticlePublished(ctx context.Context, event *ArticlePublishedEvent) error {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticlePublished) {
 		return nil
-	})
+	}
+	httpnotifyservice.Notify(httpnotifyservice.EventArticlePublished, articleNotifyPayload(event.Article))
+	return nil
 }
 
-func NewHttpNotifyArticleUpdatedHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler("HttpNotifyArticleUpdatedHandler", func(ctx context.Context, event *ArticleUpdatedEvent) error {
-		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticleUpdated) {
-			return nil
-		}
-		httpnotifyservice.Notify(httpnotifyservice.EventArticleUpdated, articleNotifyPayload(event.Article))
+func handleHttpNotifyArticleUpdated(ctx context.Context, event *ArticleUpdatedEvent) error {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticleUpdated) {
 		return nil
-	})
+	}
+	httpnotifyservice.Notify(httpnotifyservice.EventArticleUpdated, articleNotifyPayload(event.Article))
+	return nil
 }
 
-func NewHttpNotifyCommentCreatedHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler("HttpNotifyCommentCreatedHandler", func(ctx context.Context, event *CommentCreatedEvent) error {
-		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventCommentCreated) {
-			return nil
-		}
-		article := articles.GetSimple(event.ArticleId)
-		articlePayload := articleNotifyPayloadFromSmall(article)
-		commenter := userNotifyPayload(event.UserId)
-		comment := reply.Get(event.CommentId)
-
-		commentPayload := notifyComment{
-			ID:                  event.CommentId,
-			ReplyNo:             comment.ReplyNo,
-			UserID:              event.UserId,
-			User:                commenter,
-			ParentReplyID:       event.ParentReplyId,
-			ParentReplyAuthorID: event.ParentReplyAuthorId,
-			URL:                 commentURL(event.ArticleId, event.CommentId),
-		}
-		payload := notifyEventData{
-			BaseURI:        baseURI(),
-			ContentPreview: TakeUpTo64Chars(event.Content),
-			Article:        &articlePayload,
-			User:           &commenter,
-			Comment:        &commentPayload,
-		}
-		if event.ParentReplyAuthorId > 0 {
-			parentAuthor := userNotifyPayload(event.ParentReplyAuthorId)
-			payload.Comment.ParentReplyAuthor = &parentAuthor
-		}
-		httpnotifyservice.Notify(httpnotifyservice.EventCommentCreated, payload)
+func handleHttpNotifyCommentCreated(ctx context.Context, event *CommentCreatedEvent) error {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventCommentCreated) {
 		return nil
-	})
+	}
+	article := articles.GetSimple(event.ArticleId)
+	articlePayload := articleNotifyPayloadFromSmall(article)
+	commenter := userNotifyPayload(event.UserId)
+	comment := reply.Get(event.CommentId)
+
+	commentPayload := notifyComment{
+		ID:                  event.CommentId,
+		ReplyNo:             comment.ReplyNo,
+		UserID:              event.UserId,
+		User:                commenter,
+		ParentReplyID:       event.ParentReplyId,
+		ParentReplyAuthorID: event.ParentReplyAuthorId,
+		URL:                 commentURL(event.ArticleId, event.CommentId),
+	}
+	payload := notifyEventData{
+		BaseURI:        baseURI(),
+		ContentPreview: TakeUpTo64Chars(event.Content),
+		Article:        &articlePayload,
+		User:           &commenter,
+		Comment:        &commentPayload,
+	}
+	if event.ParentReplyAuthorId > 0 {
+		parentAuthor := userNotifyPayload(event.ParentReplyAuthorId)
+		payload.Comment.ParentReplyAuthor = &parentAuthor
+	}
+	httpnotifyservice.Notify(httpnotifyservice.EventCommentCreated, payload)
+	return nil
 }
 
-func NewHttpNotifyUserSignUpHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler("HttpNotifyUserSignUpHandler", func(ctx context.Context, event *UserSignUpEvent) error {
-		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventUserSignup) {
-			return nil
-		}
-		user := userNotifyPayload(event.UserId)
-		httpnotifyservice.Notify(httpnotifyservice.EventUserSignup, notifyEventData{
-			BaseURI: baseURI(),
-			User:    &user,
-		})
+func handleHttpNotifyUserSignUp(ctx context.Context, event *UserSignUpEvent) error {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventUserSignup) {
 		return nil
+	}
+	user := userNotifyPayload(event.UserId)
+	httpnotifyservice.Notify(httpnotifyservice.EventUserSignup, notifyEventData{
+		BaseURI: baseURI(),
+		User:    &user,
 	})
+	return nil
 }
 
-func NewHttpNotifyReportCreatedHandler() cqrs.EventHandler {
-	return cqrs.NewEventHandler("HttpNotifyReportCreatedHandler", func(ctx context.Context, event *ReportCreatedEvent) error {
-		if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventReportCreated) {
-			return nil
-		}
-		article := articles.GetSimple(event.ArticleId)
-		articlePayload := articleNotifyPayloadFromSmall(article)
-		reporter := userNotifyPayload(event.ReporterId)
-		payload := notifyEventData{
-			BaseURI:       baseURI(),
-			ReportID:      new(event.ReportId),
-			TargetType:    event.TargetType,
-			TargetID:      new(event.TargetId),
-			ReporterID:    new(event.ReporterId),
-			Reason:        new(event.Reason),
-			Article:       &articlePayload,
-			Reporter:      &reporter,
-			ModerationURL: moderationTargetURL(event),
-		}
-		if event.TargetType == "reply" {
-			comment := reply.Get(event.TargetId)
-			commenter := userNotifyPayload(comment.UserId)
-			payload.Comment = &notifyComment{
-				ID:      comment.Id,
-				ReplyNo: comment.ReplyNo,
-				UserID:  comment.UserId,
-				User:    commenter,
-				URL:     commentURL(comment.ArticleId, comment.Id),
-			}
-		}
-		httpnotifyservice.Notify(httpnotifyservice.EventReportCreated, payload)
+func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEvent) error {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventReportCreated) {
 		return nil
-	})
+	}
+	article := articles.GetSimple(event.ArticleId)
+	articlePayload := articleNotifyPayloadFromSmall(article)
+	reporter := userNotifyPayload(event.ReporterId)
+	payload := notifyEventData{
+		BaseURI:       baseURI(),
+		ReportID:      new(event.ReportId),
+		TargetType:    event.TargetType,
+		TargetID:      new(event.TargetId),
+		ReporterID:    new(event.ReporterId),
+		Reason:        new(event.Reason),
+		Article:       &articlePayload,
+		Reporter:      &reporter,
+		ModerationURL: moderationTargetURL(event),
+	}
+	if event.TargetType == "reply" {
+		comment := reply.Get(event.TargetId)
+		commenter := userNotifyPayload(comment.UserId)
+		payload.Comment = &notifyComment{
+			ID:      comment.Id,
+			ReplyNo: comment.ReplyNo,
+			UserID:  comment.UserId,
+			User:    commenter,
+			URL:     commentURL(comment.ArticleId, comment.Id),
+		}
+	}
+	httpnotifyservice.Notify(httpnotifyservice.EventReportCreated, payload)
+	return nil
 }
 
 type notifyEventData struct {
