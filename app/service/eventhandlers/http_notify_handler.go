@@ -89,8 +89,6 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 		return nil
 	}
 	article := articles.GetSimple(event.ArticleId)
-	articlePayload := articleNotifyPayloadFromSmall(article)
-	reporter := userNotifyPayload(event.ReporterId)
 	payload := notifyEventData{
 		BaseURI:       baseURI(),
 		ReportID:      new(event.ReportId),
@@ -98,8 +96,8 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 		TargetID:      new(event.TargetId),
 		ReporterID:    new(event.ReporterId),
 		Reason:        new(event.Reason),
-		Article:       &articlePayload,
-		Reporter:      &reporter,
+		Article:       new(articleNotifyPayloadFromSmall(article)),
+		Reporter:      new(userNotifyPayload(event.ReporterId)),
 		ModerationURL: moderationTargetURL(event),
 	}
 	if event.TargetType == "reply" {
