@@ -24,9 +24,9 @@ func TestViewCounterBatchesViewsOnClose(t *testing.T) {
 	}
 	counter.start()
 
-	counter.Count(7)
-	counter.Count(7)
-	counter.Count(9)
+	counter.Record(7)
+	counter.Record(7)
+	counter.Record(9)
 	counter.Close()
 
 	want := map[uint64]uint64{7: 2, 9: 1}
@@ -48,8 +48,8 @@ func TestViewCounterDropsWhenQueueIsFull(t *testing.T) {
 		},
 	}
 
-	counter.Count(1)
-	counter.Count(2)
+	counter.Record(1)
+	counter.Record(2)
 
 	if len(counter.requestCh) != 1 {
 		t.Fatalf("queue length = %d, want 1", len(counter.requestCh))

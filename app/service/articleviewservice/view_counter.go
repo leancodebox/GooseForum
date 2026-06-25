@@ -45,14 +45,14 @@ func GetViewCounter() *ViewCounter {
 	return counter
 }
 
-func Count(articleID uint64) {
+func RecordView(articleID uint64) {
 	if articleID == 0 {
 		return
 	}
-	GetViewCounter().Count(articleID)
+	GetViewCounter().Record(articleID)
 }
 
-func (c *ViewCounter) Count(articleID uint64) {
+func (c *ViewCounter) Record(articleID uint64) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if c.closed {

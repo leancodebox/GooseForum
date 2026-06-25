@@ -51,7 +51,7 @@ func ArticleDetail(c *gin.Context) {
 
 	renderPage(c, "article.gohtml", payload)
 	if shouldCountArticleView(&entity) {
-		articleviewservice.Count(entity.Id)
+		articleviewservice.RecordView(entity.Id)
 	}
 }
 
