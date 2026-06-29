@@ -17,7 +17,6 @@ import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/for
 import { topicDescription } from '@/runtime/topic-description'
 import EmptyState from '@/site/components/EmptyState.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import UserAvatarWithBadge from '@/site/components/UserAvatarWithBadge.vue'
 import { badgeClass, badgeIconURL } from '@/site/utils/badge-style'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '@/types/payload'
@@ -147,7 +146,7 @@ function safeProfileUrl(value?: string) {
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex min-w-0 gap-4">
-              <UserAvatarWithBadge
+              <UserAvatar
                 :src="page.props.user.avatarUrl"
                 :alt="page.props.user.username"
                 :badge="page.props.user.wornBadge"

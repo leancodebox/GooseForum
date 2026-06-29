@@ -137,9 +137,9 @@
   }
 
   .gf-floating-surface {
-    border: var(--gf-border) solid color-mix(in oklch, var(--gf-color-line) 80%, transparent);
+    border: var(--gf-border) solid var(--gf-color-line);
     border-radius: var(--gf-radius-box);
-    background: color-mix(in oklch, var(--gf-color-base-100) 95%, transparent);
+    background: var(--gf-color-base-100);
     box-shadow:
       0 18px 48px -24px rgb(15 23 42 / calc(var(--gf-depth) * 0.5)),
       0 4px 16px -12px rgb(15 23 42 / calc(var(--gf-depth) * 0.35));

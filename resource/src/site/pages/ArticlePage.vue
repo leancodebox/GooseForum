@@ -11,7 +11,6 @@ import ArticleReplyComposer from '@/site/components/ArticleReplyComposer.vue'
 import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import UserAvatarWithBadge from '@/site/components/UserAvatarWithBadge.vue'
 import type { ArticleDetailProps, LayoutPayload, ReplyPayload } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
@@ -1269,7 +1268,7 @@ async function removeReply(replyId: number) {
                 class="sticky top-19 self-start pt-1"
                 @click="showUserCard(page.props.article.author, $event)"
               >
-                <UserAvatarWithBadge :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" :badge="page.props.article.author.wornBadge" class="h-11 w-11 rounded-full ring-1 ring-line" img-class="rounded-full" />
+                <UserAvatar :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" :badge="page.props.article.author.wornBadge" class="h-11 w-11 rounded-full ring-1 ring-line" img-class="rounded-full" />
               </a>
               <div class="min-w-0">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -1390,7 +1389,7 @@ async function removeReply(replyId: number) {
                 class="sticky top-19 self-start pt-1"
                 @click="showUserCard(reply.author, $event)"
               >
-                <UserAvatarWithBadge :src="reply.author.avatarUrl" :alt="reply.author.username" :badge="reply.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
+                <UserAvatar :src="reply.author.avatarUrl" :alt="reply.author.username" :badge="reply.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
               </a>
               <div class="min-w-0">
                 <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">

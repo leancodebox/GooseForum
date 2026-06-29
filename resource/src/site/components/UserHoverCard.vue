@@ -15,7 +15,7 @@ import type { UserCardShowDetail } from '@/runtime/user-card-events'
 import type { UserHoverCardPayload } from '@/types/payload'
 import { socialIcons, socialLabels, type SimpleIcon } from '@/site/utils/social-icons'
 import { badgeClass, badgeIconURL, badgeTooltip } from '@/site/utils/badge-style'
-import UserAvatarWithBadge from './UserAvatarWithBadge.vue'
+import UserAvatar from './UserAvatar.vue'
 
 const { t } = useI18n()
 const visible = ref(false)
@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
       >
       <div class="flex items-start gap-3">
         <a :href="profileUrl" class="shrink-0 rounded-full ring-2 ring-base-100">
-          <UserAvatarWithBadge :src="avatarUrl" :alt="username" :badge="wornBadge" size="medium" class="h-14 w-14 rounded-full ring-1 ring-line" img-class="rounded-full" />
+          <UserAvatar :src="avatarUrl" :alt="username" :badge="wornBadge" size="medium" class="h-14 w-14 rounded-full ring-1 ring-line" img-class="rounded-full" />
         </a>
         <div class="min-w-0 flex-1">
           <div class="flex min-w-0 items-center gap-2">

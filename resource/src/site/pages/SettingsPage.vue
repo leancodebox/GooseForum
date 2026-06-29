@@ -33,7 +33,6 @@ import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message
 import { useAvatarCropUpload } from '@/site/composables/useAvatarCropUpload'
 import SectionHeader from '@/site/components/SectionHeader.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import UserAvatarWithBadge from '@/site/components/UserAvatarWithBadge.vue'
 import { badgeClass, badgeIconURL, badgeTooltip } from '@/site/utils/badge-style'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
@@ -456,7 +455,7 @@ async function toggleBinding(provider: string) {
                 :aria-label="t('settings.avatar.upload')"
                 @click="chooseCustomAvatar"
               >
-                <UserAvatarWithBadge :src="avatarPreviewUrl" :alt="usernameForm.username" :badge="wornBadgePreview" size="large" class="h-full w-full rounded-full" img-class="rounded-full transition group-hover:brightness-90" />
+                <UserAvatar :src="avatarPreviewUrl" :alt="usernameForm.username" :badge="wornBadgePreview" size="large" class="h-full w-full rounded-full" img-class="rounded-full transition group-hover:brightness-90" />
                 <span class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full text-neutral-content">
                   <Loader2 v-if="uploadingAvatar" class="h-8 w-8 animate-spin opacity-100" />
                   <Camera v-else class="h-8 w-8 opacity-0 drop-shadow transition group-hover:opacity-100" />
