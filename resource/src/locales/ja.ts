@@ -495,6 +495,7 @@ export default {
       privacySaved: 'プライバシー設定を保存しました',
       bindingDisconnected: 'アカウント連携を解除しました',
       avatarSaved: 'アバターを更新しました',
+      badgeSaved: '表示バッジを更新しました',
     },
     validation: {
       usernameRequired: 'ユーザー名を入力してください',
@@ -530,6 +531,11 @@ export default {
       uploadCustom: 'カスタムをアップロード',
       selectPreset: 'プリセットアバターを選択',
       applyPreset: 'アバターを適用',
+      wornBadgeTitle: '表示バッジ',
+      wornBadgeDescription: 'アバター右下に表示します。',
+      applyWornBadge: '表示を保存',
+      noWornBadge: '表示しない',
+      badgeNotWearable: '表示不可',
     },
     profile: {
       title: '公開プロフィール',
@@ -657,6 +663,7 @@ export default {
     avatarUploadEmpty: 'アバターアップロードの戻り値が空です',
     avatarPresetFailed: 'プリセットアバターの保存に失敗しました',
     avatarPresetEmpty: 'プリセットアバターの戻り値が空です',
+    badgeWearFailed: '表示バッジの保存に失敗しました',
     bindingsLoadFailed: '連携状態の読み込みに失敗しました',
     unbindFailed: '連携解除に失敗しました',
     captchaLoadFailed: '認証コードの読み込みに失敗しました',

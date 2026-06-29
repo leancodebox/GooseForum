@@ -38,6 +38,7 @@ const emptyBadge: AdminBadge = {
   color: 'blue',
   level: 'bronze',
   isEnabled: true,
+  isWearable: true,
   sortOrder: 1000,
 }
 
@@ -259,6 +260,13 @@ onMounted(() => {
               <div class="flex h-9 items-center justify-between rounded-md border bg-background px-3">
                 <span class="text-sm text-muted-foreground">{{ adminText('k00bi') }}</span>
                 <Switch v-model="form.isEnabled" />
+              </div>
+            </div>
+            <div class="grid gap-2 text-sm font-medium">
+              {{ adminText('k00d7') }}
+              <div class="flex h-9 items-center justify-between rounded-md border bg-background px-3">
+                <span class="text-sm text-muted-foreground">{{ adminText('k00d8') }}</span>
+                <Switch v-model="form.isWearable" />
               </div>
             </div>
             <DialogFooter class="sm:col-span-2">

@@ -199,6 +199,7 @@ type BadgeSaveReq struct {
 	Color       string `json:"color"`
 	Level       string `json:"level"`
 	IsEnabled   bool   `json:"isEnabled"`
+	IsWearable  bool   `json:"isWearable"`
 	SortOrder   int    `json:"sortOrder"`
 }
 
@@ -266,6 +267,7 @@ func SaveBadge(req component.BetterRequest[BadgeSaveReq]) component.Response {
 	entity.Color = params.Color
 	entity.Level = params.Level
 	entity.IsEnabled = params.IsEnabled
+	entity.IsWearable = params.IsWearable
 	entity.SortOrder = params.SortOrder
 	if err := badges.Save(&entity); err != nil {
 		return component.FailResponseCode(component.MessageAdminBadgeSaveFailed, nil)

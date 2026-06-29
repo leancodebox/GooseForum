@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 )
 
 // UserInfoShow is the authenticated user summary exposed to pages and APIs.
@@ -37,5 +38,9 @@ type UserDetailedVo struct {
 	Website             string                    `json:"website"`
 	ExternalInformation users.ExternalInformation `json:"externalInformation"`
 	Prestige            int64                     `json:"prestige"`
+	WornBadgeCode       string                    `json:"wornBadgeCode"`
+	Badges              []badgeservice.UserBadge  `json:"badges"`
+	WearableBadges      []badgeservice.UserBadge  `json:"wearableBadges"`
+	WornBadge           *badgeservice.UserBadge   `json:"wornBadge,omitempty"`
 	CreatedAt           time.Time                 `json:"createdAt"`
 }

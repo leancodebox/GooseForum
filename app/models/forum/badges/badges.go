@@ -33,6 +33,7 @@ type Entity struct {
 	Color       string    `gorm:"column:color;type:varchar(32);not null;default:'';" json:"color"`
 	Level       string    `gorm:"column:level;type:varchar(32);not null;default:'';" json:"level"`
 	IsEnabled   bool      `gorm:"column:is_enabled;type:boolean;not null;default:true;index;" json:"isEnabled"`
+	IsWearable  bool      `gorm:"column:is_wearable;type:boolean;not null;default:true;" json:"isWearable"`
 	SortOrder   int       `gorm:"column:sort_order;type:int;not null;default:0;index;" json:"sortOrder"`
 	CreatedAt   time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`
 	UpdatedAt   time.Time `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`

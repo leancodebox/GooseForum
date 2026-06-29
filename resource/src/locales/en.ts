@@ -495,6 +495,7 @@ export default {
       privacySaved: 'Privacy preferences saved',
       bindingDisconnected: 'Account binding disconnected',
       avatarSaved: 'Avatar updated',
+      badgeSaved: 'Display badge updated',
     },
     validation: {
       usernameRequired: 'Username is required',
@@ -530,6 +531,11 @@ export default {
       uploadCustom: 'Upload custom',
       selectPreset: 'Select preset avatar',
       applyPreset: 'Apply avatar',
+      wornBadgeTitle: 'Display badge',
+      wornBadgeDescription: 'Shown at the bottom-right of your avatar.',
+      applyWornBadge: 'Save badge',
+      noWornBadge: 'No badge',
+      badgeNotWearable: 'Not wearable',
     },
     profile: {
       title: 'Public profile',
@@ -657,6 +663,7 @@ export default {
     avatarUploadEmpty: 'Avatar upload returned empty',
     avatarPresetFailed: 'Failed to save preset avatar',
     avatarPresetEmpty: 'Preset avatar response is empty',
+    badgeWearFailed: 'Failed to save display badge',
     bindingsLoadFailed: 'Failed to load binding status',
     unbindFailed: 'Failed to unbind',
     captchaLoadFailed: 'Failed to load captcha',

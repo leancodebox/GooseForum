@@ -27,6 +27,7 @@ type Badge struct {
 	Color       string `json:"color"`
 	Level       string `json:"level"`
 	IsEnabled   bool   `json:"isEnabled"`
+	IsWearable  bool   `json:"isWearable"`
 	SortOrder   int    `json:"sortOrder"`
 }
 
@@ -136,6 +137,32 @@ func GetUserBadges(userID uint64) []UserBadge {
 	return result
 }
 
+func GetWearableUserBadges(userID uint64) []UserBadge {
+	return WearableBadgesFromList(GetUserBadges(userID))
+}
+
+func WearableBadgesFromList(items []UserBadge) []UserBadge {
+	return lo.Filter(items, func(item UserBadge, _ int) bool {
+		return item.IsWearable
+	})
+}
+
+func GetWornBadge(userID uint64, badgeCode string) *UserBadge {
+	return WornBadgeFromList(GetUserBadges(userID), badgeCode)
+}
+
+func WornBadgeFromList(items []UserBadge, badgeCode string) *UserBadge {
+	if badgeCode == "" {
+		return nil
+	}
+	for _, item := range items {
+		if item.Code == badgeCode && item.IsEnabled && item.IsWearable {
+			return &item
+		}
+	}
+	return nil
+}
+
 func ResolveByCodes(codes []string) []Badge {
 	if len(codes) == 0 {
 		return []Badge{}
@@ -206,6 +233,7 @@ func applyOverride(def Definition, override *badges.Entity) Badge {
 		item.Level = override.Level
 	}
 	item.IsEnabled = override.IsEnabled
+	item.IsWearable = override.IsWearable
 	if override.SortOrder != 0 {
 		item.SortOrder = override.SortOrder
 	}
@@ -225,6 +253,7 @@ func fromEntity(entity *badges.Entity) Badge {
 		Color:       entity.Color,
 		Level:       entity.Level,
 		IsEnabled:   entity.IsEnabled,
+		IsWearable:  entity.IsWearable,
 		SortOrder:   entity.SortOrder,
 	}
 }

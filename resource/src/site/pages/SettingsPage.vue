@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import {
+  Ban,
   CalendarDays,
   Camera,
   Check,
@@ -24,6 +25,7 @@ import {
   saveUserName,
   saveUserProfileCover,
   unbindOAuth,
+  wearBadge,
   type OAuthBindingsPayload,
 } from '@/runtime/api'
 import { formatDate, formatNumber } from '@/runtime/format'
@@ -31,6 +33,8 @@ import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message
 import { useAvatarCropUpload } from '@/site/composables/useAvatarCropUpload'
 import SectionHeader from '@/site/components/SectionHeader.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
+import UserAvatarWithBadge from '@/site/components/UserAvatarWithBadge.vue'
+import { badgeClass, badgeIconURL, badgeTooltip } from '@/site/utils/badge-style'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
@@ -59,7 +63,9 @@ const editingEmail = ref(false)
 const editingCover = ref(false)
 const savingCover = ref(false)
 const savingPresetAvatar = ref('')
+const savingWornBadge = ref(false)
 const presetAvatarDraft = ref(page.props.user.avatarUrl)
+const wornBadgeCode = ref(page.props.user.wornBadgeCode || '')
 const coverUrl = ref(page.props.user.profileCoverUrl || '')
 const coverDraft = ref(page.props.user.profileCoverUrl || '')
 const bindings = ref<OAuthBindingsPayload>({})
@@ -150,6 +156,9 @@ const providers = computed(() => [
 const presetAvatars = Array.from({ length: 12 }, (_, index) => `/static/pic/${index + 1}.webp`)
 const presetAvatarChanged = computed(() => presetAvatarDraft.value !== avatarUrl.value)
 const avatarPreviewUrl = computed(() => presetAvatarChanged.value ? presetAvatarDraft.value : avatarUrl.value)
+const userBadges = computed(() => page.props.user.badges || [])
+const wearableBadges = computed(() => page.props.user.wearableBadges || [])
+const wornBadgePreview = computed(() => wearableBadges.value.find(item => item.code === wornBadgeCode.value) || null)
 
 const easterEggMessages: Array<{ type: FlashMessageType; message: string }> = [
   { type: 'success', message: t('settings.easterEgg.success') },
@@ -173,6 +182,7 @@ watch(
     profileForm.externalInformation = buildExternalInfo()
     coverUrl.value = page.props.user.profileCoverUrl || ''
     coverDraft.value = page.props.user.profileCoverUrl || ''
+    wornBadgeCode.value = page.props.user.wornBadgeCode || ''
     editingCover.value = false
   },
 )
@@ -243,6 +253,13 @@ function chooseCustomAvatar() {
   openAvatarPicker()
 }
 
+function selectWornBadge(code: string) {
+  if (savingWornBadge.value) return
+  const badge = userBadges.value.find(item => item.code === code)
+  if (code !== '' && !badge?.isWearable) return
+  wornBadgeCode.value = code
+}
+
 async function applyPresetAvatar() {
   if (savingPresetAvatar.value || uploadingAvatar.value || !presetAvatarChanged.value) return
   savingPresetAvatar.value = presetAvatarDraft.value
@@ -254,6 +271,19 @@ async function applyPresetAvatar() {
     showError(err instanceof Error ? err.message : t('api.avatarPresetFailed'))
   } finally {
     savingPresetAvatar.value = ''
+  }
+}
+
+async function applyWornBadge() {
+  if (savingWornBadge.value) return
+  savingWornBadge.value = true
+  try {
+    await wearBadge(wornBadgeCode.value)
+    showStatus(t('settings.status.badgeSaved'))
+  } catch (err) {
+    showError(err instanceof Error ? err.message : t('api.badgeWearFailed'))
+  } finally {
+    savingWornBadge.value = false
   }
 }
 
@@ -421,19 +451,15 @@ async function toggleBinding(provider: string) {
             <div class="flex min-w-0 gap-4">
               <button
                 type="button"
-                class="group relative -mt-9 h-24 w-24 shrink-0 rounded-lg border-4 border-base-100 bg-base-100 shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-primary/20 sm:-mt-10 sm:h-28 sm:w-28"
+                class="group relative -mt-9 h-24 w-24 shrink-0 rounded-full border-2 border-base-100 bg-base-100 shadow-sm outline-none focus-visible:ring-4 focus-visible:ring-primary/20 sm:-mt-10 sm:h-28 sm:w-28"
                 :disabled="uploadingAvatar"
                 :aria-label="t('settings.avatar.upload')"
                 @click="chooseCustomAvatar"
               >
-                <UserAvatar :src="avatarPreviewUrl" :alt="usernameForm.username" size="large" class="h-full w-full rounded object-cover transition group-hover:brightness-90" />
-                <span class="absolute inset-0 flex items-center justify-center rounded bg-neutral/0 text-neutral-content transition group-hover:bg-neutral/20">
-                  <Loader2 v-if="uploadingAvatar" class="h-6 w-6 animate-spin opacity-100" />
-                  <Camera v-else class="h-6 w-6 opacity-0 transition group-hover:opacity-100" />
-                </span>
-                <span class="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-neutral text-neutral-content shadow-sm ring-2 ring-base-100">
-                  <Loader2 v-if="uploadingAvatar" class="h-4 w-4 animate-spin" />
-                  <Camera v-else class="h-4 w-4" />
+                <UserAvatarWithBadge :src="avatarPreviewUrl" :alt="usernameForm.username" :badge="wornBadgePreview" size="large" class="h-full w-full rounded-full" img-class="rounded-full transition group-hover:brightness-90" />
+                <span class="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full text-neutral-content">
+                  <Loader2 v-if="uploadingAvatar" class="h-8 w-8 animate-spin opacity-100" />
+                  <Camera v-else class="h-8 w-8 opacity-0 drop-shadow transition group-hover:opacity-100" />
                 </span>
                 <input ref="avatarInput" type="file" class="hidden" accept="image/*" @change="handleAvatarChange" />
               </button>
@@ -576,6 +602,66 @@ async function toggleBinding(provider: string) {
                 </span>
                 <span v-else-if="savingPresetAvatar === url" class="absolute inset-0 flex items-center justify-center rounded-md bg-base-100/70">
                   <Loader2 class="h-3.5 w-3.5 animate-spin text-primary" />
+                </span>
+              </button>
+            </div>
+          </section>
+
+          <section v-if="userBadges.length" class="mt-4 border-t border-line pt-3">
+            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-semibold text-base-content/75">{{ t('settings.avatar.wornBadgeTitle') }}</h3>
+                <p class="mt-0.5 text-xs text-base-content/50">{{ t('settings.avatar.wornBadgeDescription') }}</p>
+              </div>
+              <button
+                type="button"
+                class="gf-button gf-button-sm gf-button-primary h-8 text-sm"
+                :disabled="savingWornBadge"
+                @click="applyWornBadge"
+              >
+                <Loader2 v-if="savingWornBadge" class="h-3.5 w-3.5 animate-spin" />
+                <Check v-else class="h-3.5 w-3.5" />
+                {{ savingWornBadge ? t('settings.savingShort') : t('settings.avatar.applyWornBadge') }}
+              </button>
+            </div>
+            <div class="flex gap-2 overflow-x-auto pb-1">
+              <button
+                type="button"
+                class="relative flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-md bg-base-100 px-1 py-1.5 text-xs font-semibold transition hover:bg-base-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20"
+                :disabled="savingWornBadge"
+                @click="selectWornBadge('')"
+              >
+                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-base-200 text-base-content/55 ring-1 ring-inset ring-line">
+                  <Ban class="h-4 w-4" />
+                </span>
+                <span class="max-w-full truncate text-[10px] leading-4">{{ t('settings.avatar.noWornBadge') }}</span>
+                <span v-if="wornBadgeCode === ''" class="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-content ring-2 ring-base-100">
+                  <Check class="h-3 w-3" />
+                </span>
+              </button>
+              <button
+                v-for="badge in userBadges"
+                :key="badge.code"
+                type="button"
+                class="relative flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-md bg-base-100 px-1 py-1.5 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-wait"
+                :class="[
+                  badge.isWearable ? 'hover:bg-base-200' : 'cursor-not-allowed opacity-45 grayscale',
+                ]"
+                :aria-disabled="!badge.isWearable"
+                :disabled="savingWornBadge"
+                :title="badge.isWearable ? badgeTooltip(badge) : `${badgeTooltip(badge)} · ${t('settings.avatar.badgeNotWearable')}`"
+                @click="selectWornBadge(badge.code)"
+              >
+                <span
+                  class="flex h-8 w-8 items-center justify-center ring-1 ring-inset"
+                  :class="badgeClass(badge.color, badge.level)"
+                  style="clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)"
+                >
+                  <img :src="badgeIconURL(badge)" :alt="badge.name" class="h-4 w-4 object-contain" />
+                </span>
+                <span class="max-w-full truncate text-[10px] leading-4">{{ badge.name }}</span>
+                <span v-if="wornBadgeCode === badge.code" class="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-content ring-2 ring-base-100">
+                  <Check class="h-3 w-3" />
                 </span>
               </button>
             </div>

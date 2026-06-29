@@ -42,6 +42,7 @@ type UserInfo struct {
 	WebsiteName         string
 	Website             string
 	ExternalInformation users.ExternalInformation
+	WornBadgeCode       string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 }
@@ -61,13 +62,15 @@ type UserPublicInfo struct {
 	WebsiteName         string
 	Website             string
 	ExternalInformation users.ExternalInformation
+	WornBadgeCode       string
 	CreatedAt           time.Time
 }
 
 type UserPublicProfile struct {
-	User   UserPublicInfo
-	Stats  userStatistics.Entity
-	Badges []badgeservice.UserBadge
+	User      UserPublicInfo
+	Stats     userStatistics.Entity
+	Badges    []badgeservice.UserBadge
+	WornBadge *badgeservice.UserBadge
 }
 
 var (
@@ -138,16 +141,19 @@ func GetUserPublicProfile(userID uint64) (UserPublicProfile, bool) {
 		if !ok {
 			return UserPublicProfile{}, errUserNotFound
 		}
+		badges := badgeservice.GetUserBadges(userID)
 		return UserPublicProfile{
-			User:   user.toPublicInfo(),
-			Stats:  userStatistics.Get(userID),
-			Badges: badgeservice.GetUserBadges(userID),
+			User:      user.toPublicInfo(),
+			Stats:     userStatistics.Get(userID),
+			Badges:    badges,
+			WornBadge: badgeservice.WornBadgeFromList(badges, user.WornBadgeCode),
 		}, nil
 	}, userPublicProfileTTL)
 	if err != nil {
 		return UserPublicProfile{}, false
 	}
 	profile.Badges = cloneUserBadges(profile.Badges)
+	profile.WornBadge = cloneUserBadgePtr(profile.WornBadge)
 	return profile, true
 }
 
@@ -210,6 +216,7 @@ func userInfoFromEntity(user users.EntityComplete) UserInfo {
 		WebsiteName:         user.WebsiteName,
 		Website:             user.Website,
 		ExternalInformation: user.ExternalInformation,
+		WornBadgeCode:       user.WornBadgeCode,
 		CreatedAt:           user.CreatedAt,
 		UpdatedAt:           user.UpdatedAt,
 	}
@@ -230,6 +237,7 @@ func (user UserInfo) toPublicInfo() UserPublicInfo {
 		WebsiteName:         user.WebsiteName,
 		Website:             user.Website,
 		ExternalInformation: user.ExternalInformation,
+		WornBadgeCode:       user.WornBadgeCode,
 		CreatedAt:           user.CreatedAt,
 	}
 }
@@ -253,6 +261,7 @@ func (user UserInfo) toEntity() users.EntityComplete {
 		WebsiteName:         user.WebsiteName,
 		Website:             user.Website,
 		ExternalInformation: user.ExternalInformation,
+		WornBadgeCode:       user.WornBadgeCode,
 		CreatedAt:           user.CreatedAt,
 		UpdatedAt:           user.UpdatedAt,
 	}
@@ -297,6 +306,7 @@ func buildUserCard(profile UserPublicProfile) vo.UserCard {
 		IsFollowing:       false,
 		IsSelf:            false,
 		Badges:            cloneUserBadges(profile.Badges),
+		WornBadge:         cloneUserBadgePtr(profile.WornBadge),
 		LastActiveTime:    lastActiveTime,
 		CreatedAt:         user.CreatedAt,
 	}
@@ -326,6 +336,7 @@ func buildUserHoverCard(profile UserPublicProfile) vo.UserHoverCard {
 		IsOnline:          time.Since(lastActiveTime) < userOnlineWindow,
 		IsFollowing:       false,
 		Badges:            cloneUserBadges(profile.Badges),
+		WornBadge:         cloneUserBadgePtr(profile.WornBadge),
 		LastActiveTime:    lastActiveTime,
 		CreatedAt:         user.CreatedAt,
 	}
@@ -342,6 +353,32 @@ func cloneUserBadges(items []badgeservice.UserBadge) []badgeservice.UserBadge {
 	result := make([]badgeservice.UserBadge, len(items))
 	copy(result, items)
 	return result
+}
+
+func SetWornBadge(userID uint64, badgeCode string) bool {
+	if userID == 0 {
+		return false
+	}
+	if badgeCode != "" && badgeservice.GetWornBadge(userID, badgeCode) == nil {
+		return false
+	}
+	if err := users.UpdateWornBadgeCode(userID, badgeCode); err != nil {
+		return false
+	}
+	userInfoCache.UpdateIfPresent(userInfoKey(userID), func(user UserInfo) UserInfo {
+		user.WornBadgeCode = badgeCode
+		return user
+	}, userInfoTTL)
+	InvalidateUserPublicProfileCache(userID)
+	return true
+}
+
+func cloneUserBadgePtr(item *badgeservice.UserBadge) *badgeservice.UserBadge {
+	if item == nil {
+		return nil
+	}
+	clone := *item
+	return &clone
 }
 
 func userInfoKey(userID uint64) string {

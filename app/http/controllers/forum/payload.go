@@ -235,9 +235,10 @@ type TopicPayload struct {
 }
 
 type TopicAuthorPayload struct {
-	ID        uint64 `json:"id"`
-	Username  string `json:"username"`
-	AvatarURL string `json:"avatarUrl"`
+	ID        uint64                  `json:"id"`
+	Username  string                  `json:"username"`
+	AvatarURL string                  `json:"avatarUrl"`
+	WornBadge *badgeservice.UserBadge `json:"wornBadge,omitempty"`
 }
 
 type TopicCategoryPayload struct {
@@ -1059,7 +1060,7 @@ func userPayload(userID uint64, userMap map[uint64]*users.EntityComplete) TopicA
 	if !ok || user == nil {
 		return TopicAuthorPayload{ID: userID, Username: "匿名用户", AvatarURL: urlconfig.GetDefaultAvatar()}
 	}
-	return TopicAuthorPayload{ID: userID, Username: user.Username, AvatarURL: user.GetWebAvatarUrl()}
+	return TopicAuthorPayload{ID: userID, Username: user.Username, AvatarURL: user.GetWebAvatarUrl(), WornBadge: badgeservice.GetWornBadge(userID, user.WornBadgeCode)}
 }
 
 func ensureRenderedHTML(entity *articles.Entity) {

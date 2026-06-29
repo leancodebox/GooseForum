@@ -100,6 +100,7 @@ type EntityComplete struct {
 	WebsiteName         string              `gorm:"column:website_name;type:varchar(64);not null;default:'';" json:"websiteName"`                           // 个人网站名
 	Website             string              `gorm:"column:website;type:varchar(255);not null;default:'';" json:"website"`                                   // 个人网站
 	ExternalInformation ExternalInformation `gorm:"column:external_information;type:varchar(2048);default:'{}';serializer:json" json:"externalInformation"` // 外部信息
+	WornBadgeCode       string              `gorm:"column:worn_badge_code;type:varchar(64);not null;default:'';" json:"wornBadgeCode"`                      // 当前佩戴的徽章
 
 	// status
 	CreatedAt time.Time      `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"` //

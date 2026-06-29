@@ -14,7 +14,8 @@ import { formatDate, formatNumber, timeAgo } from '@/runtime/format'
 import type { UserCardShowDetail } from '@/runtime/user-card-events'
 import type { UserHoverCardPayload } from '@/types/payload'
 import { socialIcons, socialLabels, type SimpleIcon } from '@/site/utils/social-icons'
-import UserAvatar from './UserAvatar.vue'
+import { badgeClass, badgeIconURL, badgeTooltip } from '@/site/utils/badge-style'
+import UserAvatarWithBadge from './UserAvatarWithBadge.vue'
 
 const { t } = useI18n()
 const visible = ref(false)
@@ -32,6 +33,7 @@ let preferredSide: 'top' | 'bottom' | null = null
 const displayName = computed(() => card.value?.nickname || fallbackUser.value?.username || card.value?.username || '')
 const username = computed(() => card.value?.username || fallbackUser.value?.username || '')
 const avatarUrl = computed(() => card.value?.avatarUrl || fallbackUser.value?.avatarUrl || '')
+const wornBadge = computed(() => card.value?.wornBadge || fallbackUser.value?.wornBadge || null)
 const profileUrl = computed(() => `/u/${card.value?.userId || fallbackUser.value?.id || 0}`)
 const bioText = computed(() => card.value?.bio || card.value?.signature || '')
 const externalLinks = computed(() => {
@@ -159,33 +161,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('goose:page', hideNow)
 })
 
-function badgeClass(color: string, level: string) {
-  if (color === 'blue') return 'bg-blue-100 text-blue-700 ring-blue-200'
-  if (color === 'emerald') return 'bg-emerald-100 text-emerald-700 ring-emerald-200'
-  if (color === 'teal') return 'bg-teal-100 text-teal-700 ring-teal-200'
-  if (color === 'sky') return 'bg-sky-100 text-sky-700 ring-sky-200'
-  if (color === 'cyan') return 'bg-cyan-100 text-cyan-700 ring-cyan-200'
-  if (color === 'rose') return 'bg-rose-100 text-rose-700 ring-rose-200'
-  if (color === 'violet') return 'bg-violet-100 text-violet-700 ring-violet-200'
-  if (color === 'purple') return 'bg-purple-100 text-purple-700 ring-purple-200'
-  if (color === 'fuchsia') return 'bg-fuchsia-100 text-fuchsia-700 ring-fuchsia-200'
-  if (color === 'indigo') return 'bg-indigo-100 text-indigo-700 ring-indigo-200'
-  if (color === 'amber') return 'bg-amber-100 text-amber-700 ring-amber-200'
-  if (color === 'orange') return 'bg-orange-100 text-orange-700 ring-orange-200'
-  if (color === 'yellow') return 'bg-yellow-100 text-yellow-700 ring-yellow-200'
-  if (color === 'slate') return 'bg-slate-100 text-slate-700 ring-slate-200'
-  if (level === 'gold') return 'bg-amber-100 text-amber-700 ring-amber-200'
-  if (level === 'special') return 'bg-indigo-100 text-indigo-700 ring-indigo-200'
-  return 'bg-blue-100 text-blue-700 ring-blue-200'
-}
-
-function badgeTooltip(badge: UserHoverCardPayload['badges'][number]) {
-  return badge.description ? `${badge.name}：${badge.description}` : badge.name
-}
-
-function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
-  return badge.iconUrl || '/static/badges/contributor.svg'
-}
 </script>
 
 <template>
@@ -200,7 +175,7 @@ function badgeIconURL(badge: UserHoverCardPayload['badges'][number]) {
       >
       <div class="flex items-start gap-3">
         <a :href="profileUrl" class="shrink-0 rounded-full ring-2 ring-base-100">
-          <UserAvatar :src="avatarUrl" :alt="username" size="medium" class="h-14 w-14 rounded-full object-cover ring-1 ring-line" />
+          <UserAvatarWithBadge :src="avatarUrl" :alt="username" :badge="wornBadge" size="medium" class="h-14 w-14 rounded-full ring-1 ring-line" img-class="rounded-full" />
         </a>
         <div class="min-w-0 flex-1">
           <div class="flex min-w-0 items-center gap-2">

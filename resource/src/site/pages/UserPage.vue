@@ -17,6 +17,8 @@ import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/for
 import { topicDescription } from '@/runtime/topic-description'
 import EmptyState from '@/site/components/EmptyState.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
+import UserAvatarWithBadge from '@/site/components/UserAvatarWithBadge.vue'
+import { badgeClass, badgeIconURL } from '@/site/utils/badge-style'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
@@ -136,29 +138,6 @@ function safeProfileUrl(value?: string) {
   }
 }
 
-function badgeClass(color: string, level: string) {
-  if (color === 'blue') return 'bg-blue-100 text-blue-700 ring-blue-200'
-  if (color === 'emerald') return 'bg-emerald-100 text-emerald-700 ring-emerald-200'
-  if (color === 'teal') return 'bg-teal-100 text-teal-700 ring-teal-200'
-  if (color === 'sky') return 'bg-sky-100 text-sky-700 ring-sky-200'
-  if (color === 'cyan') return 'bg-cyan-100 text-cyan-700 ring-cyan-200'
-  if (color === 'rose') return 'bg-rose-100 text-rose-700 ring-rose-200'
-  if (color === 'violet') return 'bg-violet-100 text-violet-700 ring-violet-200'
-  if (color === 'purple') return 'bg-purple-100 text-purple-700 ring-purple-200'
-  if (color === 'fuchsia') return 'bg-fuchsia-100 text-fuchsia-700 ring-fuchsia-200'
-  if (color === 'indigo') return 'bg-indigo-100 text-indigo-700 ring-indigo-200'
-  if (color === 'amber') return 'bg-amber-100 text-amber-700 ring-amber-200'
-  if (color === 'orange') return 'bg-orange-100 text-orange-700 ring-orange-200'
-  if (color === 'yellow') return 'bg-yellow-100 text-yellow-700 ring-yellow-200'
-  if (color === 'slate') return 'bg-slate-100 text-slate-700 ring-slate-200'
-  if (level === 'gold') return 'bg-amber-100 text-amber-700 ring-amber-200'
-  if (level === 'special') return 'bg-indigo-100 text-indigo-700 ring-indigo-200'
-  return 'bg-blue-100 text-blue-700 ring-blue-200'
-}
-
-function badgeIconURL(badge: UserProfileProps['badges'][number]) {
-  return badge.iconUrl || '/static/badges/contributor.svg'
-}
 </script>
 
 <template>
@@ -168,11 +147,13 @@ function badgeIconURL(badge: UserProfileProps['badges'][number]) {
         <div class="px-4 pb-4 sm:px-5">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex min-w-0 gap-4">
-              <UserAvatar
+              <UserAvatarWithBadge
                 :src="page.props.user.avatarUrl"
                 :alt="page.props.user.username"
+                :badge="page.props.user.wornBadge"
                 size="large"
-                class="-mt-9 h-24 w-24 rounded-lg border-4 border-base-100 bg-base-100 object-cover shadow-sm sm:-mt-10 sm:h-28 sm:w-28"
+                img-class="rounded-full"
+                class="-mt-9 h-24 w-24 rounded-full border-2 border-base-100 bg-base-100 shadow-sm sm:-mt-10 sm:h-28 sm:w-28"
               />
               <div class="min-w-0 pt-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">

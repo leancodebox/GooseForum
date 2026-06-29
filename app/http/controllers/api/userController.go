@@ -249,6 +249,18 @@ func SetPresetAvatar(req component.BetterRequest[SetPresetAvatarReq]) component.
 	})
 }
 
+type WearBadgeReq struct {
+	BadgeCode string `json:"badgeCode"`
+}
+
+func WearBadge(req component.BetterRequest[WearBadgeReq]) component.Response {
+	badgeCode := strings.TrimSpace(req.Params.BadgeCode)
+	if !userservice.SetWornBadge(req.UserId, badgeCode) {
+		return component.FailResponseCode(component.MessageRequestInvalidParams, nil)
+	}
+	return component.SuccessResponseCode("更新成功", component.MessageUserUpdateSuccess, nil)
+}
+
 func isAllowedPresetAvatar(avatarUrl string) bool {
 	for i := 1; i <= 12; i++ {
 		if avatarUrl == fmt.Sprintf("/static/pic/%d.webp", i) {

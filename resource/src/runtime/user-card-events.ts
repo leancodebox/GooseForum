@@ -1,7 +1,10 @@
+import type { UserBadgePayload } from '@/types/payload'
+
 export interface UserCardTarget {
   id: number
   username: string
   avatarUrl: string
+  wornBadge?: UserBadgePayload | null
 }
 
 export interface UserCardShowDetail {

@@ -66,6 +66,12 @@ func Save(entity *EntityComplete) error {
 	return result.Error
 }
 
+func UpdateWornBadgeCode(userID uint64, badgeCode string) error {
+	return builder().
+		Where(queryopt.Eq(pid, userID)).
+		Update("worn_badge_code", badgeCode).Error
+}
+
 func All() (entities []*EntityComplete) {
 	builder().Find(&entities)
 	return

@@ -139,6 +139,7 @@ export interface AdminBadge {
   color: string
   level: string
   isEnabled: boolean
+  isWearable: boolean
   sortOrder: number
   isSystem?: boolean
   canDelete?: boolean

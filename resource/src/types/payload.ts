@@ -294,8 +294,9 @@ export interface ArticlePayload {
     id: number
     username: string
     avatarUrl: string
+    wornBadge?: UserBadgePayload | null
   }
-  participants: Array<{ id: number; username: string; avatarUrl: string }>
+  participants: Array<{ id: number; username: string; avatarUrl: string; wornBadge?: UserBadgePayload | null }>
   categories: Array<{ id: number; name: string; url: string; color: string }>
   replyCount: number
   maxReplyNo: number
@@ -321,6 +322,7 @@ export interface ReplyPayload {
     id: number
     username: string
     avatarUrl: string
+    wornBadge?: UserBadgePayload | null
   }
   createdAt: string
   replyToId?: number
@@ -352,8 +354,9 @@ export interface TopicPayload {
     id: number
     username: string
     avatarUrl: string
+    wornBadge?: UserBadgePayload | null
   }
-  participants: Array<{ id: number; username: string; avatarUrl: string }>
+  participants: Array<{ id: number; username: string; avatarUrl: string; wornBadge?: UserBadgePayload | null }>
   categories: Array<{ id: number; name: string; url: string; color: string }>
   replyCount: number
   viewCount: number
@@ -458,6 +461,7 @@ export interface UserCardPayload {
   isOnline: boolean
   isFollowing: boolean
   isSelf: boolean
+  wornBadge?: UserBadgePayload | null
   lastActiveTime: string
   createdAt: string
 }
@@ -482,6 +486,7 @@ export interface UserHoverCardPayload {
   isOnline: boolean
   isFollowing: boolean
   badges: UserBadgePayload[]
+  wornBadge?: UserBadgePayload | null
   lastActiveTime: string
   createdAt: string
 }
@@ -512,6 +517,7 @@ export interface BadgePayload {
   color: string
   level: string
   isEnabled: boolean
+  isWearable: boolean
   sortOrder: number
 }
 
@@ -759,6 +765,10 @@ export interface SettingsUserPayload {
   prestige: number
   createdAt: string
   externalInformation: Record<string, { link?: string }>
+  wornBadgeCode: string
+  badges: UserBadgePayload[]
+  wearableBadges: UserBadgePayload[]
+  wornBadge?: UserBadgePayload | null
 }
 
 export interface PublishPageProps {

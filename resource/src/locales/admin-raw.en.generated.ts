@@ -472,5 +472,7 @@ export default {
   "k00d3": "Callback \"{name}\" is missing a URL",
   "k00d4": "Callback \"{name}\" must use an http or https URL",
   "k00d5": "Callback \"{name}\" needs at least one notification event",
-  "k00d6": "Callback \"{name}\" timeout must be between 1 and 15 seconds"
+  "k00d6": "Callback \"{name}\" timeout must be between 1 and 15 seconds",
+  "k00d7": "Wearable",
+  "k00d8": "Users can select it for display"
 } as const

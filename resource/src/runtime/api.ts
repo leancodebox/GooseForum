@@ -553,6 +553,18 @@ export async function savePresetAvatar(avatarUrl: string): Promise<string> {
   return result.avatarUrl
 }
 
+export async function wearBadge(badgeCode: string): Promise<boolean> {
+  const response = await fetch('/api/wear-badge', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ badgeCode }),
+  })
+  await readApiResponse<unknown>(response, t('api.badgeWearFailed'))
+  return true
+}
+
 export async function saveUserEmail(email: string): Promise<boolean> {
   const response = await fetch('/api/set-user-email', {
     method: 'POST',

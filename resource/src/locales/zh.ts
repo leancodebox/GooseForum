@@ -495,6 +495,7 @@ export default {
       privacySaved: '隐私偏好已保存',
       bindingDisconnected: '账号绑定已解除',
       avatarSaved: '头像已更新',
+      badgeSaved: '佩戴徽章已更新',
     },
     validation: {
       usernameRequired: '用户名不能为空',
@@ -530,6 +531,11 @@ export default {
       uploadCustom: '上传自定义',
       selectPreset: '选择预设头像',
       applyPreset: '应用头像',
+      wornBadgeTitle: '佩戴徽章',
+      wornBadgeDescription: '显示在头像右下角',
+      applyWornBadge: '保存佩戴',
+      noWornBadge: '不佩戴',
+      badgeNotWearable: '不可佩戴',
     },
     profile: {
       title: '公开资料',
@@ -657,6 +663,7 @@ export default {
     avatarUploadEmpty: '头像上传返回为空',
     avatarPresetFailed: '预设头像保存失败',
     avatarPresetEmpty: '预设头像返回为空',
+    badgeWearFailed: '佩戴徽章保存失败',
     bindingsLoadFailed: '绑定状态加载失败',
     unbindFailed: '解绑失败',
     captchaLoadFailed: '验证码加载失败',

@@ -32,6 +32,7 @@ type UserCard struct {
 	ExternalInfo      users.ExternalInformation `json:"externalInformation"`
 	IsSelf            bool                      `json:"isSelf"`
 	Badges            []badgeservice.UserBadge  `json:"badges"`
+	WornBadge         *badgeservice.UserBadge   `json:"wornBadge,omitempty"`
 	LastActiveTime    time.Time                 `json:"lastActiveTime"`
 	CreatedAt         time.Time                 `json:"createdAt"`
 }
@@ -57,6 +58,7 @@ type UserHoverCard struct {
 	IsOnline          bool                      `json:"isOnline"`
 	IsFollowing       bool                      `json:"isFollowing"`
 	Badges            []badgeservice.UserBadge  `json:"badges"`
+	WornBadge         *badgeservice.UserBadge   `json:"wornBadge,omitempty"`
 	LastActiveTime    time.Time                 `json:"lastActiveTime"`
 	CreatedAt         time.Time                 `json:"createdAt"`
 }
