@@ -78,6 +78,7 @@ func pprofMux() *http.ServeMux {
 }
 
 func ginServe() {
+	preferences.OpenConfigChangeEvent()
 	// 初始化OAuth配置
 	oauthservice.InitOAuth()
 	captchaOpt.StartCleanup()
