@@ -372,10 +372,19 @@ export default {
     emptyActivity: '暂无动态。',
     emptyData: '暂无数据。',
     tabs: {
+      summary: '总结',
       topics: '主题',
+      likes: '赞',
       activity: '动态',
+      timeline: '所有',
+      badges: '徽章',
       following: '关注',
       followers: '粉丝',
+    },
+    summarySections: {
+      recentTopics: '近期主题',
+      recentBadges: '近期徽章',
+      recentActivity: '近期动态',
     },
     activity: {
       signup: '加入论坛',

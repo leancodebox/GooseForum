@@ -372,10 +372,19 @@ export default {
     emptyActivity: 'No activity yet.',
     emptyData: 'No data.',
     tabs: {
+      summary: 'Summary',
       topics: 'Topics',
+      likes: 'Likes',
       activity: 'Activity',
+      timeline: 'All',
+      badges: 'Badges',
       following: 'Following',
       followers: 'Followers',
+    },
+    summarySections: {
+      recentTopics: 'Recent topics',
+      recentBadges: 'Recent badges',
+      recentActivity: 'Recent activity',
     },
     activity: {
       signup: 'Joined the forum',

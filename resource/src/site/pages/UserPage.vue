@@ -1,25 +1,31 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue'
 import {
+  Award,
   Bird,
   CalendarDays,
   FileText,
   Heart,
+  List,
   MessageCircle,
   MessageSquare,
   PenLine,
   Radio,
   Settings,
+  UserRound,
   UserPlus,
 } from '@lucide/vue'
 import { followUser } from '@/runtime/api'
 import { formatDate, formatDateTime, formatNumber, timeAgo } from '@/runtime/format'
+import { fetchPage } from '@/runtime/router'
 import { topicDescription } from '@/runtime/topic-description'
 import EmptyState from '@/site/components/EmptyState.vue'
+import TopicList from '@/site/components/TopicList.vue'
+import TopicListFooter from '@/site/components/TopicListFooter.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import { badgeClass, badgeIconURL } from '@/site/utils/badge-style'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
-import type { LayoutPayload, TopicPayload, UserActivityPayload, UserConnectionPayload, UserProfileProps } from '@/types/payload'
+import type { LayoutPayload, PagePayload, TopicPayload, UserActivityPayload, UserLikePayload, UserProfileProps } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
@@ -28,23 +34,36 @@ const page = defineProps<{
 }>()
 
 const { t } = useI18n()
-const activeTab = ref<'topics' | 'activity' | 'following' | 'followers'>('topics')
+const activityListMode = 'waterfall'
 const isFollowing = ref(page.props.user.isFollowing)
 const followLoading = ref(false)
 const followError = ref('')
 const coverUrl = ref(page.props.user.profileCoverUrl || '')
+const activityTopics = ref<TopicPayload[]>([])
+const activities = ref<UserActivityPayload[]>([])
+const likes = ref<UserLikePayload[]>([])
+const pagination = ref(page.props.pagination)
+const loadingMore = ref(false)
+const loadError = ref('')
+const loadMoreSentinel = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | undefined
 
 const displayName = computed(() => page.props.user.nickname || page.props.user.username)
 const bioText = computed(() => page.props.user.bio || page.props.user.signature || t('user.emptyBio'))
 const visibleTopics = computed(() => page.props.topics)
 const visibleBadges = computed(() => page.props.badges.slice(0, 8))
+const activeConnections = computed(() => page.props.activityTab === 'following' ? page.props.following : page.props.followers)
+const isWaterfallTab = computed(() => page.props.section === 'activity' && (page.props.activityTab === 'timeline' || page.props.activityTab === 'topics' || page.props.activityTab === 'likes'))
+const hasActivityTopics = computed(() => activityTopics.value.length > 0)
+const hasActivities = computed(() => activities.value.length > 0)
+const hasLikes = computed(() => likes.value.length > 0)
 const socialKeys = ['github', 'twitter', 'linkedIn', 'weibo', 'bilibili', 'zhihu'] as const
 const tabItems = computed(() => [
-  { key: 'topics', label: t('user.tabs.topics'), count: page.props.topics.length },
-  { key: 'activity', label: t('user.tabs.activity'), count: page.props.activities.length },
-  { key: 'following', label: t('user.tabs.following'), count: page.props.user.followingCount },
-  { key: 'followers', label: t('user.tabs.followers'), count: page.props.user.followerCount },
-] as const)
+  ...page.props.tabs.map(tab => ({ ...tab, label: userTabLabel(tab.key) })),
+])
+const activityTabItems = computed(() => [
+  ...page.props.activityTabs.map(tab => ({ ...tab, label: userActivityTabLabel(tab.key) })),
+])
 const profileCoverStyle = computed(() => {
   const activeCoverUrl = coverUrl.value.trim()
   const defaultCover = 'linear-gradient(135deg, var(--gf-color-base-200) 0%, var(--gf-color-info-content) 52%, var(--gf-color-base-200) 100%)'
@@ -83,13 +102,19 @@ const socialProfileLinks = computed(() => socialKeys
   .filter((item): item is NonNullable<typeof item> => Boolean(item)))
 
 watch(
-  () => page.props.user.userId,
+  () => [page.props.user.userId, page.props.section, page.props.activityTab, page.props.pagination.nextUrl],
   () => {
-    activeTab.value = 'topics'
     isFollowing.value = page.props.user.isFollowing
     coverUrl.value = page.props.user.profileCoverUrl || ''
     followError.value = ''
+    activityTopics.value = [...page.props.topics]
+    activities.value = [...page.props.activities]
+    likes.value = [...page.props.likes]
+    pagination.value = page.props.pagination
+    loadError.value = ''
+    void nextTick(observeSentinel)
   },
+  { immediate: true },
 )
 
 async function toggleFollow() {
@@ -121,9 +146,85 @@ function activityLabel(activity: UserActivityPayload) {
   return activity.label || t('user.activity.default')
 }
 
+function userTabLabel(key: string) {
+  if (key === 'summary') return t('user.tabs.summary')
+  if (key === 'activity') return t('user.tabs.activity')
+  if (key === 'badges') return t('user.tabs.badges')
+  return key
+}
+
+function userActivityTabLabel(key: string) {
+  if (key === 'timeline') return t('user.tabs.timeline')
+  if (key === 'topics') return t('user.tabs.topics')
+  if (key === 'likes') return t('user.tabs.likes')
+  if (key === 'following') return t('user.tabs.following')
+  if (key === 'followers') return t('user.tabs.followers')
+  return key
+}
+
 function topicCategories(topic: TopicPayload) {
   return topic.categories.slice(0, 2)
 }
+
+async function loadMore() {
+  if (!isWaterfallTab.value || loadingMore.value || !pagination.value.hasNext || !pagination.value.nextUrl) return
+
+  loadingMore.value = true
+  loadError.value = ''
+  try {
+    const payload = (await fetchPage(new URL(pagination.value.nextUrl, window.location.origin))) as PagePayload<UserProfileProps>
+    if (page.props.activityTab === 'topics') {
+      activityTopics.value = mergeTopics(activityTopics.value, payload.props.topics)
+    } else if (page.props.activityTab === 'likes') {
+      likes.value = mergeLikes(likes.value, payload.props.likes)
+    } else {
+      activities.value = mergeActivities(activities.value, payload.props.activities)
+    }
+    pagination.value = payload.props.pagination
+  } catch (error) {
+    loadError.value = error instanceof Error ? error.message : t('common.loadFailed')
+  } finally {
+    loadingMore.value = false
+  }
+}
+
+function mergeTopics(current: TopicPayload[], incoming: TopicPayload[]) {
+  const seen = new Set(current.map((topic) => topic.id))
+  return [...current, ...incoming.filter((topic) => !seen.has(topic.id))]
+}
+
+function mergeActivities(current: UserActivityPayload[], incoming: UserActivityPayload[]) {
+  const seen = new Set(current.map((activity) => activity.id))
+  return [...current, ...incoming.filter((activity) => !seen.has(activity.id))]
+}
+
+function mergeLikes(current: UserLikePayload[], incoming: UserLikePayload[]) {
+  const seen = new Set(current.map((like) => like.id))
+  return [...current, ...incoming.filter((like) => !seen.has(like.id))]
+}
+
+function observeSentinel() {
+  observer?.disconnect()
+  if (!isWaterfallTab.value || !loadMoreSentinel.value || !('IntersectionObserver' in window)) return
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) void loadMore()
+    },
+    { rootMargin: '480px 0px' },
+  )
+  observer.observe(loadMoreSentinel.value)
+}
+
+onMounted(observeSentinel)
+onActivated(() => {
+  void nextTick(observeSentinel)
+})
+onDeactivated(() => {
+  observer?.disconnect()
+})
+onBeforeUnmount(() => {
+  observer?.disconnect()
+})
 
 function safeProfileUrl(value?: string) {
   const rawValue = value?.trim()
@@ -200,13 +301,6 @@ function safeProfileUrl(value?: string) {
 
           <p v-if="followError" class="mt-3 text-sm text-error">{{ followError }}</p>
 
-          <div class="mt-5 grid grid-cols-4 border-b border-t border-line/70 py-2.5 lg:grid-cols-8">
-            <div v-for="item in profileStats" :key="item.label" class="px-1 py-2 text-center lg:px-0 lg:py-0">
-              <div class="text-base font-bold tabular-nums lg:text-lg" :class="item.featured ? 'text-primary' : 'text-base-content'">{{ formatNumber(item.value) }}</div>
-              <div class="mt-0.5 text-[11px] font-medium lg:text-xs" :class="item.featured ? 'text-primary/80' : 'text-base-content/55'">{{ item.label }}</div>
-            </div>
-          </div>
-
           <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-base-content/55">
               <span class="inline-flex items-center gap-1.5"><CalendarDays class="h-3.5 w-3.5" /> {{ t('user.joinedAt', { date: formatDate(page.props.user.createdAt) }) }}</span>
@@ -248,99 +342,215 @@ function safeProfileUrl(value?: string) {
             </div>
           </div>
 
-          <div v-if="visibleBadges.length" class="mt-3 border-t border-line/60 pt-3">
-            <div class="flex flex-wrap gap-x-2.5 gap-y-2">
-              <div
-                v-for="badge in visibleBadges"
-                :key="badge.code"
-                class="group flex w-14 flex-col items-center gap-1"
-                :title="badge.description"
-              >
-                <span
-                  class="flex h-10 w-10 items-center justify-center ring-1 ring-inset transition group-hover:-translate-y-0.5 group-hover:shadow-sm"
-                  :class="badgeClass(badge.color, badge.level)"
-                  style="clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)"
-                >
-                  <img :src="badgeIconURL(badge)" :alt="badge.name" class="h-5 w-5 object-contain" />
-                </span>
-                <span class="w-full truncate text-center text-[10px] font-semibold text-base-content/75">{{ badge.name }}</span>
-              </div>
-            </div>
-          </div>
         </div>
-      </section>
 
-      <section class="gf-panel mt-3 overflow-hidden">
-        <div class="flex overflow-x-auto border-b border-line px-3">
-          <button
+        <div class="grid grid-cols-3 border-y border-line">
+          <a
             v-for="tab in tabItems"
             :key="tab.key"
-            type="button"
-            class="inline-flex h-11 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-semibold"
-            :class="activeTab === tab.key ? 'border-primary text-primary' : 'border-transparent text-base-content/55 hover:text-base-content'"
-            @click="activeTab = tab.key"
+            :href="tab.url"
+            class="inline-flex h-11 min-w-0 items-center justify-center gap-2 px-2 text-sm font-semibold"
+            :class="tab.active ? 'text-primary shadow-[inset_0_-2px_0_var(--gf-color-primary)]' : 'text-base-content/55 hover:text-base-content'"
           >
+            <UserRound v-if="tab.key === 'summary'" class="h-4 w-4 shrink-0" />
+            <List v-else-if="tab.key === 'activity'" class="h-4 w-4 shrink-0" />
+            <Award v-else class="h-4 w-4 shrink-0" />
             {{ tab.label }}
-            <span class="rounded bg-base-300 px-1.5 py-0.5 text-[11px] text-base-content/55">{{ formatNumber(tab.count) }}</span>
-          </button>
-        </div>
-
-        <div v-if="activeTab === 'topics'" class="divide-y divide-line">
-          <a
-            v-for="topic in visibleTopics"
-            :key="topic.id"
-            :href="topic.url"
-            class="group grid gap-2 px-4 py-3 hover:bg-base-200 sm:grid-cols-[minmax(0,1fr)_80px_80px_104px] sm:items-center"
-          >
-            <div class="min-w-0">
-              <div class="flex min-w-0 flex-wrap items-center gap-2">
-                <span class="truncate text-[15px] font-semibold text-base-content group-hover:text-primary">{{ topic.title }}</span>
-                <span
-                  v-for="category in topicCategories(topic)"
-                  :key="category.id"
-                  class="gf-badge gf-badge-muted h-5 gap-1 text-[11px] font-normal"
-                >
-                  <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
-                  {{ category.name }}
-                </span>
-              </div>
-              <p class="mt-1 truncate text-sm text-base-content/55">{{ topicDescription(topic) }}</p>
-            </div>
-            <span class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 sm:block">{{ formatNumber(topic.replyCount) }}</span>
-            <span class="hidden text-center text-sm tabular-nums text-base-content/55 sm:block">{{ formatNumber(topic.viewCount) }}</span>
-            <span class="hidden text-right text-xs font-medium text-base-content/55 sm:block">{{ timeAgo(topic.lastUpdateTime) }}</span>
           </a>
-          <EmptyState v-if="!visibleTopics.length" :icon="FileText" :title="t('user.emptyTopics')" />
         </div>
 
-        <div v-else-if="activeTab === 'activity'" class="p-4">
-          <div class="space-y-3">
-            <a
-              v-for="activity in page.props.activities"
-              :key="activity.id"
-              :href="activity.url || '#'"
-              class="flex gap-3 rounded-md border border-line p-3 hover:border-primary/20 hover:bg-info/10"
-            >
-              <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-base-300 text-base-content/55">
-                <PenLine v-if="activity.action === 2" class="h-4 w-4" />
-                <Heart v-else-if="activity.action === 3" class="h-4 w-4" />
-                <UserPlus v-else-if="activity.action === 4" class="h-4 w-4" />
-                <MessageCircle v-else-if="activity.action === 5" class="h-4 w-4" />
-                <FileText v-else class="h-4 w-4" />
-              </span>
-              <span class="min-w-0">
-                <span class="block truncate text-sm font-semibold text-base-content">{{ activityText(activity) }}</span>
-                <time class="mt-1 block text-xs text-base-content/55">{{ formatDateTime(activity.createdAt) }}</time>
-              </span>
-            </a>
-            <EmptyState v-if="!page.props.activities.length" :icon="MessageCircle" :title="t('user.emptyActivity')" />
+        <div v-if="page.props.section === 'summary'" class="p-4">
+          <section class="grid grid-cols-4 gap-y-4 border-b border-line pb-4 lg:grid-cols-8">
+            <div v-for="item in profileStats" :key="item.label" class="min-w-0 text-center">
+              <div class="text-base font-bold tabular-nums lg:text-lg" :class="item.featured ? 'text-primary' : 'text-base-content'">{{ formatNumber(item.value) }}</div>
+              <div class="mt-0.5 truncate text-[11px] font-medium lg:text-xs" :class="item.featured ? 'text-primary/80' : 'text-base-content/55'">{{ item.label }}</div>
+            </div>
+          </section>
+
+          <div class="grid gap-5 pt-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <section class="min-w-0">
+              <h2 class="mb-2 text-sm font-semibold text-base-content/75">{{ t('user.summarySections.recentTopics') }}</h2>
+              <div class="divide-y divide-line">
+                <a
+                  v-for="topic in visibleTopics"
+                  :key="topic.id"
+                  :href="topic.url"
+                  class="grid gap-2 py-3 sm:grid-cols-[minmax(0,1fr)_72px_88px] sm:items-center"
+                >
+                  <div class="min-w-0">
+                    <div class="flex min-w-0 flex-wrap items-center gap-2">
+                      <span class="truncate text-[15px] font-semibold text-base-content">{{ topic.title }}</span>
+                      <span
+                        v-for="category in topicCategories(topic)"
+                        :key="category.id"
+                        class="gf-badge gf-badge-muted h-5 gap-1 text-[11px] font-normal"
+                      >
+                        <span class="h-1.5 w-1.5 rounded-full" :style="{ backgroundColor: category.color }" />
+                        {{ category.name }}
+                      </span>
+                    </div>
+                    <p class="mt-1 truncate text-sm text-base-content/55">{{ topicDescription(topic) }}</p>
+                  </div>
+                  <span class="hidden text-center text-sm font-semibold tabular-nums text-base-content/75 sm:block">{{ formatNumber(topic.replyCount) }}</span>
+                  <span class="hidden text-right text-xs font-medium text-base-content/55 sm:block">{{ timeAgo(topic.lastUpdateTime) }}</span>
+                </a>
+              </div>
+              <EmptyState v-if="!visibleTopics.length" :icon="FileText" :title="t('user.emptyTopics')" />
+            </section>
+
+            <aside class="min-w-0 space-y-5">
+              <section v-if="visibleBadges.length" class="border-b border-line pb-5 lg:border-b-0">
+                <h2 class="mb-3 text-sm font-semibold text-base-content/75">{{ t('user.summarySections.recentBadges') }}</h2>
+                <div class="flex flex-wrap gap-x-3 gap-y-2">
+                  <div
+                    v-for="badge in visibleBadges"
+                    :key="badge.code"
+                    class="group flex w-16 flex-col items-center gap-1"
+                    :title="badge.description"
+                  >
+                    <span
+                      class="flex h-10 w-10 items-center justify-center ring-1 ring-inset transition group-hover:-translate-y-0.5 group-hover:shadow-sm"
+                      :class="badgeClass(badge.color, badge.level)"
+                      style="clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)"
+                    >
+                      <img :src="badgeIconURL(badge)" :alt="badge.name" class="h-5 w-5 object-contain" />
+                    </span>
+                    <span class="w-full truncate text-center text-[10px] font-semibold text-base-content/75">{{ badge.name }}</span>
+                  </div>
+                </div>
+              </section>
+
+              <section v-if="page.props.activities.length">
+                <h2 class="mb-2 text-sm font-semibold text-base-content/75">{{ t('user.summarySections.recentActivity') }}</h2>
+                <div class="divide-y divide-line">
+                  <a
+                    v-for="activity in page.props.activities"
+                    :key="activity.id"
+                    :href="activity.url || '#'"
+                    class="flex gap-3 py-3"
+                  >
+                    <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-base-300 text-base-content/55">
+                      <PenLine v-if="activity.action === 2" class="h-4 w-4" />
+                      <Heart v-else-if="activity.action === 3" class="h-4 w-4" />
+                      <UserPlus v-else-if="activity.action === 4" class="h-4 w-4" />
+                      <MessageCircle v-else-if="activity.action === 5" class="h-4 w-4" />
+                      <FileText v-else class="h-4 w-4" />
+                    </span>
+                    <span class="min-w-0">
+                      <span class="block truncate text-sm font-semibold text-base-content">{{ activityText(activity) }}</span>
+                      <time class="mt-1 block text-xs text-base-content/55">{{ formatDateTime(activity.createdAt) }}</time>
+                    </span>
+                  </a>
+                </div>
+              </section>
+            </aside>
           </div>
         </div>
 
-        <div v-else class="p-4">
-          <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div v-else-if="page.props.section === 'activity'">
+          <div class="grid grid-cols-5 border-b border-line">
             <a
-              v-for="item in activeTab === 'following' ? page.props.following : page.props.followers"
+              v-for="tab in activityTabItems"
+              :key="tab.key"
+              :href="tab.url"
+              class="inline-flex h-10 min-w-0 items-center justify-center gap-2 px-2 text-sm font-medium"
+              :class="tab.active ? 'text-primary shadow-[inset_0_-2px_0_var(--gf-color-primary)]' : 'text-base-content/55 hover:text-base-content'"
+            >
+              <List v-if="tab.key === 'timeline'" class="h-4 w-4 shrink-0" />
+              <FileText v-else-if="tab.key === 'topics'" class="h-4 w-4 shrink-0" />
+              <Heart v-else-if="tab.key === 'likes'" class="h-4 w-4 shrink-0" />
+              <UserPlus v-else-if="tab.key === 'following'" class="h-4 w-4 shrink-0" />
+              <UserRound v-else class="h-4 w-4 shrink-0" />
+              {{ tab.label }}
+            </a>
+          </div>
+
+          <div v-if="page.props.activityTab === 'timeline'">
+            <div class="space-y-3 p-4">
+              <a
+                v-for="activity in activities"
+                :key="activity.id"
+                :href="activity.url || '#'"
+                class="flex gap-3 rounded-md border border-line p-3 hover:border-primary/20 hover:bg-info/10"
+              >
+                <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-base-300 text-base-content/55">
+                  <PenLine v-if="activity.action === 2" class="h-4 w-4" />
+                  <Heart v-else-if="activity.action === 3" class="h-4 w-4" />
+                  <UserPlus v-else-if="activity.action === 4" class="h-4 w-4" />
+                  <MessageCircle v-else-if="activity.action === 5" class="h-4 w-4" />
+                  <FileText v-else class="h-4 w-4" />
+                </span>
+                <span class="min-w-0">
+                  <span class="block truncate text-sm font-semibold text-base-content">{{ activityText(activity) }}</span>
+                  <time class="mt-1 block text-xs text-base-content/55">{{ formatDateTime(activity.createdAt) }}</time>
+                </span>
+              </a>
+              <EmptyState v-if="!hasActivities" :icon="MessageCircle" :title="t('user.emptyActivity')" />
+            </div>
+            <div v-if="pagination.hasNext || hasActivities" ref="loadMoreSentinel">
+              <TopicListFooter
+                :pagination="pagination"
+                :mode="activityListMode"
+                :loading-more="loadingMore"
+                :has-topics="hasActivities"
+                :load-error="loadError"
+                @load-more="loadMore"
+              />
+            </div>
+          </div>
+
+          <div v-else-if="page.props.activityTab === 'topics'">
+            <TopicList :topics="activityTopics">
+              <template #empty>
+                <EmptyState v-if="!hasActivityTopics" :icon="FileText" :title="t('user.emptyTopics')" />
+              </template>
+            </TopicList>
+            <div v-if="pagination.hasNext || hasActivityTopics" ref="loadMoreSentinel">
+              <TopicListFooter
+                :pagination="pagination"
+                :mode="activityListMode"
+                :loading-more="loadingMore"
+                :has-topics="hasActivityTopics"
+                :load-error="loadError"
+                @load-more="loadMore"
+              />
+            </div>
+          </div>
+
+          <div v-else-if="page.props.activityTab === 'likes'">
+            <div class="space-y-3 p-4">
+              <a
+                v-for="like in likes"
+                :key="like.id"
+                :href="like.url"
+                class="flex min-w-0 gap-3 rounded-md border border-line p-3 hover:border-primary/20 hover:bg-info/10"
+              >
+                <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-base-300 text-base-content/55">
+                  <Heart class="h-4 w-4" />
+                </span>
+                <span class="min-w-0">
+                  <span class="block text-xs font-medium text-base-content/55">{{ t('user.activity.like') }}</span>
+                  <span class="mt-0.5 block truncate text-sm font-semibold text-base-content">{{ like.title }}</span>
+                  <time class="mt-1 block text-xs text-base-content/55">{{ formatDateTime(like.likedAt) }}</time>
+                </span>
+              </a>
+              <EmptyState v-if="!hasLikes" :icon="Heart" :title="t('user.emptyData')" />
+            </div>
+            <div v-if="pagination.hasNext || hasLikes" ref="loadMoreSentinel">
+              <TopicListFooter
+                :pagination="pagination"
+                :mode="activityListMode"
+                :loading-more="loadingMore"
+                :has-topics="hasLikes"
+                :load-error="loadError"
+                @load-more="loadMore"
+              />
+            </div>
+          </div>
+
+          <div v-else class="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
+            <a
+              v-for="item in activeConnections"
               :key="item.id"
               :href="item.url"
               class="flex min-w-0 gap-3 rounded-md border border-line p-3 hover:border-primary/20 hover:bg-info/10"
@@ -353,7 +563,31 @@ function safeProfileUrl(value?: string) {
               </span>
             </a>
           </div>
-          <EmptyState v-if="(activeTab === 'following' ? page.props.following : page.props.followers).length === 0" :icon="UserPlus" :title="t('user.emptyData')" />
+          <EmptyState v-if="(page.props.activityTab === 'following' || page.props.activityTab === 'followers') && activeConnections.length === 0" :icon="UserPlus" :title="t('user.emptyData')" />
+        </div>
+
+        <div v-else class="p-4">
+          <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <div
+              v-for="badge in page.props.badges"
+              :key="badge.code"
+              class="flex min-w-0 items-center gap-3 rounded-md border border-line p-3"
+              :title="badge.description"
+            >
+              <span
+                class="flex h-11 w-11 shrink-0 items-center justify-center ring-1 ring-inset"
+                :class="badgeClass(badge.color, badge.level)"
+                style="clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%)"
+              >
+                <img :src="badgeIconURL(badge)" :alt="badge.name" class="h-5 w-5 object-contain" />
+              </span>
+              <span class="min-w-0">
+                <span class="block truncate text-sm font-semibold text-base-content">{{ badge.name }}</span>
+                <span class="mt-0.5 block truncate text-xs text-base-content/55">{{ badge.description }}</span>
+              </span>
+            </div>
+          </div>
+          <EmptyState v-if="!page.props.badges.length" :icon="FileText" :title="t('user.emptyData')" />
         </div>
       </section>
     </article>

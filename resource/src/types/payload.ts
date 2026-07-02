@@ -255,16 +255,18 @@ export interface FooterPayload {
   primary: string[]
 }
 
+export interface PaginationPayload {
+  page: number
+  nextPage: number
+  hasNext: boolean
+  nextUrl: string
+}
+
 export interface HomeProps {
   sort: string
   tabs: Array<{ key: string; label?: string; url: string; active: boolean }>
   topics: TopicPayload[]
-  pagination: {
-    page: number
-    nextPage: number
-    hasNext: boolean
-    nextUrl: string
-  }
+  pagination: PaginationPayload
   announcement: {
     enabled: boolean
     html: string
@@ -493,9 +495,15 @@ export interface UserHoverCardPayload {
 
 export interface UserProfileProps {
   user: UserCardPayload
+  section: 'summary' | 'activity' | 'badges'
+  activityTab: 'timeline' | 'topics' | 'likes' | 'following' | 'followers'
+  tabs: Array<{ key: string; label?: string; url: string; active: boolean }>
+  activityTabs: Array<{ key: string; label?: string; url: string; active: boolean }>
+  pagination: PaginationPayload
   badges: UserBadgePayload[]
   topics: TopicPayload[]
   activities: UserActivityPayload[]
+  likes: UserLikePayload[]
   following: UserConnectionPayload[]
   followers: UserConnectionPayload[]
   isOwnProfile: boolean
@@ -536,6 +544,14 @@ export interface UserActivityPayload {
   url: string
   label: string
   createdAt: string
+}
+
+export interface UserLikePayload {
+  id: number
+  articleId: number
+  title: string
+  url: string
+  likedAt: string
 }
 
 export interface UserConnectionPayload {

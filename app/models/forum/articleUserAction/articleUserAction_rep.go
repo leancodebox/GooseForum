@@ -1,6 +1,7 @@
 package articleUserAction
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
@@ -116,4 +117,51 @@ func ListActiveWatchUserIDsAfter(articleId, afterUserId uint64, excludeUserIds [
 	}
 	query.Order(fieldUserId+" ASC").Limit(limit).Pluck(fieldUserId, &userIds)
 	return userIds
+}
+
+type LikedArticleRef struct {
+	ID        uint64    `gorm:"column:id"`
+	ArticleID uint64    `gorm:"column:article_id"`
+	LikedAt   time.Time `gorm:"column:liked_at"`
+}
+
+func ListLikedArticleRefsBefore(userId uint64, cursor string, limit int) ([]LikedArticleRef, string) {
+	if userId == 0 || limit <= 0 {
+		return nil, ""
+	}
+
+	rows := make([]LikedArticleRef, 0, limit+1)
+	cursorID := parseLikedCursor(cursor)
+	query := builder().
+		Select("id", fieldArticleId, fieldLikedAt).
+		Where(queryopt.Eq(fieldUserId, userId)).
+		Where(fieldLikedAt + " IS NOT NULL")
+	if cursorID > 0 {
+		query = query.Where("id < ?", cursorID)
+	}
+	query.Order("id DESC").Limit(limit + 1).Find(&rows)
+
+	hasNext := len(rows) > limit
+	if hasNext {
+		rows = rows[:limit]
+	}
+	if hasNext && len(rows) > 0 {
+		return rows, formatLikedCursor(rows[len(rows)-1].ID)
+	}
+	return rows, ""
+}
+
+func parseLikedCursor(cursor string) uint64 {
+	id, err := strconv.ParseUint(cursor, 10, 64)
+	if err != nil || id == 0 {
+		return 0
+	}
+	return id
+}
+
+func formatLikedCursor(id uint64) string {
+	if id == 0 {
+		return ""
+	}
+	return strconv.FormatUint(id, 10)
 }

@@ -666,18 +666,16 @@ async function toggleBinding(provider: string) {
             </div>
           </section>
         </div>
-      </section>
 
       <p
         v-if="hasStatus"
-        class="my-3 rounded-md px-3 py-2 text-sm font-medium"
+        class="mx-4 mb-3 rounded-md px-3 py-2 text-sm font-medium sm:mx-5"
         :class="error ? 'bg-error/10 text-error' : 'bg-success/10 text-success'"
       >
         {{ error || status }}
       </p>
 
-      <section class="gf-card mt-3 overflow-hidden">
-        <nav class="flex overflow-x-auto border-b border-line px-3">
+        <nav class="flex overflow-x-auto border-t border-line bg-base-200/35 px-3">
             <button
               v-for="tab in props.tabs"
               :key="tab.key"

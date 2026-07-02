@@ -317,9 +317,15 @@ type ArticlePermissions struct {
 
 type UserProfileProps struct {
 	User         *vo.UserCard             `json:"user"`
+	Section      string                   `json:"section"`
+	ActivityTab  string                   `json:"activityTab"`
+	Tabs         []TabPayload             `json:"tabs"`
+	ActivityTabs []TabPayload             `json:"activityTabs"`
+	Pagination   PaginationPayload        `json:"pagination"`
 	Badges       []badgeservice.UserBadge `json:"badges"`
 	Topics       []TopicPayload           `json:"topics"`
 	Activities   []UserActivityPayload    `json:"activities"`
+	Likes        []UserLikePayload        `json:"likes"`
 	Following    []UserConnectionPayload  `json:"following"`
 	Followers    []UserConnectionPayload  `json:"followers"`
 	IsOwnProfile bool                     `json:"isOwnProfile"`
@@ -338,6 +344,14 @@ type UserActivityPayload struct {
 	URL            string `json:"url"`
 	Label          string `json:"label"`
 	CreatedAt      string `json:"createdAt"`
+}
+
+type UserLikePayload struct {
+	ID        uint64 `json:"id"`
+	ArticleID uint64 `json:"articleId"`
+	Title     string `json:"title"`
+	URL       string `json:"url"`
+	LikedAt   string `json:"likedAt"`
 }
 
 type UserConnectionPayload struct {
@@ -1213,26 +1227,87 @@ func parsePayloadTime(value string) time.Time {
 	return time.Time{}
 }
 
-func buildUserProfileProps(c *gin.Context, user users.EntityComplete) UserProfileProps {
+const (
+	userProfileTopicPageSize    = 20
+	userProfileTimelinePageSize = 20
+	userProfileConnectionLimit  = 24
+)
+
+func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section string, activityTab string) UserProfileProps {
 	currentUserID := component.LoginUserId(c)
 	isFollowing := userFollow.IsFollowing(currentUserID, user.Id)
 	userCard, ok := userservice.GetUserCard(user.Id)
 	if !ok {
 		userCard = &vo.UserCard{}
 	}
+	userBadges := userCard.Badges
+	card := *userCard
+	userCard = &card
+	userCard.Badges = nil
 	userCard.IsFollowing = isFollowing
 	userCard.IsSelf = currentUserID == user.Id
 
-	latestArticles, _ := articles.GetLatestArticlesByUserId(user.Id, 8)
-	activities, _ := userActivities.GetUserTimeline(user.Id, 0, 20)
+	badges := []badgeservice.UserBadge{}
+	topics := []TopicPayload{}
+	activities := []UserActivityPayload{}
+	likes := []UserLikePayload{}
+	following := []UserConnectionPayload{}
+	followers := []UserConnectionPayload{}
+	pagination := PaginationPayload{Page: 1}
+
+	switch section {
+	case userProfileSectionActivity:
+		switch activityTab {
+		case userProfileActivityTopics:
+			cursor := positiveUint(c.Query("cursor"))
+			topicPage, _ := articles.GetPublishedArticlesByUserBeforeId(user.Id, cursor, userProfileTopicPageSize+1)
+			hasNext := len(topicPage) > userProfileTopicPageSize
+			if hasNext {
+				topicPage = topicPage[:userProfileTopicPageSize]
+			}
+			topics = buildTopicPayloads(hotdataserve.ArticlesSmallEntity2Vo(topicPage))
+			pagination = buildUserActivityTopicPagination(user.Id, topicPage, hasNext)
+		case userProfileActivityLikes:
+			refs, nextCursor := articleUserAction.ListLikedArticleRefsBefore(user.Id, c.Query("cursor"), userProfileTimelinePageSize)
+			likes = buildUserLikes(refs)
+			pagination = buildUserActivityLikePagination(user.Id, nextCursor)
+		case userProfileActivityFollowing:
+			following = buildUserConnections(userFollow.GetFollowingList(user.Id, 1, userProfileConnectionLimit))
+		case userProfileActivityFollowers:
+			followers = buildUserConnections(userFollow.GetFollowerList(user.Id, 1, userProfileConnectionLimit))
+		default:
+			cursor := positiveUint(c.Query("cursor"))
+			timeline, _ := userActivities.GetUserTimeline(user.Id, cursor, userProfileTimelinePageSize+1)
+			hasNext := len(timeline) > userProfileTimelinePageSize
+			if hasNext {
+				timeline = timeline[:userProfileTimelinePageSize]
+			}
+			activities = buildUserActivities(timeline)
+			pagination = buildUserActivityTimelinePagination(user.Id, timeline, hasNext)
+		}
+	case userProfileSectionBadges:
+		badges = userBadges
+	default:
+		badges = userBadges
+		latestArticles, _ := articles.GetLatestArticlesByUserId(user.Id, 8)
+		topics = buildTopicPayloads(hotdataserve.ArticlesSmallEntity2Vo(latestArticles))
+		timeline, _ := userActivities.GetUserTimeline(user.Id, 0, 5)
+		activities = buildUserActivities(timeline)
+	}
 
 	return UserProfileProps{
 		User:         userCard,
-		Badges:       userCard.Badges,
-		Topics:       buildTopicPayloads(hotdataserve.ArticlesSmallEntity2Vo(latestArticles)),
-		Activities:   buildUserActivities(activities),
-		Following:    buildUserConnections(userFollow.GetFollowingList(user.Id, 1, 12)),
-		Followers:    buildUserConnections(userFollow.GetFollowerList(user.Id, 1, 12)),
+		Section:      section,
+		ActivityTab:  activityTab,
+		Tabs:         buildUserProfileTabs(user.Id, section),
+		ActivityTabs: buildUserProfileActivityTabs(user.Id, section, activityTab),
+		Pagination:   pagination,
+		Badges:       badges,
+		Topics:       topics,
+		Activities:   activities,
+		Likes:        likes,
+		Following:    following,
+		Followers:    followers,
 		IsOwnProfile: currentUserID == user.Id,
 		CanMessage:   currentUserID > 0 && currentUserID != user.Id,
 		CanFollow:    currentUserID > 0 && currentUserID != user.Id,
@@ -1241,8 +1316,121 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete) UserProfil
 	}
 }
 
+func positiveUint(raw string) uint64 {
+	value, err := strconv.ParseUint(raw, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return value
+}
+
+func buildUserActivityTopicPagination(userID uint64, topics []*articles.SmallEntity, hasNext bool) PaginationPayload {
+	nextCursor := uint64(0)
+	if hasNext && len(topics) > 0 {
+		nextCursor = topics[len(topics)-1].Id
+	}
+	return PaginationPayload{
+		Page:     1,
+		NextPage: 0,
+		HasNext:  nextCursor > 0,
+		NextURL:  buildUserActivityTopicCursorURL(userID, nextCursor),
+	}
+}
+
+func buildUserActivityLikePagination(userID uint64, nextCursor string) PaginationPayload {
+	return PaginationPayload{
+		Page:     1,
+		NextPage: 0,
+		HasNext:  nextCursor != "",
+		NextURL:  buildUserActivityLikeCursorURL(userID, nextCursor),
+	}
+}
+
+func buildUserActivityTimelinePagination(userID uint64, activities []*userActivities.Entity, hasNext bool) PaginationPayload {
+	nextCursor := uint64(0)
+	if hasNext && len(activities) > 0 {
+		nextCursor = activities[len(activities)-1].Id
+	}
+	return PaginationPayload{
+		Page:     1,
+		NextPage: 0,
+		HasNext:  nextCursor > 0,
+		NextURL:  buildUserActivityTimelineCursorURL(userID, nextCursor),
+	}
+}
+
+func buildUserActivityTopicCursorURL(userID uint64, cursor uint64) string {
+	if cursor == 0 {
+		return ""
+	}
+	return fmt.Sprintf("/u/%d/%s/%s?cursor=%d", userID, userProfileSectionActivity, userProfileActivityTopics, cursor)
+}
+
+func buildUserActivityLikeCursorURL(userID uint64, cursor string) string {
+	if cursor == "" {
+		return ""
+	}
+	return fmt.Sprintf("/u/%d/%s/%s?cursor=%s", userID, userProfileSectionActivity, userProfileActivityLikes, url.QueryEscape(cursor))
+}
+
+func buildUserActivityTimelineCursorURL(userID uint64, cursor uint64) string {
+	if cursor == 0 {
+		return ""
+	}
+	return fmt.Sprintf("/u/%d/%s?cursor=%d", userID, userProfileSectionActivity, cursor)
+}
+
+func buildUserProfileTabs(userID uint64, active string) []TabPayload {
+	baseURL := "/u/" + strconv.FormatUint(userID, 10)
+	return []TabPayload{
+		{Key: userProfileSectionSummary, URL: baseURL, Active: active == userProfileSectionSummary},
+		{Key: userProfileSectionActivity, URL: baseURL + "/" + userProfileSectionActivity, Active: active == userProfileSectionActivity},
+		{Key: userProfileSectionBadges, URL: baseURL + "/" + userProfileSectionBadges, Active: active == userProfileSectionBadges},
+	}
+}
+
+func buildUserProfileActivityTabs(userID uint64, section string, active string) []TabPayload {
+	if section != userProfileSectionActivity {
+		return nil
+	}
+	baseURL := "/u/" + strconv.FormatUint(userID, 10) + "/" + userProfileSectionActivity
+	return []TabPayload{
+		{Key: userProfileActivityTimeline, URL: baseURL, Active: active == userProfileActivityTimeline},
+		{Key: userProfileActivityTopics, URL: baseURL + "/" + userProfileActivityTopics, Active: active == userProfileActivityTopics},
+		{Key: userProfileActivityLikes, URL: baseURL + "/" + userProfileActivityLikes, Active: active == userProfileActivityLikes},
+		{Key: userProfileActivityFollowing, URL: baseURL + "/" + userProfileActivityFollowing, Active: active == userProfileActivityFollowing},
+		{Key: userProfileActivityFollowers, URL: baseURL + "/" + userProfileActivityFollowers, Active: active == userProfileActivityFollowers},
+	}
+}
+
+func buildUserLikes(refs []articleUserAction.LikedArticleRef) []UserLikePayload {
+	ids := make([]uint64, 0, len(refs))
+	for _, ref := range refs {
+		if ref.ArticleID > 0 {
+			ids = append(ids, ref.ArticleID)
+		}
+	}
+	articleMap := articles.GetMapByIds(ids)
+	res := make([]UserLikePayload, 0, len(refs))
+	for _, ref := range refs {
+		article := articleMap[ref.ArticleID]
+		if article == nil || article.ArticleStatus != 1 || article.ProcessStatus != 0 {
+			continue
+		}
+		res = append(res, UserLikePayload{
+			ID:        ref.ID,
+			ArticleID: ref.ArticleID,
+			Title:     article.Title,
+			URL:       urlconfig.PostDetail(ref.ArticleID),
+			LikedAt:   ref.LikedAt.Format(time.DateTime),
+		})
+	}
+	return res
+}
+
 func buildUserActivities(activities []*userActivities.Entity) []UserActivityPayload {
 	res := make([]UserActivityPayload, 0, len(activities))
+	replyByID := userActivityReplyMap(activities)
 	for _, activity := range activities {
 		if activity == nil {
 			continue
@@ -1258,7 +1446,7 @@ func buildUserActivities(activities []*userActivities.Entity) []UserActivityPayl
 			SubjectType:    activity.SubjectType,
 			SubjectID:      activity.SubjectId,
 			ContentPreview: contentPreview,
-			URL:            userActivityURL(activity),
+			URL:            userActivityURL(activity, replyByID),
 			Label:          userActivityLabel(activity.Action),
 			CreatedAt:      activity.CreatedAt.Format(time.DateTime),
 		})
@@ -1266,7 +1454,45 @@ func buildUserActivities(activities []*userActivities.Entity) []UserActivityPayl
 	return res
 }
 
-func userActivityURL(activity *userActivities.Entity) string {
+func userActivityReplyMap(activities []*userActivities.Entity) map[uint64]*reply.Entity {
+	ids := make([]uint64, 0)
+	seen := map[uint64]struct{}{}
+	for _, activity := range activities {
+		if activity == nil ||
+			userActivities.ActionType(activity.Action) != userActivities.ActionComment ||
+			activity.SubjectType != userActivities.SubjectPost ||
+			activity.SubjectId == 0 {
+			continue
+		}
+		if _, ok := seen[activity.SubjectId]; ok {
+			continue
+		}
+		seen[activity.SubjectId] = struct{}{}
+		ids = append(ids, activity.SubjectId)
+	}
+
+	rows := reply.GetByIds(ids)
+	res := make(map[uint64]*reply.Entity, len(rows))
+	for _, row := range rows {
+		if row != nil && row.Id > 0 {
+			res[row.Id] = row
+		}
+	}
+	return res
+}
+
+func userActivityURL(activity *userActivities.Entity, replyByID map[uint64]*reply.Entity) string {
+	if userActivities.ActionType(activity.Action) == userActivities.ActionComment && activity.SubjectType == userActivities.SubjectPost {
+		if activity.SubjectId == 0 {
+			return ""
+		}
+		replyEntity := replyByID[activity.SubjectId]
+		if replyEntity == nil || replyEntity.ArticleId == 0 {
+			return ""
+		}
+		return urlconfig.PostDetail(replyEntity.ArticleId) + "#reply-" + strconv.FormatUint(replyEntity.Id, 10)
+	}
+
 	switch activity.SubjectType {
 	case userActivities.SubjectTopic, userActivities.SubjectPost:
 		if activity.SubjectId > 0 {

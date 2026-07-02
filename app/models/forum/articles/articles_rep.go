@@ -285,6 +285,22 @@ func GetLatestArticlesByUserId(userId uint64, limit int) ([]*SmallEntity, error)
 	return articles, err
 }
 
+func GetPublishedArticlesByUserBeforeId(userId uint64, beforeId uint64, limit int) ([]*SmallEntity, error) {
+	var articles []*SmallEntity
+	b := builder()
+	b.Where(queryopt.Eq(fieldArticleStatus, 1))
+	b.Where(queryopt.Eq(fieldProcessStatus, 0))
+	b.Where(queryopt.Eq(fieldUserId, userId))
+	if beforeId > 0 {
+		b.Where(queryopt.Lt(pid, beforeId))
+	}
+	err := b.
+		Order(queryopt.Desc(pid)).
+		Limit(limit).
+		Find(&articles).Error
+	return articles, err
+}
+
 func GetDraftArticlesByUserId(userId uint64, limit int) ([]*SmallEntity, error) {
 	var articles []*SmallEntity
 	b := builder()

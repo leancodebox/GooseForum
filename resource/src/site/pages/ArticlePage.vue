@@ -597,7 +597,10 @@ async function syncReplyHash() {
 
   highlightReply(replyId)
   await nextTick()
-  document.getElementById(`reply-${replyId}`)?.scrollIntoView({ block: 'center' })
+  const element = document.getElementById(`reply-${replyId}`)
+  if (element) {
+    scrollReplyIntoComfortView(element, 'auto')
+  }
 }
 
 function highlightReply(replyId: number) {
@@ -736,7 +739,10 @@ async function jumpToReplyNo(replyNo: number) {
     activeReplyNo.value = loaded.replyNo
     syncProgressForReplyNo(loaded.replyNo)
     await nextTick()
-    document.getElementById(`reply-${loaded.id}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    const element = document.getElementById(`reply-${loaded.id}`)
+    if (element) {
+      scrollReplyIntoComfortView(element)
+    }
     resumeReplyRailSyncWhenSettled()
     return
   }
@@ -757,7 +763,10 @@ async function jumpToReplyNo(replyNo: number) {
       activeReplyNo.value = closest.replyNo
       syncProgressForReplyNo(closest.replyNo)
       collectReplyElements()
-      document.getElementById(`reply-${closest.id}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      const element = document.getElementById(`reply-${closest.id}`)
+      if (element) {
+        scrollReplyIntoComfortView(element)
+      }
       resumeReplyRailSyncWhenSettled()
     }
   } catch (error) {
@@ -869,11 +878,11 @@ function isElementMostlyVisible(element: HTMLElement) {
   return rect.top >= 96 && rect.bottom <= window.innerHeight - 120
 }
 
-function scrollReplyIntoComfortView(element: HTMLElement) {
+function scrollReplyIntoComfortView(element: HTMLElement, behavior: ScrollBehavior = 'smooth') {
   const targetTop = element.getBoundingClientRect().top + window.scrollY - 160
   window.scrollTo({
     top: Math.max(0, targetTop),
-    behavior: 'smooth',
+    behavior,
   })
 }
 

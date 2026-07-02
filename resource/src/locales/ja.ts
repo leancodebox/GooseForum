@@ -372,10 +372,19 @@ export default {
     emptyActivity: 'アクティビティはありません。',
     emptyData: 'データはありません。',
     tabs: {
+      summary: '概要',
       topics: 'トピック',
+      likes: 'いいね',
       activity: 'アクティビティ',
+      timeline: 'すべて',
+      badges: 'バッジ',
       following: 'フォロー中',
       followers: 'フォロワー',
+    },
+    summarySections: {
+      recentTopics: '最近のトピック',
+      recentBadges: '最近のバッジ',
+      recentActivity: '最近のアクティビティ',
     },
     activity: {
       signup: 'フォーラムに参加しました',

@@ -38,13 +38,13 @@ const fieldCreatedAt = "created_at"
 const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
-	Id             uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                                                // 主键
-	UserId         uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;index:idx_user_activity_created;" json:"userId"` // 发起者 ID
-	Action         int       `gorm:"column:action;type:int;not null;default:0;" json:"action"`                                              // 行为类型
-	SubjectType    string    `gorm:"column:subject_type;type:varchar(32);not null;default:'';" json:"subjectType"`                          // 目标类型
-	SubjectId      uint64    `gorm:"column:subject_id;type:bigint unsigned;not null;default:0;" json:"subjectId"`                           // 目标 ID
-	ContentPreview string    `gorm:"column:content_preview;type:text;" json:"contentPreview"`                                               // 内容摘要
-	CreatedAt      time.Time `gorm:"column:created_at;index;autoCreateTime;index:idx_user_activity_created;" json:"createdAt"`              //
+	Id             uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;index:idx_user_activity_id,priority:2,sort:desc;" json:"id"`                                      // 主键
+	UserId         uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;index:idx_user_activity_id,priority:1;index:idx_user_activity_created;" json:"userId"` // 发起者 ID
+	Action         int       `gorm:"column:action;type:int;not null;default:0;" json:"action"`                                                                                    // 行为类型
+	SubjectType    string    `gorm:"column:subject_type;type:varchar(32);not null;default:'';" json:"subjectType"`                                                                // 目标类型
+	SubjectId      uint64    `gorm:"column:subject_id;type:bigint unsigned;not null;default:0;" json:"subjectId"`                                                                 // 目标 ID
+	ContentPreview string    `gorm:"column:content_preview;type:text;" json:"contentPreview"`                                                                                     // 内容摘要
+	CreatedAt      time.Time `gorm:"column:created_at;index;autoCreateTime;index:idx_user_activity_created;" json:"createdAt"`                                                    //
 }
 
 func (itself *Entity) TableName() string {

@@ -14,7 +14,13 @@ const keepAliveComponents = new Set(['home.index', 'category.index', 'search.ind
 const isStandalone = computed(() => standaloneComponents.has(props.page.payload.component))
 const hasRail = computed(() => props.page.payload.component === 'article.detail')
 const shouldKeepAlive = computed(() => keepAliveComponents.has(props.page.payload.component))
-const pageViewKey = computed(() => props.page.payload.url)
+const pageViewKey = computed(() => {
+  if (props.page.payload.component === 'user.profile') {
+    const user = (props.page.payload.props as { user?: { userId?: number | string } })?.user
+    return `user.profile:${user?.userId || props.page.payload.url}`
+  }
+  return props.page.payload.url
+})
 </script>
 
 <template>

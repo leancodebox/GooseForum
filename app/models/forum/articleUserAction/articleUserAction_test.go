@@ -2,6 +2,7 @@ package articleUserAction
 
 import (
 	"testing"
+	"time"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
@@ -66,5 +67,35 @@ func TestListActiveWatchUserIDsAfter(t *testing.T) {
 	want := []uint64{2}
 	if len(got) != len(want) || got[0] != want[0] {
 		t.Fatalf("ListActiveWatchUserIDsAfter() = %#v, want %#v", got, want)
+	}
+}
+
+func TestListLikedArticleRefsBefore(t *testing.T) {
+	setupTestDB(t)
+
+	base := time.Date(2026, 7, 2, 10, 0, 0, 0, time.UTC)
+	t1 := base.Add(time.Minute)
+	t2 := base.Add(2 * time.Minute)
+	t3 := base.Add(3 * time.Minute)
+	SetLikedAt(1, 10, &t1)
+	SetLikedAt(1, 20, &t2)
+	SetLikedAt(1, 30, &t3)
+	SetLikedAt(2, 40, &t3)
+	SetBookmarkedAt(1, 50, &t3)
+
+	got, nextCursor := ListLikedArticleRefsBefore(1, "", 2)
+	if len(got) != 2 || got[0].ArticleID != 30 || got[1].ArticleID != 20 {
+		t.Fatalf("ListLikedArticleRefsBefore() = %#v, want articles [30 20]", got)
+	}
+	if nextCursor == "" {
+		t.Fatal("nextCursor is empty, want next cursor")
+	}
+
+	got, nextCursor = ListLikedArticleRefsBefore(1, nextCursor, 2)
+	if len(got) != 1 || got[0].ArticleID != 10 {
+		t.Fatalf("ListLikedArticleRefsBefore(next) = %#v, want article [10]", got)
+	}
+	if nextCursor != "" {
+		t.Fatalf("nextCursor = %q, want empty", nextCursor)
 	}
 }
