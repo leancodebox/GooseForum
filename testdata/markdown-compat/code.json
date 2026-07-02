@@ -1,0 +1,8 @@
+{
+  "contains": [
+    "<pre><code class=\"language-go\">",
+    "package main",
+    "println",
+    "const value = 1"
+  ]
+}

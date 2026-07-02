@@ -1,0 +1,12 @@
+{
+  "contains": [
+    "<a href=\"https://gooseforum.online\">Goose</a>",
+    "<img src=\"/file/img/logo.webp\" alt=\"logo\"",
+    "<img src=\"https://example.com/logo.png\" alt=\"external\"",
+    "Ctrl"
+  ],
+  "notContains": [
+    "<kbd>Ctrl</kbd>",
+    "<script>"
+  ]
+}

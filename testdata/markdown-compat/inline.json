@@ -1,0 +1,10 @@
+{
+  "contains": [
+    "<strong>bold text</strong>",
+    "<em>italic text</em>",
+    "<del>deleted text</del>",
+    "<code>inline code</code>",
+    "*stars*",
+    "mixed 中文 punctuation"
+  ]
+}

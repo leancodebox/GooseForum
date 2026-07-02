@@ -1,11 +1,23 @@
 package markdown2html
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sort"
 	"strings"
 	"testing"
 
 	"github.com/yuin/goldmark/ast"
 )
+
+type markdownCompatCase struct {
+	Name        string   `json:"name"`
+	Markdown    string   `json:"markdown"`
+	Contains    []string `json:"contains"`
+	NotContains []string `json:"notContains"`
+}
 
 func TestMarkdownVersions(t *testing.T) {
 	if got := GetVersion(); got != 3 {
@@ -26,6 +38,24 @@ func TestMarkdownToHTMLRendersGFM(t *testing.T) {
 		if !strings.Contains(html, want) {
 			t.Fatalf("expected rendered HTML to contain %q, got %s", want, html)
 		}
+	}
+}
+
+func TestMarkdownCompatibilityFixtures(t *testing.T) {
+	for _, fixture := range loadMarkdownCompatFixtures(t) {
+		t.Run(fixture.Name, func(t *testing.T) {
+			html := MarkdownToHTML(fixture.Markdown)
+			for _, want := range fixture.Contains {
+				if !strings.Contains(html, want) {
+					t.Fatalf("expected rendered HTML to contain %q, got %s", want, html)
+				}
+			}
+			for _, unwanted := range fixture.NotContains {
+				if strings.Contains(html, unwanted) {
+					t.Fatalf("expected rendered HTML not to contain %q, got %s", unwanted, html)
+				}
+			}
+		})
 	}
 }
 
@@ -185,4 +215,42 @@ func TestExtractFirstImageURLSkipsInlineData(t *testing.T) {
 	if got != "https://example.com/public.webp" {
 		t.Fatalf("expected first public image, got %q", got)
 	}
+}
+
+func loadMarkdownCompatFixtures(t *testing.T) []markdownCompatCase {
+	t.Helper()
+
+	_, file, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("failed to locate markdown test file")
+	}
+	root := filepath.Join(filepath.Dir(file), "..", "..", "..", "..", "testdata", "markdown-compat")
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fixtures := make([]markdownCompatCase, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
+			continue
+		}
+		name := strings.TrimSuffix(entry.Name(), ".md")
+		markdown, err := os.ReadFile(filepath.Join(root, entry.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		expect, err := os.ReadFile(filepath.Join(root, name+".json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		fixture := markdownCompatCase{Name: name, Markdown: string(markdown)}
+		if err := json.Unmarshal(expect, &fixture); err != nil {
+			t.Fatal(err)
+		}
+		fixtures = append(fixtures, fixture)
+	}
+	sort.Slice(fixtures, func(i, j int) bool { return fixtures[i].Name < fixtures[j].Name })
+	return fixtures
 }

@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import { Bold, Code2, Image, Italic, Link, ListChecks, MessageSquareQuote, Send, X } from '@lucide/vue'
-import MarkdownIt from 'markdown-it'
-import anchor from 'markdown-it-anchor'
-import taskLists from 'markdown-it-task-lists'
 import { submitArticle, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
+import { renderMarkdownPreview } from '@/runtime/markdown'
 import { markdownFromClipboard } from '@/runtime/rich-paste'
 import { useUnsavedDraftGuard } from '@/site/composables/useUnsavedDraftGuard'
 import PageHeader from '@/site/components/PageHeader.vue'
@@ -32,18 +30,10 @@ const uploadDone = ref(0)
 const message = ref('')
 const error = ref('')
 const editor = ref<HTMLTextAreaElement | null>(null)
-const markdown = new MarkdownIt({
-  html: true,
-  linkify: true,
-  typographer: true,
-  breaks: false,
-})
-  .use(anchor)
-  .use(taskLists, { enabled: true })
 
 const isValid = computed(() => Boolean(title.value.trim() && content.value.trim() && categoryIds.value.length > 0))
 const selectedCategories = computed(() => page.props.categories.filter((category) => categoryIds.value.includes(category.id)))
-const renderedPreview = computed(() => markdown.render(content.value || ''))
+const renderedPreview = computed(() => renderMarkdownPreview(content.value))
 const draftSaveable = computed(() => isValid.value && !submitting.value && !uploading.value)
 const savedSnapshot = ref(editorSnapshot())
 const hasUnsavedChanges = computed(() => editorSnapshot() !== savedSnapshot.value)

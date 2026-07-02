@@ -80,19 +80,23 @@
     @apply mb-0;
   }
 
-  .gf-prose-article h1 {
-    @apply mt-7 mb-3 text-base-content;
+  .gf-prose-article h1,
+  .gf-prose-comment h1 {
+    @apply mt-7 mb-2 text-base-content;
   }
 
-  .gf-prose-article h2 {
+  .gf-prose-article h2,
+  .gf-prose-comment h2 {
     @apply mt-6 mb-2.5 text-base-content;
   }
 
-  .gf-prose-article h3 {
+  .gf-prose-article h3,
+  .gf-prose-comment h3 {
     @apply mt-5 mb-2 text-base-content;
   }
 
-  .gf-prose-article h4 {
+  .gf-prose-article h4,
+  .gf-prose-comment h4 {
     @apply mt-4 mb-1.5 text-base-content;
   }
 
