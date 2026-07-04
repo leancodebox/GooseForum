@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 )
 
@@ -24,13 +25,14 @@ func Search(c *gin.Context) {
 }
 
 func buildSearchMeta(c *gin.Context, query string) PageMeta {
-	title := "搜索"
+	lang := requestLang(c)
+	title := i18n.T(lang, "search")
 	if query != "" {
-		title = query + " - 搜索"
+		title = query + " - " + title
 	}
 	return PageMeta{
 		Title:       pageTitle(title),
-		Description: "搜索 " + siteTitle() + " 主题、关键词和讨论。",
+		Description: i18n.T(lang, "meta.searchDesc", "site", siteTitle()),
 		Canonical:   component.GetBaseUri(c) + buildSearchURL(query, 1),
 	}
 }

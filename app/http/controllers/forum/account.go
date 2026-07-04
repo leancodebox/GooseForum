@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/spf13/cast"
@@ -13,7 +14,7 @@ func Notifications(c *gin.Context) {
 	payload := PagePayload{
 		Component: "notifications.index",
 		Props:     buildNotificationsPageProps(c),
-		Meta:      buildSimpleMeta(c, "通知"),
+		Meta:      buildSimpleMeta(c, "meta.notifications"),
 		Layout:    buildLayout(c, "notifications"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -25,7 +26,7 @@ func Messages(c *gin.Context) {
 	payload := PagePayload{
 		Component: "messages.index",
 		Props:     buildMessagesPageProps(c),
-		Meta:      buildSimpleMeta(c, "私信"),
+		Meta:      buildSimpleMeta(c, "meta.messages"),
 		Layout:    buildLayout(c, "messages"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -37,7 +38,7 @@ func Drafts(c *gin.Context) {
 	payload := PagePayload{
 		Component: "drafts.index",
 		Props:     buildDraftsPageProps(c),
-		Meta:      buildSimpleMeta(c, "草稿箱"),
+		Meta:      buildSimpleMeta(c, "meta.drafts"),
 		Layout:    buildLayout(c, "drafts"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -54,7 +55,7 @@ func Settings(c *gin.Context) {
 	payload := PagePayload{
 		Component: "settings.index",
 		Props:     buildSettingsPageProps(user),
-		Meta:      buildSimpleMeta(c, "个人设置"),
+		Meta:      buildSimpleMeta(c, "meta.settings"),
 		Layout:    buildLayout(c, "settings"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -69,9 +70,9 @@ func Publish(c *gin.Context) {
 		c.String(http.StatusNotFound, "not found")
 		return
 	}
-	title := "发布主题"
+	title := "meta.publish"
 	if articleID > 0 {
-		title = "编辑主题"
+		title = "meta.editTopic"
 	}
 	payload := PagePayload{
 		Component: "publish.index",
@@ -93,7 +94,7 @@ func Login(c *gin.Context) {
 	payload := PagePayload{
 		Component: "auth.login",
 		Props:     buildLoginPageProps(c),
-		Meta:      buildSimpleMeta(c, "登录/注册"),
+		Meta:      buildSimpleMeta(c, "meta.loginRegister"),
 		Layout:    buildLayout(c, ""),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -105,7 +106,7 @@ func ResetPassword(c *gin.Context) {
 	payload := PagePayload{
 		Component: "auth.resetPassword",
 		Props:     ResetPasswordPageProps{Token: c.Query("token")},
-		Meta:      buildSimpleMeta(c, "重置密码"),
+		Meta:      buildSimpleMeta(c, "meta.resetPassword"),
 		Layout:    buildLayout(c, ""),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
@@ -113,9 +114,11 @@ func ResetPassword(c *gin.Context) {
 	renderPage(c, "reset_password.gohtml", payload)
 }
 
-func buildSimpleMeta(c *gin.Context, title string) PageMeta {
+// buildSimpleMeta builds page metadata whose title is a translation key
+// resolved in the request locale.
+func buildSimpleMeta(c *gin.Context, titleKey string) PageMeta {
 	return PageMeta{
-		Title:     pageTitle(title),
+		Title:     pageTitle(i18n.T(requestLang(c), titleKey)),
 		Canonical: buildPageURL(c),
 	}
 }

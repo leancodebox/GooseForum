@@ -20,7 +20,7 @@ func ThemePreview(c *gin.Context) {
 			Theme:    themeservice.LoadConfig(),
 			Defaults: themeservice.Defaults(),
 		},
-		Meta:    buildSimpleMeta(c, "主题预览"),
+		Meta:    buildSimpleMeta(c, "meta.themePreview"),
 		Layout:  buildLayout(c, "theme-preview"),
 		URL:     buildPageURL(c),
 		Version: payloadVersion,

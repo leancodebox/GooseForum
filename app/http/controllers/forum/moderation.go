@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
@@ -75,8 +76,8 @@ func Moderation(c *gin.Context) {
 			},
 		},
 		Meta: PageMeta{
-			Title:       pageTitle("版主管理"),
-			Description: "处理你负责范围内的帖子封禁与解封。",
+			Title:       pageTitle(i18n.T(requestLang(c), "meta.moderation")),
+			Description: i18n.T(requestLang(c), "meta.moderationDesc"),
 			Robots:      "noindex",
 		},
 		Layout:  buildLayout(c, "moderation"),

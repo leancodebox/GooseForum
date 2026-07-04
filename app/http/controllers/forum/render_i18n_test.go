@@ -39,9 +39,9 @@ func TestTopicListPartialLocalized(t *testing.T) {
 	type category struct{ URL, Name string }
 	type topic struct {
 		URL, Title, Description string
-		Categories             []category
-		ReplyCount, ViewCount  int
-		ActivityText           string
+		Categories              []category
+		ReplyCount, ViewCount   int
+		ActivityText            string
 	}
 
 	// Populated list -> "replies"/"views" labels.

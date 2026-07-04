@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 )
 
@@ -44,11 +45,11 @@ func RenderNotFoundPage(c *gin.Context, messageCode component.MessageCode) {
 		Component: "error.notFound",
 		Props: ErrorPageProps{
 			Code:        "404",
-			Title:       "页面不存在",
+			Title:       i18n.T(requestLang(c), "meta.notFound"),
 			MessageCode: messageCode,
 		},
 		Meta: PageMeta{
-			Title:  pageTitle("页面不存在"),
+			Title:  pageTitle(i18n.T(requestLang(c), "meta.notFound")),
 			Robots: "noindex",
 		},
 		Layout:  buildLayout(c, ""),
