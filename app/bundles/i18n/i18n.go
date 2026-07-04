@@ -18,7 +18,7 @@ import (
 var localeFS embed.FS
 
 // SupportedLocales lists the locales the server can render, in preference order.
-var SupportedLocales = []string{"zh", "en", "ja"}
+var SupportedLocales = []string{"zh", "en", "ja", "it"}
 
 // Fallback is used when a locale or a key is missing. It matches the frontend
 // fallbackLocale so the two stay consistent.

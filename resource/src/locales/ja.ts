@@ -56,10 +56,12 @@ export default {
     zh: '简体中文',
     en: 'English',
     ja: '日本語',
+    it: 'Italiano',
     short: {
       zh: '中',
       en: 'EN',
       ja: '日',
+      it: 'IT',
     },
   },
   error: {
