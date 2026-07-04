@@ -12,20 +12,20 @@
         <p>@{{.Payload.Props.User.Username}}</p>
         {{if .Payload.Props.User.Bio}}<p>{{.Payload.Props.User.Bio}}</p>{{end}}
         <dl>
-            <dt>主题</dt><dd>{{.Payload.Props.User.ArticleCount}}</dd>
-            <dt>回复</dt><dd>{{.Payload.Props.User.ReplyCount}}</dd>
-            <dt>获赞</dt><dd>{{.Payload.Props.User.LikeReceivedCount}}</dd>
-            <dt>关注者</dt><dd>{{.Payload.Props.User.FollowerCount}}</dd>
+            <dt>{{ t .Lang "topics" }}</dt><dd>{{.Payload.Props.User.ArticleCount}}</dd>
+            <dt>{{ t .Lang "repliesTitle" }}</dt><dd>{{.Payload.Props.User.ReplyCount}}</dd>
+            <dt>{{ t .Lang "likesReceived" }}</dt><dd>{{.Payload.Props.User.LikeReceivedCount}}</dd>
+            <dt>{{ t .Lang "followers" }}</dt><dd>{{.Payload.Props.User.FollowerCount}}</dd>
         </dl>
     </header>
 
     <section>
-        <h2>最近主题</h2>
-        {{template "partials/topic_list.gohtml" .Payload.Props.Topics}}
+        <h2>{{ t .Lang "recentTopics" }}</h2>
+        {{template "partials/topic_list.gohtml" (dict "Topics" .Payload.Props.Topics "Lang" .Lang)}}
     </section>
 
     <section>
-        <h2>最近动态</h2>
+        <h2>{{ t .Lang "recentActivity" }}</h2>
         <ul>
             {{range .Payload.Props.Activities}}
             <li>

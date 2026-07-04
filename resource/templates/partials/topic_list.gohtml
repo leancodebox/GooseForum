@@ -1,15 +1,15 @@
 {{define "partials/topic_list.gohtml"}}
-{{if .}}
+{{if .Topics}}
 <ol>
-    {{range .}}
+    {{range .Topics}}
     <li>
         <article>
             <h2><a href="{{.URL}}">{{.Title}}</a></h2>
             {{if .Description}}<p>{{.Description}}</p>{{end}}
             <p>
                 {{range .Categories}}<a href="{{.URL}}">{{.Name}}</a> {{end}}
-                <span>{{.ReplyCount}} 回复</span>
-                <span>{{.ViewCount}} 浏览</span>
+                <span>{{.ReplyCount}} {{ t $.Lang "replies" }}</span>
+                <span>{{.ViewCount}} {{ t $.Lang "views" }}</span>
                 <time>{{.ActivityText}}</time>
             </p>
         </article>
@@ -17,6 +17,6 @@
     {{end}}
 </ol>
 {{else}}
-<p>暂无主题。</p>
+<p>{{ t $.Lang "noTopics" }}</p>
 {{end}}
 {{end}}

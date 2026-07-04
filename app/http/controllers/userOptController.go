@@ -1,13 +1,14 @@
 package controllers
 
 import (
-	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/tokenservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -22,56 +23,58 @@ var activationTemplate = sync.OnceValues(func() (*template.Template, error) {
 func ActivateAccount(c *gin.Context) {
 	token := c.Query("token")
 	if token == "" {
-		renderActivationPage(c, false, "无效的激活链接")
+		renderActivationPage(c, false, "activationInvalidLink")
 		return
 	}
 
 	// 解析激活令牌
 	claims, err := tokenservice.ParseActivationToken(token)
 	if err != nil {
-		renderActivationPage(c, false, "激活链接已过期或无效")
+		renderActivationPage(c, false, "activationExpired")
 		return
 	}
 
 	// 获取用户信息
 	user, err := users.Get(claims.UserId)
 	if err != nil {
-		renderActivationPage(c, false, "用户不存在")
+		renderActivationPage(c, false, "activationUserNotFound")
 		return
 	}
 
 	// 检查邮箱是否匹配
 	if user.Email != claims.Email {
-		renderActivationPage(c, false, "激活链接无效")
+		renderActivationPage(c, false, "activationLinkInvalid")
 		return
 	}
 
 	// 激活账号
 	user.Activate()
 	if err = userservice.SaveUser(&user); err != nil {
-		renderActivationPage(c, false, "激活失败")
+		renderActivationPage(c, false, "activationFailed")
 		return
 	}
 
-	renderActivationPage(c, true, "账号激活成功")
+	renderActivationPage(c, true, "activationSuccess")
 }
 
 // ActivateAccountData 激活页面数据
 type ActivateAccountData struct {
 	Title       string
-	Status      string
 	Message     string
 	Success     bool
 	Description string
 }
 
-// renderActivationPage 渲染账号激活结果页。
-func renderActivationPage(c *gin.Context, success bool, message string) {
-	status := "失败"
-	description := "激活失败，请检查您的激活链接是否正确或联系管理员。"
+// renderActivationPage 渲染账号激活结果页。messageKey 为 i18n 文案键。
+func renderActivationPage(c *gin.Context, success bool, messageKey string) {
+	lang := component.RequestLang(c)
+	tr := i18n.Func(lang)
+
+	title := tr("activationTitleFail")
+	description := tr("activationDescFail")
 	if success {
-		status = "成功"
-		description = "您的账号已成功激活！现在您可以使用完整的论坛功能，包括发帖、回复、个人中心等服务。"
+		title = tr("activationTitleSuccess")
+		description = tr("activationDescSuccess")
 	}
 
 	tmpl, err := activationTemplate()
@@ -88,30 +91,14 @@ func renderActivationPage(c *gin.Context, success bool, message string) {
 		Lang string
 	}{
 		Data: ActivateAccountData{
-			Title:       fmt.Sprintf("账号激活%v", status),
-			Status:      status,
-			Message:     message,
+			Title:       title,
+			Message:     tr(messageKey),
 			Success:     success,
 			Description: description,
 		},
-		T:    activationText,
-		Lang: "zh",
+		T:    tr,
+		Lang: lang,
 	}); err != nil {
 		slog.Error("render activation template failed", "err", err)
-	}
-}
-
-func activationText(key string, _ ...any) string {
-	switch key {
-	case "account_activation":
-		return "账号激活"
-	case "back_home":
-		return "回到首页"
-	case "contact_support":
-		return "联系支持"
-	case "login_now":
-		return "立即登录"
-	default:
-		return key
 	}
 }
