@@ -105,7 +105,7 @@ async function loadGlobalModerators() {
   try {
     globalModerators.value = await getGlobalModeratorList()
   } catch (err) {
-    adminToast.error(err, '全站版主加载失败')
+    adminToast.error(err, adminText('k00ei'))
   }
 }
 
@@ -253,7 +253,7 @@ function selectGlobalModeratorCandidate(user: AdminUser) {
 async function addGlobalModeratorUser() {
   const value = globalModeratorInput.value.trim()
   if (!value) {
-    adminToast.warning('请输入用户名或用户 ID')
+    adminToast.warning(adminText('k00ej'))
     return
   }
   globalModeratorSaving.value = true
@@ -267,9 +267,9 @@ async function addGlobalModeratorUser() {
     globalModeratorInput.value = ''
     selectedGlobalModeratorUser.value = null
     globalModeratorCandidates.value = []
-    adminToast.success('全站版主已添加')
+    adminToast.success(adminText('k00ek'))
   } catch (err) {
-    adminToast.error(err, '添加全站版主失败')
+    adminToast.error(err, adminText('k00el'))
   } finally {
     globalModeratorSaving.value = false
   }
@@ -279,7 +279,7 @@ async function addModerator() {
   if (!moderatorRow.value) return
   const value = moderatorUserInput.value.trim()
   if (!value) {
-    adminToast.warning('请输入用户名或用户 ID')
+    adminToast.warning(adminText('k00ej'))
     return
   }
   moderatorSaving.value = true
@@ -296,9 +296,9 @@ async function addModerator() {
     moderatorUserInput.value = ''
     selectedModeratorUser.value = null
     moderatorCandidates.value = []
-    adminToast.success('版主已添加')
+    adminToast.success(adminText('k00em'))
   } catch (err) {
-    adminToast.error(err, '添加版主失败')
+    adminToast.error(err, adminText('k00en'))
   } finally {
     moderatorSaving.value = false
   }
@@ -324,9 +324,9 @@ async function removeGlobalModerator(id: number) {
   try {
     await deleteGlobalModerator(id)
     await loadGlobalModerators()
-    adminToast.success('全站版主已移除')
+    adminToast.success(adminText('k00eo'))
   } catch (err) {
-    adminToast.error(err, '移除全站版主失败')
+    adminToast.error(err, adminText('k00ep'))
   } finally {
     globalModeratorSaving.value = false
   }
@@ -340,9 +340,9 @@ async function removeModerator(id: number) {
     await loadCategories()
     const freshRow = rows.value.find(item => item.id === moderatorRow.value?.id)
     moderatorRow.value = freshRow || moderatorRow.value
-    adminToast.success('版主已移除')
+    adminToast.success(adminText('k00eq'))
   } catch (err) {
-    adminToast.error(err, '移除版主失败')
+    adminToast.error(err, adminText('k00er'))
   } finally {
     moderatorSaving.value = false
   }
@@ -384,10 +384,10 @@ onMounted(() => {
             <div class="grid gap-2 px-3 py-2 lg:grid-cols-[auto_minmax(0,1fr)_20rem] lg:items-start">
               <div class="flex h-8 min-w-0 items-center gap-2 text-sm">
                 <ShieldCheck class="size-4 shrink-0 text-muted-foreground" />
-                <span class="shrink-0 font-medium">全站版主</span>
+                <span class="shrink-0 font-medium">{{ adminText('k00es') }}</span>
               </div>
               <div class="flex min-h-8 min-w-0 flex-wrap content-start gap-1">
-                <span v-if="!globalModerators.length" class="inline-flex h-7 items-center text-sm text-muted-foreground">暂无</span>
+                <span v-if="!globalModerators.length" class="inline-flex h-7 items-center text-sm text-muted-foreground">{{ adminText('k00et') }}</span>
                 <span
                   v-for="moderator in globalModerators"
                   v-else
@@ -409,12 +409,12 @@ onMounted(() => {
               </div>
               <form class="flex gap-1.5" @submit.prevent="addGlobalModeratorUser">
                 <div class="relative min-w-0 flex-1">
-                  <Input v-model="globalModeratorInput" class="h-8" placeholder="用户名或用户 ID" autocomplete="off" />
+                  <Input v-model="globalModeratorInput" class="h-8" :placeholder="adminText('k00eu')" autocomplete="off" />
                   <div
                     v-if="globalModeratorInput.trim() && (globalModeratorCandidates.length || globalModeratorSearching)"
                     class="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-md border bg-popover shadow-md"
                   >
-                    <div v-if="globalModeratorSearching" class="px-3 py-2 text-sm text-muted-foreground">搜索中...</div>
+                    <div v-if="globalModeratorSearching" class="px-3 py-2 text-sm text-muted-foreground">{{ adminText('k00ev') }}</div>
                     <button
                       v-for="user in globalModeratorCandidates"
                       v-else
@@ -428,14 +428,14 @@ onMounted(() => {
                       <img v-if="user.avatarUrl" :src="user.avatarUrl" class="size-7 rounded-full object-cover ring-1 ring-border" alt="" />
                       <span v-else class="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ moderatorInitial(user.username) }}</span>
                       <span class="min-w-0 flex-1 truncate">{{ user.username }}</span>
-                      <span v-if="isAlreadyGlobalModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">已添加</span>
+                      <span v-if="isAlreadyGlobalModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{{ adminText('k00ew') }}</span>
                       <span class="shrink-0 font-mono text-xs text-muted-foreground">#{{ user.userId }}</span>
                     </button>
                   </div>
                 </div>
                 <Button type="submit" variant="outline" size="sm" :disabled="globalModeratorSaving">
                   <UserPlus class="size-3.5" />
-                  添加
+                  {{ adminText('k0094') }}
                 </Button>
               </form>
             </div>
@@ -449,7 +449,7 @@ onMounted(() => {
               <TableHead>{{ adminText('k00c2') }}</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>{{ adminText('k00ag') }}</TableHead>
-              <TableHead class="w-48">版主</TableHead>
+              <TableHead class="w-48">{{ adminText('k00ex') }}</TableHead>
               <TableHead class="w-24">{{ adminText('k00bf') }}</TableHead>
               <TableHead class="w-32 text-right">{{ adminText('k007m') }}</TableHead>
             </TableRow>
@@ -494,9 +494,9 @@ onMounted(() => {
                           {{ moderatorInitial(moderator.username) }}
                         </span>
                       </span>
-                      <span class="truncate">{{ item.moderators.length }} 人</span>
+                      <span class="truncate">{{ adminText('k00ey', { count: item.moderators.length }) }}</span>
                     </span>
-                    <span v-else>设置版主</span>
+                    <span v-else>{{ adminText('k00ez') }}</span>
                   </button>
                 </TableCell>
                 <TableCell>{{ item.sort ?? 0 }}</TableCell>
@@ -585,20 +585,20 @@ onMounted(() => {
       <Dialog :open="moderatorRow !== null" @update:open="(open) => !open && (moderatorRow = null)">
         <DialogContent class="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>分类版主</DialogTitle>
+            <DialogTitle>{{ adminText('k00f0') }}</DialogTitle>
             <DialogDescription>
-              为「{{ moderatorRow?.category }}」添加或移除前台治理版主。版主不会获得后台权限。
+              {{ adminText('k00f5', { category: moderatorRow?.category }) }}
             </DialogDescription>
           </DialogHeader>
           <div class="space-y-4">
             <form class="flex gap-2" @submit.prevent="addModerator">
               <div class="relative min-w-0 flex-1">
-                <Input v-model="moderatorUserInput" placeholder="搜索用户名或输入用户 ID" autocomplete="off" />
+                <Input v-model="moderatorUserInput" :placeholder="adminText('k00f1')" autocomplete="off" />
                 <div
                   v-if="moderatorUserInput.trim() && (moderatorCandidates.length || moderatorSearching)"
                   class="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-md border bg-popover shadow-md"
                 >
-                  <div v-if="moderatorSearching" class="px-3 py-2 text-sm text-muted-foreground">搜索中...</div>
+                  <div v-if="moderatorSearching" class="px-3 py-2 text-sm text-muted-foreground">{{ adminText('k00ev') }}</div>
                   <button
                     v-for="user in moderatorCandidates"
                     v-else
@@ -612,23 +612,23 @@ onMounted(() => {
                     <img v-if="user.avatarUrl" :src="user.avatarUrl" class="size-7 rounded-full object-cover ring-1 ring-border" alt="" />
                     <span v-else class="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">{{ moderatorInitial(user.username) }}</span>
                     <span class="min-w-0 flex-1 truncate">{{ user.username }}</span>
-                    <span v-if="isAlreadyModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">已添加</span>
+                    <span v-if="isAlreadyModerator(user.userId)" class="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{{ adminText('k00ew') }}</span>
                     <span class="shrink-0 font-mono text-xs text-muted-foreground">#{{ user.userId }}</span>
                   </button>
                 </div>
               </div>
               <Button type="submit" :disabled="moderatorSaving">
                 <UserPlus class="size-4" />
-                添加
+                {{ adminText('k0094') }}
               </Button>
             </form>
             <div class="overflow-hidden rounded-lg border">
               <div class="flex items-center justify-between border-b bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-                <span>当前版主</span>
-                <span>{{ moderatorRow?.moderators?.length || 0 }} 人</span>
+                <span>{{ adminText('k00f2') }}</span>
+                <span>{{ adminText('k00ey', { count: moderatorRow?.moderators?.length || 0 }) }}</span>
               </div>
               <div v-if="!moderatorRow?.moderators?.length" class="px-4 py-8 text-center text-sm text-muted-foreground">
-                暂无版主
+                {{ adminText('k00f3') }}
               </div>
               <div v-else class="max-h-72 divide-y overflow-y-auto">
                 <div

@@ -180,23 +180,23 @@ export function deleteCategory(id: number) {
 }
 
 export function getGlobalModeratorList() {
-  return postJson<AdminCategoryModerator[]>('/api/admin/global-moderator-list', {}, '获取全站版主失败')
+  return postJson<AdminCategoryModerator[]>('/api/admin/global-moderator-list', {}, adminText('k00f4'))
 }
 
 export function addGlobalModerator(data: { userId?: number, username?: string }) {
-  return postJson<unknown>('/api/admin/global-moderator-add', data, '添加全站版主失败')
+  return postJson<unknown>('/api/admin/global-moderator-add', data, adminText('k00el'))
 }
 
 export function deleteGlobalModerator(id: number) {
-  return postJson<unknown>('/api/admin/global-moderator-delete', { id }, '移除全站版主失败')
+  return postJson<unknown>('/api/admin/global-moderator-delete', { id }, adminText('k00ep'))
 }
 
 export function addCategoryModerator(data: { categoryId: number, userId?: number, username?: string }) {
-  return postJson<unknown>('/api/admin/category-moderator-add', data, '添加版主失败')
+  return postJson<unknown>('/api/admin/category-moderator-add', data, adminText('k00en'))
 }
 
 export function deleteCategoryModerator(id: number) {
-  return postJson<unknown>('/api/admin/category-moderator-delete', { id }, '移除版主失败')
+  return postJson<unknown>('/api/admin/category-moderator-delete', { id }, adminText('k00er'))
 }
 
 export function getArticlesList(params: { page?: number, pageSize?: number, search?: string }) {
