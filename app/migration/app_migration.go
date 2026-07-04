@@ -45,5 +45,15 @@ func runVersionedDataMigrations() {
 		pageConfig.SyncMigrationVersion(3)
 		currentVersion = 3
 	}
+	if currentVersion < 4 {
+		result := datamigration.MigrateSiteChromeContent()
+		slog.Info("app migration site chrome content done", "migrated", result.Migrated, "failed", result.Failed)
+		if result.Failed > 0 {
+			slog.Error("app migration site chrome content has failures", "failed", result.Failed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(4)
+		currentVersion = 4
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

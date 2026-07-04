@@ -13,6 +13,7 @@ import {
   Monitor,
   PanelsTopLeft,
   ShieldCheck,
+  PanelLeft,
   Tags,
   UserCog,
   Webhook,
@@ -81,6 +82,7 @@ const navGroups = computed<NavGroup[]>(() => {
     title: adminText('k007t'),
     items: [
       { title: adminText('k007u'), url: '/admin/settings/site-info', icon: PanelsTopLeft, permission: AdminPermission.SiteManager },
+      { title: adminText('k00d9'), url: '/admin/settings/site-chrome', icon: PanelLeft, permission: AdminPermission.SiteManager },
       { title: adminText('k007v'), url: '/admin/settings/mail', icon: Mail, permission: AdminPermission.SiteManager },
       { title: adminText('k0005'), url: '/admin/settings/security', icon: ShieldCheck, permission: AdminPermission.SiteManager },
       { title: adminText('k007w'), url: '/admin/settings/posting', icon: FileText, permission: AdminPermission.SiteManager },

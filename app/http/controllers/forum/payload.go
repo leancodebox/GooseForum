@@ -120,6 +120,7 @@ type ResetPasswordPageProps struct {
 type LayoutPayload struct {
 	Site    SitePayload         `json:"site"`
 	Viewer  ViewerPayload       `json:"viewer"`
+	Header  []NavItemPayload    `json:"header,omitempty"`
 	Sidebar SidebarPayload      `json:"sidebar"`
 	Footer  FooterPayload       `json:"footer"`
 	Unread  UnreadStatusPayload `json:"unread"`
@@ -165,10 +166,10 @@ type ViewerPayload struct {
 }
 
 type NavItemPayload struct {
-	Key   string `json:"key"`
-	Label string `json:"label"`
-	Icon  string `json:"icon,omitempty"`
-	URL   string `json:"url"`
+	Key       string `json:"key"`
+	Label     string `json:"label"`
+	I18nLabel string `json:"i18nLabel,omitempty"`
+	URL       string `json:"url"`
 }
 
 type CategoryNavPayload struct {
@@ -178,11 +179,19 @@ type CategoryNavPayload struct {
 	Color string `json:"color"`
 }
 
+type SidebarGroupPayload struct {
+	Key       string           `json:"key"`
+	Title     string           `json:"title"`
+	I18nLabel string           `json:"i18nLabel,omitempty"`
+	Items     []NavItemPayload `json:"items"`
+}
+
 type SidebarPayload struct {
-	Main       []NavItemPayload     `json:"main,omitempty"`
-	Resources  []NavItemPayload     `json:"resources,omitempty"`
-	Categories []CategoryNavPayload `json:"categories"`
-	ActiveKey  string               `json:"activeKey"`
+	Main       []NavItemPayload      `json:"main,omitempty"`
+	Resources  []NavItemPayload      `json:"resources,omitempty"`
+	Groups     []SidebarGroupPayload `json:"groups,omitempty"`
+	Categories []CategoryNavPayload  `json:"categories"`
+	ActiveKey  string                `json:"activeKey"`
 }
 
 type FooterPayload struct {
@@ -558,6 +567,7 @@ type SearchPageProps struct {
 
 func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
+	chrome := hotdataserve.GetSiteChromeConfigCache()
 	currentUser := component.GetLoginUser(c)
 	viewer := ViewerPayload{}
 	if currentUser != nil {
@@ -576,10 +586,14 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 	}
 	unread := buildUnreadStatus(viewer.ID)
 
-	footerPrimary := make([]string, 0, len(siteConfig.FooterInfo.Primary))
-	for _, item := range siteConfig.FooterInfo.Primary {
+	footerInfo := chrome.FooterInfo
+	footerPrimary := make([]string, 0, len(footerInfo.Primary))
+	for _, item := range footerInfo.Primary {
 		footerPrimary = append(footerPrimary, item.Content)
 	}
+	brandType := chrome.BrandType
+	brandText := chrome.BrandText
+	brandImage := chrome.BrandImage
 
 	return LayoutPayload{
 		Site: SitePayload{
@@ -588,17 +602,18 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			Logo:          siteConfig.SiteLogo,
 			Favicon:       siteConfig.SiteLogo,
 			ExternalLinks: siteConfig.ExternalLinks,
-			BrandType:     siteConfig.BrandType,
-			BrandText:     siteConfig.BrandText,
-			BrandImage:    siteConfig.BrandImage,
+			BrandType:     brandType,
+			BrandText:     brandText,
+			BrandImage:    brandImage,
 		},
 		Viewer: viewer,
+		Header: buildChromeNavItems(chrome.Header),
 		Sidebar: buildSidebarPayload(
 			hotdataserve.GetArticleCategory(),
 			activeKey,
 		),
 		Footer: FooterPayload{
-			Links:   siteConfig.FooterInfo.List,
+			Links:   footerInfo.List,
 			Primary: footerPrimary,
 		},
 		Unread: unread,
@@ -674,6 +689,7 @@ func buildUnreadStatus(userID uint64) UnreadStatusPayload {
 }
 
 func buildSidebarPayload(categories []*articleCategory.Entity, activeKey string) SidebarPayload {
+	chrome := hotdataserve.GetSiteChromeConfigCache()
 	categoryItems := make([]CategoryNavPayload, 0, len(categories))
 	for _, category := range categories {
 		if category == nil {
@@ -688,9 +704,49 @@ func buildSidebarPayload(categories []*articleCategory.Entity, activeKey string)
 	}
 
 	return SidebarPayload{
+		Main:       buildChromeNavItems(chrome.MainMenu),
+		Resources:  buildChromeNavItems(chrome.Resources),
+		Groups:     buildChromeSidebarGroups(chrome.SidebarGroups),
 		Categories: categoryItems,
 		ActiveKey:  activeKey,
 	}
+}
+
+func buildChromeSidebarGroups(groups []pageConfig.ChromeGroup) []SidebarGroupPayload {
+	result := make([]SidebarGroupPayload, 0, len(groups))
+	for _, group := range groups {
+		items := buildChromeNavItems(group.Items)
+		if (group.Title == "" && group.I18nLabel == "") || len(items) == 0 {
+			continue
+		}
+		result = append(result, SidebarGroupPayload{
+			Key:       group.ID,
+			Title:     group.Title,
+			I18nLabel: group.I18nLabel,
+			Items:     items,
+		})
+	}
+	return result
+}
+
+func buildChromeNavItems(items []pageConfig.ChromeItem) []NavItemPayload {
+	result := make([]NavItemPayload, 0, len(items))
+	for _, item := range items {
+		if !item.Enabled || (item.Label == "" && item.I18nLabel == "") {
+			continue
+		}
+		url := item.URL
+		if url == "" {
+			url = "#"
+		}
+		result = append(result, NavItemPayload{
+			Key:       item.ID,
+			Label:     item.Label,
+			I18nLabel: item.I18nLabel,
+			URL:       url,
+		})
+	}
+	return result
 }
 
 func buildHomeProps(page int, sort string, topics []*vo.ArticlesSimpleVo, hasNext bool) HomeProps {

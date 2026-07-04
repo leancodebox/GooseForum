@@ -198,6 +198,8 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("server-version", UpButterReq(api.ServerVersion)).
 		GET("site-settings", UpButterReq(api.GetSiteSettings)).
 		POST("save-site-settings", UpButterReq(api.SaveSiteSettings)).
+		GET("site-chrome", UpButterReq(api.GetSiteChrome)).
+		POST("save-site-chrome", UpButterReq(api.SaveSiteChrome)).
 		GET("site-theme", UpButterReq(api.GetSiteTheme)).
 		POST("save-site-theme", UpButterReq(api.SaveSiteTheme)).
 		POST("publish-site-theme", UpButterReq(api.PublishSiteTheme)).

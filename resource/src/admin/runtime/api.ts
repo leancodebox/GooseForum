@@ -21,6 +21,7 @@ import type {
   PostingSettings,
   SecuritySettings,
   ServerVersion,
+  SiteChromeConfig,
   SiteSettings,
   SiteStatistics,
   SponsorsConfig,
@@ -258,6 +259,10 @@ export function getSiteSettings() {
   return getJson<SiteSettings>('/api/admin/site-settings', adminText('k001f'))
 }
 
+export function getSiteChrome() {
+  return getJson<SiteChromeConfig>('/api/admin/site-chrome', '加载布局内容失败')
+}
+
 export function getMailSettings() {
   return getJson<MailSettings>('/api/admin/mail-settings', adminText('k001g'))
 }
@@ -280,6 +285,10 @@ export function getAnnouncement() {
 
 export function saveSiteSettings(settings: SiteSettings) {
   return postJson<unknown>('/api/admin/save-site-settings', { settings }, adminText('k001k'))
+}
+
+export function saveSiteChrome(settings: SiteChromeConfig) {
+  return postJson<unknown>('/api/admin/save-site-chrome', { settings }, '保存布局内容失败')
 }
 
 export function saveMailSettings(settings: MailSettings) {

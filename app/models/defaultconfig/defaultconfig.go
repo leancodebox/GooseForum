@@ -112,10 +112,32 @@ func GetDefaultSecuritySettingsConfig() pageConfig.SecurityAndRegistration {
 }
 
 func GetDefaultSiteSettingsConfig() pageConfig.SiteSettingsConfig {
-	config := mustPageConfigDefaults().Site
-	config.FooterInfo.Primary = append([]pageConfig.PItem(nil), config.FooterInfo.Primary...)
-	config.FooterInfo.List = append([]pageConfig.FooterItem(nil), config.FooterInfo.List...)
-	return config
+	return mustPageConfigDefaults().Site
+}
+
+func GetDefaultSiteChromeConfig() pageConfig.SiteChromeConfig {
+	return pageConfig.SiteChromeConfig{
+		Header:        GetDefaultSiteChromeHeader(),
+		MainMenu:      []pageConfig.ChromeItem{},
+		Resources:     []pageConfig.ChromeItem{},
+		SidebarGroups: []pageConfig.ChromeGroup{},
+		FooterInfo: pageConfig.FooterInfo{
+			Primary: []pageConfig.PItem{{Content: "Providing reliable tech since 2025"}},
+			List: []pageConfig.FooterItem{
+				{Name: "Github", Url: "https://github.com/leancodebox/GooseForum"},
+				{Name: "License", Url: "https://github.com/leancodebox/GooseForum/blob/main/LICENSE"},
+				{Name: "LeanCodeBox", Url: "https://github.com/leancodebox"},
+			},
+		},
+		BrandType: "default",
+	}
+}
+
+func GetDefaultSiteChromeHeader() []pageConfig.ChromeItem {
+	return []pageConfig.ChromeItem{
+		{ID: "sponsors", Enabled: true, Type: "link", Label: "Sponsors", I18nLabel: "shell.nav.sponsors", URL: "/sponsors"},
+		{ID: "links", Enabled: true, Type: "link", Label: "Links", I18nLabel: "shell.nav.links", URL: "/links"},
+	}
 }
 
 func GetDefaultSiteThemeConfig() pageConfig.SiteThemeConfig {

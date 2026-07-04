@@ -182,6 +182,29 @@ export interface SiteSettings {
   siteDescription: string
   siteKeywords: string
   externalLinks?: string
+}
+
+export interface SiteChromeItem {
+  id: string
+  enabled: boolean
+  type: 'link' | 'text' | string
+  label: string
+  i18nLabel: string
+  url: string
+}
+
+export interface SiteChromeGroup {
+  id: string
+  title: string
+  i18nLabel: string
+  items: SiteChromeItem[]
+}
+
+export interface SiteChromeConfig {
+  header: SiteChromeItem[]
+  mainMenu: SiteChromeItem[]
+  resources: SiteChromeItem[]
+  sidebarGroups: SiteChromeGroup[]
   footerInfo?: {
     primary: { content: string }[]
     list: { name: string, url: string }[]

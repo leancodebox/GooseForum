@@ -44,14 +44,21 @@ const props = defineProps<{
 interface SidebarNavItem {
   key: string
   label: string
+  i18nLabel?: string
   url: string
   active: boolean
-  icon?: string
 }
 
 interface SidebarCategoryItem extends SidebarNavItem {
   id: number
   color: string
+}
+
+interface SidebarGroupItem {
+  key: string
+  title: string
+  i18nLabel?: string
+  items: SidebarNavItem[]
 }
 
 const MobileDrawer = defineAsyncComponent(() => import('./MobileDrawer.vue'))
@@ -65,7 +72,7 @@ const closeTimers: Record<'lang' | 'user', number | undefined> = {
   user: undefined,
 }
 const { navigating } = useNavigationState()
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 const { isDark, toggleTheme } = useSiteTheme()
 const unreadStatus = useUnreadStatus()
 const hasUnreadNotification = computed(() => unreadStatus.notifications.value)
@@ -97,6 +104,16 @@ const resourceItems = computed<SidebarNavItem[]>(() => [
   sidebarItem('sponsors', t('shell.nav.sponsors'), '/sponsors'),
   ...serverSidebarItems(props.layout.sidebar.resources),
 ])
+const sidebarGroups = computed<SidebarGroupItem[]>(() =>
+  asArray(props.layout.sidebar.groups)
+    .map((group) => ({
+      key: group.key,
+      title: displayNavLabel(group),
+      i18nLabel: group.i18nLabel,
+      items: serverSidebarItems(group.items),
+    }))
+    .filter((group) => group.title && group.items.length > 0),
+)
 const categoryItems = computed<SidebarCategoryItem[]>(() =>
   asArray(props.layout.sidebar.categories).map((category) => {
     const key = `category_${category.id}`
@@ -110,11 +127,14 @@ const categoryItems = computed<SidebarCategoryItem[]>(() =>
     }
   }),
 )
-const headerResourceItems = computed(() =>
-  ['sponsors', 'links']
-    .map((key) => resourceItems.value.find((item) => item.key === key))
-    .filter((item): item is NonNullable<typeof item> => Boolean(item)),
-)
+const headerResourceItems = computed(() => {
+  const configured = serverSidebarItems(props.layout.header)
+  return configured.length > 0
+    ? configured
+    : ['sponsors', 'links']
+      .map((key) => resourceItems.value.find((item) => item.key === key))
+      .filter((item): item is NonNullable<typeof item> => Boolean(item))
+})
 const footerLinks = computed(() => asArray(props.layout.footer.links))
 const footerPrimary = computed(() => asArray(props.layout.footer.primary))
 const hasFooter = computed(() => footerLinks.value.length > 0 || footerPrimary.value.length > 0)
@@ -185,8 +205,12 @@ async function logout() {
   window.location.reload()
 }
 
-function sidebarIcon(key: string) {
-  return sidebarIconMap[key as keyof typeof sidebarIconMap]
+function navIcon(item: SidebarNavItem) {
+  return sidebarIconMap[item.key as keyof typeof sidebarIconMap] || Link
+}
+
+function displayNavLabel(item: { label?: string; title?: string; i18nLabel?: string }) {
+  return item.i18nLabel && te(item.i18nLabel) ? t(item.i18nLabel) : item.label || item.title || ''
 }
 
 function sidebarItem(key: string, label: string, url: string): SidebarNavItem {
@@ -201,9 +225,9 @@ function sidebarItem(key: string, label: string, url: string): SidebarNavItem {
 function serverSidebarItems(items: typeof props.layout.sidebar.main): SidebarNavItem[] {
   return asArray(items).map((item) => ({
     key: item.key,
-    label: item.label,
+    label: displayNavLabel(item),
+    i18nLabel: item.i18nLabel,
     url: item.url,
-    icon: item.icon,
     active: activeSidebarKey.value === item.key,
   }))
 }
@@ -532,12 +556,11 @@ async function loadUserHoverCard() {
                 :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
               >
                 <component
-                  :is="sidebarIcon(item.key)"
-                  v-if="sidebarIcon(item.key)"
+                  :is="navIcon(item)"
+                  v-if="navIcon(item)"
                   class="h-4 w-4 shrink-0"
                   aria-hidden="true"
                 />
-                <span v-else-if="item.icon" class="flex w-4 justify-center text-[13px] opacity-80" aria-hidden="true">{{ item.icon }}</span>
                 <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
                 <span
                   v-if="(item.key === 'messages' && hasUnreadMessage) || (item.key === 'notifications' && hasUnreadNotification) || (item.key === 'moderation' && hasModerationReports)"
@@ -558,12 +581,36 @@ async function loadUserHoverCard() {
                   :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
                 >
                   <component
-                    :is="sidebarIcon(item.key)"
-                    v-if="sidebarIcon(item.key)"
+                    :is="navIcon(item)"
+                    v-if="navIcon(item)"
                     class="h-4 w-4 shrink-0"
                     aria-hidden="true"
                   />
-                  <span v-else-if="item.icon" class="flex w-4 justify-center text-[13px] opacity-80" aria-hidden="true">{{ item.icon }}</span>
+                  <span class="truncate">{{ item.label }}</span>
+                </a>
+              </div>
+            </div>
+
+            <div
+              v-for="group in sidebarGroups"
+              :key="group.key"
+              class="mt-2"
+            >
+              <div class="mb-1 px-2 text-[10px] font-bold uppercase tracking-wide text-base-content/55">{{ group.title }}</div>
+              <div class="space-y-px">
+                <a
+                  v-for="item in group.items"
+                  :key="item.key"
+                  :href="item.url"
+                  class="flex h-7 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors duration-150"
+                  :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
+                >
+                  <component
+                    :is="navIcon(item)"
+                    v-if="navIcon(item)"
+                    class="h-4 w-4 shrink-0"
+                    aria-hidden="true"
+                  />
                   <span class="truncate">{{ item.label }}</span>
                 </a>
               </div>
@@ -629,6 +676,7 @@ async function loadUserHoverCard() {
       :open="drawerOpen"
       :primary-items="primaryItems"
       :resource-items="resourceItems"
+      :sidebar-groups="sidebarGroups"
       :category-items="categoryItems"
       :footer="layout.footer"
       :has-unread-messages="hasUnreadMessage"
@@ -638,7 +686,7 @@ async function loadUserHoverCard() {
       :menu-label="t('shell.menu')"
       :resources-label="t('shell.resources')"
       :categories-label="t('shell.categories')"
-      :sidebar-icon="sidebarIcon"
+      :sidebar-icon="navIcon"
       @close="closeDrawer"
     />
 

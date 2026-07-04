@@ -5,29 +5,5 @@
   "siteKeywords": "forum,discussion,community",
   "siteUrl": "",
   "siteEmail": "example@example.example",
-  "externalLinks": "",
-  "footerInfo": {
-    "primary": [
-      {
-        "content": "Providing reliable tech since 2025"
-      }
-    ],
-    "list": [
-      {
-        "name": "Github",
-        "url": "https://github.com/leancodebox/GooseForum"
-      },
-      {
-        "name": "License",
-        "url": "https://github.com/leancodebox/GooseForum/blob/main/LICENSE"
-      },
-      {
-        "name": "LeanCodeBox",
-        "url": "https://github.com/leancodebox"
-      }
-    ]
-  },
-  "brandType": "default",
-  "brandText": "",
-  "brandImage": ""
+  "externalLinks": ""
 }

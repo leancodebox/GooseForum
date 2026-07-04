@@ -43,6 +43,7 @@ const (
 	PostingSettings  = `postingSettings`
 	HttpNotify       = `httpNotify`
 	SiteTheme        = `siteTheme`
+	SiteChrome       = `siteChrome`
 	Version          = `version`
 	Migration        = `migration`
 )
@@ -111,23 +112,45 @@ type SponsorsRule struct {
 // SiteSettingsConfig 站点设置配置
 type SiteSettingsConfig struct {
 	// 站点基本信息
-	SiteName        string     `json:"siteName"`
-	SiteLogo        string     `json:"siteLogo"`
-	SiteDescription string     `json:"siteDescription"`
-	SiteKeywords    string     `json:"siteKeywords"`
-	SiteUrl         string     `json:"siteUrl"`
-	SiteEmail       string     `json:"siteEmail"`
-	ExternalLinks   string     `json:"externalLinks"`
-	FooterInfo      FooterInfo `json:"footerInfo"`
-	// 品牌标识类型: default(默认样式), text(自定义文字), image(图片)
-	BrandType  string `json:"brandType"`
-	BrandText  string `json:"brandText"`
-	BrandImage string `json:"brandImage"`
+	SiteName        string `json:"siteName"`
+	SiteLogo        string `json:"siteLogo"`
+	SiteDescription string `json:"siteDescription"`
+	SiteKeywords    string `json:"siteKeywords"`
+	SiteUrl         string `json:"siteUrl"`
+	SiteEmail       string `json:"siteEmail"`
+	ExternalLinks   string `json:"externalLinks"`
 }
 
 type FooterInfo struct {
 	Primary []PItem      `json:"primary"`
 	List    []FooterItem `json:"list"`
+}
+
+type SiteChromeConfig struct {
+	Header        []ChromeItem  `json:"header"`
+	MainMenu      []ChromeItem  `json:"mainMenu"`
+	Resources     []ChromeItem  `json:"resources"`
+	SidebarGroups []ChromeGroup `json:"sidebarGroups"`
+	FooterInfo    FooterInfo    `json:"footerInfo"`
+	BrandType     string        `json:"brandType"`
+	BrandText     string        `json:"brandText"`
+	BrandImage    string        `json:"brandImage"`
+}
+
+type ChromeItem struct {
+	ID        string `json:"id"`
+	Enabled   bool   `json:"enabled"`
+	Type      string `json:"type"`
+	Label     string `json:"label"`
+	I18nLabel string `json:"i18nLabel"`
+	URL       string `json:"url"`
+}
+
+type ChromeGroup struct {
+	ID        string       `json:"id"`
+	Title     string       `json:"title"`
+	I18nLabel string       `json:"i18nLabel"`
+	Items     []ChromeItem `json:"items"`
 }
 
 // MailSettingsConfig 邮件设置配置

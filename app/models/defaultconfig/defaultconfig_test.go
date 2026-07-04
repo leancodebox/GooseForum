@@ -29,9 +29,15 @@ func TestPageConfigDefaultGettersReturnCopies(t *testing.T) {
 	}
 
 	site := GetDefaultSiteSettingsConfig()
-	site.FooterInfo.List[0].Name = "changed"
-	if got := GetDefaultSiteSettingsConfig().FooterInfo.List[0].Name; got == "changed" {
-		t.Fatal("site settings getter returned shared mutable footer data")
+	site.SiteName = "changed"
+	if got := GetDefaultSiteSettingsConfig().SiteName; got == "changed" {
+		t.Fatal("site settings getter returned shared mutable data")
+	}
+
+	chrome := GetDefaultSiteChromeConfig()
+	chrome.FooterInfo.List[0].Name = "changed"
+	if got := GetDefaultSiteChromeConfig().FooterInfo.List[0].Name; got == "changed" {
+		t.Fatal("site chrome getter returned shared mutable footer data")
 	}
 
 	sponsors := GetDefaultSponsorsConfig()

@@ -55,6 +55,7 @@ export interface ResetPasswordPageProps {
 export interface LayoutPayload {
   site: SitePayload
   viewer: ViewerPayload
+  header?: NavItemPayload[]
   sidebar: SidebarPayload
   footer: FooterPayload
   unread: UnreadStatusPayload
@@ -239,13 +240,19 @@ export interface CategoryNavPayload {
 export interface NavItemPayload {
   key: string
   label: string
-  icon?: string
+  i18nLabel?: string
   url: string
 }
 
 export interface SidebarPayload {
   main?: NavItemPayload[]
   resources?: NavItemPayload[]
+  groups?: Array<{
+    key: string
+    title: string
+    i18nLabel?: string
+    items: NavItemPayload[]
+  }>
   categories: CategoryNavPayload[]
   activeKey: string
 }

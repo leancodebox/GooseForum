@@ -1197,6 +1197,19 @@ func SaveSiteSettings(req component.BetterRequest[SaveSiteSettingsReq]) componen
 	return savePageConfig(pageConfig.SiteSettings, req.Params.Settings, hotdataserve.ClearSiteSettingsConfigCache)
 }
 
+func GetSiteChrome(req component.BetterRequest[component.Null]) component.Response {
+	config := pageConfig.GetConfigByPageType(pageConfig.SiteChrome, defaultconfig.GetDefaultSiteChromeConfig())
+	return component.SuccessResponse(config)
+}
+
+type SaveSiteChromeReq struct {
+	Settings pageConfig.SiteChromeConfig `json:"settings"`
+}
+
+func SaveSiteChrome(req component.BetterRequest[SaveSiteChromeReq]) component.Response {
+	return savePageConfig(pageConfig.SiteChrome, req.Params.Settings, hotdataserve.ClearSiteChromeConfigCache)
+}
+
 func GetSiteTheme(req component.BetterRequest[component.Null]) component.Response {
 	return component.SuccessResponse(themeservice.LoadConfig())
 }

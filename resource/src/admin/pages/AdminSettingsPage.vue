@@ -7,7 +7,6 @@ import httpNotifyGuideJa from '@/admin/docs/http-notify-guide.ja.md?raw'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import MarkdownIt from 'markdown-it'
-import Draggable from 'vuedraggable'
 import { Code, FileText, Globe, Loader2, MailCheck, Plus, Save, Send, Shield, Trash2, Upload, Webhook } from '@lucide/vue'
 import AdminActionButton from '@/admin/components/AdminActionButton.vue'
 import { BasicPage } from '@/admin/components/global-layout'
@@ -71,9 +70,6 @@ const error = ref('')
 const testEmail = ref('')
 const newAllowedDomain = ref('')
 const newExtension = ref('')
-const footerDialog = ref<null | { type: 'link' | 'primary', index: number }>(null)
-const footerLinkForm = reactive({ name: '', url: '' })
-const footerPrimaryForm = reactive({ content: '' })
 
 const siteForm = reactive<SiteSettings>({
   siteName: '',
@@ -83,10 +79,6 @@ const siteForm = reactive<SiteSettings>({
   siteDescription: '',
   siteKeywords: '',
   externalLinks: '',
-  footerInfo: { primary: [], list: [] },
-  brandType: 'default',
-  brandText: '',
-  brandImage: '',
 })
 
 const mailForm = reactive<MailSettings>({
@@ -188,9 +180,6 @@ function toBool(value: unknown, fallback = false) {
 }
 
 function normalizeSite(settings: Partial<SiteSettings> = {}) {
-  const footerInfo = settings.footerInfo && typeof settings.footerInfo === 'object'
-    ? settings.footerInfo
-    : { primary: [], list: [] }
   return {
     siteName: settings.siteName ?? '',
     siteUrl: settings.siteUrl ?? '',
@@ -199,17 +188,6 @@ function normalizeSite(settings: Partial<SiteSettings> = {}) {
     siteDescription: settings.siteDescription ?? '',
     siteKeywords: settings.siteKeywords ?? '',
     externalLinks: settings.externalLinks ?? '',
-    footerInfo: {
-      primary: Array.isArray(footerInfo.primary)
-        ? footerInfo.primary.map(item => ({ content: item?.content ?? '' }))
-        : [],
-      list: Array.isArray(footerInfo.list)
-        ? footerInfo.list.map(item => ({ name: item?.name ?? '', url: item?.url ?? '' }))
-        : [],
-    },
-    brandType: ['default', 'text', 'image'].includes(settings.brandType || '') ? settings.brandType : 'default',
-    brandText: settings.brandText ?? '',
-    brandImage: settings.brandImage ?? '',
   } satisfies SiteSettings
 }
 
@@ -330,7 +308,7 @@ function normalizeAnnouncement(settings: Partial<AnnouncementConfig> = {}) {
   } satisfies AnnouncementConfig
 }
 
-async function uploadImage(target: 'siteLogo' | 'brandImage', event: Event) {
+async function uploadImage(target: 'siteLogo', event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
@@ -460,55 +438,6 @@ function onEndpointEventChange(endpoint: HttpNotifyEndpoint, eventName: string, 
   toggleEndpointEvent(endpoint, eventName, (event.target as HTMLInputElement).checked)
 }
 
-function addFooterPrimary() {
-  siteForm.footerInfo ||= { primary: [], list: [] }
-  siteForm.footerInfo.primary.push({ content: '' })
-  openFooterPrimary(siteForm.footerInfo.primary.length - 1)
-}
-
-function addFooterLink() {
-  siteForm.footerInfo ||= { primary: [], list: [] }
-  siteForm.footerInfo.list.push({ name: '', url: '' })
-  openFooterLink(siteForm.footerInfo.list.length - 1)
-}
-
-function openFooterLink(index: number) {
-  const item = siteForm.footerInfo?.list[index]
-  if (!item) return
-  footerLinkForm.name = item.name
-  footerLinkForm.url = item.url
-  footerDialog.value = { type: 'link', index }
-}
-
-function openFooterPrimary(index: number) {
-  const item = siteForm.footerInfo?.primary[index]
-  if (!item) return
-  footerPrimaryForm.content = item.content
-  footerDialog.value = { type: 'primary', index }
-}
-
-function saveFooterItem() {
-  if (!footerDialog.value) return
-  const { type, index } = footerDialog.value
-  if (type === 'link') {
-    const item = siteForm.footerInfo?.list[index]
-    if (item) {
-      item.name = footerLinkForm.name.trim()
-      item.url = footerLinkForm.url.trim()
-    }
-  } else {
-    const item = siteForm.footerInfo?.primary[index]
-    if (item) {
-      item.content = footerPrimaryForm.content.trim()
-    }
-  }
-  footerDialog.value = null
-}
-
-function closeFooterDialog(open: boolean) {
-  if (!open) footerDialog.value = null
-}
-
 function addAnnouncementExample() {
   if (!announcementForm.content) {
     announcementForm.content = adminText('k000k')
@@ -541,25 +470,6 @@ onMounted(load)
         <div class="grid gap-10 md:grid-cols-2">
           <section class="space-y-6">
             <div class="flex items-center gap-2 border-b pb-2 text-lg font-medium"><Globe class="size-5 text-muted-foreground" />{{ adminText('k007z') }}</div>
-            <div class="space-y-3">
-              <div class="text-sm font-semibold text-foreground">{{ adminText('k0085') }}</div>
-              <div class="flex flex-wrap gap-4 text-sm">
-                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="default" />{{ adminText('k0086') }}</label>
-                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="text" />{{ adminText('k0087') }}</label>
-                <label class="flex items-center gap-2"><input v-model="siteForm.brandType" type="radio" value="image" />{{ adminText('k0088') }}</label>
-              </div>
-              <label v-if="siteForm.brandType === 'default'" class="grid gap-2 text-sm font-medium">{{ adminText('k0086') }}<Input model-value="GooseForum" disabled /></label>
-              <label v-if="siteForm.brandType === 'text'" class="grid gap-2 text-sm font-medium">{{ adminText('k0089') }}<Input v-model="siteForm.brandText" placeholder="MyBrand" /></label>
-              <label v-if="siteForm.brandType === 'image'" class="grid gap-2 text-sm font-medium">{{ adminText('k008a') }}
-                <div class="flex gap-2">
-                  <Input v-model="siteForm.brandImage" placeholder="Brand Image URL" />
-                  <label class="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border bg-background shadow-xs hover:bg-accent">
-                    <Upload class="size-4" />
-                    <input class="hidden" type="file" accept="image/*" @change="uploadImage('brandImage', $event)" />
-                  </label>
-                </div>
-              </label>
-            </div>
             <label class="grid gap-2 text-sm font-medium">{{ adminText('k0080') }}<Input v-model="siteForm.siteName" placeholder="GooseForum" /></label>
             <label class="grid gap-2 text-sm font-medium">{{ adminText('k0081') }}<Input v-model="siteForm.siteUrl" placeholder="https://example.com" /></label>
             <label class="grid gap-2 text-sm font-medium">{{ adminText('k0082') }}<Input v-model="siteForm.siteEmail" placeholder="contact@example.com" /></label>
@@ -584,68 +494,6 @@ onMounted(load)
             <label class="grid gap-2 text-sm font-medium">{{ adminText('k008c') }}<Textarea v-model="siteForm.siteDescription" class="min-h-24" /></label>
             <label class="grid gap-2 text-sm font-medium">{{ adminText('k008d') }}<Input v-model="siteForm.siteKeywords" placeholder="forum, community" /></label>
             <label class="grid gap-2 text-sm font-medium">{{ adminText('k008e') }}<Textarea v-model="siteForm.externalLinks" class="min-h-28 font-mono text-xs" /></label>
-            <div class="space-y-4 border-y py-4">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <div class="font-semibold">{{ adminText('k008f') }}</div>
-                  <p class="text-xs text-muted-foreground">{{ adminText('k008g') }}</p>
-                </div>
-                <div class="flex gap-2">
-                  <Button variant="ghost" size="sm" type="button" @click="addFooterLink"><Plus class="size-4" />{{ adminText('k0071') }}</Button>
-                  <Button variant="ghost" size="sm" type="button" @click="addFooterPrimary"><Plus class="size-4" />{{ adminText('k008h') }}</Button>
-                </div>
-              </div>
-              <div class="rounded-lg border bg-background px-3 py-3 text-xs leading-5 text-muted-foreground shadow-xs">
-                <div class="space-y-1.5">
-                  <Draggable
-                    v-model="siteForm.footerInfo!.list"
-                    item-key="name"
-                    direction="horizontal"
-                    handle=".js-footer-handle"
-                    class="flex min-h-5 flex-wrap items-center gap-x-3 gap-y-1"
-                    ghost-class="opacity-40"
-                  >
-                    <template #item="{ element: item, index }">
-                      <div class="group inline-flex min-h-5 items-center rounded text-muted-foreground transition-colors hover:bg-muted/60 hover:text-primary">
-                        <span class="js-footer-handle -ml-1 mr-0.5 cursor-grab text-muted-foreground/45 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
-                        <button class="inline-flex min-h-5 items-center rounded px-0.5 text-left text-xs" type="button" @click="openFooterLink(index)">
-                          {{ item.name || adminText('k004g') }}
-                        </button>
-                        <Button variant="ghost" size="icon" class="ml-0.5 size-5 rounded-sm opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100" type="button" @click="siteForm.footerInfo?.list.splice(index, 1)">
-                          <Trash2 class="size-3.5" />
-                        </Button>
-                      </div>
-                    </template>
-                    <template #footer>
-                      <div v-if="siteForm.footerInfo?.list.length === 0" class="min-h-5 text-muted-foreground/70">{{ adminText('k008i') }}</div>
-                    </template>
-                  </Draggable>
-
-                  <Draggable
-                    v-model="siteForm.footerInfo!.primary"
-                    item-key="content"
-                    handle=".js-footer-handle"
-                    class="mt-1 flex min-h-5 flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground"
-                    ghost-class="opacity-40"
-                  >
-                    <template #item="{ element: item, index }">
-                      <div class="group inline-flex min-h-5 max-w-full items-center rounded transition-colors hover:bg-muted/60">
-                        <span class="js-footer-handle -ml-1 mr-0.5 cursor-grab text-muted-foreground/45 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">⋮⋮</span>
-                        <button class="inline-flex min-h-5 items-center rounded px-0.5 text-left text-xs text-muted-foreground" type="button" @click="openFooterPrimary(index)">
-                          {{ item.content || adminText('k004h') }}
-                        </button>
-                        <Button variant="ghost" size="icon" class="ml-0.5 size-5 rounded-sm opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100" type="button" @click="siteForm.footerInfo?.primary.splice(index, 1)">
-                          <Trash2 class="size-3.5" />
-                        </Button>
-                      </div>
-                    </template>
-                    <template #footer>
-                      <div v-if="siteForm.footerInfo?.primary.length === 0" class="min-h-5 text-muted-foreground/70">{{ adminText('k0062') }}</div>
-                    </template>
-                  </Draggable>
-                </div>
-              </div>
-            </div>
           </section>
         </div>
       </form>
@@ -861,40 +709,6 @@ onMounted(load)
         <Button variant="outline" type="button" @click="addAnnouncementExample"><Code class="size-4" />{{ adminText('k009n') }}</Button>
       </form>
 
-      <Dialog v-if="kind === 'site-info'" :open="footerDialog !== null" @update:open="closeFooterDialog">
-        <DialogContent class="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{{ footerDialog?.type === 'link' ? adminText('k004i') : adminText('k004j') }}</DialogTitle>
-            <DialogDescription>
-              {{ adminText('k009o') }}
-            </DialogDescription>
-          </DialogHeader>
-          <form v-if="footerDialog?.type === 'link'" class="grid gap-4" @submit.prevent="saveFooterItem">
-            <label class="grid gap-2 text-sm font-medium">
-              {{ adminText('k0079') }}
-              <Input v-model="footerLinkForm.name" placeholder="Github" />
-            </label>
-            <label class="grid gap-2 text-sm font-medium">
-              {{ adminText('k009p') }}
-              <Input v-model="footerLinkForm.url" placeholder="https://example.com" />
-            </label>
-            <DialogFooter>
-              <Button variant="outline" type="button" @click="footerDialog = null">{{ adminText('k009q') }}</Button>
-              <Button type="submit">{{ adminText('k005g') }}</Button>
-            </DialogFooter>
-          </form>
-          <form v-else class="grid gap-4" @submit.prevent="saveFooterItem">
-            <label class="grid gap-2 text-sm font-medium">
-              {{ adminText('k009r') }}
-              <Input v-model="footerPrimaryForm.content" placeholder="Powered by GooseForum" />
-            </label>
-            <DialogFooter>
-              <Button variant="outline" type="button" @click="footerDialog = null">{{ adminText('k009q') }}</Button>
-              <Button type="submit">{{ adminText('k005g') }}</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </BasicPage>
 </template>
 

@@ -42,6 +42,15 @@ func GetSiteThemeConfigCache() pageConfig.SiteThemeConfig {
 	return data
 }
 
+var siteChromeConfigCache = &localcache.Cache[pageConfig.SiteChromeConfig]{MaxEntries: configCacheEntries}
+
+func GetSiteChromeConfigCache() pageConfig.SiteChromeConfig {
+	data, _ := siteChromeConfigCache.GetOrLoadE("", func() (pageConfig.SiteChromeConfig, error) {
+		return pageConfig.GetConfigByPageType(pageConfig.SiteChrome, defaultconfig.GetDefaultSiteChromeConfig()), nil
+	}, configFastCacheTTL)
+	return data
+}
+
 var mailSettingsConfigCache = &localcache.Cache[pageConfig.MailSettingsConfig]{MaxEntries: configCacheEntries}
 
 func GetMailSettingsConfigCache() pageConfig.MailSettingsConfig {
@@ -107,6 +116,10 @@ func ClearSiteSettingsConfigCache() {
 
 func ClearSiteThemeConfigCache() {
 	siteThemeConfigCache.Clear()
+}
+
+func ClearSiteChromeConfigCache() {
+	siteChromeConfigCache.Clear()
 }
 
 func ClearMailSettingsConfigCache() {

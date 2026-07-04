@@ -50,6 +50,10 @@ export const adminRouter = createRouter({
       path: '/admin/opt-records',
       component: () => import('@/admin/pages/management/OptRecordsManagementPage.vue'),
     },
+    {
+      path: '/admin/settings/site-chrome',
+      component: () => import('@/admin/pages/management/SiteChromeManagementPage.vue'),
+    },
     ...Object.entries(settingsPages).map(([path, kind]) => ({
       path,
       component: () => import('@/admin/pages/AdminSettingsPage.vue'),

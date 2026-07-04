@@ -8,9 +8,9 @@ import type { FooterPayload } from '@/types/payload'
 interface SidebarNavItem {
   key: string
   label: string
+  i18nLabel?: string
   url: string
   active: boolean
-  icon?: string
 }
 
 interface SidebarCategoryItem extends SidebarNavItem {
@@ -18,10 +18,18 @@ interface SidebarCategoryItem extends SidebarNavItem {
   color: string
 }
 
+interface SidebarGroupItem {
+  key: string
+  title: string
+  i18nLabel?: string
+  items: SidebarNavItem[]
+}
+
 const props = defineProps<{
   open: boolean
   primaryItems: SidebarNavItem[]
   resourceItems: SidebarNavItem[]
+  sidebarGroups: SidebarGroupItem[]
   categoryItems: SidebarCategoryItem[]
   footer: FooterPayload
   hasUnreadMessages?: boolean
@@ -31,7 +39,7 @@ const props = defineProps<{
   menuLabel: string
   resourcesLabel: string
   categoriesLabel: string
-  sidebarIcon: (key: string) => unknown
+  sidebarIcon: (item: SidebarNavItem) => unknown
 }>()
 
 const emit = defineEmits<{
@@ -77,12 +85,11 @@ function close() {
             :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
           >
             <component
-              :is="sidebarIcon(item.key)"
-              v-if="sidebarIcon(item.key)"
+              :is="sidebarIcon(item)"
+              v-if="sidebarIcon(item)"
               class="h-4 w-4 shrink-0"
               aria-hidden="true"
             />
-            <span v-else-if="item.icon" class="flex w-4 justify-center opacity-80" aria-hidden="true">{{ item.icon }}</span>
             <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
             <span
               v-if="(item.key === 'messages' && hasUnreadMessages) || (item.key === 'notifications' && hasUnreadNotifications) || (item.key === 'moderation' && hasModerationReports)"
@@ -101,12 +108,33 @@ function close() {
             :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
           >
             <component
-              :is="sidebarIcon(item.key)"
-              v-if="sidebarIcon(item.key)"
+              :is="sidebarIcon(item)"
+              v-if="sidebarIcon(item)"
               class="h-4 w-4 shrink-0"
               aria-hidden="true"
             />
-            <span v-else-if="item.icon" class="flex w-4 justify-center opacity-80" aria-hidden="true">{{ item.icon }}</span>
+            <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+          </a>
+        </div>
+        <div
+          v-for="group in sidebarGroups"
+          :key="group.key"
+          class="mt-4 space-y-0.5"
+        >
+          <div class="px-2 text-[10px] font-bold uppercase tracking-wide text-base-content/55">{{ group.title }}</div>
+          <a
+            v-for="item in group.items"
+            :key="item.key"
+            :href="item.url"
+            class="flex h-9 items-center gap-2 rounded-md px-2 text-sm font-medium"
+            :class="item.active ? 'bg-info/10 text-primary' : 'text-base-content/75 hover:bg-base-300 hover:text-base-content'"
+          >
+            <component
+              :is="sidebarIcon(item)"
+              v-if="sidebarIcon(item)"
+              class="h-4 w-4 shrink-0"
+              aria-hidden="true"
+            />
             <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
           </a>
         </div>
