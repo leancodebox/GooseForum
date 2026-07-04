@@ -42,5 +42,11 @@
   "activationExpired": "有効化リンクの有効期限が切れているか、無効です",
   "activationUserNotFound": "ユーザーが存在しません",
   "activationLinkInvalid": "有効化リンクが無効です",
-  "activationFailed": "有効化に失敗しました"
+  "activationFailed": "有効化に失敗しました",
+  "permission.admin": "管理者",
+  "permission.userManager": "ユーザー管理",
+  "permission.articlesManager": "記事管理",
+  "permission.pageManager": "ページ管理",
+  "permission.roleManager": "ロール管理",
+  "permission.siteManager": "サイト管理"
 }

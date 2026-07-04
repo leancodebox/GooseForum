@@ -674,7 +674,7 @@ type PermissionListReq struct {
 }
 
 func GetPermissionList(req component.BetterRequest[PermissionListReq]) component.Response {
-	res := permission.BuildOptions()
+	res := permission.BuildOptions(component.RequestLang(req.GinContext))
 	return component.SuccessResponse(res)
 }
 
@@ -705,6 +705,7 @@ type PermissionItem struct {
 }
 
 func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
+	lang := component.RequestLang(req.GinContext)
 	pageData := role.Page(role.PageQuery{})
 	roleIds := lo.Map(pageData.Data, func(t role.Entity, _ int) uint64 {
 		return t.Id
@@ -719,7 +720,7 @@ func RoleList(req component.BetterRequest[RoleListReq]) component.Response {
 		if ok {
 			permissionItemList = lo.Map(pList, func(t uint64, _ int) PermissionItem {
 				p := permission.Enum(t)
-				return PermissionItem{Id: p.Id(), Name: p.Name()}
+				return PermissionItem{Id: p.Id(), Name: p.LocalizedName(lang)}
 			})
 		}
 		return RoleItem{

@@ -42,5 +42,11 @@
   "activationExpired": "The activation link has expired or is invalid",
   "activationUserNotFound": "User not found",
   "activationLinkInvalid": "The activation link is invalid",
-  "activationFailed": "Activation failed"
+  "activationFailed": "Activation failed",
+  "permission.admin": "Administrator",
+  "permission.userManager": "User management",
+  "permission.articlesManager": "Article management",
+  "permission.pageManager": "Page management",
+  "permission.roleManager": "Role management",
+  "permission.siteManager": "Site management"
 }

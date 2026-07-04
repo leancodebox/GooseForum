@@ -42,5 +42,11 @@
   "activationExpired": "激活链接已过期或无效",
   "activationUserNotFound": "用户不存在",
   "activationLinkInvalid": "激活链接无效",
-  "activationFailed": "激活失败"
+  "activationFailed": "激活失败",
+  "permission.admin": "管理员",
+  "permission.userManager": "用户管理",
+  "permission.articlesManager": "文章管理",
+  "permission.pageManager": "页面管理",
+  "permission.roleManager": "角色管理",
+  "permission.siteManager": "站点管理"
 }

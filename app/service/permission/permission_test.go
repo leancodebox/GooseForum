@@ -21,7 +21,7 @@ func TestEnumIdAndBuildOptions(t *testing.T) {
 		t.Fatalf("Id() = %d, want %d", got, SiteManager)
 	}
 
-	options := BuildOptions()
+	options := BuildOptions("en")
 	if len(options) != int(SiteManager-Admin+1) {
 		t.Fatalf("BuildOptions() length = %d, want %d", len(options), SiteManager-Admin+1)
 	}
@@ -29,8 +29,11 @@ func TestEnumIdAndBuildOptions(t *testing.T) {
 		if option.Name == "" || option.Label == "" {
 			t.Fatalf("BuildOptions() contains empty label: %#v", option)
 		}
-		if option.Name != option.Value.Name() || option.Label != option.Value.Name() {
+		if option.Name != option.Value.LocalizedName("en") || option.Label != option.Value.LocalizedName("en") {
 			t.Fatalf("BuildOptions() mismatch: %#v", option)
 		}
+	}
+	if options[0].Label != "Administrator" {
+		t.Fatalf("BuildOptions(\"en\")[0].Label = %q, want Administrator", options[0].Label)
 	}
 }
