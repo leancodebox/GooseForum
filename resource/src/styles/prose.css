@@ -195,6 +195,11 @@
     @apply my-2.5 max-w-full rounded-lg border border-line object-contain;
   }
 
+  .gf-prose-article img,
+  .gf-prose-comment img {
+    @apply cursor-zoom-in;
+  }
+
   .gf-prose-comment ul,
   .gf-prose-comment ol {
     @apply my-1.5 pl-5;

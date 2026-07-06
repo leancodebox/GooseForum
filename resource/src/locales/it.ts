@@ -13,6 +13,7 @@ export default {
     loading: 'Elaborazione...',
     loadingShort: 'Caricamento...',
     loadFailed: 'Caricamento non riuscito',
+    preview: 'Anteprima',
     loadMore: 'Carica altro',
     retry: 'Riprova',
     search: 'Cerca',
@@ -1132,6 +1133,7 @@ export default {
     compressFailed: 'Compressione dell’immagine non riuscita: {message}',
     readFailed: 'Lettura dell’immagine non riuscita',
     encodeFailed: 'Codifica dell’immagine non riuscita',
+    originalSize: 'Dimensione originale',
   },
   documentTitle: {
     newMessage: '[Nuovo messaggio]',

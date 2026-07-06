@@ -8,6 +8,7 @@ import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
 import ArticleReplyComposer from '@/site/components/ArticleReplyComposer.vue'
+import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
 import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
@@ -69,6 +70,7 @@ const articleHeaderEl = ref<HTMLElement | null>(null)
 const titleEl = ref<HTMLElement | null>(null)
 const replyLoadMoreEl = ref<HTMLElement | null>(null)
 const replyListEndEl = ref<HTMLElement | null>(null)
+const markdownImageViewer = ref<InstanceType<typeof MarkdownImageViewer> | null>(null)
 const articleRailTopOffset = ref(0)
 const showHeaderTitle = ref(false)
 const isMobileHeaderViewport = ref(false)
@@ -1198,6 +1200,41 @@ function requestReport(target: { targetType: 'article' | 'reply'; targetId: numb
   reportError.value = ''
 }
 
+function handleMarkdownImageClick(event: MouseEvent) {
+  const target = event.target
+  if (!(target instanceof HTMLElement)) return
+
+  const image = target.closest('.gf-prose-article img, .gf-prose-comment img')
+  if (!(image instanceof HTMLImageElement)) return
+
+  const imageSrc = image.currentSrc || image.src
+  if (!imageSrc) return
+
+  const anchor = image.closest('a')
+  if (anchor && !sameUrl(anchor.href, imageSrc)) return
+
+  event.preventDefault()
+  event.stopPropagation()
+
+  const markdownImages = Array.from(document.querySelectorAll<HTMLImageElement>('.gf-prose-article img, .gf-prose-comment img'))
+    .map((item) => ({
+      src: item.currentSrc || item.src,
+      alt: item.alt || '',
+    }))
+    .filter((item) => item.src)
+  const index = markdownImages.findIndex((item) => sameUrl(item.src, imageSrc))
+
+  markdownImageViewer.value?.open(markdownImages, index >= 0 ? index : 0)
+}
+
+function sameUrl(left: string, right: string) {
+  try {
+    return new URL(left, window.location.href).href === new URL(right, window.location.href).href
+  } catch {
+    return left === right
+  }
+}
+
 function requestArticleReport() {
   requestReport({
     targetType: 'article',
@@ -1277,7 +1314,7 @@ async function removeReply(replyId: number) {
 </script>
 
 <template>
-    <article class="min-w-0">
+    <article class="min-w-0" @click="handleMarkdownImageClick">
       <header ref="articleHeaderEl" class="relative z-10 border-b border-line/70 px-4 py-4 sm:mb-4 sm:px-0 sm:pb-4 sm:pt-0 xl:w-[calc(100%+292px)]">
         <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-base-content [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.article.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-base-content/55">
@@ -1665,6 +1702,8 @@ async function removeReply(replyId: number) {
       />
 
     </article>
+
+    <MarkdownImageViewer ref="markdownImageViewer" />
 
     <Teleport to="body">
       <Transition name="gf-modal">

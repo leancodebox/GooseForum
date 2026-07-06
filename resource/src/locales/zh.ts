@@ -13,6 +13,7 @@ export default {
     loading: '处理中...',
     loadingShort: '加载中...',
     loadFailed: '加载失败',
+    preview: '预览',
     loadMore: '加载更多',
     retry: '重试',
     search: '搜索',
@@ -1132,6 +1133,7 @@ export default {
     compressFailed: '图片压缩失败: {message}',
     readFailed: '图片读取失败',
     encodeFailed: '图片编码失败',
+    originalSize: '原始尺寸',
   },
   documentTitle: {
     newMessage: '【新私信】',

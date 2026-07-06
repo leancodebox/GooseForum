@@ -13,6 +13,7 @@ export default {
     loading: 'Working...',
     loadingShort: 'Loading...',
     loadFailed: 'Failed to load',
+    preview: 'Preview',
     loadMore: 'Load more',
     retry: 'Retry',
     search: 'Search',
@@ -1132,6 +1133,7 @@ export default {
     compressFailed: 'Image compression failed: {message}',
     readFailed: 'Failed to read image',
     encodeFailed: 'Failed to encode image',
+    originalSize: 'Original size',
   },
   documentTitle: {
     newMessage: '[New message]',

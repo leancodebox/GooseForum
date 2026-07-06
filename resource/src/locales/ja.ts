@@ -13,6 +13,7 @@ export default {
     loading: '処理中...',
     loadingShort: '読み込み中...',
     loadFailed: '読み込みに失敗しました',
+    preview: 'プレビュー',
     loadMore: 'さらに読み込む',
     retry: '再試行',
     search: '検索',
@@ -1132,6 +1133,7 @@ export default {
     compressFailed: '画像圧縮に失敗しました: {message}',
     readFailed: '画像の読み込みに失敗しました',
     encodeFailed: '画像のエンコードに失敗しました',
+    originalSize: '元のサイズ',
   },
   documentTitle: {
     newMessage: '【新着メッセージ】',
