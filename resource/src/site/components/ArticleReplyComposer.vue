@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import type { Component } from 'vue'
-import { Image, Loader2, MessageSquare, Send, X } from '@lucide/vue'
+import { Check, Image, Loader2, MessageSquare, Send, X } from '@lucide/vue'
 import { uploadImage } from '@/runtime/api'
 import { formatNumber } from '@/runtime/format'
 import { processImageFile, validateImageFile } from '@/runtime/image'
@@ -32,6 +32,7 @@ const props = defineProps<{
   hasRail: boolean
   maxNo: number
   mobileRailOpen: boolean
+  mode?: 'create' | 'edit'
   open: boolean
   progressCurrent?: number
   progressEnd?: number
@@ -64,6 +65,14 @@ const uploadingImage = ref(false)
 const dragOver = ref(false)
 const composerBusy = computed(() => props.submitting || uploadingImage.value)
 const showFloatingControls = computed(() => props.hasRail || props.authenticated)
+const editing = computed(() => props.mode === 'edit')
+const composerTitle = computed(() => editing.value ? t('article.editOwnReply') : t('article.joinDiscussion'))
+const composerPlaceholder = computed(() => editing.value ? t('article.editReplyPlaceholder') : t('article.replyPlaceholder'))
+const submitText = computed(() => {
+  if (uploadingImage.value) return t('publish.processingImage')
+  if (props.submitting) return editing.value ? t('common.saving') : t('article.publishing')
+  return editing.value ? t('common.save') : t('article.publishReply')
+})
 
 watch(
   () => props.open,
@@ -79,6 +88,7 @@ function openReply() {
 }
 
 function closeComposer() {
+  if (composerBusy.value) return
   emit('update:open', false)
 }
 
@@ -301,13 +311,13 @@ function submit() {
           <div v-else-if="authenticated" class="gf-floating-surface pointer-events-auto relative w-[min(42rem,calc(100vw-1.5rem))] p-3">
             <div class="mb-2 flex items-center justify-between gap-3">
               <div class="min-w-0">
-                <div class="text-sm font-semibold text-base-content">{{ t('article.joinDiscussion') }}</div>
+                <div class="text-sm font-semibold text-base-content">{{ composerTitle }}</div>
               </div>
-              <button type="button" class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75" @click="closeComposer">
+              <button type="button" class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75 disabled:cursor-not-allowed disabled:opacity-60" :disabled="composerBusy" @click="closeComposer">
                 <X class="h-4 w-4" />
               </button>
             </div>
-            <div v-if="target" class="mb-2 flex min-w-0 items-center justify-between gap-3 rounded-md border border-primary/20 bg-info/10 px-3 py-2">
+            <div v-if="target && !editing" class="mb-2 flex min-w-0 items-center justify-between gap-3 rounded-md border border-primary/20 bg-info/10 px-3 py-2">
               <div class="min-w-0 text-sm font-medium text-base-content/75">
                 {{ t('article.replyTo', { user: `@${target.author.username}` }) }}
               </div>
@@ -321,7 +331,7 @@ function submit() {
               v-model="content"
               rows="3"
               class="gf-textarea min-h-24 leading-6"
-              :placeholder="t('article.replyPlaceholder')"
+              :placeholder="composerPlaceholder"
               @input="emit('clearValidation')"
               @paste="handlePaste"
               @drop="handleDrop"
@@ -343,13 +353,14 @@ function submit() {
                 <input type="file" accept="image/*" multiple class="hidden" :disabled="uploadingImage" @change="handleImageInput" />
               </label>
               <div class="flex justify-end gap-2">
-                <button v-if="target" type="button" class="gf-button gf-button-md gf-button-muted" @click="emit('clearTarget')">
+                <button v-if="target && !editing" type="button" class="gf-button gf-button-md gf-button-muted" @click="emit('clearTarget')">
                   {{ t('common.cancel') }}
                 </button>
                 <button type="button" class="gf-button gf-button-md gf-button-primary" :disabled="composerBusy" @click="submit">
                   <Loader2 v-if="composerBusy" class="h-4 w-4 animate-spin" />
+                  <Check v-else-if="editing" class="h-4 w-4" />
                   <Send v-else class="h-4 w-4" />
-                  {{ uploadingImage ? t('publish.processingImage') : submitting ? t('article.publishing') : t('article.publishReply') }}
+                  {{ submitText }}
                 </button>
               </div>
             </div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, Teleport, watch } from 'vue'
-import { AlertTriangle, Ban, Bell, Bookmark, Check, ChevronsUp, Clock, CornerDownLeft, Eye, Flag, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, Teleport, watch } from 'vue'
+import { AlertTriangle, Ban, Bell, Bookmark, ChevronsUp, Clock, CornerDownLeft, Eye, Flag, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
 import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, submitReport, updateModerationArticleStatus, updateModerationReplyStatus, updateReply, watchArticle } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { useFlashMessages } from '@/runtime/flash-message'
@@ -36,6 +36,8 @@ const submitting = ref(false)
 const deletingReplyId = ref(0)
 const editingReplyId = ref(0)
 const savingEditReplyId = ref(0)
+const replyDraftBeforeEdit = ref('')
+const replyTargetBeforeEdit = ref(0)
 const pendingDeleteReply = ref<ReplyPayload | null>(null)
 const pendingModerationAction = ref<'ban' | 'unban' | null>(null)
 const pendingReport = ref<{ targetType: 'article' | 'reply'; targetId: number; title: string; excerpt: string } | null>(null)
@@ -63,8 +65,6 @@ const replyWindowError = ref('')
 const deleteErrorMessage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
-const editReplyContents = reactive<Record<number, string>>({})
-const editReplyErrors = reactive<Record<number, string>>({})
 const articleHeaderEl = ref<HTMLElement | null>(null)
 const titleEl = ref<HTMLElement | null>(null)
 const replyLoadMoreEl = ref<HTMLElement | null>(null)
@@ -75,6 +75,7 @@ const isMobileHeaderViewport = ref(false)
 const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const composerOpen = ref(false)
+const composerMode = computed(() => editingReplyId.value ? 'edit' : 'create')
 const mobileReplyRailOpen = ref(false)
 const activeReplyNo = ref(firstReplyNo(page.props.replies) || 1)
 const replyRailProgressCurrent = ref(0)
@@ -849,7 +850,17 @@ function focusReplyEditor() {
   composerOpen.value = true
 }
 
+function updateComposerOpen(open: boolean) {
+  composerOpen.value = open
+  if (!open && editingReplyId.value) {
+    cancelEditReply()
+  }
+}
+
 function openFloatingReply() {
+  if (editingReplyId.value) {
+    cancelEditReply()
+  }
   replyTargetId.value = 0
   focusReplyEditor()
 }
@@ -989,8 +1000,10 @@ async function toggleWatch() {
 }
 
 function replyTo(reply: ReplyPayload) {
+  if (editingReplyId.value) {
+    cancelEditReply()
+  }
   replyTargetId.value = reply.id
-  editingReplyId.value = 0
   errorMessage.value = ''
   successMessage.value = ''
   focusReplyEditor()
@@ -1016,38 +1029,52 @@ function handleReplyImageError(message: string) {
 }
 
 function startEditReply(reply: ReplyPayload) {
+  if (savingEditReplyId.value || deletingReplyId.value === reply.id) return
+  if (!editingReplyId.value) {
+    replyDraftBeforeEdit.value = replyContent.value
+    replyTargetBeforeEdit.value = replyTargetId.value
+  }
   replyTargetId.value = 0
   editingReplyId.value = reply.id
-  editReplyContents[reply.id] = reply.content
-  editReplyErrors[reply.id] = ''
+  replyContent.value = reply.content
+  errorMessage.value = ''
+  successMessage.value = ''
+  focusReplyEditor()
 }
 
-function cancelEditReply(replyId: number) {
+function cancelEditReply() {
   if (savingEditReplyId.value) return
   editingReplyId.value = 0
-  editReplyErrors[replyId] = ''
+  errorMessage.value = ''
+  replyContent.value = replyDraftBeforeEdit.value
+  replyTargetId.value = replyTargetBeforeEdit.value
+  replyDraftBeforeEdit.value = ''
+  replyTargetBeforeEdit.value = 0
 }
 
-function clearEditReplyValidation(replyId: number) {
-  editReplyErrors[replyId] = ''
-}
-
-async function saveReplyEdit(reply: ReplyPayload) {
+async function saveReplyEdit() {
   if (savingEditReplyId.value) return
 
-  const content = (editReplyContents[reply.id] || '').trim()
+  const reply = replies.value.find((item) => item.id === editingReplyId.value)
+  if (!reply) {
+    cancelEditReply()
+    return
+  }
+
+  const content = replyContent.value.trim()
   if (!content) {
-    editReplyErrors[reply.id] = t('article.replyRequired')
+    errorMessage.value = t('article.replyRequired')
     return
   }
   if (content === reply.content.trim()) {
-    editingReplyId.value = 0
-    editReplyErrors[reply.id] = ''
+    cancelEditReply()
+    composerOpen.value = false
     return
   }
 
   savingEditReplyId.value = reply.id
-  editReplyErrors[reply.id] = ''
+  errorMessage.value = ''
+  successMessage.value = ''
   try {
     const updated = await updateReply(reply.id, content)
     const index = replies.value.findIndex((item) => item.id === reply.id)
@@ -1060,15 +1087,25 @@ async function saveReplyEdit(reply: ReplyPayload) {
       }
     }
     editingReplyId.value = 0
-    successMessage.value = t('article.replyUpdated')
+    replyContent.value = replyDraftBeforeEdit.value
+    replyTargetId.value = replyTargetBeforeEdit.value
+    replyDraftBeforeEdit.value = ''
+    replyTargetBeforeEdit.value = 0
+    composerOpen.value = false
+    pushFlash(t('article.replyUpdated'), 'success')
   } catch (error) {
-    editReplyErrors[reply.id] = error instanceof Error ? error.message : t('api.replyUpdateFailed')
+    errorMessage.value = error instanceof Error ? error.message : t('api.replyUpdateFailed')
   } finally {
     savingEditReplyId.value = 0
   }
 }
 
 async function submitReply() {
+  if (editingReplyId.value) {
+    await saveReplyEdit()
+    return
+  }
+
   const replyId = replyTarget.value?.id || 0
   const content = replyContent.value.trim()
   if (submitting.value) return
@@ -1484,48 +1521,16 @@ async function removeReply(replyId: number) {
                   <span class="shrink-0">{{ t('article.reply') }}</span>
                   <a :href="`/u/${reply.replyToUserId}`" class="min-w-0 truncate font-medium text-base-content/75 hover:text-primary">@{{ reply.replyToUsername }}</a>
                 </p>
-                <Transition name="gf-local-expand">
-                  <div v-if="editingReplyId === reply.id" class="mt-3 rounded-lg border border-primary/20 bg-info/10 p-3">
-                    <div class="mb-2 flex items-center justify-between">
-                      <div class="text-xs font-semibold text-primary">{{ t('article.editOwnReply') }}</div>
-                      <button type="button" class="rounded-md p-1 text-base-content/55 hover:bg-base-100 hover:text-base-content/75" @click="cancelEditReply(reply.id)">
-                        <X class="h-4 w-4" />
-                      </button>
-                    </div>
-                    <textarea
-                      v-model="editReplyContents[reply.id]"
-                      class="gf-textarea min-h-24 border-primary/20"
-                      :placeholder="t('article.editReplyPlaceholder')"
-                      @input="clearEditReplyValidation(reply.id)"
-                    />
-                    <p v-if="editReplyErrors[reply.id]" class="mt-2 text-sm text-error">{{ editReplyErrors[reply.id] }}</p>
-                    <div class="mt-2 flex justify-end gap-2">
-                      <button type="button" class="gf-button gf-button-sm gf-button-muted text-xs hover:bg-base-100" @click="cancelEditReply(reply.id)">{{ t('common.cancel') }}</button>
-                      <button
-                        type="button"
-                        class="gf-button gf-button-sm gf-button-primary text-xs"
-                        :disabled="savingEditReplyId === reply.id"
-                        @click="saveReplyEdit(reply)"
-                      >
-                        <Loader2 v-if="savingEditReplyId === reply.id" class="h-3.5 w-3.5 animate-spin" />
-                        <Check v-else class="h-3.5 w-3.5" />
-                        {{ savingEditReplyId === reply.id ? t('common.saving') : t('common.save') }}
-                      </button>
-                    </div>
-                  </div>
-                </Transition>
-                <template v-if="editingReplyId !== reply.id">
-                  <div v-if="reply.isHidden && !reply.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
-                    {{ t('article.hiddenReplyPlaceholder') }}
-                  </div>
-                  <div v-else class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
-                  <div v-if="reply.isHidden && reply.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
-                    {{ t('article.hiddenReplyBadge') }}
-                  </div>
-                  <div v-if="reply.updatedAt && reply.updatedAt !== reply.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
-                    {{ t('article.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
-                  </div>
-                </template>
+                <div v-if="reply.isHidden && !reply.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
+                  {{ t('article.hiddenReplyPlaceholder') }}
+                </div>
+                <div v-else class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
+                <div v-if="reply.isHidden && reply.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
+                  {{ t('article.hiddenReplyBadge') }}
+                </div>
+                <div v-if="reply.updatedAt && reply.updatedAt !== reply.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
+                  {{ t('article.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
+                </div>
               </div>
             </div>
 
@@ -1628,7 +1633,7 @@ async function removeReply(replyId: number) {
       <ArticleReplyComposer
         v-model="replyContent"
         v-model:mobile-rail-open="mobileReplyRailOpen"
-        v-model:open="composerOpen"
+        :open="composerOpen"
         :actions="floatingArticleActions"
         :authenticated="page.layout.viewer.isAuthenticated"
         :can-reply="page.props.permissions.canReply"
@@ -1638,12 +1643,13 @@ async function removeReply(replyId: number) {
         :error-message="errorMessage"
         :has-rail="hasReplyRail"
         :max-no="replyMaxRange"
+        :mode="composerMode"
         :progress-current="replyRailProgressCurrent"
         :progress-end="replyRailProgressEnd"
         :progress-start="replyRailProgressStart"
         :rail-busy="replyRailBusy"
         :start-label="replyRailStartLabel"
-        :submitting="submitting"
+        :submitting="editingReplyId ? savingEditReplyId > 0 : submitting"
         :success-message="successMessage"
         :target="replyTarget"
         @clear-target="cancelReplyTarget"
@@ -1655,6 +1661,7 @@ async function removeReply(replyId: number) {
         @open-reply="openFloatingReply"
         @select-rail="selectReplyFromRail"
         @submit="submitReply"
+        @update:open="updateComposerOpen"
       />
 
     </article>
