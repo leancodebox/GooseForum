@@ -552,6 +552,7 @@ export default {
       title: 'Public profile',
       description: 'This content appears on your profile page and hover card.',
       displayName: 'Display name',
+      language: 'Language',
       coverUrl: 'Cover URL',
       websiteName: 'Website name',
       website: 'Personal website',

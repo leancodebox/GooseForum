@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
@@ -25,13 +26,16 @@ func init() {
 	passwordResetTmpl = template.Must(template.New("passwordReset").Parse(passwordResetTemplate))
 }
 
-func generateActivationEmailBody(username, token string) (string, error) {
+func generateActivationEmailBody(username, token string, locale ...string) (string, error) {
 	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
+	lang := emailBodyLang(locale...)
 	var buf bytes.Buffer
 	err := emailTmpl.Execute(&buf, map[string]any{
 		"SiteName":       siteConfig.SiteName,
 		"Username":       username,
-		"ActivationLink": buildEmailActionURL(emailSiteBaseURL(siteConfig.SiteUrl), urlconfig.Activate(), token),
+		"ActivationLink": buildEmailActionURL(emailSiteBaseURL(siteConfig.SiteUrl), urlconfig.Activate(), token, locale...),
+		"Lang":           lang,
+		"T":              i18n.Func(lang),
 	})
 	if err != nil {
 		return "", err
@@ -39,12 +43,15 @@ func generateActivationEmailBody(username, token string) (string, error) {
 	return buf.String(), nil
 }
 
-func generatePasswordResetEmailBody(username, token string) (string, error) {
+func generatePasswordResetEmailBody(username, token string, locale ...string) (string, error) {
 	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
+	lang := emailBodyLang(locale...)
 	var buf bytes.Buffer
 	err := passwordResetTmpl.Execute(&buf, map[string]any{
 		"Username":  username,
-		"ResetLink": buildEmailActionURL(emailSiteBaseURL(siteConfig.SiteUrl), urlconfig.ResetPassword(), token),
+		"ResetLink": buildEmailActionURL(emailSiteBaseURL(siteConfig.SiteUrl), urlconfig.ResetPassword(), token, locale...),
+		"Lang":      lang,
+		"T":         i18n.Func(lang),
 	})
 	if err != nil {
 		return "", err
@@ -60,11 +67,28 @@ func emailSiteBaseURL(siteURL string) string {
 	return strings.TrimRight(baseURL, "/")
 }
 
-func buildEmailActionURL(baseURL, actionPath, token string) string {
+func buildEmailActionURL(baseURL, actionPath, token string, locale ...string) string {
 	cleanBaseURL := strings.TrimRight(strings.TrimSpace(baseURL), "/")
 	cleanPath := "/" + strings.TrimLeft(actionPath, "/")
 	actionURL := cleanBaseURL + cleanPath
 	query := url.Values{}
+	if lang := normalizeEmailLocale(locale...); lang != "" {
+		query.Set("lang", lang)
+	}
 	query.Set("token", token)
 	return actionURL + "?" + query.Encode()
+}
+
+func emailBodyLang(locale ...string) string {
+	if lang := normalizeEmailLocale(locale...); lang != "" {
+		return lang
+	}
+	return i18n.Fallback
+}
+
+func normalizeEmailLocale(locale ...string) string {
+	if len(locale) == 0 || strings.TrimSpace(locale[0]) == "" {
+		return ""
+	}
+	return i18n.Normalize(locale[0])
 }

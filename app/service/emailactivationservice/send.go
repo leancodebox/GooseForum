@@ -20,6 +20,7 @@ func SendActivationEmail(userEntity *users.EntityComplete) error {
 		Username: userEntity.Username,
 		Token:    token,
 		Type:     "activation",
+		Locale:   userEntity.Locale,
 	})
 	if err != nil {
 		slog.Debug("激活邮件任务入队失败", "userId", userEntity.Id, "email", userEntity.Email, "err", err)

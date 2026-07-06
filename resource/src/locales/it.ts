@@ -552,6 +552,7 @@ export default {
       title: 'Profilo pubblico',
       description: 'Questi contenuti appaiono sulla tua pagina profilo e sulla scheda al passaggio del mouse.',
       displayName: 'Nome visualizzato',
+      language: 'Lingua',
       coverUrl: 'URL copertina',
       websiteName: 'Nome del sito web',
       website: 'Sito web personale',

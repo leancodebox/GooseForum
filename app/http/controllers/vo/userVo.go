@@ -36,6 +36,7 @@ type UserDetailedVo struct {
 	Signature           string                    `json:"signature"`
 	WebsiteName         string                    `json:"websiteName"`
 	Website             string                    `json:"website"`
+	Locale              string                    `json:"locale"`
 	ExternalInformation users.ExternalInformation `json:"externalInformation"`
 	Prestige            int64                     `json:"prestige"`
 	WornBadgeCode       string                    `json:"wornBadgeCode"`

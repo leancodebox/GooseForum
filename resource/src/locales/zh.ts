@@ -552,6 +552,7 @@ export default {
       title: '公开资料',
       description: '这里的内容会展示在你的个人主页和悬停卡片中。',
       displayName: '显示名称',
+      language: '语言',
       coverUrl: '封面 URL',
       websiteName: '网站名称',
       website: '个人网站',

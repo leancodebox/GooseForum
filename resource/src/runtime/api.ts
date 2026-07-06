@@ -509,6 +509,7 @@ export async function markChatRead(convId: number): Promise<boolean> {
 
 export interface SaveUserInfoInput {
   nickname: string
+  locale?: string
   bio: string
   signature: string
   website: string
@@ -736,6 +737,7 @@ export async function register(
   password: string,
   captchaId: string,
   captchaCode: string,
+  locale?: string,
 ): Promise<string> {
   const response = await fetch('/api/register', {
     method: 'POST',
@@ -746,6 +748,7 @@ export async function register(
       userName: username,
       email,
       passWord: password,
+      locale,
       captchaId,
       captchaCode,
     }),

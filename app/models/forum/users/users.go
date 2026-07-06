@@ -85,6 +85,7 @@ type EntityComplete struct {
 	Email        string     `gorm:"column:email;index;type:varchar(128);not null;default:'';" json:"email"`      //
 	Password     string     `gorm:"column:password;type:varchar(128);not null;default:'';" json:"-"`             //
 	TokenVersion uint64     `gorm:"column:token_version;type:bigint unsigned;not null;default:0;" json:"-"`      // 登录令牌版本，改密后自增
+	Locale       string     `gorm:"column:locale;type:varchar(16);not null;default:'';" json:"locale"`           // 用户语言偏好
 	IsFrozen     int8       `gorm:"column:is_frozen;type:tinyint;not null;default:0;" json:"isFrozen"`           // 状态：0正常 1冻结
 	IsActivated  int8       `gorm:"column:is_activated;type:tinyint;not null;default:0;" json:"isActivated"`     // 是否验证通过: 0未激活 1 已激活
 	ActivatedAt  *time.Time `gorm:"column:activated_at;type:datetime;" json:"activatedAt"`                       // 激活时间

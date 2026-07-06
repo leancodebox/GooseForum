@@ -779,6 +779,7 @@ export interface SettingsUserPayload {
   username: string
   email: string
   nickname: string
+  locale: string
   avatarUrl: string
   profileCoverUrl: string
   bio: string

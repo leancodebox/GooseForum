@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{.Lang}}">
 <head>
     <meta charset="UTF-8">
-    <title>账号激活</title>
+    <title>{{call .T "email.activation.subject"}}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,13 +36,13 @@
 </head>
 <body>
 <div class="container">
-    <h2>欢迎加入 {{.SiteName}}</h2>
-    <p>亲爱的 {{.Username}}:</p>
-    <p>请点击以下按钮激活您的账号:</p>
-    <a href="{{.ActivationLink}}" class="button">激活账号</a>
-    <p class="note">如果按钮无法点击，请复制以下链接到浏览器打开：</p>
+    <h2>{{call .T "email.activation.heading" "site" .SiteName}}</h2>
+    <p>{{call .T "email.greeting" "username" .Username}}</p>
+    <p>{{call .T "email.activation.instruction"}}</p>
+    <a href="{{.ActivationLink}}" class="button">{{call .T "email.activation.button"}}</a>
+    <p class="note">{{call .T "email.copyLink"}}</p>
     <p>{{.ActivationLink}}</p>
-    <p class="note">此链接24小时内有效</p>
+    <p class="note">{{call .T "email.activation.expires"}}</p>
 </div>
 </body>
 </html>

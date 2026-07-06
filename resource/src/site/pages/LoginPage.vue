@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { Languages, LoaderCircle, LockKeyhole, Mail, UserRound } from '@lucide/vue'
+import { LoaderCircle, LockKeyhole, Mail, UserRound } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { forgotPassword, getCaptcha, login, register } from '@/runtime/api'
 import { queueFlashMessage } from '@/runtime/flash-message'
@@ -121,7 +121,7 @@ async function handleRegister() {
   loading.register = true
   error.value = ''
   try {
-    const message = await register(registerForm.username, registerForm.email, registerForm.password, captchaId.value, registerForm.captcha)
+    const message = await register(registerForm.username, registerForm.email, registerForm.password, captchaId.value, registerForm.captcha, String(locale.value))
     queueFlashMessage(message || t('auth.validation.registerSuccess'), 'success')
     window.location.href = homeUrl.value
   } catch (err) {
@@ -267,8 +267,7 @@ function errorMessage(err: unknown, fallback: string) {
             </label>
             <div class="flex gap-3">
               <span class="relative min-w-0 flex-1">
-                <Languages class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/55" />
-                <input v-model.trim="registerForm.captcha" class="gf-input pl-10" :placeholder="t('auth.captcha')" />
+                <input v-model.trim="registerForm.captcha" class="gf-input" :placeholder="t('auth.captcha')" />
               </span>
               <button type="button" class="relative h-10 w-28 overflow-hidden gf-panel" @click="refreshCaptcha">
                 <LoaderCircle v-if="captchaLoading || !captchaImg" class="mx-auto h-5 w-5 animate-spin text-base-content/55" />

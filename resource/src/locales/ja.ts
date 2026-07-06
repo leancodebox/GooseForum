@@ -552,6 +552,7 @@ export default {
       title: '公開プロフィール',
       description: 'この内容はプロフィールページとホバーカードに表示されます。',
       displayName: '表示名',
+      language: '言語',
       coverUrl: 'カバー URL',
       websiteName: 'サイト名',
       website: '個人サイト',

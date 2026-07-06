@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 )
 
-func CreateUser(username, password, email string, needValid bool) (*users.EntityComplete, error) {
+func CreateUser(username, password, email string, needValid bool, locale ...string) (*users.EntityComplete, error) {
 	userEntity := users.MakeUser(username, password, email)
+	userEntity.Locale = normalizeUserLocale(locale...)
 	userEntity.Nickname = GenerateGooseNickname()
 	if !needValid {
 		userEntity.IsActivated = users.ActivationSuccess
@@ -29,6 +32,13 @@ func CreateUser(username, password, email string, needValid bool) (*users.Entity
 		FirstUserInit(userEntity)
 	}
 	return userEntity, nil
+}
+
+func normalizeUserLocale(values ...string) string {
+	if len(values) == 0 || strings.TrimSpace(values[0]) == "" {
+		return ""
+	}
+	return i18n.Normalize(values[0])
 }
 
 // GenerateGooseNickname creates a compact random default nickname.

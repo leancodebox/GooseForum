@@ -53,6 +53,7 @@ func TestUser2UserDetailedVo(t *testing.T) {
 		Signature:   "signature",
 		WebsiteName: "site",
 		Website:     "https://example.com",
+		Locale:      "en",
 		Prestige:    5,
 		CreatedAt:   createdAt,
 	}
@@ -66,6 +67,9 @@ func TestUser2UserDetailedVo(t *testing.T) {
 	}
 	if got.WebsiteName != user.WebsiteName || got.Website != user.Website {
 		t.Fatalf("website fields not mapped: %#v", got)
+	}
+	if got.Locale != user.Locale {
+		t.Fatalf("Locale = %q, want %q", got.Locale, user.Locale)
 	}
 	if !got.CreatedAt.Equal(createdAt) {
 		t.Fatalf("CreatedAt = %v, want %v", got.CreatedAt, createdAt)

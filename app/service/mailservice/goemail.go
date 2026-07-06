@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
@@ -58,7 +59,7 @@ func setMessageFrom(message *mail.Msg, config pageConfig.MailSettingsConfig) err
 	return nil
 }
 
-func SendActivationEmail(to, username, token string) error {
+func SendActivationEmail(to, username, token string, locale ...string) error {
 	config := hotdataserve.GetMailSettingsConfigCache()
 	fromName, fromEmail := normalizeSender(config)
 	slog.Debug("准备发送激活邮件", "to", to, "username", username, "enableMail", config.EnableMail, "smtpHost", config.SmtpHost, "smtpPort", config.SmtpPort, "fromName", fromName, "fromEmail", fromEmail)
@@ -69,11 +70,11 @@ func SendActivationEmail(to, username, token string) error {
 	if err := message.To(to); err != nil {
 		return fmt.Errorf("failed to set To address: %w", err)
 	}
-	message.Subject("activation-email")
+	message.Subject(i18n.T(emailBodyLang(locale...), "email.activation.subject"))
 	if err := setMessageFrom(message, config); err != nil {
 		return err
 	}
-	body, err := generateActivationEmailBody(username, token)
+	body, err := generateActivationEmailBody(username, token, locale...)
 	if err != nil {
 		return fmt.Errorf("生成邮件内容失败: %w", err)
 	}
@@ -94,7 +95,7 @@ func SendActivationEmail(to, username, token string) error {
 }
 
 // SendPasswordResetEmail 发送密码重置邮件
-func SendPasswordResetEmail(to, username, token string) error {
+func SendPasswordResetEmail(to, username, token string, locale ...string) error {
 	config := hotdataserve.GetMailSettingsConfigCache()
 	fromName, fromEmail := normalizeSender(config)
 	slog.Debug("准备发送密码重置邮件", "to", to, "username", username, "enableMail", config.EnableMail, "smtpHost", config.SmtpHost, "smtpPort", config.SmtpPort, "fromName", fromName, "fromEmail", fromEmail)
@@ -105,11 +106,11 @@ func SendPasswordResetEmail(to, username, token string) error {
 	if err := message.To(to); err != nil {
 		return fmt.Errorf("failed to set To address: %w", err)
 	}
-	message.Subject("密码重置请求")
+	message.Subject(i18n.T(emailBodyLang(locale...), "email.passwordReset.subject"))
 	if err := setMessageFrom(message, config); err != nil {
 		return err
 	}
-	body, err := generatePasswordResetEmailBody(username, token)
+	body, err := generatePasswordResetEmailBody(username, token, locale...)
 	if err != nil {
 		return fmt.Errorf("生成邮件内容失败: %w", err)
 	}

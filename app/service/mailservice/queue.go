@@ -23,6 +23,7 @@ type EmailTask struct {
 	Username string `json:"username"`
 	Token    string `json:"token"`
 	Type     string `json:"type"`
+	Locale   string `json:"locale,omitempty"`
 }
 
 var emailProcessor = struct {
@@ -170,9 +171,9 @@ func processPendingEmailTasks(stopCh <-chan struct{}) bool {
 func processEmailTask(task EmailTask) error {
 	switch task.Type {
 	case "activation":
-		return SendActivationEmail(task.To, task.Username, task.Token)
+		return SendActivationEmail(task.To, task.Username, task.Token, task.Locale)
 	case "reset_password":
-		return SendPasswordResetEmail(task.To, task.Username, task.Token)
+		return SendPasswordResetEmail(task.To, task.Username, task.Token, task.Locale)
 	default:
 		return fmt.Errorf("未知的邮件类型: %s", task.Type)
 	}

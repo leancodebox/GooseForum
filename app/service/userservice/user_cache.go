@@ -28,6 +28,7 @@ type UserInfo struct {
 	Id                  uint64
 	Username            string
 	Email               string
+	Locale              string
 	TokenVersion        uint64
 	IsFrozen            int8
 	IsActivated         int8
@@ -202,6 +203,7 @@ func userInfoFromEntity(user users.EntityComplete) UserInfo {
 		Id:                  user.Id,
 		Username:            user.Username,
 		Email:               user.Email,
+		Locale:              user.Locale,
 		TokenVersion:        user.TokenVersion,
 		IsFrozen:            user.IsFrozen,
 		IsActivated:         user.IsActivated,
@@ -247,6 +249,7 @@ func (user UserInfo) toEntity() users.EntityComplete {
 		Id:                  user.Id,
 		Username:            user.Username,
 		Email:               user.Email,
+		Locale:              user.Locale,
 		TokenVersion:        user.TokenVersion,
 		IsFrozen:            user.IsFrozen,
 		IsActivated:         user.IsActivated,

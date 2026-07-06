@@ -32,18 +32,20 @@ import { formatDate, formatNumber } from '@/runtime/format'
 import { useFlashMessages, type FlashMessageType } from '@/runtime/flash-message'
 import { useAvatarCropUpload } from '@/site/composables/useAvatarCropUpload'
 import SectionHeader from '@/site/components/SectionHeader.vue'
+import SiteSelect from '@/site/components/SiteSelect.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import { badgeClass, badgeIconURL, badgeTooltip } from '@/site/utils/badge-style'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
 import type { LayoutPayload, SettingsPageProps } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
+import { supportedLocales } from '@/runtime/i18n'
 
 const page = defineProps<{
   layout: LayoutPayload
   props: SettingsPageProps
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const tabKeys = ['profile', 'account', 'privacy', 'binding'] as const
 type TabKey = (typeof tabKeys)[number]
 
@@ -92,6 +94,7 @@ const socialKeys = ['github', 'twitter', 'linkedIn', 'weibo', 'bilibili', 'zhihu
 
 const profileForm = reactive({
   nickname: page.props.user.nickname || '',
+  locale: page.props.user.locale || String(locale.value),
   bio: page.props.user.bio || '',
   signature: page.props.user.signature || '',
   websiteName: page.props.user.websiteName || '',
@@ -152,6 +155,10 @@ const providers = computed(() => [
   { key: 'github', label: 'GitHub', supported: true },
   { key: 'google', label: 'Google', supported: false },
 ])
+const localeOptions = computed(() => supportedLocales.map(item => ({
+  value: item,
+  label: t(`locale.${item}`),
+})))
 const presetAvatars = Array.from({ length: 12 }, (_, index) => `/static/pic/${index + 1}.webp`)
 const presetAvatarChanged = computed(() => presetAvatarDraft.value !== avatarUrl.value)
 const avatarPreviewUrl = computed(() => presetAvatarChanged.value ? presetAvatarDraft.value : avatarUrl.value)
@@ -174,6 +181,7 @@ watch(
     usernameForm.username = page.props.user.username
     emailForm.email = page.props.user.email
     profileForm.nickname = page.props.user.nickname || ''
+    profileForm.locale = page.props.user.locale || String(locale.value)
     profileForm.bio = page.props.user.bio || ''
     profileForm.signature = page.props.user.signature || ''
     profileForm.websiteName = page.props.user.websiteName || ''
@@ -755,9 +763,13 @@ async function toggleBinding(provider: string) {
                     </button>
                   </div>
                 </div>
-                <label class="block sm:col-span-2">
+                <label class="block min-w-0">
                   <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.displayName') }}</span>
                   <input v-model="profileForm.nickname" class="gf-input mt-1" />
+                </label>
+                <label class="block min-w-0">
+                  <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.language') }}</span>
+                  <SiteSelect v-model="profileForm.locale" class="mt-1" :options="localeOptions" />
                 </label>
                 <label class="block">
                   <span class="text-sm font-medium text-base-content/75">{{ t('settings.profile.websiteName') }}</span>

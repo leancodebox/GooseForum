@@ -83,7 +83,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	userEntity, err := userservice.CreateUser(r.Username, r.Password, r.Email, true)
+	userEntity, err := userservice.CreateUser(r.Username, r.Password, r.Email, true, r.Locale)
 	if userEntity == nil || err != nil {
 		slog.Error("注册创建用户失败", "username", r.Username, "email", r.Email, "error", err)
 		c.JSON(200, component.FailDataCode(component.MessageAuthRegisterFailed, nil))

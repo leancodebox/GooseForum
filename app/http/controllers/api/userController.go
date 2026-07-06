@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/captchaOpt"
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/emailactivationservice"
@@ -174,6 +175,7 @@ type EditUserInfoReq struct {
 	Signature           string                    `json:"signature"`
 	Website             string                    `json:"website"`
 	WebsiteName         string                    `json:"websiteName"`
+	Locale              string                    `json:"locale,omitempty"`
 	ExternalInformation users.ExternalInformation `json:"externalInformation"`
 }
 
@@ -193,6 +195,9 @@ func EditUserInfo(req component.BetterRequest[EditUserInfoReq]) component.Respon
 	}
 	userEntity.Website = req.Params.Website
 	userEntity.WebsiteName = req.Params.WebsiteName
+	if strings.TrimSpace(req.Params.Locale) != "" {
+		userEntity.Locale = i18n.Normalize(req.Params.Locale)
+	}
 	userEntity.ExternalInformation = req.Params.ExternalInformation
 
 	err = userservice.SaveUser(&userEntity)
@@ -541,6 +546,7 @@ func ForgotPassword(req component.BetterRequest[ForgotPasswordReq]) component.Re
 		Username: userEntity.Username,
 		Token:    token,
 		Type:     "reset_password",
+		Locale:   userEntity.Locale,
 	})
 	if err != nil {
 		slog.Error("添加密码重置邮件任务到队列失败", "error", err)

@@ -39,6 +39,7 @@ func User2UserDetailedVo(user users.EntityComplete) *vo.UserDetailedVo {
 		Signature:           user.Signature,
 		WebsiteName:         user.WebsiteName,
 		Website:             user.Website,
+		Locale:              user.Locale,
 		ExternalInformation: user.ExternalInformation,
 		Prestige:            user.Prestige,
 		WornBadgeCode:       user.WornBadgeCode,
