@@ -7,38 +7,38 @@
 {{define "page"}}
 <main>
     <header>
-        <h1>搜索</h1>
+        <h1>{{ t .Lang "search" }}</h1>
         {{if .Payload.Props.Query}}
-        <p>“{{.Payload.Props.Query}}” 共 {{.Payload.Props.Total}} 个结果。</p>
+        <p>{{ t .Lang "searchSummary" "query" .Payload.Props.Query "total" .Payload.Props.Total }}</p>
         {{else}}
-        <p>搜索主题、关键词和社区讨论。</p>
+        <p>{{ t .Lang "searchTagline" }}</p>
         {{end}}
         <form action="/search" method="GET">
             <label>
-                <span>关键词</span>
-                <input type="search" name="q" value="{{.Payload.Props.Query}}" placeholder="搜索主题...">
+                <span>{{ t .Lang "keyword" }}</span>
+                <input type="search" name="q" value="{{.Payload.Props.Query}}" placeholder="{{ t .Lang "searchTopicsPlaceholder" }}">
             </label>
-            <button type="submit">搜索</button>
+            <button type="submit">{{ t .Lang "search" }}</button>
         </form>
     </header>
 
     {{if .Payload.Props.Topics}}
     <section>
-        <h2>搜索结果</h2>
-        {{template "partials/topic_list.gohtml" .Payload.Props.Topics}}
+        <h2>{{ t .Lang "searchResults" }}</h2>
+        {{template "partials/topic_list.gohtml" (dict "Topics" .Payload.Props.Topics "Lang" .Lang)}}
         <nav>
             {{if gt .Payload.Props.Pagination.Page 1}}
-            <a href="/search?q={{.Payload.Props.Query}}&page={{sub .Payload.Props.Pagination.Page 1}}">上一页</a>
+            <a href="/search?q={{.Payload.Props.Query}}&page={{sub .Payload.Props.Pagination.Page 1}}">{{ t .Lang "prevPage" }}</a>
             {{end}}
             {{if .Payload.Props.Pagination.HasNext}}
-            <a href="{{.Payload.Props.Pagination.NextURL}}" rel="next">下一页</a>
+            <a href="{{.Payload.Props.Pagination.NextURL}}" rel="next">{{ t .Lang "nextPage" }}</a>
             {{end}}
         </nav>
     </section>
     {{else if .Payload.Props.Query}}
-    <p>没有找到结果。</p>
+    <p>{{ t .Lang "noResults" }}</p>
     {{else}}
-    <p>请输入关键词开始搜索。</p>
+    <p>{{ t .Lang "searchPrompt" }}</p>
     {{end}}
 </main>
 {{end}}

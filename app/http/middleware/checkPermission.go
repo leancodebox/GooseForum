@@ -21,7 +21,7 @@ func CheckPermission(permissionType permission.Enum) gin.HandlerFunc {
 		if !permission.CheckRole(roleId, permissionType) {
 			c.JSON(http.StatusForbidden, component.FailDataCode(
 				component.MessagePermissionDenied,
-				component.MessageParams{"permission": permissionType.Name()}))
+				component.MessageParams{"permission": permissionType.LocalizedName(component.RequestLang(c))}))
 			c.Abort()
 			return
 		}

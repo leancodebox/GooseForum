@@ -5,6 +5,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
@@ -15,22 +16,38 @@ var rolePermissionCache = localcache.Cache[[]Enum]{MaxEntries: 256}
 
 type Enum int
 
-func (receiver Enum) Name() string {
+// i18nKey returns the stable translation key for the permission label.
+func (receiver Enum) i18nKey() string {
 	switch receiver {
 	case Admin:
-		return "管理员"
+		return "permission.admin"
 	case UserManager:
-		return "用户管理"
+		return "permission.userManager"
 	case ArticlesManager:
-		return "文章管理"
+		return "permission.articlesManager"
 	case PageManager:
-		return "页面管理"
+		return "permission.pageManager"
 	case RoleManager:
-		return "角色管理"
+		return "permission.roleManager"
 	case SiteManager:
-		return "站点管理"
+		return "permission.siteManager"
 	}
 	return ""
+}
+
+// Name returns the permission label in the fallback locale (zh). Prefer
+// LocalizedName when a request locale is available.
+func (receiver Enum) Name() string {
+	return receiver.LocalizedName(i18n.Fallback)
+}
+
+// LocalizedName returns the permission label translated into lang.
+func (receiver Enum) LocalizedName(lang string) string {
+	key := receiver.i18nKey()
+	if key == "" {
+		return ""
+	}
+	return i18n.T(lang, key)
 }
 
 func (receiver Enum) Id() uint64 {
@@ -46,10 +63,11 @@ const (
 	SiteManager
 )
 
-func BuildOptions() []datastruct.Option[string, Enum] {
+func BuildOptions(lang string) []datastruct.Option[string, Enum] {
 	return lo.Map(lo.RangeFrom(int(Admin), int(SiteManager-Admin+1)), func(i int, _ int) datastruct.Option[string, Enum] {
 		item := Enum(i)
-		return datastruct.Option[string, Enum]{Name: item.Name(), Label: item.Name(), Value: item}
+		name := item.LocalizedName(lang)
+		return datastruct.Option[string, Enum]{Name: name, Label: name, Value: item}
 	})
 }
 

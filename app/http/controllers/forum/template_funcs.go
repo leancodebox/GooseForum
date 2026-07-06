@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 )
 
 var templateFuncMap = template.FuncMap{
@@ -20,19 +22,14 @@ var templateFuncMap = template.FuncMap{
 	"json": func(v any) template.JS {
 		return template.JS(jsonopt.Encode(v))
 	},
+	// t localizes a server-rendered string, e.g. {{ t .Lang "search" }}.
+	// Extra args are alternating name/value pairs for {name} placeholders.
+	"t": i18n.T,
 }
 
+// requestLang resolves and normalizes the request locale. It delegates to
+// component.RequestLang so the templates and the activation page share one
+// source of truth. The normalized value is also safe as an <html lang> value.
 func requestLang(c *gin.Context) string {
-	lang := c.Query("lang")
-	if lang == "" {
-		if cookie, err := c.Cookie("lang"); err == nil && cookie != "" {
-			lang = cookie
-		} else {
-			lang = c.GetHeader("Accept-Language")
-		}
-	}
-	if lang == "" {
-		lang = "zh"
-	}
-	return lang
+	return component.RequestLang(c)
 }

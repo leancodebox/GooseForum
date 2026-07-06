@@ -413,7 +413,7 @@ async function persistThemeDraft() {
 
 function resetPrepublish() {
   applyPrepublishConfig(configFromPrepublish(savedConfig.value))
-  message.value = '已还原到已保存配置'
+  message.value = t('themePreview.restoredToSaved')
   error.value = ''
 }
 
@@ -424,7 +424,7 @@ function resetSelectedThemeToDefault() {
   theme.label = defaultTheme.label
   theme.colorScheme = defaultTheme.colorScheme
   theme.tokens = cloneSiteThemeTokens(defaultTheme.tokens)
-  message.value = `${defaultTheme.label} 已恢复内置默认`
+  message.value = t('themePreview.themeRestoredDefault', { name: defaultTheme.label })
   error.value = ''
 }
 
@@ -435,7 +435,7 @@ function resetAllThemesToDefault() {
   prepublish.themes.splice(0, prepublish.themes.length, ...defaults.themes)
   prepublish.prepublish = undefined
   prepublish.publishedAt = savedConfig.value.publishedAt
-  message.value = '已恢复为内置默认主题，保存预发布后可发布到全站'
+  message.value = t('themePreview.allRestoredDefault')
   error.value = ''
 }
 
@@ -445,9 +445,9 @@ async function copyThemeCss() {
   error.value = ''
   try {
     await navigator.clipboard.writeText(activeThemeCss.value || '/* custom theme disabled */')
-    message.value = 'CSS 已复制'
+    message.value = t('themePreview.cssCopied')
   } catch {
-    error.value = 'CSS 复制失败'
+    error.value = t('themePreview.cssCopyFailed')
   } finally {
     window.setTimeout(() => {
       copying.value = false
@@ -501,7 +501,7 @@ function hexToRgb(value: string) {
           <div class="min-w-0">
             <div class="flex items-center gap-2">
               <PaintBucket class="h-4 w-4 text-primary" />
-              <h1 class="truncate text-base font-semibold text-base-content">主题预览设置</h1>
+              <h1 class="truncate text-base font-semibold text-base-content">{{ t('themePreview.pageTitle') }}</h1>
             </div>
             <div class="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold">
               <span class="rounded-full bg-base-200 px-2 py-1 text-base-content/65">v{{ prepublish.version || 1 }}</span>
@@ -512,9 +512,9 @@ function hexToRgb(value: string) {
           </div>
           <div class="flex shrink-0 items-center gap-1.5">
             <button type="button" class="gf-button gf-button-sm gf-button-secondary text-xs" @click="resetAllThemesToDefault">
-              默认
+              {{ t('themePreview.resetDefault') }}
             </button>
-            <button type="button" class="gf-icon-button h-8 w-8 bg-base-200" title="还原到已保存配置" @click="resetPrepublish">
+            <button type="button" class="gf-icon-button h-8 w-8 bg-base-200" :title="t('themePreview.restoreToSavedTitle')" @click="resetPrepublish">
               <RotateCcw class="h-4 w-4" />
             </button>
           </div>
@@ -540,7 +540,7 @@ function hexToRgb(value: string) {
             </button>
           </div>
           <label class="inline-flex cursor-pointer items-center gap-2 rounded-md bg-base-200 px-2 text-sm font-semibold text-base-content/75">
-            <span>启用</span>
+            <span>{{ t('themePreview.enableLabel') }}</span>
             <span class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition" :class="prepublish.enabled ? 'bg-primary' : 'bg-base-300'">
               <input v-model="prepublish.enabled" type="checkbox" class="peer sr-only" />
               <span class="absolute left-0.5 h-4 w-4 rounded-full bg-primary-content transition" :class="prepublish.enabled ? 'translate-x-4' : 'translate-x-0 bg-base-100'" />
@@ -587,7 +587,7 @@ function hexToRgb(value: string) {
             <h2 class="text-sm font-semibold text-base-content">Change Colors</h2>
             <span class="h-px flex-1 bg-line" />
             <button type="button" class="gf-button gf-button-sm gf-button-secondary h-7 text-xs" @click="resetSelectedThemeToDefault">
-              默认
+              {{ t('themePreview.resetDefault') }}
             </button>
           </div>
 
@@ -744,12 +744,12 @@ function hexToRgb(value: string) {
             <section class="gf-card overflow-hidden">
               <header class="flex flex-col gap-2 border-b border-line bg-base-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex min-w-0 items-center gap-2 overflow-x-auto">
-                  <button class="gf-tab gf-tab-active">最新</button>
-                  <button class="gf-tab gf-tab-idle">热门</button>
-                  <button class="gf-tab gf-tab-idle">精华</button>
+                  <button class="gf-tab gf-tab-active">{{ t('themePreview.tabLatest') }}</button>
+                  <button class="gf-tab gf-tab-idle">{{ t('themePreview.tabHot') }}</button>
+                  <button class="gf-tab gf-tab-idle">{{ t('themePreview.tabFeatured') }}</button>
                 </div>
                 <button class="gf-button gf-button-sm gf-button-primary">
-                  <Rocket class="h-4 w-4" /> 发布主题
+                  <Rocket class="h-4 w-4" /> {{ t('themePreview.samplePublish') }}
                 </button>
               </header>
               <div class="hidden grid-cols-[minmax(0,1fr)_88px_56px_56px_64px] gap-2 border-b border-line bg-base-200/60 px-3 py-2 text-[11px] font-bold uppercase text-base-content/75 xl:grid">
@@ -764,7 +764,7 @@ function hexToRgb(value: string) {
                   <div class="min-w-0">
                     <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                       <a href="#" class="min-w-0 truncate text-[15px] font-semibold leading-6 text-base-content hover:text-primary sm:text-base">
-                        {{ index === 1 ? '主题系统重构讨论：颜色、圆角和组件状态' : index === 2 ? 'Markdown 正文在深色模式下的可读性' : '新用户引导和消息通知的视觉检查' }}
+                        {{ index === 1 ? t('themePreview.sampleTopic1') : index === 2 ? t('themePreview.sampleTopic2') : t('themePreview.sampleTopic3') }}
                       </a>
                       <span class="gf-topic-chip">
                         <span class="h-1.5 w-1.5 rounded-full bg-primary" /> design
@@ -773,7 +773,7 @@ function hexToRgb(value: string) {
                         <AlertTriangle class="h-3 w-3" /> hot
                       </span>
                     </div>
-                    <p class="mt-1 min-h-5 truncate text-[13px] leading-5 text-base-content/55">观察弱文本、分隔线、标签和悬停背景在当前主题下的层级。</p>
+                    <p class="mt-1 min-h-5 truncate text-[13px] leading-5 text-base-content/55">{{ t('themePreview.sampleTopicExcerpt') }}</p>
                   </div>
                   <div class="hidden justify-center xl:flex">
                     <div class="flex h-7 min-w-7 -space-x-2.5">
@@ -794,10 +794,10 @@ function hexToRgb(value: string) {
                 <span class="gf-badge gf-badge-info">Preview</span>
                 <span class="gf-badge gf-badge-muted">Theme</span>
               </div>
-              <h3 class="mt-3 text-xl font-semibold leading-tight text-base-content">一篇主题帖的标题</h3>
+              <h3 class="mt-3 text-xl font-semibold leading-tight text-base-content">{{ t('themePreview.sampleArticleTitle') }}</h3>
               <div class="gf-prose gf-prose-article mt-2 text-sm">
-                <p>这里模拟正文、链接、引用和代码块。主题变量应该让内容在明暗模式下都清晰，尤其是正文、边框和弱文本。</p>
-                <blockquote>颜色层级应该安静，但不能含糊。</blockquote>
+                <p>{{ t('themePreview.sampleArticleBody') }}</p>
+                <blockquote>{{ t('themePreview.sampleArticleQuote') }}</blockquote>
                 <pre><code>const theme = 'gf-{{ selectedTheme === 'gf-dark' ? 'dark' : 'light' }}'</code></pre>
               </div>
             </article>
@@ -814,8 +814,8 @@ function hexToRgb(value: string) {
             <section class="gf-panel p-3">
               <h3 class="text-sm font-semibold text-base-content">Messages</h3>
               <div class="mt-3 space-y-3">
-                <div class="rounded-box bg-base-300 px-3 py-2 text-sm text-base-content">这个背景还舒服吗？</div>
-                <div class="rounded-box bg-primary px-3 py-2 text-sm text-primary-content">对比度需要稳。</div>
+                <div class="rounded-box bg-base-300 px-3 py-2 text-sm text-base-content">{{ t('themePreview.sampleMessageIncoming') }}</div>
+                <div class="rounded-box bg-primary px-3 py-2 text-sm text-primary-content">{{ t('themePreview.sampleMessageOutgoing') }}</div>
               </div>
             </section>
             <section class="gf-panel p-3">
@@ -853,7 +853,7 @@ function hexToRgb(value: string) {
                 <label class="mt-3 block text-xs font-medium text-base-content/55">Input</label>
                 <input class="gf-input mt-1 bg-base-200" value="GooseForum" />
                 <label class="mt-3 block text-xs font-medium text-base-content/55">Textarea</label>
-                <textarea class="gf-textarea mt-1 min-h-20 resize-none bg-base-200">主题变量覆盖输入、焦点和正文。</textarea>
+                <textarea class="gf-textarea mt-1 min-h-20 resize-none bg-base-200" :value="t('themePreview.sampleTextarea')"></textarea>
                 <div class="mt-3 flex items-center justify-between rounded-selector bg-base-200 px-3 py-2">
                   <span class="text-sm font-medium text-base-content/75">Selector</span>
                   <span class="h-5 w-9 rounded-full bg-primary p-0.5"><span class="block h-4 w-4 translate-x-4 rounded-full bg-primary-content" /></span>

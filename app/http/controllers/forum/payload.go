@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
@@ -1147,7 +1148,7 @@ func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
 	canonical := baseURL + article.URL
 	description := article.Description
 	if description == "" {
-		description = "阅读 " + article.Title + "，参与 " + siteTitle() + " 的社区讨论。"
+		description = i18n.T(requestLang(c), "meta.articleDesc", "title", article.Title, "site", siteTitle())
 	}
 	inlineImages := articleImageURLs(article, baseURL)
 	categoryNames := lo.Map(article.Categories, func(item TopicCategoryPayload, _ int) string { return item.Name })
@@ -1170,7 +1171,7 @@ func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
 		Type:             "DiscussionForumPosting",
 		Headline:         article.Title,
 		Description:      description,
-		Text:             articlePlainText(article),
+		Text:             articlePlainText(requestLang(c), article),
 		Image:            inlineImages,
 		Author:           vo.Person{Type: "Person", Name: article.Author.Username, URL: baseURL + "/u/" + strconv.FormatUint(article.Author.ID, 10)},
 		Publisher:        vo.Organization{Type: "Organization", Name: siteTitle(), URL: baseURL},
@@ -1214,15 +1215,15 @@ func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
 	}
 }
 
-func articlePlainText(article ArticlePayload) string {
+func articlePlainText(lang string, article ArticlePayload) string {
 	text := truncateSEOText(article.Description, 1000)
 	if text != "" {
 		return text
 	}
 	if article.Title != "" {
-		return "阅读 " + article.Title + "，参与 " + siteTitle() + " 的社区讨论。"
+		return i18n.T(lang, "meta.articleDesc", "title", article.Title, "site", siteTitle())
 	}
-	return "参与 " + siteTitle() + " 的社区讨论。"
+	return i18n.T(lang, "meta.communityDesc", "site", siteTitle())
 }
 
 func articleImageURLs(article ArticlePayload, baseURL string) []string {
@@ -1603,7 +1604,7 @@ func buildUserMeta(c *gin.Context, user *vo.UserCard) PageMeta {
 		description = user.Signature
 	}
 	if description == "" {
-		description = "查看 " + user.Username + " 在 " + siteTitle() + " 的主题、动态和社区关系。"
+		description = i18n.T(requestLang(c), "meta.userDesc", "username", user.Username, "site", siteTitle())
 	}
 	return PageMeta{
 		Title:       pageTitle(user.Username),
@@ -1664,7 +1665,7 @@ func buildCategoryPageURL(category *articleCategory.Entity, sort string, page in
 func buildCategoryMeta(c *gin.Context, category *articleCategory.Entity) PageMeta {
 	description := category.Desc
 	if description == "" {
-		description = "浏览 " + category.Category + " 分类下的主题。"
+		description = i18n.T(requestLang(c), "meta.categoryDesc", "category", category.Category)
 	}
 	return PageMeta{
 		Title:       pageTitle(category.Category),
@@ -1704,9 +1705,10 @@ func buildLinksPageProps(groups []pageConfig.FriendLinksGroup) LinksPageProps {
 }
 
 func buildLinksMeta(c *gin.Context) PageMeta {
+	lang := requestLang(c)
 	return PageMeta{
-		Title:       pageTitle("友情链接"),
-		Description: siteTitle() + " 友情链接与社区伙伴。",
+		Title:       pageTitle(i18n.T(lang, "friendLinks")),
+		Description: i18n.T(lang, "meta.friendLinksDesc", "site", siteTitle()),
 		Canonical:   component.GetBaseUri(c) + "/links",
 	}
 }
@@ -1790,9 +1792,10 @@ func sponsorAvatar(avatar string) string {
 }
 
 func buildSponsorsMeta(c *gin.Context) PageMeta {
+	lang := requestLang(c)
 	return PageMeta{
-		Title:       pageTitle("赞助商"),
-		Description: "感谢支持 " + siteTitle() + " 的赞助商与社区伙伴。",
+		Title:       pageTitle(i18n.T(lang, "sponsors")),
+		Description: i18n.T(lang, "meta.sponsorsDesc", "site", siteTitle()),
 		Canonical:   component.GetBaseUri(c) + "/sponsors",
 	}
 }

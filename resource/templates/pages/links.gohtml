@@ -7,8 +7,8 @@
 {{define "page"}}
 <main>
     <header>
-        <h1>友情链接</h1>
-        <p>共 {{.Payload.Props.TotalCount}} 个社区伙伴。</p>
+        <h1>{{ t .Lang "friendLinks" }}</h1>
+        <p>{{ t .Lang "partnersSummary" "count" .Payload.Props.TotalCount }}</p>
     </header>
     {{range .Payload.Props.Groups}}
     <section>
