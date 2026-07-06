@@ -6,6 +6,7 @@ import type {
   AdminBadge,
   AdminCategory,
   AdminCategoryModerator,
+  AdminFileResource,
   AdminOptRecord,
   AdminPermissionOption,
   AdminRole,
@@ -205,6 +206,10 @@ export function getArticlesList(params: { page?: number, pageSize?: number, sear
 
 export function getOptRecordList(params: { page?: number, pageSize?: number, optUserId?: number, optType?: number, targetType?: number, targetId?: number }) {
   return postJson<PageResult<AdminOptRecord>>('/api/admin/opt-record-page', params, adminText('k0013'))
+}
+
+export function getFileResourceList(params: { page?: number, pageSize?: number }) {
+  return postJson<PageResult<AdminFileResource>>('/api/admin/file-resources', params, adminText('k00fb'))
 }
 
 export function getArticleSource(id: number) {

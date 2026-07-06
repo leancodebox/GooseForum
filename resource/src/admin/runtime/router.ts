@@ -47,6 +47,10 @@ export const adminRouter = createRouter({
       component: () => import('@/admin/pages/management/BadgesManagementPage.vue'),
     },
     {
+      path: '/admin/files/resources',
+      component: () => import('@/admin/pages/management/FileResourcesManagementPage.vue'),
+    },
+    {
       path: '/admin/opt-records',
       component: () => import('@/admin/pages/management/OptRecordsManagementPage.vue'),
     },

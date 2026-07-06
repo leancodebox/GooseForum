@@ -542,5 +542,19 @@ export default {
   "k00f2": "Current moderators",
   "k00f3": "No moderators yet",
   "k00f4": "Failed to load global moderators",
-  "k00f5": "Add or remove public-facing moderators for \"{category}\". Moderators do not gain admin panel access."
+  "k00f5": "Add or remove public-facing moderators for \"{category}\". Moderators do not gain admin panel access.",
+  "k00f6": "Resource viewer",
+  "k00f7": "Type",
+  "k00f8": "Uploader",
+  "k00f9": "Uploaded at",
+  "k00fa": "URL",
+  "k00fb": "Failed to load resources",
+  "k00fc": "Resource URL copied",
+  "k00fd": "Failed to copy resource URL",
+  "k00fe": "View uploaded site resources for inspection and URL copying.",
+  "k00ff": "No resources",
+  "k00fg": "Copy URL",
+  "k00fh": "Open resource",
+  "k00fi": "Size",
+  "k00fj": "Max ID"
 } as const

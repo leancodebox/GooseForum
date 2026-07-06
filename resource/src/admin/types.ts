@@ -123,6 +123,17 @@ export interface AdminOptRecord {
   createdAt: string
 }
 
+export interface AdminFileResource {
+  id: number
+  name: string
+  type: string
+  size: number
+  userId: number
+  uploaderUsername?: string
+  createdAt: string
+  url: string
+}
+
 export interface ArticleSource extends AdminArticle {
   content: string
 }

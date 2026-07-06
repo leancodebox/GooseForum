@@ -8,9 +8,28 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 
 	"github.com/google/uuid"
 )
+
+type FileResource struct {
+	Id        uint64    `json:"id"`
+	Name      string    `json:"name"`
+	Type      string    `json:"type"`
+	Size      int64     `json:"size"`
+	UserId    uint64    `json:"userId"`
+	CreatedAt time.Time `json:"createdAt"`
+	URL       string    `json:"url"`
+	Data      []byte    `json:"-"`
+}
+
+type FileResourcePageResult struct {
+	List     []FileResource
+	Page     int
+	PageSize int
+	MaxId    int64
+}
 
 var supportedImageTypes = map[string]string{
 	".jpg":  "image/jpeg",
@@ -63,6 +82,38 @@ func GetFileByName(name string) (*Entity, error) {
 		return nil, errors.New("file not found")
 	}
 	return &entity, nil
+}
+
+func FileResourcePage(page, pageSize int) FileResourcePageResult {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	if pageSize > 50 {
+		pageSize = 50
+	}
+
+	var maxId int64
+	builder().Select("id").Order("id DESC").Limit(1).Scan(&maxId)
+	upperId := maxId - int64((page-1)*pageSize)
+
+	var list []FileResource
+	builder().
+		Where("id <= ?", upperId).
+		Select("id, name, assert_type AS type, LENGTH(content) AS size, user_id, created_at").
+		Order("id DESC").
+		Limit(pageSize).
+		Scan(&list)
+	for index := range list {
+		list[index].URL = list[index].GetAccessPath()
+	}
+	return FileResourcePageResult{List: list, Page: page, PageSize: pageSize, MaxId: maxId}
+}
+
+func (itself FileResource) GetAccessPath() string {
+	return urlconfig.FilePath(itself.Name)
 }
 
 // CountDailyUploads returns the number of files uploaded by a user today.

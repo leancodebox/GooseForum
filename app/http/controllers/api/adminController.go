@@ -11,6 +11,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
+	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
@@ -833,6 +834,36 @@ func OptRecordPage(req component.BetterRequest[OptRecordPageReq]) component.Resp
 		pageData.Page,
 		pageData.PageSize,
 		pageData.Total,
+	)
+}
+
+type FileResourcePageReq struct {
+	Page     int `json:"page"`
+	PageSize int `json:"pageSize"`
+}
+
+type FileResourceItem struct {
+	filedata.FileResource
+	UploaderUsername string `json:"uploaderUsername"`
+}
+
+func FileResourcePage(req component.BetterRequest[FileResourcePageReq]) component.Response {
+	pageData := filedata.FileResourcePage(req.Params.Page, component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50))
+	userIDs := lo.Map(pageData.List, func(item filedata.FileResource, _ int) uint64 {
+		return item.UserId
+	})
+	userMap := users.GetMapByIds(userIDs)
+	return component.SuccessPage(
+		lo.Map(pageData.List, func(item filedata.FileResource, _ int) FileResourceItem {
+			username := ""
+			if user := userMap[item.UserId]; user != nil {
+				username = user.Username
+			}
+			return FileResourceItem{FileResource: item, UploaderUsername: username}
+		}),
+		pageData.Page,
+		pageData.PageSize,
+		pageData.MaxId,
 	)
 }
 

@@ -3,6 +3,7 @@ import { adminText } from '@/admin/runtime/i18n-text'
 import {
   Award,
   FileText,
+  Files,
   ExternalLink,
   GalleryVerticalEnd,
   Heart,
@@ -75,6 +76,7 @@ const navGroups = computed<NavGroup[]>(() => {
       { title: adminText('k002j'), url: '/admin/links', icon: Link, permission: AdminPermission.PageManager },
       { title: adminText('k004o'), url: '/admin/sponsors', icon: Heart, permission: AdminPermission.PageManager },
       { title: adminText('k0058'), url: '/admin/badges', icon: Award, permission: AdminPermission.SiteManager },
+      { title: adminText('k00f6'), url: '/admin/files/resources', icon: Files, permission: AdminPermission.SiteManager },
       { title: adminText('k007c'), url: '/admin/opt-records', icon: ListChecks, permission: AdminPermission.Admin },
     ],
   },

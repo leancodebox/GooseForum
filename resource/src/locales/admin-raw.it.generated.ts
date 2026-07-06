@@ -542,5 +542,19 @@ export default {
   "k00f2": "Moderatori attuali",
   "k00f3": "Ancora nessun moderatore",
   "k00f4": "Caricamento dei moderatori globali non riuscito",
-  "k00f5": "Aggiungi o rimuovi i moderatori pubblici per \"{category}\". I moderatori non ottengono l'accesso al pannello di amministrazione."
+  "k00f5": "Aggiungi o rimuovi i moderatori pubblici per \"{category}\". I moderatori non ottengono l'accesso al pannello di amministrazione.",
+  "k00f6": "Visualizzatore risorse",
+  "k00f7": "Tipo",
+  "k00f8": "Uploader",
+  "k00f9": "Caricata il",
+  "k00fa": "URL",
+  "k00fb": "Caricamento delle risorse non riuscito",
+  "k00fc": "URL risorsa copiato",
+  "k00fd": "Copia dell'URL risorsa non riuscita",
+  "k00fe": "Visualizza le risorse caricate sul sito e copia i loro URL.",
+  "k00ff": "Nessuna risorsa",
+  "k00fg": "Copia URL",
+  "k00fh": "Apri risorsa",
+  "k00fi": "Dimensione",
+  "k00fj": "ID massimo"
 } as const
