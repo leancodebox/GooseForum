@@ -116,6 +116,13 @@ defineExpose({
         :aria-label="currentImage.alt || t('common.preview')"
         @click.self="close"
       >
+        <div
+          v-if="hasMultipleImages"
+          class="gf-markdown-image-viewer-count absolute left-3 top-3 z-10 rounded-full px-3 py-2 text-xs font-semibold tabular-nums sm:left-5 sm:top-5"
+        >
+          {{ currentIndex + 1 }} / {{ images.length }}
+        </div>
+
         <div class="absolute right-3 top-3 z-10 flex items-center gap-2 sm:right-5 sm:top-5">
           <button
             type="button"
@@ -153,13 +160,13 @@ defineExpose({
           <span class="sr-only">{{ t('common.previousPage') }}</span>
         </button>
 
-        <div class="gf-markdown-image-viewer-stage flex h-full w-full items-center justify-center overflow-auto" :class="actualSize ? 'p-4 sm:p-8' : 'p-0'">
+        <div class="gf-markdown-image-viewer-stage grid h-full w-full place-items-center overflow-hidden p-0">
           <img
             :key="currentImage.src"
             :src="currentImage.src"
             :alt="currentImage.alt"
             class="gf-markdown-image-viewer-image rounded-md object-contain"
-            :class="actualSize ? 'max-h-none max-w-none cursor-zoom-out' : 'max-h-[calc(100dvh-6rem)] max-w-[calc(100vw-1.5rem)] cursor-zoom-in sm:max-w-[calc(100vw-7rem)]'"
+            :class="actualSize ? 'max-h-[calc(100dvh-3rem)] max-w-[calc(100vw-1.5rem)] cursor-zoom-out sm:max-w-[calc(100vw-3rem)]' : 'max-h-[calc(100dvh-6rem)] max-w-[calc(100vw-1.5rem)] cursor-zoom-in sm:max-w-[calc(100vw-7rem)]'"
             decoding="async"
             @click.stop="toggleActualSize"
           >
@@ -207,6 +214,14 @@ defineExpose({
 .gf-markdown-image-viewer-button:hover {
   background: color-mix(in oklch, var(--gf-color-base-200) 90%, var(--gf-color-base-100));
   color: var(--gf-color-base-content);
+}
+
+.gf-markdown-image-viewer-count {
+  border: var(--gf-border) solid color-mix(in oklch, var(--gf-color-line) 70%, transparent);
+  background: color-mix(in oklch, var(--gf-color-base-100) 82%, transparent);
+  color: color-mix(in oklch, var(--gf-color-base-content) 72%, transparent);
+  box-shadow: 0 12px 30px -24px color-mix(in oklch, var(--gf-color-neutral) 65%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 .gf-markdown-image-viewer-image {
