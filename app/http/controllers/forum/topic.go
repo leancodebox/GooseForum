@@ -9,9 +9,9 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/leancodebox/GooseForum/app/service/articleviewservice"
 	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
+	"github.com/leancodebox/GooseForum/app/service/topicviewservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/spf13/cast"
 )
@@ -56,7 +56,7 @@ func TopicDetail(c *gin.Context) {
 
 	renderPage(c, "topic.gohtml", payload)
 	if shouldCountTopicView(&topic) {
-		articleviewservice.RecordView(topic.Id)
+		topicviewservice.RecordView(topic.Id)
 	}
 }
 

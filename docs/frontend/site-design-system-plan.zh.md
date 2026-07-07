@@ -207,7 +207,7 @@ resource/src/styles/
   tokens.css            :root / [data-theme] / @theme inline
   base.css              html, body, app root, 全局基础元素
   motion.css            gf-page, gf-menu, gf-modal, reduced-motion
-  prose.css             gf-prose, article/comment prose
+  prose.css             gf-prose, topic/post prose
   components.css        gf-card, gf-button, gf-input, gf-tab, gf-menu 等基础组件
   patterns.css          gf-topic-row, gf-home-topic-toolbar 等产品模式
   utilities.css         gf-scrollbar-none 等少量工具

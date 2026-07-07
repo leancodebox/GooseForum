@@ -98,12 +98,12 @@ const replyRailEndLabel = computed(() => formatRailDate(replyTailLoaded.value ? 
 const replyRailBusy = computed(() => loadingReplyWindow.value && (loadingReplyDirection.value === 'anchor' || loadingReplyDirection.value === 'tail'))
 const actionMessageSuccess = computed(() =>
   [
-    t('article.bookmarkAdded'),
-    t('article.bookmarkRemoved'),
-    t('article.watchAdded'),
-    t('article.watchRemoved'),
-    t('article.moderationBanSuccess'),
-    t('article.moderationUnbanSuccess'),
+    t('topic.bookmarkAdded'),
+    t('topic.bookmarkRemoved'),
+    t('topic.watchAdded'),
+    t('topic.watchRemoved'),
+    t('topic.moderationBanSuccess'),
+    t('topic.moderationUnbanSuccess'),
   ].includes(actionMessage.value),
 )
 const reportReasons = ['spam', 'abuse', 'illegal', 'irrelevant', 'other']
@@ -115,7 +115,7 @@ const floatingTopicActions = computed(() => {
       active: isLiked.value,
       acting: actingLike.value,
       fill: true,
-      title: t('article.like'),
+      title: t('topic.like'),
       activeClass: 'bg-error/10 text-error hover:bg-error/10',
       onClick: toggleLike,
     },
@@ -125,7 +125,7 @@ const floatingTopicActions = computed(() => {
       active: isBookmarked.value,
       acting: actingBookmark.value,
       fill: true,
-      title: isBookmarked.value ? t('article.bookmarked') : t('article.bookmark'),
+      title: isBookmarked.value ? t('topic.bookmarked') : t('topic.bookmark'),
       activeClass: 'bg-info/10 text-primary hover:bg-info/10',
       onClick: toggleBookmark,
     },
@@ -135,7 +135,7 @@ const floatingTopicActions = computed(() => {
       active: isWatched.value,
       acting: actingWatch.value,
       fill: true,
-      title: isWatched.value ? t('article.watched') : t('article.watch'),
+      title: isWatched.value ? t('topic.watched') : t('topic.watch'),
       activeClass: 'bg-success/10 text-success hover:bg-success/15',
       onClick: toggleWatch,
     },
@@ -149,7 +149,7 @@ const floatingTopicActions = computed(() => {
       active: false,
       acting: actingModeration.value,
       fill: false,
-      title: isBanned ? t('article.moderationUnban') : t('article.moderationBan'),
+      title: isBanned ? t('topic.moderationUnban') : t('topic.moderationBan'),
       activeClass: 'text-base-content/75 hover:bg-base-200 hover:text-base-content',
       onClick: async () => requestTopicModeration(isBanned ? 'unban' : 'ban'),
     })
@@ -973,7 +973,7 @@ async function toggleBookmark() {
   isBookmarked.value = nextBookmarked
   try {
     await bookmarkTopic(page.props.topic.id, nextBookmarked ? 1 : 2)
-    actionMessage.value = nextBookmarked ? t('article.bookmarkAdded') : t('article.bookmarkRemoved')
+    actionMessage.value = nextBookmarked ? t('topic.bookmarkAdded') : t('topic.bookmarkRemoved')
   } catch (error) {
     isBookmarked.value = previousBookmarked
     actionMessage.value = error instanceof Error ? error.message : t('api.bookmarkFailed')
@@ -992,7 +992,7 @@ async function toggleWatch() {
   isWatched.value = nextWatched
   try {
     await watchTopic(page.props.topic.id, nextWatched ? 1 : 2)
-    actionMessage.value = nextWatched ? t('article.watchAdded') : t('article.watchRemoved')
+    actionMessage.value = nextWatched ? t('topic.watchAdded') : t('topic.watchRemoved')
   } catch (error) {
     isWatched.value = previousWatched
     actionMessage.value = error instanceof Error ? error.message : t('api.watchFailed')
@@ -1065,7 +1065,7 @@ async function saveReplyEdit() {
 
   const content = replyContent.value.trim()
   if (!content) {
-    errorMessage.value = t('article.replyRequired')
+    errorMessage.value = t('topic.replyRequired')
     return
   }
   if (content === reply.content.trim()) {
@@ -1094,7 +1094,7 @@ async function saveReplyEdit() {
     replyDraftBeforeEdit.value = ''
     replyTargetBeforeEdit.value = 0
     composerOpen.value = false
-    pushFlash(t('article.replyUpdated'), 'success')
+    pushFlash(t('topic.replyUpdated'), 'success')
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('api.replyUpdateFailed')
   } finally {
@@ -1113,7 +1113,7 @@ async function submitReply() {
   if (submitting.value) return
 
   if (!content) {
-    errorMessage.value = t('article.replyRequired')
+    errorMessage.value = t('topic.replyRequired')
     successMessage.value = ''
     return
   }
@@ -1125,7 +1125,7 @@ async function submitReply() {
     const createdReply = await createPost(page.props.topic.id, content, replyId)
     replyContent.value = ''
     replyTargetId.value = 0
-    successMessage.value = t('article.replyPosted')
+    successMessage.value = t('topic.replyPosted')
     const createdReplyId = typeof createdReply === 'object' && createdReply !== null ? createdReply.id : createdReply
     if (typeof createdReplyId === 'number') {
       await revealCreatedReply(createdReplyId)
@@ -1175,7 +1175,7 @@ async function updateTopicModerationFromDetail() {
     await updateModerationTopicStatus(page.props.topic.id, action)
     topicProcessStatus.value = action === 'ban' ? 1 : 0
     pendingModerationAction.value = null
-    actionMessage.value = action === 'ban' ? t('article.moderationBanSuccess') : t('article.moderationUnbanSuccess')
+    actionMessage.value = action === 'ban' ? t('topic.moderationBanSuccess') : t('topic.moderationUnbanSuccess')
     pushFlash(actionMessage.value, 'success')
   } catch (error) {
     actionMessage.value = error instanceof Error ? error.message : t('api.moderationActionFailed')
@@ -1248,7 +1248,7 @@ function requestReplyReport(reply: PostPayload) {
   requestReport({
     targetType: 'post',
     targetId: reply.id,
-    title: t('article.replyReportTitle', { no: reply.postNo || reply.id }),
+    title: t('topic.replyReportTitle', { no: reply.postNo || reply.id }),
     excerpt: reply.content,
   })
 }
@@ -1266,7 +1266,7 @@ async function submitCurrentReport() {
   try {
     await submitReport(pendingReport.value.targetType, pendingReport.value.targetId, reportReason.value, reportNote.value)
     pendingReport.value = null
-    pushFlash(t('article.reportSubmitted'), 'success')
+    pushFlash(t('topic.reportSubmitted'), 'success')
   } catch (error) {
     reportError.value = error instanceof Error ? error.message : t('api.reportFailed')
   } finally {
@@ -1285,7 +1285,7 @@ async function moderateReply(reply: PostPayload, action: 'ban' | 'unban') {
     await updateModerationPostStatus(reply.id, action)
     reply.processStatus = action === 'ban' ? 1 : 0
     reply.isHidden = action === 'ban'
-    pushFlash(action === 'ban' ? t('article.replyModerationBanSuccess') : t('article.replyModerationUnbanSuccess'), 'success')
+    pushFlash(action === 'ban' ? t('topic.replyModerationBanSuccess') : t('topic.replyModerationUnbanSuccess'), 'success')
   } catch (error) {
     pushFlash(error instanceof Error ? error.message : t('api.moderationActionFailed'), 'error')
   } finally {
@@ -1302,7 +1302,7 @@ async function removeReply(replyId: number) {
   deleteErrorMessage.value = ''
   try {
     await deletePost(replyId)
-    successMessage.value = t('article.replyDeleted')
+    successMessage.value = t('topic.replyDeleted')
     pendingDeleteReply.value = null
     await refreshCurrentPage()
   } catch (error) {
@@ -1357,7 +1357,7 @@ async function removeReply(replyId: number) {
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <a :href="`/u/${page.props.topic.author.id}`" class="font-semibold text-base-content hover:text-primary">{{ page.props.topic.author.username }}</a>
-                    <div class="text-xs font-medium text-base-content/75">{{ t('article.body') }}</div>
+                    <div class="text-xs font-medium text-base-content/75">{{ t('topic.body') }}</div>
                   </div>
                   <div class="flex flex-wrap items-center justify-end gap-3 text-xs font-medium text-base-content/75">
                     <div class="flex items-center gap-3">
@@ -1385,7 +1385,7 @@ async function removeReply(replyId: number) {
                     @click="toggleLike"
                   >
                     <Heart class="h-4 w-4" :fill="isLiked ? 'currentColor' : 'none'" />
-                    {{ likeCount ? formatNumber(likeCount) : t('article.like') }}
+                    {{ likeCount ? formatNumber(likeCount) : t('topic.like') }}
                   </button>
                   <button
                     type="button"
@@ -1395,7 +1395,7 @@ async function removeReply(replyId: number) {
                     @click="toggleBookmark"
                   >
                     <Bookmark class="h-4 w-4" :fill="isBookmarked ? 'currentColor' : 'none'" />
-                    {{ isBookmarked ? t('article.bookmarked') : t('article.bookmark') }}
+                    {{ isBookmarked ? t('topic.bookmarked') : t('topic.bookmark') }}
                   </button>
                   <button
                     type="button"
@@ -1405,7 +1405,7 @@ async function removeReply(replyId: number) {
                     @click="toggleWatch"
                   >
                     <Bell class="h-4 w-4" :fill="isWatched ? 'currentColor' : 'none'" />
-                    {{ isWatched ? t('article.watched') : t('article.watch') }}
+                    {{ isWatched ? t('topic.watched') : t('topic.watch') }}
                   </button>
                   <button
                     v-if="!page.props.permissions.isOwnTopic"
@@ -1414,7 +1414,7 @@ async function removeReply(replyId: number) {
                     @click="requestTopicReport"
                   >
                     <Flag class="h-4 w-4" />
-                    {{ t('article.report') }}
+                    {{ t('topic.report') }}
                   </button>
                   <button
                     v-if="page.props.permissions.canModerateTopic && topicProcessStatus === 0"
@@ -1424,7 +1424,7 @@ async function removeReply(replyId: number) {
                     @click="requestTopicModeration('ban')"
                   >
                     <Ban class="h-4 w-4" />
-                    {{ t('article.moderationBan') }}
+                    {{ t('topic.moderationBan') }}
                   </button>
                   <button
                     v-else-if="page.props.permissions.canModerateTopic && topicProcessStatus === 1"
@@ -1434,7 +1434,7 @@ async function removeReply(replyId: number) {
                     @click="requestTopicModeration('unban')"
                   >
                     <RotateCcw class="h-4 w-4" />
-                    {{ t('article.moderationUnban') }}
+                    {{ t('topic.moderationUnban') }}
                   </button>
                   <span v-if="actionMessage" class="text-xs" :class="actionMessageSuccess ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
                 </div>
@@ -1454,7 +1454,7 @@ async function removeReply(replyId: number) {
               >
                 <Loader2 v-if="loadingReplyDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
                 <ChevronsUp v-else class="h-3.5 w-3.5" />
-                {{ t('article.loadEarlierReplies') }}
+                {{ t('topic.loadEarlierReplies') }}
               </button>
             </div>
 
@@ -1503,70 +1503,70 @@ async function removeReply(replyId: number) {
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       :disabled="deletingReplyId === reply.id"
-                      :title="deletingReplyId === reply.id ? t('article.deleting') : t('article.delete')"
+                      :title="deletingReplyId === reply.id ? t('topic.deleting') : t('topic.delete')"
                       @click="requestDeleteReply(reply)"
                     >
                       <Trash2 class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ deletingReplyId === reply.id ? t('article.deleting') : t('article.delete') }}</span>
+                      <span class="sr-only">{{ deletingReplyId === reply.id ? t('topic.deleting') : t('topic.delete') }}</span>
                     </button>
                     <button
                       v-if="page.props.permissions.canPost && !reply.isHidden"
                       type="button"
                       class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                      :title="t('article.reply')"
+                      :title="t('topic.reply')"
                       @click="replyTo(reply)"
                     >
                       <CornerDownLeft class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('article.reply') }}</span>
+                      <span class="sr-only">{{ t('topic.reply') }}</span>
                     </button>
                     <button
                       v-if="!reply.isOwnPost && !reply.isHidden"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
-                      :title="t('article.report')"
+                      :title="t('topic.report')"
                       @click="requestReplyReport(reply)"
                     >
                       <Flag class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('article.report') }}</span>
+                      <span class="sr-only">{{ t('topic.report') }}</span>
                     </button>
                     <button
                       v-if="reply.canModerate && reply.processStatus === 0"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:opacity-50"
                       :disabled="replyModerationBusy(reply.id)"
-                      :title="t('article.moderationBan')"
+                      :title="t('topic.moderationBan')"
                       @click="moderateReply(reply, 'ban')"
                     >
                       <Ban class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('article.moderationBan') }}</span>
+                      <span class="sr-only">{{ t('topic.moderationBan') }}</span>
                     </button>
                     <button
                       v-else-if="reply.canModerate && reply.processStatus === 1"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
                       :disabled="replyModerationBusy(reply.id)"
-                      :title="t('article.moderationUnban')"
+                      :title="t('topic.moderationUnban')"
                       @click="moderateReply(reply, 'unban')"
                     >
                       <RotateCcw class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('article.moderationUnban') }}</span>
+                      <span class="sr-only">{{ t('topic.moderationUnban') }}</span>
                     </button>
                     <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
                   </div>
                 </div>
                 <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-base-200 px-2 py-1 text-sm text-base-content/55">
-                  <span class="shrink-0">{{ t('article.reply') }}</span>
+                  <span class="shrink-0">{{ t('topic.reply') }}</span>
                   <a :href="`/u/${reply.replyToUserId}`" class="min-w-0 truncate font-medium text-base-content/75 hover:text-primary">@{{ reply.replyToUsername }}</a>
                 </p>
                 <div v-if="reply.isHidden && !reply.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
-                  {{ t('article.hiddenReplyPlaceholder') }}
+                  {{ t('topic.hiddenReplyPlaceholder') }}
                 </div>
                 <div v-else class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
                 <div v-if="reply.isHidden && reply.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
-                  {{ t('article.hiddenReplyBadge') }}
+                  {{ t('topic.hiddenReplyBadge') }}
                 </div>
                 <div v-if="reply.updatedAt && reply.updatedAt !== reply.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
-                  {{ t('article.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
+                  {{ t('topic.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
                 </div>
               </div>
             </div>
@@ -1581,12 +1581,12 @@ async function removeReply(replyId: number) {
                 @click="loadReplyWindow('after')"
               >
                 <Loader2 v-if="loadingReplyDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
-                {{ t('article.retryLoadReplies') }}
+                {{ t('topic.retryLoadReplies') }}
               </button>
               <p v-else-if="replyWindowError" class="text-xs text-error">{{ replyWindowError }}</p>
               <p v-else-if="replyHasAfter && loadingReplyDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-base-content/55">
                 <Loader2 class="h-3.5 w-3.5 animate-spin" />
-                {{ t('article.loadingMoreReplies') }}
+                {{ t('topic.loadingMoreReplies') }}
               </p>
               <button
                 v-else-if="replyHasAfter"
@@ -1595,9 +1595,9 @@ async function removeReply(replyId: number) {
                 :disabled="loadingReplyWindow"
                 @click="loadMoreRepliesManually"
               >
-                {{ t('article.loadMoreReplies') }}
+                {{ t('topic.loadMoreReplies') }}
               </button>
-              <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-base-content/55">{{ t('article.allRepliesShown') }}</p>
+              <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-base-content/55">{{ t('topic.allRepliesShown') }}</p>
             </div>
             <span ref="replyListEndEl" class="block h-px scroll-mb-28" aria-hidden="true" />
           </div>
@@ -1607,26 +1607,26 @@ async function removeReply(replyId: number) {
               class="sticky top-19"
             >
               <div class="px-4 py-4">
-                <h2 class="text-sm font-semibold text-base-content/55">{{ t('article.overview') }}</h2>
+                <h2 class="text-sm font-semibold text-base-content/55">{{ t('topic.overview') }}</h2>
               </div>
 
               <dl class="space-y-4 border-t border-line px-4 py-5 text-sm">
                 <div class="flex items-center justify-between gap-4">
-                  <dt class="font-semibold text-base-content/55">{{ t('article.replyCount') }}</dt>
+                  <dt class="font-semibold text-base-content/55">{{ t('topic.replyCount') }}</dt>
                   <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.topic.replyCount) }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-4">
-                  <dt class="font-semibold text-base-content/55">{{ t('article.viewCount') }}</dt>
+                  <dt class="font-semibold text-base-content/55">{{ t('topic.viewCount') }}</dt>
                   <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.topic.viewCount) }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-4">
-                  <dt class="font-semibold text-base-content/55">{{ t('article.participants') }}</dt>
+                  <dt class="font-semibold text-base-content/55">{{ t('topic.participants') }}</dt>
                   <dd class="text-right font-semibold tabular-nums text-base-content">{{ page.props.topic.participants.length }}</dd>
                 </div>
               </dl>
 
               <div v-if="page.props.topic.participants.length" class="border-t border-line px-4 py-4">
-                <h3 class="mb-3 text-sm font-semibold text-base-content/55">{{ t('article.activeParticipants') }}</h3>
+                <h3 class="mb-3 text-sm font-semibold text-base-content/55">{{ t('topic.activeParticipants') }}</h3>
                 <div class="flex flex-wrap gap-1.5">
                   <a
                     v-for="participant in page.props.topic.participants"
@@ -1721,8 +1721,8 @@ async function removeReply(replyId: number) {
                 <AlertTriangle class="h-5 w-5" />
               </div>
               <div class="min-w-0 flex-1">
-                <h2 id="delete-reply-title" class="text-base font-bold text-base-content">{{ t('article.deleteReplyTitle') }}</h2>
-                <p class="mt-1 text-sm leading-6 text-base-content/55">{{ t('article.deleteReplyDescription') }}</p>
+                <h2 id="delete-reply-title" class="text-base font-bold text-base-content">{{ t('topic.deleteReplyTitle') }}</h2>
+                <p class="mt-1 text-sm leading-6 text-base-content/55">{{ t('topic.deleteReplyDescription') }}</p>
               </div>
               <button
                 type="button"
@@ -1758,7 +1758,7 @@ async function removeReply(replyId: number) {
               >
                 <Loader2 v-if="deletingReplyId === pendingDeleteReply.id" class="h-4 w-4 animate-spin" />
                 <Trash2 v-else class="h-4 w-4" />
-                {{ deletingReplyId === pendingDeleteReply.id ? t('article.deleting') : t('article.confirmDelete') }}
+                {{ deletingReplyId === pendingDeleteReply.id ? t('topic.deleting') : t('topic.confirmDelete') }}
               </button>
             </div>
           </div>
@@ -1782,7 +1782,7 @@ async function removeReply(replyId: number) {
                 <Flag class="h-5 w-5" />
               </div>
               <div class="min-w-0 flex-1">
-                <h2 id="report-title" class="text-base font-bold text-base-content">{{ t('article.reportTitle') }}</h2>
+                <h2 id="report-title" class="text-base font-bold text-base-content">{{ t('topic.reportTitle') }}</h2>
                 <p class="mt-1 line-clamp-2 text-sm leading-6 text-base-content/55">{{ pendingReport.title }}</p>
               </div>
               <button
@@ -1798,13 +1798,13 @@ async function removeReply(replyId: number) {
             <div class="mt-4 space-y-3">
               <label v-for="reason in reportReasons" :key="reason" class="flex cursor-pointer items-center gap-2 text-sm text-base-content/75">
                 <input v-model="reportReason" class="radio radio-sm" type="radio" name="report-reason" :value="reason" />
-                <span>{{ t(`article.reportReasons.${reason}`) }}</span>
+                <span>{{ t(`topic.reportReasons.${reason}`) }}</span>
               </label>
               <textarea
                 v-model="reportNote"
                 class="gf-textarea min-h-24"
                 maxlength="300"
-                :placeholder="t('article.reportNotePlaceholder')"
+                :placeholder="t('topic.reportNotePlaceholder')"
               />
             </div>
 
@@ -1827,7 +1827,7 @@ async function removeReply(replyId: number) {
               >
                 <Loader2 v-if="reportSubmitting" class="h-4 w-4 animate-spin" />
                 <Flag v-else class="h-4 w-4" />
-                {{ reportSubmitting ? t('common.loadingShort') : t('article.submitReport') }}
+                {{ reportSubmitting ? t('common.loadingShort') : t('topic.submitReport') }}
               </button>
             </div>
           </div>
@@ -1850,10 +1850,10 @@ async function removeReply(replyId: number) {
               <AlertTriangle class="mt-0.5 h-5 w-5 shrink-0 text-error" />
               <div class="min-w-0 flex-1">
                 <h2 id="ban-topic-title" class="text-base font-bold text-base-content">
-                  {{ pendingModerationAction === 'ban' ? t('article.moderationBanTitle') : t('article.moderationUnbanTitle') }}
+                  {{ pendingModerationAction === 'ban' ? t('topic.moderationBanTitle') : t('topic.moderationUnbanTitle') }}
                 </h2>
                 <p class="mt-1 text-sm leading-6 text-base-content/55">
-                  {{ pendingModerationAction === 'ban' ? t('article.moderationBanDescription') : t('article.moderationUnbanDescription') }}
+                  {{ pendingModerationAction === 'ban' ? t('topic.moderationBanDescription') : t('topic.moderationUnbanDescription') }}
                 </p>
               </div>
               <button
@@ -1883,7 +1883,7 @@ async function removeReply(replyId: number) {
               >
                 <Loader2 v-if="actingModeration" class="h-4 w-4 animate-spin" />
                 <component :is="pendingModerationAction === 'ban' ? Ban : RotateCcw" v-else class="h-4 w-4" />
-                {{ actingModeration ? t('common.loadingShort') : (pendingModerationAction === 'ban' ? t('article.confirmModerationBan') : t('article.confirmModerationUnban')) }}
+                {{ actingModeration ? t('common.loadingShort') : (pendingModerationAction === 'ban' ? t('topic.confirmModerationBan') : t('topic.confirmModerationUnban')) }}
               </button>
             </div>
           </div>

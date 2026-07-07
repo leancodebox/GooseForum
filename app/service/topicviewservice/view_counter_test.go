@@ -1,4 +1,4 @@
-package articleviewservice
+package topicviewservice
 
 import (
 	"reflect"
@@ -16,8 +16,8 @@ func TestViewCounterBatchesViewsOnClose(t *testing.T) {
 		requestCh: make(chan uint64, 8),
 		closeCh:   make(chan struct{}),
 		flushFn: func(counts map[uint64]uint64) error {
-			for articleID, count := range counts {
-				flushed[articleID] += count
+			for topicID, count := range counts {
+				flushed[topicID] += count
 			}
 			return nil
 		},

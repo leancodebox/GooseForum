@@ -10,7 +10,7 @@ import (
 	"github.com/samber/lo"
 )
 
-// SearchRequest is an article search request.
+// SearchRequest is a topic search request.
 type SearchRequest struct {
 	Query      string   `json:"query"`
 	Categories []uint64 `json:"categories"`
@@ -24,14 +24,14 @@ type SearchResult struct {
 	Title string `json:"title"`
 }
 
-// SearchResponse is the article search response.
+// SearchResponse is the topic search response.
 type SearchResponse struct {
 	Results []SearchResult `json:"results"`
 	Total   int64          `json:"total"`
 }
 
-// SearchArticles returns article IDs and titles directly from Meilisearch.
-func SearchArticles(req SearchRequest) (*SearchResponse, error) {
+// SearchTopics returns topic IDs and titles directly from Meilisearch.
+func SearchTopics(req SearchRequest) (*SearchResponse, error) {
 	if !meiliconnect.IsAvailable() {
 		return &SearchResponse{
 			Results: []SearchResult{},
@@ -40,7 +40,7 @@ func SearchArticles(req SearchRequest) (*SearchResponse, error) {
 	}
 
 	client := meiliconnect.GetClient()
-	index := client.Index(Index)
+	index := client.Index(TopicIndex)
 
 	searchReq := &meilisearch.SearchRequest{
 		Query:  req.Query,

@@ -281,7 +281,7 @@ export default {
     following: 'フォロー中',
     viewProfile: 'プロフィールを見る',
   },
-  article: {
+  topic: {
     body: '本文',
     like: 'いいね',
     bookmark: 'ブックマーク',
@@ -290,8 +290,8 @@ export default {
     bookmarkRemoved: 'ブックマークを解除しました。',
     watch: 'コメントをウォッチ',
     watched: 'コメントをウォッチ中',
-    watchAdded: '記事のコメントをウォッチしました。',
-    watchRemoved: '記事のコメントのウォッチを解除しました。',
+    watchAdded: 'トピックの返信をウォッチしました。',
+    watchRemoved: 'トピックの返信のウォッチを解除しました。',
     reply: '返信',
     replyRequired: '返信内容を入力してください',
     replyUpdated: '返信を更新しました。',

@@ -1,0 +1,59 @@
+{
+  "exclude_dirs": [
+    ".git",
+    "node_modules",
+    "dist",
+    "tmp",
+    "storage",
+    "app/models/deprecatedmodels",
+    "app/service/datamigration"
+  ],
+  "scan": {
+    "extensions": [
+      ".go",
+      ".ts",
+      ".vue",
+      ".md",
+      ".gohtml",
+      ".css",
+      ".json"
+    ],
+    "keywords": [
+      "article",
+      "articles",
+      "reply",
+      "replies"
+    ]
+  },
+  "rules": [
+    {
+      "name": "site-topic-i18n",
+      "description": "Rename site-facing article.* i18n keys to topic.* in the current frontend files.",
+      "paths": [
+        "resource/src/site/pages/TopicPage.vue",
+        "resource/src/site/components/PostComposer.vue",
+        "resource/src/locales/zh.ts",
+        "resource/src/locales/en.ts",
+        "resource/src/locales/ja.ts",
+        "resource/src/locales/it.ts"
+      ],
+      "replacements": [
+        {
+          "type": "literal",
+          "from": "article.",
+          "to": "topic."
+        }
+      ]
+    },
+    {
+      "name": "welcome-topic-shell",
+      "description": "Example of renaming the embedded first-topic markdown file after call sites are updated.",
+      "renames": [
+        {
+          "from": "app/service/userservice/welcomeArticle.md",
+          "to": "app/service/userservice/welcomeTopic.md"
+        }
+      ]
+    }
+  ]
+}

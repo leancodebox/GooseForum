@@ -1,4 +1,4 @@
-package articleviewservice
+package topicviewservice
 
 import (
 	"errors"
@@ -40,19 +40,19 @@ func GetViewCounter() *ViewCounter {
 		}
 		counter.start()
 		closer.RegisterPriority(closer.PriorityFlush, CloseViewCounter)
-		slog.Info("article view counter started", "flushInterval", viewFlushInterval.String(), "queueSize", viewQueueSize)
+		slog.Info("topic view counter started", "flushInterval", viewFlushInterval.String(), "queueSize", viewQueueSize)
 	})
 	return counter
 }
 
-func RecordView(articleID uint64) {
-	if articleID == 0 {
+func RecordView(topicID uint64) {
+	if topicID == 0 {
 		return
 	}
-	GetViewCounter().Record(articleID)
+	GetViewCounter().Record(topicID)
 }
 
-func (c *ViewCounter) Record(articleID uint64) {
+func (c *ViewCounter) Record(topicID uint64) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if c.closed {
@@ -60,9 +60,9 @@ func (c *ViewCounter) Record(articleID uint64) {
 	}
 
 	select {
-	case c.requestCh <- articleID:
+	case c.requestCh <- topicID:
 	default:
-		slog.Warn("article view counter queue full, drop view", "articleId", articleID)
+		slog.Warn("topic view counter queue full, drop view", "topicId", topicID)
 	}
 }
 
@@ -71,8 +71,8 @@ func (c *ViewCounter) start() {
 		pending := make(map[uint64]uint64)
 		for {
 			select {
-			case articleID := <-c.requestCh:
-				pending[articleID]++
+			case topicID := <-c.requestCh:
+				pending[topicID]++
 			case <-c.ticker.C:
 				c.flush(pending)
 				pending = make(map[uint64]uint64)
@@ -88,8 +88,8 @@ func (c *ViewCounter) start() {
 func (c *ViewCounter) drain(pending map[uint64]uint64) {
 	for {
 		select {
-		case articleID := <-c.requestCh:
-			pending[articleID]++
+		case topicID := <-c.requestCh:
+			pending[topicID]++
 		default:
 			return
 		}
@@ -101,14 +101,14 @@ func (c *ViewCounter) flush(pending map[uint64]uint64) {
 		return
 	}
 	if c.flushFn == nil {
-		slog.Error("flush article view counts failed", "err", errMissingFlushFn)
+		slog.Error("flush topic view counts failed", "err", errMissingFlushFn)
 		return
 	}
 	if err := c.flushFn(pending); err != nil {
-		slog.Error("flush article view counts failed", "count", len(pending), "err", err)
+		slog.Error("flush topic view counts failed", "count", len(pending), "err", err)
 		return
 	}
-	slog.Debug("article view counts flushed", "count", len(pending))
+	slog.Debug("topic view counts flushed", "count", len(pending))
 }
 
 func (c *ViewCounter) Close() {
@@ -132,4 +132,4 @@ func CloseViewCounter() error {
 	return nil
 }
 
-var errMissingFlushFn = errors.New("article view counter flush function is nil")
+var errMissingFlushFn = errors.New("topic view counter flush function is nil")

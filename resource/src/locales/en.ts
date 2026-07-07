@@ -281,7 +281,7 @@ export default {
     following: 'Following',
     viewProfile: 'View profile',
   },
-  article: {
+  topic: {
     body: 'Body',
     like: 'Like',
     bookmark: 'Bookmark',
@@ -290,8 +290,8 @@ export default {
     bookmarkRemoved: 'Bookmark removed.',
     watch: 'Watch comments',
     watched: 'Watching comments',
-    watchAdded: 'Watching article comments.',
-    watchRemoved: 'Stopped watching article comments.',
+    watchAdded: 'Watching topic replies.',
+    watchRemoved: 'Stopped watching topic replies.',
     reply: 'Reply',
     replyRequired: 'Reply content cannot be empty',
     replyUpdated: 'Reply updated.',

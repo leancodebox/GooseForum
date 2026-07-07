@@ -2077,7 +2077,7 @@ func buildSearchPageProps(query string, page int) SearchPageProps {
 	if page < 1 {
 		page = 1
 	}
-	result, err := searchservice.SearchArticles(searchservice.SearchRequest{
+	result, err := searchservice.SearchTopics(searchservice.SearchRequest{
 		Query:  query,
 		Limit:  pageSize,
 		Offset: (page - 1) * pageSize,

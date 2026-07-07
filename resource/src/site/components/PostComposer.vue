@@ -66,12 +66,12 @@ const dragOver = ref(false)
 const composerBusy = computed(() => props.submitting || uploadingImage.value)
 const showFloatingControls = computed(() => props.hasRail || props.authenticated)
 const editing = computed(() => props.mode === 'edit')
-const composerTitle = computed(() => editing.value ? t('article.editOwnReply') : t('article.joinDiscussion'))
-const composerPlaceholder = computed(() => editing.value ? t('article.editReplyPlaceholder') : t('article.replyPlaceholder'))
+const composerTitle = computed(() => editing.value ? t('topic.editOwnReply') : t('topic.joinDiscussion'))
+const composerPlaceholder = computed(() => editing.value ? t('topic.editReplyPlaceholder') : t('topic.replyPlaceholder'))
 const submitText = computed(() => {
   if (uploadingImage.value) return t('publish.processingImage')
-  if (props.submitting) return editing.value ? t('common.saving') : t('article.publishing')
-  return editing.value ? t('common.save') : t('article.publishReply')
+  if (props.submitting) return editing.value ? t('common.saving') : t('topic.publishing')
+  return editing.value ? t('common.save') : t('topic.publishReply')
 })
 
 watch(
@@ -245,7 +245,7 @@ function submit() {
             @click.stop
           >
             <div class="mb-1 flex items-center justify-between gap-3 px-1">
-              <div class="text-xs font-semibold text-base-content/55">{{ t('article.replyPosition') }}</div>
+              <div class="text-xs font-semibold text-base-content/55">{{ t('topic.replyPosition') }}</div>
               <button
                 type="button"
                 class="inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-300 hover:text-base-content"
@@ -277,7 +277,7 @@ function submit() {
                 type="button"
                 class="inline-flex h-9 items-center rounded-full px-2.5 text-sm font-black tabular-nums text-primary transition hover:bg-info/10 hover:text-primary xl:hidden"
                 :aria-expanded="mobileRailOpen"
-                :aria-label="t('article.replyPosition')"
+                :aria-label="t('topic.replyPosition')"
                 @click="toggleMobileRail"
               >
                 {{ `${currentNo} / ${formatNumber(maxNo)}` }}
@@ -300,11 +300,11 @@ function submit() {
                 v-if="authenticated && canPost"
                 type="button"
                 class="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-base-content/75 transition hover:bg-info/10 hover:text-primary"
-                :title="t('article.joinDiscussion')"
+                :title="t('topic.joinDiscussion')"
                 @click="openReply"
               >
                 <MessageSquare class="h-4 w-4" />
-                <span>{{ t('article.joinDiscussion') }}</span>
+                <span>{{ t('topic.joinDiscussion') }}</span>
               </button>
             </div>
           </div>
@@ -319,7 +319,7 @@ function submit() {
             </div>
             <div v-if="target && !editing" class="mb-2 flex min-w-0 items-center justify-between gap-3 rounded-md border border-primary/20 bg-info/10 px-3 py-2">
               <div class="min-w-0 text-sm font-medium text-base-content/75">
-                {{ t('article.replyTo', { user: `@${target.author.username}` }) }}
+                {{ t('topic.replyTo', { user: `@${target.author.username}` }) }}
               </div>
               <button type="button" class="gf-icon-button h-7 w-7 shrink-0 hover:bg-base-100" :aria-label="t('common.cancel')" @click="emit('clearTarget')">
                 <X class="h-3.5 w-3.5" />

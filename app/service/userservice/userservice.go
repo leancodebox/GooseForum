@@ -10,11 +10,11 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/permission"
 )
 
-//go:embed welcomeArticle.md
-var welcomeArticle string
+//go:embed welcomeTopic.md
+var welcomeTopic string
 
-func GetWelcomeArticleContent() string {
-	return welcomeArticle
+func GetWelcomeTopicContent() string {
+	return welcomeTopic
 }
 
 func FirstUserInit(adminUser *users.EntityComplete) {

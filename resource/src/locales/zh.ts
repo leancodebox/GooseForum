@@ -281,7 +281,7 @@ export default {
     following: '已关注',
     viewProfile: '查看主页',
   },
-  article: {
+  topic: {
     body: '正文',
     like: '点赞',
     bookmark: '收藏',
@@ -290,8 +290,8 @@ export default {
     bookmarkRemoved: '已取消收藏。',
     watch: '关注',
     watched: '已关注',
-    watchAdded: '已关注文章评论。',
-    watchRemoved: '已取消关注文章评论。',
+    watchAdded: '已关注主题回复。',
+    watchRemoved: '已取消关注主题回复。',
     reply: '回复',
     replyRequired: '回复内容不能为空',
     replyUpdated: '回复已更新。',

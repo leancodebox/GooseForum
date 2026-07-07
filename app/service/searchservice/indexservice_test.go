@@ -28,7 +28,7 @@ func TestConvertTopicToSearchDocument(t *testing.T) {
 	if got.ID != topic.Id || got.Title != topic.Title {
 		t.Fatalf("unexpected identity fields: %#v", got)
 	}
-	if got.Type != 0 || got.ArticleStatus != topic.Status || got.ProcessStatus != topic.ProcessStatus {
+	if got.Type != 0 || got.TopicStatus != topic.Status || got.ProcessStatus != topic.ProcessStatus {
 		t.Fatalf("unexpected status fields: %#v", got)
 	}
 	if got.CreatedAt != createdAt.Unix() || got.UpdatedAt != updatedAt.Unix() {

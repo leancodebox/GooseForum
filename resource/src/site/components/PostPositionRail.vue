@@ -112,7 +112,7 @@ function removePointerListeners() {
     <button
       type="button"
       class="mb-3 block max-w-full truncate text-left text-base font-semibold leading-tight text-base-content/55 transition hover:text-base-content/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
-      :title="t('article.earliestContent')"
+      :title="t('topic.earliestContent')"
       @click="emit('earliest')"
     >
       {{ startLabel }}
@@ -127,7 +127,7 @@ function removePointerListeners() {
         class="relative h-48 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
         role="slider"
         tabindex="0"
-        :aria-label="t('article.replyPosition')"
+        :aria-label="t('topic.replyPosition')"
         :aria-valuemin="1"
         :aria-valuemax="max"
         :aria-valuenow="displayNo"
@@ -159,7 +159,7 @@ function removePointerListeners() {
     <button
       type="button"
       class="mt-3 block max-w-full truncate text-left text-base font-semibold leading-tight text-base-content/55 transition hover:text-base-content/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-content/35 focus-visible:ring-offset-2"
-      :title="t('article.latestReply')"
+      :title="t('topic.latestReply')"
       @click="emit('latest')"
     >
       {{ endLabel }}

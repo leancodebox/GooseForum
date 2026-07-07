@@ -213,7 +213,7 @@ posts.post_no = 1
 | 主题参与者 | `articles.posters` 由 `articles_user_stat` 同步 | topic 继续缓存 posters；来源改为 posts 聚合 | 删除/封禁 post 后参与者缓存是否重算要定义 |
 | 分类 | `article_category_rs.article_id` | 可维持一段时间，内部解释为 topic_id；后续再改名为 topic_category_rs | 改表名收益不大，可放到最后做 |
 | 点赞/收藏/关注 | `articleUserAction.article_id` | 这些是容器级动作，建议继续挂 topic | 命名可先不改表，避免牵连列表和用户页 |
-| 浏览量 | `articleviewservice` 更新 articles.view_count | 浏览量属于 topic，迁到 topics.view_count | 热门排序依赖该字段，迁移需保持原子更新语义 |
+| 浏览量 | `topicviewservice` 更新 topics.view_count | 浏览量属于 topic，迁到 topics.view_count | 热门排序依赖该字段，迁移需保持原子更新语义 |
 | SEO / Sitemap / RSS | 使用 article title/content/description/first_image_url | title 属于 topic，正文摘要来自首楼 post，URL 不变 | 历史 URL 不变时 SEO 风险较低，但摘要生成路径要改 |
 | HTTP 通知 | payload 使用 `topic` / `post` 字段，`targetType` 使用 `topic/post` | 新接入方只使用新字段，不再扩散旧命名 | 第三方回调消费者升级时需要同步修改字段读取 |
 | 管理后台 | 文章管理、举报管理、审核日志读取 article/reply | 管理文章列表仍以 topic 为主，正文处理以 post 为主 | 文案和操作语义要避免“封禁主题”和“封禁回复”混淆 |

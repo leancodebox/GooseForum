@@ -281,7 +281,7 @@ export default {
     following: 'Segue',
     viewProfile: 'Visualizza profilo',
   },
-  article: {
+  topic: {
     body: 'Corpo',
     like: 'Mi piace',
     bookmark: 'Salva',
@@ -290,8 +290,8 @@ export default {
     bookmarkRemoved: 'Segnalibro rimosso.',
     watch: 'Segui i commenti',
     watched: 'Stai seguendo i commenti',
-    watchAdded: 'Stai seguendo i commenti dell’articolo.',
-    watchRemoved: 'Hai smesso di seguire i commenti dell’articolo.',
+    watchAdded: 'Stai seguendo le risposte dell’argomento.',
+    watchRemoved: 'Hai smesso di seguire le risposte dell’argomento.',
     reply: 'Rispondi',
     replyRequired: 'Il contenuto della risposta non può essere vuoto',
     replyUpdated: 'Risposta aggiornata.',

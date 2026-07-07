@@ -23,18 +23,18 @@ type IndexBuildResult struct {
 }
 
 // convertTopicToSearchDocument maps a topic and its first post to a search document.
-func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity) ArticleSearchDocument {
+func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity) TopicSearchDocument {
 	searchContent := ""
 	if firstPost != nil {
 		searchContent = markdown2html.ExtractSearchContent(firstPost.Content)
 	}
-	return ArticleSearchDocument{
+	return TopicSearchDocument{
 		ID:            topic.Id,
 		Title:         topic.Title,
 		SearchContent: searchContent,
 		Type:          0,
 		Category:      topic.CategoryIds,
-		ArticleStatus: topic.Status,
+		TopicStatus:   topic.Status,
 		ProcessStatus: topic.ProcessStatus,
 		CreatedAt:     topic.CreatedAt.Unix(),
 		UpdatedAt:     topic.UpdatedAt.Unix(),
@@ -50,7 +50,7 @@ func BuildSingleTopicSearchDocument(topic *topics.Entity, firstPost *posts.Entit
 	}
 
 	client := meiliconnect.GetClient()
-	index := client.Index(Index)
+	index := client.Index(TopicIndex)
 	var task *meilisearch.TaskInfo
 	var err error
 	pk := "id"
@@ -72,16 +72,16 @@ func BuildSingleTopicSearchDocument(topic *topics.Entity, firstPost *posts.Entit
 	return task, nil
 }
 
-// BuildMeilisearchIndex rebuilds the Meilisearch article index.
+// BuildMeilisearchIndex rebuilds the Meilisearch topic index.
 func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 	if !meiliconnect.IsAvailable() {
 		return nil, errors.New("meilisearch 服务不可用，请检查配置或连接状态")
 	}
 
-	fmt.Println("开始构建 Meilisearch 文章索引...")
+	fmt.Println("开始构建 Meilisearch 主题索引...")
 
 	client := meiliconnect.GetClient()
-	indexName := Index
+	indexName := TopicIndex
 	index := client.Index(indexName)
 
 	fmt.Println("配置索引设置...")
@@ -89,14 +89,14 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 		return nil, fmt.Errorf("配置索引失败: %w", err)
 	}
 
-	var articleStartId uint64 = 0
+	var topicStartID uint64
 	limit := 100
 	processedCount := 0
 	failedCount := 0
 	totalBatches := 0
 
 	for {
-		topicList := topics.QueryById(articleStartId, limit)
+		topicList := topics.QueryById(topicStartID, limit)
 		if len(topicList) == 0 {
 			break
 		}
@@ -114,7 +114,7 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 			fmt.Printf("处理主题 ID:%v, TaskUID: %v\n", topic.Id, getTaskUID(task))
 			processedCount++
 		})
-		articleStartId = topicList[len(topicList)-1].Id
+		topicStartID = topicList[len(topicList)-1].Id
 
 		totalBatches++
 		if len(topicList) < limit {
@@ -131,8 +131,8 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 
 	fmt.Printf("\n=== Meilisearch 索引构建完成 ===\n")
 	fmt.Printf("处理批次: %d\n", result.TotalBatches)
-	fmt.Printf("成功索引: %d 篇文章\n", result.ProcessedCount)
-	fmt.Printf("失败数量: %d 篇文章\n", result.FailedCount)
+	fmt.Printf("成功索引: %d 个主题\n", result.ProcessedCount)
+	fmt.Printf("失败数量: %d 个主题\n", result.FailedCount)
 	fmt.Printf("索引名称: %s\n", result.IndexName)
 
 	return result, nil

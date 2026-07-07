@@ -152,7 +152,7 @@ Public SPA navigation rules:
 
 - Keep the app shell mounted across in-app navigation.
 - Do not clear shell header state before the next page is ready to render.
-- Animate the main content area only when the page identity changes, such as topic list to article detail.
+- Animate the main content area only when the page identity changes, such as topic list to topic detail.
 - Do not animate the whole page for same-view filter changes. Stable regions such as announcements, tabs, headers, and list frames should stay still when only list data changes.
 - Let the component that owns the changed data provide local motion when it does not disturb document height. For same-view topic sort changes, do not animate the whole topic list in or out; prefer direct data replacement plus stable tab/loading feedback.
 - Keep the previous page visible until the next payload and component are ready.
