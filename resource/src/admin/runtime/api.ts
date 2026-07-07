@@ -2,7 +2,7 @@ import { adminText } from '@/admin/runtime/i18n-text'
 import { resolveApiMessage } from '@/runtime/api-message'
 import type {
   ApiEnvelope,
-  AdminArticle,
+  AdminTopic,
   AdminBadge,
   AdminCategory,
   AdminCategoryModerator,
@@ -12,7 +12,7 @@ import type {
   AdminRole,
   AdminUser,
   AnnouncementConfig,
-  ArticleSource,
+  TopicSource,
   DailyTraffic,
   FriendLinkGroup,
   GithubRelease,
@@ -200,8 +200,8 @@ export function deleteCategoryModerator(id: number) {
   return postJson<unknown>('/api/admin/category-moderator-delete', { id }, adminText('k00er'))
 }
 
-export function getArticlesList(params: { page?: number, pageSize?: number, search?: string }) {
-  return postJson<PageResult<AdminArticle>>('/api/admin/topics/list', params, adminText('k0012'))
+export function getTopicsList(params: { page?: number, pageSize?: number, search?: string }) {
+  return postJson<PageResult<AdminTopic>>('/api/admin/topics/list', params, adminText('k0012'))
 }
 
 export function getOptRecordList(params: { page?: number, pageSize?: number, optUserId?: number, optType?: number, targetType?: number, targetId?: number }) {
@@ -212,23 +212,23 @@ export function getFileResourceList(params: { page?: number, pageSize?: number }
   return postJson<PageResult<AdminFileResource>>('/api/admin/file-resources', params, adminText('k00fb'))
 }
 
-export function getArticleSource(id: number) {
-  return postJson<ArticleSource>('/api/admin/topics/source', { topicId: id }, adminText('k0014'))
+export function getTopicSource(id: number) {
+  return postJson<TopicSource>('/api/admin/topics/source', { topicId: id }, adminText('k0014'))
 }
 
-export function editArticle(data: { topicId: number, processStatus: number }) {
+export function editTopic(data: { topicId: number, processStatus: number }) {
   return postJson<unknown>('/api/admin/topics/edit', data, adminText('k0015'))
 }
 
-export function deleteArticle(id: number) {
+export function deleteTopic(id: number) {
   return postJson<unknown>('/api/admin/topics/delete', { topicId: id }, adminText('k00cd'))
 }
 
-export function editArticlePin(data: { topicId: number, pinWeight: number }) {
+export function updateTopicPin(data: { topicId: number, pinWeight: number }) {
   return postJson<unknown>('/api/admin/topics/pin-edit', data, adminText('k0016'))
 }
 
-export function editArticleCategories(data: { topicId: number, categoryId: number[] }) {
+export function updateTopicCategories(data: { topicId: number, categoryId: number[] }) {
   return postJson<unknown>('/api/admin/topics/categories-edit', data, adminText('k0017'))
 }
 

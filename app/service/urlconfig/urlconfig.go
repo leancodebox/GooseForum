@@ -71,7 +71,7 @@ func Sponsors() string { return PathSponsors }
 // About returns the about page path.
 func About() string { return PathAbout }
 
-// Publish returns the article publishing path.
+// Publish returns the topic publishing path.
 func Publish() string { return PathPublish }
 
 // Search returns the search page path.
@@ -109,7 +109,7 @@ func Rss() string {
 	return PathRss
 }
 
-// PostDetail returns the article detail path for id.
+// PostDetail returns the topic detail path for id.
 func PostDetail(id any) string {
 	return fmt.Sprintf("%s/%v", PathPost, id)
 }

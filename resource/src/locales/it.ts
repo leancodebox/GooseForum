@@ -151,8 +151,8 @@ export default {
     viewProfile: 'Visualizza profilo',
     templates: {
       comment: 'ha commentato il tuo argomento',
-      reply: 'ti ha risposto',
-      articleComment: 'ha commentato un articolo che segui',
+      postReply: 'ti ha risposto',
+      topicPost: 'ha pubblicato in un topic che segui',
       follow: 'ha iniziato a seguirti',
       badge: 'ha ottenuto il badge "{badge}"',
     },

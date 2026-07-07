@@ -191,8 +191,8 @@ function notificationText(item: NotificationPayload) {
   if (item.eventType === 'follow') {
     return templateText || item.content || item.payload.content || t('notifications.followDescription', { actor: actorName(item) })
   }
-  if (item.article) {
-    return item.article.title
+  if (item.topic) {
+    return item.topic.title
   }
   if (templateText) return templateText
   return item.content || item.payload.content || t('notifications.fallback')
@@ -203,13 +203,14 @@ function notificationTitleText(item: NotificationPayload) {
 }
 
 function notificationTemplateText(item: NotificationPayload) {
-  switch (item.payload.templateKey) {
+  const templateKey = item.payload.templateKey as string | undefined
+  switch (templateKey) {
     case 'notifications.templates.comment':
       return t('notifications.templates.comment')
-    case 'notifications.templates.reply':
-      return t('notifications.templates.reply')
-    case 'notifications.templates.articleComment':
-      return t('notifications.templates.articleComment')
+    case 'notifications.templates.postReply':
+      return t('notifications.templates.postReply')
+    case 'notifications.templates.topicPost':
+      return t('notifications.templates.topicPost')
     case 'notifications.templates.follow':
       return t('notifications.templates.follow')
     case 'notifications.templates.badge':
@@ -224,8 +225,8 @@ function notificationVerb(item: NotificationPayload) {
   if (templateText && item.eventType !== 'badge') return templateText
   if (item.eventType === 'follow') return t('notifications.verb.follow')
   if (item.eventType === 'badge') return ''
-  if (item.eventType === 'reply') return t('notifications.verb.reply')
-  if (item.eventType === 'comment' || item.eventType === 'article_comment') return t('notifications.verb.comment')
+  if (item.eventType === 'post_reply') return t('notifications.verb.reply')
+  if (item.eventType === 'comment' || item.eventType === 'topic_post') return t('notifications.verb.comment')
   return notificationTitleText(item)
 }
 
@@ -246,7 +247,7 @@ function actorURL(item: NotificationPayload) {
 }
 
 function targetURL(item: NotificationPayload) {
-  if (item.article) return item.article.url
+  if (item.topic) return item.topic.url
   if (item.eventType === 'badge') return item.payload.metadata?.profileUrl || actorURL(item)
   if (item.eventType === 'follow') return actorURL(item)
   return ''
@@ -385,8 +386,8 @@ function markItemReadAndNavigate(item: NotificationPayload) {
               <span v-else class="max-w-[42%] shrink-0 truncate font-semibold text-base-content">{{ item.eventType === 'follow' ? actorName(item) : notificationTitleText(item) }}</span>
               <span class="shrink-0 text-base-content/55">{{ item.actor.id || item.eventType === 'follow' ? notificationVerb(item) : '' }}</span>
               <a
-                v-if="item.article"
-                :href="item.article.url"
+                v-if="item.topic"
+                :href="item.topic.url"
                 class="min-w-0 max-w-full truncate font-semibold text-primary hover:text-primary"
                 @click="markItemReadAndNavigate(item)"
               >

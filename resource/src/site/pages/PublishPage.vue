@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import { Bold, Code2, Image, Italic, Link, ListChecks, MessageSquareQuote, Send, X } from '@lucide/vue'
-import { submitArticle, uploadImage } from '@/runtime/api'
+import { submitTopic, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { renderMarkdownPreview } from '@/runtime/markdown'
 import { markdownFromClipboard } from '@/runtime/rich-paste'
@@ -16,11 +16,11 @@ const page = defineProps<{
 }>()
 
 const { t } = useI18n()
-const title = ref(page.props.article.title || '')
-const content = ref(page.props.article.content || '')
-const type = ref(page.props.article.type || page.props.types[0]?.value || 0)
-const categoryIds = ref<number[]>([...(page.props.article.categoryIds || [])])
-const currentTopicId = ref(page.props.articleId)
+const title = ref(page.props.topic.title || '')
+const content = ref(page.props.topic.content || '')
+const type = ref(page.props.topic.type || page.props.types[0]?.value || 0)
+const categoryIds = ref<number[]>([...(page.props.topic.categoryIds || [])])
+const currentTopicId = ref(page.props.topicId)
 const preview = ref(false)
 const submitting = ref(false)
 const uploading = ref(false)
@@ -243,13 +243,13 @@ async function save() {
   error.value = ''
   message.value = ''
   try {
-    const id = await submitArticle({
+    const id = await submitTopic({
       topicId: currentTopicId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       type: type.value,
       categoryId: categoryIds.value,
-      articleStatus: 1,
+      topicStatus: 1,
     })
     currentTopicId.value = id
     syncSavedSnapshot()
@@ -273,13 +273,13 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
   error.value = ''
   message.value = ''
   try {
-    const id = await submitArticle({
+    const id = await submitTopic({
       topicId: currentTopicId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       type: type.value,
       categoryId: categoryIds.value,
-      articleStatus: 0,
+      topicStatus: 0,
     })
     currentTopicId.value = id
     syncSavedSnapshot()

@@ -32,7 +32,7 @@
         <h2>{{ t .Lang "repliesTitle" }}</h2>
         <ol>
             {{range .Payload.Props.Posts}}
-            <li id="reply-{{.ID}}">
+            <li id="post-{{.ID}}">
                 <article>
                     <p>
                         <a href="/u/{{.Author.ID}}">{{.Author.Username}}</a>

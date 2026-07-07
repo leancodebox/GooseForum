@@ -74,10 +74,10 @@ func TestWriteTopicCreatesTopicAndFirstPost(t *testing.T) {
 	res := WriteTopic(component.BetterRequest[WriteTopicReq]{
 		UserId: 1001,
 		Params: WriteTopicReq{
-			Title:         "Topic title",
-			Content:       "Topic content with enough words",
-			CategoryId:    []uint64{2001},
-			ArticleStatus: 1,
+			Title:       "Topic title",
+			Content:     "Topic content with enough words",
+			CategoryId:  []uint64{2001},
+			TopicStatus: 1,
 		},
 	})
 	topicID, ok := res.Data.Result.(uint64)

@@ -172,10 +172,10 @@ posts.post_no = 1
 
 ```text
 /p/post/{articleID}
-/p/post/{articleID}#reply-{replyID}
+/p/post/{articleID}#post-{postID}
 ```
 
-即使内部逐步引入 `topic` / `post` 概念，也不在本轮设计中引入新的公开路由，例如 `/p/topic/{topicID}`，也不要求前端锚点从 `reply-{id}` 改为 `post-{id}`。
+即使内部逐步引入 `topic` / `post` 概念，也不在本轮设计中引入新的公开路由，例如 `/p/topic/{topicID}`。当前公开详情页 URL 继续保留 `/p/post/{id}`，但页面锚点已经切换到 `post-{id}`。
 
 这样做的原因：
 
@@ -187,7 +187,7 @@ posts.post_no = 1
 
 - `articleID` 在公开接口和 URL 上可以继续存在一段时间。
 - 内部代码可以逐步把它解释为 `topicID`。
-- `#reply-{replyID}` 继续兼容旧回复锚点。
+- 页面锚点统一使用 `#post-{postID}`。
 - 是否改公开路由另起设计，不纳入本次改造范围。
 
 ## 影响面梳理
@@ -207,7 +207,7 @@ posts.post_no = 1
 | 举报 | 旧 `article/reply` target 由迁移脚本读取，`article_id` 作为历史存储字段保留 | 正文举报迁到 `target_type=post`，主题举报使用 `target_type=topic`；保留 topic_id 便于范围查询 | 版主按分类过滤举报依赖 topic/category，新代码不再暴露旧 target 常量 |
 | 文件引用 | 旧 `article/reply` target 由迁移脚本读取 | 正文内联图片迁到 `TargetTopic/TargetPost`；头像、管理上传不变 | 旧 target 只保留在迁移脚本中，新写入不再暴露旧常量 |
 | 搜索 | 文章正文和标题搜索依赖 article；回复搜索目前较弱 | topic 索引标题/摘要；post 索引正文 | 搜索结果需要决定返回 topic 还是具体 post |
-| 通知/未读 | `eventNotification` payload 包含 articleId/commentId；链接拼 `#reply-{id}` | payload 可逐步增加 topicId/postId，但公开链接保持旧格式 | 历史通知不能失效，payload hydrate 需要兼容旧字段 |
+| 通知/未读 | `eventNotification` payload 使用 `topicId/postId/topicTitle`；链接拼 `#post-{id}` | 运行时代码只保留 topic/post 命名，历史数据通过迁移脚本转换 | 历史通知的存量数据需要通过迁移清洗完成 |
 | 用户动态 | `userActivities.SubjectTopic`、`SubjectPost`，评论动态通过 reply 回查 article | SubjectPost 应指向 post；仍需能从 post 找 topic | 旧动态的 subject_id 是 reply id，迁移期必须有映射或兼容查询 |
 | 用户统计 | `user_statistics.article_count/reply_count`、`articles_user_stat` | article_count 可变为 topic_count；reply_count 可变为 post_count 排除首楼 | 统计口径变化会影响个人页展示和徽章/积分逻辑 |
 | 主题参与者 | `articles.posters` 由 `articles_user_stat` 同步 | topic 继续缓存 posters；来源改为 posts 聚合 | 删除/封禁 post 后参与者缓存是否重算要定义 |
@@ -215,7 +215,7 @@ posts.post_no = 1
 | 点赞/收藏/关注 | `articleUserAction.article_id` | 这些是容器级动作，建议继续挂 topic | 命名可先不改表，避免牵连列表和用户页 |
 | 浏览量 | `articleviewservice` 更新 articles.view_count | 浏览量属于 topic，迁到 topics.view_count | 热门排序依赖该字段，迁移需保持原子更新语义 |
 | SEO / Sitemap / RSS | 使用 article title/content/description/first_image_url | title 属于 topic，正文摘要来自首楼 post，URL 不变 | 历史 URL 不变时 SEO 风险较低，但摘要生成路径要改 |
-| HTTP 通知 | 事件里有 articleId、commentId、targetType article/reply | 新事件可增加 topicId/postId，旧字段继续保留兼容 | 第三方回调消费者可能依赖旧字段，不能直接删除 |
+| HTTP 通知 | payload 使用 `topic` / `post` 字段，`targetType` 使用 `topic/post` | 新接入方只使用新字段，不再扩散旧命名 | 第三方回调消费者升级时需要同步修改字段读取 |
 | 管理后台 | 文章管理、举报管理、审核日志读取 article/reply | 管理文章列表仍以 topic 为主，正文处理以 post 为主 | 文案和操作语义要避免“封禁主题”和“封禁回复”混淆 |
 | 数据迁移 | 当前 `reply_sequence`、article user action 等迁移依赖 article/reply | 新增 posts 回填和 id 映射迁移；旧迁移保留 | SQLite/MySQL 差异、批量回填时间、失败重试需要单独设计 |
 | 缓存 | 文章列表缓存、用户缓存、未读缓存等间接依赖 article/reply | 缓存 key 和失效点需要随着 topic/post 写路径调整 | 双写阶段最容易出现旧表新表缓存不一致 |

@@ -43,10 +43,10 @@ func TopicDetail(c *gin.Context) {
 	ensurePostRenderedHTML(&firstPost)
 	props := buildTopicDetailProps(c, &topic, &firstPost)
 	payload := PagePayload{
-		Component: "article.detail",
+		Component: "topic.detail",
 		Props:     props,
-		Meta:      buildArticleMeta(c, props.Topic),
-		Layout:    buildLayout(c, activeKeyForArticle(props.Topic)),
+		Meta:      buildTopicMeta(c, props.Topic),
+		Layout:    buildLayout(c, activeKeyForTopic(props.Topic)),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
@@ -54,7 +54,7 @@ func TopicDetail(c *gin.Context) {
 		payload.Meta.Robots = "noindex"
 	}
 
-	renderPage(c, "article.gohtml", payload)
+	renderPage(c, "topic.gohtml", payload)
 	if shouldCountTopicView(&topic) {
 		articleviewservice.RecordView(topic.Id)
 	}
@@ -300,9 +300,9 @@ func renderNotFoundWithMessage(c *gin.Context, messageCode component.MessageCode
 	renderPageWithStatus(c, http.StatusNotFound, "error.gohtml", payload)
 }
 
-func activeKeyForArticle(article TopicDetailPayload) string {
-	if len(article.Categories) > 0 {
-		return "category_" + cast.ToString(article.Categories[0].ID)
+func activeKeyForTopic(topic TopicDetailPayload) string {
+	if len(topic.Categories) > 0 {
+		return "category_" + cast.ToString(topic.Categories[0].ID)
 	}
 	return "topics"
 }

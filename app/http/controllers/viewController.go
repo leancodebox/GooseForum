@@ -105,11 +105,11 @@ func Register(c *gin.Context) {
 	if userEntity.Id == 1 {
 		WriteTopic(component.BetterRequest[WriteTopicReq]{
 			Params: WriteTopicReq{
-				Content:       userservice.GetWelcomeArticleContent(),
-				Title:         "Hi With GooseForum",
-				Type:          1,
-				CategoryId:    []uint64{1},
-				ArticleStatus: 1,
+				Content:     userservice.GetWelcomeArticleContent(),
+				Title:       "Hi With GooseForum",
+				Type:        1,
+				CategoryId:  []uint64{1},
+				TopicStatus: 1,
 			},
 			UserId: userEntity.Id,
 		})

@@ -151,8 +151,8 @@ export default {
     viewProfile: 'プロフィールを見る',
     templates: {
       comment: 'あなたのトピックにコメントしました',
-      reply: 'あなたに返信しました',
-      articleComment: 'ウォッチ中の記事にコメントしました',
+      postReply: 'あなたに返信しました',
+      topicPost: 'ウォッチ中のトピックに投稿しました',
       follow: 'あなたをフォローしました',
       badge: '「{badge}」バッジを獲得しました',
     },

@@ -4,14 +4,14 @@ import (
 	"testing"
 )
 
-func TestCommentURL(t *testing.T) {
-	if got := commentURL(123, 456); got != "/p/post/123#reply-456" {
-		t.Fatalf("commentURL() = %q", got)
+func TestPostURL(t *testing.T) {
+	if got := postURL(123, 456); got != "/p/post/123#post-456" {
+		t.Fatalf("postURL() = %q", got)
 	}
-	if got := commentURL(123, 0); got != "/p/post/123" {
-		t.Fatalf("commentURL without comment = %q", got)
+	if got := postURL(123, 0); got != "/p/post/123" {
+		t.Fatalf("postURL without post = %q", got)
 	}
-	if got := commentURL(0, 456); got != "" {
-		t.Fatalf("commentURL without article = %q", got)
+	if got := postURL(0, 456); got != "" {
+		t.Fatalf("postURL without topic = %q", got)
 	}
 }

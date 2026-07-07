@@ -151,8 +151,8 @@ export default {
     viewProfile: 'View profile',
     templates: {
       comment: 'commented on your topic',
-      reply: 'replied to you',
-      articleComment: 'commented on an article you watch',
+      postReply: 'replied to you',
+      topicPost: 'posted in a topic you watch',
       follow: 'followed you',
       badge: 'earned the "{badge}" badge',
     },

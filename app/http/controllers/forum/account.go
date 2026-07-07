@@ -64,14 +64,14 @@ func Settings(c *gin.Context) {
 }
 
 func Publish(c *gin.Context) {
-	articleID := cast.ToUint64(c.Query("id"))
-	props, err := buildPublishPageProps(c, articleID)
+	topicID := cast.ToUint64(c.Query("id"))
+	props, err := buildPublishPageProps(c, topicID)
 	if err != nil {
 		c.String(http.StatusNotFound, "not found")
 		return
 	}
 	title := "meta.publish"
-	if articleID > 0 {
+	if topicID > 0 {
 		title = "meta.editTopic"
 	}
 	payload := PagePayload{

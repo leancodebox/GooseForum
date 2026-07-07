@@ -8,32 +8,32 @@ const tableName = "event_notification"
 
 // Event Types
 const (
-	EventTypeComment        = "comment"         // 评论通知
-	EventTypeReply          = "reply"           // 回复通知
-	EventTypeArticleComment = "article_comment" // 关注文章评论通知
-	EventTypeSystem         = "system"          // 系统通知
-	EventTypeFollow         = "follow"          // 关注通知
-	EventTypeBadge          = "badge"           // 徽章通知
+	EventTypeComment   = "comment"    // 主题收到新 post
+	EventTypePostReply = "post_reply" // post 回复通知
+	EventTypeTopicPost = "topic_post" // 关注主题的新 post 通知
+	EventTypeSystem    = "system"     // 系统通知
+	EventTypeFollow    = "follow"     // 关注通知
+	EventTypeBadge     = "badge"      // 徽章通知
 )
 
 const (
-	TemplateComment        = "notifications.templates.comment"
-	TemplateReply          = "notifications.templates.reply"
-	TemplateArticleComment = "notifications.templates.articleComment"
-	TemplateFollow         = "notifications.templates.follow"
-	TemplateBadge          = "notifications.templates.badge"
+	TemplateComment   = "notifications.templates.comment"
+	TemplatePostReply = "notifications.templates.postReply"
+	TemplateTopicPost = "notifications.templates.topicPost"
+	TemplateFollow    = "notifications.templates.follow"
+	TemplateBadge     = "notifications.templates.badge"
 )
 
 // Future unread-scope design:
 //
 // Notifications are event records, but unread indicators in the UI often belong
 // to a business scope instead of a single notification row. For example,
-// comment/reply/article_comment notifications can all point to the same article,
-// and closing one of them should be able to clear the article unread dot.
+// comment/post_reply/topic_post notifications can all point to the same topic,
+// and closing one of them should be able to clear the topic unread dot.
 //
 // When this is implemented, add a stable scope pair to Entity:
-//   ScopeType string // article, comment, user, badge, system, ...
-//   ScopeKey  string // article id, comment id, badge code, system batch key, ...
+//   ScopeType string // topic, post, user, badge, system, ...
+//   ScopeKey  string // topic id, post id, badge code, system batch key, ...
 //
 // Mark-as-read should stay permission anchored by notification id:
 //   1. Client sends only notificationId.
@@ -42,26 +42,23 @@ const (
 //      same user_id + scope_type + scope_key as read.
 //   4. If no scope is present, mark only the current notification as read.
 //
-// This avoids trusting client-provided scope values, keeps non-article
+// This avoids trusting client-provided scope values, keeps non-topic
 // notifications independent, and lets different event types share one unread
 // state when they point to the same business object.
 
 // NotificationPayload 通知内容的基础结构
 type NotificationPayload struct {
-	Title          string                     `json:"title,omitempty"`       // 旧通知兼容
-	Content        string                     `json:"content,omitempty"`     // 旧通知兼容
-	TemplateKey    string                     `json:"templateKey,omitempty"` // 前端 i18n 模板 key
-	TemplateParams NotificationTemplateParams `json:"templateParams"`        // 前端 i18n 模板参数
+	Title          string                     `json:"title,omitempty"`
+	Content        string                     `json:"content,omitempty"`
+	TemplateKey    string                     `json:"templateKey,omitempty"`
+	TemplateParams NotificationTemplateParams `json:"templateParams"`
 	// 通用字段
 	ActorId   uint64 `json:"actorId"`             // 触发者ID
 	ActorName string `json:"actorName,omitempty"` // 触发者名称
-	// 文章相关
-	ArticleId    uint64 `json:"articleId,omitempty"`    // 相关文章ID
-	ArticleTitle string `json:"articleTitle,omitempty"` // 文章标题
-	TopicId      uint64 `json:"topicId,omitempty"`      // 相关主题ID
-	// 评论相关
-	CommentId uint64 `json:"commentId,omitempty"` // 评论ID
-	PostId    uint64 `json:"postId,omitempty"`    // 相关正文ID
+	// Topic / post references
+	TopicId    uint64 `json:"topicId,omitempty"`
+	TopicTitle string `json:"topicTitle,omitempty"`
+	PostId     uint64 `json:"postId,omitempty"`
 	// 其他元数据
 	Extra Extra `json:"metadata"`
 }

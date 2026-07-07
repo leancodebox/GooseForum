@@ -28,16 +28,16 @@ import {
   TableRow,
 } from '@/admin/components/ui/table'
 import {
-  editArticle,
-  editArticleCategories,
-  editArticlePin,
-  deleteArticle,
-  getArticleSource,
-  getArticlesList,
+  editTopic,
+  updateTopicCategories,
+  updateTopicPin,
+  deleteTopic,
+  getTopicSource,
+  getTopicsList,
   getCategoryList,
 } from '@/admin/runtime/api'
 import { adminToast } from '@/admin/runtime/toast'
-import type { AdminArticle, AdminCategory, AdminPayload, ArticleSource, ManageHomeProps } from '@/admin/types'
+import type { AdminTopic, AdminCategory, AdminPayload, TopicSource, ManageHomeProps } from '@/admin/types'
 
 defineProps<{
   payload: AdminPayload<ManageHomeProps>
@@ -47,20 +47,20 @@ const loading = ref(false)
 const saving = ref(false)
 const sourceLoading = ref(false)
 const error = ref('')
-const rows = ref<AdminArticle[]>([])
+const rows = ref<AdminTopic[]>([])
 const hasNext = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
 const search = ref('')
 const appliedSearch = ref('')
 const categories = ref<AdminCategory[]>([])
-const categoryDialogRow = ref<AdminArticle | null>(null)
+const categoryDialogRow = ref<AdminTopic | null>(null)
 const selectedCategoryIds = ref<number[]>([])
-const sourceDialogRow = ref<AdminArticle | null>(null)
-const source = ref<ArticleSource | null>(null)
-const actionRow = ref<AdminArticle | null>(null)
-const deleteRow = ref<AdminArticle | null>(null)
-const pinDialogRow = ref<AdminArticle | null>(null)
+const sourceDialogRow = ref<AdminTopic | null>(null)
+const source = ref<TopicSource | null>(null)
+const actionRow = ref<AdminTopic | null>(null)
+const deleteRow = ref<AdminTopic | null>(null)
+const pinDialogRow = ref<AdminTopic | null>(null)
 const pinWeightInput = ref(0)
 
 interface CategoryOption {
@@ -103,11 +103,11 @@ function typeInfo(type: number) {
   return articleTypes[type] || { label: adminText('k003g'), className: 'bg-slate-50 text-slate-700 border-slate-100' }
 }
 
-function avatarText(post: AdminArticle) {
+function avatarText(post: AdminTopic) {
   return post.username.slice(0, 1).toUpperCase()
 }
 
-function postCategories(post: AdminArticle) {
+function postCategories(post: AdminTopic) {
   return (post.categoryId || []).map((id) => {
     const category = categoryMap.value.get(id)
     if (category) {
@@ -137,7 +137,7 @@ function postTime(value?: string) {
   return value.slice(11, 16)
 }
 
-function articleStatusInfo(status: number) {
+function topicStatusInfo(status: number) {
   return status === 1
     ? { label: adminText('k003q'), className: 'bg-slate-950 text-white' }
     : { label: adminText('k003r'), className: 'bg-slate-100 text-slate-600' }
@@ -148,7 +148,7 @@ async function loadPosts() {
   error.value = ''
   try {
     const [postPage, categoryList] = await Promise.all([
-      getArticlesList({ page: page.value, pageSize: pageSize.value, search: appliedSearch.value || undefined }),
+      getTopicsList({ page: page.value, pageSize: pageSize.value, search: appliedSearch.value || undefined }),
       categories.value.length ? Promise.resolve(categories.value) : getCategoryList(),
     ])
     rows.value = postPage.list || []
@@ -178,12 +178,12 @@ function changePageSize(event: Event) {
   void loadPosts()
 }
 
-function openCategoryDialog(post: AdminArticle) {
+function openCategoryDialog(post: AdminTopic) {
   categoryDialogRow.value = post
   selectedCategoryIds.value = [...(post.categoryId || [])]
 }
 
-function openPinDialog(post: AdminArticle) {
+function openPinDialog(post: AdminTopic) {
   pinDialogRow.value = post
   pinWeightInput.value = post.pinWeight || 0
 }
@@ -209,7 +209,7 @@ async function saveCategories() {
   }
   saving.value = true
   try {
-    await editArticleCategories({ topicId: categoryDialogRow.value.id, categoryId: validCategoryIds })
+    await updateTopicCategories({ topicId: categoryDialogRow.value.id, categoryId: validCategoryIds })
     categoryDialogRow.value = null
     await loadPosts()
     adminToast.success(adminText('k003v'))
@@ -225,7 +225,7 @@ async function savePinWeight() {
   const pinWeight = Math.max(0, Math.trunc(Number(pinWeightInput.value) || 0))
   saving.value = true
   try {
-    await editArticlePin({ topicId: pinDialogRow.value.id, pinWeight })
+    await updateTopicPin({ topicId: pinDialogRow.value.id, pinWeight })
     pinDialogRow.value = null
     await loadPosts()
     adminToast.success(pinWeight > 0 ? adminText('k003w') : adminText('k003x'))
@@ -236,12 +236,12 @@ async function savePinWeight() {
   }
 }
 
-async function openSource(post: AdminArticle) {
+async function openSource(post: AdminTopic) {
   sourceDialogRow.value = post
   source.value = null
   sourceLoading.value = true
   try {
-    source.value = await getArticleSource(post.id)
+    source.value = await getTopicSource(post.id)
   } catch (err) {
     adminToast.error(err, adminText('k003y'))
   } finally {
@@ -264,7 +264,7 @@ async function toggleProcessStatus() {
   const restoring = actionRow.value.processStatus === 1
   saving.value = true
   try {
-    await editArticle({
+    await editTopic({
       topicId: actionRow.value.id,
       processStatus: restoring ? 0 : 1,
     })
@@ -278,11 +278,11 @@ async function toggleProcessStatus() {
   }
 }
 
-async function confirmDeleteArticle() {
+async function confirmDeleteTopic() {
   if (!deleteRow.value) return
   saving.value = true
   try {
-    await deleteArticle(deleteRow.value.id)
+    await deleteTopic(deleteRow.value.id)
     deleteRow.value = null
     await loadPosts()
     adminToast.success(adminText('k00ce'))
@@ -359,8 +359,8 @@ onMounted(() => {
                     {{ post.description || adminText('k005w') }}
                   </p>
                 </div>
-                <span class="inline-flex h-6 shrink-0 items-center rounded-md px-2 text-xs font-semibold" :class="articleStatusInfo(post.articleStatus).className">
-                  {{ articleStatusInfo(post.articleStatus).label }}
+                <span class="inline-flex h-6 shrink-0 items-center rounded-md px-2 text-xs font-semibold" :class="topicStatusInfo(post.topicStatus).className">
+                  {{ topicStatusInfo(post.topicStatus).label }}
                 </span>
               </div>
 
@@ -469,8 +469,8 @@ onMounted(() => {
                   </TableCell>
                   <TableCell class="py-2 text-center align-middle">
                     <div class="inline-flex min-w-[52px] flex-col items-center gap-0.5">
-                      <span class="inline-flex h-6 items-center rounded-md px-2 text-xs font-semibold" :class="articleStatusInfo(post.articleStatus).className">
-                        {{ articleStatusInfo(post.articleStatus).label }}
+                      <span class="inline-flex h-6 items-center rounded-md px-2 text-xs font-semibold" :class="topicStatusInfo(post.topicStatus).className">
+                        {{ topicStatusInfo(post.topicStatus).label }}
                       </span>
                       <span class="text-[11px]" :class="post.processStatus === 1 ? 'text-destructive' : 'text-muted-foreground'">
                         {{ post.processStatus === 1 ? adminText('k005x') : adminText('k005y') }}
@@ -594,7 +594,7 @@ onMounted(() => {
         :description="adminText('k00cg', { title: deleteRow?.title || '' })"
         :loading="saving"
         @update:open="(open) => !open && (deleteRow = null)"
-        @confirm="confirmDeleteArticle"
+        @confirm="confirmDeleteTopic"
       />
     </BasicPage>
 </template>

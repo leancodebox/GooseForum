@@ -18,7 +18,6 @@ type ReportCreatedEvent struct {
 	ReportId   uint64
 	TargetType string
 	TargetId   uint64
-	ArticleId  uint64
 	TopicId    uint64
 	ReporterId uint64
 	Reason     string
@@ -44,34 +43,34 @@ func handleHttpNotifyCommentCreated(ctx context.Context, event *CommentCreatedEv
 	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventCommentCreated) {
 		return nil
 	}
-	topic := topics.GetSimple(event.topicID())
-	articlePayload := topicNotifyPayloadFromSmall(topic)
+	topic := topics.GetSimple(event.TopicId)
+	topicPayload := topicNotifyPayloadFromSmall(topic)
 	commenter := userNotifyPayload(event.UserId)
-	post := posts.Get(event.postID())
-	replyNo := uint64(0)
+	post := posts.Get(event.PostId)
+	postNo := uint64(0)
 	if post.Id > 0 {
-		replyNo = post.PostNo - 1
+		postNo = post.PostNo - 1
 	}
 
-	commentPayload := notifyComment{
-		ID:                  event.postID(),
-		ReplyNo:             replyNo,
+	postPayload := notifyPost{
+		ID:                  event.PostId,
+		PostNo:              postNo,
 		UserID:              event.UserId,
 		User:                commenter,
-		ParentReplyID:       event.ParentReplyId,
-		ParentReplyAuthorID: event.ParentReplyAuthorId,
-		URL:                 commentURL(event.topicID(), event.postID()),
+		ReplyToPostID:       event.ReplyToPostId,
+		ReplyToPostAuthorID: event.ReplyToPostAuthorId,
+		URL:                 postURL(event.TopicId, event.PostId),
 	}
 	payload := notifyEventData{
 		BaseURI:        baseURI(),
 		ContentPreview: TakeUpTo64Chars(event.Content),
-		Article:        &articlePayload,
+		Topic:          &topicPayload,
 		User:           &commenter,
-		Comment:        &commentPayload,
+		Post:           &postPayload,
 	}
-	if event.ParentReplyAuthorId > 0 {
-		parentAuthor := userNotifyPayload(event.ParentReplyAuthorId)
-		payload.Comment.ParentReplyAuthor = &parentAuthor
+	if event.ReplyToPostAuthorId > 0 {
+		parentAuthor := userNotifyPayload(event.ReplyToPostAuthorId)
+		payload.Post.ReplyToPostAuthor = &parentAuthor
 	}
 	httpnotifyservice.Notify(httpnotifyservice.EventCommentCreated, payload)
 	return nil
@@ -93,7 +92,7 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventReportCreated) {
 		return nil
 	}
-	topic := topics.GetSimple(event.topicID())
+	topic := topics.GetSimple(event.TopicId)
 	payload := notifyEventData{
 		BaseURI:       baseURI(),
 		ReportID:      new(event.ReportId),
@@ -101,19 +100,19 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 		TargetID:      new(event.TargetId),
 		ReporterID:    new(event.ReporterId),
 		Reason:        new(event.Reason),
-		Article:       new(topicNotifyPayloadFromSmall(topic)),
+		Topic:         new(topicNotifyPayloadFromSmall(topic)),
 		Reporter:      new(userNotifyPayload(event.ReporterId)),
 		ModerationURL: moderationTargetURL(event),
 	}
 	if event.TargetType == "reply" || event.TargetType == "post" {
 		post := posts.Get(event.TargetId)
 		commenter := userNotifyPayload(post.UserId)
-		payload.Comment = &notifyComment{
-			ID:      post.Id,
-			ReplyNo: post.PostNo - 1,
-			UserID:  post.UserId,
-			User:    commenter,
-			URL:     commentURL(post.TopicId, post.Id),
+		payload.Post = &notifyPost{
+			ID:     post.Id,
+			PostNo: post.PostNo - 1,
+			UserID: post.UserId,
+			User:   commenter,
+			URL:    postURL(post.TopicId, post.Id),
 		}
 	}
 	httpnotifyservice.Notify(httpnotifyservice.EventReportCreated, payload)
@@ -121,21 +120,21 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 }
 
 type notifyEventData struct {
-	BaseURI        string         `json:"baseUri"`
-	ContentPreview string         `json:"contentPreview,omitempty"`
-	Article        *notifyArticle `json:"article,omitempty"`
-	User           *notifyUser    `json:"user,omitempty"`
-	Comment        *notifyComment `json:"comment,omitempty"`
-	ReportID       *uint64        `json:"reportId,omitempty"`
-	TargetType     string         `json:"targetType,omitempty"`
-	TargetID       *uint64        `json:"targetId,omitempty"`
-	ReporterID     *uint64        `json:"reporterId,omitempty"`
-	Reason         *string        `json:"reason,omitempty"`
-	Reporter       *notifyUser    `json:"reporter,omitempty"`
-	ModerationURL  string         `json:"moderationUrl,omitempty"`
+	BaseURI        string       `json:"baseUri"`
+	ContentPreview string       `json:"contentPreview,omitempty"`
+	Topic          *notifyTopic `json:"topic,omitempty"`
+	User           *notifyUser  `json:"user,omitempty"`
+	Post           *notifyPost  `json:"post,omitempty"`
+	ReportID       *uint64      `json:"reportId,omitempty"`
+	TargetType     string       `json:"targetType,omitempty"`
+	TargetID       *uint64      `json:"targetId,omitempty"`
+	ReporterID     *uint64      `json:"reporterId,omitempty"`
+	Reason         *string      `json:"reason,omitempty"`
+	Reporter       *notifyUser  `json:"reporter,omitempty"`
+	ModerationURL  string       `json:"moderationUrl,omitempty"`
 }
 
-type notifyArticle struct {
+type notifyTopic struct {
 	ID            uint64           `json:"id"`
 	Title         string           `json:"title"`
 	URL           string           `json:"url"`
@@ -147,14 +146,14 @@ type notifyArticle struct {
 	Categories    []notifyCategory `json:"categories"`
 }
 
-type notifyComment struct {
+type notifyPost struct {
 	ID                  uint64      `json:"id"`
-	ReplyNo             uint64      `json:"replyNo"`
+	PostNo              uint64      `json:"postNo"`
 	UserID              uint64      `json:"userId"`
 	User                notifyUser  `json:"user"`
-	ParentReplyID       uint64      `json:"parentReplyId,omitempty"`
-	ParentReplyAuthorID uint64      `json:"parentReplyAuthorId,omitempty"`
-	ParentReplyAuthor   *notifyUser `json:"parentReplyAuthor,omitempty"`
+	ReplyToPostID       uint64      `json:"replyToPostId,omitempty"`
+	ReplyToPostAuthorID uint64      `json:"replyToPostAuthorId,omitempty"`
+	ReplyToPostAuthor   *notifyUser `json:"replyToPostAuthor,omitempty"`
 	URL                 string      `json:"url"`
 }
 
@@ -191,7 +190,7 @@ func topicNotifyPayload(topic *topics.Entity) notifyEventData {
 	if topic == nil {
 		return notifyEventData{BaseURI: baseURI()}
 	}
-	summary := notifyArticle{
+	summary := notifyTopic{
 		ID:            topic.Id,
 		Title:         topic.Title,
 		URL:           urlconfig.PostDetail(topic.Id),
@@ -205,16 +204,16 @@ func topicNotifyPayload(topic *topics.Entity) notifyEventData {
 	user := summary.User
 	return notifyEventData{
 		BaseURI: baseURI(),
-		Article: &summary,
+		Topic:   &summary,
 		User:    &user,
 	}
 }
 
-func topicNotifyPayloadFromSmall(topic topics.SmallEntity) notifyArticle {
+func topicNotifyPayloadFromSmall(topic topics.SmallEntity) notifyTopic {
 	if topic.Id == 0 {
-		return notifyArticle{}
+		return notifyTopic{}
 	}
-	return notifyArticle{
+	return notifyTopic{
 		ID:            topic.Id,
 		Title:         topic.Title,
 		URL:           urlconfig.PostDetail(topic.Id),
@@ -273,32 +272,24 @@ func userNotifyPayload(userID uint64) notifyUser {
 	}
 }
 
-func commentURL(articleID uint64, commentID uint64) string {
-	if articleID == 0 {
-		return ""
-	}
-	if commentID == 0 {
-		return urlconfig.PostDetail(articleID)
-	}
-	return urlconfig.PostDetail(articleID) + "#reply-" + uintToString(commentID)
-}
-
-func moderationTargetURL(event *ReportCreatedEvent) string {
-	topicID := event.topicID()
+func postURL(topicID uint64, postID uint64) string {
 	if topicID == 0 {
 		return ""
 	}
-	if (event.TargetType == "reply" || event.TargetType == "post") && event.TargetId > 0 {
-		return commentURL(topicID, event.TargetId)
+	if postID == 0 {
+		return urlconfig.PostDetail(topicID)
 	}
-	return urlconfig.PostDetail(topicID)
+	return urlconfig.PostDetail(topicID) + "#post-" + uintToString(postID)
 }
 
-func (event *ReportCreatedEvent) topicID() uint64 {
-	if event.TopicId > 0 {
-		return event.TopicId
+func moderationTargetURL(event *ReportCreatedEvent) string {
+	if event.TopicId == 0 {
+		return ""
 	}
-	return event.ArticleId
+	if (event.TargetType == "reply" || event.TargetType == "post") && event.TargetId > 0 {
+		return postURL(event.TopicId, event.TargetId)
+	}
+	return urlconfig.PostDetail(event.TopicId)
 }
 
 func uintToString(value uint64) string {

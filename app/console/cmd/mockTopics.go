@@ -12,15 +12,15 @@ import (
 
 func init() {
 	cmd := &cobra.Command{
-		Use:   "mock-articles",
-		Short: "Mock articles for testing",
-		Run:   runMockArticles,
+		Use:   "mock-topics",
+		Short: "Mock topics for testing",
+		Run:   runMockTopics,
 	}
 	appendCommand(cmd)
 }
 
-func runMockArticles(cmd *cobra.Command, args []string) {
-	fmt.Println("Starting to mock articles...")
+func runMockTopics(cmd *cobra.Command, args []string) {
+	fmt.Println("Starting to mock topics...")
 
 	allUsers := users.All()
 	if len(allUsers) == 0 {
@@ -28,8 +28,8 @@ func runMockArticles(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	totalArticles := 50
-	for i := 1; i <= totalArticles; i++ {
+	totalTopics := 50
+	for i := 1; i <= totalTopics; i++ {
 		// Pick a user randomly or sequentially
 		user := allUsers[i%len(allUsers)]
 
@@ -45,14 +45,14 @@ func runMockArticles(cmd *cobra.Command, args []string) {
 
 		resp := controllers.WriteTopic(req)
 		if resp.Data.Code == component.SUCCESS {
-			fmt.Printf("[%d/%d] Created article: %s (User: %s)\n", i, totalArticles, req.Params.Title, user.Username)
+			fmt.Printf("[%d/%d] Created topic: %s (User: %s)\n", i, totalTopics, req.Params.Title, user.Username)
 		} else {
-			fmt.Printf("[%d/%d] Failed to create article: %s\n", i, totalArticles, resp.Data.MessageCode)
+			fmt.Printf("[%d/%d] Failed to create topic: %s\n", i, totalTopics, resp.Data.MessageCode)
 		}
 
 		// Small delay to ensure sequence and timestamp difference
 		time.Sleep(10 * time.Millisecond)
 	}
 
-	fmt.Println("Mock articles generation completed.")
+	fmt.Println("Mock topics generation completed.")
 }

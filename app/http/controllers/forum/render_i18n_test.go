@@ -16,7 +16,7 @@ func TestServerTemplatesParse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newRegistry: %v", err)
 	}
-	for _, name := range []string{"home.gohtml", "search.gohtml", "user.gohtml", "article.gohtml", "links.gohtml", "sponsors.gohtml"} {
+	for _, name := range []string{"home.gohtml", "search.gohtml", "user.gohtml", "topic.gohtml", "links.gohtml", "sponsors.gohtml"} {
 		if reg.templates[name] == nil {
 			t.Errorf("template %s failed to register", name)
 		}

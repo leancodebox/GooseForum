@@ -272,7 +272,7 @@ type TopicDetailPayload struct {
 	FirstImageURL string                 `json:"firstImageUrl,omitempty"`
 	URL           string                 `json:"url"`
 	HTML          string                 `json:"html"`
-	ArticleStatus int8                   `json:"articleStatus"`
+	TopicStatus   int8                   `json:"topicStatus"`
 	ProcessStatus int8                   `json:"processStatus"`
 	Author        TopicAuthorPayload     `json:"author"`
 	Participants  []TopicAuthorPayload   `json:"participants"`
@@ -357,11 +357,11 @@ type UserActivityPayload struct {
 }
 
 type UserLikePayload struct {
-	ID        uint64 `json:"id"`
-	ArticleID uint64 `json:"articleId"`
-	Title     string `json:"title"`
-	URL       string `json:"url"`
-	LikedAt   string `json:"likedAt"`
+	ID      uint64 `json:"id"`
+	TopicID uint64 `json:"topicId"`
+	Title   string `json:"title"`
+	URL     string `json:"url"`
+	LikedAt string `json:"likedAt"`
 }
 
 type UserConnectionPayload struct {
@@ -481,11 +481,11 @@ type NotificationPayload struct {
 	Title     string                                `json:"title"`
 	Content   string                                `json:"content"`
 	Actor     TopicAuthorPayload                    `json:"actor"`
-	Article   *NotificationArticlePayload           `json:"article,omitempty"`
+	Topic     *NotificationTopicPayload             `json:"topic,omitempty"`
 	Payload   eventNotification.NotificationPayload `json:"payload"`
 }
 
-type NotificationArticlePayload struct {
+type NotificationTopicPayload struct {
 	ID    uint64 `json:"id"`
 	Title string `json:"title"`
 	URL   string `json:"url"`
@@ -526,11 +526,11 @@ type SettingsStatsPayload struct {
 }
 
 type PublishPageProps struct {
-	ArticleID  uint64                   `json:"articleId"`
+	TopicID    uint64                   `json:"topicId"`
 	IsEditing  bool                     `json:"isEditing"`
 	Categories []PublishCategoryPayload `json:"categories"`
 	Types      []PublishTypePayload     `json:"types"`
-	Article    PublishArticlePayload    `json:"article"`
+	Topic      PublishTopicPayload      `json:"topic"`
 }
 
 type PublishCategoryPayload struct {
@@ -550,12 +550,12 @@ type ModerationPageProps struct {
 	Pagination   PaginationPayload `json:"pagination"`
 }
 
-type PublishArticlePayload struct {
-	Title         string   `json:"title"`
-	Content       string   `json:"content"`
-	Type          int8     `json:"type"`
-	CategoryIDs   []uint64 `json:"categoryIds"`
-	ArticleStatus int8     `json:"articleStatus"`
+type PublishTopicPayload struct {
+	Title       string   `json:"title"`
+	Content     string   `json:"content"`
+	Type        int8     `json:"type"`
+	CategoryIDs []uint64 `json:"categoryIds"`
+	TopicStatus int8     `json:"topicStatus"`
 }
 
 type SearchPageProps struct {
@@ -750,7 +750,7 @@ func buildChromeNavItems(items []pageConfig.ChromeItem) []NavItemPayload {
 	return result
 }
 
-func buildHomeProps(page int, sort string, topics []*vo.ArticlesSimpleVo, hasNext bool) HomeProps {
+func buildHomeProps(page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) HomeProps {
 	nextPage := 0
 	if hasNext {
 		nextPage = page + 1
@@ -800,7 +800,7 @@ func buildHomeTabs(sort string) []TabPayload {
 	}
 }
 
-func buildTopicPayloads(topics []*vo.ArticlesSimpleVo) []TopicPayload {
+func buildTopicPayloads(topics []*vo.TopicsSimpleVo) []TopicPayload {
 	categoryMap := hotdataserve.CategoryMap()
 	res := make([]TopicPayload, 0, len(topics))
 	for _, topic := range topics {
@@ -853,7 +853,7 @@ func buildTopicPayloads(topics []*vo.ArticlesSimpleVo) []TopicPayload {
 	return res
 }
 
-func buildParticipants(topic *vo.ArticlesSimpleVo) []TopicAuthorPayload {
+func buildParticipants(topic *vo.TopicsSimpleVo) []TopicAuthorPayload {
 	participants := make([]TopicAuthorPayload, 0, len(topic.Posters)+1)
 	seen := map[uint64]bool{}
 	add := func(user TopicAuthorPayload) {
@@ -1042,7 +1042,7 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 
 func buildArticleHotTopics(currentArticleID uint64) []TopicPayload {
 	topicPage := hotdataserve.GetLatestArticlesSimpleVoPaginated(1, "hot")
-	filtered := make([]*vo.ArticlesSimpleVo, 0, 6)
+	filtered := make([]*vo.TopicsSimpleVo, 0, 6)
 	for _, topic := range topicPage.Topics {
 		if topic == nil || topic.Id == currentArticleID {
 			continue
@@ -1100,7 +1100,7 @@ func buildTopicArticlePayload(c *gin.Context, topic *topics.Entity, firstPost *p
 		FirstImageURL: topic.FirstImageURL,
 		URL:           urlconfig.PostDetail(topic.Id),
 		HTML:          html,
-		ArticleStatus: topic.Status,
+		TopicStatus:   topic.Status,
 		ProcessStatus: topic.ProcessStatus,
 		Author:        userPayload(topic.UserId, userMap),
 		Participants:  participants,
@@ -1162,21 +1162,21 @@ func ensurePostRenderedHTML(entity *posts.Entity) {
 	_ = posts.SaveNoUpdate(entity)
 }
 
-func buildArticleMeta(c *gin.Context, article TopicDetailPayload) PageMeta {
+func buildTopicMeta(c *gin.Context, topic TopicDetailPayload) PageMeta {
 	baseURL := component.GetBaseUri(c)
-	canonical := baseURL + article.URL
-	description := article.Description
+	canonical := baseURL + topic.URL
+	description := topic.Description
 	if description == "" {
-		description = i18n.T(requestLang(c), "meta.articleDesc", "title", article.Title, "site", siteTitle())
+		description = i18n.T(requestLang(c), "meta.articleDesc", "title", topic.Title, "site", siteTitle())
 	}
-	inlineImages := articleImageURLs(article, baseURL)
-	categoryNames := lo.Map(article.Categories, func(item TopicCategoryPayload, _ int) string { return item.Name })
+	inlineImages := articleImageURLs(topic, baseURL)
+	categoryNames := lo.Map(topic.Categories, func(item TopicCategoryPayload, _ int) string { return item.Name })
 	section := ""
 	if len(categoryNames) > 0 {
 		section = categoryNames[0]
 	}
-	publishedAt := parsePayloadTime(article.CreatedAt)
-	modifiedAt := parsePayloadTime(article.UpdatedAt)
+	publishedAt := parsePayloadTime(topic.CreatedAt)
+	modifiedAt := parsePayloadTime(topic.UpdatedAt)
 	publishedTime := ""
 	modifiedTime := ""
 	if !publishedAt.IsZero() {
@@ -1188,11 +1188,11 @@ func buildArticleMeta(c *gin.Context, article TopicDetailPayload) PageMeta {
 	jsonLD := vo.ArticleJSONLD{
 		Context:          "https://schema.org",
 		Type:             "DiscussionForumPosting",
-		Headline:         article.Title,
+		Headline:         topic.Title,
 		Description:      description,
-		Text:             articlePlainText(requestLang(c), article),
+		Text:             articlePlainText(requestLang(c), topic),
 		Image:            inlineImages,
-		Author:           vo.Person{Type: "Person", Name: article.Author.Username, URL: baseURL + "/u/" + strconv.FormatUint(article.Author.ID, 10)},
+		Author:           vo.Person{Type: "Person", Name: topic.Author.Username, URL: baseURL + "/u/" + strconv.FormatUint(topic.Author.ID, 10)},
 		Publisher:        vo.Organization{Type: "Organization", Name: siteTitle(), URL: baseURL},
 		DatePublished:    publishedTime,
 		DateModified:     modifiedTime,
@@ -1200,33 +1200,33 @@ func buildArticleMeta(c *gin.Context, article TopicDetailPayload) PageMeta {
 		MainEntityOfPage: canonical,
 		ArticleSection:   section,
 		Keywords:         categoryNames,
-		CommentCount:     article.ReplyCount,
+		CommentCount:     topic.ReplyCount,
 		InteractionStatistic: []vo.InteractionCounter{
-			{Type: "InteractionCounter", InteractionType: "https://schema.org/CommentAction", UserInteractionCount: article.ReplyCount},
-			{Type: "InteractionCounter", InteractionType: "https://schema.org/LikeAction", UserInteractionCount: article.LikeCount},
-			{Type: "InteractionCounter", InteractionType: "https://schema.org/ViewAction", UserInteractionCount: article.ViewCount},
+			{Type: "InteractionCounter", InteractionType: "https://schema.org/CommentAction", UserInteractionCount: topic.ReplyCount},
+			{Type: "InteractionCounter", InteractionType: "https://schema.org/LikeAction", UserInteractionCount: topic.LikeCount},
+			{Type: "InteractionCounter", InteractionType: "https://schema.org/ViewAction", UserInteractionCount: topic.ViewCount},
 		},
 	}
 	return PageMeta{
-		Title:       pageTitle(article.Title),
+		Title:       pageTitle(topic.Title),
 		Description: description,
 		Canonical:   canonical,
 		OpenGraph: &OpenGraphMeta{
-			Title:         article.Title,
+			Title:         topic.Title,
 			Description:   description,
 			Type:          "article",
 			URL:           canonical,
 			SiteName:      siteTitle(),
 			PublishedTime: publishedTime,
 			ModifiedTime:  modifiedTime,
-			Author:        article.Author.Username,
+			Author:        topic.Author.Username,
 			Section:       section,
 			Tags:          categoryNames,
 			Image:         firstString(inlineImages),
 		},
 		Twitter: &TwitterMeta{
 			Card:        "summary",
-			Title:       article.Title,
+			Title:       topic.Title,
 			Description: description,
 			Image:       firstString(inlineImages),
 		},
@@ -1494,11 +1494,11 @@ func buildUserLikes(refs []topicUserAction.LikedTopicRef) []UserLikePayload {
 			continue
 		}
 		res = append(res, UserLikePayload{
-			ID:        ref.ID,
-			ArticleID: ref.TopicID,
-			Title:     topic.Title,
-			URL:       urlconfig.PostDetail(ref.TopicID),
-			LikedAt:   ref.LikedAt.Format(time.DateTime),
+			ID:      ref.ID,
+			TopicID: ref.TopicID,
+			Title:   topic.Title,
+			URL:     urlconfig.PostDetail(ref.TopicID),
+			LikedAt: ref.LikedAt.Format(time.DateTime),
 		})
 	}
 	return res
@@ -1566,7 +1566,7 @@ func userActivityURL(activity *userActivities.Entity, replyByID map[uint64]*post
 		if post == nil || post.TopicId == 0 {
 			return ""
 		}
-		return urlconfig.PostDetail(post.TopicId) + "#reply-" + strconv.FormatUint(post.Id, 10)
+		return urlconfig.PostDetail(post.TopicId) + "#post-" + strconv.FormatUint(post.Id, 10)
 	}
 
 	switch activity.SubjectType {
@@ -1632,7 +1632,7 @@ func buildUserMeta(c *gin.Context, user *vo.UserCard) PageMeta {
 	}
 }
 
-func buildCategoryPageProps(category *category.Entity, page int, sort string, topics []*vo.ArticlesSimpleVo, hasNext bool) CategoryPageProps {
+func buildCategoryPageProps(category *category.Entity, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) CategoryPageProps {
 	nextPage := 0
 	if hasNext {
 		nextPage = page + 1
@@ -1913,14 +1913,14 @@ func BuildNotificationPayload(notification *eventNotification.Entity) Notificati
 		item.Actor.Username = payload.Extra.FollowerName
 	}
 	if payload.TopicId > 0 {
-		articleURL := urlconfig.PostDetail(payload.TopicId)
+		topicURL := urlconfig.PostDetail(payload.TopicId)
 		if payload.PostId > 0 {
-			articleURL = fmt.Sprintf("%s#reply-%d", articleURL, payload.PostId)
+			topicURL = fmt.Sprintf("%s#post-%d", topicURL, payload.PostId)
 		}
-		item.Article = &NotificationArticlePayload{
+		item.Topic = &NotificationTopicPayload{
 			ID:    payload.TopicId,
-			Title: payload.ArticleTitle,
-			URL:   articleURL,
+			Title: payload.TopicTitle,
+			URL:   topicURL,
 		}
 	}
 	return item
@@ -1936,9 +1936,9 @@ func notificationTitle(eventType string, payload eventNotification.NotificationP
 	switch eventType {
 	case eventNotification.EventTypeComment:
 		return ""
-	case eventNotification.EventTypeReply:
+	case eventNotification.EventTypePostReply:
 		return ""
-	case eventNotification.EventTypeArticleComment:
+	case eventNotification.EventTypeTopicPost:
 		return ""
 	case eventNotification.EventTypeFollow:
 		return ""
@@ -1996,34 +1996,34 @@ func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 	}
 }
 
-func buildPublishPageProps(c *gin.Context, articleID uint64) (PublishPageProps, error) {
+func buildPublishPageProps(c *gin.Context, topicID uint64) (PublishPageProps, error) {
 	props := PublishPageProps{
-		ArticleID:  articleID,
-		IsEditing:  articleID > 0,
+		TopicID:    topicID,
+		IsEditing:  topicID > 0,
 		Categories: buildPublishCategories(),
 		Types:      buildPublishTypes(),
-		Article: PublishArticlePayload{
+		Topic: PublishTopicPayload{
 			Type: defaultPublishType(),
 		},
 	}
-	if articleID == 0 {
+	if topicID == 0 {
 		return props, nil
 	}
 
-	topic := topics.Get(articleID)
+	topic := topics.Get(topicID)
 	if topic.Id == 0 || topic.UserId != component.LoginUserId(c) {
-		return props, errors.New("article not found")
+		return props, errors.New("topic not found")
 	}
 	firstPost := posts.Get(topic.FirstPostId)
 	if firstPost.Id == 0 {
 		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 	}
-	props.Article = PublishArticlePayload{
-		Title:         topic.Title,
-		Content:       firstPost.Content,
-		Type:          0,
-		CategoryIDs:   topic.CategoryIds,
-		ArticleStatus: topic.Status,
+	props.Topic = PublishTopicPayload{
+		Title:       topic.Title,
+		Content:     firstPost.Content,
+		Type:        0,
+		CategoryIDs: topic.CategoryIds,
+		TopicStatus: topic.Status,
 	}
 	return props, nil
 }

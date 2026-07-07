@@ -2,7 +2,7 @@ import type { Component } from 'vue'
 
 export const pageLoaders = {
   'home.index': () => import('@/site/pages/HomePage.vue'),
-  'article.detail': () => import('@/site/pages/TopicPage.vue'),
+  'topic.detail': () => import('@/site/pages/TopicPage.vue'),
   'user.profile': () => import('@/site/pages/UserPage.vue'),
   'category.index': () => import('@/site/pages/CategoryPage.vue'),
   'links.index': () => import('@/site/pages/LinksPage.vue'),

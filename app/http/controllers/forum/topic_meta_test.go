@@ -24,7 +24,7 @@ func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 	c, _ := gin.CreateTestContext(nil)
 	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/1", nil)
 
-	meta := buildArticleMeta(c, TopicDetailPayload{
+	meta := buildTopicMeta(c, TopicDetailPayload{
 		ID:          1,
 		Title:       "讨论标题",
 		Description: "讨论描述",
@@ -55,7 +55,7 @@ func TestArticleMetaJSONLDIncludesImageForImageOnlyArticle(t *testing.T) {
 	c, _ := gin.CreateTestContext(nil)
 	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/440", nil)
 
-	meta := buildArticleMeta(c, TopicDetailPayload{
+	meta := buildTopicMeta(c, TopicDetailPayload{
 		ID:            440,
 		Title:         "叮叮叮～又得到一个徽章",
 		Description:   "",

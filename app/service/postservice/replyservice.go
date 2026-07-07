@@ -1,4 +1,4 @@
-package replyservice
+package postservice
 
 import (
 	"log/slog"
@@ -10,9 +10,9 @@ import (
 	"github.com/samber/lo"
 )
 
-const articleSequenceLockShards = 256
+const topicSequenceLockShards = 256
 
-var articleSequenceLocks [articleSequenceLockShards]sync.Mutex
+var topicSequenceLocks [topicSequenceLockShards]sync.Mutex
 
 func CreateTopicPost(entity *posts.Entity, topicEntity topics.SmallEntity) error {
 	postNo, err := reserveTopicPostSequence(entity.TopicId)
@@ -30,7 +30,7 @@ func CreateTopicPost(entity *posts.Entity, topicEntity topics.SmallEntity) error
 }
 
 func reserveTopicPostSequence(topicId uint64) (uint64, error) {
-	lock := &articleSequenceLocks[topicId%articleSequenceLockShards]
+	lock := &topicSequenceLocks[topicId%topicSequenceLockShards]
 	lock.Lock()
 	defer lock.Unlock()
 

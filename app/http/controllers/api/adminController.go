@@ -413,7 +413,7 @@ type ArticlesInfoVo struct {
 	Type          int8   `json:"type"`
 	UserId        uint64 `json:"userId"`
 	Username      string `json:"username"`
-	ArticleStatus int8   `json:"articleStatus"`
+	TopicStatus   int8   `json:"topicStatus"`
 	ProcessStatus int8   `json:"processStatus"`
 	CreatedAt     string `json:"createdAt"`
 	UpdatedAt     string `json:"updatedAt"`
@@ -428,7 +428,7 @@ type ArticlesInfoAdminVo struct {
 	UserId        uint64   `json:"userId"`
 	Username      string   `json:"username"`
 	UserAvatarUrl string   `json:"userAvatarUrl"`
-	ArticleStatus int8     `json:"articleStatus"`
+	TopicStatus   int8     `json:"topicStatus"`
 	ProcessStatus int8     `json:"processStatus"`
 	ViewCount     uint64   `json:"viewCount"`
 	ReplyCount    uint64   `json:"replyCount"`
@@ -450,7 +450,7 @@ type TopicSourceVo struct {
 	Type          int8     `json:"type"`
 	CategoryId    []uint64 `json:"categoryId"`
 	UserId        uint64   `json:"userId"`
-	ArticleStatus int8     `json:"articleStatus"`
+	TopicStatus   int8     `json:"topicStatus"`
 	ProcessStatus int8     `json:"processStatus"`
 	CreatedAt     string   `json:"createdAt"`
 	UpdatedAt     string   `json:"updatedAt"`
@@ -480,7 +480,7 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 				UserId:        t.UserId,
 				Username:      username,
 				UserAvatarUrl: userAvatarUrl,
-				ArticleStatus: t.Status,
+				TopicStatus:   t.Status,
 				ProcessStatus: t.ProcessStatus,
 				ViewCount:     t.ViewCount,
 				ReplyCount:    t.ReplyCount,
@@ -514,7 +514,7 @@ func TopicSource(req component.BetterRequest[TopicSourceReq]) component.Response
 		Type:          0,
 		CategoryId:    topic.CategoryIds,
 		UserId:        topic.UserId,
-		ArticleStatus: topic.Status,
+		TopicStatus:   topic.Status,
 		ProcessStatus: topic.ProcessStatus,
 		CreatedAt:     topic.CreatedAt.Format(time.DateTime),
 		UpdatedAt:     topic.UpdatedAt.Format(time.DateTime),

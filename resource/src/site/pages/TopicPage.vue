@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, Teleport, watch } from 'vue'
 import { AlertTriangle, Ban, Bell, Bookmark, ChevronsUp, Clock, CornerDownLeft, Eye, Flag, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
-import { bookmarkArticle, deletePost, getPostWindow, likeArticle, createPost, submitReport, updateModerationTopicStatus, updateModerationPostStatus, updatePost, watchArticle } from '@/runtime/api'
+import { bookmarkTopic, deletePost, getPostWindow, likeTopic, createPost, submitReport, updateModerationTopicStatus, updateModerationPostStatus, updatePost, watchTopic } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { useFlashMessages } from '@/runtime/flash-message'
 import { fetchPage } from '@/runtime/router'
@@ -66,12 +66,12 @@ const replyWindowError = ref('')
 const deleteErrorMessage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
-const articleHeaderEl = ref<HTMLElement | null>(null)
+const topicHeaderEl = ref<HTMLElement | null>(null)
 const titleEl = ref<HTMLElement | null>(null)
 const replyLoadMoreEl = ref<HTMLElement | null>(null)
 const replyListEndEl = ref<HTMLElement | null>(null)
 const markdownImageViewer = ref<InstanceType<typeof MarkdownImageViewer> | null>(null)
-const articleRailTopOffset = ref(0)
+const topicRailTopOffset = ref(0)
 const showHeaderTitle = ref(false)
 const isMobileHeaderViewport = ref(false)
 const mobileHeaderTitleVisible = ref(false)
@@ -107,7 +107,7 @@ const actionMessageSuccess = computed(() =>
   ].includes(actionMessage.value),
 )
 const reportReasons = ['spam', 'abuse', 'illegal', 'irrelevant', 'other']
-const floatingArticleActions = computed(() => {
+const floatingTopicActions = computed(() => {
   const actions = [
     {
       key: 'like',
@@ -151,7 +151,7 @@ const floatingArticleActions = computed(() => {
       fill: false,
       title: isBanned ? t('article.moderationUnban') : t('article.moderationBan'),
       activeClass: 'text-base-content/75 hover:bg-base-200 hover:text-base-content',
-      onClick: async () => requestArticleModeration(isBanned ? 'unban' : 'ban'),
+      onClick: async () => requestTopicModeration(isBanned ? 'unban' : 'ban'),
     })
   }
 
@@ -159,7 +159,7 @@ const floatingArticleActions = computed(() => {
 })
 const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
-let articleHeaderResizeObserver: ResizeObserver | undefined
+let topicHeaderResizeObserver: ResizeObserver | undefined
 let replyLoadObserver: IntersectionObserver | undefined
 let lastHeaderScrollY = 0
 let headerScrollFrame = 0
@@ -174,24 +174,24 @@ let replyRailResumeLastScrollY = 0
 let replyRailResumeStableFrames = 0
 let replyElements: HTMLElement[] = []
 
-function updateArticleRailTopOffset() {
-  if (!articleHeaderEl.value) {
-    articleRailTopOffset.value = 0
+function updateTopicRailTopOffset() {
+  if (!topicHeaderEl.value) {
+    topicRailTopOffset.value = 0
     return
   }
 
-  const style = window.getComputedStyle(articleHeaderEl.value)
-  articleRailTopOffset.value = Math.ceil(articleHeaderEl.value.offsetHeight + (Number.parseFloat(style.marginBottom) || 0))
+  const style = window.getComputedStyle(topicHeaderEl.value)
+  topicRailTopOffset.value = Math.ceil(topicHeaderEl.value.offsetHeight + (Number.parseFloat(style.marginBottom) || 0))
 }
 
-function observeArticleHeader() {
-  articleHeaderResizeObserver?.disconnect()
-  updateArticleRailTopOffset()
+function observeTopicHeader() {
+  topicHeaderResizeObserver?.disconnect()
+  updateTopicRailTopOffset()
 
-  if (!articleHeaderEl.value || !('ResizeObserver' in window)) return
+  if (!topicHeaderEl.value || !('ResizeObserver' in window)) return
 
-  articleHeaderResizeObserver = new ResizeObserver(updateArticleRailTopOffset)
-  articleHeaderResizeObserver.observe(articleHeaderEl.value)
+  topicHeaderResizeObserver = new ResizeObserver(updateTopicRailTopOffset)
+  topicHeaderResizeObserver.observe(topicHeaderEl.value)
 }
 
 function observeTitle() {
@@ -211,7 +211,7 @@ function observeTitle() {
 
 onMounted(() => {
   setupHeaderTitleBehavior()
-  void nextTick(observeArticleHeader)
+  void nextTick(observeTopicHeader)
   void nextTick(observeTitle)
   void nextTick(observeReplyLoader)
   void nextTick(collectReplyElements)
@@ -236,7 +236,7 @@ watch(
     }
     resetRepliesFromProps()
     mobileReplyRailOpen.value = false
-    void nextTick(observeArticleHeader)
+    void nextTick(observeTopicHeader)
     void nextTick(observeTitle)
     void nextTick(observeReplyLoader)
     void nextTick(collectReplyElements)
@@ -272,12 +272,12 @@ watch(
 
 onBeforeUnmount(() => {
   titleObserver?.disconnect()
-  articleHeaderResizeObserver?.disconnect()
+  topicHeaderResizeObserver?.disconnect()
   replyLoadObserver?.disconnect()
   window.removeEventListener('scroll', updateMobileHeaderTitle)
   window.removeEventListener('scroll', scheduleActiveReplyFromScroll)
   window.removeEventListener('scroll', scheduleReplyBottomLoadCheck)
-  window.removeEventListener('resize', updateArticleRailTopOffset)
+  window.removeEventListener('resize', updateTopicRailTopOffset)
   window.removeEventListener('resize', updateHeaderViewport)
   window.removeEventListener('resize', scheduleActiveReplyFromScroll)
   window.removeEventListener('resize', scheduleReplyBottomLoadCheck)
@@ -296,7 +296,7 @@ function setupHeaderTitleBehavior() {
   updateHeaderViewport()
   window.addEventListener('scroll', updateMobileHeaderTitle, { passive: true })
   window.addEventListener('scroll', scheduleActiveReplyFromScroll, { passive: true })
-  window.addEventListener('resize', updateArticleRailTopOffset)
+  window.addEventListener('resize', updateTopicRailTopOffset)
   window.addEventListener('resize', updateHeaderViewport)
   window.addEventListener('resize', scheduleActiveReplyFromScroll)
 }
@@ -586,7 +586,7 @@ function hasMoreInitialReplies() {
 }
 
 function findReplyHashId() {
-  const match = window.location.hash.match(/^#reply-(\d+)$/)
+  const match = window.location.hash.match(/^#post-(\d+)$/)
   return match ? Number(match[1]) : 0
 }
 
@@ -600,7 +600,7 @@ async function syncReplyHash() {
 
   highlightReply(replyId)
   await nextTick()
-  const element = document.getElementById(`reply-${replyId}`)
+  const element = document.getElementById(`post-${replyId}`)
   if (element) {
     scrollReplyIntoComfortView(element, 'auto')
   }
@@ -742,7 +742,7 @@ async function jumpToPostNo(postNo: number) {
     activePostNo.value = loaded.postNo
     syncProgressForPostNo(loaded.postNo)
     await nextTick()
-    const element = document.getElementById(`reply-${loaded.id}`)
+    const element = document.getElementById(`post-${loaded.id}`)
     if (element) {
       scrollReplyIntoComfortView(element)
     }
@@ -766,7 +766,7 @@ async function jumpToPostNo(postNo: number) {
       activePostNo.value = closest.postNo
       syncProgressForPostNo(closest.postNo)
       collectReplyElements()
-      const element = document.getElementById(`reply-${closest.id}`)
+      const element = document.getElementById(`post-${closest.id}`)
       if (element) {
         scrollReplyIntoComfortView(element)
       }
@@ -832,7 +832,7 @@ function scrollReplyListEndIntoView() {
 
   const latest = replies.value[replies.value.length - 1]
   if (latest) {
-    document.getElementById(`reply-${latest.id}`)?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    document.getElementById(`post-${latest.id}`)?.scrollIntoView({ block: 'end', behavior: 'smooth' })
   }
 }
 
@@ -843,7 +843,7 @@ function flushPendingReplyJump() {
   void jumpToPostNo(postNo)
 }
 
-function jumpToArticleBody() {
+function jumpToTopicBody() {
   void jumpToPostNo(1)
 }
 
@@ -881,9 +881,9 @@ async function jumpToLatestReplyFromRail() {
   await jumpToLatestReply()
 }
 
-function jumpToArticleBodyFromRail() {
+function jumpToTopicBodyFromRail() {
   closeMobileReplyRail()
-  jumpToArticleBody()
+  jumpToTopicBody()
 }
 
 function isElementMostlyVisible(element: HTMLElement) {
@@ -909,7 +909,7 @@ async function findReplyElementAfterLayout(replyId: number) {
   for (let attempts = 0; attempts < 4; attempts += 1) {
     await nextTick()
     await waitForAnimationFrame()
-    const element = document.getElementById(`reply-${replyId}`)
+    const element = document.getElementById(`post-${replyId}`)
     if (element) return element
   }
   return null
@@ -953,7 +953,7 @@ async function toggleLike() {
   isLiked.value = nextLiked
   likeCount.value = Math.max(0, likeCount.value + (nextLiked ? 1 : -1))
   try {
-    await likeArticle(page.props.topic.id, nextLiked ? 1 : 2)
+    await likeTopic(page.props.topic.id, nextLiked ? 1 : 2)
   } catch (error) {
     isLiked.value = previousLiked
     likeCount.value = previousCount
@@ -972,7 +972,7 @@ async function toggleBookmark() {
   actionMessage.value = ''
   isBookmarked.value = nextBookmarked
   try {
-    await bookmarkArticle(page.props.topic.id, nextBookmarked ? 1 : 2)
+    await bookmarkTopic(page.props.topic.id, nextBookmarked ? 1 : 2)
     actionMessage.value = nextBookmarked ? t('article.bookmarkAdded') : t('article.bookmarkRemoved')
   } catch (error) {
     isBookmarked.value = previousBookmarked
@@ -991,7 +991,7 @@ async function toggleWatch() {
   actionMessage.value = ''
   isWatched.value = nextWatched
   try {
-    await watchArticle(page.props.topic.id, nextWatched ? 1 : 2)
+    await watchTopic(page.props.topic.id, nextWatched ? 1 : 2)
     actionMessage.value = nextWatched ? t('article.watchAdded') : t('article.watchRemoved')
   } catch (error) {
     isWatched.value = previousWatched
@@ -1156,17 +1156,17 @@ function closeDeleteDialog() {
   deleteErrorMessage.value = ''
 }
 
-function requestArticleModeration(action: 'ban' | 'unban') {
+function requestTopicModeration(action: 'ban' | 'unban') {
   actionMessage.value = ''
   pendingModerationAction.value = action
 }
 
-function closeArticleModerationDialog() {
+function closeTopicModerationDialog() {
   if (actingModeration.value) return
   pendingModerationAction.value = null
 }
 
-async function updateArticleModerationFromDetail() {
+async function updateTopicModerationFromDetail() {
   if (actingModeration.value || !pendingModerationAction.value) return
   actingModeration.value = true
   actionMessage.value = ''
@@ -1235,7 +1235,7 @@ function sameUrl(left: string, right: string) {
   }
 }
 
-function requestArticleReport() {
+function requestTopicReport() {
   requestReport({
     targetType: 'topic',
     targetId: page.props.topic.id,
@@ -1315,7 +1315,7 @@ async function removeReply(replyId: number) {
 
 <template>
     <article class="min-w-0" @click="handleMarkdownImageClick">
-      <header ref="articleHeaderEl" class="relative z-10 border-b border-line/70 px-4 py-4 sm:mb-4 sm:px-0 sm:pb-4 sm:pt-0 xl:w-[calc(100%+292px)]">
+      <header ref="topicHeaderEl" class="relative z-10 border-b border-line/70 px-4 py-4 sm:mb-4 sm:px-0 sm:pb-4 sm:pt-0 xl:w-[calc(100%+292px)]">
         <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-base-content [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.topic.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-base-content/55">
           <a
@@ -1411,7 +1411,7 @@ async function removeReply(replyId: number) {
                     v-if="!page.props.permissions.isOwnTopic"
                     type="button"
                     class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-warning/10 hover:text-warning"
-                    @click="requestArticleReport"
+                    @click="requestTopicReport"
                   >
                     <Flag class="h-4 w-4" />
                     {{ t('article.report') }}
@@ -1421,7 +1421,7 @@ async function removeReply(replyId: number) {
                     type="button"
                     class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
                     :disabled="actingModeration"
-                    @click="requestArticleModeration('ban')"
+                    @click="requestTopicModeration('ban')"
                   >
                     <Ban class="h-4 w-4" />
                     {{ t('article.moderationBan') }}
@@ -1431,7 +1431,7 @@ async function removeReply(replyId: number) {
                     type="button"
                     class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
                     :disabled="actingModeration"
-                    @click="requestArticleModeration('unban')"
+                    @click="requestTopicModeration('unban')"
                   >
                     <RotateCcw class="h-4 w-4" />
                     {{ t('article.moderationUnban') }}
@@ -1460,7 +1460,7 @@ async function removeReply(replyId: number) {
 
             <div
               v-for="reply in replies"
-              :id="`reply-${reply.id}`"
+              :id="`post-${reply.id}`"
               :key="reply.id"
               :data-post-no="reply.postNo"
               class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-line px-3 py-4 transition hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5 xl:border-t-transparent"
@@ -1652,7 +1652,7 @@ async function removeReply(replyId: number) {
                 :progress-current="replyRailProgressCurrent"
                 :progress-end="replyRailProgressEnd"
                 :progress-start="replyRailProgressStart"
-                @earliest="jumpToArticleBodyFromRail"
+                @earliest="jumpToTopicBodyFromRail"
                 @latest="jumpToLatestReplyFromRail"
                 @select="selectReplyFromRail"
               />
@@ -1671,7 +1671,7 @@ async function removeReply(replyId: number) {
         v-model="replyContent"
         v-model:mobile-rail-open="mobileReplyRailOpen"
         :open="composerOpen"
-        :actions="floatingArticleActions"
+        :actions="floatingTopicActions"
         :authenticated="page.layout.viewer.isAuthenticated"
         :can-post="page.props.permissions.canPost"
         :current-label="replyRailCurrentLabel"
@@ -1691,7 +1691,7 @@ async function removeReply(replyId: number) {
         :target="replyTarget"
         @clear-target="cancelReplyTarget"
         @clear-validation="clearReplyValidation"
-        @earliest="jumpToArticleBodyFromRail"
+        @earliest="jumpToTopicBodyFromRail"
         @image-error="handleReplyImageError"
         @image-inserted="handleReplyImageInserted"
         @latest="jumpToLatestReplyFromRail"
@@ -1843,7 +1843,7 @@ async function removeReply(replyId: number) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="ban-article-title"
-          @click.self="closeArticleModerationDialog"
+          @click.self="closeTopicModerationDialog"
         >
           <div class="gf-menu-surface w-full max-w-sm p-4">
             <div class="flex items-start gap-3">
@@ -1860,7 +1860,7 @@ async function removeReply(replyId: number) {
                 type="button"
                 class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75 disabled:cursor-not-allowed disabled:opacity-50"
                 :disabled="actingModeration"
-                @click="closeArticleModerationDialog"
+                @click="closeTopicModerationDialog"
               >
                 <X class="h-4 w-4" />
               </button>
@@ -1871,7 +1871,7 @@ async function removeReply(replyId: number) {
                 type="button"
                 class="gf-button gf-button-md gf-button-muted"
                 :disabled="actingModeration"
-                @click="closeArticleModerationDialog"
+                @click="closeTopicModerationDialog"
               >
                 {{ t('common.cancel') }}
               </button>
@@ -1879,7 +1879,7 @@ async function removeReply(replyId: number) {
                 type="button"
                 class="gf-button gf-button-md gf-button-danger"
                 :disabled="actingModeration"
-                @click="updateArticleModerationFromDetail"
+                @click="updateTopicModerationFromDetail"
               >
                 <Loader2 v-if="actingModeration" class="h-4 w-4 animate-spin" />
                 <component :is="pendingModerationAction === 'ban' ? Ban : RotateCcw" v-else class="h-4 w-4" />

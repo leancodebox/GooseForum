@@ -10,18 +10,18 @@ import (
 func init() {
 	cmd := &cobra.Command{
 		Use:   "rebuild-search-index",
-		Short: "Rebuild the Meilisearch article index",
+		Short: "Rebuild the Meilisearch topic index",
 		RunE:  runRebuildSearchIndex,
 	}
 	appendCommand(cmd)
 }
 
 func runRebuildSearchIndex(_ *cobra.Command, _ []string) error {
-	fmt.Println("Rebuilding Meilisearch article index...")
+	fmt.Println("Rebuilding Meilisearch topic index...")
 	result, err := searchservice.BuildMeilisearchIndex()
 	if err != nil {
-		return fmt.Errorf("rebuild Meilisearch article index: %w", err)
+		return fmt.Errorf("rebuild Meilisearch topic index: %w", err)
 	}
-	fmt.Printf("Meilisearch article index rebuilt: processed %d articles.\n", result.ProcessedCount)
+	fmt.Printf("Meilisearch topic index rebuilt: processed %d topics.\n", result.ProcessedCount)
 	return nil
 }

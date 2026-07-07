@@ -234,7 +234,7 @@ resource/src/styles/
 - `tokens.css` 是主题系统入口，必须保持小而稳定。
 - `components.css` 放通用 UI 组件，不放页面专属布局。
 - `patterns.css` 放产品级复合模式，例如 topic row、home toolbar。
-- `prose.css` 单独维护，因为文章正文和评论正文有独立排版规则。
+- `prose.css` 单独维护，因为 topic 正文和 post 正文有独立排版规则。
 - 新增 CSS 前先判断属于 token、component、pattern 还是 utility。
 
 后续迁移时不再需要先做“拆文件”步骤，应直接从扩展 `components.css` 的最小基础语义类开始。
@@ -307,8 +307,8 @@ theme-preview 应从“主题编辑页”升级为“真实组件验收页”。
 它需要覆盖：
 
 - topic list 行。
-- article card / article body。
-- reply stream。
+- topic card / topic body。
+- post stream。
 - button、input、textarea、select。
 - tab、badge、pill、alert。
 - dropdown、menu、modal-like surface。
@@ -380,7 +380,7 @@ gf-alert
 优先顺序：
 
 1. Home / Category topic list。
-2. Article detail / reply stream。
+2. Topic detail / post stream。
 3. Publish page。
 4. Search page。
 5. Messages / Notifications。

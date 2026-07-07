@@ -297,7 +297,7 @@ export interface TopicDetailPayload {
   description: string
   url: string
   html: string
-  articleStatus: number
+  topicStatus: number
   processStatus: number
   author: {
     id: number
@@ -555,7 +555,7 @@ export interface UserActivityPayload {
 
 export interface UserLikePayload {
   id: number
-  articleId: number
+  topicId: number
   title: string
   url: string
   likedAt: string
@@ -670,8 +670,8 @@ export interface NotificationListResponse {
 
 export type NotificationTemplateKey =
   | 'notifications.templates.comment'
-  | 'notifications.templates.reply'
-  | 'notifications.templates.articleComment'
+  | 'notifications.templates.postReply'
+  | 'notifications.templates.topicPost'
   | 'notifications.templates.follow'
   | 'notifications.templates.badge'
 
@@ -711,7 +711,7 @@ export interface NotificationPayload {
     username: string
     avatarUrl?: string
   }
-  article?: {
+  topic?: {
     id: number
     title: string
     url: string
@@ -725,7 +725,7 @@ export interface NotificationPayload {
     actorName?: string
     topicId?: number
     postId?: number
-    articleTitle?: string
+    topicTitle?: string
     metadata?: {
       followerName?: string
       badgeCode?: string
@@ -797,16 +797,16 @@ export interface SettingsUserPayload {
 }
 
 export interface PublishPageProps {
-  articleId: number
+  topicId: number
   isEditing: boolean
   categories: PublishCategoryPayload[]
   types: PublishTypePayload[]
-  article: {
+  topic: {
     title: string
     content: string
     type: number
     categoryIds: number[]
-    articleStatus: number
+    topicStatus: number
   }
 }
 

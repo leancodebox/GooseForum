@@ -8,8 +8,8 @@ import (
 func TestCommentNotificationExcludeUserIds(t *testing.T) {
 	event := &CommentCreatedEvent{
 		UserId:              1,
-		ArticleAuthorId:     2,
-		ParentReplyAuthorId: 2,
+		TopicAuthorId:       2,
+		ReplyToPostAuthorId: 2,
 	}
 
 	userIds := commentNotificationExcludeUserIds(event)
@@ -23,26 +23,10 @@ func TestCommentNotificationExcludeUserIds(t *testing.T) {
 	}
 }
 
-func TestCommentCreatedEventTopicPostIDs(t *testing.T) {
-	event := &CommentCreatedEvent{
-		ArticleId: 10,
-		CommentId: 20,
-		TopicId:   30,
-		PostId:    40,
-	}
-	if got := event.topicID(); got != 30 {
-		t.Fatalf("topicID() = %d, want 30", got)
-	}
-	if got := event.postID(); got != 40 {
-		t.Fatalf("postID() = %d, want 40", got)
-	}
-
-	legacy := &CommentCreatedEvent{ArticleId: 10, CommentId: 20}
-	if got := legacy.topicID(); got != 10 {
-		t.Fatalf("legacy topicID() = %d, want 10", got)
-	}
-	if got := legacy.postID(); got != 20 {
-		t.Fatalf("legacy postID() = %d, want 20", got)
+func TestCommentCreatedEventCarriesTopicPostIDs(t *testing.T) {
+	event := &CommentCreatedEvent{TopicId: 30, PostId: 40}
+	if event.TopicId != 30 || event.PostId != 40 {
+		t.Fatalf("event ids = %#v", event)
 	}
 }
 
@@ -55,16 +39,16 @@ func TestShouldNotifyArticleAuthor(t *testing.T) {
 		{
 			name: "root comment notifies article author",
 			event: &CommentCreatedEvent{
-				UserId:          1,
-				ArticleAuthorId: 2,
+				UserId:        1,
+				TopicAuthorId: 2,
 			},
 			want: true,
 		},
 		{
 			name: "article author own comment does not notify",
 			event: &CommentCreatedEvent{
-				UserId:          2,
-				ArticleAuthorId: 2,
+				UserId:        2,
+				TopicAuthorId: 2,
 			},
 			want: false,
 		},
@@ -72,9 +56,9 @@ func TestShouldNotifyArticleAuthor(t *testing.T) {
 			name: "reply to another user still notifies article author",
 			event: &CommentCreatedEvent{
 				UserId:              1,
-				ArticleAuthorId:     2,
-				ParentReplyId:       10,
-				ParentReplyAuthorId: 3,
+				TopicAuthorId:       2,
+				ReplyToPostId:       10,
+				ReplyToPostAuthorId: 3,
 			},
 			want: true,
 		},
@@ -82,9 +66,9 @@ func TestShouldNotifyArticleAuthor(t *testing.T) {
 			name: "reply to article author only sends reply notification",
 			event: &CommentCreatedEvent{
 				UserId:              1,
-				ArticleAuthorId:     2,
-				ParentReplyId:       10,
-				ParentReplyAuthorId: 2,
+				TopicAuthorId:       2,
+				ReplyToPostId:       10,
+				ReplyToPostAuthorId: 2,
 			},
 			want: false,
 		},
@@ -116,7 +100,7 @@ func TestShouldNotifyParentReplyAuthor(t *testing.T) {
 			name: "root comment does not notify parent reply author",
 			event: &CommentCreatedEvent{
 				UserId:              1,
-				ParentReplyAuthorId: 2,
+				ReplyToPostAuthorId: 2,
 			},
 			want: false,
 		},
@@ -124,8 +108,8 @@ func TestShouldNotifyParentReplyAuthor(t *testing.T) {
 			name: "reply notifies parent reply author",
 			event: &CommentCreatedEvent{
 				UserId:              1,
-				ParentReplyId:       10,
-				ParentReplyAuthorId: 2,
+				ReplyToPostId:       10,
+				ReplyToPostAuthorId: 2,
 			},
 			want: true,
 		},
@@ -133,8 +117,8 @@ func TestShouldNotifyParentReplyAuthor(t *testing.T) {
 			name: "self reply does not notify",
 			event: &CommentCreatedEvent{
 				UserId:              1,
-				ParentReplyId:       10,
-				ParentReplyAuthorId: 1,
+				ReplyToPostId:       10,
+				ReplyToPostAuthorId: 1,
 			},
 			want: false,
 		},
@@ -142,7 +126,7 @@ func TestShouldNotifyParentReplyAuthor(t *testing.T) {
 			name: "missing parent reply author does not notify",
 			event: &CommentCreatedEvent{
 				UserId:        1,
-				ParentReplyId: 10,
+				ReplyToPostId: 10,
 			},
 			want: false,
 		},

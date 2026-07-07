@@ -61,8 +61,8 @@ func TestUserActivityURLForCommentUsesPostTopic(t *testing.T) {
 		456: {Id: 456, TopicId: 123},
 	}
 
-	if got := userActivityURL(activity, postByID); got != "/p/post/123#reply-456" {
-		t.Fatalf("userActivityURL() = %q, want %q", got, "/p/post/123#reply-456")
+	if got := userActivityURL(activity, postByID); got != "/p/post/123#post-456" {
+		t.Fatalf("userActivityURL() = %q, want %q", got, "/p/post/123#post-456")
 	}
 }
 

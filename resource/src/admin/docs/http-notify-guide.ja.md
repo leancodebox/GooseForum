@@ -29,7 +29,7 @@ X-Goose-Signature: sha256=...
   "timestamp": 1710000000,
   "data": {
     "baseUri": "http://localhost:5234",
-    "article": {
+    "topic": {
       "id": 123,
       "title": "Hello GooseForum",
       "url": "/p/post/123",

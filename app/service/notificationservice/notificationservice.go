@@ -58,7 +58,7 @@ func hydrateNotifications(notifications []*eventNotification.Entity) {
 			notification.Payload.ActorName = userInfo.Username
 		}
 		if topicInfo, ok := topicMap[notification.Payload.TopicId]; ok {
-			notification.Payload.ArticleTitle = topicInfo.Title
+			notification.Payload.TopicTitle = topicInfo.Title
 		}
 	})
 }

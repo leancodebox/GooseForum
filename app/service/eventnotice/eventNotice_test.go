@@ -27,7 +27,4 @@ func TestCommentNotificationsUseTopicPostPayload(t *testing.T) {
 	if notification.Payload.TopicId != 10 || notification.Payload.PostId != 99 {
 		t.Fatalf("payload topic/post = %d/%d, want 10/99", notification.Payload.TopicId, notification.Payload.PostId)
 	}
-	if notification.Payload.ArticleId != 0 || notification.Payload.CommentId != 0 {
-		t.Fatalf("legacy payload article/comment = %d/%d, want zero", notification.Payload.ArticleId, notification.Payload.CommentId)
-	}
 }

@@ -32,5 +32,5 @@ func handleActivityFollow(ctx context.Context, event *UserFollowedEvent) error {
 
 // handleActivityReply 记录回复行为
 func handleActivityReply(ctx context.Context, event *CommentCreatedEvent) error {
-	return userActivities.Record(event.UserId, userActivities.ActionComment, userActivities.SubjectPost, event.CommentId, TakeUpTo64Chars(event.Content))
+	return userActivities.Record(event.UserId, userActivities.ActionComment, userActivities.SubjectPost, event.PostId, TakeUpTo64Chars(event.Content))
 }

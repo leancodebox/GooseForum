@@ -14,7 +14,7 @@ rendering such as diagrams, math, and code highlighting.
 ## Goals
 
 - Store user-authored Markdown as the source of truth.
-- Render final article and reply HTML on the server with `goldmark`.
+- Render final topic and post HTML on the server with `goldmark`.
 - Render editor preview on the client with `markdown-it`.
 - Define a Markdown compatibility test suite that both renderers must satisfy.
 - Add advanced visual features as client-side enhancements when they are needed.
@@ -45,7 +45,7 @@ goldmark server HTML
         |
         | persisted rendered_html / page payload
         v
-public article and reply display
+public topic and post display
 ```
 
 The server result is the trusted result. Client preview should be close enough
@@ -103,7 +103,7 @@ cd resource && pnpm exec vitest run test/markdown-compat.test.ts
 
 Server rendering owns:
 
-- final article and reply HTML
+- final topic and post HTML
 - security-sensitive normalization
 - link attributes such as `target` and `rel`
 - image attributes such as lazy loading and async decoding

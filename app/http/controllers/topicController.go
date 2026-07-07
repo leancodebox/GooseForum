@@ -18,7 +18,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
-	"github.com/leancodebox/GooseForum/app/service/replyservice"
+	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
@@ -27,12 +27,12 @@ func GetSiteStatistics() component.Response {
 }
 
 type WriteTopicReq struct {
-	TopicId       uint64   `json:"topicId"`
-	Content       string   `json:"content" validate:"required"`
-	Title         string   `json:"title" validate:"required"`
-	Type          int8     `json:"type"`
-	CategoryId    []uint64 `json:"categoryId" validate:"min=1,max=3"`
-	ArticleStatus int8     `json:"articleStatus" validate:"oneof=0 1"`
+	TopicId     uint64   `json:"topicId"`
+	Content     string   `json:"content" validate:"required"`
+	Title       string   `json:"title" validate:"required"`
+	Type        int8     `json:"type"`
+	CategoryId  []uint64 `json:"categoryId" validate:"min=1,max=3"`
+	TopicStatus int8     `json:"topicStatus" validate:"oneof=0 1"`
 }
 
 // WriteTopic creates or updates a topic and its first post.
@@ -118,7 +118,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		topic.UserId = req.UserId
 	}
 	topic.CategoryIds = req.Params.CategoryId
-	topic.Status = req.Params.ArticleStatus
+	topic.Status = req.Params.TopicStatus
 	topic.Title = req.Params.Title
 	topic.Excerpt = markdown2html.ExtractDescription(req.Params.Content, 200)
 	topic.FirstImageURL = markdown2html.ExtractFirstImageURL(req.Params.Content)
@@ -184,18 +184,18 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	return component.SuccessResponse(topic.Id)
 }
 
-func normalizeWriteArticleType(articleType int8) int8 {
-	switch articleType {
+func normalizeWriteTopicType(topicType int8) int8 {
+	switch topicType {
 	case 1, 2:
-		return articleType
+		return topicType
 	default:
 		return 1
 	}
 }
 
 type TopicStatusReq struct {
-	TopicId       uint64 `json:"topicId" validate:"required"`
-	ArticleStatus int8   `json:"articleStatus" validate:"oneof=0 1"`
+	TopicId     uint64 `json:"topicId" validate:"required"`
+	TopicStatus int8   `json:"topicStatus" validate:"oneof=0 1"`
 }
 
 func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Response {
@@ -206,10 +206,11 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 	if topic.UserId != req.UserId {
 		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
 	}
-	if topic.Status == req.Params.ArticleStatus {
+	nextStatus := req.Params.TopicStatus
+	if topic.Status == nextStatus {
 		return component.SuccessResponse(true)
 	}
-	topic.Status = req.Params.ArticleStatus
+	topic.Status = nextStatus
 	if err := topics.Save(&topic); err != nil {
 		return component.FailResponseCode(component.MessageArticleSaveFailed, nil)
 	}
@@ -296,7 +297,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 		ReplyToPostId:   req.Params.ReplyToPostId,
 	}
 
-	err = replyservice.CreateTopicPost(postEntity, topicEntity)
+	err = postservice.CreateTopicPost(postEntity, topicEntity)
 	if err != nil {
 		return component.FailResponseCode(
 			component.MessageCommentCreateFailed,
@@ -317,15 +318,13 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 
 	// 发布统一的评论创建事件
 	eventbus.Publish(context.Background(), &eventhandlers.CommentCreatedEvent{
-		ArticleId:           topicEntity.Id,
-		CommentId:           postEntity.Id,
 		TopicId:             topicEntity.Id,
 		PostId:              postEntity.Id,
 		UserId:              req.UserId,
 		Content:             req.Params.Content,
-		ArticleAuthorId:     topicEntity.UserId,
-		ParentReplyId:       req.Params.ReplyToPostId,
-		ParentReplyAuthorId: parentReplyAuthorId,
+		TopicAuthorId:       topicEntity.UserId,
+		ReplyToPostId:       req.Params.ReplyToPostId,
+		ReplyToPostAuthorId: parentReplyAuthorId,
 	})
 
 	return component.SuccessResponse(map[string]any{
@@ -406,7 +405,7 @@ func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 	posts.DeleteEntity(&postEntity)
 	topicEntity := topics.GetSimple(postEntity.TopicId)
 	if topicEntity.Id > 0 {
-		replyservice.SyncTopicPostStats(topicEntity, req.UserId, true)
+		postservice.SyncTopicPostStats(topicEntity, req.UserId, true)
 		hotdataserve.ClearArticleListCache()
 	}
 	return component.SuccessResponse(true)

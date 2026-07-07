@@ -83,7 +83,7 @@ func TestAdminTopicsListReadsTopics(t *testing.T) {
 	if !ok {
 		t.Fatalf("result type = %T", res.Data.Result)
 	}
-	if len(page.List) == 0 || page.List[0].Id != 920001 || page.List[0].Description != "Topic excerpt" || page.List[0].ArticleStatus != 1 {
+	if len(page.List) == 0 || page.List[0].Id != 920001 || page.List[0].Description != "Topic excerpt" || page.List[0].TopicStatus != 1 {
 		t.Fatalf("page = %#v", page)
 	}
 }

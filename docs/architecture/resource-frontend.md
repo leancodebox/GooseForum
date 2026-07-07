@@ -83,7 +83,7 @@ The public site should prioritize reading, scanning, and participation.
 Key areas:
 
 - Home and category topic lists.
-- Article detail and reply stream.
+- Topic detail and post stream.
 - Publish/edit flows.
 - Search.
 - User profile and settings.
@@ -92,7 +92,7 @@ Key areas:
 Public-site implementation rules:
 
 - Keep no-js output useful for core content.
-- Keep page titles, canonical metadata, and article content available in GoHTML.
+- Keep page titles, canonical metadata, and topic content available in GoHTML.
 - Use the shared payload runtime for navigation and API error handling.
 - Keep public-site CSS in `resource/src/styles` and site-scoped components.
 
@@ -103,7 +103,7 @@ The admin console is an operational tool. It should be dense, predictable, and s
 Key areas:
 
 - Dashboard and site statistics.
-- Article management.
+- Topic management.
 - Category management.
 - User management.
 - Settings and operational configuration.

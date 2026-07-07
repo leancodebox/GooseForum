@@ -429,7 +429,7 @@ func buildReportLogSnapshot(record reports.Entity, resolution string) moderation
 			snapshot.TopicId = post.TopicId
 			snapshot.TopicTitle = topic.Title
 			snapshot.PostNo = post.PostNo
-			snapshot.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(post.TopicId), post.Id)
+			snapshot.TargetURL = fmt.Sprintf("%s#post-%d", urlconfig.PostDetail(post.TopicId), post.Id)
 			snapshot.Excerpt = moderationExcerpt(post.Content)
 		}
 	}
@@ -608,7 +608,7 @@ func moderationLogSubject(record moderationLog.Entity, params map[string]any, to
 		}
 		subject := ModerationLogSubject{Type: record.SubjectType, ID: record.SubjectId, Title: postLogTitle(title, postNo), Excerpt: excerpt}
 		if topicID > 0 {
-			subject.URL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(topicID), record.SubjectId)
+			subject.URL = fmt.Sprintf("%s#post-%d", urlconfig.PostDetail(topicID), record.SubjectId)
 		}
 		return subject
 	case moderationLog.SubjectReport:
@@ -846,7 +846,7 @@ func buildModerationReportItem(userID uint64, categoryID uint64, record reports.
 		}
 		item.Title = topic.Title
 		item.Excerpt = post.Content
-		item.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(topicID), post.Id)
+		item.TargetURL = fmt.Sprintf("%s#post-%d", urlconfig.PostDetail(topicID), post.Id)
 	}
 	if item.Title == "" {
 		item.Title = fmt.Sprintf("#%d", record.TargetId)

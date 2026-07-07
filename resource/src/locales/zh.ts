@@ -151,8 +151,8 @@ export default {
     viewProfile: '查看主页',
     templates: {
       comment: '评论了你的主题',
-      reply: '回复了你',
-      articleComment: '在你关注的文章下发表了新评论',
+      postReply: '回复了你',
+      topicPost: '在你关注的主题下发表了新内容',
       follow: '关注了你',
       badge: '获得了「{badge}」徽章',
     },

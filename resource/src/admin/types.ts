@@ -90,7 +90,7 @@ export interface AdminPermissionOption {
   value: number
 }
 
-export interface AdminArticle {
+export interface AdminTopic {
   id: number
   title: string
   description?: string | null
@@ -99,7 +99,7 @@ export interface AdminArticle {
   userId: number
   username: string
   userAvatarUrl?: string | null
-  articleStatus: number
+  topicStatus: number
   processStatus: number
   viewCount: number
   replyCount: number
@@ -134,7 +134,7 @@ export interface AdminFileResource {
   url: string
 }
 
-export interface ArticleSource extends AdminArticle {
+export interface TopicSource extends AdminTopic {
   content: string
 }
 

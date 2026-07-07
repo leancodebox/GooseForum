@@ -12,7 +12,7 @@ const shellState = useShellState()
 const standaloneComponents = new Set(['auth.login', 'auth.resetPassword'])
 const keepAliveComponents = new Set(['home.index', 'category.index', 'search.index'])
 const isStandalone = computed(() => standaloneComponents.has(props.page.payload.component))
-const hasRail = computed(() => props.page.payload.component === 'article.detail')
+const hasRail = computed(() => props.page.payload.component === 'topic.detail')
 const shouldKeepAlive = computed(() => keepAliveComponents.has(props.page.payload.component))
 const pageViewKey = computed(() => {
   if (props.page.payload.component === 'user.profile') {

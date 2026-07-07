@@ -32,11 +32,11 @@ func SendCommentNotification(userId uint64, topicId uint64, commentContent strin
 	return err
 }
 
-// SendReplyNotification 发送回复通知
-func SendReplyNotification(userId uint64, postId uint64, topicId uint64, replyContent string, replierId uint64) error {
+// SendPostReplyNotification 发送 post 回复通知
+func SendPostReplyNotification(userId uint64, postId uint64, topicId uint64, replyContent string, replierId uint64) error {
 	payload := eventNotification.NotificationPayload{
 		Content:     replyContent,
-		TemplateKey: eventNotification.TemplateReply,
+		TemplateKey: eventNotification.TemplatePostReply,
 		TemplateParams: eventNotification.NotificationTemplateParams{
 			Preview: replyContent,
 		},
@@ -47,7 +47,7 @@ func SendReplyNotification(userId uint64, postId uint64, topicId uint64, replyCo
 
 	notification := &eventNotification.Entity{
 		UserId:    userId,
-		EventType: eventNotification.EventTypeReply,
+		EventType: eventNotification.EventTypePostReply,
 		Payload:   payload,
 	}
 
@@ -58,7 +58,7 @@ func SendReplyNotification(userId uint64, postId uint64, topicId uint64, replyCo
 	return err
 }
 
-func SendArticleCommentNotifications(userIds []uint64, topicId uint64, postId uint64, commentContent string, commenterId uint64) error {
+func SendTopicPostNotifications(userIds []uint64, topicId uint64, postId uint64, commentContent string, commenterId uint64) error {
 	if len(userIds) == 0 {
 		return nil
 	}
@@ -70,10 +70,10 @@ func SendArticleCommentNotifications(userIds []uint64, topicId uint64, postId ui
 		}
 		notifications = append(notifications, &eventNotification.Entity{
 			UserId:    userId,
-			EventType: eventNotification.EventTypeArticleComment,
+			EventType: eventNotification.EventTypeTopicPost,
 			Payload: eventNotification.NotificationPayload{
 				Content:     commentContent,
-				TemplateKey: eventNotification.TemplateArticleComment,
+				TemplateKey: eventNotification.TemplateTopicPost,
 				TemplateParams: eventNotification.NotificationTemplateParams{
 					Preview: commentContent,
 				},

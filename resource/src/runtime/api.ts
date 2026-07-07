@@ -139,7 +139,7 @@ export async function getPostWindow(input: PostWindowInput): Promise<PostWindowP
   return readApiResponse<PostWindowPayload>(response, t('api.repliesLoadFailed'))
 }
 
-export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
+export async function likeTopic(id: number, action: 1 | 2): Promise<boolean> {
   const response = await fetch('/api/forum/topics/like', {
     method: 'POST',
     headers: {
@@ -153,7 +153,7 @@ export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
   return readApiResponse<boolean>(response, t('api.likeFailed'))
 }
 
-export async function bookmarkArticle(id: number, action: 1 | 2): Promise<boolean> {
+export async function bookmarkTopic(id: number, action: 1 | 2): Promise<boolean> {
   const response = await fetch('/api/forum/topics/bookmark', {
     method: 'POST',
     headers: {
@@ -167,7 +167,7 @@ export async function bookmarkArticle(id: number, action: 1 | 2): Promise<boolea
   return readApiResponse<boolean>(response, t('api.bookmarkFailed'))
 }
 
-export async function watchArticle(id: number, action: 1 | 2): Promise<boolean> {
+export async function watchTopic(id: number, action: 1 | 2): Promise<boolean> {
   const response = await fetch('/api/forum/topics/watch', {
     method: 'POST',
     headers: {
@@ -181,7 +181,7 @@ export async function watchArticle(id: number, action: 1 | 2): Promise<boolean> 
   return readApiResponse<boolean>(response, t('api.watchFailed'))
 }
 
-export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Promise<boolean> {
+export async function updateTopicStatus(id: number, topicStatus: 0 | 1): Promise<boolean> {
   const response = await fetch('/api/forum/topics/status', {
     method: 'POST',
     headers: {
@@ -189,7 +189,7 @@ export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Pro
     },
     body: JSON.stringify({
       topicId: id,
-      articleStatus,
+      topicStatus,
     }),
   })
   return readApiResponse<boolean>(response, t('api.articleStatusFailed'))
@@ -363,22 +363,22 @@ export async function followUser(userId: number, isFollowing: boolean): Promise<
   return data.result ?? data.data ?? true
 }
 
-export interface SubmitArticleInput {
+export interface SubmitTopicInput {
   topicId: number
   title: string
   content: string
   type: number
   categoryId: number[]
-  articleStatus: 0 | 1
+  topicStatus: 0 | 1
 }
 
-export async function submitArticle(article: SubmitArticleInput): Promise<number> {
+export async function submitTopic(topic: SubmitTopicInput): Promise<number> {
   const response = await fetch('/api/forum/topics/write', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(article),
+    body: JSON.stringify(topic),
   })
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`)
@@ -388,7 +388,7 @@ export async function submitArticle(article: SubmitArticleInput): Promise<number
   if (data.code !== undefined && data.code !== 0) {
     throw new Error(responseMessage(data, t('api.articleSaveFailed')))
   }
-  return data.result ?? data.data ?? article.topicId
+  return data.result ?? data.data ?? topic.topicId
 }
 
 export async function uploadImage(file: File): Promise<string> {

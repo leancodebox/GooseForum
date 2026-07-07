@@ -228,25 +228,25 @@ Rules:
 - Hover and active states should be subtle.
 - Empty states explain the reason and offer a useful action when possible.
 
-## Article Detail
+## Topic Detail
 
-Article detail structure:
+Topic detail structure:
 
 ```text
 title block
-article body
-reply stream
-reply composer or login prompt
+topic body
+post stream
+post composer or login prompt
 optional right rail
 ```
 
 Rules:
 
 - The title is prominent but not oversized.
-- Article body and editor preview must share prose behavior.
-- Reply actions should be available without visually dominating the stream.
-- A user's own replies may expose edit actions when permissions allow.
-- Errors from reply creation or editing must be shown near the action that failed.
+- Topic body and editor preview must share prose behavior.
+- Post actions should be available without visually dominating the stream.
+- A user's own posts may expose edit actions when permissions allow.
+- Errors from post creation or editing must be shown near the action that failed.
 
 ## Forms
 
@@ -324,10 +324,10 @@ Public topic pages:
 - No-js output contains the core list.
 - SPA navigation does not flash blank content.
 
-Article pages:
+Topic pages:
 
-- Article content and replies are readable without JavaScript.
-- Reply creation and own-reply editing surface validation errors.
+- Topic content and posts are readable without JavaScript.
+- Post creation and own-post editing surface validation errors.
 - Composer pending and failure states are clear.
 
 Admin pages:
