@@ -5,8 +5,8 @@ import "time"
 const tableName = "file_usages"
 
 const (
-	TargetArticle     = "article"
-	TargetReply       = "reply"
+	TargetTopic       = "topic"
+	TargetPost        = "post"
 	TargetUser        = "user"
 	TargetAdminUpload = "admin_upload"
 )

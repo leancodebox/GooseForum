@@ -138,7 +138,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, req.Params.CategoryId); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
-		fileusageservice.ReplaceArticle(topic.Id, req.UserId, firstPost.Content)
+		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
 		hotdataserve.ClearArticleListCache()
 		if topic.Status == 1 {
 			eventbus.Publish(context.Background(), &eventhandlers.ArticleUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
@@ -168,7 +168,7 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		if err := topics.Save(&topic); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
-		fileusageservice.ReplaceArticle(topic.Id, req.UserId, firstPost.Content)
+		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
 		if topic.Status == 1 {
 			userStatistics.WriteArticle(req.UserId)
 		}
@@ -304,7 +304,7 @@ func ArticleReply(req component.BetterRequest[CreatePostReq]) component.Response
 			component.MessageParams{"error": err.Error()})
 
 	}
-	fileusageservice.ReplaceReply(postEntity.Id, req.UserId, postEntity.Content)
+	fileusageservice.ReplacePost(postEntity.Id, req.UserId, postEntity.Content)
 	userStatistics.WriteComment(req.UserId)
 	userservice.InvalidateUserPublicProfileCache(req.UserId)
 	hotdataserve.ClearArticleListCache()
@@ -330,7 +330,7 @@ func ArticleReply(req component.BetterRequest[CreatePostReq]) component.Response
 
 	return component.SuccessResponse(map[string]any{
 		"id":              postEntity.Id,
-		"replyNo":         postEntity.PostNo - 1,
+		"postNo":          postEntity.PostNo - 1,
 		"renderedContent": postEntity.RenderedHTML,
 	})
 }
@@ -384,11 +384,11 @@ func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response
 			component.MessageParams{"error": err.Error()})
 
 	}
-	fileusageservice.ReplaceReply(postEntity.Id, req.UserId, postEntity.Content)
+	fileusageservice.ReplacePost(postEntity.Id, req.UserId, postEntity.Content)
 
 	return component.SuccessResponse(map[string]any{
 		"id":              postEntity.Id,
-		"replyNo":         postEntity.PostNo - 1,
+		"postNo":          postEntity.PostNo - 1,
 		"content":         postEntity.Content,
 		"renderedContent": postEntity.RenderedHTML,
 		"updatedAt":       postEntity.UpdatedAt.Format(time.DateTime),

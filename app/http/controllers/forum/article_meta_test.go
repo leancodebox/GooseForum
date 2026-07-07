@@ -24,7 +24,7 @@ func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 	c, _ := gin.CreateTestContext(nil)
 	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/1", nil)
 
-	meta := buildArticleMeta(c, ArticlePayload{
+	meta := buildArticleMeta(c, TopicDetailPayload{
 		ID:          1,
 		Title:       "讨论标题",
 		Description: "讨论描述",
@@ -55,7 +55,7 @@ func TestArticleMetaJSONLDIncludesImageForImageOnlyArticle(t *testing.T) {
 	c, _ := gin.CreateTestContext(nil)
 	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/440", nil)
 
-	meta := buildArticleMeta(c, ArticlePayload{
+	meta := buildArticleMeta(c, TopicDetailPayload{
 		ID:            440,
 		Title:         "叮叮叮～又得到一个徽章",
 		Description:   "",
@@ -173,14 +173,14 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "/p/post/990010", nil)
 	props := buildTopicDetailProps(c, &topic, &firstPost)
 
-	if props.Article.ID != topicID || props.Article.HTML != "<p>first</p>" || props.Article.MaxReplyNo != 1 {
-		t.Fatalf("article payload mismatch: %#v", props.Article)
+	if props.Topic.ID != topicID || props.Topic.HTML != "<p>first</p>" || props.Topic.MaxPostNo != 1 {
+		t.Fatalf("article payload mismatch: %#v", props.Topic)
 	}
-	if len(props.Article.Categories) != 1 || props.Article.Categories[0].Name != "General" {
-		t.Fatalf("categories mismatch: %#v", props.Article.Categories)
+	if len(props.Topic.Categories) != 1 || props.Topic.Categories[0].Name != "General" {
+		t.Fatalf("categories mismatch: %#v", props.Topic.Categories)
 	}
-	if len(props.Replies) != 1 || props.Replies[0].ID != replyPostID || props.Replies[0].ReplyNo != 1 {
-		t.Fatalf("replies mismatch: %#v", props.Replies)
+	if len(props.Posts) != 1 || props.Posts[0].ID != replyPostID || props.Posts[0].PostNo != 1 {
+		t.Fatalf("posts mismatch: %#v", props.Posts)
 	}
 }
 
@@ -228,14 +228,14 @@ func TestArticleRepliesWindowSkipsFirstPostInCursors(t *testing.T) {
 			Limit:   50,
 		},
 	})
-	payload, ok := res.Data.Result.(ReplyWindowPayload)
+	payload, ok := res.Data.Result.(PostWindowPayload)
 	if !ok {
-		t.Fatalf("result type = %T, want ReplyWindowPayload", res.Data.Result)
+		t.Fatalf("result type = %T, want PostWindowPayload", res.Data.Result)
 	}
-	if len(payload.Replies) != 1 || payload.Replies[0].ID != replyPostID {
-		t.Fatalf("replies = %#v, want only reply post", payload.Replies)
+	if len(payload.Posts) != 1 || payload.Posts[0].ID != replyPostID {
+		t.Fatalf("posts = %#v, want only reply post", payload.Posts)
 	}
-	if payload.BeforeCursor != replyPostID || payload.AfterCursor != replyPostID || payload.BeforeReplyNo != 1 || payload.AfterReplyNo != 1 {
+	if payload.BeforeCursor != replyPostID || payload.AfterCursor != replyPostID || payload.BeforePostNo != 1 || payload.AfterPostNo != 1 {
 		t.Fatalf("cursor payload = %#v", payload)
 	}
 }

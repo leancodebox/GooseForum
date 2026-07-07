@@ -7,10 +7,10 @@ import { formatNumber } from '@/runtime/format'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { markdownFromClipboard } from '@/runtime/rich-paste'
 import type { PostPayload } from '@/types/payload'
-import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
+import PostPositionRail from '@/site/components/PostPositionRail.vue'
 import { useI18n } from 'vue-i18n'
 
-type ArticleReplyAction = {
+type PostAction = {
   key: string
   icon: Component
   active: boolean
@@ -22,9 +22,9 @@ type ArticleReplyAction = {
 }
 
 const props = defineProps<{
-  actions: ArticleReplyAction[]
+  actions: PostAction[]
   authenticated: boolean
-  canReply: boolean
+  canPost: boolean
   currentLabel: string
   currentNo: number
   endLabel: string
@@ -52,7 +52,7 @@ const emit = defineEmits<{
   imageInserted: [count: number]
   latest: []
   openReply: []
-  selectRail: [replyNo: number]
+  selectRail: [postNo: number]
   submit: []
   'update:mobileRailOpen': [value: boolean]
   'update:open': [value: boolean]
@@ -255,7 +255,7 @@ function submit() {
                 <X class="h-4 w-4" />
               </button>
             </div>
-            <ReplyPositionRail
+            <PostPositionRail
               :current="currentNo"
               :max="maxNo"
               :start-label="startLabel"
@@ -297,7 +297,7 @@ function submit() {
                 <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active && action.fill !== false ? 'currentColor' : 'none'" />
               </button>
               <button
-                v-if="authenticated && canReply"
+                v-if="authenticated && canPost"
                 type="button"
                 class="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-base-content/75 transition hover:bg-info/10 hover:text-primary"
                 :title="t('article.joinDiscussion')"

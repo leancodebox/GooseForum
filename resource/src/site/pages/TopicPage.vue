@@ -7,9 +7,9 @@ import { useFlashMessages } from '@/runtime/flash-message'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
-import ArticleReplyComposer from '@/site/components/ArticleReplyComposer.vue'
+import PostComposer from '@/site/components/PostComposer.vue'
 import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
-import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
+import PostPositionRail from '@/site/components/PostPositionRail.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { TopicDetailProps, LayoutPayload, PostPayload } from '@/types/payload'
@@ -24,10 +24,10 @@ const { t } = useI18n()
 const { push: pushFlash } = useFlashMessages()
 const replyContent = ref('')
 const replyTargetId = ref(0)
-const likeCount = ref(page.props.article.likeCount)
-const isLiked = ref(page.props.article.isLiked)
-const isBookmarked = ref(page.props.article.isBookmarked)
-const isWatched = ref(page.props.article.isWatched)
+const likeCount = ref(page.props.topic.likeCount)
+const isLiked = ref(page.props.topic.isLiked)
+const isBookmarked = ref(page.props.topic.isBookmarked)
+const isWatched = ref(page.props.topic.isWatched)
 const actionMessage = ref('')
 const actingLike = ref(false)
 const actingBookmark = ref(false)
@@ -47,17 +47,17 @@ const reportNote = ref('')
 const reportSubmitting = ref(false)
 const reportError = ref('')
 const moderatingReplyIds = ref<number[]>([])
-const replies = ref<PostPayload[]>([...page.props.replies])
-const topicProcessStatus = ref(page.props.article.processStatus)
+const replies = ref<PostPayload[]>([...page.props.posts])
+const topicProcessStatus = ref(page.props.topic.processStatus)
 const replyTarget = computed(() => replies.value.find((reply) => reply.id === replyTargetId.value))
 const replyWindowMode = ref(false)
 const replyHasBefore = ref(false)
 const replyHasAfter = ref(hasMoreInitialReplies())
-const replyBeforeCursor = ref(firstReplyId(page.props.replies))
-const replyAfterCursor = ref(lastReplyId(page.props.replies))
-const replyBeforeReplyNo = ref(firstReplyNo(page.props.replies))
-const replyAfterReplyNo = ref(lastReplyNo(page.props.replies))
-const replyMaxNo = ref(initialMaxReplyNo())
+const replyBeforeCursor = ref(firstReplyId(page.props.posts))
+const replyAfterCursor = ref(lastReplyId(page.props.posts))
+const replyBeforePostNo = ref(firstPostNo(page.props.posts))
+const replyAfterPostNo = ref(lastPostNo(page.props.posts))
+const replyMaxNo = ref(initialMaxPostNo())
 const replyTailLoaded = ref(!hasMoreInitialReplies())
 const replyAutoLoadAfter = ref(true)
 const loadingReplyWindow = ref(false)
@@ -79,22 +79,22 @@ const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMob
 const composerOpen = ref(false)
 const composerMode = computed(() => editingReplyId.value ? 'edit' : 'create')
 const mobileReplyRailOpen = ref(false)
-const activeReplyNo = ref(firstReplyNo(page.props.replies) || 1)
+const activePostNo = ref(firstPostNo(page.props.posts) || 1)
 const replyRailProgressCurrent = ref(0)
 const replyRailProgressStart = ref(0)
 const replyRailProgressEnd = ref(0)
-const replyMaxRange = computed(() => Math.max(replyMaxNo.value, ...replies.value.map((reply) => reply.replyNo || 0)))
-const hasReplyRail = computed(() => page.props.article.replyCount > 0 && replyMaxRange.value > 0)
+const replyMaxRange = computed(() => Math.max(replyMaxNo.value, ...replies.value.map((reply) => reply.postNo || 0)))
+const hasReplyRail = computed(() => page.props.topic.replyCount > 0 && replyMaxRange.value > 0)
 const replyRailCurrentNo = computed(() => {
-  const fallback = firstReplyNo(replies.value) || 1
-  return clampReplyNo(activeReplyNo.value || fallback)
+  const fallback = firstPostNo(replies.value) || 1
+  return clampPostNo(activePostNo.value || fallback)
 })
 const replyRailCurrentLabel = computed(() => {
-  const activeReply = replies.value.find((reply) => reply.replyNo === replyRailCurrentNo.value)
+  const activeReply = replies.value.find((reply) => reply.postNo === replyRailCurrentNo.value)
   return activeReply ? formatRailDate(activeReply.createdAt) : ''
 })
-const replyRailStartLabel = computed(() => formatRailDate(page.props.article.createdAt))
-const replyRailEndLabel = computed(() => formatRailDate(replyTailLoaded.value ? replies.value[replies.value.length - 1]?.createdAt || page.props.article.updatedAt : page.props.article.updatedAt))
+const replyRailStartLabel = computed(() => formatRailDate(page.props.topic.createdAt))
+const replyRailEndLabel = computed(() => formatRailDate(replyTailLoaded.value ? replies.value[replies.value.length - 1]?.createdAt || page.props.topic.updatedAt : page.props.topic.updatedAt))
 const replyRailBusy = computed(() => loadingReplyWindow.value && (loadingReplyDirection.value === 'anchor' || loadingReplyDirection.value === 'tail'))
 const actionMessageSuccess = computed(() =>
   [
@@ -141,7 +141,7 @@ const floatingArticleActions = computed(() => {
     },
   ]
 
-  if (page.props.permissions.canModerateArticle) {
+  if (page.props.permissions.canModerateTopic) {
     const isBanned = topicProcessStatus.value === 1
     actions.push({
       key: isBanned ? 'unban' : 'ban',
@@ -221,13 +221,13 @@ onMounted(() => {
 })
 
 watch(
-  () => page.props.article.id,
+  () => page.props.topic.id,
   () => {
-    likeCount.value = page.props.article.likeCount
-    isLiked.value = page.props.article.isLiked
-    isBookmarked.value = page.props.article.isBookmarked
-    isWatched.value = page.props.article.isWatched
-    topicProcessStatus.value = page.props.article.processStatus
+    likeCount.value = page.props.topic.likeCount
+    isLiked.value = page.props.topic.isLiked
+    isBookmarked.value = page.props.topic.isBookmarked
+    isWatched.value = page.props.topic.isWatched
+    topicProcessStatus.value = page.props.topic.processStatus
     pendingModerationAction.value = null
     actingModeration.value = false
     mobileHeaderTitleVisible.value = false
@@ -247,7 +247,7 @@ watch(
 )
 
 watch(
-  () => [page.props.article.title, page.props.article.categories, effectiveShowHeaderTitle.value] as const,
+  () => [page.props.topic.title, page.props.topic.categories, effectiveShowHeaderTitle.value] as const,
   ([title, categories, show]) => {
     shellState.headerTitle = title
     shellState.headerTags = categories.map((category) => ({
@@ -261,7 +261,7 @@ watch(
 )
 
 watch(
-  () => replies.value.map((reply) => `${reply.id}:${reply.replyNo}`).join(','),
+  () => replies.value.map((reply) => `${reply.id}:${reply.postNo}`).join(','),
   () => {
     void nextTick(() => {
       collectReplyElements()
@@ -385,7 +385,7 @@ function observeReplyLoader() {
 }
 
 function collectReplyElements() {
-  replyElements = Array.from(document.querySelectorAll<HTMLElement>('[data-reply-no]'))
+  replyElements = Array.from(document.querySelectorAll<HTMLElement>('[data-post-no]'))
 }
 
 function pauseReplyRailSync() {
@@ -428,8 +428,8 @@ function scheduleActiveReplyFromScroll() {
 
 function syncReplyRailProgress() {
   const progress = measureReplyViewportProgress()
-  if (progress.replyNo >= 0) {
-    activeReplyNo.value = progress.replyNo
+  if (progress.postNo >= 0) {
+    activePostNo.value = progress.postNo
     replyRailProgressCurrent.value = progress.current
     replyRailProgressStart.value = progress.start
     replyRailProgressEnd.value = progress.end
@@ -440,18 +440,18 @@ function measureReplyViewportProgress() {
   const markerY = Math.min(window.innerHeight * 0.38, 340)
   const viewportTop = 88
   const viewportBottom = window.innerHeight - 96
-  const firstVisibleReplyNo = firstReplyNo(replies.value) || 1
+  const firstVisiblePostNo = firstPostNo(replies.value) || 1
 
-  let coveringReplyNo: number | null = null
+  let coveringPostNo: number | null = null
   let coveringProgress = 0
   let coveringDistance = Number.POSITIVE_INFINITY
-  let nearestReplyNo: number | null = null
+  let nearestPostNo: number | null = null
   let nearestProgress = 0
   let nearestDistance = Number.POSITIVE_INFINITY
 
   for (const element of replyElements) {
-    const replyNo = Number(element.dataset.replyNo || 0)
-    if (!replyNo) continue
+    const postNo = Number(element.dataset.postNo || 0)
+    if (!postNo) continue
     const rect = element.getBoundingClientRect()
     if (rect.bottom <= viewportTop || rect.top >= viewportBottom) continue
 
@@ -462,8 +462,8 @@ function measureReplyViewportProgress() {
     if (rect.top <= markerY && rect.bottom >= markerY) {
       const distance = Math.abs(rect.top - markerY)
       if (distance < coveringDistance) {
-        coveringReplyNo = replyNo
-        coveringProgress = progressForReplyNoFraction(replyNo, (markerY - rect.top) / Math.max(1, rect.height))
+        coveringPostNo = postNo
+        coveringProgress = progressForPostNoFraction(postNo, (markerY - rect.top) / Math.max(1, rect.height))
         coveringDistance = distance
       }
       continue
@@ -471,21 +471,21 @@ function measureReplyViewportProgress() {
 
     const distance = Math.abs(rect.top - markerY)
     if (distance < nearestDistance) {
-      nearestReplyNo = replyNo
-      nearestProgress = progressForReplyNoFraction(replyNo, rect.top > markerY ? 0 : 1)
+      nearestPostNo = postNo
+      nearestProgress = progressForPostNoFraction(postNo, rect.top > markerY ? 0 : 1)
       nearestDistance = distance
     }
   }
 
-  const fallbackReplyNo = firstVisibleReplyNo
-  const replyNo = coveringReplyNo ?? nearestReplyNo ?? fallbackReplyNo
-  const current = coveringReplyNo !== null
+  const fallbackPostNo = firstVisiblePostNo
+  const postNo = coveringPostNo ?? nearestPostNo ?? fallbackPostNo
+  const current = coveringPostNo !== null
     ? coveringProgress
-    : nearestReplyNo !== null
+    : nearestPostNo !== null
       ? nearestProgress
       : 0
   return {
-    replyNo,
+    postNo,
     current,
     start: Math.max(0, current - visibleSlotSize() / 2),
     end: Math.min(1, current + visibleSlotSize() / 2),
@@ -493,19 +493,19 @@ function measureReplyViewportProgress() {
 }
 
 function resetRepliesFromProps() {
-  replies.value = [...page.props.replies]
+  replies.value = [...page.props.posts]
   replyWindowMode.value = false
   replyHasBefore.value = false
   replyHasAfter.value = hasMoreInitialReplies()
-  replyBeforeCursor.value = firstReplyId(page.props.replies)
-  replyAfterCursor.value = lastReplyId(page.props.replies)
-  replyBeforeReplyNo.value = firstReplyNo(page.props.replies)
-  replyAfterReplyNo.value = lastReplyNo(page.props.replies)
-  replyMaxNo.value = initialMaxReplyNo()
+  replyBeforeCursor.value = firstReplyId(page.props.posts)
+  replyAfterCursor.value = lastReplyId(page.props.posts)
+  replyBeforePostNo.value = firstPostNo(page.props.posts)
+  replyAfterPostNo.value = lastPostNo(page.props.posts)
+  replyMaxNo.value = initialMaxPostNo()
   replyTailLoaded.value = !hasMoreInitialReplies()
   replyAutoLoadAfter.value = true
-  activeReplyNo.value = firstReplyNo(page.props.replies) || 1
-  syncProgressForReplyNo(activeReplyNo.value)
+  activePostNo.value = firstPostNo(page.props.posts) || 1
+  syncProgressForPostNo(activePostNo.value)
   replyWindowError.value = ''
   editingReplyId.value = 0
 }
@@ -518,50 +518,50 @@ function lastReplyId(items: PostPayload[]) {
   return items.length ? items[items.length - 1].id : 0
 }
 
-function firstReplyNo(items: PostPayload[]) {
-  return items.length ? items[0].replyNo || 0 : 0
+function firstPostNo(items: PostPayload[]) {
+  return items.length ? items[0].postNo || 0 : 0
 }
 
-function lastReplyNo(items: PostPayload[]) {
-  return items.length ? items[items.length - 1].replyNo || 0 : 0
+function lastPostNo(items: PostPayload[]) {
+  return items.length ? items[items.length - 1].postNo || 0 : 0
 }
 
-function initialMaxReplyNo() {
-  return Math.max(page.props.article.maxReplyNo || 0, page.props.article.replyCount || 0, lastReplyNo(page.props.replies))
+function initialMaxPostNo() {
+  return Math.max(page.props.topic.maxPostNo || 0, page.props.topic.replyCount || 0, lastPostNo(page.props.posts))
 }
 
-function clampReplyNo(replyNo: number) {
-  const maxReplyNo = Math.max(1, replyMaxRange.value || 1)
-  return Math.min(maxReplyNo, Math.max(1, Math.round(replyNo)))
+function clampPostNo(postNo: number) {
+  const maxPostNo = Math.max(1, replyMaxRange.value || 1)
+  return Math.min(maxPostNo, Math.max(1, Math.round(postNo)))
 }
 
-function progressForReplyNo(replyNo: number) {
-  return progressForReplyNoFraction(replyNo, 0.5)
+function progressForPostNo(postNo: number) {
+  return progressForPostNoFraction(postNo, 0.5)
 }
 
-function progressForReplyNoFraction(replyNo: number, fraction: number) {
-  const maxReplyNo = Math.max(1, replyMaxRange.value || 1)
-  if (maxReplyNo <= 1) return Math.min(1, Math.max(0, fraction))
-  return Math.min(1, Math.max(0, (Math.max(1, replyNo) - 1 + Math.min(1, Math.max(0, fraction))) / maxReplyNo))
+function progressForPostNoFraction(postNo: number, fraction: number) {
+  const maxPostNo = Math.max(1, replyMaxRange.value || 1)
+  if (maxPostNo <= 1) return Math.min(1, Math.max(0, fraction))
+  return Math.min(1, Math.max(0, (Math.max(1, postNo) - 1 + Math.min(1, Math.max(0, fraction))) / maxPostNo))
 }
 
 function visibleSlotSize() {
   return 1 / Math.max(1, replyMaxRange.value || 1)
 }
 
-function syncProgressForReplyNo(replyNo: number) {
-  const progress = progressForReplyNo(replyNo)
+function syncProgressForPostNo(postNo: number) {
+  const progress = progressForPostNo(postNo)
   replyRailProgressCurrent.value = progress
   replyRailProgressStart.value = Math.max(0, progress - visibleSlotSize() / 2)
   replyRailProgressEnd.value = Math.min(1, progress + visibleSlotSize() / 2)
 }
 
-function findClosestLoadedReply(replyNo: number) {
+function findClosestLoadedReply(postNo: number) {
   let closest: PostPayload | undefined
   let closestDistance = Number.POSITIVE_INFINITY
   for (const reply of replies.value) {
-    if (!reply.replyNo) continue
-    const distance = Math.abs(reply.replyNo - replyNo)
+    if (!reply.postNo) continue
+    const distance = Math.abs(reply.postNo - postNo)
     if (distance < closestDistance) {
       closest = reply
       closestDistance = distance
@@ -582,7 +582,7 @@ function formatRailDate(value: string) {
 }
 
 function hasMoreInitialReplies() {
-  return page.props.article.replyCount > page.props.replies.length
+  return page.props.topic.replyCount > page.props.posts.length
 }
 
 function findReplyHashId() {
@@ -631,14 +631,14 @@ function applyPostWindowPayload(
   forceWindowMode: boolean,
 ) {
   replyWindowMode.value = forceWindowMode || replyWindowMode.value
-  mergeReplies(payload.replies, mergeMode)
+  mergeReplies(payload.posts, mergeMode)
   replyHasBefore.value = replyWindowMode.value ? payload.hasBefore : false
   replyHasAfter.value = payload.hasAfter
   replyBeforeCursor.value = payload.beforeCursor ?? firstReplyId(replies.value)
   replyAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
-  replyBeforeReplyNo.value = payload.beforeReplyNo ?? firstReplyNo(replies.value)
-  replyAfterReplyNo.value = payload.afterReplyNo ?? lastReplyNo(replies.value)
-  replyMaxNo.value = Math.max(replyMaxNo.value, payload.maxReplyNo || 0)
+  replyBeforePostNo.value = payload.beforePostNo ?? firstPostNo(replies.value)
+  replyAfterPostNo.value = payload.afterPostNo ?? lastPostNo(replies.value)
+  replyMaxNo.value = Math.max(replyMaxNo.value, payload.maxPostNo || 0)
   if (mergeMode === 'replace') {
     replyTailLoaded.value = payloadEndsAtTail(payload)
   } else if (mergeMode === 'append' && payloadEndsAtTail(payload)) {
@@ -647,9 +647,9 @@ function applyPostWindowPayload(
 }
 
 function payloadEndsAtTail(payload: Awaited<ReturnType<typeof getPostWindow>>) {
-  const afterReplyNo = payload.afterReplyNo || lastReplyNo(payload.replies)
-  const maxReplyNo = Math.max(replyMaxNo.value, payload.maxReplyNo || 0)
-  return payload.replies.length > 0 && !payload.hasAfter && afterReplyNo >= maxReplyNo
+  const afterPostNo = payload.afterPostNo || lastPostNo(payload.posts)
+  const maxPostNo = Math.max(replyMaxNo.value, payload.maxPostNo || 0)
+  return payload.posts.length > 0 && !payload.hasAfter && afterPostNo >= maxPostNo
 }
 
 function disableReplyAutoLoadAfter() {
@@ -672,12 +672,12 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail'
   replyWindowError.value = ''
   try {
     const payload = await getPostWindow({
-      topicId: page.props.article.id,
+      topicId: page.props.topic.id,
       anchorPostId: direction === 'anchor' ? anchorValue : undefined,
-      beforePostNo: direction === 'before' ? replyBeforeReplyNo.value : undefined,
-      afterPostNo: direction === 'after' ? replyAfterReplyNo.value : undefined,
-      before: direction === 'before' && !replyBeforeReplyNo.value ? replyBeforeCursor.value : undefined,
-      after: direction === 'after' && !replyAfterReplyNo.value ? replyAfterCursor.value : undefined,
+      beforePostNo: direction === 'before' ? replyBeforePostNo.value : undefined,
+      afterPostNo: direction === 'after' ? replyAfterPostNo.value : undefined,
+      before: direction === 'before' && !replyBeforePostNo.value ? replyBeforeCursor.value : undefined,
+      after: direction === 'after' && !replyAfterPostNo.value ? replyAfterCursor.value : undefined,
       tail: direction === 'tail',
       limit: 20,
     })
@@ -697,11 +697,11 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail'
       disableReplyAutoLoadAfter()
     }
     if (direction === 'before') {
-      activeReplyNo.value = firstReplyNo(payload.replies) || firstReplyNo(replies.value)
-      syncProgressForReplyNo(activeReplyNo.value || 1)
+      activePostNo.value = firstPostNo(payload.posts) || firstPostNo(replies.value)
+      syncProgressForPostNo(activePostNo.value || 1)
     } else if (direction === 'tail') {
-      activeReplyNo.value = lastReplyNo(payload.replies) || lastReplyNo(replies.value) || replyMaxRange.value
-      syncProgressForReplyNo(activeReplyNo.value || 1)
+      activePostNo.value = lastPostNo(payload.posts) || lastPostNo(replies.value) || replyMaxRange.value
+      syncProgressForPostNo(activePostNo.value || 1)
     }
     await nextTick()
     collectReplyElements()
@@ -719,8 +719,8 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail'
   }
 }
 
-async function jumpToReplyNo(replyNo: number) {
-  const target = clampReplyNo(replyNo)
+async function jumpToPostNo(postNo: number) {
+  const target = clampPostNo(postNo)
   if (target >= replyMaxRange.value) {
     await jumpToLatestReply()
     return
@@ -728,19 +728,19 @@ async function jumpToReplyNo(replyNo: number) {
 
   if (loadingReplyWindow.value) {
     pendingReplyJumpNo = target
-    activeReplyNo.value = target
-    syncProgressForReplyNo(target)
+    activePostNo.value = target
+    syncProgressForPostNo(target)
     return
   }
 
   disableReplyAutoLoadAfter()
-  activeReplyNo.value = target
-  syncProgressForReplyNo(target)
+  activePostNo.value = target
+  syncProgressForPostNo(target)
   pauseReplyRailSync()
-  const loaded = replies.value.find((reply) => reply.replyNo === target)
+  const loaded = replies.value.find((reply) => reply.postNo === target)
   if (loaded) {
-    activeReplyNo.value = loaded.replyNo
-    syncProgressForReplyNo(loaded.replyNo)
+    activePostNo.value = loaded.postNo
+    syncProgressForPostNo(loaded.postNo)
     await nextTick()
     const element = document.getElementById(`reply-${loaded.id}`)
     if (element) {
@@ -755,7 +755,7 @@ async function jumpToReplyNo(replyNo: number) {
   replyWindowError.value = ''
   try {
     const payload = await getPostWindow({
-      topicId: page.props.article.id,
+      topicId: page.props.topic.id,
       anchorPostNo: target,
       limit: 20,
     })
@@ -763,8 +763,8 @@ async function jumpToReplyNo(replyNo: number) {
     await nextTick()
     const closest = findClosestLoadedReply(target)
     if (closest) {
-      activeReplyNo.value = closest.replyNo
-      syncProgressForReplyNo(closest.replyNo)
+      activePostNo.value = closest.postNo
+      syncProgressForPostNo(closest.postNo)
       collectReplyElements()
       const element = document.getElementById(`reply-${closest.id}`)
       if (element) {
@@ -785,29 +785,29 @@ async function jumpToLatestReply() {
   if (!replyMaxRange.value) return
   if (loadingReplyWindow.value) {
     pendingReplyJumpNo = replyMaxRange.value
-    activeReplyNo.value = replyMaxRange.value
-    syncProgressForReplyNo(replyMaxRange.value)
+    activePostNo.value = replyMaxRange.value
+    syncProgressForPostNo(replyMaxRange.value)
     return
   }
   disableReplyAutoLoadAfter()
-  activeReplyNo.value = replyMaxRange.value
-  syncProgressForReplyNo(replyMaxRange.value)
+  activePostNo.value = replyMaxRange.value
+  syncProgressForPostNo(replyMaxRange.value)
   pauseReplyRailSync()
   if (replyTailLoaded.value) {
     const latest = replies.value[replies.value.length - 1]
     if (latest) {
-      activeReplyNo.value = latest.replyNo
-      syncProgressForReplyNo(latest.replyNo)
+      activePostNo.value = latest.postNo
+      syncProgressForPostNo(latest.postNo)
       await nextTick()
       scrollReplyListEndIntoView()
       resumeReplyRailSyncWhenSettled()
     }
     return
   }
-  const loadedLatest = replies.value.find((reply) => reply.replyNo === replyMaxRange.value)
+  const loadedLatest = replies.value.find((reply) => reply.postNo === replyMaxRange.value)
   if (loadedLatest) {
-    activeReplyNo.value = loadedLatest.replyNo
-    syncProgressForReplyNo(loadedLatest.replyNo)
+    activePostNo.value = loadedLatest.postNo
+    syncProgressForPostNo(loadedLatest.postNo)
     await nextTick()
     scrollReplyListEndIntoView()
     resumeReplyRailSyncWhenSettled()
@@ -817,8 +817,8 @@ async function jumpToLatestReply() {
   await nextTick()
   const latest = replies.value[replies.value.length - 1]
   if (latest) {
-    activeReplyNo.value = latest.replyNo
-    syncProgressForReplyNo(latest.replyNo)
+    activePostNo.value = latest.postNo
+    syncProgressForPostNo(latest.postNo)
     scrollReplyListEndIntoView()
     resumeReplyRailSyncWhenSettled()
   }
@@ -838,13 +838,13 @@ function scrollReplyListEndIntoView() {
 
 function flushPendingReplyJump() {
   if (!pendingReplyJumpNo || loadingReplyWindow.value) return
-  const replyNo = pendingReplyJumpNo
+  const postNo = pendingReplyJumpNo
   pendingReplyJumpNo = null
-  void jumpToReplyNo(replyNo)
+  void jumpToPostNo(postNo)
 }
 
 function jumpToArticleBody() {
-  void jumpToReplyNo(1)
+  void jumpToPostNo(1)
 }
 
 function focusReplyEditor() {
@@ -871,9 +871,9 @@ function closeMobileReplyRail() {
   mobileReplyRailOpen.value = false
 }
 
-async function selectReplyFromRail(replyNo: number) {
+async function selectReplyFromRail(postNo: number) {
   closeMobileReplyRail()
-  await jumpToReplyNo(replyNo)
+  await jumpToPostNo(postNo)
 }
 
 async function jumpToLatestReplyFromRail() {
@@ -920,15 +920,15 @@ async function revealCreatedReply(replyId: number) {
 
   pauseReplyRailSync()
   const payload = await getPostWindow({
-    topicId: page.props.article.id,
+    topicId: page.props.topic.id,
     anchorPostId: replyId,
     limit: 20,
   })
   applyPostWindowPayload(payload, 'replace', true)
-  const createdReply = payload.replies.find((reply) => reply.id === replyId)
-  if (createdReply?.replyNo) {
-    activeReplyNo.value = createdReply.replyNo
-    syncProgressForReplyNo(createdReply.replyNo)
+  const createdReply = payload.posts.find((reply) => reply.id === replyId)
+  if (createdReply?.postNo) {
+    activePostNo.value = createdReply.postNo
+    syncProgressForPostNo(createdReply.postNo)
   }
   highlightReply(replyId)
   const element = await findReplyElementAfterLayout(replyId)
@@ -953,7 +953,7 @@ async function toggleLike() {
   isLiked.value = nextLiked
   likeCount.value = Math.max(0, likeCount.value + (nextLiked ? 1 : -1))
   try {
-    await likeArticle(page.props.article.id, nextLiked ? 1 : 2)
+    await likeArticle(page.props.topic.id, nextLiked ? 1 : 2)
   } catch (error) {
     isLiked.value = previousLiked
     likeCount.value = previousCount
@@ -972,7 +972,7 @@ async function toggleBookmark() {
   actionMessage.value = ''
   isBookmarked.value = nextBookmarked
   try {
-    await bookmarkArticle(page.props.article.id, nextBookmarked ? 1 : 2)
+    await bookmarkArticle(page.props.topic.id, nextBookmarked ? 1 : 2)
     actionMessage.value = nextBookmarked ? t('article.bookmarkAdded') : t('article.bookmarkRemoved')
   } catch (error) {
     isBookmarked.value = previousBookmarked
@@ -991,7 +991,7 @@ async function toggleWatch() {
   actionMessage.value = ''
   isWatched.value = nextWatched
   try {
-    await watchArticle(page.props.article.id, nextWatched ? 1 : 2)
+    await watchArticle(page.props.topic.id, nextWatched ? 1 : 2)
     actionMessage.value = nextWatched ? t('article.watchAdded') : t('article.watchRemoved')
   } catch (error) {
     isWatched.value = previousWatched
@@ -1122,7 +1122,7 @@ async function submitReply() {
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    const createdReply = await createPost(page.props.article.id, content, replyId)
+    const createdReply = await createPost(page.props.topic.id, content, replyId)
     replyContent.value = ''
     replyTargetId.value = 0
     successMessage.value = t('article.replyPosted')
@@ -1172,7 +1172,7 @@ async function updateArticleModerationFromDetail() {
   actionMessage.value = ''
   const action = pendingModerationAction.value
   try {
-    await updateModerationTopicStatus(page.props.article.id, action)
+    await updateModerationTopicStatus(page.props.topic.id, action)
     topicProcessStatus.value = action === 'ban' ? 1 : 0
     pendingModerationAction.value = null
     actionMessage.value = action === 'ban' ? t('article.moderationBanSuccess') : t('article.moderationUnbanSuccess')
@@ -1238,9 +1238,9 @@ function sameUrl(left: string, right: string) {
 function requestArticleReport() {
   requestReport({
     targetType: 'topic',
-    targetId: page.props.article.id,
-    title: page.props.article.title,
-    excerpt: page.props.article.description,
+    targetId: page.props.topic.id,
+    title: page.props.topic.title,
+    excerpt: page.props.topic.description,
   })
 }
 
@@ -1248,7 +1248,7 @@ function requestReplyReport(reply: PostPayload) {
   requestReport({
     targetType: 'post',
     targetId: reply.id,
-    title: t('article.replyReportTitle', { no: reply.replyNo || reply.id }),
+    title: t('article.replyReportTitle', { no: reply.postNo || reply.id }),
     excerpt: reply.content,
   })
 }
@@ -1316,22 +1316,22 @@ async function removeReply(replyId: number) {
 <template>
     <article class="min-w-0" @click="handleMarkdownImageClick">
       <header ref="articleHeaderEl" class="relative z-10 border-b border-line/70 px-4 py-4 sm:mb-4 sm:px-0 sm:pb-4 sm:pt-0 xl:w-[calc(100%+292px)]">
-        <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-base-content [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.article.title }}</h1>
+        <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-base-content [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.topic.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-base-content/55">
           <a
-            :href="`/u/${page.props.article.author.id}`"
+            :href="`/u/${page.props.topic.author.id}`"
             class="inline-flex items-center gap-2 font-medium text-base-content/75 hover:text-primary"
-            @click="showUserCard(page.props.article.author, $event)"
+            @click="showUserCard(page.props.topic.author, $event)"
           >
-            <UserAvatar :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" class="h-5 w-5 rounded-full object-cover" />
-            {{ page.props.article.author.username }}
+            <UserAvatar :src="page.props.topic.author.avatarUrl" :alt="page.props.topic.author.username" class="h-5 w-5 rounded-full object-cover" />
+            {{ page.props.topic.author.username }}
           </a>
           <span class="inline-flex items-center gap-1.5">
             <Clock class="h-3.5 w-3.5" />
-            {{ formatDateTime(page.props.article.createdAt) }}
+            {{ formatDateTime(page.props.topic.createdAt) }}
           </span>
           <a
-            v-for="category in page.props.article.categories"
+            v-for="category in page.props.topic.categories"
             :key="category.id"
             :href="category.url"
             class="inline-flex items-center gap-1.5 rounded-sm text-base-content/75 hover:text-primary"
@@ -1347,27 +1347,27 @@ async function removeReply(replyId: number) {
           <div class="min-w-0">
             <div class="grid grid-cols-[44px_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5">
               <a
-                :href="`/u/${page.props.article.author.id}`"
+                :href="`/u/${page.props.topic.author.id}`"
                 class="sticky top-19 self-start pt-1"
-                @click="showUserCard(page.props.article.author, $event)"
+                @click="showUserCard(page.props.topic.author, $event)"
               >
-                <UserAvatar :src="page.props.article.author.avatarUrl" :alt="page.props.article.author.username" :badge="page.props.article.author.wornBadge" class="h-11 w-11 rounded-full ring-1 ring-line" img-class="rounded-full" />
+                <UserAvatar :src="page.props.topic.author.avatarUrl" :alt="page.props.topic.author.username" :badge="page.props.topic.author.wornBadge" class="h-11 w-11 rounded-full ring-1 ring-line" img-class="rounded-full" />
               </a>
               <div class="min-w-0">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <a :href="`/u/${page.props.article.author.id}`" class="font-semibold text-base-content hover:text-primary">{{ page.props.article.author.username }}</a>
+                    <a :href="`/u/${page.props.topic.author.id}`" class="font-semibold text-base-content hover:text-primary">{{ page.props.topic.author.username }}</a>
                     <div class="text-xs font-medium text-base-content/75">{{ t('article.body') }}</div>
                   </div>
                   <div class="flex flex-wrap items-center justify-end gap-3 text-xs font-medium text-base-content/75">
                     <div class="flex items-center gap-3">
-                      <span class="inline-flex items-center gap-1"><MessageSquare class="h-3.5 w-3.5" />{{ formatNumber(page.props.article.replyCount) }}</span>
-                      <span class="inline-flex items-center gap-1"><Eye class="h-3.5 w-3.5" />{{ formatNumber(page.props.article.viewCount) }}</span>
+                      <span class="inline-flex items-center gap-1"><MessageSquare class="h-3.5 w-3.5" />{{ formatNumber(page.props.topic.replyCount) }}</span>
+                      <span class="inline-flex items-center gap-1"><Eye class="h-3.5 w-3.5" />{{ formatNumber(page.props.topic.viewCount) }}</span>
                       <span class="inline-flex items-center gap-1"><Heart class="h-3.5 w-3.5" />{{ formatNumber(likeCount) }}</span>
                     </div>
                     <a
-                      v-if="page.props.permissions.isOwnArticle"
-                      :href="`/publish?id=${page.props.article.id}`"
+                      v-if="page.props.permissions.isOwnTopic"
+                      :href="`/publish?id=${page.props.topic.id}`"
                       class="gf-button gf-button-secondary h-7 px-2 text-xs hover:border-primary/20 hover:bg-info/10 hover:text-primary"
                     >
                       <PencilLine class="h-3.5 w-3.5" />
@@ -1375,7 +1375,7 @@ async function removeReply(replyId: number) {
                     </a>
                   </div>
                 </div>
-                <div class="gf-prose gf-prose-article" v-html="page.props.article.html" />
+                <div class="gf-prose gf-prose-article" v-html="page.props.topic.html" />
                 <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-4">
                   <button
                     type="button"
@@ -1408,7 +1408,7 @@ async function removeReply(replyId: number) {
                     {{ isWatched ? t('article.watched') : t('article.watch') }}
                   </button>
                   <button
-                    v-if="!page.props.permissions.isOwnArticle"
+                    v-if="!page.props.permissions.isOwnTopic"
                     type="button"
                     class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-warning/10 hover:text-warning"
                     @click="requestArticleReport"
@@ -1417,7 +1417,7 @@ async function removeReply(replyId: number) {
                     {{ t('article.report') }}
                   </button>
                   <button
-                    v-if="page.props.permissions.canModerateArticle && topicProcessStatus === 0"
+                    v-if="page.props.permissions.canModerateTopic && topicProcessStatus === 0"
                     type="button"
                     class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
                     :disabled="actingModeration"
@@ -1427,7 +1427,7 @@ async function removeReply(replyId: number) {
                     {{ t('article.moderationBan') }}
                   </button>
                   <button
-                    v-else-if="page.props.permissions.canModerateArticle && topicProcessStatus === 1"
+                    v-else-if="page.props.permissions.canModerateTopic && topicProcessStatus === 1"
                     type="button"
                     class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
                     :disabled="actingModeration"
@@ -1462,7 +1462,7 @@ async function removeReply(replyId: number) {
               v-for="reply in replies"
               :id="`reply-${reply.id}`"
               :key="reply.id"
-              :data-reply-no="reply.replyNo"
+              :data-post-no="reply.postNo"
               class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-line px-3 py-4 transition hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5 xl:border-t-transparent"
               :class="{ 'bg-info/10 ring-1 ring-inset ring-primary/20': highlightedReplyId === reply.id }"
             >
@@ -1479,16 +1479,16 @@ async function removeReply(replyId: number) {
                   <div class="min-w-0">
                     <div class="flex min-w-0 items-center gap-2">
                       <a :href="`/u/${reply.author.id}`" class="min-w-0 truncate font-semibold text-base-content hover:text-primary">{{ reply.author.username }}</a>
-                      <span v-if="reply.replyNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 sm:inline">#{{ formatNumber(reply.replyNo) }}</span>
+                      <span v-if="reply.postNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 sm:inline">#{{ formatNumber(reply.postNo) }}</span>
                     </div>
                     <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55 sm:hidden">
-                      <span v-if="reply.replyNo" class="font-semibold tabular-nums text-base-content/55">#{{ formatNumber(reply.replyNo) }}</span>
+                      <span v-if="reply.postNo" class="font-semibold tabular-nums text-base-content/55">#{{ formatNumber(reply.postNo) }}</span>
                       <time class="truncate">{{ formatDateTime(reply.createdAt) }}</time>
                     </div>
                   </div>
                   <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
                     <button
-                      v-if="reply.isOwnReply && !reply.isHidden"
+                      v-if="reply.isOwnPost && !reply.isHidden"
                       type="button"
                       class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       :disabled="savingEditReplyId === reply.id || deletingReplyId === reply.id"
@@ -1499,7 +1499,7 @@ async function removeReply(replyId: number) {
                       <span class="sr-only">{{ t('common.edit') }}</span>
                     </button>
                     <button
-                      v-if="reply.isOwnReply && !reply.isHidden"
+                      v-if="reply.isOwnPost && !reply.isHidden"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       :disabled="deletingReplyId === reply.id"
@@ -1510,7 +1510,7 @@ async function removeReply(replyId: number) {
                       <span class="sr-only">{{ deletingReplyId === reply.id ? t('article.deleting') : t('article.delete') }}</span>
                     </button>
                     <button
-                      v-if="page.props.permissions.canReply && !reply.isHidden"
+                      v-if="page.props.permissions.canPost && !reply.isHidden"
                       type="button"
                       class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       :title="t('article.reply')"
@@ -1520,7 +1520,7 @@ async function removeReply(replyId: number) {
                       <span class="sr-only">{{ t('article.reply') }}</span>
                     </button>
                     <button
-                      v-if="!reply.isOwnReply && !reply.isHidden"
+                      v-if="!reply.isOwnPost && !reply.isHidden"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
                       :title="t('article.report')"
@@ -1613,23 +1613,23 @@ async function removeReply(replyId: number) {
               <dl class="space-y-4 border-t border-line px-4 py-5 text-sm">
                 <div class="flex items-center justify-between gap-4">
                   <dt class="font-semibold text-base-content/55">{{ t('article.replyCount') }}</dt>
-                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.article.replyCount) }}</dd>
+                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.topic.replyCount) }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-4">
                   <dt class="font-semibold text-base-content/55">{{ t('article.viewCount') }}</dt>
-                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.article.viewCount) }}</dd>
+                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ formatNumber(page.props.topic.viewCount) }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-4">
                   <dt class="font-semibold text-base-content/55">{{ t('article.participants') }}</dt>
-                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ page.props.article.participants.length }}</dd>
+                  <dd class="text-right font-semibold tabular-nums text-base-content">{{ page.props.topic.participants.length }}</dd>
                 </div>
               </dl>
 
-              <div v-if="page.props.article.participants.length" class="border-t border-line px-4 py-4">
+              <div v-if="page.props.topic.participants.length" class="border-t border-line px-4 py-4">
                 <h3 class="mb-3 text-sm font-semibold text-base-content/55">{{ t('article.activeParticipants') }}</h3>
                 <div class="flex flex-wrap gap-1.5">
                   <a
-                    v-for="participant in page.props.article.participants"
+                    v-for="participant in page.props.topic.participants"
                     :key="participant.id"
                     :href="`/u/${participant.id}`"
                     class="rounded-full"
@@ -1640,8 +1640,8 @@ async function removeReply(replyId: number) {
                 </div>
               </div>
 
-              <ReplyPositionRail
-                v-if="page.props.article.replyCount > 0 && replyMaxRange > 0"
+              <PostPositionRail
+                v-if="page.props.topic.replyCount > 0 && replyMaxRange > 0"
                 class="border-t border-line"
                 :current="replyRailCurrentNo"
                 :max="replyMaxRange"
@@ -1667,13 +1667,13 @@ async function removeReply(replyId: number) {
         </div>
       </section>
 
-      <ArticleReplyComposer
+      <PostComposer
         v-model="replyContent"
         v-model:mobile-rail-open="mobileReplyRailOpen"
         :open="composerOpen"
         :actions="floatingArticleActions"
         :authenticated="page.layout.viewer.isAuthenticated"
-        :can-reply="page.props.permissions.canReply"
+        :can-post="page.props.permissions.canPost"
         :current-label="replyRailCurrentLabel"
         :current-no="replyRailCurrentNo"
         :end-label="replyRailEndLabel"

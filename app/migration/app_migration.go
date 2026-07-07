@@ -75,5 +75,15 @@ func runVersionedDataMigrations() {
 		pageConfig.SyncMigrationVersion(6)
 		currentVersion = 6
 	}
+	if currentVersion < 7 {
+		result := datamigration.BackfillFileUsagesTopicPost()
+		slog.Info("app migration file usage topic post migration done", "fileUsages", result.FileUsages, "fileUsagesMissing", result.FileUsagesMissing, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration file usage topic post migration has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(7)
+		currentVersion = 7
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

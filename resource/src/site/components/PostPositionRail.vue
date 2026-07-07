@@ -18,7 +18,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   earliest: []
   latest: []
-  select: [replyNo: number]
+  select: [postNo: number]
 }>()
 
 const { t } = useI18n()
@@ -27,9 +27,9 @@ const dragging = ref(false)
 const previewNo = ref<number | null>(null)
 const railHeight = 192
 const thumbHeight = 28
-const thumbNo = computed(() => clampReplyNo(previewNo.value ?? props.current ?? 1))
+const thumbNo = computed(() => clampPostNo(previewNo.value ?? props.current ?? 1))
 const displayNo = computed(() => thumbNo.value)
-const normalizedCurrent = computed(() => dragging.value ? progressForReplyNo(thumbNo.value) : clampProgress(props.progressCurrent ?? progressForReplyNo(props.current)))
+const normalizedCurrent = computed(() => dragging.value ? progressForPostNo(thumbNo.value) : clampProgress(props.progressCurrent ?? progressForPostNo(props.current)))
 const thumbStyle = computed(() => ({
   top: `${thumbTopPx.value}px`,
   height: `${thumbHeight}px`,
@@ -46,8 +46,8 @@ onBeforeUnmount(() => {
   removePointerListeners()
 })
 
-function clampReplyNo(replyNo: number) {
-  return Math.min(Math.max(1, props.max || 1), Math.max(1, Math.round(replyNo)))
+function clampPostNo(postNo: number) {
+  return Math.min(Math.max(1, props.max || 1), Math.max(1, Math.round(postNo)))
 }
 
 function clampProgress(value: number) {
@@ -55,36 +55,36 @@ function clampProgress(value: number) {
   return Math.min(1, Math.max(0, value))
 }
 
-function progressForReplyNo(replyNo: number) {
+function progressForPostNo(postNo: number) {
   if (props.max <= 1) return 0
-  return clampProgress((replyNo - 1) / (props.max - 1))
+  return clampProgress((postNo - 1) / (props.max - 1))
 }
 
-function replyNoFromPointer(event: PointerEvent) {
+function postNoFromPointer(event: PointerEvent) {
   const element = railEl.value
   if (!element) return displayNo.value
   const rect = element.getBoundingClientRect()
   const ratio = Math.min(1, Math.max(0, (event.clientY - rect.top) / Math.max(1, rect.height)))
-  return clampReplyNo(1 + ratio * Math.max(0, props.max - 1))
+  return clampPostNo(1 + ratio * Math.max(0, props.max - 1))
 }
 
 function startDrag(event: PointerEvent) {
   if (!props.max || props.busy) return
   event.preventDefault()
   dragging.value = true
-  previewNo.value = replyNoFromPointer(event)
+  previewNo.value = postNoFromPointer(event)
   window.addEventListener('pointermove', handlePointerMove)
   window.addEventListener('pointerup', handlePointerUp)
 }
 
 function handlePointerMove(event: PointerEvent) {
   if (!dragging.value) return
-  previewNo.value = replyNoFromPointer(event)
+  previewNo.value = postNoFromPointer(event)
 }
 
 function handlePointerUp(event: PointerEvent) {
   if (!dragging.value) return
-  previewNo.value = replyNoFromPointer(event)
+  previewNo.value = postNoFromPointer(event)
   const target = previewNo.value
   dragging.value = false
   previewNo.value = null
@@ -94,8 +94,8 @@ function handlePointerUp(event: PointerEvent) {
   }
 }
 
-function selectReplyNo(replyNo: number) {
-  const target = clampReplyNo(replyNo)
+function selectPostNo(postNo: number) {
+  const target = clampPostNo(postNo)
   if (target !== props.current) {
     emit('select', target)
   }
@@ -131,9 +131,9 @@ function removePointerListeners() {
         :aria-valuemin="1"
         :aria-valuemax="max"
         :aria-valuenow="displayNo"
-        @keydown.up.prevent="selectReplyNo(displayNo - 1)"
-        @keydown.down.prevent="selectReplyNo(displayNo + 1)"
-        @keydown.home.prevent="selectReplyNo(1)"
+        @keydown.up.prevent="selectPostNo(displayNo - 1)"
+        @keydown.down.prevent="selectPostNo(displayNo + 1)"
+        @keydown.home.prevent="selectPostNo(1)"
         @keydown.end.prevent="emit('latest')"
       >
         <div class="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-line" />

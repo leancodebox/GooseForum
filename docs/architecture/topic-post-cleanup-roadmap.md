@@ -37,7 +37,7 @@ pnpm -C resource build
 
 `pnpm -C resource build` 目前会出现 `@vueuse/core` 的 Rolldown `INVALID_ANNOTATION` warning，但构建退出码为 0 时可接受。
 
-## 阶段 1：前端内部命名收敛
+## 阶段 1：前端详情页命名收敛
 
 目标：前端代码内部尽量使用 `topic/post`，减少新代码继续沿用 `article/reply`。
 
@@ -45,39 +45,39 @@ pnpm -C resource build
 
 - `resource/src/runtime/api.ts`
 - `resource/src/types/payload.ts`
-- `resource/src/site/pages/ArticlePage.vue`
+- `resource/src/site/pages/TopicPage.vue`
 - `resource/src/site/pages/PublishPage.vue`
 - 相关 site/admin 组件和类型。
 
 建议操作：
 
-1. 保留页面组件文件名 `ArticlePage.vue`，先不改文件名，避免路由和模板映射扩大。
-2. 把 runtime 中旧包装函数逐步替换：
+1. 页面组件文件名已从 `ArticlePage.vue` 调整为 `TopicPage.vue`，详情页内嵌组件已调整为 `PostComposer.vue` / `PostPositionRail.vue`。
+2. 把 runtime 中旧包装函数替换为：
    - `postReply` -> `createPost`
    - `updateReply` -> `updatePost`
    - `deleteReply` -> `deletePost`
    - `updateModerationArticleStatus` -> `updateModerationTopicStatus`
    - `updateModerationReplyStatus` -> `updateModerationPostStatus`
-3. 页面内部变量按局部逐步替换：
+3. 页面详情 payload 使用 `topic/posts`，post 字段使用 `topicId/postNo`：
    - `replyId` -> `postId`
    - `replyNo` -> `postNo`，如果 UI 文案仍叫“回复楼层”，可只改代码变量。
    - `currentArticleId` -> `currentTopicId`
    - `articleProcessStatus` -> `topicProcessStatus`
-4. 类型逐步增加新名字别名，再替换使用方：
-   - `ArticlePayload` -> `TopicPayload`
+4. 类型使用新名字，不再额外保留详情页兼容别名：
+   - `ArticlePayload` -> `TopicDetailPayload`
    - `ArticleDetailProps` -> `TopicDetailProps`
    - `ReplyWindowPayload` -> `PostWindowPayload`
    - `PostPayload` 已是新名，优先沿用。
 5. 完成后搜索确认：
 
 ```bash
-rg "postReply|updateReply|deleteReply|articleId|replyId|replyNo|ArticlePayload|ArticleDetailProps|ReplyWindowPayload" resource/src
+rg "postReply|updateReply|deleteReply|articleId|replyId|replyNo|ArticlePayload|ArticleDetailProps|ReplyWindowPayload|ArticlePage|ArticleReplyComposer|ReplyPositionRail" resource/src
 ```
 
 允许保留：
 
 - i18n 文案中的“文章/回复”用户可见文本。
-- DOM/hash 相关的 `reply-`。
+- 用户可见 URL/hash 相关的 `reply-` 需要单独评估是否迁移，避免破坏外链。
 - 历史 payload 兼容字段。
 
 ## 阶段 2：后端运行时代码命名收敛
@@ -137,7 +137,6 @@ rg "ArticleReply|WriteArticles|UpdateArticleStatus|ArticlesList|ArticleSource|Ed
 - `app/service/eventhandlers/`
 - `app/service/notificationservice/`
 - `app/service/moderationlogservice/`
-- `app/models/forum/reports/`
 - `app/models/forum/eventNotification/`
 
 建议操作：
@@ -147,11 +146,12 @@ rg "ArticleReply|WriteArticles|UpdateArticleStatus|ArticlesList|ArticleSource|Ed
    - 通知 payload `articleId/commentId -> topicId/postId`。
    - 审核日志 `subject/action/params` 从 `article/reply` 转成 `topic/post`。
 2. 新写入只写 topic/post 字段。
-3. 旧字段只允许出现在迁移脚本和迁移测试里。
+3. 旧字段只允许出现在迁移脚本、迁移测试、deprecated model 或明确保留的历史存储字段里；模型层不再暴露 `reports.TargetArticle` / `reports.TargetReply`、`fileUsage.TargetArticle` / `fileUsage.TargetReply` 这类可供新代码复用的旧常量。
 4. 为历史迁移补测试：
    - 旧 `reports.TargetArticle` / `reports.TargetReply` 能迁成 `topic/post`。
    - 旧通知 payload 能迁成 `topicId/postId`。
    - 旧审核日志 payload 能迁成 `topicId/postId/postNo`。
+   - 旧 file usage target 能迁成 `topic/post`。
 5. 完成后搜索确认：
 
 ```bash

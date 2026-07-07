@@ -52,13 +52,13 @@ async function readApiSuccessMessage(response: Response, successFallback: string
 
 export interface CreatePostResult {
   id: number
-  replyNo?: number
+  postNo?: number
   renderedContent: string
 }
 
 export interface UpdatePostResult {
   id: number
-  replyNo?: number
+  postNo?: number
   content: string
   renderedContent: string
   updatedAt: string

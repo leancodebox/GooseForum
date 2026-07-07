@@ -204,8 +204,8 @@ posts.post_no = 1
 | 编辑正文 | 文章编辑和回复编辑分两条逻辑 | 首楼和回复统一为 post 编辑；topic 标题/分类仍单独编辑 | 权限判断需要区分 topic 管理和 post 作者编辑 |
 | 删除/软删 | `articles.DeletedAt`、`reply.DeletedAt` | topic 删除和 post 删除语义分离；删除首楼是否删除整个 topic 需要定义 | 删除首楼、删除最后回复、恢复数据都会影响统计 |
 | 审核/封禁 | `articles.process_status`、`reply.process_status`、`moderationLog.SubjectArticle/Reply` | 正文级封禁迁到 post；topic 级处理保留在 topic | “封禁主题”和“封禁首楼”语义不同，不能简单合并 |
-| 举报 | `reports.TargetArticle`、`reports.TargetReply`、`article_id` 冗余字段 | 正文举报迁到 `target_type=post`，topic 举报另行定义；保留 topic_id 便于范围查询 | 版主按分类过滤举报依赖 article/category，需要保留 topic/category 快速判断 |
-| 文件引用 | `fileUsage.TargetArticle`、`TargetReply` | 正文内联图片迁到 `TargetPost`；头像、管理上传不变 | 历史引用和孤儿文件判断需要同时识别旧 target 和新 target |
+| 举报 | 旧 `article/reply` target 由迁移脚本读取，`article_id` 作为历史存储字段保留 | 正文举报迁到 `target_type=post`，主题举报使用 `target_type=topic`；保留 topic_id 便于范围查询 | 版主按分类过滤举报依赖 topic/category，新代码不再暴露旧 target 常量 |
+| 文件引用 | 旧 `article/reply` target 由迁移脚本读取 | 正文内联图片迁到 `TargetTopic/TargetPost`；头像、管理上传不变 | 旧 target 只保留在迁移脚本中，新写入不再暴露旧常量 |
 | 搜索 | 文章正文和标题搜索依赖 article；回复搜索目前较弱 | topic 索引标题/摘要；post 索引正文 | 搜索结果需要决定返回 topic 还是具体 post |
 | 通知/未读 | `eventNotification` payload 包含 articleId/commentId；链接拼 `#reply-{id}` | payload 可逐步增加 topicId/postId，但公开链接保持旧格式 | 历史通知不能失效，payload hydrate 需要兼容旧字段 |
 | 用户动态 | `userActivities.SubjectTopic`、`SubjectPost`，评论动态通过 reply 回查 article | SubjectPost 应指向 post；仍需能从 post 找 topic | 旧动态的 subject_id 是 reply id，迁移期必须有映射或兼容查询 |

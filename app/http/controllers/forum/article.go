@@ -45,8 +45,8 @@ func ArticleDetail(c *gin.Context) {
 	payload := PagePayload{
 		Component: "article.detail",
 		Props:     props,
-		Meta:      buildArticleMeta(c, props.Article),
-		Layout:    buildLayout(c, activeKeyForArticle(props.Article)),
+		Meta:      buildArticleMeta(c, props.Topic),
+		Layout:    buildLayout(c, activeKeyForArticle(props.Topic)),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
@@ -200,36 +200,36 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 
 	var beforeCursor uint64
 	var afterCursor uint64
-	var beforeReplyNo uint64
-	var afterReplyNo uint64
+	var beforePostNo uint64
+	var afterPostNo uint64
 	if len(postEntities) > 0 {
 		beforeCursor = postEntities[0].Id
 		afterCursor = postEntities[len(postEntities)-1].Id
-		beforeReplyNo = postEntities[0].PostNo - 1
-		afterReplyNo = postEntities[len(postEntities)-1].PostNo - 1
+		beforePostNo = postEntities[0].PostNo - 1
+		afterPostNo = postEntities[len(postEntities)-1].PostNo - 1
 	}
-	maxReplyNo := uint64(0)
+	maxPostNo := uint64(0)
 	if topicEntity.PostSeq > 0 {
-		maxReplyNo = topicEntity.PostSeq - 1
+		maxPostNo = topicEntity.PostSeq - 1
 	}
-	if maxReplyNo == 0 && topicEntity.ReplyCount > 0 {
-		maxPostNo := posts.GetMaxPostNoByTopicId(topicID)
-		if maxPostNo > 0 {
-			maxReplyNo = maxPostNo - 1
+	if maxPostNo == 0 && topicEntity.ReplyCount > 0 {
+		maxPostSeq := posts.GetMaxPostNoByTopicId(topicID)
+		if maxPostSeq > 0 {
+			maxPostNo = maxPostSeq - 1
 		}
 	}
 
-	return component.SuccessResponse(ReplyWindowPayload{
-		Replies:       payloadReplies,
-		AnchorReplyID: req.Params.AnchorPostID,
-		BeforeCursor:  beforeCursor,
-		AfterCursor:   afterCursor,
-		BeforeReplyNo: beforeReplyNo,
-		AfterReplyNo:  afterReplyNo,
-		HasBefore:     hasBefore,
-		HasAfter:      hasAfter,
-		Total:         int64(topicEntity.ReplyCount),
-		MaxReplyNo:    maxReplyNo,
+	return component.SuccessResponse(PostWindowPayload{
+		Posts:        payloadReplies,
+		AnchorPostID: req.Params.AnchorPostID,
+		BeforeCursor: beforeCursor,
+		AfterCursor:  afterCursor,
+		BeforePostNo: beforePostNo,
+		AfterPostNo:  afterPostNo,
+		HasBefore:    hasBefore,
+		HasAfter:     hasAfter,
+		Total:        int64(topicEntity.ReplyCount),
+		MaxPostNo:    maxPostNo,
 	})
 }
 
@@ -300,7 +300,7 @@ func renderNotFoundWithMessage(c *gin.Context, messageCode component.MessageCode
 	renderPageWithStatus(c, http.StatusNotFound, "error.gohtml", payload)
 }
 
-func activeKeyForArticle(article ArticlePayload) string {
+func activeKeyForArticle(article TopicDetailPayload) string {
 	if len(article.Categories) > 0 {
 		return "category_" + cast.ToString(article.Categories[0].ID)
 	}

@@ -281,13 +281,13 @@ export interface HomeProps {
 }
 
 export interface TopicDetailProps {
-  article: TopicDetailPayload
-  replies: PostPayload[]
+  topic: TopicDetailPayload
+  posts: PostPayload[]
   hotTopics: TopicPayload[]
   permissions: {
-    isOwnArticle: boolean
-    canReply: boolean
-    canModerateArticle: boolean
+    isOwnTopic: boolean
+    canPost: boolean
+    canModerateTopic: boolean
   }
 }
 
@@ -308,7 +308,7 @@ export interface TopicDetailPayload {
   participants: Array<{ id: number; username: string; avatarUrl: string; wornBadge?: UserBadgePayload | null }>
   categories: Array<{ id: number; name: string; url: string; color: string }>
   replyCount: number
-  maxReplyNo: number
+  maxPostNo: number
   viewCount: number
   likeCount: number
   isLiked: boolean
@@ -320,8 +320,8 @@ export interface TopicDetailPayload {
 
 export interface PostPayload {
   id: number
-  articleId: number
-  replyNo: number
+  topicId: number
+  postNo: number
   content: string
   renderedContent: string
   processStatus: number
@@ -334,24 +334,24 @@ export interface PostPayload {
     wornBadge?: UserBadgePayload | null
   }
   createdAt: string
-  replyToId?: number
+  replyToPostId?: number
   replyToUserId?: number
   replyToUsername?: string
-  isOwnReply: boolean
+  isOwnPost: boolean
   updatedAt?: string
 }
 
 export interface PostWindowPayload {
-  replies: PostPayload[]
-  anchorReplyId?: number
+  posts: PostPayload[]
+  anchorPostId?: number
   beforeCursor?: number
   afterCursor?: number
-  beforeReplyNo?: number
-  afterReplyNo?: number
+  beforePostNo?: number
+  afterPostNo?: number
   hasBefore: boolean
   hasAfter: boolean
   total: number
-  maxReplyNo: number
+  maxPostNo: number
 }
 
 export interface TopicPayload {

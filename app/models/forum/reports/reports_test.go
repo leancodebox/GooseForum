@@ -16,7 +16,7 @@ func TestCreateOpenReturnsExistingOpenReport(t *testing.T) {
 	}
 
 	first, created, err := CreateOpen(Entity{
-		TargetType: TargetArticle,
+		TargetType: TargetTopic,
 		TargetId:   1,
 		ReporterId: 2,
 		Reason:     ReasonSpam,
@@ -26,7 +26,7 @@ func TestCreateOpenReturnsExistingOpenReport(t *testing.T) {
 	}
 
 	second, created, err := CreateOpen(Entity{
-		TargetType: TargetArticle,
+		TargetType: TargetTopic,
 		TargetId:   1,
 		ReporterId: 2,
 		Reason:     ReasonAbuse,

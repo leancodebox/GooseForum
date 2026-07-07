@@ -5,10 +5,8 @@ import "time"
 const tableName = "reports"
 
 const (
-	TargetArticle = "article"
-	TargetReply   = "reply"
-	TargetTopic   = "topic"
-	TargetPost    = "post"
+	TargetTopic = "topic"
+	TargetPost  = "post"
 )
 
 const (

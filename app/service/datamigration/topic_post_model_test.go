@@ -8,6 +8,7 @@ import (
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
+	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
 	"github.com/leancodebox/GooseForum/app/models/forum/migrationMapping"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
@@ -36,6 +37,7 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 		&moderationLog.Entity{},
 		&eventNotification.Entity{},
 		&reports.Entity{},
+		&fileUsage.Entity{},
 	); err != nil {
 		t.Fatalf("migrate new tables: %v", err)
 	}
@@ -122,7 +124,9 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 		"created_at": now,
 		"updated_at": now,
 	})
-	conn.Create(&reports.Entity{TargetType: reports.TargetReply, TargetId: 99, ArticleId: 10, ReporterId: 1, Status: reports.StatusOpen})
+	conn.Create(&reports.Entity{TargetType: legacyReportTargetReply, TargetId: 99, ArticleId: 10, ReporterId: 1, Status: reports.StatusOpen})
+	conn.Create(&fileUsage.Entity{FileName: "topic.png", TargetType: legacyFileUsageTargetArticle, TargetId: 10, UsageType: fileUsage.UsageInlineImage, UserId: 1, CreatedAt: now, UpdatedAt: now})
+	conn.Create(&fileUsage.Entity{FileName: "reply.png", TargetType: legacyFileUsageTargetReply, TargetId: 99, UsageType: fileUsage.UsageInlineImage, UserId: 2, CreatedAt: now, UpdatedAt: now})
 	conn.Create(&moderationLog.Entity{
 		ActorUserId: 1,
 		Action:      legacyModerationActionReplyBlocked,
@@ -147,7 +151,7 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 		Payload: moderationLog.Payload{
 			MessageCode: "moderation.log.report.statusChanged",
 			Params: map[string]any{
-				"targetType": reports.TargetReply,
+				"targetType": legacyReportTargetReply,
 				"targetId":   99,
 				"articleId":  10,
 				"replyNo":    1,
@@ -164,6 +168,10 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 	logResult := BackfillModerationLogsTopicPostWithDB(conn)
 	if logResult.Failed != 0 {
 		t.Fatalf("BackfillModerationLogsTopicPostWithDB() failed=%d last=%s", logResult.Failed, logResult.LastFailed)
+	}
+	fileUsageResult := BackfillFileUsagesTopicPostWithDB(conn)
+	if fileUsageResult.Failed != 0 {
+		t.Fatalf("BackfillFileUsagesTopicPostWithDB() failed=%d last=%s", fileUsageResult.Failed, fileUsageResult.LastFailed)
 	}
 	if result.Topics != 1 || result.Posts != 2 || result.Categories != 1 || result.TopicCategoryIndexes != 1 {
 		t.Fatalf("unexpected result counts: %#v", result)
@@ -236,6 +244,20 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 	}
 	if payloadMap["customKey"] != "keep-me" {
 		t.Fatalf("custom notification payload key was not preserved: %#v", payloadMap)
+	}
+
+	var topicFileUsage fileUsage.Entity
+	if err := conn.Where("target_type = ? AND target_id = ? AND file_name = ?", fileUsage.TargetTopic, uint64(10), "topic.png").First(&topicFileUsage).Error; err != nil {
+		t.Fatalf("load migrated topic file usage: %v", err)
+	}
+	var postFileUsage fileUsage.Entity
+	if err := conn.Where("target_type = ? AND target_id = ? AND file_name = ?", fileUsage.TargetPost, replyPost.Id, "reply.png").First(&postFileUsage).Error; err != nil {
+		t.Fatalf("load migrated post file usage: %v", err)
+	}
+	var legacyFileUsageCount int64
+	conn.Model(&fileUsage.Entity{}).Where("target_type IN ?", []string{legacyFileUsageTargetArticle, legacyFileUsageTargetReply}).Count(&legacyFileUsageCount)
+	if legacyFileUsageCount != 0 {
+		t.Fatalf("legacy file usage rows were not removed: %d", legacyFileUsageCount)
 	}
 
 	var report reports.Entity

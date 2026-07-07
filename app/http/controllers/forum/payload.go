@@ -258,14 +258,14 @@ type TopicCategoryPayload struct {
 	Color string `json:"color"`
 }
 
-type ArticleDetailProps struct {
-	Article     ArticlePayload     `json:"article"`
-	Replies     []ReplyPayload     `json:"replies"`
+type TopicDetailProps struct {
+	Topic       TopicDetailPayload `json:"topic"`
+	Posts       []PostPayload      `json:"posts"`
 	HotTopics   []TopicPayload     `json:"hotTopics"`
-	Permissions ArticlePermissions `json:"permissions"`
+	Permissions TopicPermissions   `json:"permissions"`
 }
 
-type ArticlePayload struct {
+type TopicDetailPayload struct {
 	ID            uint64                 `json:"id"`
 	Title         string                 `json:"title"`
 	Description   string                 `json:"description"`
@@ -278,7 +278,7 @@ type ArticlePayload struct {
 	Participants  []TopicAuthorPayload   `json:"participants"`
 	Categories    []TopicCategoryPayload `json:"categories"`
 	ReplyCount    uint64                 `json:"replyCount"`
-	MaxReplyNo    uint64                 `json:"maxReplyNo"`
+	MaxPostNo     uint64                 `json:"maxPostNo"`
 	ViewCount     uint64                 `json:"viewCount"`
 	LikeCount     uint64                 `json:"likeCount"`
 	IsLiked       bool                   `json:"isLiked"`
@@ -288,10 +288,10 @@ type ArticlePayload struct {
 	UpdatedAt     string                 `json:"updatedAt"`
 }
 
-type ReplyPayload struct {
+type PostPayload struct {
 	ID              uint64             `json:"id"`
-	ArticleID       uint64             `json:"articleId"`
-	ReplyNo         uint64             `json:"replyNo"`
+	TopicID         uint64             `json:"topicId"`
+	PostNo          uint64             `json:"postNo"`
 	Content         string             `json:"content"`
 	RenderedContent string             `json:"renderedContent"`
 	ProcessStatus   int8               `json:"processStatus"`
@@ -299,30 +299,30 @@ type ReplyPayload struct {
 	CanModerate     bool               `json:"canModerate"`
 	Author          TopicAuthorPayload `json:"author"`
 	CreatedAt       string             `json:"createdAt"`
-	ReplyToID       uint64             `json:"replyToId,omitempty"`
+	ReplyToPostID   uint64             `json:"replyToPostId,omitempty"`
 	ReplyToUserID   uint64             `json:"replyToUserId,omitempty"`
 	ReplyToUsername string             `json:"replyToUsername,omitempty"`
-	IsOwnReply      bool               `json:"isOwnReply"`
+	IsOwnPost       bool               `json:"isOwnPost"`
 	UpdatedAt       string             `json:"updatedAt"`
 }
 
-type ReplyWindowPayload struct {
-	Replies       []ReplyPayload `json:"replies"`
-	AnchorReplyID uint64         `json:"anchorReplyId,omitempty"`
-	BeforeCursor  uint64         `json:"beforeCursor,omitempty"`
-	AfterCursor   uint64         `json:"afterCursor,omitempty"`
-	BeforeReplyNo uint64         `json:"beforeReplyNo,omitempty"`
-	AfterReplyNo  uint64         `json:"afterReplyNo,omitempty"`
-	HasBefore     bool           `json:"hasBefore"`
-	HasAfter      bool           `json:"hasAfter"`
-	Total         int64          `json:"total"`
-	MaxReplyNo    uint64         `json:"maxReplyNo"`
+type PostWindowPayload struct {
+	Posts        []PostPayload `json:"posts"`
+	AnchorPostID uint64        `json:"anchorPostId,omitempty"`
+	BeforeCursor uint64        `json:"beforeCursor,omitempty"`
+	AfterCursor  uint64        `json:"afterCursor,omitempty"`
+	BeforePostNo uint64        `json:"beforePostNo,omitempty"`
+	AfterPostNo  uint64        `json:"afterPostNo,omitempty"`
+	HasBefore    bool          `json:"hasBefore"`
+	HasAfter     bool          `json:"hasAfter"`
+	Total        int64         `json:"total"`
+	MaxPostNo    uint64        `json:"maxPostNo"`
 }
 
-type ArticlePermissions struct {
-	IsOwnArticle       bool `json:"isOwnArticle"`
-	CanReply           bool `json:"canReply"`
-	CanModerateArticle bool `json:"canModerateArticle"`
+type TopicPermissions struct {
+	IsOwnTopic       bool `json:"isOwnTopic"`
+	CanPost          bool `json:"canPost"`
+	CanModerateTopic bool `json:"canModerateTopic"`
 }
 
 type UserProfileProps struct {
@@ -917,7 +917,7 @@ func buildHomeMeta(c *gin.Context) PageMeta {
 	}
 }
 
-func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity) ArticleDetailProps {
+func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity) TopicDetailProps {
 	currentUserID := component.LoginUserId(c)
 	postEntities := posts.GetFirstPageByTopicId(topic.Id)
 	userIDs := make([]uint64, 0, 1+len(postEntities))
@@ -936,19 +936,19 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 	}
 	userMap := users.GetMapByIds(userIDs)
 
-	return ArticleDetailProps{
-		Article:   buildTopicArticlePayload(c, topic, firstPost, userMap),
-		Replies:   buildPostPayloads(postEntities, userMap, currentUserID, moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds)),
+	return TopicDetailProps{
+		Topic:     buildTopicArticlePayload(c, topic, firstPost, userMap),
+		Posts:     buildPostPayloads(postEntities, userMap, currentUserID, moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds)),
 		HotTopics: buildArticleHotTopics(topic.Id),
-		Permissions: ArticlePermissions{
-			IsOwnArticle:       currentUserID == topic.UserId,
-			CanReply:           currentUserID > 0,
-			CanModerateArticle: moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds),
+		Permissions: TopicPermissions{
+			IsOwnTopic:       currentUserID == topic.UserId,
+			CanPost:          currentUserID > 0,
+			CanModerateTopic: moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds),
 		},
 	}
 }
 
-func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) []ReplyPayload {
+func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) []PostPayload {
 	postMap := make(map[uint64]*posts.Entity, len(postEntities))
 	for _, item := range postEntities {
 		if item != nil {
@@ -998,7 +998,7 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 	}
 	maps.Copy(userMap, users.GetMapByIds(userIDs))
 
-	res := make([]ReplyPayload, 0, len(postEntities))
+	res := make([]PostPayload, 0, len(postEntities))
 	for _, item := range postEntities {
 		if item == nil || item.PostNo <= 1 {
 			continue
@@ -1019,10 +1019,10 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 			content = ""
 			renderedContent = ""
 		}
-		res = append(res, ReplyPayload{
+		res = append(res, PostPayload{
 			ID:              item.Id,
-			ArticleID:       item.TopicId,
-			ReplyNo:         item.PostNo - 1,
+			TopicID:         item.TopicId,
+			PostNo:          item.PostNo - 1,
 			Content:         content,
 			RenderedContent: renderedContent,
 			ProcessStatus:   item.ProcessStatus,
@@ -1030,10 +1030,10 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 			CanModerate:     canModerate,
 			Author:          author,
 			CreatedAt:       item.CreatedAt.Format(time.DateTime),
-			ReplyToID:       item.ReplyToPostId,
+			ReplyToPostID:   item.ReplyToPostId,
 			ReplyToUserID:   replyToUserID,
 			ReplyToUsername: replyToName,
-			IsOwnReply:      currentUserID == item.UserId,
+			IsOwnPost:       currentUserID == item.UserId,
 			UpdatedAt:       item.UpdatedAt.Format(time.DateTime),
 		})
 	}
@@ -1055,7 +1055,7 @@ func buildArticleHotTopics(currentArticleID uint64) []TopicPayload {
 	return buildTopicPayloads(filtered)
 }
 
-func buildTopicArticlePayload(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, userMap map[uint64]*users.EntityComplete) ArticlePayload {
+func buildTopicArticlePayload(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, userMap map[uint64]*users.EntityComplete) TopicDetailPayload {
 	participants := make([]TopicAuthorPayload, 0, len(userMap))
 	seen := map[uint64]bool{}
 	addParticipant := func(userID uint64) {
@@ -1093,7 +1093,7 @@ func buildTopicArticlePayload(c *gin.Context, topic *topics.Entity, firstPost *p
 		updatedAt = firstPost.UpdatedAt
 	}
 
-	return ArticlePayload{
+	return TopicDetailPayload{
 		ID:            topic.Id,
 		Title:         topic.Title,
 		Description:   topic.Excerpt,
@@ -1106,7 +1106,7 @@ func buildTopicArticlePayload(c *gin.Context, topic *topics.Entity, firstPost *p
 		Participants:  participants,
 		Categories:    categoryPayloads(topic.CategoryIds),
 		ReplyCount:    topic.ReplyCount,
-		MaxReplyNo:    positivePostReplyNo(topic.PostSeq),
+		MaxPostNo:     positivePostReplyNo(topic.PostSeq),
 		ViewCount:     topic.ViewCount,
 		LikeCount:     topic.LikeCount,
 		IsLiked:       isLiked,
@@ -1162,7 +1162,7 @@ func ensurePostRenderedHTML(entity *posts.Entity) {
 	_ = posts.SaveNoUpdate(entity)
 }
 
-func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
+func buildArticleMeta(c *gin.Context, article TopicDetailPayload) PageMeta {
 	baseURL := component.GetBaseUri(c)
 	canonical := baseURL + article.URL
 	description := article.Description
@@ -1234,7 +1234,7 @@ func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {
 	}
 }
 
-func articlePlainText(lang string, article ArticlePayload) string {
+func articlePlainText(lang string, article TopicDetailPayload) string {
 	text := truncateSEOText(article.Description, 1000)
 	if text != "" {
 		return text
@@ -1245,7 +1245,7 @@ func articlePlainText(lang string, article ArticlePayload) string {
 	return i18n.T(lang, "meta.communityDesc", "site", siteTitle())
 }
 
-func articleImageURLs(article ArticlePayload, baseURL string) []string {
+func articleImageURLs(article TopicDetailPayload, baseURL string) []string {
 	if imageURL := absolutePublicURL(article.FirstImageURL, baseURL); imageURL != "" {
 		return []string{imageURL}
 	}

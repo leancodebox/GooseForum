@@ -7,6 +7,7 @@ import (
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
+	"github.com/leancodebox/GooseForum/app/models/forum/fileUsage"
 	"github.com/leancodebox/GooseForum/app/models/forum/migrationMapping"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
@@ -28,6 +29,10 @@ const (
 	legacyModerationActionArticleRestored = "articleUnblocked"
 	legacyModerationActionReplyBlocked    = "replyBlocked"
 	legacyModerationActionReplyRestored   = "replyUnblocked"
+	legacyReportTargetArticle             = "article"
+	legacyReportTargetReply               = "reply"
+	legacyFileUsageTargetArticle          = "article"
+	legacyFileUsageTargetReply            = "reply"
 )
 
 type TopicPostMigrationResult struct {
@@ -41,6 +46,8 @@ type TopicPostMigrationResult struct {
 	Notifications         int
 	ReportsChecked        int
 	ReportsMissing        int
+	FileUsages            int
+	FileUsagesMissing     int
 	ModerationLogs        int
 	ModerationLogsMissing int
 	Skipped               int
@@ -91,6 +98,16 @@ func BackfillTopicPostModel() TopicPostMigrationResult {
 
 func BackfillModerationLogsTopicPost() TopicPostMigrationResult {
 	return BackfillModerationLogsTopicPostWithDB(db.Connect())
+}
+
+func BackfillFileUsagesTopicPost() TopicPostMigrationResult {
+	return BackfillFileUsagesTopicPostWithDB(db.Connect())
+}
+
+func BackfillFileUsagesTopicPostWithDB(conn *gorm.DB) TopicPostMigrationResult {
+	result := TopicPostMigrationResult{}
+	migrateFileUsages(conn, &result)
+	return result
 }
 
 func BackfillModerationLogsTopicPostWithDB(conn *gorm.DB) TopicPostMigrationResult {
@@ -499,7 +516,7 @@ func migrateReports(conn *gorm.DB, result *TopicPostMigrationResult) {
 	for _, row := range rows {
 		result.ReportsChecked++
 		switch row.TargetType {
-		case reports.TargetArticle:
+		case legacyReportTargetArticle:
 			topicID := row.TopicId
 			if topicID == 0 {
 				topicID = row.ArticleId
@@ -518,7 +535,7 @@ func migrateReports(conn *gorm.DB, result *TopicPostMigrationResult) {
 			}).Error; err != nil {
 				failMigration(result, "report_topic_update", err)
 			}
-		case reports.TargetReply:
+		case legacyReportTargetReply:
 			mapped := loadMapping(conn, "reply", row.TargetId)
 			if mapped.TargetId == 0 {
 				result.ReportsMissing++
@@ -639,10 +656,10 @@ func migrateModerationLogParams(conn *gorm.DB, params map[string]any, result *To
 	}
 	if targetType, ok := params["targetType"].(string); ok {
 		switch targetType {
-		case reports.TargetArticle:
+		case legacyReportTargetArticle:
 			params["targetType"] = reports.TargetTopic
 			changed = true
-		case reports.TargetReply:
+		case legacyReportTargetReply:
 			params["targetType"] = reports.TargetPost
 			if targetID := uint64FromJSONNumber(params["targetId"]); targetID > 0 {
 				mapped := loadMapping(conn, "reply", targetID)
@@ -663,6 +680,63 @@ func migrateModerationLogParams(conn *gorm.DB, params map[string]any, result *To
 		}
 	}
 	return changed
+}
+
+func migrateFileUsages(conn *gorm.DB, result *TopicPostMigrationResult) {
+	if !conn.Migrator().HasTable((&fileUsage.Entity{}).TableName()) {
+		return
+	}
+	var rows []fileUsage.Entity
+	if err := conn.
+		Where("target_type IN ?", []string{legacyFileUsageTargetArticle, legacyFileUsageTargetReply}).
+		Find(&rows).Error; err != nil {
+		failMigration(result, "file_usage_scan", err)
+		return
+	}
+	for _, row := range rows {
+		targetType := ""
+		targetID := uint64(0)
+		switch row.TargetType {
+		case legacyFileUsageTargetArticle:
+			targetType = fileUsage.TargetTopic
+			targetID = row.TargetId
+		case legacyFileUsageTargetReply:
+			mapped := loadMapping(conn, "reply", row.TargetId)
+			if mapped.TargetId == 0 {
+				result.FileUsagesMissing++
+				continue
+			}
+			targetType = fileUsage.TargetPost
+			targetID = mapped.TargetId
+		default:
+			continue
+		}
+		if targetID == 0 {
+			result.FileUsagesMissing++
+			continue
+		}
+		next := row
+		next.Id = 0
+		next.TargetType = targetType
+		next.TargetId = targetID
+		if err := conn.Clauses(clause.OnConflict{
+			Columns: []clause.Column{
+				{Name: "target_type"},
+				{Name: "target_id"},
+				{Name: "usage_type"},
+				{Name: "file_name"},
+			},
+			DoNothing: true,
+		}).Create(&next).Error; err != nil {
+			failMigration(result, "file_usage_create", err)
+			continue
+		}
+		if err := conn.Delete(&fileUsage.Entity{}, row.Id).Error; err != nil {
+			failMigration(result, "file_usage_delete", err)
+			continue
+		}
+		result.FileUsages++
+	}
 }
 
 func saveMapping(conn *gorm.DB, result *TopicPostMigrationResult, sourceType string, sourceID uint64, targetType string, targetID uint64) {

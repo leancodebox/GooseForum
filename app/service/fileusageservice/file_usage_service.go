@@ -15,12 +15,12 @@ type Usage struct {
 	UsageType string
 }
 
-func ReplaceArticle(articleId uint64, userId uint64, content string) {
-	replace(fileUsage.TargetArticle, articleId, []string{fileUsage.UsageInlineImage}, userId, namesToUsages(markdown2html.ExtractImageURLs(content), fileUsage.UsageInlineImage))
+func ReplaceTopic(topicID uint64, userID uint64, content string) {
+	replace(fileUsage.TargetTopic, topicID, []string{fileUsage.UsageInlineImage}, userID, namesToUsages(markdown2html.ExtractImageURLs(content), fileUsage.UsageInlineImage))
 }
 
-func ReplaceReply(replyId uint64, userId uint64, content string) {
-	replace(fileUsage.TargetReply, replyId, []string{fileUsage.UsageInlineImage}, userId, namesToUsages(markdown2html.ExtractImageURLs(content), fileUsage.UsageInlineImage))
+func ReplacePost(postID uint64, userID uint64, content string) {
+	replace(fileUsage.TargetPost, postID, []string{fileUsage.UsageInlineImage}, userID, namesToUsages(markdown2html.ExtractImageURLs(content), fileUsage.UsageInlineImage))
 }
 
 func ReplaceAvatar(userId uint64, fileNames []string) {
