@@ -67,6 +67,65 @@ func GetMapByIds(ids []uint64) map[uint64]SmallEntity {
 	return result
 }
 
+func GetPointerMapByIds(ids []uint64) map[uint64]*SmallEntity {
+	valueMap := GetMapByIds(ids)
+	result := make(map[uint64]*SmallEntity, len(valueMap))
+	for id, item := range valueMap {
+		entity := item
+		result[id] = &entity
+	}
+	return result
+}
+
+func GetLatestPublished(limit int) (entities []*Entity, err error) {
+	err = builder().
+		Where(queryopt.Eq("status", 1)).
+		Where(queryopt.Eq("process_status", 0)).
+		Order(queryopt.Desc("updated_at")).
+		Order(queryopt.Desc("id")).
+		Limit(limit).
+		Find(&entities).Error
+	return
+}
+
+func GetLatestPublishedByUserId(userId uint64, limit int) ([]*SmallEntity, error) {
+	var entities []*SmallEntity
+	err := builder().
+		Where(queryopt.Eq("user_id", userId)).
+		Where(queryopt.Eq("status", 1)).
+		Where(queryopt.Eq("process_status", 0)).
+		Order(queryopt.Desc("updated_at")).
+		Order(queryopt.Desc("id")).
+		Limit(limit).
+		Find(&entities).Error
+	return entities, err
+}
+
+func GetPublishedByUserBeforeId(userId uint64, beforeId uint64, limit int) ([]*SmallEntity, error) {
+	var entities []*SmallEntity
+	query := builder().
+		Where(queryopt.Eq("user_id", userId)).
+		Where(queryopt.Eq("status", 1)).
+		Where(queryopt.Eq("process_status", 0))
+	if beforeId > 0 {
+		query = query.Where(queryopt.Lt("id", beforeId))
+	}
+	err := query.Order(queryopt.Desc("id")).Limit(limit).Find(&entities).Error
+	return entities, err
+}
+
+func GetDraftsByUserId(userId uint64, limit int) ([]*SmallEntity, error) {
+	var entities []*SmallEntity
+	err := builder().
+		Where(queryopt.Eq("user_id", userId)).
+		Where(queryopt.Eq("status", 0)).
+		Order(queryopt.Desc("updated_at")).
+		Order(queryopt.Desc("id")).
+		Limit(limit).
+		Find(&entities).Error
+	return entities, err
+}
+
 func CantWriteNew(userId uint64, maxCount int64) bool {
 	var count int64
 	builder().Where(queryopt.Eq("user_id", userId)).Where(queryopt.Gt("created_at", time.Now().Format("2006-01-02"))).Count(&count)
@@ -80,6 +139,12 @@ type PageQuery struct {
 	FilterStatus   bool
 	CategoryId     uint64
 	Sort           string
+}
+
+type AdminPageQuery struct {
+	Page, PageSize int
+	Search         string
+	UserId         uint64
 }
 
 type ModerationPageQuery struct {
@@ -128,6 +193,36 @@ func Page[ResType SmallEntity](q PageQuery) struct {
 		PageSize int
 		HasNext  bool
 		Data     []ResType
+	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
+}
+
+func PageForAdmin(q AdminPageQuery) struct {
+	Page     int
+	PageSize int
+	HasNext  bool
+	Data     []SmallEntity
+} {
+	var list []SmallEntity
+	q.Page = max(q.Page-1, 0)
+	q.PageSize = pageutil.BoundPageSize(q.PageSize)
+	queryLimit := q.PageSize + 1
+	b := builder()
+	if q.Search != "" {
+		b.Where(queryopt.Like("title", q.Search))
+	}
+	if q.UserId != 0 {
+		b.Where(queryopt.Eq("user_id", q.UserId))
+	}
+	b.Limit(queryLimit).Offset(q.PageSize * q.Page).Order(queryopt.Desc("pin_weight")).Order(queryopt.Desc("updated_at")).Order(queryopt.Desc("id")).Find(&list)
+	hasNext := len(list) > q.PageSize
+	if hasNext {
+		list = list[:q.PageSize]
+	}
+	return struct {
+		Page     int
+		PageSize int
+		HasNext  bool
+		Data     []SmallEntity
 	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
 }
 

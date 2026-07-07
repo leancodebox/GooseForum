@@ -83,9 +83,6 @@ func TestCategoryCacheReadsCleanCategories(t *testing.T) {
 	if got := CategoryMap()[980003]; got == nil || got.Name != "Clean" {
 		t.Fatalf("category map item=%#v, want Clean", got)
 	}
-	if legacy := ArticleCategoryMap()[980003]; legacy == nil || legacy.Category != "Clean" {
-		t.Fatalf("legacy category map item=%#v, want Clean", legacy)
-	}
 }
 
 func TestSiteStatsReadsTopicPostMaxIds(t *testing.T) {

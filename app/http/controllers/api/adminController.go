@@ -12,8 +12,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
@@ -441,7 +439,7 @@ type ArticlesInfoAdminVo struct {
 }
 
 type ArticleSourceReq struct {
-	Id uint64 `json:"id" validate:"required"`
+	TopicId uint64 `json:"topicId" validate:"required"`
 }
 
 type ArticleSourceVo struct {
@@ -460,7 +458,7 @@ type ArticleSourceVo struct {
 
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
 	param := req.Params
-	pageData := topics.Page[topics.SmallEntity](topics.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, Search: param.Search, UserId: param.UserId})
+	pageData := topics.PageForAdmin(topics.AdminPageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, Search: param.Search, UserId: param.UserId})
 	userIds := lo.Map(pageData.Data, func(t topics.SmallEntity, _ int) uint64 {
 		return t.UserId
 	})
@@ -499,7 +497,7 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 }
 
 func ArticleSource(req component.BetterRequest[ArticleSourceReq]) component.Response {
-	topic := topics.Get(req.Params.Id)
+	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
@@ -524,27 +522,27 @@ func ArticleSource(req component.BetterRequest[ArticleSourceReq]) component.Resp
 }
 
 type EditArticleReq struct {
-	Id            uint64 `json:"id" validate:"required"`
+	TopicId       uint64 `json:"topicId" validate:"required"`
 	ProcessStatus int8   `json:"processStatus" validate:"oneof=0 1"` // 0正常 1封禁
 }
 
 type EditArticlePinReq struct {
-	Id        uint64 `json:"id" validate:"required"`
+	TopicId   uint64 `json:"topicId" validate:"required"`
 	PinWeight int    `json:"pinWeight" validate:"min=0,max=1000000"`
 }
 
 type EditArticleCategoriesReq struct {
-	Id         uint64   `json:"id" validate:"required"`
+	TopicId    uint64   `json:"topicId" validate:"required"`
 	CategoryId []uint64 `json:"categoryId" validate:"min=1,max=3"`
 }
 
 type DeleteArticleReq struct {
-	Id uint64 `json:"id" validate:"required"`
+	TopicId uint64 `json:"topicId" validate:"required"`
 }
 
 // EditArticle 文章状态管理
 func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response {
-	topic := topics.Get(req.Params.Id)
+	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
@@ -577,7 +575,7 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 }
 
 func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Response {
-	topic := topics.Get(req.Params.Id)
+	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
@@ -599,7 +597,7 @@ func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Resp
 }
 
 func EditArticlePin(req component.BetterRequest[EditArticlePinReq]) component.Response {
-	topic := topics.Get(req.Params.Id)
+	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
@@ -634,7 +632,7 @@ func EditArticleCategories(req component.BetterRequest[EditArticleCategoriesReq]
 		}
 	}
 
-	topic := topics.Get(req.Params.Id)
+	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
@@ -883,8 +881,8 @@ type CategoryModeratorItem struct {
 
 // GetCategoryList 获取分类列表
 func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Response {
-	categories := articleCategory.All()
-	categoryIds := lo.Map(categories, func(item *articleCategory.Entity, _ int) uint64 {
+	categories := category.All()
+	categoryIds := lo.Map(categories, func(item *category.Entity, _ int) uint64 {
 		return item.Id
 	})
 	moderatorList := moderators.GetByCategoryIds(categoryIds)
@@ -896,7 +894,7 @@ func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Res
 		return item.ScopeId
 	})
 
-	return component.SuccessResponse(lo.Map(categories, func(t *articleCategory.Entity, _ int) CategoryItem {
+	return component.SuccessResponse(lo.Map(categories, func(t *category.Entity, _ int) CategoryItem {
 		moderatorItems := lo.Map(moderatorGroup[t.Id], func(item *moderators.Entity, _ int) CategoryModeratorItem {
 			user := userMap[item.UserId]
 			username := ""
@@ -915,7 +913,7 @@ func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Res
 		})
 		return CategoryItem{
 			Id:         t.Id,
-			Category:   t.Category,
+			Category:   t.Name,
 			Desc:       t.Desc,
 			Icon:       t.Icon,
 			Color:      t.Color,
@@ -951,8 +949,8 @@ func resolveModeratorUser(params ModeratorUserReq) (users.EntityComplete, bool) 
 }
 
 func AddCategoryModerator(req component.BetterRequest[AddCategoryModeratorReq]) component.Response {
-	category := articleCategory.Get(req.Params.CategoryId)
-	if category.Id == 0 {
+	categoryEntity := category.Get(req.Params.CategoryId)
+	if categoryEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageAdminCategoryNotFound, nil)
 	}
 	if req.Params.UserId == 0 && strings.TrimSpace(req.Params.Username) == "" {
@@ -963,22 +961,22 @@ func AddCategoryModerator(req component.BetterRequest[AddCategoryModeratorReq]) 
 		return component.FailResponseCode(component.MessageAdminModeratorUserNotFound, nil)
 	}
 
-	entity := moderators.GetByUserScope(user.Id, moderators.ScopeCategory, category.Id)
+	entity := moderators.GetByUserScope(user.Id, moderators.ScopeCategory, categoryEntity.Id)
 	entity.UserId = user.Id
 	entity.ScopeType = moderators.ScopeCategory
-	entity.ScopeId = category.Id
+	entity.ScopeId = categoryEntity.Id
 	entity.Status = moderators.StatusEnabled
 	if entity.CreatedBy == 0 {
 		entity.CreatedBy = req.UserId
 	}
 	if err := moderators.Save(&entity); err != nil {
-		slog.Error("save category moderator failed", "categoryId", category.Id, "userId", user.Id, "err", err)
+		slog.Error("save category moderator failed", "categoryId", categoryEntity.Id, "userId", user.Id, "err", err)
 		return component.FailResponse()
 	}
 	moderatorservice.Invalidate()
-	optlogger.UserOptCode(req.UserId, optlogger.EditCategory, category.Id, "admin.opt.category.moderatorAdded", optlogger.MessageParams{
-		"categoryId":   category.Id,
-		"categoryName": category.Category,
+	optlogger.UserOptCode(req.UserId, optlogger.EditCategory, categoryEntity.Id, "admin.opt.category.moderatorAdded", optlogger.MessageParams{
+		"categoryId":   categoryEntity.Id,
+		"categoryName": categoryEntity.Name,
 		"userId":       user.Id,
 		"username":     user.Username,
 	})
@@ -1055,7 +1053,7 @@ func DeleteCategoryModerator(req component.BetterRequest[struct {
 	if entity.Id == 0 || entity.ScopeType != moderators.ScopeCategory {
 		return component.FailResponseCode(component.MessageAdminModeratorNotFound, nil)
 	}
-	category := articleCategory.Get(entity.ScopeId)
+	categoryEntity := category.Get(entity.ScopeId)
 	if err := moderators.Delete(&entity); err != nil {
 		slog.Error("delete category moderator failed", "moderatorId", entity.Id, "err", err)
 		return component.FailResponse()
@@ -1063,7 +1061,7 @@ func DeleteCategoryModerator(req component.BetterRequest[struct {
 	moderatorservice.Invalidate()
 	optlogger.UserOptCode(req.UserId, optlogger.EditCategory, entity.ScopeId, "admin.opt.category.moderatorRemoved", optlogger.MessageParams{
 		"categoryId":   entity.ScopeId,
-		"categoryName": category.Category,
+		"categoryName": categoryEntity.Name,
 		"userId":       entity.UserId,
 	})
 	return component.SuccessResponse(true)
@@ -1085,19 +1083,19 @@ func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Respon
 		return component.FailResponseCode(component.MessageAdminCategoryRequired, nil)
 	}
 
-	entity := articleCategory.Get(req.Params.Id)
+	entity := category.Get(req.Params.Id)
 	if req.Params.Id != 0 && entity.Id == 0 {
 		return component.FailResponseCode(component.MessageAdminCategoryDataNotFound, nil)
 	}
-	entity.Category = req.Params.Category
+	entity.Name = req.Params.Category
 	entity.Desc = req.Params.Desc
 	entity.Icon = req.Params.Icon
 	entity.Color = req.Params.Color
 	entity.Slug = req.Params.Slug
 	entity.Sort = req.Params.Sort
 
-	articleCategory.SaveOrCreateById(&entity)
-	hotdataserve.ClearArticleCategoryCache()
+	category.SaveOrCreateById(&entity)
+	hotdataserve.ClearCategoryCache()
 	return component.SuccessResponse(true)
 }
 
@@ -1105,18 +1103,18 @@ func SaveCategory(req component.BetterRequest[CategorySaveReq]) component.Respon
 func DeleteCategory(req component.BetterRequest[struct {
 	Id uint64 `json:"id"`
 }]) component.Response {
-	entity := articleCategory.Get(req.Params.Id)
+	entity := category.Get(req.Params.Id)
 	if entity.Id == 0 {
 		return component.FailResponseCode(component.MessageAdminCategoryNotFound, nil)
 	}
-	if articleCategory.Count() == 1 {
+	if category.Count() == 1 {
 		return component.FailResponseCode(component.MessageAdminCategoryKeepOne, nil)
 	}
-	if articleCategoryRs.GetOneByCategoryId(entity.Id).Id > 0 {
+	if topicCategoryIndex.GetOneByCategoryId(entity.Id).Id > 0 {
 		return component.FailResponseCode(component.MessageAdminCategoryHasArticles, nil)
 	}
-	articleCategory.DeleteEntity(&entity)
-	hotdataserve.ClearArticleCategoryCache()
+	category.DeleteEntity(&entity)
+	hotdataserve.ClearCategoryCache()
 	return component.SuccessResponse(true)
 }
 

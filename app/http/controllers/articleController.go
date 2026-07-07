@@ -8,7 +8,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
@@ -28,7 +27,7 @@ func GetSiteStatistics() component.Response {
 }
 
 type WriteArticleReq struct {
-	Id            int64    `json:"id"`
+	TopicId       uint64   `json:"topicId"`
 	Content       string   `json:"content" validate:"required"`
 	Title         string   `json:"title" validate:"required"`
 	Type          int8     `json:"type"`
@@ -106,8 +105,8 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 	}
 	var topic topics.Entity
 	var firstPost posts.Entity
-	if req.Params.Id != 0 {
-		topic = topics.Get(uint64(req.Params.Id))
+	if req.Params.TopicId != 0 {
+		topic = topics.Get(req.Params.TopicId)
 		if topic.UserId != req.UserId {
 			return component.FailResponseCode(component.MessageArticleOwnerMismatch, nil)
 		}
@@ -186,21 +185,21 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 }
 
 func normalizeWriteArticleType(articleType int8) int8 {
-	switch articles.Type(articleType) {
-	case articles.Share, articles.Help:
+	switch articleType {
+	case 1, 2:
 		return articleType
 	default:
-		return int8(articles.Share)
+		return 1
 	}
 }
 
 type ArticleStatusReq struct {
-	Id            uint64 `json:"id" validate:"required"`
+	TopicId       uint64 `json:"topicId" validate:"required"`
 	ArticleStatus int8   `json:"articleStatus" validate:"oneof=0 1"`
 }
 
 func UpdateArticleStatus(req component.BetterRequest[ArticleStatusReq]) component.Response {
-	topic := topics.Get(req.Params.Id)
+	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
@@ -222,13 +221,13 @@ func UpdateArticleStatus(req component.BetterRequest[ArticleStatusReq]) componen
 	return component.SuccessResponse(true)
 }
 
-type ArticleReplyId struct {
-	ArticleId uint64 `json:"articleId"`
-	Content   string `json:"content"`
-	ReplyId   uint64 `json:"replyId"`
+type CreatePostReq struct {
+	TopicId       uint64 `json:"topicId"`
+	Content       string `json:"content"`
+	ReplyToPostId uint64 `json:"replyToPostId"`
 }
 
-func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Response {
+func ArticleReply(req component.BetterRequest[CreatePostReq]) component.Response {
 	// 获取发布设置
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 
@@ -275,26 +274,26 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		}
 	}
 
-	topicEntity := topics.GetSimple(req.Params.ArticleId)
+	topicEntity := topics.GetSimple(req.Params.TopicId)
 	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
 	var parentPost posts.Entity
-	if req.Params.ReplyId > 0 {
-		parentPost = posts.Get(req.Params.ReplyId)
-		if parentPost.Id == 0 || parentPost.TopicId != req.Params.ArticleId || parentPost.PostNo <= 1 {
+	if req.Params.ReplyToPostId > 0 {
+		parentPost = posts.Get(req.Params.ReplyToPostId)
+		if parentPost.Id == 0 || parentPost.TopicId != req.Params.TopicId || parentPost.PostNo <= 1 {
 			return component.FailResponseCode(component.MessageCommentReplyTargetMissed, nil)
 		}
 	}
 
 	postEntity := &posts.Entity{
-		TopicId:         req.Params.ArticleId,
+		TopicId:         req.Params.TopicId,
 		Content:         content,
 		RenderedHTML:    markdown2html.CommentMarkdownToHTML(content),
 		RenderedVersion: markdown2html.GetCommentVersion(),
 		UserId:          req.UserId,
-		ReplyToPostId:   req.Params.ReplyId,
+		ReplyToPostId:   req.Params.ReplyToPostId,
 	}
 
 	err = replyservice.CreateTopicPost(postEntity, topicEntity)
@@ -312,7 +311,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 
 	// 获取父评论作者ID
 	var parentReplyAuthorId uint64
-	if req.Params.ReplyId > 0 {
+	if req.Params.ReplyToPostId > 0 {
 		parentReplyAuthorId = parentPost.UserId
 	}
 
@@ -325,7 +324,7 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		UserId:              req.UserId,
 		Content:             req.Params.Content,
 		ArticleAuthorId:     topicEntity.UserId,
-		ParentReplyId:       req.Params.ReplyId,
+		ParentReplyId:       req.Params.ReplyToPostId,
 		ParentReplyAuthorId: parentReplyAuthorId,
 	})
 
@@ -336,18 +335,18 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 	})
 }
 
-type DeleteReplyId struct {
-	ReplyId uint64 `json:"replyId"`
+type DeletePostReq struct {
+	PostId uint64 `json:"postId"`
 }
 
 type UpdateReplyReq struct {
-	ReplyId uint64 `json:"replyId"`
+	PostId  uint64 `json:"postId"`
 	Content string `json:"content"`
 }
 
 func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
-	postEntity := posts.Get(req.Params.ReplyId)
+	postEntity := posts.Get(req.Params.PostId)
 	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
 		return component.FailResponseCode(component.MessageReplyNotFound, nil)
 	}
@@ -396,8 +395,8 @@ func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response
 	})
 }
 
-func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response {
-	postEntity := posts.Get(req.Params.ReplyId)
+func DeleteReply(req component.BetterRequest[DeletePostReq]) component.Response {
+	postEntity := posts.Get(req.Params.PostId)
 	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
 		return component.FailResponseCode(component.MessageReplyNotFound, nil)
 	}
@@ -414,12 +413,12 @@ func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response 
 }
 
 type LikeArticleReq struct {
-	Id     uint64 `json:"id"`
-	Action int    `json:"action" validate:"min=1,max=2"` // 1 点赞，2 取消
+	TopicId uint64 `json:"topicId"`
+	Action  int    `json:"action" validate:"min=1,max=2"` // 1 点赞，2 取消
 }
 
 func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response {
-	topicEntity := topics.Get(req.Params.Id)
+	topicEntity := topics.Get(req.Params.TopicId)
 	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
@@ -460,12 +459,12 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 }
 
 type BookmarkArticleReq struct {
-	Id     uint64 `json:"id"`
-	Action int    `json:"action" validate:"min=1,max=2"` // 1 收藏，2 取消
+	TopicId uint64 `json:"topicId"`
+	Action  int    `json:"action" validate:"min=1,max=2"` // 1 收藏，2 取消
 }
 
 func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.Response {
-	topicEntity := topics.Get(req.Params.Id)
+	topicEntity := topics.Get(req.Params.TopicId)
 	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
@@ -495,12 +494,12 @@ func updateBookmarkStats(userID uint64, bookmarked bool) {
 }
 
 type WatchArticleReq struct {
-	Id     uint64 `json:"id"`
-	Action int    `json:"action" validate:"min=1,max=2"` // 1 关注，2 取消
+	TopicId uint64 `json:"topicId"`
+	Action  int    `json:"action" validate:"min=1,max=2"` // 1 关注，2 取消
 }
 
 func WatchArticle(req component.BetterRequest[WatchArticleReq]) component.Response {
-	topicEntity := topics.Get(req.Params.Id)
+	topicEntity := topics.Get(req.Params.TopicId)
 	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}

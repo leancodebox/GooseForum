@@ -92,7 +92,7 @@ func TestAdminArticleSourceReadsFirstPost(t *testing.T) {
 	conn := setupAdminTopicTestDB(t)
 	_, categoryID := seedAdminTopic(t, conn, 921001)
 
-	res := ArticleSource(component.BetterRequest[ArticleSourceReq]{Params: ArticleSourceReq{Id: 921001}})
+	res := ArticleSource(component.BetterRequest[ArticleSourceReq]{Params: ArticleSourceReq{TopicId: 921001}})
 	source, ok := res.Data.Result.(ArticleSourceVo)
 	if !ok {
 		t.Fatalf("result type = %T", res.Data.Result)
@@ -109,19 +109,19 @@ func TestAdminEditArticleMutatesTopic(t *testing.T) {
 		t.Fatalf("create second category: %v", err)
 	}
 
-	EditArticle(component.BetterRequest[EditArticleReq]{UserId: 1, Params: EditArticleReq{Id: 922001, ProcessStatus: 1}})
+	EditArticle(component.BetterRequest[EditArticleReq]{UserId: 1, Params: EditArticleReq{TopicId: 922001, ProcessStatus: 1}})
 	topic := topics.Get(922001)
 	if topic.ProcessStatus != 1 {
 		t.Fatalf("process status = %d, want 1", topic.ProcessStatus)
 	}
 
-	EditArticlePin(component.BetterRequest[EditArticlePinReq]{UserId: 1, Params: EditArticlePinReq{Id: 922001, PinWeight: 9}})
+	EditArticlePin(component.BetterRequest[EditArticlePinReq]{UserId: 1, Params: EditArticlePinReq{TopicId: 922001, PinWeight: 9}})
 	topic = topics.Get(922001)
 	if topic.PinWeight != 9 {
 		t.Fatalf("pin weight = %d, want 9", topic.PinWeight)
 	}
 
-	EditArticleCategories(component.BetterRequest[EditArticleCategoriesReq]{UserId: 1, Params: EditArticleCategoriesReq{Id: 922001, CategoryId: []uint64{922999}}})
+	EditArticleCategories(component.BetterRequest[EditArticleCategoriesReq]{UserId: 1, Params: EditArticleCategoriesReq{TopicId: 922001, CategoryId: []uint64{922999}}})
 	topic = topics.Get(922001)
 	if len(topic.CategoryIds) != 1 || topic.CategoryIds[0] != 922999 {
 		t.Fatalf("topic categories = %#v", topic.CategoryIds)

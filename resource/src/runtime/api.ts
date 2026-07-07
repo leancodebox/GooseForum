@@ -69,15 +69,15 @@ export interface UpdateReplyResult {
 export type UpdatePostResult = UpdateReplyResult
 
 export async function createPost(topicId: number, content: string, replyToPostId = 0): Promise<CreatePostResult | number | boolean> {
-  const response = await fetch('/api/forum/articles-reply', {
+  const response = await fetch('/api/forum/posts/create', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      articleId: topicId,
+      topicId,
       content,
-      replyId: replyToPostId,
+      replyToPostId,
     }),
   })
   return readApiResponse<CreatePostResult | number | boolean>(response, t('api.replyFailed'))
@@ -88,13 +88,13 @@ export async function postReply(articleId: number, content: string, replyId = 0)
 }
 
 export async function updatePost(postId: number, content: string): Promise<UpdatePostResult> {
-  const response = await fetch('/api/forum/articles-reply-update', {
+  const response = await fetch('/api/forum/posts/update', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      replyId: postId,
+      postId,
       content,
     }),
   })
@@ -106,13 +106,13 @@ export async function updateReply(replyId: number, content: string): Promise<Upd
 }
 
 export async function deletePost(postId: number): Promise<boolean> {
-  const response = await fetch('/api/forum/articles-reply-delete', {
+  const response = await fetch('/api/forum/posts/delete', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      replyId: postId,
+      postId,
     }),
   })
   return readApiResponse<boolean>(response, t('api.replyDeleteFailed'))
@@ -124,35 +124,34 @@ export async function deleteReply(replyId: number): Promise<boolean> {
 
 export interface PostWindowInput {
   topicId: number
-  anchorReplyId?: number
-  anchorReplyNo?: number
+  anchorPostId?: number
+  anchorPostNo?: number
   before?: number
   after?: number
-  beforeReplyNo?: number
-  afterReplyNo?: number
+  beforePostNo?: number
+  afterPostNo?: number
   limit?: number
   tail?: boolean
 }
 
 export interface ReplyWindowInput extends Omit<PostWindowInput, 'topicId'> {
-  articleId?: number
   topicId?: number
 }
 
 export async function getPostWindow(input: PostWindowInput): Promise<ReplyWindowPayload> {
   const params = new URLSearchParams({
-    articleId: String(input.topicId),
+    topicId: String(input.topicId),
   })
-  if (input.anchorReplyId) params.set('anchorReplyId', String(input.anchorReplyId))
-  if (input.anchorReplyNo) params.set('anchorReplyNo', String(input.anchorReplyNo))
+  if (input.anchorPostId) params.set('anchorPostId', String(input.anchorPostId))
+  if (input.anchorPostNo) params.set('anchorPostNo', String(input.anchorPostNo))
   if (input.before) params.set('before', String(input.before))
   if (input.after) params.set('after', String(input.after))
-  if (input.beforeReplyNo) params.set('beforeReplyNo', String(input.beforeReplyNo))
-  if (input.afterReplyNo) params.set('afterReplyNo', String(input.afterReplyNo))
+  if (input.beforePostNo) params.set('beforePostNo', String(input.beforePostNo))
+  if (input.afterPostNo) params.set('afterPostNo', String(input.afterPostNo))
   if (input.limit) params.set('limit', String(input.limit))
   if (input.tail) params.set('tail', 'true')
 
-  const response = await fetch(`/api/forum/article-replies-window?${params.toString()}`, {
+  const response = await fetch(`/api/forum/posts/window?${params.toString()}`, {
     headers: {
       Accept: 'application/json',
     },
@@ -163,18 +162,18 @@ export async function getPostWindow(input: PostWindowInput): Promise<ReplyWindow
 export async function getArticleRepliesWindow(input: ReplyWindowInput): Promise<ReplyWindowPayload> {
   return getPostWindow({
     ...input,
-    topicId: input.topicId ?? input.articleId ?? 0,
+    topicId: input.topicId ?? 0,
   })
 }
 
 export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
-  const response = await fetch('/api/forum/like-articles', {
+  const response = await fetch('/api/forum/topics/like', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      id,
+      topicId: id,
       action,
     }),
   })
@@ -182,13 +181,13 @@ export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
 }
 
 export async function bookmarkArticle(id: number, action: 1 | 2): Promise<boolean> {
-  const response = await fetch('/api/forum/bookmark-article', {
+  const response = await fetch('/api/forum/topics/bookmark', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      id,
+      topicId: id,
       action,
     }),
   })
@@ -196,13 +195,13 @@ export async function bookmarkArticle(id: number, action: 1 | 2): Promise<boolea
 }
 
 export async function watchArticle(id: number, action: 1 | 2): Promise<boolean> {
-  const response = await fetch('/api/forum/watch-article', {
+  const response = await fetch('/api/forum/topics/watch', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      id,
+      topicId: id,
       action,
     }),
   })
@@ -210,13 +209,13 @@ export async function watchArticle(id: number, action: 1 | 2): Promise<boolean> 
 }
 
 export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Promise<boolean> {
-  const response = await fetch('/api/forum/article-status', {
+  const response = await fetch('/api/forum/topics/status', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      id,
+      topicId: id,
       articleStatus,
     }),
   })
@@ -224,17 +223,17 @@ export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Pro
 }
 
 export async function updateModerationArticleStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
-  const response = await fetch('/api/forum/moderation/article-status', {
+  const response = await fetch('/api/forum/moderation/topic-status', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ id, action }),
+    body: JSON.stringify({ topicId: id, action }),
   })
   return readApiResponse<boolean>(response, t('api.moderationActionFailed'))
 }
 
-export async function submitReport(targetType: 'article' | 'reply', targetId: number, reason: string, note: string): Promise<boolean> {
+export async function submitReport(targetType: 'topic' | 'post', targetId: number, reason: string, note: string): Promise<boolean> {
   const response = await fetch('/api/forum/report', {
     method: 'POST',
     headers: {
@@ -246,12 +245,12 @@ export async function submitReport(targetType: 'article' | 'reply', targetId: nu
 }
 
 export async function updateModerationReplyStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
-  const response = await fetch('/api/forum/moderation/reply-status', {
+  const response = await fetch('/api/forum/moderation/post-status', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ id, action }),
+    body: JSON.stringify({ postId: id, action }),
   })
   return readApiResponse<boolean>(response, t('api.moderationActionFailed'))
 }
@@ -392,7 +391,7 @@ export async function followUser(userId: number, isFollowing: boolean): Promise<
 }
 
 export interface SubmitArticleInput {
-  id: number
+  topicId: number
   title: string
   content: string
   type: number
@@ -401,7 +400,7 @@ export interface SubmitArticleInput {
 }
 
 export async function submitArticle(article: SubmitArticleInput): Promise<number> {
-  const response = await fetch('/api/forum/write-articles', {
+  const response = await fetch('/api/forum/topics/write', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -416,7 +415,7 @@ export async function submitArticle(article: SubmitArticleInput): Promise<number
   if (data.code !== undefined && data.code !== 0) {
     throw new Error(responseMessage(data, t('api.articleSaveFailed')))
   }
-  return data.result ?? data.data ?? article.id
+  return data.result ?? data.data ?? article.topicId
 }
 
 export async function uploadImage(file: File): Promise<string> {

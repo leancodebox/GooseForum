@@ -6,7 +6,7 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/http/controllers"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/deprecatedmodels/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
@@ -87,11 +87,10 @@ func runMockArticlesUserStat(cmd *cobra.Command, args []string) {
 			// Pick random user
 			userId := lo.Sample(userIds)
 
-			req := component.BetterRequest[controllers.ArticleReplyId]{
-				Params: controllers.ArticleReplyId{
-					ArticleId: article.Id,
-					Content:   fmt.Sprintf("Mock reply content %d-%d for article %d. This is generated for local reply timeline testing.", i, j, article.Id),
-					ReplyId:   0,
+			req := component.BetterRequest[controllers.CreatePostReq]{
+				Params: controllers.CreatePostReq{
+					TopicId: article.Id,
+					Content: fmt.Sprintf("Mock reply content %d-%d for article %d. This is generated for local reply timeline testing.", i, j, article.Id),
 				},
 				UserId: userId,
 			}

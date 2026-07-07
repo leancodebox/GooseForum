@@ -14,10 +14,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
-	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -51,7 +49,7 @@ func Moderation(c *gin.Context) {
 	}
 	categoryID := moderationCategoryID(c, availableCategories)
 
-	pageData := articles.PageForModeration(articles.ModerationPageQuery{
+	pageData := topics.PageForModeration(topics.ModerationPageQuery{
 		Page:                page,
 		PageSize:            moderationPageSize,
 		FilterProcessStatus: true,
@@ -69,7 +67,7 @@ func Moderation(c *gin.Context) {
 		Component: "moderation.index",
 		Props: ModerationPageProps{
 			CategoryTabs: buildModerationCategoryTabs(availableCategories, categoryID),
-			Topics:       buildTopicPayloads(hotdataserve.ArticlesSmallEntity2Vo(moderationEntityPointers(pageData.Data))),
+			Topics:       buildTopicPayloads(hotdataserve.TopicsSmallEntity2Vo(moderationEntityPointers(pageData.Data))),
 			Pagination: PaginationPayload{
 				Page:     pageData.Page,
 				NextPage: nextPage,
@@ -98,8 +96,8 @@ func moderationPage(c *gin.Context) int {
 }
 
 type ModerationArticleStatusReq struct {
-	Id     uint64 `json:"id" validate:"required"`
-	Action string `json:"action" validate:"oneof=ban unban"`
+	TopicId uint64 `json:"topicId" validate:"required"`
+	Action  string `json:"action" validate:"oneof=ban unban"`
 }
 
 type ModerationLogListReq struct {
@@ -114,7 +112,7 @@ type ModerationLogListResponse struct {
 }
 
 type CreateReportReq struct {
-	TargetType string `json:"targetType" validate:"required,oneof=article reply"`
+	TargetType string `json:"targetType" validate:"required,oneof=topic post"`
 	TargetId   uint64 `json:"targetId" validate:"required"`
 	Reason     string `json:"reason" validate:"required,oneof=spam abuse illegal irrelevant other"`
 	Note       string `json:"note"`
@@ -133,7 +131,7 @@ type ModerationReportStatusReq struct {
 }
 
 type ModerationReplyStatusReq struct {
-	Id     uint64 `json:"id" validate:"required"`
+	PostId uint64 `json:"postId" validate:"required"`
 	Action string `json:"action" validate:"oneof=ban unban"`
 }
 
@@ -181,36 +179,36 @@ type ModerationLogSubject struct {
 }
 
 func UpdateModerationArticleStatus(req component.BetterRequest[ModerationArticleStatusReq]) component.Response {
-	article := articles.Get(req.Params.Id)
-	if article.Id == 0 {
+	topic := topics.Get(req.Params.TopicId)
+	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
-	if !moderatorservice.CanModerateAnyCategory(req.UserId, article.CategoryId) {
+	if !moderatorservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	nextStatus := moderationTargetStatus(req.Params.Action)
-	if article.ProcessStatus == nextStatus {
+	if topic.ProcessStatus == nextStatus {
 		return component.SuccessResponse(true)
 	}
-	if err := articles.UpdateProcessStatus(article.Id, nextStatus); err != nil {
+	if err := topics.UpdateProcessStatus(topic.Id, nextStatus); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
-	article.ProcessStatus = nextStatus
+	topic.ProcessStatus = nextStatus
 	hotdataserve.ClearArticleListCache()
-	topic := topics.Get(article.Id)
 	firstPost := posts.Get(topic.FirstPostId)
 	if firstPost.Id == 0 {
 		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 	}
 	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
-		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
+		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
 	}
-	moderationlogservice.ArticleStatusChanged(req.UserId, article.Id, article.Title, nextStatus == 1)
+	moderationlogservice.ArticleStatusChanged(req.UserId, topic.Id, topic.Title, nextStatus == 1)
 	return component.SuccessResponse(true)
 }
 
 func CreateReport(req component.BetterRequest[CreateReportReq]) component.Response {
-	target, ok := reportTargetInfo(req.Params.TargetType, req.Params.TargetId, req.UserId)
+	targetType := normalizeReportTargetType(req.Params.TargetType)
+	target, ok := reportTargetInfo(targetType, req.Params.TargetId, req.UserId)
 	if !ok {
 		return component.FailResponseCode(component.MessageReportTargetInvalid, nil)
 	}
@@ -218,7 +216,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 		return component.FailResponseCode(component.MessageReportOwnContent, nil)
 	}
 	report, created, err := reports.CreateOpen(reports.Entity{
-		TargetType: req.Params.TargetType,
+		TargetType: targetType,
 		TargetId:   req.Params.TargetId,
 		ArticleId:  target.ArticleID,
 		TopicId:    target.TopicID,
@@ -232,7 +230,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 	if !created {
 		return component.FailResponseCode(component.MessageReportDuplicate, nil)
 	}
-	moderationstatusservice.InvalidateArticle(target.ArticleID)
+	moderationstatusservice.InvalidateTopic(target.TopicID)
 	eventbus.Publish(context.Background(), &eventhandlers.ReportCreatedEvent{
 		ReportId:   report.Id,
 		TargetType: report.TargetType,
@@ -246,31 +244,31 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 }
 
 func UpdateModerationReplyStatus(req component.BetterRequest[ModerationReplyStatusReq]) component.Response {
-	replyEntity := reply.Get(req.Params.Id)
-	if replyEntity.Id == 0 {
+	post := posts.Get(req.Params.PostId)
+	if post.Id == 0 {
 		return component.FailResponseCode(component.MessageReplyNotFound, nil)
 	}
-	article := articles.GetSimple(replyEntity.ArticleId)
-	if article.Id == 0 || !moderatorservice.CanModerateAnyCategory(req.UserId, article.CategoryId) {
+	topic := topics.GetSimple(post.TopicId)
+	if topic.Id == 0 || !moderatorservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	nextStatus := moderationTargetStatus(req.Params.Action)
-	if replyEntity.ProcessStatus == nextStatus {
+	if post.ProcessStatus == nextStatus {
 		return component.SuccessResponse(true)
 	}
-	if err := reply.UpdateProcessStatus(replyEntity.Id, nextStatus); err != nil {
+	if err := posts.UpdateProcessStatus(post.Id, nextStatus); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
-	userMap := users.GetMapByIds([]uint64{replyEntity.UserId})
-	author := userPayload(replyEntity.UserId, userMap)
+	userMap := users.GetMapByIds([]uint64{post.UserId})
+	author := userPayload(post.UserId, userMap)
 	moderationlogservice.ReplyStatusChanged(req.UserId, moderationlogservice.ReplySnapshot{
-		ReplyId:       replyEntity.Id,
-		ArticleId:     replyEntity.ArticleId,
-		ArticleTitle:  article.Title,
-		ReplyNo:       replyEntity.ReplyNo,
-		ReplyAuthorId: replyEntity.UserId,
+		ReplyId:       post.Id,
+		ArticleId:     post.TopicId,
+		ArticleTitle:  topic.Title,
+		ReplyNo:       post.PostNo - 1,
+		ReplyAuthorId: post.UserId,
 		ReplyAuthor:   author.Username,
-		Excerpt:       moderationExcerpt(replyEntity.Content),
+		Excerpt:       moderationExcerpt(post.Content),
 	}, nextStatus == 1)
 	return component.SuccessResponse(true)
 }
@@ -356,24 +354,35 @@ type reportTargetInfoData struct {
 
 func reportTargetInfo(targetType string, targetID uint64, userID uint64) (reportTargetInfoData, bool) {
 	switch targetType {
-	case reports.TargetArticle:
-		article := articles.GetSimple(targetID)
-		if article.Id == 0 || !canViewArticleSimple(&article, userID) {
+	case reports.TargetArticle, reports.TargetTopic:
+		topic := topics.GetSimple(targetID)
+		if topic.Id == 0 || !canViewTopicSimple(&topic, userID) {
 			return reportTargetInfoData{}, false
 		}
-		return reportTargetInfoData{UserID: article.UserId, ArticleID: article.Id, TopicID: article.Id}, true
-	case reports.TargetReply:
-		replyEntity := reply.Get(targetID)
-		if replyEntity.Id == 0 || replyEntity.ProcessStatus != 0 {
+		return reportTargetInfoData{UserID: topic.UserId, ArticleID: topic.Id, TopicID: topic.Id}, true
+	case reports.TargetReply, reports.TargetPost:
+		post := posts.Get(targetID)
+		if post.Id == 0 || post.ProcessStatus != 0 {
 			return reportTargetInfoData{}, false
 		}
-		article := articles.GetSimple(replyEntity.ArticleId)
-		if article.Id == 0 || !canViewArticleSimple(&article, userID) {
+		topic := topics.GetSimple(post.TopicId)
+		if topic.Id == 0 || !canViewTopicSimple(&topic, userID) {
 			return reportTargetInfoData{}, false
 		}
-		return reportTargetInfoData{UserID: replyEntity.UserId, ArticleID: article.Id, TopicID: article.Id}, true
+		return reportTargetInfoData{UserID: post.UserId, ArticleID: topic.Id, TopicID: topic.Id}, true
 	default:
 		return reportTargetInfoData{}, false
+	}
+}
+
+func normalizeReportTargetType(targetType string) string {
+	switch targetType {
+	case reports.TargetArticle:
+		return reports.TargetTopic
+	case reports.TargetReply:
+		return reports.TargetPost
+	default:
+		return targetType
 	}
 }
 
@@ -388,7 +397,7 @@ func reportArticleID(record reports.Entity) uint64 {
 		return record.TargetId
 	}
 	if record.TargetType == reports.TargetReply {
-		return reply.Get(record.TargetId).ArticleId
+		return posts.Get(record.TargetId).TopicId
 	}
 	if record.TargetType == reports.TargetPost {
 		return posts.Get(record.TargetId).TopicId
@@ -426,12 +435,12 @@ func buildReportLogSnapshot(record reports.Entity, resolution string) moderation
 	}
 	switch record.TargetType {
 	case reports.TargetArticle:
-		article := articles.GetSimple(record.TargetId)
-		if article.Id > 0 {
-			snapshot.ArticleId = article.Id
-			snapshot.ArticleTitle = article.Title
-			snapshot.TargetURL = urlconfig.PostDetail(article.Id)
-			snapshot.Excerpt = moderationExcerpt(article.Description)
+		topic := topics.GetSimple(record.TargetId)
+		if topic.Id > 0 {
+			snapshot.ArticleId = topic.Id
+			snapshot.ArticleTitle = topic.Title
+			snapshot.TargetURL = urlconfig.PostDetail(topic.Id)
+			snapshot.Excerpt = moderationExcerpt(topic.Excerpt)
 		}
 	case reports.TargetTopic:
 		topic := topics.Get(record.TargetId)
@@ -442,14 +451,14 @@ func buildReportLogSnapshot(record reports.Entity, resolution string) moderation
 			snapshot.Excerpt = moderationExcerpt(topic.Excerpt)
 		}
 	case reports.TargetReply:
-		replyEntity := reply.Get(record.TargetId)
-		if replyEntity.Id > 0 {
-			article := articles.GetSimple(replyEntity.ArticleId)
-			snapshot.ArticleId = replyEntity.ArticleId
-			snapshot.ArticleTitle = article.Title
-			snapshot.ReplyNo = replyEntity.ReplyNo
-			snapshot.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(replyEntity.ArticleId), replyEntity.Id)
-			snapshot.Excerpt = moderationExcerpt(replyEntity.Content)
+		post := posts.Get(record.TargetId)
+		if post.Id > 0 {
+			topic := topics.GetSimple(post.TopicId)
+			snapshot.ArticleId = post.TopicId
+			snapshot.ArticleTitle = topic.Title
+			snapshot.ReplyNo = post.PostNo - 1
+			snapshot.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(post.TopicId), post.Id)
+			snapshot.Excerpt = moderationExcerpt(post.Content)
 		}
 	case reports.TargetPost:
 		post := posts.Get(record.TargetId)
@@ -473,18 +482,18 @@ func canModerateReportTarget(userID uint64, targetType string, targetID uint64) 
 func reportTargetCategories(targetType string, targetID uint64) ([]uint64, bool) {
 	switch targetType {
 	case reports.TargetArticle:
-		article := articles.GetSimple(targetID)
-		return article.CategoryId, article.Id > 0
+		topic := topics.GetSimple(targetID)
+		return topic.CategoryIds, topic.Id > 0
 	case reports.TargetTopic:
 		topic := topics.Get(targetID)
 		return topic.CategoryIds, topic.Id > 0
 	case reports.TargetReply:
-		replyEntity := reply.Get(targetID)
-		if replyEntity.Id == 0 {
+		post := posts.Get(targetID)
+		if post.Id == 0 {
 			return nil, false
 		}
-		article := articles.GetSimple(replyEntity.ArticleId)
-		return article.CategoryId, article.Id > 0
+		topic := topics.GetSimple(post.TopicId)
+		return topic.CategoryIds, topic.Id > 0
 	case reports.TargetPost:
 		post := posts.Get(targetID)
 		if post.Id == 0 {
@@ -537,7 +546,7 @@ func buildModerationPageURL(categoryID uint64, page int) string {
 }
 
 func moderationCategories(global bool, categoryIDs []uint64) []TopicCategoryPayload {
-	categories := hotdataserve.GetArticleCategory()
+	categories := hotdataserve.GetCategory()
 	allowed := map[uint64]bool{}
 	if global {
 		for _, category := range categories {
@@ -557,7 +566,7 @@ func moderationCategories(global bool, categoryIDs []uint64) []TopicCategoryPayl
 		}
 		res = append(res, TopicCategoryPayload{
 			ID:    category.Id,
-			Name:  category.Category,
+			Name:  category.Name,
 			URL:   categoryURL(category),
 			Color: category.Color,
 		})
@@ -565,8 +574,8 @@ func moderationCategories(global bool, categoryIDs []uint64) []TopicCategoryPayl
 	return res
 }
 
-func moderationEntityPointers(data []articles.SmallEntity) []*articles.SmallEntity {
-	res := make([]*articles.SmallEntity, 0, len(data))
+func moderationEntityPointers(data []topics.SmallEntity) []*topics.SmallEntity {
+	res := make([]*topics.SmallEntity, 0, len(data))
 	for i := range data {
 		res = append(res, &data[i])
 	}
@@ -578,31 +587,31 @@ func buildModerationLogItems(records []moderationLog.Entity) []ModerationLogItem
 		return []ModerationLogItem{}
 	}
 	actorIDs := make([]uint64, 0, len(records))
-	articleIDs := make([]uint64, 0, len(records))
+	topicIDs := make([]uint64, 0, len(records))
 	for _, record := range records {
 		actorIDs = appendUniqueUint64(actorIDs, record.ActorUserId)
 		if record.Payload.Params != nil {
-			articleIDs = appendUniqueUint64(articleIDs, uint64FromParam(record.Payload.Params["articleId"]))
+			topicIDs = appendUniqueUint64(topicIDs, uint64FromParam(record.Payload.Params["articleId"]))
 		}
 		if record.SubjectType == moderationLog.SubjectArticle {
-			articleIDs = appendUniqueUint64(articleIDs, record.SubjectId)
+			topicIDs = appendUniqueUint64(topicIDs, record.SubjectId)
 		}
 	}
 	userMap := users.GetMapByIds(actorIDs)
-	articleMap := articles.GetMapByIds(articleIDs)
+	topicMap := topics.GetPointerMapByIds(topicIDs)
 	items := make([]ModerationLogItem, 0, len(records))
 	for _, record := range records {
 		payload := record.Payload
 		if payload.Params == nil {
 			payload.Params = map[string]any{}
 		}
-		subject := moderationLogSubject(record, payload.Params, articleMap)
+		subject := moderationLogSubject(record, payload.Params, topicMap)
 		items = append(items, ModerationLogItem{
 			ID:          record.Id,
 			Action:      record.Action,
 			Actor:       userPayload(record.ActorUserId, userMap),
 			Subject:     subject,
-			Categories:  moderationLogCategories(record, payload.Params, subject.ID, articleMap),
+			Categories:  moderationLogCategories(record, payload.Params, subject.ID, topicMap),
 			MessageCode: payload.MessageCode,
 			Params:      payload.Params,
 			CreatedAt:   record.CreatedAt.Format(time.DateTime),
@@ -611,14 +620,14 @@ func buildModerationLogItems(records []moderationLog.Entity) []ModerationLogItem
 	return items
 }
 
-func moderationLogSubject(record moderationLog.Entity, params map[string]any, articleMap map[uint64]*articles.SmallEntity) ModerationLogSubject {
+func moderationLogSubject(record moderationLog.Entity, params map[string]any, topicMap map[uint64]*topics.SmallEntity) ModerationLogSubject {
 	switch record.SubjectType {
 	case moderationLog.SubjectArticle:
 		subject := ModerationLogSubject{Type: record.SubjectType, ID: record.SubjectId, Title: fmt.Sprint(params["title"])}
-		if article := articleMap[record.SubjectId]; article != nil {
-			subject.Title = article.Title
-			subject.URL = urlconfig.PostDetail(article.Id)
-			subject.Excerpt = article.Description
+		if topic := topicMap[record.SubjectId]; topic != nil {
+			subject.Title = topic.Title
+			subject.URL = urlconfig.PostDetail(topic.Id)
+			subject.Excerpt = topic.Excerpt
 		} else if subject.ID > 0 {
 			subject.URL = urlconfig.PostDetail(subject.ID)
 		}
@@ -638,8 +647,8 @@ func moderationLogSubject(record moderationLog.Entity, params map[string]any, ar
 		replyNo := uint64FromParam(params["replyNo"])
 		excerpt := fmt.Sprint(params["excerpt"])
 		if (title == "" || title == "<nil>") && articleID > 0 {
-			if article := articleMap[articleID]; article != nil {
-				title = article.Title
+			if topic := topicMap[articleID]; topic != nil {
+				title = topic.Title
 			}
 		}
 		if title == "" || title == "<nil>" {
@@ -699,16 +708,16 @@ func uint64FromParam(value any) uint64 {
 	}
 }
 
-func moderationLogCategories(record moderationLog.Entity, params map[string]any, subjectID uint64, articleMap map[uint64]*articles.SmallEntity) []TopicCategoryPayload {
+func moderationLogCategories(record moderationLog.Entity, params map[string]any, subjectID uint64, topicMap map[uint64]*topics.SmallEntity) []TopicCategoryPayload {
 	articleID := subjectID
 	if record.SubjectType == moderationLog.SubjectReply || record.SubjectType == moderationLog.SubjectReport {
 		articleID = uint64FromParam(params["articleId"])
 	}
-	article := articleMap[articleID]
-	if article == nil {
+	topic := topicMap[articleID]
+	if topic == nil {
 		return []TopicCategoryPayload{}
 	}
-	return categoryPayloads(article.CategoryId)
+	return categoryPayloads(topic.CategoryIds)
 }
 
 func moderationReportPage(userID uint64, status string, categoryID uint64, cursor uint64, pageSize int) ([]ModerationReportItem, uint64, bool) {
@@ -765,29 +774,25 @@ func reportScopeCategoryIDs(userID uint64, categoryID uint64) ([]uint64, bool) {
 }
 
 type moderationReportBatchMaps struct {
-	ArticleMap map[uint64]*articles.SmallEntity
-	ReplyMap   map[uint64]*reply.Entity
-	TopicMap   map[uint64]topics.SmallEntity
-	PostMap    map[uint64]*posts.Entity
-	UserMap    map[uint64]*users.EntityComplete
+	TopicMap map[uint64]topics.SmallEntity
+	PostMap  map[uint64]*posts.Entity
+	UserMap  map[uint64]*users.EntityComplete
 }
 
 func reportBatchMaps(records []reports.Entity) moderationReportBatchMaps {
-	articleIDs := make([]uint64, 0, len(records))
-	replyIDs := make([]uint64, 0, len(records))
 	topicIDs := make([]uint64, 0, len(records))
 	postIDs := make([]uint64, 0, len(records))
 	userIDs := make([]uint64, 0, len(records)*2)
 	for _, record := range records {
 		userIDs = appendUniqueUint64(userIDs, record.ReporterId)
 		userIDs = appendUniqueUint64(userIDs, record.HandlerId)
-		articleIDs = appendUniqueUint64(articleIDs, record.ArticleId)
+		topicIDs = appendUniqueUint64(topicIDs, record.ArticleId)
 		topicIDs = appendUniqueUint64(topicIDs, record.TopicId)
 		if record.TargetType == reports.TargetArticle {
-			articleIDs = appendUniqueUint64(articleIDs, record.TargetId)
+			topicIDs = appendUniqueUint64(topicIDs, record.TargetId)
 		}
 		if record.TargetType == reports.TargetReply {
-			replyIDs = appendUniqueUint64(replyIDs, record.TargetId)
+			postIDs = appendUniqueUint64(postIDs, record.TargetId)
 		}
 		if record.TargetType == reports.TargetTopic {
 			topicIDs = appendUniqueUint64(topicIDs, record.TargetId)
@@ -796,32 +801,15 @@ func reportBatchMaps(records []reports.Entity) moderationReportBatchMaps {
 			postIDs = appendUniqueUint64(postIDs, record.TargetId)
 		}
 	}
-	replyMap := replyMapByIDs(replyIDs)
-	for _, replyEntity := range replyMap {
-		articleIDs = appendUniqueUint64(articleIDs, replyEntity.ArticleId)
-	}
 	postMap := postMapByIDs(postIDs)
 	for _, post := range postMap {
 		topicIDs = appendUniqueUint64(topicIDs, post.TopicId)
 	}
 	return moderationReportBatchMaps{
-		ArticleMap: articles.GetMapByIds(articleIDs),
-		ReplyMap:   replyMap,
-		TopicMap:   topics.GetMapByIds(topicIDs),
-		PostMap:    postMap,
-		UserMap:    users.GetMapByIds(userIDs),
+		TopicMap: topics.GetMapByIds(topicIDs),
+		PostMap:  postMap,
+		UserMap:  users.GetMapByIds(userIDs),
 	}
-}
-
-func replyMapByIDs(ids []uint64) map[uint64]*reply.Entity {
-	rows := reply.GetByIds(ids)
-	res := make(map[uint64]*reply.Entity, len(rows))
-	for _, row := range rows {
-		if row != nil {
-			res[row.Id] = row
-		}
-	}
-	return res
 }
 
 func postMapByIDs(ids []uint64) map[uint64]*posts.Entity {
@@ -838,11 +826,11 @@ func postMapByIDs(ids []uint64) map[uint64]*posts.Entity {
 func reportCategoriesFromMaps(record reports.Entity, batchMaps moderationReportBatchMaps) ([]uint64, bool) {
 	switch record.TargetType {
 	case reports.TargetArticle:
-		article := batchMaps.ArticleMap[record.TargetId]
-		if article == nil {
+		topic := batchMaps.TopicMap[record.TargetId]
+		if topic.Id == 0 {
 			return nil, false
 		}
-		return article.CategoryId, true
+		return topic.CategoryIds, true
 	case reports.TargetTopic:
 		topic := batchMaps.TopicMap[record.TargetId]
 		if topic.Id == 0 {
@@ -850,19 +838,7 @@ func reportCategoriesFromMaps(record reports.Entity, batchMaps moderationReportB
 		}
 		return topic.CategoryIds, true
 	case reports.TargetReply:
-		replyEntity := batchMaps.ReplyMap[record.TargetId]
-		if replyEntity == nil && record.ArticleId == 0 {
-			return nil, false
-		}
-		articleID := record.ArticleId
-		if articleID == 0 {
-			articleID = replyEntity.ArticleId
-		}
-		article := batchMaps.ArticleMap[articleID]
-		if article == nil {
-			return nil, false
-		}
-		return article.CategoryId, true
+		return reportPostCategoriesFromMaps(record, batchMaps)
 	case reports.TargetPost:
 		topicID := record.TopicId
 		if topicID == 0 {
@@ -882,6 +858,25 @@ func reportCategoriesFromMaps(record reports.Entity, batchMaps moderationReportB
 	}
 }
 
+func reportPostCategoriesFromMaps(record reports.Entity, batchMaps moderationReportBatchMaps) ([]uint64, bool) {
+	topicID := record.TopicId
+	if topicID == 0 {
+		topicID = record.ArticleId
+	}
+	if topicID == 0 {
+		post := batchMaps.PostMap[record.TargetId]
+		if post == nil {
+			return nil, false
+		}
+		topicID = post.TopicId
+	}
+	topic := batchMaps.TopicMap[topicID]
+	if topic.Id == 0 {
+		return nil, false
+	}
+	return topic.CategoryIds, true
+}
+
 func buildModerationReportItem(userID uint64, categoryID uint64, record reports.Entity, batchMaps moderationReportBatchMaps) (ModerationReportItem, bool) {
 	categoryIDs, ok := reportCategoriesFromMaps(record, batchMaps)
 	if !ok || !moderatorservice.CanModerateAnyCategory(userID, categoryIDs) {
@@ -896,7 +891,7 @@ func buildModerationReportItem(userID uint64, categoryID uint64, record reports.
 	}
 	item := ModerationReportItem{
 		ID:         record.Id,
-		TargetType: record.TargetType,
+		TargetType: publicReportTargetType(record.TargetType),
 		TargetID:   record.TargetId,
 		Reason:     record.Reason,
 		Note:       record.Note,
@@ -912,13 +907,13 @@ func buildModerationReportItem(userID uint64, categoryID uint64, record reports.
 	}
 	switch record.TargetType {
 	case reports.TargetArticle:
-		article := batchMaps.ArticleMap[record.TargetId]
-		if article == nil {
+		topic := batchMaps.TopicMap[record.TargetId]
+		if topic.Id == 0 {
 			return ModerationReportItem{}, false
 		}
-		item.Title = article.Title
-		item.Excerpt = article.Description
-		item.TargetURL = urlconfig.PostDetail(article.Id)
+		item.Title = topic.Title
+		item.Excerpt = topic.Excerpt
+		item.TargetURL = urlconfig.PostDetail(topic.Id)
 	case reports.TargetTopic:
 		topic := batchMaps.TopicMap[record.TargetId]
 		if topic.Id == 0 {
@@ -927,21 +922,24 @@ func buildModerationReportItem(userID uint64, categoryID uint64, record reports.
 		item.Title = topic.Title
 		item.TargetURL = urlconfig.PostDetail(topic.Id)
 	case reports.TargetReply:
-		replyEntity := batchMaps.ReplyMap[record.TargetId]
-		if replyEntity == nil {
+		post := batchMaps.PostMap[record.TargetId]
+		if post == nil {
 			return ModerationReportItem{}, false
 		}
-		articleID := record.ArticleId
-		if articleID == 0 {
-			articleID = replyEntity.ArticleId
+		topicID := record.TopicId
+		if topicID == 0 {
+			topicID = record.ArticleId
 		}
-		article := batchMaps.ArticleMap[articleID]
-		if article == nil {
+		if topicID == 0 {
+			topicID = post.TopicId
+		}
+		topic := batchMaps.TopicMap[topicID]
+		if topic.Id == 0 {
 			return ModerationReportItem{}, false
 		}
-		item.Title = article.Title
-		item.Excerpt = replyEntity.Content
-		item.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(articleID), replyEntity.Id)
+		item.Title = topic.Title
+		item.Excerpt = post.Content
+		item.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(topicID), post.Id)
 	case reports.TargetPost:
 		post := batchMaps.PostMap[record.TargetId]
 		if post == nil {
@@ -963,6 +961,17 @@ func buildModerationReportItem(userID uint64, categoryID uint64, record reports.
 		item.Title = fmt.Sprintf("#%d", record.TargetId)
 	}
 	return item, true
+}
+
+func publicReportTargetType(targetType string) string {
+	switch targetType {
+	case reports.TargetArticle:
+		return reports.TargetTopic
+	case reports.TargetReply:
+		return reports.TargetPost
+	default:
+		return targetType
+	}
 }
 
 func appendUniqueUint64(items []uint64, item uint64) []uint64 {

@@ -3,7 +3,7 @@ package forum
 import (
 	"testing"
 
-	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
 )
 
@@ -51,17 +51,17 @@ func TestResolveUserProfileActivitySection(t *testing.T) {
 	}
 }
 
-func TestUserActivityURLForCommentUsesReplyArticle(t *testing.T) {
+func TestUserActivityURLForCommentUsesPostTopic(t *testing.T) {
 	activity := &userActivities.Entity{
 		Action:      int(userActivities.ActionComment),
 		SubjectType: userActivities.SubjectPost,
 		SubjectId:   456,
 	}
-	replyByID := map[uint64]*reply.Entity{
-		456: {Id: 456, ArticleId: 123},
+	postByID := map[uint64]*posts.Entity{
+		456: {Id: 456, TopicId: 123},
 	}
 
-	if got := userActivityURL(activity, replyByID); got != "/p/post/123#reply-456" {
+	if got := userActivityURL(activity, postByID); got != "/p/post/123#reply-456" {
 		t.Fatalf("userActivityURL() = %q, want %q", got, "/p/post/123#reply-456")
 	}
 }

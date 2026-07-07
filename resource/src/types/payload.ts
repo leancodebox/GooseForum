@@ -421,7 +421,7 @@ export interface ModerationLogListResponse {
 
 export interface ModerationReportItem {
   id: number
-  targetType: 'article' | 'reply'
+  targetType: 'topic' | 'post'
   targetId: number
   targetUrl: string
   title: string

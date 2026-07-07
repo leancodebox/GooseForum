@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -62,24 +61,24 @@ func ArticleDetail(c *gin.Context) {
 }
 
 type ArticleRepliesWindowReq struct {
-	ArticleID     uint64 `form:"articleId"`
-	AnchorReplyID uint64 `form:"anchorReplyId"`
-	AnchorReplyNo uint64 `form:"anchorReplyNo"`
-	Before        uint64 `form:"before"`
-	After         uint64 `form:"after"`
-	BeforeReplyNo uint64 `form:"beforeReplyNo"`
-	AfterReplyNo  uint64 `form:"afterReplyNo"`
-	Limit         int    `form:"limit"`
-	Tail          bool   `form:"tail"`
+	TopicID      uint64 `form:"topicId"`
+	AnchorPostID uint64 `form:"anchorPostId"`
+	AnchorPostNo uint64 `form:"anchorPostNo"`
+	Before       uint64 `form:"before"`
+	After        uint64 `form:"after"`
+	BeforePostNo uint64 `form:"beforePostNo"`
+	AfterPostNo  uint64 `form:"afterPostNo"`
+	Limit        int    `form:"limit"`
+	Tail         bool   `form:"tail"`
 }
 
 func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) component.Response {
-	articleID := req.Params.ArticleID
-	if articleID == 0 {
+	topicID := req.Params.TopicID
+	if topicID == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	topicEntity := topics.GetSimple(articleID)
+	topicEntity := topics.GetSimple(topicID)
 	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
@@ -97,18 +96,18 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 	var hasAfter bool
 
 	switch {
-	case req.Params.AnchorReplyNo > 0:
-		anchor, ok := posts.GetByTopicPostNoAtOrAfter(articleID, req.Params.AnchorReplyNo+1)
+	case req.Params.AnchorPostNo > 0:
+		anchor, ok := posts.GetByTopicPostNoAtOrAfter(topicID, req.Params.AnchorPostNo+1)
 		if !ok {
-			anchor, ok = posts.GetByTopicPostNoAtOrBefore(articleID, req.Params.AnchorReplyNo+1)
+			anchor, ok = posts.GetByTopicPostNoAtOrBefore(topicID, req.Params.AnchorPostNo+1)
 		}
-		if !ok || anchor.Id == 0 || anchor.TopicId != articleID || anchor.PostNo <= 1 {
+		if !ok || anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo <= 1 {
 			return component.FailResponseCode(component.MessageReplyNotFound, nil)
 		}
 		beforeLimit := min(5, limit/2)
 		afterLimit := limit - beforeLimit - 1
-		beforeReplies := posts.GetByTopicPostNoBefore(articleID, anchor.PostNo, beforeLimit+1)
-		afterReplies := posts.GetByTopicPostNoAfter(articleID, anchor.PostNo, afterLimit+1)
+		beforeReplies := posts.GetByTopicPostNoBefore(topicID, anchor.PostNo, beforeLimit+1)
+		afterReplies := posts.GetByTopicPostNoAfter(topicID, anchor.PostNo, afterLimit+1)
 		hasBefore = len(beforeReplies) > beforeLimit
 		hasAfter = len(afterReplies) > afterLimit
 		if hasBefore {
@@ -121,20 +120,20 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 		postEntities = append(postEntities, &anchor)
 		postEntities = append(postEntities, afterReplies...)
 	case req.Params.Tail:
-		postEntities = posts.GetByTopicPostNoDesc(articleID, limit+1)
+		postEntities = posts.GetByTopicPostNoDesc(topicID, limit+1)
 		hasBefore = len(postEntities) > limit
 		if hasBefore {
 			postEntities = postEntities[1:]
 		}
-	case req.Params.AnchorReplyID > 0:
-		anchor := posts.Get(req.Params.AnchorReplyID)
-		if anchor.Id == 0 || anchor.TopicId != articleID || anchor.PostNo <= 1 {
+	case req.Params.AnchorPostID > 0:
+		anchor := posts.Get(req.Params.AnchorPostID)
+		if anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo <= 1 {
 			return component.FailResponseCode(component.MessageReplyNotFound, nil)
 		}
 		beforeLimit := min(5, limit/2)
 		afterLimit := limit - beforeLimit - 1
-		beforeReplies := posts.GetByTopicIdBefore(articleID, anchor.Id, beforeLimit+1)
-		afterReplies := posts.GetByTopicIdAfter(articleID, anchor.Id, afterLimit+1)
+		beforeReplies := posts.GetByTopicIdBefore(topicID, anchor.Id, beforeLimit+1)
+		afterReplies := posts.GetByTopicIdAfter(topicID, anchor.Id, afterLimit+1)
 		hasBefore = len(beforeReplies) > beforeLimit
 		hasAfter = len(afterReplies) > afterLimit
 		if hasBefore {
@@ -146,36 +145,36 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 		postEntities = append(postEntities, beforeReplies...)
 		postEntities = append(postEntities, &anchor)
 		postEntities = append(postEntities, afterReplies...)
-	case req.Params.BeforeReplyNo > 0:
-		postEntities = posts.GetByTopicPostNoBefore(articleID, req.Params.BeforeReplyNo+1, limit+1)
+	case req.Params.BeforePostNo > 0:
+		postEntities = posts.GetByTopicPostNoBefore(topicID, req.Params.BeforePostNo+1, limit+1)
 		hasBefore = len(postEntities) > limit
 		if hasBefore {
 			postEntities = postEntities[1:]
 		}
 		hasAfter = true
-	case req.Params.AfterReplyNo > 0:
-		postEntities = posts.GetByTopicPostNoAfter(articleID, req.Params.AfterReplyNo+1, limit+1)
+	case req.Params.AfterPostNo > 0:
+		postEntities = posts.GetByTopicPostNoAfter(topicID, req.Params.AfterPostNo+1, limit+1)
 		hasAfter = len(postEntities) > limit
 		if hasAfter {
 			postEntities = postEntities[:limit]
 		}
 		hasBefore = true
 	case req.Params.Before > 0:
-		postEntities = posts.GetByTopicIdBefore(articleID, req.Params.Before, limit+1)
+		postEntities = posts.GetByTopicIdBefore(topicID, req.Params.Before, limit+1)
 		hasBefore = len(postEntities) > limit
 		if hasBefore {
 			postEntities = postEntities[1:]
 		}
 		hasAfter = true
 	case req.Params.After > 0:
-		postEntities = posts.GetByTopicIdAfter(articleID, req.Params.After, limit+1)
+		postEntities = posts.GetByTopicIdAfter(topicID, req.Params.After, limit+1)
 		hasAfter = len(postEntities) > limit
 		if hasAfter {
 			postEntities = postEntities[:limit]
 		}
 		hasBefore = true
 	default:
-		postEntities = posts.GetByTopicPostNoAfter(articleID, 1, limit+1)
+		postEntities = posts.GetByTopicPostNoAfter(topicID, 1, limit+1)
 		hasAfter = len(postEntities) > limit
 		if hasAfter {
 			postEntities = postEntities[:limit]
@@ -214,7 +213,7 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 		maxReplyNo = topicEntity.PostSeq - 1
 	}
 	if maxReplyNo == 0 && topicEntity.ReplyCount > 0 {
-		maxPostNo := posts.GetMaxPostNoByTopicId(articleID)
+		maxPostNo := posts.GetMaxPostNoByTopicId(topicID)
 		if maxPostNo > 0 {
 			maxReplyNo = maxPostNo - 1
 		}
@@ -222,7 +221,7 @@ func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) 
 
 	return component.SuccessResponse(ReplyWindowPayload{
 		Replies:       payloadReplies,
-		AnchorReplyID: req.Params.AnchorReplyID,
+		AnchorReplyID: req.Params.AnchorPostID,
 		BeforeCursor:  beforeCursor,
 		AfterCursor:   afterCursor,
 		BeforeReplyNo: beforeReplyNo,
@@ -243,26 +242,6 @@ func filterReplyPosts(postEntities []*posts.Entity) []*posts.Entity {
 		res = append(res, item)
 	}
 	return res
-}
-
-func canViewArticle(entity *articles.Entity, userID uint64) bool {
-	if entity.ArticleStatus != 1 {
-		return userID != 0 && userID == entity.UserId
-	}
-	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedArticle(userID) && !moderatorservice.CanModerateAnyCategory(userID, entity.CategoryId) {
-		return false
-	}
-	return true
-}
-
-func canViewArticleSimple(entity *articles.SmallEntity, userID uint64) bool {
-	if entity.ArticleStatus != 1 {
-		return userID != 0 && userID == entity.UserId
-	}
-	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedArticle(userID) && !moderatorservice.CanModerateAnyCategory(userID, entity.CategoryId) {
-		return false
-	}
-	return true
 }
 
 func canViewTopic(entity *topics.Entity, userID uint64) bool {
@@ -291,10 +270,6 @@ func currentUserCanViewProcessedArticle(userID uint64) bool {
 	}
 	roleID, ok := userservice.GetUserRoleId(userID)
 	return ok && permission.CheckRole(roleID, permission.ArticlesManager)
-}
-
-func shouldCountArticleView(entity *articles.Entity) bool {
-	return entity.ArticleStatus == 1 && entity.ProcessStatus == 0
 }
 
 func shouldCountTopicView(entity *topics.Entity) bool {

@@ -41,7 +41,7 @@ const replyDraftBeforeEdit = ref('')
 const replyTargetBeforeEdit = ref(0)
 const pendingDeleteReply = ref<PostPayload | null>(null)
 const pendingModerationAction = ref<'ban' | 'unban' | null>(null)
-const pendingReport = ref<{ targetType: 'article' | 'reply'; targetId: number; title: string; excerpt: string } | null>(null)
+const pendingReport = ref<{ targetType: 'topic' | 'post'; targetId: number; title: string; excerpt: string } | null>(null)
 const reportReason = ref('spam')
 const reportNote = ref('')
 const reportSubmitting = ref(false)
@@ -672,10 +672,10 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail'
   replyWindowError.value = ''
   try {
     const payload = await getArticleRepliesWindow({
-      articleId: page.props.article.id,
-      anchorReplyId: direction === 'anchor' ? anchorValue : undefined,
-      beforeReplyNo: direction === 'before' ? replyBeforeReplyNo.value : undefined,
-      afterReplyNo: direction === 'after' ? replyAfterReplyNo.value : undefined,
+      topicId: page.props.article.id,
+      anchorPostId: direction === 'anchor' ? anchorValue : undefined,
+      beforePostNo: direction === 'before' ? replyBeforeReplyNo.value : undefined,
+      afterPostNo: direction === 'after' ? replyAfterReplyNo.value : undefined,
       before: direction === 'before' && !replyBeforeReplyNo.value ? replyBeforeCursor.value : undefined,
       after: direction === 'after' && !replyAfterReplyNo.value ? replyAfterCursor.value : undefined,
       tail: direction === 'tail',
@@ -755,8 +755,8 @@ async function jumpToReplyNo(replyNo: number) {
   replyWindowError.value = ''
   try {
     const payload = await getArticleRepliesWindow({
-      articleId: page.props.article.id,
-      anchorReplyNo: target,
+      topicId: page.props.article.id,
+      anchorPostNo: target,
       limit: 20,
     })
     applyReplyWindowPayload(payload, 'replace', true)
@@ -920,8 +920,8 @@ async function revealCreatedReply(replyId: number) {
 
   pauseReplyRailSync()
   const payload = await getArticleRepliesWindow({
-    articleId: page.props.article.id,
-    anchorReplyId: replyId,
+    topicId: page.props.article.id,
+    anchorPostId: replyId,
     limit: 20,
   })
   applyReplyWindowPayload(payload, 'replace', true)
@@ -1189,7 +1189,7 @@ function openLogin() {
   window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}`
 }
 
-function requestReport(target: { targetType: 'article' | 'reply'; targetId: number; title: string; excerpt: string }) {
+function requestReport(target: { targetType: 'topic' | 'post'; targetId: number; title: string; excerpt: string }) {
   if (!page.layout.viewer.isAuthenticated) {
     openLogin()
     return
@@ -1237,7 +1237,7 @@ function sameUrl(left: string, right: string) {
 
 function requestArticleReport() {
   requestReport({
-    targetType: 'article',
+    targetType: 'topic',
     targetId: page.props.article.id,
     title: page.props.article.title,
     excerpt: page.props.article.description,
@@ -1246,7 +1246,7 @@ function requestArticleReport() {
 
 function requestReplyReport(reply: PostPayload) {
   requestReport({
-    targetType: 'reply',
+    targetType: 'post',
     targetId: reply.id,
     title: t('article.replyReportTitle', { no: reply.replyNo || reply.id }),
     excerpt: reply.content,

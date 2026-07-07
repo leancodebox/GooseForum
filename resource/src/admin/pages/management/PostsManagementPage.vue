@@ -209,7 +209,7 @@ async function saveCategories() {
   }
   saving.value = true
   try {
-    await editArticleCategories({ id: categoryDialogRow.value.id, categoryId: validCategoryIds })
+    await editArticleCategories({ topicId: categoryDialogRow.value.id, categoryId: validCategoryIds })
     categoryDialogRow.value = null
     await loadPosts()
     adminToast.success(adminText('k003v'))
@@ -225,7 +225,7 @@ async function savePinWeight() {
   const pinWeight = Math.max(0, Math.trunc(Number(pinWeightInput.value) || 0))
   saving.value = true
   try {
-    await editArticlePin({ id: pinDialogRow.value.id, pinWeight })
+    await editArticlePin({ topicId: pinDialogRow.value.id, pinWeight })
     pinDialogRow.value = null
     await loadPosts()
     adminToast.success(pinWeight > 0 ? adminText('k003w') : adminText('k003x'))
@@ -265,7 +265,7 @@ async function toggleProcessStatus() {
   saving.value = true
   try {
     await editArticle({
-      id: actionRow.value.id,
+      topicId: actionRow.value.id,
       processStatus: restoring ? 0 : 1,
     })
     actionRow.value = null

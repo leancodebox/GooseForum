@@ -46,6 +46,17 @@ func GetByIds(ids []uint64) (entities []*Entity) {
 	return
 }
 
+func GetMapByIds(ids []uint64) map[uint64]*Entity {
+	list := GetByIds(ids)
+	result := make(map[uint64]*Entity, len(list))
+	for _, item := range list {
+		if item != nil {
+			result[item.Id] = item
+		}
+	}
+	return result
+}
+
 func UpdateProcessStatus(id uint64, processStatus int8) error {
 	return builder().Where(queryopt.Eq("id", id)).Update("process_status", processStatus).Error
 }

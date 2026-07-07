@@ -185,14 +185,14 @@ async function hideReportTarget(item: ModerationReportItem) {
   reportBusyIds.value = [...reportBusyIds.value, item.id]
   reportError.value = ''
   try {
-    if (item.targetType === 'article') {
+    if (item.targetType === 'topic') {
       await updateModerationArticleStatus(item.targetId, 'ban')
     } else {
       await updateModerationReplyStatus(item.targetId, 'ban')
     }
     await updateModerationReportStatus(item.id, 'ban')
     reportItems.value = reportItems.value.filter(report => report.id !== item.id)
-    if (item.targetType === 'article') {
+    if (item.targetType === 'topic') {
       topics.value = topics.value.filter(topic => topic.id !== item.targetId)
     }
     logLoaded.value = false

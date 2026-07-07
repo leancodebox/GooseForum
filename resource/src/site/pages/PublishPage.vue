@@ -244,7 +244,7 @@ async function save() {
   message.value = ''
   try {
     const id = await submitArticle({
-      id: currentArticleId.value,
+      topicId: currentArticleId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       type: type.value,
@@ -274,7 +274,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
   message.value = ''
   try {
     const id = await submitArticle({
-      id: currentArticleId.value,
+      topicId: currentArticleId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       type: type.value,

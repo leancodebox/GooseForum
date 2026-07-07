@@ -89,14 +89,19 @@ func TestTopicRepositoryParity(t *testing.T) {
 		t.Fatalf("PageForModeration() = %#v, want blocked topic 40", moderationPage.Data)
 	}
 
+	if err := UpdatePinWeight(10, 99); err != nil {
+		t.Fatalf("UpdatePinWeight() err=%v", err)
+	}
+	adminPage := PageForAdmin(AdminPageQuery{Page: 1, PageSize: 10, UserId: 1})
+	if len(adminPage.Data) != 3 || adminPage.Data[0].Id != 10 || adminPage.Data[1].Id != 40 || adminPage.Data[2].Id != 30 {
+		t.Fatalf("PageForAdmin() ids = %#v, want pinned topic 10 before topics 40, 30", adminPage.Data)
+	}
+
 	if err := UpdateProcessStatus(10, 1); err != nil {
 		t.Fatalf("UpdateProcessStatus() err=%v", err)
 	}
 	if got := GetSimple(10); got.ProcessStatus != 1 {
 		t.Fatalf("GetSimple(10).ProcessStatus=%d, want 1", got.ProcessStatus)
-	}
-	if err := UpdatePinWeight(10, 99); err != nil {
-		t.Fatalf("UpdatePinWeight() err=%v", err)
 	}
 	if got := Get(10); got.PinWeight != 99 {
 		t.Fatalf("Get(10).PinWeight=%d, want 99", got.PinWeight)

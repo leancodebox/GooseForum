@@ -116,11 +116,11 @@ func TestArticleReplyWritesPostAndTopicStats(t *testing.T) {
 		t.Fatalf("set first post: %v", err)
 	}
 
-	res := ArticleReply(component.BetterRequest[ArticleReplyId]{
+	res := ArticleReply(component.BetterRequest[CreatePostReq]{
 		UserId: 1102,
-		Params: ArticleReplyId{
-			ArticleId: topic.Id,
-			Content:   "reply content with enough words",
+		Params: CreatePostReq{
+			TopicId: topic.Id,
+			Content: "reply content with enough words",
 		},
 	})
 	payload, ok := res.Data.Result.(map[string]any)
@@ -149,9 +149,9 @@ func TestTopicActionsUseTopicUserAction(t *testing.T) {
 		t.Fatalf("create topic: %v", err)
 	}
 
-	LikeArticle(component.BetterRequest[LikeArticleReq]{UserId: 1202, Params: LikeArticleReq{Id: 4001, Action: 1}})
-	BookmarkArticle(component.BetterRequest[BookmarkArticleReq]{UserId: 1202, Params: BookmarkArticleReq{Id: 4001, Action: 1}})
-	WatchArticle(component.BetterRequest[WatchArticleReq]{UserId: 1202, Params: WatchArticleReq{Id: 4001, Action: 1}})
+	LikeArticle(component.BetterRequest[LikeArticleReq]{UserId: 1202, Params: LikeArticleReq{TopicId: 4001, Action: 1}})
+	BookmarkArticle(component.BetterRequest[BookmarkArticleReq]{UserId: 1202, Params: BookmarkArticleReq{TopicId: 4001, Action: 1}})
+	WatchArticle(component.BetterRequest[WatchArticleReq]{UserId: 1202, Params: WatchArticleReq{TopicId: 4001, Action: 1}})
 
 	action := topicUserAction.GetByTopicId(uint64(1202), uint64(4001))
 	if action.Id == 0 || action.LikedAt == nil || action.BookmarkedAt == nil || action.WatchedAt == nil {

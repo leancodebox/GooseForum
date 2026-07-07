@@ -10,7 +10,7 @@ import (
 
 func Category(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
-	category := hotdataserve.GetCategoryById(id)
+	category := hotdataserve.GetCleanCategoryById(id)
 	if category == nil {
 		renderNotFoundWithMessage(c, component.MessagePageNotFound)
 		return

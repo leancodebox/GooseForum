@@ -11,7 +11,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
@@ -87,33 +86,33 @@ func TestArticleMetaJSONLDIncludesImageForImageOnlyArticle(t *testing.T) {
 	}
 }
 
-func TestDraftArticleCanOnlyBeViewedByAuthor(t *testing.T) {
-	draft := &articles.Entity{Id: 1, UserId: 10, ArticleStatus: 0, ProcessStatus: 0}
+func TestDraftTopicCanOnlyBeViewedByAuthor(t *testing.T) {
+	draft := &topics.Entity{Id: 1, UserId: 10, Status: 0, ProcessStatus: 0}
 
-	if !canViewArticle(draft, 10) {
-		t.Fatal("expected draft author to view draft article")
+	if !canViewTopic(draft, 10) {
+		t.Fatal("expected draft author to view draft topic")
 	}
-	if canViewArticle(draft, 11) {
-		t.Fatal("expected other users to be blocked from draft article")
+	if canViewTopic(draft, 11) {
+		t.Fatal("expected other users to be blocked from draft topic")
 	}
-	if canViewArticle(draft, 0) {
-		t.Fatal("expected guests to be blocked from draft article")
+	if canViewTopic(draft, 0) {
+		t.Fatal("expected guests to be blocked from draft topic")
 	}
 }
 
-func TestDraftArticleViewIsNotCounted(t *testing.T) {
-	draft := &articles.Entity{Id: 1, UserId: 10, ArticleStatus: 0, ProcessStatus: 0}
-	published := &articles.Entity{Id: 2, UserId: 10, ArticleStatus: 1, ProcessStatus: 0}
-	blocked := &articles.Entity{Id: 3, UserId: 10, ArticleStatus: 1, ProcessStatus: 1}
+func TestDraftTopicViewIsNotCounted(t *testing.T) {
+	draft := &topics.Entity{Id: 1, UserId: 10, Status: 0, ProcessStatus: 0}
+	published := &topics.Entity{Id: 2, UserId: 10, Status: 1, ProcessStatus: 0}
+	blocked := &topics.Entity{Id: 3, UserId: 10, Status: 1, ProcessStatus: 1}
 
-	if shouldCountArticleView(draft) {
-		t.Fatal("expected draft article views to be ignored")
+	if shouldCountTopicView(draft) {
+		t.Fatal("expected draft topic views to be ignored")
 	}
-	if !shouldCountArticleView(published) {
-		t.Fatal("expected published normal article views to be counted")
+	if !shouldCountTopicView(published) {
+		t.Fatal("expected published normal topic views to be counted")
 	}
-	if shouldCountArticleView(blocked) {
-		t.Fatal("expected blocked article views to be ignored")
+	if shouldCountTopicView(blocked) {
+		t.Fatal("expected blocked topic views to be ignored")
 	}
 }
 
@@ -224,9 +223,9 @@ func TestArticleRepliesWindowSkipsFirstPostInCursors(t *testing.T) {
 
 	res := ArticleRepliesWindow(component.BetterRequest[ArticleRepliesWindowReq]{
 		Params: ArticleRepliesWindowReq{
-			ArticleID: topicID,
-			Tail:      true,
-			Limit:     50,
+			TopicID: topicID,
+			Tail:    true,
+			Limit:   50,
 		},
 	})
 	payload, ok := res.Data.Result.(ReplyWindowPayload)

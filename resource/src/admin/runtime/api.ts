@@ -201,7 +201,7 @@ export function deleteCategoryModerator(id: number) {
 }
 
 export function getArticlesList(params: { page?: number, pageSize?: number, search?: string }) {
-  return postJson<PageResult<AdminArticle>>('/api/admin/articles-list', params, adminText('k0012'))
+  return postJson<PageResult<AdminArticle>>('/api/admin/topics/list', params, adminText('k0012'))
 }
 
 export function getOptRecordList(params: { page?: number, pageSize?: number, optUserId?: number, optType?: number, targetType?: number, targetId?: number }) {
@@ -213,23 +213,23 @@ export function getFileResourceList(params: { page?: number, pageSize?: number }
 }
 
 export function getArticleSource(id: number) {
-  return postJson<ArticleSource>('/api/admin/article-source', { id }, adminText('k0014'))
+  return postJson<ArticleSource>('/api/admin/topics/source', { topicId: id }, adminText('k0014'))
 }
 
-export function editArticle(data: { id: number, processStatus: number }) {
-  return postJson<unknown>('/api/admin/article-edit', data, adminText('k0015'))
+export function editArticle(data: { topicId: number, processStatus: number }) {
+  return postJson<unknown>('/api/admin/topics/edit', data, adminText('k0015'))
 }
 
 export function deleteArticle(id: number) {
-  return postJson<unknown>('/api/admin/article-delete', { id }, adminText('k00cd'))
+  return postJson<unknown>('/api/admin/topics/delete', { topicId: id }, adminText('k00cd'))
 }
 
-export function editArticlePin(data: { id: number, pinWeight: number }) {
-  return postJson<unknown>('/api/admin/article-pin-edit', data, adminText('k0016'))
+export function editArticlePin(data: { topicId: number, pinWeight: number }) {
+  return postJson<unknown>('/api/admin/topics/pin-edit', data, adminText('k0016'))
 }
 
-export function editArticleCategories(data: { id: number, categoryId: number[] }) {
-  return postJson<unknown>('/api/admin/article-categories-edit', data, adminText('k0017'))
+export function editArticleCategories(data: { topicId: number, categoryId: number[] }) {
+  return postJson<unknown>('/api/admin/topics/categories-edit', data, adminText('k0017'))
 }
 
 export function getFriendLinks() {

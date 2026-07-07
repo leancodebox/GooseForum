@@ -17,13 +17,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
-	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
@@ -613,7 +610,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 		Viewer: viewer,
 		Header: buildChromeNavItems(chrome.Header),
 		Sidebar: buildSidebarPayload(
-			hotdataserve.GetArticleCategory(),
+			hotdataserve.GetCategory(),
 			activeKey,
 		),
 		Footer: FooterPayload{
@@ -692,7 +689,7 @@ func buildUnreadStatus(userID uint64) UnreadStatusPayload {
 	}
 }
 
-func buildSidebarPayload(categories []*articleCategory.Entity, activeKey string) SidebarPayload {
+func buildSidebarPayload(categories []*category.Entity, activeKey string) SidebarPayload {
 	chrome := hotdataserve.GetSiteChromeConfigCache()
 	categoryItems := make([]CategoryNavPayload, 0, len(categories))
 	for _, category := range categories {
@@ -701,7 +698,7 @@ func buildSidebarPayload(categories []*articleCategory.Entity, activeKey string)
 		}
 		categoryItems = append(categoryItems, CategoryNavPayload{
 			ID:    category.Id,
-			Label: category.Category,
+			Label: category.Name,
 			URL:   categoryURL(category),
 			Color: category.Color,
 		})
@@ -804,7 +801,7 @@ func buildHomeTabs(sort string) []TabPayload {
 }
 
 func buildTopicPayloads(topics []*vo.ArticlesSimpleVo) []TopicPayload {
-	categoryMap := hotdataserve.ArticleCategoryMap()
+	categoryMap := hotdataserve.CategoryMap()
 	res := make([]TopicPayload, 0, len(topics))
 	for _, topic := range topics {
 		if topic == nil {
@@ -818,7 +815,7 @@ func buildTopicPayloads(topics []*vo.ArticlesSimpleVo) []TopicPayload {
 				name = topic.Categories[i]
 			}
 			if category, ok := categoryMap[categoryID]; ok && category != nil {
-				name = category.Category
+				name = category.Name
 				color = category.Color
 			}
 			if name == "" {
@@ -888,10 +885,10 @@ func buildHomePageURL(sort string, page int) string {
 	return "/?" + values.Encode()
 }
 
-func categoryURL(category *articleCategory.Entity) string {
+func categoryURL(category *category.Entity) string {
 	slug := category.Slug
 	if slug == "" {
-		slug = category.Category
+		slug = category.Name
 	}
 	return "/c/" + url.PathEscape(slug) + "/" + strconv.FormatUint(category.Id, 10)
 }
@@ -917,37 +914,6 @@ func buildHomeMeta(c *gin.Context) PageMeta {
 		Title:       siteTitle(),
 		Description: siteConfig.SiteDescription,
 		Canonical:   buildPageURL(c),
-	}
-}
-
-func buildArticleDetailProps(c *gin.Context, entity *articles.Entity) ArticleDetailProps {
-	currentUserID := component.LoginUserId(c)
-	replyEntities := reply.GetFirstPageByArticleId(entity.Id)
-	userIDs := make([]uint64, 0, 1+len(replyEntities))
-	seenUserIDs := make(map[uint64]struct{}, 1+len(replyEntities))
-	userIDs = append(userIDs, entity.UserId)
-	seenUserIDs[entity.UserId] = struct{}{}
-	for _, item := range replyEntities {
-		if item == nil {
-			continue
-		}
-		if _, seen := seenUserIDs[item.UserId]; seen {
-			continue
-		}
-		seenUserIDs[item.UserId] = struct{}{}
-		userIDs = append(userIDs, item.UserId)
-	}
-	userMap := users.GetMapByIds(userIDs)
-
-	return ArticleDetailProps{
-		Article:   buildArticlePayload(c, entity, userMap),
-		Replies:   buildReplyPayloads(replyEntities, userMap, currentUserID, moderatorservice.CanModerateAnyCategory(currentUserID, entity.CategoryId)),
-		HotTopics: buildArticleHotTopics(entity.Id),
-		Permissions: ArticlePermissions{
-			IsOwnArticle:       currentUserID == entity.UserId,
-			CanReply:           currentUserID > 0,
-			CanModerateArticle: moderatorservice.CanModerateAnyCategory(currentUserID, entity.CategoryId),
-		},
 	}
 }
 
@@ -980,98 +946,6 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 			CanModerateArticle: moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds),
 		},
 	}
-}
-
-func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) []ReplyPayload {
-	replyMap := make(map[uint64]*reply.Entity, len(replyEntities))
-	for _, item := range replyEntities {
-		if item != nil {
-			replyMap[item.Id] = item
-		}
-	}
-
-	missingParentIDs := make([]uint64, 0)
-	seenMissingParentIDs := make(map[uint64]struct{})
-	for _, item := range replyEntities {
-		if item == nil || item.ReplyId == 0 {
-			continue
-		}
-		if _, ok := replyMap[item.ReplyId]; !ok {
-			if _, seen := seenMissingParentIDs[item.ReplyId]; seen {
-				continue
-			}
-			seenMissingParentIDs[item.ReplyId] = struct{}{}
-			missingParentIDs = append(missingParentIDs, item.ReplyId)
-		}
-	}
-	for _, parent := range reply.GetByIds(missingParentIDs) {
-		if parent != nil {
-			replyMap[parent.Id] = parent
-		}
-	}
-
-	userIDs := make([]uint64, 0, len(replyEntities)+len(replyMap))
-	seenUserIDs := make(map[uint64]struct{}, len(replyEntities)+len(replyMap))
-	for _, item := range replyEntities {
-		if item == nil {
-			continue
-		}
-		if _, seen := seenUserIDs[item.UserId]; !seen {
-			seenUserIDs[item.UserId] = struct{}{}
-			userIDs = append(userIDs, item.UserId)
-		}
-	}
-	for _, parent := range replyMap {
-		if parent == nil {
-			continue
-		}
-		if _, seen := seenUserIDs[parent.UserId]; !seen {
-			seenUserIDs[parent.UserId] = struct{}{}
-			userIDs = append(userIDs, parent.UserId)
-		}
-	}
-	maps.Copy(userMap, users.GetMapByIds(userIDs))
-
-	res := make([]ReplyPayload, 0, len(replyEntities))
-	for _, item := range replyEntities {
-		if item == nil {
-			continue
-		}
-		author := userPayload(item.UserId, userMap)
-		replyToName, replyToUserID := "", uint64(0)
-		if item.ReplyId > 0 {
-			if parent, ok := replyMap[item.ReplyId]; ok && parent != nil {
-				parentAuthor := userPayload(parent.UserId, userMap)
-				replyToName = parentAuthor.Username
-				replyToUserID = parentAuthor.ID
-			}
-		}
-		content := item.Content
-		renderedContent := item.RenderedHTML
-		isHidden := item.ProcessStatus != 0
-		if isHidden && !canModerate {
-			content = ""
-			renderedContent = ""
-		}
-		res = append(res, ReplyPayload{
-			ID:              item.Id,
-			ArticleID:       item.ArticleId,
-			ReplyNo:         item.ReplyNo,
-			Content:         content,
-			RenderedContent: renderedContent,
-			ProcessStatus:   item.ProcessStatus,
-			IsHidden:        isHidden,
-			CanModerate:     canModerate,
-			Author:          author,
-			CreatedAt:       item.CreatedAt.Format(time.DateTime),
-			ReplyToID:       item.ReplyId,
-			ReplyToUserID:   replyToUserID,
-			ReplyToUsername: replyToName,
-			IsOwnReply:      currentUserID == item.UserId,
-			UpdatedAt:       item.UpdatedAt.Format(time.DateTime),
-		})
-	}
-	return res
 }
 
 func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) []ReplyPayload {
@@ -1243,59 +1117,6 @@ func buildTopicArticlePayload(c *gin.Context, topic *topics.Entity, firstPost *p
 	}
 }
 
-func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[uint64]*users.EntityComplete) ArticlePayload {
-	participants := make([]TopicAuthorPayload, 0, len(userMap))
-	seen := map[uint64]bool{}
-	addParticipant := func(userID uint64) {
-		if userID == 0 || seen[userID] {
-			return
-		}
-		seen[userID] = true
-		participants = append(participants, userPayload(userID, userMap))
-	}
-	addParticipant(entity.UserId)
-	for userID := range userMap {
-		addParticipant(userID)
-	}
-	if len(participants) > 12 {
-		participants = participants[:12]
-	}
-
-	currentUserID := component.LoginUserId(c)
-	isLiked := false
-	isBookmarked := false
-	isWatched := false
-	if currentUserID > 0 {
-		state := articleUserAction.GetByArticleId(currentUserID, entity.Id)
-		isLiked = state.LikedAt != nil
-		isBookmarked = state.BookmarkedAt != nil
-		isWatched = state.WatchedAt != nil
-	}
-
-	return ArticlePayload{
-		ID:            entity.Id,
-		Title:         entity.Title,
-		Description:   entity.Description,
-		FirstImageURL: entity.FirstImageURL,
-		URL:           urlconfig.PostDetail(entity.Id),
-		HTML:          entity.RenderedHTML,
-		ArticleStatus: entity.ArticleStatus,
-		ProcessStatus: entity.ProcessStatus,
-		Author:        userPayload(entity.UserId, userMap),
-		Participants:  participants,
-		Categories:    categoryPayloads(entity.CategoryId),
-		ReplyCount:    entity.ReplyCount,
-		MaxReplyNo:    entity.ReplySeq,
-		ViewCount:     entity.ViewCount,
-		LikeCount:     entity.LikeCount,
-		IsLiked:       isLiked,
-		IsBookmarked:  isBookmarked,
-		IsWatched:     isWatched,
-		CreatedAt:     entity.CreatedAt.Format(time.DateTime),
-		UpdatedAt:     entity.UpdatedAt.Format(time.DateTime),
-	}
-}
-
 func positivePostReplyNo(postSeq uint64) uint64 {
 	if postSeq == 0 {
 		return 0
@@ -1304,7 +1125,7 @@ func positivePostReplyNo(postSeq uint64) uint64 {
 }
 
 func categoryPayloads(ids []uint64) []TopicCategoryPayload {
-	categoryMap := hotdataserve.ArticleCategoryMap()
+	categoryMap := hotdataserve.CategoryMap()
 	res := make([]TopicCategoryPayload, 0, len(ids))
 	for _, id := range ids {
 		category, ok := categoryMap[id]
@@ -1313,7 +1134,7 @@ func categoryPayloads(ids []uint64) []TopicCategoryPayload {
 		}
 		res = append(res, TopicCategoryPayload{
 			ID:    category.Id,
-			Name:  category.Category,
+			Name:  category.Name,
 			URL:   categoryURL(category),
 			Color: category.Color,
 		})
@@ -1327,15 +1148,6 @@ func userPayload(userID uint64, userMap map[uint64]*users.EntityComplete) TopicA
 		return TopicAuthorPayload{ID: userID, Username: "匿名用户", AvatarURL: urlconfig.GetDefaultAvatar()}
 	}
 	return TopicAuthorPayload{ID: userID, Username: user.Username, AvatarURL: user.GetWebAvatarUrl(), WornBadge: badgeservice.GetWornBadge(userID, user.WornBadgeCode)}
-}
-
-func ensureRenderedHTML(entity *articles.Entity) {
-	if entity.RenderedVersion >= markdown2html.GetVersion() && entity.RenderedHTML != "" {
-		return
-	}
-	entity.RenderedHTML = markdown2html.MarkdownToHTML(entity.Content)
-	entity.RenderedVersion = markdown2html.GetVersion()
-	_ = articles.SaveNoUpdate(entity)
 }
 
 func ensurePostRenderedHTML(entity *posts.Entity) {
@@ -1512,7 +1324,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 	userCard.IsSelf = currentUserID == user.Id
 
 	badges := []badgeservice.UserBadge{}
-	topics := []TopicPayload{}
+	topicPayloads := []TopicPayload{}
 	activities := []UserActivityPayload{}
 	likes := []UserLikePayload{}
 	following := []UserConnectionPayload{}
@@ -1524,15 +1336,15 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 		switch activityTab {
 		case userProfileActivityTopics:
 			cursor := positiveUint(c.Query("cursor"))
-			topicPage, _ := articles.GetPublishedArticlesByUserBeforeId(user.Id, cursor, userProfileTopicPageSize+1)
+			topicPage, _ := topics.GetPublishedByUserBeforeId(user.Id, cursor, userProfileTopicPageSize+1)
 			hasNext := len(topicPage) > userProfileTopicPageSize
 			if hasNext {
 				topicPage = topicPage[:userProfileTopicPageSize]
 			}
-			topics = buildTopicPayloads(hotdataserve.ArticlesSmallEntity2Vo(topicPage))
+			topicPayloads = buildTopicPayloads(hotdataserve.TopicsSmallEntity2Vo(topicPage))
 			pagination = buildUserActivityTopicPagination(user.Id, topicPage, hasNext)
 		case userProfileActivityLikes:
-			refs, nextCursor := articleUserAction.ListLikedArticleRefsBefore(user.Id, c.Query("cursor"), userProfileTimelinePageSize)
+			refs, nextCursor := topicUserAction.ListLikedTopicRefsBefore(user.Id, c.Query("cursor"), userProfileTimelinePageSize)
 			likes = buildUserLikes(refs)
 			pagination = buildUserActivityLikePagination(user.Id, nextCursor)
 		case userProfileActivityFollowing:
@@ -1553,8 +1365,8 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 		badges = userBadges
 	default:
 		badges = userBadges
-		latestArticles, _ := articles.GetLatestArticlesByUserId(user.Id, 8)
-		topics = buildTopicPayloads(hotdataserve.ArticlesSmallEntity2Vo(latestArticles))
+		latestTopics, _ := topics.GetLatestPublishedByUserId(user.Id, 8)
+		topicPayloads = buildTopicPayloads(hotdataserve.TopicsSmallEntity2Vo(latestTopics))
 		timeline, _ := userActivities.GetUserTimeline(user.Id, 0, 5)
 		activities = buildUserActivities(timeline)
 	}
@@ -1567,7 +1379,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 		ActivityTabs: buildUserProfileActivityTabs(user.Id, section, activityTab),
 		Pagination:   pagination,
 		Badges:       badges,
-		Topics:       topics,
+		Topics:       topicPayloads,
 		Activities:   activities,
 		Likes:        likes,
 		Following:    following,
@@ -1588,7 +1400,7 @@ func positiveUint(raw string) uint64 {
 	return value
 }
 
-func buildUserActivityTopicPagination(userID uint64, topics []*articles.SmallEntity, hasNext bool) PaginationPayload {
+func buildUserActivityTopicPagination(userID uint64, topics []*topics.SmallEntity, hasNext bool) PaginationPayload {
 	nextCursor := uint64(0)
 	if hasNext && len(topics) > 0 {
 		nextCursor = topics[len(topics)-1].Id
@@ -1667,25 +1479,25 @@ func buildUserProfileActivityTabs(userID uint64, section string, active string) 
 	}
 }
 
-func buildUserLikes(refs []articleUserAction.LikedArticleRef) []UserLikePayload {
+func buildUserLikes(refs []topicUserAction.LikedTopicRef) []UserLikePayload {
 	ids := make([]uint64, 0, len(refs))
 	for _, ref := range refs {
-		if ref.ArticleID > 0 {
-			ids = append(ids, ref.ArticleID)
+		if ref.TopicID > 0 {
+			ids = append(ids, ref.TopicID)
 		}
 	}
-	articleMap := articles.GetMapByIds(ids)
+	topicMap := topics.GetPointerMapByIds(ids)
 	res := make([]UserLikePayload, 0, len(refs))
 	for _, ref := range refs {
-		article := articleMap[ref.ArticleID]
-		if article == nil || article.ArticleStatus != 1 || article.ProcessStatus != 0 {
+		topic := topicMap[ref.TopicID]
+		if topic == nil || topic.Status != 1 || topic.ProcessStatus != 0 {
 			continue
 		}
 		res = append(res, UserLikePayload{
 			ID:        ref.ID,
-			ArticleID: ref.ArticleID,
-			Title:     article.Title,
-			URL:       urlconfig.PostDetail(ref.ArticleID),
+			ArticleID: ref.TopicID,
+			Title:     topic.Title,
+			URL:       urlconfig.PostDetail(ref.TopicID),
 			LikedAt:   ref.LikedAt.Format(time.DateTime),
 		})
 	}
@@ -1718,7 +1530,7 @@ func buildUserActivities(activities []*userActivities.Entity) []UserActivityPayl
 	return res
 }
 
-func userActivityReplyMap(activities []*userActivities.Entity) map[uint64]*reply.Entity {
+func userActivityReplyMap(activities []*userActivities.Entity) map[uint64]*posts.Entity {
 	ids := make([]uint64, 0)
 	seen := map[uint64]struct{}{}
 	for _, activity := range activities {
@@ -1735,8 +1547,8 @@ func userActivityReplyMap(activities []*userActivities.Entity) map[uint64]*reply
 		ids = append(ids, activity.SubjectId)
 	}
 
-	rows := reply.GetByIds(ids)
-	res := make(map[uint64]*reply.Entity, len(rows))
+	rows := posts.GetByIds(ids)
+	res := make(map[uint64]*posts.Entity, len(rows))
 	for _, row := range rows {
 		if row != nil && row.Id > 0 {
 			res[row.Id] = row
@@ -1745,16 +1557,16 @@ func userActivityReplyMap(activities []*userActivities.Entity) map[uint64]*reply
 	return res
 }
 
-func userActivityURL(activity *userActivities.Entity, replyByID map[uint64]*reply.Entity) string {
+func userActivityURL(activity *userActivities.Entity, replyByID map[uint64]*posts.Entity) string {
 	if userActivities.ActionType(activity.Action) == userActivities.ActionComment && activity.SubjectType == userActivities.SubjectPost {
 		if activity.SubjectId == 0 {
 			return ""
 		}
-		replyEntity := replyByID[activity.SubjectId]
-		if replyEntity == nil || replyEntity.ArticleId == 0 {
+		post := replyByID[activity.SubjectId]
+		if post == nil || post.TopicId == 0 {
 			return ""
 		}
-		return urlconfig.PostDetail(replyEntity.ArticleId) + "#reply-" + strconv.FormatUint(replyEntity.Id, 10)
+		return urlconfig.PostDetail(post.TopicId) + "#reply-" + strconv.FormatUint(post.Id, 10)
 	}
 
 	switch activity.SubjectType {
@@ -1820,7 +1632,7 @@ func buildUserMeta(c *gin.Context, user *vo.UserCard) PageMeta {
 	}
 }
 
-func buildCategoryPageProps(category *articleCategory.Entity, page int, sort string, topics []*vo.ArticlesSimpleVo, hasNext bool) CategoryPageProps {
+func buildCategoryPageProps(category *category.Entity, page int, sort string, topics []*vo.ArticlesSimpleVo, hasNext bool) CategoryPageProps {
 	nextPage := 0
 	if hasNext {
 		nextPage = page + 1
@@ -1828,7 +1640,7 @@ func buildCategoryPageProps(category *articleCategory.Entity, page int, sort str
 	return CategoryPageProps{
 		Category: CategoryHeaderPayload{
 			ID:          category.Id,
-			Name:        category.Category,
+			Name:        category.Name,
 			Description: category.Desc,
 			Icon:        category.Icon,
 			Color:       category.Color,
@@ -1846,21 +1658,21 @@ func buildCategoryPageProps(category *articleCategory.Entity, page int, sort str
 	}
 }
 
-func buildCategoryTabs(category *articleCategory.Entity, sort string) []TabPayload {
+func buildCategoryTabs(category *category.Entity, sort string) []TabPayload {
 	return []TabPayload{
 		{Key: "latest", URL: categorySortURL(category, "latest"), Active: sort == "" || sort == "latest"},
 		{Key: "new", URL: categorySortURL(category, "new"), Active: sort == "new"},
 	}
 }
 
-func categorySortURL(category *articleCategory.Entity, sort string) string {
+func categorySortURL(category *category.Entity, sort string) string {
 	if sort == "" || sort == "latest" {
 		return categoryURL(category)
 	}
 	return categoryURL(category) + "/l/" + url.PathEscape(sort)
 }
 
-func buildCategoryPageURL(category *articleCategory.Entity, sort string, page int) string {
+func buildCategoryPageURL(category *category.Entity, sort string, page int) string {
 	if page <= 0 {
 		return ""
 	}
@@ -1869,13 +1681,13 @@ func buildCategoryPageURL(category *articleCategory.Entity, sort string, page in
 	return categorySortURL(category, sort) + "?" + values.Encode()
 }
 
-func buildCategoryMeta(c *gin.Context, category *articleCategory.Entity) PageMeta {
+func buildCategoryMeta(c *gin.Context, category *category.Entity) PageMeta {
 	description := category.Desc
 	if description == "" {
-		description = i18n.T(requestLang(c), "meta.categoryDesc", "category", category.Category)
+		description = i18n.T(requestLang(c), "meta.categoryDesc", "category", category.Name)
 	}
 	return PageMeta{
-		Title:       pageTitle(category.Category),
+		Title:       pageTitle(category.Name),
 		Description: description,
 		Canonical:   component.GetBaseUri(c) + categoryURL(category),
 	}
@@ -2031,22 +1843,22 @@ func buildNotificationsPageProps(c *gin.Context) NotificationsPageProps {
 	}
 }
 
-func buildDraftPayloads(entities []*articles.SmallEntity) []DraftPayload {
-	categoryMap := hotdataserve.ArticleCategoryMap()
+func buildDraftPayloads(entities []*topics.SmallEntity) []DraftPayload {
+	categoryMap := hotdataserve.CategoryMap()
 	items := make([]DraftPayload, 0, len(entities))
 	for _, entity := range entities {
 		if entity == nil {
 			continue
 		}
-		categories := make([]TopicCategoryPayload, 0, len(entity.CategoryId))
-		for _, categoryID := range entity.CategoryId {
+		categories := make([]TopicCategoryPayload, 0, len(entity.CategoryIds))
+		for _, categoryID := range entity.CategoryIds {
 			category, ok := categoryMap[categoryID]
 			if !ok || category == nil {
 				continue
 			}
 			categories = append(categories, TopicCategoryPayload{
 				ID:    categoryID,
-				Name:  category.Category,
+				Name:  category.Name,
 				URL:   categoryURL(category),
 				Color: category.Color,
 			})
@@ -2054,7 +1866,7 @@ func buildDraftPayloads(entities []*articles.SmallEntity) []DraftPayload {
 		items = append(items, DraftPayload{
 			ID:            entity.Id,
 			Title:         entity.Title,
-			Description:   entity.Description,
+			Description:   entity.Excerpt,
 			EditURL:       urlconfig.Publish() + "?id=" + strconv.FormatUint(entity.Id, 10),
 			ReplyCount:    entity.ReplyCount,
 			ViewCount:     entity.ViewCount,
@@ -2069,7 +1881,7 @@ func buildDraftPayloads(entities []*articles.SmallEntity) []DraftPayload {
 
 func buildDraftsPageProps(c *gin.Context) DraftsPageProps {
 	userID := component.LoginUserId(c)
-	drafts, _ := articles.GetDraftArticlesByUserId(userID, 100)
+	drafts, _ := topics.GetDraftsByUserId(userID, 100)
 	return DraftsPageProps{
 		Total:  int64(len(drafts)),
 		Drafts: buildDraftPayloads(drafts),
@@ -2198,22 +2010,26 @@ func buildPublishPageProps(c *gin.Context, articleID uint64) (PublishPageProps, 
 		return props, nil
 	}
 
-	entity := articles.Get(articleID)
-	if entity.Id == 0 || entity.UserId != component.LoginUserId(c) {
+	topic := topics.Get(articleID)
+	if topic.Id == 0 || topic.UserId != component.LoginUserId(c) {
 		return props, errors.New("article not found")
 	}
+	firstPost := posts.Get(topic.FirstPostId)
+	if firstPost.Id == 0 {
+		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
+	}
 	props.Article = PublishArticlePayload{
-		Title:         entity.Title,
-		Content:       entity.Content,
-		Type:          entity.Type,
-		CategoryIDs:   entity.CategoryId,
-		ArticleStatus: entity.ArticleStatus,
+		Title:         topic.Title,
+		Content:       firstPost.Content,
+		Type:          0,
+		CategoryIDs:   topic.CategoryIds,
+		ArticleStatus: topic.Status,
 	}
 	return props, nil
 }
 
 func buildPublishCategories() []PublishCategoryPayload {
-	categories := hotdataserve.GetArticleCategory()
+	categories := hotdataserve.GetCategory()
 	res := make([]PublishCategoryPayload, 0, len(categories))
 	for _, category := range categories {
 		if category == nil {
@@ -2221,7 +2037,7 @@ func buildPublishCategories() []PublishCategoryPayload {
 		}
 		res = append(res, PublishCategoryPayload{
 			ID:    category.Id,
-			Name:  category.Category,
+			Name:  category.Name,
 			Color: category.Color,
 		})
 	}
@@ -2242,7 +2058,7 @@ func defaultPublishType() int8 {
 	if items != nil && len(*items) > 0 {
 		return int8((*items)[0].Value)
 	}
-	return int8(articles.Share)
+	return 1
 }
 
 func buildSearchPageProps(query string, page int) SearchPageProps {
@@ -2273,10 +2089,10 @@ func buildSearchPageProps(query string, page int) SearchPageProps {
 	ids := lo.Map(result.Results, func(item searchservice.SearchResult, _ int) uint64 {
 		return item.ID
 	})
-	articleMap := articles.GetMapByIds(ids)
-	orderedArticles := lo.FilterMap(ids, func(id uint64, _ int) (*articles.SmallEntity, bool) {
-		article, ok := articleMap[id]
-		return article, ok && article != nil
+	topicMap := topics.GetPointerMapByIds(ids)
+	orderedTopics := lo.FilterMap(ids, func(id uint64, _ int) (*topics.SmallEntity, bool) {
+		topic, ok := topicMap[id]
+		return topic, ok && topic != nil
 	})
 	totalPageCount := totalPages(result.Total, pageSize)
 	nextPage := 0
@@ -2284,7 +2100,7 @@ func buildSearchPageProps(query string, page int) SearchPageProps {
 		nextPage = page + 1
 	}
 
-	props.Topics = buildTopicPayloads(hotdataserve.ArticlesSmallEntity2Vo(orderedArticles))
+	props.Topics = buildTopicPayloads(hotdataserve.TopicsSmallEntity2Vo(orderedTopics))
 	props.Total = result.Total
 	props.TotalPages = totalPageCount
 	props.Pagination = PaginationPayload{
