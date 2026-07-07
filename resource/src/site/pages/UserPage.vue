@@ -78,7 +78,7 @@ const profileCoverStyle = computed(() => {
 })
 const profileStats = computed(() => [
   { label: t('user.stats.reputation'), value: page.props.user.prestige, featured: true },
-  { label: t('user.stats.topics'), value: page.props.user.articleCount },
+  { label: t('user.stats.topics'), value: page.props.user.topicCount },
   { label: t('user.stats.replies'), value: page.props.user.replyCount },
   { label: t('user.stats.likesReceived'), value: page.props.user.likeReceivedCount },
   { label: t('user.stats.likesGiven'), value: page.props.user.likeGivenCount },

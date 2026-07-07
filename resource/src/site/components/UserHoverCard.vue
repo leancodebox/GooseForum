@@ -246,7 +246,7 @@ onBeforeUnmount(() => {
 
         <div class="mt-3 grid grid-cols-4 divide-x divide-line border-y border-line py-2">
           <div class="px-2 text-center">
-            <div class="text-sm font-bold tabular-nums text-base-content">{{ formatNumber(card?.articleCount || 0) }}</div>
+            <div class="text-sm font-bold tabular-nums text-base-content">{{ formatNumber(card?.topicCount || 0) }}</div>
             <div class="mt-0.5 text-[11px] text-base-content/55">{{ t('userCard.stats.topics') }}</div>
           </div>
           <div class="px-2 text-center">

@@ -138,7 +138,7 @@ const profileCoverStyle = computed(() => {
 })
 const hasStatus = computed(() => Boolean(status.value || error.value))
 const statsItems = computed(() => [
-  { label: t('user.stats.topics'), value: page.props.stats.articleCount },
+  { label: t('user.stats.topics'), value: page.props.stats.topicCount },
   { label: t('user.stats.replies'), value: page.props.stats.replyCount },
   { label: t('user.stats.likesReceived'), value: page.props.stats.likeReceivedCount },
   { label: t('user.stats.likesGiven'), value: page.props.stats.likeGivenCount },

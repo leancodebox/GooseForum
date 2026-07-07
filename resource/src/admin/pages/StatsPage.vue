@@ -50,14 +50,14 @@ const summaryItems = computed(() => [
   },
   {
     label: adminText('k002h'),
-    value: stats.value?.articleCount,
-    delta: `+${stats.value?.articleMonthCount ?? 0}`,
+    value: stats.value?.topicMaxId,
+    delta: `+${stats.value?.topicMonthCount ?? 0}`,
     icon: FileText,
     visible: true,
   },
   {
     label: adminText('k002i'),
-    value: stats.value?.reply,
+    value: stats.value?.postMaxId,
     icon: MessageSquare,
     visible: true,
   },

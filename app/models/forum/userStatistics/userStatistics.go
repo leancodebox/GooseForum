@@ -9,8 +9,8 @@ const tableName = "user_statistics"
 // pid 用户ID
 const pid = "user_id"
 
-// fieldArticleCount 发表文章数
-const fieldArticleCount = "article_count"
+// fieldTopicCount 发表主题数
+const fieldTopicCount = "article_count"
 
 // fieldPostCount 发帖数(包括主题和回复)
 const fieldPostCount = "post_count"
@@ -44,7 +44,7 @@ const fieldUpdatedAt = "updated_at"
 
 type Entity struct {
 	UserId            uint64    `gorm:"primaryKey;column:user_id;autoIncrement;not null;" json:"userId"`                           // 用户ID
-	ArticleCount      uint      `gorm:"column:article_count;type:int unsigned;not null;default:0;" json:"articleCount"`            // 发表文章数
+	TopicCount        uint      `gorm:"column:article_count;type:int unsigned;not null;default:0;" json:"topicCount"`              // 发表主题数
 	ReplyCount        uint      `gorm:"column:reply_count;type:int unsigned;not null;default:0;" json:"replyCount"`                // 评论数
 	FollowerCount     uint      `gorm:"column:follower_count;type:int unsigned;not null;default:0;" json:"followerCount"`          // 粉丝数
 	FollowingCount    uint      `gorm:"column:following_count;type:int unsigned;not null;default:0;" json:"followingCount"`        // 关注数

@@ -460,7 +460,7 @@ export interface UserCardPayload {
   prestige: number
   externalInformation: Record<string, { link?: string }>
   isAdmin: boolean
-  articleCount: number
+  topicCount: number
   replyCount: number
   likeReceivedCount: number
   likeGivenCount: number
@@ -488,7 +488,7 @@ export interface UserHoverCardPayload {
   prestige: number
   externalInformation: Record<string, { link?: string }>
   isAdmin: boolean
-  articleCount: number
+  topicCount: number
   replyCount: number
   likeReceivedCount: number
   followerCount: number
@@ -763,7 +763,7 @@ export interface MessageConversationPayload {
 export interface SettingsPageProps {
   user: SettingsUserPayload
   stats: {
-    articleCount: number
+    topicCount: number
     replyCount: number
     followerCount: number
     followingCount: number

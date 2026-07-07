@@ -2,10 +2,10 @@ package vo
 
 // SiteStats contains site-wide counters shown in shared page components.
 type SiteStats struct {
-	UserCount         uint64 `json:"userCount"`
-	UserMonthCount    int64  `json:"userMonthCount"`
-	ArticleCount      uint64 `json:"articleCount"`
-	ArticleMonthCount int64  `json:"articleMonthCount"`
-	Reply             uint64 `json:"reply"`
-	LinksCount        int    `json:"linksCount"`
+	UserCount       uint64 `json:"userCount"`
+	UserMonthCount  int64  `json:"userMonthCount"`
+	TopicMaxID      uint64 `json:"topicMaxId"`
+	TopicMonthCount int64  `json:"topicMonthCount"`
+	PostMaxID       uint64 `json:"postMaxId"`
+	LinksCount      int    `json:"linksCount"`
 }

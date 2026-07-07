@@ -33,7 +33,7 @@ func Run() {
 		now := time.Now()
 		keys := []dailyStats.StatType{
 			dailyStats.StatTypeRegCount,
-			dailyStats.StatTypeArticleCount,
+			dailyStats.StatTypeTopicCount,
 			dailyStats.StatTypeReplyCount,
 		}
 		for i := range 7 {

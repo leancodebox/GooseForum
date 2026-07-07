@@ -24,12 +24,12 @@ func GetSiteStatisticsData() *vo.SiteStats {
 			return len(group.Links)
 		})
 		return &vo.SiteStats{
-			UserCount:         users.GetMaxId(),
-			UserMonthCount:    dailyStats.GetCurrentMonthSum(dailyStats.StatTypeRegCount),
-			ArticleCount:      topics.GetMaxId(),
-			ArticleMonthCount: dailyStats.GetCurrentMonthSum(dailyStats.StatTypeArticleCount),
-			Reply:             posts.GetMaxId(),
-			LinksCount:        linksCount,
+			UserCount:       users.GetMaxId(),
+			UserMonthCount:  dailyStats.GetCurrentMonthSum(dailyStats.StatTypeRegCount),
+			TopicMaxID:      topics.GetMaxId(),
+			TopicMonthCount: dailyStats.GetCurrentMonthSum(dailyStats.StatTypeTopicCount),
+			PostMaxID:       posts.GetMaxId(),
+			LinksCount:      linksCount,
 		}, nil
 	}, siteStatsCacheTTL)
 	return data

@@ -55,9 +55,9 @@ func candidateCodes(trigger Trigger) []string {
 func shouldGrant(code string, stats userStatistics.Entity) bool {
 	switch code {
 	case CodeFirstPost:
-		return stats.ArticleCount >= 1
+		return stats.TopicCount >= 1
 	case CodeWriter10:
-		return stats.ArticleCount >= 10
+		return stats.TopicCount >= 10
 	case CodeFirstComment:
 		return stats.ReplyCount >= 1
 	case CodeCommenter50:

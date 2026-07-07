@@ -14,7 +14,7 @@ func handleStatsSignUp(ctx context.Context, event *UserSignUpEvent) error {
 
 // handleStatsPost 记录发帖统计
 func handleStatsPost(ctx context.Context, event *TopicPublishedEvent) error {
-	return dailyStats.Increment(time.Now(), dailyStats.StatTypeArticleCount, 1)
+	return dailyStats.Increment(time.Now(), dailyStats.StatTypeTopicCount, 1)
 }
 
 // handleStatsReply 记录回复统计

@@ -285,16 +285,16 @@ export interface AnnouncementConfig {
 export interface SiteStatistics {
   userCount: number
   userMonthCount: number
-  articleCount: number
-  articleMonthCount: number
-  reply: number
+  topicMaxId: number
+  topicMonthCount: number
+  postMaxId: number
   linksCount: number
 }
 
 export interface DailyTraffic {
   date: string
   regCount: number
-  articleCount: number
+  topicCount: number
   replyCount: number
 }
 

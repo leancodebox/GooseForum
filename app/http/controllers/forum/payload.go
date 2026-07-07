@@ -515,7 +515,7 @@ type SettingsPageProps struct {
 }
 
 type SettingsStatsPayload struct {
-	ArticleCount      uint   `json:"articleCount"`
+	TopicCount        uint   `json:"topicCount"`
 	ReplyCount        uint   `json:"replyCount"`
 	FollowerCount     uint   `json:"followerCount"`
 	FollowingCount    uint   `json:"followingCount"`
@@ -1978,7 +1978,7 @@ func buildSettingsPageProps(user users.EntityComplete) SettingsPageProps {
 	return SettingsPageProps{
 		User: transform.User2UserDetailedVo(user),
 		Stats: SettingsStatsPayload{
-			ArticleCount:      stats.ArticleCount,
+			TopicCount:        stats.TopicCount,
 			ReplyCount:        stats.ReplyCount,
 			FollowerCount:     stats.FollowerCount,
 			FollowingCount:    stats.FollowingCount,

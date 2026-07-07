@@ -30,7 +30,7 @@ const chartData = computed<Data[]>(() =>
   props.data.map(item => ({
     date: new Date(item.date),
     regCount: item.regCount,
-    topicCount: item.articleCount,
+    topicCount: item.topicCount,
     replyCount: item.replyCount,
   })),
 )

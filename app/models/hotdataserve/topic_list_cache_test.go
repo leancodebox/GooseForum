@@ -103,7 +103,7 @@ func TestSiteStatsReadsTopicPostMaxIds(t *testing.T) {
 	conn.Create(&posts.Entity{Id: 990020, TopicId: 990010, PostNo: 1, UserId: 990001, CreatedAt: now, UpdatedAt: now})
 
 	stats := GetSiteStatisticsData()
-	if stats.ArticleCount != 990010 || stats.Reply != 990020 {
-		t.Fatalf("stats article=%d reply=%d, want topic/post max ids", stats.ArticleCount, stats.Reply)
+	if stats.TopicMaxID != 990010 || stats.PostMaxID != 990020 {
+		t.Fatalf("stats topicMaxId=%d postMaxId=%d, want topic/post max ids", stats.TopicMaxID, stats.PostMaxID)
 	}
 }
