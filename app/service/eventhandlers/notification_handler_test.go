@@ -30,7 +30,7 @@ func TestCommentCreatedEventCarriesTopicPostIDs(t *testing.T) {
 	}
 }
 
-func TestShouldNotifyArticleAuthor(t *testing.T) {
+func TestShouldNotifyTopicAuthor(t *testing.T) {
 	tests := []struct {
 		name  string
 		event *CommentCreatedEvent
@@ -83,8 +83,8 @@ func TestShouldNotifyArticleAuthor(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := shouldNotifyArticleAuthor(tt.event); got != tt.want {
-				t.Fatalf("shouldNotifyArticleAuthor() = %v, want %v", got, tt.want)
+			if got := shouldNotifyTopicAuthor(tt.event); got != tt.want {
+				t.Fatalf("shouldNotifyTopicAuthor() = %v, want %v", got, tt.want)
 			}
 		})
 	}

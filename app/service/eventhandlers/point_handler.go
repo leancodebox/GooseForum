@@ -6,8 +6,8 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/pointservice"
 )
 
-// handlePointArticlePublished 发帖获得积分
-func handlePointArticlePublished(ctx context.Context, event *ArticlePublishedEvent) error {
+// handlePointTopicPublished 发帖获得积分
+func handlePointTopicPublished(ctx context.Context, event *TopicPublishedEvent) error {
 	_, userID, _ := event.Subject()
 	if userID == 0 {
 		return nil

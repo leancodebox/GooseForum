@@ -7,7 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
-func handleBadgePost(ctx context.Context, event *ArticlePublishedEvent) error {
+func handleBadgePost(ctx context.Context, event *TopicPublishedEvent) error {
 	_, userID, _ := event.Subject()
 	if userID == 0 {
 		return nil

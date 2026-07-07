@@ -12,7 +12,7 @@ func handleActivitySignUp(ctx context.Context, event *UserSignUpEvent) error {
 }
 
 // handleActivityPost 记录发帖行为
-func handleActivityPost(ctx context.Context, event *ArticlePublishedEvent) error {
+func handleActivityPost(ctx context.Context, event *TopicPublishedEvent) error {
 	topicID, userID, title := event.Subject()
 	if topicID == 0 || userID == 0 {
 		return nil

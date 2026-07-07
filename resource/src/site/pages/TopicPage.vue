@@ -1842,14 +1842,14 @@ async function removeReply(replyId: number) {
           class="fixed inset-0 z-[110] flex items-center justify-center bg-neutral/45 px-4 py-6 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="ban-article-title"
+          aria-labelledby="ban-topic-title"
           @click.self="closeTopicModerationDialog"
         >
           <div class="gf-menu-surface w-full max-w-sm p-4">
             <div class="flex items-start gap-3">
               <AlertTriangle class="mt-0.5 h-5 w-5 shrink-0 text-error" />
               <div class="min-w-0 flex-1">
-                <h2 id="ban-article-title" class="text-base font-bold text-base-content">
+                <h2 id="ban-topic-title" class="text-base font-bold text-base-content">
                   {{ pendingModerationAction === 'ban' ? t('article.moderationBanTitle') : t('article.moderationUnbanTitle') }}
                 </h2>
                 <p class="mt-1 text-sm leading-6 text-base-content/55">

@@ -161,7 +161,7 @@ func apiRoute(ginApp *gin.Engine) {
 		POST("save-user-badges", UpButterReq(api.SaveUserBadges)).
 		GET("get-all-role-item", UpButterReq(api.GetAllRoleItem))
 
-	adminApi.Group("", middleware.CheckPermission(permission.ArticlesManager)).
+	adminApi.Group("", middleware.CheckPermission(permission.TopicsManager)).
 		POST("topics/list", UpButterReq(api.TopicsList)).
 		POST("topics/source", UpButterReq(api.TopicSource)).
 		POST("topics/edit", UpButterReq(api.EditTopic)).

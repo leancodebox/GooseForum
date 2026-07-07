@@ -23,7 +23,7 @@ func (receiver Enum) i18nKey() string {
 		return "permission.admin"
 	case UserManager:
 		return "permission.userManager"
-	case ArticlesManager:
+	case TopicsManager:
 		return "permission.articlesManager"
 	case PageManager:
 		return "permission.pageManager"
@@ -57,7 +57,7 @@ func (receiver Enum) Id() uint64 {
 const (
 	Admin Enum = iota
 	UserManager
-	ArticlesManager
+	TopicsManager
 	PageManager
 	RoleManager
 	SiteManager

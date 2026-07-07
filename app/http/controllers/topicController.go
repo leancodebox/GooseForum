@@ -139,9 +139,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
-		hotdataserve.ClearArticleListCache()
+		hotdataserve.ClearTopicListCache()
 		if topic.Status == 1 {
-			eventbus.Publish(context.Background(), &eventhandlers.ArticleUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
+			eventbus.Publish(context.Background(), &eventhandlers.TopicUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
 		}
 	} else {
 		topic.PostCount = 1
@@ -176,9 +176,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, req.Params.CategoryId); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
-		hotdataserve.ClearArticleListCache()
+		hotdataserve.ClearTopicListCache()
 		if topic.Status == 1 {
-			eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Topic: &topic, FirstPost: &firstPost})
+			eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
 		}
 	}
 	return component.SuccessResponse(topic.Id)
@@ -215,9 +215,9 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 		return component.FailResponseCode(component.MessageArticleSaveFailed, nil)
 	}
 	firstPost := posts.Get(topic.FirstPostId)
-	hotdataserve.ClearArticleListCache()
+	hotdataserve.ClearTopicListCache()
 	if topic.Status == 1 {
-		eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Topic: &topic, FirstPost: &firstPost})
+		eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
 	}
 	return component.SuccessResponse(true)
 }
@@ -308,7 +308,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	fileusageservice.ReplacePost(postEntity.Id, req.UserId, postEntity.Content)
 	userStatistics.WriteComment(req.UserId)
 	userservice.InvalidateUserPublicProfileCache(req.UserId)
-	hotdataserve.ClearArticleListCache()
+	hotdataserve.ClearTopicListCache()
 
 	// 获取父评论作者ID
 	var parentReplyAuthorId uint64
@@ -406,7 +406,7 @@ func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 	topicEntity := topics.GetSimple(postEntity.TopicId)
 	if topicEntity.Id > 0 {
 		postservice.SyncTopicPostStats(topicEntity, req.UserId, true)
-		hotdataserve.ClearArticleListCache()
+		hotdataserve.ClearTopicListCache()
 	}
 	return component.SuccessResponse(true)
 }
@@ -436,7 +436,7 @@ func LikeTopic(req component.BetterRequest[LikeTopicReq]) component.Response {
 			userStatistics.GivenLike(req.UserId)
 			userservice.InvalidateUserPublicProfileCache(topicEntity.UserId)
 			userservice.InvalidateUserPublicProfileCache(req.UserId)
-			hotdataserve.ClearArticleListCache()
+			hotdataserve.ClearTopicListCache()
 
 			// 发送点赞事件
 			eventbus.Publish(context.Background(), &eventhandlers.ArticleLikedEvent{
@@ -451,7 +451,7 @@ func LikeTopic(req component.BetterRequest[LikeTopicReq]) component.Response {
 			userStatistics.CancelGivenLike(req.UserId)
 			userservice.InvalidateUserPublicProfileCache(topicEntity.UserId)
 			userservice.InvalidateUserPublicProfileCache(req.UserId)
-			hotdataserve.ClearArticleListCache()
+			hotdataserve.ClearTopicListCache()
 		}
 	}
 	return component.SuccessResponse(true)

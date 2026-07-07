@@ -23,8 +23,6 @@ type TopicsSimpleVo struct {
 	Posters        []PosterVo `json:"posters,omitempty"`
 }
 
-type ArticlesSimpleVo = TopicsSimpleVo
-
 // PosterVo is a lightweight user summary attached to compact topic responses.
 type PosterVo struct {
 	Id        uint64 `json:"id"`

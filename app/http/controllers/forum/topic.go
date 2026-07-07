@@ -248,7 +248,7 @@ func canViewTopic(entity *topics.Entity, userID uint64) bool {
 	if entity.Status != 1 {
 		return userID != 0 && userID == entity.UserId
 	}
-	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedArticle(userID) && !moderatorservice.CanModerateAnyCategory(userID, entity.CategoryIds) {
+	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedTopic(userID) && !moderatorservice.CanModerateAnyCategory(userID, entity.CategoryIds) {
 		return false
 	}
 	return true
@@ -258,18 +258,18 @@ func canViewTopicSimple(entity *topics.SmallEntity, userID uint64) bool {
 	if entity.Status != 1 {
 		return userID != 0 && userID == entity.UserId
 	}
-	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedArticle(userID) && !moderatorservice.CanModerateAnyCategory(userID, entity.CategoryIds) {
+	if entity.ProcessStatus != 0 && !currentUserCanViewProcessedTopic(userID) && !moderatorservice.CanModerateAnyCategory(userID, entity.CategoryIds) {
 		return false
 	}
 	return true
 }
 
-func currentUserCanViewProcessedArticle(userID uint64) bool {
+func currentUserCanViewProcessedTopic(userID uint64) bool {
 	if userID == 0 {
 		return false
 	}
 	roleID, ok := userservice.GetUserRoleId(userID)
-	return ok && permission.CheckRole(roleID, permission.ArticlesManager)
+	return ok && permission.CheckRole(roleID, permission.TopicsManager)
 }
 
 func shouldCountTopicView(entity *topics.Entity) bool {

@@ -10,15 +10,15 @@ const (
 	topicTypeHelp  = 2
 )
 
-var articlesType = []datastruct.Option[string, int]{
+var topicTypes = []datastruct.Option[string, int]{
 	{Name: "share", Value: topicTypeShare},
 	{Name: "help", Value: topicTypeHelp},
 }
 
-var articlesTypeMap = lo.KeyBy(articlesType, func(v datastruct.Option[string, int]) int {
+var topicTypeMap = lo.KeyBy(topicTypes, func(v datastruct.Option[string, int]) int {
 	return v.Value
 })
 
-func GetArticlesType() *[]datastruct.Option[string, int] {
-	return &articlesType
+func GetTopicTypes() *[]datastruct.Option[string, int] {
+	return &topicTypes
 }

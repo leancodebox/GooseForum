@@ -34,10 +34,6 @@ func HasOpenReports(userID uint64) bool {
 	return false
 }
 
-func InvalidateArticle(articleID uint64) {
-	InvalidateTopic(articleID)
-}
-
 func InvalidateTopic(topicID uint64) {
 	topic := topics.GetSimple(topicID)
 	for _, categoryID := range topic.CategoryIds {

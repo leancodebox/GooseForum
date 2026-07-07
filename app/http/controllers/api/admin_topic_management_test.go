@@ -79,7 +79,7 @@ func TestAdminTopicsListReadsTopics(t *testing.T) {
 	seedAdminTopic(t, conn, 920001)
 
 	res := TopicsList(component.BetterRequest[TopicsListReq]{Params: TopicsListReq{Page: 1, PageSize: 10}})
-	page, ok := res.Data.Result.(component.Page[ArticlesInfoAdminVo])
+	page, ok := res.Data.Result.(component.Page[TopicInfoAdminVo])
 	if !ok {
 		t.Fatalf("result type = %T", res.Data.Result)
 	}

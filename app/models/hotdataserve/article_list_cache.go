@@ -12,58 +12,50 @@ import (
 )
 
 const (
-	maxCachedArticlePage = 50
-	articleListCacheTTL  = 5 * time.Second
-	articleListEntries   = 512
+	maxCachedTopicPage = 50
+	topicListCacheTTL  = 5 * time.Second
+	topicListEntries   = 512
 )
 
-type ArticleSimpleVoPage struct {
-	Topics  []*vo.ArticlesSimpleVo
+type TopicSimpleVoPage struct {
+	Topics  []*vo.TopicsSimpleVo
 	HasNext bool
 }
 
-var articleSimpleVoCache = &localcache.Cache[ArticleSimpleVoPage]{MaxEntries: articleListEntries}
+var topicSimpleVoCache = &localcache.Cache[TopicSimpleVoPage]{MaxEntries: topicListEntries}
 
-func GetLatestTopicsSimpleVoPaginated(page int, sort string) ArticleSimpleVoPage {
-	page = normalizeArticlePage(page)
-	sort = normalizeArticleSort(sort)
-	if !shouldCacheArticlePage(page) {
-		return loadLatestArticlesSimpleVoPaginated(page, sort)
+func GetLatestTopicsSimpleVoPaginated(page int, sort string) TopicSimpleVoPage {
+	page = normalizeTopicPage(page)
+	sort = normalizeTopicSort(sort)
+	if !shouldCacheTopicPage(page) {
+		return loadLatestTopicsSimpleVoPaginated(page, sort)
 	}
-	key := "home:GetLatestArticles:" + sort + ":" + strconv.Itoa(page)
-	return articleSimpleVoCache.GetOrLoad(key, func() (ArticleSimpleVoPage, error) {
-		return loadLatestArticlesSimpleVoPaginated(page, sort), nil
-	}, articleListCacheTTL)
+	key := "home:GetLatestTopics:" + sort + ":" + strconv.Itoa(page)
+	return topicSimpleVoCache.GetOrLoad(key, func() (TopicSimpleVoPage, error) {
+		return loadLatestTopicsSimpleVoPaginated(page, sort), nil
+	}, topicListCacheTTL)
 }
 
-func GetLatestArticlesSimpleVoPaginated(page int, sort string) ArticleSimpleVoPage {
-	return GetLatestTopicsSimpleVoPaginated(page, sort)
-}
-
-func GetTopicsByCategorySimpleVo(categoryId uint64, sort string, page int) ArticleSimpleVoPage {
-	page = normalizeArticlePage(page)
-	sort = normalizeArticleSort(sort)
-	if !shouldCacheArticlePage(page) {
-		return loadArticlesByCategorySimpleVo(categoryId, sort, page)
+func GetTopicsByCategorySimpleVo(categoryId uint64, sort string, page int) TopicSimpleVoPage {
+	page = normalizeTopicPage(page)
+	sort = normalizeTopicSort(sort)
+	if !shouldCacheTopicPage(page) {
+		return loadTopicsByCategorySimpleVo(categoryId, sort, page)
 	}
-	key := "GetArticlesByCategory:" + strconv.FormatUint(categoryId, 10) + ":" + sort + ":" + strconv.Itoa(page)
-	return articleSimpleVoCache.GetOrLoad(key, func() (ArticleSimpleVoPage, error) {
-		return loadArticlesByCategorySimpleVo(categoryId, sort, page), nil
-	}, articleListCacheTTL)
+	key := "GetTopicsByCategory:" + strconv.FormatUint(categoryId, 10) + ":" + sort + ":" + strconv.Itoa(page)
+	return topicSimpleVoCache.GetOrLoad(key, func() (TopicSimpleVoPage, error) {
+		return loadTopicsByCategorySimpleVo(categoryId, sort, page), nil
+	}, topicListCacheTTL)
 }
 
-func GetArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) ArticleSimpleVoPage {
-	return GetTopicsByCategorySimpleVo(categoryId, sort, page)
-}
-
-func normalizeArticlePage(page int) int {
+func normalizeTopicPage(page int) int {
 	if page < 1 {
 		return 1
 	}
 	return page
 }
 
-func normalizeArticleSort(sort string) string {
+func normalizeTopicSort(sort string) string {
 	switch sort {
 	case "hot", "popular", "new":
 		return sort
@@ -72,24 +64,24 @@ func normalizeArticleSort(sort string) string {
 	}
 }
 
-func shouldCacheArticlePage(page int) bool {
-	return page <= maxCachedArticlePage
+func shouldCacheTopicPage(page int) bool {
+	return page <= maxCachedTopicPage
 }
 
-func loadLatestArticlesSimpleVoPaginated(page int, sort string) ArticleSimpleVoPage {
+func loadLatestTopicsSimpleVoPaginated(page int, sort string) TopicSimpleVoPage {
 	res := topics.Page[topics.SmallEntity](topics.PageQuery{
 		Page:         page,
 		PageSize:     20,
 		FilterStatus: true,
 		Sort:         sort,
 	})
-	return ArticleSimpleVoPage{
+	return TopicSimpleVoPage{
 		Topics:  TopicsSmallEntity2Vo(topicSmallEntitiesToPointers(res.Data)),
 		HasNext: res.HasNext,
 	}
 }
 
-func loadArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) ArticleSimpleVoPage {
+func loadTopicsByCategorySimpleVo(categoryId uint64, sort string, page int) TopicSimpleVoPage {
 	res := topics.Page[topics.SmallEntity](topics.PageQuery{
 		Page:         page,
 		PageSize:     20,
@@ -97,7 +89,7 @@ func loadArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) Ar
 		FilterStatus: true,
 		Sort:         sort,
 	})
-	return ArticleSimpleVoPage{
+	return TopicSimpleVoPage{
 		Topics:  TopicsSmallEntity2Vo(topicSmallEntitiesToPointers(res.Data)),
 		HasNext: res.HasNext,
 	}
@@ -111,7 +103,7 @@ func topicSmallEntitiesToPointers(data []topics.SmallEntity) []*topics.SmallEnti
 	return res
 }
 
-func TopicsSmallEntity2Vo(data []*topics.SmallEntity) []*vo.ArticlesSimpleVo {
+func TopicsSmallEntity2Vo(data []*topics.SmallEntity) []*vo.TopicsSimpleVo {
 	userIDs := make([]uint64, 0, len(data)*2)
 	seenUserIDs := make(map[uint64]struct{}, len(data)*2)
 	for _, topic := range data {
@@ -134,9 +126,9 @@ func TopicsSmallEntity2Vo(data []*topics.SmallEntity) []*vo.ArticlesSimpleVo {
 	return TopicsSmallEntityWithUser2Vo(data, userMap)
 }
 
-func TopicsSmallEntityWithUser2Vo(data []*topics.SmallEntity, userMap map[uint64]*users.EntityComplete) []*vo.ArticlesSimpleVo {
+func TopicsSmallEntityWithUser2Vo(data []*topics.SmallEntity, userMap map[uint64]*users.EntityComplete) []*vo.TopicsSimpleVo {
 	categoryMap := CategoryMap()
-	res := make([]*vo.ArticlesSimpleVo, 0, len(data))
+	res := make([]*vo.TopicsSimpleVo, 0, len(data))
 	for _, t := range data {
 		if t == nil {
 			continue
@@ -174,7 +166,7 @@ func TopicsSmallEntityWithUser2Vo(data []*topics.SmallEntity, userMap map[uint64
 			})
 		}
 
-		res = append(res, &vo.ArticlesSimpleVo{
+		res = append(res, &vo.TopicsSimpleVo{
 			Id:             t.Id,
 			Title:          t.Title,
 			Description:    t.Excerpt,
@@ -199,9 +191,5 @@ func TopicsSmallEntityWithUser2Vo(data []*topics.SmallEntity, userMap map[uint64
 }
 
 func ClearTopicListCache() {
-	articleSimpleVoCache.Clear()
-}
-
-func ClearArticleListCache() {
-	ClearTopicListCache()
+	topicSimpleVoCache.Clear()
 }

@@ -22,7 +22,7 @@ const props = defineProps<{
 type Data = {
   date: Date
   regCount: number
-  articleCount: number
+  topicCount: number
   replyCount: number
 }
 
@@ -30,7 +30,7 @@ const chartData = computed<Data[]>(() =>
   props.data.map(item => ({
     date: new Date(item.date),
     regCount: item.regCount,
-    articleCount: item.articleCount,
+    topicCount: item.articleCount,
     replyCount: item.replyCount,
   })),
 )
@@ -40,7 +40,7 @@ const chartConfig = {
     label: adminText('k001p'),
     color: 'var(--chart-1)',
   },
-  articleCount: {
+  topicCount: {
     label: adminText('k001q'),
     color: 'var(--chart-2)',
   },
@@ -55,9 +55,9 @@ const svgDefs = `
     <stop offset="5%" stop-color="var(--color-regCount)" stop-opacity="0.8" />
     <stop offset="95%" stop-color="var(--color-regCount)" stop-opacity="0.1" />
   </linearGradient>
-  <linearGradient id="fillArticleCount" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="5%" stop-color="var(--color-articleCount)" stop-opacity="0.8" />
-    <stop offset="95%" stop-color="var(--color-articleCount)" stop-opacity="0.1" />
+  <linearGradient id="fillTopicCount" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="5%" stop-color="var(--color-topicCount)" stop-opacity="0.8" />
+    <stop offset="95%" stop-color="var(--color-topicCount)" stop-opacity="0.1" />
   </linearGradient>
   <linearGradient id="fillReplyCount" x1="0" y1="0" x2="0" y2="1">
     <stop offset="5%" stop-color="var(--color-replyCount)" stop-opacity="0.8" />
@@ -90,18 +90,18 @@ const svgDefs = `
         >
           <VisArea
             :x="(d: Data) => d.date"
-            :y="[(d: Data) => d.regCount, (d: Data) => d.articleCount, (d: Data) => d.replyCount]"
-            :color="(_d: Data, i: number) => ['url(#fillRegCount)', 'url(#fillArticleCount)', 'url(#fillReplyCount)'][i]"
+            :y="[(d: Data) => d.regCount, (d: Data) => d.topicCount, (d: Data) => d.replyCount]"
+            :color="(_d: Data, i: number) => ['url(#fillRegCount)', 'url(#fillTopicCount)', 'url(#fillReplyCount)'][i]"
             :opacity="1"
           />
           <VisLine
             :x="(d: Data) => d.date"
             :y="[
               (d: Data) => d.regCount,
-              (d: Data) => d.regCount + d.articleCount,
-              (d: Data) => d.regCount + d.articleCount + d.replyCount,
+              (d: Data) => d.regCount + d.topicCount,
+              (d: Data) => d.regCount + d.topicCount + d.replyCount,
             ]"
-            :color="(_d: Data, i: number) => [chartConfig.regCount.color, chartConfig.articleCount.color, chartConfig.replyCount.color][i]"
+            :color="(_d: Data, i: number) => [chartConfig.regCount.color, chartConfig.topicCount.color, chartConfig.replyCount.color][i]"
             :line-width="1"
           />
           <VisAxis
@@ -137,7 +137,7 @@ const svgDefs = `
                 })
               },
             })"
-            :color="(_d: Data, i: number) => [chartConfig.regCount.color, chartConfig.articleCount.color, chartConfig.replyCount.color][i % 3]"
+            :color="(_d: Data, i: number) => [chartConfig.regCount.color, chartConfig.topicCount.color, chartConfig.replyCount.color][i % 3]"
           />
         </VisXYContainer>
         <ChartLegendContent />

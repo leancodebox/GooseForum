@@ -9,9 +9,9 @@ func Handlers() []cqrs.EventHandler {
 	return []cqrs.EventHandler{
 		cqrs.NewEventHandler("CommentCreatedHandler", handleCommentCreated),
 		cqrs.NewEventHandler("UserFollowedHandler", handleUserFollowed),
-		cqrs.NewEventHandler("ArticlePublishedHandler", handleArticlePublished),
-		cqrs.NewEventHandler("ArticleUpdatedHandler", handleArticleUpdated),
-		cqrs.NewEventHandler("PointArticlePublishedHandler", handlePointArticlePublished),
+		cqrs.NewEventHandler("TopicPublishedHandler", handleTopicPublished),
+		cqrs.NewEventHandler("TopicUpdatedHandler", handleTopicUpdated),
+		cqrs.NewEventHandler("PointTopicPublishedHandler", handlePointTopicPublished),
 		cqrs.NewEventHandler("PointCommentCreatedHandler", handlePointCommentCreated),
 		cqrs.NewEventHandler("UserLastActiveUpdatedHandler", handleUserLastActiveUpdated),
 
@@ -34,8 +34,8 @@ func Handlers() []cqrs.EventHandler {
 		cqrs.NewEventHandler("BadgeFollowHandler", handleBadgeFollow),
 
 		// HTTP 事件通知
-		cqrs.NewEventHandler("HttpNotifyArticlePublishedHandler", handleHttpNotifyArticlePublished),
-		cqrs.NewEventHandler("HttpNotifyArticleUpdatedHandler", handleHttpNotifyArticleUpdated),
+		cqrs.NewEventHandler("HttpNotifyTopicPublishedHandler", handleHttpNotifyTopicPublished),
+		cqrs.NewEventHandler("HttpNotifyTopicUpdatedHandler", handleHttpNotifyTopicUpdated),
 		cqrs.NewEventHandler("HttpNotifyCommentCreatedHandler", handleHttpNotifyCommentCreated),
 		cqrs.NewEventHandler("HttpNotifyUserSignUpHandler", handleHttpNotifyUserSignUp),
 		cqrs.NewEventHandler("HttpNotifyReportCreatedHandler", handleHttpNotifyReportCreated),

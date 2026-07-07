@@ -7,7 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 )
 
-const articleWatchNotifyBatchSize = 500
+const topicWatchNotifyBatchSize = 500
 
 // TakeUpTo64Chars 按字符数截取字符串，最多取 64 个字符
 func TakeUpTo64Chars(s string) string {
@@ -33,18 +33,18 @@ type CommentCreatedEvent struct {
 func handleCommentCreated(ctx context.Context, event *CommentCreatedEvent) error {
 	contentPreview := TakeUpTo64Chars(event.Content)
 	// 如果不是主题作者自己发表评论，通知主题作者
-	if shouldNotifyArticleAuthor(event) {
+	if shouldNotifyTopicAuthor(event) {
 		_ = eventnotice.SendCommentNotification(event.TopicAuthorId, event.TopicId, contentPreview, event.UserId, event.PostId)
 	}
 	// 如果是回复 post，且不是回复自己，通知原 post 作者
 	if shouldNotifyParentReplyAuthor(event) {
 		_ = eventnotice.SendPostReplyNotification(event.ReplyToPostAuthorId, event.PostId, event.TopicId, contentPreview, event.UserId)
 	}
-	notifyArticleWatchers(event, contentPreview)
+	notifyTopicWatchers(event, contentPreview)
 	return nil
 }
 
-func shouldNotifyArticleAuthor(event *CommentCreatedEvent) bool {
+func shouldNotifyTopicAuthor(event *CommentCreatedEvent) bool {
 	if event.TopicAuthorId == 0 || event.TopicAuthorId == event.UserId {
 		return false
 	}
@@ -55,17 +55,17 @@ func shouldNotifyParentReplyAuthor(event *CommentCreatedEvent) bool {
 	return event.ReplyToPostId > 0 && event.ReplyToPostAuthorId > 0 && event.ReplyToPostAuthorId != event.UserId
 }
 
-func notifyArticleWatchers(event *CommentCreatedEvent, contentPreview string) {
+func notifyTopicWatchers(event *CommentCreatedEvent, contentPreview string) {
 	excludeUserIds := commentNotificationExcludeUserIds(event)
 	afterUserId := uint64(0)
 	for {
-		userIds := topicUserAction.ListActiveWatchUserIDsAfter(event.TopicId, afterUserId, excludeUserIds, articleWatchNotifyBatchSize)
+		userIds := topicUserAction.ListActiveWatchUserIDsAfter(event.TopicId, afterUserId, excludeUserIds, topicWatchNotifyBatchSize)
 		if len(userIds) == 0 {
 			return
 		}
 		_ = eventnotice.SendTopicPostNotifications(userIds, event.TopicId, event.PostId, contentPreview, event.UserId)
 		afterUserId = userIds[len(userIds)-1]
-		if len(userIds) < articleWatchNotifyBatchSize {
+		if len(userIds) < topicWatchNotifyBatchSize {
 			return
 		}
 	}

@@ -18,7 +18,7 @@ func Category(c *gin.Context) {
 
 	sort, _ := lo.Coalesce(c.Param("sort"), "latest")
 	page := lo.Ternary(cast.ToInt(c.Query("page")) <= 0, 1, cast.ToInt(c.Query("page")))
-	topicPage := hotdataserve.GetArticlesByCategorySimpleVo(id, sort, page)
+	topicPage := hotdataserve.GetTopicsByCategorySimpleVo(id, sort, page)
 
 	payload := PagePayload{
 		Component: "category.index",

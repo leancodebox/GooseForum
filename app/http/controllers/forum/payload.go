@@ -937,9 +937,9 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 	userMap := users.GetMapByIds(userIDs)
 
 	return TopicDetailProps{
-		Topic:     buildTopicArticlePayload(c, topic, firstPost, userMap),
+		Topic:     buildTopicDetailPayload(c, topic, firstPost, userMap),
 		Posts:     buildPostPayloads(postEntities, userMap, currentUserID, moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds)),
-		HotTopics: buildArticleHotTopics(topic.Id),
+		HotTopics: buildTopicHotTopics(topic.Id),
 		Permissions: TopicPermissions{
 			IsOwnTopic:       currentUserID == topic.UserId,
 			CanPost:          currentUserID > 0,
@@ -1040,11 +1040,11 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 	return res
 }
 
-func buildArticleHotTopics(currentArticleID uint64) []TopicPayload {
-	topicPage := hotdataserve.GetLatestArticlesSimpleVoPaginated(1, "hot")
+func buildTopicHotTopics(currentTopicID uint64) []TopicPayload {
+	topicPage := hotdataserve.GetLatestTopicsSimpleVoPaginated(1, "hot")
 	filtered := make([]*vo.TopicsSimpleVo, 0, 6)
 	for _, topic := range topicPage.Topics {
-		if topic == nil || topic.Id == currentArticleID {
+		if topic == nil || topic.Id == currentTopicID {
 			continue
 		}
 		filtered = append(filtered, topic)
@@ -1055,7 +1055,7 @@ func buildArticleHotTopics(currentArticleID uint64) []TopicPayload {
 	return buildTopicPayloads(filtered)
 }
 
-func buildTopicArticlePayload(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, userMap map[uint64]*users.EntityComplete) TopicDetailPayload {
+func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, userMap map[uint64]*users.EntityComplete) TopicDetailPayload {
 	participants := make([]TopicAuthorPayload, 0, len(userMap))
 	seen := map[uint64]bool{}
 	addParticipant := func(userID uint64) {
@@ -1169,7 +1169,7 @@ func buildTopicMeta(c *gin.Context, topic TopicDetailPayload) PageMeta {
 	if description == "" {
 		description = i18n.T(requestLang(c), "meta.articleDesc", "title", topic.Title, "site", siteTitle())
 	}
-	inlineImages := articleImageURLs(topic, baseURL)
+	inlineImages := topicImageURLs(topic, baseURL)
 	categoryNames := lo.Map(topic.Categories, func(item TopicCategoryPayload, _ int) string { return item.Name })
 	section := ""
 	if len(categoryNames) > 0 {
@@ -1190,7 +1190,7 @@ func buildTopicMeta(c *gin.Context, topic TopicDetailPayload) PageMeta {
 		Type:             "DiscussionForumPosting",
 		Headline:         topic.Title,
 		Description:      description,
-		Text:             articlePlainText(requestLang(c), topic),
+		Text:             topicPlainText(requestLang(c), topic),
 		Image:            inlineImages,
 		Author:           vo.Person{Type: "Person", Name: topic.Author.Username, URL: baseURL + "/u/" + strconv.FormatUint(topic.Author.ID, 10)},
 		Publisher:        vo.Organization{Type: "Organization", Name: siteTitle(), URL: baseURL},
@@ -1234,19 +1234,19 @@ func buildTopicMeta(c *gin.Context, topic TopicDetailPayload) PageMeta {
 	}
 }
 
-func articlePlainText(lang string, article TopicDetailPayload) string {
-	text := truncateSEOText(article.Description, 1000)
+func topicPlainText(lang string, topic TopicDetailPayload) string {
+	text := truncateSEOText(topic.Description, 1000)
 	if text != "" {
 		return text
 	}
-	if article.Title != "" {
-		return i18n.T(lang, "meta.articleDesc", "title", article.Title, "site", siteTitle())
+	if topic.Title != "" {
+		return i18n.T(lang, "meta.articleDesc", "title", topic.Title, "site", siteTitle())
 	}
 	return i18n.T(lang, "meta.communityDesc", "site", siteTitle())
 }
 
-func articleImageURLs(article TopicDetailPayload, baseURL string) []string {
-	if imageURL := absolutePublicURL(article.FirstImageURL, baseURL); imageURL != "" {
+func topicImageURLs(topic TopicDetailPayload, baseURL string) []string {
+	if imageURL := absolutePublicURL(topic.FirstImageURL, baseURL); imageURL != "" {
 		return []string{imageURL}
 	}
 	return nil
@@ -2045,7 +2045,7 @@ func buildPublishCategories() []PublishCategoryPayload {
 }
 
 func buildPublishTypes() []PublishTypePayload {
-	items := hotdataserve.GetArticlesType()
+	items := hotdataserve.GetTopicTypes()
 	res := make([]PublishTypePayload, 0, len(*items))
 	for _, item := range *items {
 		res = append(res, PublishTypePayload{Name: item.Name, Value: item.Value})
@@ -2054,7 +2054,7 @@ func buildPublishTypes() []PublishTypePayload {
 }
 
 func defaultPublishType() int8 {
-	items := hotdataserve.GetArticlesType()
+	items := hotdataserve.GetTopicTypes()
 	if items != nil && len(*items) > 0 {
 		return int8((*items)[0].Value)
 	}

@@ -23,19 +23,19 @@ type ReportCreatedEvent struct {
 	Reason     string
 }
 
-func handleHttpNotifyArticlePublished(ctx context.Context, event *ArticlePublishedEvent) error {
+func handleHttpNotifyTopicPublished(ctx context.Context, event *TopicPublishedEvent) error {
 	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticlePublished) {
 		return nil
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventArticlePublished, articleEventNotifyPayload(event))
+	httpnotifyservice.Notify(httpnotifyservice.EventArticlePublished, topicEventNotifyPayload(event))
 	return nil
 }
 
-func handleHttpNotifyArticleUpdated(ctx context.Context, event *ArticleUpdatedEvent) error {
+func handleHttpNotifyTopicUpdated(ctx context.Context, event *TopicUpdatedEvent) error {
 	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticleUpdated) {
 		return nil
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventArticleUpdated, articleUpdatedEventNotifyPayload(event))
+	httpnotifyservice.Notify(httpnotifyservice.EventArticleUpdated, topicUpdatedEventNotifyPayload(event))
 	return nil
 }
 
@@ -172,14 +172,14 @@ type notifyUser struct {
 	URL         string `json:"url"`
 }
 
-func articleEventNotifyPayload(event *ArticlePublishedEvent) notifyEventData {
+func topicEventNotifyPayload(event *TopicPublishedEvent) notifyEventData {
 	if event != nil && event.Topic != nil {
 		return topicNotifyPayload(event.Topic)
 	}
 	return notifyEventData{BaseURI: baseURI()}
 }
 
-func articleUpdatedEventNotifyPayload(event *ArticleUpdatedEvent) notifyEventData {
+func topicUpdatedEventNotifyPayload(event *TopicUpdatedEvent) notifyEventData {
 	if event != nil && event.Topic != nil {
 		return topicNotifyPayload(event.Topic)
 	}

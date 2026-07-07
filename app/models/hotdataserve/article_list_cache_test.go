@@ -15,7 +15,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
-func TestArticleListCacheReadsTopics(t *testing.T) {
+func TestTopicListCacheReadsTopics(t *testing.T) {
 	preferences.Set("db.default.connection", "sqlite")
 	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
@@ -27,7 +27,7 @@ func TestArticleListCacheReadsTopics(t *testing.T) {
 	conn.Where("1 = 1").Delete(&topicCategoryIndex.Entity{})
 	conn.Where("1 = 1").Delete(&users.EntityComplete{})
 	ClearArticleCategoryCache()
-	ClearArticleListCache()
+	ClearTopicListCache()
 
 	now := time.Date(2026, 7, 7, 12, 0, 0, 0, time.UTC)
 	conn.Create(&users.EntityComplete{Id: 1, Username: "author"})

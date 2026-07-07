@@ -194,7 +194,7 @@ func UpdateModerationTopicStatus(req component.BetterRequest[ModerationTopicStat
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	topic.ProcessStatus = nextStatus
-	hotdataserve.ClearArticleListCache()
+	hotdataserve.ClearTopicListCache()
 	firstPost := posts.Get(topic.FirstPostId)
 	if firstPost.Id == 0 {
 		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
@@ -308,7 +308,7 @@ func UpdateModerationReportStatus(req component.BetterRequest[ModerationReportSt
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	moderationlogservice.ReportStatusChanged(req.UserId, buildReportLogSnapshot(report, resolution), nextStatus)
-	moderationstatusservice.InvalidateArticle(reportArticleID(report))
+	moderationstatusservice.InvalidateTopic(reportTopicID(report))
 	return component.SuccessResponse(true)
 }
 
@@ -372,7 +372,7 @@ func reportTargetInfo(targetType string, targetID uint64, userID uint64) (report
 	}
 }
 
-func reportArticleID(record reports.Entity) uint64 {
+func reportTopicID(record reports.Entity) uint64 {
 	if record.TopicId > 0 {
 		return record.TopicId
 	}

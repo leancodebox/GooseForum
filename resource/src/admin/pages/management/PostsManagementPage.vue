@@ -92,7 +92,7 @@ const categoryDialogOptions = computed<CategoryOption[]>(() => {
 const rangeStart = computed(() => (rows.value.length === 0 ? 0 : (page.value - 1) * pageSize.value + 1))
 const rangeEnd = computed(() => rows.value.length === 0 ? 0 : rangeStart.value + rows.value.length - 1)
 
-const articleTypes: Record<number, { label: string, className: string }> = {
+const topicTypes: Record<number, { label: string, className: string }> = {
   0: { label: adminText('k003m'), className: 'bg-blue-50 text-blue-700 border-blue-100' },
   1: { label: adminText('k003n'), className: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
   2: { label: adminText('k003o'), className: 'bg-amber-50 text-amber-700 border-amber-100' },
@@ -100,7 +100,7 @@ const articleTypes: Record<number, { label: string, className: string }> = {
 }
 
 function typeInfo(type: number) {
-  return articleTypes[type] || { label: adminText('k003g'), className: 'bg-slate-50 text-slate-700 border-slate-100' }
+  return topicTypes[type] || { label: adminText('k003g'), className: 'bg-slate-50 text-slate-700 border-slate-100' }
 }
 
 function avatarText(post: AdminTopic) {

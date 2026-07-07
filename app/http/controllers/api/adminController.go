@@ -407,7 +407,7 @@ type TopicsListReq struct {
 	UserId   uint64 `form:"userId"`
 }
 
-type ArticlesInfoVo struct {
+type TopicInfoVo struct {
 	Id            uint64 `json:"id"`
 	Title         string `json:"title"`
 	Type          int8   `json:"type"`
@@ -419,7 +419,7 @@ type ArticlesInfoVo struct {
 	UpdatedAt     string `json:"updatedAt"`
 }
 
-type ArticlesInfoAdminVo struct {
+type TopicInfoAdminVo struct {
 	Id            uint64   `json:"id"`
 	Title         string   `json:"title"`
 	Description   string   `json:"description"`
@@ -463,15 +463,15 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
-	return component.SuccessResponse(component.Page[ArticlesInfoAdminVo]{
-		List: lo.Map(pageData.Data, func(t topics.SmallEntity, _ int) ArticlesInfoAdminVo {
+	return component.SuccessResponse(component.Page[TopicInfoAdminVo]{
+		List: lo.Map(pageData.Data, func(t topics.SmallEntity, _ int) TopicInfoAdminVo {
 			username := ""
 			userAvatarUrl := ""
 			if user := userMap[t.UserId]; user != nil {
 				username = user.Username
 				userAvatarUrl = user.GetWebAvatarUrl()
 			}
-			return ArticlesInfoAdminVo{
+			return TopicInfoAdminVo{
 				Id:            t.Id,
 				Title:         t.Title,
 				Description:   t.Excerpt,
@@ -570,7 +570,7 @@ func EditTopic(req component.BetterRequest[EditTopicReq]) component.Response {
 	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
 		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
 	}
-	hotdataserve.ClearArticleListCache()
+	hotdataserve.ClearTopicListCache()
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
@@ -589,7 +589,7 @@ func DeleteTopic(req component.BetterRequest[DeleteTopicReq]) component.Response
 	if rows := topics.Delete(&topic); rows == 0 {
 		return component.FailResponseCode(component.MessageAdminArticleDeleteFailed, nil)
 	}
-	hotdataserve.ClearArticleListCache()
+	hotdataserve.ClearTopicListCache()
 	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.deleted", optlogger.MessageParams{
 		"title": topic.Title,
 	})
@@ -608,7 +608,7 @@ func EditTopicPin(req component.BetterRequest[EditTopicPinReq]) component.Respon
 	if err := topics.UpdatePinWeight(topic.Id, req.Params.PinWeight); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
-	hotdataserve.ClearArticleListCache()
+	hotdataserve.ClearTopicListCache()
 	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.pinWeightChanged", optlogger.MessageParams{
 		"title":        topic.Title,
 		"oldPinWeight": oldPinWeight,
@@ -655,7 +655,7 @@ func EditTopicCategories(req component.BetterRequest[EditTopicCategoriesReq]) co
 	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
 		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
 	}
-	hotdataserve.ClearArticleListCache()
+	hotdataserve.ClearTopicListCache()
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
