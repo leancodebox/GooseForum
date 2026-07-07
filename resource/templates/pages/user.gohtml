@@ -12,7 +12,7 @@
         <p>@{{.Payload.Props.User.Username}}</p>
         {{if .Payload.Props.User.Bio}}<p>{{.Payload.Props.User.Bio}}</p>{{end}}
         <dl>
-            <dt>{{ t .Lang "topics" }}</dt><dd>{{.Payload.Props.User.ArticleCount}}</dd>
+            <dt>{{ t .Lang "topics" }}</dt><dd>{{.Payload.Props.User.TopicCount}}</dd>
             <dt>{{ t .Lang "repliesTitle" }}</dt><dd>{{.Payload.Props.User.ReplyCount}}</dd>
             <dt>{{ t .Lang "likesReceived" }}</dt><dd>{{.Payload.Props.User.LikeReceivedCount}}</dd>
             <dt>{{ t .Lang "followers" }}</dt><dd>{{.Payload.Props.User.FollowerCount}}</dd>
