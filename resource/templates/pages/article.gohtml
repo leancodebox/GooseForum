@@ -7,31 +7,31 @@
 {{define "page"}}
 <main>
     <article>
-        <h1>{{.Payload.Props.Article.Title}}</h1>
-        {{if .Payload.Props.Article.Description}}<p>{{.Payload.Props.Article.Description}}</p>{{end}}
+        <h1>{{.Payload.Props.Topic.Title}}</h1>
+        {{if .Payload.Props.Topic.Description}}<p>{{.Payload.Props.Topic.Description}}</p>{{end}}
         <p>
-            {{if .Payload.Props.Article.Categories}}
-            {{range .Payload.Props.Article.Categories}}
+            {{if .Payload.Props.Topic.Categories}}
+            {{range .Payload.Props.Topic.Categories}}
             <a href="{{.URL}}" rel="tag">{{.Name}}</a>
             {{end}}
             {{end}}
-            <a href="/u/{{.Payload.Props.Article.Author.ID}}">{{.Payload.Props.Article.Author.Username}}</a>
-            <time datetime="{{.Payload.Meta.OpenGraph.PublishedTime}}">{{.Payload.Props.Article.CreatedAt}}</time>
-            {{if .Payload.Meta.OpenGraph.ModifiedTime}}<time datetime="{{.Payload.Meta.OpenGraph.ModifiedTime}}">{{ t .Lang "updatedAt" }} {{.Payload.Props.Article.UpdatedAt}}</time>{{end}}
-            <span>{{.Payload.Props.Article.ReplyCount}} {{ t .Lang "replies" }}</span>
-            <span>{{.Payload.Props.Article.LikeCount}} {{ t .Lang "likes" }}</span>
-            <span>{{.Payload.Props.Article.ViewCount}} {{ t .Lang "views" }}</span>
+            <a href="/u/{{.Payload.Props.Topic.Author.ID}}">{{.Payload.Props.Topic.Author.Username}}</a>
+            <time datetime="{{.Payload.Meta.OpenGraph.PublishedTime}}">{{.Payload.Props.Topic.CreatedAt}}</time>
+            {{if .Payload.Meta.OpenGraph.ModifiedTime}}<time datetime="{{.Payload.Meta.OpenGraph.ModifiedTime}}">{{ t .Lang "updatedAt" }} {{.Payload.Props.Topic.UpdatedAt}}</time>{{end}}
+            <span>{{.Payload.Props.Topic.ReplyCount}} {{ t .Lang "replies" }}</span>
+            <span>{{.Payload.Props.Topic.LikeCount}} {{ t .Lang "likes" }}</span>
+            <span>{{.Payload.Props.Topic.ViewCount}} {{ t .Lang "views" }}</span>
         </p>
         <div>
-            {{SafeHTML .Payload.Props.Article.HTML}}
+            {{SafeHTML .Payload.Props.Topic.HTML}}
         </div>
     </article>
 
-    {{if .Payload.Props.Replies}}
+    {{if .Payload.Props.Posts}}
     <section aria-label="{{ t .Lang "repliesTitle" }}">
         <h2>{{ t .Lang "repliesTitle" }}</h2>
         <ol>
-            {{range .Payload.Props.Replies}}
+            {{range .Payload.Props.Posts}}
             <li id="reply-{{.ID}}">
                 <article>
                     <p>
