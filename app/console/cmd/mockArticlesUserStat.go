@@ -94,7 +94,7 @@ func runMockArticlesUserStat(cmd *cobra.Command, args []string) {
 				},
 				UserId: userId,
 			}
-			resp := controllers.ArticleReply(req)
+			resp := controllers.CreatePost(req)
 
 			if resp.Data.Code != component.SUCCESS {
 				fmt.Printf("Error creating reply for article %d: %s\n", article.Id, resp.Data.MessageCode)
