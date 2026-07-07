@@ -13,7 +13,11 @@ func handleActivitySignUp(ctx context.Context, event *UserSignUpEvent) error {
 
 // handleActivityPost 记录发帖行为
 func handleActivityPost(ctx context.Context, event *ArticlePublishedEvent) error {
-	return userActivities.Record(event.Article.UserId, userActivities.ActionPost, userActivities.SubjectTopic, event.Article.Id, event.Article.Title)
+	topicID, userID, title := event.Subject()
+	if topicID == 0 || userID == 0 {
+		return nil
+	}
+	return userActivities.Record(userID, userActivities.ActionPost, userActivities.SubjectTopic, topicID, title)
 }
 
 // handleActivityLike 记录点赞行为

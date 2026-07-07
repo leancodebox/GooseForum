@@ -7,7 +7,8 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/meiliconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
@@ -21,46 +22,50 @@ type IndexBuildResult struct {
 	IndexName      string `json:"indexName"`
 }
 
-// convertToSearchDocument maps an article entity to a search document.
-func convertToSearchDocument(article *articles.Entity) ArticleSearchDocument {
-	searchContent := markdown2html.ExtractSearchContent(article.Content)
-	categoryIds := article.CategoryId
+// convertTopicToSearchDocument maps a topic and its first post to a search document.
+func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity) ArticleSearchDocument {
+	searchContent := ""
+	if firstPost != nil {
+		searchContent = markdown2html.ExtractSearchContent(firstPost.Content)
+	}
 	return ArticleSearchDocument{
-		ID:            article.Id,
-		Title:         article.Title,
+		ID:            topic.Id,
+		Title:         topic.Title,
 		SearchContent: searchContent,
-		Type:          article.Type,
-		Category:      categoryIds,
-		ArticleStatus: article.ArticleStatus,
-		ProcessStatus: article.ProcessStatus,
-		CreatedAt:     article.CreatedAt.Unix(),
-		UpdatedAt:     article.UpdatedAt.Unix(),
+		Type:          0,
+		Category:      topic.CategoryIds,
+		ArticleStatus: topic.Status,
+		ProcessStatus: topic.ProcessStatus,
+		CreatedAt:     topic.CreatedAt.Unix(),
+		UpdatedAt:     topic.UpdatedAt.Unix(),
 	}
 }
 
-func BuildSingleArticleSearchDocument(article *articles.Entity) (*meilisearch.TaskInfo, error) {
+func BuildSingleTopicSearchDocument(topic *topics.Entity, firstPost *posts.Entity) (*meilisearch.TaskInfo, error) {
 	if !meiliconnect.IsAvailable() {
+		return nil, nil
+	}
+	if topic == nil {
 		return nil, nil
 	}
 
 	client := meiliconnect.GetClient()
-	indexName := Index
-	index := client.Index(indexName)
+	index := client.Index(Index)
 	var task *meilisearch.TaskInfo
 	var err error
 	pk := "id"
-	if article.ArticleStatus == 1 && article.ProcessStatus == 0 {
-		doc := convertToSearchDocument(article)
+	if topic.Status == 1 && topic.ProcessStatus == 0 {
+		doc := convertTopicToSearchDocument(topic, firstPost)
 		task, err = index.AddDocuments(doc, &pk)
 		if err != nil {
-			slog.Warn(fmt.Sprintf("Meilisearch 处理文章 ID:%v 失败: %v\n", doc.ID, err))
+			slog.Warn(fmt.Sprintf("Meilisearch 处理主题 ID:%v 失败: %v\n", doc.ID, err))
 			return nil, fmt.Errorf("add search document: %w", err)
 		}
-		slog.Info(fmt.Sprintf("处理文章 ID:%v, TaskUID: %v\n", doc.ID, getTaskUID(task)))
+		slog.Info(fmt.Sprintf("处理主题 ID:%v, TaskUID: %v\n", doc.ID, getTaskUID(task)))
 	} else {
-		_, err = index.Delete(cast.ToString(article.Id))
+		_, err = index.Delete(cast.ToString(topic.Id))
 		if err != nil {
-			slog.Warn(fmt.Sprintf("Meilisearch 删除文档失败: %v, Error: %v\n", article.Id, err))
+			slog.Warn(fmt.Sprintf("Meilisearch 删除文档失败: %v, Error: %v\n", topic.Id, err))
 			return nil, fmt.Errorf("delete search document: %w", err)
 		}
 	}
@@ -91,24 +96,28 @@ func BuildMeilisearchIndex() (*IndexBuildResult, error) {
 	totalBatches := 0
 
 	for {
-		articleList := articles.QueryById(articleStartId, limit)
-		if len(articleList) == 0 {
+		topicList := topics.QueryById(articleStartId, limit)
+		if len(topicList) == 0 {
 			break
 		}
-		lo.ForEach(articleList, func(article *articles.Entity, _ int) {
-			task, err := BuildSingleArticleSearchDocument(article)
+		lo.ForEach(topicList, func(topic *topics.Entity, _ int) {
+			firstPost := posts.Get(topic.FirstPostId)
+			if firstPost.Id == 0 {
+				firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
+			}
+			task, err := BuildSingleTopicSearchDocument(topic, &firstPost)
 			if err != nil {
 				failedCount++
-				slog.Warn("failed to build article search document", "articleId", article.Id, "err", err)
+				slog.Warn("failed to build topic search document", "topicId", topic.Id, "err", err)
 				return
 			}
-			fmt.Printf("处理文章 ID:%v, TaskUID: %v\n", article.Id, getTaskUID(task))
+			fmt.Printf("处理主题 ID:%v, TaskUID: %v\n", topic.Id, getTaskUID(task))
 			processedCount++
 		})
-		articleStartId = articleList[len(articleList)-1].Id
+		articleStartId = topicList[len(topicList)-1].Id
 
 		totalBatches++
-		if len(articleList) < limit {
+		if len(topicList) < limit {
 			break
 		}
 	}

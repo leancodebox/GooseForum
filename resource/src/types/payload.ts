@@ -281,8 +281,8 @@ export interface HomeProps {
 }
 
 export interface ArticleDetailProps {
-  article: ArticlePayload
-  replies: ReplyPayload[]
+  article: TopicDetailPayload
+  replies: PostPayload[]
   hotTopics: TopicPayload[]
   permissions: {
     isOwnArticle: boolean
@@ -318,6 +318,8 @@ export interface ArticlePayload {
   updatedAt: string
 }
 
+export type TopicDetailPayload = ArticlePayload
+
 export interface ReplyPayload {
   id: number
   articleId: number
@@ -341,8 +343,10 @@ export interface ReplyPayload {
   updatedAt?: string
 }
 
+export type PostPayload = ReplyPayload
+
 export interface ReplyWindowPayload {
-  replies: ReplyPayload[]
+  replies: PostPayload[]
   anchorReplyId?: number
   beforeCursor?: number
   afterCursor?: number

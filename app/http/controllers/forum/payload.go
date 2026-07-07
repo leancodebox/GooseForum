@@ -22,7 +22,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/userActivities"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
@@ -948,6 +951,37 @@ func buildArticleDetailProps(c *gin.Context, entity *articles.Entity) ArticleDet
 	}
 }
 
+func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity) ArticleDetailProps {
+	currentUserID := component.LoginUserId(c)
+	postEntities := posts.GetFirstPageByTopicId(topic.Id)
+	userIDs := make([]uint64, 0, 1+len(postEntities))
+	seenUserIDs := make(map[uint64]struct{}, 1+len(postEntities))
+	userIDs = append(userIDs, topic.UserId)
+	seenUserIDs[topic.UserId] = struct{}{}
+	for _, item := range postEntities {
+		if item == nil {
+			continue
+		}
+		if _, seen := seenUserIDs[item.UserId]; seen {
+			continue
+		}
+		seenUserIDs[item.UserId] = struct{}{}
+		userIDs = append(userIDs, item.UserId)
+	}
+	userMap := users.GetMapByIds(userIDs)
+
+	return ArticleDetailProps{
+		Article:   buildTopicArticlePayload(c, topic, firstPost, userMap),
+		Replies:   buildPostPayloads(postEntities, userMap, currentUserID, moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds)),
+		HotTopics: buildArticleHotTopics(topic.Id),
+		Permissions: ArticlePermissions{
+			IsOwnArticle:       currentUserID == topic.UserId,
+			CanReply:           currentUserID > 0,
+			CanModerateArticle: moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds),
+		},
+	}
+}
+
 func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) []ReplyPayload {
 	replyMap := make(map[uint64]*reply.Entity, len(replyEntities))
 	for _, item := range replyEntities {
@@ -1040,6 +1074,98 @@ func buildReplyPayloads(replyEntities []*reply.Entity, userMap map[uint64]*users
 	return res
 }
 
+func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) []ReplyPayload {
+	postMap := make(map[uint64]*posts.Entity, len(postEntities))
+	for _, item := range postEntities {
+		if item != nil {
+			postMap[item.Id] = item
+		}
+	}
+
+	missingParentIDs := make([]uint64, 0)
+	seenMissingParentIDs := make(map[uint64]struct{})
+	for _, item := range postEntities {
+		if item == nil || item.ReplyToPostId == 0 {
+			continue
+		}
+		if _, ok := postMap[item.ReplyToPostId]; !ok {
+			if _, seen := seenMissingParentIDs[item.ReplyToPostId]; seen {
+				continue
+			}
+			seenMissingParentIDs[item.ReplyToPostId] = struct{}{}
+			missingParentIDs = append(missingParentIDs, item.ReplyToPostId)
+		}
+	}
+	for _, parent := range posts.GetByIds(missingParentIDs) {
+		if parent != nil {
+			postMap[parent.Id] = parent
+		}
+	}
+
+	userIDs := make([]uint64, 0, len(postEntities)+len(postMap))
+	seenUserIDs := make(map[uint64]struct{}, len(postEntities)+len(postMap))
+	for _, item := range postEntities {
+		if item == nil {
+			continue
+		}
+		if _, seen := seenUserIDs[item.UserId]; !seen {
+			seenUserIDs[item.UserId] = struct{}{}
+			userIDs = append(userIDs, item.UserId)
+		}
+	}
+	for _, parent := range postMap {
+		if parent == nil {
+			continue
+		}
+		if _, seen := seenUserIDs[parent.UserId]; !seen {
+			seenUserIDs[parent.UserId] = struct{}{}
+			userIDs = append(userIDs, parent.UserId)
+		}
+	}
+	maps.Copy(userMap, users.GetMapByIds(userIDs))
+
+	res := make([]ReplyPayload, 0, len(postEntities))
+	for _, item := range postEntities {
+		if item == nil || item.PostNo <= 1 {
+			continue
+		}
+		author := userPayload(item.UserId, userMap)
+		replyToName, replyToUserID := "", uint64(0)
+		if item.ReplyToPostId > 0 {
+			if parent, ok := postMap[item.ReplyToPostId]; ok && parent != nil {
+				parentAuthor := userPayload(parent.UserId, userMap)
+				replyToName = parentAuthor.Username
+				replyToUserID = parentAuthor.ID
+			}
+		}
+		content := item.Content
+		renderedContent := item.RenderedHTML
+		isHidden := item.ProcessStatus != 0
+		if isHidden && !canModerate {
+			content = ""
+			renderedContent = ""
+		}
+		res = append(res, ReplyPayload{
+			ID:              item.Id,
+			ArticleID:       item.TopicId,
+			ReplyNo:         item.PostNo - 1,
+			Content:         content,
+			RenderedContent: renderedContent,
+			ProcessStatus:   item.ProcessStatus,
+			IsHidden:        isHidden,
+			CanModerate:     canModerate,
+			Author:          author,
+			CreatedAt:       item.CreatedAt.Format(time.DateTime),
+			ReplyToID:       item.ReplyToPostId,
+			ReplyToUserID:   replyToUserID,
+			ReplyToUsername: replyToName,
+			IsOwnReply:      currentUserID == item.UserId,
+			UpdatedAt:       item.UpdatedAt.Format(time.DateTime),
+		})
+	}
+	return res
+}
+
 func buildArticleHotTopics(currentArticleID uint64) []TopicPayload {
 	topicPage := hotdataserve.GetLatestArticlesSimpleVoPaginated(1, "hot")
 	filtered := make([]*vo.ArticlesSimpleVo, 0, 6)
@@ -1053,6 +1179,68 @@ func buildArticleHotTopics(currentArticleID uint64) []TopicPayload {
 		}
 	}
 	return buildTopicPayloads(filtered)
+}
+
+func buildTopicArticlePayload(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, userMap map[uint64]*users.EntityComplete) ArticlePayload {
+	participants := make([]TopicAuthorPayload, 0, len(userMap))
+	seen := map[uint64]bool{}
+	addParticipant := func(userID uint64) {
+		if userID == 0 || seen[userID] {
+			return
+		}
+		seen[userID] = true
+		participants = append(participants, userPayload(userID, userMap))
+	}
+	addParticipant(topic.UserId)
+	for userID := range userMap {
+		addParticipant(userID)
+	}
+	if len(participants) > 12 {
+		participants = participants[:12]
+	}
+
+	currentUserID := component.LoginUserId(c)
+	isLiked := false
+	isBookmarked := false
+	isWatched := false
+	if currentUserID > 0 {
+		state := topicUserAction.GetByTopicId(currentUserID, topic.Id)
+		isLiked = state.LikedAt != nil
+		isBookmarked = state.BookmarkedAt != nil
+		isWatched = state.WatchedAt != nil
+	}
+
+	html := ""
+	createdAt := topic.CreatedAt
+	updatedAt := topic.UpdatedAt
+	if firstPost != nil {
+		html = firstPost.RenderedHTML
+		createdAt = firstPost.CreatedAt
+		updatedAt = firstPost.UpdatedAt
+	}
+
+	return ArticlePayload{
+		ID:            topic.Id,
+		Title:         topic.Title,
+		Description:   topic.Excerpt,
+		FirstImageURL: topic.FirstImageURL,
+		URL:           urlconfig.PostDetail(topic.Id),
+		HTML:          html,
+		ArticleStatus: topic.Status,
+		ProcessStatus: topic.ProcessStatus,
+		Author:        userPayload(topic.UserId, userMap),
+		Participants:  participants,
+		Categories:    categoryPayloads(topic.CategoryIds),
+		ReplyCount:    topic.ReplyCount,
+		MaxReplyNo:    positivePostReplyNo(topic.PostSeq),
+		ViewCount:     topic.ViewCount,
+		LikeCount:     topic.LikeCount,
+		IsLiked:       isLiked,
+		IsBookmarked:  isBookmarked,
+		IsWatched:     isWatched,
+		CreatedAt:     createdAt.Format(time.DateTime),
+		UpdatedAt:     updatedAt.Format(time.DateTime),
+	}
 }
 
 func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[uint64]*users.EntityComplete) ArticlePayload {
@@ -1108,6 +1296,13 @@ func buildArticlePayload(c *gin.Context, entity *articles.Entity, userMap map[ui
 	}
 }
 
+func positivePostReplyNo(postSeq uint64) uint64 {
+	if postSeq == 0 {
+		return 0
+	}
+	return postSeq - 1
+}
+
 func categoryPayloads(ids []uint64) []TopicCategoryPayload {
 	categoryMap := hotdataserve.ArticleCategoryMap()
 	res := make([]TopicCategoryPayload, 0, len(ids))
@@ -1141,6 +1336,18 @@ func ensureRenderedHTML(entity *articles.Entity) {
 	entity.RenderedHTML = markdown2html.MarkdownToHTML(entity.Content)
 	entity.RenderedVersion = markdown2html.GetVersion()
 	_ = articles.SaveNoUpdate(entity)
+}
+
+func ensurePostRenderedHTML(entity *posts.Entity) {
+	if entity == nil || entity.Id == 0 {
+		return
+	}
+	if entity.RenderedVersion >= markdown2html.GetVersion() && entity.RenderedHTML != "" {
+		return
+	}
+	entity.RenderedHTML = markdown2html.MarkdownToHTML(entity.Content)
+	entity.RenderedVersion = markdown2html.GetVersion()
+	_ = posts.SaveNoUpdate(entity)
 }
 
 func buildArticleMeta(c *gin.Context, article ArticlePayload) PageMeta {

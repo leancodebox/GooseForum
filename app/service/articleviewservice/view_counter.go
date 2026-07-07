@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 )
 
 const (
@@ -36,7 +36,7 @@ func GetViewCounter() *ViewCounter {
 			ticker:    time.NewTicker(viewFlushInterval),
 			requestCh: make(chan uint64, viewQueueSize),
 			closeCh:   make(chan struct{}),
-			flushFn:   articles.IncrementViews,
+			flushFn:   topics.IncrementViews,
 		}
 		counter.start()
 		closer.RegisterPriority(closer.PriorityFlush, CloseViewCounter)

@@ -8,7 +8,11 @@ import (
 
 // handlePointArticlePublished 发帖获得积分
 func handlePointArticlePublished(ctx context.Context, event *ArticlePublishedEvent) error {
-	pointservice.RewardPoints(event.Article.UserId, 10, pointservice.RewardPoints4WriteArticles)
+	_, userID, _ := event.Subject()
+	if userID == 0 {
+		return nil
+	}
+	pointservice.RewardPoints(userID, 10, pointservice.RewardPoints4WriteArticles)
 	return nil
 }
 

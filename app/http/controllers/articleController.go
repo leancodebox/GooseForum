@@ -8,10 +8,11 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/userFollow"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -20,7 +21,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/replyservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
-	"github.com/samber/lo"
 )
 
 func GetSiteStatistics() component.Response {
@@ -101,72 +101,88 @@ func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Respo
 		}
 	}
 
-	if articles.CantWriteNew(req.UserId, 10) {
+	if topics.CantWriteNew(req.UserId, 10) {
 		return component.FailResponseCode(component.MessageArticleDailyLimit, nil)
 	}
-	var article articles.Entity
+	var topic topics.Entity
+	var firstPost posts.Entity
 	if req.Params.Id != 0 {
-		article = articles.Get(req.Params.Id)
-		if article.UserId != req.UserId {
+		topic = topics.Get(uint64(req.Params.Id))
+		if topic.UserId != req.UserId {
 			return component.FailResponseCode(component.MessageArticleOwnerMismatch, nil)
 		}
+		firstPost = posts.Get(topic.FirstPostId)
+		if firstPost.Id == 0 {
+			firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
+		}
 	} else {
-		article.UserId = req.UserId
-		article.Type = normalizeWriteArticleType(req.Params.Type)
+		topic.UserId = req.UserId
 	}
-	article.CategoryId = req.Params.CategoryId
-	article.ArticleStatus = req.Params.ArticleStatus
-	article.Content = req.Params.Content
-	article.Title = req.Params.Title
-	// 自动生成文章描述
-	article.Description = markdown2html.ExtractDescription(req.Params.Content, 200)
-	article.FirstImageURL = markdown2html.ExtractFirstImageURL(req.Params.Content)
-	article.RenderedVersion = markdown2html.GetVersion()
-	article.RenderedHTML = "" // 用户提交后不用渲染，避免提交时间过长。
-	if article.Id > 0 {
-		if err := articles.Save(&article); err != nil {
+	topic.CategoryIds = req.Params.CategoryId
+	topic.Status = req.Params.ArticleStatus
+	topic.Title = req.Params.Title
+	topic.Excerpt = markdown2html.ExtractDescription(req.Params.Content, 200)
+	topic.FirstImageURL = markdown2html.ExtractFirstImageURL(req.Params.Content)
+	if topic.Id > 0 {
+		if firstPost.Id == 0 {
+			return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		}
+		firstPost.Content = req.Params.Content
+		firstPost.RenderedHTML = ""
+		firstPost.RenderedVersion = markdown2html.GetVersion()
+		if err := topics.Save(&topic); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
-		fileusageservice.ReplaceArticle(article.Id, req.UserId, article.Content)
-		categoryIDMap := lo.SliceToMap(req.Params.CategoryId, func(id uint64) (uint64, bool) {
-			return id, true
-		})
-
-		for _, item := range articleCategoryRs.GetByArticleId(article.Id) {
-			if _, ok := categoryIDMap[item.ArticleCategoryId]; ok {
-				item.Effective = 1
-				articleCategoryRs.SaveOrCreateById(item)
-				// 如果已经存在，从 map 中删除，避免重复插入
-				delete(categoryIDMap, item.ArticleCategoryId)
-			} else {
-				item.Effective = 0
-				articleCategoryRs.SaveOrCreateById(item)
-			}
+		if err := posts.Save(&firstPost); err != nil {
+			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
-		// 插入新的条目
-		for id := range categoryIDMap {
-			rs := &articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: id, Effective: 1}
-			articleCategoryRs.SaveOrCreateById(rs)
+		if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, req.Params.CategoryId); err != nil {
+			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
-		if article.ArticleStatus == 1 {
-			eventbus.Publish(context.Background(), &eventhandlers.ArticleUpdatedEvent{Article: &article})
+		fileusageservice.ReplaceArticle(topic.Id, req.UserId, firstPost.Content)
+		hotdataserve.ClearArticleListCache()
+		if topic.Status == 1 {
+			eventbus.Publish(context.Background(), &eventhandlers.ArticleUpdatedEvent{Topic: &topic, FirstPost: &firstPost})
 		}
 	} else {
-		articles.Create(&article)
-		fileusageservice.ReplaceArticle(article.Id, req.UserId, article.Content)
-		if article.ArticleStatus == 1 {
+		topic.PostCount = 1
+		topic.PostSeq = 1
+		topic.Posters = []topics.Poster{{UserID: req.UserId}}
+		if err := topics.Create(&topic); err != nil {
+			return component.FailResponseCode(component.MessageOperationFailed, nil)
+		}
+		firstPost = posts.Entity{
+			TopicId:         topic.Id,
+			PostNo:          1,
+			UserId:          req.UserId,
+			Content:         req.Params.Content,
+			RenderedHTML:    "",
+			RenderedVersion: markdown2html.GetVersion(),
+		}
+		if err := posts.Create(&firstPost); err != nil {
+			return component.FailResponseCode(component.MessageOperationFailed, nil)
+		}
+		topic.FirstPostId = firstPost.Id
+		topic.LastPostId = firstPost.Id
+		now := time.Now()
+		topic.LastPostedAt = &now
+		if err := topics.Save(&topic); err != nil {
+			return component.FailResponseCode(component.MessageOperationFailed, nil)
+		}
+		fileusageservice.ReplaceArticle(topic.Id, req.UserId, firstPost.Content)
+		if topic.Status == 1 {
 			userStatistics.WriteArticle(req.UserId)
 		}
 		userservice.InvalidateUserPublicProfileCache(req.UserId)
-		lo.ForEach(req.Params.CategoryId, func(item uint64, _ int) {
-			rs := articleCategoryRs.Entity{ArticleId: article.Id, ArticleCategoryId: item, Effective: 1}
-			articleCategoryRs.SaveOrCreateById(&rs)
-		})
-		if article.ArticleStatus == 1 {
-			eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Article: &article})
+		if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, req.Params.CategoryId); err != nil {
+			return component.FailResponseCode(component.MessageOperationFailed, nil)
+		}
+		hotdataserve.ClearArticleListCache()
+		if topic.Status == 1 {
+			eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Topic: &topic, FirstPost: &firstPost})
 		}
 	}
-	return component.SuccessResponse(article.Id)
+	return component.SuccessResponse(topic.Id)
 }
 
 func normalizeWriteArticleType(articleType int8) int8 {
@@ -184,22 +200,24 @@ type ArticleStatusReq struct {
 }
 
 func UpdateArticleStatus(req component.BetterRequest[ArticleStatusReq]) component.Response {
-	article := articles.Get(req.Params.Id)
-	if article.Id == 0 {
+	topic := topics.Get(req.Params.Id)
+	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
-	if article.UserId != req.UserId {
+	if topic.UserId != req.UserId {
 		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
 	}
-	if article.ArticleStatus == req.Params.ArticleStatus {
+	if topic.Status == req.Params.ArticleStatus {
 		return component.SuccessResponse(true)
 	}
-	article.ArticleStatus = req.Params.ArticleStatus
-	if err := articles.Save(&article); err != nil {
+	topic.Status = req.Params.ArticleStatus
+	if err := topics.Save(&topic); err != nil {
 		return component.FailResponseCode(component.MessageArticleSaveFailed, nil)
 	}
-	if article.ArticleStatus == 1 {
-		eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Article: &article})
+	firstPost := posts.Get(topic.FirstPostId)
+	hotdataserve.ClearArticleListCache()
+	if topic.Status == 1 {
+		eventbus.Publish(context.Background(), &eventhandlers.ArticlePublishedEvent{Topic: &topic, FirstPost: &firstPost})
 	}
 	return component.SuccessResponse(true)
 }
@@ -257,29 +275,29 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 		}
 	}
 
-	articleEntity := articles.GetSimple(req.Params.ArticleId)
-	if articleEntity.Id == 0 {
+	topicEntity := topics.GetSimple(req.Params.ArticleId)
+	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	var parentReply reply.Entity
+	var parentPost posts.Entity
 	if req.Params.ReplyId > 0 {
-		parentReply = reply.Get(req.Params.ReplyId)
-		if parentReply.Id == 0 || parentReply.ArticleId != req.Params.ArticleId {
+		parentPost = posts.Get(req.Params.ReplyId)
+		if parentPost.Id == 0 || parentPost.TopicId != req.Params.ArticleId || parentPost.PostNo <= 1 {
 			return component.FailResponseCode(component.MessageCommentReplyTargetMissed, nil)
 		}
 	}
 
-	replyEntity := &reply.Entity{
-		ArticleId:       req.Params.ArticleId,
+	postEntity := &posts.Entity{
+		TopicId:         req.Params.ArticleId,
 		Content:         content,
 		RenderedHTML:    markdown2html.CommentMarkdownToHTML(content),
 		RenderedVersion: markdown2html.GetCommentVersion(),
 		UserId:          req.UserId,
-		ReplyId:         req.Params.ReplyId,
+		ReplyToPostId:   req.Params.ReplyId,
 	}
 
-	err = replyservice.CreateArticleReply(replyEntity, articleEntity)
+	err = replyservice.CreateTopicPost(postEntity, topicEntity)
 	if err != nil {
 		return component.FailResponseCode(
 			component.MessageCommentCreateFailed,
@@ -287,31 +305,34 @@ func ArticleReply(req component.BetterRequest[ArticleReplyId]) component.Respons
 			component.MessageParams{"error": err.Error()})
 
 	}
-	fileusageservice.ReplaceReply(replyEntity.Id, req.UserId, replyEntity.Content)
+	fileusageservice.ReplaceReply(postEntity.Id, req.UserId, postEntity.Content)
 	userStatistics.WriteComment(req.UserId)
 	userservice.InvalidateUserPublicProfileCache(req.UserId)
+	hotdataserve.ClearArticleListCache()
 
 	// 获取父评论作者ID
 	var parentReplyAuthorId uint64
 	if req.Params.ReplyId > 0 {
-		parentReplyAuthorId = parentReply.UserId
+		parentReplyAuthorId = parentPost.UserId
 	}
 
 	// 发布统一的评论创建事件
 	eventbus.Publish(context.Background(), &eventhandlers.CommentCreatedEvent{
-		ArticleId:           articleEntity.Id,
-		CommentId:           replyEntity.Id,
+		ArticleId:           topicEntity.Id,
+		CommentId:           postEntity.Id,
+		TopicId:             topicEntity.Id,
+		PostId:              postEntity.Id,
 		UserId:              req.UserId,
 		Content:             req.Params.Content,
-		ArticleAuthorId:     articleEntity.UserId,
+		ArticleAuthorId:     topicEntity.UserId,
 		ParentReplyId:       req.Params.ReplyId,
 		ParentReplyAuthorId: parentReplyAuthorId,
 	})
 
 	return component.SuccessResponse(map[string]any{
-		"id":              replyEntity.Id,
-		"replyNo":         replyEntity.ReplyNo,
-		"renderedContent": replyEntity.RenderedHTML,
+		"id":              postEntity.Id,
+		"replyNo":         postEntity.PostNo - 1,
+		"renderedContent": postEntity.RenderedHTML,
 	})
 }
 
@@ -326,11 +347,11 @@ type UpdateReplyReq struct {
 
 func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
-	replyEntity := reply.Get(req.Params.ReplyId)
-	if replyEntity.Id == 0 {
+	postEntity := posts.Get(req.Params.ReplyId)
+	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
 		return component.FailResponseCode(component.MessageReplyNotFound, nil)
 	}
-	if replyEntity.UserId != req.UserId {
+	if postEntity.UserId != req.UserId {
 		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
 	}
 
@@ -353,40 +374,41 @@ func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response
 
 	}
 
-	replyEntity.Content = content
-	replyEntity.RenderedHTML = markdown2html.CommentMarkdownToHTML(content)
-	replyEntity.RenderedVersion = markdown2html.GetCommentVersion()
+	postEntity.Content = content
+	postEntity.RenderedHTML = markdown2html.CommentMarkdownToHTML(content)
+	postEntity.RenderedVersion = markdown2html.GetCommentVersion()
 
-	if err := reply.Save(&replyEntity); err != nil {
+	if err := posts.Save(&postEntity); err != nil {
 		return component.FailResponseCode(
 			component.MessageReplyUpdateFailed,
 
 			component.MessageParams{"error": err.Error()})
 
 	}
-	fileusageservice.ReplaceReply(replyEntity.Id, req.UserId, replyEntity.Content)
+	fileusageservice.ReplaceReply(postEntity.Id, req.UserId, postEntity.Content)
 
 	return component.SuccessResponse(map[string]any{
-		"id":              replyEntity.Id,
-		"replyNo":         replyEntity.ReplyNo,
-		"content":         replyEntity.Content,
-		"renderedContent": replyEntity.RenderedHTML,
-		"updatedAt":       replyEntity.UpdatedAt.Format(time.DateTime),
+		"id":              postEntity.Id,
+		"replyNo":         postEntity.PostNo - 1,
+		"content":         postEntity.Content,
+		"renderedContent": postEntity.RenderedHTML,
+		"updatedAt":       postEntity.UpdatedAt.Format(time.DateTime),
 	})
 }
 
 func DeleteReply(req component.BetterRequest[DeleteReplyId]) component.Response {
-	replyEntity := reply.Get(req.Params.ReplyId)
-	if replyEntity.Id == 0 {
+	postEntity := posts.Get(req.Params.ReplyId)
+	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
 		return component.FailResponseCode(component.MessageReplyNotFound, nil)
 	}
-	if replyEntity.UserId != req.UserId {
+	if postEntity.UserId != req.UserId {
 		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
 	}
-	reply.DeleteEntity(&replyEntity)
-	articleEntity := articles.GetSimple(replyEntity.ArticleId)
-	if articleEntity.Id > 0 {
-		replyservice.SyncArticleReplyStats(articleEntity, req.UserId, true)
+	posts.DeleteEntity(&postEntity)
+	topicEntity := topics.GetSimple(postEntity.TopicId)
+	if topicEntity.Id > 0 {
+		replyservice.SyncTopicPostStats(topicEntity, req.UserId, true)
+		hotdataserve.ClearArticleListCache()
 	}
 	return component.SuccessResponse(true)
 }
@@ -397,11 +419,11 @@ type LikeArticleReq struct {
 }
 
 func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response {
-	articleEntity := articles.Get(req.Params.Id)
-	if articleEntity.Id == 0 {
+	topicEntity := topics.Get(req.Params.Id)
+	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
-	state := articleUserAction.GetByArticleId(req.UserId, articleEntity.Id)
+	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)
 	targetLiked := req.Params.Action == 1
 	if state.Id == 0 && !targetLiked {
 		return component.SuccessResponse(true)
@@ -409,27 +431,29 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 	if state.Id != 0 && (state.LikedAt != nil) == targetLiked {
 		return component.SuccessResponse(true)
 	}
-	if articleUserAction.SetLiked(req.UserId, articleEntity.Id, targetLiked) {
+	if topicUserAction.SetLiked(req.UserId, topicEntity.Id, targetLiked) {
 		if req.Params.Action == 1 {
-			articles.IncrementLike(articleEntity)
-			userStatistics.LikeArticle(articleEntity.UserId)
+			topics.IncrementLike(topicEntity)
+			userStatistics.LikeArticle(topicEntity.UserId)
 			userStatistics.GivenLike(req.UserId)
-			userservice.InvalidateUserPublicProfileCache(articleEntity.UserId)
+			userservice.InvalidateUserPublicProfileCache(topicEntity.UserId)
 			userservice.InvalidateUserPublicProfileCache(req.UserId)
+			hotdataserve.ClearArticleListCache()
 
 			// 发送点赞事件
 			eventbus.Publish(context.Background(), &eventhandlers.ArticleLikedEvent{
-				UserId:    articleEntity.UserId,
-				ArticleId: articleEntity.Id,
-				Title:     articleEntity.Title,
+				UserId:    topicEntity.UserId,
+				ArticleId: topicEntity.Id,
+				Title:     topicEntity.Title,
 				LikierId:  req.UserId,
 			})
 		} else {
-			articles.DecrementLike(articleEntity)
-			userStatistics.CancelLikeArticle(articleEntity.UserId)
+			topics.DecrementLike(topicEntity)
+			userStatistics.CancelLikeArticle(topicEntity.UserId)
 			userStatistics.CancelGivenLike(req.UserId)
-			userservice.InvalidateUserPublicProfileCache(articleEntity.UserId)
+			userservice.InvalidateUserPublicProfileCache(topicEntity.UserId)
 			userservice.InvalidateUserPublicProfileCache(req.UserId)
+			hotdataserve.ClearArticleListCache()
 		}
 	}
 	return component.SuccessResponse(true)
@@ -441,12 +465,12 @@ type BookmarkArticleReq struct {
 }
 
 func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.Response {
-	articleEntity := articles.Get(req.Params.Id)
-	if articleEntity.Id == 0 {
+	topicEntity := topics.Get(req.Params.Id)
+	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	state := articleUserAction.GetByArticleId(req.UserId, articleEntity.Id)
+	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)
 	targetBookmarked := req.Params.Action == 1
 	if state.Id == 0 && !targetBookmarked {
 		return component.SuccessResponse(true)
@@ -455,7 +479,7 @@ func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.
 		return component.SuccessResponse(true)
 	}
 
-	if articleUserAction.SetBookmarked(req.UserId, articleEntity.Id, targetBookmarked) {
+	if topicUserAction.SetBookmarked(req.UserId, topicEntity.Id, targetBookmarked) {
 		updateBookmarkStats(req.UserId, targetBookmarked)
 		userservice.InvalidateUserPublicProfileCache(req.UserId)
 	}
@@ -476,12 +500,12 @@ type WatchArticleReq struct {
 }
 
 func WatchArticle(req component.BetterRequest[WatchArticleReq]) component.Response {
-	articleEntity := articles.Get(req.Params.Id)
-	if articleEntity.Id == 0 {
+	topicEntity := topics.Get(req.Params.Id)
+	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	state := articleUserAction.GetByArticleId(req.UserId, articleEntity.Id)
+	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)
 	targetWatched := req.Params.Action == 1
 	if state.Id == 0 && !targetWatched {
 		return component.SuccessResponse(true)
@@ -490,7 +514,7 @@ func WatchArticle(req component.BetterRequest[WatchArticleReq]) component.Respon
 		return component.SuccessResponse(true)
 	}
 
-	articleUserAction.SetWatched(req.UserId, articleEntity.Id, targetWatched)
+	topicUserAction.SetWatched(req.UserId, topicEntity.Id, targetWatched)
 	return component.SuccessResponse(true)
 }
 

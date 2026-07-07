@@ -8,7 +8,11 @@ import (
 )
 
 func handleBadgePost(ctx context.Context, event *ArticlePublishedEvent) error {
-	checkAndInvalidateUserBadges(event.Article.UserId, badgeservice.TriggerPost)
+	_, userID, _ := event.Subject()
+	if userID == 0 {
+		return nil
+	}
+	checkAndInvalidateUserBadges(userID, badgeservice.TriggerPost)
 	return nil
 }
 

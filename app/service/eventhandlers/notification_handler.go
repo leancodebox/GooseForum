@@ -3,7 +3,7 @@ package eventhandlers
 import (
 	"context"
 
-	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
 	"github.com/leancodebox/GooseForum/app/service/eventnotice"
 )
 
@@ -22,6 +22,8 @@ func TakeUpTo64Chars(s string) string {
 type CommentCreatedEvent struct {
 	ArticleId           uint64
 	CommentId           uint64 // 新创建的评论ID
+	TopicId             uint64
+	PostId              uint64 // 新创建的正文ID
 	UserId              uint64 // 评论者ID
 	Content             string // 评论内容
 	ArticleAuthorId     uint64 // 文章作者ID
@@ -29,16 +31,30 @@ type CommentCreatedEvent struct {
 	ParentReplyAuthorId uint64 // 父评论作者ID
 }
 
+func (event *CommentCreatedEvent) topicID() uint64 {
+	if event.TopicId > 0 {
+		return event.TopicId
+	}
+	return event.ArticleId
+}
+
+func (event *CommentCreatedEvent) postID() uint64 {
+	if event.PostId > 0 {
+		return event.PostId
+	}
+	return event.CommentId
+}
+
 // handleCommentCreated 发送评论/回复通知
 func handleCommentCreated(ctx context.Context, event *CommentCreatedEvent) error {
 	contentPreview := TakeUpTo64Chars(event.Content)
 	// 如果不是文章作者自己评论，通知文章作者
 	if shouldNotifyArticleAuthor(event) {
-		_ = eventnotice.SendCommentNotification(event.ArticleAuthorId, event.ArticleId, contentPreview, event.UserId, event.CommentId)
+		_ = eventnotice.SendCommentNotification(event.ArticleAuthorId, event.topicID(), contentPreview, event.UserId, event.postID())
 	}
 	// 如果是回复评论，且不是回复自己，通知原评论作者
 	if shouldNotifyParentReplyAuthor(event) {
-		_ = eventnotice.SendReplyNotification(event.ParentReplyAuthorId, event.CommentId, event.ArticleId, contentPreview, event.UserId)
+		_ = eventnotice.SendReplyNotification(event.ParentReplyAuthorId, event.postID(), event.topicID(), contentPreview, event.UserId)
 	}
 	notifyArticleWatchers(event, contentPreview)
 	return nil
@@ -59,11 +75,11 @@ func notifyArticleWatchers(event *CommentCreatedEvent, contentPreview string) {
 	excludeUserIds := commentNotificationExcludeUserIds(event)
 	afterUserId := uint64(0)
 	for {
-		userIds := articleUserAction.ListActiveWatchUserIDsAfter(event.ArticleId, afterUserId, excludeUserIds, articleWatchNotifyBatchSize)
+		userIds := topicUserAction.ListActiveWatchUserIDsAfter(event.topicID(), afterUserId, excludeUserIds, articleWatchNotifyBatchSize)
 		if len(userIds) == 0 {
 			return
 		}
-		_ = eventnotice.SendArticleCommentNotifications(userIds, event.ArticleId, event.CommentId, contentPreview, event.UserId)
+		_ = eventnotice.SendArticleCommentNotifications(userIds, event.topicID(), event.postID(), contentPreview, event.UserId)
 		afterUserId = userIds[len(userIds)-1]
 		if len(userIds) < articleWatchNotifyBatchSize {
 			return

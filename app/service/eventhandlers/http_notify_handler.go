@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
-	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/category"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/httpnotifyservice"
@@ -19,6 +19,7 @@ type ReportCreatedEvent struct {
 	TargetType string
 	TargetId   uint64
 	ArticleId  uint64
+	TopicId    uint64
 	ReporterId uint64
 	Reason     string
 }
@@ -27,7 +28,7 @@ func handleHttpNotifyArticlePublished(ctx context.Context, event *ArticlePublish
 	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticlePublished) {
 		return nil
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventArticlePublished, articleNotifyPayload(event.Article))
+	httpnotifyservice.Notify(httpnotifyservice.EventArticlePublished, articleEventNotifyPayload(event))
 	return nil
 }
 
@@ -35,7 +36,7 @@ func handleHttpNotifyArticleUpdated(ctx context.Context, event *ArticleUpdatedEv
 	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticleUpdated) {
 		return nil
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventArticleUpdated, articleNotifyPayload(event.Article))
+	httpnotifyservice.Notify(httpnotifyservice.EventArticleUpdated, articleUpdatedEventNotifyPayload(event))
 	return nil
 }
 
@@ -43,19 +44,23 @@ func handleHttpNotifyCommentCreated(ctx context.Context, event *CommentCreatedEv
 	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventCommentCreated) {
 		return nil
 	}
-	article := articles.GetSimple(event.ArticleId)
-	articlePayload := articleNotifyPayloadFromSmall(article)
+	topic := topics.GetSimple(event.topicID())
+	articlePayload := topicNotifyPayloadFromSmall(topic)
 	commenter := userNotifyPayload(event.UserId)
-	comment := reply.Get(event.CommentId)
+	post := posts.Get(event.postID())
+	replyNo := uint64(0)
+	if post.Id > 0 {
+		replyNo = post.PostNo - 1
+	}
 
 	commentPayload := notifyComment{
-		ID:                  event.CommentId,
-		ReplyNo:             comment.ReplyNo,
+		ID:                  event.postID(),
+		ReplyNo:             replyNo,
 		UserID:              event.UserId,
 		User:                commenter,
 		ParentReplyID:       event.ParentReplyId,
 		ParentReplyAuthorID: event.ParentReplyAuthorId,
-		URL:                 commentURL(event.ArticleId, event.CommentId),
+		URL:                 commentURL(event.topicID(), event.postID()),
 	}
 	payload := notifyEventData{
 		BaseURI:        baseURI(),
@@ -88,7 +93,7 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventReportCreated) {
 		return nil
 	}
-	article := articles.GetSimple(event.ArticleId)
+	topic := topics.GetSimple(event.topicID())
 	payload := notifyEventData{
 		BaseURI:       baseURI(),
 		ReportID:      new(event.ReportId),
@@ -96,19 +101,19 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 		TargetID:      new(event.TargetId),
 		ReporterID:    new(event.ReporterId),
 		Reason:        new(event.Reason),
-		Article:       new(articleNotifyPayloadFromSmall(article)),
+		Article:       new(topicNotifyPayloadFromSmall(topic)),
 		Reporter:      new(userNotifyPayload(event.ReporterId)),
 		ModerationURL: moderationTargetURL(event),
 	}
-	if event.TargetType == "reply" {
-		comment := reply.Get(event.TargetId)
-		commenter := userNotifyPayload(comment.UserId)
+	if event.TargetType == "reply" || event.TargetType == "post" {
+		post := posts.Get(event.TargetId)
+		commenter := userNotifyPayload(post.UserId)
 		payload.Comment = &notifyComment{
-			ID:      comment.Id,
-			ReplyNo: comment.ReplyNo,
-			UserID:  comment.UserId,
+			ID:      post.Id,
+			ReplyNo: post.PostNo - 1,
+			UserID:  post.UserId,
 			User:    commenter,
-			URL:     commentURL(comment.ArticleId, comment.Id),
+			URL:     commentURL(post.TopicId, post.Id),
 		}
 	}
 	httpnotifyservice.Notify(httpnotifyservice.EventReportCreated, payload)
@@ -168,20 +173,34 @@ type notifyUser struct {
 	URL         string `json:"url"`
 }
 
-func articleNotifyPayload(article *articles.Entity) notifyEventData {
-	if article == nil {
+func articleEventNotifyPayload(event *ArticlePublishedEvent) notifyEventData {
+	if event != nil && event.Topic != nil {
+		return topicNotifyPayload(event.Topic)
+	}
+	return notifyEventData{BaseURI: baseURI()}
+}
+
+func articleUpdatedEventNotifyPayload(event *ArticleUpdatedEvent) notifyEventData {
+	if event != nil && event.Topic != nil {
+		return topicNotifyPayload(event.Topic)
+	}
+	return notifyEventData{BaseURI: baseURI()}
+}
+
+func topicNotifyPayload(topic *topics.Entity) notifyEventData {
+	if topic == nil {
 		return notifyEventData{BaseURI: baseURI()}
 	}
 	summary := notifyArticle{
-		ID:            article.Id,
-		Title:         article.Title,
-		URL:           urlconfig.PostDetail(article.Id),
-		Description:   article.Description,
-		FirstImageURL: article.FirstImageURL,
-		UserID:        article.UserId,
-		User:          userNotifyPayload(article.UserId),
-		CategoryIDs:   article.CategoryId,
-		Categories:    categoryNotifyPayloads(article.CategoryId),
+		ID:            topic.Id,
+		Title:         topic.Title,
+		URL:           urlconfig.PostDetail(topic.Id),
+		Description:   topic.Excerpt,
+		FirstImageURL: topic.FirstImageURL,
+		UserID:        topic.UserId,
+		User:          userNotifyPayload(topic.UserId),
+		CategoryIDs:   topic.CategoryIds,
+		Categories:    topicCategoryNotifyPayloads(topic.CategoryIds),
 	}
 	user := summary.User
 	return notifyEventData{
@@ -191,42 +210,42 @@ func articleNotifyPayload(article *articles.Entity) notifyEventData {
 	}
 }
 
-func articleNotifyPayloadFromSmall(article articles.SmallEntity) notifyArticle {
-	if article.Id == 0 {
+func topicNotifyPayloadFromSmall(topic topics.SmallEntity) notifyArticle {
+	if topic.Id == 0 {
 		return notifyArticle{}
 	}
 	return notifyArticle{
-		ID:            article.Id,
-		Title:         article.Title,
-		URL:           urlconfig.PostDetail(article.Id),
-		Description:   article.Description,
-		FirstImageURL: article.FirstImageURL,
-		UserID:        article.UserId,
-		User:          userNotifyPayload(article.UserId),
-		CategoryIDs:   article.CategoryId,
-		Categories:    categoryNotifyPayloads(article.CategoryId),
+		ID:            topic.Id,
+		Title:         topic.Title,
+		URL:           urlconfig.PostDetail(topic.Id),
+		Description:   topic.Excerpt,
+		FirstImageURL: topic.FirstImageURL,
+		UserID:        topic.UserId,
+		User:          userNotifyPayload(topic.UserId),
+		CategoryIDs:   topic.CategoryIds,
+		Categories:    topicCategoryNotifyPayloads(topic.CategoryIds),
 	}
 }
 
-func categoryNotifyPayloads(categoryIDs []uint64) []notifyCategory {
+func topicCategoryNotifyPayloads(categoryIDs []uint64) []notifyCategory {
 	if len(categoryIDs) == 0 {
 		return []notifyCategory{}
 	}
-	categories := articleCategory.All()
-	categoryByID := make(map[uint64]*articleCategory.Entity, len(categories))
-	for _, category := range categories {
-		categoryByID[category.Id] = category
+	categories := category.All()
+	categoryByID := make(map[uint64]*category.Entity, len(categories))
+	for _, item := range categories {
+		categoryByID[item.Id] = item
 	}
 	payloads := make([]notifyCategory, 0, len(categoryIDs))
 	for _, categoryID := range categoryIDs {
-		category, ok := categoryByID[categoryID]
+		item, ok := categoryByID[categoryID]
 		if !ok {
 			continue
 		}
 		payloads = append(payloads, notifyCategory{
-			ID:   category.Id,
-			Name: category.Category,
-			Slug: category.Slug,
+			ID:   item.Id,
+			Name: item.Name,
+			Slug: item.Slug,
 		})
 	}
 	return payloads
@@ -265,13 +284,21 @@ func commentURL(articleID uint64, commentID uint64) string {
 }
 
 func moderationTargetURL(event *ReportCreatedEvent) string {
-	if event.ArticleId == 0 {
+	topicID := event.topicID()
+	if topicID == 0 {
 		return ""
 	}
-	if event.TargetType == "reply" && event.TargetId > 0 {
-		return commentURL(event.ArticleId, event.TargetId)
+	if (event.TargetType == "reply" || event.TargetType == "post") && event.TargetId > 0 {
+		return commentURL(topicID, event.TargetId)
 	}
-	return urlconfig.PostDetail(event.ArticleId)
+	return urlconfig.PostDetail(topicID)
+}
+
+func (event *ReportCreatedEvent) topicID() uint64 {
+	if event.TopicId > 0 {
+		return event.TopicId
+	}
+	return event.ArticleId
 }
 
 func uintToString(value uint64) string {

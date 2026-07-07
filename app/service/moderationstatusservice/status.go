@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
 )
@@ -35,8 +35,12 @@ func HasOpenReports(userID uint64) bool {
 }
 
 func InvalidateArticle(articleID uint64) {
-	article := articles.GetSimple(articleID)
-	for _, categoryID := range article.CategoryId {
+	InvalidateTopic(articleID)
+}
+
+func InvalidateTopic(topicID uint64) {
+	topic := topics.GetSimple(topicID)
+	for _, categoryID := range topic.CategoryIds {
 		statusCache.Delete(cacheKeyCategory(categoryID))
 	}
 }
@@ -57,11 +61,11 @@ func cacheKeyCategory(categoryID uint64) string {
 }
 
 func allCategoryIDs() []uint64 {
-	categories := hotdataserve.GetArticleCategory()
+	categories := hotdataserve.GetCategory()
 	ids := make([]uint64, 0, len(categories))
-	for _, category := range categories {
-		if category != nil && category.Id > 0 {
-			ids = append(ids, category.Id)
+	for _, item := range categories {
+		if item != nil && item.Id > 0 {
+			ids = append(ids, item.Id)
 		}
 	}
 	return ids

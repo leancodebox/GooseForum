@@ -5,10 +5,10 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
-	"github.com/leancodebox/GooseForum/app/models/forum/reply"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/samber/lo"
 )
@@ -26,9 +26,9 @@ func GetSiteStatisticsData() *vo.SiteStats {
 		return &vo.SiteStats{
 			UserCount:         users.GetMaxId(),
 			UserMonthCount:    dailyStats.GetCurrentMonthSum(dailyStats.StatTypeRegCount),
-			ArticleCount:      articles.GetMaxId(),
+			ArticleCount:      topics.GetMaxId(),
 			ArticleMonthCount: dailyStats.GetCurrentMonthSum(dailyStats.StatTypeArticleCount),
-			Reply:             reply.GetMaxId(),
+			Reply:             posts.GetMaxId(),
 			LinksCount:        linksCount,
 		}, nil
 	}, siteStatsCacheTTL)

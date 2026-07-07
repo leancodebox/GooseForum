@@ -7,6 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
@@ -24,7 +25,7 @@ type ArticleSimpleVoPage struct {
 
 var articleSimpleVoCache = &localcache.Cache[ArticleSimpleVoPage]{MaxEntries: articleListEntries}
 
-func GetLatestArticlesSimpleVoPaginated(page int, sort string) ArticleSimpleVoPage {
+func GetLatestTopicsSimpleVoPaginated(page int, sort string) ArticleSimpleVoPage {
 	page = normalizeArticlePage(page)
 	sort = normalizeArticleSort(sort)
 	if !shouldCacheArticlePage(page) {
@@ -36,7 +37,11 @@ func GetLatestArticlesSimpleVoPaginated(page int, sort string) ArticleSimpleVoPa
 	}, articleListCacheTTL)
 }
 
-func GetArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) ArticleSimpleVoPage {
+func GetLatestArticlesSimpleVoPaginated(page int, sort string) ArticleSimpleVoPage {
+	return GetLatestTopicsSimpleVoPaginated(page, sort)
+}
+
+func GetTopicsByCategorySimpleVo(categoryId uint64, sort string, page int) ArticleSimpleVoPage {
 	page = normalizeArticlePage(page)
 	sort = normalizeArticleSort(sort)
 	if !shouldCacheArticlePage(page) {
@@ -46,6 +51,10 @@ func GetArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) Art
 	return articleSimpleVoCache.GetOrLoad(key, func() (ArticleSimpleVoPage, error) {
 		return loadArticlesByCategorySimpleVo(categoryId, sort, page), nil
 	}, articleListCacheTTL)
+}
+
+func GetArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) ArticleSimpleVoPage {
+	return GetTopicsByCategorySimpleVo(categoryId, sort, page)
 }
 
 func normalizeArticlePage(page int) int {
@@ -69,20 +78,20 @@ func shouldCacheArticlePage(page int) bool {
 }
 
 func loadLatestArticlesSimpleVoPaginated(page int, sort string) ArticleSimpleVoPage {
-	res := articles.Page[articles.SmallEntity](articles.PageQuery{
+	res := topics.Page[topics.SmallEntity](topics.PageQuery{
 		Page:         page,
 		PageSize:     20,
 		FilterStatus: true,
 		Sort:         sort,
 	})
 	return ArticleSimpleVoPage{
-		Topics:  ArticlesSmallEntity2Vo(smallEntitiesToPointers(res.Data)),
+		Topics:  TopicsSmallEntity2Vo(topicSmallEntitiesToPointers(res.Data)),
 		HasNext: res.HasNext,
 	}
 }
 
 func loadArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) ArticleSimpleVoPage {
-	res := articles.Page[articles.SmallEntity](articles.PageQuery{
+	res := topics.Page[topics.SmallEntity](topics.PageQuery{
 		Page:         page,
 		PageSize:     20,
 		CategoryId:   categoryId,
@@ -90,13 +99,21 @@ func loadArticlesByCategorySimpleVo(categoryId uint64, sort string, page int) Ar
 		Sort:         sort,
 	})
 	return ArticleSimpleVoPage{
-		Topics:  ArticlesSmallEntity2Vo(smallEntitiesToPointers(res.Data)),
+		Topics:  TopicsSmallEntity2Vo(topicSmallEntitiesToPointers(res.Data)),
 		HasNext: res.HasNext,
 	}
 }
 
 func smallEntitiesToPointers(data []articles.SmallEntity) []*articles.SmallEntity {
 	res := make([]*articles.SmallEntity, 0, len(data))
+	for i := range data {
+		res = append(res, &data[i])
+	}
+	return res
+}
+
+func topicSmallEntitiesToPointers(data []topics.SmallEntity) []*topics.SmallEntity {
+	res := make([]*topics.SmallEntity, 0, len(data))
 	for i := range data {
 		res = append(res, &data[i])
 	}
@@ -124,6 +141,29 @@ func ArticlesSmallEntity2Vo(data []*articles.SmallEntity) []*vo.ArticlesSimpleVo
 	}
 	userMap := users.GetMapByIds(userIDs)
 	return ArticlesSmallEntityWithUser2Vo(data, userMap)
+}
+
+func TopicsSmallEntity2Vo(data []*topics.SmallEntity) []*vo.ArticlesSimpleVo {
+	userIDs := make([]uint64, 0, len(data)*2)
+	seenUserIDs := make(map[uint64]struct{}, len(data)*2)
+	for _, topic := range data {
+		if topic == nil {
+			continue
+		}
+		if _, ok := seenUserIDs[topic.UserId]; !ok {
+			seenUserIDs[topic.UserId] = struct{}{}
+			userIDs = append(userIDs, topic.UserId)
+		}
+		for _, poster := range topic.GetPosters() {
+			if _, ok := seenUserIDs[poster.UserID]; ok {
+				continue
+			}
+			seenUserIDs[poster.UserID] = struct{}{}
+			userIDs = append(userIDs, poster.UserID)
+		}
+	}
+	userMap := users.GetMapByIds(userIDs)
+	return TopicsSmallEntityWithUser2Vo(data, userMap)
 }
 
 func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[uint64]*users.EntityComplete) []*vo.ArticlesSimpleVo {
@@ -190,6 +230,74 @@ func ArticlesSmallEntityWithUser2Vo(data []*articles.SmallEntity, userMap map[ui
 	return res
 }
 
-func ClearArticleListCache() {
+func TopicsSmallEntityWithUser2Vo(data []*topics.SmallEntity, userMap map[uint64]*users.EntityComplete) []*vo.ArticlesSimpleVo {
+	categoryMap := CategoryMap()
+	res := make([]*vo.ArticlesSimpleVo, 0, len(data))
+	for _, t := range data {
+		if t == nil {
+			continue
+		}
+
+		categoryNames := make([]string, 0, len(t.CategoryIds))
+		for _, item := range t.CategoryIds {
+			if category, ok := categoryMap[item]; ok && category != nil {
+				categoryNames = append(categoryNames, category.Name)
+				continue
+			}
+			categoryNames = append(categoryNames, "")
+		}
+
+		username := ""
+		avatarUrl := urlconfig.GetDefaultAvatar()
+		if user, ok := userMap[t.UserId]; ok {
+			username = user.Username
+			avatarUrl = user.GetWebAvatarUrl()
+		}
+
+		posters := t.GetPosters()
+		postersVo := make([]vo.PosterVo, 0, len(posters))
+		for _, poster := range posters {
+			posterUsername := ""
+			posterAvatarUrl := urlconfig.GetDefaultAvatar()
+			if user, ok := userMap[poster.UserID]; ok {
+				posterUsername = user.Username
+				posterAvatarUrl = user.GetWebAvatarUrl()
+			}
+			postersVo = append(postersVo, vo.PosterVo{
+				Id:        poster.UserID,
+				Username:  posterUsername,
+				AvatarUrl: posterAvatarUrl,
+			})
+		}
+
+		res = append(res, &vo.ArticlesSimpleVo{
+			Id:             t.Id,
+			Title:          t.Title,
+			Description:    t.Excerpt,
+			FirstImageURL:  t.FirstImageURL,
+			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
+			CreateTime:     t.CreatedAt.Format(time.DateTime),
+			AuthorId:       t.UserId,
+			Username:       username,
+			AvatarUrl:      avatarUrl,
+			ViewCount:      t.ViewCount,
+			CommentCount:   t.ReplyCount,
+			PinWeight:      t.PinWeight,
+			Categories:     categoryNames,
+			CategoriesId:   t.CategoryIds,
+			Type:           0,
+			TypeStr:        "",
+			ProcessStatus:  t.ProcessStatus,
+			Posters:        postersVo,
+		})
+	}
+	return res
+}
+
+func ClearTopicListCache() {
 	articleSimpleVoCache.Clear()
+}
+
+func ClearArticleListCache() {
+	ClearTopicListCache()
 }

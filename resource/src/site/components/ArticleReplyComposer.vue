@@ -6,7 +6,7 @@ import { uploadImage } from '@/runtime/api'
 import { formatNumber } from '@/runtime/format'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { markdownFromClipboard } from '@/runtime/rich-paste'
-import type { ReplyPayload } from '@/types/payload'
+import type { PostPayload } from '@/types/payload'
 import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
 import { useI18n } from 'vue-i18n'
 
@@ -41,7 +41,7 @@ const props = defineProps<{
   startLabel: string
   submitting: boolean
   successMessage: string
-  target?: ReplyPayload
+  target?: PostPayload
 }>()
 
 const emit = defineEmits<{

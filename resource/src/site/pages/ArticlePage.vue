@@ -12,7 +12,7 @@ import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
 import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import type { ArticleDetailProps, LayoutPayload, ReplyPayload } from '@/types/payload'
+import type { ArticleDetailProps, LayoutPayload, PostPayload } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
@@ -39,7 +39,7 @@ const editingReplyId = ref(0)
 const savingEditReplyId = ref(0)
 const replyDraftBeforeEdit = ref('')
 const replyTargetBeforeEdit = ref(0)
-const pendingDeleteReply = ref<ReplyPayload | null>(null)
+const pendingDeleteReply = ref<PostPayload | null>(null)
 const pendingModerationAction = ref<'ban' | 'unban' | null>(null)
 const pendingReport = ref<{ targetType: 'article' | 'reply'; targetId: number; title: string; excerpt: string } | null>(null)
 const reportReason = ref('spam')
@@ -47,7 +47,7 @@ const reportNote = ref('')
 const reportSubmitting = ref(false)
 const reportError = ref('')
 const moderatingReplyIds = ref<number[]>([])
-const replies = ref<ReplyPayload[]>([...page.props.replies])
+const replies = ref<PostPayload[]>([...page.props.replies])
 const articleProcessStatus = ref(page.props.article.processStatus)
 const replyTarget = computed(() => replies.value.find((reply) => reply.id === replyTargetId.value))
 const replyWindowMode = ref(false)
@@ -510,19 +510,19 @@ function resetRepliesFromProps() {
   editingReplyId.value = 0
 }
 
-function firstReplyId(items: ReplyPayload[]) {
+function firstReplyId(items: PostPayload[]) {
   return items.length ? items[0].id : 0
 }
 
-function lastReplyId(items: ReplyPayload[]) {
+function lastReplyId(items: PostPayload[]) {
   return items.length ? items[items.length - 1].id : 0
 }
 
-function firstReplyNo(items: ReplyPayload[]) {
+function firstReplyNo(items: PostPayload[]) {
   return items.length ? items[0].replyNo || 0 : 0
 }
 
-function lastReplyNo(items: ReplyPayload[]) {
+function lastReplyNo(items: PostPayload[]) {
   return items.length ? items[items.length - 1].replyNo || 0 : 0
 }
 
@@ -557,7 +557,7 @@ function syncProgressForReplyNo(replyNo: number) {
 }
 
 function findClosestLoadedReply(replyNo: number) {
-  let closest: ReplyPayload | undefined
+  let closest: PostPayload | undefined
   let closestDistance = Number.POSITIVE_INFINITY
   for (const reply of replies.value) {
     if (!reply.replyNo) continue
@@ -614,7 +614,7 @@ function highlightReply(replyId: number) {
   }, 2400)
 }
 
-function mergeReplies(nextReplies: ReplyPayload[], mode: 'replace' | 'prepend' | 'append') {
+function mergeReplies(nextReplies: PostPayload[], mode: 'replace' | 'prepend' | 'append') {
   if (mode === 'replace') {
     replies.value = nextReplies
     return
@@ -1001,7 +1001,7 @@ async function toggleWatch() {
   }
 }
 
-function replyTo(reply: ReplyPayload) {
+function replyTo(reply: PostPayload) {
   if (editingReplyId.value) {
     cancelEditReply()
   }
@@ -1030,7 +1030,7 @@ function handleReplyImageError(message: string) {
   errorMessage.value = message
 }
 
-function startEditReply(reply: ReplyPayload) {
+function startEditReply(reply: PostPayload) {
   if (savingEditReplyId.value || deletingReplyId.value === reply.id) return
   if (!editingReplyId.value) {
     replyDraftBeforeEdit.value = replyContent.value
@@ -1144,7 +1144,7 @@ async function refreshCurrentPage() {
   window.dispatchEvent(new CustomEvent('goose:page', { detail: payload }))
 }
 
-function requestDeleteReply(reply: ReplyPayload) {
+function requestDeleteReply(reply: PostPayload) {
   if (savingEditReplyId.value === reply.id) return
   pendingDeleteReply.value = reply
   deleteErrorMessage.value = ''
@@ -1244,7 +1244,7 @@ function requestArticleReport() {
   })
 }
 
-function requestReplyReport(reply: ReplyPayload) {
+function requestReplyReport(reply: PostPayload) {
   requestReport({
     targetType: 'reply',
     targetId: reply.id,
@@ -1278,7 +1278,7 @@ function replyModerationBusy(replyId: number) {
   return moderatingReplyIds.value.includes(replyId)
 }
 
-async function moderateReply(reply: ReplyPayload, action: 'ban' | 'unban') {
+async function moderateReply(reply: PostPayload, action: 'ban' | 'unban') {
   if (replyModerationBusy(reply.id)) return
   moderatingReplyIds.value = [...moderatingReplyIds.value, reply.id]
   try {

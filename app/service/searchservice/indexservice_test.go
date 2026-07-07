@@ -5,30 +5,30 @@ import (
 	"testing"
 	"time"
 
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 )
 
-func TestConvertToSearchDocument(t *testing.T) {
+func TestConvertTopicToSearchDocument(t *testing.T) {
 	createdAt := time.Unix(1700000000, 0)
 	updatedAt := time.Unix(1700000300, 0)
-	article := &articles.Entity{
+	topic := &topics.Entity{
 		Id:            42,
 		Title:         "Searchable title",
-		Content:       "# Heading\n\nVisible text with [link](https://example.com).\n\n```go\nhidden()\n```",
-		Type:          2,
-		CategoryId:    []uint64{3, 5},
-		ArticleStatus: 1,
+		CategoryIds:   []uint64{3, 5},
+		Status:        1,
 		ProcessStatus: 0,
 		CreatedAt:     createdAt,
 		UpdatedAt:     updatedAt,
 	}
+	firstPost := &posts.Entity{Content: "# Heading\n\nVisible text with [link](https://example.com).\n\n```go\nhidden()\n```"}
 
-	got := convertToSearchDocument(article)
+	got := convertTopicToSearchDocument(topic, firstPost)
 
-	if got.ID != article.Id || got.Title != article.Title {
+	if got.ID != topic.Id || got.Title != topic.Title {
 		t.Fatalf("unexpected identity fields: %#v", got)
 	}
-	if got.Type != article.Type || got.ArticleStatus != article.ArticleStatus || got.ProcessStatus != article.ProcessStatus {
+	if got.Type != 0 || got.ArticleStatus != topic.Status || got.ProcessStatus != topic.ProcessStatus {
 		t.Fatalf("unexpected status fields: %#v", got)
 	}
 	if got.CreatedAt != createdAt.Unix() || got.UpdatedAt != updatedAt.Unix() {

@@ -14,14 +14,17 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/filemodel/filedata"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
 	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
-	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
+	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderators"
 	"github.com/leancodebox/GooseForum/app/models/forum/optRecord"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/role"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -457,13 +460,13 @@ type ArticleSourceVo struct {
 
 func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
 	param := req.Params
-	pageData := articles.Page[articles.SmallEntity](articles.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, UserId: param.UserId})
-	userIds := lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) uint64 {
+	pageData := topics.Page[topics.SmallEntity](topics.PageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, Search: param.Search, UserId: param.UserId})
+	userIds := lo.Map(pageData.Data, func(t topics.SmallEntity, _ int) uint64 {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
 	return component.SuccessResponse(component.Page[ArticlesInfoAdminVo]{
-		List: lo.Map(pageData.Data, func(t articles.SmallEntity, _ int) ArticlesInfoAdminVo {
+		List: lo.Map(pageData.Data, func(t topics.SmallEntity, _ int) ArticlesInfoAdminVo {
 			username := ""
 			userAvatarUrl := ""
 			if user := userMap[t.UserId]; user != nil {
@@ -473,13 +476,13 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 			return ArticlesInfoAdminVo{
 				Id:            t.Id,
 				Title:         t.Title,
-				Description:   t.Description,
-				Type:          t.Type,
-				CategoryId:    t.CategoryId,
+				Description:   t.Excerpt,
+				Type:          0,
+				CategoryId:    t.CategoryIds,
 				UserId:        t.UserId,
 				Username:      username,
 				UserAvatarUrl: userAvatarUrl,
-				ArticleStatus: t.ArticleStatus,
+				ArticleStatus: t.Status,
 				ProcessStatus: t.ProcessStatus,
 				ViewCount:     t.ViewCount,
 				ReplyCount:    t.ReplyCount,
@@ -496,23 +499,27 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 }
 
 func ArticleSource(req component.BetterRequest[ArticleSourceReq]) component.Response {
-	article := articles.Get(req.Params.Id)
-	if article.Id == 0 {
+	topic := topics.Get(req.Params.Id)
+	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+	}
+	firstPost := posts.Get(topic.FirstPostId)
+	if firstPost.Id == 0 {
+		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 	}
 
 	return component.SuccessResponse(ArticleSourceVo{
-		Id:            article.Id,
-		Title:         article.Title,
-		Description:   article.Description,
-		Content:       article.Content,
-		Type:          article.Type,
-		CategoryId:    article.CategoryId,
-		UserId:        article.UserId,
-		ArticleStatus: article.ArticleStatus,
-		ProcessStatus: article.ProcessStatus,
-		CreatedAt:     article.CreatedAt.Format(time.DateTime),
-		UpdatedAt:     article.UpdatedAt.Format(time.DateTime),
+		Id:            topic.Id,
+		Title:         topic.Title,
+		Description:   topic.Excerpt,
+		Content:       firstPost.Content,
+		Type:          0,
+		CategoryId:    topic.CategoryIds,
+		UserId:        topic.UserId,
+		ArticleStatus: topic.Status,
+		ProcessStatus: topic.ProcessStatus,
+		CreatedAt:     topic.CreatedAt.Format(time.DateTime),
+		UpdatedAt:     topic.UpdatedAt.Format(time.DateTime),
 	})
 }
 
@@ -537,72 +544,75 @@ type DeleteArticleReq struct {
 
 // EditArticle 文章状态管理
 func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response {
-	article := articles.Get(req.Params.Id)
-	if article.Id == 0 {
+	topic := topics.Get(req.Params.Id)
+	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	if article.ProcessStatus == req.Params.ProcessStatus {
+	if topic.ProcessStatus == req.Params.ProcessStatus {
 		return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 	}
 
-	if err := articles.UpdateProcessStatus(article.Id, req.Params.ProcessStatus); err != nil {
+	if err := topics.UpdateProcessStatus(topic.Id, req.Params.ProcessStatus); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
-	article.ProcessStatus = req.Params.ProcessStatus
+	topic.ProcessStatus = req.Params.ProcessStatus
 
 	// 记录操作日志
 	statusCode := "unblocked"
 	if req.Params.ProcessStatus == 1 {
 		statusCode = "blocked"
 	}
-	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, article.Id, "admin.opt.article.statusChanged", optlogger.MessageParams{
-		"title":  article.Title,
+	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.statusChanged", optlogger.MessageParams{
+		"title":  topic.Title,
 		"status": statusCode,
 	})
-	moderationlogservice.ArticleStatusChanged(req.UserId, article.Id, article.Title, req.Params.ProcessStatus == 1)
-	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
-		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
+	moderationlogservice.ArticleStatusChanged(req.UserId, topic.Id, topic.Title, req.Params.ProcessStatus == 1)
+	firstPost := posts.Get(topic.FirstPostId)
+	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
+		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
 	}
+	hotdataserve.ClearArticleListCache()
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
 func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Response {
-	article := articles.Get(req.Params.Id)
-	if article.Id == 0 {
+	topic := topics.Get(req.Params.Id)
+	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	article.ProcessStatus = 1
-	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
-		slog.Error("failed to delete article search document", "articleId", article.Id, "err", err)
+	topic.ProcessStatus = 1
+	firstPost := posts.Get(topic.FirstPostId)
+	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
+		slog.Error("failed to delete topic search document", "topicId", topic.Id, "err", err)
 	}
-	articleCategoryRs.DeleteByArticleId(article.Id)
-	if rows := articles.Delete(&article); rows == 0 {
+	topicCategoryIndex.DeleteByTopicId(topic.Id)
+	if rows := topics.Delete(&topic); rows == 0 {
 		return component.FailResponseCode(component.MessageAdminArticleDeleteFailed, nil)
 	}
 	hotdataserve.ClearArticleListCache()
-	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, article.Id, "admin.opt.article.deleted", optlogger.MessageParams{
-		"title": article.Title,
+	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.deleted", optlogger.MessageParams{
+		"title": topic.Title,
 	})
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
 func EditArticlePin(req component.BetterRequest[EditArticlePinReq]) component.Response {
-	article := articles.Get(req.Params.Id)
-	if article.Id == 0 {
+	topic := topics.Get(req.Params.Id)
+	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
-	if article.PinWeight == req.Params.PinWeight {
+	if topic.PinWeight == req.Params.PinWeight {
 		return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 	}
-	oldPinWeight := article.PinWeight
-	if err := articles.UpdatePinWeight(article.Id, req.Params.PinWeight); err != nil {
+	oldPinWeight := topic.PinWeight
+	if err := topics.UpdatePinWeight(topic.Id, req.Params.PinWeight); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	hotdataserve.ClearArticleListCache()
-	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, article.Id, "admin.opt.article.pinWeightChanged", optlogger.MessageParams{
-		"title":        article.Title,
+	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.pinWeightChanged", optlogger.MessageParams{
+		"title":        topic.Title,
 		"oldPinWeight": oldPinWeight,
 		"pinWeight":    req.Params.PinWeight,
 	})
@@ -619,56 +629,36 @@ func EditArticleCategories(req component.BetterRequest[EditArticleCategoriesReq]
 		return component.FailResponseCode(component.MessageAdminCategorySelectTooMany, nil)
 	}
 	for _, categoryId := range categoryIds {
-		if categoryId == 0 || articleCategory.Get(categoryId).Id == 0 {
+		if categoryId == 0 || category.Get(categoryId).Id == 0 {
 			return component.FailResponseCode(component.MessageAdminCategoryNotFound, nil)
 		}
 	}
 
-	article := articles.Get(req.Params.Id)
-	if article.Id == 0 {
+	topic := topics.Get(req.Params.Id)
+	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
 	}
 
-	oldCategoryIds := append([]uint64(nil), article.CategoryId...)
-	article.CategoryId = categoryIds
-	if err := articles.SaveNoUpdate(&article); err != nil {
+	oldCategoryIds := append([]uint64(nil), topic.CategoryIds...)
+	topic.CategoryIds = categoryIds
+	if err := topics.SaveNoUpdate(&topic); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 
-	syncArticleCategoryRelations(article.Id, categoryIds)
-	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, article.Id, "admin.opt.article.categoriesChanged", optlogger.MessageParams{
-		"title":          article.Title,
+	if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, categoryIds); err != nil {
+		return component.FailResponseCode(component.MessageOperationFailed, nil)
+	}
+	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.categoriesChanged", optlogger.MessageParams{
+		"title":          topic.Title,
 		"oldCategoryIds": oldCategoryIds,
 		"categoryIds":    categoryIds,
 	})
-	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
-		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
+	firstPost := posts.Get(topic.FirstPostId)
+	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
+		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
 	}
+	hotdataserve.ClearArticleListCache()
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
-}
-
-func syncArticleCategoryRelations(articleId uint64, categoryIds []uint64) {
-	categoryIDMap := lo.SliceToMap(categoryIds, func(id uint64) (uint64, bool) {
-		return id, true
-	})
-	for _, item := range articleCategoryRs.GetByArticleId(articleId) {
-		if _, ok := categoryIDMap[item.ArticleCategoryId]; ok {
-			item.Effective = 1
-			articleCategoryRs.SaveOrCreateById(item)
-			delete(categoryIDMap, item.ArticleCategoryId)
-		} else {
-			item.Effective = 0
-			articleCategoryRs.SaveOrCreateById(item)
-		}
-	}
-	for id := range categoryIDMap {
-		rs := &articleCategoryRs.Entity{
-			ArticleId:         articleId,
-			ArticleCategoryId: id,
-			Effective:         1,
-		}
-		articleCategoryRs.SaveOrCreateById(rs)
-	}
 }
 
 type PermissionListReq struct {

@@ -197,7 +197,12 @@ func UpdateModerationArticleStatus(req component.BetterRequest[ModerationArticle
 	}
 	article.ProcessStatus = nextStatus
 	hotdataserve.ClearArticleListCache()
-	if _, err := searchservice.BuildSingleArticleSearchDocument(&article); err != nil {
+	topic := topics.Get(article.Id)
+	firstPost := posts.Get(topic.FirstPostId)
+	if firstPost.Id == 0 {
+		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
+	}
+	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
 		slog.Error("failed to rebuild article search document", "articleId", article.Id, "err", err)
 	}
 	moderationlogservice.ArticleStatusChanged(req.UserId, article.Id, article.Title, nextStatus == 1)
@@ -233,6 +238,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 		TargetType: report.TargetType,
 		TargetId:   report.TargetId,
 		ArticleId:  report.ArticleId,
+		TopicId:    report.TopicId,
 		ReporterId: report.ReporterId,
 		Reason:     report.Reason,
 	})

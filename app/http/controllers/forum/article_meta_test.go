@@ -7,8 +7,17 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
+	"github.com/leancodebox/GooseForum/app/bundles/preferences"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
+	"github.com/leancodebox/GooseForum/app/models/forum/category"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
+	"github.com/leancodebox/GooseForum/app/models/forum/users"
+	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
 func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
@@ -105,5 +114,129 @@ func TestDraftArticleViewIsNotCounted(t *testing.T) {
 	}
 	if shouldCountArticleView(blocked) {
 		t.Fatal("expected blocked article views to be ignored")
+	}
+}
+
+func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
+	preferences.Set("db.default.connection", "sqlite")
+	preferences.Set("db.default.path", ":memory:")
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &category.Entity{}, &users.EntityComplete{}, &topicUserAction.Entity{}); err != nil {
+		t.Fatalf("migrate topic detail tables: %v", err)
+	}
+	hotdataserve.ClearArticleCategoryCache()
+
+	now := time.Date(2026, 7, 7, 12, 0, 0, 0, time.UTC)
+	topicID := uint64(990010)
+	firstPostID := uint64(990100)
+	replyPostID := uint64(990101)
+	authorID := uint64(990001)
+	replyerID := uint64(990002)
+	categoryID := uint64(990003)
+	t.Cleanup(func() {
+		conn.Unscoped().Where("topic_id = ?", topicID).Delete(&posts.Entity{})
+		conn.Unscoped().Delete(&topics.Entity{}, topicID)
+		conn.Unscoped().Delete(&category.Entity{}, categoryID)
+		conn.Unscoped().Delete(&users.EntityComplete{}, []uint64{authorID, replyerID})
+		conn.Where("user_id = ? AND topic_id = ?", authorID, topicID).Delete(&topicUserAction.Entity{})
+		hotdataserve.ClearArticleCategoryCache()
+	})
+	conn.Unscoped().Where("topic_id = ?", topicID).Delete(&posts.Entity{})
+	conn.Unscoped().Delete(&topics.Entity{}, topicID)
+	conn.Unscoped().Delete(&category.Entity{}, categoryID)
+	conn.Unscoped().Delete(&users.EntityComplete{}, []uint64{authorID, replyerID})
+	conn.Where("user_id = ? AND topic_id = ?", authorID, topicID).Delete(&topicUserAction.Entity{})
+	conn.Create(&users.EntityComplete{Id: authorID, Username: "author"})
+	conn.Create(&users.EntityComplete{Id: replyerID, Username: "replyer"})
+	conn.Create(&category.Entity{Id: categoryID, Name: "General", Slug: "general"})
+	topic := topics.Entity{
+		Id:            topicID,
+		Title:         "topic title",
+		Excerpt:       "topic excerpt",
+		CategoryIds:   []uint64{categoryID},
+		UserId:        authorID,
+		Status:        1,
+		ProcessStatus: 0,
+		ReplyCount:    1,
+		PostSeq:       2,
+		CreatedAt:     now,
+		UpdatedAt:     now,
+	}
+	conn.Create(&topic)
+	firstPost := posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: authorID, Content: "first", RenderedHTML: "<p>first</p>", RenderedVersion: 1, CreatedAt: now, UpdatedAt: now}
+	conn.Create(&firstPost)
+	conn.Model(&topics.Entity{}).Where("id = ?", topicID).Update("first_post_id", firstPost.Id)
+	conn.Create(&posts.Entity{Id: replyPostID, TopicId: topicID, PostNo: 2, UserId: replyerID, Content: "reply", RenderedHTML: "<p>reply</p>", RenderedVersion: 1, CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})
+	conn.Create(&topicUserAction.Entity{UserId: authorID, TopicId: topicID, LikedAt: &now, WatchedAt: &now})
+
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(nil)
+	c.Request = httptest.NewRequest(http.MethodGet, "/p/post/990010", nil)
+	props := buildTopicDetailProps(c, &topic, &firstPost)
+
+	if props.Article.ID != topicID || props.Article.HTML != "<p>first</p>" || props.Article.MaxReplyNo != 1 {
+		t.Fatalf("article payload mismatch: %#v", props.Article)
+	}
+	if len(props.Article.Categories) != 1 || props.Article.Categories[0].Name != "General" {
+		t.Fatalf("categories mismatch: %#v", props.Article.Categories)
+	}
+	if len(props.Replies) != 1 || props.Replies[0].ID != replyPostID || props.Replies[0].ReplyNo != 1 {
+		t.Fatalf("replies mismatch: %#v", props.Replies)
+	}
+}
+
+func TestArticleRepliesWindowSkipsFirstPostInCursors(t *testing.T) {
+	preferences.Set("db.default.connection", "sqlite")
+	preferences.Set("db.default.path", ":memory:")
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &users.EntityComplete{}); err != nil {
+		t.Fatalf("migrate reply window tables: %v", err)
+	}
+
+	now := time.Date(2026, 7, 7, 13, 0, 0, 0, time.UTC)
+	topicID := uint64(991010)
+	firstPostID := uint64(991100)
+	replyPostID := uint64(991101)
+	userID := uint64(991001)
+	t.Cleanup(func() {
+		conn.Unscoped().Where("topic_id = ?", topicID).Delete(&posts.Entity{})
+		conn.Unscoped().Delete(&topics.Entity{}, topicID)
+		conn.Unscoped().Delete(&users.EntityComplete{}, userID)
+	})
+	conn.Unscoped().Where("topic_id = ?", topicID).Delete(&posts.Entity{})
+	conn.Unscoped().Delete(&topics.Entity{}, topicID)
+	conn.Unscoped().Delete(&users.EntityComplete{}, userID)
+	conn.Create(&users.EntityComplete{Id: userID, Username: "author"})
+	conn.Create(&topics.Entity{
+		Id:            topicID,
+		Title:         "topic",
+		UserId:        userID,
+		Status:        1,
+		ProcessStatus: 0,
+		ReplyCount:    1,
+		PostSeq:       2,
+		FirstPostId:   firstPostID,
+		CreatedAt:     now,
+		UpdatedAt:     now,
+	})
+	conn.Create(&posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: userID, Content: "first", CreatedAt: now, UpdatedAt: now})
+	conn.Create(&posts.Entity{Id: replyPostID, TopicId: topicID, PostNo: 2, UserId: userID, Content: "reply", CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})
+
+	res := ArticleRepliesWindow(component.BetterRequest[ArticleRepliesWindowReq]{
+		Params: ArticleRepliesWindowReq{
+			ArticleID: topicID,
+			Tail:      true,
+			Limit:     50,
+		},
+	})
+	payload, ok := res.Data.Result.(ReplyWindowPayload)
+	if !ok {
+		t.Fatalf("result type = %T, want ReplyWindowPayload", res.Data.Result)
+	}
+	if len(payload.Replies) != 1 || payload.Replies[0].ID != replyPostID {
+		t.Fatalf("replies = %#v, want only reply post", payload.Replies)
+	}
+	if payload.BeforeCursor != replyPostID || payload.AfterCursor != replyPostID || payload.BeforeReplyNo != 1 || payload.AfterReplyNo != 1 {
+		t.Fatalf("cursor payload = %#v", payload)
 	}
 }

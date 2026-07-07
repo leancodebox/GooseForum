@@ -23,6 +23,29 @@ func TestCommentNotificationExcludeUserIds(t *testing.T) {
 	}
 }
 
+func TestCommentCreatedEventTopicPostIDs(t *testing.T) {
+	event := &CommentCreatedEvent{
+		ArticleId: 10,
+		CommentId: 20,
+		TopicId:   30,
+		PostId:    40,
+	}
+	if got := event.topicID(); got != 30 {
+		t.Fatalf("topicID() = %d, want 30", got)
+	}
+	if got := event.postID(); got != 40 {
+		t.Fatalf("postID() = %d, want 40", got)
+	}
+
+	legacy := &CommentCreatedEvent{ArticleId: 10, CommentId: 20}
+	if got := legacy.topicID(); got != 10 {
+		t.Fatalf("legacy topicID() = %d, want 10", got)
+	}
+	if got := legacy.postID(); got != 20 {
+		t.Fatalf("legacy postID() = %d, want 20", got)
+	}
+}
+
 func TestShouldNotifyArticleAuthor(t *testing.T) {
 	tests := []struct {
 		name  string

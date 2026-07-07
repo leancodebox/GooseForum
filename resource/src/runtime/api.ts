@@ -56,6 +56,8 @@ export interface PostReplyResult {
   renderedContent: string
 }
 
+export type CreatePostResult = PostReplyResult
+
 export interface UpdateReplyResult {
   id: number
   replyNo?: number
@@ -64,50 +66,64 @@ export interface UpdateReplyResult {
   updatedAt: string
 }
 
-export async function postReply(articleId: number, content: string, replyId = 0): Promise<PostReplyResult | number | boolean> {
+export type UpdatePostResult = UpdateReplyResult
+
+export async function createPost(topicId: number, content: string, replyToPostId = 0): Promise<CreatePostResult | number | boolean> {
   const response = await fetch('/api/forum/articles-reply', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      articleId,
+      articleId: topicId,
       content,
-      replyId,
+      replyId: replyToPostId,
     }),
   })
-  return readApiResponse<PostReplyResult | number | boolean>(response, t('api.replyFailed'))
+  return readApiResponse<CreatePostResult | number | boolean>(response, t('api.replyFailed'))
 }
 
-export async function updateReply(replyId: number, content: string): Promise<UpdateReplyResult> {
+export async function postReply(articleId: number, content: string, replyId = 0): Promise<PostReplyResult | number | boolean> {
+  return createPost(articleId, content, replyId)
+}
+
+export async function updatePost(postId: number, content: string): Promise<UpdatePostResult> {
   const response = await fetch('/api/forum/articles-reply-update', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      replyId,
+      replyId: postId,
       content,
     }),
   })
-  return readApiResponse<UpdateReplyResult>(response, t('api.replyUpdateFailed'))
+  return readApiResponse<UpdatePostResult>(response, t('api.replyUpdateFailed'))
 }
 
-export async function deleteReply(replyId: number): Promise<boolean> {
+export async function updateReply(replyId: number, content: string): Promise<UpdateReplyResult> {
+  return updatePost(replyId, content)
+}
+
+export async function deletePost(postId: number): Promise<boolean> {
   const response = await fetch('/api/forum/articles-reply-delete', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      replyId,
+      replyId: postId,
     }),
   })
   return readApiResponse<boolean>(response, t('api.replyDeleteFailed'))
 }
 
-export interface ReplyWindowInput {
-  articleId: number
+export async function deleteReply(replyId: number): Promise<boolean> {
+  return deletePost(replyId)
+}
+
+export interface PostWindowInput {
+  topicId: number
   anchorReplyId?: number
   anchorReplyNo?: number
   before?: number
@@ -118,9 +134,14 @@ export interface ReplyWindowInput {
   tail?: boolean
 }
 
-export async function getArticleRepliesWindow(input: ReplyWindowInput): Promise<ReplyWindowPayload> {
+export interface ReplyWindowInput extends Omit<PostWindowInput, 'topicId'> {
+  articleId?: number
+  topicId?: number
+}
+
+export async function getPostWindow(input: PostWindowInput): Promise<ReplyWindowPayload> {
   const params = new URLSearchParams({
-    articleId: String(input.articleId),
+    articleId: String(input.topicId),
   })
   if (input.anchorReplyId) params.set('anchorReplyId', String(input.anchorReplyId))
   if (input.anchorReplyNo) params.set('anchorReplyNo', String(input.anchorReplyNo))
@@ -137,6 +158,13 @@ export async function getArticleRepliesWindow(input: ReplyWindowInput): Promise<
     },
   })
   return readApiResponse<ReplyWindowPayload>(response, t('api.repliesLoadFailed'))
+}
+
+export async function getArticleRepliesWindow(input: ReplyWindowInput): Promise<ReplyWindowPayload> {
+  return getPostWindow({
+    ...input,
+    topicId: input.topicId ?? input.articleId ?? 0,
+  })
 }
 
 export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
