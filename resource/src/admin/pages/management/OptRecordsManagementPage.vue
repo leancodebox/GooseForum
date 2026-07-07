@@ -25,14 +25,14 @@ const columns = ['ID', adminText('k0036'), adminText('k0037'), adminText('k0038'
 
 const optTypeCodeMap: Record<number, string> = {
   0: 'editUser',
-  1: 'editArticle',
+  1: 'editTopic',
   2: 'editCategory',
 }
 
 const targetTypeCodeMap: Record<number, string> = {
   0: 'system',
   1: 'user',
-  2: 'article',
+  2: 'topic',
   3: 'docProject',
   4: 'docVersion',
   5: 'docContent',
@@ -41,11 +41,11 @@ const targetTypeCodeMap: Record<number, string> = {
 
 const optInfoMessageKeyMap: Record<string, string> = {
   'admin.opt.user.updated': 'adminOptLog.messages.userUpdated',
-  'admin.opt.article.statusChanged': 'adminOptLog.messages.articleStatusChanged',
-  'admin.opt.article.pinWeightChanged': 'adminOptLog.messages.articlePinWeightChanged',
-  'admin.opt.article.categoriesChanged': 'adminOptLog.messages.articleCategoriesChanged',
-  'admin.opt.article.deleted': 'adminOptLog.messages.articleDeleted',
-  'moderator.opt.article.statusChanged': 'adminOptLog.messages.moderatorArticleStatusChanged',
+  'admin.opt.topic.statusChanged': 'adminOptLog.messages.topicStatusChanged',
+  'admin.opt.topic.pinWeightChanged': 'adminOptLog.messages.topicPinWeightChanged',
+  'admin.opt.topic.categoriesChanged': 'adminOptLog.messages.topicCategoriesChanged',
+  'admin.opt.topic.deleted': 'adminOptLog.messages.topicDeleted',
+  'moderator.opt.topic.statusChanged': 'adminOptLog.messages.moderatorTopicStatusChanged',
   'admin.opt.category.moderatorAdded': 'adminOptLog.messages.categoryModeratorAdded',
   'admin.opt.category.moderatorRemoved': 'adminOptLog.messages.categoryModeratorRemoved',
 }

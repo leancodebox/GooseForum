@@ -4,8 +4,8 @@ HTTP 通知会在选中的站内事件发生后，异步向回调地址发送 PO
 
 ### 支持的事件
 
-- `article.published`
-- `article.updated`
+- `topic.published`
+- `topic.updated`
 - `comment.created`
 - `user.signup`
 - `moderation.report.created`
@@ -17,7 +17,7 @@ HTTP 通知会在选中的站内事件发生后，异步向回调地址发送 PO
 ```http
 POST /your-webhook HTTP/1.1
 Content-Type: application/json
-X-Goose-Event: article.published
+X-Goose-Event: topic.published
 X-Goose-Delivery: 7c9f0b0fd4e2a111
 X-Goose-Timestamp: 1710000000
 X-Goose-Signature: sha256=...
@@ -25,7 +25,7 @@ X-Goose-Signature: sha256=...
 
 ```json
 {
-  "event": "article.published",
+  "event": "topic.published",
   "timestamp": 1710000000,
   "data": {
     "baseUri": "http://localhost:5234",
@@ -61,7 +61,7 @@ X-Goose-Signature: sha256=...
 }
 ```
 
-`baseUri` 可用于把 `article.url`、`user.url`、`comment.url` 这类站内路径拼成完整 URL；新接入建议优先使用 `article`、`user`、`comment`、`reporter` 等结构化对象，避免重复解析顶层镜像字段。评论事件会额外包含评论内容预览、评论人信息和评论 URL；举报评论时也会包含被举报评论信息。
+`baseUri` 可用于把 `topic.url`、`user.url`、`post.url` 这类站内路径拼成完整 URL；新接入建议优先使用 `topic`、`user`、`post`、`reporter` 等结构化对象，避免重复解析顶层镜像字段。评论事件会额外包含内容预览、评论人信息和 post URL；举报 post 时也会包含被举报 post 信息。
 
 ### 签名校验
 

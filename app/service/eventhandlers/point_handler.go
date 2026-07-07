@@ -12,12 +12,12 @@ func handlePointTopicPublished(ctx context.Context, event *TopicPublishedEvent) 
 	if userID == 0 {
 		return nil
 	}
-	pointservice.RewardPoints(userID, 10, pointservice.RewardPoints4WriteArticles)
+	pointservice.RewardPoints(userID, 10, pointservice.RewardPointsWriteTopic)
 	return nil
 }
 
 // handlePointCommentCreated 评论获得积分
 func handlePointCommentCreated(ctx context.Context, event *CommentCreatedEvent) error {
-	pointservice.RewardPoints(event.UserId, 2, pointservice.RewardPoints4Reply)
+	pointservice.RewardPoints(event.UserId, 2, pointservice.RewardPointsWritePost)
 	return nil
 }

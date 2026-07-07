@@ -8,8 +8,8 @@ func TestRewardPointsTypeString(t *testing.T) {
 		want  string
 	}{
 		{value: RewardPointsInit, want: "初始化"},
-		{value: RewardPoints4WriteArticles, want: ""},
-		{value: RewardPoints4Reply, want: ""},
+		{value: RewardPointsWriteTopic, want: ""},
+		{value: RewardPointsWritePost, want: ""},
 		{value: RewardPointsType(99), want: ""},
 	}
 

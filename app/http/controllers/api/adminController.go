@@ -499,7 +499,7 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 func TopicSource(req component.BetterRequest[TopicSourceReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 	firstPost := posts.Get(topic.FirstPostId)
 	if firstPost.Id == 0 {
@@ -544,7 +544,7 @@ type DeleteTopicReq struct {
 func EditTopic(req component.BetterRequest[EditTopicReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
 	if topic.ProcessStatus == req.Params.ProcessStatus {
@@ -561,7 +561,7 @@ func EditTopic(req component.BetterRequest[EditTopicReq]) component.Response {
 	if req.Params.ProcessStatus == 1 {
 		statusCode = "blocked"
 	}
-	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.statusChanged", optlogger.MessageParams{
+	optlogger.UserOptCode(req.UserId, optlogger.EditTopic, topic.Id, "admin.opt.topic.statusChanged", optlogger.MessageParams{
 		"title":  topic.Title,
 		"status": statusCode,
 	})
@@ -577,7 +577,7 @@ func EditTopic(req component.BetterRequest[EditTopicReq]) component.Response {
 func DeleteTopic(req component.BetterRequest[DeleteTopicReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
 	topic.ProcessStatus = 1
@@ -587,10 +587,10 @@ func DeleteTopic(req component.BetterRequest[DeleteTopicReq]) component.Response
 	}
 	topicCategoryIndex.DeleteByTopicId(topic.Id)
 	if rows := topics.Delete(&topic); rows == 0 {
-		return component.FailResponseCode(component.MessageAdminArticleDeleteFailed, nil)
+		return component.FailResponseCode(component.MessageAdminTopicDeleteFailed, nil)
 	}
 	hotdataserve.ClearTopicListCache()
-	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.deleted", optlogger.MessageParams{
+	optlogger.UserOptCode(req.UserId, optlogger.EditTopic, topic.Id, "admin.opt.topic.deleted", optlogger.MessageParams{
 		"title": topic.Title,
 	})
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
@@ -599,7 +599,7 @@ func DeleteTopic(req component.BetterRequest[DeleteTopicReq]) component.Response
 func EditTopicPin(req component.BetterRequest[EditTopicPinReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 	if topic.PinWeight == req.Params.PinWeight {
 		return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
@@ -609,7 +609,7 @@ func EditTopicPin(req component.BetterRequest[EditTopicPinReq]) component.Respon
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
 	hotdataserve.ClearTopicListCache()
-	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.pinWeightChanged", optlogger.MessageParams{
+	optlogger.UserOptCode(req.UserId, optlogger.EditTopic, topic.Id, "admin.opt.topic.pinWeightChanged", optlogger.MessageParams{
 		"title":        topic.Title,
 		"oldPinWeight": oldPinWeight,
 		"pinWeight":    req.Params.PinWeight,
@@ -621,10 +621,10 @@ func EditTopicPin(req component.BetterRequest[EditTopicPinReq]) component.Respon
 func EditTopicCategories(req component.BetterRequest[EditTopicCategoriesReq]) component.Response {
 	categoryIds := lo.Uniq(req.Params.CategoryId)
 	if len(categoryIds) == 0 {
-		return component.FailResponseCode(component.MessageAdminCategorySelectRequired, nil)
+		return component.FailResponseCode(component.MessageAdminTopicCategoryRequired, nil)
 	}
 	if len(categoryIds) > 3 {
-		return component.FailResponseCode(component.MessageAdminCategorySelectTooMany, nil)
+		return component.FailResponseCode(component.MessageAdminTopicCategoryTooMany, nil)
 	}
 	for _, categoryId := range categoryIds {
 		if categoryId == 0 || category.Get(categoryId).Id == 0 {
@@ -634,7 +634,7 @@ func EditTopicCategories(req component.BetterRequest[EditTopicCategoriesReq]) co
 
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
 	oldCategoryIds := append([]uint64(nil), topic.CategoryIds...)
@@ -646,7 +646,7 @@ func EditTopicCategories(req component.BetterRequest[EditTopicCategoriesReq]) co
 	if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, categoryIds); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
-	optlogger.UserOptCode(req.UserId, optlogger.EditArticle, topic.Id, "admin.opt.article.categoriesChanged", optlogger.MessageParams{
+	optlogger.UserOptCode(req.UserId, optlogger.EditTopic, topic.Id, "admin.opt.topic.categoriesChanged", optlogger.MessageParams{
 		"title":          topic.Title,
 		"oldCategoryIds": oldCategoryIds,
 		"categoryIds":    categoryIds,

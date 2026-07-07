@@ -1013,8 +1013,8 @@ export default {
       handlerLabel: '処理者',
       noExcerpt: '抜粋はありません',
       targetTypes: {
-        article: '投稿',
-        reply: '返信',
+        topic: 'トピック',
+        post: '投稿',
       },
       reasons: {
         spam: 'スパム',
@@ -1078,13 +1078,13 @@ export default {
   adminOptLog: {
     optType: {
       editUser: 'User operation',
-      editArticle: 'Edit post',
+      editTopic: 'Edit topic',
       editCategory: 'Edit category',
     },
     targetType: {
       system: 'System',
       user: 'User',
-      article: 'Post',
+      topic: 'Topic',
       docProject: 'Document project',
       docVersion: 'Document version',
       docContent: 'Document content',
@@ -1092,11 +1092,11 @@ export default {
     },
     messages: {
       userUpdated: 'Updated user {userId}: {changedFields}',
-      articleStatusChanged: 'Post "{title}" status changed to {status}',
-      articlePinWeightChanged: 'Post "{title}" pin weight {oldPinWeight} -> {pinWeight}',
-      articleCategoriesChanged: 'Post "{title}" categories {oldCategoryIds} -> {categoryIds}',
-      articleDeleted: 'Deleted post "{title}"',
-      moderatorArticleStatusChanged: 'Moderator changed post "{title}" to {status}',
+      topicStatusChanged: 'Topic "{title}" status changed to {status}',
+      topicPinWeightChanged: 'Topic "{title}" pin weight {oldPinWeight} -> {pinWeight}',
+      topicCategoriesChanged: 'Topic "{title}" categories {oldCategoryIds} -> {categoryIds}',
+      topicDeleted: 'Deleted topic "{title}"',
+      moderatorTopicStatusChanged: 'Moderator changed topic "{title}" to {status}',
       categoryModeratorAdded: 'Added moderator {username} to category "{categoryName}"',
       categoryModeratorRemoved: 'Removed moderator {userId} from category "{categoryName}"',
     },

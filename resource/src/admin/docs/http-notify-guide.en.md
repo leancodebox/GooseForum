@@ -4,8 +4,8 @@ HTTP notifications send asynchronous POST requests to callback URLs when selecte
 
 ### Supported events
 
-- `article.published`
-- `article.updated`
+- `topic.published`
+- `topic.updated`
 - `comment.created`
 - `user.signup`
 - `moderation.report.created`
@@ -17,7 +17,7 @@ The request body is JSON. Headers include the event name, delivery ID, timestamp
 ```http
 POST /your-webhook HTTP/1.1
 Content-Type: application/json
-X-Goose-Event: article.published
+X-Goose-Event: topic.published
 X-Goose-Delivery: 7c9f0b0fd4e2a111
 X-Goose-Timestamp: 1710000000
 X-Goose-Signature: sha256=...
@@ -25,7 +25,7 @@ X-Goose-Signature: sha256=...
 
 ```json
 {
-  "event": "article.published",
+  "event": "topic.published",
   "timestamp": 1710000000,
   "data": {
     "baseUri": "http://localhost:5234",
@@ -61,7 +61,7 @@ X-Goose-Signature: sha256=...
 }
 ```
 
-`baseUri` can be used to turn site paths such as `article.url`, `user.url`, and `comment.url` into absolute URLs. New integrations should prefer structured objects such as `article`, `user`, `comment`, and `reporter`, avoiding duplicate top-level mirror fields. Comment events also include the comment preview, commenter profile, and comment URL; report events for replies include the reported comment details.
+`baseUri` can be used to turn site paths such as `topic.url`, `user.url`, and `post.url` into absolute URLs. New integrations should prefer structured objects such as `topic`, `user`, `post`, and `reporter`, avoiding duplicate top-level mirror fields. Comment events also include the content preview, commenter profile, and post URL; report events for posts include the reported post details.
 
 ### Signature verification
 

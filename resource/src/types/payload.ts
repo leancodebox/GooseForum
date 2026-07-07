@@ -387,7 +387,7 @@ export interface ModerationPageProps {
 }
 
 export interface ModerationLogSubject {
-  type: 'article' | 'category' | 'user' | 'system' | string
+  type: 'topic' | 'post' | 'category' | 'user' | 'system' | string
   id: number
   title: string
   url?: string

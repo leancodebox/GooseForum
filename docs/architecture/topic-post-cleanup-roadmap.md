@@ -112,8 +112,7 @@ rg "postReply|updateReply|deleteReply|articleId|replyId|replyNo|ArticlePayload|A
    - `ArticleSource` -> `TopicSource`
    - `EditArticle` -> `EditTopic`
    - `DeleteArticle` -> `DeleteTopic`
-4. 保留旧日志 message key，不在这一阶段改 i18n key：
-   - 例如 `admin.opt.article.deleted` 可以暂时保留。
+4. 日志 message key 与内部事件名也统一切到 topic/post，不继续保留 article/reply。
 5. 完成后搜索确认：
 
 ```bash

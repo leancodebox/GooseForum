@@ -23,8 +23,8 @@ import (
 )
 
 const (
-	EventArticlePublished = "article.published"
-	EventArticleUpdated   = "article.updated"
+	EventTopicPublished   = "topic.published"
+	EventTopicUpdated     = "topic.updated"
 	EventCommentCreated   = "comment.created"
 	EventUserSignup       = "user.signup"
 	EventReportCreated    = "moderation.report.created"

@@ -4,8 +4,8 @@ HTTP 通知は、選択したサイト内イベントが発生したときに、
 
 ### 対応イベント
 
-- `article.published`
-- `article.updated`
+- `topic.published`
+- `topic.updated`
 - `comment.created`
 - `user.signup`
 - `moderation.report.created`
@@ -17,7 +17,7 @@ HTTP 通知は、選択したサイト内イベントが発生したときに、
 ```http
 POST /your-webhook HTTP/1.1
 Content-Type: application/json
-X-Goose-Event: article.published
+X-Goose-Event: topic.published
 X-Goose-Delivery: 7c9f0b0fd4e2a111
 X-Goose-Timestamp: 1710000000
 X-Goose-Signature: sha256=...
@@ -25,7 +25,7 @@ X-Goose-Signature: sha256=...
 
 ```json
 {
-  "event": "article.published",
+  "event": "topic.published",
   "timestamp": 1710000000,
   "data": {
     "baseUri": "http://localhost:5234",
@@ -61,7 +61,7 @@ X-Goose-Signature: sha256=...
 }
 ```
 
-`baseUri` は `article.url`、`user.url`、`comment.url` などのサイト内パスを絶対 URL にするために使えます。新しい連携では、重複するトップレベルのミラーフィールドではなく、`article`、`user`、`comment`、`reporter` などの構造化オブジェクトを優先して使ってください。コメントイベントにはコメント本文のプレビュー、投稿者情報、コメント URL も含まれます。返信への通報イベントには、通報対象のコメント情報も含まれます。
+`baseUri` は `topic.url`、`user.url`、`post.url` などのサイト内パスを絶対 URL にするために使えます。新しい連携では、重複するトップレベルのミラーフィールドではなく、`topic`、`user`、`post`、`reporter` などの構造化オブジェクトを優先して使ってください。コメントイベントには内容プレビュー、投稿者情報、post URL も含まれます。post への通報イベントには、通報対象の post 情報も含まれます。
 
 ### 署名検証
 

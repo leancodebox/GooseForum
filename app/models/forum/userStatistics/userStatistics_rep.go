@@ -29,7 +29,7 @@ func Get(id any) (entity Entity) {
 	return
 }
 
-func WriteArticle(userId uint64) int64 {
+func WriteTopic(userId uint64) int64 {
 	result := builder().Exec("UPDATE user_statistics SET article_count = article_count+1 where user_id = ?", userId)
 	return result.RowsAffected
 }
@@ -39,8 +39,8 @@ func WriteComment(userId uint64) int64 {
 	return result.RowsAffected
 }
 
-// LikeArticle 收到的点赞
-func LikeArticle(userId uint64) int64 {
+// LikeTopic 收到的点赞
+func LikeTopic(userId uint64) int64 {
 	result := builder().Exec("UPDATE user_statistics SET like_received_count = like_received_count+1 where user_id = ?", userId)
 	return result.RowsAffected
 }
@@ -51,7 +51,7 @@ func GivenLike(userId uint64) int64 {
 	return result.RowsAffected
 }
 
-func CancelLikeArticle(userId uint64) int64 {
+func CancelLikeTopic(userId uint64) int64 {
 	result := builder().Exec("UPDATE user_statistics SET like_received_count = like_received_count-1 where user_id = ?", userId)
 	return result.RowsAffected
 }

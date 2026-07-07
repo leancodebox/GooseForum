@@ -1013,8 +1013,8 @@ export default {
       handlerLabel: '处理人',
       noExcerpt: '暂无摘要',
       targetTypes: {
-        article: '文章',
-        reply: '回复',
+        topic: '主题',
+        post: '帖子',
       },
       reasons: {
         spam: '垃圾广告',
@@ -1078,13 +1078,13 @@ export default {
   adminOptLog: {
     optType: {
       editUser: '操作用户',
-      editArticle: '编辑文章',
+      editTopic: '编辑主题',
       editCategory: '编辑分类',
     },
     targetType: {
       system: '系统',
       user: '用户',
-      article: '文章',
+      topic: '主题',
       docProject: '文档项目',
       docVersion: '文档版本',
       docContent: '文档内容',
@@ -1092,11 +1092,11 @@ export default {
     },
     messages: {
       userUpdated: '更新用户 {userId}：{changedFields}',
-      articleStatusChanged: '文章「{title}」状态调整为{status}',
-      articlePinWeightChanged: '文章「{title}」置顶权重 {oldPinWeight} -> {pinWeight}',
-      articleCategoriesChanged: '文章「{title}」分类 {oldCategoryIds} -> {categoryIds}',
-      articleDeleted: '删除文章「{title}」',
-      moderatorArticleStatusChanged: '版主将文章「{title}」调整为{status}',
+      topicStatusChanged: '主题「{title}」状态调整为{status}',
+      topicPinWeightChanged: '主题「{title}」置顶权重 {oldPinWeight} -> {pinWeight}',
+      topicCategoriesChanged: '主题「{title}」分类 {oldCategoryIds} -> {categoryIds}',
+      topicDeleted: '删除主题「{title}」',
+      moderatorTopicStatusChanged: '版主将主题「{title}」调整为{status}',
       categoryModeratorAdded: '为分类「{categoryName}」添加版主 {username}',
       categoryModeratorRemoved: '移除分类「{categoryName}」的版主 {userId}',
     },

@@ -24,18 +24,18 @@ type ReportCreatedEvent struct {
 }
 
 func handleHttpNotifyTopicPublished(ctx context.Context, event *TopicPublishedEvent) error {
-	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticlePublished) {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicPublished) {
 		return nil
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventArticlePublished, topicEventNotifyPayload(event))
+	httpnotifyservice.Notify(httpnotifyservice.EventTopicPublished, topicEventNotifyPayload(event))
 	return nil
 }
 
 func handleHttpNotifyTopicUpdated(ctx context.Context, event *TopicUpdatedEvent) error {
-	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventArticleUpdated) {
+	if !httpnotifyservice.ShouldNotify(httpnotifyservice.EventTopicUpdated) {
 		return nil
 	}
-	httpnotifyservice.Notify(httpnotifyservice.EventArticleUpdated, topicUpdatedEventNotifyPayload(event))
+	httpnotifyservice.Notify(httpnotifyservice.EventTopicUpdated, topicUpdatedEventNotifyPayload(event))
 	return nil
 }
 

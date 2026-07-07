@@ -101,10 +101,10 @@ func handleUserFollowed(ctx context.Context, event *UserFollowedEvent) error {
 	return eventnotice.SendFollowNotification(event.UserId, event.FollowerId, event.FollowerName)
 }
 
-// ArticleLikedEvent 文章点赞事件
-type ArticleLikedEvent struct {
-	UserId    uint64
-	ArticleId uint64
-	Title     string
-	LikierId  uint64
+// TopicLikedEvent 主题点赞事件
+type TopicLikedEvent struct {
+	UserId  uint64
+	TopicId uint64
+	Title   string
+	LikerId uint64
 }

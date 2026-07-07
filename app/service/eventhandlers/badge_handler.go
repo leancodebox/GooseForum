@@ -29,8 +29,8 @@ func handleBadgeComment(ctx context.Context, event *CommentCreatedEvent) error {
 	return nil
 }
 
-func handleBadgeLike(ctx context.Context, event *ArticleLikedEvent) error {
-	checkAndInvalidateUserBadges(event.LikierId, badgeservice.TriggerLike)
+func handleBadgeLike(ctx context.Context, event *TopicLikedEvent) error {
+	checkAndInvalidateUserBadges(event.LikerId, badgeservice.TriggerLike)
 	checkAndInvalidateUserBadges(event.UserId, badgeservice.TriggerLike)
 	return nil
 }

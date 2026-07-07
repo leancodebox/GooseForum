@@ -19,7 +19,7 @@ func TopicStatusChanged(actorUserId uint64, topicId uint64, title string, blocke
 		SubjectType: moderationLog.SubjectTopic,
 		SubjectId:   topicId,
 		Payload: moderationLog.Payload{
-			MessageCode: "moderation.log.article.statusChanged",
+			MessageCode: "moderation.log.topic.statusChanged",
 			Params: map[string]any{
 				"topicId": topicId,
 				"title":   title,
@@ -67,14 +67,14 @@ func PostStatusChanged(actorUserId uint64, snapshot PostSnapshot, blocked bool) 
 		SubjectType: moderationLog.SubjectPost,
 		SubjectId:   snapshot.PostId,
 		Payload: moderationLog.Payload{
-			MessageCode: "moderation.log.reply.statusChanged",
+			MessageCode: "moderation.log.post.statusChanged",
 			Params: map[string]any{
 				"topicId":       snapshot.TopicId,
 				"postId":        snapshot.PostId,
 				"title":         snapshot.TopicTitle,
 				"postNo":        snapshot.PostNo,
-				"replyAuthorId": snapshot.PostAuthorId,
-				"replyAuthor":   snapshot.PostAuthor,
+				"postAuthorId":  snapshot.PostAuthorId,
+				"postAuthor":    snapshot.PostAuthor,
 				"excerpt":       snapshot.Excerpt,
 				"status":        status,
 			},

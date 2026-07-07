@@ -53,7 +53,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	if len(req.Params.Title) < postingConfig.TextControl.MinTitleLength {
 		minLength := postingConfig.TextControl.MinTitleLength
 		return component.FailResponseCode(
-			component.MessageArticleTitleTooShort,
+			component.MessageTopicTitleTooShort,
 
 			component.MessageParams{"minLength": minLength})
 
@@ -62,7 +62,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	if len(req.Params.Title) > postingConfig.TextControl.MaxTitleLength {
 		maxLength := postingConfig.TextControl.MaxTitleLength
 		return component.FailResponseCode(
-			component.MessageArticleTitleTooLong,
+			component.MessageTopicTitleTooLong,
 
 			component.MessageParams{"maxLength": maxLength})
 
@@ -71,7 +71,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	if len(req.Params.Content) < postingConfig.TextControl.MinPostLength {
 		minLength := postingConfig.TextControl.MinPostLength
 		return component.FailResponseCode(
-			component.MessageArticleContentTooShort,
+			component.MessageTopicContentTooShort,
 
 			component.MessageParams{"minLength": minLength})
 
@@ -80,7 +80,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	if len(req.Params.Content) > postingConfig.TextControl.MaxPostLength {
 		maxLength := postingConfig.TextControl.MaxPostLength
 		return component.FailResponseCode(
-			component.MessageArticleContentTooLong,
+			component.MessageTopicContentTooLong,
 
 			component.MessageParams{"maxLength": maxLength})
 
@@ -93,7 +93,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			minutes := postingConfig.TextControl.NewUserPostCooldownMinutes
 			availableAt := cooldownTime.Format("2006-01-02 15:04:05")
 			return component.FailResponseCode(
-				component.MessageArticlePostCooldown,
+				component.MessageTopicPostCooldown,
 
 				component.MessageParams{"minutes": minutes, "availableAt": availableAt})
 
@@ -101,14 +101,14 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	}
 
 	if topics.CantWriteNew(req.UserId, 10) {
-		return component.FailResponseCode(component.MessageArticleDailyLimit, nil)
+		return component.FailResponseCode(component.MessageTopicDailyLimit, nil)
 	}
 	var topic topics.Entity
 	var firstPost posts.Entity
 	if req.Params.TopicId != 0 {
 		topic = topics.Get(req.Params.TopicId)
 		if topic.UserId != req.UserId {
-			return component.FailResponseCode(component.MessageArticleOwnerMismatch, nil)
+			return component.FailResponseCode(component.MessageTopicOwnerMismatch, nil)
 		}
 		firstPost = posts.Get(topic.FirstPostId)
 		if firstPost.Id == 0 {
@@ -124,7 +124,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	topic.FirstImageURL = markdown2html.ExtractFirstImageURL(req.Params.Content)
 	if topic.Id > 0 {
 		if firstPost.Id == 0 {
-			return component.FailResponseCode(component.MessageArticleNotFound, nil)
+			return component.FailResponseCode(component.MessageTopicNotFound, nil)
 		}
 		firstPost.Content = req.Params.Content
 		firstPost.RenderedHTML = ""
@@ -170,7 +170,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		}
 		fileusageservice.ReplaceTopic(topic.Id, req.UserId, firstPost.Content)
 		if topic.Status == 1 {
-			userStatistics.WriteArticle(req.UserId)
+			userStatistics.WriteTopic(req.UserId)
 		}
 		userservice.InvalidateUserPublicProfileCache(req.UserId)
 		if err := topicCategoryIndex.ReplaceTopicCategories(topic.Id, req.Params.CategoryId); err != nil {
@@ -201,10 +201,10 @@ type TopicStatusReq struct {
 func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 	if topic.UserId != req.UserId {
-		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
+		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
 	}
 	nextStatus := req.Params.TopicStatus
 	if topic.Status == nextStatus {
@@ -212,7 +212,7 @@ func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Re
 	}
 	topic.Status = nextStatus
 	if err := topics.Save(&topic); err != nil {
-		return component.FailResponseCode(component.MessageArticleSaveFailed, nil)
+		return component.FailResponseCode(component.MessageTopicSaveFailed, nil)
 	}
 	firstPost := posts.Get(topic.FirstPostId)
 	hotdataserve.ClearTopicListCache()
@@ -277,7 +277,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 
 	topicEntity := topics.GetSimple(req.Params.TopicId)
 	if topicEntity.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
 	var parentPost posts.Entity
@@ -347,10 +347,10 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 	postEntity := posts.Get(req.Params.PostId)
 	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
-		return component.FailResponseCode(component.MessageReplyNotFound, nil)
+		return component.FailResponseCode(component.MessagePostNotFound, nil)
 	}
 	if postEntity.UserId != req.UserId {
-		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
+		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
 	}
 
 	content := strings.TrimSpace(req.Params.Content)
@@ -378,7 +378,7 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 
 	if err := posts.Save(&postEntity); err != nil {
 		return component.FailResponseCode(
-			component.MessageReplyUpdateFailed,
+			component.MessagePostUpdateFailed,
 
 			component.MessageParams{"error": err.Error()})
 
@@ -397,10 +397,10 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 	postEntity := posts.Get(req.Params.PostId)
 	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
-		return component.FailResponseCode(component.MessageReplyNotFound, nil)
+		return component.FailResponseCode(component.MessagePostNotFound, nil)
 	}
 	if postEntity.UserId != req.UserId {
-		return component.FailResponseCode(component.MessageArticleOperationDenied, nil)
+		return component.FailResponseCode(component.MessageTopicOperationDenied, nil)
 	}
 	posts.DeleteEntity(&postEntity)
 	topicEntity := topics.GetSimple(postEntity.TopicId)
@@ -419,7 +419,7 @@ type LikeTopicReq struct {
 func LikeTopic(req component.BetterRequest[LikeTopicReq]) component.Response {
 	topicEntity := topics.Get(req.Params.TopicId)
 	if topicEntity.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)
 	targetLiked := req.Params.Action == 1
@@ -432,22 +432,22 @@ func LikeTopic(req component.BetterRequest[LikeTopicReq]) component.Response {
 	if topicUserAction.SetLiked(req.UserId, topicEntity.Id, targetLiked) {
 		if req.Params.Action == 1 {
 			topics.IncrementLike(topicEntity)
-			userStatistics.LikeArticle(topicEntity.UserId)
+			userStatistics.LikeTopic(topicEntity.UserId)
 			userStatistics.GivenLike(req.UserId)
 			userservice.InvalidateUserPublicProfileCache(topicEntity.UserId)
 			userservice.InvalidateUserPublicProfileCache(req.UserId)
 			hotdataserve.ClearTopicListCache()
 
 			// 发送点赞事件
-			eventbus.Publish(context.Background(), &eventhandlers.ArticleLikedEvent{
-				UserId:    topicEntity.UserId,
-				ArticleId: topicEntity.Id,
-				Title:     topicEntity.Title,
-				LikierId:  req.UserId,
+			eventbus.Publish(context.Background(), &eventhandlers.TopicLikedEvent{
+				UserId:  topicEntity.UserId,
+				TopicId: topicEntity.Id,
+				Title:   topicEntity.Title,
+				LikerId: req.UserId,
 			})
 		} else {
 			topics.DecrementLike(topicEntity)
-			userStatistics.CancelLikeArticle(topicEntity.UserId)
+			userStatistics.CancelLikeTopic(topicEntity.UserId)
 			userStatistics.CancelGivenLike(req.UserId)
 			userservice.InvalidateUserPublicProfileCache(topicEntity.UserId)
 			userservice.InvalidateUserPublicProfileCache(req.UserId)
@@ -465,7 +465,7 @@ type BookmarkTopicReq struct {
 func BookmarkTopic(req component.BetterRequest[BookmarkTopicReq]) component.Response {
 	topicEntity := topics.Get(req.Params.TopicId)
 	if topicEntity.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
 	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)
@@ -500,7 +500,7 @@ type WatchTopicReq struct {
 func WatchTopic(req component.BetterRequest[WatchTopicReq]) component.Response {
 	topicEntity := topics.Get(req.Params.TopicId)
 	if topicEntity.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
 	state := topicUserAction.GetByTopicId(req.UserId, topicEntity.Id)

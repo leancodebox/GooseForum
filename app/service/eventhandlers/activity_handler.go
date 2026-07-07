@@ -21,8 +21,8 @@ func handleActivityPost(ctx context.Context, event *TopicPublishedEvent) error {
 }
 
 // handleActivityLike 记录点赞行为
-func handleActivityLike(ctx context.Context, event *ArticleLikedEvent) error {
-	return userActivities.Record(event.LikierId, userActivities.ActionLike, userActivities.SubjectTopic, event.ArticleId, event.Title)
+func handleActivityLike(ctx context.Context, event *TopicLikedEvent) error {
+	return userActivities.Record(event.LikerId, userActivities.ActionLike, userActivities.SubjectTopic, event.TopicId, event.Title)
 }
 
 // handleActivityFollow 记录关注行为

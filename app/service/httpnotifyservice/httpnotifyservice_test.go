@@ -10,9 +10,9 @@ import (
 )
 
 func TestEndpointAcceptsSelectedEvent(t *testing.T) {
-	endpoint := pageConfig.HttpNotifyEndpoint{Enabled: true, URL: "http://example.com/hook", Events: []string{"article.published"}}
+	endpoint := pageConfig.HttpNotifyEndpoint{Enabled: true, URL: "http://example.com/hook", Events: []string{"topic.published"}}
 
-	if !endpointAccepts(endpoint, "article.published") {
+	if !endpointAccepts(endpoint, "topic.published") {
 		t.Fatal("expected endpoint to accept selected event")
 	}
 	if endpointAccepts(endpoint, "comment.created") {
@@ -24,27 +24,27 @@ func TestShouldNotifyConfig(t *testing.T) {
 	config := pageConfig.HttpNotifyConfig{Enabled: true, Endpoints: []pageConfig.HttpNotifyEndpoint{{
 		Enabled: true,
 		URL:     "http://example.com/hook",
-		Events:  []string{"article.published"},
+		Events:  []string{"topic.published"},
 	}}}
 
-	if !shouldNotify(config, "article.published") {
+	if !shouldNotify(config, "topic.published") {
 		t.Fatal("expected enabled matching endpoint to notify")
 	}
 	if shouldNotify(config, "comment.created") {
 		t.Fatal("expected unmatched event to skip notification")
 	}
 	config.Enabled = false
-	if shouldNotify(config, "article.published") {
+	if shouldNotify(config, "topic.published") {
 		t.Fatal("expected disabled config to skip notification")
 	}
 }
 
 func TestBuildSignedRequest(t *testing.T) {
-	body := []byte(`{"event":"article.published"}`)
+	body := []byte(`{"event":"topic.published"}`)
 	req, err := buildRequest(pageConfig.HttpNotifyEndpoint{
 		URL:    "http://example.com/hook",
 		Secret: "secret",
-	}, "article.published", "delivery-1", 1710000000, body)
+	}, "topic.published", "delivery-1", 1710000000, body)
 	if err != nil {
 		t.Fatalf("build request: %v", err)
 	}
@@ -54,7 +54,7 @@ func TestBuildSignedRequest(t *testing.T) {
 	mac.Write(body)
 	wantSignature := "sha256=" + hex.EncodeToString(mac.Sum(nil))
 
-	if req.Header.Get("X-Goose-Event") != "article.published" {
+	if req.Header.Get("X-Goose-Event") != "topic.published" {
 		t.Fatalf("event header = %q", req.Header.Get("X-Goose-Event"))
 	}
 	if req.Header.Get("X-Goose-Delivery") != "delivery-1" {

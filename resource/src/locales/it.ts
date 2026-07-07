@@ -1013,8 +1013,8 @@ export default {
       handlerLabel: 'Gestore',
       noExcerpt: 'Nessun estratto',
       targetTypes: {
-        article: 'Post',
-        reply: 'Risposta',
+        topic: 'Topic',
+        post: 'Post',
       },
       reasons: {
         spam: 'Spam',
@@ -1078,13 +1078,13 @@ export default {
   adminOptLog: {
     optType: {
       editUser: 'Operazione utente',
-      editArticle: 'Modifica post',
+      editTopic: 'Modifica topic',
       editCategory: 'Modifica categoria',
     },
     targetType: {
       system: 'Sistema',
       user: 'Utente',
-      article: 'Post',
+      topic: 'Topic',
       docProject: 'Progetto documento',
       docVersion: 'Versione documento',
       docContent: 'Contenuto documento',
@@ -1092,11 +1092,11 @@ export default {
     },
     messages: {
       userUpdated: 'Utente {userId} aggiornato: {changedFields}',
-      articleStatusChanged: 'Stato del post "{title}" cambiato in {status}',
-      articlePinWeightChanged: 'Peso di fissaggio del post "{title}" {oldPinWeight} -> {pinWeight}',
-      articleCategoriesChanged: 'Categorie del post "{title}" {oldCategoryIds} -> {categoryIds}',
-      articleDeleted: 'Post "{title}" eliminato',
-      moderatorArticleStatusChanged: 'Il moderatore ha cambiato il post "{title}" in {status}',
+      topicStatusChanged: 'Stato del topic "{title}" cambiato in {status}',
+      topicPinWeightChanged: 'Peso di fissaggio del topic "{title}" {oldPinWeight} -> {pinWeight}',
+      topicCategoriesChanged: 'Categorie del topic "{title}" {oldCategoryIds} -> {categoryIds}',
+      topicDeleted: 'Topic "{title}" eliminato',
+      moderatorTopicStatusChanged: 'Il moderatore ha cambiato il topic "{title}" in {status}',
       categoryModeratorAdded: 'Aggiunto il moderatore {username} alla categoria "{categoryName}"',
       categoryModeratorRemoved: 'Rimosso il moderatore {userId} dalla categoria "{categoryName}"',
     },

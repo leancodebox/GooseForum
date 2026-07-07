@@ -118,8 +118,8 @@ const postingForm = reactive<PostingSettings>({
 const httpNotifyEvents = computed(() => {
   locale.value
   return [
-    { value: 'article.published', label: adminText('k00ck') },
-    { value: 'article.updated', label: adminText('k00cl') },
+    { value: 'topic.published', label: adminText('k00ck') },
+    { value: 'topic.updated', label: adminText('k00cl') },
     { value: 'comment.created', label: adminText('k00cm') },
     { value: 'user.signup', label: adminText('k00cn') },
     { value: 'moderation.report.created', label: adminText('k00co') },
@@ -413,7 +413,7 @@ function addHttpEndpoint() {
     enabled: true,
     url: '',
     secret: '',
-    events: ['article.published'],
+    events: ['topic.published'],
     timeoutSeconds: 2,
     failureCount: 0,
     lastError: '',

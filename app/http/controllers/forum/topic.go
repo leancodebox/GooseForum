@@ -75,15 +75,15 @@ type PostWindowReq struct {
 func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 	topicID := req.Params.TopicID
 	if topicID == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
 	topicEntity := topics.GetSimple(topicID)
 	if topicEntity.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 	if !canViewTopicSimple(&topicEntity, req.UserId) {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 
 	limit := req.Params.Limit
@@ -102,7 +102,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 			anchor, ok = posts.GetByTopicPostNoAtOrBefore(topicID, req.Params.AnchorPostNo+1)
 		}
 		if !ok || anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo <= 1 {
-			return component.FailResponseCode(component.MessageReplyNotFound, nil)
+			return component.FailResponseCode(component.MessagePostNotFound, nil)
 		}
 		beforeLimit := min(5, limit/2)
 		afterLimit := limit - beforeLimit - 1
@@ -128,7 +128,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 	case req.Params.AnchorPostID > 0:
 		anchor := posts.Get(req.Params.AnchorPostID)
 		if anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo <= 1 {
-			return component.FailResponseCode(component.MessageReplyNotFound, nil)
+			return component.FailResponseCode(component.MessagePostNotFound, nil)
 		}
 		beforeLimit := min(5, limit/2)
 		afterLimit := limit - beforeLimit - 1

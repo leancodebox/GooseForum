@@ -10,7 +10,7 @@ func TestOptEnumNameAndTargetType(t *testing.T) {
 		wantTarget TargetTypeEnum
 	}{
 		{name: "edit user", value: EditUser, wantName: "操作用户", wantTarget: User},
-		{name: "edit article", value: EditArticle, wantName: "编辑文章", wantTarget: Article},
+		{name: "edit topic", value: EditTopic, wantName: "编辑主题", wantTarget: Topic},
 		{name: "unknown", value: OptEnum(99), wantName: "", wantTarget: System},
 	}
 
@@ -33,6 +33,7 @@ func TestTargetTypeEnumName(t *testing.T) {
 	}{
 		{value: System, want: "系统"},
 		{value: User, want: "用户"},
+		{value: Topic, want: "主题"},
 		{value: DocProject, want: "文档项目"},
 		{value: DocVersion, want: "文档版本"},
 		{value: DocContent, want: "文档内容"},
@@ -47,7 +48,7 @@ func TestTargetTypeEnumName(t *testing.T) {
 }
 
 func TestEnumToInt(t *testing.T) {
-	if got := EditArticle.toInt(); got != 1 {
+	if got := EditTopic.toInt(); got != 1 {
 		t.Fatalf("OptEnum.toInt() = %d, want 1", got)
 	}
 	if got := TargetTypeEnum(DocContent).toInt(); got != 5 {

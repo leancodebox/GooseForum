@@ -11,9 +11,9 @@ import (
 type RewardPointsType int
 
 var (
-	RewardPointsInit           RewardPointsType = 0
-	RewardPoints4WriteArticles RewardPointsType = 1
-	RewardPoints4Reply         RewardPointsType = 2
+	RewardPointsInit       RewardPointsType = 0
+	RewardPointsWriteTopic RewardPointsType = 1
+	RewardPointsWritePost  RewardPointsType = 2
 )
 
 func (r RewardPointsType) String() string {

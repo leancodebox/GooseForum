@@ -181,7 +181,7 @@ type ModerationLogSubject struct {
 func UpdateModerationTopicStatus(req component.BetterRequest[ModerationTopicStatusReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
-		return component.FailResponseCode(component.MessageArticleNotFound, nil)
+		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
 	if !moderatorservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
@@ -243,7 +243,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 func UpdateModerationPostStatus(req component.BetterRequest[ModerationPostStatusReq]) component.Response {
 	post := posts.Get(req.Params.PostId)
 	if post.Id == 0 {
-		return component.FailResponseCode(component.MessageReplyNotFound, nil)
+		return component.FailResponseCode(component.MessagePostNotFound, nil)
 	}
 	topic := topics.GetSimple(post.TopicId)
 	if topic.Id == 0 || !moderatorservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
