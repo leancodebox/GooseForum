@@ -3,8 +3,8 @@ package datamigration
 import (
 	"log/slog"
 
+	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
-	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 )
 
 type ReplyMarkdownResult struct {
@@ -14,17 +14,33 @@ type ReplyMarkdownResult struct {
 }
 
 func RebuildReplyMarkdown() ReplyMarkdownResult {
+	conn := db.Connect()
 	var startId uint64
 	const limit = 200
 	version := markdown2html.GetCommentVersion()
 	result := ReplyMarkdownResult{}
+	if !conn.Migrator().HasTable("reply") {
+		return result
+	}
 
 	for {
-		replyList := reply.QueryById(startId, limit)
+		var replyList []struct {
+			Id              uint64
+			Content         string
+			RenderedHTML    string
+			RenderedVersion uint32
+		}
+		if err := conn.Table("reply").
+			Select("id", "content", "rendered_html", "rendered_version").
+			Where("id > ?", startId).
+			Order("id asc").
+			Limit(limit).
+			Find(&replyList).Error; err != nil {
+			result.Failed++
+			slog.Error("reply markdown scan failed", "err", err)
+			return result
+		}
 		for _, item := range replyList {
-			if item == nil {
-				continue
-			}
 			if startId < item.Id {
 				startId = item.Id
 			}
@@ -32,9 +48,13 @@ func RebuildReplyMarkdown() ReplyMarkdownResult {
 				result.Skipped++
 				continue
 			}
-			item.RenderedHTML = markdown2html.CommentMarkdownToHTML(item.Content)
-			item.RenderedVersion = version
-			if err := reply.SaveNoUpdate(item); err != nil {
+			renderedHTML := markdown2html.CommentMarkdownToHTML(item.Content)
+			if err := conn.Table("reply").
+				Where("id = ?", item.Id).
+				Updates(map[string]any{
+					"rendered_html":    renderedHTML,
+					"rendered_version": version,
+				}).Error; err != nil {
 				result.Failed++
 				slog.Error("reply markdown rebuild failed", "replyId", item.Id, "err", err)
 				continue

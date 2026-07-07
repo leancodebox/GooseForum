@@ -5,7 +5,7 @@ import (
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategoryRs"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 )
 
 func TestCreateOpenReturnsExistingOpenReport(t *testing.T) {
@@ -50,7 +50,7 @@ func TestUpdateStatusRecordsHandler(t *testing.T) {
 	}
 
 	report, created, err := CreateOpen(Entity{
-		TargetType: TargetReply,
+		TargetType: TargetPost,
 		TargetId:   9,
 		ReporterId: 2,
 		Reason:     ReasonAbuse,
@@ -69,23 +69,23 @@ func TestUpdateStatusRecordsHandler(t *testing.T) {
 	}
 }
 
-func TestCursorPageScopeCategoryIDsIncludesArticlesAndReplies(t *testing.T) {
+func TestCursorPageScopeCategoryIDsIncludesTopicsAndPosts(t *testing.T) {
 	preferences.Set("db.default.connection", "sqlite")
 	preferences.Set("db.default.path", ":memory:")
 	conn := db.Connect()
-	if err := conn.AutoMigrate(&Entity{}, &articleCategoryRs.Entity{}); err != nil {
+	if err := conn.AutoMigrate(&Entity{}, &topicCategoryIndex.Entity{}); err != nil {
 		t.Fatalf("migrate reports scope tables: %v", err)
 	}
 	conn.Where("1 = 1").Delete(&Entity{})
-	conn.Where("1 = 1").Delete(&articleCategoryRs.Entity{})
+	conn.Where("1 = 1").Delete(&topicCategoryIndex.Entity{})
 
-	conn.Create(&articleCategoryRs.Entity{ArticleId: 10, ArticleCategoryId: 3, Effective: 1})
-	conn.Create(&articleCategoryRs.Entity{ArticleId: 20, ArticleCategoryId: 4, Effective: 1})
+	conn.Create(&topicCategoryIndex.Entity{TopicId: 10, CategoryId: 3, Effective: 1})
+	conn.Create(&topicCategoryIndex.Entity{TopicId: 20, CategoryId: 4, Effective: 1})
 	conn.Create(&[]Entity{
-		{TargetType: TargetArticle, TargetId: 10, ArticleId: 10, ReporterId: 1, Status: StatusOpen},
-		{TargetType: TargetArticle, TargetId: 20, ArticleId: 20, ReporterId: 1, Status: StatusOpen},
-		{TargetType: TargetReply, TargetId: 100, ArticleId: 10, ReporterId: 1, Status: StatusOpen},
-		{TargetType: TargetReply, TargetId: 200, ArticleId: 20, ReporterId: 1, Status: StatusOpen},
+		{TargetType: TargetTopic, TargetId: 10, TopicId: 10, ReporterId: 1, Status: StatusOpen},
+		{TargetType: TargetTopic, TargetId: 20, TopicId: 20, ReporterId: 1, Status: StatusOpen},
+		{TargetType: TargetPost, TargetId: 100, TopicId: 10, ReporterId: 1, Status: StatusOpen},
+		{TargetType: TargetPost, TargetId: 200, TopicId: 20, ReporterId: 1, Status: StatusOpen},
 	})
 
 	got := CursorPage(CursorPageQuery{

@@ -58,8 +58,10 @@ type NotificationPayload struct {
 	// 文章相关
 	ArticleId    uint64 `json:"articleId,omitempty"`    // 相关文章ID
 	ArticleTitle string `json:"articleTitle,omitempty"` // 文章标题
+	TopicId      uint64 `json:"topicId,omitempty"`      // 相关主题ID
 	// 评论相关
 	CommentId uint64 `json:"commentId,omitempty"` // 评论ID
+	PostId    uint64 `json:"postId,omitempty"`    // 相关正文ID
 	// 其他元数据
 	Extra Extra `json:"metadata"`
 }

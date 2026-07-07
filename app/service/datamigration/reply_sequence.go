@@ -17,6 +17,9 @@ type ReplySequenceResult struct {
 func BackfillReplySequence() ReplySequenceResult {
 	conn := db.Connect()
 	result := ReplySequenceResult{}
+	if !conn.Migrator().HasTable("reply") || !conn.Migrator().HasTable("articles") {
+		return result
+	}
 
 	var articleIDs []uint64
 	if err := conn.Table("reply").

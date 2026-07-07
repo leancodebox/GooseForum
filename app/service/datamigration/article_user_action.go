@@ -5,7 +5,8 @@ import (
 	"time"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleUserAction"
+	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
+	"gorm.io/gorm/clause"
 )
 
 type ArticleUserActionResult struct {
@@ -17,18 +18,18 @@ type ArticleUserActionResult struct {
 func BackfillArticleUserAction() ArticleUserActionResult {
 	conn := db.Connect()
 	result := ArticleUserActionResult{}
-	if err := conn.AutoMigrate(&articleUserAction.Entity{}); err != nil {
+	if err := conn.AutoMigrate(&topicUserAction.Entity{}); err != nil {
 		result.Failed++
 		slog.Error("article user action table migration failed", "err", err)
 		return result
 	}
 	sources := []struct {
 		table string
-		set   func(uint64, uint64, *time.Time) bool
+		field string
 	}{
-		{table: "article_like", set: articleUserAction.SetLikedAt},
-		{table: "article_bookmark", set: articleUserAction.SetBookmarkedAt},
-		{table: "article_watch", set: articleUserAction.SetWatchedAt},
+		{table: "article_like", field: "liked_at"},
+		{table: "article_bookmark", field: "bookmarked_at"},
+		{table: "article_watch", field: "watched_at"},
 	}
 
 	for _, source := range sources {
@@ -54,9 +55,21 @@ func BackfillArticleUserAction() ArticleUserActionResult {
 			if actedAt.IsZero() {
 				actedAt = time.Now()
 			}
-			if !source.set(row.UserId, row.ArticleId, &actedAt) {
+			rowData := map[string]any{
+				"user_id":    row.UserId,
+				"topic_id":   row.ArticleId,
+				source.field: actedAt,
+				"created_at": actedAt,
+				"updated_at": actedAt,
+			}
+			if err := conn.Table("topic_user_action").Clauses(clause.OnConflict{
+				Columns: []clause.Column{{Name: "user_id"}, {Name: "topic_id"}},
+				DoUpdates: clause.Assignments(map[string]any{
+					source.field: actedAt,
+				}),
+			}).Create(rowData).Error; err != nil {
 				result.Failed++
-				slog.Error("article user action backfill failed", "table", source.table, "userId", row.UserId, "articleId", row.ArticleId)
+				slog.Error("topic user action backfill failed", "table", source.table, "userId", row.UserId, "articleId", row.ArticleId, "err", err)
 				continue
 			}
 			result.Processed++

@@ -61,10 +61,10 @@ func CursorPage(q CursorPageQuery) []Entity {
 	}
 	if len(q.ScopeCategoryIDs) > 0 {
 		b = b.Where(`EXISTS (
-			SELECT 1 FROM article_category_rs rs
-			WHERE rs.article_id = reports.article_id
-				AND rs.article_category_id IN ?
-				AND rs.effective = ?
+			SELECT 1 FROM topic_category_index idx
+			WHERE idx.topic_id = reports.topic_id
+				AND idx.category_id IN ?
+				AND idx.effective = ?
 		)`, q.ScopeCategoryIDs, 1)
 	}
 	if q.Cursor > 0 {

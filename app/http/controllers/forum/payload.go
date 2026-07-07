@@ -1893,13 +1893,13 @@ func BuildNotificationPayload(notification *eventNotification.Entity) Notificati
 	if item.Actor.Username == "" && payload.Extra.FollowerName != "" {
 		item.Actor.Username = payload.Extra.FollowerName
 	}
-	if payload.ArticleId > 0 {
-		articleURL := urlconfig.PostDetail(payload.ArticleId)
-		if payload.CommentId > 0 {
-			articleURL = fmt.Sprintf("%s#reply-%d", articleURL, payload.CommentId)
+	if payload.TopicId > 0 {
+		articleURL := urlconfig.PostDetail(payload.TopicId)
+		if payload.PostId > 0 {
+			articleURL = fmt.Sprintf("%s#reply-%d", articleURL, payload.PostId)
 		}
 		item.Article = &NotificationArticlePayload{
-			ID:    payload.ArticleId,
+			ID:    payload.TopicId,
 			Title: payload.ArticleTitle,
 			URL:   articleURL,
 		}

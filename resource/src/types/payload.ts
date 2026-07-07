@@ -723,7 +723,8 @@ export interface NotificationPayload {
     templateParams?: NotificationTemplateParams
     actorId: number
     actorName?: string
-    articleId?: number
+    topicId?: number
+    postId?: number
     articleTitle?: string
     metadata?: {
       followerName?: string

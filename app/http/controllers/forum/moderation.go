@@ -16,8 +16,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/articles"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
+	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/reply"
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
+	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
@@ -214,6 +216,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 		TargetType: req.Params.TargetType,
 		TargetId:   req.Params.TargetId,
 		ArticleId:  target.ArticleID,
+		TopicId:    target.TopicID,
 		ReporterId: req.UserId,
 		Reason:     req.Params.Reason,
 		Note:       trimReportNote(req.Params.Note),
@@ -342,6 +345,7 @@ func moderationTargetStatus(actionType string) int8 {
 type reportTargetInfoData struct {
 	UserID    uint64
 	ArticleID uint64
+	TopicID   uint64
 }
 
 func reportTargetInfo(targetType string, targetID uint64, userID uint64) (reportTargetInfoData, bool) {
@@ -351,7 +355,7 @@ func reportTargetInfo(targetType string, targetID uint64, userID uint64) (report
 		if article.Id == 0 || !canViewArticleSimple(&article, userID) {
 			return reportTargetInfoData{}, false
 		}
-		return reportTargetInfoData{UserID: article.UserId, ArticleID: article.Id}, true
+		return reportTargetInfoData{UserID: article.UserId, ArticleID: article.Id, TopicID: article.Id}, true
 	case reports.TargetReply:
 		replyEntity := reply.Get(targetID)
 		if replyEntity.Id == 0 || replyEntity.ProcessStatus != 0 {
@@ -361,21 +365,27 @@ func reportTargetInfo(targetType string, targetID uint64, userID uint64) (report
 		if article.Id == 0 || !canViewArticleSimple(&article, userID) {
 			return reportTargetInfoData{}, false
 		}
-		return reportTargetInfoData{UserID: replyEntity.UserId, ArticleID: article.Id}, true
+		return reportTargetInfoData{UserID: replyEntity.UserId, ArticleID: article.Id, TopicID: article.Id}, true
 	default:
 		return reportTargetInfoData{}, false
 	}
 }
 
 func reportArticleID(record reports.Entity) uint64 {
+	if record.TopicId > 0 {
+		return record.TopicId
+	}
 	if record.ArticleId > 0 {
 		return record.ArticleId
 	}
-	if record.TargetType == reports.TargetArticle {
+	if record.TargetType == reports.TargetArticle || record.TargetType == reports.TargetTopic {
 		return record.TargetId
 	}
 	if record.TargetType == reports.TargetReply {
 		return reply.Get(record.TargetId).ArticleId
+	}
+	if record.TargetType == reports.TargetPost {
+		return posts.Get(record.TargetId).TopicId
 	}
 	return 0
 }
@@ -417,6 +427,14 @@ func buildReportLogSnapshot(record reports.Entity, resolution string) moderation
 			snapshot.TargetURL = urlconfig.PostDetail(article.Id)
 			snapshot.Excerpt = moderationExcerpt(article.Description)
 		}
+	case reports.TargetTopic:
+		topic := topics.Get(record.TargetId)
+		if topic.Id > 0 {
+			snapshot.ArticleId = topic.Id
+			snapshot.ArticleTitle = topic.Title
+			snapshot.TargetURL = urlconfig.PostDetail(topic.Id)
+			snapshot.Excerpt = moderationExcerpt(topic.Excerpt)
+		}
 	case reports.TargetReply:
 		replyEntity := reply.Get(record.TargetId)
 		if replyEntity.Id > 0 {
@@ -426,6 +444,16 @@ func buildReportLogSnapshot(record reports.Entity, resolution string) moderation
 			snapshot.ReplyNo = replyEntity.ReplyNo
 			snapshot.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(replyEntity.ArticleId), replyEntity.Id)
 			snapshot.Excerpt = moderationExcerpt(replyEntity.Content)
+		}
+	case reports.TargetPost:
+		post := posts.Get(record.TargetId)
+		if post.Id > 0 {
+			topic := topics.Get(post.TopicId)
+			snapshot.ArticleId = post.TopicId
+			snapshot.ArticleTitle = topic.Title
+			snapshot.ReplyNo = post.PostNo
+			snapshot.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(post.TopicId), post.Id)
+			snapshot.Excerpt = moderationExcerpt(post.Content)
 		}
 	}
 	return snapshot
@@ -441,6 +469,9 @@ func reportTargetCategories(targetType string, targetID uint64) ([]uint64, bool)
 	case reports.TargetArticle:
 		article := articles.GetSimple(targetID)
 		return article.CategoryId, article.Id > 0
+	case reports.TargetTopic:
+		topic := topics.Get(targetID)
+		return topic.CategoryIds, topic.Id > 0
 	case reports.TargetReply:
 		replyEntity := reply.Get(targetID)
 		if replyEntity.Id == 0 {
@@ -448,6 +479,13 @@ func reportTargetCategories(targetType string, targetID uint64) ([]uint64, bool)
 		}
 		article := articles.GetSimple(replyEntity.ArticleId)
 		return article.CategoryId, article.Id > 0
+	case reports.TargetPost:
+		post := posts.Get(targetID)
+		if post.Id == 0 {
+			return nil, false
+		}
+		topic := topics.Get(post.TopicId)
+		return topic.CategoryIds, topic.Id > 0
 	default:
 		return nil, false
 	}
@@ -688,10 +726,10 @@ func moderationReportPage(userID uint64, status string, categoryID uint64, curso
 	if hasNext {
 		pageRecords = records[:pageSize]
 	}
-	articleMap, replyMap, userMap := reportBatchMaps(pageRecords)
+	batchMaps := reportBatchMaps(pageRecords)
 	items := make([]ModerationReportItem, 0, len(pageRecords))
 	for _, record := range pageRecords {
-		item, ok := buildModerationReportItem(userID, categoryID, record, articleMap, replyMap, userMap)
+		item, ok := buildModerationReportItem(userID, categoryID, record, batchMaps)
 		if ok {
 			items = append(items, item)
 		}
@@ -720,26 +758,53 @@ func reportScopeCategoryIDs(userID uint64, categoryID uint64) ([]uint64, bool) {
 	return nil, false
 }
 
-func reportBatchMaps(records []reports.Entity) (map[uint64]*articles.SmallEntity, map[uint64]*reply.Entity, map[uint64]*users.EntityComplete) {
+type moderationReportBatchMaps struct {
+	ArticleMap map[uint64]*articles.SmallEntity
+	ReplyMap   map[uint64]*reply.Entity
+	TopicMap   map[uint64]topics.SmallEntity
+	PostMap    map[uint64]*posts.Entity
+	UserMap    map[uint64]*users.EntityComplete
+}
+
+func reportBatchMaps(records []reports.Entity) moderationReportBatchMaps {
 	articleIDs := make([]uint64, 0, len(records))
 	replyIDs := make([]uint64, 0, len(records))
+	topicIDs := make([]uint64, 0, len(records))
+	postIDs := make([]uint64, 0, len(records))
 	userIDs := make([]uint64, 0, len(records)*2)
 	for _, record := range records {
 		userIDs = appendUniqueUint64(userIDs, record.ReporterId)
 		userIDs = appendUniqueUint64(userIDs, record.HandlerId)
 		articleIDs = appendUniqueUint64(articleIDs, record.ArticleId)
+		topicIDs = appendUniqueUint64(topicIDs, record.TopicId)
 		if record.TargetType == reports.TargetArticle {
 			articleIDs = appendUniqueUint64(articleIDs, record.TargetId)
 		}
 		if record.TargetType == reports.TargetReply {
 			replyIDs = appendUniqueUint64(replyIDs, record.TargetId)
 		}
+		if record.TargetType == reports.TargetTopic {
+			topicIDs = appendUniqueUint64(topicIDs, record.TargetId)
+		}
+		if record.TargetType == reports.TargetPost {
+			postIDs = appendUniqueUint64(postIDs, record.TargetId)
+		}
 	}
 	replyMap := replyMapByIDs(replyIDs)
 	for _, replyEntity := range replyMap {
 		articleIDs = appendUniqueUint64(articleIDs, replyEntity.ArticleId)
 	}
-	return articles.GetMapByIds(articleIDs), replyMap, users.GetMapByIds(userIDs)
+	postMap := postMapByIDs(postIDs)
+	for _, post := range postMap {
+		topicIDs = appendUniqueUint64(topicIDs, post.TopicId)
+	}
+	return moderationReportBatchMaps{
+		ArticleMap: articles.GetMapByIds(articleIDs),
+		ReplyMap:   replyMap,
+		TopicMap:   topics.GetMapByIds(topicIDs),
+		PostMap:    postMap,
+		UserMap:    users.GetMapByIds(userIDs),
+	}
 }
 
 func replyMapByIDs(ids []uint64) map[uint64]*reply.Entity {
@@ -753,16 +818,33 @@ func replyMapByIDs(ids []uint64) map[uint64]*reply.Entity {
 	return res
 }
 
-func reportCategoriesFromMaps(record reports.Entity, articleMap map[uint64]*articles.SmallEntity, replyMap map[uint64]*reply.Entity) ([]uint64, bool) {
+func postMapByIDs(ids []uint64) map[uint64]*posts.Entity {
+	rows := posts.GetByIds(ids)
+	res := make(map[uint64]*posts.Entity, len(rows))
+	for _, row := range rows {
+		if row != nil {
+			res[row.Id] = row
+		}
+	}
+	return res
+}
+
+func reportCategoriesFromMaps(record reports.Entity, batchMaps moderationReportBatchMaps) ([]uint64, bool) {
 	switch record.TargetType {
 	case reports.TargetArticle:
-		article := articleMap[record.TargetId]
+		article := batchMaps.ArticleMap[record.TargetId]
 		if article == nil {
 			return nil, false
 		}
 		return article.CategoryId, true
+	case reports.TargetTopic:
+		topic := batchMaps.TopicMap[record.TargetId]
+		if topic.Id == 0 {
+			return nil, false
+		}
+		return topic.CategoryIds, true
 	case reports.TargetReply:
-		replyEntity := replyMap[record.TargetId]
+		replyEntity := batchMaps.ReplyMap[record.TargetId]
 		if replyEntity == nil && record.ArticleId == 0 {
 			return nil, false
 		}
@@ -770,18 +852,32 @@ func reportCategoriesFromMaps(record reports.Entity, articleMap map[uint64]*arti
 		if articleID == 0 {
 			articleID = replyEntity.ArticleId
 		}
-		article := articleMap[articleID]
+		article := batchMaps.ArticleMap[articleID]
 		if article == nil {
 			return nil, false
 		}
 		return article.CategoryId, true
+	case reports.TargetPost:
+		topicID := record.TopicId
+		if topicID == 0 {
+			post := batchMaps.PostMap[record.TargetId]
+			if post == nil {
+				return nil, false
+			}
+			topicID = post.TopicId
+		}
+		topic := batchMaps.TopicMap[topicID]
+		if topic.Id == 0 {
+			return nil, false
+		}
+		return topic.CategoryIds, true
 	default:
 		return nil, false
 	}
 }
 
-func buildModerationReportItem(userID uint64, categoryID uint64, record reports.Entity, articleMap map[uint64]*articles.SmallEntity, replyMap map[uint64]*reply.Entity, userMap map[uint64]*users.EntityComplete) (ModerationReportItem, bool) {
-	categoryIDs, ok := reportCategoriesFromMaps(record, articleMap, replyMap)
+func buildModerationReportItem(userID uint64, categoryID uint64, record reports.Entity, batchMaps moderationReportBatchMaps) (ModerationReportItem, bool) {
+	categoryIDs, ok := reportCategoriesFromMaps(record, batchMaps)
 	if !ok || !moderatorservice.CanModerateAnyCategory(userID, categoryIDs) {
 		return ModerationReportItem{}, false
 	}
@@ -800,8 +896,8 @@ func buildModerationReportItem(userID uint64, categoryID uint64, record reports.
 		Note:       record.Note,
 		Status:     record.Status,
 		Resolution: resolution,
-		Reporter:   userPayload(record.ReporterId, userMap),
-		Handler:    userPayload(record.HandlerId, userMap),
+		Reporter:   userPayload(record.ReporterId, batchMaps.UserMap),
+		Handler:    userPayload(record.HandlerId, batchMaps.UserMap),
 		Categories: categoryPayloads(categoryIDs),
 		CreatedAt:  record.CreatedAt.Format(time.DateTime),
 	}
@@ -810,15 +906,22 @@ func buildModerationReportItem(userID uint64, categoryID uint64, record reports.
 	}
 	switch record.TargetType {
 	case reports.TargetArticle:
-		article := articleMap[record.TargetId]
+		article := batchMaps.ArticleMap[record.TargetId]
 		if article == nil {
 			return ModerationReportItem{}, false
 		}
 		item.Title = article.Title
 		item.Excerpt = article.Description
 		item.TargetURL = urlconfig.PostDetail(article.Id)
+	case reports.TargetTopic:
+		topic := batchMaps.TopicMap[record.TargetId]
+		if topic.Id == 0 {
+			return ModerationReportItem{}, false
+		}
+		item.Title = topic.Title
+		item.TargetURL = urlconfig.PostDetail(topic.Id)
 	case reports.TargetReply:
-		replyEntity := replyMap[record.TargetId]
+		replyEntity := batchMaps.ReplyMap[record.TargetId]
 		if replyEntity == nil {
 			return ModerationReportItem{}, false
 		}
@@ -826,13 +929,29 @@ func buildModerationReportItem(userID uint64, categoryID uint64, record reports.
 		if articleID == 0 {
 			articleID = replyEntity.ArticleId
 		}
-		article := articleMap[articleID]
+		article := batchMaps.ArticleMap[articleID]
 		if article == nil {
 			return ModerationReportItem{}, false
 		}
 		item.Title = article.Title
 		item.Excerpt = replyEntity.Content
 		item.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(articleID), replyEntity.Id)
+	case reports.TargetPost:
+		post := batchMaps.PostMap[record.TargetId]
+		if post == nil {
+			return ModerationReportItem{}, false
+		}
+		topicID := record.TopicId
+		if topicID == 0 {
+			topicID = post.TopicId
+		}
+		topic := batchMaps.TopicMap[topicID]
+		if topic.Id == 0 {
+			return ModerationReportItem{}, false
+		}
+		item.Title = topic.Title
+		item.Excerpt = post.Content
+		item.TargetURL = fmt.Sprintf("%s#reply-%d", urlconfig.PostDetail(topicID), post.Id)
 	}
 	if item.Title == "" {
 		item.Title = fmt.Sprintf("#%d", record.TargetId)

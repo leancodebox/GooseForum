@@ -5,17 +5,17 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
-	"github.com/leancodebox/GooseForum/app/models/forum/articleCategory"
+	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 )
 
 func EnsureDefaultData() {
-	category := articleCategory.GetOne()
-	if category.Id == 0 {
-		category.Category = "GooseForum"
-		category.Desc = "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆"
-		articleCategory.SaveOrCreateById(&category)
-		slog.Info("created default article category")
+	defaultCategory := category.Get(1)
+	if defaultCategory.Id == 0 {
+		defaultCategory.Name = "GooseForum"
+		defaultCategory.Desc = "🦢 大鹅栖息地 | 自由漫谈的江湖茶馆"
+		category.SaveOrCreateById(&defaultCategory)
+		slog.Info("created default category")
 	}
 
 	configEntity := pageConfig.GetByPageType(pageConfig.FriendShipLinks)

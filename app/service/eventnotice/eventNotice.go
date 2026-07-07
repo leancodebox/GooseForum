@@ -7,16 +7,16 @@ import (
 )
 
 // SendCommentNotification 发送评论通知
-func SendCommentNotification(userId uint64, articleId uint64, commentContent string, commenterId uint64, replyId uint64) error {
+func SendCommentNotification(userId uint64, topicId uint64, commentContent string, commenterId uint64, postId uint64) error {
 	payload := eventNotification.NotificationPayload{
 		Content:     commentContent,
 		TemplateKey: eventNotification.TemplateComment,
 		TemplateParams: eventNotification.NotificationTemplateParams{
 			Preview: commentContent,
 		},
-		ActorId:   commenterId,
-		ArticleId: articleId,
-		CommentId: replyId,
+		ActorId: commenterId,
+		TopicId: topicId,
+		PostId:  postId,
 	}
 
 	notification := &eventNotification.Entity{
@@ -33,16 +33,16 @@ func SendCommentNotification(userId uint64, articleId uint64, commentContent str
 }
 
 // SendReplyNotification 发送回复通知
-func SendReplyNotification(userId uint64, commentId uint64, articleId uint64, replyContent string, replierId uint64) error {
+func SendReplyNotification(userId uint64, postId uint64, topicId uint64, replyContent string, replierId uint64) error {
 	payload := eventNotification.NotificationPayload{
 		Content:     replyContent,
 		TemplateKey: eventNotification.TemplateReply,
 		TemplateParams: eventNotification.NotificationTemplateParams{
 			Preview: replyContent,
 		},
-		ActorId:   replierId,
-		ArticleId: articleId,
-		CommentId: commentId,
+		ActorId: replierId,
+		TopicId: topicId,
+		PostId:  postId,
 	}
 
 	notification := &eventNotification.Entity{
@@ -58,7 +58,7 @@ func SendReplyNotification(userId uint64, commentId uint64, articleId uint64, re
 	return err
 }
 
-func SendArticleCommentNotifications(userIds []uint64, articleId uint64, commentId uint64, commentContent string, commenterId uint64) error {
+func SendArticleCommentNotifications(userIds []uint64, topicId uint64, postId uint64, commentContent string, commenterId uint64) error {
 	if len(userIds) == 0 {
 		return nil
 	}
@@ -77,9 +77,9 @@ func SendArticleCommentNotifications(userIds []uint64, articleId uint64, comment
 				TemplateParams: eventNotification.NotificationTemplateParams{
 					Preview: commentContent,
 				},
-				ActorId:   commenterId,
-				ArticleId: articleId,
-				CommentId: commentId,
+				ActorId: commenterId,
+				TopicId: topicId,
+				PostId:  postId,
 			},
 		})
 	}
