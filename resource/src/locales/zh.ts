@@ -1044,8 +1044,12 @@ export default {
       actions: {
         articleBlocked: '封禁了',
         articleUnblocked: '解封了',
+        topicBlocked: '封禁了',
+        topicUnblocked: '解封了',
         replyBlocked: '隐藏了',
         replyUnblocked: '恢复了',
+        postBlocked: '隐藏了',
+        postUnblocked: '恢复了',
         reportResolved: '处理了举报',
         reportRejected: '忽略了举报',
         categoryModeratorAdded: '新增版主范围',

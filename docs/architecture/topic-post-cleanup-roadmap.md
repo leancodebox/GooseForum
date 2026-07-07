@@ -11,7 +11,7 @@
 - Admin 内容管理 API 已改为 `admin/topics/*`。
 - 回复窗口和审核 API 已改为 `posts/window`、`moderation/topic-status`、`moderation/post-status`。
 - 举报新写入已使用 `targetType = topic/post`。
-- 历史举报、日志、通知里仍保留 `article/reply` 兼容读取。
+- 历史举报、日志、通知会由迁移脚本转换到 `topic/post`；运行时代码后续不再保留 `article/reply` 兼容读取。
 - 旧 model 目录暂时保留，不在当前阶段删除。
 
 暂不处理：
@@ -129,7 +129,7 @@ rg "ArticleReply|WriteArticles|UpdateArticleStatus|ArticlesList|ArticleSource|Ed
 
 ## 阶段 3：历史兼容边界整理
 
-目标：明确哪些旧字段只是历史兼容，避免以后误以为还能继续写旧协议。
+目标：确认迁移脚本已经覆盖旧字段，并清理运行时代码里的 `article/reply` 兼容分支，避免以后误以为还能继续写旧协议。
 
 建议修改范围：
 
@@ -142,23 +142,23 @@ rg "ArticleReply|WriteArticles|UpdateArticleStatus|ArticlesList|ArticleSource|Ed
 
 建议操作：
 
-1. 建立小型转换函数，集中处理旧字段：
-   - `normalizeReportTargetType(article/reply -> topic/post)`
-   - `publicReportTargetType(article/reply -> topic/post)`
-   - 通知 payload 中 `articleId/commentId` 到 `topicId/postId` 的读取 fallback。
+1. 迁移脚本集中处理旧字段：
+   - 举报 `article/reply -> topic/post`。
+   - 通知 payload `articleId/commentId -> topicId/postId`。
+   - 审核日志 `subject/action/params` 从 `article/reply` 转成 `topic/post`。
 2. 新写入只写 topic/post 字段。
-3. 旧字段只读不写，除非迁移脚本明确需要。
-4. 为历史兼容补测试：
-   - 旧 `reports.TargetArticle` 能在审核列表输出为 `topic`。
-   - 旧 `reports.TargetReply` 能在审核列表输出为 `post`。
-   - 旧通知 payload 能正常跳转。
+3. 旧字段只允许出现在迁移脚本和迁移测试里。
+4. 为历史迁移补测试：
+   - 旧 `reports.TargetArticle` / `reports.TargetReply` 能迁成 `topic/post`。
+   - 旧通知 payload 能迁成 `topicId/postId`。
+   - 旧审核日志 payload 能迁成 `topicId/postId/postNo`。
 5. 完成后搜索确认：
 
 ```bash
 rg "TargetArticle|TargetReply|articleId|commentId|replyId" app/service app/http/controllers/forum app/models/forum/reports
 ```
 
-这里的目标不是清零，而是保证每个残留都有明确兼容理由。
+这里的目标是运行时代码尽量清零；残留应只在迁移脚本、迁移测试或用户可见文案里出现。
 
 ## 阶段 4：旧 model 运行时依赖清零
 

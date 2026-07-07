@@ -57,13 +57,23 @@ func runVersionedDataMigrations() {
 	}
 	if currentVersion < 5 {
 		result := datamigration.BackfillTopicPostModel()
-		slog.Info("app migration topic post model done", "topics", result.Topics, "posts", result.Posts, "categories", result.Categories, "topicCategoryIndexes", result.TopicCategoryIndexes, "topicUserActions", result.TopicUserActions, "topicUserStats", result.TopicUserStats, "mappings", result.Mappings, "notifications", result.Notifications, "reportsChecked", result.ReportsChecked, "reportsMissing", result.ReportsMissing, "skipped", result.Skipped, "failed", result.Failed, "lastFailed", result.LastFailed)
+		slog.Info("app migration topic post model done", "topics", result.Topics, "posts", result.Posts, "categories", result.Categories, "topicCategoryIndexes", result.TopicCategoryIndexes, "topicUserActions", result.TopicUserActions, "topicUserStats", result.TopicUserStats, "mappings", result.Mappings, "notifications", result.Notifications, "reportsChecked", result.ReportsChecked, "reportsMissing", result.ReportsMissing, "moderationLogs", result.ModerationLogs, "moderationLogsMissing", result.ModerationLogsMissing, "skipped", result.Skipped, "failed", result.Failed, "lastFailed", result.LastFailed)
 		if result.Failed > 0 {
 			slog.Error("app migration topic post model has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
 			return
 		}
 		pageConfig.SyncMigrationVersion(5)
 		currentVersion = 5
+	}
+	if currentVersion < 6 {
+		result := datamigration.BackfillModerationLogsTopicPost()
+		slog.Info("app migration moderation log topic post migration done", "moderationLogs", result.ModerationLogs, "moderationLogsMissing", result.ModerationLogsMissing, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration moderation log topic post migration has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(6)
+		currentVersion = 6
 	}
 	slog.Info("app migration end", "version", currentVersion)
 }

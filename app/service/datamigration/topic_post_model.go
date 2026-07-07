@@ -8,6 +8,7 @@ import (
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/migrationMapping"
+	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
@@ -20,20 +21,31 @@ import (
 
 const TopicPostMigrationScope = "topic_post_model"
 
+const (
+	legacyModerationSubjectArticle        = "article"
+	legacyModerationSubjectReply          = "reply"
+	legacyModerationActionArticleBlocked  = "articleBlocked"
+	legacyModerationActionArticleRestored = "articleUnblocked"
+	legacyModerationActionReplyBlocked    = "replyBlocked"
+	legacyModerationActionReplyRestored   = "replyUnblocked"
+)
+
 type TopicPostMigrationResult struct {
-	Topics               int
-	Posts                int
-	Categories           int
-	TopicCategoryIndexes int
-	TopicUserActions     int
-	TopicUserStats       int
-	Mappings             int
-	Notifications        int
-	ReportsChecked       int
-	ReportsMissing       int
-	Skipped              int
-	Failed               int
-	LastFailed           string
+	Topics                int
+	Posts                 int
+	Categories            int
+	TopicCategoryIndexes  int
+	TopicUserActions      int
+	TopicUserStats        int
+	Mappings              int
+	Notifications         int
+	ReportsChecked        int
+	ReportsMissing        int
+	ModerationLogs        int
+	ModerationLogsMissing int
+	Skipped               int
+	Failed                int
+	LastFailed            string
 }
 
 type legacyArticleRow struct {
@@ -75,6 +87,16 @@ type legacyReplyRow struct {
 
 func BackfillTopicPostModel() TopicPostMigrationResult {
 	return BackfillTopicPostModelWithDB(db.Connect())
+}
+
+func BackfillModerationLogsTopicPost() TopicPostMigrationResult {
+	return BackfillModerationLogsTopicPostWithDB(db.Connect())
+}
+
+func BackfillModerationLogsTopicPostWithDB(conn *gorm.DB) TopicPostMigrationResult {
+	result := TopicPostMigrationResult{}
+	migrateModerationLogs(conn, &result)
+	return result
 }
 
 func BackfillTopicPostModelWithDB(conn *gorm.DB) TopicPostMigrationResult {
@@ -526,6 +548,123 @@ func migrateReports(conn *gorm.DB, result *TopicPostMigrationResult) {
 	}
 }
 
+func migrateModerationLogs(conn *gorm.DB, result *TopicPostMigrationResult) {
+	if !conn.Migrator().HasTable("moderation_logs") {
+		return
+	}
+	var rows []moderationLog.Entity
+	if err := conn.Find(&rows).Error; err != nil {
+		failMigration(result, "moderation_log_scan", err)
+		return
+	}
+	for _, row := range rows {
+		changed := false
+		subjectType := row.SubjectType
+		subjectID := row.SubjectId
+		action := row.Action
+		params := row.Payload.Params
+		if params == nil {
+			params = map[string]any{}
+		}
+
+		switch row.SubjectType {
+		case legacyModerationSubjectArticle:
+			subjectType = moderationLog.SubjectTopic
+			changed = true
+		case legacyModerationSubjectReply:
+			mapped := loadMapping(conn, "reply", row.SubjectId)
+			if mapped.TargetId == 0 {
+				result.ModerationLogsMissing++
+				continue
+			}
+			subjectType = moderationLog.SubjectPost
+			subjectID = mapped.TargetId
+			params["postId"] = mapped.TargetId
+			if post := loadPost(conn, mapped.TargetId); post.Id > 0 {
+				params["postNo"] = post.PostNo
+				if uint64FromJSONNumber(params["topicId"]) == 0 {
+					params["topicId"] = post.TopicId
+				}
+			}
+			delete(params, "replyNo")
+			changed = true
+		}
+
+		switch row.Action {
+		case legacyModerationActionArticleBlocked:
+			action = moderationLog.ActionTopicBlocked
+			changed = true
+		case legacyModerationActionArticleRestored:
+			action = moderationLog.ActionTopicUnblocked
+			changed = true
+		case legacyModerationActionReplyBlocked:
+			action = moderationLog.ActionPostBlocked
+			changed = true
+		case legacyModerationActionReplyRestored:
+			action = moderationLog.ActionPostUnblocked
+			changed = true
+		}
+
+		if migrateModerationLogParams(conn, params, result) {
+			changed = true
+		}
+		if !changed {
+			continue
+		}
+		row.Payload.Params = params
+		payloadBytes, err := json.Marshal(row.Payload)
+		if err != nil {
+			failMigration(result, "moderation_log_remarshal", err)
+			continue
+		}
+		if err := conn.Model(&moderationLog.Entity{}).Where("id = ?", row.Id).Updates(map[string]any{
+			"action":       action,
+			"subject_type": subjectType,
+			"subject_id":   subjectID,
+			"payload":      string(payloadBytes),
+		}).Error; err != nil {
+			failMigration(result, "moderation_log_update", err)
+			continue
+		}
+		result.ModerationLogs++
+	}
+}
+
+func migrateModerationLogParams(conn *gorm.DB, params map[string]any, result *TopicPostMigrationResult) bool {
+	changed := false
+	if articleID := uint64FromJSONNumber(params["articleId"]); articleID > 0 {
+		params["topicId"] = articleID
+		delete(params, "articleId")
+		changed = true
+	}
+	if targetType, ok := params["targetType"].(string); ok {
+		switch targetType {
+		case reports.TargetArticle:
+			params["targetType"] = reports.TargetTopic
+			changed = true
+		case reports.TargetReply:
+			params["targetType"] = reports.TargetPost
+			if targetID := uint64FromJSONNumber(params["targetId"]); targetID > 0 {
+				mapped := loadMapping(conn, "reply", targetID)
+				if mapped.TargetId > 0 {
+					params["targetId"] = mapped.TargetId
+					if post := loadPost(conn, mapped.TargetId); post.Id > 0 {
+						params["postNo"] = post.PostNo
+						if uint64FromJSONNumber(params["topicId"]) == 0 {
+							params["topicId"] = post.TopicId
+						}
+					}
+				} else {
+					result.ModerationLogsMissing++
+				}
+			}
+			delete(params, "replyNo")
+			changed = true
+		}
+	}
+	return changed
+}
+
 func saveMapping(conn *gorm.DB, result *TopicPostMigrationResult, sourceType string, sourceID uint64, targetType string, targetID uint64) {
 	if sourceID == 0 || targetID == 0 {
 		result.Skipped++
@@ -548,6 +687,12 @@ func saveMapping(conn *gorm.DB, result *TopicPostMigrationResult, sourceType str
 func loadMapping(conn *gorm.DB, sourceType string, sourceID uint64) migrationMapping.Entity {
 	var entity migrationMapping.Entity
 	conn.Where("scope = ? AND source_type = ? AND source_id = ?", TopicPostMigrationScope, sourceType, sourceID).First(&entity)
+	return entity
+}
+
+func loadPost(conn *gorm.DB, postID uint64) posts.Entity {
+	var entity posts.Entity
+	conn.First(&entity, postID)
 	return entity
 }
 

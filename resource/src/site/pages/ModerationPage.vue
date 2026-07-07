@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import { Ban, CircleAlert, Flag, History, RotateCcw, Scale, XCircle } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
-import { fetchModerationLogs, fetchModerationReports, updateModerationArticleStatus, updateModerationReplyStatus, updateModerationReportStatus } from '@/runtime/api'
+import { fetchModerationLogs, fetchModerationReports, updateModerationTopicStatus, updateModerationPostStatus, updateModerationReportStatus } from '@/runtime/api'
 import { formatDateTime } from '@/runtime/format'
 import { fetchPage } from '@/runtime/router'
 import { showUserCard } from '@/runtime/user-card-events'
@@ -96,7 +96,7 @@ async function moderateTopic(topic: TopicPayload) {
   busyIds.value = [...busyIds.value, topic.id]
   actionError.value = ''
   try {
-    await updateModerationArticleStatus(topic.id, 'unban')
+    await updateModerationTopicStatus(topic.id, 'unban')
     topics.value = topics.value.filter(item => item.id !== topic.id)
     logLoaded.value = false
     logItems.value = []
@@ -186,9 +186,9 @@ async function hideReportTarget(item: ModerationReportItem) {
   reportError.value = ''
   try {
     if (item.targetType === 'topic') {
-      await updateModerationArticleStatus(item.targetId, 'ban')
+      await updateModerationTopicStatus(item.targetId, 'ban')
     } else {
-      await updateModerationReplyStatus(item.targetId, 'ban')
+      await updateModerationPostStatus(item.targetId, 'ban')
     }
     await updateModerationReportStatus(item.id, 'ban')
     reportItems.value = reportItems.value.filter(report => report.id !== item.id)

@@ -20,7 +20,7 @@ const title = ref(page.props.article.title || '')
 const content = ref(page.props.article.content || '')
 const type = ref(page.props.article.type || page.props.types[0]?.value || 0)
 const categoryIds = ref<number[]>([...(page.props.article.categoryIds || [])])
-const currentArticleId = ref(page.props.articleId)
+const currentTopicId = ref(page.props.articleId)
 const preview = ref(false)
 const submitting = ref(false)
 const uploading = ref(false)
@@ -244,14 +244,14 @@ async function save() {
   message.value = ''
   try {
     const id = await submitArticle({
-      topicId: currentArticleId.value,
+      topicId: currentTopicId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       type: type.value,
       categoryId: categoryIds.value,
       articleStatus: 1,
     })
-    currentArticleId.value = id
+    currentTopicId.value = id
     syncSavedSnapshot()
     forceNextNavigation()
     message.value = page.props.isEditing ? t('publish.topicUpdated') : t('publish.topicPublished')
@@ -274,14 +274,14 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
   message.value = ''
   try {
     const id = await submitArticle({
-      topicId: currentArticleId.value,
+      topicId: currentTopicId.value,
       title: title.value.trim(),
       content: content.value.trim(),
       type: type.value,
       categoryId: categoryIds.value,
       articleStatus: 0,
     })
-    currentArticleId.value = id
+    currentTopicId.value = id
     syncSavedSnapshot()
     forceNextNavigation()
     if (redirect) window.location.href = nextUrl || '/drafts'

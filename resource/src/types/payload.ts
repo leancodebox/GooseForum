@@ -280,7 +280,7 @@ export interface HomeProps {
   }
 }
 
-export interface ArticleDetailProps {
+export interface TopicDetailProps {
   article: TopicDetailPayload
   replies: PostPayload[]
   hotTopics: TopicPayload[]
@@ -291,7 +291,7 @@ export interface ArticleDetailProps {
   }
 }
 
-export interface ArticlePayload {
+export interface TopicDetailPayload {
   id: number
   title: string
   description: string
@@ -318,9 +318,7 @@ export interface ArticlePayload {
   updatedAt: string
 }
 
-export type TopicDetailPayload = ArticlePayload
-
-export interface ReplyPayload {
+export interface PostPayload {
   id: number
   articleId: number
   replyNo: number
@@ -343,9 +341,7 @@ export interface ReplyPayload {
   updatedAt?: string
 }
 
-export type PostPayload = ReplyPayload
-
-export interface ReplyWindowPayload {
+export interface PostWindowPayload {
   replies: PostPayload[]
   anchorReplyId?: number
   beforeCursor?: number

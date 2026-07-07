@@ -9,6 +9,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 	"github.com/leancodebox/GooseForum/app/models/forum/migrationMapping"
+	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
@@ -32,6 +33,7 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 		&topicUserAction.Entity{},
 		&topicUserStat.Entity{},
 		&migrationMapping.Entity{},
+		&moderationLog.Entity{},
 		&eventNotification.Entity{},
 		&reports.Entity{},
 	); err != nil {
@@ -121,10 +123,47 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 		"updated_at": now,
 	})
 	conn.Create(&reports.Entity{TargetType: reports.TargetReply, TargetId: 99, ArticleId: 10, ReporterId: 1, Status: reports.StatusOpen})
+	conn.Create(&moderationLog.Entity{
+		ActorUserId: 1,
+		Action:      legacyModerationActionReplyBlocked,
+		SubjectType: legacyModerationSubjectReply,
+		SubjectId:   99,
+		Payload: moderationLog.Payload{
+			MessageCode: "moderation.log.reply.statusChanged",
+			Params: map[string]any{
+				"articleId": 10,
+				"title":     "hello topic",
+				"replyNo":   1,
+				"excerpt":   "reply body",
+			},
+		},
+		CreatedAt: now,
+	})
+	conn.Create(&moderationLog.Entity{
+		ActorUserId: 1,
+		Action:      moderationLog.ActionReportResolved,
+		SubjectType: moderationLog.SubjectReport,
+		SubjectId:   1,
+		Payload: moderationLog.Payload{
+			MessageCode: "moderation.log.report.statusChanged",
+			Params: map[string]any{
+				"targetType": reports.TargetReply,
+				"targetId":   99,
+				"articleId":  10,
+				"replyNo":    1,
+				"title":      "hello topic",
+			},
+		},
+		CreatedAt: now,
+	})
 
 	result := BackfillTopicPostModelWithDB(conn)
 	if result.Failed != 0 {
 		t.Fatalf("BackfillTopicPostModelWithDB() failed=%d last=%s", result.Failed, result.LastFailed)
+	}
+	logResult := BackfillModerationLogsTopicPostWithDB(conn)
+	if logResult.Failed != 0 {
+		t.Fatalf("BackfillModerationLogsTopicPostWithDB() failed=%d last=%s", logResult.Failed, logResult.LastFailed)
 	}
 	if result.Topics != 1 || result.Posts != 2 || result.Categories != 1 || result.TopicCategoryIndexes != 1 {
 		t.Fatalf("unexpected result counts: %#v", result)
@@ -205,6 +244,31 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 	}
 	if report.TargetType != reports.TargetPost || report.TargetId != replyPost.Id || report.TopicId != 10 {
 		t.Fatalf("report was not migrated to post/topic: %#v replyPost=%d", report, replyPost.Id)
+	}
+
+	var replyLog moderationLog.Entity
+	if err := conn.Where("action = ?", moderationLog.ActionPostBlocked).First(&replyLog).Error; err != nil {
+		t.Fatalf("load migrated reply moderation log: %v", err)
+	}
+	if replyLog.SubjectType != moderationLog.SubjectPost || replyLog.SubjectId != replyPost.Id {
+		t.Fatalf("reply moderation log subject mismatch: %#v replyPost=%d", replyLog, replyPost.Id)
+	}
+	if replyLog.Payload.Params["articleId"] != nil || replyLog.Payload.Params["replyNo"] != nil {
+		t.Fatalf("reply moderation log kept legacy params: %#v", replyLog.Payload.Params)
+	}
+	if uint64FromJSONNumber(replyLog.Payload.Params["topicId"]) != 10 || uint64FromJSONNumber(replyLog.Payload.Params["postId"]) != replyPost.Id || uint64FromJSONNumber(replyLog.Payload.Params["postNo"]) != replyPost.PostNo {
+		t.Fatalf("reply moderation log params mismatch: %#v replyPost=%#v", replyLog.Payload.Params, replyPost)
+	}
+
+	var reportLog moderationLog.Entity
+	if err := conn.Where("action = ?", moderationLog.ActionReportResolved).First(&reportLog).Error; err != nil {
+		t.Fatalf("load migrated report moderation log: %v", err)
+	}
+	if reportLog.Payload.Params["targetType"] != reports.TargetPost || uint64FromJSONNumber(reportLog.Payload.Params["targetId"]) != replyPost.Id {
+		t.Fatalf("report moderation log target mismatch: %#v replyPost=%d", reportLog.Payload.Params, replyPost.Id)
+	}
+	if reportLog.Payload.Params["articleId"] != nil || reportLog.Payload.Params["replyNo"] != nil {
+		t.Fatalf("report moderation log kept legacy params: %#v", reportLog.Payload.Params)
 	}
 }
 

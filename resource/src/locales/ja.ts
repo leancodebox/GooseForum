@@ -1044,8 +1044,12 @@ export default {
       actions: {
         articleBlocked: '封禁しました',
         articleUnblocked: '解除しました',
+        topicBlocked: '封禁しました',
+        topicUnblocked: '解除しました',
         replyBlocked: '非表示にしました',
         replyUnblocked: '復元しました',
+        postBlocked: '非表示にしました',
+        postUnblocked: '復元しました',
         reportResolved: '通報を処理しました',
         reportRejected: '通報を無視しました',
         categoryModeratorAdded: 'モデレーター範囲を追加しました',

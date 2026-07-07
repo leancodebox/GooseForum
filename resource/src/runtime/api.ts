@@ -1,4 +1,4 @@
-import type { ModerationLogListResponse, ModerationReportListResponse, NotificationFilter, NotificationListResponse, ReplyWindowPayload, SiteThemeConfig, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
+import type { ModerationLogListResponse, ModerationReportListResponse, NotificationFilter, NotificationListResponse, PostWindowPayload, SiteThemeConfig, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
 import { i18n } from './i18n'
 import { resolveApiMessage } from './api-message'
 
@@ -50,23 +50,19 @@ async function readApiSuccessMessage(response: Response, successFallback: string
   return responseMessage(data, successFallback)
 }
 
-export interface PostReplyResult {
+export interface CreatePostResult {
   id: number
   replyNo?: number
   renderedContent: string
 }
 
-export type CreatePostResult = PostReplyResult
-
-export interface UpdateReplyResult {
+export interface UpdatePostResult {
   id: number
   replyNo?: number
   content: string
   renderedContent: string
   updatedAt: string
 }
-
-export type UpdatePostResult = UpdateReplyResult
 
 export async function createPost(topicId: number, content: string, replyToPostId = 0): Promise<CreatePostResult | number | boolean> {
   const response = await fetch('/api/forum/posts/create', {
@@ -83,10 +79,6 @@ export async function createPost(topicId: number, content: string, replyToPostId
   return readApiResponse<CreatePostResult | number | boolean>(response, t('api.replyFailed'))
 }
 
-export async function postReply(articleId: number, content: string, replyId = 0): Promise<PostReplyResult | number | boolean> {
-  return createPost(articleId, content, replyId)
-}
-
 export async function updatePost(postId: number, content: string): Promise<UpdatePostResult> {
   const response = await fetch('/api/forum/posts/update', {
     method: 'POST',
@@ -99,10 +91,6 @@ export async function updatePost(postId: number, content: string): Promise<Updat
     }),
   })
   return readApiResponse<UpdatePostResult>(response, t('api.replyUpdateFailed'))
-}
-
-export async function updateReply(replyId: number, content: string): Promise<UpdateReplyResult> {
-  return updatePost(replyId, content)
 }
 
 export async function deletePost(postId: number): Promise<boolean> {
@@ -118,10 +106,6 @@ export async function deletePost(postId: number): Promise<boolean> {
   return readApiResponse<boolean>(response, t('api.replyDeleteFailed'))
 }
 
-export async function deleteReply(replyId: number): Promise<boolean> {
-  return deletePost(replyId)
-}
-
 export interface PostWindowInput {
   topicId: number
   anchorPostId?: number
@@ -134,11 +118,7 @@ export interface PostWindowInput {
   tail?: boolean
 }
 
-export interface ReplyWindowInput extends Omit<PostWindowInput, 'topicId'> {
-  topicId?: number
-}
-
-export async function getPostWindow(input: PostWindowInput): Promise<ReplyWindowPayload> {
+export async function getPostWindow(input: PostWindowInput): Promise<PostWindowPayload> {
   const params = new URLSearchParams({
     topicId: String(input.topicId),
   })
@@ -156,14 +136,7 @@ export async function getPostWindow(input: PostWindowInput): Promise<ReplyWindow
       Accept: 'application/json',
     },
   })
-  return readApiResponse<ReplyWindowPayload>(response, t('api.repliesLoadFailed'))
-}
-
-export async function getArticleRepliesWindow(input: ReplyWindowInput): Promise<ReplyWindowPayload> {
-  return getPostWindow({
-    ...input,
-    topicId: input.topicId ?? 0,
-  })
+  return readApiResponse<PostWindowPayload>(response, t('api.repliesLoadFailed'))
 }
 
 export async function likeArticle(id: number, action: 1 | 2): Promise<boolean> {
@@ -222,7 +195,7 @@ export async function updateArticleStatus(id: number, articleStatus: 0 | 1): Pro
   return readApiResponse<boolean>(response, t('api.articleStatusFailed'))
 }
 
-export async function updateModerationArticleStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
+export async function updateModerationTopicStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
   const response = await fetch('/api/forum/moderation/topic-status', {
     method: 'POST',
     headers: {
@@ -244,7 +217,7 @@ export async function submitReport(targetType: 'topic' | 'post', targetId: numbe
   return readApiResponse<boolean>(response, t('api.reportFailed'))
 }
 
-export async function updateModerationReplyStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
+export async function updateModerationPostStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
   const response = await fetch('/api/forum/moderation/post-status', {
     method: 'POST',
     headers: {

@@ -1044,8 +1044,12 @@ export default {
       actions: {
         articleBlocked: 'ha bloccato',
         articleUnblocked: 'ha ripristinato',
+        topicBlocked: 'ha bloccato',
+        topicUnblocked: 'ha ripristinato',
         replyBlocked: 'ha nascosto',
         replyUnblocked: 'ha ripristinato',
+        postBlocked: 'ha nascosto',
+        postUnblocked: 'ha ripristinato',
         reportResolved: 'ha risolto la segnalazione',
         reportRejected: 'ha ignorato la segnalazione',
         categoryModeratorAdded: 'ha aggiunto un ambito di moderazione',

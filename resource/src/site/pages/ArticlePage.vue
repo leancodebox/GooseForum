@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, Teleport, watch } from 'vue'
 import { AlertTriangle, Ban, Bell, Bookmark, ChevronsUp, Clock, CornerDownLeft, Eye, Flag, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
-import { bookmarkArticle, deleteReply, getArticleRepliesWindow, likeArticle, postReply, submitReport, updateModerationArticleStatus, updateModerationReplyStatus, updateReply, watchArticle } from '@/runtime/api'
+import { bookmarkArticle, deletePost, getPostWindow, likeArticle, createPost, submitReport, updateModerationTopicStatus, updateModerationPostStatus, updatePost, watchArticle } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
 import { useFlashMessages } from '@/runtime/flash-message'
 import { fetchPage } from '@/runtime/router'
@@ -12,12 +12,12 @@ import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
 import ReplyPositionRail from '@/site/components/ReplyPositionRail.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import type { ArticleDetailProps, LayoutPayload, PostPayload } from '@/types/payload'
+import type { TopicDetailProps, LayoutPayload, PostPayload } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
   layout: LayoutPayload
-  props: ArticleDetailProps
+  props: TopicDetailProps
 }>()
 
 const { t } = useI18n()
@@ -48,7 +48,7 @@ const reportSubmitting = ref(false)
 const reportError = ref('')
 const moderatingReplyIds = ref<number[]>([])
 const replies = ref<PostPayload[]>([...page.props.replies])
-const articleProcessStatus = ref(page.props.article.processStatus)
+const topicProcessStatus = ref(page.props.article.processStatus)
 const replyTarget = computed(() => replies.value.find((reply) => reply.id === replyTargetId.value))
 const replyWindowMode = ref(false)
 const replyHasBefore = ref(false)
@@ -142,7 +142,7 @@ const floatingArticleActions = computed(() => {
   ]
 
   if (page.props.permissions.canModerateArticle) {
-    const isBanned = articleProcessStatus.value === 1
+    const isBanned = topicProcessStatus.value === 1
     actions.push({
       key: isBanned ? 'unban' : 'ban',
       icon: isBanned ? RotateCcw : Ban,
@@ -227,7 +227,7 @@ watch(
     isLiked.value = page.props.article.isLiked
     isBookmarked.value = page.props.article.isBookmarked
     isWatched.value = page.props.article.isWatched
-    articleProcessStatus.value = page.props.article.processStatus
+    topicProcessStatus.value = page.props.article.processStatus
     pendingModerationAction.value = null
     actingModeration.value = false
     mobileHeaderTitleVisible.value = false
@@ -625,8 +625,8 @@ function mergeReplies(nextReplies: PostPayload[], mode: 'replace' | 'prepend' | 
   replies.value = mode === 'prepend' ? [...filtered, ...replies.value] : [...replies.value, ...filtered]
 }
 
-function applyReplyWindowPayload(
-  payload: Awaited<ReturnType<typeof getArticleRepliesWindow>>,
+function applyPostWindowPayload(
+  payload: Awaited<ReturnType<typeof getPostWindow>>,
   mergeMode: 'replace' | 'prepend' | 'append',
   forceWindowMode: boolean,
 ) {
@@ -646,7 +646,7 @@ function applyReplyWindowPayload(
   }
 }
 
-function payloadEndsAtTail(payload: Awaited<ReturnType<typeof getArticleRepliesWindow>>) {
+function payloadEndsAtTail(payload: Awaited<ReturnType<typeof getPostWindow>>) {
   const afterReplyNo = payload.afterReplyNo || lastReplyNo(payload.replies)
   const maxReplyNo = Math.max(replyMaxNo.value, payload.maxReplyNo || 0)
   return payload.replies.length > 0 && !payload.hasAfter && afterReplyNo >= maxReplyNo
@@ -671,7 +671,7 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail'
   loadingReplyDirection.value = direction
   replyWindowError.value = ''
   try {
-    const payload = await getArticleRepliesWindow({
+    const payload = await getPostWindow({
       topicId: page.props.article.id,
       anchorPostId: direction === 'anchor' ? anchorValue : undefined,
       beforePostNo: direction === 'before' ? replyBeforeReplyNo.value : undefined,
@@ -682,7 +682,7 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail'
       limit: 20,
     })
 
-    applyReplyWindowPayload(
+    applyPostWindowPayload(
       payload,
       direction === 'before' ? 'prepend' : direction === 'after' ? 'append' : 'replace',
       direction === 'anchor' || direction === 'tail' || direction === 'before' || wasWindowMode,
@@ -754,12 +754,12 @@ async function jumpToReplyNo(replyNo: number) {
   loadingReplyDirection.value = 'anchor'
   replyWindowError.value = ''
   try {
-    const payload = await getArticleRepliesWindow({
+    const payload = await getPostWindow({
       topicId: page.props.article.id,
       anchorPostNo: target,
       limit: 20,
     })
-    applyReplyWindowPayload(payload, 'replace', true)
+    applyPostWindowPayload(payload, 'replace', true)
     await nextTick()
     const closest = findClosestLoadedReply(target)
     if (closest) {
@@ -919,12 +919,12 @@ async function revealCreatedReply(replyId: number) {
   if (!replyId) return
 
   pauseReplyRailSync()
-  const payload = await getArticleRepliesWindow({
+  const payload = await getPostWindow({
     topicId: page.props.article.id,
     anchorPostId: replyId,
     limit: 20,
   })
-  applyReplyWindowPayload(payload, 'replace', true)
+  applyPostWindowPayload(payload, 'replace', true)
   const createdReply = payload.replies.find((reply) => reply.id === replyId)
   if (createdReply?.replyNo) {
     activeReplyNo.value = createdReply.replyNo
@@ -1078,7 +1078,7 @@ async function saveReplyEdit() {
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    const updated = await updateReply(reply.id, content)
+    const updated = await updatePost(reply.id, content)
     const index = replies.value.findIndex((item) => item.id === reply.id)
     if (index >= 0) {
       replies.value[index] = {
@@ -1122,7 +1122,7 @@ async function submitReply() {
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    const createdReply = await postReply(page.props.article.id, content, replyId)
+    const createdReply = await createPost(page.props.article.id, content, replyId)
     replyContent.value = ''
     replyTargetId.value = 0
     successMessage.value = t('article.replyPosted')
@@ -1172,8 +1172,8 @@ async function updateArticleModerationFromDetail() {
   actionMessage.value = ''
   const action = pendingModerationAction.value
   try {
-    await updateModerationArticleStatus(page.props.article.id, action)
-    articleProcessStatus.value = action === 'ban' ? 1 : 0
+    await updateModerationTopicStatus(page.props.article.id, action)
+    topicProcessStatus.value = action === 'ban' ? 1 : 0
     pendingModerationAction.value = null
     actionMessage.value = action === 'ban' ? t('article.moderationBanSuccess') : t('article.moderationUnbanSuccess')
     pushFlash(actionMessage.value, 'success')
@@ -1282,7 +1282,7 @@ async function moderateReply(reply: PostPayload, action: 'ban' | 'unban') {
   if (replyModerationBusy(reply.id)) return
   moderatingReplyIds.value = [...moderatingReplyIds.value, reply.id]
   try {
-    await updateModerationReplyStatus(reply.id, action)
+    await updateModerationPostStatus(reply.id, action)
     reply.processStatus = action === 'ban' ? 1 : 0
     reply.isHidden = action === 'ban'
     pushFlash(action === 'ban' ? t('article.replyModerationBanSuccess') : t('article.replyModerationUnbanSuccess'), 'success')
@@ -1301,7 +1301,7 @@ async function removeReply(replyId: number) {
   successMessage.value = ''
   deleteErrorMessage.value = ''
   try {
-    await deleteReply(replyId)
+    await deletePost(replyId)
     successMessage.value = t('article.replyDeleted')
     pendingDeleteReply.value = null
     await refreshCurrentPage()
@@ -1417,7 +1417,7 @@ async function removeReply(replyId: number) {
                     {{ t('article.report') }}
                   </button>
                   <button
-                    v-if="page.props.permissions.canModerateArticle && articleProcessStatus === 0"
+                    v-if="page.props.permissions.canModerateArticle && topicProcessStatus === 0"
                     type="button"
                     class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
                     :disabled="actingModeration"
@@ -1427,7 +1427,7 @@ async function removeReply(replyId: number) {
                     {{ t('article.moderationBan') }}
                   </button>
                   <button
-                    v-else-if="page.props.permissions.canModerateArticle && articleProcessStatus === 1"
+                    v-else-if="page.props.permissions.canModerateArticle && topicProcessStatus === 1"
                     type="button"
                     class="gf-button gf-button-sm px-2.5 text-base-content/55 hover:bg-base-200 hover:text-base-content"
                     :disabled="actingModeration"

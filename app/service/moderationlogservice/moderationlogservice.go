@@ -6,73 +6,75 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 )
 
-func ArticleStatusChanged(actorUserId uint64, articleId uint64, title string, blocked bool) {
-	action := moderationLog.ActionArticleUnblocked
+func TopicStatusChanged(actorUserId uint64, topicId uint64, title string, blocked bool) {
+	action := moderationLog.ActionTopicUnblocked
 	status := "unblocked"
 	if blocked {
-		action = moderationLog.ActionArticleBlocked
+		action = moderationLog.ActionTopicBlocked
 		status = "blocked"
 	}
 	create(moderationLog.Entity{
 		ActorUserId: actorUserId,
 		Action:      action,
-		SubjectType: moderationLog.SubjectArticle,
-		SubjectId:   articleId,
+		SubjectType: moderationLog.SubjectTopic,
+		SubjectId:   topicId,
 		Payload: moderationLog.Payload{
 			MessageCode: "moderation.log.article.statusChanged",
 			Params: map[string]any{
-				"title":  title,
-				"status": status,
+				"topicId": topicId,
+				"title":   title,
+				"status":  status,
 			},
 		},
 	})
 }
 
-type ReplySnapshot struct {
-	ReplyId       uint64
-	ArticleId     uint64
-	ArticleTitle  string
-	ReplyNo       uint64
-	ReplyAuthorId uint64
-	ReplyAuthor   string
-	Excerpt       string
-}
-
-type ReportSnapshot struct {
-	ReportId     uint64
-	TargetType   string
-	TargetId     uint64
-	TargetURL    string
-	ArticleId    uint64
-	ArticleTitle string
-	ReplyNo      uint64
-	Reason       string
-	Resolution   string
-	ReporterId   uint64
-	Reporter     string
+type PostSnapshot struct {
+	PostId       uint64
+	TopicId      uint64
+	TopicTitle   string
+	PostNo       uint64
+	PostAuthorId uint64
+	PostAuthor   string
 	Excerpt      string
 }
 
-func ReplyStatusChanged(actorUserId uint64, snapshot ReplySnapshot, blocked bool) {
-	action := moderationLog.ActionReplyUnblocked
+type ReportSnapshot struct {
+	ReportId   uint64
+	TargetType string
+	TargetId   uint64
+	TargetURL  string
+	TopicId    uint64
+	TopicTitle string
+	PostNo     uint64
+	Reason     string
+	Resolution string
+	ReporterId uint64
+	Reporter   string
+	Excerpt    string
+}
+
+func PostStatusChanged(actorUserId uint64, snapshot PostSnapshot, blocked bool) {
+	action := moderationLog.ActionPostUnblocked
 	status := "unblocked"
 	if blocked {
-		action = moderationLog.ActionReplyBlocked
+		action = moderationLog.ActionPostBlocked
 		status = "blocked"
 	}
 	create(moderationLog.Entity{
 		ActorUserId: actorUserId,
 		Action:      action,
-		SubjectType: moderationLog.SubjectReply,
-		SubjectId:   snapshot.ReplyId,
+		SubjectType: moderationLog.SubjectPost,
+		SubjectId:   snapshot.PostId,
 		Payload: moderationLog.Payload{
 			MessageCode: "moderation.log.reply.statusChanged",
 			Params: map[string]any{
-				"articleId":     snapshot.ArticleId,
-				"title":         snapshot.ArticleTitle,
-				"replyNo":       snapshot.ReplyNo,
-				"replyAuthorId": snapshot.ReplyAuthorId,
-				"replyAuthor":   snapshot.ReplyAuthor,
+				"topicId":       snapshot.TopicId,
+				"postId":        snapshot.PostId,
+				"title":         snapshot.TopicTitle,
+				"postNo":        snapshot.PostNo,
+				"replyAuthorId": snapshot.PostAuthorId,
+				"replyAuthor":   snapshot.PostAuthor,
 				"excerpt":       snapshot.Excerpt,
 				"status":        status,
 			},
@@ -96,9 +98,9 @@ func ReportStatusChanged(actorUserId uint64, snapshot ReportSnapshot, status str
 				"targetType": snapshot.TargetType,
 				"targetId":   snapshot.TargetId,
 				"targetUrl":  snapshot.TargetURL,
-				"articleId":  snapshot.ArticleId,
-				"title":      snapshot.ArticleTitle,
-				"replyNo":    snapshot.ReplyNo,
+				"topicId":    snapshot.TopicId,
+				"title":      snapshot.TopicTitle,
+				"postNo":     snapshot.PostNo,
 				"reason":     snapshot.Reason,
 				"resolution": snapshot.Resolution,
 				"reporterId": snapshot.ReporterId,

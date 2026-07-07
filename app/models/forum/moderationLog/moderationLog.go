@@ -5,21 +5,21 @@ import "time"
 const tableName = "moderation_logs"
 
 const (
-	SubjectArticle  = "article"
 	SubjectCategory = "category"
-	SubjectReply    = "reply"
+	SubjectTopic    = "topic"
+	SubjectPost     = "post"
 	SubjectReport   = "report"
 	SubjectUser     = "user"
 	SubjectSystem   = "system"
 )
 
 const (
-	ActionArticleBlocked   = "articleBlocked"
-	ActionArticleUnblocked = "articleUnblocked"
-	ActionReplyBlocked     = "replyBlocked"
-	ActionReplyUnblocked   = "replyUnblocked"
-	ActionReportResolved   = "reportResolved"
-	ActionReportRejected   = "reportRejected"
+	ActionTopicBlocked   = "topicBlocked"
+	ActionTopicUnblocked = "topicUnblocked"
+	ActionPostBlocked    = "postBlocked"
+	ActionPostUnblocked  = "postUnblocked"
+	ActionReportResolved = "reportResolved"
+	ActionReportRejected = "reportRejected"
 )
 
 const (

@@ -1044,8 +1044,12 @@ export default {
       actions: {
         articleBlocked: 'blocked',
         articleUnblocked: 'restored',
+        topicBlocked: 'blocked',
+        topicUnblocked: 'restored',
         replyBlocked: 'hid',
         replyUnblocked: 'restored',
+        postBlocked: 'hid',
+        postUnblocked: 'restored',
         reportResolved: 'resolved report',
         reportRejected: 'ignored report',
         categoryModeratorAdded: 'added moderator scope',
