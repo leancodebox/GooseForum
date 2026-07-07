@@ -284,7 +284,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	if req.Params.ReplyToPostId > 0 {
 		parentPost = posts.Get(req.Params.ReplyToPostId)
 		if parentPost.Id == 0 || parentPost.TopicId != req.Params.TopicId || parentPost.PostNo <= 1 {
-			return component.FailResponseCode(component.MessageCommentReplyTargetMissed, nil)
+			return component.FailResponseCode(component.MessageCommentParentPostMissing, nil)
 		}
 	}
 
@@ -310,10 +310,10 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	userservice.InvalidateUserPublicProfileCache(req.UserId)
 	hotdataserve.ClearTopicListCache()
 
-	// 获取父评论作者ID
-	var parentReplyAuthorId uint64
+	// 获取父 post 作者 ID
+	var parentPostAuthorID uint64
 	if req.Params.ReplyToPostId > 0 {
-		parentReplyAuthorId = parentPost.UserId
+		parentPostAuthorID = parentPost.UserId
 	}
 
 	// 发布统一的评论创建事件
@@ -324,7 +324,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 		Content:             req.Params.Content,
 		TopicAuthorId:       topicEntity.UserId,
 		ReplyToPostId:       req.Params.ReplyToPostId,
-		ReplyToPostAuthorId: parentReplyAuthorId,
+		ReplyToPostAuthorId: parentPostAuthorID,
 	})
 
 	return component.SuccessResponse(map[string]any{

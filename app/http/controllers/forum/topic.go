@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-const replyWindowLimit = 20
+const postWindowLimit = 20
 
 func TopicDetail(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
@@ -88,7 +88,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 
 	limit := req.Params.Limit
 	if limit <= 0 || limit > 50 {
-		limit = replyWindowLimit
+		limit = postWindowLimit
 	}
 
 	var postEntities []*posts.Entity
@@ -106,19 +106,19 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		}
 		beforeLimit := min(5, limit/2)
 		afterLimit := limit - beforeLimit - 1
-		beforeReplies := posts.GetByTopicPostNoBefore(topicID, anchor.PostNo, beforeLimit+1)
-		afterReplies := posts.GetByTopicPostNoAfter(topicID, anchor.PostNo, afterLimit+1)
-		hasBefore = len(beforeReplies) > beforeLimit
-		hasAfter = len(afterReplies) > afterLimit
+		beforePosts := posts.GetByTopicPostNoBefore(topicID, anchor.PostNo, beforeLimit+1)
+		afterPosts := posts.GetByTopicPostNoAfter(topicID, anchor.PostNo, afterLimit+1)
+		hasBefore = len(beforePosts) > beforeLimit
+		hasAfter = len(afterPosts) > afterLimit
 		if hasBefore {
-			beforeReplies = beforeReplies[1:]
+			beforePosts = beforePosts[1:]
 		}
 		if hasAfter {
-			afterReplies = afterReplies[:afterLimit]
+			afterPosts = afterPosts[:afterLimit]
 		}
-		postEntities = append(postEntities, beforeReplies...)
+		postEntities = append(postEntities, beforePosts...)
 		postEntities = append(postEntities, &anchor)
-		postEntities = append(postEntities, afterReplies...)
+		postEntities = append(postEntities, afterPosts...)
 	case req.Params.Tail:
 		postEntities = posts.GetByTopicPostNoDesc(topicID, limit+1)
 		hasBefore = len(postEntities) > limit
@@ -132,19 +132,19 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		}
 		beforeLimit := min(5, limit/2)
 		afterLimit := limit - beforeLimit - 1
-		beforeReplies := posts.GetByTopicIdBefore(topicID, anchor.Id, beforeLimit+1)
-		afterReplies := posts.GetByTopicIdAfter(topicID, anchor.Id, afterLimit+1)
-		hasBefore = len(beforeReplies) > beforeLimit
-		hasAfter = len(afterReplies) > afterLimit
+		beforePosts := posts.GetByTopicIdBefore(topicID, anchor.Id, beforeLimit+1)
+		afterPosts := posts.GetByTopicIdAfter(topicID, anchor.Id, afterLimit+1)
+		hasBefore = len(beforePosts) > beforeLimit
+		hasAfter = len(afterPosts) > afterLimit
 		if hasBefore {
-			beforeReplies = beforeReplies[1:]
+			beforePosts = beforePosts[1:]
 		}
 		if hasAfter {
-			afterReplies = afterReplies[:afterLimit]
+			afterPosts = afterPosts[:afterLimit]
 		}
-		postEntities = append(postEntities, beforeReplies...)
+		postEntities = append(postEntities, beforePosts...)
 		postEntities = append(postEntities, &anchor)
-		postEntities = append(postEntities, afterReplies...)
+		postEntities = append(postEntities, afterPosts...)
 	case req.Params.BeforePostNo > 0:
 		postEntities = posts.GetByTopicPostNoBefore(topicID, req.Params.BeforePostNo+1, limit+1)
 		hasBefore = len(postEntities) > limit
@@ -180,7 +180,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 			postEntities = postEntities[:limit]
 		}
 	}
-	postEntities = filterReplyPosts(postEntities)
+	postEntities = filterSecondaryPosts(postEntities)
 
 	userIDs := make([]uint64, 0, len(postEntities))
 	seenUserIDs := make(map[uint64]struct{}, len(postEntities))
@@ -195,8 +195,8 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		userIDs = append(userIDs, item.UserId)
 	}
 	userMap := users.GetMapByIds(userIDs)
-	canModerateReplies := moderatorservice.CanModerateAnyCategory(req.UserId, topicEntity.CategoryIds)
-	payloadReplies := buildPostPayloads(postEntities, userMap, req.UserId, canModerateReplies)
+	canModeratePosts := moderatorservice.CanModerateAnyCategory(req.UserId, topicEntity.CategoryIds)
+	payloadPosts := buildPostPayloads(postEntities, userMap, req.UserId, canModeratePosts)
 
 	var beforeCursor uint64
 	var afterCursor uint64
@@ -220,7 +220,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 	}
 
 	return component.SuccessResponse(PostWindowPayload{
-		Posts:        payloadReplies,
+		Posts:        payloadPosts,
 		AnchorPostID: req.Params.AnchorPostID,
 		BeforeCursor: beforeCursor,
 		AfterCursor:  afterCursor,
@@ -233,7 +233,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 	})
 }
 
-func filterReplyPosts(postEntities []*posts.Entity) []*posts.Entity {
+func filterSecondaryPosts(postEntities []*posts.Entity) []*posts.Entity {
 	res := postEntities[:0]
 	for _, item := range postEntities {
 		if item == nil || item.PostNo <= 1 {

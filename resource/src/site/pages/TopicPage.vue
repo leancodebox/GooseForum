@@ -22,8 +22,8 @@ const page = defineProps<{
 
 const { t } = useI18n()
 const { push: pushFlash } = useFlashMessages()
-const replyContent = ref('')
-const replyTargetId = ref(0)
+const postContent = ref('')
+const targetPostId = ref(0)
 const likeCount = ref(page.props.topic.likeCount)
 const isLiked = ref(page.props.topic.isLiked)
 const isBookmarked = ref(page.props.topic.isBookmarked)
@@ -37,8 +37,8 @@ const submitting = ref(false)
 const deletingReplyId = ref(0)
 const editingReplyId = ref(0)
 const savingEditReplyId = ref(0)
-const replyDraftBeforeEdit = ref('')
-const replyTargetBeforeEdit = ref(0)
+const postDraftBeforeEdit = ref('')
+const targetPostBeforeEdit = ref(0)
 const pendingDeleteReply = ref<PostPayload | null>(null)
 const pendingModerationAction = ref<'ban' | 'unban' | null>(null)
 const pendingReport = ref<{ targetType: 'topic' | 'post'; targetId: number; title: string; excerpt: string } | null>(null)
@@ -49,27 +49,27 @@ const reportError = ref('')
 const moderatingReplyIds = ref<number[]>([])
 const replies = ref<PostPayload[]>([...page.props.posts])
 const topicProcessStatus = ref(page.props.topic.processStatus)
-const replyTarget = computed(() => replies.value.find((reply) => reply.id === replyTargetId.value))
-const replyWindowMode = ref(false)
-const replyHasBefore = ref(false)
-const replyHasAfter = ref(hasMoreInitialReplies())
-const replyBeforeCursor = ref(firstReplyId(page.props.posts))
-const replyAfterCursor = ref(lastReplyId(page.props.posts))
-const replyBeforePostNo = ref(firstPostNo(page.props.posts))
-const replyAfterPostNo = ref(lastPostNo(page.props.posts))
-const replyMaxNo = ref(initialMaxPostNo())
-const replyTailLoaded = ref(!hasMoreInitialReplies())
-const replyAutoLoadAfter = ref(true)
-const loadingReplyWindow = ref(false)
-const loadingReplyDirection = ref<'before' | 'after' | 'anchor' | 'tail' | null>(null)
-const replyWindowError = ref('')
+const targetPost = computed(() => replies.value.find((reply) => reply.id === targetPostId.value))
+const postWindowMode = ref(false)
+const postHasBefore = ref(false)
+const postHasAfter = ref(hasMoreInitialReplies())
+const postBeforeCursor = ref(firstReplyId(page.props.posts))
+const postAfterCursor = ref(lastReplyId(page.props.posts))
+const postBeforePostNo = ref(firstPostNo(page.props.posts))
+const postAfterPostNo = ref(lastPostNo(page.props.posts))
+const postMaxNo = ref(initialMaxPostNo())
+const postTailLoaded = ref(!hasMoreInitialReplies())
+const postAutoLoadAfter = ref(true)
+const loadingPostWindow = ref(false)
+const loadingPostDirection = ref<'before' | 'after' | 'anchor' | 'tail' | null>(null)
+const postWindowError = ref('')
 const deleteErrorMessage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const topicHeaderEl = ref<HTMLElement | null>(null)
 const titleEl = ref<HTMLElement | null>(null)
-const replyLoadMoreEl = ref<HTMLElement | null>(null)
-const replyListEndEl = ref<HTMLElement | null>(null)
+const postLoadMoreEl = ref<HTMLElement | null>(null)
+const postListEndEl = ref<HTMLElement | null>(null)
 const markdownImageViewer = ref<InstanceType<typeof MarkdownImageViewer> | null>(null)
 const topicRailTopOffset = ref(0)
 const showHeaderTitle = ref(false)
@@ -80,22 +80,22 @@ const composerOpen = ref(false)
 const composerMode = computed(() => editingReplyId.value ? 'edit' : 'create')
 const mobileReplyRailOpen = ref(false)
 const activePostNo = ref(firstPostNo(page.props.posts) || 1)
-const replyRailProgressCurrent = ref(0)
-const replyRailProgressStart = ref(0)
-const replyRailProgressEnd = ref(0)
-const replyMaxRange = computed(() => Math.max(replyMaxNo.value, ...replies.value.map((reply) => reply.postNo || 0)))
-const hasReplyRail = computed(() => page.props.topic.replyCount > 0 && replyMaxRange.value > 0)
-const replyRailCurrentNo = computed(() => {
+const postRailProgressCurrent = ref(0)
+const postRailProgressStart = ref(0)
+const postRailProgressEnd = ref(0)
+const postMaxRange = computed(() => Math.max(postMaxNo.value, ...replies.value.map((reply) => reply.postNo || 0)))
+const hasPostRail = computed(() => page.props.topic.replyCount > 0 && postMaxRange.value > 0)
+const postRailCurrentNo = computed(() => {
   const fallback = firstPostNo(replies.value) || 1
   return clampPostNo(activePostNo.value || fallback)
 })
-const replyRailCurrentLabel = computed(() => {
-  const activeReply = replies.value.find((reply) => reply.postNo === replyRailCurrentNo.value)
+const postRailCurrentLabel = computed(() => {
+  const activeReply = replies.value.find((reply) => reply.postNo === postRailCurrentNo.value)
   return activeReply ? formatRailDate(activeReply.createdAt) : ''
 })
-const replyRailStartLabel = computed(() => formatRailDate(page.props.topic.createdAt))
-const replyRailEndLabel = computed(() => formatRailDate(replyTailLoaded.value ? replies.value[replies.value.length - 1]?.createdAt || page.props.topic.updatedAt : page.props.topic.updatedAt))
-const replyRailBusy = computed(() => loadingReplyWindow.value && (loadingReplyDirection.value === 'anchor' || loadingReplyDirection.value === 'tail'))
+const postRailStartLabel = computed(() => formatRailDate(page.props.topic.createdAt))
+const postRailEndLabel = computed(() => formatRailDate(postTailLoaded.value ? replies.value[replies.value.length - 1]?.createdAt || page.props.topic.updatedAt : page.props.topic.updatedAt))
+const postRailBusy = computed(() => loadingPostWindow.value && (loadingPostDirection.value === 'anchor' || loadingPostDirection.value === 'tail'))
 const actionMessageSuccess = computed(() =>
   [
     t('topic.bookmarkAdded'),
@@ -160,19 +160,19 @@ const floatingTopicActions = computed(() => {
 const shellState = useShellState()
 let titleObserver: IntersectionObserver | undefined
 let topicHeaderResizeObserver: ResizeObserver | undefined
-let replyLoadObserver: IntersectionObserver | undefined
+let postLoadObserver: IntersectionObserver | undefined
 let lastHeaderScrollY = 0
 let headerScrollFrame = 0
-const highlightedReplyId = ref<number | null>(null)
+const highlightedPostId = ref<number | null>(null)
 let highlightTimer: number | undefined
-let replyBottomLoadFrame = 0
+let postBottomLoadFrame = 0
 let activeReplyScrollFrame = 0
-let pendingReplyJumpNo: number | null = null
-let replyRailSyncPaused = false
-let replyRailResumeFrame = 0
-let replyRailResumeLastScrollY = 0
-let replyRailResumeStableFrames = 0
-let replyElements: HTMLElement[] = []
+let pendingPostJumpNo: number | null = null
+let postRailSyncPaused = false
+let postRailResumeFrame = 0
+let postRailResumeLastScrollY = 0
+let postRailResumeStableFrames = 0
+let postElements: HTMLElement[] = []
 
 function updateTopicRailTopOffset() {
   if (!topicHeaderEl.value) {
@@ -213,11 +213,11 @@ onMounted(() => {
   setupHeaderTitleBehavior()
   void nextTick(observeTopicHeader)
   void nextTick(observeTitle)
-  void nextTick(observeReplyLoader)
-  void nextTick(collectReplyElements)
-  void nextTick(scheduleActiveReplyFromScroll)
-  setupReplyBottomLoadFallback()
-  void syncReplyHash()
+  void nextTick(observePostLoader)
+  void nextTick(collectPostElements)
+  void nextTick(scheduleActivePostFromScroll)
+  setupPostBottomLoadFallback()
+  void syncPostHash()
 })
 
 watch(
@@ -238,10 +238,10 @@ watch(
     mobileReplyRailOpen.value = false
     void nextTick(observeTopicHeader)
     void nextTick(observeTitle)
-    void nextTick(observeReplyLoader)
-    void nextTick(collectReplyElements)
-    void nextTick(scheduleActiveReplyFromScroll)
-    void nextTick(syncReplyHash)
+    void nextTick(observePostLoader)
+    void nextTick(collectPostElements)
+    void nextTick(scheduleActivePostFromScroll)
+    void nextTick(syncPostHash)
   },
   { immediate: true },
 )
@@ -264,8 +264,8 @@ watch(
   () => replies.value.map((reply) => `${reply.id}:${reply.postNo}`).join(','),
   () => {
     void nextTick(() => {
-      collectReplyElements()
-      scheduleActiveReplyFromScroll()
+      collectPostElements()
+      scheduleActivePostFromScroll()
     })
   },
 )
@@ -273,18 +273,18 @@ watch(
 onBeforeUnmount(() => {
   titleObserver?.disconnect()
   topicHeaderResizeObserver?.disconnect()
-  replyLoadObserver?.disconnect()
+  postLoadObserver?.disconnect()
   window.removeEventListener('scroll', updateMobileHeaderTitle)
-  window.removeEventListener('scroll', scheduleActiveReplyFromScroll)
-  window.removeEventListener('scroll', scheduleReplyBottomLoadCheck)
+  window.removeEventListener('scroll', scheduleActivePostFromScroll)
+  window.removeEventListener('scroll', schedulePostBottomLoadCheck)
   window.removeEventListener('resize', updateTopicRailTopOffset)
   window.removeEventListener('resize', updateHeaderViewport)
-  window.removeEventListener('resize', scheduleActiveReplyFromScroll)
-  window.removeEventListener('resize', scheduleReplyBottomLoadCheck)
+  window.removeEventListener('resize', scheduleActivePostFromScroll)
+  window.removeEventListener('resize', schedulePostBottomLoadCheck)
   window.cancelAnimationFrame(headerScrollFrame)
-  window.cancelAnimationFrame(replyBottomLoadFrame)
+  window.cancelAnimationFrame(postBottomLoadFrame)
   window.cancelAnimationFrame(activeReplyScrollFrame)
-  window.cancelAnimationFrame(replyRailResumeFrame)
+  window.cancelAnimationFrame(postRailResumeFrame)
   window.clearTimeout(highlightTimer)
   shellState.headerTitle = ''
   shellState.headerTags = []
@@ -295,21 +295,21 @@ function setupHeaderTitleBehavior() {
   lastHeaderScrollY = window.scrollY
   updateHeaderViewport()
   window.addEventListener('scroll', updateMobileHeaderTitle, { passive: true })
-  window.addEventListener('scroll', scheduleActiveReplyFromScroll, { passive: true })
+  window.addEventListener('scroll', scheduleActivePostFromScroll, { passive: true })
   window.addEventListener('resize', updateTopicRailTopOffset)
   window.addEventListener('resize', updateHeaderViewport)
-  window.addEventListener('resize', scheduleActiveReplyFromScroll)
+  window.addEventListener('resize', scheduleActivePostFromScroll)
 }
 
-function setupReplyBottomLoadFallback() {
-  window.addEventListener('scroll', scheduleReplyBottomLoadCheck, { passive: true })
-  window.addEventListener('resize', scheduleReplyBottomLoadCheck)
+function setupPostBottomLoadFallback() {
+  window.addEventListener('scroll', schedulePostBottomLoadCheck, { passive: true })
+  window.addEventListener('resize', schedulePostBottomLoadCheck)
 }
 
-function scheduleReplyBottomLoadCheck() {
-  if (replyBottomLoadFrame) return
-  replyBottomLoadFrame = window.requestAnimationFrame(() => {
-    replyBottomLoadFrame = 0
+function schedulePostBottomLoadCheck() {
+  if (postBottomLoadFrame) return
+  postBottomLoadFrame = window.requestAnimationFrame(() => {
+    postBottomLoadFrame = 0
     void maybeLoadRepliesAtPageBottom()
   })
 }
@@ -321,20 +321,20 @@ function isNearDocumentBottom() {
 }
 
 async function maybeLoadRepliesAtPageBottom() {
-  if (!replyHasAfter.value || loadingReplyWindow.value || replyWindowError.value) return
+  if (!postHasAfter.value || loadingPostWindow.value || postWindowError.value) return
   if (!isNearDocumentBottom()) return
 
-  replyAutoLoadAfter.value = true
-  await loadReplyWindow('after')
+  postAutoLoadAfter.value = true
+  await loadPostWindow('after')
   await nextTick()
-  if (replyHasAfter.value && isNearDocumentBottom()) {
-    scheduleReplyBottomLoadCheck()
+  if (postHasAfter.value && isNearDocumentBottom()) {
+    schedulePostBottomLoadCheck()
   }
 }
 
 async function loadMoreRepliesManually() {
-  replyAutoLoadAfter.value = true
-  await loadReplyWindow('after')
+  postAutoLoadAfter.value = true
+  await loadPostWindow('after')
 }
 
 function updateHeaderViewport() {
@@ -369,57 +369,57 @@ function applyMobileHeaderTitle() {
   lastHeaderScrollY = scrollY
 }
 
-function observeReplyLoader() {
-  replyLoadObserver?.disconnect()
-  if (!replyLoadMoreEl.value || !replyHasAfter.value || !replyAutoLoadAfter.value || !('IntersectionObserver' in window)) return
+function observePostLoader() {
+  postLoadObserver?.disconnect()
+  if (!postLoadMoreEl.value || !postHasAfter.value || !postAutoLoadAfter.value || !('IntersectionObserver' in window)) return
 
-  replyLoadObserver = new IntersectionObserver(
+  postLoadObserver = new IntersectionObserver(
     (entries) => {
-      if (entries[0]?.isIntersecting && replyHasAfter.value && replyAutoLoadAfter.value && !loadingReplyWindow.value && !replyWindowError.value) {
-        void loadReplyWindow('after')
+      if (entries[0]?.isIntersecting && postHasAfter.value && postAutoLoadAfter.value && !loadingPostWindow.value && !postWindowError.value) {
+        void loadPostWindow('after')
       }
     },
     { rootMargin: '360px 0px' },
   )
-  replyLoadObserver.observe(replyLoadMoreEl.value)
+  postLoadObserver.observe(postLoadMoreEl.value)
 }
 
-function collectReplyElements() {
-  replyElements = Array.from(document.querySelectorAll<HTMLElement>('[data-post-no]'))
+function collectPostElements() {
+  postElements = Array.from(document.querySelectorAll<HTMLElement>('[data-post-no]'))
 }
 
-function pauseReplyRailSync() {
-  replyRailSyncPaused = true
-  window.cancelAnimationFrame(replyRailResumeFrame)
-  replyRailResumeFrame = 0
-  replyRailResumeLastScrollY = window.scrollY
-  replyRailResumeStableFrames = 0
+function pausePostRailSync() {
+  postRailSyncPaused = true
+  window.cancelAnimationFrame(postRailResumeFrame)
+  postRailResumeFrame = 0
+  postRailResumeLastScrollY = window.scrollY
+  postRailResumeStableFrames = 0
 }
 
-function resumeReplyRailSyncWhenSettled() {
-  pauseReplyRailSync()
+function resumePostRailSyncWhenSettled() {
+  pausePostRailSync()
   const startedAt = performance.now()
   const settle = () => {
     const currentY = window.scrollY
-    if (Math.abs(currentY - replyRailResumeLastScrollY) < 1) {
-      replyRailResumeStableFrames += 1
+    if (Math.abs(currentY - postRailResumeLastScrollY) < 1) {
+      postRailResumeStableFrames += 1
     } else {
-      replyRailResumeStableFrames = 0
-      replyRailResumeLastScrollY = currentY
+      postRailResumeStableFrames = 0
+      postRailResumeLastScrollY = currentY
     }
-    if (replyRailResumeStableFrames >= 4 || performance.now() - startedAt > 1600) {
-      replyRailSyncPaused = false
-      replyRailResumeFrame = 0
+    if (postRailResumeStableFrames >= 4 || performance.now() - startedAt > 1600) {
+      postRailSyncPaused = false
+      postRailResumeFrame = 0
       syncReplyRailProgress()
       return
     }
-    replyRailResumeFrame = window.requestAnimationFrame(settle)
+    postRailResumeFrame = window.requestAnimationFrame(settle)
   }
-  replyRailResumeFrame = window.requestAnimationFrame(settle)
+  postRailResumeFrame = window.requestAnimationFrame(settle)
 }
 
-function scheduleActiveReplyFromScroll() {
-  if (replyRailSyncPaused || activeReplyScrollFrame) return
+function scheduleActivePostFromScroll() {
+  if (postRailSyncPaused || activeReplyScrollFrame) return
   activeReplyScrollFrame = window.requestAnimationFrame(() => {
     activeReplyScrollFrame = 0
     syncReplyRailProgress()
@@ -430,9 +430,9 @@ function syncReplyRailProgress() {
   const progress = measureReplyViewportProgress()
   if (progress.postNo >= 0) {
     activePostNo.value = progress.postNo
-    replyRailProgressCurrent.value = progress.current
-    replyRailProgressStart.value = progress.start
-    replyRailProgressEnd.value = progress.end
+    postRailProgressCurrent.value = progress.current
+    postRailProgressStart.value = progress.start
+    postRailProgressEnd.value = progress.end
   }
 }
 
@@ -449,7 +449,7 @@ function measureReplyViewportProgress() {
   let nearestProgress = 0
   let nearestDistance = Number.POSITIVE_INFINITY
 
-  for (const element of replyElements) {
+  for (const element of postElements) {
     const postNo = Number(element.dataset.postNo || 0)
     if (!postNo) continue
     const rect = element.getBoundingClientRect()
@@ -494,19 +494,19 @@ function measureReplyViewportProgress() {
 
 function resetRepliesFromProps() {
   replies.value = [...page.props.posts]
-  replyWindowMode.value = false
-  replyHasBefore.value = false
-  replyHasAfter.value = hasMoreInitialReplies()
-  replyBeforeCursor.value = firstReplyId(page.props.posts)
-  replyAfterCursor.value = lastReplyId(page.props.posts)
-  replyBeforePostNo.value = firstPostNo(page.props.posts)
-  replyAfterPostNo.value = lastPostNo(page.props.posts)
-  replyMaxNo.value = initialMaxPostNo()
-  replyTailLoaded.value = !hasMoreInitialReplies()
-  replyAutoLoadAfter.value = true
+  postWindowMode.value = false
+  postHasBefore.value = false
+  postHasAfter.value = hasMoreInitialReplies()
+  postBeforeCursor.value = firstReplyId(page.props.posts)
+  postAfterCursor.value = lastReplyId(page.props.posts)
+  postBeforePostNo.value = firstPostNo(page.props.posts)
+  postAfterPostNo.value = lastPostNo(page.props.posts)
+  postMaxNo.value = initialMaxPostNo()
+  postTailLoaded.value = !hasMoreInitialReplies()
+  postAutoLoadAfter.value = true
   activePostNo.value = firstPostNo(page.props.posts) || 1
   syncProgressForPostNo(activePostNo.value)
-  replyWindowError.value = ''
+  postWindowError.value = ''
   editingReplyId.value = 0
 }
 
@@ -531,7 +531,7 @@ function initialMaxPostNo() {
 }
 
 function clampPostNo(postNo: number) {
-  const maxPostNo = Math.max(1, replyMaxRange.value || 1)
+  const maxPostNo = Math.max(1, postMaxRange.value || 1)
   return Math.min(maxPostNo, Math.max(1, Math.round(postNo)))
 }
 
@@ -540,23 +540,23 @@ function progressForPostNo(postNo: number) {
 }
 
 function progressForPostNoFraction(postNo: number, fraction: number) {
-  const maxPostNo = Math.max(1, replyMaxRange.value || 1)
+  const maxPostNo = Math.max(1, postMaxRange.value || 1)
   if (maxPostNo <= 1) return Math.min(1, Math.max(0, fraction))
   return Math.min(1, Math.max(0, (Math.max(1, postNo) - 1 + Math.min(1, Math.max(0, fraction))) / maxPostNo))
 }
 
 function visibleSlotSize() {
-  return 1 / Math.max(1, replyMaxRange.value || 1)
+  return 1 / Math.max(1, postMaxRange.value || 1)
 }
 
 function syncProgressForPostNo(postNo: number) {
   const progress = progressForPostNo(postNo)
-  replyRailProgressCurrent.value = progress
-  replyRailProgressStart.value = Math.max(0, progress - visibleSlotSize() / 2)
-  replyRailProgressEnd.value = Math.min(1, progress + visibleSlotSize() / 2)
+  postRailProgressCurrent.value = progress
+  postRailProgressStart.value = Math.max(0, progress - visibleSlotSize() / 2)
+  postRailProgressEnd.value = Math.min(1, progress + visibleSlotSize() / 2)
 }
 
-function findClosestLoadedReply(postNo: number) {
+function findClosestLoadedPost(postNo: number) {
   let closest: PostPayload | undefined
   let closestDistance = Number.POSITIVE_INFINITY
   for (const reply of replies.value) {
@@ -590,27 +590,27 @@ function findReplyHashId() {
   return match ? Number(match[1]) : 0
 }
 
-async function syncReplyHash() {
+async function syncPostHash() {
   const replyId = findReplyHashId()
   if (!replyId) return
 
   if (!replies.value.some((reply) => reply.id === replyId)) {
-    await loadReplyWindow('anchor', replyId)
+    await loadPostWindow('anchor', replyId)
   }
 
-  highlightReply(replyId)
+  highlightPost(replyId)
   await nextTick()
   const element = document.getElementById(`post-${replyId}`)
   if (element) {
-    scrollReplyIntoComfortView(element, 'auto')
+    scrollPostIntoComfortView(element, 'auto')
   }
 }
 
-function highlightReply(replyId: number) {
-  highlightedReplyId.value = replyId
+function highlightPost(replyId: number) {
+  highlightedPostId.value = replyId
   window.clearTimeout(highlightTimer)
   highlightTimer = window.setTimeout(() => {
-    highlightedReplyId.value = null
+    highlightedPostId.value = null
   }, 2400)
 }
 
@@ -630,54 +630,54 @@ function applyPostWindowPayload(
   mergeMode: 'replace' | 'prepend' | 'append',
   forceWindowMode: boolean,
 ) {
-  replyWindowMode.value = forceWindowMode || replyWindowMode.value
+  postWindowMode.value = forceWindowMode || postWindowMode.value
   mergeReplies(payload.posts, mergeMode)
-  replyHasBefore.value = replyWindowMode.value ? payload.hasBefore : false
-  replyHasAfter.value = payload.hasAfter
-  replyBeforeCursor.value = payload.beforeCursor ?? firstReplyId(replies.value)
-  replyAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
-  replyBeforePostNo.value = payload.beforePostNo ?? firstPostNo(replies.value)
-  replyAfterPostNo.value = payload.afterPostNo ?? lastPostNo(replies.value)
-  replyMaxNo.value = Math.max(replyMaxNo.value, payload.maxPostNo || 0)
+  postHasBefore.value = postWindowMode.value ? payload.hasBefore : false
+  postHasAfter.value = payload.hasAfter
+  postBeforeCursor.value = payload.beforeCursor ?? firstReplyId(replies.value)
+  postAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
+  postBeforePostNo.value = payload.beforePostNo ?? firstPostNo(replies.value)
+  postAfterPostNo.value = payload.afterPostNo ?? lastPostNo(replies.value)
+  postMaxNo.value = Math.max(postMaxNo.value, payload.maxPostNo || 0)
   if (mergeMode === 'replace') {
-    replyTailLoaded.value = payloadEndsAtTail(payload)
+    postTailLoaded.value = payloadEndsAtTail(payload)
   } else if (mergeMode === 'append' && payloadEndsAtTail(payload)) {
-    replyTailLoaded.value = true
+    postTailLoaded.value = true
   }
 }
 
 function payloadEndsAtTail(payload: Awaited<ReturnType<typeof getPostWindow>>) {
   const afterPostNo = payload.afterPostNo || lastPostNo(payload.posts)
-  const maxPostNo = Math.max(replyMaxNo.value, payload.maxPostNo || 0)
+  const maxPostNo = Math.max(postMaxNo.value, payload.maxPostNo || 0)
   return payload.posts.length > 0 && !payload.hasAfter && afterPostNo >= maxPostNo
 }
 
 function disableReplyAutoLoadAfter() {
-  replyAutoLoadAfter.value = false
-  replyLoadObserver?.disconnect()
+  postAutoLoadAfter.value = false
+  postLoadObserver?.disconnect()
 }
 
-async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail', anchorValue = 0) {
-  if (loadingReplyWindow.value) return
-  if (direction === 'after' && (!replyHasAfter.value || !replyAutoLoadAfter.value)) return
-  if (direction === 'tail' && replyTailLoaded.value) return
+async function loadPostWindow(direction: 'before' | 'after' | 'anchor' | 'tail', anchorValue = 0) {
+  if (loadingPostWindow.value) return
+  if (direction === 'after' && (!postHasAfter.value || !postAutoLoadAfter.value)) return
+  if (direction === 'tail' && postTailLoaded.value) return
 
   if (direction !== 'after') {
     disableReplyAutoLoadAfter()
   }
 
-  const wasWindowMode = replyWindowMode.value
-  loadingReplyWindow.value = true
-  loadingReplyDirection.value = direction
-  replyWindowError.value = ''
+  const wasWindowMode = postWindowMode.value
+  loadingPostWindow.value = true
+  loadingPostDirection.value = direction
+  postWindowError.value = ''
   try {
     const payload = await getPostWindow({
       topicId: page.props.topic.id,
       anchorPostId: direction === 'anchor' ? anchorValue : undefined,
-      beforePostNo: direction === 'before' ? replyBeforePostNo.value : undefined,
-      afterPostNo: direction === 'after' ? replyAfterPostNo.value : undefined,
-      before: direction === 'before' && !replyBeforePostNo.value ? replyBeforeCursor.value : undefined,
-      after: direction === 'after' && !replyAfterPostNo.value ? replyAfterCursor.value : undefined,
+      beforePostNo: direction === 'before' ? postBeforePostNo.value : undefined,
+      afterPostNo: direction === 'after' ? postAfterPostNo.value : undefined,
+      before: direction === 'before' && !postBeforePostNo.value ? postBeforeCursor.value : undefined,
+      after: direction === 'after' && !postAfterPostNo.value ? postAfterCursor.value : undefined,
       tail: direction === 'tail',
       limit: 20,
     })
@@ -688,46 +688,46 @@ async function loadReplyWindow(direction: 'before' | 'after' | 'anchor' | 'tail'
       direction === 'anchor' || direction === 'tail' || direction === 'before' || wasWindowMode,
     )
     if (direction === 'after' && !payload.hasAfter) {
-      replyTailLoaded.value = true
+      postTailLoaded.value = true
       disableReplyAutoLoadAfter()
     }
     if (direction === 'tail') {
-      replyTailLoaded.value = true
-      replyHasAfter.value = false
+      postTailLoaded.value = true
+      postHasAfter.value = false
       disableReplyAutoLoadAfter()
     }
     if (direction === 'before') {
       activePostNo.value = firstPostNo(payload.posts) || firstPostNo(replies.value)
       syncProgressForPostNo(activePostNo.value || 1)
     } else if (direction === 'tail') {
-      activePostNo.value = lastPostNo(payload.posts) || lastPostNo(replies.value) || replyMaxRange.value
+      activePostNo.value = lastPostNo(payload.posts) || lastPostNo(replies.value) || postMaxRange.value
       syncProgressForPostNo(activePostNo.value || 1)
     }
     await nextTick()
-    collectReplyElements()
-    if (replyAutoLoadAfter.value) {
-      observeReplyLoader()
+    collectPostElements()
+    if (postAutoLoadAfter.value) {
+      observePostLoader()
     }
-    replyRailSyncPaused = false
-    scheduleActiveReplyFromScroll()
+    postRailSyncPaused = false
+    scheduleActivePostFromScroll()
   } catch (error) {
-    replyWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
+    postWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
   } finally {
-    loadingReplyWindow.value = false
-    loadingReplyDirection.value = null
-    flushPendingReplyJump()
+    loadingPostWindow.value = false
+    loadingPostDirection.value = null
+    flushPendingPostJump()
   }
 }
 
 async function jumpToPostNo(postNo: number) {
   const target = clampPostNo(postNo)
-  if (target >= replyMaxRange.value) {
-    await jumpToLatestReply()
+  if (target >= postMaxRange.value) {
+    await jumpToLatestPost()
     return
   }
 
-  if (loadingReplyWindow.value) {
-    pendingReplyJumpNo = target
+  if (loadingPostWindow.value) {
+    pendingPostJumpNo = target
     activePostNo.value = target
     syncProgressForPostNo(target)
     return
@@ -736,7 +736,7 @@ async function jumpToPostNo(postNo: number) {
   disableReplyAutoLoadAfter()
   activePostNo.value = target
   syncProgressForPostNo(target)
-  pauseReplyRailSync()
+  pausePostRailSync()
   const loaded = replies.value.find((reply) => reply.postNo === target)
   if (loaded) {
     activePostNo.value = loaded.postNo
@@ -744,15 +744,15 @@ async function jumpToPostNo(postNo: number) {
     await nextTick()
     const element = document.getElementById(`post-${loaded.id}`)
     if (element) {
-      scrollReplyIntoComfortView(element)
+      scrollPostIntoComfortView(element)
     }
-    resumeReplyRailSyncWhenSettled()
+    resumePostRailSyncWhenSettled()
     return
   }
 
-  loadingReplyWindow.value = true
-  loadingReplyDirection.value = 'anchor'
-  replyWindowError.value = ''
+  loadingPostWindow.value = true
+  loadingPostDirection.value = 'anchor'
+  postWindowError.value = ''
   try {
     const payload = await getPostWindow({
       topicId: page.props.topic.id,
@@ -761,72 +761,72 @@ async function jumpToPostNo(postNo: number) {
     })
     applyPostWindowPayload(payload, 'replace', true)
     await nextTick()
-    const closest = findClosestLoadedReply(target)
+    const closest = findClosestLoadedPost(target)
     if (closest) {
       activePostNo.value = closest.postNo
       syncProgressForPostNo(closest.postNo)
-      collectReplyElements()
+      collectPostElements()
       const element = document.getElementById(`post-${closest.id}`)
       if (element) {
-        scrollReplyIntoComfortView(element)
+        scrollPostIntoComfortView(element)
       }
-      resumeReplyRailSyncWhenSettled()
+      resumePostRailSyncWhenSettled()
     }
   } catch (error) {
-    replyWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
+    postWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
   } finally {
-    loadingReplyWindow.value = false
-    loadingReplyDirection.value = null
-    flushPendingReplyJump()
+    loadingPostWindow.value = false
+    loadingPostDirection.value = null
+    flushPendingPostJump()
   }
 }
 
-async function jumpToLatestReply() {
-  if (!replyMaxRange.value) return
-  if (loadingReplyWindow.value) {
-    pendingReplyJumpNo = replyMaxRange.value
-    activePostNo.value = replyMaxRange.value
-    syncProgressForPostNo(replyMaxRange.value)
+async function jumpToLatestPost() {
+  if (!postMaxRange.value) return
+  if (loadingPostWindow.value) {
+    pendingPostJumpNo = postMaxRange.value
+    activePostNo.value = postMaxRange.value
+    syncProgressForPostNo(postMaxRange.value)
     return
   }
   disableReplyAutoLoadAfter()
-  activePostNo.value = replyMaxRange.value
-  syncProgressForPostNo(replyMaxRange.value)
-  pauseReplyRailSync()
-  if (replyTailLoaded.value) {
+  activePostNo.value = postMaxRange.value
+  syncProgressForPostNo(postMaxRange.value)
+  pausePostRailSync()
+  if (postTailLoaded.value) {
     const latest = replies.value[replies.value.length - 1]
     if (latest) {
       activePostNo.value = latest.postNo
       syncProgressForPostNo(latest.postNo)
       await nextTick()
-      scrollReplyListEndIntoView()
-      resumeReplyRailSyncWhenSettled()
+      scrollPostListEndIntoView()
+      resumePostRailSyncWhenSettled()
     }
     return
   }
-  const loadedLatest = replies.value.find((reply) => reply.postNo === replyMaxRange.value)
+  const loadedLatest = replies.value.find((reply) => reply.postNo === postMaxRange.value)
   if (loadedLatest) {
     activePostNo.value = loadedLatest.postNo
     syncProgressForPostNo(loadedLatest.postNo)
     await nextTick()
-    scrollReplyListEndIntoView()
-    resumeReplyRailSyncWhenSettled()
+    scrollPostListEndIntoView()
+    resumePostRailSyncWhenSettled()
     return
   }
-  await loadReplyWindow('tail')
+  await loadPostWindow('tail')
   await nextTick()
   const latest = replies.value[replies.value.length - 1]
   if (latest) {
     activePostNo.value = latest.postNo
     syncProgressForPostNo(latest.postNo)
-    scrollReplyListEndIntoView()
-    resumeReplyRailSyncWhenSettled()
+    scrollPostListEndIntoView()
+    resumePostRailSyncWhenSettled()
   }
 }
 
-function scrollReplyListEndIntoView() {
-  if (replyListEndEl.value) {
-    replyListEndEl.value.scrollIntoView({ block: 'end', behavior: 'smooth' })
+function scrollPostListEndIntoView() {
+  if (postListEndEl.value) {
+    postListEndEl.value.scrollIntoView({ block: 'end', behavior: 'smooth' })
     return
   }
 
@@ -836,10 +836,10 @@ function scrollReplyListEndIntoView() {
   }
 }
 
-function flushPendingReplyJump() {
-  if (!pendingReplyJumpNo || loadingReplyWindow.value) return
-  const postNo = pendingReplyJumpNo
-  pendingReplyJumpNo = null
+function flushPendingPostJump() {
+  if (!pendingPostJumpNo || loadingPostWindow.value) return
+  const postNo = pendingPostJumpNo
+  pendingPostJumpNo = null
   void jumpToPostNo(postNo)
 }
 
@@ -847,7 +847,7 @@ function jumpToTopicBody() {
   void jumpToPostNo(1)
 }
 
-function focusReplyEditor() {
+function focusPostComposer() {
   mobileReplyRailOpen.value = false
   composerOpen.value = true
 }
@@ -859,26 +859,26 @@ function updateComposerOpen(open: boolean) {
   }
 }
 
-function openFloatingReply() {
+function openFloatingPostComposer() {
   if (editingReplyId.value) {
     cancelEditReply()
   }
-  replyTargetId.value = 0
-  focusReplyEditor()
+  targetPostId.value = 0
+  focusPostComposer()
 }
 
 function closeMobileReplyRail() {
   mobileReplyRailOpen.value = false
 }
 
-async function selectReplyFromRail(postNo: number) {
+async function selectPostFromRail(postNo: number) {
   closeMobileReplyRail()
   await jumpToPostNo(postNo)
 }
 
-async function jumpToLatestReplyFromRail() {
+async function jumpToLatestPostFromRail() {
   closeMobileReplyRail()
-  await jumpToLatestReply()
+  await jumpToLatestPost()
 }
 
 function jumpToTopicBodyFromRail() {
@@ -891,7 +891,7 @@ function isElementMostlyVisible(element: HTMLElement) {
   return rect.top >= 96 && rect.bottom <= window.innerHeight - 120
 }
 
-function scrollReplyIntoComfortView(element: HTMLElement, behavior: ScrollBehavior = 'smooth') {
+function scrollPostIntoComfortView(element: HTMLElement, behavior: ScrollBehavior = 'smooth') {
   const targetTop = element.getBoundingClientRect().top + window.scrollY - 160
   window.scrollTo({
     top: Math.max(0, targetTop),
@@ -905,7 +905,7 @@ function waitForAnimationFrame() {
   })
 }
 
-async function findReplyElementAfterLayout(replyId: number) {
+async function findPostElementAfterLayout(replyId: number) {
   for (let attempts = 0; attempts < 4; attempts += 1) {
     await nextTick()
     await waitForAnimationFrame()
@@ -915,10 +915,10 @@ async function findReplyElementAfterLayout(replyId: number) {
   return null
 }
 
-async function revealCreatedReply(replyId: number) {
+async function revealCreatedPost(replyId: number) {
   if (!replyId) return
 
-  pauseReplyRailSync()
+  pausePostRailSync()
   const payload = await getPostWindow({
     topicId: page.props.topic.id,
     anchorPostId: replyId,
@@ -930,16 +930,16 @@ async function revealCreatedReply(replyId: number) {
     activePostNo.value = createdReply.postNo
     syncProgressForPostNo(createdReply.postNo)
   }
-  highlightReply(replyId)
-  const element = await findReplyElementAfterLayout(replyId)
+  highlightPost(replyId)
+  const element = await findPostElementAfterLayout(replyId)
   if (element && !isElementMostlyVisible(element)) {
-    scrollReplyIntoComfortView(element)
-    resumeReplyRailSyncWhenSettled()
+    scrollPostIntoComfortView(element)
+    resumePostRailSyncWhenSettled()
     return
   }
-  replyRailSyncPaused = false
-  collectReplyElements()
-  scheduleActiveReplyFromScroll()
+  postRailSyncPaused = false
+  collectPostElements()
+  scheduleActivePostFromScroll()
 }
 
 async function toggleLike() {
@@ -1005,56 +1005,56 @@ function replyTo(reply: PostPayload) {
   if (editingReplyId.value) {
     cancelEditReply()
   }
-  replyTargetId.value = reply.id
+  targetPostId.value = reply.id
   errorMessage.value = ''
   successMessage.value = ''
-  focusReplyEditor()
+  focusPostComposer()
 }
 
-function cancelReplyTarget() {
-  replyTargetId.value = 0
+function cancelPostTarget() {
+  targetPostId.value = 0
   errorMessage.value = ''
 }
 
-function clearReplyValidation() {
+function clearPostValidation() {
   errorMessage.value = ''
   successMessage.value = ''
 }
 
-function handleReplyImageInserted(count: number) {
+function handlePostImageInserted(count: number) {
   errorMessage.value = ''
   successMessage.value = count > 1 ? t('publish.imagesInserted', { count }) : t('publish.imageInserted')
 }
 
-function handleReplyImageError(message: string) {
+function handlePostImageError(message: string) {
   errorMessage.value = message
 }
 
 function startEditReply(reply: PostPayload) {
   if (savingEditReplyId.value || deletingReplyId.value === reply.id) return
   if (!editingReplyId.value) {
-    replyDraftBeforeEdit.value = replyContent.value
-    replyTargetBeforeEdit.value = replyTargetId.value
+    postDraftBeforeEdit.value = postContent.value
+    targetPostBeforeEdit.value = targetPostId.value
   }
-  replyTargetId.value = 0
+  targetPostId.value = 0
   editingReplyId.value = reply.id
-  replyContent.value = reply.content
+  postContent.value = reply.content
   errorMessage.value = ''
   successMessage.value = ''
-  focusReplyEditor()
+  focusPostComposer()
 }
 
 function cancelEditReply() {
   if (savingEditReplyId.value) return
   editingReplyId.value = 0
   errorMessage.value = ''
-  replyContent.value = replyDraftBeforeEdit.value
-  replyTargetId.value = replyTargetBeforeEdit.value
-  replyDraftBeforeEdit.value = ''
-  replyTargetBeforeEdit.value = 0
+  postContent.value = postDraftBeforeEdit.value
+  targetPostId.value = targetPostBeforeEdit.value
+  postDraftBeforeEdit.value = ''
+  targetPostBeforeEdit.value = 0
 }
 
-async function saveReplyEdit() {
+async function savePostEdit() {
   if (savingEditReplyId.value) return
 
   const reply = replies.value.find((item) => item.id === editingReplyId.value)
@@ -1063,7 +1063,7 @@ async function saveReplyEdit() {
     return
   }
 
-  const content = replyContent.value.trim()
+  const content = postContent.value.trim()
   if (!content) {
     errorMessage.value = t('topic.replyRequired')
     return
@@ -1089,10 +1089,10 @@ async function saveReplyEdit() {
       }
     }
     editingReplyId.value = 0
-    replyContent.value = replyDraftBeforeEdit.value
-    replyTargetId.value = replyTargetBeforeEdit.value
-    replyDraftBeforeEdit.value = ''
-    replyTargetBeforeEdit.value = 0
+    postContent.value = postDraftBeforeEdit.value
+    targetPostId.value = targetPostBeforeEdit.value
+    postDraftBeforeEdit.value = ''
+    targetPostBeforeEdit.value = 0
     composerOpen.value = false
     pushFlash(t('topic.replyUpdated'), 'success')
   } catch (error) {
@@ -1102,14 +1102,14 @@ async function saveReplyEdit() {
   }
 }
 
-async function submitReply() {
+async function submitPost() {
   if (editingReplyId.value) {
-    await saveReplyEdit()
+    await savePostEdit()
     return
   }
 
-  const replyId = replyTarget.value?.id || 0
-  const content = replyContent.value.trim()
+  const replyId = targetPost.value?.id || 0
+  const content = postContent.value.trim()
   if (submitting.value) return
 
   if (!content) {
@@ -1123,12 +1123,12 @@ async function submitReply() {
   successMessage.value = ''
   try {
     const createdReply = await createPost(page.props.topic.id, content, replyId)
-    replyContent.value = ''
-    replyTargetId.value = 0
+    postContent.value = ''
+    targetPostId.value = 0
     successMessage.value = t('topic.replyPosted')
     const createdReplyId = typeof createdReply === 'object' && createdReply !== null ? createdReply.id : createdReply
     if (typeof createdReplyId === 'number') {
-      await revealCreatedReply(createdReplyId)
+      await revealCreatedPost(createdReplyId)
     } else {
       await refreshCurrentPage()
     }
@@ -1244,7 +1244,7 @@ function requestTopicReport() {
   })
 }
 
-function requestReplyReport(reply: PostPayload) {
+function requestPostReport(reply: PostPayload) {
   requestReport({
     targetType: 'post',
     targetId: reply.id,
@@ -1274,12 +1274,12 @@ async function submitCurrentReport() {
   }
 }
 
-function replyModerationBusy(replyId: number) {
+function postModerationBusy(replyId: number) {
   return moderatingReplyIds.value.includes(replyId)
 }
 
 async function moderateReply(reply: PostPayload, action: 'ban' | 'unban') {
-  if (replyModerationBusy(reply.id)) return
+  if (postModerationBusy(reply.id)) return
   moderatingReplyIds.value = [...moderatingReplyIds.value, reply.id]
   try {
     await updateModerationPostStatus(reply.id, action)
@@ -1293,7 +1293,7 @@ async function moderateReply(reply: PostPayload, action: 'ban' | 'unban') {
   }
 }
 
-async function removeReply(replyId: number) {
+async function removePost(replyId: number) {
   if (deletingReplyId.value || savingEditReplyId.value === replyId) return
 
   deletingReplyId.value = replyId
@@ -1443,16 +1443,16 @@ async function removeReply(replyId: number) {
 
             <span v-if="replies.length" id="replies" class="block scroll-mt-20" aria-hidden="true" />
 
-            <div v-if="replyHasBefore" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
+            <div v-if="postHasBefore" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
               <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
               <button
-                v-if="replyHasBefore"
+                v-if="postHasBefore"
                 type="button"
                 class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-semibold text-primary transition hover:bg-info/10 hover:text-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                :disabled="loadingReplyWindow"
-                @click="loadReplyWindow('before')"
+                :disabled="loadingPostWindow"
+                @click="loadPostWindow('before')"
               >
-                <Loader2 v-if="loadingReplyDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
+                <Loader2 v-if="loadingPostDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
                 <ChevronsUp v-else class="h-3.5 w-3.5" />
                 {{ t('topic.loadEarlierReplies') }}
               </button>
@@ -1464,7 +1464,7 @@ async function removeReply(replyId: number) {
               :key="reply.id"
               :data-post-no="reply.postNo"
               class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-line px-3 py-4 transition hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5 xl:border-t-transparent"
-              :class="{ 'bg-info/10 ring-1 ring-inset ring-primary/20': highlightedReplyId === reply.id }"
+              :class="{ 'bg-info/10 ring-1 ring-inset ring-primary/20': highlightedPostId === reply.id }"
             >
               <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
               <a
@@ -1524,7 +1524,7 @@ async function removeReply(replyId: number) {
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
                       :title="t('topic.report')"
-                      @click="requestReplyReport(reply)"
+                      @click="requestPostReport(reply)"
                     >
                       <Flag class="h-3.5 w-3.5" />
                       <span class="sr-only">{{ t('topic.report') }}</span>
@@ -1533,7 +1533,7 @@ async function removeReply(replyId: number) {
                       v-if="reply.canModerate && reply.processStatus === 0"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:opacity-50"
-                      :disabled="replyModerationBusy(reply.id)"
+                      :disabled="postModerationBusy(reply.id)"
                       :title="t('topic.moderationBan')"
                       @click="moderateReply(reply, 'ban')"
                     >
@@ -1544,7 +1544,7 @@ async function removeReply(replyId: number) {
                       v-else-if="reply.canModerate && reply.processStatus === 1"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
-                      :disabled="replyModerationBusy(reply.id)"
+                      :disabled="postModerationBusy(reply.id)"
                       :title="t('topic.moderationUnban')"
                       @click="moderateReply(reply, 'unban')"
                     >
@@ -1571,35 +1571,35 @@ async function removeReply(replyId: number) {
               </div>
             </div>
 
-            <div v-if="replyHasAfter || loadingReplyDirection === 'after' || replyWindowError || (!replyHasAfter && replies.length)" ref="replyLoadMoreEl" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
+            <div v-if="postHasAfter || loadingPostDirection === 'after' || postWindowError || (!postHasAfter && replies.length)" ref="postLoadMoreEl" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
               <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
               <button
-                v-if="replyHasAfter && replyWindowError"
+                v-if="postHasAfter && postWindowError"
                 type="button"
                 class="gf-button gf-button-sm gf-button-secondary text-xs"
-                :disabled="loadingReplyWindow"
-                @click="loadReplyWindow('after')"
+                :disabled="loadingPostWindow"
+                @click="loadPostWindow('after')"
               >
-                <Loader2 v-if="loadingReplyDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
+                <Loader2 v-if="loadingPostDirection === 'after'" class="h-3.5 w-3.5 animate-spin" />
                 {{ t('topic.retryLoadReplies') }}
               </button>
-              <p v-else-if="replyWindowError" class="text-xs text-error">{{ replyWindowError }}</p>
-              <p v-else-if="replyHasAfter && loadingReplyDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-base-content/55">
+              <p v-else-if="postWindowError" class="text-xs text-error">{{ postWindowError }}</p>
+              <p v-else-if="postHasAfter && loadingPostDirection === 'after'" class="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-base-content/55">
                 <Loader2 class="h-3.5 w-3.5 animate-spin" />
                 {{ t('topic.loadingMoreReplies') }}
               </p>
               <button
-                v-else-if="replyHasAfter"
+                v-else-if="postHasAfter"
                 type="button"
                 class="gf-button gf-button-sm gf-button-secondary text-xs"
-                :disabled="loadingReplyWindow"
+                :disabled="loadingPostWindow"
                 @click="loadMoreRepliesManually"
               >
                 {{ t('topic.loadMoreReplies') }}
               </button>
-              <p v-else-if="!replyHasAfter && replies.length" class="text-xs font-medium text-base-content/55">{{ t('topic.allRepliesShown') }}</p>
+              <p v-else-if="!postHasAfter && replies.length" class="text-xs font-medium text-base-content/55">{{ t('topic.allRepliesShown') }}</p>
             </div>
-            <span ref="replyListEndEl" class="block h-px scroll-mb-28" aria-hidden="true" />
+            <span ref="postListEndEl" class="block h-px scroll-mb-28" aria-hidden="true" />
           </div>
 
           <aside class="hidden min-w-0 xl:block">
@@ -1641,20 +1641,20 @@ async function removeReply(replyId: number) {
               </div>
 
               <PostPositionRail
-                v-if="page.props.topic.replyCount > 0 && replyMaxRange > 0"
+                v-if="page.props.topic.replyCount > 0 && postMaxRange > 0"
                 class="border-t border-line"
-                :current="replyRailCurrentNo"
-                :max="replyMaxRange"
-                :start-label="replyRailStartLabel"
-                :end-label="replyRailEndLabel"
-                :current-label="replyRailCurrentLabel"
-                :busy="replyRailBusy"
-                :progress-current="replyRailProgressCurrent"
-                :progress-end="replyRailProgressEnd"
-                :progress-start="replyRailProgressStart"
+                :current="postRailCurrentNo"
+                :max="postMaxRange"
+                :start-label="postRailStartLabel"
+                :end-label="postRailEndLabel"
+                :current-label="postRailCurrentLabel"
+                :busy="postRailBusy"
+                :progress-current="postRailProgressCurrent"
+                :progress-end="postRailProgressEnd"
+                :progress-start="postRailProgressStart"
                 @earliest="jumpToTopicBodyFromRail"
-                @latest="jumpToLatestReplyFromRail"
-                @select="selectReplyFromRail"
+                @latest="jumpToLatestPostFromRail"
+                @select="selectPostFromRail"
               />
             </div>
           </aside>
@@ -1668,36 +1668,36 @@ async function removeReply(replyId: number) {
       </section>
 
       <PostComposer
-        v-model="replyContent"
+        v-model="postContent"
         v-model:mobile-rail-open="mobileReplyRailOpen"
         :open="composerOpen"
         :actions="floatingTopicActions"
         :authenticated="page.layout.viewer.isAuthenticated"
         :can-post="page.props.permissions.canPost"
-        :current-label="replyRailCurrentLabel"
-        :current-no="replyRailCurrentNo"
-        :end-label="replyRailEndLabel"
+        :current-label="postRailCurrentLabel"
+        :current-no="postRailCurrentNo"
+        :end-label="postRailEndLabel"
         :error-message="errorMessage"
-        :has-rail="hasReplyRail"
-        :max-no="replyMaxRange"
+        :has-rail="hasPostRail"
+        :max-no="postMaxRange"
         :mode="composerMode"
-        :progress-current="replyRailProgressCurrent"
-        :progress-end="replyRailProgressEnd"
-        :progress-start="replyRailProgressStart"
-        :rail-busy="replyRailBusy"
-        :start-label="replyRailStartLabel"
+        :progress-current="postRailProgressCurrent"
+        :progress-end="postRailProgressEnd"
+        :progress-start="postRailProgressStart"
+        :rail-busy="postRailBusy"
+        :start-label="postRailStartLabel"
         :submitting="editingReplyId ? savingEditReplyId > 0 : submitting"
         :success-message="successMessage"
-        :target="replyTarget"
-        @clear-target="cancelReplyTarget"
-        @clear-validation="clearReplyValidation"
+        :target="targetPost"
+        @clear-target="cancelPostTarget"
+        @clear-validation="clearPostValidation"
         @earliest="jumpToTopicBodyFromRail"
-        @image-error="handleReplyImageError"
-        @image-inserted="handleReplyImageInserted"
-        @latest="jumpToLatestReplyFromRail"
-        @open-reply="openFloatingReply"
-        @select-rail="selectReplyFromRail"
-        @submit="submitReply"
+        @image-error="handlePostImageError"
+        @image-inserted="handlePostImageInserted"
+        @latest="jumpToLatestPostFromRail"
+        @open-reply="openFloatingPostComposer"
+        @select-rail="selectPostFromRail"
+        @submit="submitPost"
         @update:open="updateComposerOpen"
       />
 
@@ -1754,7 +1754,7 @@ async function removeReply(replyId: number) {
                 type="button"
                 class="gf-button gf-button-md gf-button-danger"
                 :disabled="Boolean(deletingReplyId)"
-                @click="removeReply(pendingDeleteReply.id)"
+                @click="removePost(pendingDeleteReply.id)"
               >
                 <Loader2 v-if="deletingReplyId === pendingDeleteReply.id" class="h-4 w-4 animate-spin" />
                 <Trash2 v-else class="h-4 w-4" />
