@@ -400,7 +400,7 @@ func EditUser(req component.BetterRequest[EditUserReq]) component.Response {
 	return component.SuccessResponseCode("success", component.MessageOperationSuccess, nil)
 }
 
-type ArticlesListReq struct {
+type TopicsListReq struct {
 	Page     int    `form:"page"`
 	PageSize int    `form:"pageSize"`
 	Search   string `form:"search"`
@@ -438,11 +438,11 @@ type ArticlesInfoAdminVo struct {
 	UpdatedAt     string   `json:"updatedAt"`
 }
 
-type ArticleSourceReq struct {
+type TopicSourceReq struct {
 	TopicId uint64 `json:"topicId" validate:"required"`
 }
 
-type ArticleSourceVo struct {
+type TopicSourceVo struct {
 	Id            uint64   `json:"id"`
 	Title         string   `json:"title"`
 	Description   string   `json:"description"`
@@ -456,7 +456,7 @@ type ArticleSourceVo struct {
 	UpdatedAt     string   `json:"updatedAt"`
 }
 
-func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Response {
+func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 	param := req.Params
 	pageData := topics.PageForAdmin(topics.AdminPageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, Search: param.Search, UserId: param.UserId})
 	userIds := lo.Map(pageData.Data, func(t topics.SmallEntity, _ int) uint64 {
@@ -496,7 +496,7 @@ func ArticlesList(req component.BetterRequest[ArticlesListReq]) component.Respon
 	})
 }
 
-func ArticleSource(req component.BetterRequest[ArticleSourceReq]) component.Response {
+func TopicSource(req component.BetterRequest[TopicSourceReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
@@ -506,7 +506,7 @@ func ArticleSource(req component.BetterRequest[ArticleSourceReq]) component.Resp
 		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 	}
 
-	return component.SuccessResponse(ArticleSourceVo{
+	return component.SuccessResponse(TopicSourceVo{
 		Id:            topic.Id,
 		Title:         topic.Title,
 		Description:   topic.Excerpt,
@@ -521,27 +521,27 @@ func ArticleSource(req component.BetterRequest[ArticleSourceReq]) component.Resp
 	})
 }
 
-type EditArticleReq struct {
+type EditTopicReq struct {
 	TopicId       uint64 `json:"topicId" validate:"required"`
 	ProcessStatus int8   `json:"processStatus" validate:"oneof=0 1"` // 0正常 1封禁
 }
 
-type EditArticlePinReq struct {
+type EditTopicPinReq struct {
 	TopicId   uint64 `json:"topicId" validate:"required"`
 	PinWeight int    `json:"pinWeight" validate:"min=0,max=1000000"`
 }
 
-type EditArticleCategoriesReq struct {
+type EditTopicCategoriesReq struct {
 	TopicId    uint64   `json:"topicId" validate:"required"`
 	CategoryId []uint64 `json:"categoryId" validate:"min=1,max=3"`
 }
 
-type DeleteArticleReq struct {
+type DeleteTopicReq struct {
 	TopicId uint64 `json:"topicId" validate:"required"`
 }
 
-// EditArticle 文章状态管理
-func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response {
+// EditTopic updates topic moderation status.
+func EditTopic(req component.BetterRequest[EditTopicReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
@@ -565,7 +565,7 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 		"title":  topic.Title,
 		"status": statusCode,
 	})
-	moderationlogservice.ArticleStatusChanged(req.UserId, topic.Id, topic.Title, req.Params.ProcessStatus == 1)
+	moderationlogservice.TopicStatusChanged(req.UserId, topic.Id, topic.Title, req.Params.ProcessStatus == 1)
 	firstPost := posts.Get(topic.FirstPostId)
 	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
 		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
@@ -574,7 +574,7 @@ func EditArticle(req component.BetterRequest[EditArticleReq]) component.Response
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
-func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Response {
+func DeleteTopic(req component.BetterRequest[DeleteTopicReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
@@ -596,7 +596,7 @@ func DeleteArticle(req component.BetterRequest[DeleteArticleReq]) component.Resp
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
-func EditArticlePin(req component.BetterRequest[EditArticlePinReq]) component.Response {
+func EditTopicPin(req component.BetterRequest[EditTopicPinReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
@@ -617,8 +617,8 @@ func EditArticlePin(req component.BetterRequest[EditArticlePinReq]) component.Re
 	return component.SuccessResponseCode("操作成功", component.MessageOperationSuccess, nil)
 }
 
-// EditArticleCategories 文章分类管理
-func EditArticleCategories(req component.BetterRequest[EditArticleCategoriesReq]) component.Response {
+// EditTopicCategories updates topic categories.
+func EditTopicCategories(req component.BetterRequest[EditTopicCategoriesReq]) component.Response {
 	categoryIds := lo.Uniq(req.Params.CategoryId)
 	if len(categoryIds) == 0 {
 		return component.FailResponseCode(component.MessageAdminCategorySelectRequired, nil)

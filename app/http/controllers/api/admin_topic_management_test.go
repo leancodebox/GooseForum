@@ -74,11 +74,11 @@ func seedAdminTopic(t *testing.T, conn *gorm.DB, topicID uint64) (uint64, uint64
 	return userID, categoryID
 }
 
-func TestAdminArticlesListReadsTopics(t *testing.T) {
+func TestAdminTopicsListReadsTopics(t *testing.T) {
 	conn := setupAdminTopicTestDB(t)
 	seedAdminTopic(t, conn, 920001)
 
-	res := ArticlesList(component.BetterRequest[ArticlesListReq]{Params: ArticlesListReq{Page: 1, PageSize: 10}})
+	res := TopicsList(component.BetterRequest[TopicsListReq]{Params: TopicsListReq{Page: 1, PageSize: 10}})
 	page, ok := res.Data.Result.(component.Page[ArticlesInfoAdminVo])
 	if !ok {
 		t.Fatalf("result type = %T", res.Data.Result)
@@ -88,12 +88,12 @@ func TestAdminArticlesListReadsTopics(t *testing.T) {
 	}
 }
 
-func TestAdminArticleSourceReadsFirstPost(t *testing.T) {
+func TestAdminTopicSourceReadsFirstPost(t *testing.T) {
 	conn := setupAdminTopicTestDB(t)
 	_, categoryID := seedAdminTopic(t, conn, 921001)
 
-	res := ArticleSource(component.BetterRequest[ArticleSourceReq]{Params: ArticleSourceReq{TopicId: 921001}})
-	source, ok := res.Data.Result.(ArticleSourceVo)
+	res := TopicSource(component.BetterRequest[TopicSourceReq]{Params: TopicSourceReq{TopicId: 921001}})
+	source, ok := res.Data.Result.(TopicSourceVo)
 	if !ok {
 		t.Fatalf("result type = %T", res.Data.Result)
 	}
@@ -102,26 +102,26 @@ func TestAdminArticleSourceReadsFirstPost(t *testing.T) {
 	}
 }
 
-func TestAdminEditArticleMutatesTopic(t *testing.T) {
+func TestAdminEditTopicMutatesTopic(t *testing.T) {
 	conn := setupAdminTopicTestDB(t)
 	_, categoryID := seedAdminTopic(t, conn, 922001)
 	if err := conn.Create(&category.Entity{Id: 922999, Name: "Second", Slug: "second"}).Error; err != nil {
 		t.Fatalf("create second category: %v", err)
 	}
 
-	EditArticle(component.BetterRequest[EditArticleReq]{UserId: 1, Params: EditArticleReq{TopicId: 922001, ProcessStatus: 1}})
+	EditTopic(component.BetterRequest[EditTopicReq]{UserId: 1, Params: EditTopicReq{TopicId: 922001, ProcessStatus: 1}})
 	topic := topics.Get(922001)
 	if topic.ProcessStatus != 1 {
 		t.Fatalf("process status = %d, want 1", topic.ProcessStatus)
 	}
 
-	EditArticlePin(component.BetterRequest[EditArticlePinReq]{UserId: 1, Params: EditArticlePinReq{TopicId: 922001, PinWeight: 9}})
+	EditTopicPin(component.BetterRequest[EditTopicPinReq]{UserId: 1, Params: EditTopicPinReq{TopicId: 922001, PinWeight: 9}})
 	topic = topics.Get(922001)
 	if topic.PinWeight != 9 {
 		t.Fatalf("pin weight = %d, want 9", topic.PinWeight)
 	}
 
-	EditArticleCategories(component.BetterRequest[EditArticleCategoriesReq]{UserId: 1, Params: EditArticleCategoriesReq{TopicId: 922001, CategoryId: []uint64{922999}}})
+	EditTopicCategories(component.BetterRequest[EditTopicCategoriesReq]{UserId: 1, Params: EditTopicCategoriesReq{TopicId: 922001, CategoryId: []uint64{922999}}})
 	topic = topics.Get(922001)
 	if len(topic.CategoryIds) != 1 || topic.CategoryIds[0] != 922999 {
 		t.Fatalf("topic categories = %#v", topic.CategoryIds)

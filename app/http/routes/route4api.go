@@ -58,7 +58,7 @@ func viewRoute(ginApp *gin.Engine) {
 	}
 
 	viewRouteApp.GET("/", forum.Home)
-	viewRouteApp.GET("/p/post/:id", forum.ArticleDetail)
+	viewRouteApp.GET("/p/post/:id", forum.TopicDetail)
 	viewRouteApp.GET("/u/:userId", forum.UserProfile)
 	viewRouteApp.GET("/u/:userId/:section", forum.UserProfile)
 	viewRouteApp.GET("/u/:userId/:section/:subsection", forum.UserProfile)
@@ -121,25 +121,25 @@ func apiRoute(ginApp *gin.Engine) {
 
 	forumApi := baseApi.Group("forum")
 	forumApi.GET("get-site-statistics", ginUpNP(controllers.GetSiteStatistics))
-	forumApi.GET("posts/window", middleware.JWTAuth, middleware.NoUpdateUserActivity, UpQueryReq(forum.ArticleRepliesWindow))
+	forumApi.GET("posts/window", middleware.JWTAuth, middleware.NoUpdateUserActivity, UpQueryReq(forum.PostWindow))
 
 	forumLoginApi := forumApi.Use(middleware.JWTAuthCheck)
 	forumLoginApi.GET("unread-status", middleware.NoUpdateUserActivity, UpButterReq(api.GetUnreadStatus))
 	forumLoginApi.GET("notifications", middleware.NoUpdateUserActivity, UpQueryReq(api.NotificationList))
 	forumLoginApi.POST("notification/mark-read", middleware.CheckWritableAccount, UpButterReq(api.MarkAsRead))
 	forumLoginApi.POST("notification/mark-all-read", middleware.CheckWritableAccount, UpButterReq(api.MarkAllAsRead))
-	forumLoginApi.POST("topics/write", middleware.CheckWritableAccount, UpButterReq(controllers.WriteArticles))
-	forumLoginApi.POST("topics/status", middleware.CheckWritableAccount, UpButterReq(controllers.UpdateArticleStatus))
-	forumLoginApi.POST("posts/create", middleware.CheckWritableAccount, UpButterReq(controllers.ArticleReply))
-	forumLoginApi.POST("posts/update", middleware.CheckWritableAccount, UpButterReq(controllers.UpdateReply))
-	forumLoginApi.POST("posts/delete", middleware.CheckWritableAccount, UpButterReq(controllers.DeleteReply))
-	forumLoginApi.POST("topics/like", middleware.CheckWritableAccount, UpButterReq(controllers.LikeArticle))
-	forumLoginApi.POST("topics/bookmark", middleware.CheckWritableAccount, UpButterReq(controllers.BookmarkArticle))
-	forumLoginApi.POST("topics/watch", middleware.CheckWritableAccount, UpButterReq(controllers.WatchArticle))
+	forumLoginApi.POST("topics/write", middleware.CheckWritableAccount, UpButterReq(controllers.WriteTopic))
+	forumLoginApi.POST("topics/status", middleware.CheckWritableAccount, UpButterReq(controllers.UpdateTopicStatus))
+	forumLoginApi.POST("posts/create", middleware.CheckWritableAccount, UpButterReq(controllers.CreatePost))
+	forumLoginApi.POST("posts/update", middleware.CheckWritableAccount, UpButterReq(controllers.UpdatePost))
+	forumLoginApi.POST("posts/delete", middleware.CheckWritableAccount, UpButterReq(controllers.DeletePost))
+	forumLoginApi.POST("topics/like", middleware.CheckWritableAccount, UpButterReq(controllers.LikeTopic))
+	forumLoginApi.POST("topics/bookmark", middleware.CheckWritableAccount, UpButterReq(controllers.BookmarkTopic))
+	forumLoginApi.POST("topics/watch", middleware.CheckWritableAccount, UpButterReq(controllers.WatchTopic))
 	forumLoginApi.POST("follow-user", middleware.CheckWritableAccount, UpButterReq(controllers.FollowUser))
 	forumLoginApi.POST("report", middleware.CheckWritableAccount, UpButterReq(forum.CreateReport))
-	forumLoginApi.POST("moderation/topic-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationArticleStatus))
-	forumLoginApi.POST("moderation/post-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationReplyStatus))
+	forumLoginApi.POST("moderation/topic-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationTopicStatus))
+	forumLoginApi.POST("moderation/post-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationPostStatus))
 	forumLoginApi.POST("moderation/reports", middleware.NoUpdateUserActivity, UpButterReq(forum.ModerationReportList))
 	forumLoginApi.POST("moderation/report-status", middleware.CheckWritableAccount, UpButterReq(forum.UpdateModerationReportStatus))
 	forumLoginApi.POST("moderation/logs", middleware.NoUpdateUserActivity, UpButterReq(forum.ModerationLogList))
@@ -162,12 +162,12 @@ func apiRoute(ginApp *gin.Engine) {
 		GET("get-all-role-item", UpButterReq(api.GetAllRoleItem))
 
 	adminApi.Group("", middleware.CheckPermission(permission.ArticlesManager)).
-		POST("topics/list", UpButterReq(api.ArticlesList)).
-		POST("topics/source", UpButterReq(api.ArticleSource)).
-		POST("topics/edit", UpButterReq(api.EditArticle)).
-		POST("topics/delete", UpButterReq(api.DeleteArticle)).
-		POST("topics/pin-edit", UpButterReq(api.EditArticlePin)).
-		POST("topics/categories-edit", UpButterReq(api.EditArticleCategories)).
+		POST("topics/list", UpButterReq(api.TopicsList)).
+		POST("topics/source", UpButterReq(api.TopicSource)).
+		POST("topics/edit", UpButterReq(api.EditTopic)).
+		POST("topics/delete", UpButterReq(api.DeleteTopic)).
+		POST("topics/pin-edit", UpButterReq(api.EditTopicPin)).
+		POST("topics/categories-edit", UpButterReq(api.EditTopicCategories)).
 		POST("category-list", UpButterReq(api.GetCategoryList)).
 		POST("category-save", UpButterReq(api.SaveCategory)).
 		POST("category-delete", UpButterReq(api.DeleteCategory)).

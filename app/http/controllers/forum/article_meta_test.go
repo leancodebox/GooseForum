@@ -184,7 +184,7 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	}
 }
 
-func TestArticleRepliesWindowSkipsFirstPostInCursors(t *testing.T) {
+func TestPostWindowSkipsFirstPostInCursors(t *testing.T) {
 	preferences.Set("db.default.connection", "sqlite")
 	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
@@ -221,8 +221,8 @@ func TestArticleRepliesWindowSkipsFirstPostInCursors(t *testing.T) {
 	conn.Create(&posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: userID, Content: "first", CreatedAt: now, UpdatedAt: now})
 	conn.Create(&posts.Entity{Id: replyPostID, TopicId: topicID, PostNo: 2, UserId: userID, Content: "reply", CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})
 
-	res := ArticleRepliesWindow(component.BetterRequest[ArticleRepliesWindowReq]{
-		Params: ArticleRepliesWindowReq{
+	res := PostWindow(component.BetterRequest[PostWindowReq]{
+		Params: PostWindowReq{
 			TopicID: topicID,
 			Tail:    true,
 			Limit:   50,

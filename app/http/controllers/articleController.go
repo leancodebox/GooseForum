@@ -26,7 +26,7 @@ func GetSiteStatistics() component.Response {
 	return component.SuccessResponse(hotdataserve.GetSiteStatisticsData())
 }
 
-type WriteArticleReq struct {
+type WriteTopicReq struct {
 	TopicId       uint64   `json:"topicId"`
 	Content       string   `json:"content" validate:"required"`
 	Title         string   `json:"title" validate:"required"`
@@ -35,8 +35,8 @@ type WriteArticleReq struct {
 	ArticleStatus int8     `json:"articleStatus" validate:"oneof=0 1"`
 }
 
-// WriteArticles 创建或更新文章。
-func WriteArticles(req component.BetterRequest[WriteArticleReq]) component.Response {
+// WriteTopic creates or updates a topic and its first post.
+func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 	// 获取发布设置
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 
@@ -193,12 +193,12 @@ func normalizeWriteArticleType(articleType int8) int8 {
 	}
 }
 
-type ArticleStatusReq struct {
+type TopicStatusReq struct {
 	TopicId       uint64 `json:"topicId" validate:"required"`
 	ArticleStatus int8   `json:"articleStatus" validate:"oneof=0 1"`
 }
 
-func UpdateArticleStatus(req component.BetterRequest[ArticleStatusReq]) component.Response {
+func UpdateTopicStatus(req component.BetterRequest[TopicStatusReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
@@ -227,7 +227,7 @@ type CreatePostReq struct {
 	ReplyToPostId uint64 `json:"replyToPostId"`
 }
 
-func ArticleReply(req component.BetterRequest[CreatePostReq]) component.Response {
+func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	// 获取发布设置
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 
@@ -339,12 +339,12 @@ type DeletePostReq struct {
 	PostId uint64 `json:"postId"`
 }
 
-type UpdateReplyReq struct {
+type UpdatePostReq struct {
 	PostId  uint64 `json:"postId"`
 	Content string `json:"content"`
 }
 
-func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response {
+func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 	postingConfig := hotdataserve.GetPostingSettingsConfigCache()
 	postEntity := posts.Get(req.Params.PostId)
 	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
@@ -395,7 +395,7 @@ func UpdateReply(req component.BetterRequest[UpdateReplyReq]) component.Response
 	})
 }
 
-func DeleteReply(req component.BetterRequest[DeletePostReq]) component.Response {
+func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 	postEntity := posts.Get(req.Params.PostId)
 	if postEntity.Id == 0 || postEntity.PostNo <= 1 {
 		return component.FailResponseCode(component.MessageReplyNotFound, nil)
@@ -412,12 +412,12 @@ func DeleteReply(req component.BetterRequest[DeletePostReq]) component.Response 
 	return component.SuccessResponse(true)
 }
 
-type LikeArticleReq struct {
+type LikeTopicReq struct {
 	TopicId uint64 `json:"topicId"`
 	Action  int    `json:"action" validate:"min=1,max=2"` // 1 点赞，2 取消
 }
 
-func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response {
+func LikeTopic(req component.BetterRequest[LikeTopicReq]) component.Response {
 	topicEntity := topics.Get(req.Params.TopicId)
 	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
@@ -458,12 +458,12 @@ func LikeArticle(req component.BetterRequest[LikeArticleReq]) component.Response
 	return component.SuccessResponse(true)
 }
 
-type BookmarkArticleReq struct {
+type BookmarkTopicReq struct {
 	TopicId uint64 `json:"topicId"`
 	Action  int    `json:"action" validate:"min=1,max=2"` // 1 收藏，2 取消
 }
 
-func BookmarkArticle(req component.BetterRequest[BookmarkArticleReq]) component.Response {
+func BookmarkTopic(req component.BetterRequest[BookmarkTopicReq]) component.Response {
 	topicEntity := topics.Get(req.Params.TopicId)
 	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
@@ -493,12 +493,12 @@ func updateBookmarkStats(userID uint64, bookmarked bool) {
 	userStatistics.CancelCollection(userID)
 }
 
-type WatchArticleReq struct {
+type WatchTopicReq struct {
 	TopicId uint64 `json:"topicId"`
 	Action  int    `json:"action" validate:"min=1,max=2"` // 1 关注，2 取消
 }
 
-func WatchArticle(req component.BetterRequest[WatchArticleReq]) component.Response {
+func WatchTopic(req component.BetterRequest[WatchTopicReq]) component.Response {
 	topicEntity := topics.Get(req.Params.TopicId)
 	if topicEntity.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)

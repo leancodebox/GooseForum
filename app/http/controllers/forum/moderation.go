@@ -95,7 +95,7 @@ func moderationPage(c *gin.Context) int {
 	return page
 }
 
-type ModerationArticleStatusReq struct {
+type ModerationTopicStatusReq struct {
 	TopicId uint64 `json:"topicId" validate:"required"`
 	Action  string `json:"action" validate:"oneof=ban unban"`
 }
@@ -130,7 +130,7 @@ type ModerationReportStatusReq struct {
 	Action string `json:"action" validate:"oneof=ban resolve reject"`
 }
 
-type ModerationReplyStatusReq struct {
+type ModerationPostStatusReq struct {
 	PostId uint64 `json:"postId" validate:"required"`
 	Action string `json:"action" validate:"oneof=ban unban"`
 }
@@ -178,7 +178,7 @@ type ModerationLogSubject struct {
 	Excerpt string `json:"excerpt,omitempty"`
 }
 
-func UpdateModerationArticleStatus(req component.BetterRequest[ModerationArticleStatusReq]) component.Response {
+func UpdateModerationTopicStatus(req component.BetterRequest[ModerationTopicStatusReq]) component.Response {
 	topic := topics.Get(req.Params.TopicId)
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)
@@ -240,7 +240,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 	return component.SuccessResponse(true)
 }
 
-func UpdateModerationReplyStatus(req component.BetterRequest[ModerationReplyStatusReq]) component.Response {
+func UpdateModerationPostStatus(req component.BetterRequest[ModerationPostStatusReq]) component.Response {
 	post := posts.Get(req.Params.PostId)
 	if post.Id == 0 {
 		return component.FailResponseCode(component.MessageReplyNotFound, nil)

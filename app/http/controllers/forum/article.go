@@ -18,7 +18,7 @@ import (
 
 const replyWindowLimit = 20
 
-func ArticleDetail(c *gin.Context) {
+func TopicDetail(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
 	if id == 0 {
 		renderNotFound(c)
@@ -60,7 +60,7 @@ func ArticleDetail(c *gin.Context) {
 	}
 }
 
-type ArticleRepliesWindowReq struct {
+type PostWindowReq struct {
 	TopicID      uint64 `form:"topicId"`
 	AnchorPostID uint64 `form:"anchorPostId"`
 	AnchorPostNo uint64 `form:"anchorPostNo"`
@@ -72,7 +72,7 @@ type ArticleRepliesWindowReq struct {
 	Tail         bool   `form:"tail"`
 }
 
-func ArticleRepliesWindow(req component.BetterRequest[ArticleRepliesWindowReq]) component.Response {
+func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 	topicID := req.Params.TopicID
 	if topicID == 0 {
 		return component.FailResponseCode(component.MessageArticleNotFound, nil)

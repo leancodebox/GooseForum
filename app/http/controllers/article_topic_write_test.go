@@ -64,16 +64,16 @@ func createTopicWriteUser(t *testing.T, conn *gorm.DB, id uint64, username strin
 	}
 }
 
-func TestWriteArticlesCreatesTopicAndFirstPost(t *testing.T) {
+func TestWriteTopicCreatesTopicAndFirstPost(t *testing.T) {
 	conn := setupTopicWriteTestDB(t)
 	createTopicWriteUser(t, conn, 1001, "author")
 	if err := conn.Create(&category.Entity{Id: 2001, Name: "General", Slug: "general"}).Error; err != nil {
 		t.Fatalf("create category: %v", err)
 	}
 
-	res := WriteArticles(component.BetterRequest[WriteArticleReq]{
+	res := WriteTopic(component.BetterRequest[WriteTopicReq]{
 		UserId: 1001,
-		Params: WriteArticleReq{
+		Params: WriteTopicReq{
 			Title:         "Topic title",
 			Content:       "Topic content with enough words",
 			CategoryId:    []uint64{2001},
@@ -99,7 +99,7 @@ func TestWriteArticlesCreatesTopicAndFirstPost(t *testing.T) {
 	}
 }
 
-func TestArticleReplyWritesPostAndTopicStats(t *testing.T) {
+func TestCreatePostWritesPostAndTopicStats(t *testing.T) {
 	conn := setupTopicWriteTestDB(t)
 	createTopicWriteUser(t, conn, 1101, "author")
 	createTopicWriteUser(t, conn, 1102, "replyer")
@@ -116,7 +116,7 @@ func TestArticleReplyWritesPostAndTopicStats(t *testing.T) {
 		t.Fatalf("set first post: %v", err)
 	}
 
-	res := ArticleReply(component.BetterRequest[CreatePostReq]{
+	res := CreatePost(component.BetterRequest[CreatePostReq]{
 		UserId: 1102,
 		Params: CreatePostReq{
 			TopicId: topic.Id,
@@ -149,9 +149,9 @@ func TestTopicActionsUseTopicUserAction(t *testing.T) {
 		t.Fatalf("create topic: %v", err)
 	}
 
-	LikeArticle(component.BetterRequest[LikeArticleReq]{UserId: 1202, Params: LikeArticleReq{TopicId: 4001, Action: 1}})
-	BookmarkArticle(component.BetterRequest[BookmarkArticleReq]{UserId: 1202, Params: BookmarkArticleReq{TopicId: 4001, Action: 1}})
-	WatchArticle(component.BetterRequest[WatchArticleReq]{UserId: 1202, Params: WatchArticleReq{TopicId: 4001, Action: 1}})
+	LikeTopic(component.BetterRequest[LikeTopicReq]{UserId: 1202, Params: LikeTopicReq{TopicId: 4001, Action: 1}})
+	BookmarkTopic(component.BetterRequest[BookmarkTopicReq]{UserId: 1202, Params: BookmarkTopicReq{TopicId: 4001, Action: 1}})
+	WatchTopic(component.BetterRequest[WatchTopicReq]{UserId: 1202, Params: WatchTopicReq{TopicId: 4001, Action: 1}})
 
 	action := topicUserAction.GetByTopicId(uint64(1202), uint64(4001))
 	if action.Id == 0 || action.LikedAt == nil || action.BookmarkedAt == nil || action.WatchedAt == nil {
