@@ -1029,6 +1029,10 @@ function canDeleteRenderedPost(post: PostPayload) {
 
 function startEditPost(post: PostPayload) {
   if (savingEditPostId.value || deletingPostId.value === post.id) return
+  if (isFirstPost(post)) {
+    window.location.href = `/publish?id=${page.props.topic.id}`
+    return
+  }
   if (!editingPostId.value) {
     postDraftBeforeEdit.value = postContent.value
     targetPostBeforeEdit.value = targetPostId.value
