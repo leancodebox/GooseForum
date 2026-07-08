@@ -1360,7 +1360,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 			if hasNext {
 				topicPage = topicPage[:userProfileTopicPageSize]
 			}
-			topicPayloads = buildTopicPayloads(hotdataserve.TopicsSmallEntity2Vo(topicPage))
+			topicPayloads = buildTopicPayloads(hotdataserve.Topics2Vo(topicPage))
 			pagination = buildUserActivityTopicPagination(user.Id, topicPage, hasNext)
 		case userProfileActivityLikes:
 			refs, nextCursor := topicUserAction.ListLikedTopicRefsBefore(user.Id, c.Query("cursor"), userProfileTimelinePageSize)
@@ -1385,7 +1385,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 	default:
 		badges = userBadges
 		latestTopics, _ := topics.GetLatestPublishedByUserId(user.Id, 8)
-		topicPayloads = buildTopicPayloads(hotdataserve.TopicsSmallEntity2Vo(latestTopics))
+		topicPayloads = buildTopicPayloads(hotdataserve.Topics2Vo(latestTopics))
 		timeline, _ := userActivities.GetUserTimeline(user.Id, 0, 5)
 		activities = buildUserActivities(timeline)
 	}
@@ -1419,7 +1419,7 @@ func positiveUint(raw string) uint64 {
 	return value
 }
 
-func buildUserActivityTopicPagination(userID uint64, topics []*topics.SmallEntity, hasNext bool) PaginationPayload {
+func buildUserActivityTopicPagination(userID uint64, topics []*topics.Entity, hasNext bool) PaginationPayload {
 	nextCursor := uint64(0)
 	if hasNext && len(topics) > 0 {
 		nextCursor = topics[len(topics)-1].Id
@@ -1862,7 +1862,7 @@ func buildNotificationsPageProps(c *gin.Context) NotificationsPageProps {
 	}
 }
 
-func buildDraftPayloads(entities []*topics.SmallEntity) []DraftPayload {
+func buildDraftPayloads(entities []*topics.Entity) []DraftPayload {
 	categoryMap := hotdataserve.CategoryMap()
 	items := make([]DraftPayload, 0, len(entities))
 	for _, entity := range entities {
@@ -2109,7 +2109,7 @@ func buildSearchPageProps(query string, page int) SearchPageProps {
 		return item.ID
 	})
 	topicMap := topics.GetPointerMapByIds(ids)
-	orderedTopics := lo.FilterMap(ids, func(id uint64, _ int) (*topics.SmallEntity, bool) {
+	orderedTopics := lo.FilterMap(ids, func(id uint64, _ int) (*topics.Entity, bool) {
 		topic, ok := topicMap[id]
 		return topic, ok && topic != nil
 	})
@@ -2119,7 +2119,7 @@ func buildSearchPageProps(query string, page int) SearchPageProps {
 		nextPage = page + 1
 	}
 
-	props.Topics = buildTopicPayloads(hotdataserve.TopicsSmallEntity2Vo(orderedTopics))
+	props.Topics = buildTopicPayloads(hotdataserve.Topics2Vo(orderedTopics))
 	props.Total = result.Total
 	props.TotalPages = totalPageCount
 	props.Pagination = PaginationPayload{

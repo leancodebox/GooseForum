@@ -73,7 +73,7 @@ func TestTopicRepositoryParity(t *testing.T) {
 		{TopicId: 40, CategoryId: 3, Effective: 1},
 	})
 
-	page := Page[SmallEntity](PageQuery{Page: 1, PageSize: 10, FilterStatus: true, CategoryId: 3, Sort: "new"})
+	page := Page(PageQuery{Page: 1, PageSize: 10, FilterStatus: true, CategoryId: 3, Sort: "new"})
 	if len(page.Data) != 1 || page.Data[0].Id != 10 {
 		t.Fatalf("Page() filtered ids = %#v, want only topic 10", page.Data)
 	}

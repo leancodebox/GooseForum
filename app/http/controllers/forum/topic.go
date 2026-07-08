@@ -206,7 +206,7 @@ func canViewTopic(entity *topics.Entity, userID uint64) bool {
 	return true
 }
 
-func canViewTopicSimple(entity *topics.SmallEntity, userID uint64) bool {
+func canViewTopicSimple(entity *topics.Entity, userID uint64) bool {
 	if entity.Status != 1 {
 		return userID != 0 && userID == entity.UserId
 	}

@@ -209,7 +209,7 @@ func topicNotifyPayload(topic *topics.Entity) notifyEventData {
 	}
 }
 
-func topicNotifyPayloadFromSmall(topic topics.SmallEntity) notifyTopic {
+func topicNotifyPayloadFromSmall(topic topics.Entity) notifyTopic {
 	if topic.Id == 0 {
 		return notifyTopic{}
 	}

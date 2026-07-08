@@ -69,20 +69,20 @@ func shouldCacheTopicPage(page int) bool {
 }
 
 func loadLatestTopicsSimpleVoPaginated(page int, sort string) TopicSimpleVoPage {
-	res := topics.Page[topics.SmallEntity](topics.PageQuery{
+	res := topics.Page(topics.PageQuery{
 		Page:         page,
 		PageSize:     20,
 		FilterStatus: true,
 		Sort:         sort,
 	})
 	return TopicSimpleVoPage{
-		Topics:  TopicsSmallEntity2Vo(topicSmallEntitiesToPointers(res.Data)),
+		Topics:  Topics2Vo(topicEntitiesToPointers(res.Data)),
 		HasNext: res.HasNext,
 	}
 }
 
 func loadTopicsByCategorySimpleVo(categoryId uint64, sort string, page int) TopicSimpleVoPage {
-	res := topics.Page[topics.SmallEntity](topics.PageQuery{
+	res := topics.Page(topics.PageQuery{
 		Page:         page,
 		PageSize:     20,
 		CategoryId:   categoryId,
@@ -90,20 +90,20 @@ func loadTopicsByCategorySimpleVo(categoryId uint64, sort string, page int) Topi
 		Sort:         sort,
 	})
 	return TopicSimpleVoPage{
-		Topics:  TopicsSmallEntity2Vo(topicSmallEntitiesToPointers(res.Data)),
+		Topics:  Topics2Vo(topicEntitiesToPointers(res.Data)),
 		HasNext: res.HasNext,
 	}
 }
 
-func topicSmallEntitiesToPointers(data []topics.SmallEntity) []*topics.SmallEntity {
-	res := make([]*topics.SmallEntity, 0, len(data))
+func topicEntitiesToPointers(data []topics.Entity) []*topics.Entity {
+	res := make([]*topics.Entity, 0, len(data))
 	for i := range data {
 		res = append(res, &data[i])
 	}
 	return res
 }
 
-func TopicsSmallEntity2Vo(data []*topics.SmallEntity) []*vo.TopicsSimpleVo {
+func Topics2Vo(data []*topics.Entity) []*vo.TopicsSimpleVo {
 	userIDs := make([]uint64, 0, len(data)*2)
 	seenUserIDs := make(map[uint64]struct{}, len(data)*2)
 	for _, topic := range data {
@@ -123,10 +123,10 @@ func TopicsSmallEntity2Vo(data []*topics.SmallEntity) []*vo.TopicsSimpleVo {
 		}
 	}
 	userMap := users.GetMapByIds(userIDs)
-	return TopicsSmallEntityWithUser2Vo(data, userMap)
+	return TopicsWithUser2Vo(data, userMap)
 }
 
-func TopicsSmallEntityWithUser2Vo(data []*topics.SmallEntity, userMap map[uint64]*users.EntityComplete) []*vo.TopicsSimpleVo {
+func TopicsWithUser2Vo(data []*topics.Entity, userMap map[uint64]*users.EntityComplete) []*vo.TopicsSimpleVo {
 	categoryMap := CategoryMap()
 	res := make([]*vo.TopicsSimpleVo, 0, len(data))
 	for _, t := range data {

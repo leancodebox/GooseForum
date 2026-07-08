@@ -38,7 +38,7 @@ func Get(id uint64) (entity Entity) {
 	return
 }
 
-func GetSimple(id any) (entity SmallEntity) {
+func GetSimple(id any) (entity Entity) {
 	builder().Where(queryopt.Eq("id", id)).First(&entity)
 	return
 }
@@ -54,22 +54,22 @@ func QueryById(startId uint64, limit int) (entities []*Entity) {
 	return
 }
 
-func GetMapByIds(ids []uint64) map[uint64]SmallEntity {
-	var list []SmallEntity
+func GetMapByIds(ids []uint64) map[uint64]Entity {
+	var list []Entity
 	if len(ids) == 0 {
-		return map[uint64]SmallEntity{}
+		return map[uint64]Entity{}
 	}
 	builder().Where("id in ?", ids).Find(&list)
-	result := make(map[uint64]SmallEntity, len(list))
+	result := make(map[uint64]Entity, len(list))
 	for _, item := range list {
 		result[item.Id] = item
 	}
 	return result
 }
 
-func GetPointerMapByIds(ids []uint64) map[uint64]*SmallEntity {
+func GetPointerMapByIds(ids []uint64) map[uint64]*Entity {
 	valueMap := GetMapByIds(ids)
-	result := make(map[uint64]*SmallEntity, len(valueMap))
+	result := make(map[uint64]*Entity, len(valueMap))
 	for id, item := range valueMap {
 		entity := item
 		result[id] = &entity
@@ -88,8 +88,8 @@ func GetLatestPublished(limit int) (entities []*Entity, err error) {
 	return
 }
 
-func GetLatestPublishedByUserId(userId uint64, limit int) ([]*SmallEntity, error) {
-	var entities []*SmallEntity
+func GetLatestPublishedByUserId(userId uint64, limit int) ([]*Entity, error) {
+	var entities []*Entity
 	err := builder().
 		Where(queryopt.Eq("user_id", userId)).
 		Where(queryopt.Eq("status", 1)).
@@ -101,8 +101,8 @@ func GetLatestPublishedByUserId(userId uint64, limit int) ([]*SmallEntity, error
 	return entities, err
 }
 
-func GetPublishedByUserBeforeId(userId uint64, beforeId uint64, limit int) ([]*SmallEntity, error) {
-	var entities []*SmallEntity
+func GetPublishedByUserBeforeId(userId uint64, beforeId uint64, limit int) ([]*Entity, error) {
+	var entities []*Entity
 	query := builder().
 		Where(queryopt.Eq("user_id", userId)).
 		Where(queryopt.Eq("status", 1)).
@@ -114,8 +114,8 @@ func GetPublishedByUserBeforeId(userId uint64, beforeId uint64, limit int) ([]*S
 	return entities, err
 }
 
-func GetDraftsByUserId(userId uint64, limit int) ([]*SmallEntity, error) {
-	var entities []*SmallEntity
+func GetDraftsByUserId(userId uint64, limit int) ([]*Entity, error) {
+	var entities []*Entity
 	err := builder().
 		Where(queryopt.Eq("user_id", userId)).
 		Where(queryopt.Eq("status", 0)).
@@ -154,13 +154,13 @@ type ModerationPageQuery struct {
 	CategoryIDs         []uint64
 }
 
-func Page[ResType SmallEntity](q PageQuery) struct {
+func Page(q PageQuery) struct {
 	Page     int
 	PageSize int
 	HasNext  bool
-	Data     []ResType
+	Data     []Entity
 } {
-	var list []ResType
+	var list []Entity
 	q.Page = max(q.Page-1, 0)
 	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	queryLimit := q.PageSize + 1
@@ -192,7 +192,7 @@ func Page[ResType SmallEntity](q PageQuery) struct {
 		Page     int
 		PageSize int
 		HasNext  bool
-		Data     []ResType
+		Data     []Entity
 	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
 }
 
@@ -200,9 +200,9 @@ func PageForAdmin(q AdminPageQuery) struct {
 	Page     int
 	PageSize int
 	HasNext  bool
-	Data     []SmallEntity
+	Data     []Entity
 } {
-	var list []SmallEntity
+	var list []Entity
 	q.Page = max(q.Page-1, 0)
 	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	queryLimit := q.PageSize + 1
@@ -222,7 +222,7 @@ func PageForAdmin(q AdminPageQuery) struct {
 		Page     int
 		PageSize int
 		HasNext  bool
-		Data     []SmallEntity
+		Data     []Entity
 	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, HasNext: hasNext}
 }
 
@@ -231,9 +231,9 @@ func PageForModeration(q ModerationPageQuery) struct {
 	PageSize int
 	Total    int64
 	HasNext  bool
-	Data     []SmallEntity
+	Data     []Entity
 } {
-	var list []SmallEntity
+	var list []Entity
 	q.Page = max(q.Page-1, 0)
 	q.PageSize = pageutil.BoundPageSize(q.PageSize)
 	queryLimit := q.PageSize + 1
@@ -262,7 +262,7 @@ func PageForModeration(q ModerationPageQuery) struct {
 		PageSize int
 		Total    int64
 		HasNext  bool
-		Data     []SmallEntity
+		Data     []Entity
 	}{Page: q.Page + 1, PageSize: q.PageSize, Data: list, Total: total, HasNext: hasNext}
 }
 

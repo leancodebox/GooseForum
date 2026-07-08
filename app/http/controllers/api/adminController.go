@@ -459,12 +459,12 @@ type TopicSourceVo struct {
 func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 	param := req.Params
 	pageData := topics.PageForAdmin(topics.AdminPageQuery{Page: max(param.Page, 1), PageSize: param.PageSize, Search: param.Search, UserId: param.UserId})
-	userIds := lo.Map(pageData.Data, func(t topics.SmallEntity, _ int) uint64 {
+	userIds := lo.Map(pageData.Data, func(t topics.Entity, _ int) uint64 {
 		return t.UserId
 	})
 	userMap := users.GetMapByIds(userIds)
 	return component.SuccessResponse(component.Page[TopicInfoAdminVo]{
-		List: lo.Map(pageData.Data, func(t topics.SmallEntity, _ int) TopicInfoAdminVo {
+		List: lo.Map(pageData.Data, func(t topics.Entity, _ int) TopicInfoAdminVo {
 			username := ""
 			userAvatarUrl := ""
 			if user := userMap[t.UserId]; user != nil {

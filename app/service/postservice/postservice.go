@@ -14,7 +14,7 @@ const topicSequenceLockShards = 256
 
 var topicSequenceLocks [topicSequenceLockShards]sync.Mutex
 
-func CreateTopicPost(entity *posts.Entity, topicEntity topics.SmallEntity) error {
+func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
 	postNo, err := reserveTopicPostSequence(entity.TopicId)
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func reserveTopicPostSequence(topicId uint64) (uint64, error) {
 	return topics.ReservePostSequence(topicId)
 }
 
-func SyncTopicPostStats(topicEntity topics.SmallEntity, userId uint64, isDelete bool) {
+func SyncTopicPostStats(topicEntity topics.Entity, userId uint64, isDelete bool) {
 	if isDelete {
 		if err := topicUserStat.DecrementUserPost(topicEntity.Id, userId); err != nil {
 			slog.Error("failed to decrement topic user post stat", "topicId", topicEntity.Id, "userId", userId, "err", err)

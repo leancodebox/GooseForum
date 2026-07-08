@@ -67,7 +67,7 @@ func Moderation(c *gin.Context) {
 		Component: "moderation.index",
 		Props: ModerationPageProps{
 			CategoryTabs: buildModerationCategoryTabs(availableCategories, categoryID),
-			Topics:       buildTopicPayloads(hotdataserve.TopicsSmallEntity2Vo(moderationEntityPointers(pageData.Data))),
+			Topics:       buildTopicPayloads(hotdataserve.Topics2Vo(moderationEntityPointers(pageData.Data))),
 			Pagination: PaginationPayload{
 				Page:     pageData.Page,
 				NextPage: nextPage,
@@ -526,8 +526,8 @@ func moderationCategories(global bool, categoryIDs []uint64) []TopicCategoryPayl
 	return res
 }
 
-func moderationEntityPointers(data []topics.SmallEntity) []*topics.SmallEntity {
-	res := make([]*topics.SmallEntity, 0, len(data))
+func moderationEntityPointers(data []topics.Entity) []*topics.Entity {
+	res := make([]*topics.Entity, 0, len(data))
 	for i := range data {
 		res = append(res, &data[i])
 	}
@@ -572,7 +572,7 @@ func buildModerationLogItems(records []moderationLog.Entity) []ModerationLogItem
 	return items
 }
 
-func moderationLogSubject(record moderationLog.Entity, params map[string]any, topicMap map[uint64]*topics.SmallEntity) ModerationLogSubject {
+func moderationLogSubject(record moderationLog.Entity, params map[string]any, topicMap map[uint64]*topics.Entity) ModerationLogSubject {
 	switch record.SubjectType {
 	case moderationLog.SubjectTopic:
 		subject := ModerationLogSubject{Type: record.SubjectType, ID: record.SubjectId, Title: fmt.Sprint(params["title"])}
@@ -660,7 +660,7 @@ func uint64FromParam(value any) uint64 {
 	}
 }
 
-func moderationLogCategories(record moderationLog.Entity, params map[string]any, subjectID uint64, topicMap map[uint64]*topics.SmallEntity) []TopicCategoryPayload {
+func moderationLogCategories(record moderationLog.Entity, params map[string]any, subjectID uint64, topicMap map[uint64]*topics.Entity) []TopicCategoryPayload {
 	topicID := subjectID
 	if record.SubjectType == moderationLog.SubjectPost || record.SubjectType == moderationLog.SubjectReport {
 		topicID = uint64FromParam(params["topicId"])
@@ -726,7 +726,7 @@ func reportScopeCategoryIDs(userID uint64, categoryID uint64) ([]uint64, bool) {
 }
 
 type moderationReportBatchMaps struct {
-	TopicMap map[uint64]topics.SmallEntity
+	TopicMap map[uint64]topics.Entity
 	PostMap  map[uint64]*posts.Entity
 	UserMap  map[uint64]*users.EntityComplete
 }

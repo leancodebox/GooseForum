@@ -41,31 +41,7 @@ func (itself *Entity) TableName() string {
 	return tableName
 }
 
-type SmallEntity struct {
-	Id            uint64         `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`
-	Title         string         `gorm:"column:title;type:varchar(512);not null;default:'';" json:"title"`
-	Excerpt       string         `gorm:"column:excerpt;type:varchar(255);not null;default:'';" json:"excerpt"`
-	FirstImageURL string         `gorm:"column:first_image_url;type:varchar(512);not null;default:'';" json:"firstImageUrl"`
-	CategoryIds   []uint64       `gorm:"column:category_id;type:varchar(255);not null;default:'[]';serializer:json" json:"categoryIds"`
-	UserId        uint64         `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`
-	Posters       []Poster       `gorm:"column:posters;type:text;serializer:json" json:"posters"`
-	Status        int8           `gorm:"column:status;type:tinyint;not null;default:0;" json:"status"`
-	ProcessStatus int8           `gorm:"column:process_status;type:tinyint;not null;default:0;" json:"processStatus"`
-	LikeCount     uint64         `gorm:"column:like_count;type:bigint unsigned;not null;default:0;" json:"likeCount"`
-	ReplyCount    uint64         `gorm:"column:reply_count;type:bigint unsigned;not null;default:0;" json:"replyCount"`
-	PostSeq       uint64         `gorm:"column:post_seq;type:bigint unsigned;not null;default:0;" json:"postSeq"`
-	ViewCount     uint64         `gorm:"column:view_count;type:bigint unsigned;not null;default:0;" json:"viewCount"`
-	PinWeight     int            `gorm:"column:pin_weight;type:int;not null;default:0;" json:"pinWeight"`
-	CreatedAt     time.Time      `gorm:"column:created_at;autoCreateTime;<-:create;" json:"createdAt"`
-	UpdatedAt     time.Time      `gorm:"column:updated_at;autoUpdateTime;" json:"updatedAt"`
-	DeletedAt     gorm.DeletedAt `json:"-"`
-}
-
-func (itself *SmallEntity) TableName() string {
-	return tableName
-}
-
-func (itself *SmallEntity) GetPosters() []Poster {
+func (itself *Entity) GetPosters() []Poster {
 	if len(itself.Posters) == 0 {
 		return []Poster{{UserID: itself.UserId}}
 	}
