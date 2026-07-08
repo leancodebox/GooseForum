@@ -822,12 +822,12 @@ export default {
       saveFailed: '文件保存失败: {error}',
       success: '图片上传成功',
     },
-    article: {
-      notFound: '文章不存在',
+    topic: {
+      notFound: '主题不存在',
       ownerMismatch: '不要更改别人发出的帖子哦',
       operationDenied: '不可操作',
       saveFailed: '保存失败',
-      dailyLimit: '您当天已发布较多，为保证质量，请明天再发布新文章',
+      dailyLimit: '您当天已发布较多，为保证质量，请明天再发布新主题',
       title: {
         tooShort: '标题长度不能少于 {minLength} 位',
         tooLong: '标题长度不能超过 {maxLength} 位',
@@ -921,10 +921,10 @@ export default {
         keepOne: '至少保留1个分类',
         hasTopics: '当前分类存在有效主题',
       },
-      article: {
+      topic: {
         categoryRequired: '至少选择一个分类',
         categoryTooMany: '最多选择 3 个分类',
-        deleteFailed: '删除文章失败',
+        deleteFailed: '删除主题失败',
       },
       role: {
         notFound: '角色不存在',
@@ -1042,8 +1042,6 @@ export default {
         time: '时间',
       },
       actions: {
-        articleBlocked: '封禁了',
-        articleUnblocked: '解封了',
         topicBlocked: '封禁了',
         topicUnblocked: '解封了',
         replyBlocked: '隐藏了',

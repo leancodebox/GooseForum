@@ -383,7 +383,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                 </div>
               </div>
 
-              <div v-else class="gf-prose gf-prose-article min-h-96 rounded-lg border border-line bg-base-200/50 p-5">
+              <div v-else class="gf-prose gf-prose-post min-h-96 rounded-lg border border-line bg-base-200/50 p-5">
                 <div v-if="content.trim()" v-html="renderedPreview" />
                 <p v-else class="text-sm text-base-content/55">{{ t('publish.emptyPreview') }}</p>
               </div>

@@ -173,13 +173,13 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "/p/post/990010", nil)
 	props := buildTopicDetailProps(c, &topic, &firstPost)
 
-	if props.Topic.ID != topicID || props.Topic.HTML != "<p>first</p>" || props.Topic.MaxPostNo != 1 {
+	if props.Topic.ID != topicID || props.Topic.HTML != "<p>first</p>" || props.Topic.MaxPostNo != 2 {
 		t.Fatalf("topic payload mismatch: %#v", props.Topic)
 	}
 	if len(props.Topic.Categories) != 1 || props.Topic.Categories[0].Name != "General" {
 		t.Fatalf("categories mismatch: %#v", props.Topic.Categories)
 	}
-	if len(props.Posts) != 1 || props.Posts[0].ID != replyPostID || props.Posts[0].PostNo != 1 {
+	if len(props.Posts) != 1 || props.Posts[0].ID != replyPostID || props.Posts[0].PostNo != 2 {
 		t.Fatalf("posts mismatch: %#v", props.Posts)
 	}
 }
@@ -235,7 +235,62 @@ func TestPostWindowSkipsFirstPostInCursors(t *testing.T) {
 	if len(payload.Posts) != 1 || payload.Posts[0].ID != replyPostID {
 		t.Fatalf("posts = %#v, want only reply post", payload.Posts)
 	}
-	if payload.BeforeCursor != replyPostID || payload.AfterCursor != replyPostID || payload.BeforePostNo != 1 || payload.AfterPostNo != 1 {
+	if payload.BeforeCursor != replyPostID || payload.AfterCursor != replyPostID || payload.BeforePostNo != 2 || payload.AfterPostNo != 2 {
 		t.Fatalf("cursor payload = %#v", payload)
+	}
+	if payload.MaxPostNo != 2 || payload.Posts[0].PostNo != 2 {
+		t.Fatalf("post number payload = %#v", payload)
+	}
+}
+
+func TestPostWindowAnchorPostNoFallsForwardAcrossDeletedReplies(t *testing.T) {
+	preferences.Set("db.default.connection", "sqlite")
+	preferences.Set("db.default.path", ":memory:")
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &users.EntityComplete{}); err != nil {
+		t.Fatalf("migrate reply window tables: %v", err)
+	}
+
+	now := time.Date(2026, 7, 7, 13, 0, 0, 0, time.UTC)
+	topicID := uint64(992010)
+	firstPostID := uint64(992100)
+	userID := uint64(992001)
+	t.Cleanup(func() {
+		conn.Unscoped().Where("topic_id = ?", topicID).Delete(&posts.Entity{})
+		conn.Unscoped().Delete(&topics.Entity{}, topicID)
+		conn.Unscoped().Delete(&users.EntityComplete{}, userID)
+	})
+	conn.Unscoped().Where("topic_id = ?", topicID).Delete(&posts.Entity{})
+	conn.Unscoped().Delete(&topics.Entity{}, topicID)
+	conn.Unscoped().Delete(&users.EntityComplete{}, userID)
+	conn.Create(&users.EntityComplete{Id: userID, Username: "author"})
+	conn.Create(&topics.Entity{
+		Id:            topicID,
+		Title:         "topic",
+		UserId:        userID,
+		Status:        1,
+		ProcessStatus: 0,
+		ReplyCount:    1,
+		PostSeq:       4,
+		FirstPostId:   firstPostID,
+		CreatedAt:     now,
+		UpdatedAt:     now,
+	})
+	conn.Create(&posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: userID, Content: "first", CreatedAt: now, UpdatedAt: now})
+	conn.Create(&posts.Entity{Id: 992104, TopicId: topicID, PostNo: 4, UserId: userID, Content: "reply after deleted replies", CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})
+
+	res := PostWindow(component.BetterRequest[PostWindowReq]{
+		Params: PostWindowReq{
+			TopicID:      topicID,
+			AnchorPostNo: 2,
+			Limit:        20,
+		},
+	})
+	payload, ok := res.Data.Result.(PostWindowPayload)
+	if !ok {
+		t.Fatalf("result type = %T, want PostWindowPayload", res.Data.Result)
+	}
+	if len(payload.Posts) != 1 || payload.Posts[0].PostNo != 4 || payload.BeforePostNo != 4 || payload.AfterPostNo != 4 || payload.MaxPostNo != 4 {
+		t.Fatalf("payload = %#v, want nearest remaining reply post no 4", payload)
 	}
 }

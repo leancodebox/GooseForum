@@ -822,8 +822,8 @@ export default {
       saveFailed: 'Failed to save file: {error}',
       success: 'Image uploaded successfully',
     },
-    article: {
-      notFound: 'Article not found',
+    topic: {
+      notFound: 'Topic not found',
       ownerMismatch: "You cannot edit someone else's post",
       operationDenied: 'Operation not allowed',
       saveFailed: 'Failed to save',
@@ -921,10 +921,10 @@ export default {
         keepOne: 'Keep at least one category',
         hasTopics: 'This category still has active topics',
       },
-      article: {
+      topic: {
         categoryRequired: 'Select at least one category',
         categoryTooMany: 'Select at most 3 categories',
-        deleteFailed: 'Failed to delete article',
+        deleteFailed: 'Failed to delete topic',
       },
       role: {
         notFound: 'Role not found',
@@ -1042,8 +1042,6 @@ export default {
         time: 'Time',
       },
       actions: {
-        articleBlocked: 'blocked',
-        articleUnblocked: 'restored',
         topicBlocked: 'blocked',
         topicUnblocked: 'restored',
         replyBlocked: 'hid',

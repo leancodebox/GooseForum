@@ -131,6 +131,9 @@ func TestCreatePostWritesPostAndTopicStats(t *testing.T) {
 	if !ok || postID == 0 {
 		t.Fatalf("reply payload = %#v", payload)
 	}
+	if got, ok := payload["postNo"].(uint64); !ok || got != 2 {
+		t.Fatalf("reply payload postNo = %#v, want 2", payload)
+	}
 	post := posts.Get(postID)
 	if post.Id == 0 || post.TopicId != topic.Id || post.PostNo != 2 {
 		t.Fatalf("post = %#v", post)

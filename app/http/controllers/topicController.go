@@ -329,7 +329,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 
 	return component.SuccessResponse(map[string]any{
 		"id":              postEntity.Id,
-		"postNo":          postEntity.PostNo - 1,
+		"postNo":          postEntity.PostNo,
 		"renderedContent": postEntity.RenderedHTML,
 	})
 }
@@ -387,7 +387,7 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 
 	return component.SuccessResponse(map[string]any{
 		"id":              postEntity.Id,
-		"postNo":          postEntity.PostNo - 1,
+		"postNo":          postEntity.PostNo,
 		"content":         postEntity.Content,
 		"renderedContent": postEntity.RenderedHTML,
 		"updatedAt":       postEntity.UpdatedAt.Format(time.DateTime),

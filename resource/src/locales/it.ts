@@ -822,8 +822,8 @@ export default {
       saveFailed: 'Salvataggio del file non riuscito: {error}',
       success: 'Immagine caricata con successo',
     },
-    article: {
-      notFound: 'Articolo non trovato',
+    topic: {
+      notFound: 'Topic non trovato',
       ownerMismatch: 'Non puoi modificare il post di qualcun altro',
       operationDenied: 'Operazione non consentita',
       saveFailed: 'Salvataggio non riuscito',
@@ -921,10 +921,10 @@ export default {
         keepOne: 'Mantieni almeno una categoria',
         hasTopics: 'Questa categoria ha ancora topic attivi',
       },
-      article: {
+      topic: {
         categoryRequired: 'Seleziona almeno una categoria',
         categoryTooMany: 'Seleziona al massimo 3 categorie',
-        deleteFailed: 'Eliminazione dell’articolo non riuscita',
+        deleteFailed: 'Eliminazione del topic non riuscita',
       },
       role: {
         notFound: 'Ruolo non trovato',
@@ -1042,8 +1042,6 @@ export default {
         time: 'Ora',
       },
       actions: {
-        articleBlocked: 'ha bloccato',
-        articleUnblocked: 'ha ripristinato',
         topicBlocked: 'ha bloccato',
         topicUnblocked: 'ha ripristinato',
         replyBlocked: 'ha nascosto',

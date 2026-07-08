@@ -822,8 +822,8 @@ export default {
       saveFailed: 'ファイルの保存に失敗しました: {error}',
       success: '画像をアップロードしました',
     },
-    article: {
-      notFound: '記事が見つかりません',
+    topic: {
+      notFound: 'トピックが見つかりません',
       ownerMismatch: '他の人の投稿は編集できません',
       operationDenied: '操作できません',
       saveFailed: '保存に失敗しました',
@@ -921,10 +921,10 @@ export default {
         keepOne: 'カテゴリーを少なくとも1つ残してください',
         hasTopics: 'このカテゴリーには有効なトピックがあります',
       },
-      article: {
+      topic: {
         categoryRequired: 'カテゴリーを少なくとも1つ選択してください',
         categoryTooMany: 'カテゴリーは最大3つまで選択できます',
-        deleteFailed: '投稿の削除に失敗しました',
+        deleteFailed: 'トピックの削除に失敗しました',
       },
       role: {
         notFound: 'ロールが見つかりません',
@@ -1042,8 +1042,6 @@ export default {
         time: '時間',
       },
       actions: {
-        articleBlocked: '封禁しました',
-        articleUnblocked: '解除しました',
         topicBlocked: '封禁しました',
         topicUnblocked: '解除しました',
         replyBlocked: '非表示にしました',

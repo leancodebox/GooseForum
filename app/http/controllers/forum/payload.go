@@ -1022,7 +1022,7 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 		res = append(res, PostPayload{
 			ID:              item.Id,
 			TopicID:         item.TopicId,
-			PostNo:          item.PostNo - 1,
+			PostNo:          item.PostNo,
 			Content:         content,
 			RenderedContent: renderedContent,
 			ProcessStatus:   item.ProcessStatus,
@@ -1106,7 +1106,7 @@ func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *po
 		Participants:  participants,
 		Categories:    categoryPayloads(topic.CategoryIds),
 		ReplyCount:    topic.ReplyCount,
-		MaxPostNo:     positivePostReplyNo(topic.PostSeq),
+		MaxPostNo:     topic.PostSeq,
 		ViewCount:     topic.ViewCount,
 		LikeCount:     topic.LikeCount,
 		IsLiked:       isLiked,
@@ -1115,13 +1115,6 @@ func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *po
 		CreatedAt:     createdAt.Format(time.DateTime),
 		UpdatedAt:     updatedAt.Format(time.DateTime),
 	}
-}
-
-func positivePostReplyNo(postSeq uint64) uint64 {
-	if postSeq == 0 {
-		return 0
-	}
-	return postSeq - 1
 }
 
 func categoryPayloads(ids []uint64) []TopicCategoryPayload {

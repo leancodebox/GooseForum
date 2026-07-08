@@ -49,7 +49,7 @@ func handleHttpNotifyCommentCreated(ctx context.Context, event *CommentCreatedEv
 	post := posts.Get(event.PostId)
 	postNo := uint64(0)
 	if post.Id > 0 {
-		postNo = post.PostNo - 1
+		postNo = post.PostNo
 	}
 
 	postPayload := notifyPost{
@@ -109,7 +109,7 @@ func handleHttpNotifyReportCreated(ctx context.Context, event *ReportCreatedEven
 		commenter := userNotifyPayload(post.UserId)
 		payload.Post = &notifyPost{
 			ID:     post.Id,
-			PostNo: post.PostNo - 1,
+			PostNo: post.PostNo,
 			UserID: post.UserId,
 			User:   commenter,
 			URL:    postURL(post.TopicId, post.Id),

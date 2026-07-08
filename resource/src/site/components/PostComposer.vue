@@ -73,7 +73,6 @@ const submitText = computed(() => {
   if (props.submitting) return editing.value ? t('common.saving') : t('topic.publishing')
   return editing.value ? t('common.save') : t('topic.publishReply')
 })
-
 watch(
   () => props.open,
   async (open) => {

@@ -131,9 +131,9 @@ function removePointerListeners() {
         :aria-valuemin="1"
         :aria-valuemax="max"
         :aria-valuenow="displayNo"
-        @keydown.up.prevent="selectPostNo(displayNo - 1)"
-        @keydown.down.prevent="selectPostNo(displayNo + 1)"
-        @keydown.home.prevent="selectPostNo(1)"
+        @keydown.up.prevent="selectPostNo(thumbNo - 1)"
+        @keydown.down.prevent="selectPostNo(thumbNo + 1)"
+        @keydown.home.prevent="emit('earliest')"
         @keydown.end.prevent="emit('latest')"
       >
         <div class="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-line" />

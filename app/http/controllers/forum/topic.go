@@ -97,9 +97,9 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 
 	switch {
 	case req.Params.AnchorPostNo > 0:
-		anchor, ok := posts.GetByTopicPostNoAtOrAfter(topicID, req.Params.AnchorPostNo+1)
+		anchor, ok := posts.GetByTopicPostNoAtOrAfter(topicID, req.Params.AnchorPostNo)
 		if !ok {
-			anchor, ok = posts.GetByTopicPostNoAtOrBefore(topicID, req.Params.AnchorPostNo+1)
+			anchor, ok = posts.GetByTopicPostNoAtOrBefore(topicID, req.Params.AnchorPostNo)
 		}
 		if !ok || anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo <= 1 {
 			return component.FailResponseCode(component.MessagePostNotFound, nil)
@@ -146,14 +146,14 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		postEntities = append(postEntities, &anchor)
 		postEntities = append(postEntities, afterPosts...)
 	case req.Params.BeforePostNo > 0:
-		postEntities = posts.GetByTopicPostNoBefore(topicID, req.Params.BeforePostNo+1, limit+1)
+		postEntities = posts.GetByTopicPostNoBefore(topicID, req.Params.BeforePostNo, limit+1)
 		hasBefore = len(postEntities) > limit
 		if hasBefore {
 			postEntities = postEntities[1:]
 		}
 		hasAfter = true
 	case req.Params.AfterPostNo > 0:
-		postEntities = posts.GetByTopicPostNoAfter(topicID, req.Params.AfterPostNo+1, limit+1)
+		postEntities = posts.GetByTopicPostNoAfter(topicID, req.Params.AfterPostNo, limit+1)
 		hasAfter = len(postEntities) > limit
 		if hasAfter {
 			postEntities = postEntities[:limit]
@@ -205,17 +205,17 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 	if len(postEntities) > 0 {
 		beforeCursor = postEntities[0].Id
 		afterCursor = postEntities[len(postEntities)-1].Id
-		beforePostNo = postEntities[0].PostNo - 1
-		afterPostNo = postEntities[len(postEntities)-1].PostNo - 1
+		beforePostNo = postEntities[0].PostNo
+		afterPostNo = postEntities[len(postEntities)-1].PostNo
 	}
 	maxPostNo := uint64(0)
 	if topicEntity.PostSeq > 0 {
-		maxPostNo = topicEntity.PostSeq - 1
+		maxPostNo = topicEntity.PostSeq
 	}
 	if maxPostNo == 0 && topicEntity.ReplyCount > 0 {
 		maxPostSeq := posts.GetMaxPostNoByTopicId(topicID)
 		if maxPostSeq > 0 {
-			maxPostNo = maxPostSeq - 1
+			maxPostNo = maxPostSeq
 		}
 	}
 

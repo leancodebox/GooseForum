@@ -84,14 +84,14 @@ const postRailProgressCurrent = ref(0)
 const postRailProgressStart = ref(0)
 const postRailProgressEnd = ref(0)
 const postMaxRange = computed(() => Math.max(postMaxNo.value, ...posts.value.map((post) => post.postNo || 0)))
-const hasPostRail = computed(() => page.props.topic.replyCount > 0 && postMaxRange.value > 0)
+const hasPostRail = computed(() => postMaxRange.value > 0)
 const postRailCurrentNo = computed(() => {
   const fallback = firstPostNo(posts.value) || 1
   return clampPostNo(activePostNo.value || fallback)
 })
 const postRailCurrentLabel = computed(() => {
   const activePost = posts.value.find((post) => post.postNo === postRailCurrentNo.value)
-  return activePost ? formatRailDate(activePost.createdAt) : ''
+  return activePost ? formatRailDate(activePost.createdAt) : formatRailDate(page.props.topic.createdAt)
 })
 const postRailStartLabel = computed(() => formatRailDate(page.props.topic.createdAt))
 const postRailEndLabel = computed(() => formatRailDate(postTailLoaded.value ? posts.value[posts.value.length - 1]?.createdAt || page.props.topic.updatedAt : page.props.topic.updatedAt))
@@ -873,6 +873,10 @@ function closeMobilePostRail() {
 
 async function selectPostFromRail(postNo: number) {
   closeMobilePostRail()
+  if (postNo <= 1) {
+    jumpToTopicBody()
+    return
+  }
   await jumpToPostNo(postNo)
 }
 
@@ -1204,7 +1208,7 @@ function handleMarkdownImageClick(event: MouseEvent) {
   const target = event.target
   if (!(target instanceof HTMLElement)) return
 
-  const image = target.closest('.gf-prose-article img, .gf-prose-comment img')
+  const image = target.closest('.gf-prose-post img')
   if (!(image instanceof HTMLImageElement)) return
 
   const imageSrc = image.currentSrc || image.src
@@ -1216,7 +1220,7 @@ function handleMarkdownImageClick(event: MouseEvent) {
   event.preventDefault()
   event.stopPropagation()
 
-  const markdownImages = Array.from(document.querySelectorAll<HTMLImageElement>('.gf-prose-article img, .gf-prose-comment img'))
+  const markdownImages = Array.from(document.querySelectorAll<HTMLImageElement>('.gf-prose-post img'))
     .map((item) => ({
       src: item.currentSrc || item.src,
       alt: item.alt || '',
@@ -1314,7 +1318,8 @@ async function removePost(postId: number) {
 </script>
 
 <template>
-    <article class="min-w-0" @click="handleMarkdownImageClick">
+  <div class="min-w-0">
+    <div class="min-w-0" @click="handleMarkdownImageClick">
       <header ref="topicHeaderEl" class="relative z-10 border-b border-line/70 px-4 py-4 sm:mb-4 sm:px-0 sm:pb-4 sm:pt-0 xl:w-[calc(100%+292px)]">
         <h1 ref="titleEl" class="break-words text-2xl font-bold leading-tight text-base-content [overflow-wrap:anywhere] sm:text-3xl">{{ page.props.topic.title }}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-base-content/55">
@@ -1345,7 +1350,7 @@ async function removePost(postId: number) {
       <section class="gf-card xl:w-[calc(100%+292px)]">
         <div class="min-w-0 xl:grid xl:grid-cols-[minmax(0,1fr)_256px]">
           <div class="min-w-0">
-            <div class="grid grid-cols-[44px_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5">
+            <article data-post-no="1" class="grid grid-cols-[44px_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5">
               <a
                 :href="`/u/${page.props.topic.author.id}`"
                 class="sticky top-19 self-start pt-1"
@@ -1375,7 +1380,7 @@ async function removePost(postId: number) {
                     </a>
                   </div>
                 </div>
-                <div class="gf-prose gf-prose-article" v-html="page.props.topic.html" />
+                <div class="gf-prose gf-prose-post" v-html="page.props.topic.html" />
                 <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-4">
                   <button
                     type="button"
@@ -1439,7 +1444,7 @@ async function removePost(postId: number) {
                   <span v-if="actionMessage" class="text-xs" :class="actionMessageSuccess ? 'text-base-content/75' : 'text-error'">{{ actionMessage }}</span>
                 </div>
               </div>
-            </div>
+            </article>
 
             <span v-if="posts.length" id="posts" class="block scroll-mt-20" aria-hidden="true" />
 
@@ -1458,7 +1463,7 @@ async function removePost(postId: number) {
               </button>
             </div>
 
-            <div
+            <article
               v-for="post in posts"
               :id="`post-${post.id}`"
               :key="post.id"
@@ -1561,7 +1566,7 @@ async function removePost(postId: number) {
                 <div v-if="post.isHidden && !post.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
                   {{ t('topic.hiddenReplyPlaceholder') }}
                 </div>
-                <div v-else class="gf-prose gf-prose-comment" v-html="post.renderedContent" />
+                <div v-else class="gf-prose gf-prose-post" v-html="post.renderedContent" />
                 <div v-if="post.isHidden && post.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
                   {{ t('topic.hiddenReplyBadge') }}
                 </div>
@@ -1569,7 +1574,7 @@ async function removePost(postId: number) {
                   {{ t('topic.editedAt', { time: formatDateTime(post.updatedAt) }) }}
                 </div>
               </div>
-            </div>
+            </article>
 
             <div v-if="postHasAfter || loadingPostDirection === 'after' || postWindowError || (!postHasAfter && posts.length)" ref="postLoadMoreEl" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
               <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
@@ -1701,7 +1706,7 @@ async function removePost(postId: number) {
         @update:open="updateComposerOpen"
       />
 
-    </article>
+    </div>
 
     <MarkdownImageViewer ref="markdownImageViewer" />
 
@@ -1890,4 +1895,5 @@ async function removePost(postId: number) {
         </div>
       </Transition>
     </Teleport>
+  </div>
 </template>
