@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, Teleport, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, Teleport, watch } from 'vue'
 import { AlertTriangle, Ban, Bell, Bookmark, ChevronsUp, Clock, CornerDownLeft, Eye, Flag, Heart, Loader2, MessageSquare, PencilLine, RotateCcw, Trash2, X } from '@lucide/vue'
 import { bookmarkTopic, deletePost, getPostWindow, likeTopic, createPost, submitReport, updateModerationTopicStatus, updateModerationPostStatus, updatePost, watchTopic } from '@/runtime/api'
 import { formatDateTime, formatNumber } from '@/runtime/format'
@@ -7,7 +7,6 @@ import { useFlashMessages } from '@/runtime/flash-message'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
-import PostComposer from '@/site/components/PostComposer.vue'
 import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
 import PostPositionRail from '@/site/components/PostPositionRail.vue'
 import TopicList from '@/site/components/TopicList.vue'
@@ -22,6 +21,7 @@ const page = defineProps<{
 
 const { t } = useI18n()
 const { push: pushFlash } = useFlashMessages()
+const PostComposer = defineAsyncComponent(() => import('@/site/components/PostComposer.vue'))
 const initialPostStream = page.props.postStream
 const initialPosts = initialPostStream.posts
 const postContent = ref('')
@@ -75,6 +75,7 @@ const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const composerOpen = ref(false)
 const composerMode = computed(() => editingPostId.value ? 'edit' : 'create')
+const composerMounted = computed(() => composerOpen.value || Boolean(postContent.value || targetPostId.value || editingPostId.value))
 const mobilePostRailOpen = ref(false)
 const activePostNo = ref(firstPostNo(initialPosts) || 1)
 const postRailProgressCurrent = ref(0)
@@ -1675,6 +1676,7 @@ async function removePost(postId: number) {
       </section>
 
       <PostComposer
+        v-if="composerMounted"
         v-model="postContent"
         v-model:mobile-rail-open="mobilePostRailOpen"
         :open="composerOpen"

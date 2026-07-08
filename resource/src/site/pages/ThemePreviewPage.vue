@@ -20,8 +20,8 @@ import {
   Sparkles,
   Sun,
 } from '@lucide/vue'
-import { publishSiteTheme, saveSiteTheme } from '@/runtime/api'
 import { useFlashMessages } from '@/runtime/flash-message'
+import { publishSiteTheme, saveSiteTheme } from '@/runtime/site-theme-api'
 import { applySiteThemeCss, applySiteThemePayload, setTheme, type SiteTheme } from '@/runtime/site-theme'
 import {
   cloneSiteThemeTokens,

@@ -1,5 +1,5 @@
-import Compressor from 'compressorjs'
 import { i18n } from './i18n'
+import type CompressorType from 'compressorjs'
 
 export interface ImageProcessResult {
   file: File
@@ -81,7 +81,8 @@ export async function canvasToImageFile(
   })
 }
 
-function compressImage(file: File, mimeType: string, quality: number): Promise<File> {
+async function compressImage(file: File, mimeType: string, quality: number): Promise<File> {
+  const { default: Compressor } = await import('compressorjs') as { default: typeof CompressorType }
   return new Promise((resolve, reject) => {
     new Compressor(file, {
       quality,

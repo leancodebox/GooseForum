@@ -1,4 +1,4 @@
-import type { ModerationLogListResponse, ModerationReportListResponse, NotificationFilter, NotificationListResponse, PostWindowPayload, SiteThemeConfig, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
+import type { ModerationLogListResponse, ModerationReportListResponse, NotificationFilter, NotificationListResponse, PostWindowPayload, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
 import { i18n } from './i18n'
 import { resolveApiMessage } from './api-message'
 
@@ -649,27 +649,6 @@ export async function unbindOAuth(provider: string): Promise<boolean> {
   })
   await readApiResponse<unknown>(response, t('api.unbindFailed'))
   return true
-}
-
-export async function saveSiteTheme(settings: SiteThemeConfig): Promise<SiteThemeConfig> {
-  const response = await fetch('/api/admin/save-site-theme', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ settings }),
-  })
-  return readApiResponse<SiteThemeConfig>(response, t('api.themeSaveFailed'))
-}
-
-export async function publishSiteTheme(): Promise<SiteThemeConfig> {
-  const response = await fetch('/api/admin/publish-site-theme', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-  return readApiResponse<SiteThemeConfig>(response, t('api.themeSaveFailed'))
 }
 
 interface CaptchaPayload {
