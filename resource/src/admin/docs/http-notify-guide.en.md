@@ -33,7 +33,7 @@ X-Goose-Signature: sha256=...
       "id": 123,
       "title": "Hello GooseForum",
       "url": "/p/post/123",
-      "description": "Article summary",
+      "description": "Topic summary",
       "firstImageUrl": "",
       "userId": 1,
       "user": {

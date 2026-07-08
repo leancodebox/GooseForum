@@ -54,6 +54,6 @@ func ClearCategoryCache() {
 	ClearTopicListCache()
 }
 
-func ClearArticleCategoryCache() {
+func ClearTopicCategoryCache() {
 	ClearCategoryCache()
 }

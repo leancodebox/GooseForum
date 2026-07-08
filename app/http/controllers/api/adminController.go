@@ -1111,7 +1111,7 @@ func DeleteCategory(req component.BetterRequest[struct {
 		return component.FailResponseCode(component.MessageAdminCategoryKeepOne, nil)
 	}
 	if topicCategoryIndex.GetOneByCategoryId(entity.Id).Id > 0 {
-		return component.FailResponseCode(component.MessageAdminCategoryHasArticles, nil)
+		return component.FailResponseCode(component.MessageAdminCategoryHasTopics, nil)
 	}
 	category.DeleteEntity(&entity)
 	hotdataserve.ClearCategoryCache()

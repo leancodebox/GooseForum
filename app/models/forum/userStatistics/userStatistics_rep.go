@@ -30,7 +30,7 @@ func Get(id any) (entity Entity) {
 }
 
 func WriteTopic(userId uint64) int64 {
-	result := builder().Exec("UPDATE user_statistics SET article_count = article_count+1 where user_id = ?", userId)
+	result := builder().Exec("UPDATE user_statistics SET topic_count = topic_count+1 where user_id = ?", userId)
 	return result.RowsAffected
 }
 

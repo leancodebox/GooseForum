@@ -1167,7 +1167,7 @@ func buildTopicMeta(c *gin.Context, topic TopicDetailPayload) PageMeta {
 	canonical := baseURL + topic.URL
 	description := topic.Description
 	if description == "" {
-		description = i18n.T(requestLang(c), "meta.articleDesc", "title", topic.Title, "site", siteTitle())
+		description = i18n.T(requestLang(c), "meta.topicDesc", "title", topic.Title, "site", siteTitle())
 	}
 	inlineImages := topicImageURLs(topic, baseURL)
 	categoryNames := lo.Map(topic.Categories, func(item TopicCategoryPayload, _ int) string { return item.Name })
@@ -1240,7 +1240,7 @@ func topicPlainText(lang string, topic TopicDetailPayload) string {
 		return text
 	}
 	if topic.Title != "" {
-		return i18n.T(lang, "meta.articleDesc", "title", topic.Title, "site", siteTitle())
+		return i18n.T(lang, "meta.topicDesc", "title", topic.Title, "site", siteTitle())
 	}
 	return i18n.T(lang, "meta.communityDesc", "site", siteTitle())
 }

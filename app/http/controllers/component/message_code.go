@@ -161,7 +161,7 @@ const (
 	MessageAdminCategoryNotFound       MessageCode = "admin.category.notFound"         // 分类不存在。
 	MessageAdminCategoryDataNotFound   MessageCode = "admin.category.dataNotFound"     // 分类数据不存在。
 	MessageAdminCategoryKeepOne        MessageCode = "admin.category.keepOne"          // 至少保留一个分类。
-	MessageAdminCategoryHasArticles    MessageCode = "admin.category.hasArticles"      // 分类下存在有效文章。
+	MessageAdminCategoryHasTopics      MessageCode = "admin.category.hasTopics"        // 分类下存在有效主题。
 	MessageAdminModeratorUserRequired  MessageCode = "admin.moderator.userRequired"    // 版主用户不能为空。
 	MessageAdminModeratorUserNotFound  MessageCode = "admin.moderator.userNotFound"    // 版主用户不存在。
 	MessageAdminModeratorNotFound      MessageCode = "admin.moderator.notFound"        // 版主记录不存在。

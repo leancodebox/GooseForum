@@ -123,7 +123,7 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &category.Entity{}, &users.EntityComplete{}, &topicUserAction.Entity{}); err != nil {
 		t.Fatalf("migrate topic detail tables: %v", err)
 	}
-	hotdataserve.ClearArticleCategoryCache()
+	hotdataserve.ClearTopicCategoryCache()
 
 	now := time.Date(2026, 7, 7, 12, 0, 0, 0, time.UTC)
 	topicID := uint64(990010)
@@ -138,7 +138,7 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 		conn.Unscoped().Delete(&category.Entity{}, categoryID)
 		conn.Unscoped().Delete(&users.EntityComplete{}, []uint64{authorID, replyerID})
 		conn.Where("user_id = ? AND topic_id = ?", authorID, topicID).Delete(&topicUserAction.Entity{})
-		hotdataserve.ClearArticleCategoryCache()
+		hotdataserve.ClearTopicCategoryCache()
 	})
 	conn.Unscoped().Where("topic_id = ?", topicID).Delete(&posts.Entity{})
 	conn.Unscoped().Delete(&topics.Entity{}, topicID)

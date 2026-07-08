@@ -61,7 +61,7 @@
   "email.passwordReset.contact": "Per qualsiasi domanda, contatta il team di supporto.",
   "permission.admin": "Amministratore",
   "permission.userManager": "Gestione utenti",
-  "permission.articlesManager": "Gestione articoli",
+  "permission.topicsManager": "Gestione topic",
   "permission.pageManager": "Gestione pagine",
   "permission.roleManager": "Gestione ruoli",
   "permission.siteManager": "Gestione sito",
@@ -81,7 +81,7 @@
   "meta.searchDesc": "Cerca argomenti, parole chiave e discussioni su {site}.",
   "meta.friendLinksDesc": "Amici e partner della community di {site}.",
   "meta.sponsorsDesc": "Grazie agli sponsor e ai partner della community che supportano {site}.",
-  "meta.articleDesc": "Leggi “{title}” e partecipa alla discussione su {site}.",
+  "meta.topicDesc": "Leggi “{title}” e partecipa alla discussione su {site}.",
   "meta.communityDesc": "Partecipa alla discussione della community su {site}.",
   "meta.userDesc": "Scopri argomenti, attività e connessioni di {username} su {site}.",
   "meta.categoryDesc": "Sfoglia gli argomenti nella categoria {category}."

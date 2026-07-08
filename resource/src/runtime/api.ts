@@ -192,7 +192,7 @@ export async function updateTopicStatus(id: number, topicStatus: 0 | 1): Promise
       topicStatus,
     }),
   })
-  return readApiResponse<boolean>(response, t('api.articleStatusFailed'))
+  return readApiResponse<boolean>(response, t('api.topicStatusFailed'))
 }
 
 export async function updateModerationTopicStatus(id: number, action: 'ban' | 'unban'): Promise<boolean> {
@@ -386,7 +386,7 @@ export async function submitTopic(topic: SubmitTopicInput): Promise<number> {
 
   const data = (await response.json()) as ApiResponse<number>
   if (data.code !== undefined && data.code !== 0) {
-    throw new Error(responseMessage(data, t('api.articleSaveFailed')))
+    throw new Error(responseMessage(data, t('api.topicSaveFailed')))
   }
   return data.result ?? data.data ?? topic.topicId
 }

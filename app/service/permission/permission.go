@@ -24,7 +24,7 @@ func (receiver Enum) i18nKey() string {
 	case UserManager:
 		return "permission.userManager"
 	case TopicsManager:
-		return "permission.articlesManager"
+		return "permission.topicsManager"
 	case PageManager:
 		return "permission.pageManager"
 	case RoleManager:

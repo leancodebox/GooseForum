@@ -117,7 +117,7 @@ const passwordForm = reactive({
 })
 
 const privacy = reactive({
-  showArticles: true,
+  showTopics: true,
   showFollowing: true,
   emailNotifications: true,
 })
@@ -852,10 +852,10 @@ async function toggleBinding(provider: string) {
             <div class="max-w-2xl divide-y divide-line p-4">
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>
-                  <span class="block text-sm font-semibold text-base-content">{{ t('settings.privacy.showArticles') }}</span>
-                  <span class="text-sm text-base-content/55">{{ t('settings.privacy.showArticlesDescription') }}</span>
+                  <span class="block text-sm font-semibold text-base-content">{{ t('settings.privacy.showTopics') }}</span>
+                  <span class="text-sm text-base-content/55">{{ t('settings.privacy.showTopicsDescription') }}</span>
                 </span>
-                <input v-model="privacy.showArticles" type="checkbox" class="h-5 w-5 rounded border-line text-primary" @change="savePrivacy" />
+                <input v-model="privacy.showTopics" type="checkbox" class="h-5 w-5 rounded border-line text-primary" @change="savePrivacy" />
               </label>
               <label class="flex items-center justify-between gap-4 py-4">
                 <span>

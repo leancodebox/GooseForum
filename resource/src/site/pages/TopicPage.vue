@@ -34,27 +34,27 @@ const actingBookmark = ref(false)
 const actingWatch = ref(false)
 const actingModeration = ref(false)
 const submitting = ref(false)
-const deletingReplyId = ref(0)
-const editingReplyId = ref(0)
-const savingEditReplyId = ref(0)
+const deletingPostId = ref(0)
+const editingPostId = ref(0)
+const savingEditPostId = ref(0)
 const postDraftBeforeEdit = ref('')
 const targetPostBeforeEdit = ref(0)
-const pendingDeleteReply = ref<PostPayload | null>(null)
+const pendingDeletePost = ref<PostPayload | null>(null)
 const pendingModerationAction = ref<'ban' | 'unban' | null>(null)
 const pendingReport = ref<{ targetType: 'topic' | 'post'; targetId: number; title: string; excerpt: string } | null>(null)
 const reportReason = ref('spam')
 const reportNote = ref('')
 const reportSubmitting = ref(false)
 const reportError = ref('')
-const moderatingReplyIds = ref<number[]>([])
-const replies = ref<PostPayload[]>([...page.props.posts])
+const moderatingPostIds = ref<number[]>([])
+const posts = ref<PostPayload[]>([...page.props.posts])
 const topicProcessStatus = ref(page.props.topic.processStatus)
-const targetPost = computed(() => replies.value.find((reply) => reply.id === targetPostId.value))
+const targetPost = computed(() => posts.value.find((post) => post.id === targetPostId.value))
 const postWindowMode = ref(false)
 const postHasBefore = ref(false)
 const postHasAfter = ref(hasMoreInitialReplies())
-const postBeforeCursor = ref(firstReplyId(page.props.posts))
-const postAfterCursor = ref(lastReplyId(page.props.posts))
+const postBeforeCursor = ref(firstPostId(page.props.posts))
+const postAfterCursor = ref(lastPostId(page.props.posts))
 const postBeforePostNo = ref(firstPostNo(page.props.posts))
 const postAfterPostNo = ref(lastPostNo(page.props.posts))
 const postMaxNo = ref(initialMaxPostNo())
@@ -77,24 +77,24 @@ const isMobileHeaderViewport = ref(false)
 const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const composerOpen = ref(false)
-const composerMode = computed(() => editingReplyId.value ? 'edit' : 'create')
-const mobileReplyRailOpen = ref(false)
+const composerMode = computed(() => editingPostId.value ? 'edit' : 'create')
+const mobilePostRailOpen = ref(false)
 const activePostNo = ref(firstPostNo(page.props.posts) || 1)
 const postRailProgressCurrent = ref(0)
 const postRailProgressStart = ref(0)
 const postRailProgressEnd = ref(0)
-const postMaxRange = computed(() => Math.max(postMaxNo.value, ...replies.value.map((reply) => reply.postNo || 0)))
+const postMaxRange = computed(() => Math.max(postMaxNo.value, ...posts.value.map((post) => post.postNo || 0)))
 const hasPostRail = computed(() => page.props.topic.replyCount > 0 && postMaxRange.value > 0)
 const postRailCurrentNo = computed(() => {
-  const fallback = firstPostNo(replies.value) || 1
+  const fallback = firstPostNo(posts.value) || 1
   return clampPostNo(activePostNo.value || fallback)
 })
 const postRailCurrentLabel = computed(() => {
-  const activeReply = replies.value.find((reply) => reply.postNo === postRailCurrentNo.value)
-  return activeReply ? formatRailDate(activeReply.createdAt) : ''
+  const activePost = posts.value.find((post) => post.postNo === postRailCurrentNo.value)
+  return activePost ? formatRailDate(activePost.createdAt) : ''
 })
 const postRailStartLabel = computed(() => formatRailDate(page.props.topic.createdAt))
-const postRailEndLabel = computed(() => formatRailDate(postTailLoaded.value ? replies.value[replies.value.length - 1]?.createdAt || page.props.topic.updatedAt : page.props.topic.updatedAt))
+const postRailEndLabel = computed(() => formatRailDate(postTailLoaded.value ? posts.value[posts.value.length - 1]?.createdAt || page.props.topic.updatedAt : page.props.topic.updatedAt))
 const postRailBusy = computed(() => loadingPostWindow.value && (loadingPostDirection.value === 'anchor' || loadingPostDirection.value === 'tail'))
 const actionMessageSuccess = computed(() =>
   [
@@ -166,7 +166,7 @@ let headerScrollFrame = 0
 const highlightedPostId = ref<number | null>(null)
 let highlightTimer: number | undefined
 let postBottomLoadFrame = 0
-let activeReplyScrollFrame = 0
+let activePostScrollFrame = 0
 let pendingPostJumpNo: number | null = null
 let postRailSyncPaused = false
 let postRailResumeFrame = 0
@@ -234,8 +234,8 @@ watch(
     if (typeof window !== 'undefined') {
       lastHeaderScrollY = window.scrollY
     }
-    resetRepliesFromProps()
-    mobileReplyRailOpen.value = false
+    resetPostsFromProps()
+    mobilePostRailOpen.value = false
     void nextTick(observeTopicHeader)
     void nextTick(observeTitle)
     void nextTick(observePostLoader)
@@ -261,7 +261,7 @@ watch(
 )
 
 watch(
-  () => replies.value.map((reply) => `${reply.id}:${reply.postNo}`).join(','),
+  () => posts.value.map((post) => `${post.id}:${post.postNo}`).join(','),
   () => {
     void nextTick(() => {
       collectPostElements()
@@ -283,7 +283,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', schedulePostBottomLoadCheck)
   window.cancelAnimationFrame(headerScrollFrame)
   window.cancelAnimationFrame(postBottomLoadFrame)
-  window.cancelAnimationFrame(activeReplyScrollFrame)
+  window.cancelAnimationFrame(activePostScrollFrame)
   window.cancelAnimationFrame(postRailResumeFrame)
   window.clearTimeout(highlightTimer)
   shellState.headerTitle = ''
@@ -410,7 +410,7 @@ function resumePostRailSyncWhenSettled() {
     if (postRailResumeStableFrames >= 4 || performance.now() - startedAt > 1600) {
       postRailSyncPaused = false
       postRailResumeFrame = 0
-      syncReplyRailProgress()
+      syncPostRailProgress()
       return
     }
     postRailResumeFrame = window.requestAnimationFrame(settle)
@@ -419,15 +419,15 @@ function resumePostRailSyncWhenSettled() {
 }
 
 function scheduleActivePostFromScroll() {
-  if (postRailSyncPaused || activeReplyScrollFrame) return
-  activeReplyScrollFrame = window.requestAnimationFrame(() => {
-    activeReplyScrollFrame = 0
-    syncReplyRailProgress()
+  if (postRailSyncPaused || activePostScrollFrame) return
+  activePostScrollFrame = window.requestAnimationFrame(() => {
+    activePostScrollFrame = 0
+    syncPostRailProgress()
   })
 }
 
-function syncReplyRailProgress() {
-  const progress = measureReplyViewportProgress()
+function syncPostRailProgress() {
+  const progress = measurePostViewportProgress()
   if (progress.postNo >= 0) {
     activePostNo.value = progress.postNo
     postRailProgressCurrent.value = progress.current
@@ -436,11 +436,11 @@ function syncReplyRailProgress() {
   }
 }
 
-function measureReplyViewportProgress() {
+function measurePostViewportProgress() {
   const markerY = Math.min(window.innerHeight * 0.38, 340)
   const viewportTop = 88
   const viewportBottom = window.innerHeight - 96
-  const firstVisiblePostNo = firstPostNo(replies.value) || 1
+  const firstVisiblePostNo = firstPostNo(posts.value) || 1
 
   let coveringPostNo: number | null = null
   let coveringProgress = 0
@@ -492,13 +492,13 @@ function measureReplyViewportProgress() {
   }
 }
 
-function resetRepliesFromProps() {
-  replies.value = [...page.props.posts]
+function resetPostsFromProps() {
+  posts.value = [...page.props.posts]
   postWindowMode.value = false
   postHasBefore.value = false
   postHasAfter.value = hasMoreInitialReplies()
-  postBeforeCursor.value = firstReplyId(page.props.posts)
-  postAfterCursor.value = lastReplyId(page.props.posts)
+  postBeforeCursor.value = firstPostId(page.props.posts)
+  postAfterCursor.value = lastPostId(page.props.posts)
   postBeforePostNo.value = firstPostNo(page.props.posts)
   postAfterPostNo.value = lastPostNo(page.props.posts)
   postMaxNo.value = initialMaxPostNo()
@@ -507,14 +507,14 @@ function resetRepliesFromProps() {
   activePostNo.value = firstPostNo(page.props.posts) || 1
   syncProgressForPostNo(activePostNo.value)
   postWindowError.value = ''
-  editingReplyId.value = 0
+  editingPostId.value = 0
 }
 
-function firstReplyId(items: PostPayload[]) {
+function firstPostId(items: PostPayload[]) {
   return items.length ? items[0].id : 0
 }
 
-function lastReplyId(items: PostPayload[]) {
+function lastPostId(items: PostPayload[]) {
   return items.length ? items[items.length - 1].id : 0
 }
 
@@ -559,11 +559,11 @@ function syncProgressForPostNo(postNo: number) {
 function findClosestLoadedPost(postNo: number) {
   let closest: PostPayload | undefined
   let closestDistance = Number.POSITIVE_INFINITY
-  for (const reply of replies.value) {
-    if (!reply.postNo) continue
-    const distance = Math.abs(reply.postNo - postNo)
+  for (const post of posts.value) {
+    if (!post.postNo) continue
+    const distance = Math.abs(post.postNo - postNo)
     if (distance < closestDistance) {
-      closest = reply
+      closest = post
       closestDistance = distance
     }
   }
@@ -585,44 +585,44 @@ function hasMoreInitialReplies() {
   return page.props.topic.replyCount > page.props.posts.length
 }
 
-function findReplyHashId() {
+function findPostHashId() {
   const match = window.location.hash.match(/^#post-(\d+)$/)
   return match ? Number(match[1]) : 0
 }
 
 async function syncPostHash() {
-  const replyId = findReplyHashId()
-  if (!replyId) return
+  const postId = findPostHashId()
+  if (!postId) return
 
-  if (!replies.value.some((reply) => reply.id === replyId)) {
-    await loadPostWindow('anchor', replyId)
+  if (!posts.value.some((post) => post.id === postId)) {
+    await loadPostWindow('anchor', postId)
   }
 
-  highlightPost(replyId)
+  highlightPost(postId)
   await nextTick()
-  const element = document.getElementById(`post-${replyId}`)
+  const element = document.getElementById(`post-${postId}`)
   if (element) {
     scrollPostIntoComfortView(element, 'auto')
   }
 }
 
-function highlightPost(replyId: number) {
-  highlightedPostId.value = replyId
+function highlightPost(postId: number) {
+  highlightedPostId.value = postId
   window.clearTimeout(highlightTimer)
   highlightTimer = window.setTimeout(() => {
     highlightedPostId.value = null
   }, 2400)
 }
 
-function mergeReplies(nextReplies: PostPayload[], mode: 'replace' | 'prepend' | 'append') {
+function mergePosts(nextReplies: PostPayload[], mode: 'replace' | 'prepend' | 'append') {
   if (mode === 'replace') {
-    replies.value = nextReplies
+    posts.value = nextReplies
     return
   }
 
-  const seen = new Set(replies.value.map((reply) => reply.id))
-  const filtered = nextReplies.filter((reply) => !seen.has(reply.id))
-  replies.value = mode === 'prepend' ? [...filtered, ...replies.value] : [...replies.value, ...filtered]
+  const seen = new Set(posts.value.map((post) => post.id))
+  const filtered = nextReplies.filter((post) => !seen.has(post.id))
+  posts.value = mode === 'prepend' ? [...filtered, ...posts.value] : [...posts.value, ...filtered]
 }
 
 function applyPostWindowPayload(
@@ -631,13 +631,13 @@ function applyPostWindowPayload(
   forceWindowMode: boolean,
 ) {
   postWindowMode.value = forceWindowMode || postWindowMode.value
-  mergeReplies(payload.posts, mergeMode)
+  mergePosts(payload.posts, mergeMode)
   postHasBefore.value = postWindowMode.value ? payload.hasBefore : false
   postHasAfter.value = payload.hasAfter
-  postBeforeCursor.value = payload.beforeCursor ?? firstReplyId(replies.value)
-  postAfterCursor.value = payload.afterCursor ?? lastReplyId(replies.value)
-  postBeforePostNo.value = payload.beforePostNo ?? firstPostNo(replies.value)
-  postAfterPostNo.value = payload.afterPostNo ?? lastPostNo(replies.value)
+  postBeforeCursor.value = payload.beforeCursor ?? firstPostId(posts.value)
+  postAfterCursor.value = payload.afterCursor ?? lastPostId(posts.value)
+  postBeforePostNo.value = payload.beforePostNo ?? firstPostNo(posts.value)
+  postAfterPostNo.value = payload.afterPostNo ?? lastPostNo(posts.value)
   postMaxNo.value = Math.max(postMaxNo.value, payload.maxPostNo || 0)
   if (mergeMode === 'replace') {
     postTailLoaded.value = payloadEndsAtTail(payload)
@@ -652,7 +652,7 @@ function payloadEndsAtTail(payload: Awaited<ReturnType<typeof getPostWindow>>) {
   return payload.posts.length > 0 && !payload.hasAfter && afterPostNo >= maxPostNo
 }
 
-function disableReplyAutoLoadAfter() {
+function disablePostAutoLoadAfter() {
   postAutoLoadAfter.value = false
   postLoadObserver?.disconnect()
 }
@@ -663,7 +663,7 @@ async function loadPostWindow(direction: 'before' | 'after' | 'anchor' | 'tail',
   if (direction === 'tail' && postTailLoaded.value) return
 
   if (direction !== 'after') {
-    disableReplyAutoLoadAfter()
+    disablePostAutoLoadAfter()
   }
 
   const wasWindowMode = postWindowMode.value
@@ -689,18 +689,18 @@ async function loadPostWindow(direction: 'before' | 'after' | 'anchor' | 'tail',
     )
     if (direction === 'after' && !payload.hasAfter) {
       postTailLoaded.value = true
-      disableReplyAutoLoadAfter()
+      disablePostAutoLoadAfter()
     }
     if (direction === 'tail') {
       postTailLoaded.value = true
       postHasAfter.value = false
-      disableReplyAutoLoadAfter()
+      disablePostAutoLoadAfter()
     }
     if (direction === 'before') {
-      activePostNo.value = firstPostNo(payload.posts) || firstPostNo(replies.value)
+      activePostNo.value = firstPostNo(payload.posts) || firstPostNo(posts.value)
       syncProgressForPostNo(activePostNo.value || 1)
     } else if (direction === 'tail') {
-      activePostNo.value = lastPostNo(payload.posts) || lastPostNo(replies.value) || postMaxRange.value
+      activePostNo.value = lastPostNo(payload.posts) || lastPostNo(posts.value) || postMaxRange.value
       syncProgressForPostNo(activePostNo.value || 1)
     }
     await nextTick()
@@ -733,11 +733,11 @@ async function jumpToPostNo(postNo: number) {
     return
   }
 
-  disableReplyAutoLoadAfter()
+  disablePostAutoLoadAfter()
   activePostNo.value = target
   syncProgressForPostNo(target)
   pausePostRailSync()
-  const loaded = replies.value.find((reply) => reply.postNo === target)
+  const loaded = posts.value.find((post) => post.postNo === target)
   if (loaded) {
     activePostNo.value = loaded.postNo
     syncProgressForPostNo(loaded.postNo)
@@ -789,12 +789,12 @@ async function jumpToLatestPost() {
     syncProgressForPostNo(postMaxRange.value)
     return
   }
-  disableReplyAutoLoadAfter()
+  disablePostAutoLoadAfter()
   activePostNo.value = postMaxRange.value
   syncProgressForPostNo(postMaxRange.value)
   pausePostRailSync()
   if (postTailLoaded.value) {
-    const latest = replies.value[replies.value.length - 1]
+    const latest = posts.value[posts.value.length - 1]
     if (latest) {
       activePostNo.value = latest.postNo
       syncProgressForPostNo(latest.postNo)
@@ -804,7 +804,7 @@ async function jumpToLatestPost() {
     }
     return
   }
-  const loadedLatest = replies.value.find((reply) => reply.postNo === postMaxRange.value)
+  const loadedLatest = posts.value.find((post) => post.postNo === postMaxRange.value)
   if (loadedLatest) {
     activePostNo.value = loadedLatest.postNo
     syncProgressForPostNo(loadedLatest.postNo)
@@ -815,7 +815,7 @@ async function jumpToLatestPost() {
   }
   await loadPostWindow('tail')
   await nextTick()
-  const latest = replies.value[replies.value.length - 1]
+  const latest = posts.value[posts.value.length - 1]
   if (latest) {
     activePostNo.value = latest.postNo
     syncProgressForPostNo(latest.postNo)
@@ -830,7 +830,7 @@ function scrollPostListEndIntoView() {
     return
   }
 
-  const latest = replies.value[replies.value.length - 1]
+  const latest = posts.value[posts.value.length - 1]
   if (latest) {
     document.getElementById(`post-${latest.id}`)?.scrollIntoView({ block: 'end', behavior: 'smooth' })
   }
@@ -848,41 +848,41 @@ function jumpToTopicBody() {
 }
 
 function focusPostComposer() {
-  mobileReplyRailOpen.value = false
+  mobilePostRailOpen.value = false
   composerOpen.value = true
 }
 
 function updateComposerOpen(open: boolean) {
   composerOpen.value = open
-  if (!open && editingReplyId.value) {
-    cancelEditReply()
+  if (!open && editingPostId.value) {
+    cancelEditPost()
   }
 }
 
 function openFloatingPostComposer() {
-  if (editingReplyId.value) {
-    cancelEditReply()
+  if (editingPostId.value) {
+    cancelEditPost()
   }
   targetPostId.value = 0
   focusPostComposer()
 }
 
-function closeMobileReplyRail() {
-  mobileReplyRailOpen.value = false
+function closeMobilePostRail() {
+  mobilePostRailOpen.value = false
 }
 
 async function selectPostFromRail(postNo: number) {
-  closeMobileReplyRail()
+  closeMobilePostRail()
   await jumpToPostNo(postNo)
 }
 
 async function jumpToLatestPostFromRail() {
-  closeMobileReplyRail()
+  closeMobilePostRail()
   await jumpToLatestPost()
 }
 
 function jumpToTopicBodyFromRail() {
-  closeMobileReplyRail()
+  closeMobilePostRail()
   jumpToTopicBody()
 }
 
@@ -905,33 +905,33 @@ function waitForAnimationFrame() {
   })
 }
 
-async function findPostElementAfterLayout(replyId: number) {
+async function findPostElementAfterLayout(postId: number) {
   for (let attempts = 0; attempts < 4; attempts += 1) {
     await nextTick()
     await waitForAnimationFrame()
-    const element = document.getElementById(`post-${replyId}`)
+    const element = document.getElementById(`post-${postId}`)
     if (element) return element
   }
   return null
 }
 
-async function revealCreatedPost(replyId: number) {
-  if (!replyId) return
+async function revealCreatedPost(postId: number) {
+  if (!postId) return
 
   pausePostRailSync()
   const payload = await getPostWindow({
     topicId: page.props.topic.id,
-    anchorPostId: replyId,
+    anchorPostId: postId,
     limit: 20,
   })
   applyPostWindowPayload(payload, 'replace', true)
-  const createdReply = payload.posts.find((reply) => reply.id === replyId)
-  if (createdReply?.postNo) {
-    activePostNo.value = createdReply.postNo
-    syncProgressForPostNo(createdReply.postNo)
+  const createdPost = payload.posts.find((post) => post.id === postId)
+  if (createdPost?.postNo) {
+    activePostNo.value = createdPost.postNo
+    syncProgressForPostNo(createdPost.postNo)
   }
-  highlightPost(replyId)
-  const element = await findPostElementAfterLayout(replyId)
+  highlightPost(postId)
+  const element = await findPostElementAfterLayout(postId)
   if (element && !isElementMostlyVisible(element)) {
     scrollPostIntoComfortView(element)
     resumePostRailSyncWhenSettled()
@@ -1001,11 +1001,11 @@ async function toggleWatch() {
   }
 }
 
-function replyTo(reply: PostPayload) {
-  if (editingReplyId.value) {
-    cancelEditReply()
+function replyTo(post: PostPayload) {
+  if (editingPostId.value) {
+    cancelEditPost()
   }
-  targetPostId.value = reply.id
+  targetPostId.value = post.id
   errorMessage.value = ''
   successMessage.value = ''
   focusPostComposer()
@@ -1030,23 +1030,23 @@ function handlePostImageError(message: string) {
   errorMessage.value = message
 }
 
-function startEditReply(reply: PostPayload) {
-  if (savingEditReplyId.value || deletingReplyId.value === reply.id) return
-  if (!editingReplyId.value) {
+function startEditPost(post: PostPayload) {
+  if (savingEditPostId.value || deletingPostId.value === post.id) return
+  if (!editingPostId.value) {
     postDraftBeforeEdit.value = postContent.value
     targetPostBeforeEdit.value = targetPostId.value
   }
   targetPostId.value = 0
-  editingReplyId.value = reply.id
-  postContent.value = reply.content
+  editingPostId.value = post.id
+  postContent.value = post.content
   errorMessage.value = ''
   successMessage.value = ''
   focusPostComposer()
 }
 
-function cancelEditReply() {
-  if (savingEditReplyId.value) return
-  editingReplyId.value = 0
+function cancelEditPost() {
+  if (savingEditPostId.value) return
+  editingPostId.value = 0
   errorMessage.value = ''
   postContent.value = postDraftBeforeEdit.value
   targetPostId.value = targetPostBeforeEdit.value
@@ -1055,11 +1055,11 @@ function cancelEditReply() {
 }
 
 async function savePostEdit() {
-  if (savingEditReplyId.value) return
+  if (savingEditPostId.value) return
 
-  const reply = replies.value.find((item) => item.id === editingReplyId.value)
-  if (!reply) {
-    cancelEditReply()
+  const post = posts.value.find((item) => item.id === editingPostId.value)
+  if (!post) {
+    cancelEditPost()
     return
   }
 
@@ -1068,27 +1068,27 @@ async function savePostEdit() {
     errorMessage.value = t('topic.replyRequired')
     return
   }
-  if (content === reply.content.trim()) {
-    cancelEditReply()
+  if (content === post.content.trim()) {
+    cancelEditPost()
     composerOpen.value = false
     return
   }
 
-  savingEditReplyId.value = reply.id
+  savingEditPostId.value = post.id
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    const updated = await updatePost(reply.id, content)
-    const index = replies.value.findIndex((item) => item.id === reply.id)
+    const updated = await updatePost(post.id, content)
+    const index = posts.value.findIndex((item) => item.id === post.id)
     if (index >= 0) {
-      replies.value[index] = {
-        ...replies.value[index],
+      posts.value[index] = {
+        ...posts.value[index],
         content: updated.content,
         renderedContent: updated.renderedContent,
         updatedAt: updated.updatedAt,
       }
     }
-    editingReplyId.value = 0
+    editingPostId.value = 0
     postContent.value = postDraftBeforeEdit.value
     targetPostId.value = targetPostBeforeEdit.value
     postDraftBeforeEdit.value = ''
@@ -1098,17 +1098,17 @@ async function savePostEdit() {
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('api.replyUpdateFailed')
   } finally {
-    savingEditReplyId.value = 0
+    savingEditPostId.value = 0
   }
 }
 
 async function submitPost() {
-  if (editingReplyId.value) {
+  if (editingPostId.value) {
     await savePostEdit()
     return
   }
 
-  const replyId = targetPost.value?.id || 0
+  const postId = targetPost.value?.id || 0
   const content = postContent.value.trim()
   if (submitting.value) return
 
@@ -1122,13 +1122,13 @@ async function submitPost() {
   errorMessage.value = ''
   successMessage.value = ''
   try {
-    const createdReply = await createPost(page.props.topic.id, content, replyId)
+    const createdPost = await createPost(page.props.topic.id, content, postId)
     postContent.value = ''
     targetPostId.value = 0
     successMessage.value = t('topic.replyPosted')
-    const createdReplyId = typeof createdReply === 'object' && createdReply !== null ? createdReply.id : createdReply
-    if (typeof createdReplyId === 'number') {
-      await revealCreatedPost(createdReplyId)
+    const createdPostId = typeof createdPost === 'object' && createdPost !== null ? createdPost.id : createdPost
+    if (typeof createdPostId === 'number') {
+      await revealCreatedPost(createdPostId)
     } else {
       await refreshCurrentPage()
     }
@@ -1144,15 +1144,15 @@ async function refreshCurrentPage() {
   window.dispatchEvent(new CustomEvent('goose:page', { detail: payload }))
 }
 
-function requestDeleteReply(reply: PostPayload) {
-  if (savingEditReplyId.value === reply.id) return
-  pendingDeleteReply.value = reply
+function requestDeletePost(post: PostPayload) {
+  if (savingEditPostId.value === post.id) return
+  pendingDeletePost.value = post
   deleteErrorMessage.value = ''
 }
 
 function closeDeleteDialog() {
-  if (deletingReplyId.value) return
-  pendingDeleteReply.value = null
+  if (deletingPostId.value) return
+  pendingDeletePost.value = null
   deleteErrorMessage.value = ''
 }
 
@@ -1244,12 +1244,12 @@ function requestTopicReport() {
   })
 }
 
-function requestPostReport(reply: PostPayload) {
+function requestPostReport(post: PostPayload) {
   requestReport({
     targetType: 'post',
-    targetId: reply.id,
-    title: t('topic.replyReportTitle', { no: reply.postNo || reply.id }),
-    excerpt: reply.content,
+    targetId: post.id,
+    title: t('topic.replyReportTitle', { no: post.postNo || post.id }),
+    excerpt: post.content,
   })
 }
 
@@ -1274,41 +1274,41 @@ async function submitCurrentReport() {
   }
 }
 
-function postModerationBusy(replyId: number) {
-  return moderatingReplyIds.value.includes(replyId)
+function postModerationBusy(postId: number) {
+  return moderatingPostIds.value.includes(postId)
 }
 
-async function moderateReply(reply: PostPayload, action: 'ban' | 'unban') {
-  if (postModerationBusy(reply.id)) return
-  moderatingReplyIds.value = [...moderatingReplyIds.value, reply.id]
+async function moderatePost(post: PostPayload, action: 'ban' | 'unban') {
+  if (postModerationBusy(post.id)) return
+  moderatingPostIds.value = [...moderatingPostIds.value, post.id]
   try {
-    await updateModerationPostStatus(reply.id, action)
-    reply.processStatus = action === 'ban' ? 1 : 0
-    reply.isHidden = action === 'ban'
+    await updateModerationPostStatus(post.id, action)
+    post.processStatus = action === 'ban' ? 1 : 0
+    post.isHidden = action === 'ban'
     pushFlash(action === 'ban' ? t('topic.replyModerationBanSuccess') : t('topic.replyModerationUnbanSuccess'), 'success')
   } catch (error) {
     pushFlash(error instanceof Error ? error.message : t('api.moderationActionFailed'), 'error')
   } finally {
-    moderatingReplyIds.value = moderatingReplyIds.value.filter(id => id !== reply.id)
+    moderatingPostIds.value = moderatingPostIds.value.filter(id => id !== post.id)
   }
 }
 
-async function removePost(replyId: number) {
-  if (deletingReplyId.value || savingEditReplyId.value === replyId) return
+async function removePost(postId: number) {
+  if (deletingPostId.value || savingEditPostId.value === postId) return
 
-  deletingReplyId.value = replyId
+  deletingPostId.value = postId
   errorMessage.value = ''
   successMessage.value = ''
   deleteErrorMessage.value = ''
   try {
-    await deletePost(replyId)
+    await deletePost(postId)
     successMessage.value = t('topic.replyDeleted')
-    pendingDeleteReply.value = null
+    pendingDeletePost.value = null
     await refreshCurrentPage()
   } catch (error) {
     deleteErrorMessage.value = error instanceof Error ? error.message : t('api.replyDeleteFailed')
   } finally {
-    deletingReplyId.value = 0
+    deletingPostId.value = 0
   }
 }
 </script>
@@ -1441,7 +1441,7 @@ async function removePost(replyId: number) {
               </div>
             </div>
 
-            <span v-if="replies.length" id="replies" class="block scroll-mt-20" aria-hidden="true" />
+            <span v-if="posts.length" id="posts" class="block scroll-mt-20" aria-hidden="true" />
 
             <div v-if="postHasBefore" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
               <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
@@ -1459,119 +1459,119 @@ async function removePost(replyId: number) {
             </div>
 
             <div
-              v-for="reply in replies"
-              :id="`post-${reply.id}`"
-              :key="reply.id"
-              :data-post-no="reply.postNo"
+              v-for="post in posts"
+              :id="`post-${post.id}`"
+              :key="post.id"
+              :data-post-no="post.postNo"
               class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-line px-3 py-4 transition hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5 xl:border-t-transparent"
-              :class="{ 'bg-info/10 ring-1 ring-inset ring-primary/20': highlightedPostId === reply.id }"
+              :class="{ 'bg-info/10 ring-1 ring-inset ring-primary/20': highlightedPostId === post.id }"
             >
               <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
               <a
-                :href="`/u/${reply.author.id}`"
+                :href="`/u/${post.author.id}`"
                 class="sticky top-19 self-start pt-1"
-                @click="showUserCard(reply.author, $event)"
+                @click="showUserCard(post.author, $event)"
               >
-                <UserAvatar :src="reply.author.avatarUrl" :alt="reply.author.username" :badge="reply.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
+                <UserAvatar :src="post.author.avatarUrl" :alt="post.author.username" :badge="post.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
               </a>
               <div class="min-w-0">
                 <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
                   <div class="min-w-0">
                     <div class="flex min-w-0 items-center gap-2">
-                      <a :href="`/u/${reply.author.id}`" class="min-w-0 truncate font-semibold text-base-content hover:text-primary">{{ reply.author.username }}</a>
-                      <span v-if="reply.postNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 sm:inline">#{{ formatNumber(reply.postNo) }}</span>
+                      <a :href="`/u/${post.author.id}`" class="min-w-0 truncate font-semibold text-base-content hover:text-primary">{{ post.author.username }}</a>
+                      <span v-if="post.postNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 sm:inline">#{{ formatNumber(post.postNo) }}</span>
                     </div>
                     <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55 sm:hidden">
-                      <span v-if="reply.postNo" class="font-semibold tabular-nums text-base-content/55">#{{ formatNumber(reply.postNo) }}</span>
-                      <time class="truncate">{{ formatDateTime(reply.createdAt) }}</time>
+                      <span v-if="post.postNo" class="font-semibold tabular-nums text-base-content/55">#{{ formatNumber(post.postNo) }}</span>
+                      <time class="truncate">{{ formatDateTime(post.createdAt) }}</time>
                     </div>
                   </div>
                   <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
                     <button
-                      v-if="reply.isOwnPost && !reply.isHidden"
+                      v-if="post.isOwnPost && !post.isHidden"
                       type="button"
                       class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      :disabled="savingEditReplyId === reply.id || deletingReplyId === reply.id"
+                      :disabled="savingEditPostId === post.id || deletingPostId === post.id"
                       :title="t('common.edit')"
-                      @click="startEditReply(reply)"
+                      @click="startEditPost(post)"
                     >
                       <PencilLine class="h-3.5 w-3.5" />
                       <span class="sr-only">{{ t('common.edit') }}</span>
                     </button>
                     <button
-                      v-if="reply.isOwnPost && !reply.isHidden"
+                      v-if="post.isOwnPost && !post.isHidden"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      :disabled="deletingReplyId === reply.id"
-                      :title="deletingReplyId === reply.id ? t('topic.deleting') : t('topic.delete')"
-                      @click="requestDeleteReply(reply)"
+                      :disabled="deletingPostId === post.id"
+                      :title="deletingPostId === post.id ? t('topic.deleting') : t('topic.delete')"
+                      @click="requestDeletePost(post)"
                     >
                       <Trash2 class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ deletingReplyId === reply.id ? t('topic.deleting') : t('topic.delete') }}</span>
+                      <span class="sr-only">{{ deletingPostId === post.id ? t('topic.deleting') : t('topic.delete') }}</span>
                     </button>
                     <button
-                      v-if="page.props.permissions.canPost && !reply.isHidden"
+                      v-if="page.props.permissions.canPost && !post.isHidden"
                       type="button"
                       class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       :title="t('topic.reply')"
-                      @click="replyTo(reply)"
+                      @click="replyTo(post)"
                     >
                       <CornerDownLeft class="h-3.5 w-3.5" />
                       <span class="sr-only">{{ t('topic.reply') }}</span>
                     </button>
                     <button
-                      v-if="!reply.isOwnPost && !reply.isHidden"
+                      v-if="!post.isOwnPost && !post.isHidden"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
                       :title="t('topic.report')"
-                      @click="requestPostReport(reply)"
+                      @click="requestPostReport(post)"
                     >
                       <Flag class="h-3.5 w-3.5" />
                       <span class="sr-only">{{ t('topic.report') }}</span>
                     </button>
                     <button
-                      v-if="reply.canModerate && reply.processStatus === 0"
+                      v-if="post.canModerate && post.processStatus === 0"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:opacity-50"
-                      :disabled="postModerationBusy(reply.id)"
+                      :disabled="postModerationBusy(post.id)"
                       :title="t('topic.moderationBan')"
-                      @click="moderateReply(reply, 'ban')"
+                      @click="moderatePost(post, 'ban')"
                     >
                       <Ban class="h-3.5 w-3.5" />
                       <span class="sr-only">{{ t('topic.moderationBan') }}</span>
                     </button>
                     <button
-                      v-else-if="reply.canModerate && reply.processStatus === 1"
+                      v-else-if="post.canModerate && post.processStatus === 1"
                       type="button"
                       class="gf-icon-button h-8 w-8 shrink-0 hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
-                      :disabled="postModerationBusy(reply.id)"
+                      :disabled="postModerationBusy(post.id)"
                       :title="t('topic.moderationUnban')"
-                      @click="moderateReply(reply, 'unban')"
+                      @click="moderatePost(post, 'unban')"
                     >
                       <RotateCcw class="h-3.5 w-3.5" />
                       <span class="sr-only">{{ t('topic.moderationUnban') }}</span>
                     </button>
-                    <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(reply.createdAt) }}</time>
+                    <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(post.createdAt) }}</time>
                   </div>
                 </div>
-                <p v-if="reply.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-base-200 px-2 py-1 text-sm text-base-content/55">
+                <p v-if="post.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-base-200 px-2 py-1 text-sm text-base-content/55">
                   <span class="shrink-0">{{ t('topic.reply') }}</span>
-                  <a :href="`/u/${reply.replyToUserId}`" class="min-w-0 truncate font-medium text-base-content/75 hover:text-primary">@{{ reply.replyToUsername }}</a>
+                  <a :href="`/u/${post.replyToUserId}`" class="min-w-0 truncate font-medium text-base-content/75 hover:text-primary">@{{ post.replyToUsername }}</a>
                 </p>
-                <div v-if="reply.isHidden && !reply.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
+                <div v-if="post.isHidden && !post.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
                   {{ t('topic.hiddenReplyPlaceholder') }}
                 </div>
-                <div v-else class="gf-prose gf-prose-comment" v-html="reply.renderedContent" />
-                <div v-if="reply.isHidden && reply.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
+                <div v-else class="gf-prose gf-prose-comment" v-html="post.renderedContent" />
+                <div v-if="post.isHidden && post.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
                   {{ t('topic.hiddenReplyBadge') }}
                 </div>
-                <div v-if="reply.updatedAt && reply.updatedAt !== reply.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
-                  {{ t('topic.editedAt', { time: formatDateTime(reply.updatedAt) }) }}
+                <div v-if="post.updatedAt && post.updatedAt !== post.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
+                  {{ t('topic.editedAt', { time: formatDateTime(post.updatedAt) }) }}
                 </div>
               </div>
             </div>
 
-            <div v-if="postHasAfter || loadingPostDirection === 'after' || postWindowError || (!postHasAfter && replies.length)" ref="postLoadMoreEl" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
+            <div v-if="postHasAfter || loadingPostDirection === 'after' || postWindowError || (!postHasAfter && posts.length)" ref="postLoadMoreEl" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
               <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
               <button
                 v-if="postHasAfter && postWindowError"
@@ -1597,7 +1597,7 @@ async function removePost(replyId: number) {
               >
                 {{ t('topic.loadMoreReplies') }}
               </button>
-              <p v-else-if="!postHasAfter && replies.length" class="text-xs font-medium text-base-content/55">{{ t('topic.allRepliesShown') }}</p>
+              <p v-else-if="!postHasAfter && posts.length" class="text-xs font-medium text-base-content/55">{{ t('topic.allRepliesShown') }}</p>
             </div>
             <span ref="postListEndEl" class="block h-px scroll-mb-28" aria-hidden="true" />
           </div>
@@ -1669,7 +1669,7 @@ async function removePost(replyId: number) {
 
       <PostComposer
         v-model="postContent"
-        v-model:mobile-rail-open="mobileReplyRailOpen"
+        v-model:mobile-rail-open="mobilePostRailOpen"
         :open="composerOpen"
         :actions="floatingTopicActions"
         :authenticated="page.layout.viewer.isAuthenticated"
@@ -1686,7 +1686,7 @@ async function removePost(replyId: number) {
         :progress-start="postRailProgressStart"
         :rail-busy="postRailBusy"
         :start-label="postRailStartLabel"
-        :submitting="editingReplyId ? savingEditReplyId > 0 : submitting"
+        :submitting="editingPostId ? savingEditPostId > 0 : submitting"
         :success-message="successMessage"
         :target="targetPost"
         @clear-target="cancelPostTarget"
@@ -1708,11 +1708,11 @@ async function removePost(replyId: number) {
     <Teleport to="body">
       <Transition name="gf-modal">
         <div
-          v-if="pendingDeleteReply"
+          v-if="pendingDeletePost"
           class="fixed inset-0 z-[110] flex items-center justify-center bg-neutral/45 px-4 py-6 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="delete-reply-title"
+          aria-labelledby="delete-post-title"
           @click.self="closeDeleteDialog"
         >
           <div class="gf-menu-surface w-full max-w-sm p-4">
@@ -1721,13 +1721,13 @@ async function removePost(replyId: number) {
                 <AlertTriangle class="h-5 w-5" />
               </div>
               <div class="min-w-0 flex-1">
-                <h2 id="delete-reply-title" class="text-base font-bold text-base-content">{{ t('topic.deleteReplyTitle') }}</h2>
+                <h2 id="delete-post-title" class="text-base font-bold text-base-content">{{ t('topic.deleteReplyTitle') }}</h2>
                 <p class="mt-1 text-sm leading-6 text-base-content/55">{{ t('topic.deleteReplyDescription') }}</p>
               </div>
               <button
                 type="button"
                 class="rounded-md p-1 text-base-content/55 transition hover:bg-base-300 hover:text-base-content/75 disabled:cursor-not-allowed disabled:opacity-50"
-                :disabled="Boolean(deletingReplyId)"
+                :disabled="Boolean(deletingPostId)"
                 @click="closeDeleteDialog"
               >
                 <X class="h-4 w-4" />
@@ -1735,8 +1735,8 @@ async function removePost(replyId: number) {
             </div>
 
             <div class="mt-4 rounded-md border border-line bg-base-200 px-3 py-2">
-              <div class="text-xs font-semibold text-base-content/55">@{{ pendingDeleteReply.author.username }}</div>
-              <p class="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-6 text-base-content/75">{{ pendingDeleteReply.content }}</p>
+              <div class="text-xs font-semibold text-base-content/55">@{{ pendingDeletePost.author.username }}</div>
+              <p class="mt-1 line-clamp-3 whitespace-pre-wrap text-sm leading-6 text-base-content/75">{{ pendingDeletePost.content }}</p>
             </div>
 
             <p v-if="deleteErrorMessage" class="mt-3 text-sm text-error">{{ deleteErrorMessage }}</p>
@@ -1745,7 +1745,7 @@ async function removePost(replyId: number) {
               <button
                 type="button"
                 class="gf-button gf-button-md gf-button-muted"
-                :disabled="Boolean(deletingReplyId)"
+                :disabled="Boolean(deletingPostId)"
                 @click="closeDeleteDialog"
               >
                 {{ t('common.cancel') }}
@@ -1753,12 +1753,12 @@ async function removePost(replyId: number) {
               <button
                 type="button"
                 class="gf-button gf-button-md gf-button-danger"
-                :disabled="Boolean(deletingReplyId)"
-                @click="removePost(pendingDeleteReply.id)"
+                :disabled="Boolean(deletingPostId)"
+                @click="removePost(pendingDeletePost.id)"
               >
-                <Loader2 v-if="deletingReplyId === pendingDeleteReply.id" class="h-4 w-4 animate-spin" />
+                <Loader2 v-if="deletingPostId === pendingDeletePost.id" class="h-4 w-4 animate-spin" />
                 <Trash2 v-else class="h-4 w-4" />
-                {{ deletingReplyId === pendingDeleteReply.id ? t('topic.deleting') : t('topic.confirmDelete') }}
+                {{ deletingPostId === pendingDeletePost.id ? t('topic.deleting') : t('topic.confirmDelete') }}
               </button>
             </div>
           </div>

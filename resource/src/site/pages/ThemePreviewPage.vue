@@ -794,10 +794,10 @@ function hexToRgb(value: string) {
                 <span class="gf-badge gf-badge-info">Preview</span>
                 <span class="gf-badge gf-badge-muted">Theme</span>
               </div>
-              <h3 class="mt-3 text-xl font-semibold leading-tight text-base-content">{{ t('themePreview.sampleArticleTitle') }}</h3>
+              <h3 class="mt-3 text-xl font-semibold leading-tight text-base-content">{{ t('themePreview.sampleTopicTitle') }}</h3>
               <div class="gf-prose gf-prose-article mt-2 text-sm">
-                <p>{{ t('themePreview.sampleArticleBody') }}</p>
-                <blockquote>{{ t('themePreview.sampleArticleQuote') }}</blockquote>
+                <p>{{ t('themePreview.sampleTopicBody') }}</p>
+                <blockquote>{{ t('themePreview.sampleTopicQuote') }}</blockquote>
                 <pre><code>const theme = 'gf-{{ selectedTheme === 'gf-dark' ? 'dark' : 'light' }}'</code></pre>
               </div>
             </article>

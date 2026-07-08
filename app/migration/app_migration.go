@@ -85,5 +85,15 @@ func runVersionedDataMigrations() {
 		pageConfig.SyncMigrationVersion(7)
 		currentVersion = 7
 	}
+	if currentVersion < 8 {
+		result := datamigration.MigrateTopicCountNaming()
+		slog.Info("app migration topic count naming done", "userStatisticsMigrated", result.UserStatisticsMigrated, "dailyStatsMigrated", result.DailyStatsMigrated, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration topic count naming has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(8)
+		currentVersion = 8
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

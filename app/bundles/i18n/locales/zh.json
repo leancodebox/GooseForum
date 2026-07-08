@@ -61,7 +61,7 @@
   "email.passwordReset.contact": "如果您有任何疑问，请联系我们的客服团队。",
   "permission.admin": "管理员",
   "permission.userManager": "用户管理",
-  "permission.articlesManager": "文章管理",
+  "permission.topicsManager": "主题管理",
   "permission.pageManager": "页面管理",
   "permission.roleManager": "角色管理",
   "permission.siteManager": "站点管理",
@@ -81,7 +81,7 @@
   "meta.searchDesc": "搜索 {site} 主题、关键词和讨论。",
   "meta.friendLinksDesc": "{site} 友情链接与社区伙伴。",
   "meta.sponsorsDesc": "感谢支持 {site} 的赞助商与社区伙伴。",
-  "meta.articleDesc": "阅读 {title}，参与 {site} 的社区讨论。",
+  "meta.topicDesc": "阅读 {title}，参与 {site} 的社区讨论。",
   "meta.communityDesc": "参与 {site} 的社区讨论。",
   "meta.userDesc": "查看 {username} 在 {site} 的主题、动态和社区关系。",
   "meta.categoryDesc": "浏览 {category} 分类下的主题。"

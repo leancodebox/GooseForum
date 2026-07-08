@@ -61,7 +61,7 @@
   "email.passwordReset.contact": "ご不明な点がある場合は、サポートチームまでお問い合わせください。",
   "permission.admin": "管理者",
   "permission.userManager": "ユーザー管理",
-  "permission.articlesManager": "記事管理",
+  "permission.topicsManager": "トピック管理",
   "permission.pageManager": "ページ管理",
   "permission.roleManager": "ロール管理",
   "permission.siteManager": "サイト管理",
@@ -81,7 +81,7 @@
   "meta.searchDesc": "{site} のトピック・キーワード・議論を検索します。",
   "meta.friendLinksDesc": "{site} の相互リンクとコミュニティパートナー。",
   "meta.sponsorsDesc": "{site} を支援してくださるスポンサーとコミュニティパートナーに感謝します。",
-  "meta.articleDesc": "「{title}」を読んで、{site} のコミュニティで議論に参加しましょう。",
+  "meta.topicDesc": "「{title}」を読んで、{site} のコミュニティで議論に参加しましょう。",
   "meta.communityDesc": "{site} のコミュニティで議論に参加しましょう。",
   "meta.userDesc": "{site} での {username} のトピック・アクティビティ・コミュニティのつながりを見る。",
   "meta.categoryDesc": "{category} カテゴリーのトピックを閲覧する。"

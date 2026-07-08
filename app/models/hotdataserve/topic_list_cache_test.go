@@ -26,7 +26,7 @@ func TestTopicListCacheReadsTopics(t *testing.T) {
 	conn.Where("1 = 1").Delete(&category.Entity{})
 	conn.Where("1 = 1").Delete(&topicCategoryIndex.Entity{})
 	conn.Where("1 = 1").Delete(&users.EntityComplete{})
-	ClearArticleCategoryCache()
+	ClearTopicCategoryCache()
 	ClearTopicListCache()
 
 	now := time.Date(2026, 7, 7, 12, 0, 0, 0, time.UTC)
