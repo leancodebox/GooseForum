@@ -101,7 +101,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		if !ok {
 			anchor, ok = posts.GetByTopicPostNoAtOrBefore(topicID, req.Params.AnchorPostNo)
 		}
-		if !ok || anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo <= 1 {
+		if !ok || anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo < 1 {
 			return component.FailResponseCode(component.MessagePostNotFound, nil)
 		}
 		beforeLimit := min(5, limit/2)
@@ -127,7 +127,7 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		}
 	case req.Params.AnchorPostID > 0:
 		anchor := posts.Get(req.Params.AnchorPostID)
-		if anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo <= 1 {
+		if anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo < 1 {
 			return component.FailResponseCode(component.MessagePostNotFound, nil)
 		}
 		beforeLimit := min(5, limit/2)
@@ -174,13 +174,12 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		}
 		hasBefore = true
 	default:
-		postEntities = posts.GetByTopicPostNoAfter(topicID, 1, limit+1)
+		postEntities = posts.GetByTopicPostNoAfter(topicID, 0, limit+1)
 		hasAfter = len(postEntities) > limit
 		if hasAfter {
 			postEntities = postEntities[:limit]
 		}
 	}
-	postEntities = filterSecondaryPosts(postEntities)
 
 	userIDs := make([]uint64, 0, len(postEntities))
 	seenUserIDs := make(map[uint64]struct{}, len(postEntities))
@@ -196,18 +195,6 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 	}
 	userMap := users.GetMapByIds(userIDs)
 	canModeratePosts := moderatorservice.CanModerateAnyCategory(req.UserId, topicEntity.CategoryIds)
-	payloadPosts := buildPostPayloads(postEntities, userMap, req.UserId, canModeratePosts)
-
-	var beforeCursor uint64
-	var afterCursor uint64
-	var beforePostNo uint64
-	var afterPostNo uint64
-	if len(postEntities) > 0 {
-		beforeCursor = postEntities[0].Id
-		afterCursor = postEntities[len(postEntities)-1].Id
-		beforePostNo = postEntities[0].PostNo
-		afterPostNo = postEntities[len(postEntities)-1].PostNo
-	}
 	maxPostNo := uint64(0)
 	if topicEntity.PostSeq > 0 {
 		maxPostNo = topicEntity.PostSeq
@@ -219,29 +206,17 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		}
 	}
 
-	return component.SuccessResponse(PostWindowPayload{
-		Posts:        payloadPosts,
-		AnchorPostID: req.Params.AnchorPostID,
-		BeforeCursor: beforeCursor,
-		AfterCursor:  afterCursor,
-		BeforePostNo: beforePostNo,
-		AfterPostNo:  afterPostNo,
-		HasBefore:    hasBefore,
-		HasAfter:     hasAfter,
-		Total:        int64(topicEntity.ReplyCount),
-		MaxPostNo:    maxPostNo,
-	})
-}
-
-func filterSecondaryPosts(postEntities []*posts.Entity) []*posts.Entity {
-	res := postEntities[:0]
-	for _, item := range postEntities {
-		if item == nil || item.PostNo <= 1 {
-			continue
-		}
-		res = append(res, item)
-	}
-	return res
+	return component.SuccessResponse(buildPostWindowPayloadFromEntities(
+		postEntities,
+		userMap,
+		req.UserId,
+		canModeratePosts,
+		hasBefore,
+		hasAfter,
+		int64(maxPostNo),
+		maxPostNo,
+		req.Params.AnchorPostID,
+	))
 }
 
 func canViewTopic(entity *topics.Entity, userID uint64) bool {

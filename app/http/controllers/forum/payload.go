@@ -260,7 +260,7 @@ type TopicCategoryPayload struct {
 
 type TopicDetailProps struct {
 	Topic       TopicDetailPayload `json:"topic"`
-	Posts       []PostPayload      `json:"posts"`
+	PostStream  PostWindowPayload  `json:"postStream"`
 	HotTopics   []TopicPayload     `json:"hotTopics"`
 	Permissions TopicPermissions   `json:"permissions"`
 }
@@ -271,7 +271,6 @@ type TopicDetailPayload struct {
 	Description   string                 `json:"description"`
 	FirstImageURL string                 `json:"firstImageUrl,omitempty"`
 	URL           string                 `json:"url"`
-	HTML          string                 `json:"html"`
 	TopicStatus   int8                   `json:"topicStatus"`
 	ProcessStatus int8                   `json:"processStatus"`
 	Author        TopicAuthorPayload     `json:"author"`
@@ -920,10 +919,11 @@ func buildHomeMeta(c *gin.Context) PageMeta {
 func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity) TopicDetailProps {
 	currentUserID := component.LoginUserId(c)
 	postEntities := posts.GetFirstPageByTopicId(topic.Id)
-	userIDs := make([]uint64, 0, 1+len(postEntities))
-	seenUserIDs := make(map[uint64]struct{}, 1+len(postEntities))
-	userIDs = append(userIDs, topic.UserId)
-	seenUserIDs[topic.UserId] = struct{}{}
+	if len(postEntities) == 0 && firstPost != nil && firstPost.Id != 0 {
+		postEntities = append(postEntities, firstPost)
+	}
+	userIDs := make([]uint64, 0, len(postEntities))
+	seenUserIDs := make(map[uint64]struct{}, len(postEntities))
 	for _, item := range postEntities {
 		if item == nil {
 			continue
@@ -935,16 +935,53 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 		userIDs = append(userIDs, item.UserId)
 	}
 	userMap := users.GetMapByIds(userIDs)
+	canModerate := moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds)
 
 	return TopicDetailProps{
-		Topic:     buildTopicDetailPayload(c, topic, firstPost, userMap),
-		Posts:     buildPostPayloads(postEntities, userMap, currentUserID, moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds)),
+		Topic: buildTopicDetailPayload(c, topic, firstPost, userMap),
+		PostStream: buildPostWindowPayloadFromEntities(
+			postEntities,
+			userMap,
+			currentUserID,
+			canModerate,
+			false,
+			topic.PostSeq > uint64(len(postEntities)),
+			int64(topic.PostSeq),
+			topic.PostSeq,
+			0,
+		),
 		HotTopics: buildTopicHotTopics(topic.Id),
 		Permissions: TopicPermissions{
 			IsOwnTopic:       currentUserID == topic.UserId,
 			CanPost:          currentUserID > 0,
-			CanModerateTopic: moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds),
+			CanModerateTopic: canModerate,
 		},
+	}
+}
+
+func buildPostWindowPayloadFromEntities(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool, hasBefore bool, hasAfter bool, total int64, maxPostNo uint64, anchorPostID uint64) PostWindowPayload {
+	payloadPosts := buildPostPayloads(postEntities, userMap, currentUserID, canModerate)
+	var beforeCursor uint64
+	var afterCursor uint64
+	var beforePostNo uint64
+	var afterPostNo uint64
+	if len(postEntities) > 0 {
+		beforeCursor = postEntities[0].Id
+		afterCursor = postEntities[len(postEntities)-1].Id
+		beforePostNo = postEntities[0].PostNo
+		afterPostNo = postEntities[len(postEntities)-1].PostNo
+	}
+	return PostWindowPayload{
+		Posts:        payloadPosts,
+		AnchorPostID: anchorPostID,
+		BeforeCursor: beforeCursor,
+		AfterCursor:  afterCursor,
+		BeforePostNo: beforePostNo,
+		AfterPostNo:  afterPostNo,
+		HasBefore:    hasBefore,
+		HasAfter:     hasAfter,
+		Total:        total,
+		MaxPostNo:    maxPostNo,
 	}
 }
 
@@ -1000,7 +1037,7 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 
 	res := make([]PostPayload, 0, len(postEntities))
 	for _, item := range postEntities {
-		if item == nil || item.PostNo <= 1 {
+		if item == nil {
 			continue
 		}
 		author := userPayload(item.UserId, userMap)
@@ -1084,11 +1121,9 @@ func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *po
 		isWatched = state.WatchedAt != nil
 	}
 
-	html := ""
 	createdAt := topic.CreatedAt
 	updatedAt := topic.UpdatedAt
 	if firstPost != nil {
-		html = firstPost.RenderedHTML
 		createdAt = firstPost.CreatedAt
 		updatedAt = firstPost.UpdatedAt
 	}
@@ -1099,7 +1134,6 @@ func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *po
 		Description:   topic.Excerpt,
 		FirstImageURL: topic.FirstImageURL,
 		URL:           urlconfig.PostDetail(topic.Id),
-		HTML:          html,
 		TopicStatus:   topic.Status,
 		ProcessStatus: topic.ProcessStatus,
 		Author:        userPayload(topic.UserId, userMap),

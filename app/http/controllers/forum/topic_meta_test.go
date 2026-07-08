@@ -29,7 +29,6 @@ func TestTopicMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 		Title:       "讨论标题",
 		Description: "讨论描述",
 		URL:         "/p/post/1",
-		HTML:        "<p>正文内容 <strong>重点</strong></p>",
 		Author:      TopicAuthorPayload{ID: 12, Username: "author"},
 		CreatedAt:   time.Now().Format(time.DateTime),
 		UpdatedAt:   time.Now().Format(time.DateTime),
@@ -61,7 +60,6 @@ func TestTopicMetaJSONLDIncludesImageForImageOnlyTopic(t *testing.T) {
 		Description:   "",
 		URL:           "/p/post/440",
 		FirstImageURL: "/file/badges/earned.webp",
-		HTML:          `<p><img src="/file/badges/fallback.webp" alt="徽章"></p>`,
 		Author:        TopicAuthorPayload{ID: 1, Username: "abandon1a2b"},
 		CreatedAt:     time.Now().Format(time.DateTime),
 		UpdatedAt:     time.Now().Format(time.DateTime),
@@ -173,18 +171,27 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "/p/post/990010", nil)
 	props := buildTopicDetailProps(c, &topic, &firstPost)
 
-	if props.Topic.ID != topicID || props.Topic.HTML != "<p>first</p>" || props.Topic.MaxPostNo != 2 {
+	if props.Topic.ID != topicID || props.Topic.MaxPostNo != 2 {
 		t.Fatalf("topic payload mismatch: %#v", props.Topic)
 	}
 	if len(props.Topic.Categories) != 1 || props.Topic.Categories[0].Name != "General" {
 		t.Fatalf("categories mismatch: %#v", props.Topic.Categories)
 	}
-	if len(props.Posts) != 1 || props.Posts[0].ID != replyPostID || props.Posts[0].PostNo != 2 {
-		t.Fatalf("posts mismatch: %#v", props.Posts)
+	if len(props.PostStream.Posts) != 2 {
+		t.Fatalf("post stream length = %d, want 2", len(props.PostStream.Posts))
+	}
+	if props.PostStream.Posts[0].ID != firstPostID || props.PostStream.Posts[0].PostNo != 1 || props.PostStream.Posts[0].RenderedContent != "<p>first</p>" {
+		t.Fatalf("first post payload mismatch: %#v", props.PostStream.Posts[0])
+	}
+	if props.PostStream.Posts[1].ID != replyPostID || props.PostStream.Posts[1].PostNo != 2 {
+		t.Fatalf("reply post payload mismatch: %#v", props.PostStream.Posts[1])
+	}
+	if props.PostStream.BeforePostNo != 1 || props.PostStream.AfterPostNo != 2 || props.PostStream.MaxPostNo != 2 {
+		t.Fatalf("post stream cursor mismatch: %#v", props.PostStream)
 	}
 }
 
-func TestPostWindowSkipsFirstPostInCursors(t *testing.T) {
+func TestPostWindowTailIncludesFirstPostWhenWindowCoversWholeStream(t *testing.T) {
 	preferences.Set("db.default.connection", "sqlite")
 	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
@@ -232,14 +239,69 @@ func TestPostWindowSkipsFirstPostInCursors(t *testing.T) {
 	if !ok {
 		t.Fatalf("result type = %T, want PostWindowPayload", res.Data.Result)
 	}
-	if len(payload.Posts) != 1 || payload.Posts[0].ID != replyPostID {
-		t.Fatalf("posts = %#v, want only reply post", payload.Posts)
+	if len(payload.Posts) != 2 || payload.Posts[0].ID != firstPostID || payload.Posts[0].PostNo != 1 || payload.Posts[1].ID != replyPostID || payload.Posts[1].PostNo != 2 {
+		t.Fatalf("posts = %#v, want first post and reply post", payload.Posts)
 	}
-	if payload.BeforeCursor != replyPostID || payload.AfterCursor != replyPostID || payload.BeforePostNo != 2 || payload.AfterPostNo != 2 {
+	if payload.BeforeCursor != firstPostID || payload.AfterCursor != replyPostID || payload.BeforePostNo != 1 || payload.AfterPostNo != 2 {
 		t.Fatalf("cursor payload = %#v", payload)
 	}
-	if payload.MaxPostNo != 2 || payload.Posts[0].PostNo != 2 {
-		t.Fatalf("post number payload = %#v", payload)
+	if payload.Total != 2 || payload.MaxPostNo != 2 {
+		t.Fatalf("stream totals = %#v", payload)
+	}
+}
+
+func TestPostWindowAnchorPostNoCanLoadFirstPost(t *testing.T) {
+	preferences.Set("db.default.connection", "sqlite")
+	preferences.Set("db.default.path", ":memory:")
+	conn := dbconnect.Connect()
+	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &users.EntityComplete{}); err != nil {
+		t.Fatalf("migrate post window tables: %v", err)
+	}
+
+	now := time.Date(2026, 7, 7, 14, 0, 0, 0, time.UTC)
+	topicID := uint64(993010)
+	firstPostID := uint64(993100)
+	replyPostID := uint64(993101)
+	userID := uint64(993001)
+	t.Cleanup(func() {
+		conn.Unscoped().Where("topic_id = ?", topicID).Delete(&posts.Entity{})
+		conn.Unscoped().Delete(&topics.Entity{}, topicID)
+		conn.Unscoped().Delete(&users.EntityComplete{}, userID)
+	})
+	conn.Unscoped().Where("topic_id = ?", topicID).Delete(&posts.Entity{})
+	conn.Unscoped().Delete(&topics.Entity{}, topicID)
+	conn.Unscoped().Delete(&users.EntityComplete{}, userID)
+	conn.Create(&users.EntityComplete{Id: userID, Username: "author"})
+	conn.Create(&topics.Entity{
+		Id:          topicID,
+		Title:       "topic",
+		UserId:      userID,
+		Status:      1,
+		ReplyCount:  1,
+		PostSeq:     2,
+		FirstPostId: firstPostID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	})
+	conn.Create(&posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: userID, Content: "first", CreatedAt: now, UpdatedAt: now})
+	conn.Create(&posts.Entity{Id: replyPostID, TopicId: topicID, PostNo: 2, UserId: userID, Content: "reply", CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})
+
+	res := PostWindow(component.BetterRequest[PostWindowReq]{
+		Params: PostWindowReq{
+			TopicID:      topicID,
+			AnchorPostNo: 1,
+			Limit:        20,
+		},
+	})
+	payload, ok := res.Data.Result.(PostWindowPayload)
+	if !ok {
+		t.Fatalf("result type = %T, want PostWindowPayload", res.Data.Result)
+	}
+	if len(payload.Posts) != 2 || payload.Posts[0].PostNo != 1 || payload.Posts[1].PostNo != 2 {
+		t.Fatalf("payload posts = %#v, want first post and reply", payload.Posts)
+	}
+	if payload.HasBefore {
+		t.Fatalf("first post anchor should not have before window: %#v", payload)
 	}
 }
 
@@ -290,7 +352,7 @@ func TestPostWindowAnchorPostNoFallsForwardAcrossDeletedReplies(t *testing.T) {
 	if !ok {
 		t.Fatalf("result type = %T, want PostWindowPayload", res.Data.Result)
 	}
-	if len(payload.Posts) != 1 || payload.Posts[0].PostNo != 4 || payload.BeforePostNo != 4 || payload.AfterPostNo != 4 || payload.MaxPostNo != 4 {
-		t.Fatalf("payload = %#v, want nearest remaining reply post no 4", payload)
+	if len(payload.Posts) != 2 || payload.Posts[0].PostNo != 1 || payload.Posts[1].PostNo != 4 || payload.BeforePostNo != 1 || payload.AfterPostNo != 4 || payload.MaxPostNo != 4 {
+		t.Fatalf("payload = %#v, want first post plus nearest remaining post no 4", payload)
 	}
 }
