@@ -33,8 +33,7 @@ type Entity struct {
 }
 
 type Poster struct {
-	UserID      uint64 `json:"user_id"`
-	Description string `json:"description"`
+	UserID uint64 `json:"user_id"`
 }
 
 func (itself *Entity) TableName() string {

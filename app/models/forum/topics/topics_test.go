@@ -124,7 +124,7 @@ func TestTopicRepositoryParity(t *testing.T) {
 	if nextNo != 1 {
 		t.Fatalf("ReservePostSequence()=%d, want 1", nextNo)
 	}
-	if err := IncrementPostFast(10, []Poster{{UserID: 2, Description: "reply"}}); err != nil {
+	if err := IncrementPostFast(10, []Poster{{UserID: 2}}); err != nil {
 		t.Fatalf("IncrementPostFast() err=%v", err)
 	}
 	if got := Get(10); got.PostCount != 1 || got.ReplyCount != 2 || len(got.Posters) != 1 {
