@@ -282,7 +282,7 @@ export interface HomeProps {
 
 export interface TopicDetailProps {
   topic: TopicDetailPayload
-  posts: PostPayload[]
+  postStream: PostWindowPayload
   hotTopics: TopicPayload[]
   permissions: {
     isOwnTopic: boolean
@@ -296,7 +296,6 @@ export interface TopicDetailPayload {
   title: string
   description: string
   url: string
-  html: string
   topicStatus: number
   processStatus: number
   author: {
@@ -344,8 +343,6 @@ export interface PostPayload {
 export interface PostWindowPayload {
   posts: PostPayload[]
   anchorPostId?: number
-  beforeCursor?: number
-  afterCursor?: number
   beforePostNo?: number
   afterPostNo?: number
   hasBefore: boolean

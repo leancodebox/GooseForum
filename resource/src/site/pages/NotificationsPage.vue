@@ -369,7 +369,7 @@ function markItemReadAndNavigate(item: NotificationPayload) {
         <article
           v-for="item in notifications"
           :key="item.id"
-          class="relative grid grid-cols-[34px_minmax(0,1fr)] gap-3 px-3 py-2.5 transition hover:bg-base-200/70 md:grid-cols-[34px_minmax(0,1fr)_116px_40px] md:items-start"
+          class="relative grid grid-cols-[34px_minmax(0,1fr)] gap-3 px-3 py-2.5 transition-[background-color] hover:bg-base-200/70 md:grid-cols-[34px_minmax(0,1fr)_116px_40px] md:items-start"
           :class="{ 'bg-info/10 before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-primary': !item.isRead }"
         >
           <div
@@ -419,7 +419,7 @@ function markItemReadAndNavigate(item: NotificationPayload) {
           <button
             v-if="!item.isRead"
             type="button"
-            class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted hover:bg-base-100 hover:text-primary md:static"
+            class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted transition-colors hover:bg-base-100 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:static"
             :title="t('notifications.markRead')"
             :aria-label="t('notifications.markRead')"
             @click.stop="markItemRead(item)"

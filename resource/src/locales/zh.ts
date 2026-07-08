@@ -283,6 +283,7 @@ export default {
   },
   topic: {
     body: '正文',
+    originalPost: '正文',
     like: '点赞',
     bookmark: '收藏',
     bookmarked: '已收藏',

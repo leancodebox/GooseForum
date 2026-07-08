@@ -89,16 +89,14 @@ function handlePointerUp(event: PointerEvent) {
   dragging.value = false
   previewNo.value = null
   removePointerListeners()
-  if (target && target !== props.current) {
+  if (target) {
     emit('select', target)
   }
 }
 
 function selectPostNo(postNo: number) {
   const target = clampPostNo(postNo)
-  if (target !== props.current) {
-    emit('select', target)
-  }
+  emit('select', target)
 }
 
 function removePointerListeners() {

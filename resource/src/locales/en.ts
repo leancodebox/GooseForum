@@ -283,6 +283,7 @@ export default {
   },
   topic: {
     body: 'Body',
+    originalPost: 'Original post',
     like: 'Like',
     bookmark: 'Bookmark',
     bookmarked: 'Bookmarked',

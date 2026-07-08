@@ -22,6 +22,8 @@ const page = defineProps<{
 
 const { t } = useI18n()
 const { push: pushFlash } = useFlashMessages()
+const initialPostStream = page.props.postStream
+const initialPosts = initialPostStream.posts
 const postContent = ref('')
 const targetPostId = ref(0)
 const likeCount = ref(page.props.topic.likeCount)
@@ -47,21 +49,17 @@ const reportNote = ref('')
 const reportSubmitting = ref(false)
 const reportError = ref('')
 const moderatingPostIds = ref<number[]>([])
-const posts = ref<PostPayload[]>([...page.props.posts])
+const posts = ref<PostPayload[]>([...initialPosts])
 const topicProcessStatus = ref(page.props.topic.processStatus)
 const targetPost = computed(() => posts.value.find((post) => post.id === targetPostId.value))
-const postWindowMode = ref(false)
-const postHasBefore = ref(false)
-const postHasAfter = ref(hasMoreInitialReplies())
-const postBeforeCursor = ref(firstPostId(page.props.posts))
-const postAfterCursor = ref(lastPostId(page.props.posts))
-const postBeforePostNo = ref(firstPostNo(page.props.posts))
-const postAfterPostNo = ref(lastPostNo(page.props.posts))
-const postMaxNo = ref(initialMaxPostNo())
-const postTailLoaded = ref(!hasMoreInitialReplies())
+const postHasBefore = ref(initialPostStream.hasBefore)
+const postHasAfter = ref(initialPostStream.hasAfter)
+const postBeforePostNo = ref(initialPostStream.beforePostNo || firstPostNo(initialPosts))
+const postAfterPostNo = ref(initialPostStream.afterPostNo || lastPostNo(initialPosts))
+const postMaxNo = ref(initialPostStream.maxPostNo || initialMaxPostNo())
 const postAutoLoadAfter = ref(true)
 const loadingPostWindow = ref(false)
-const loadingPostDirection = ref<'before' | 'after' | 'anchor' | 'tail' | null>(null)
+const loadingPostDirection = ref<'before' | 'after' | 'anchor' | null>(null)
 const postWindowError = ref('')
 const deleteErrorMessage = ref('')
 const errorMessage = ref('')
@@ -69,7 +67,6 @@ const successMessage = ref('')
 const topicHeaderEl = ref<HTMLElement | null>(null)
 const titleEl = ref<HTMLElement | null>(null)
 const postLoadMoreEl = ref<HTMLElement | null>(null)
-const postListEndEl = ref<HTMLElement | null>(null)
 const markdownImageViewer = ref<InstanceType<typeof MarkdownImageViewer> | null>(null)
 const topicRailTopOffset = ref(0)
 const showHeaderTitle = ref(false)
@@ -79,7 +76,7 @@ const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMob
 const composerOpen = ref(false)
 const composerMode = computed(() => editingPostId.value ? 'edit' : 'create')
 const mobilePostRailOpen = ref(false)
-const activePostNo = ref(firstPostNo(page.props.posts) || 1)
+const activePostNo = ref(firstPostNo(initialPosts) || 1)
 const postRailProgressCurrent = ref(0)
 const postRailProgressStart = ref(0)
 const postRailProgressEnd = ref(0)
@@ -94,8 +91,8 @@ const postRailCurrentLabel = computed(() => {
   return activePost ? formatRailDate(activePost.createdAt) : formatRailDate(page.props.topic.createdAt)
 })
 const postRailStartLabel = computed(() => formatRailDate(page.props.topic.createdAt))
-const postRailEndLabel = computed(() => formatRailDate(postTailLoaded.value ? posts.value[posts.value.length - 1]?.createdAt || page.props.topic.updatedAt : page.props.topic.updatedAt))
-const postRailBusy = computed(() => loadingPostWindow.value && (loadingPostDirection.value === 'anchor' || loadingPostDirection.value === 'tail'))
+const postRailEndLabel = computed(() => formatRailDate(postHasAfter.value ? page.props.topic.updatedAt : posts.value[posts.value.length - 1]?.createdAt || page.props.topic.updatedAt))
+const postRailBusy = computed(() => navigationPhase.value !== 'idle' || (loadingPostWindow.value && loadingPostDirection.value === 'anchor'))
 const actionMessageSuccess = computed(() =>
   [
     t('topic.bookmarkAdded'),
@@ -167,12 +164,14 @@ const highlightedPostId = ref<number | null>(null)
 let highlightTimer: number | undefined
 let postBottomLoadFrame = 0
 let activePostScrollFrame = 0
-let pendingPostJumpNo: number | null = null
-let postRailSyncPaused = false
+const navigationPhase = ref<'idle' | 'loading' | 'scrolling'>('idle')
+const navigationTargetPostNo = ref(0)
+const navigationTargetPostId = ref(0)
 let postRailResumeFrame = 0
 let postRailResumeLastScrollY = 0
 let postRailResumeStableFrames = 0
 let postElements: HTMLElement[] = []
+const postNavigationTargetTop = 160
 
 function updateTopicRailTopOffset() {
   if (!topicHeaderEl.value) {
@@ -285,6 +284,7 @@ onBeforeUnmount(() => {
   window.cancelAnimationFrame(postBottomLoadFrame)
   window.cancelAnimationFrame(activePostScrollFrame)
   window.cancelAnimationFrame(postRailResumeFrame)
+  navigationTargetPostId.value = 0
   window.clearTimeout(highlightTimer)
   shellState.headerTitle = ''
   shellState.headerTags = []
@@ -310,7 +310,7 @@ function schedulePostBottomLoadCheck() {
   if (postBottomLoadFrame) return
   postBottomLoadFrame = window.requestAnimationFrame(() => {
     postBottomLoadFrame = 0
-    void maybeLoadRepliesAtPageBottom()
+    void maybeLoadRepliesNearViewportEdge()
   })
 }
 
@@ -320,9 +320,10 @@ function isNearDocumentBottom() {
   return fullHeight - (window.scrollY + window.innerHeight) <= 480
 }
 
-async function maybeLoadRepliesAtPageBottom() {
-  if (!postHasAfter.value || loadingPostWindow.value || postWindowError.value) return
-  if (!isNearDocumentBottom()) return
+async function maybeLoadRepliesNearViewportEdge() {
+  if (loadingPostWindow.value || postWindowError.value) return
+
+  if (!postHasAfter.value || !isNearDocumentBottom()) return
 
   postAutoLoadAfter.value = true
   await loadPostWindow('after')
@@ -370,6 +371,10 @@ function applyMobileHeaderTitle() {
 }
 
 function observePostLoader() {
+  observePostAfterLoader()
+}
+
+function observePostAfterLoader() {
   postLoadObserver?.disconnect()
   if (!postLoadMoreEl.value || !postHasAfter.value || !postAutoLoadAfter.value || !('IntersectionObserver' in window)) return
 
@@ -389,26 +394,46 @@ function collectPostElements() {
 }
 
 function pausePostRailSync() {
-  postRailSyncPaused = true
+  navigationPhase.value = 'scrolling'
   window.cancelAnimationFrame(postRailResumeFrame)
   postRailResumeFrame = 0
   postRailResumeLastScrollY = window.scrollY
   postRailResumeStableFrames = 0
 }
 
+function keepNavigationTargetPinned() {
+  if (!navigationTargetPostId.value) return false
+
+  const element = document.getElementById(`post-${navigationTargetPostId.value}`)
+  if (!element) return false
+
+  const delta = element.getBoundingClientRect().top - postNavigationTargetTop
+  if (Math.abs(delta) < 1) return false
+
+  window.scrollBy({ top: delta, behavior: 'auto' })
+  return true
+}
+
 function resumePostRailSyncWhenSettled() {
-  pausePostRailSync()
+  navigationPhase.value = 'scrolling'
+  window.cancelAnimationFrame(postRailResumeFrame)
+  postRailResumeFrame = 0
+  postRailResumeLastScrollY = window.scrollY
+  postRailResumeStableFrames = 0
   const startedAt = performance.now()
   const settle = () => {
+    const pinned = keepNavigationTargetPinned()
     const currentY = window.scrollY
-    if (Math.abs(currentY - postRailResumeLastScrollY) < 1) {
+    if (!pinned && Math.abs(currentY - postRailResumeLastScrollY) < 1) {
       postRailResumeStableFrames += 1
     } else {
       postRailResumeStableFrames = 0
       postRailResumeLastScrollY = currentY
     }
-    if (postRailResumeStableFrames >= 4 || performance.now() - startedAt > 1600) {
-      postRailSyncPaused = false
+    if (postRailResumeStableFrames >= 8 || performance.now() - startedAt > 2600) {
+      navigationPhase.value = 'idle'
+      navigationTargetPostNo.value = 0
+      navigationTargetPostId.value = 0
       postRailResumeFrame = 0
       syncPostRailProgress()
       return
@@ -419,7 +444,7 @@ function resumePostRailSyncWhenSettled() {
 }
 
 function scheduleActivePostFromScroll() {
-  if (postRailSyncPaused || activePostScrollFrame) return
+  if (navigationPhase.value !== 'idle' || activePostScrollFrame) return
   activePostScrollFrame = window.requestAnimationFrame(() => {
     activePostScrollFrame = 0
     syncPostRailProgress()
@@ -493,29 +518,20 @@ function measurePostViewportProgress() {
 }
 
 function resetPostsFromProps() {
-  posts.value = [...page.props.posts]
-  postWindowMode.value = false
-  postHasBefore.value = false
-  postHasAfter.value = hasMoreInitialReplies()
-  postBeforeCursor.value = firstPostId(page.props.posts)
-  postAfterCursor.value = lastPostId(page.props.posts)
-  postBeforePostNo.value = firstPostNo(page.props.posts)
-  postAfterPostNo.value = lastPostNo(page.props.posts)
-  postMaxNo.value = initialMaxPostNo()
-  postTailLoaded.value = !hasMoreInitialReplies()
+  posts.value = [...initialPosts]
+  postHasBefore.value = initialPostStream.hasBefore
+  postHasAfter.value = initialPostStream.hasAfter
+  postBeforePostNo.value = initialPostStream.beforePostNo || firstPostNo(initialPosts)
+  postAfterPostNo.value = initialPostStream.afterPostNo || lastPostNo(initialPosts)
+  postMaxNo.value = initialPostStream.maxPostNo || initialMaxPostNo()
   postAutoLoadAfter.value = true
-  activePostNo.value = firstPostNo(page.props.posts) || 1
+  navigationPhase.value = 'idle'
+  navigationTargetPostNo.value = 0
+  navigationTargetPostId.value = 0
+  activePostNo.value = firstPostNo(initialPosts) || 1
   syncProgressForPostNo(activePostNo.value)
   postWindowError.value = ''
   editingPostId.value = 0
-}
-
-function firstPostId(items: PostPayload[]) {
-  return items.length ? items[0].id : 0
-}
-
-function lastPostId(items: PostPayload[]) {
-  return items.length ? items[items.length - 1].id : 0
 }
 
 function firstPostNo(items: PostPayload[]) {
@@ -527,7 +543,7 @@ function lastPostNo(items: PostPayload[]) {
 }
 
 function initialMaxPostNo() {
-  return Math.max(page.props.topic.maxPostNo || 0, page.props.topic.replyCount || 0, lastPostNo(page.props.posts))
+  return Math.max(page.props.topic.maxPostNo || 0, page.props.postStream.maxPostNo || 0, lastPostNo(initialPosts))
 }
 
 function clampPostNo(postNo: number) {
@@ -581,10 +597,6 @@ function formatRailDate(value: string) {
   return new Intl.DateTimeFormat(undefined, options).format(date)
 }
 
-function hasMoreInitialReplies() {
-  return page.props.topic.replyCount > page.props.posts.length
-}
-
 function findPostHashId() {
   const match = window.location.hash.match(/^#post-(\d+)$/)
   return match ? Number(match[1]) : 0
@@ -595,14 +607,35 @@ async function syncPostHash() {
   if (!postId) return
 
   if (!posts.value.some((post) => post.id === postId)) {
-    await loadPostWindow('anchor', postId)
+    navigationPhase.value = 'loading'
+    loadingPostWindow.value = true
+    loadingPostDirection.value = 'anchor'
+    postWindowError.value = ''
+    try {
+      const payload = await getPostWindow({
+        topicId: page.props.topic.id,
+        anchorPostId: postId,
+        limit: 20,
+      })
+      applyPostWindowPayload(payload, 'replace')
+      await nextTick()
+      collectPostElements()
+    } catch (error) {
+      postWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
+    } finally {
+      loadingPostWindow.value = false
+      loadingPostDirection.value = null
+      navigationPhase.value = 'idle'
+    }
   }
 
   highlightPost(postId)
   await nextTick()
   const element = document.getElementById(`post-${postId}`)
   if (element) {
+    navigationTargetPostId.value = postId
     scrollPostIntoComfortView(element, 'auto')
+    resumePostRailSyncWhenSettled()
   }
 }
 
@@ -625,31 +658,13 @@ function mergePosts(nextReplies: PostPayload[], mode: 'replace' | 'prepend' | 'a
   posts.value = mode === 'prepend' ? [...filtered, ...posts.value] : [...posts.value, ...filtered]
 }
 
-function applyPostWindowPayload(
-  payload: Awaited<ReturnType<typeof getPostWindow>>,
-  mergeMode: 'replace' | 'prepend' | 'append',
-  forceWindowMode: boolean,
-) {
-  postWindowMode.value = forceWindowMode || postWindowMode.value
+function applyPostWindowPayload(payload: Awaited<ReturnType<typeof getPostWindow>>, mergeMode: 'replace' | 'prepend' | 'append') {
   mergePosts(payload.posts, mergeMode)
-  postHasBefore.value = postWindowMode.value ? payload.hasBefore : false
+  postHasBefore.value = payload.hasBefore
   postHasAfter.value = payload.hasAfter
-  postBeforeCursor.value = payload.beforeCursor ?? firstPostId(posts.value)
-  postAfterCursor.value = payload.afterCursor ?? lastPostId(posts.value)
   postBeforePostNo.value = payload.beforePostNo ?? firstPostNo(posts.value)
   postAfterPostNo.value = payload.afterPostNo ?? lastPostNo(posts.value)
   postMaxNo.value = Math.max(postMaxNo.value, payload.maxPostNo || 0)
-  if (mergeMode === 'replace') {
-    postTailLoaded.value = payloadEndsAtTail(payload)
-  } else if (mergeMode === 'append' && payloadEndsAtTail(payload)) {
-    postTailLoaded.value = true
-  }
-}
-
-function payloadEndsAtTail(payload: Awaited<ReturnType<typeof getPostWindow>>) {
-  const afterPostNo = payload.afterPostNo || lastPostNo(payload.posts)
-  const maxPostNo = Math.max(postMaxNo.value, payload.maxPostNo || 0)
-  return payload.posts.length > 0 && !payload.hasAfter && afterPostNo >= maxPostNo
 }
 
 function disablePostAutoLoadAfter() {
@@ -657,93 +672,92 @@ function disablePostAutoLoadAfter() {
   postLoadObserver?.disconnect()
 }
 
-async function loadPostWindow(direction: 'before' | 'after' | 'anchor' | 'tail', anchorValue = 0) {
+function firstVisiblePostElement() {
+  for (const element of postElements) {
+    const rect = element.getBoundingClientRect()
+    if (rect.bottom > 96) return element
+  }
+  return postElements[0] || null
+}
+
+async function keepScrollPositionWhilePrepending<T>(operation: () => Promise<T>) {
+  const anchor = firstVisiblePostElement()
+  const beforeTop = anchor?.getBoundingClientRect().top ?? 0
+  const result = await operation()
+  await nextTick()
+  collectPostElements()
+  if (anchor) {
+    const afterTop = anchor.getBoundingClientRect().top
+    window.scrollBy({ top: afterTop - beforeTop, behavior: 'auto' })
+  }
+  return result
+}
+
+async function loadPostWindow(direction: 'before' | 'after') {
   if (loadingPostWindow.value) return
   if (direction === 'after' && (!postHasAfter.value || !postAutoLoadAfter.value)) return
-  if (direction === 'tail' && postTailLoaded.value) return
+  if (direction === 'before' && !postHasBefore.value) return
 
-  if (direction !== 'after') {
-    disablePostAutoLoadAfter()
-  }
-
-  const wasWindowMode = postWindowMode.value
   loadingPostWindow.value = true
   loadingPostDirection.value = direction
   postWindowError.value = ''
   try {
-    const payload = await getPostWindow({
-      topicId: page.props.topic.id,
-      anchorPostId: direction === 'anchor' ? anchorValue : undefined,
-      beforePostNo: direction === 'before' ? postBeforePostNo.value : undefined,
-      afterPostNo: direction === 'after' ? postAfterPostNo.value : undefined,
-      before: direction === 'before' && !postBeforePostNo.value ? postBeforeCursor.value : undefined,
-      after: direction === 'after' && !postAfterPostNo.value ? postAfterCursor.value : undefined,
-      tail: direction === 'tail',
-      limit: 20,
-    })
-
-    applyPostWindowPayload(
-      payload,
-      direction === 'before' ? 'prepend' : direction === 'after' ? 'append' : 'replace',
-      direction === 'anchor' || direction === 'tail' || direction === 'before' || wasWindowMode,
-    )
-    if (direction === 'after' && !payload.hasAfter) {
-      postTailLoaded.value = true
-      disablePostAutoLoadAfter()
-    }
-    if (direction === 'tail') {
-      postTailLoaded.value = true
-      postHasAfter.value = false
-      disablePostAutoLoadAfter()
-    }
     if (direction === 'before') {
-      activePostNo.value = firstPostNo(payload.posts) || firstPostNo(posts.value)
-      syncProgressForPostNo(activePostNo.value || 1)
-    } else if (direction === 'tail') {
-      activePostNo.value = lastPostNo(payload.posts) || lastPostNo(posts.value) || postMaxRange.value
-      syncProgressForPostNo(activePostNo.value || 1)
+      await keepScrollPositionWhilePrepending(async () => {
+        const payload = await getPostWindow({
+          topicId: page.props.topic.id,
+          beforePostNo: postBeforePostNo.value,
+          limit: 20,
+        })
+        applyPostWindowPayload(payload, 'prepend')
+        return payload
+      })
+    } else {
+      const payload = await getPostWindow({
+        topicId: page.props.topic.id,
+        afterPostNo: postAfterPostNo.value,
+        limit: 20,
+      })
+      applyPostWindowPayload(payload, 'append')
+      await nextTick()
+      collectPostElements()
+      if (!payload.hasAfter) {
+        disablePostAutoLoadAfter()
+      }
     }
-    await nextTick()
-    collectPostElements()
     if (postAutoLoadAfter.value) {
       observePostLoader()
     }
-    postRailSyncPaused = false
     scheduleActivePostFromScroll()
   } catch (error) {
     postWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
   } finally {
     loadingPostWindow.value = false
     loadingPostDirection.value = null
-    flushPendingPostJump()
   }
 }
 
 async function jumpToPostNo(postNo: number) {
   const target = clampPostNo(postNo)
-  if (target >= postMaxRange.value) {
-    await jumpToLatestPost()
-    return
-  }
-
   if (loadingPostWindow.value) {
-    pendingPostJumpNo = target
     activePostNo.value = target
     syncProgressForPostNo(target)
     return
   }
 
   disablePostAutoLoadAfter()
+  navigationPhase.value = 'loading'
+  navigationTargetPostNo.value = target
+  navigationTargetPostId.value = 0
   activePostNo.value = target
   syncProgressForPostNo(target)
-  pausePostRailSync()
   const loaded = posts.value.find((post) => post.postNo === target)
   if (loaded) {
     activePostNo.value = loaded.postNo
     syncProgressForPostNo(loaded.postNo)
-    await nextTick()
-    const element = document.getElementById(`post-${loaded.id}`)
+    const element = await findPostElementAfterLayout(loaded.id)
     if (element) {
+      navigationTargetPostId.value = loaded.id
       scrollPostIntoComfortView(element)
     }
     resumePostRailSyncWhenSettled()
@@ -759,88 +773,37 @@ async function jumpToPostNo(postNo: number) {
       anchorPostNo: target,
       limit: 20,
     })
-    applyPostWindowPayload(payload, 'replace', true)
+    applyPostWindowPayload(payload, 'replace')
     await nextTick()
+    collectPostElements()
     const closest = findClosestLoadedPost(target)
     if (closest) {
       activePostNo.value = closest.postNo
       syncProgressForPostNo(closest.postNo)
-      collectPostElements()
-      const element = document.getElementById(`post-${closest.id}`)
+      const element = await findPostElementAfterLayout(closest.id)
       if (element) {
-        scrollPostIntoComfortView(element)
+        navigationTargetPostId.value = closest.id
+        scrollPostIntoComfortView(element, 'auto')
       }
       resumePostRailSyncWhenSettled()
+    } else {
+      navigationPhase.value = 'idle'
+      navigationTargetPostNo.value = 0
+      navigationTargetPostId.value = 0
     }
   } catch (error) {
     postWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
+    navigationPhase.value = 'idle'
+    navigationTargetPostNo.value = 0
+    navigationTargetPostId.value = 0
   } finally {
     loadingPostWindow.value = false
     loadingPostDirection.value = null
-    flushPendingPostJump()
   }
 }
 
 async function jumpToLatestPost() {
-  if (!postMaxRange.value) return
-  if (loadingPostWindow.value) {
-    pendingPostJumpNo = postMaxRange.value
-    activePostNo.value = postMaxRange.value
-    syncProgressForPostNo(postMaxRange.value)
-    return
-  }
-  disablePostAutoLoadAfter()
-  activePostNo.value = postMaxRange.value
-  syncProgressForPostNo(postMaxRange.value)
-  pausePostRailSync()
-  if (postTailLoaded.value) {
-    const latest = posts.value[posts.value.length - 1]
-    if (latest) {
-      activePostNo.value = latest.postNo
-      syncProgressForPostNo(latest.postNo)
-      await nextTick()
-      scrollPostListEndIntoView()
-      resumePostRailSyncWhenSettled()
-    }
-    return
-  }
-  const loadedLatest = posts.value.find((post) => post.postNo === postMaxRange.value)
-  if (loadedLatest) {
-    activePostNo.value = loadedLatest.postNo
-    syncProgressForPostNo(loadedLatest.postNo)
-    await nextTick()
-    scrollPostListEndIntoView()
-    resumePostRailSyncWhenSettled()
-    return
-  }
-  await loadPostWindow('tail')
-  await nextTick()
-  const latest = posts.value[posts.value.length - 1]
-  if (latest) {
-    activePostNo.value = latest.postNo
-    syncProgressForPostNo(latest.postNo)
-    scrollPostListEndIntoView()
-    resumePostRailSyncWhenSettled()
-  }
-}
-
-function scrollPostListEndIntoView() {
-  if (postListEndEl.value) {
-    postListEndEl.value.scrollIntoView({ block: 'end', behavior: 'smooth' })
-    return
-  }
-
-  const latest = posts.value[posts.value.length - 1]
-  if (latest) {
-    document.getElementById(`post-${latest.id}`)?.scrollIntoView({ block: 'end', behavior: 'smooth' })
-  }
-}
-
-function flushPendingPostJump() {
-  if (!pendingPostJumpNo || loadingPostWindow.value) return
-  const postNo = pendingPostJumpNo
-  pendingPostJumpNo = null
-  void jumpToPostNo(postNo)
+  await jumpToPostNo(postMaxRange.value)
 }
 
 function jumpToTopicBody() {
@@ -896,7 +859,7 @@ function isElementMostlyVisible(element: HTMLElement) {
 }
 
 function scrollPostIntoComfortView(element: HTMLElement, behavior: ScrollBehavior = 'smooth') {
-  const targetTop = element.getBoundingClientRect().top + window.scrollY - 160
+  const targetTop = element.getBoundingClientRect().top + window.scrollY - postNavigationTargetTop
   window.scrollTo({
     top: Math.max(0, targetTop),
     behavior,
@@ -910,38 +873,53 @@ function waitForAnimationFrame() {
 }
 
 async function findPostElementAfterLayout(postId: number) {
-  for (let attempts = 0; attempts < 4; attempts += 1) {
+  let lastTop: number | null = null
+  let stableFrames = 0
+  for (let attempts = 0; attempts < 10; attempts += 1) {
     await nextTick()
     await waitForAnimationFrame()
     const element = document.getElementById(`post-${postId}`)
-    if (element) return element
+    if (!element) continue
+
+    const top = element.getBoundingClientRect().top
+    if (lastTop !== null && Math.abs(top - lastTop) < 1) {
+      stableFrames += 1
+      if (stableFrames >= 2) return element
+    } else {
+      stableFrames = 0
+      lastTop = top
+    }
   }
-  return null
+  return document.getElementById(`post-${postId}`)
 }
 
 async function revealCreatedPost(postId: number) {
   if (!postId) return
 
-  pausePostRailSync()
+  navigationPhase.value = 'loading'
   const payload = await getPostWindow({
     topicId: page.props.topic.id,
     anchorPostId: postId,
     limit: 20,
   })
-  applyPostWindowPayload(payload, 'replace', true)
+  applyPostWindowPayload(payload, 'replace')
   const createdPost = payload.posts.find((post) => post.id === postId)
   if (createdPost?.postNo) {
+    navigationTargetPostNo.value = createdPost.postNo
     activePostNo.value = createdPost.postNo
     syncProgressForPostNo(createdPost.postNo)
   }
   highlightPost(postId)
   const element = await findPostElementAfterLayout(postId)
   if (element && !isElementMostlyVisible(element)) {
+    navigationTargetPostId.value = postId
     scrollPostIntoComfortView(element)
     resumePostRailSyncWhenSettled()
     return
   }
-  postRailSyncPaused = false
+  navigationPhase.value = 'idle'
+  navigationTargetPostNo.value = 0
+  navigationTargetPostId.value = 0
   collectPostElements()
   scheduleActivePostFromScroll()
 }
@@ -1032,6 +1010,18 @@ function handlePostImageInserted(count: number) {
 
 function handlePostImageError(message: string) {
   errorMessage.value = message
+}
+
+function isFirstPost(post: PostPayload) {
+  return post.postNo === 1
+}
+
+function canEditPost(post: PostPayload) {
+  return post.isOwnPost && !post.isHidden
+}
+
+function canDeleteRenderedPost(post: PostPayload) {
+  return post.isOwnPost && !post.isHidden && !isFirstPost(post)
 }
 
 function startEditPost(post: PostPayload) {
@@ -1344,44 +1334,155 @@ async function removePost(postId: number) {
             <span class="h-2 w-2 rounded-[3px]" :style="{ backgroundColor: category.color }" />
             {{ category.name }}
           </a>
+          <span class="inline-flex items-center gap-1.5">
+            <MessageSquare class="h-3.5 w-3.5" />
+            {{ formatNumber(page.props.topic.replyCount) }}
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <Eye class="h-3.5 w-3.5" />
+            {{ formatNumber(page.props.topic.viewCount) }}
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <Heart class="h-3.5 w-3.5" />
+            {{ formatNumber(likeCount) }}
+          </span>
         </div>
       </header>
 
       <section class="gf-card xl:w-[calc(100%+292px)]">
         <div class="min-w-0 xl:grid xl:grid-cols-[minmax(0,1fr)_256px]">
           <div class="min-w-0">
-            <article data-post-no="1" class="grid grid-cols-[44px_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5">
-              <a
-                :href="`/u/${page.props.topic.author.id}`"
-                class="sticky top-19 self-start pt-1"
-                @click="showUserCard(page.props.topic.author, $event)"
+            <span v-if="posts.length" id="posts" class="block scroll-mt-20" aria-hidden="true" />
+
+            <div v-if="postHasBefore" class="relative px-4 py-3 text-center">
+              <button
+                v-if="postHasBefore"
+                type="button"
+                class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-semibold text-primary transition-colors hover:bg-info/10 hover:text-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                :disabled="loadingPostWindow"
+                @click="loadPostWindow('before')"
               >
-                <UserAvatar :src="page.props.topic.author.avatarUrl" :alt="page.props.topic.author.username" :badge="page.props.topic.author.wornBadge" class="h-11 w-11 rounded-full ring-1 ring-line" img-class="rounded-full" />
+                <Loader2 v-if="loadingPostDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
+                <ChevronsUp v-else class="h-3.5 w-3.5" />
+                {{ t('topic.loadEarlierReplies') }}
+              </button>
+            </div>
+            <article
+              v-for="(post, index) in posts"
+              :id="`post-${post.id}`"
+              :key="post.id"
+              :data-post-no="post.postNo"
+              class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 px-3 py-4 transition-[background-color] hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
+              :class="{
+                'border-t border-line xl:border-t-transparent': index > 0,
+                'bg-info/10': highlightedPostId === post.id,
+                '[border-top-left-radius:calc(var(--gf-radius-box)-var(--gf-border))] [border-top-right-radius:calc(var(--gf-radius-box)-var(--gf-border))]': index === 0 && !postHasBefore,
+              }"
+            >
+              <div v-if="index > 0" class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
+              <a
+                :href="`/u/${post.author.id}`"
+                class="sticky top-19 self-start pt-1"
+                @click="showUserCard(post.author, $event)"
+              >
+                <UserAvatar :src="post.author.avatarUrl" :alt="post.author.username" :badge="post.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
               </a>
               <div class="min-w-0">
-                <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <a :href="`/u/${page.props.topic.author.id}`" class="font-semibold text-base-content hover:text-primary">{{ page.props.topic.author.username }}</a>
-                    <div class="text-xs font-medium text-base-content/75">{{ t('topic.body') }}</div>
-                  </div>
-                  <div class="flex flex-wrap items-center justify-end gap-3 text-xs font-medium text-base-content/75">
-                    <div class="flex items-center gap-3">
-                      <span class="inline-flex items-center gap-1"><MessageSquare class="h-3.5 w-3.5" />{{ formatNumber(page.props.topic.replyCount) }}</span>
-                      <span class="inline-flex items-center gap-1"><Eye class="h-3.5 w-3.5" />{{ formatNumber(page.props.topic.viewCount) }}</span>
-                      <span class="inline-flex items-center gap-1"><Heart class="h-3.5 w-3.5" />{{ formatNumber(likeCount) }}</span>
+                <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="flex min-w-0 items-center gap-2">
+                      <a :href="`/u/${post.author.id}`" class="min-w-0 truncate font-semibold text-base-content hover:text-primary">{{ post.author.username }}</a>
+                      <span v-if="isFirstPost(post)" class="rounded bg-base-200 px-1.5 py-0.5 text-xs font-semibold text-base-content/55">{{ t('topic.originalPost') }}</span>
+                      <span v-if="post.postNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 sm:inline">#{{ formatNumber(post.postNo) }}</span>
                     </div>
-                    <a
-                      v-if="page.props.permissions.isOwnTopic"
-                      :href="`/publish?id=${page.props.topic.id}`"
-                      class="gf-button gf-button-secondary h-7 px-2 text-xs hover:border-primary/20 hover:bg-info/10 hover:text-primary"
+                    <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55 sm:hidden">
+                      <span v-if="post.postNo" class="font-semibold tabular-nums text-base-content/55">#{{ formatNumber(post.postNo) }}</span>
+                      <time class="truncate">{{ formatDateTime(post.createdAt) }}</time>
+                    </div>
+                  </div>
+                  <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
+                    <button
+                      v-if="canEditPost(post)"
+                      type="button"
+                      class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      :disabled="savingEditPostId === post.id || deletingPostId === post.id"
+                      :title="t('common.edit')"
+                      @click="startEditPost(post)"
                     >
                       <PencilLine class="h-3.5 w-3.5" />
-                      {{ t('common.edit') }}
-                    </a>
+                      <span class="sr-only">{{ t('common.edit') }}</span>
+                    </button>
+                    <button
+                      v-if="canDeleteRenderedPost(post)"
+                      type="button"
+                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      :disabled="deletingPostId === post.id"
+                      :title="deletingPostId === post.id ? t('topic.deleting') : t('topic.delete')"
+                      @click="requestDeletePost(post)"
+                    >
+                      <Trash2 class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ deletingPostId === post.id ? t('topic.deleting') : t('topic.delete') }}</span>
+                    </button>
+                    <button
+                      v-if="page.props.permissions.canPost && !post.isHidden"
+                      type="button"
+                      class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                      :title="t('topic.reply')"
+                      @click="replyTo(post)"
+                    >
+                      <CornerDownLeft class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ t('topic.reply') }}</span>
+                    </button>
+                    <button
+                      v-if="!isFirstPost(post) && !post.isOwnPost && !post.isHidden"
+                      type="button"
+                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
+                      :title="t('topic.report')"
+                      @click="requestPostReport(post)"
+                    >
+                      <Flag class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ t('topic.report') }}</span>
+                    </button>
+                    <button
+                      v-if="!isFirstPost(post) && post.canModerate && post.processStatus === 0"
+                      type="button"
+                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:opacity-50"
+                      :disabled="postModerationBusy(post.id)"
+                      :title="t('topic.moderationBan')"
+                      @click="moderatePost(post, 'ban')"
+                    >
+                      <Ban class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ t('topic.moderationBan') }}</span>
+                    </button>
+                    <button
+                      v-else-if="!isFirstPost(post) && post.canModerate && post.processStatus === 1"
+                      type="button"
+                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
+                      :disabled="postModerationBusy(post.id)"
+                      :title="t('topic.moderationUnban')"
+                      @click="moderatePost(post, 'unban')"
+                    >
+                      <RotateCcw class="h-3.5 w-3.5" />
+                      <span class="sr-only">{{ t('topic.moderationUnban') }}</span>
+                    </button>
+                    <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(post.createdAt) }}</time>
                   </div>
                 </div>
-                <div class="gf-prose gf-prose-post" v-html="page.props.topic.html" />
-                <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-4">
+                <p v-if="post.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-base-200 px-2 py-1 text-sm text-base-content/55">
+                  <span class="shrink-0">{{ t('topic.reply') }}</span>
+                  <a :href="`/u/${post.replyToUserId}`" class="min-w-0 truncate font-medium text-base-content/75 hover:text-primary">@{{ post.replyToUsername }}</a>
+                </p>
+                <div v-if="post.isHidden && !post.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
+                  {{ t('topic.hiddenReplyPlaceholder') }}
+                </div>
+                <div v-else class="gf-prose gf-prose-post" v-html="post.renderedContent" />
+                <div v-if="post.isHidden && post.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
+                  {{ t('topic.hiddenReplyBadge') }}
+                </div>
+                <div v-if="post.updatedAt && post.updatedAt !== post.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
+                  {{ t('topic.editedAt', { time: formatDateTime(post.updatedAt) }) }}
+                </div>
+                <div v-if="isFirstPost(post)" class="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-3">
                   <button
                     type="button"
                     class="gf-button gf-button-sm px-2.5"
@@ -1446,136 +1547,6 @@ async function removePost(postId: number) {
               </div>
             </article>
 
-            <span v-if="posts.length" id="posts" class="block scroll-mt-20" aria-hidden="true" />
-
-            <div v-if="postHasBefore" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
-              <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
-              <button
-                v-if="postHasBefore"
-                type="button"
-                class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-semibold text-primary transition hover:bg-info/10 hover:text-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                :disabled="loadingPostWindow"
-                @click="loadPostWindow('before')"
-              >
-                <Loader2 v-if="loadingPostDirection === 'before'" class="h-3.5 w-3.5 animate-spin" />
-                <ChevronsUp v-else class="h-3.5 w-3.5" />
-                {{ t('topic.loadEarlierReplies') }}
-              </button>
-            </div>
-
-            <article
-              v-for="post in posts"
-              :id="`post-${post.id}`"
-              :key="post.id"
-              :data-post-no="post.postNo"
-              class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 border-t border-line px-3 py-4 transition hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5 xl:border-t-transparent"
-              :class="{ 'bg-info/10 ring-1 ring-inset ring-primary/20': highlightedPostId === post.id }"
-            >
-              <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
-              <a
-                :href="`/u/${post.author.id}`"
-                class="sticky top-19 self-start pt-1"
-                @click="showUserCard(post.author, $event)"
-              >
-                <UserAvatar :src="post.author.avatarUrl" :alt="post.author.username" :badge="post.author.wornBadge" class="h-9 w-9 rounded-full ring-1 ring-line sm:h-10 sm:w-10" img-class="rounded-full" />
-              </a>
-              <div class="min-w-0">
-                <div class="mb-1.5 flex min-w-0 items-start justify-between gap-2">
-                  <div class="min-w-0">
-                    <div class="flex min-w-0 items-center gap-2">
-                      <a :href="`/u/${post.author.id}`" class="min-w-0 truncate font-semibold text-base-content hover:text-primary">{{ post.author.username }}</a>
-                      <span v-if="post.postNo" class="hidden shrink-0 text-xs font-semibold tabular-nums text-base-content/55 sm:inline">#{{ formatNumber(post.postNo) }}</span>
-                    </div>
-                    <div class="mt-0.5 flex items-center gap-2 text-xs text-base-content/55 sm:hidden">
-                      <span v-if="post.postNo" class="font-semibold tabular-nums text-base-content/55">#{{ formatNumber(post.postNo) }}</span>
-                      <time class="truncate">{{ formatDateTime(post.createdAt) }}</time>
-                    </div>
-                  </div>
-                  <div class="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
-                    <button
-                      v-if="post.isOwnPost && !post.isHidden"
-                      type="button"
-                      class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      :disabled="savingEditPostId === post.id || deletingPostId === post.id"
-                      :title="t('common.edit')"
-                      @click="startEditPost(post)"
-                    >
-                      <PencilLine class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('common.edit') }}</span>
-                    </button>
-                    <button
-                      v-if="post.isOwnPost && !post.isHidden"
-                      type="button"
-                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      :disabled="deletingPostId === post.id"
-                      :title="deletingPostId === post.id ? t('topic.deleting') : t('topic.delete')"
-                      @click="requestDeletePost(post)"
-                    >
-                      <Trash2 class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ deletingPostId === post.id ? t('topic.deleting') : t('topic.delete') }}</span>
-                    </button>
-                    <button
-                      v-if="page.props.permissions.canPost && !post.isHidden"
-                      type="button"
-                      class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-icon-muted transition hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                      :title="t('topic.reply')"
-                      @click="replyTo(post)"
-                    >
-                      <CornerDownLeft class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('topic.reply') }}</span>
-                    </button>
-                    <button
-                      v-if="!post.isOwnPost && !post.isHidden"
-                      type="button"
-                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-warning/10 hover:text-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2"
-                      :title="t('topic.report')"
-                      @click="requestPostReport(post)"
-                    >
-                      <Flag class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('topic.report') }}</span>
-                    </button>
-                    <button
-                      v-if="post.canModerate && post.processStatus === 0"
-                      type="button"
-                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-error/10 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 disabled:opacity-50"
-                      :disabled="postModerationBusy(post.id)"
-                      :title="t('topic.moderationBan')"
-                      @click="moderatePost(post, 'ban')"
-                    >
-                      <Ban class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('topic.moderationBan') }}</span>
-                    </button>
-                    <button
-                      v-else-if="post.canModerate && post.processStatus === 1"
-                      type="button"
-                      class="gf-icon-button h-8 w-8 shrink-0 hover:bg-info/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
-                      :disabled="postModerationBusy(post.id)"
-                      :title="t('topic.moderationUnban')"
-                      @click="moderatePost(post, 'unban')"
-                    >
-                      <RotateCcw class="h-3.5 w-3.5" />
-                      <span class="sr-only">{{ t('topic.moderationUnban') }}</span>
-                    </button>
-                    <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(post.createdAt) }}</time>
-                  </div>
-                </div>
-                <p v-if="post.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-base-200 px-2 py-1 text-sm text-base-content/55">
-                  <span class="shrink-0">{{ t('topic.reply') }}</span>
-                  <a :href="`/u/${post.replyToUserId}`" class="min-w-0 truncate font-medium text-base-content/75 hover:text-primary">@{{ post.replyToUsername }}</a>
-                </p>
-                <div v-if="post.isHidden && !post.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
-                  {{ t('topic.hiddenReplyPlaceholder') }}
-                </div>
-                <div v-else class="gf-prose gf-prose-post" v-html="post.renderedContent" />
-                <div v-if="post.isHidden && post.canModerate" class="mt-2 inline-flex rounded bg-base-200 px-2 py-1 text-xs font-semibold text-base-content/45">
-                  {{ t('topic.hiddenReplyBadge') }}
-                </div>
-                <div v-if="post.updatedAt && post.updatedAt !== post.createdAt" class="mt-2 text-xs font-medium text-base-content/55">
-                  {{ t('topic.editedAt', { time: formatDateTime(post.updatedAt) }) }}
-                </div>
-              </div>
-            </article>
-
             <div v-if="postHasAfter || loadingPostDirection === 'after' || postWindowError || (!postHasAfter && posts.length)" ref="postLoadMoreEl" class="relative border-t border-line px-4 py-3 text-center xl:border-t-transparent">
               <div class="pointer-events-none absolute left-5 right-5 top-0 hidden border-t border-line xl:block" aria-hidden="true" />
               <button
@@ -1604,7 +1575,7 @@ async function removePost(postId: number) {
               </button>
               <p v-else-if="!postHasAfter && posts.length" class="text-xs font-medium text-base-content/55">{{ t('topic.allRepliesShown') }}</p>
             </div>
-            <span ref="postListEndEl" class="block h-px scroll-mb-28" aria-hidden="true" />
+            <span class="block h-px scroll-mb-28" aria-hidden="true" />
           </div>
 
           <aside class="hidden min-w-0 xl:block">

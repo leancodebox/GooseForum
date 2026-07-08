@@ -283,6 +283,7 @@ export default {
   },
   topic: {
     body: 'Corpo',
+    originalPost: 'Post originale',
     like: 'Mi piace',
     bookmark: 'Salva',
     bookmarked: 'Salvato',

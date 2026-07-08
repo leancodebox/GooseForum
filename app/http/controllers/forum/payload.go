@@ -308,8 +308,6 @@ type PostPayload struct {
 type PostWindowPayload struct {
 	Posts        []PostPayload `json:"posts"`
 	AnchorPostID uint64        `json:"anchorPostId,omitempty"`
-	BeforeCursor uint64        `json:"beforeCursor,omitempty"`
-	AfterCursor  uint64        `json:"afterCursor,omitempty"`
 	BeforePostNo uint64        `json:"beforePostNo,omitempty"`
 	AfterPostNo  uint64        `json:"afterPostNo,omitempty"`
 	HasBefore    bool          `json:"hasBefore"`
@@ -961,21 +959,15 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 
 func buildPostWindowPayloadFromEntities(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool, hasBefore bool, hasAfter bool, total int64, maxPostNo uint64, anchorPostID uint64) PostWindowPayload {
 	payloadPosts := buildPostPayloads(postEntities, userMap, currentUserID, canModerate)
-	var beforeCursor uint64
-	var afterCursor uint64
 	var beforePostNo uint64
 	var afterPostNo uint64
 	if len(postEntities) > 0 {
-		beforeCursor = postEntities[0].Id
-		afterCursor = postEntities[len(postEntities)-1].Id
 		beforePostNo = postEntities[0].PostNo
 		afterPostNo = postEntities[len(postEntities)-1].PostNo
 	}
 	return PostWindowPayload{
 		Posts:        payloadPosts,
 		AnchorPostID: anchorPostID,
-		BeforeCursor: beforeCursor,
-		AfterCursor:  afterCursor,
 		BeforePostNo: beforePostNo,
 		AfterPostNo:  afterPostNo,
 		HasBefore:    hasBefore,

@@ -191,7 +191,7 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	}
 }
 
-func TestPostWindowTailIncludesFirstPostWhenWindowCoversWholeStream(t *testing.T) {
+func TestPostWindowDefaultLoadsFromFirstPost(t *testing.T) {
 	preferences.Set("db.default.connection", "sqlite")
 	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
@@ -231,18 +231,17 @@ func TestPostWindowTailIncludesFirstPostWhenWindowCoversWholeStream(t *testing.T
 	res := PostWindow(component.BetterRequest[PostWindowReq]{
 		Params: PostWindowReq{
 			TopicID: topicID,
-			Tail:    true,
-			Limit:   50,
+			Limit:   1,
 		},
 	})
 	payload, ok := res.Data.Result.(PostWindowPayload)
 	if !ok {
 		t.Fatalf("result type = %T, want PostWindowPayload", res.Data.Result)
 	}
-	if len(payload.Posts) != 2 || payload.Posts[0].ID != firstPostID || payload.Posts[0].PostNo != 1 || payload.Posts[1].ID != replyPostID || payload.Posts[1].PostNo != 2 {
-		t.Fatalf("posts = %#v, want first post and reply post", payload.Posts)
+	if len(payload.Posts) != 1 || payload.Posts[0].ID != firstPostID || payload.Posts[0].PostNo != 1 {
+		t.Fatalf("posts = %#v, want default first post window", payload.Posts)
 	}
-	if payload.BeforeCursor != firstPostID || payload.AfterCursor != replyPostID || payload.BeforePostNo != 1 || payload.AfterPostNo != 2 {
+	if payload.BeforePostNo != 1 || payload.AfterPostNo != 1 {
 		t.Fatalf("cursor payload = %#v", payload)
 	}
 	if payload.Total != 2 || payload.MaxPostNo != 2 {

@@ -283,6 +283,7 @@ export default {
   },
   topic: {
     body: '本文',
+    originalPost: '本文',
     like: 'いいね',
     bookmark: 'ブックマーク',
     bookmarked: 'ブックマーク済み',

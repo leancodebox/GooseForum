@@ -64,12 +64,9 @@ type PostWindowReq struct {
 	TopicID      uint64 `form:"topicId"`
 	AnchorPostID uint64 `form:"anchorPostId"`
 	AnchorPostNo uint64 `form:"anchorPostNo"`
-	Before       uint64 `form:"before"`
-	After        uint64 `form:"after"`
 	BeforePostNo uint64 `form:"beforePostNo"`
 	AfterPostNo  uint64 `form:"afterPostNo"`
 	Limit        int    `form:"limit"`
-	Tail         bool   `form:"tail"`
 }
 
 func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
@@ -119,12 +116,6 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		postEntities = append(postEntities, beforePosts...)
 		postEntities = append(postEntities, &anchor)
 		postEntities = append(postEntities, afterPosts...)
-	case req.Params.Tail:
-		postEntities = posts.GetByTopicPostNoDesc(topicID, limit+1)
-		hasBefore = len(postEntities) > limit
-		if hasBefore {
-			postEntities = postEntities[1:]
-		}
 	case req.Params.AnchorPostID > 0:
 		anchor := posts.Get(req.Params.AnchorPostID)
 		if anchor.Id == 0 || anchor.TopicId != topicID || anchor.PostNo < 1 {
@@ -154,20 +145,6 @@ func PostWindow(req component.BetterRequest[PostWindowReq]) component.Response {
 		hasAfter = true
 	case req.Params.AfterPostNo > 0:
 		postEntities = posts.GetByTopicPostNoAfter(topicID, req.Params.AfterPostNo, limit+1)
-		hasAfter = len(postEntities) > limit
-		if hasAfter {
-			postEntities = postEntities[:limit]
-		}
-		hasBefore = true
-	case req.Params.Before > 0:
-		postEntities = posts.GetByTopicIdBefore(topicID, req.Params.Before, limit+1)
-		hasBefore = len(postEntities) > limit
-		if hasBefore {
-			postEntities = postEntities[1:]
-		}
-		hasAfter = true
-	case req.Params.After > 0:
-		postEntities = posts.GetByTopicIdAfter(topicID, req.Params.After, limit+1)
 		hasAfter = len(postEntities) > limit
 		if hasAfter {
 			postEntities = postEntities[:limit]

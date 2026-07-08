@@ -110,12 +110,9 @@ export interface PostWindowInput {
   topicId: number
   anchorPostId?: number
   anchorPostNo?: number
-  before?: number
-  after?: number
   beforePostNo?: number
   afterPostNo?: number
   limit?: number
-  tail?: boolean
 }
 
 export async function getPostWindow(input: PostWindowInput): Promise<PostWindowPayload> {
@@ -124,12 +121,9 @@ export async function getPostWindow(input: PostWindowInput): Promise<PostWindowP
   })
   if (input.anchorPostId) params.set('anchorPostId', String(input.anchorPostId))
   if (input.anchorPostNo) params.set('anchorPostNo', String(input.anchorPostNo))
-  if (input.before) params.set('before', String(input.before))
-  if (input.after) params.set('after', String(input.after))
   if (input.beforePostNo) params.set('beforePostNo', String(input.beforePostNo))
   if (input.afterPostNo) params.set('afterPostNo', String(input.afterPostNo))
   if (input.limit) params.set('limit', String(input.limit))
-  if (input.tail) params.set('tail', 'true')
 
   const response = await fetch(`/api/forum/posts/window?${params.toString()}`, {
     headers: {
