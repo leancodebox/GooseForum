@@ -37,7 +37,7 @@ func TestShouldNotifyTopicAuthor(t *testing.T) {
 		want  bool
 	}{
 		{
-			name: "root comment notifies article author",
+			name: "root comment notifies topic author",
 			event: &CommentCreatedEvent{
 				UserId:        1,
 				TopicAuthorId: 2,
@@ -45,7 +45,7 @@ func TestShouldNotifyTopicAuthor(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "article author own comment does not notify",
+			name: "topic author own comment does not notify",
 			event: &CommentCreatedEvent{
 				UserId:        2,
 				TopicAuthorId: 2,
@@ -53,7 +53,7 @@ func TestShouldNotifyTopicAuthor(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "reply to another user still notifies article author",
+			name: "reply to another user still notifies topic author",
 			event: &CommentCreatedEvent{
 				UserId:              1,
 				TopicAuthorId:       2,
@@ -63,7 +63,7 @@ func TestShouldNotifyTopicAuthor(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "reply to article author only sends reply notification",
+			name: "reply to topic author only sends reply notification",
 			event: &CommentCreatedEvent{
 				UserId:              1,
 				TopicAuthorId:       2,
@@ -73,7 +73,7 @@ func TestShouldNotifyTopicAuthor(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "missing article author does not notify",
+			name: "missing topic author does not notify",
 			event: &CommentCreatedEvent{
 				UserId: 1,
 			},

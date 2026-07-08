@@ -41,6 +41,9 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 	); err != nil {
 		t.Fatalf("migrate new tables: %v", err)
 	}
+	if err := conn.Exec("ALTER TABLE reports ADD COLUMN article_id integer not null default 0").Error; err != nil {
+		t.Fatalf("add legacy report article column: %v", err)
+	}
 
 	now := time.Date(2026, 7, 7, 12, 0, 0, 0, time.UTC)
 	conn.Table("articles").Create(map[string]any{
@@ -124,7 +127,15 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 		"created_at": now,
 		"updated_at": now,
 	})
-	conn.Create(&reports.Entity{TargetType: legacyReportTargetReply, TargetId: 99, ArticleId: 10, ReporterId: 1, Status: reports.StatusOpen})
+	conn.Table("reports").Create(map[string]any{
+		"target_type": legacyReportTargetReply,
+		"target_id":   99,
+		"article_id":  10,
+		"reporter_id": 1,
+		"status":      reports.StatusOpen,
+		"created_at":  now,
+		"updated_at":  now,
+	})
 	conn.Create(&fileUsage.Entity{FileName: "topic.png", TargetType: legacyFileUsageTargetArticle, TargetId: 10, UsageType: fileUsage.UsageInlineImage, UserId: 1, CreatedAt: now, UpdatedAt: now})
 	conn.Create(&fileUsage.Entity{FileName: "reply.png", TargetType: legacyFileUsageTargetReply, TargetId: 99, UsageType: fileUsage.UsageInlineImage, UserId: 2, CreatedAt: now, UpdatedAt: now})
 	conn.Create(&moderationLog.Entity{

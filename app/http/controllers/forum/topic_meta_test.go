@@ -19,7 +19,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 )
 
-func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
+func TestTopicMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	c, _ := gin.CreateTestContext(nil)
 	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/1", nil)
@@ -40,7 +40,7 @@ func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 		t.Fatalf("expected ArticleJSONLD, got %T", meta.JSONLD)
 	}
 	if jsonLD.Text != "讨论描述" {
-		t.Fatalf("expected text field to use precomputed article description, got %q", jsonLD.Text)
+		t.Fatalf("expected text field to use precomputed topic description, got %q", jsonLD.Text)
 	}
 	if jsonLD.Type != "DiscussionForumPosting" {
 		t.Fatalf("expected DiscussionForumPosting, got %q", jsonLD.Type)
@@ -50,7 +50,7 @@ func TestArticleMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
 	}
 }
 
-func TestArticleMetaJSONLDIncludesImageForImageOnlyArticle(t *testing.T) {
+func TestTopicMetaJSONLDIncludesImageForImageOnlyTopic(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	c, _ := gin.CreateTestContext(nil)
 	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/440", nil)
@@ -73,7 +73,7 @@ func TestArticleMetaJSONLDIncludesImageForImageOnlyArticle(t *testing.T) {
 	}
 	expectedText := "阅读 叮叮叮～又得到一个徽章，参与 GooseForum 的社区讨论。"
 	if jsonLD.Text != expectedText {
-		t.Fatalf("expected image-only article text fallback, got %q", jsonLD.Text)
+		t.Fatalf("expected image-only topic text fallback, got %q", jsonLD.Text)
 	}
 	if len(jsonLD.Image) != 1 || jsonLD.Image[0] != "http://localhost/file/badges/earned.webp" {
 		t.Fatalf("expected absolute inline image URL, got %#v", jsonLD.Image)
@@ -174,7 +174,7 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	props := buildTopicDetailProps(c, &topic, &firstPost)
 
 	if props.Topic.ID != topicID || props.Topic.HTML != "<p>first</p>" || props.Topic.MaxPostNo != 1 {
-		t.Fatalf("article payload mismatch: %#v", props.Topic)
+		t.Fatalf("topic payload mismatch: %#v", props.Topic)
 	}
 	if len(props.Topic.Categories) != 1 || props.Topic.Categories[0].Name != "General" {
 		t.Fatalf("categories mismatch: %#v", props.Topic.Categories)

@@ -92,6 +92,14 @@ type legacyReplyRow struct {
 	UpdatedAt       time.Time
 }
 
+type legacyReportRow struct {
+	Id         uint64
+	TargetType string
+	TargetId   uint64
+	ArticleId  uint64
+	TopicId    uint64
+}
+
 func BackfillTopicPostModel() TopicPostMigrationResult {
 	return BackfillTopicPostModelWithDB(db.Connect())
 }
@@ -508,8 +516,8 @@ func migrateReports(conn *gorm.DB, result *TopicPostMigrationResult) {
 	if !conn.Migrator().HasTable("reports") {
 		return
 	}
-	var rows []reports.Entity
-	if err := conn.Find(&rows).Error; err != nil {
+	var rows []legacyReportRow
+	if err := conn.Table("reports").Find(&rows).Error; err != nil {
 		failMigration(result, "report_scan", err)
 		return
 	}

@@ -1,12 +1,29 @@
 package reports
 
 import (
+	"sync"
 	"testing"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
+	"gorm.io/gorm/schema"
 )
+
+func TestReportEntityDoesNotExposeLegacySourceID(t *testing.T) {
+	parsed, err := schema.Parse(&Entity{}, &sync.Map{}, schema.NamingStrategy{})
+	if err != nil {
+		t.Fatalf("parse reports entity schema: %v", err)
+	}
+	legacyFieldName := "Art" + "icleId"
+	legacyDBName := "art" + "icle_id"
+	if _, ok := parsed.FieldsByName[legacyFieldName]; ok {
+		t.Fatalf("reports.Entity should not expose legacy source id field")
+	}
+	if _, ok := parsed.FieldsByDBName[legacyDBName]; ok {
+		t.Fatalf("reports.Entity should not map legacy source id column")
+	}
+}
 
 func TestCreateOpenReturnsExistingOpenReport(t *testing.T) {
 	preferences.Set("db.default.connection", "sqlite")

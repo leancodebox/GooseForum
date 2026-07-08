@@ -105,5 +105,15 @@ func runVersionedDataMigrations() {
 		pageConfig.SyncMigrationVersion(9)
 		currentVersion = 9
 	}
+	if currentVersion < 10 {
+		result := datamigration.DropReportLegacyColumns()
+		slog.Info("app migration report legacy columns done", "articleIDColumnDropped", result.ArticleIDColumnDropped, "statusArticleIndexDrop", result.StatusArticleIndexDrop, "articleIndexDrop", result.ArticleIndexDrop, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration report legacy columns has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(10)
+		currentVersion = 10
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

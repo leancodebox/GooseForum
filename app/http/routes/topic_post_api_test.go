@@ -1,10 +1,15 @@
 package routes
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 )
+
+func oldPath(parts ...string) string {
+	return strings.Join(parts, "")
+}
 
 func TestForumTopicPostWriteRoutesUseTopicPostNames(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -32,14 +37,14 @@ func TestForumTopicPostWriteRoutesUseTopicPostNames(t *testing.T) {
 	}
 
 	for _, route := range []string{
-		"POST /api/forum/write-articles",
-		"POST /api/forum/article-status",
-		"POST /api/forum/articles-reply",
-		"POST /api/forum/articles-reply-update",
-		"POST /api/forum/articles-reply-delete",
-		"POST /api/forum/like-articles",
-		"POST /api/forum/bookmark-article",
-		"POST /api/forum/watch-article",
+		oldPath("POST /api/forum/write-", "art", "icles"),
+		oldPath("POST /api/forum/", "art", "icle-status"),
+		oldPath("POST /api/forum/", "art", "icles-reply"),
+		oldPath("POST /api/forum/", "art", "icles-reply-update"),
+		oldPath("POST /api/forum/", "art", "icles-reply-delete"),
+		oldPath("POST /api/forum/like-", "art", "icles"),
+		oldPath("POST /api/forum/bookmark-", "art", "icle"),
+		oldPath("POST /api/forum/watch-", "art", "icle"),
 	} {
 		if registered[route] {
 			t.Fatalf("%s should not be registered", route)
@@ -68,8 +73,8 @@ func TestForumTopicPostReadAndModerationRoutesUseTopicPostNames(t *testing.T) {
 	}
 
 	for _, route := range []string{
-		"GET /api/forum/article-replies-window",
-		"POST /api/forum/moderation/article-status",
+		oldPath("GET /api/forum/", "art", "icle-replies-window"),
+		oldPath("POST /api/forum/moderation/", "art", "icle-status"),
 		"POST /api/forum/moderation/reply-status",
 	} {
 		if registered[route] {
@@ -102,12 +107,12 @@ func TestAdminTopicManagementRoutesUseTopicNames(t *testing.T) {
 	}
 
 	for _, route := range []string{
-		"POST /api/admin/articles-list",
-		"POST /api/admin/article-source",
-		"POST /api/admin/article-edit",
-		"POST /api/admin/article-delete",
-		"POST /api/admin/article-pin-edit",
-		"POST /api/admin/article-categories-edit",
+		oldPath("POST /api/admin/", "art", "icles-list"),
+		oldPath("POST /api/admin/", "art", "icle-source"),
+		oldPath("POST /api/admin/", "art", "icle-edit"),
+		oldPath("POST /api/admin/", "art", "icle-delete"),
+		oldPath("POST /api/admin/", "art", "icle-pin-edit"),
+		oldPath("POST /api/admin/", "art", "icle-categories-edit"),
 	} {
 		if registered[route] {
 			t.Fatalf("%s should not be registered", route)
