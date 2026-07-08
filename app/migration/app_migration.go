@@ -95,5 +95,15 @@ func runVersionedDataMigrations() {
 		pageConfig.SyncMigrationVersion(8)
 		currentVersion = 8
 	}
+	if currentVersion < 9 {
+		result := datamigration.MigrateTopicSearchIndex()
+		slog.Info("app migration topic search index done", "skipped", result.Skipped, "rebuilt", result.Rebuilt, "processed", result.ProcessedCount, "failedCount", result.FailedCount, "legacyIndexDeleteTried", result.LegacyIndexDeleteTried, "legacyIndexDeleted", result.LegacyIndexDeleted, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 || result.FailedCount > 0 {
+			slog.Error("app migration topic search index has failures", "failed", result.Failed, "failedCount", result.FailedCount, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(9)
+		currentVersion = 9
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

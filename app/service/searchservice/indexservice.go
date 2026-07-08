@@ -32,7 +32,6 @@ func convertTopicToSearchDocument(topic *topics.Entity, firstPost *posts.Entity)
 		ID:            topic.Id,
 		Title:         topic.Title,
 		SearchContent: searchContent,
-		Type:          0,
 		Category:      topic.CategoryIds,
 		TopicStatus:   topic.Status,
 		ProcessStatus: topic.ProcessStatus,
@@ -150,8 +149,6 @@ func configureIndex(index meilisearch.IndexManager) error {
 	}
 
 	filterableAttributes := []any{
-		"type",
-		"userId",
 		"category",
 	}
 	_, err = index.UpdateFilterableAttributes(&filterableAttributes)

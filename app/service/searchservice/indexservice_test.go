@@ -1,6 +1,7 @@
 package searchservice
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -28,7 +29,7 @@ func TestConvertTopicToSearchDocument(t *testing.T) {
 	if got.ID != topic.Id || got.Title != topic.Title {
 		t.Fatalf("unexpected identity fields: %#v", got)
 	}
-	if got.Type != 0 || got.TopicStatus != topic.Status || got.ProcessStatus != topic.ProcessStatus {
+	if got.TopicStatus != topic.Status || got.ProcessStatus != topic.ProcessStatus {
 		t.Fatalf("unexpected status fields: %#v", got)
 	}
 	if got.CreatedAt != createdAt.Unix() || got.UpdatedAt != updatedAt.Unix() {
@@ -42,6 +43,18 @@ func TestConvertTopicToSearchDocument(t *testing.T) {
 	}
 	if strings.Contains(got.SearchContent, "hidden") {
 		t.Fatalf("SearchContent should skip fenced code, got %q", got.SearchContent)
+	}
+}
+
+func TestTopicIndexUsesTopicName(t *testing.T) {
+	if TopicIndex != "topics" {
+		t.Fatalf("TopicIndex = %q, want topics", TopicIndex)
+	}
+}
+
+func TestTopicSearchDocumentDoesNotExposeLegacyType(t *testing.T) {
+	if _, ok := reflect.TypeOf(TopicSearchDocument{}).FieldByName("Type"); ok {
+		t.Fatalf("TopicSearchDocument should not expose legacy Type field")
 	}
 }
 
