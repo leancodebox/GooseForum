@@ -905,13 +905,17 @@ func buildPageURL(c *gin.Context) string {
 	return component.GetBaseUri(c) + c.Request.URL.String()
 }
 
-func buildHomeMeta(c *gin.Context) PageMeta {
+func buildHomeMeta(c *gin.Context, page int, sort string) PageMeta {
 	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
-	return PageMeta{
+	meta := PageMeta{
 		Title:       siteTitle(),
 		Description: siteConfig.SiteDescription,
-		Canonical:   buildPageURL(c),
+		Canonical:   component.GetBaseUri(c) + "/",
 	}
+	if page > 1 || sort != "latest" {
+		meta.Robots = "noindex,follow"
+	}
+	return meta
 }
 
 func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity) TopicDetailProps {
@@ -1644,11 +1648,28 @@ func buildUserMeta(c *gin.Context, user *vo.UserCard) PageMeta {
 	if description == "" {
 		description = i18n.T(requestLang(c), "meta.userDesc", "username", user.Username, "site", siteTitle())
 	}
-	return PageMeta{
+	meta := PageMeta{
 		Title:       pageTitle(user.Username),
 		Description: description,
 		Canonical:   component.GetBaseUri(c) + "/u/" + strconv.FormatUint(user.UserId, 10),
 	}
+	if isEmptyUserProfile(user) {
+		meta.Robots = "noindex,follow"
+	}
+	return meta
+}
+
+func isEmptyUserProfile(user *vo.UserCard) bool {
+	if user == nil {
+		return true
+	}
+	if strings.TrimSpace(user.Bio) != "" || strings.TrimSpace(user.Signature) != "" {
+		return false
+	}
+	return user.TopicCount == 0 &&
+		user.ReplyCount == 0 &&
+		user.LikeReceivedCount == 0 &&
+		user.FollowerCount == 0
 }
 
 func buildCategoryPageProps(category *category.Entity, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) CategoryPageProps {
@@ -1700,16 +1721,20 @@ func buildCategoryPageURL(category *category.Entity, sort string, page int) stri
 	return categorySortURL(category, sort) + "?" + values.Encode()
 }
 
-func buildCategoryMeta(c *gin.Context, category *category.Entity) PageMeta {
+func buildCategoryMeta(c *gin.Context, category *category.Entity, page int, sort string) PageMeta {
 	description := category.Desc
 	if description == "" {
 		description = i18n.T(requestLang(c), "meta.categoryDesc", "category", category.Name)
 	}
-	return PageMeta{
+	meta := PageMeta{
 		Title:       pageTitle(category.Name),
 		Description: description,
 		Canonical:   component.GetBaseUri(c) + categoryURL(category),
 	}
+	if page > 1 || sort != "latest" {
+		meta.Robots = "noindex,follow"
+	}
+	return meta
 }
 
 func buildLinksPageProps(groups []pageConfig.FriendLinksGroup) LinksPageProps {

@@ -660,11 +660,14 @@ function mergePosts(nextReplies: PostPayload[], mode: 'replace' | 'prepend' | 'a
 
 function applyPostWindowPayload(payload: Awaited<ReturnType<typeof getPostWindow>>, mergeMode: 'replace' | 'prepend' | 'append') {
   mergePosts(payload.posts, mergeMode)
-  postHasBefore.value = payload.hasBefore
-  postHasAfter.value = payload.hasAfter
+  const nextMaxPostNo = Math.max(postMaxNo.value, payload.maxPostNo || 0)
+  const loadedFirstPostNo = firstPostNo(posts.value)
+  const loadedLastPostNo = lastPostNo(posts.value)
+  postHasBefore.value = payload.hasBefore && loadedFirstPostNo > 1
+  postHasAfter.value = payload.hasAfter && loadedLastPostNo < nextMaxPostNo
   postBeforePostNo.value = payload.beforePostNo ?? firstPostNo(posts.value)
   postAfterPostNo.value = payload.afterPostNo ?? lastPostNo(posts.value)
-  postMaxNo.value = Math.max(postMaxNo.value, payload.maxPostNo || 0)
+  postMaxNo.value = nextMaxPostNo
 }
 
 function disablePostAutoLoadAfter() {
@@ -1372,7 +1375,7 @@ async function removePost(postId: number) {
               :id="`post-${post.id}`"
               :key="post.id"
               :data-post-no="post.postNo"
-              class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 px-3 py-4 transition-[background-color] hover:bg-base-200/70 sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
+              class="group relative grid scroll-mt-20 grid-cols-[40px_minmax(0,1fr)] gap-2.5 px-3 py-4 transition-[background-color] sm:grid-cols-[52px_minmax(0,1fr)] sm:gap-4 sm:p-5"
               :class="{
                 'border-t border-line xl:border-t-transparent': index > 0,
                 'bg-info/10': highlightedPostId === post.id,

@@ -22,16 +22,19 @@
             <span>{{.Payload.Props.Topic.LikeCount}} {{ t .Lang "likes" }}</span>
             <span>{{.Payload.Props.Topic.ViewCount}} {{ t .Lang "views" }}</span>
         </p>
+        {{with index .Payload.Props.PostStream.Posts 0}}
         <div>
-            {{SafeHTML .Payload.Props.Topic.HTML}}
+            {{SafeHTML .RenderedContent}}
         </div>
+        {{end}}
     </article>
 
-    {{if .Payload.Props.Posts}}
+    {{if .Payload.Props.PostStream.Posts}}
     <section aria-label="{{ t .Lang "repliesTitle" }}">
         <h2>{{ t .Lang "repliesTitle" }}</h2>
         <ol>
-            {{range .Payload.Props.Posts}}
+            {{range .Payload.Props.PostStream.Posts}}
+            {{if gt .PostNo 1}}
             <li id="post-{{.ID}}">
                 <article>
                     <p>
@@ -42,6 +45,7 @@
                     <p>{{Nl2br .Content}}</p>
                 </article>
             </li>
+            {{end}}
             {{end}}
         </ol>
     </section>

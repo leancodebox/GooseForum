@@ -15,7 +15,7 @@ func Home(c *gin.Context) {
 	payload := PagePayload{
 		Component: "home.index",
 		Props:     buildHomeProps(page, sort, topicPage.Topics, topicPage.HasNext),
-		Meta:      buildHomeMeta(c),
+		Meta:      buildHomeMeta(c, page, sort),
 		Layout:    buildLayout(c, activeKeyForHome(sort)),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
