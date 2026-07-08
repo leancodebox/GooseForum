@@ -661,13 +661,17 @@ function mergePosts(nextReplies: PostPayload[], mode: 'replace' | 'prepend' | 'a
 function applyPostWindowPayload(payload: Awaited<ReturnType<typeof getPostWindow>>, mergeMode: 'replace' | 'prepend' | 'append') {
   mergePosts(payload.posts, mergeMode)
   const nextMaxPostNo = Math.max(postMaxNo.value, payload.maxPostNo || 0)
+  postMaxNo.value = nextMaxPostNo
+  syncLoadedPostWindowBounds(payload.hasBefore, payload.hasAfter, nextMaxPostNo)
+}
+
+function syncLoadedPostWindowBounds(hasBefore = postHasBefore.value, hasAfter = postHasAfter.value, maxPostNo = postMaxNo.value) {
   const loadedFirstPostNo = firstPostNo(posts.value)
   const loadedLastPostNo = lastPostNo(posts.value)
-  postHasBefore.value = payload.hasBefore && loadedFirstPostNo > 1
-  postHasAfter.value = payload.hasAfter && loadedLastPostNo < nextMaxPostNo
-  postBeforePostNo.value = payload.beforePostNo ?? firstPostNo(posts.value)
-  postAfterPostNo.value = payload.afterPostNo ?? lastPostNo(posts.value)
-  postMaxNo.value = nextMaxPostNo
+  postHasBefore.value = hasBefore && loadedFirstPostNo > 1
+  postHasAfter.value = hasAfter && loadedLastPostNo < maxPostNo
+  postBeforePostNo.value = loadedFirstPostNo
+  postAfterPostNo.value = loadedLastPostNo
 }
 
 function disablePostAutoLoadAfter() {
@@ -1302,10 +1306,30 @@ async function removePost(postId: number) {
   successMessage.value = ''
   deleteErrorMessage.value = ''
   try {
+    const removedPost = posts.value.find((post) => post.id === postId)
     await deletePost(postId)
+    posts.value = posts.value.filter((post) => post.id !== postId)
+    if (targetPostId.value === postId) {
+      targetPostId.value = 0
+    }
+    if (editingPostId.value === postId) {
+      editingPostId.value = 0
+      postContent.value = postDraftBeforeEdit.value
+      targetPostId.value = targetPostBeforeEdit.value
+      postDraftBeforeEdit.value = ''
+      targetPostBeforeEdit.value = 0
+    }
+    if (removedPost?.postNo && activePostNo.value === removedPost.postNo) {
+      const closest = findClosestLoadedPost(removedPost.postNo)
+      activePostNo.value = closest?.postNo || lastPostNo(posts.value) || firstPostNo(posts.value) || 1
+    }
+    syncLoadedPostWindowBounds()
+    syncProgressForPostNo(activePostNo.value || 1)
+    await nextTick()
+    collectPostElements()
+    scheduleActivePostFromScroll()
     successMessage.value = t('topic.replyDeleted')
     pendingDeletePost.value = null
-    await refreshCurrentPage()
   } catch (error) {
     deleteErrorMessage.value = error instanceof Error ? error.message : t('api.replyDeleteFailed')
   } finally {
