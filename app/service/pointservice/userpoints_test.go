@@ -2,20 +2,20 @@ package pointservice
 
 import "testing"
 
-func TestRewardPointsTypeString(t *testing.T) {
+func TestPointsActionCode(t *testing.T) {
 	tests := []struct {
-		value RewardPointsType
-		want  string
+		value PointsAction
+		code  string
 	}{
-		{value: RewardPointsInit, want: "初始化"},
-		{value: RewardPointsWriteTopic, want: ""},
-		{value: RewardPointsWritePost, want: ""},
-		{value: RewardPointsType(99), want: ""},
+		{value: PointsActionInit, code: "init"},
+		{value: PointsActionTopicPublished, code: "topic_published"},
+		{value: PointsActionPostCreated, code: "post_created"},
+		{value: PointsAction(99), code: "unknown"},
 	}
 
 	for _, tt := range tests {
-		if got := tt.value.String(); got != tt.want {
-			t.Fatalf("String() = %q, want %q", got, tt.want)
+		if got := tt.value.Code(); got != tt.code {
+			t.Fatalf("Code() = %q, want %q", got, tt.code)
 		}
 	}
 }

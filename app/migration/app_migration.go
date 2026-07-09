@@ -115,5 +115,15 @@ func runVersionedDataMigrations() {
 		pageConfig.SyncMigrationVersion(10)
 		currentVersion = 10
 	}
+	if currentVersion < 11 {
+		result := datamigration.MigratePointsRecordAction()
+		slog.Info("app migration points record action done", "backfilled", result.Backfilled, "changeReasonColumnDropped", result.ChangeReasonColumnDropped, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration points record action has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(11)
+		currentVersion = 11
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

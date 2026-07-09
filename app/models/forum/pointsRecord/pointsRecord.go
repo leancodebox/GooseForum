@@ -12,17 +12,21 @@ const pid = "id"
 // fieldUserId
 const fieldUserId = "user_id"
 
-// fieldChangeReason
-const fieldChangeReason = "change_reason"
+// fieldAction
+const fieldAction = "action"
+
+// fieldPointsChange
+const fieldPointsChange = "points_change"
 
 // fieldCreatedAt
 const fieldCreatedAt = "created_at"
 
 type Entity struct {
-	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                //
-	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"` //
-	ChangeReason string    `gorm:"column:change_reason;type:varchar(255);" json:"changeReason"`           //
-	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`    //
+	Id           uint64    `gorm:"primaryKey;column:id;autoIncrement;not null;" json:"id"`                   //
+	UserId       uint64    `gorm:"column:user_id;type:bigint unsigned;not null;default:0;" json:"userId"`    //
+	Action       string    `gorm:"column:action;type:varchar(64);not null;default:'';index;" json:"action"`  //
+	PointsChange int64     `gorm:"column:points_change;type:bigint;not null;default:0;" json:"pointsChange"` //
+	CreatedAt    time.Time `gorm:"column:created_at;index;autoCreateTime;<-:create;" json:"createdAt"`       //
 }
 
 // func (itself *Entity) BeforeSave(tx *gorm.DB) (err error) {}

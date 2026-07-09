@@ -8,32 +8,39 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 )
 
-type RewardPointsType int
+type PointsAction int
 
-var (
-	RewardPointsInit       RewardPointsType = 0
-	RewardPointsWriteTopic RewardPointsType = 1
-	RewardPointsWritePost  RewardPointsType = 2
+const (
+	PointsActionUnknown PointsAction = iota
+	PointsActionInit
+	PointsActionTopicPublished
+	PointsActionPostCreated
 )
 
-func (r RewardPointsType) String() string {
-	switch r {
-	case 0:
-		return "初始化"
-	case 1:
-		return ""
-	case 2:
-		return ""
+func (action PointsAction) Code() string {
+	switch action {
+	case PointsActionInit:
+		return "init"
+	case PointsActionTopicPublished:
+		return "topic_published"
+	case PointsActionPostCreated:
+		return "post_created"
+	default:
+		return "unknown"
 	}
-	return ""
 }
 
-func RewardPoints(userId uint64, points int64, reason RewardPointsType) {
+func RewardPoints(userId uint64, points int64, action PointsAction) {
 	_ = userPoints.Increment(userId, points)
 
 	users.IncrementPrestige(points, userId)
 
-	pointsRecordEntity := pointsRecord.Entity{UserId: userId, ChangeReason: reason.String(), CreatedAt: time.Now()}
+	pointsRecordEntity := pointsRecord.Entity{
+		UserId:       userId,
+		Action:       action.Code(),
+		PointsChange: points,
+		CreatedAt:    time.Now(),
+	}
 	pointsRecord.Save(&pointsRecordEntity)
 
 }
@@ -47,6 +54,11 @@ func InitUserPoints(userId uint64, points int64) {
 	userPoint.CurrentPoints += points
 	userPoints.Create(&userPoint)
 
-	pointsRecordEntity := pointsRecord.Entity{UserId: userId, ChangeReason: RewardPointsInit.String(), CreatedAt: time.Now()}
+	pointsRecordEntity := pointsRecord.Entity{
+		UserId:       userId,
+		Action:       PointsActionInit.Code(),
+		PointsChange: points,
+		CreatedAt:    time.Now(),
+	}
 	pointsRecord.Save(&pointsRecordEntity)
 }
