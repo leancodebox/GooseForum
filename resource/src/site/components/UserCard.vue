@@ -9,10 +9,10 @@ import {
   Radio,
   UserPlus,
 } from '@lucide/vue'
-import { getUserHoverCard } from '@/runtime/api'
+import { getUserCard } from '@/runtime/api'
 import { formatDate, formatNumber, timeAgo } from '@/runtime/format'
 import type { UserCardShowDetail } from '@/runtime/user-card-events'
-import type { UserHoverCardPayload } from '@/types/payload'
+import type { UserCardPayload } from '@/types/payload'
 import { socialIcons, socialLabels, type SimpleIcon } from '@/site/utils/social-icons'
 import { badgeClass, badgeIconURL, badgeTooltip } from '@/site/utils/badge-style'
 import UserAvatar from './UserAvatar.vue'
@@ -22,11 +22,11 @@ const visible = ref(false)
 const loading = ref(false)
 const error = ref('')
 const fallbackUser = ref<UserCardShowDetail['user'] | null>(null)
-const card = ref<UserHoverCardPayload | null>(null)
+const card = ref<UserCardPayload | null>(null)
 const position = ref({ left: 0, top: 0 })
 const cardEl = ref<HTMLElement | null>(null)
 const activeBadgeCode = ref('')
-const cache = new Map<number, UserHoverCardPayload>()
+const cache = new Map<number, UserCardPayload>()
 let requestToken = 0
 let preferredSide: 'top' | 'bottom' | null = null
 
@@ -119,7 +119,7 @@ async function show(event: Event) {
   loading.value = true
   card.value = null
   try {
-    const result = await getUserHoverCard(detail.user.id)
+    const result = await getUserCard(detail.user.id)
     if (token !== requestToken) return
     cache.set(detail.user.id, result)
     card.value = result

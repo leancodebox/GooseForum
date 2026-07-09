@@ -1,4 +1,4 @@
-import type { ModerationLogListResponse, ModerationReportListResponse, NotificationFilter, NotificationListResponse, PostWindowPayload, UserCardPayload, UserHoverCardPayload } from '@/types/payload'
+import type { ModerationLogListResponse, ModerationReportListResponse, NotificationFilter, NotificationListResponse, PostWindowPayload, UserCardPayload } from '@/types/payload'
 import { i18n } from './i18n'
 import { resolveApiMessage } from './api-message'
 
@@ -302,28 +302,6 @@ export async function getUserCard(userId: number): Promise<UserCardPayload> {
   }
 
   const data = (await response.json()) as ApiResponse<UserCardPayload>
-  if (data.code !== undefined && data.code !== 0) {
-    throw new Error(responseMessage(data, t('api.userLoadFailed')))
-  }
-
-  const result = data.result ?? data.data
-  if (!result) {
-    throw new Error(t('api.userEmpty'))
-  }
-  return result
-}
-
-export async function getUserHoverCard(userId: number): Promise<UserHoverCardPayload> {
-  const response = await fetch(`/api/user-hover-card?userId=${encodeURIComponent(String(userId))}`, {
-    headers: {
-      Accept: 'application/json',
-    },
-  })
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`)
-  }
-
-  const data = (await response.json()) as ApiResponse<UserHoverCardPayload>
   if (data.code !== undefined && data.code !== 0) {
     throw new Error(responseMessage(data, t('api.userLoadFailed')))
   }

@@ -100,7 +100,6 @@ func apiRoute(ginApp *gin.Engine) {
 
 	baseApi.GET("get-captcha", UpQueryReq(api.GetCaptcha))
 	baseApi.GET("user-card", UpQueryReq(api.GetUserCard))
-	baseApi.GET("user-hover-card", UpQueryReq(api.GetUserHoverCard))
 	baseApi.POST("forgot-password", UpButterReq(api.ForgotPassword))
 	baseApi.POST("reset-password", UpButterReq(api.ResetPassword))
 	baseApi.GET("auth/:provider", controllers.ProviderLogin)

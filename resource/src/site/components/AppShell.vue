@@ -31,7 +31,7 @@ import { useUnreadStatus } from '@/runtime/unread-status'
 import type { LayoutPayload } from '@/types/payload'
 import type { UserCardShowDetail } from '@/runtime/user-card-events'
 import UserAvatar from './UserAvatar.vue'
-import type UserHoverCardComponent from './UserHoverCard.vue'
+import type UserCardComponent from './UserCard.vue'
 
 const props = defineProps<{
   layout: LayoutPayload
@@ -62,7 +62,7 @@ interface SidebarGroupItem {
 }
 
 const MobileDrawer = defineAsyncComponent(() => import('./MobileDrawer.vue'))
-const UserHoverCard = shallowRef<typeof UserHoverCardComponent | null>(null)
+const UserCard = shallowRef<typeof UserCardComponent | null>(null)
 const drawerOpen = ref(false)
 const headerElevated = ref(false)
 const langMenuOpen = ref(false)
@@ -152,7 +152,7 @@ const sidebarIconMap = {
   links: Link,
   sponsors: Heart,
 } as const
-let userHoverCardLoading: Promise<void> | undefined
+let userCardLoading: Promise<void> | undefined
 
 watch(
   () => props.layout.sidebar.activeKey,
@@ -169,12 +169,12 @@ onMounted(() => {
   }
   updateHeaderElevated()
   window.addEventListener('scroll', updateHeaderElevated, { passive: true })
-  window.addEventListener('goose:user-card-show', ensureUserHoverCardForEvent)
+  window.addEventListener('goose:user-card-show', ensureUserCardForEvent)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateHeaderElevated)
-  window.removeEventListener('goose:user-card-show', ensureUserHoverCardForEvent)
+  window.removeEventListener('goose:user-card-show', ensureUserCardForEvent)
 })
 
 watch(
@@ -255,28 +255,28 @@ function closeHoverMenuSoon(menu: 'lang' | 'user') {
   }, 120)
 }
 
-function ensureUserHoverCardForEvent(event: Event) {
-  if (UserHoverCard.value) return
+function ensureUserCardForEvent(event: Event) {
+  if (UserCard.value) return
   const detail = (event as CustomEvent<UserCardShowDetail>).detail
   if (!detail?.user?.id || !detail.target) return
-  void loadUserHoverCard().then(async () => {
+  void loadUserCard().then(async () => {
     await nextTick()
     window.dispatchEvent(new CustomEvent<UserCardShowDetail>('goose:user-card-show', { detail }))
   })
 }
 
-async function loadUserHoverCard() {
-  if (UserHoverCard.value) return
-  if (!userHoverCardLoading) {
-    userHoverCardLoading = import('./UserHoverCard.vue')
+async function loadUserCard() {
+  if (UserCard.value) return
+  if (!userCardLoading) {
+    userCardLoading = import('./UserCard.vue')
       .then((module) => {
-        UserHoverCard.value = module.default
+        UserCard.value = module.default
       })
       .finally(() => {
-        userHoverCardLoading = undefined
+        userCardLoading = undefined
       })
   }
-  await userHoverCardLoading
+  await userCardLoading
 }
 </script>
 
@@ -690,6 +690,6 @@ async function loadUserHoverCard() {
       @close="closeDrawer"
     />
 
-    <component :is="UserHoverCard" v-if="UserHoverCard" />
+    <component :is="UserCard" v-if="UserCard" />
   </div>
 </template>

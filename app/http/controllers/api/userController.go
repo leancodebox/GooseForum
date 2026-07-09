@@ -57,21 +57,6 @@ func GetUserCard(req component.BetterRequest[GetUserCardReq]) component.Response
 	return component.SuccessResponse(card)
 }
 
-func GetUserHoverCard(req component.BetterRequest[GetUserCardReq]) component.Response {
-	userId := req.Params.UserId
-	card, ok := userservice.GetUserHoverCard(userId)
-	if !ok {
-		return component.FailResponseCode(component.MessageUserNotFound, nil)
-	}
-	currentUserId := req.UserId
-	card.IsFollowing = false
-	if currentUserId > 0 && currentUserId != userId {
-		card.IsFollowing = userFollow.IsFollowing(currentUserId, userId)
-	}
-
-	return component.SuccessResponse(card)
-}
-
 type EditUserEmailReq struct {
 	Email string `json:"email" validate:"required,email"`
 }

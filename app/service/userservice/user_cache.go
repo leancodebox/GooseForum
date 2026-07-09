@@ -104,15 +104,6 @@ func GetUserRoleId(userID uint64) (uint64, bool) {
 	return user.RoleId, true
 }
 
-func GetUserHoverCard(userID uint64) (*vo.UserHoverCard, bool) {
-	profile, ok := GetUserPublicProfile(userID)
-	if !ok {
-		return nil, false
-	}
-	card := buildUserHoverCard(profile)
-	return &card, true
-}
-
 func GetUserCard(userID uint64) (*vo.UserCard, bool) {
 	profile, ok := GetUserPublicProfile(userID)
 	if !ok {
@@ -306,38 +297,6 @@ func buildUserCard(profile UserPublicProfile) vo.UserCard {
 		FollowingCount:    stats.FollowingCount,
 		CollectionCount:   stats.CollectionCount,
 		IsOnline:          time.Since(lastActiveTime) < userOnlineWindow,
-		IsFollowing:       false,
-		IsSelf:            false,
-		Badges:            cloneUserBadges(profile.Badges),
-		WornBadge:         cloneUserBadgePtr(profile.WornBadge),
-		LastActiveTime:    lastActiveTime,
-		CreatedAt:         user.CreatedAt,
-	}
-}
-
-func buildUserHoverCard(profile UserPublicProfile) vo.UserHoverCard {
-	user := profile.User
-	stats := profile.Stats
-	lastActiveTime := effectiveLastActiveTime(user.Id, stats.LastActiveTime)
-	return vo.UserHoverCard{
-		UserId:            user.Id,
-		Username:          user.Username,
-		Nickname:          user.Nickname,
-		AvatarUrl:         user.webAvatarURL(),
-		ProfileCoverUrl:   user.ProfileCoverUrl,
-		Bio:               user.Bio,
-		Signature:         user.Signature,
-		WebsiteName:       user.WebsiteName,
-		Website:           user.Website,
-		Prestige:          user.Prestige,
-		ExternalInfo:      user.ExternalInformation,
-		IsAdmin:           userIsAdmin(user.RoleId),
-		TopicCount:        stats.TopicCount,
-		ReplyCount:        stats.ReplyCount,
-		LikeReceivedCount: stats.LikeReceivedCount,
-		FollowerCount:     stats.FollowerCount,
-		IsOnline:          time.Since(lastActiveTime) < userOnlineWindow,
-		IsFollowing:       false,
 		Badges:            cloneUserBadges(profile.Badges),
 		WornBadge:         cloneUserBadgePtr(profile.WornBadge),
 		LastActiveTime:    lastActiveTime,

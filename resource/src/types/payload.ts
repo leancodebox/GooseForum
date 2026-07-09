@@ -467,30 +467,6 @@ export interface UserCardPayload {
   isOnline: boolean
   isFollowing: boolean
   isSelf: boolean
-  wornBadge?: UserBadgePayload | null
-  lastActiveTime: string
-  createdAt: string
-}
-
-export interface UserHoverCardPayload {
-  userId: number
-  username: string
-  nickname: string
-  avatarUrl: string
-  profileCoverUrl: string
-  bio: string
-  signature: string
-  websiteName: string
-  website: string
-  prestige: number
-  externalInformation: Record<string, { link?: string }>
-  isAdmin: boolean
-  topicCount: number
-  replyCount: number
-  likeReceivedCount: number
-  followerCount: number
-  isOnline: boolean
-  isFollowing: boolean
   badges: UserBadgePayload[]
   wornBadge?: UserBadgePayload | null
   lastActiveTime: string
