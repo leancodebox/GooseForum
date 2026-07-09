@@ -30,7 +30,6 @@ type WriteTopicReq struct {
 	TopicId     uint64   `json:"topicId"`
 	Content     string   `json:"content" validate:"required"`
 	Title       string   `json:"title" validate:"required"`
-	Type        int8     `json:"type"`
 	CategoryId  []uint64 `json:"categoryId" validate:"min=1,max=3"`
 	TopicStatus int8     `json:"topicStatus" validate:"oneof=0 1"`
 }
@@ -182,15 +181,6 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		}
 	}
 	return component.SuccessResponse(topic.Id)
-}
-
-func normalizeWriteTopicType(topicType int8) int8 {
-	switch topicType {
-	case 1, 2:
-		return topicType
-	default:
-		return 1
-	}
 }
 
 type TopicStatusReq struct {

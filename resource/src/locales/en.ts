@@ -462,13 +462,8 @@ export default {
     leaveWithoutSaving: 'Leave without saving',
     fields: {
       title: 'Title',
-      type: 'Type',
       category: 'Category',
       body: 'Body',
-    },
-    types: {
-      share: 'Share',
-      help: 'Help',
     },
     toolbar: {
       bold: 'Bold',

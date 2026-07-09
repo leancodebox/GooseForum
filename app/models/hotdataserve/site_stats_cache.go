@@ -18,7 +18,7 @@ const siteStatsCacheTTL = 5 * time.Second
 var siteStatisticsDataCache = &localcache.Cache[*vo.SiteStats]{MaxEntries: finiteCacheEntries}
 
 func GetSiteStatisticsData() *vo.SiteStats {
-	data, _ := siteStatisticsDataCache.GetOrLoadE("", func() (*vo.SiteStats, error) {
+	return siteStatisticsDataCache.GetOrLoad("", func() (*vo.SiteStats, error) {
 		res := GetFriendLinksConfigCache()
 		linksCount := lo.SumBy(res, func(group pageConfig.FriendLinksGroup) int {
 			return len(group.Links)
@@ -32,5 +32,4 @@ func GetSiteStatisticsData() *vo.SiteStats {
 			LinksCount:      linksCount,
 		}, nil
 	}, siteStatsCacheTTL)
-	return data
 }

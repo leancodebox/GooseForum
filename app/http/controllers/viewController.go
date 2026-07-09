@@ -107,7 +107,6 @@ func Register(c *gin.Context) {
 			Params: WriteTopicReq{
 				Content:     userservice.GetWelcomeTopicContent(),
 				Title:       "Hi With GooseForum",
-				Type:        1,
 				CategoryId:  []uint64{1},
 				TopicStatus: 1,
 			},

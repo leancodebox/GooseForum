@@ -410,7 +410,6 @@ type TopicsListReq struct {
 type TopicInfoVo struct {
 	Id            uint64 `json:"id"`
 	Title         string `json:"title"`
-	Type          int8   `json:"type"`
 	UserId        uint64 `json:"userId"`
 	Username      string `json:"username"`
 	TopicStatus   int8   `json:"topicStatus"`
@@ -423,7 +422,6 @@ type TopicInfoAdminVo struct {
 	Id            uint64   `json:"id"`
 	Title         string   `json:"title"`
 	Description   string   `json:"description"`
-	Type          int8     `json:"type"`
 	CategoryId    []uint64 `json:"categoryId"`
 	UserId        uint64   `json:"userId"`
 	Username      string   `json:"username"`
@@ -447,7 +445,6 @@ type TopicSourceVo struct {
 	Title         string   `json:"title"`
 	Description   string   `json:"description"`
 	Content       string   `json:"content"`
-	Type          int8     `json:"type"`
 	CategoryId    []uint64 `json:"categoryId"`
 	UserId        uint64   `json:"userId"`
 	TopicStatus   int8     `json:"topicStatus"`
@@ -475,7 +472,6 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 				Id:            t.Id,
 				Title:         t.Title,
 				Description:   t.Excerpt,
-				Type:          0,
 				CategoryId:    t.CategoryIds,
 				UserId:        t.UserId,
 				Username:      username,
@@ -511,7 +507,6 @@ func TopicSource(req component.BetterRequest[TopicSourceReq]) component.Response
 		Title:         topic.Title,
 		Description:   topic.Excerpt,
 		Content:       firstPost.Content,
-		Type:          0,
 		CategoryId:    topic.CategoryIds,
 		UserId:        topic.UserId,
 		TopicStatus:   topic.Status,

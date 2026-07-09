@@ -14,6 +14,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/eventbus"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
+	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
@@ -67,7 +68,7 @@ func Moderation(c *gin.Context) {
 		Component: "moderation.index",
 		Props: ModerationPageProps{
 			CategoryTabs: buildModerationCategoryTabs(availableCategories, categoryID),
-			Topics:       buildTopicPayloads(hotdataserve.Topics2Vo(moderationEntityPointers(pageData.Data))),
+			Topics:       buildTopicPayloads(transform.Topics2Vo(moderationEntityPointers(pageData.Data), hotdataserve.CategoryMap())),
 			Pagination: PaginationPayload{
 				Page:     pageData.Page,
 				NextPage: nextPage,

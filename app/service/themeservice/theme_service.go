@@ -57,10 +57,9 @@ func LoadConfig() pageConfig.SiteThemeConfig {
 }
 
 func Runtime() RuntimeTheme {
-	data, _ := runtimeCache.GetOrLoadE("", func() (RuntimeTheme, error) {
+	return runtimeCache.GetOrLoad("", func() (RuntimeTheme, error) {
 		return BuildRuntime(hotdataserve.GetSiteThemeConfigCache()), nil
 	}, runtimeCacheTTL)
-	return data
 }
 
 func ClearCaches() {

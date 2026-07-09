@@ -462,13 +462,8 @@ export default {
     leaveWithoutSaving: 'Esci senza salvare',
     fields: {
       title: 'Titolo',
-      type: 'Tipo',
       category: 'Categoria',
       body: 'Corpo',
-    },
-    types: {
-      share: 'Condivisione',
-      help: 'Aiuto',
     },
     toolbar: {
       bold: 'Grassetto',

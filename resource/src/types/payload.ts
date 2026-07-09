@@ -797,11 +797,9 @@ export interface PublishPageProps {
   topicId: number
   isEditing: boolean
   categories: PublishCategoryPayload[]
-  types: PublishTypePayload[]
   topic: {
     title: string
     content: string
-    type: number
     categoryIds: number[]
     topicStatus: number
   }
@@ -811,11 +809,6 @@ export interface PublishCategoryPayload {
   id: number
   name: string
   color: string
-}
-
-export interface PublishTypePayload {
-  name: string
-  value: number
 }
 
 export interface SearchPageProps {

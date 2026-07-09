@@ -462,13 +462,8 @@ export default {
     leaveWithoutSaving: '保存せず離れる',
     fields: {
       title: 'タイトル',
-      type: '種類',
       category: 'カテゴリ',
       body: '本文',
-    },
-    types: {
-      share: '共有',
-      help: '質問',
     },
     toolbar: {
       bold: '太字',

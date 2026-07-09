@@ -526,7 +526,6 @@ type PublishPageProps struct {
 	TopicID    uint64                   `json:"topicId"`
 	IsEditing  bool                     `json:"isEditing"`
 	Categories []PublishCategoryPayload `json:"categories"`
-	Types      []PublishTypePayload     `json:"types"`
 	Topic      PublishTopicPayload      `json:"topic"`
 }
 
@@ -534,11 +533,6 @@ type PublishCategoryPayload struct {
 	ID    uint64 `json:"id"`
 	Name  string `json:"name"`
 	Color string `json:"color"`
-}
-
-type PublishTypePayload struct {
-	Name  string `json:"name"`
-	Value int    `json:"value"`
 }
 
 type ModerationPageProps struct {
@@ -550,7 +544,6 @@ type ModerationPageProps struct {
 type PublishTopicPayload struct {
 	Title       string   `json:"title"`
 	Content     string   `json:"content"`
-	Type        int8     `json:"type"`
 	CategoryIDs []uint64 `json:"categoryIds"`
 	TopicStatus int8     `json:"topicStatus"`
 }
@@ -1364,7 +1357,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 			if hasNext {
 				topicPage = topicPage[:userProfileTopicPageSize]
 			}
-			topicPayloads = buildTopicPayloads(hotdataserve.Topics2Vo(topicPage))
+			topicPayloads = buildTopicPayloads(transform.Topics2Vo(topicPage, hotdataserve.CategoryMap()))
 			pagination = buildUserActivityTopicPagination(user.Id, topicPage, hasNext)
 		case userProfileActivityLikes:
 			refs, nextCursor := topicUserAction.ListLikedTopicRefsBefore(user.Id, c.Query("cursor"), userProfileTimelinePageSize)
@@ -1389,7 +1382,7 @@ func buildUserProfileProps(c *gin.Context, user users.EntityComplete, section st
 	default:
 		badges = userBadges
 		latestTopics, _ := topics.GetLatestPublishedByUserId(user.Id, 8)
-		topicPayloads = buildTopicPayloads(hotdataserve.Topics2Vo(latestTopics))
+		topicPayloads = buildTopicPayloads(transform.Topics2Vo(latestTopics, hotdataserve.CategoryMap()))
 		timeline, _ := userActivities.GetUserTimeline(user.Id, 0, 5)
 		activities = buildUserActivities(timeline)
 	}
@@ -2045,10 +2038,7 @@ func buildPublishPageProps(c *gin.Context, topicID uint64) (PublishPageProps, er
 		TopicID:    topicID,
 		IsEditing:  topicID > 0,
 		Categories: buildPublishCategories(),
-		Types:      buildPublishTypes(),
-		Topic: PublishTopicPayload{
-			Type: defaultPublishType(),
-		},
+		Topic:      PublishTopicPayload{},
 	}
 	if topicID == 0 {
 		return props, nil
@@ -2065,7 +2055,6 @@ func buildPublishPageProps(c *gin.Context, topicID uint64) (PublishPageProps, er
 	props.Topic = PublishTopicPayload{
 		Title:       topic.Title,
 		Content:     firstPost.Content,
-		Type:        0,
 		CategoryIDs: topic.CategoryIds,
 		TopicStatus: topic.Status,
 	}
@@ -2086,23 +2075,6 @@ func buildPublishCategories() []PublishCategoryPayload {
 		})
 	}
 	return res
-}
-
-func buildPublishTypes() []PublishTypePayload {
-	items := hotdataserve.GetTopicTypes()
-	res := make([]PublishTypePayload, 0, len(*items))
-	for _, item := range *items {
-		res = append(res, PublishTypePayload{Name: item.Name, Value: item.Value})
-	}
-	return res
-}
-
-func defaultPublishType() int8 {
-	items := hotdataserve.GetTopicTypes()
-	if items != nil && len(*items) > 0 {
-		return int8((*items)[0].Value)
-	}
-	return 1
 }
 
 func buildSearchPageProps(query string, page int) SearchPageProps {
@@ -2144,7 +2116,7 @@ func buildSearchPageProps(query string, page int) SearchPageProps {
 		nextPage = page + 1
 	}
 
-	props.Topics = buildTopicPayloads(hotdataserve.Topics2Vo(orderedTopics))
+	props.Topics = buildTopicPayloads(transform.Topics2Vo(orderedTopics, hotdataserve.CategoryMap()))
 	props.Total = result.Total
 	props.TotalPages = totalPageCount
 	props.Pagination = PaginationPayload{

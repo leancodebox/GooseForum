@@ -462,13 +462,8 @@ export default {
     leaveWithoutSaving: '不保存离开',
     fields: {
       title: '标题',
-      type: '类型',
       category: '分类',
       body: '正文',
-    },
-    types: {
-      share: '分享',
-      help: '求助',
     },
     toolbar: {
       bold: '加粗',

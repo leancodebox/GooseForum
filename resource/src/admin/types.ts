@@ -94,7 +94,6 @@ export interface AdminTopic {
   id: number
   title: string
   description?: string | null
-  type: number
   categoryId: number[]
   userId: number
   username: string

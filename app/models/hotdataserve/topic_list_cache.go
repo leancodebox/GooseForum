@@ -5,10 +5,9 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
-	"github.com/leancodebox/GooseForum/app/models/forum/users"
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
 
 const (
@@ -76,7 +75,7 @@ func loadLatestTopicsSimpleVoPaginated(page int, sort string) TopicSimpleVoPage 
 		Sort:         sort,
 	})
 	return TopicSimpleVoPage{
-		Topics:  Topics2Vo(topicEntitiesToPointers(res.Data)),
+		Topics:  transform.Topics2Vo(topicEntitiesToPointers(res.Data), CategoryMap()),
 		HasNext: res.HasNext,
 	}
 }
@@ -90,7 +89,7 @@ func loadTopicsByCategorySimpleVo(categoryId uint64, sort string, page int) Topi
 		Sort:         sort,
 	})
 	return TopicSimpleVoPage{
-		Topics:  Topics2Vo(topicEntitiesToPointers(res.Data)),
+		Topics:  transform.Topics2Vo(topicEntitiesToPointers(res.Data), CategoryMap()),
 		HasNext: res.HasNext,
 	}
 }
@@ -99,93 +98,6 @@ func topicEntitiesToPointers(data []topics.Entity) []*topics.Entity {
 	res := make([]*topics.Entity, 0, len(data))
 	for i := range data {
 		res = append(res, &data[i])
-	}
-	return res
-}
-
-func Topics2Vo(data []*topics.Entity) []*vo.TopicsSimpleVo {
-	userIDs := make([]uint64, 0, len(data)*2)
-	seenUserIDs := make(map[uint64]struct{}, len(data)*2)
-	for _, topic := range data {
-		if topic == nil {
-			continue
-		}
-		if _, ok := seenUserIDs[topic.UserId]; !ok {
-			seenUserIDs[topic.UserId] = struct{}{}
-			userIDs = append(userIDs, topic.UserId)
-		}
-		for _, poster := range topic.GetPosters() {
-			if _, ok := seenUserIDs[poster.UserID]; ok {
-				continue
-			}
-			seenUserIDs[poster.UserID] = struct{}{}
-			userIDs = append(userIDs, poster.UserID)
-		}
-	}
-	userMap := users.GetMapByIds(userIDs)
-	return TopicsWithUser2Vo(data, userMap)
-}
-
-func TopicsWithUser2Vo(data []*topics.Entity, userMap map[uint64]*users.EntityComplete) []*vo.TopicsSimpleVo {
-	categoryMap := CategoryMap()
-	res := make([]*vo.TopicsSimpleVo, 0, len(data))
-	for _, t := range data {
-		if t == nil {
-			continue
-		}
-
-		categoryNames := make([]string, 0, len(t.CategoryIds))
-		for _, item := range t.CategoryIds {
-			if category, ok := categoryMap[item]; ok && category != nil {
-				categoryNames = append(categoryNames, category.Name)
-				continue
-			}
-			categoryNames = append(categoryNames, "")
-		}
-
-		username := ""
-		avatarUrl := urlconfig.GetDefaultAvatar()
-		if user, ok := userMap[t.UserId]; ok {
-			username = user.Username
-			avatarUrl = user.GetWebAvatarUrl()
-		}
-
-		posters := t.GetPosters()
-		postersVo := make([]vo.PosterVo, 0, len(posters))
-		for _, poster := range posters {
-			posterUsername := ""
-			posterAvatarUrl := urlconfig.GetDefaultAvatar()
-			if user, ok := userMap[poster.UserID]; ok {
-				posterUsername = user.Username
-				posterAvatarUrl = user.GetWebAvatarUrl()
-			}
-			postersVo = append(postersVo, vo.PosterVo{
-				Id:        poster.UserID,
-				Username:  posterUsername,
-				AvatarUrl: posterAvatarUrl,
-			})
-		}
-
-		res = append(res, &vo.TopicsSimpleVo{
-			Id:             t.Id,
-			Title:          t.Title,
-			Description:    t.Excerpt,
-			FirstImageURL:  t.FirstImageURL,
-			LastUpdateTime: t.UpdatedAt.Format(time.DateTime),
-			CreateTime:     t.CreatedAt.Format(time.DateTime),
-			AuthorId:       t.UserId,
-			Username:       username,
-			AvatarUrl:      avatarUrl,
-			ViewCount:      t.ViewCount,
-			CommentCount:   t.ReplyCount,
-			PinWeight:      t.PinWeight,
-			Categories:     categoryNames,
-			CategoriesId:   t.CategoryIds,
-			Type:           0,
-			TypeStr:        "",
-			ProcessStatus:  t.ProcessStatus,
-			Posters:        postersVo,
-		})
 	}
 	return res
 }

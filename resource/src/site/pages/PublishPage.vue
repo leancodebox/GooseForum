@@ -18,7 +18,6 @@ const page = defineProps<{
 const { t } = useI18n()
 const title = ref(page.props.topic.title || '')
 const content = ref(page.props.topic.content || '')
-const type = ref(page.props.topic.type || page.props.types[0]?.value || 0)
 const categoryIds = ref<number[]>([...(page.props.topic.categoryIds || [])])
 const currentTopicId = ref(page.props.topicId)
 const preview = ref(false)
@@ -57,7 +56,6 @@ function editorSnapshot() {
   return JSON.stringify({
     title: title.value.trim(),
     content: content.value.trim(),
-    type: type.value,
     categoryIds: [...categoryIds.value].sort((a, b) => a - b),
   })
 }
@@ -247,7 +245,6 @@ async function save() {
       topicId: currentTopicId.value,
       title: title.value.trim(),
       content: content.value.trim(),
-      type: type.value,
       categoryId: categoryIds.value,
       topicStatus: 1,
     })
@@ -277,7 +274,6 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
       topicId: currentTopicId.value,
       title: title.value.trim(),
       content: content.value.trim(),
-      type: type.value,
       categoryId: categoryIds.value,
       topicStatus: 0,
     })

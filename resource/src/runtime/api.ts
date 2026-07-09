@@ -361,7 +361,6 @@ export interface SubmitTopicInput {
   topicId: number
   title: string
   content: string
-  type: number
   categoryId: number[]
   topicStatus: 0 | 1
 }

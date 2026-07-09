@@ -92,17 +92,6 @@ const categoryDialogOptions = computed<CategoryOption[]>(() => {
 const rangeStart = computed(() => (rows.value.length === 0 ? 0 : (page.value - 1) * pageSize.value + 1))
 const rangeEnd = computed(() => rows.value.length === 0 ? 0 : rangeStart.value + rows.value.length - 1)
 
-const topicTypes: Record<number, { label: string, className: string }> = {
-  0: { label: adminText('k003m'), className: 'bg-blue-50 text-blue-700 border-blue-100' },
-  1: { label: adminText('k003n'), className: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-  2: { label: adminText('k003o'), className: 'bg-amber-50 text-amber-700 border-amber-100' },
-  3: { label: adminText('k003p'), className: 'bg-violet-50 text-violet-700 border-violet-100' },
-}
-
-function typeInfo(type: number) {
-  return topicTypes[type] || { label: adminText('k003g'), className: 'bg-slate-50 text-slate-700 border-slate-100' }
-}
-
 function avatarText(post: AdminTopic) {
   return post.username.slice(0, 1).toUpperCase()
 }
@@ -349,9 +338,6 @@ onMounted(() => {
                     <a :href="`/p/post/${post.id}`" target="_blank" rel="noreferrer" class="min-w-0 truncate text-[15px] font-semibold leading-5 text-foreground hover:text-primary hover:underline">
                       {{ post.title }}
                     </a>
-                    <span class="inline-flex h-5 shrink-0 items-center rounded-full border px-1.5 text-[11px] font-semibold" :class="typeInfo(post.type).className">
-                      {{ typeInfo(post.type).label }}
-                    </span>
                     <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
                     <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
                   </div>
@@ -436,9 +422,6 @@ onMounted(() => {
                         <a :href="`/p/post/${post.id}`" target="_blank" rel="noreferrer" class="min-w-0 truncate text-[15px] font-semibold leading-5 text-foreground hover:text-primary hover:underline">
                           {{ post.title }}
                         </a>
-                        <span class="inline-flex h-5 shrink-0 items-center rounded-full border px-1.5 text-[11px] font-semibold" :class="typeInfo(post.type).className">
-                          {{ typeInfo(post.type).label }}
-                        </span>
                         <Badge v-if="post.processStatus === 1" variant="destructive" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k0069') }}</Badge>
                         <Badge v-if="post.pinWeight > 0" variant="secondary" class="h-5 shrink-0 rounded-full px-1.5 text-[10px]">{{ adminText('k00ax') }} {{ post.pinWeight }}</Badge>
                       </div>

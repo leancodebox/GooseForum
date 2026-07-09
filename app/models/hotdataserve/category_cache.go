@@ -29,7 +29,7 @@ func CategoryMap() map[uint64]*category.Entity {
 }
 
 func loadCategorySnapshot() categorySnapshot {
-	data, _ := categoryCache.GetOrLoadE(
+	return categoryCache.GetOrLoad(
 		"categorySnapshot",
 		func() (categorySnapshot, error) {
 			list := category.All()
@@ -42,7 +42,6 @@ func loadCategorySnapshot() categorySnapshot {
 		},
 		categoryCacheTTL,
 	)
-	return data
 }
 
 func GetCleanCategoryById(id uint64) *category.Entity {

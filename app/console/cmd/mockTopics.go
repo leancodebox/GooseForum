@@ -38,7 +38,6 @@ func runMockTopics(cmd *cobra.Command, args []string) {
 			Params: controllers.WriteTopicReq{
 				Title:      fmt.Sprintf("测试文章 %03d - %s", i, time.Now().Format("15:04:05")),
 				Content:    fmt.Sprintf("这是第 %d 篇自动生成的测试文章内容。\n\n生成时间: %s\n作者: %s", i, time.Now().Format(time.RFC3339), user.Username),
-				Type:       1,           // 0-3
 				CategoryId: []uint64{1}, // Default to first category
 			},
 		}
