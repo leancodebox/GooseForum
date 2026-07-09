@@ -107,11 +107,14 @@ async function refresh(force = false) {
 }
 
 function startPolling(initial?: Partial<UnreadStatusPayload>) {
-  if (initial) applyUnread(initial)
+  const hasInitial = initial !== undefined && initial !== null
+  if (hasInitial) applyUnread(initial)
   if (pollTimer !== undefined) return
-  const cached = readCache()
-  if (cached) applyUnread(cached)
-  void refresh(true)
+  if (!hasInitial) {
+    const cached = readCache()
+    if (cached) applyUnread(cached)
+    void refresh(true)
+  }
   pollTimer = window.setInterval(() => {
     void refresh(true)
   }, POLL_INTERVAL)

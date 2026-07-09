@@ -7,6 +7,7 @@ import { useFlashMessages } from '@/runtime/flash-message'
 import { fetchPage } from '@/runtime/router'
 import { useShellState } from '@/runtime/shell-state'
 import { showUserCard } from '@/runtime/user-card-events'
+import { measurePostViewportProgressFromRects } from '@/runtime/post-viewport-progress'
 import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
 import PostPositionRail from '@/site/components/PostPositionRail.vue'
 import TopicList from '@/site/components/TopicList.vue'
@@ -466,56 +467,22 @@ function measurePostViewportProgress() {
   const markerY = Math.min(window.innerHeight * 0.38, 340)
   const viewportTop = 88
   const viewportBottom = window.innerHeight - 96
-  const firstVisiblePostNo = firstPostNo(posts.value) || 1
-
-  let coveringPostNo: number | null = null
-  let coveringProgress = 0
-  let coveringDistance = Number.POSITIVE_INFINITY
-  let nearestPostNo: number | null = null
-  let nearestProgress = 0
-  let nearestDistance = Number.POSITIVE_INFINITY
-
-  for (const element of postElements) {
-    const postNo = Number(element.dataset.postNo || 0)
-    if (!postNo) continue
-    const rect = element.getBoundingClientRect()
-    if (rect.bottom <= viewportTop || rect.top >= viewportBottom) continue
-
-    const visibleTop = Math.max(viewportTop, rect.top)
-    const visibleBottom = Math.min(viewportBottom, rect.bottom)
-    if (visibleBottom <= visibleTop) continue
-
-    if (rect.top <= markerY && rect.bottom >= markerY) {
-      const distance = Math.abs(rect.top - markerY)
-      if (distance < coveringDistance) {
-        coveringPostNo = postNo
-        coveringProgress = progressForPostNoFraction(postNo, (markerY - rect.top) / Math.max(1, rect.height))
-        coveringDistance = distance
+  return measurePostViewportProgressFromRects({
+    posts: postElements.map((element) => {
+      const rect = element.getBoundingClientRect()
+      return {
+        postNo: Number(element.dataset.postNo || 0),
+        top: rect.top,
+        bottom: rect.bottom,
+        height: rect.height,
       }
-      continue
-    }
-
-    const distance = Math.abs(rect.top - markerY)
-    if (distance < nearestDistance) {
-      nearestPostNo = postNo
-      nearestProgress = progressForPostNoFraction(postNo, rect.top > markerY ? 0 : 1)
-      nearestDistance = distance
-    }
-  }
-
-  const fallbackPostNo = firstVisiblePostNo
-  const postNo = coveringPostNo ?? nearestPostNo ?? fallbackPostNo
-  const current = coveringPostNo !== null
-    ? coveringProgress
-    : nearestPostNo !== null
-      ? nearestProgress
-      : 0
-  return {
-    postNo,
-    current,
-    start: Math.max(0, current - visibleSlotSize() / 2),
-    end: Math.min(1, current + visibleSlotSize() / 2),
-  }
+    }),
+    markerY,
+    viewportTop,
+    viewportBottom,
+    maxPostNo: postMaxRange.value,
+    visibleSlotSize: visibleSlotSize(),
+  })
 }
 
 function resetPostsFromProps() {
