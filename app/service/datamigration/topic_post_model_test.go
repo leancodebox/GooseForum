@@ -195,6 +195,9 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 	if topic.Title != "hello topic" || topic.PostCount != 2 || topic.ReplyCount != 1 || topic.FirstPostId == 0 || topic.LastPostId == 0 {
 		t.Fatalf("topic not migrated correctly: %#v", topic)
 	}
+	if !topic.CreatedAt.Equal(now) || !topic.UpdatedAt.Equal(now) {
+		t.Fatalf("topic timestamps changed during migration: created=%s updated=%s want=%s", topic.CreatedAt, topic.UpdatedAt, now)
+	}
 
 	var firstPost posts.Entity
 	if err := conn.Where("topic_id = ? AND post_no = ?", 10, 1).First(&firstPost).Error; err != nil {
@@ -203,6 +206,9 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 	if firstPost.Content != "first post" || firstPost.UserId != 1 {
 		t.Fatalf("first post not migrated correctly: %#v", firstPost)
 	}
+	if !firstPost.CreatedAt.Equal(now) || !firstPost.UpdatedAt.Equal(now) {
+		t.Fatalf("first post timestamps changed during migration: created=%s updated=%s want=%s", firstPost.CreatedAt, firstPost.UpdatedAt, now)
+	}
 
 	var replyPost posts.Entity
 	if err := conn.Where("topic_id = ? AND post_no = ?", 10, 2).First(&replyPost).Error; err != nil {
@@ -210,6 +216,9 @@ func TestBackfillTopicPostModelCopiesOldTablesWithoutOldModels(t *testing.T) {
 	}
 	if replyPost.Content != "reply body" || replyPost.UserId != 2 {
 		t.Fatalf("reply post not migrated correctly: %#v", replyPost)
+	}
+	if !replyPost.CreatedAt.Equal(now.Add(time.Minute)) || !replyPost.UpdatedAt.Equal(now.Add(time.Minute)) {
+		t.Fatalf("reply post timestamps changed during migration: created=%s updated=%s want=%s", replyPost.CreatedAt, replyPost.UpdatedAt, now.Add(time.Minute))
 	}
 
 	var mapped migrationMapping.Entity

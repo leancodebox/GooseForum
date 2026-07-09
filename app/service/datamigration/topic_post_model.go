@@ -309,7 +309,7 @@ func linkReplyParents(conn *gorm.DB, result *TopicPostMigrationResult) {
 			result.Skipped++
 			continue
 		}
-		if err := conn.Model(&posts.Entity{}).Where("id = ?", child.TargetId).Update("reply_to_post_id", parent.TargetId).Error; err != nil {
+		if err := conn.Model(&posts.Entity{}).Where("id = ?", child.TargetId).UpdateColumn("reply_to_post_id", parent.TargetId).Error; err != nil {
 			failMigration(result, "reply_parent_link", err)
 		}
 	}
@@ -339,7 +339,7 @@ func syncTopicPostPointers(conn *gorm.DB, result *TopicPostMigrationResult) {
 			"post_seq":       last.PostNo,
 			"last_posted_at": last.CreatedAt,
 		}
-		if err := conn.Model(&topics.Entity{}).Where("id = ?", topicID).Updates(updates).Error; err != nil {
+		if err := conn.Model(&topics.Entity{}).Where("id = ?", topicID).UpdateColumns(updates).Error; err != nil {
 			failMigration(result, "topic_pointer_update", err)
 		}
 	}
@@ -536,7 +536,7 @@ func migrateReports(conn *gorm.DB, result *TopicPostMigrationResult) {
 				result.ReportsMissing++
 				continue
 			}
-			if err := conn.Model(&reports.Entity{}).Where("id = ?", row.Id).Updates(map[string]any{
+			if err := conn.Model(&reports.Entity{}).Where("id = ?", row.Id).UpdateColumns(map[string]any{
 				"target_type": reports.TargetTopic,
 				"target_id":   topicID,
 				"topic_id":    topicID,
@@ -562,7 +562,7 @@ func migrateReports(conn *gorm.DB, result *TopicPostMigrationResult) {
 				result.ReportsMissing++
 				continue
 			}
-			if err := conn.Model(&reports.Entity{}).Where("id = ?", row.Id).Updates(map[string]any{
+			if err := conn.Model(&reports.Entity{}).Where("id = ?", row.Id).UpdateColumns(map[string]any{
 				"target_type": reports.TargetPost,
 				"target_id":   mapped.TargetId,
 				"topic_id":    topicID,
