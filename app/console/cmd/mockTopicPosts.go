@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/leancodebox/GooseForum/app/http/controllers"
+	"github.com/leancodebox/GooseForum/app/http/controllers/api"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
@@ -91,14 +91,14 @@ func runMockTopicPosts(cmd *cobra.Command, args []string) {
 			// Pick random user
 			userId := lo.Sample(userIds)
 
-			req := component.BetterRequest[controllers.CreatePostReq]{
-				Params: controllers.CreatePostReq{
+			req := component.BetterRequest[api.CreatePostReq]{
+				Params: api.CreatePostReq{
 					TopicId: topic.Id,
 					Content: fmt.Sprintf("Mock post content %d-%d for topic %d. This is generated for local topic timeline testing.", i, j, topic.Id),
 				},
 				UserId: userId,
 			}
-			resp := controllers.CreatePost(req)
+			resp := api.CreatePost(req)
 
 			if resp.Data.Code != component.SUCCESS {
 				fmt.Printf("Error creating post for topic %d: %s\n", topic.Id, resp.Data.MessageCode)

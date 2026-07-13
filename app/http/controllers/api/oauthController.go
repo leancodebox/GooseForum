@@ -1,4 +1,4 @@
-package controllers
+package api
 
 import (
 	"log/slog"
@@ -89,7 +89,7 @@ func ProviderCallback(c *gin.Context) {
 }
 
 // UnbindOAuth 解绑OAuth账户
-func UnbindOAuth(req component.BetterRequest[null]) component.Response {
+func UnbindOAuth(req component.BetterRequest[component.Null]) component.Response {
 	// 检查用户是否已登录
 	userID := req.UserId
 
@@ -108,7 +108,7 @@ func UnbindOAuth(req component.BetterRequest[null]) component.Response {
 }
 
 // GetOAuthBindings 获取用户的OAuth绑定状态
-func GetOAuthBindings(req component.BetterRequest[null]) component.Response {
+func GetOAuthBindings(req component.BetterRequest[component.Null]) component.Response {
 	// 检查用户是否已登录
 	userID := req.UserId
 
