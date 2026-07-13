@@ -4,7 +4,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	forumcontroller "github.com/leancodebox/GooseForum/app/http/controllers/forum"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
-	"github.com/leancodebox/GooseForum/app/service/moderationstatusservice"
+	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 )
@@ -17,7 +17,7 @@ func GetUnreadStatus(req component.BetterRequest[GetUnreadCountReq]) component.R
 	return component.SuccessResponse(component.DataMap{
 		"notifications":          status.Notifications,
 		"messages":               status.Messages,
-		"moderationReports":      moderationstatusservice.HasOpenReports(req.UserId),
+		"moderationReports":      moderationservice.HasOpenReports(req.UserId),
 		"latestNotificationType": status.LatestNotificationType,
 	})
 }
@@ -55,16 +55,9 @@ func NotificationList(req component.BetterRequest[NotificationListReq]) componen
 		return component.FailResponseCode(component.MessageRequestParseFailed, component.MessageParams{"error": err.Error()})
 	}
 
-	items := make([]forumcontroller.NotificationPayload, 0, len(notifications))
-	for _, notification := range notifications {
-		if notification == nil {
-			continue
-		}
-		items = append(items, forumcontroller.BuildNotificationPayload(notification))
-	}
 	unreadCount, _ := eventNotification.GetUnreadCount(req.UserId)
 	return component.SuccessResponse(NotificationListResp{
-		Items:       items,
+		Items:       forumcontroller.BuildNotificationPayloads(notifications),
 		NextCursor:  nextCursor,
 		HasNext:     hasNext,
 		UnreadCount: unreadCount,

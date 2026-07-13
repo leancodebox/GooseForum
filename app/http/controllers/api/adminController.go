@@ -29,8 +29,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/mailservice"
-	"github.com/leancodebox/GooseForum/app/service/moderationlogservice"
-	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
+	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/optlogger"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
@@ -189,21 +188,7 @@ func UserList(req component.BetterRequest[UserListReq]) component.Response {
 	)
 }
 
-type BadgeSaveReq struct {
-	Code        string `json:"code"`
-	Type        string `json:"type"`
-	GrantMode   string `json:"grantMode"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	IconType    string `json:"iconType"`
-	IconKey     string `json:"iconKey"`
-	IconURL     string `json:"iconUrl"`
-	Color       string `json:"color"`
-	Level       string `json:"level"`
-	IsEnabled   bool   `json:"isEnabled"`
-	IsWearable  bool   `json:"isWearable"`
-	SortOrder   int    `json:"sortOrder"`
-}
+type BadgeSaveReq = badgeservice.Badge
 
 func BadgeList(req component.BetterRequest[component.Null]) component.Response {
 	return component.SuccessResponse(badgeservice.AllForAdmin())
@@ -407,33 +392,26 @@ type TopicsListReq struct {
 	UserId   uint64 `form:"userId"`
 }
 
-type TopicInfoVo struct {
-	Id            uint64 `json:"id"`
-	Title         string `json:"title"`
-	UserId        uint64 `json:"userId"`
-	Username      string `json:"username"`
-	TopicStatus   int8   `json:"topicStatus"`
-	ProcessStatus int8   `json:"processStatus"`
-	CreatedAt     string `json:"createdAt"`
-	UpdatedAt     string `json:"updatedAt"`
-}
-
-type TopicInfoAdminVo struct {
+type TopicAdminBaseVo struct {
 	Id            uint64   `json:"id"`
 	Title         string   `json:"title"`
 	Description   string   `json:"description"`
 	CategoryId    []uint64 `json:"categoryId"`
 	UserId        uint64   `json:"userId"`
-	Username      string   `json:"username"`
-	UserAvatarUrl string   `json:"userAvatarUrl"`
 	TopicStatus   int8     `json:"topicStatus"`
 	ProcessStatus int8     `json:"processStatus"`
-	ViewCount     uint64   `json:"viewCount"`
-	ReplyCount    uint64   `json:"replyCount"`
-	LikeCount     uint64   `json:"likeCount"`
-	PinWeight     int      `json:"pinWeight"`
 	CreatedAt     string   `json:"createdAt"`
 	UpdatedAt     string   `json:"updatedAt"`
+}
+
+type TopicInfoAdminVo struct {
+	TopicAdminBaseVo
+	Username      string `json:"username"`
+	UserAvatarUrl string `json:"userAvatarUrl"`
+	ViewCount     uint64 `json:"viewCount"`
+	ReplyCount    uint64 `json:"replyCount"`
+	LikeCount     uint64 `json:"likeCount"`
+	PinWeight     int    `json:"pinWeight"`
 }
 
 type TopicSourceReq struct {
@@ -441,16 +419,8 @@ type TopicSourceReq struct {
 }
 
 type TopicSourceVo struct {
-	Id            uint64   `json:"id"`
-	Title         string   `json:"title"`
-	Description   string   `json:"description"`
-	Content       string   `json:"content"`
-	CategoryId    []uint64 `json:"categoryId"`
-	UserId        uint64   `json:"userId"`
-	TopicStatus   int8     `json:"topicStatus"`
-	ProcessStatus int8     `json:"processStatus"`
-	CreatedAt     string   `json:"createdAt"`
-	UpdatedAt     string   `json:"updatedAt"`
+	TopicAdminBaseVo
+	Content string `json:"content"`
 }
 
 func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
@@ -469,21 +439,23 @@ func TopicsList(req component.BetterRequest[TopicsListReq]) component.Response {
 				userAvatarUrl = user.GetWebAvatarUrl()
 			}
 			return TopicInfoAdminVo{
-				Id:            t.Id,
-				Title:         t.Title,
-				Description:   t.Excerpt,
-				CategoryId:    t.CategoryIds,
-				UserId:        t.UserId,
+				TopicAdminBaseVo: TopicAdminBaseVo{
+					Id:            t.Id,
+					Title:         t.Title,
+					Description:   t.Excerpt,
+					CategoryId:    t.CategoryIds,
+					UserId:        t.UserId,
+					TopicStatus:   t.Status,
+					ProcessStatus: t.ProcessStatus,
+					CreatedAt:     t.CreatedAt.Format(time.DateTime),
+					UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
+				},
 				Username:      username,
 				UserAvatarUrl: userAvatarUrl,
-				TopicStatus:   t.Status,
-				ProcessStatus: t.ProcessStatus,
 				ViewCount:     t.ViewCount,
 				ReplyCount:    t.ReplyCount,
 				LikeCount:     t.LikeCount,
 				PinWeight:     t.PinWeight,
-				CreatedAt:     t.CreatedAt.Format(time.DateTime),
-				UpdatedAt:     t.UpdatedAt.Format(time.DateTime),
 			}
 		}),
 		Page:    pageData.Page,
@@ -503,16 +475,18 @@ func TopicSource(req component.BetterRequest[TopicSourceReq]) component.Response
 	}
 
 	return component.SuccessResponse(TopicSourceVo{
-		Id:            topic.Id,
-		Title:         topic.Title,
-		Description:   topic.Excerpt,
-		Content:       firstPost.Content,
-		CategoryId:    topic.CategoryIds,
-		UserId:        topic.UserId,
-		TopicStatus:   topic.Status,
-		ProcessStatus: topic.ProcessStatus,
-		CreatedAt:     topic.CreatedAt.Format(time.DateTime),
-		UpdatedAt:     topic.UpdatedAt.Format(time.DateTime),
+		TopicAdminBaseVo: TopicAdminBaseVo{
+			Id:            topic.Id,
+			Title:         topic.Title,
+			Description:   topic.Excerpt,
+			CategoryId:    topic.CategoryIds,
+			UserId:        topic.UserId,
+			TopicStatus:   topic.Status,
+			ProcessStatus: topic.ProcessStatus,
+			CreatedAt:     topic.CreatedAt.Format(time.DateTime),
+			UpdatedAt:     topic.UpdatedAt.Format(time.DateTime),
+		},
+		Content: firstPost.Content,
 	})
 }
 
@@ -560,7 +534,7 @@ func EditTopic(req component.BetterRequest[EditTopicReq]) component.Response {
 		"title":  topic.Title,
 		"status": statusCode,
 	})
-	moderationlogservice.TopicStatusChanged(req.UserId, topic.Id, topic.Title, req.Params.ProcessStatus == 1)
+	moderationservice.TopicStatusChanged(req.UserId, topic.Id, topic.Title, req.Params.ProcessStatus == 1)
 	firstPost := posts.Get(topic.FirstPostId)
 	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
 		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
@@ -890,22 +864,6 @@ func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Res
 	})
 
 	return component.SuccessResponse(lo.Map(categories, func(t *category.Entity, _ int) CategoryItem {
-		moderatorItems := lo.Map(moderatorGroup[t.Id], func(item *moderators.Entity, _ int) CategoryModeratorItem {
-			user := userMap[item.UserId]
-			username := ""
-			avatarURL := ""
-			if user != nil {
-				username = user.Username
-				avatarURL = user.GetWebAvatarUrl()
-			}
-			return CategoryModeratorItem{
-				Id:        item.Id,
-				UserId:    item.UserId,
-				Username:  username,
-				AvatarUrl: avatarURL,
-				Status:    item.Status,
-			}
-		})
 		return CategoryItem{
 			Id:         t.Id,
 			Category:   t.Name,
@@ -914,9 +872,28 @@ func GetCategoryList(req component.BetterRequest[CategoryListReq]) component.Res
 			Color:      t.Color,
 			Slug:       t.Slug,
 			Sort:       t.Sort,
-			Moderators: moderatorItems,
+			Moderators: buildCategoryModeratorItems(moderatorGroup[t.Id], userMap),
 		}
 	}))
+}
+
+func buildCategoryModeratorItems(moderatorList []*moderators.Entity, userMap map[uint64]*users.EntityComplete) []CategoryModeratorItem {
+	return lo.Map(moderatorList, func(item *moderators.Entity, _ int) CategoryModeratorItem {
+		user := userMap[item.UserId]
+		username := ""
+		avatarURL := ""
+		if user != nil {
+			username = user.Username
+			avatarURL = user.GetWebAvatarUrl()
+		}
+		return CategoryModeratorItem{
+			Id:        item.Id,
+			UserId:    item.UserId,
+			Username:  username,
+			AvatarUrl: avatarURL,
+			Status:    item.Status,
+		}
+	})
 }
 
 type AddCategoryModeratorReq struct {
@@ -968,7 +945,7 @@ func AddCategoryModerator(req component.BetterRequest[AddCategoryModeratorReq]) 
 		slog.Error("save category moderator failed", "categoryId", categoryEntity.Id, "userId", user.Id, "err", err)
 		return component.FailResponse()
 	}
-	moderatorservice.Invalidate()
+	moderationservice.Invalidate()
 	optlogger.UserOptCode(req.UserId, optlogger.EditCategory, categoryEntity.Id, "admin.opt.category.moderatorAdded", optlogger.MessageParams{
 		"categoryId":   categoryEntity.Id,
 		"categoryName": categoryEntity.Name,
@@ -984,22 +961,7 @@ func GetGlobalModeratorList(req component.BetterRequest[struct{}]) component.Res
 		return item.UserId
 	}))
 	userMap := users.GetMapByIds(moderatorUserIds)
-	return component.SuccessResponse(lo.Map(moderatorList, func(item *moderators.Entity, _ int) CategoryModeratorItem {
-		user := userMap[item.UserId]
-		username := ""
-		avatarURL := ""
-		if user != nil {
-			username = user.Username
-			avatarURL = user.GetWebAvatarUrl()
-		}
-		return CategoryModeratorItem{
-			Id:        item.Id,
-			UserId:    item.UserId,
-			Username:  username,
-			AvatarUrl: avatarURL,
-			Status:    item.Status,
-		}
-	}))
+	return component.SuccessResponse(buildCategoryModeratorItems(moderatorList, userMap))
 }
 
 func AddGlobalModerator(req component.BetterRequest[ModeratorUserReq]) component.Response {
@@ -1022,7 +984,7 @@ func AddGlobalModerator(req component.BetterRequest[ModeratorUserReq]) component
 		slog.Error("save global moderator failed", "userId", user.Id, "err", err)
 		return component.FailResponse()
 	}
-	moderatorservice.Invalidate()
+	moderationservice.Invalidate()
 	return component.SuccessResponse(true)
 }
 
@@ -1037,7 +999,7 @@ func DeleteGlobalModerator(req component.BetterRequest[struct {
 		slog.Error("delete global moderator failed", "moderatorId", entity.Id, "err", err)
 		return component.FailResponse()
 	}
-	moderatorservice.Invalidate()
+	moderationservice.Invalidate()
 	return component.SuccessResponse(true)
 }
 
@@ -1053,7 +1015,7 @@ func DeleteCategoryModerator(req component.BetterRequest[struct {
 		slog.Error("delete category moderator failed", "moderatorId", entity.Id, "err", err)
 		return component.FailResponse()
 	}
-	moderatorservice.Invalidate()
+	moderationservice.Invalidate()
 	optlogger.UserOptCode(req.UserId, optlogger.EditCategory, entity.ScopeId, "admin.opt.category.moderatorRemoved", optlogger.MessageParams{
 		"categoryId":   entity.ScopeId,
 		"categoryName": categoryEntity.Name,

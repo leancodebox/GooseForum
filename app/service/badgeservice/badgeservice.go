@@ -7,7 +7,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/models/forum/badges"
 	"github.com/leancodebox/GooseForum/app/models/forum/userBadges"
-	"github.com/leancodebox/GooseForum/app/service/eventnotice"
+	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/samber/lo"
 )
 
@@ -193,7 +193,7 @@ func Grant(userID uint64, code string, source string, reason string, grantedBy u
 	hadRecord := userBadges.Exists(userID, code)
 	granted, err := userBadges.Grant(userID, code, source, reason, grantedBy, nil)
 	if err == nil && granted && !hadRecord && source != userBadges.SourceMigration {
-		_ = eventnotice.SendBadgeNotification(userID, badge.Code, badge.Name, badge.IconURL)
+		_ = notificationservice.SendBadgeNotification(userID, badge.Code, badge.Name, badge.IconURL)
 	}
 	return granted, err
 }
@@ -206,8 +206,8 @@ func ResolveOne(code string) Badge {
 	return items[0]
 }
 
-func applyOverride(def Definition, override *badges.Entity) Badge {
-	item := Badge(def)
+func applyOverride(def Badge, override *badges.Entity) Badge {
+	item := def
 	if override == nil {
 		return item
 	}

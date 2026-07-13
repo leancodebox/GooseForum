@@ -5,10 +5,10 @@ import { getChatMessages, markChatRead, sendChatMessage, type ChatMessagePayload
 import { formatChatTime } from '@/runtime/format'
 import { useUnreadStatus } from '@/runtime/unread-status'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import type { LayoutPayload, MessageConversationPayload, MessagesPageProps, UserConnectionPayload } from '@/types/payload'
+import type { ChatItemPayload, LayoutPayload, MessagesPageProps, UserConnectionPayload } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
-type ChatConversation = MessageConversationPayload & {
+type ChatConversation = ChatItemPayload & {
   messages: ChatMessagePayload[]
   loading?: boolean
   loadingOlder?: boolean

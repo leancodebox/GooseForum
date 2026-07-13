@@ -27,24 +27,8 @@ const (
 	LevelSpecial = "special"
 )
 
-type Definition struct {
-	Code        string
-	Type        string
-	GrantMode   string
-	Name        string
-	Description string
-	IconType    string
-	IconKey     string
-	IconURL     string
-	Color       string
-	Level       string
-	IsEnabled   bool
-	IsWearable  bool
-	SortOrder   int
-}
-
-func systemDefinitions() []Definition {
-	return []Definition{
+func systemDefinitions() []Badge {
+	return []Badge{
 		{Code: CodeFirstPost, Type: badges.TypeSystem, GrantMode: badges.GrantModeAuto, Name: "初次发帖", Description: "发布了第一篇主题", IconType: badges.IconTypeAsset, IconURL: "/static/badges/first-post.svg", Color: "blue", Level: LevelBronze, IsEnabled: true, IsWearable: false, SortOrder: 10},
 		{Code: CodeFirstComment, Type: badges.TypeSystem, GrantMode: badges.GrantModeAuto, Name: "初次评论", Description: "留下了第一条评论或回复", IconType: badges.IconTypeAsset, IconURL: "/static/badges/first-comment.svg", Color: "teal", Level: LevelBronze, IsEnabled: true, IsWearable: false, SortOrder: 20},
 		{Code: CodeFirstLikeGiven, Type: badges.TypeSystem, GrantMode: badges.GrantModeAuto, Name: "友善点赞", Description: "第一次为他人的内容点赞", IconType: badges.IconTypeAsset, IconURL: "/static/badges/first-like-given.svg", Color: "rose", Level: LevelBronze, IsEnabled: true, IsWearable: false, SortOrder: 30},

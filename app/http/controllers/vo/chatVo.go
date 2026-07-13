@@ -10,6 +10,7 @@ type ChatItemVo struct {
 	LastMsgTime  string `json:"lastMsgTime"`
 	UnreadCount  uint   `json:"unreadCount"`
 	ConvId       uint64 `json:"convId"`
+	PeerUrl      string `json:"peerUrl"`
 }
 
 // MessageVo represents one chat message decorated for the current viewer.

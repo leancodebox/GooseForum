@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
-	"github.com/leancodebox/GooseForum/app/service/eventnotice"
+	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 )
 
 const topicWatchNotifyBatchSize = 500
@@ -34,11 +34,11 @@ func handleCommentCreated(ctx context.Context, event *CommentCreatedEvent) error
 	contentPreview := TakeUpTo64Chars(event.Content)
 	// 如果不是主题作者自己发表评论，通知主题作者
 	if shouldNotifyTopicAuthor(event) {
-		_ = eventnotice.SendCommentNotification(event.TopicAuthorId, event.TopicId, contentPreview, event.UserId, event.PostId)
+		_ = notificationservice.SendCommentNotification(event.TopicAuthorId, event.TopicId, contentPreview, event.UserId, event.PostId)
 	}
 	// 如果是回复 post，且不是回复自己，通知原 post 作者
 	if shouldNotifyParentReplyAuthor(event) {
-		_ = eventnotice.SendPostReplyNotification(event.ReplyToPostAuthorId, event.PostId, event.TopicId, contentPreview, event.UserId)
+		_ = notificationservice.SendPostReplyNotification(event.ReplyToPostAuthorId, event.PostId, event.TopicId, contentPreview, event.UserId)
 	}
 	notifyTopicWatchers(event, contentPreview)
 	return nil
@@ -63,7 +63,7 @@ func notifyTopicWatchers(event *CommentCreatedEvent, contentPreview string) {
 		if len(userIds) == 0 {
 			return
 		}
-		_ = eventnotice.SendTopicPostNotifications(userIds, event.TopicId, event.PostId, contentPreview, event.UserId)
+		_ = notificationservice.SendTopicPostNotifications(userIds, event.TopicId, event.PostId, contentPreview, event.UserId)
 		afterUserId = userIds[len(userIds)-1]
 		if len(userIds) < topicWatchNotifyBatchSize {
 			return
@@ -98,7 +98,7 @@ type UserFollowedEvent struct {
 
 // handleUserFollowed 发送关注通知
 func handleUserFollowed(ctx context.Context, event *UserFollowedEvent) error {
-	return eventnotice.SendFollowNotification(event.UserId, event.FollowerId, event.FollowerName)
+	return notificationservice.SendFollowNotification(event.UserId, event.FollowerId, event.FollowerName)
 }
 
 // TopicLikedEvent 主题点赞事件

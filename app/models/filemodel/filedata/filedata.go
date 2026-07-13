@@ -38,5 +38,9 @@ func (itself *Entity) TableName() string {
 }
 
 func (itself *Entity) GetAccessPath() string {
-	return urlconfig.FilePath(itself.Name)
+	return accessPath(itself.Name)
+}
+
+func accessPath(name string) string {
+	return urlconfig.FilePath(name)
 }

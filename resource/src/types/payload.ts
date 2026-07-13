@@ -717,11 +717,11 @@ export interface NotificationTemplateParams {
 }
 
 export interface MessagesPageProps {
-  conversations: MessageConversationPayload[]
+  conversations: ChatItemPayload[]
   suggestedUsers: UserConnectionPayload[]
 }
 
-export interface MessageConversationPayload {
+export interface ChatItemPayload {
   id: number
   peerId: number
   peerUsername: string

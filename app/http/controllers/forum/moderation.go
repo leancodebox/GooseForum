@@ -22,9 +22,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
-	"github.com/leancodebox/GooseForum/app/service/moderationlogservice"
-	"github.com/leancodebox/GooseForum/app/service/moderationstatusservice"
-	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
+	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 )
@@ -33,12 +31,12 @@ const moderationPageSize = 20
 
 func Moderation(c *gin.Context) {
 	userID := component.LoginUserId(c)
-	if !moderatorservice.CanAccessModeration(userID) {
+	if !moderationservice.CanAccessModeration(userID) {
 		renderNotFound(c)
 		return
 	}
 	page := moderationPage(c)
-	global, categoryIDs := moderatorservice.ScopeForUser(userID)
+	global, categoryIDs := moderationservice.ScopeForUser(userID)
 	if !global && len(categoryIDs) == 0 {
 		renderNotFound(c)
 		return
@@ -184,7 +182,7 @@ func UpdateModerationTopicStatus(req component.BetterRequest[ModerationTopicStat
 	if topic.Id == 0 {
 		return component.FailResponseCode(component.MessageTopicNotFound, nil)
 	}
-	if !moderatorservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
+	if !moderationservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	nextStatus := moderationTargetStatus(req.Params.Action)
@@ -203,7 +201,7 @@ func UpdateModerationTopicStatus(req component.BetterRequest[ModerationTopicStat
 	if _, err := searchservice.BuildSingleTopicSearchDocument(&topic, &firstPost); err != nil {
 		slog.Error("failed to rebuild topic search document", "topicId", topic.Id, "err", err)
 	}
-	moderationlogservice.TopicStatusChanged(req.UserId, topic.Id, topic.Title, nextStatus == 1)
+	moderationservice.TopicStatusChanged(req.UserId, topic.Id, topic.Title, nextStatus == 1)
 	return component.SuccessResponse(true)
 }
 
@@ -229,7 +227,7 @@ func CreateReport(req component.BetterRequest[CreateReportReq]) component.Respon
 	if !created {
 		return component.FailResponseCode(component.MessageReportDuplicate, nil)
 	}
-	moderationstatusservice.InvalidateTopic(target.TopicID)
+	moderationservice.InvalidateTopic(target.TopicID)
 	eventbus.Publish(context.Background(), &eventhandlers.ReportCreatedEvent{
 		ReportId:   report.Id,
 		TargetType: report.TargetType,
@@ -247,7 +245,7 @@ func UpdateModerationPostStatus(req component.BetterRequest[ModerationPostStatus
 		return component.FailResponseCode(component.MessagePostNotFound, nil)
 	}
 	topic := topics.GetSimple(post.TopicId)
-	if topic.Id == 0 || !moderatorservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
+	if topic.Id == 0 || !moderationservice.CanModerateAnyCategory(req.UserId, topic.CategoryIds) {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	nextStatus := moderationTargetStatus(req.Params.Action)
@@ -259,7 +257,7 @@ func UpdateModerationPostStatus(req component.BetterRequest[ModerationPostStatus
 	}
 	userMap := users.GetMapByIds([]uint64{post.UserId})
 	author := userPayload(post.UserId, userMap)
-	moderationlogservice.PostStatusChanged(req.UserId, moderationlogservice.PostSnapshot{
+	moderationservice.PostStatusChanged(req.UserId, moderationservice.PostSnapshot{
 		PostId:       post.Id,
 		TopicId:      post.TopicId,
 		TopicTitle:   topic.Title,
@@ -272,7 +270,7 @@ func UpdateModerationPostStatus(req component.BetterRequest[ModerationPostStatus
 }
 
 func ModerationReportList(req component.BetterRequest[ModerationReportListReq]) component.Response {
-	if !moderatorservice.CanAccessModeration(req.UserId) {
+	if !moderationservice.CanAccessModeration(req.UserId) {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	pageSize := component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50)
@@ -308,13 +306,13 @@ func UpdateModerationReportStatus(req component.BetterRequest[ModerationReportSt
 	if err := reports.UpdateStatus(report.Id, nextStatus, resolution, req.UserId); err != nil {
 		return component.FailResponseCode(component.MessageOperationFailed, nil)
 	}
-	moderationlogservice.ReportStatusChanged(req.UserId, buildReportLogSnapshot(report, resolution), nextStatus)
-	moderationstatusservice.InvalidateTopic(reportTopicID(report))
+	moderationservice.ReportStatusChanged(req.UserId, buildReportLogSnapshot(report, resolution), nextStatus)
+	moderationservice.InvalidateTopic(reportTopicID(report))
 	return component.SuccessResponse(true)
 }
 
 func ModerationLogList(req component.BetterRequest[ModerationLogListReq]) component.Response {
-	if !moderatorservice.CanAccessModeration(req.UserId) {
+	if !moderationservice.CanAccessModeration(req.UserId) {
 		return component.FailResponseCode(component.MessagePermissionDenied, nil)
 	}
 	pageSize := component.BoundPageSizeWithRange(req.Params.PageSize, 10, 50)
@@ -402,10 +400,10 @@ func moderationExcerpt(content string) string {
 	return string(runes)
 }
 
-func buildReportLogSnapshot(record reports.Entity, resolution string) moderationlogservice.ReportSnapshot {
+func buildReportLogSnapshot(record reports.Entity, resolution string) moderationservice.ReportSnapshot {
 	userMap := users.GetMapByIds([]uint64{record.ReporterId})
 	reporter := userPayload(record.ReporterId, userMap)
-	snapshot := moderationlogservice.ReportSnapshot{
+	snapshot := moderationservice.ReportSnapshot{
 		ReportId:   record.Id,
 		TargetType: record.TargetType,
 		TargetId:   record.TargetId,
@@ -439,7 +437,7 @@ func buildReportLogSnapshot(record reports.Entity, resolution string) moderation
 
 func canModerateReportTarget(userID uint64, targetType string, targetID uint64) bool {
 	categoryIDs, ok := reportTargetCategories(targetType, targetID)
-	return ok && moderatorservice.CanModerateAnyCategory(userID, categoryIDs)
+	return ok && moderationservice.CanModerateAnyCategory(userID, categoryIDs)
 }
 
 func reportTargetCategories(targetType string, targetID uint64) ([]uint64, bool) {
@@ -710,7 +708,7 @@ func moderationReportPage(userID uint64, status string, categoryID uint64, curso
 }
 
 func reportScopeCategoryIDs(userID uint64, categoryID uint64) ([]uint64, bool) {
-	global, categoryIDs := moderatorservice.ScopeForUser(userID)
+	global, categoryIDs := moderationservice.ScopeForUser(userID)
 	if global {
 		if categoryID > 0 {
 			return []uint64{categoryID}, true
@@ -798,7 +796,7 @@ func reportCategoriesFromMaps(record reports.Entity, batchMaps moderationReportB
 
 func buildModerationReportItem(userID uint64, categoryID uint64, record reports.Entity, batchMaps moderationReportBatchMaps) (ModerationReportItem, bool) {
 	categoryIDs, ok := reportCategoriesFromMaps(record, batchMaps)
-	if !ok || !moderatorservice.CanModerateAnyCategory(userID, categoryIDs) {
+	if !ok || !moderationservice.CanModerateAnyCategory(userID, categoryIDs) {
 		return ModerationReportItem{}, false
 	}
 	if categoryID > 0 && !slices.Contains(categoryIDs, categoryID) {

@@ -1,4 +1,4 @@
-package moderatorservice
+package moderationservice
 
 import (
 	"slices"

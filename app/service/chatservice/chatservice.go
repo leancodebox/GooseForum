@@ -10,6 +10,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/chat/messages"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
+	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/samber/lo"
 )
 
@@ -119,6 +120,7 @@ func GetChatList(userId uint64) ([]*vo.ChatItemVo, error) {
 			PeerId:      cfg.PeerId,
 			UnreadCount: cfg.UnreadCount,
 			ConvId:      cfg.ConvId,
+			PeerUrl:     urlconfig.User(cfg.PeerId),
 		}
 
 		if peer != nil {

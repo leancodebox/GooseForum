@@ -1,4 +1,4 @@
-package eventnotice
+package notificationservice
 
 import (
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"

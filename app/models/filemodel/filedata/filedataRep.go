@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/queryopt"
-	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 
 	"github.com/google/uuid"
 )
@@ -113,7 +112,7 @@ func FileResourcePage(page, pageSize int) FileResourcePageResult {
 }
 
 func (itself FileResource) GetAccessPath() string {
-	return urlconfig.FilePath(itself.Name)
+	return accessPath(itself.Name)
 }
 
 // CountDailyUploads returns the number of files uploaded by a user today.

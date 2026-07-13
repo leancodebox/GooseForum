@@ -1,4 +1,4 @@
-package moderationstatusservice
+package moderationservice
 
 import (
 	"strconv"
@@ -8,7 +8,6 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
-	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
 )
 
 const statusTTL = 5 * time.Minute
@@ -19,10 +18,10 @@ func HasOpenReports(userID uint64) bool {
 	if userID == 0 {
 		return false
 	}
-	if !moderatorservice.CanAccessModeration(userID) {
+	if !CanAccessModeration(userID) {
 		return false
 	}
-	global, categoryIDs := moderatorservice.ScopeForUser(userID)
+	global, categoryIDs := ScopeForUser(userID)
 	if global {
 		categoryIDs = allCategoryIDs()
 	}

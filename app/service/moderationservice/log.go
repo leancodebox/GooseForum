@@ -1,4 +1,4 @@
-package moderationlogservice
+package moderationservice
 
 import (
 	"log/slog"
@@ -69,14 +69,14 @@ func PostStatusChanged(actorUserId uint64, snapshot PostSnapshot, blocked bool) 
 		Payload: moderationLog.Payload{
 			MessageCode: "moderation.log.post.statusChanged",
 			Params: map[string]any{
-				"topicId":       snapshot.TopicId,
-				"postId":        snapshot.PostId,
-				"title":         snapshot.TopicTitle,
-				"postNo":        snapshot.PostNo,
-				"postAuthorId":  snapshot.PostAuthorId,
-				"postAuthor":    snapshot.PostAuthor,
-				"excerpt":       snapshot.Excerpt,
-				"status":        status,
+				"topicId":      snapshot.TopicId,
+				"postId":       snapshot.PostId,
+				"title":        snapshot.TopicTitle,
+				"postNo":       snapshot.PostNo,
+				"postAuthorId": snapshot.PostAuthorId,
+				"postAuthor":   snapshot.PostAuthor,
+				"excerpt":      snapshot.Excerpt,
+				"status":       status,
 			},
 		},
 	})

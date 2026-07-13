@@ -1,4 +1,4 @@
-package eventnotice
+package notificationservice
 
 import (
 	"testing"

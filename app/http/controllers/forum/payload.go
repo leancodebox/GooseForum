@@ -30,8 +30,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 	"github.com/leancodebox/GooseForum/app/service/chatservice"
-	"github.com/leancodebox/GooseForum/app/service/moderationstatusservice"
-	"github.com/leancodebox/GooseForum/app/service/moderatorservice"
+	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
@@ -428,21 +427,11 @@ type SponsorPayload struct {
 	AvatarURL string `json:"avatarUrl"`
 }
 
-type SponsorsPageIntroPayload struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-}
+type SponsorsPageIntroPayload = pageConfig.SponsorsPageIntro
 
-type SponsorsContactPayload struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	ButtonText  string `json:"buttonText"`
-	ButtonLink  string `json:"buttonLink"`
-}
+type SponsorsContactPayload = pageConfig.SponsorsContact
 
-type SponsorsRulePayload struct {
-	Content string `json:"content"`
-}
+type SponsorsRulePayload = pageConfig.SponsorsRule
 
 type NotificationsPageProps struct {
 	Total         int64                 `json:"total"`
@@ -489,20 +478,8 @@ type NotificationTopicPayload struct {
 }
 
 type MessagesPageProps struct {
-	Conversations  []MessageConversationPayload `json:"conversations"`
-	SuggestedUsers []UserConnectionPayload      `json:"suggestedUsers"`
-}
-
-type MessageConversationPayload struct {
-	ID           uint64 `json:"id"`
-	PeerID       uint64 `json:"peerId"`
-	PeerUsername string `json:"peerUsername"`
-	PeerAvatar   string `json:"peerAvatar"`
-	LastMsg      string `json:"lastMsg"`
-	LastMsgTime  string `json:"lastMsgTime"`
-	UnreadCount  uint   `json:"unreadCount"`
-	ConvID       uint64 `json:"convId"`
-	PeerURL      string `json:"peerUrl"`
+	Conversations  []*vo.ChatItemVo        `json:"conversations"`
+	SuggestedUsers []UserConnectionPayload `json:"suggestedUsers"`
 }
 
 type SettingsPageProps struct {
@@ -570,7 +547,7 @@ func buildLayout(c *gin.Context, activeKey string) LayoutPayload {
 			AvatarURL:                 currentUser.AvatarUrl,
 			IsAuthenticated:           currentUser.UserId > 0,
 			CanAccessAdmin:            currentUser.CanAccessAdmin,
-			IsModerator:               moderatorservice.CanAccessModeration(currentUser.UserId),
+			IsModerator:               moderationservice.CanAccessModeration(currentUser.UserId),
 			RequiresEmailVerification: currentUser.UserId > 0 && securityConfig.EnableEmailVerification && currentUser.IsActivated == users.ActivationPending,
 			AdminPermissions:          buildAdminPermissions(currentUser.UserId),
 		}
@@ -674,7 +651,7 @@ func buildUnreadStatus(userID uint64) UnreadStatusPayload {
 	return UnreadStatusPayload{
 		Notifications:          status.Notifications,
 		Messages:               status.Messages,
-		ModerationReports:      moderationstatusservice.HasOpenReports(userID),
+		ModerationReports:      moderationservice.HasOpenReports(userID),
 		LatestNotificationType: status.LatestNotificationType,
 	}
 }
@@ -930,7 +907,7 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 		userIDs = append(userIDs, item.UserId)
 	}
 	userMap := users.GetMapByIds(userIDs)
-	canModerate := moderatorservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds)
+	canModerate := moderationservice.CanModerateAnyCategory(currentUserID, topic.CategoryIds)
 
 	return TopicDetailProps{
 		Topic: buildTopicDetailPayload(c, topic, firstPost, userMap),
@@ -1860,13 +1837,7 @@ func buildNotificationsPageProps(c *gin.Context) NotificationsPageProps {
 	userID := component.LoginUserId(c)
 	notifications, nextCursor, hasNext, _ := notificationservice.GetNotificationCursorList(userID, notificationservice.DefaultNotificationPageSize, 0, false)
 	unreadCount, _ := eventNotification.GetUnreadCount(userID)
-	items := make([]NotificationPayload, 0, len(notifications))
-	for _, notification := range notifications {
-		if notification == nil {
-			continue
-		}
-		items = append(items, BuildNotificationPayload(notification))
-	}
+	items := BuildNotificationPayloads(notifications)
 	return NotificationsPageProps{
 		Total:         int64(len(items)),
 		UnreadCount:   unreadCount,
@@ -1931,6 +1902,17 @@ func buildDraftsPageProps(c *gin.Context) DraftsPageProps {
 	}
 }
 
+func BuildNotificationPayloads(notifications []*eventNotification.Entity) []NotificationPayload {
+	items := make([]NotificationPayload, 0, len(notifications))
+	for _, notification := range notifications {
+		if notification == nil {
+			continue
+		}
+		items = append(items, BuildNotificationPayload(notification))
+	}
+	return items
+}
+
 func BuildNotificationPayload(notification *eventNotification.Entity) NotificationPayload {
 	payload := notification.Payload
 	item := NotificationPayload{
@@ -1987,25 +1969,8 @@ func notificationTitle(eventType string, payload eventNotification.NotificationP
 func buildMessagesPageProps(c *gin.Context) MessagesPageProps {
 	userID := component.LoginUserId(c)
 	list, _ := chatservice.GetChatList(userID)
-	conversations := make([]MessageConversationPayload, 0, len(list))
-	for _, item := range list {
-		if item == nil {
-			continue
-		}
-		conversations = append(conversations, MessageConversationPayload{
-			ID:           item.Id,
-			PeerID:       item.PeerId,
-			PeerUsername: item.PeerUsername,
-			PeerAvatar:   item.PeerAvatar,
-			LastMsg:      item.LastMsg,
-			LastMsgTime:  item.LastMsgTime,
-			UnreadCount:  item.UnreadCount,
-			ConvID:       item.ConvId,
-			PeerURL:      "/u/" + strconv.FormatUint(item.PeerId, 10),
-		})
-	}
 	return MessagesPageProps{
-		Conversations:  conversations,
+		Conversations:  list,
 		SuggestedUsers: buildUserConnections(userFollow.GetFollowingList(userID, 1, 12)),
 	}
 }

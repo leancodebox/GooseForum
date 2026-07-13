@@ -1,4 +1,4 @@
-package moderationstatusservice
+package moderationservice
 
 import (
 	"testing"

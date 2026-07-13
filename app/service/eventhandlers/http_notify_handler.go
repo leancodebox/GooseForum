@@ -190,17 +190,7 @@ func topicNotifyPayload(topic *topics.Entity) notifyEventData {
 	if topic == nil {
 		return notifyEventData{BaseURI: baseURI()}
 	}
-	summary := notifyTopic{
-		ID:            topic.Id,
-		Title:         topic.Title,
-		URL:           urlconfig.PostDetail(topic.Id),
-		Description:   topic.Excerpt,
-		FirstImageURL: topic.FirstImageURL,
-		UserID:        topic.UserId,
-		User:          userNotifyPayload(topic.UserId),
-		CategoryIDs:   topic.CategoryIds,
-		Categories:    topicCategoryNotifyPayloads(topic.CategoryIds),
-	}
+	summary := buildNotifyTopic(topic.Id, topic.Title, topic.Excerpt, topic.FirstImageURL, topic.UserId, topic.CategoryIds)
 	user := summary.User
 	return notifyEventData{
 		BaseURI: baseURI(),
@@ -213,16 +203,20 @@ func topicNotifyPayloadFromSmall(topic topics.Entity) notifyTopic {
 	if topic.Id == 0 {
 		return notifyTopic{}
 	}
+	return buildNotifyTopic(topic.Id, topic.Title, topic.Excerpt, topic.FirstImageURL, topic.UserId, topic.CategoryIds)
+}
+
+func buildNotifyTopic(id uint64, title string, description string, firstImageURL string, userID uint64, categoryIDs []uint64) notifyTopic {
 	return notifyTopic{
-		ID:            topic.Id,
-		Title:         topic.Title,
-		URL:           urlconfig.PostDetail(topic.Id),
-		Description:   topic.Excerpt,
-		FirstImageURL: topic.FirstImageURL,
-		UserID:        topic.UserId,
-		User:          userNotifyPayload(topic.UserId),
-		CategoryIDs:   topic.CategoryIds,
-		Categories:    topicCategoryNotifyPayloads(topic.CategoryIds),
+		ID:            id,
+		Title:         title,
+		URL:           urlconfig.PostDetail(id),
+		Description:   description,
+		FirstImageURL: firstImageURL,
+		UserID:        userID,
+		User:          userNotifyPayload(userID),
+		CategoryIDs:   categoryIDs,
+		Categories:    topicCategoryNotifyPayloads(categoryIDs),
 	}
 }
 
