@@ -9,8 +9,11 @@
     <h1>{{.Payload.Layout.Site.Name}}</h1>
     {{if .Payload.Meta.Description}}<p>{{.Payload.Meta.Description}}</p>{{end}}
     {{template "partials/topic_list.gohtml" (dict "Topics" .Payload.Props.Topics "Lang" .Lang)}}
-    {{if .Payload.Props.Pagination.HasNext}}
-    <p><a href="{{.Payload.Props.Pagination.NextURL}}" rel="next">{{ t .Lang "nextPage" }}</a></p>
+    {{if or .Payload.Meta.PrevURL .Payload.Meta.NextURL}}
+    <nav aria-label="Pagination">
+        {{if .Payload.Meta.PrevURL}}<a href="{{.Payload.Meta.PrevURL}}" rel="prev">{{ t .Lang "prevPage" }}</a>{{end}}
+        {{if .Payload.Meta.NextURL}}<a href="{{.Payload.Meta.NextURL}}" rel="next">{{ t .Lang "nextPage" }}</a>{{end}}
+    </nav>
     {{end}}
 </main>
 {{end}}

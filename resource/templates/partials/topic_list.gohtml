@@ -1,21 +1,42 @@
 {{define "partials/topic_list.gohtml"}}
 {{if .Topics}}
-<ol>
+<table class="gf-crawler-topic-list">
+    <colgroup>
+        <col>
+        <col style="width: 120px">
+        <col style="width: 120px">
+        <col style="width: 160px">
+    </colgroup>
+    <thead>
+    <tr>
+        <th scope="col">{{ t $.Lang "topics" }}</th>
+        <th scope="col">{{ t $.Lang "replies" }}</th>
+        <th scope="col">{{ t $.Lang "views" }}</th>
+        <th scope="col">{{ t $.Lang "activity" }}</th>
+    </tr>
+    </thead>
+    <tbody>
     {{range .Topics}}
-    <li>
-        <article>
-            <h2><a href="{{.URL}}">{{.Title}}</a></h2>
-            {{if .Description}}<p>{{.Description}}</p>{{end}}
-            <p>
-                {{range .Categories}}<a href="{{.URL}}">{{.Name}}</a> {{end}}
-                <span>{{.ReplyCount}} {{ t $.Lang "replies" }}</span>
-                <span>{{.ViewCount}} {{ t $.Lang "views" }}</span>
-                <time>{{.ActivityText}}</time>
+    <tr>
+        <td class="gf-crawler-topic-main">
+            <article>
+            <h2 class="gf-crawler-topic-title"><a href="{{.URL}}" rel="bookmark">{{.Title}}</a></h2>
+            {{if or .Author.Username .Categories}}
+            <p class="gf-crawler-topic-meta">
+                {{if .Author.Username}}<a href="/u/{{.Author.ID}}" rel="author">{{.Author.Username}}</a>{{end}}
+                {{range .Categories}}<a href="{{.URL}}" rel="tag">{{.Name}}</a> {{end}}
             </p>
-        </article>
-    </li>
+            {{end}}
+            {{if .Description}}<p class="gf-crawler-topic-excerpt">{{.Description}}</p>{{end}}
+            </article>
+        </td>
+        <td class="gf-crawler-topic-number">{{.ReplyCount}}</td>
+        <td class="gf-crawler-topic-number">{{.ViewCount}}</td>
+        <td class="gf-crawler-topic-activity">{{if .LastUpdateTime}}<time>{{.LastUpdateTime}}</time>{{else if .ActivityText}}<time>{{.ActivityText}}</time>{{end}}</td>
+    </tr>
     {{end}}
-</ol>
+    </tbody>
+</table>
 {{else}}
 <p>{{ t $.Lang "noTopics" }}</p>
 {{end}}

@@ -72,6 +72,8 @@ type PageMeta struct {
 	Title       string         `json:"title"`
 	Description string         `json:"description,omitempty"`
 	Canonical   string         `json:"canonical,omitempty"`
+	PrevURL     string         `json:"prevUrl,omitempty"`
+	NextURL     string         `json:"nextUrl,omitempty"`
 	Robots      string         `json:"robots,omitempty"`
 	OpenGraph   *OpenGraphMeta `json:"openGraph,omitempty"`
 	Twitter     *TwitterMeta   `json:"twitter,omitempty"`
@@ -844,6 +846,14 @@ func buildHomePageURL(sort string, page int) string {
 	if page <= 0 {
 		return ""
 	}
+	if page == 1 {
+		if sort != "" && sort != "latest" {
+			values := url.Values{}
+			values.Set("sort", sort)
+			return "/?" + values.Encode()
+		}
+		return "/"
+	}
 	values := url.Values{}
 	if sort != "" && sort != "latest" {
 		values.Set("sort", sort)
@@ -875,12 +885,18 @@ func buildPageURL(c *gin.Context) string {
 	return component.GetBaseUri(c) + c.Request.URL.String()
 }
 
-func buildHomeMeta(c *gin.Context, page int, sort string) PageMeta {
+func buildHomeMeta(c *gin.Context, page int, sort string, hasNext bool) PageMeta {
 	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
 	meta := PageMeta{
 		Title:       siteTitle(),
 		Description: siteConfig.SiteDescription,
 		Canonical:   component.GetBaseUri(c) + "/",
+	}
+	if page > 1 {
+		meta.PrevURL = buildHomePageURL(sort, page-1)
+	}
+	if hasNext {
+		meta.NextURL = buildHomePageURL(sort, page+1)
 	}
 	if page > 1 || sort != "latest" {
 		meta.Robots = "noindex,follow"
@@ -1155,7 +1171,7 @@ func ensurePostRenderedHTML(entity *posts.Entity) {
 	_ = posts.SaveNoUpdate(entity)
 }
 
-func buildTopicMeta(c *gin.Context, topic TopicDetailPayload) PageMeta {
+func buildTopicMeta(c *gin.Context, topic TopicDetailPayload, postStream ...[]PostPayload) PageMeta {
 	baseURL := component.GetBaseUri(c)
 	canonical := baseURL + topic.URL
 	description := topic.Description
@@ -1200,6 +1216,9 @@ func buildTopicMeta(c *gin.Context, topic TopicDetailPayload) PageMeta {
 			{Type: "InteractionCounter", InteractionType: "https://schema.org/ViewAction", UserInteractionCount: topic.ViewCount},
 		},
 	}
+	if len(postStream) > 0 {
+		jsonLD.Comment = buildTopicJSONLDComments(postStream[0], canonical)
+	}
 	return PageMeta{
 		Title:       pageTitle(topic.Title),
 		Description: description,
@@ -1225,6 +1244,40 @@ func buildTopicMeta(c *gin.Context, topic TopicDetailPayload) PageMeta {
 		},
 		JSONLD: jsonLD,
 	}
+}
+
+const (
+	topicJSONLDCommentLimit     = 5
+	topicJSONLDCommentTextLimit = 300
+)
+
+func buildTopicJSONLDComments(posts []PostPayload, canonical string) []vo.Comment {
+	comments := make([]vo.Comment, 0, min(len(posts), topicJSONLDCommentLimit))
+	for _, post := range posts {
+		if post.PostNo <= 1 || post.IsHidden || post.ProcessStatus != 0 {
+			continue
+		}
+		text := truncateSEOText(post.Content, topicJSONLDCommentTextLimit)
+		if text == "" {
+			continue
+		}
+		publishedAt := parsePayloadTime(post.CreatedAt)
+		publishedTime := ""
+		if !publishedAt.IsZero() {
+			publishedTime = publishedAt.Format(time.RFC3339)
+		}
+		comments = append(comments, vo.Comment{
+			Type:          "Comment",
+			Text:          text,
+			Author:        vo.Person{Type: "Person", Name: post.Author.Username},
+			DatePublished: publishedTime,
+			URL:           canonical + "#post-" + strconv.FormatUint(post.ID, 10),
+		})
+		if len(comments) >= topicJSONLDCommentLimit {
+			break
+		}
+	}
+	return comments
 }
 
 func topicPlainText(lang string, topic TopicDetailPayload) string {
@@ -1686,12 +1739,15 @@ func buildCategoryPageURL(category *category.Entity, sort string, page int) stri
 	if page <= 0 {
 		return ""
 	}
+	if page == 1 {
+		return categorySortURL(category, sort)
+	}
 	values := url.Values{}
 	values.Set("page", strconv.Itoa(page))
 	return categorySortURL(category, sort) + "?" + values.Encode()
 }
 
-func buildCategoryMeta(c *gin.Context, category *category.Entity, page int, sort string) PageMeta {
+func buildCategoryMeta(c *gin.Context, category *category.Entity, page int, sort string, hasNext bool) PageMeta {
 	description := category.Desc
 	if description == "" {
 		description = i18n.T(requestLang(c), "meta.categoryDesc", "category", category.Name)
@@ -1700,6 +1756,12 @@ func buildCategoryMeta(c *gin.Context, category *category.Entity, page int, sort
 		Title:       pageTitle(category.Name),
 		Description: description,
 		Canonical:   component.GetBaseUri(c) + categoryURL(category),
+	}
+	if page > 1 {
+		meta.PrevURL = buildCategoryPageURL(category, sort, page-1)
+	}
+	if hasNext {
+		meta.NextURL = buildCategoryPageURL(category, sort, page+1)
 	}
 	if page > 1 || sort != "latest" {
 		meta.Robots = "noindex,follow"

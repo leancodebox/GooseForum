@@ -14,6 +14,8 @@ export function updateDocumentMeta(payload: PagePayload) {
   setMeta('description', payload.meta.description || '')
   setMeta('robots', payload.meta.robots || '')
   setCanonical(payload.meta.canonical || payload.url)
+  setLinkRel('prev', payload.meta.prevUrl || '')
+  setLinkRel('next', payload.meta.nextUrl || '')
   setPropertyMeta('og:title', payload.meta.openGraph?.title || '')
   setPropertyMeta('og:description', payload.meta.openGraph?.description || '')
   setPropertyMeta('og:type', payload.meta.openGraph?.type || '')
@@ -47,14 +49,18 @@ function setMeta(name: string, content: string) {
 }
 
 function setCanonical(href: string) {
-  let el = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+  setLinkRel('canonical', href)
+}
+
+function setLinkRel(rel: string, href: string) {
+  let el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)
   if (!href) {
     el?.remove()
     return
   }
   if (!el) {
     el = document.createElement('link')
-    el.rel = 'canonical'
+    el.rel = rel
     document.head.appendChild(el)
   }
   el.href = href

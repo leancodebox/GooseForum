@@ -3,6 +3,7 @@ package forum
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -80,6 +81,74 @@ func TestTopicMetaJSONLDIncludesImageForImageOnlyTopic(t *testing.T) {
 	}
 	if meta.Twitter == nil || meta.Twitter.Image != "http://localhost/file/badges/earned.webp" {
 		t.Fatalf("expected Twitter image to use first inline image, got %#v", meta.Twitter)
+	}
+}
+
+func TestTopicMetaJSONLDIncludesVisiblePostStreamComments(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(nil)
+	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/440", nil)
+
+	meta := buildTopicMeta(c, TopicDetailPayload{
+		ID:          440,
+		Title:       "Topic with replies",
+		Description: "Topic description",
+		URL:         "/p/post/440",
+		Author:      TopicAuthorPayload{ID: 1, Username: "author"},
+		CreatedAt:   time.Now().Format(time.DateTime),
+		UpdatedAt:   time.Now().Format(time.DateTime),
+	}, []PostPayload{
+		{ID: 100, PostNo: 1, Content: "first post", Author: TopicAuthorPayload{ID: 1, Username: "author"}, CreatedAt: "2026-07-08 10:00:00"},
+		{ID: 101, PostNo: 2, Content: "reply body", Author: TopicAuthorPayload{ID: 2, Username: "replyer"}, CreatedAt: "2026-07-08 10:01:00"},
+	})
+
+	jsonLD, ok := meta.JSONLD.(vo.ArticleJSONLD)
+	if !ok {
+		t.Fatalf("expected ArticleJSONLD, got %T", meta.JSONLD)
+	}
+	if len(jsonLD.Comment) != 1 {
+		t.Fatalf("comments len = %d, want 1", len(jsonLD.Comment))
+	}
+	if jsonLD.Comment[0].Text != "reply body" || jsonLD.Comment[0].Author.Name != "replyer" || jsonLD.Comment[0].URL != "http://localhost/p/post/440#post-101" {
+		t.Fatalf("comment json-ld = %#v", jsonLD.Comment[0])
+	}
+}
+
+func TestTopicMetaJSONLDLimitsPostStreamComments(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(nil)
+	c.Request = httptest.NewRequest(http.MethodGet, "https://example.com/p/post/440", nil)
+
+	postStream := []PostPayload{{ID: 100, PostNo: 1, Content: "first post", Author: TopicAuthorPayload{ID: 1, Username: "author"}, CreatedAt: "2026-07-08 10:00:00"}}
+	for i := 0; i < topicJSONLDCommentLimit+3; i++ {
+		postStream = append(postStream, PostPayload{
+			ID:        uint64(101 + i),
+			PostNo:    uint64(2 + i),
+			Content:   strings.Repeat("x", topicJSONLDCommentTextLimit+100),
+			Author:    TopicAuthorPayload{ID: uint64(2 + i), Username: "replyer"},
+			CreatedAt: "2026-07-08 10:01:00",
+		})
+	}
+
+	meta := buildTopicMeta(c, TopicDetailPayload{
+		ID:          440,
+		Title:       "Topic with many replies",
+		Description: "Topic description",
+		URL:         "/p/post/440",
+		Author:      TopicAuthorPayload{ID: 1, Username: "author"},
+		CreatedAt:   time.Now().Format(time.DateTime),
+		UpdatedAt:   time.Now().Format(time.DateTime),
+	}, postStream)
+
+	jsonLD, ok := meta.JSONLD.(vo.ArticleJSONLD)
+	if !ok {
+		t.Fatalf("expected ArticleJSONLD, got %T", meta.JSONLD)
+	}
+	if len(jsonLD.Comment) != topicJSONLDCommentLimit {
+		t.Fatalf("comments len = %d, want %d", len(jsonLD.Comment), topicJSONLDCommentLimit)
+	}
+	if len([]rune(jsonLD.Comment[0].Text)) != topicJSONLDCommentTextLimit {
+		t.Fatalf("comment text len = %d, want %d", len([]rune(jsonLD.Comment[0].Text)), topicJSONLDCommentTextLimit)
 	}
 }
 

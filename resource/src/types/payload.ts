@@ -11,6 +11,8 @@ export interface PageMeta {
   title: string
   description?: string
   canonical?: string
+  prevUrl?: string
+  nextUrl?: string
   robots?: string
   openGraph?: {
     title?: string

@@ -5,30 +5,35 @@
 {{end}}
 
 {{define "page"}}
-<main>
-    <header>
-        <img src="{{.Payload.Props.User.AvatarUrl}}" alt="{{.Payload.Props.User.Username}}" width="96" height="96">
-        <h1>{{.Payload.Props.User.Nickname}}</h1>
-        <p>@{{.Payload.Props.User.Username}}</p>
-        {{if .Payload.Props.User.Bio}}<p>{{.Payload.Props.User.Bio}}</p>{{end}}
-        <dl>
-            <dt>{{ t .Lang "topics" }}</dt><dd>{{.Payload.Props.User.TopicCount}}</dd>
-            <dt>{{ t .Lang "repliesTitle" }}</dt><dd>{{.Payload.Props.User.ReplyCount}}</dd>
-            <dt>{{ t .Lang "likesReceived" }}</dt><dd>{{.Payload.Props.User.LikeReceivedCount}}</dd>
-            <dt>{{ t .Lang "followers" }}</dt><dd>{{.Payload.Props.User.FollowerCount}}</dd>
-        </dl>
+<main class="gf-crawler-user-page">
+    <header class="gf-crawler-user-head">
+        <img class="gf-crawler-user-avatar" src="{{.Payload.Props.User.AvatarUrl}}" alt="{{.Payload.Props.User.Username}}" width="96" height="96">
+        <div>
+            <h1>{{.Payload.Props.User.Nickname}}</h1>
+            <p class="gf-crawler-user-meta">@{{.Payload.Props.User.Username}}</p>
+            {{if .Payload.Props.User.Bio}}<p class="gf-crawler-user-bio">{{.Payload.Props.User.Bio}}</p>{{end}}
+        </div>
     </header>
 
-    <section>
+    <section class="gf-crawler-user-stats" aria-label="{{ t .Lang "profileStats" }}">
+        <dl>
+            <div><dt>{{ t .Lang "topics" }}</dt><dd>{{.Payload.Props.User.TopicCount}}</dd></div>
+            <div><dt>{{ t .Lang "repliesTitle" }}</dt><dd>{{.Payload.Props.User.ReplyCount}}</dd></div>
+            <div><dt>{{ t .Lang "likesReceived" }}</dt><dd>{{.Payload.Props.User.LikeReceivedCount}}</dd></div>
+            <div><dt>{{ t .Lang "followers" }}</dt><dd>{{.Payload.Props.User.FollowerCount}}</dd></div>
+        </dl>
+    </section>
+
+    <section class="gf-crawler-user-section">
         <h2>{{ t .Lang "recentTopics" }}</h2>
         {{template "partials/topic_list.gohtml" (dict "Topics" .Payload.Props.Topics "Lang" .Lang)}}
     </section>
 
-    <section>
+    <section class="gf-crawler-user-section">
         <h2>{{ t .Lang "recentActivity" }}</h2>
-        <ul>
+        <ul class="gf-crawler-activity-list">
             {{range .Payload.Props.Activities}}
-            <li>
+            <li class="gf-crawler-activity">
                 {{if .URL}}<a href="{{.URL}}">{{.Label}}</a>{{else}}{{.Label}}{{end}}
                 {{if .ContentPreview}}：{{.ContentPreview}}{{end}}
                 <time>{{.CreatedAt}}</time>

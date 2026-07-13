@@ -5,11 +5,11 @@
 {{end}}
 
 {{define "page"}}
-<main>
-    <article>
+<main class="gf-crawler-topic-page">
+    <article class="gf-crawler-topic-head">
         <h1>{{.Payload.Props.Topic.Title}}</h1>
-        {{if .Payload.Props.Topic.Description}}<p>{{.Payload.Props.Topic.Description}}</p>{{end}}
-        <p>
+        {{if .Payload.Props.Topic.Description}}<p class="gf-crawler-topic-summary">{{.Payload.Props.Topic.Description}}</p>{{end}}
+        <p class="gf-crawler-post-meta">
             {{if .Payload.Props.Topic.Categories}}
             {{range .Payload.Props.Topic.Categories}}
             <a href="{{.URL}}" rel="tag">{{.Name}}</a>
@@ -22,30 +22,30 @@
             <span>{{.Payload.Props.Topic.LikeCount}} {{ t .Lang "likes" }}</span>
             <span>{{.Payload.Props.Topic.ViewCount}} {{ t .Lang "views" }}</span>
         </p>
-        {{with index .Payload.Props.PostStream.Posts 0}}
-        <div>
-            {{SafeHTML .RenderedContent}}
-        </div>
-        {{end}}
     </article>
 
     {{if .Payload.Props.PostStream.Posts}}
-    <section aria-label="{{ t .Lang "repliesTitle" }}">
-        <h2>{{ t .Lang "repliesTitle" }}</h2>
+    <section class="gf-crawler-post-list" aria-label="{{ t .Lang "posts" }}">
+        <h2>{{ t .Lang "posts" }}</h2>
         <ol>
             {{range .Payload.Props.PostStream.Posts}}
-            {{if gt .PostNo 1}}
-            <li id="post-{{.ID}}">
+            <li id="post-{{.ID}}" class="gf-crawler-post">
                 <article>
-                    <p>
+                    <p class="gf-crawler-post-meta">
+                        <a href="#post-{{.ID}}">#{{.PostNo}}</a>
                         <a href="/u/{{.Author.ID}}">{{.Author.Username}}</a>
                         <time>{{.CreatedAt}}</time>
                     </p>
                     {{if .ReplyToUsername}}<p>{{ t $.Lang "replyTo" }} @{{.ReplyToUsername}}</p>{{end}}
+                    <div class="gf-crawler-post-body">
+                    {{if .RenderedContent}}
+                    {{SafeHTML .RenderedContent}}
+                    {{else}}
                     <p>{{Nl2br .Content}}</p>
+                    {{end}}
+                    </div>
                 </article>
             </li>
-            {{end}}
             {{end}}
         </ol>
     </section>

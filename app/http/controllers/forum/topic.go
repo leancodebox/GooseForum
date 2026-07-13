@@ -45,7 +45,7 @@ func TopicDetail(c *gin.Context) {
 	payload := PagePayload{
 		Component: "topic.detail",
 		Props:     props,
-		Meta:      buildTopicMeta(c, props.Topic),
+		Meta:      buildTopicMeta(c, props.Topic, props.PostStream.Posts),
 		Layout:    buildLayout(c, activeKeyForTopic(props.Topic)),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
