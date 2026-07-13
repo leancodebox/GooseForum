@@ -4,13 +4,10 @@ import (
 	"testing"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/db4fileconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
 func setupFileDataTestDB(t *testing.T) {
 	t.Helper()
-	preferences.Set("db.file.connection", "sqlite")
-	preferences.Set("db.file.path", ":memory:")
 	conn := db.Connect()
 	if err := conn.AutoMigrate(&Entity{}); err != nil {
 		t.Fatalf("migrate file data: %v", err)

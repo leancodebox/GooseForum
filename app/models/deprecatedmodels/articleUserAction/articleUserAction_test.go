@@ -5,13 +5,10 @@ import (
 	"time"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
 func setupTestDB(t *testing.T) {
 	t.Helper()
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	if err := db.Connect().AutoMigrate(&Entity{}); err != nil {
 		t.Fatalf("migrate article user action: %v", err)
 	}

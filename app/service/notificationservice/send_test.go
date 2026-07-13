@@ -4,13 +4,10 @@ import (
 	"testing"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 )
 
 func TestCommentNotificationsUseTopicPostPayload(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := db.Connect()
 	if err := conn.AutoMigrate(&eventNotification.Entity{}); err != nil {
 		t.Fatalf("migrate notifications: %v", err)

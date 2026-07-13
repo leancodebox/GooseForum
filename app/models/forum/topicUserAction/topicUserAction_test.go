@@ -6,12 +6,9 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 )
 
 func TestTopicUserActionRepositoryParity(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&Entity{}); err != nil {
 		t.Fatalf("migrate topic user action: %v", err)

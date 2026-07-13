@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/moderationLog"
@@ -19,8 +18,6 @@ import (
 
 func setupAdminTopicTestDB(t *testing.T) *gorm.DB {
 	t.Helper()
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(
 		&users.EntityComplete{},

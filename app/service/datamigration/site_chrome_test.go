@@ -5,7 +5,6 @@ import (
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
 	"github.com/leancodebox/GooseForum/app/bundles/jsonopt"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"gorm.io/gorm"
 )
@@ -74,8 +73,6 @@ func TestMigrateSiteChromeContentKeepsDefaultsWithoutLegacySiteSettings(t *testi
 
 func resetPageConfigDB(t *testing.T) *gorm.DB {
 	t.Helper()
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := db.Connect()
 	if err := conn.AutoMigrate(&pageConfig.Entity{}); err != nil {
 		t.Fatalf("migrate page config: %v", err)

@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
@@ -115,8 +114,6 @@ func TestDraftTopicViewIsNotCounted(t *testing.T) {
 }
 
 func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &category.Entity{}, &users.EntityComplete{}, &topicUserAction.Entity{}); err != nil {
 		t.Fatalf("migrate topic detail tables: %v", err)
@@ -192,8 +189,6 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 }
 
 func TestPostWindowDefaultLoadsFromFirstPost(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &users.EntityComplete{}); err != nil {
 		t.Fatalf("migrate reply window tables: %v", err)
@@ -250,8 +245,6 @@ func TestPostWindowDefaultLoadsFromFirstPost(t *testing.T) {
 }
 
 func TestPostWindowAnchorPostNoCanLoadFirstPost(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &users.EntityComplete{}); err != nil {
 		t.Fatalf("migrate post window tables: %v", err)
@@ -305,8 +298,6 @@ func TestPostWindowAnchorPostNoCanLoadFirstPost(t *testing.T) {
 }
 
 func TestPostWindowAnchorPostNoFallsForwardAcrossDeletedReplies(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &users.EntityComplete{}); err != nil {
 		t.Fatalf("migrate reply window tables: %v", err)

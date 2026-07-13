@@ -35,6 +35,16 @@ type Connect struct {
 	Init    bool
 }
 
+func TestConfig() Config {
+	return Config{
+		Connection:         "sqlite",
+		DbPath:             ":memory:",
+		MaxIdleConnections: 1,
+		MaxOpenConnections: 1,
+		MaxLifeSeconds:     60,
+	}
+}
+
 func (itself *Connect) IsSqlite() bool {
 	return itself.Config.Connection == "sqlite"
 }

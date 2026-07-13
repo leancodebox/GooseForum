@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"gorm.io/gorm/schema"
 )
@@ -26,8 +25,6 @@ func TestReportEntityDoesNotExposeLegacySourceID(t *testing.T) {
 }
 
 func TestCreateOpenReturnsExistingOpenReport(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	if err := db.Connect().AutoMigrate(&Entity{}); err != nil {
 		t.Fatalf("migrate reports: %v", err)
 	}
@@ -60,8 +57,6 @@ func TestCreateOpenReturnsExistingOpenReport(t *testing.T) {
 }
 
 func TestUpdateStatusRecordsHandler(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	if err := db.Connect().AutoMigrate(&Entity{}); err != nil {
 		t.Fatalf("migrate reports: %v", err)
 	}
@@ -87,8 +82,6 @@ func TestUpdateStatusRecordsHandler(t *testing.T) {
 }
 
 func TestCursorPageScopeCategoryIDsIncludesTopicsAndPosts(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := db.Connect()
 	if err := conn.AutoMigrate(&Entity{}, &topicCategoryIndex.Entity{}); err != nil {
 		t.Fatalf("migrate reports scope tables: %v", err)

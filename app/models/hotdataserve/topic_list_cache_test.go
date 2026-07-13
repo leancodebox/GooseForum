@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -16,8 +15,6 @@ import (
 )
 
 func TestTopicListCacheReadsTopics(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&topics.Entity{}, &category.Entity{}, &topicCategoryIndex.Entity{}, &users.EntityComplete{}); err != nil {
 		t.Fatalf("migrate topic list cache tables: %v", err)
@@ -66,8 +63,6 @@ func TestTopicListCacheReadsTopics(t *testing.T) {
 }
 
 func TestCategoryCacheReadsCleanCategories(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&category.Entity{}); err != nil {
 		t.Fatalf("migrate category cache tables: %v", err)
@@ -86,8 +81,6 @@ func TestCategoryCacheReadsCleanCategories(t *testing.T) {
 }
 
 func TestSiteStatsReadsTopicPostMaxIds(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&topics.Entity{}, &posts.Entity{}, &users.EntityComplete{}, &dailyStats.Entity{}, &pageConfig.Entity{}); err != nil {
 		t.Fatalf("migrate site stats tables: %v", err)

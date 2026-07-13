@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
@@ -13,8 +12,6 @@ import (
 )
 
 func TestInvalidateTopicClearsCategoryStatusCache(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&topics.Entity{}, &category.Entity{}, &topicCategoryIndex.Entity{}, &reports.Entity{}); err != nil {
 		t.Fatalf("migrate moderation status tables: %v", err)

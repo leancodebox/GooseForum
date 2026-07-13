@@ -45,7 +45,7 @@ func GenerateConfig() ([]byte, error) {
 func init() {
 	cfgPath := "config.toml"
 	wd, _ := os.Getwd()
-	if isTestMode() {
+	if IsTestMode() {
 		dir, err := findConfigDirTest(wd, 6)
 		if err != nil {
 			slog.Error("preferences.test.search", "err", err)
@@ -187,7 +187,7 @@ func All() map[string]any {
 	return v.AllSettings()
 }
 
-func isTestMode() bool {
+func IsTestMode() bool {
 	if strings.HasSuffix(os.Args[0], ".test") {
 		return true
 	}

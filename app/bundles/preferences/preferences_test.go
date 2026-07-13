@@ -8,6 +8,12 @@ func TestSpliceConfig(t *testing.T) {
 	}
 }
 
+func TestIsTestMode(t *testing.T) {
+	if !IsTestMode() {
+		t.Fatal("IsTestMode() = false, want true under go test")
+	}
+}
+
 func TestTypedPreferences(t *testing.T) {
 	Set("test.string", "goose")
 	Set("test.int", 12)

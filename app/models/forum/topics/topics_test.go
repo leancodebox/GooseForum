@@ -6,7 +6,6 @@ import (
 
 	"github.com/glebarez/sqlite"
 	"github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicCategoryIndex"
 	"gorm.io/gorm"
@@ -50,8 +49,6 @@ func TestTopicAndPostSchemaMigrates(t *testing.T) {
 }
 
 func TestTopicRepositoryParity(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := dbconnect.Connect()
 	if err := conn.AutoMigrate(&Entity{}, &posts.Entity{}, &topicCategoryIndex.Entity{}); err != nil {
 		t.Fatalf("migrate topic repository tables: %v", err)

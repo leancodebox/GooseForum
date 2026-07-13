@@ -5,13 +5,10 @@ import (
 	"time"
 
 	db "github.com/leancodebox/GooseForum/app/bundles/connect/dbconnect"
-	"github.com/leancodebox/GooseForum/app/bundles/preferences"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
 )
 
 func TestBackfillArticleUserActionMergesLegacyRows(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 	conn := db.Connect()
 	createLegacyArticleActionTables(t)
 
@@ -42,8 +39,6 @@ func TestBackfillArticleUserActionMergesLegacyRows(t *testing.T) {
 }
 
 func TestBackfillArticleUserActionSkipsMissingLegacyTables(t *testing.T) {
-	preferences.Set("db.default.connection", "sqlite")
-	preferences.Set("db.default.path", ":memory:")
 
 	result := BackfillArticleUserAction()
 	if result.Failed != 0 {
