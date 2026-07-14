@@ -53,6 +53,14 @@
     .gf-shell-main .gf-panel:has(+ .gf-panel) {
       border-bottom-color: transparent;
     }
+
+    .gf-shell-main .gf-announcement-panel:has(+ .gf-card) {
+      border-bottom-color: var(--gf-color-line);
+    }
+
+    .gf-shell-main .gf-email-verification + .gf-announcement-panel {
+      border-top: 0;
+    }
   }
 
   .gf-button {
