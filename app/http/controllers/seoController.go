@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
@@ -30,7 +31,7 @@ var sitemapTpl string
 
 const seoXMLCacheTTL = 10 * time.Second
 
-var seoXMLCache = localcache.Cache[string]{MaxEntries: 128}
+var seoXMLCache = localcache.Cache[string]{MaxEntries: cacheconfig.Current().SEOXML}
 
 // RenderRobotsTxt renders robots.txt.
 func RenderRobotsTxt(c *gin.Context) {

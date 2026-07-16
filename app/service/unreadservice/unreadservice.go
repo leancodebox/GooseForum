@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/chat/imUserChatConfigs"
 	"github.com/leancodebox/GooseForum/app/models/forum/eventNotification"
 )
 
 const statusTTL = 2 * time.Minute
 
-var statusCache = localcache.Cache[Status]{MaxEntries: 2048}
+var statusCache = localcache.Cache[Status]{MaxEntries: cacheconfig.Current().UnreadStatus}
 
 type Status struct {
 	Notifications          bool   `json:"notifications"`

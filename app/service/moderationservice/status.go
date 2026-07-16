@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/reports"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
@@ -12,7 +13,7 @@ import (
 
 const statusTTL = 5 * time.Minute
 
-var statusCache = localcache.Cache[bool]{MaxEntries: 2048}
+var statusCache = localcache.Cache[bool]{MaxEntries: cacheconfig.Current().ModerationStatus}
 
 func HasOpenReports(userID uint64) bool {
 	if userID == 0 {

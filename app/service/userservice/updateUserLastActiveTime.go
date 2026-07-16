@@ -8,10 +8,9 @@ import (
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/userStatistics"
 )
-
-const userActivityCacheEntries = 8192
 
 type userActivity struct {
 	LastActiveAt  time.Time
@@ -36,7 +35,7 @@ var activityStore = &userActivityStore{
 func (store *userActivityStore) init() {
 	store.once.Do(func() {
 		store.cache = ttlcache.New[uint64, userActivity](
-			ttlcache.WithCapacity[uint64, userActivity](userActivityCacheEntries),
+			ttlcache.WithCapacity[uint64, userActivity](cacheconfig.Current().UserActivity),
 			ttlcache.WithDisableTouchOnHit[uint64, userActivity](),
 		)
 		store.cache.OnEviction(func(_ context.Context, reason ttlcache.EvictionReason, item *ttlcache.Item[uint64, userActivity]) {

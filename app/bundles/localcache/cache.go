@@ -7,12 +7,9 @@ import (
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/leancodebox/GooseForum/app/bundles/closer"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"golang.org/x/sync/singleflight"
 )
-
-// defaultMaxEntries is the memory backstop for request/user-derived key spaces.
-// Finite caches should still be documented and invalidated explicitly.
-const defaultMaxEntries uint64 = 2048
 
 // Cache is a small in-process cache facade backed by ttlcache.
 type Cache[V any] struct {
@@ -39,7 +36,7 @@ func (c *Cache[V]) init() {
 
 func (c *Cache[V]) maxEntries() uint64 {
 	if c.MaxEntries == 0 {
-		return defaultMaxEntries
+		return cacheconfig.Current().DefaultLocal
 	}
 	return c.MaxEntries
 }

@@ -5,15 +5,15 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 )
 
 const (
-	maxCachedTopicPage = 50
+	maxCachedTopicPage = 32
 	topicListCacheTTL  = 5 * time.Second
-	topicListEntries   = 512
 )
 
 type TopicSimpleVoPage struct {
@@ -21,7 +21,7 @@ type TopicSimpleVoPage struct {
 	HasNext bool
 }
 
-var topicSimpleVoCache = &localcache.Cache[TopicSimpleVoPage]{MaxEntries: topicListEntries}
+var topicSimpleVoCache = &localcache.Cache[TopicSimpleVoPage]{MaxEntries: cacheconfig.Current().TopicList}
 
 func GetLatestTopicsSimpleVoPaginated(page int, sort string) TopicSimpleVoPage {
 	page = normalizeTopicPage(page)

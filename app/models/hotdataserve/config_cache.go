@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 )
@@ -12,10 +13,9 @@ const (
 	configFastCacheTTL = 5 * time.Second
 	configSlowCacheTTL = time.Minute
 	configRareCacheTTL = time.Hour
-	configCacheEntries = 4
 )
 
-var sponsorsConfigCache = &localcache.Cache[pageConfig.SponsorsConfig]{MaxEntries: configCacheEntries}
+var sponsorsConfigCache = &localcache.Cache[pageConfig.SponsorsConfig]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func SponsorsConfigCache() pageConfig.SponsorsConfig {
 	return sponsorsConfigCache.GetOrLoad("", func() (pageConfig.SponsorsConfig, error) {
@@ -23,7 +23,7 @@ func SponsorsConfigCache() pageConfig.SponsorsConfig {
 	}, configSlowCacheTTL)
 }
 
-var siteSettingsConfigCache = &localcache.Cache[pageConfig.SiteSettingsConfig]{MaxEntries: configCacheEntries}
+var siteSettingsConfigCache = &localcache.Cache[pageConfig.SiteSettingsConfig]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetSiteSettingsConfigCache() pageConfig.SiteSettingsConfig {
 	return siteSettingsConfigCache.GetOrLoad("", func() (pageConfig.SiteSettingsConfig, error) {
@@ -31,7 +31,7 @@ func GetSiteSettingsConfigCache() pageConfig.SiteSettingsConfig {
 	}, configFastCacheTTL)
 }
 
-var siteThemeConfigCache = &localcache.Cache[pageConfig.SiteThemeConfig]{MaxEntries: configCacheEntries}
+var siteThemeConfigCache = &localcache.Cache[pageConfig.SiteThemeConfig]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetSiteThemeConfigCache() pageConfig.SiteThemeConfig {
 	return siteThemeConfigCache.GetOrLoad("", func() (pageConfig.SiteThemeConfig, error) {
@@ -39,7 +39,7 @@ func GetSiteThemeConfigCache() pageConfig.SiteThemeConfig {
 	}, configFastCacheTTL)
 }
 
-var siteChromeConfigCache = &localcache.Cache[pageConfig.SiteChromeConfig]{MaxEntries: configCacheEntries}
+var siteChromeConfigCache = &localcache.Cache[pageConfig.SiteChromeConfig]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetSiteChromeConfigCache() pageConfig.SiteChromeConfig {
 	return siteChromeConfigCache.GetOrLoad("", func() (pageConfig.SiteChromeConfig, error) {
@@ -47,7 +47,7 @@ func GetSiteChromeConfigCache() pageConfig.SiteChromeConfig {
 	}, configFastCacheTTL)
 }
 
-var mailSettingsConfigCache = &localcache.Cache[pageConfig.MailSettingsConfig]{MaxEntries: configCacheEntries}
+var mailSettingsConfigCache = &localcache.Cache[pageConfig.MailSettingsConfig]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetMailSettingsConfigCache() pageConfig.MailSettingsConfig {
 	return mailSettingsConfigCache.GetOrLoad("", func() (pageConfig.MailSettingsConfig, error) {
@@ -55,7 +55,7 @@ func GetMailSettingsConfigCache() pageConfig.MailSettingsConfig {
 	}, configFastCacheTTL)
 }
 
-var announcementConfigCache = &localcache.Cache[pageConfig.AnnouncementConfig]{MaxEntries: configCacheEntries}
+var announcementConfigCache = &localcache.Cache[pageConfig.AnnouncementConfig]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetAnnouncementConfigCache() pageConfig.AnnouncementConfig {
 	return announcementConfigCache.GetOrLoad("", func() (pageConfig.AnnouncementConfig, error) {
@@ -65,7 +65,7 @@ func GetAnnouncementConfigCache() pageConfig.AnnouncementConfig {
 	}, configFastCacheTTL)
 }
 
-var securitySettingsConfigCache = &localcache.Cache[pageConfig.SecurityAndRegistration]{MaxEntries: configCacheEntries}
+var securitySettingsConfigCache = &localcache.Cache[pageConfig.SecurityAndRegistration]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetSecuritySettingsConfigCache() pageConfig.SecurityAndRegistration {
 	return securitySettingsConfigCache.GetOrLoad("", func() (pageConfig.SecurityAndRegistration, error) {
@@ -73,7 +73,7 @@ func GetSecuritySettingsConfigCache() pageConfig.SecurityAndRegistration {
 	}, configFastCacheTTL)
 }
 
-var postingSettingsConfigCache = &localcache.Cache[pageConfig.PostingContent]{MaxEntries: configCacheEntries}
+var postingSettingsConfigCache = &localcache.Cache[pageConfig.PostingContent]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetPostingSettingsConfigCache() pageConfig.PostingContent {
 	return postingSettingsConfigCache.GetOrLoad("", func() (pageConfig.PostingContent, error) {
@@ -81,7 +81,7 @@ func GetPostingSettingsConfigCache() pageConfig.PostingContent {
 	}, configFastCacheTTL)
 }
 
-var httpNotifyConfigCache = &localcache.Cache[pageConfig.HttpNotifyConfig]{MaxEntries: configCacheEntries}
+var httpNotifyConfigCache = &localcache.Cache[pageConfig.HttpNotifyConfig]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetHttpNotifyConfigCache() pageConfig.HttpNotifyConfig {
 	return httpNotifyConfigCache.GetOrLoad("", func() (pageConfig.HttpNotifyConfig, error) {
@@ -125,7 +125,7 @@ func ClearSponsorsConfigCache() {
 	sponsorsConfigCache.Clear()
 }
 
-var friendLinksConfigCache = &localcache.Cache[[]pageConfig.FriendLinksGroup]{MaxEntries: configCacheEntries}
+var friendLinksConfigCache = &localcache.Cache[[]pageConfig.FriendLinksGroup]{MaxEntries: cacheconfig.Current().PageConfig}
 
 func GetFriendLinksConfigCache() []pageConfig.FriendLinksGroup {
 	return friendLinksConfigCache.GetOrLoad("", func() ([]pageConfig.FriendLinksGroup, error) {

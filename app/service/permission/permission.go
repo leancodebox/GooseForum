@@ -7,12 +7,13 @@ import (
 
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/datastruct"
 	"github.com/leancodebox/GooseForum/app/models/forum/rolePermissionRs"
 	"github.com/samber/lo"
 )
 
-var rolePermissionCache = localcache.Cache[[]Enum]{MaxEntries: 256}
+var rolePermissionCache = localcache.Cache[[]Enum]{MaxEntries: cacheconfig.Current().RolePermission}
 
 type Enum int
 

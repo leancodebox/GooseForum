@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
@@ -46,7 +47,7 @@ func (colors RuntimeThemeColors) Payload() map[string]string {
 	return payload
 }
 
-var runtimeCache = &localcache.Cache[RuntimeTheme]{MaxEntries: 1}
+var runtimeCache = &localcache.Cache[RuntimeTheme]{MaxEntries: cacheconfig.Current().RuntimeTheme}
 
 func Defaults() pageConfig.SiteThemeConfig {
 	return NormalizeConfig(defaultconfig.GetDefaultSiteThemeConfig())

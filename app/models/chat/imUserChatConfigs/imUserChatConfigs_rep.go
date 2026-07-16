@@ -5,12 +5,13 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"gorm.io/gorm"
 )
 
 const conversationAccessTTL = 2 * time.Minute
 
-var conversationAccessCache = localcache.Cache[bool]{MaxEntries: 4096}
+var conversationAccessCache = localcache.Cache[bool]{MaxEntries: cacheconfig.Current().ConversationAccess}
 
 func create(entity *Entity) int64 {
 	result := builder().Create(entity)

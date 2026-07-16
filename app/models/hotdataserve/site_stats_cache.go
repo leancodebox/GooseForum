@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/forum/dailyStats"
 	"github.com/leancodebox/GooseForum/app/models/forum/pageConfig"
@@ -15,7 +16,7 @@ import (
 
 const siteStatsCacheTTL = 5 * time.Second
 
-var siteStatisticsDataCache = &localcache.Cache[*vo.SiteStats]{MaxEntries: finiteCacheEntries}
+var siteStatisticsDataCache = &localcache.Cache[*vo.SiteStats]{MaxEntries: cacheconfig.Current().SiteStatistics}
 
 func GetSiteStatisticsData() *vo.SiteStats {
 	return siteStatisticsDataCache.GetOrLoad("", func() (*vo.SiteStats, error) {

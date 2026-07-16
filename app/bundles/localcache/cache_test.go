@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 )
 
 func TestCache_GetOrLoad(t *testing.T) {
@@ -28,6 +30,7 @@ func TestCache_GetOrLoad(t *testing.T) {
 func TestCache_LimitsEntries(t *testing.T) {
 	c := Cache[int]{}
 	defer stopTestCache(&c)
+	defaultMaxEntries := cacheconfig.Current().DefaultLocal
 	for i := range int(defaultMaxEntries) + 10 {
 		key := "key-" + strconv.Itoa(i)
 		_, _ = c.GetOrLoadE(key, func() (int, error) {

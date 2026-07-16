@@ -4,16 +4,16 @@ import (
 	"time"
 
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
+	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/models/forum/category"
 	"github.com/samber/lo"
 )
 
 const (
-	categoryCacheTTL   = time.Minute
-	finiteCacheEntries = 4
+	categoryCacheTTL = time.Minute
 )
 
-var categoryCache = &localcache.Cache[categorySnapshot]{MaxEntries: finiteCacheEntries}
+var categoryCache = &localcache.Cache[categorySnapshot]{MaxEntries: cacheconfig.Current().Category}
 
 type categorySnapshot struct {
 	list        []*category.Entity
