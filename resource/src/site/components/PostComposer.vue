@@ -1,44 +1,17 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import type { Component } from 'vue'
-import { Check, Image, Loader2, MessageSquare, Send, X } from '@lucide/vue'
+import { Check, Image, Loader2, Send, X } from '@lucide/vue'
 import { uploadImage } from '@/runtime/api'
-import { formatNumber } from '@/runtime/format'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { markdownFromClipboard } from '@/runtime/rich-paste'
 import type { PostPayload } from '@/types/payload'
-import PostPositionRail from '@/site/components/PostPositionRail.vue'
 import { useI18n } from 'vue-i18n'
 
-type PostAction = {
-  key: string
-  icon: Component
-  active: boolean
-  acting: boolean
-  fill?: boolean
-  title: string
-  activeClass: string
-  onClick: () => void | Promise<void>
-}
-
 const props = defineProps<{
-  actions: PostAction[]
   authenticated: boolean
-  canPost: boolean
-  currentLabel: string
-  currentNo: number
-  endLabel: string
   errorMessage: string
-  hasRail: boolean
-  maxNo: number
-  mobileRailOpen: boolean
   mode?: 'create' | 'edit'
   open: boolean
-  progressCurrent?: number
-  progressEnd?: number
-  progressStart?: number
-  railBusy: boolean
-  startLabel: string
   submitting: boolean
   successMessage: string
   target?: PostPayload
@@ -47,14 +20,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   clearTarget: []
   clearValidation: []
-  earliest: []
   imageError: [message: string]
   imageInserted: [count: number]
-  latest: []
-  openReply: []
-  selectRail: [postNo: number]
   submit: []
-  'update:mobileRailOpen': [value: boolean]
   'update:open': [value: boolean]
 }>()
 
@@ -64,7 +32,6 @@ const editorEl = ref<HTMLTextAreaElement | null>(null)
 const uploadingImage = ref(false)
 const dragOver = ref(false)
 const composerBusy = computed(() => props.submitting || uploadingImage.value)
-const showFloatingControls = computed(() => props.hasRail || props.authenticated)
 const editing = computed(() => props.mode === 'edit')
 const composerTitle = computed(() => editing.value ? t('topic.editOwnReply') : t('topic.joinDiscussion'))
 const composerPlaceholder = computed(() => editing.value ? t('topic.editReplyPlaceholder') : t('topic.replyPlaceholder'))
@@ -82,21 +49,9 @@ watch(
   },
 )
 
-function openReply() {
-  emit('openReply')
-}
-
 function closeComposer() {
   if (composerBusy.value) return
   emit('update:open', false)
-}
-
-function toggleMobileRail() {
-  emit('update:mobileRailOpen', !props.mobileRailOpen)
-}
-
-function closeMobileRail() {
-  emit('update:mobileRailOpen', false)
 }
 
 function imageAlt(filename: string) {
@@ -229,85 +184,11 @@ function submit() {
 </script>
 
 <template>
-  <Teleport v-if="hasRail || showFloatingControls || open" to="body">
-    <div
-      v-if="mobileRailOpen"
-      class="pointer-events-auto fixed inset-0 z-[89] xl:hidden"
-      @click="closeMobileRail"
-    />
+  <Teleport v-if="open" to="body">
     <div class="pointer-events-none fixed inset-x-0 bottom-4 z-[90] px-3 sm:px-6">
       <div class="relative mx-auto flex w-full max-w-full justify-center">
-        <Transition name="floating-reply" mode="out-in">
-          <div
-            v-if="mobileRailOpen"
-            class="gf-floating-surface pointer-events-auto relative w-[min(18rem,calc(100vw-2rem))] p-2 xl:hidden"
-            @click.stop
-          >
-            <div class="mb-1 flex items-center justify-between gap-3 px-1">
-              <div class="text-xs font-semibold text-base-content/55">{{ t('topic.replyPosition') }}</div>
-              <button
-                type="button"
-                class="inline-flex h-7 w-7 items-center justify-center rounded-md text-icon-muted transition hover:bg-base-300 hover:text-base-content"
-                :aria-label="t('common.close')"
-                @click="closeMobileRail"
-              >
-                <X class="h-4 w-4" />
-              </button>
-            </div>
-            <PostPositionRail
-              :current="currentNo"
-              :max="maxNo"
-              :start-label="startLabel"
-              :end-label="endLabel"
-              :current-label="currentLabel"
-              :busy="railBusy"
-              :progress-current="progressCurrent"
-              :progress-end="progressEnd"
-              :progress-start="progressStart"
-              @earliest="emit('earliest')"
-              @latest="emit('latest')"
-              @select="emit('selectRail', $event)"
-            />
-          </div>
-          <div v-else-if="!open" class="pointer-events-auto flex max-w-full flex-col items-center gap-2">
-            <div class="gf-floating-surface flex w-fit max-w-full items-center gap-1 rounded-full p-1">
-              <button
-                v-if="hasRail"
-                type="button"
-                class="inline-flex h-9 items-center rounded-full px-2.5 text-sm font-black tabular-nums text-primary transition hover:bg-info/10 hover:text-primary xl:hidden"
-                :aria-expanded="mobileRailOpen"
-                :aria-label="t('topic.replyPosition')"
-                @click="toggleMobileRail"
-              >
-                {{ `${currentNo} / ${formatNumber(maxNo)}` }}
-              </button>
-              <button
-                v-if="authenticated"
-                v-for="action in actions"
-                :key="action.key"
-                type="button"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
-                :class="action.active ? action.activeClass : 'text-base-content/75 hover:bg-base-200 hover:text-base-content'"
-                :disabled="action.acting"
-                :title="action.title"
-                @click="action.onClick"
-              >
-                <Loader2 v-if="action.acting" class="h-4 w-4 animate-spin" />
-                <component :is="action.icon" v-else class="h-4 w-4" :fill="action.active && action.fill !== false ? 'currentColor' : 'none'" />
-              </button>
-              <button
-                v-if="authenticated && canPost"
-                type="button"
-                class="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-base-content/75 transition hover:bg-info/10 hover:text-primary"
-                :title="t('topic.joinDiscussion')"
-                @click="openReply"
-              >
-                <MessageSquare class="h-4 w-4" />
-                <span>{{ t('topic.joinDiscussion') }}</span>
-              </button>
-            </div>
-          </div>
-          <div v-else-if="authenticated" class="gf-floating-surface pointer-events-auto relative w-[min(42rem,calc(100vw-1.5rem))] p-3">
+        <Transition name="floating-reply">
+          <div v-if="authenticated" class="gf-floating-surface pointer-events-auto relative w-[min(42rem,calc(100vw-1.5rem))] p-3">
             <div class="mb-2 flex items-center justify-between gap-3">
               <div class="min-w-0">
                 <div class="text-sm font-semibold text-base-content">{{ composerTitle }}</div>

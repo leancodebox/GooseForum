@@ -10,6 +10,7 @@ import { showUserCard } from '@/runtime/user-card-events'
 import { measurePostViewportProgressFromRects } from '@/runtime/post-viewport-progress'
 import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
 import PostPositionRail from '@/site/components/PostPositionRail.vue'
+import TopicFloatingControls from '@/site/components/TopicFloatingControls.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import type { TopicDetailProps, LayoutPayload, PostPayload } from '@/types/payload'
@@ -76,7 +77,7 @@ const mobileHeaderTitleVisible = ref(false)
 const effectiveShowHeaderTitle = computed(() => showHeaderTitle.value && (!isMobileHeaderViewport.value || mobileHeaderTitleVisible.value))
 const composerOpen = ref(false)
 const composerMode = computed(() => editingPostId.value ? 'edit' : 'create')
-const composerMounted = computed(() => composerOpen.value || Boolean(postContent.value || targetPostId.value || editingPostId.value))
+const composerMounted = computed(() => composerOpen.value)
 const mobilePostRailOpen = ref(false)
 const activePostNo = ref(firstPostNo(initialPosts) || 1)
 const postRailProgressCurrent = ref(0)
@@ -1642,9 +1643,7 @@ async function removePost(postId: number) {
         </div>
       </section>
 
-      <PostComposer
-        v-if="composerMounted"
-        v-model="postContent"
+      <TopicFloatingControls
         v-model:mobile-rail-open="mobilePostRailOpen"
         :open="composerOpen"
         :actions="floatingTopicActions"
@@ -1653,26 +1652,33 @@ async function removePost(postId: number) {
         :current-label="postRailCurrentLabel"
         :current-no="postRailCurrentNo"
         :end-label="postRailEndLabel"
-        :error-message="errorMessage"
         :has-rail="hasPostRail"
         :max-no="postMaxRange"
-        :mode="composerMode"
         :progress-current="postRailProgressCurrent"
         :progress-end="postRailProgressEnd"
         :progress-start="postRailProgressStart"
         :rail-busy="postRailBusy"
         :start-label="postRailStartLabel"
+        @earliest="jumpToTopicBodyFromRail"
+        @latest="jumpToLatestPostFromRail"
+        @open-reply="openFloatingPostComposer"
+        @select-rail="selectPostFromRail"
+      />
+
+      <PostComposer
+        v-if="composerMounted"
+        v-model="postContent"
+        :open="composerOpen"
+        :authenticated="page.layout.viewer.isAuthenticated"
+        :error-message="errorMessage"
+        :mode="composerMode"
         :submitting="editingPostId ? savingEditPostId > 0 : submitting"
         :success-message="successMessage"
         :target="targetPost"
         @clear-target="cancelPostTarget"
         @clear-validation="clearPostValidation"
-        @earliest="jumpToTopicBodyFromRail"
         @image-error="handlePostImageError"
         @image-inserted="handlePostImageInserted"
-        @latest="jumpToLatestPostFromRail"
-        @open-reply="openFloatingPostComposer"
-        @select-rail="selectPostFromRail"
         @submit="submitPost"
         @update:open="updateComposerOpen"
       />
