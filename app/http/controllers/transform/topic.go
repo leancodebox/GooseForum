@@ -89,6 +89,7 @@ func TopicsWithUser2Vo(data []*topics.Entity, categoryMap map[uint64]*category.E
 			CategoriesId:   t.CategoryIds,
 			ProcessStatus:  t.ProcessStatus,
 			Posters:        postersVo,
+			LastPostId:     t.LastPostId,
 			LastPostedAt:   timeValue(t.LastPostedAt),
 		})
 	}

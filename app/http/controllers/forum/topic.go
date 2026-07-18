@@ -45,7 +45,7 @@ func TopicDetail(c *gin.Context) {
 	}
 	ensurePostRenderedHTML(&firstPost)
 	if loginUser.UserId > 0 {
-		if err := topicunseenservice.MarkVisited(loginUser.UserId, topic.Id, time.Now()); err != nil {
+		if err := topicunseenservice.MarkVisited(loginUser.UserId, topic.Id, topic.LastPostId, time.Now()); err != nil {
 			slog.Warn("mark topic visited failed", "userId", loginUser.UserId, "topicId", topic.Id, "error", err)
 		}
 	}

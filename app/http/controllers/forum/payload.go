@@ -758,6 +758,7 @@ func buildTrackedTopicPayloads(userID uint64, topics []*vo.TopicsSimpleVo) []Top
 		}
 		activities = append(activities, topicunseenservice.TopicActivity{
 			TopicID:      topic.Id,
+			LastPostID:   topic.LastPostId,
 			LastPostedAt: topic.LastPostedAt,
 		})
 	}

@@ -36,7 +36,7 @@ func TestNextTrackingKeepsLastSeenDuringActiveVisit(t *testing.T) {
 
 func TestBadgerTrackingFlow(t *testing.T) {
 	start := time.Date(2026, 7, 17, 8, 0, 0, 0, time.UTC)
-	activity := TopicActivity{TopicID: 42, LastPostedAt: start.Add(-time.Hour)}
+	activity := TopicActivity{TopicID: 42, LastPostID: 100, LastPostedAt: start.Add(-time.Hour)}
 
 	first, err := Resolve(7, []TopicActivity{activity}, start)
 	if err != nil {
@@ -54,7 +54,7 @@ func TestBadgerTrackingFlow(t *testing.T) {
 		t.Fatal("refreshed Resolve() cleared unseen during active visit")
 	}
 
-	if err := MarkVisited(7, 42, start.Add(6*time.Minute)); err != nil {
+	if err := MarkVisited(7, 42, 100, start.Add(6*time.Minute)); err != nil {
 		t.Fatalf("MarkVisited() error = %v", err)
 	}
 	visited, err := Resolve(7, []TopicActivity{activity}, start.Add(7*time.Minute))
@@ -65,6 +65,7 @@ func TestBadgerTrackingFlow(t *testing.T) {
 		t.Fatal("visited Resolve() unseen = true, want false")
 	}
 
+	activity.LastPostID = 101
 	activity.LastPostedAt = start.Add(8 * time.Minute)
 	updated, err := Resolve(7, []TopicActivity{activity}, start.Add(9*time.Minute))
 	if err != nil {
@@ -76,11 +77,11 @@ func TestBadgerTrackingFlow(t *testing.T) {
 }
 
 func TestMarkVisitedDoesNotMoveBackward(t *testing.T) {
-	latest := time.Date(2026, 7, 17, 9, 0, 0, 0, time.UTC)
-	if err := MarkVisited(7, 42, latest); err != nil {
+	now := time.Date(2026, 7, 17, 9, 0, 0, 0, time.UTC)
+	if err := MarkVisited(7, 42, 101, now); err != nil {
 		t.Fatalf("latest MarkVisited() error = %v", err)
 	}
-	if err := MarkVisited(7, 42, latest.Add(-time.Minute)); err != nil {
+	if err := MarkVisited(7, 42, 100, now.Add(time.Minute)); err != nil {
 		t.Fatalf("older MarkVisited() error = %v", err)
 	}
 
@@ -88,9 +89,9 @@ func TestMarkVisitedDoesNotMoveBackward(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetBytes() error = %v", err)
 	}
-	visitedAt, ok := decodeVisit(value)
-	if !ok || !visitedAt.Equal(latest) {
-		t.Fatalf("visitedAt = %v, want %v", visitedAt, latest)
+	lastSeenPostID, ok := decodeVisit(value)
+	if !ok || lastSeenPostID != 101 {
+		t.Fatalf("lastSeenPostID = %d, want 101", lastSeenPostID)
 	}
 }
 
@@ -119,12 +120,12 @@ func TestResolveUnseenUsesLastPostedAndLastVisited(t *testing.T) {
 	now := time.Date(2026, 7, 17, 8, 0, 0, 0, time.UTC)
 	baseline := now.Add(-12 * time.Hour)
 	activities := []TopicActivity{
-		{TopicID: 1, LastPostedAt: now.Add(-time.Hour)},
-		{TopicID: 2, LastPostedAt: now.Add(-time.Hour)},
-		{TopicID: 3, LastPostedAt: now.Add(-24 * time.Hour)},
+		{TopicID: 1, LastPostID: 11, LastPostedAt: now.Add(-time.Hour)},
+		{TopicID: 2, LastPostID: 22, LastPostedAt: now.Add(-time.Hour)},
+		{TopicID: 3, LastPostID: 33, LastPostedAt: now.Add(-24 * time.Hour)},
 	}
-	visited := map[uint64]time.Time{
-		2: now.Add(-30 * time.Minute),
+	visited := map[uint64]uint64{
+		2: 22,
 	}
 
 	got := resolveUnseen(activities, visited, baseline)

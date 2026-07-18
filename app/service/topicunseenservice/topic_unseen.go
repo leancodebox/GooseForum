@@ -16,11 +16,12 @@ const (
 	valueVersion      = byte(1)
 	trackingValueSize = 17
 	visitValueSize    = 9
-	keyPrefix         = "topic-unseen:v1:"
+	keyPrefix         = "topic-unseen:v2:"
 )
 
 type TopicActivity struct {
 	TopicID      uint64
+	LastPostID   uint64
 	LastPostedAt time.Time
 }
 
@@ -59,34 +60,34 @@ func Resolve(userID uint64, activities []TopicActivity, now time.Time) (map[uint
 	if err != nil {
 		return nil, err
 	}
-	visited := make(map[uint64]time.Time, len(values))
+	visited := make(map[uint64]uint64, len(values))
 	for _, activity := range activities {
 		value, exists := values[visitKey(userID, activity.TopicID)]
 		if !exists {
 			continue
 		}
-		visitedAt, ok := decodeVisit(value)
+		lastSeenPostID, ok := decodeVisit(value)
 		if ok {
-			visited[activity.TopicID] = visitedAt
+			visited[activity.TopicID] = lastSeenPostID
 		}
 	}
 	return resolveUnseen(activities, visited, minLastSeenAt(tracking.LastSeenAt, now)), nil
 }
 
 // MarkVisited records a successful topic detail visit and refreshes user activity.
-func MarkVisited(userID, topicID uint64, now time.Time) error {
-	if userID == 0 || topicID == 0 {
+func MarkVisited(userID, topicID, lastSeenPostID uint64, now time.Time) error {
+	if userID == 0 || topicID == 0 || lastSeenPostID == 0 {
 		return nil
 	}
 	_, trackingErr := touchTracking(userID, now)
 	visitErr := kvstore.UpdateBytes(visitKey(userID, topicID), trackingTTL, func(current []byte, exists bool) (kvstore.UpdateAction, []byte, error) {
 		if exists {
-			visitedAt, ok := decodeVisit(current)
-			if ok && !now.After(visitedAt) {
+			currentPostID, ok := decodeVisit(current)
+			if ok && lastSeenPostID <= currentPostID {
 				return kvstore.UpdateSet, current, nil
 			}
 		}
-		return kvstore.UpdateSet, encodeVisit(now), nil
+		return kvstore.UpdateSet, encodeVisit(lastSeenPostID), nil
 	})
 	return errors.Join(trackingErr, visitErr)
 }
@@ -130,14 +131,14 @@ func minLastSeenAt(lastSeenAt, now time.Time) time.Time {
 	return floor
 }
 
-func resolveUnseen(activities []TopicActivity, visited map[uint64]time.Time, baseline time.Time) map[uint64]bool {
+func resolveUnseen(activities []TopicActivity, visited map[uint64]uint64, baseline time.Time) map[uint64]bool {
 	result := make(map[uint64]bool, len(activities))
 	for _, activity := range activities {
-		if activity.TopicID == 0 || activity.LastPostedAt.IsZero() || !activity.LastPostedAt.After(baseline) {
+		if activity.TopicID == 0 || activity.LastPostID == 0 || activity.LastPostedAt.IsZero() || !activity.LastPostedAt.After(baseline) {
 			continue
 		}
-		visitedAt, exists := visited[activity.TopicID]
-		result[activity.TopicID] = !exists || activity.LastPostedAt.After(visitedAt)
+		lastSeenPostID, exists := visited[activity.TopicID]
+		result[activity.TopicID] = !exists || activity.LastPostID > lastSeenPostID
 	}
 	return result
 }
@@ -168,18 +169,18 @@ func decodeTracking(value []byte) (trackingState, bool) {
 	}, true
 }
 
-func encodeVisit(visitedAt time.Time) []byte {
+func encodeVisit(lastSeenPostID uint64) []byte {
 	value := make([]byte, visitValueSize)
 	value[0] = valueVersion
-	binary.BigEndian.PutUint64(value[1:9], encodeTime(visitedAt))
+	binary.BigEndian.PutUint64(value[1:9], lastSeenPostID)
 	return value
 }
 
-func decodeVisit(value []byte) (time.Time, bool) {
+func decodeVisit(value []byte) (uint64, bool) {
 	if len(value) != visitValueSize || value[0] != valueVersion {
-		return time.Time{}, false
+		return 0, false
 	}
-	return decodeTime(binary.BigEndian.Uint64(value[1:9])), true
+	return binary.BigEndian.Uint64(value[1:9]), true
 }
 
 func encodeTime(value time.Time) uint64 {

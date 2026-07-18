@@ -21,6 +21,7 @@ type TopicsSimpleVo struct {
 	CategoriesId   []uint64   `json:"categoriesId,omitempty"`
 	AvatarUrl      string     `json:"avatarUrl,omitempty"`
 	Posters        []PosterVo `json:"posters,omitempty"`
+	LastPostId     uint64     `json:"-"`
 	LastPostedAt   time.Time  `json:"-"`
 }
 

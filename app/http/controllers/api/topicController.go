@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/eventhandlers"
 	"github.com/leancodebox/GooseForum/app/service/fileusageservice"
 	"github.com/leancodebox/GooseForum/app/service/postservice"
+	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 )
 
@@ -179,6 +181,9 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		if topic.Status == 1 {
 			eventbus.Publish(context.Background(), &eventhandlers.TopicPublishedEvent{Topic: &topic, FirstPost: &firstPost})
 		}
+		if err := topicunseenservice.MarkVisited(req.UserId, topic.Id, firstPost.Id, time.Now()); err != nil {
+			slog.Warn("mark created topic visited failed", "userId", req.UserId, "topicId", topic.Id, "error", err)
+		}
 	}
 	return component.SuccessResponse(topic.Id)
 }
@@ -294,6 +299,9 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 
 			component.MessageParams{"error": err.Error()})
 
+	}
+	if err := topicunseenservice.MarkVisited(req.UserId, topicEntity.Id, postEntity.Id, time.Now()); err != nil {
+		slog.Warn("mark created post visited failed", "userId", req.UserId, "topicId", topicEntity.Id, "postId", postEntity.Id, "error", err)
 	}
 	fileusageservice.ReplacePost(postEntity.Id, req.UserId, postEntity.Content)
 	userStatistics.WriteComment(req.UserId)
