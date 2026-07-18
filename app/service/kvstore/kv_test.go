@@ -51,6 +51,43 @@ func TestSetGetAndCopiesBytes(t *testing.T) {
 	}
 }
 
+func TestGetManyBytesReturnsExistingKeysAndCopiesValues(t *testing.T) {
+	useTempStore(t)
+
+	if err := SetBytes("one", []byte("first"), 0); err != nil {
+		t.Fatalf("SetBytes(one) error = %v", err)
+	}
+	if err := SetBytes("two", []byte("second"), 0); err != nil {
+		t.Fatalf("SetBytes(two) error = %v", err)
+	}
+
+	got, err := GetManyBytes([]string{"one", "missing", "two", "one"})
+	if err != nil {
+		t.Fatalf("GetManyBytes() error = %v", err)
+	}
+	if len(got) != 2 || string(got["one"]) != "first" || string(got["two"]) != "second" {
+		t.Fatalf("GetManyBytes() = %#v, want existing values", got)
+	}
+
+	got["one"][0] = 'x'
+	again, err := Get("one")
+	if err != nil {
+		t.Fatalf("Get(one) error = %v", err)
+	}
+	if again != "first" {
+		t.Fatalf("stored value after caller mutation = %q, want first", again)
+	}
+}
+
+func TestGetManyBytesRejectsInvalidKeys(t *testing.T) {
+	useTempStore(t)
+
+	_, err := GetManyBytes([]string{"valid", ""})
+	if !errors.Is(err, ErrInvalidKey) {
+		t.Fatalf("GetManyBytes() error = %v, want ErrInvalidKey", err)
+	}
+}
+
 func TestUpdateBytesSetKeepAndCopiesCurrent(t *testing.T) {
 	useTempStore(t)
 

@@ -41,6 +41,11 @@ const { t } = useI18n()
           <a :href="topic.url" class="min-w-0 truncate text-[15px] font-medium leading-6 text-base-content group-hover:text-primary sm:text-base">
             {{ topic.title }}
           </a>
+          <span
+            v-if="topic.unseen"
+            class="h-2 w-2 shrink-0 rounded-full bg-primary"
+            aria-hidden="true"
+          />
         </span>
         <a
           v-for="category in showCategories ? topic.categories : []"

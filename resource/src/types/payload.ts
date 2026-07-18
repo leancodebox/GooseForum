@@ -372,6 +372,7 @@ export interface TopicPayload {
   processStatus: number
   activityText: string
   lastUpdateTime: string
+  unseen?: boolean
 }
 
 export interface ModerationPageProps {

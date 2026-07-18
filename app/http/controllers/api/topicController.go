@@ -273,7 +273,7 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	var parentPost posts.Entity
 	if req.Params.ReplyToPostId > 0 {
 		parentPost = posts.Get(req.Params.ReplyToPostId)
-		if parentPost.Id == 0 || parentPost.TopicId != req.Params.TopicId || parentPost.PostNo <= 1 {
+		if parentPost.Id == 0 || parentPost.TopicId != req.Params.TopicId {
 			return component.FailResponseCode(component.MessageCommentParentPostMissing, nil)
 		}
 	}
@@ -395,7 +395,7 @@ func DeletePost(req component.BetterRequest[DeletePostReq]) component.Response {
 	posts.DeleteEntity(&postEntity)
 	topicEntity := topics.GetSimple(postEntity.TopicId)
 	if topicEntity.Id > 0 {
-		postservice.SyncTopicPostStats(topicEntity, req.UserId, true)
+		postservice.SyncTopicPostStats(topicEntity, postEntity, true)
 		hotdataserve.ClearTopicListCache()
 	}
 	return component.SuccessResponse(true)

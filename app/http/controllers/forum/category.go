@@ -22,7 +22,7 @@ func Category(c *gin.Context) {
 
 	payload := PagePayload{
 		Component: "category.index",
-		Props:     buildCategoryPageProps(category, page, sort, topicPage.Topics, topicPage.HasNext),
+		Props:     buildCategoryPageProps(component.LoginUserId(c), category, page, sort, topicPage.Topics, topicPage.HasNext),
 		Meta:      buildCategoryMeta(c, category, page, sort, topicPage.HasNext),
 		Layout:    buildLayout(c, "category_"+cast.ToString(category.Id)),
 		URL:       buildPageURL(c),

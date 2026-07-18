@@ -1,7 +1,9 @@
 package forum
 
 import (
+	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
@@ -11,6 +13,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
+	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/topicviewservice"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
 	"github.com/spf13/cast"
@@ -41,6 +44,11 @@ func TopicDetail(c *gin.Context) {
 		firstPost, _ = posts.GetByTopicPostNoAtOrAfter(topic.Id, 1)
 	}
 	ensurePostRenderedHTML(&firstPost)
+	if loginUser.UserId > 0 {
+		if err := topicunseenservice.MarkVisited(loginUser.UserId, topic.Id, time.Now()); err != nil {
+			slog.Warn("mark topic visited failed", "userId", loginUser.UserId, "topicId", topic.Id, "error", err)
+		}
+	}
 	props := buildTopicDetailProps(c, &topic, &firstPost)
 	payload := PagePayload{
 		Component: "topic.detail",

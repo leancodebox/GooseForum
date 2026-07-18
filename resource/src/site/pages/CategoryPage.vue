@@ -40,6 +40,16 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => page.props.topics,
+  (incoming) => {
+    const unseenByID = new Map(incoming.map((topic) => [topic.id, topic.unseen]))
+    topics.value = topics.value.map((topic) =>
+      unseenByID.has(topic.id) ? { ...topic, unseen: unseenByID.get(topic.id) } : topic,
+    )
+  },
+)
+
 watch(listMode, (mode) => {
   if (mode === 'pagination') {
     observer?.disconnect()

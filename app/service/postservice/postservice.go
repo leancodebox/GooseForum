@@ -15,7 +15,11 @@ const topicSequenceLockShards = 256
 var topicSequenceLocks [topicSequenceLockShards]sync.Mutex
 
 func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
-	postNo, err := reserveTopicPostSequence(entity.TopicId)
+	lock := &topicSequenceLocks[entity.TopicId%topicSequenceLockShards]
+	lock.Lock()
+	defer lock.Unlock()
+
+	postNo, err := topics.ReservePostSequence(entity.TopicId)
 	if err != nil {
 		return err
 	}
@@ -25,19 +29,12 @@ func CreateTopicPost(entity *posts.Entity, topicEntity topics.Entity) error {
 		return err
 	}
 
-	SyncTopicPostStats(topicEntity, entity.UserId, false)
+	SyncTopicPostStats(topicEntity, *entity, false)
 	return nil
 }
 
-func reserveTopicPostSequence(topicId uint64) (uint64, error) {
-	lock := &topicSequenceLocks[topicId%topicSequenceLockShards]
-	lock.Lock()
-	defer lock.Unlock()
-
-	return topics.ReservePostSequence(topicId)
-}
-
-func SyncTopicPostStats(topicEntity topics.Entity, userId uint64, isDelete bool) {
+func SyncTopicPostStats(topicEntity topics.Entity, postEntity posts.Entity, isDelete bool) {
+	userId := postEntity.UserId
 	if isDelete {
 		if err := topicUserStat.DecrementUserPost(topicEntity.Id, userId); err != nil {
 			slog.Error("failed to decrement topic user post stat", "topicId", topicEntity.Id, "userId", userId, "err", err)
@@ -61,11 +58,12 @@ func SyncTopicPostStats(topicEntity topics.Entity, userId uint64, isDelete bool)
 	})
 
 	if isDelete {
-		if err := topics.DecrementPostFast(topicEntity.Id, pList); err != nil {
+		lastPost, _ := posts.GetLastByTopicID(topicEntity.Id)
+		if err := topics.DecrementPostFast(topicEntity.Id, pList, lastPost.Id, lastPost.CreatedAt); err != nil {
 			slog.Error("failed to decrement topic post count", "topicId", topicEntity.Id, "err", err)
 		}
 	} else {
-		if err := topics.IncrementPostFast(topicEntity.Id, pList); err != nil {
+		if err := topics.IncrementPostFast(topicEntity.Id, pList, postEntity.Id, postEntity.CreatedAt); err != nil {
 			slog.Error("failed to increment topic post count", "topicId", topicEntity.Id, "err", err)
 		}
 	}

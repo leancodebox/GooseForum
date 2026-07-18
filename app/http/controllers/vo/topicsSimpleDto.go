@@ -1,5 +1,7 @@
 package vo
 
+import "time"
+
 // TopicsSimpleVo is the compact topic payload used by list views and feed-like responses.
 type TopicsSimpleVo struct {
 	Id             uint64     `json:"id"`
@@ -19,6 +21,7 @@ type TopicsSimpleVo struct {
 	CategoriesId   []uint64   `json:"categoriesId,omitempty"`
 	AvatarUrl      string     `json:"avatarUrl,omitempty"`
 	Posters        []PosterVo `json:"posters,omitempty"`
+	LastPostedAt   time.Time  `json:"-"`
 }
 
 // PosterVo is a lightweight user summary attached to compact topic responses.

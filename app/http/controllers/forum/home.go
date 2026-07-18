@@ -2,6 +2,7 @@ package forum
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/leancodebox/GooseForum/app/http/controllers/component"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
@@ -14,7 +15,7 @@ func Home(c *gin.Context) {
 	topicPage := hotdataserve.GetLatestTopicsSimpleVoPaginated(page, sort)
 	payload := PagePayload{
 		Component: "home.index",
-		Props:     buildHomeProps(page, sort, topicPage.Topics, topicPage.HasNext),
+		Props:     buildHomeProps(component.LoginUserId(c), page, sort, topicPage.Topics, topicPage.HasNext),
 		Meta:      buildHomeMeta(c, page, sort, topicPage.HasNext),
 		Layout:    buildLayout(c, activeKeyForHome(sort)),
 		URL:       buildPageURL(c),

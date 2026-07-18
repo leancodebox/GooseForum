@@ -139,6 +139,15 @@ func GetByTopicPostNoAtOrBefore(topicId uint64, postNo uint64) (entity Entity, o
 	return entity, err == nil
 }
 
+func GetLastByTopicID(topicID uint64) (entity Entity, ok bool) {
+	err := builder().
+		Where(queryopt.Eq("topic_id", topicID)).
+		Order(queryopt.Desc("post_no")).
+		Order(queryopt.Desc("id")).
+		First(&entity).Error
+	return entity, err == nil
+}
+
 func GetMaxPostNoByTopicId(topicId uint64) uint64 {
 	var entity Entity
 	err := builder().

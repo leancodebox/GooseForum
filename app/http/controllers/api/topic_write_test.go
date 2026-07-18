@@ -116,8 +116,9 @@ func TestCreatePostWritesPostAndTopicStats(t *testing.T) {
 	res := CreatePost(component.BetterRequest[CreatePostReq]{
 		UserId: 1102,
 		Params: CreatePostReq{
-			TopicId: topic.Id,
-			Content: "reply content with enough words",
+			TopicId:       topic.Id,
+			Content:       "reply content with enough words",
+			ReplyToPostId: firstPost.Id,
 		},
 	})
 	payload, ok := res.Data.Result.(map[string]any)
@@ -132,7 +133,7 @@ func TestCreatePostWritesPostAndTopicStats(t *testing.T) {
 		t.Fatalf("reply payload postNo = %#v, want 2", payload)
 	}
 	post := posts.Get(postID)
-	if post.Id == 0 || post.TopicId != topic.Id || post.PostNo != 2 {
+	if post.Id == 0 || post.TopicId != topic.Id || post.PostNo != 2 || post.ReplyToPostId != firstPost.Id {
 		t.Fatalf("post = %#v", post)
 	}
 	topic = topics.Get(topic.Id)

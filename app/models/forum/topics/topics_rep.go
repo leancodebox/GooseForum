@@ -296,20 +296,30 @@ func IncrementViews(counts map[uint64]uint64) error {
 	return nil
 }
 
-func IncrementPostFast(topicId uint64, posters []Poster) error {
+func IncrementPostFast(topicId uint64, posters []Poster, lastPostID uint64, lastPostedAt time.Time) error {
 	return builder().Where("id = ?", topicId).Updates(map[string]any{
 		"post_count":  gorm.Expr("post_count + 1"),
 		"reply_count": gorm.Expr("reply_count + 1"),
 		"posters":     jsonopt.Encode(posters),
-		"updated_at":  time.Now(),
+		"last_post_id": gorm.Expr(
+			"CASE WHEN last_posted_at IS NULL OR last_posted_at < ? OR (last_posted_at = ? AND last_post_id < ?) THEN ? ELSE last_post_id END",
+			lastPostedAt, lastPostedAt, lastPostID, lastPostID,
+		),
+		"last_posted_at": gorm.Expr(
+			"CASE WHEN last_posted_at IS NULL OR last_posted_at < ? THEN ? ELSE last_posted_at END",
+			lastPostedAt, lastPostedAt,
+		),
+		"updated_at": time.Now(),
 	}).Error
 }
 
-func DecrementPostFast(topicId uint64, posters []Poster) error {
+func DecrementPostFast(topicId uint64, posters []Poster, lastPostID uint64, lastPostedAt time.Time) error {
 	return builder().Where("id = ?", topicId).Updates(map[string]any{
-		"post_count":  gorm.Expr("CASE WHEN post_count > 0 THEN post_count - 1 ELSE 0 END"),
-		"reply_count": gorm.Expr("CASE WHEN reply_count > 0 THEN reply_count - 1 ELSE 0 END"),
-		"posters":     jsonopt.Encode(posters),
+		"post_count":     gorm.Expr("CASE WHEN post_count > 0 THEN post_count - 1 ELSE 0 END"),
+		"reply_count":    gorm.Expr("CASE WHEN reply_count > 0 THEN reply_count - 1 ELSE 0 END"),
+		"posters":        jsonopt.Encode(posters),
+		"last_post_id":   lastPostID,
+		"last_posted_at": lastPostedAt,
 	}).Error
 }
 

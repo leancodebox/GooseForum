@@ -89,7 +89,15 @@ func TopicsWithUser2Vo(data []*topics.Entity, categoryMap map[uint64]*category.E
 			CategoriesId:   t.CategoryIds,
 			ProcessStatus:  t.ProcessStatus,
 			Posters:        postersVo,
+			LastPostedAt:   timeValue(t.LastPostedAt),
 		})
 	}
 	return res
+}
+
+func timeValue(value *time.Time) time.Time {
+	if value == nil {
+		return time.Time{}
+	}
+	return *value
 }

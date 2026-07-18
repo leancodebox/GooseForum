@@ -255,6 +255,47 @@ func GetBytes(key string) ([]byte, error) {
 	return value, err
 }
 
+// GetManyBytes reads the existing values for keys in one Badger read transaction.
+// Missing keys are omitted from the result.
+func GetManyBytes(keys []string) (map[string][]byte, error) {
+	result := make(map[string][]byte, len(keys))
+	if len(keys) == 0 {
+		return result, nil
+	}
+	for _, key := range keys {
+		if err := validKey(key); err != nil {
+			return nil, err
+		}
+	}
+	instance, err := connectStore()
+	if err != nil {
+		return nil, err
+	}
+	err = instance.withDB(func(database *badger.DB) error {
+		return database.View(func(txn *badger.Txn) error {
+			for _, key := range keys {
+				if _, exists := result[key]; exists {
+					continue
+				}
+				item, err := txn.Get([]byte(key))
+				if errors.Is(err, badger.ErrKeyNotFound) {
+					continue
+				}
+				if err != nil {
+					return err
+				}
+				value, err := copyItemValue(item)
+				if err != nil {
+					return err
+				}
+				result[key] = value
+			}
+			return nil
+		})
+	})
+	return result, err
+}
+
 // UpdateBytes 在单个 Badger 事务内完成一个 key 的读改写。
 // updater 可能因事务冲突被重试，调用方应只基于 current/exists 计算返回值，避免在回调里执行外部副作用。
 func UpdateBytes(key string, ttl time.Duration, updater func(current []byte, exists bool) (UpdateAction, []byte, error)) error {

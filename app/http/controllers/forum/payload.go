@@ -3,6 +3,7 @@ package forum
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"maps"
 	"net/url"
 	"slices"
@@ -35,6 +36,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/permission"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/themeservice"
+	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
 	"github.com/leancodebox/GooseForum/app/service/unreadservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 	"github.com/leancodebox/GooseForum/app/service/userservice"
@@ -243,6 +245,7 @@ type TopicPayload struct {
 	ViewCount      uint64                 `json:"viewCount"`
 	ActivityText   string                 `json:"activityText"`
 	LastUpdateTime string                 `json:"lastUpdateTime"`
+	Unseen         bool                   `json:"unseen,omitempty"`
 }
 
 type TopicAuthorPayload struct {
@@ -719,7 +722,7 @@ func buildChromeNavItems(items []pageConfig.ChromeItem) []NavItemPayload {
 	return result
 }
 
-func buildHomeProps(page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) HomeProps {
+func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) HomeProps {
 	nextPage := 0
 	if hasNext {
 		nextPage = page + 1
@@ -729,7 +732,7 @@ func buildHomeProps(page int, sort string, topics []*vo.TopicsSimpleVo, hasNext 
 	return HomeProps{
 		Sort:   sort,
 		Tabs:   buildHomeTabs(sort),
-		Topics: buildTopicPayloads(topics),
+		Topics: buildTrackedTopicPayloads(userID, topics),
 		Pagination: PaginationPayload{
 			Page:     page,
 			NextPage: nextPage,
@@ -741,6 +744,32 @@ func buildHomeProps(page int, sort string, topics []*vo.TopicsSimpleVo, hasNext 
 			HTML:    announcement.GetHtmlContent(),
 		},
 	}
+}
+
+func buildTrackedTopicPayloads(userID uint64, topics []*vo.TopicsSimpleVo) []TopicPayload {
+	payloads := buildTopicPayloads(topics)
+	if userID == 0 || len(payloads) == 0 {
+		return payloads
+	}
+	activities := make([]topicunseenservice.TopicActivity, 0, len(topics))
+	for _, topic := range topics {
+		if topic == nil || topic.Id == 0 {
+			continue
+		}
+		activities = append(activities, topicunseenservice.TopicActivity{
+			TopicID:      topic.Id,
+			LastPostedAt: topic.LastPostedAt,
+		})
+	}
+	unseen, err := topicunseenservice.Resolve(userID, activities, time.Now())
+	if err != nil {
+		slog.Warn("resolve topic unseen state failed", "userId", userID, "error", err)
+		return payloads
+	}
+	for i := range payloads {
+		payloads[i].Unseen = unseen[payloads[i].ID]
+	}
+	return payloads
 }
 
 func buildLoginPageProps(c *gin.Context) LoginPageProps {
@@ -1695,7 +1724,7 @@ func isEmptyUserProfile(user *vo.UserCard) bool {
 		user.FollowerCount == 0
 }
 
-func buildCategoryPageProps(category *category.Entity, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) CategoryPageProps {
+func buildCategoryPageProps(userID uint64, category *category.Entity, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) CategoryPageProps {
 	nextPage := 0
 	if hasNext {
 		nextPage = page + 1
@@ -1711,7 +1740,7 @@ func buildCategoryPageProps(category *category.Entity, page int, sort string, to
 		},
 		Sort:   sort,
 		Tabs:   buildCategoryTabs(category, sort),
-		Topics: buildTopicPayloads(topics),
+		Topics: buildTrackedTopicPayloads(userID, topics),
 		Pagination: PaginationPayload{
 			Page:     page,
 			NextPage: nextPage,

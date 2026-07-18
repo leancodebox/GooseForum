@@ -121,16 +121,24 @@ func TestTopicRepositoryParity(t *testing.T) {
 	if nextNo != 1 {
 		t.Fatalf("ReservePostSequence()=%d, want 1", nextNo)
 	}
-	if err := IncrementPostFast(10, []Poster{{UserID: 2}}); err != nil {
+	lastPostedAt := now.Add(5 * time.Minute)
+	if err := IncrementPostFast(10, []Poster{{UserID: 2}}, 101, lastPostedAt); err != nil {
 		t.Fatalf("IncrementPostFast() err=%v", err)
 	}
-	if got := Get(10); got.PostCount != 1 || got.ReplyCount != 2 || len(got.Posters) != 1 {
+	if got := Get(10); got.PostCount != 1 || got.ReplyCount != 2 || len(got.Posters) != 1 || got.LastPostId != 101 || got.LastPostedAt == nil || !got.LastPostedAt.Equal(lastPostedAt) {
 		t.Fatalf("after IncrementPostFast() topic=%#v", got)
 	}
-	if err := DecrementPostFast(10, []Poster{}); err != nil {
+	if err := IncrementPostFast(10, []Poster{{UserID: 3}}, 99, lastPostedAt.Add(-time.Minute)); err != nil {
+		t.Fatalf("older IncrementPostFast() err=%v", err)
+	}
+	if got := Get(10); got.LastPostId != 101 || got.LastPostedAt == nil || !got.LastPostedAt.Equal(lastPostedAt) {
+		t.Fatalf("older increment moved last post backward: topic=%#v", got)
+	}
+	previousPostedAt := now.Add(time.Minute)
+	if err := DecrementPostFast(10, []Poster{}, 100, previousPostedAt); err != nil {
 		t.Fatalf("DecrementPostFast() err=%v", err)
 	}
-	if got := Get(10); got.ReplyCount != 1 {
-		t.Fatalf("after DecrementPostFast() ReplyCount=%d, want 1", got.ReplyCount)
+	if got := Get(10); got.ReplyCount != 2 || got.LastPostId != 100 || got.LastPostedAt == nil || !got.LastPostedAt.Equal(previousPostedAt) {
+		t.Fatalf("after DecrementPostFast() topic=%#v", got)
 	}
 }
