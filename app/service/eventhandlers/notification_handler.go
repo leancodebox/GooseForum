@@ -3,6 +3,7 @@ package eventhandlers
 import (
 	"context"
 
+	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/topicUserAction"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 )
@@ -11,11 +12,7 @@ const topicWatchNotifyBatchSize = 500
 
 // TakeUpTo64Chars 按字符数截取字符串，最多取 64 个字符
 func TakeUpTo64Chars(s string) string {
-	runes := []rune(s)
-	if len(runes) > 64 {
-		return string(runes[:64])
-	}
-	return s
+	return markdown2html.ExtractPreview(s, 64)
 }
 
 // CommentCreatedEvent 评论/回复创建事件

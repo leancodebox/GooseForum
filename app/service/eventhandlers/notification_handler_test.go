@@ -156,3 +156,10 @@ func TestTakeUpTo64Chars(t *testing.T) {
 		t.Fatalf("TakeUpTo64Chars() length = %d, want 64", len([]rune(got)))
 	}
 }
+
+func TestTakeUpTo64CharsRemovesMarkdownImageSyntax(t *testing.T) {
+	got := TakeUpTo64Chars("![image](/file/img/2026/07/example.png)")
+	if got != "[图片]" {
+		t.Fatalf("TakeUpTo64Chars() = %q, want [图片]", got)
+	}
+}

@@ -156,6 +156,22 @@ func TestExtractDescriptionRt(t *testing.T) {
 	}
 }
 
+func TestExtractPreviewConvertsMarkdownToReadableText(t *testing.T) {
+	input := "回复 **重点** [文档](https://example.com) ![截图](/file/image.png)"
+	if got := ExtractPreview(input, 64); got != "回复 重点 文档 [图片]" {
+		t.Fatalf("ExtractPreview() = %q", got)
+	}
+}
+
+func TestExtractPreviewUsesImageFallbackAndTruncatesRunes(t *testing.T) {
+	if got := ExtractPreview("![](/file/image.png)", 64); got != "[图片]" {
+		t.Fatalf("image preview = %q, want [图片]", got)
+	}
+	if got := ExtractPreview(strings.Repeat("鹅", 65), 64); len([]rune(got)) != 64 {
+		t.Fatalf("preview rune count = %d, want 64", len([]rune(got)))
+	}
+}
+
 func TestFallbackExtractDescription(t *testing.T) {
 	got := fallbackExtractDescription(`# Title
 

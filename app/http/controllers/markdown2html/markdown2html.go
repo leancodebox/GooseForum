@@ -215,6 +215,46 @@ func ExtractDescription(content string, maxLength int) string {
 	return description
 }
 
+// ExtractPreview converts Markdown into compact readable text for notifications and activity lists.
+func ExtractPreview(content string, maxLength int) string {
+	if maxLength <= 0 {
+		return ""
+	}
+
+	reader := text.NewReader([]byte(content))
+	doc := GetParser().Parser().Parse(reader)
+	var builder strings.Builder
+	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		switch node := n.(type) {
+		case *ast.Text:
+			builder.Write(node.Segment.Value(reader.Source()))
+			if node.SoftLineBreak() || node.HardLineBreak() {
+				builder.WriteByte(' ')
+			}
+		case *ast.Image:
+			builder.WriteString("[图片]")
+			return ast.WalkSkipChildren, nil
+		case *ast.CodeBlock, *ast.FencedCodeBlock, *ast.HTMLBlock:
+			return ast.WalkSkipChildren, nil
+		case *ast.Paragraph, *ast.Heading, *ast.ListItem:
+			if builder.Len() > 0 {
+				builder.WriteByte(' ')
+			}
+		}
+		return ast.WalkContinue, nil
+	})
+
+	preview := strings.Join(strings.Fields(builder.String()), " ")
+	runes := []rune(preview)
+	if len(runes) > maxLength {
+		preview = string(runes[:maxLength])
+	}
+	return preview
+}
+
 func extractDescriptionBlockText(node ast.Node, source []byte) string {
 	var builder strings.Builder
 	_ = ast.Walk(node, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
