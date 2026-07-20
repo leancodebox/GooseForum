@@ -17,6 +17,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/forum/users"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/badgeservice"
 )
 
 func TestTopicMetaJSONLDIncludesForumRequiredFields(t *testing.T) {
@@ -193,6 +194,7 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	topicID := uint64(990010)
 	firstPostID := uint64(990100)
 	replyPostID := uint64(990101)
+	secondReplyPostID := uint64(990102)
 	authorID := uint64(990001)
 	replyerID := uint64(990002)
 	categoryID := uint64(990003)
@@ -220,8 +222,8 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 		UserId:        authorID,
 		Status:        1,
 		ProcessStatus: 0,
-		ReplyCount:    1,
-		PostSeq:       2,
+		ReplyCount:    2,
+		PostSeq:       3,
 		CreatedAt:     now,
 		UpdatedAt:     now,
 	}
@@ -229,7 +231,8 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	firstPost := posts.Entity{Id: firstPostID, TopicId: topicID, PostNo: 1, UserId: authorID, Content: "first", RenderedHTML: "<p>first</p>", RenderedVersion: 1, CreatedAt: now, UpdatedAt: now}
 	conn.Create(&firstPost)
 	conn.Model(&topics.Entity{}).Where("id = ?", topicID).Update("first_post_id", firstPost.Id)
-	conn.Create(&posts.Entity{Id: replyPostID, TopicId: topicID, PostNo: 2, UserId: replyerID, Content: "reply", RenderedHTML: "<p>reply</p>", RenderedVersion: 1, CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})
+	conn.Create(&posts.Entity{Id: replyPostID, TopicId: topicID, PostNo: 2, UserId: replyerID, ReplyToPostId: firstPostID, Content: "reply", RenderedHTML: "<p>reply</p>", RenderedVersion: 1, CreatedAt: now.Add(time.Minute), UpdatedAt: now.Add(time.Minute)})
+	conn.Create(&posts.Entity{Id: secondReplyPostID, TopicId: topicID, PostNo: 3, UserId: replyerID, ReplyToPostId: firstPostID, Content: "second reply", RenderedHTML: "<p>second reply</p>", RenderedVersion: 1, CreatedAt: now.Add(2 * time.Minute), UpdatedAt: now.Add(2 * time.Minute)})
 	conn.Create(&topicUserAction.Entity{UserId: authorID, TopicId: topicID, LikedAt: &now, WatchedAt: &now})
 
 	gin.SetMode(gin.TestMode)
@@ -237,23 +240,45 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	c.Request = httptest.NewRequest(http.MethodGet, "/p/post/990010", nil)
 	props := buildTopicDetailProps(c, &topic, &firstPost)
 
-	if props.Topic.ID != topicID || props.Topic.MaxPostNo != 2 {
+	if props.Topic.ID != topicID || props.Topic.MaxPostNo != 3 {
 		t.Fatalf("topic payload mismatch: %#v", props.Topic)
 	}
 	if len(props.Topic.Categories) != 1 || props.Topic.Categories[0].Name != "General" {
 		t.Fatalf("categories mismatch: %#v", props.Topic.Categories)
 	}
-	if len(props.PostStream.Posts) != 2 {
-		t.Fatalf("post stream length = %d, want 2", len(props.PostStream.Posts))
+	if len(props.PostStream.Posts) != 3 {
+		t.Fatalf("post stream length = %d, want 3", len(props.PostStream.Posts))
 	}
-	if props.PostStream.Posts[0].ID != firstPostID || props.PostStream.Posts[0].PostNo != 1 || props.PostStream.Posts[0].RenderedContent != "<p>first</p>" {
+	if props.PostStream.Posts[0].ID != firstPostID || props.PostStream.Posts[0].PostNo != 1 || props.PostStream.Posts[0].RenderedContent != "<p>first</p>\n" {
 		t.Fatalf("first post payload mismatch: %#v", props.PostStream.Posts[0])
 	}
 	if props.PostStream.Posts[1].ID != replyPostID || props.PostStream.Posts[1].PostNo != 2 {
 		t.Fatalf("reply post payload mismatch: %#v", props.PostStream.Posts[1])
 	}
-	if props.PostStream.BeforePostNo != 1 || props.PostStream.AfterPostNo != 2 || props.PostStream.MaxPostNo != 2 {
+	if props.PostStream.Posts[1].ReplyToPostID != firstPostID {
+		t.Fatalf("reply post target id mismatch: %#v", props.PostStream.Posts[1])
+	}
+	if len(props.PostStream.ReplyTargets) != 1 || props.PostStream.ReplyTargets[0].ID != firstPostID || props.PostStream.ReplyTargets[0].PostNo != 1 || props.PostStream.ReplyTargets[0].RenderedContent != "<p>first</p>\n" || props.PostStream.ReplyTargets[0].Unavailable {
+		t.Fatalf("reply targets mismatch: %#v", props.PostStream.ReplyTargets)
+	}
+	if props.PostStream.BeforePostNo != 1 || props.PostStream.AfterPostNo != 3 || props.PostStream.MaxPostNo != 3 {
 		t.Fatalf("post stream cursor mismatch: %#v", props.PostStream)
+	}
+}
+
+func TestBuildReplyTargetPayloadHidesUnavailablePostMetadata(t *testing.T) {
+	parent := &posts.Entity{Id: 2, TopicId: 1, PostNo: 3, UserId: 4, ProcessStatus: 1}
+	target := buildReplyTargetPayload(
+		1,
+		parent.Id,
+		map[uint64]*posts.Entity{parent.Id: parent},
+		map[uint64]*users.EntityComplete{parent.UserId: {Id: parent.UserId, Username: "hidden-author"}},
+		map[uint64]*badgeservice.UserBadge{},
+		false,
+	)
+
+	if !target.Unavailable || target.PostNo != 0 || target.Author.ID != 0 || target.RenderedContent != "" {
+		t.Fatalf("hidden reply target leaked metadata: %#v", target)
 	}
 }
 

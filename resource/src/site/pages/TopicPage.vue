@@ -10,10 +10,11 @@ import { showUserCard } from '@/runtime/user-card-events'
 import { measurePostViewportProgressFromRects } from '@/runtime/post-viewport-progress'
 import MarkdownImageViewer from '@/site/components/MarkdownImageViewer.vue'
 import PostPositionRail from '@/site/components/PostPositionRail.vue'
+import PostReplyReference from '@/site/components/PostReplyReference.vue'
 import TopicFloatingControls from '@/site/components/TopicFloatingControls.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import type { TopicDetailProps, LayoutPayload, PostPayload } from '@/types/payload'
+import type { TopicDetailProps, LayoutPayload, PostPayload, ReplyTargetPayload } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{
@@ -52,6 +53,8 @@ const reportSubmitting = ref(false)
 const reportError = ref('')
 const moderatingPostIds = ref<number[]>([])
 const posts = ref<PostPayload[]>([...initialPosts])
+const replyTargets = ref<ReplyTargetPayload[]>([...(initialPostStream.replyTargets || [])])
+const replyTargetMap = computed(() => new Map(replyTargets.value.map((target) => [target.id, target])))
 const topicProcessStatus = ref(page.props.topic.processStatus)
 const targetPost = computed(() => posts.value.find((post) => post.id === targetPostId.value))
 const postHasBefore = ref(initialPostStream.hasBefore)
@@ -488,6 +491,7 @@ function measurePostViewportProgress() {
 
 function resetPostsFromProps() {
   posts.value = [...initialPosts]
+  replyTargets.value = [...(initialPostStream.replyTargets || [])]
   postHasBefore.value = initialPostStream.hasBefore
   postHasAfter.value = initialPostStream.hasAfter
   postBeforePostNo.value = initialPostStream.beforePostNo || firstPostNo(initialPosts)
@@ -627,8 +631,23 @@ function mergePosts(nextReplies: PostPayload[], mode: 'replace' | 'prepend' | 'a
   posts.value = mode === 'prepend' ? [...filtered, ...posts.value] : [...posts.value, ...filtered]
 }
 
+function mergeReplyTargets(nextTargets: ReplyTargetPayload[], mode: 'replace' | 'prepend' | 'append') {
+  if (mode === 'replace') {
+    replyTargets.value = nextTargets
+    return
+  }
+  const merged = new Map(replyTargets.value.map((target) => [target.id, target]))
+  for (const target of nextTargets) merged.set(target.id, target)
+  replyTargets.value = [...merged.values()]
+}
+
+function replyTargetFor(post: PostPayload) {
+  return post.replyToPostId ? replyTargetMap.value.get(post.replyToPostId) : undefined
+}
+
 function applyPostWindowPayload(payload: Awaited<ReturnType<typeof getPostWindow>>, mergeMode: 'replace' | 'prepend' | 'append') {
   mergePosts(payload.posts, mergeMode)
+  mergeReplyTargets(payload.replyTargets || [], mergeMode)
   const nextMaxPostNo = Math.max(postMaxNo.value, payload.maxPostNo || 0)
   postMaxNo.value = nextMaxPostNo
   syncLoadedPostWindowBounds(payload.hasBefore, payload.hasAfter, nextMaxPostNo)
@@ -1468,10 +1487,7 @@ async function removePost(postId: number) {
                     <time class="hidden w-36 shrink-0 text-right text-xs text-base-content/55 sm:-ml-1 sm:block">{{ formatDateTime(post.createdAt) }}</time>
                   </div>
                 </div>
-                <p v-if="post.replyToUsername" class="mb-1.5 inline-flex max-w-full min-w-0 items-center gap-1 rounded bg-base-200 px-2 py-1 text-sm text-base-content/55">
-                  <span class="shrink-0">{{ t('topic.reply') }}</span>
-                  <a :href="`/u/${post.replyToUserId}`" class="min-w-0 truncate font-medium text-base-content/75 hover:text-primary">@{{ post.replyToUsername }}</a>
-                </p>
+                <PostReplyReference v-if="post.replyToPostId" :target="replyTargetFor(post)" />
                 <div v-if="post.isHidden && !post.canModerate" class="rounded border border-line bg-base-200/60 px-3 py-2 text-sm text-base-content/45">
                   {{ t('topic.hiddenReplyPlaceholder') }}
                 </div>

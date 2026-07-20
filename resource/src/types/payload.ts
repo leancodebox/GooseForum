@@ -342,8 +342,22 @@ export interface PostPayload {
   updatedAt?: string
 }
 
+export interface ReplyTargetPayload {
+  id: number
+  postNo?: number
+  author: {
+    id: number
+    username: string
+    avatarUrl: string
+    wornBadge?: UserBadgePayload | null
+  }
+  renderedContent?: string
+  unavailable?: boolean
+}
+
 export interface PostWindowPayload {
   posts: PostPayload[]
+  replyTargets: ReplyTargetPayload[]
   anchorPostId?: number
   beforePostNo?: number
   afterPostNo?: number

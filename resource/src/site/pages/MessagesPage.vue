@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { ArrowLeft, MessageSquare, MoreVertical, PenLine, Search, Send, Smile, X } from '@lucide/vue'
+import { ArrowLeft, MessageSquare, MessageSquarePlus, MoreVertical, Search, Send, Smile, X } from '@lucide/vue'
 import { getChatMessages, markChatRead, sendChatMessage, type ChatMessagePayload } from '@/runtime/api'
 import { formatChatTime } from '@/runtime/format'
 import { useUnreadStatus } from '@/runtime/unread-status'
@@ -248,7 +248,7 @@ async function startChat(user: UserConnectionPayload) {
               :title="t('messages.newMessage')"
               @click="showNewChat = true"
             >
-              <PenLine class="h-4 w-4" />
+              <MessageSquarePlus class="h-4 w-4" />
             </button>
           </div>
 

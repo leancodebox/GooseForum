@@ -16,12 +16,8 @@ import (
 	nethtml "golang.org/x/net/html"
 )
 
-func GetVersion() uint32 {
-	return 3
-}
-
-func GetCommentVersion() uint32 {
-	return 1
+func GetPostVersion() uint32 {
+	return 4
 }
 
 var md = goldmark.New(
@@ -48,12 +44,12 @@ func MarkdownToHTML(markdown string) string {
 	return buf.String()
 }
 
-// CommentMarkdownToHTML renders comment Markdown and normalizes links/images for public UGC.
-func CommentMarkdownToHTML(markdown string) string {
-	return normalizeCommentHTML(MarkdownToHTML(markdown))
+// PostMarkdownToHTML renders public user content and applies UGC link/image policies.
+func PostMarkdownToHTML(markdown string) string {
+	return normalizePostHTML(MarkdownToHTML(markdown))
 }
 
-func normalizeCommentHTML(raw string) string {
+func normalizePostHTML(raw string) string {
 	root, err := nethtml.Parse(strings.NewReader("<div>" + raw + "</div>"))
 	if err != nil {
 		return raw
@@ -64,8 +60,10 @@ func normalizeCommentHTML(raw string) string {
 		if node.Type == nethtml.ElementNode {
 			switch node.Data {
 			case "a":
-				setHTMLAttr(node, "target", "_blank")
-				setHTMLAttr(node, "rel", "nofollow ugc noopener noreferrer")
+				if isExternalHTTPLink(getHTMLAttr(node, "href")) {
+					setHTMLAttr(node, "target", "_blank")
+					setHTMLAttr(node, "rel", "nofollow ugc noopener noreferrer")
+				}
 			case "img":
 				setHTMLAttr(node, "loading", "lazy")
 				setHTMLAttr(node, "decoding", "async")
@@ -88,6 +86,20 @@ func normalizeCommentHTML(raw string) string {
 		}
 	}
 	return buf.String()
+}
+
+func getHTMLAttr(node *nethtml.Node, key string) string {
+	for _, attr := range node.Attr {
+		if attr.Key == key {
+			return attr.Val
+		}
+	}
+	return ""
+}
+
+func isExternalHTTPLink(value string) bool {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	return err == nil && parsed.IsAbs() && (parsed.Scheme == "http" || parsed.Scheme == "https")
 }
 
 func findFirstElement(node *nethtml.Node, tag string) *nethtml.Node {

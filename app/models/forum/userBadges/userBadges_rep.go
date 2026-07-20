@@ -108,6 +108,18 @@ func GetActiveByUserID(userID uint64) (entities []*Entity) {
 	return
 }
 
+func GetActiveByUserIDsAndCodes(userIDs []uint64, badgeCodes []string) (entities []*Entity) {
+	if len(userIDs) == 0 || len(badgeCodes) == 0 {
+		return
+	}
+	builder().
+		Where(queryopt.In("user_id", userIDs)).
+		Where(queryopt.In("badge_code", badgeCodes)).
+		Where("revoked_at IS NULL").
+		Find(&entities)
+	return
+}
+
 func Revoke(userID uint64, badgeCode string) error {
 	now := time.Now()
 	return builder().

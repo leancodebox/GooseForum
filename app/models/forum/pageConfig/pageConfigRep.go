@@ -39,7 +39,7 @@ func GetConfigByPageType[T any](pageType string, defaultValue T) T {
 	return defaultValue
 }
 
-const AppMigrationVersion uint32 = 11
+const AppMigrationVersion uint32 = 12
 
 func GetMigrationVersion() uint32 {
 	configEntity := GetByPageType(Migration)

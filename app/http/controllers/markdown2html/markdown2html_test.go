@@ -20,11 +20,8 @@ type markdownCompatCase struct {
 }
 
 func TestMarkdownVersions(t *testing.T) {
-	if got := GetVersion(); got != 3 {
-		t.Fatalf("GetVersion() = %d, want 3", got)
-	}
-	if got := GetCommentVersion(); got != 1 {
-		t.Fatalf("GetCommentVersion() = %d, want 1", got)
+	if got := GetPostVersion(); got != 4 {
+		t.Fatalf("GetPostVersion() = %d, want 4", got)
 	}
 	if GetParser() == nil {
 		t.Fatal("GetParser() returned nil")
@@ -59,8 +56,8 @@ func TestMarkdownCompatibilityFixtures(t *testing.T) {
 	}
 }
 
-func TestCommentMarkdownToHTMLNormalizesLinksAndImages(t *testing.T) {
-	html := CommentMarkdownToHTML(`[Goose](https://gooseforum.online)
+func TestPostMarkdownToHTMLNormalizesExternalLinksAndImages(t *testing.T) {
+	html := PostMarkdownToHTML(`[Goose](https://gooseforum.online)
 
 ![logo](https://gooseforum.online/logo.png)`)
 
@@ -78,8 +75,15 @@ func TestCommentMarkdownToHTMLNormalizesLinksAndImages(t *testing.T) {
 	}
 }
 
-func TestNormalizeCommentHTMLUpdatesExistingAttributes(t *testing.T) {
-	html := normalizeCommentHTML(`<p><a href="https://example.com" target="_self" rel="next">link</a><img src="/a.png" loading="eager"></p>`)
+func TestPostMarkdownToHTMLKeepsInternalLinksInCurrentPage(t *testing.T) {
+	html := PostMarkdownToHTML(`[topic](/p/post/123)`)
+	if strings.Contains(html, `target="_blank"`) || strings.Contains(html, `rel="nofollow ugc noopener noreferrer"`) {
+		t.Fatalf("expected relative internal link to keep normal navigation, got %s", html)
+	}
+}
+
+func TestNormalizePostHTMLUpdatesExistingAttributes(t *testing.T) {
+	html := normalizePostHTML(`<p><a href="https://example.com" target="_self" rel="next">link</a><img src="/a.png" loading="eager"></p>`)
 
 	for _, want := range []string{`target="_blank"`, `rel="nofollow ugc noopener noreferrer"`, `loading="lazy"`, `decoding="async"`} {
 		if !strings.Contains(html, want) {

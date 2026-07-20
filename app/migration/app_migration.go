@@ -125,5 +125,15 @@ func runVersionedDataMigrations() {
 		pageConfig.SyncMigrationVersion(11)
 		currentVersion = 11
 	}
+	if currentVersion < 12 {
+		result := datamigration.RebuildPostMarkdown()
+		slog.Info("app migration rebuild post markdown done", "processed", result.Processed, "failed", result.Failed, "lastFailed", result.LastFailed)
+		if result.Failed > 0 {
+			slog.Error("app migration rebuild post markdown has failures", "failed", result.Failed, "lastFailed", result.LastFailed)
+			return
+		}
+		pageConfig.SyncMigrationVersion(12)
+		currentVersion = 12
+	}
 	slog.Info("app migration end", "version", currentVersion)
 }

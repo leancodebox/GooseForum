@@ -17,7 +17,7 @@ func RebuildReplyMarkdown() ReplyMarkdownResult {
 	conn := db.Connect()
 	var startId uint64
 	const limit = 200
-	version := markdown2html.GetCommentVersion()
+	version := markdown2html.GetPostVersion()
 	result := ReplyMarkdownResult{}
 	if !conn.Migrator().HasTable("reply") {
 		return result
@@ -48,7 +48,7 @@ func RebuildReplyMarkdown() ReplyMarkdownResult {
 				result.Skipped++
 				continue
 			}
-			renderedHTML := markdown2html.CommentMarkdownToHTML(item.Content)
+			renderedHTML := markdown2html.PostMarkdownToHTML(item.Content)
 			if err := conn.Table("reply").
 				Where("id = ?", item.Id).
 				Updates(map[string]any{

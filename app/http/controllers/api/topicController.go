@@ -129,7 +129,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 		}
 		firstPost.Content = req.Params.Content
 		firstPost.RenderedHTML = ""
-		firstPost.RenderedVersion = markdown2html.GetVersion()
+		firstPost.RenderedVersion = markdown2html.GetPostVersion()
 		if err := topics.Save(&topic); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
 		}
@@ -157,7 +157,7 @@ func WriteTopic(req component.BetterRequest[WriteTopicReq]) component.Response {
 			UserId:          req.UserId,
 			Content:         req.Params.Content,
 			RenderedHTML:    "",
-			RenderedVersion: markdown2html.GetVersion(),
+			RenderedVersion: markdown2html.GetPostVersion(),
 		}
 		if err := posts.Create(&firstPost); err != nil {
 			return component.FailResponseCode(component.MessageOperationFailed, nil)
@@ -286,8 +286,8 @@ func CreatePost(req component.BetterRequest[CreatePostReq]) component.Response {
 	postEntity := &posts.Entity{
 		TopicId:         req.Params.TopicId,
 		Content:         content,
-		RenderedHTML:    markdown2html.CommentMarkdownToHTML(content),
-		RenderedVersion: markdown2html.GetCommentVersion(),
+		RenderedHTML:    markdown2html.PostMarkdownToHTML(content),
+		RenderedVersion: markdown2html.GetPostVersion(),
 		UserId:          req.UserId,
 		ReplyToPostId:   req.Params.ReplyToPostId,
 	}
@@ -371,8 +371,8 @@ func UpdatePost(req component.BetterRequest[UpdatePostReq]) component.Response {
 	}
 
 	postEntity.Content = content
-	postEntity.RenderedHTML = markdown2html.CommentMarkdownToHTML(content)
-	postEntity.RenderedVersion = markdown2html.GetCommentVersion()
+	postEntity.RenderedHTML = markdown2html.PostMarkdownToHTML(content)
+	postEntity.RenderedVersion = markdown2html.GetPostVersion()
 
 	if err := posts.Save(&postEntity); err != nil {
 		return component.FailResponseCode(

@@ -14,7 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leancodebox/GooseForum/app/bundles/i18n"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/http/controllers/transform"
 	"github.com/leancodebox/GooseForum/app/http/controllers/vo"
 	"github.com/leancodebox/GooseForum/app/models/defaultconfig"
@@ -34,6 +33,7 @@ import (
 	"github.com/leancodebox/GooseForum/app/service/moderationservice"
 	"github.com/leancodebox/GooseForum/app/service/notificationservice"
 	"github.com/leancodebox/GooseForum/app/service/permission"
+	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/searchservice"
 	"github.com/leancodebox/GooseForum/app/service/themeservice"
 	"github.com/leancodebox/GooseForum/app/service/topicunseenservice"
@@ -309,15 +309,24 @@ type PostPayload struct {
 	UpdatedAt       string             `json:"updatedAt"`
 }
 
+type ReplyTargetPayload struct {
+	ID              uint64             `json:"id"`
+	PostNo          uint64             `json:"postNo,omitempty"`
+	Author          TopicAuthorPayload `json:"author"`
+	RenderedContent string             `json:"renderedContent,omitempty"`
+	Unavailable     bool               `json:"unavailable,omitempty"`
+}
+
 type PostWindowPayload struct {
-	Posts        []PostPayload `json:"posts"`
-	AnchorPostID uint64        `json:"anchorPostId,omitempty"`
-	BeforePostNo uint64        `json:"beforePostNo,omitempty"`
-	AfterPostNo  uint64        `json:"afterPostNo,omitempty"`
-	HasBefore    bool          `json:"hasBefore"`
-	HasAfter     bool          `json:"hasAfter"`
-	Total        int64         `json:"total"`
-	MaxPostNo    uint64        `json:"maxPostNo"`
+	Posts        []PostPayload        `json:"posts"`
+	ReplyTargets []ReplyTargetPayload `json:"replyTargets"`
+	AnchorPostID uint64               `json:"anchorPostId,omitempty"`
+	BeforePostNo uint64               `json:"beforePostNo,omitempty"`
+	AfterPostNo  uint64               `json:"afterPostNo,omitempty"`
+	HasBefore    bool                 `json:"hasBefore"`
+	HasAfter     bool                 `json:"hasAfter"`
+	Total        int64                `json:"total"`
+	MaxPostNo    uint64               `json:"maxPostNo"`
 }
 
 type TopicPermissions struct {
@@ -978,7 +987,7 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 }
 
 func buildPostWindowPayloadFromEntities(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool, hasBefore bool, hasAfter bool, total int64, maxPostNo uint64, anchorPostID uint64) PostWindowPayload {
-	payloadPosts := buildPostPayloads(postEntities, userMap, currentUserID, canModerate)
+	payloadPosts, replyTargets := buildPostPayloads(postEntities, userMap, currentUserID, canModerate)
 	var beforePostNo uint64
 	var afterPostNo uint64
 	if len(postEntities) > 0 {
@@ -987,6 +996,7 @@ func buildPostWindowPayloadFromEntities(postEntities []*posts.Entity, userMap ma
 	}
 	return PostWindowPayload{
 		Posts:        payloadPosts,
+		ReplyTargets: replyTargets,
 		AnchorPostID: anchorPostID,
 		BeforePostNo: beforePostNo,
 		AfterPostNo:  afterPostNo,
@@ -997,7 +1007,7 @@ func buildPostWindowPayloadFromEntities(postEntities []*posts.Entity, userMap ma
 	}
 }
 
-func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) []PostPayload {
+func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool) ([]PostPayload, []ReplyTargetPayload) {
 	postMap := make(map[uint64]*posts.Entity, len(postEntities))
 	for _, item := range postEntities {
 		if item != nil {
@@ -1025,40 +1035,45 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 		}
 	}
 
-	userIDs := make([]uint64, 0, len(postEntities)+len(postMap))
-	seenUserIDs := make(map[uint64]struct{}, len(postEntities)+len(postMap))
-	for _, item := range postEntities {
-		if item == nil {
-			continue
-		}
-		if _, seen := seenUserIDs[item.UserId]; !seen {
-			seenUserIDs[item.UserId] = struct{}{}
-			userIDs = append(userIDs, item.UserId)
-		}
-	}
+	missingUserIDs := make([]uint64, 0, len(postMap))
+	seenMissingUserIDs := make(map[uint64]struct{}, len(postMap))
 	for _, parent := range postMap {
 		if parent == nil {
 			continue
 		}
-		if _, seen := seenUserIDs[parent.UserId]; !seen {
-			seenUserIDs[parent.UserId] = struct{}{}
-			userIDs = append(userIDs, parent.UserId)
+		if _, loaded := userMap[parent.UserId]; loaded {
+			continue
+		}
+		if _, seen := seenMissingUserIDs[parent.UserId]; !seen {
+			seenMissingUserIDs[parent.UserId] = struct{}{}
+			missingUserIDs = append(missingUserIDs, parent.UserId)
 		}
 	}
-	maps.Copy(userMap, users.GetMapByIds(userIDs))
+	maps.Copy(userMap, users.GetMapByIds(missingUserIDs))
+	wornBadges := badgeservice.GetWornBadges(selectedWornBadges(userMap))
+	authorPayload := func(userID uint64) TopicAuthorPayload {
+		return userPayloadWithWornBadge(userID, userMap, wornBadges[userID])
+	}
 
 	res := make([]PostPayload, 0, len(postEntities))
+	replyTargets := make([]ReplyTargetPayload, 0, len(seenMissingParentIDs))
+	seenReplyTargets := make(map[uint64]struct{}, len(seenMissingParentIDs))
 	for _, item := range postEntities {
 		if item == nil {
 			continue
 		}
-		author := userPayload(item.UserId, userMap)
+		author := authorPayload(item.UserId)
+		postservice.EnsureRenderedHTML(item)
 		replyToName, replyToUserID := "", uint64(0)
 		if item.ReplyToPostId > 0 {
-			if parent, ok := postMap[item.ReplyToPostId]; ok && parent != nil {
-				parentAuthor := userPayload(parent.UserId, userMap)
+			if parent, ok := postMap[item.ReplyToPostId]; ok && parent != nil && parent.TopicId == item.TopicId && (parent.ProcessStatus == 0 || canModerate) {
+				parentAuthor := authorPayload(parent.UserId)
 				replyToName = parentAuthor.Username
 				replyToUserID = parentAuthor.ID
+			}
+			if _, seen := seenReplyTargets[item.ReplyToPostId]; !seen {
+				seenReplyTargets[item.ReplyToPostId] = struct{}{}
+				replyTargets = append(replyTargets, buildReplyTargetPayload(item.TopicId, item.ReplyToPostId, postMap, userMap, wornBadges, canModerate))
 			}
 		}
 		content := item.Content
@@ -1086,7 +1101,23 @@ func buildPostPayloads(postEntities []*posts.Entity, userMap map[uint64]*users.E
 			UpdatedAt:       item.UpdatedAt.Format(time.DateTime),
 		})
 	}
-	return res
+	return res, replyTargets
+}
+
+func buildReplyTargetPayload(topicID, postID uint64, postMap map[uint64]*posts.Entity, userMap map[uint64]*users.EntityComplete, wornBadges map[uint64]*badgeservice.UserBadge, canModerate bool) ReplyTargetPayload {
+	target := ReplyTargetPayload{ID: postID, Unavailable: true}
+	parent, ok := postMap[postID]
+	if !ok || parent == nil || parent.TopicId != topicID {
+		return target
+	}
+	if parent.ProcessStatus != 0 && !canModerate {
+		return target
+	}
+	target.PostNo = parent.PostNo
+	target.Author = userPayloadWithWornBadge(parent.UserId, userMap, wornBadges[parent.UserId])
+	target.RenderedContent = postservice.EnsureRenderedHTML(parent)
+	target.Unavailable = false
+	return target
 }
 
 func buildTopicHotTopics(currentTopicID uint64) []TopicPayload {
@@ -1105,6 +1136,10 @@ func buildTopicHotTopics(currentTopicID uint64) []TopicPayload {
 }
 
 func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, userMap map[uint64]*users.EntityComplete) TopicDetailPayload {
+	wornBadges := badgeservice.GetWornBadges(selectedWornBadges(userMap))
+	authorPayload := func(userID uint64) TopicAuthorPayload {
+		return userPayloadWithWornBadge(userID, userMap, wornBadges[userID])
+	}
 	participants := make([]TopicAuthorPayload, 0, len(userMap))
 	seen := map[uint64]bool{}
 	addParticipant := func(userID uint64) {
@@ -1112,7 +1147,7 @@ func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *po
 			return
 		}
 		seen[userID] = true
-		participants = append(participants, userPayload(userID, userMap))
+		participants = append(participants, authorPayload(userID))
 	}
 	addParticipant(topic.UserId)
 	for userID := range userMap {
@@ -1148,7 +1183,7 @@ func buildTopicDetailPayload(c *gin.Context, topic *topics.Entity, firstPost *po
 		URL:           urlconfig.PostDetail(topic.Id),
 		TopicStatus:   topic.Status,
 		ProcessStatus: topic.ProcessStatus,
-		Author:        userPayload(topic.UserId, userMap),
+		Author:        authorPayload(topic.UserId),
 		Participants:  participants,
 		Categories:    categoryPayloads(topic.CategoryIds),
 		ReplyCount:    topic.ReplyCount,
@@ -1186,19 +1221,25 @@ func userPayload(userID uint64, userMap map[uint64]*users.EntityComplete) TopicA
 	if !ok || user == nil {
 		return TopicAuthorPayload{ID: userID, Username: "匿名用户", AvatarURL: urlconfig.GetDefaultAvatar()}
 	}
-	return TopicAuthorPayload{ID: userID, Username: user.Username, AvatarURL: user.GetWebAvatarUrl(), WornBadge: badgeservice.GetWornBadge(userID, user.WornBadgeCode)}
+	return userPayloadWithWornBadge(userID, userMap, badgeservice.GetWornBadge(userID, user.WornBadgeCode))
 }
 
-func ensurePostRenderedHTML(entity *posts.Entity) {
-	if entity == nil || entity.Id == 0 {
-		return
+func selectedWornBadges(userMap map[uint64]*users.EntityComplete) map[uint64]string {
+	selected := make(map[uint64]string, len(userMap))
+	for userID, user := range userMap {
+		if user != nil && user.WornBadgeCode != "" {
+			selected[userID] = user.WornBadgeCode
+		}
 	}
-	if entity.RenderedVersion >= markdown2html.GetVersion() && entity.RenderedHTML != "" {
-		return
+	return selected
+}
+
+func userPayloadWithWornBadge(userID uint64, userMap map[uint64]*users.EntityComplete, wornBadge *badgeservice.UserBadge) TopicAuthorPayload {
+	user, ok := userMap[userID]
+	if !ok || user == nil {
+		return TopicAuthorPayload{ID: userID, Username: "匿名用户", AvatarURL: urlconfig.GetDefaultAvatar()}
 	}
-	entity.RenderedHTML = markdown2html.MarkdownToHTML(entity.Content)
-	entity.RenderedVersion = markdown2html.GetVersion()
-	_ = posts.SaveNoUpdate(entity)
+	return TopicAuthorPayload{ID: userID, Username: user.Username, AvatarURL: user.GetWebAvatarUrl(), WornBadge: wornBadge}
 }
 
 func buildTopicMeta(c *gin.Context, topic TopicDetailPayload, postStream ...[]PostPayload) PageMeta {

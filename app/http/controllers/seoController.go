@@ -13,10 +13,10 @@ import (
 	"github.com/leancodebox/GooseForum/app/bundles/localcache"
 	"github.com/leancodebox/GooseForum/app/cacheconfig"
 	"github.com/leancodebox/GooseForum/app/http/controllers/component"
-	"github.com/leancodebox/GooseForum/app/http/controllers/markdown2html"
 	"github.com/leancodebox/GooseForum/app/models/forum/posts"
 	"github.com/leancodebox/GooseForum/app/models/forum/topics"
 	"github.com/leancodebox/GooseForum/app/models/hotdataserve"
+	"github.com/leancodebox/GooseForum/app/service/postservice"
 	"github.com/leancodebox/GooseForum/app/service/urlconfig"
 
 	"github.com/gin-gonic/gin"
@@ -191,19 +191,12 @@ func buildRSSXML(host string) (string, error) {
 	for _, item := range topicList {
 		firstPost := firstPostMap[item.FirstPostId]
 		itemURL := host + urlconfig.PostDetail(item.Id)
-		content := ""
-		if firstPost != nil {
-			content = firstPost.RenderedHTML
-			if content == "" {
-				content = markdown2html.MarkdownToHTML(firstPost.Content)
-			}
-		}
 
 		feed.Items = append(feed.Items, &feeds.Item{
 			Title:       item.Title,
 			Link:        &feeds.Link{Href: itemURL},
 			Description: item.Excerpt,
-			Content:     content,
+			Content:     postservice.EnsureRenderedHTML(firstPost),
 			Id:          itemURL,
 			Created:     item.CreatedAt,
 			Updated:     item.UpdatedAt,

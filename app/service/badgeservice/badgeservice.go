@@ -149,7 +149,49 @@ func WearableBadgesFromList(items []UserBadge) []UserBadge {
 }
 
 func GetWornBadge(userID uint64, badgeCode string) *UserBadge {
+	if userID == 0 || badgeCode == "" {
+		return nil
+	}
 	return WornBadgeFromList(GetUserBadges(userID), badgeCode)
+}
+
+func GetWornBadges(selected map[uint64]string) map[uint64]*UserBadge {
+	userIDs := make([]uint64, 0, len(selected))
+	badgeCodes := make([]string, 0, len(selected))
+	for userID, badgeCode := range selected {
+		if userID == 0 || badgeCode == "" {
+			continue
+		}
+		userIDs = append(userIDs, userID)
+		badgeCodes = append(badgeCodes, badgeCode)
+	}
+	if len(userIDs) == 0 {
+		return map[uint64]*UserBadge{}
+	}
+
+	records := userBadges.GetActiveByUserIDsAndCodes(lo.Uniq(userIDs), lo.Uniq(badgeCodes))
+	definitions := lo.KeyBy(ResolveByCodes(badgeCodes), func(item Badge) string { return item.Code })
+	return wornBadgesFromRecords(selected, records, definitions)
+}
+
+func wornBadgesFromRecords(selected map[uint64]string, records []*userBadges.Entity, definitions map[string]Badge) map[uint64]*UserBadge {
+	result := make(map[uint64]*UserBadge, len(records))
+	for _, record := range records {
+		if record == nil || selected[record.UserId] != record.BadgeCode {
+			continue
+		}
+		badge, ok := definitions[record.BadgeCode]
+		if !ok || !badge.IsEnabled || !badge.IsWearable {
+			continue
+		}
+		result[record.UserId] = &UserBadge{
+			Badge:     badge,
+			Source:    record.Source,
+			Reason:    record.Reason,
+			GrantedAt: record.GrantedAt.Format(time.DateTime),
+		}
+	}
+	return result
 }
 
 func WornBadgeFromList(items []UserBadge, badgeCode string) *UserBadge {
