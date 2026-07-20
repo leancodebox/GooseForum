@@ -10,7 +10,8 @@ before:
     - go generate ./...
 
 builds:
-  - env:
+  - id: unix
+    env:
       - CGO_ENABLED=0
     flags:
       - -trimpath
@@ -21,14 +22,30 @@ builds:
       - -X github.com/leancodebox/GooseForum/app/bundles/buildinfo.BuildDate={{ .Date }}
     goos:
       - linux
-      - windows
       - darwin
+    goarch:
+      - amd64
+      - arm64
+  - id: windows
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/leancodebox/GooseForum/app/bundles/buildinfo.Version={{ .Version }}
+      - -X github.com/leancodebox/GooseForum/app/bundles/buildinfo.Commit={{ .Commit }}
+      - -X github.com/leancodebox/GooseForum/app/bundles/buildinfo.BuildDate={{ .Date }}
+    goos:
+      - windows
     goarch:
       - amd64
       - arm64
 
 archives:
-  - formats: [tar.gz]
+  - id: unix
+    ids: [unix]
+    formats: [tar.gz]
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -36,11 +53,20 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    format_overrides:
-      - goos: windows
-        formats: [zip]
+  - id: windows
+    ids: [windows]
+    formats: [zip]
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
     files:
-      - src: '{{ if eq .Os "windows" }}scripts/windows/start.bat{{ end }}'
+      - LICENSE*
+      - README*
+      - src: scripts/windows/start.bat
         dst: start.bat
 
 changelog:
