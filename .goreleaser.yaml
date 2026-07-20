@@ -39,6 +39,9 @@ archives:
     format_overrides:
       - goos: windows
         formats: [zip]
+    files:
+      - src: '{{ if eq .Os "windows" }}scripts/windows/start.bat{{ end }}'
+        dst: start.bat
 
 changelog:
   sort: asc
