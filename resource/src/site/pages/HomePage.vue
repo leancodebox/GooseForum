@@ -17,12 +17,15 @@ const page = defineProps<{
 }>()
 const { t } = useI18n()
 const { mode: listMode, setMode: setListMode } = useTopicListMode()
+const announcementReadStorageKey = 'goose:announcement:last-read-published-at'
+const announcementReminderWindow = 7 * 24 * 60 * 60 * 1000
 
 const topics = ref<TopicPayload[]>([])
 const pagination = ref<HomeProps['pagination']>(page.props.pagination)
 const loadingMore = ref(false)
 const loadError = ref('')
 const loadMoreSentinel = ref<HTMLElement | null>(null)
+const announcementUnread = ref(shouldRemindAnnouncement())
 let observer: IntersectionObserver | undefined
 
 const hasTopics = computed(() => topics.value.length > 0)
@@ -48,6 +51,11 @@ watch(
       unseenByID.has(topic.id) ? { ...topic, unseen: unseenByID.get(topic.id) } : topic,
     )
   },
+)
+
+watch(
+  () => [page.props.announcement.enabled, page.props.announcement.publishedAt] as const,
+  () => refreshAnnouncementReminder(),
 )
 
 watch(listMode, (mode) => {
@@ -88,6 +96,44 @@ function sortTabLabel(key: string, fallback?: string) {
   return fallback || key
 }
 
+function markAnnouncementRead() {
+  announcementUnread.value = false
+  const publishedAt = parseAnnouncementTime(page.props.announcement.publishedAt)
+  if (!Number.isFinite(publishedAt)) return
+  try {
+    window.localStorage.setItem(announcementReadStorageKey, String(publishedAt))
+  } catch {
+    // Storage may be unavailable in private or restricted browsing contexts.
+  }
+}
+
+function shouldRemindAnnouncement() {
+  if (!page.props.announcement.enabled) return false
+  const publishedAt = parseAnnouncementTime(page.props.announcement.publishedAt)
+  if (!Number.isFinite(publishedAt)) return false
+  const age = Date.now() - publishedAt
+  if (age < 0 || age > announcementReminderWindow) return false
+
+  try {
+    const lastReadAt = Number(window.localStorage.getItem(announcementReadStorageKey) || 0)
+    return !Number.isFinite(lastReadAt) || lastReadAt < publishedAt
+  } catch {
+    return true
+  }
+}
+
+function parseAnnouncementTime(value?: string) {
+  return Date.parse((value || '').replace(' ', 'T'))
+}
+
+function refreshAnnouncementReminder() {
+  announcementUnread.value = shouldRemindAnnouncement()
+}
+
+function syncAnnouncementRead(event: StorageEvent) {
+  if (event.key === announcementReadStorageKey) refreshAnnouncementReminder()
+}
+
 function observeSentinel() {
   observer?.disconnect()
   if (!isWaterfallMode.value || !loadMoreSentinel.value || !('IntersectionObserver' in window)) return
@@ -100,7 +146,10 @@ function observeSentinel() {
   observer.observe(loadMoreSentinel.value)
 }
 
-onMounted(observeSentinel)
+onMounted(() => {
+  observeSentinel()
+  window.addEventListener('storage', syncAnnouncementRead)
+})
 onActivated(() => {
   void nextTick(observeSentinel)
 })
@@ -110,6 +159,7 @@ onDeactivated(() => {
 
 onBeforeUnmount(() => {
   observer?.disconnect()
+  window.removeEventListener('storage', syncAnnouncementRead)
 })
 
 </script>
@@ -140,7 +190,17 @@ onBeforeUnmount(() => {
         :aria-label="t('topicList.announcement')"
       >
         <div class="flex items-start gap-2 sm:gap-2.5">
-          <Bell class="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          <button
+            v-if="announcementUnread"
+            type="button"
+            class="-mx-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-primary transition hover:bg-primary/10 focus-visible:bg-primary/10 focus-visible:outline-none"
+            :title="t('topicList.markAnnouncementRead')"
+            :aria-label="t('topicList.markAnnouncementRead')"
+            @click="markAnnouncementRead"
+          >
+            <Bell class="announcement-unread-bell h-4 w-4" />
+          </button>
+          <Bell v-else class="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
           <div class="min-w-0 flex-1">
             <div class="gf-prose gf-prose-announcement" v-html="page.props.announcement.html" />
           </div>
@@ -188,3 +248,31 @@ onBeforeUnmount(() => {
       </section>
     </div>
 </template>
+
+<style scoped>
+.announcement-unread-bell {
+  animation: announcement-bell-ring 2s ease-in-out infinite;
+  transform-origin: 50% 15%;
+}
+
+@keyframes announcement-bell-ring {
+  0%, 30%, 100% {
+    transform: rotate(0) scale(1);
+  }
+  5% {
+    transform: rotate(20deg) scale(1.12);
+  }
+  10% { transform: rotate(-18deg) scale(1.12); }
+  15% {
+    transform: rotate(14deg) scale(1.08);
+  }
+  20% { transform: rotate(-10deg) scale(1.05); }
+  25% { transform: rotate(5deg) scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-unread-bell {
+    animation: none;
+  }
+}
+</style>

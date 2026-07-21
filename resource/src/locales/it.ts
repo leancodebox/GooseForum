@@ -192,6 +192,7 @@ export default {
     newTopic: 'Nuovo argomento',
     pinned: 'In evidenza',
     announcement: 'Annuncio',
+    markAnnouncementRead: 'Segna come letto',
     tabs: {
       latest: 'Recenti',
       hot: 'Di tendenza',

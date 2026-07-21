@@ -192,6 +192,7 @@ export default {
     newTopic: 'New topic',
     pinned: 'Pinned',
     announcement: 'Announcement',
+    markAnnouncementRead: 'Mark as read',
     tabs: {
       latest: 'Latest',
       hot: 'Hot',

@@ -192,6 +192,7 @@ export default {
     newTopic: '新建主题',
     pinned: '置顶',
     announcement: '公告',
+    markAnnouncementRead: '标记为已读',
     tabs: {
       latest: '最新',
       hot: '热门',

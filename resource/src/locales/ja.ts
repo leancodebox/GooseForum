@@ -192,6 +192,7 @@ export default {
     newTopic: '新規トピック',
     pinned: '固定',
     announcement: 'お知らせ',
+    markAnnouncementRead: '既読にする',
     tabs: {
       latest: '最新',
       hot: '人気',

@@ -279,6 +279,7 @@ export interface HomeProps {
   announcement: {
     enabled: boolean
     html: string
+    publishedAt?: string
   }
 }
 

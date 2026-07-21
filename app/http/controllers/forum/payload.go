@@ -226,8 +226,9 @@ type PaginationPayload struct {
 }
 
 type AnnouncementPayload struct {
-	Enabled bool   `json:"enabled"`
-	HTML    string `json:"html"`
+	Enabled     bool   `json:"enabled"`
+	HTML        string `json:"html"`
+	PublishedAt string `json:"publishedAt,omitempty"`
 }
 
 type TopicPayload struct {
@@ -749,8 +750,9 @@ func buildHomeProps(userID uint64, page int, sort string, topics []*vo.TopicsSim
 			NextURL:  buildHomePageURL(sort, nextPage),
 		},
 		Announcement: AnnouncementPayload{
-			Enabled: announcement.Enabled,
-			HTML:    announcement.GetHtmlContent(),
+			Enabled:     announcement.Enabled,
+			HTML:        announcement.GetHtmlContent(),
+			PublishedAt: announcement.PublishedAt,
 		},
 	}
 }

@@ -168,9 +168,10 @@ type MailSettingsConfig struct {
 
 // AnnouncementConfig 公告设置配置
 type AnnouncementConfig struct {
-	Enabled     bool   `json:"enabled"` // 是否启用公告
-	Content     string `json:"content"` // 公告内容
-	HtmlContent string `json:"-"`       // 预渲染后的 HTML，仅服务端使用
+	Enabled     bool   `json:"enabled"`               // 是否启用公告
+	Content     string `json:"content"`               // 公告内容
+	PublishedAt string `json:"publishedAt,omitempty"` // 公告生效时间
+	HtmlContent string `json:"-"`                     // 预渲染后的 HTML，仅服务端使用
 }
 
 func (itself *AnnouncementConfig) PrepareHTML() {

@@ -1285,6 +1285,7 @@ type SaveAnnouncementReq struct {
 
 // SaveAnnouncement 保存公告设置
 func SaveAnnouncement(req component.BetterRequest[SaveAnnouncementReq]) component.Response {
+	req.Params.Settings.PublishedAt = time.Now().Format(time.DateTime)
 	return savePageConfig(pageConfig.Announcement, req.Params.Settings, hotdataserve.ClearAnnouncementConfigCache)
 }
 

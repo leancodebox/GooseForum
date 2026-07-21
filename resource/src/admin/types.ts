@@ -279,6 +279,7 @@ export interface HttpNotifySettings {
 export interface AnnouncementConfig {
   enabled: boolean
   content: string
+  publishedAt?: string
 }
 
 export interface SiteStatistics {
