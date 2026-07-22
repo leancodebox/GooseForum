@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
-import { Bold, Code2, Image, Italic, Link, ListChecks, MessageSquareQuote, Send, X } from '@lucide/vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { Bold, ClipboardPaste, Code, Code2, CornerDownLeft, Eye, Heading, Image, Italic, Link, List, ListChecks, ListOrdered, MessageSquareQuote, Minus, Send, Strikethrough, Table2, X } from '@lucide/vue'
 import { submitTopic, uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { renderMarkdownPreview } from '@/runtime/markdown'
-import { markdownFromClipboard } from '@/runtime/rich-paste'
+import { createMarkdownTable, fencedCodeBlock, formatMarkdownLines, prefixMarkdownBlock, replaceMarkdownSelectionWithBlock, type MarkdownBlockType } from '@/runtime/markdown-editing'
+import { hasUnsupportedVisualMarkdown, markdownFromClipboard } from '@/runtime/rich-paste'
 import { useUnsavedDraftGuard } from '@/site/composables/useUnsavedDraftGuard'
 import PageHeader from '@/site/components/PageHeader.vue'
+import VisualMarkdownEditor from '@/site/components/VisualMarkdownEditor.vue'
 import type { LayoutPayload, PublishPageProps } from '@/types/payload'
 import { useI18n } from 'vue-i18n'
 
@@ -20,6 +22,7 @@ const title = ref(page.props.topic.title || '')
 const content = ref(page.props.topic.content || '')
 const categoryIds = ref<number[]>([...(page.props.topic.categoryIds || [])])
 const currentTopicId = ref(page.props.topicId)
+const editorMode = ref<'markdown' | 'visual'>(hasUnsupportedVisualMarkdown(content.value) ? 'markdown' : 'visual')
 const preview = ref(false)
 const submitting = ref(false)
 const uploading = ref(false)
@@ -29,6 +32,23 @@ const uploadDone = ref(0)
 const message = ref('')
 const error = ref('')
 const editor = ref<HTMLTextAreaElement | null>(null)
+const visualEditor = ref<InstanceType<typeof VisualMarkdownEditor> | null>(null)
+const blockPicker = ref<HTMLElement | null>(null)
+const blockPickerOpen = ref(false)
+const linkPicker = ref<HTMLElement | null>(null)
+const linkInput = ref<HTMLInputElement | null>(null)
+const linkPickerOpen = ref(false)
+const linkUrl = ref('https://')
+const tablePicker = ref<HTMLElement | null>(null)
+const tablePickerOpen = ref(false)
+const tablePickerRows = ref(3)
+const tablePickerColumns = ref(3)
+const tablePickerMaxRows = 8
+const tablePickerMaxColumns = 8
+const tablePickerCells = Array.from({ length: tablePickerMaxRows * tablePickerMaxColumns }, (_, index) => ({
+  row: Math.floor(index / tablePickerMaxColumns) + 1,
+  column: (index % tablePickerMaxColumns) + 1,
+}))
 
 const isValid = computed(() => Boolean(title.value.trim() && content.value.trim() && categoryIds.value.length > 0))
 const selectedCategories = computed(() => page.props.categories.filter((category) => categoryIds.value.includes(category.id)))
@@ -92,6 +112,10 @@ function imageAlt(filename: string) {
 }
 
 function insertMarkdownBlock(text: string) {
+  if (editorMode.value === 'visual') {
+    visualEditor.value?.insertMarkdown(text)
+    return
+  }
   const el = editor.value
   if (!el) {
     content.value = content.value ? `${content.value}\n${text}` : text
@@ -100,16 +124,190 @@ function insertMarkdownBlock(text: string) {
 
   const start = el.selectionStart
   const end = el.selectionEnd
-  const before = content.value.slice(0, start)
-  const after = content.value.slice(end)
-  const prefix = before && !before.endsWith('\n') ? '\n' : ''
-  const suffix = after && !text.endsWith('\n') ? '\n' : ''
-  content.value = `${before}${prefix}${text}${suffix}${after}`
+  const result = replaceMarkdownSelectionWithBlock(content.value, start, end, text)
+  content.value = result.value
 
   nextTick(() => {
     el.focus()
-    const cursor = start + prefix.length + text.length
-    el.setSelectionRange(cursor, cursor)
+    el.setSelectionRange(result.selectionEnd, result.selectionEnd)
+  })
+}
+
+function selectedMarkdownText(placeholder: string) {
+  const el = editor.value
+  if (!el) return placeholder
+  return content.value.slice(el.selectionStart, el.selectionEnd) || placeholder
+}
+
+function insertPrefixedMarkdownBlock(prefix: string, placeholder: string) {
+  insertMarkdownBlock(prefixMarkdownBlock(selectedMarkdownText(placeholder), prefix))
+}
+
+function insertFencedCodeBlock() {
+  insertMarkdownBlock(fencedCodeBlock(selectedMarkdownText('code')))
+}
+
+async function selectEditorMode(mode: 'markdown' | 'visual') {
+  if (editorMode.value === mode && !preview.value) return
+  if (mode === 'visual' && hasUnsupportedVisualMarkdown(content.value)) {
+    error.value = t('publish.visualUnsupported')
+    return
+  }
+  error.value = ''
+  blockPickerOpen.value = false
+  linkPickerOpen.value = false
+  tablePickerOpen.value = false
+  editorMode.value = mode
+  preview.value = false
+  await nextTick()
+  if (mode === 'visual') {
+    visualEditor.value?.focus()
+  } else {
+    editor.value?.focus()
+  }
+}
+
+async function togglePreview() {
+  blockPickerOpen.value = false
+  linkPickerOpen.value = false
+  tablePickerOpen.value = false
+  preview.value = !preview.value
+  if (!preview.value && editorMode.value === 'visual') {
+    await nextTick()
+    visualEditor.value?.restoreEditableBoundaries()
+    visualEditor.value?.focus()
+  }
+}
+
+type ToolbarAction = 'bold' | 'italic' | 'strike' | 'inlineCode' | 'quote' | 'code' | 'bulletList' | 'orderedList' | 'horizontalRule' | 'hardBreak'
+
+function applyToolbarAction(action: ToolbarAction) {
+  if (editorMode.value === 'markdown') {
+    if (action === 'bold') insert('**', '**', t('publish.placeholder.bold'))
+    else if (action === 'italic') insert('*', '*', t('publish.placeholder.italic'))
+    else if (action === 'strike') insert('~~', '~~', t('publish.placeholder.strike'))
+    else if (action === 'inlineCode') insert('`', '`', 'code')
+    else if (action === 'quote') insertPrefixedMarkdownBlock('> ', t('publish.placeholder.quote'))
+    else if (action === 'code') insertFencedCodeBlock()
+    else if (action === 'bulletList') insertPrefixedMarkdownBlock('- ', t('publish.placeholder.listItem'))
+    else if (action === 'orderedList') insertPrefixedMarkdownBlock('1. ', t('publish.placeholder.listItem'))
+    else if (action === 'horizontalRule') insertMarkdownBlock('---')
+    else insert('  \n')
+    return
+  }
+
+  visualEditor.value?.applyAction(action)
+}
+
+function openBlockPicker() {
+  linkPickerOpen.value = false
+  tablePickerOpen.value = false
+  blockPickerOpen.value = !blockPickerOpen.value
+}
+
+function applyBlockType(block: MarkdownBlockType) {
+  blockPickerOpen.value = false
+  if (editorMode.value === 'visual') {
+    visualEditor.value?.setBlock(block)
+    return
+  }
+  if (block === 'code_block') {
+    insertFencedCodeBlock()
+    return
+  }
+  setMarkdownLineType(block)
+}
+
+function setMarkdownLineType(block: Exclude<MarkdownBlockType, 'code_block'>) {
+  const el = editor.value
+  if (!el) return
+  const result = formatMarkdownLines(content.value, el.selectionStart, el.selectionEnd, block)
+  content.value = result.value
+  nextTick(() => {
+    el.focus()
+    el.setSelectionRange(result.selectionStart, result.selectionEnd)
+  })
+}
+
+async function openLinkPicker() {
+  if (editorMode.value === 'markdown') {
+    insert('[', '](https://)', t('publish.placeholder.link'))
+    return
+  }
+  blockPickerOpen.value = false
+  tablePickerOpen.value = false
+  linkPickerOpen.value = !linkPickerOpen.value
+  if (!linkPickerOpen.value) return
+  linkUrl.value = visualEditor.value?.activeLinkHref() || 'https://'
+  await nextTick()
+  linkInput.value?.focus()
+  linkInput.value?.select()
+}
+
+function applyLink() {
+  const href = linkUrl.value.trim()
+  if (!href) return
+  linkPickerOpen.value = false
+  visualEditor.value?.setLink(href, t('publish.placeholder.link'))
+}
+
+function openTablePicker() {
+  blockPickerOpen.value = false
+  linkPickerOpen.value = false
+  tablePickerRows.value = 3
+  tablePickerColumns.value = 3
+  tablePickerOpen.value = !tablePickerOpen.value
+}
+
+function selectTableSize(row: number, column: number) {
+  tablePickerRows.value = row
+  tablePickerColumns.value = column
+}
+
+function insertTable(row: number, column: number) {
+  tablePickerOpen.value = false
+  if (editorMode.value === 'visual') visualEditor.value?.insertTable(row, column)
+  else insertMarkdownBlock(createMarkdownTable(row, column))
+}
+
+function closeToolbarPopovers(event: PointerEvent) {
+  const target = event.target as Node
+  if (blockPicker.value?.contains(target) || linkPicker.value?.contains(target) || tablePicker.value?.contains(target)) return
+  blockPickerOpen.value = false
+  linkPickerOpen.value = false
+  tablePickerOpen.value = false
+}
+
+onMounted(() => document.addEventListener('pointerdown', closeToolbarPopovers))
+onBeforeUnmount(() => document.removeEventListener('pointerdown', closeToolbarPopovers))
+
+async function pastePlainText() {
+  error.value = ''
+  try {
+    const text = await navigator.clipboard.readText()
+    if (!text) return
+    if (editorMode.value === 'visual') {
+      visualEditor.value?.insertText(text)
+    } else {
+      insertPlainTextInMarkdown(text)
+    }
+  } catch {
+    error.value = t('publish.clipboardReadFailed')
+  }
+}
+
+function insertPlainTextInMarkdown(text: string) {
+  const el = editor.value
+  if (!el) {
+    content.value += text
+    return
+  }
+  const start = el.selectionStart
+  const end = el.selectionEnd
+  content.value = `${content.value.slice(0, start)}${text}${content.value.slice(end)}`
+  nextTick(() => {
+    el.focus()
+    el.setSelectionRange(start + text.length, start + text.length)
   })
 }
 
@@ -329,42 +527,115 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
             </div>
 
             <div>
-              <div class="mb-2 flex items-center justify-between">
+              <div class="mb-1 flex items-center">
                 <span class="text-sm font-semibold text-base-content/75">{{ t('publish.fields.body') }}</span>
-                <div class="inline-flex rounded-md border border-line p-0.5 text-xs font-semibold">
-                  <button type="button" class="rounded px-2 py-1" :class="!preview ? 'bg-neutral text-neutral-content' : 'text-base-content/55'" @click="preview = false">{{ t('common.edit') }}</button>
-                  <button type="button" class="rounded px-2 py-1" :class="preview ? 'bg-neutral text-neutral-content' : 'text-base-content/55'" @click="preview = true">{{ t('publish.preview') }}</button>
-                </div>
               </div>
 
-              <div
-                v-if="!preview"
-                class="overflow-hidden rounded-lg border transition"
-                :class="dragOver ? 'border-primary bg-info/10 shadow-[0_0_0_4px_rgba(59,130,246,0.12)]' : 'border-line bg-base-100'"
-              >
-                <div class="flex flex-wrap items-center gap-1 border-b border-line bg-base-200 px-2 py-2">
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.bold')" @click="insert('**', '**', t('publish.placeholder.bold'))"><Bold class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.italic')" @click="insert('*', '*', t('publish.placeholder.italic'))"><Italic class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.link')" @click="insert('[', '](https://)', t('publish.placeholder.link'))"><Link class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.quote')" @click="insert('\\n> ', '', t('publish.placeholder.quote'))"><MessageSquareQuote class="h-4 w-4" /></button>
-                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-100 hover:text-base-content" :title="t('publish.toolbar.code')" @click="insert('\\n```\\n', '\\n```\\n', 'code')"><Code2 class="h-4 w-4" /></button>
-                  <span v-if="uploadText" class="gf-badge gf-badge-info ml-auto rounded">{{ uploadText }}</span>
-                  <label
-                    class="rounded p-1.5 text-base-content/55 transition hover:bg-base-100 hover:text-base-content"
-                    :class="uploadText ? '' : 'ml-auto'"
-                    :title="t('publish.uploadImageTitle')"
-                  >
+              <div class="mb-2 flex flex-wrap items-center gap-1 py-2">
+                <div v-if="!preview" class="flex flex-wrap items-center gap-1">
+                  <div ref="blockPicker" class="relative mr-1">
+                    <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.blockType')" :aria-expanded="blockPickerOpen" @mousedown.prevent @click="openBlockPicker"><Heading class="h-4 w-4" /></button>
+                    <div v-if="blockPickerOpen" class="gf-menu-surface absolute left-0 top-full z-30 mt-1.5 w-48 p-2 shadow-lg" role="menu" @keydown.esc.stop="blockPickerOpen = false">
+                      <button type="button" class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-base-content/75 hover:bg-base-200 hover:text-base-content" @click="applyBlockType('paragraph')">
+                        <span class="w-7 font-medium">P</span>{{ t('publish.toolbar.paragraph') }}
+                      </button>
+                      <button v-for="level in 6" :key="level" type="button" class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-base-content/75 hover:bg-base-200 hover:text-base-content" @click="applyBlockType(`heading_${level}` as MarkdownBlockType)">
+                        <span class="w-7 font-semibold">H{{ level }}</span>{{ t('publish.toolbar.heading', { level }) }}
+                      </button>
+                      <button type="button" class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-base-content/75 hover:bg-base-200 hover:text-base-content" @click="applyBlockType('code_block')">
+                        <Code2 class="h-4 w-7" />{{ t('publish.toolbar.codeBlock') }}
+                      </button>
+                    </div>
+                  </div>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.bold')" @mousedown.prevent @click="applyToolbarAction('bold')"><Bold class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.italic')" @mousedown.prevent @click="applyToolbarAction('italic')"><Italic class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.strike')" @mousedown.prevent @click="applyToolbarAction('strike')"><Strikethrough class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.inlineCode')" @mousedown.prevent @click="applyToolbarAction('inlineCode')"><Code class="h-4 w-4" /></button>
+                  <div ref="linkPicker" class="relative">
+                    <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.link')" :aria-expanded="linkPickerOpen" @mousedown.prevent @click="openLinkPicker"><Link class="h-4 w-4" /></button>
+                    <form v-if="linkPickerOpen" class="gf-menu-surface absolute left-0 top-full z-30 mt-1.5 flex w-72 items-center gap-1.5 p-2 shadow-lg" @submit.prevent="applyLink">
+                      <input ref="linkInput" v-model="linkUrl" type="text" inputmode="url" class="h-8 min-w-0 flex-1 rounded border border-line bg-base-100 px-2 text-sm outline-none focus:border-primary" :placeholder="t('publish.toolbar.linkUrl')" />
+                      <button type="submit" class="gf-button gf-button-primary h-8 px-2.5" :disabled="!linkUrl.trim()">{{ t('publish.toolbar.applyLink') }}</button>
+                    </form>
+                  </div>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.quote')" @mousedown.prevent @click="applyToolbarAction('quote')"><MessageSquareQuote class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.code')" @mousedown.prevent @click="applyToolbarAction('code')"><Code2 class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.bulletList')" @mousedown.prevent @click="applyToolbarAction('bulletList')"><List class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.orderedList')" @mousedown.prevent @click="applyToolbarAction('orderedList')"><ListOrdered class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.horizontalRule')" @mousedown.prevent @click="applyToolbarAction('horizontalRule')"><Minus class="h-4 w-4" /></button>
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.hardBreak')" @mousedown.prevent @click="applyToolbarAction('hardBreak')"><CornerDownLeft class="h-4 w-4" /></button>
+                  <div ref="tablePicker" class="relative">
+                    <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.toolbar.table')" :aria-expanded="tablePickerOpen" @mousedown.prevent @click="openTablePicker"><Table2 class="h-4 w-4" /></button>
+                    <div
+                      v-if="tablePickerOpen"
+                      class="gf-menu-surface absolute left-0 top-full z-30 mt-1.5 p-2.5 shadow-lg"
+                      role="menu"
+                      @keydown.esc.stop="tablePickerOpen = false"
+                    >
+                      <div class="mb-2 text-center text-xs font-medium text-base-content/75">
+                        {{ t('publish.toolbar.tableSize', { rows: tablePickerRows, columns: tablePickerColumns }) }}
+                      </div>
+                      <div class="grid gap-1" :style="{ gridTemplateColumns: `repeat(${tablePickerMaxColumns}, 1.25rem)` }">
+                        <button
+                          v-for="cell in tablePickerCells"
+                          :key="`${cell.row}-${cell.column}`"
+                          type="button"
+                          class="h-5 w-5 rounded-[2px] border transition-colors"
+                          :class="cell.row <= tablePickerRows && cell.column <= tablePickerColumns ? 'border-primary bg-primary/25' : 'border-line bg-base-100 hover:border-primary/60'"
+                          :aria-label="t('publish.toolbar.tableSize', { rows: cell.row, columns: cell.column })"
+                          @mouseenter="selectTableSize(cell.row, cell.column)"
+                          @focus="selectTableSize(cell.row, cell.column)"
+                          @click="insertTable(cell.row, cell.column)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <span class="mx-1 h-5 w-px bg-line" />
+                  <button type="button" class="rounded p-1.5 text-base-content/55 hover:bg-base-200 hover:text-base-content" :title="t('publish.pastePlainText')" @mousedown.prevent @click="pastePlainText"><ClipboardPaste class="h-4 w-4" /></button>
+                  <span v-if="uploadText" class="gf-badge gf-badge-info rounded">{{ uploadText }}</span>
+                  <label class="rounded p-1.5 text-base-content/55 transition hover:bg-base-200 hover:text-base-content" :title="t('publish.uploadImageTitle')">
                     <Image class="h-4 w-4" />
                     <input type="file" accept="image/*" multiple class="hidden" :disabled="uploading" @change="handleImage" />
                   </label>
                 </div>
+
+                <div class="ml-auto flex items-center gap-1.5 text-xs font-semibold">
+                  <div class="inline-flex rounded-md border border-line p-0.5">
+                    <button type="button" class="rounded px-2 py-1" :class="editorMode === 'visual' ? 'bg-neutral text-neutral-content' : 'text-base-content/55 hover:text-base-content'" @click="selectEditorMode('visual')">{{ t('publish.visualMode') }}</button>
+                    <button type="button" class="rounded px-2 py-1" :class="editorMode === 'markdown' ? 'bg-neutral text-neutral-content' : 'text-base-content/55 hover:text-base-content'" @click="selectEditorMode('markdown')">{{ t('publish.markdownMode') }}</button>
+                  </div>
+                  <button type="button" class="inline-flex items-center gap-1 rounded-md border border-line px-2 py-1.5" :class="preview ? 'bg-neutral text-neutral-content' : 'text-base-content/55 hover:bg-base-200 hover:text-base-content'" @click="togglePreview">
+                    <Eye class="h-3.5 w-3.5" />
+                    {{ t('publish.preview') }}
+                  </button>
+                </div>
+              </div>
+
+              <div
+                v-show="!preview"
+                :class="[
+                  'min-h-80 bg-transparent',
+                  dragOver ? 'bg-info/10 ring-1 ring-inset ring-primary shadow-[0_0_0_4px_rgba(59,130,246,0.12)]' : '',
+                ]"
+              >
                 <div class="relative">
                   <textarea
+                    v-if="editorMode === 'markdown'"
                     ref="editor"
                     v-model="content"
-                    class="min-h-96 w-full resize-y border-0 bg-transparent px-4 py-3 font-mono text-sm leading-relaxed outline-none"
+                    class="block min-h-80 w-full resize-none border-0 bg-transparent px-1 py-4 text-[15px] leading-relaxed outline-none placeholder:text-base-content/45"
                     :placeholder="t('publish.bodyPlaceholder')"
                     @keydown="handleEditorKeydown"
+                    @paste="handlePaste"
+                    @drop="handleDrop"
+                    @dragover="handleDragOver"
+                    @dragleave="dragOver = false"
+                  />
+                  <VisualMarkdownEditor
+                    v-else
+                    ref="visualEditor"
+                    v-model="content"
+                    :placeholder="t('publish.visualPlaceholder')"
                     @paste="handlePaste"
                     @drop="handleDrop"
                     @dragover="handleDragOver"
@@ -379,9 +650,9 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
                 </div>
               </div>
 
-              <div v-else class="gf-prose gf-prose-post min-h-96 rounded-lg border border-line bg-base-200/50 p-5">
-                <div v-if="content.trim()" v-html="renderedPreview" />
-                <p v-else class="text-sm text-base-content/55">{{ t('publish.emptyPreview') }}</p>
+              <div v-if="preview && content.trim()" class="gf-prose gf-prose-post min-h-80 max-w-none px-1 py-4" v-html="renderedPreview" />
+              <div v-else-if="preview" class="gf-prose gf-prose-post min-h-80 max-w-none px-1 py-4">
+                <p class="text-sm text-base-content/55">{{ t('publish.emptyPreview') }}</p>
               </div>
             </div>
 

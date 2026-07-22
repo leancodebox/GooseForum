@@ -15,3 +15,8 @@ export function markdownFromClipboard(data: DataTransfer | null) {
   if (!html.trim()) return ''
   return htmlToMarkdown(html)
 }
+
+export function hasUnsupportedVisualMarkdown(markdown: string) {
+  const hasTaskList = /^\s*(?:>\s*)*(?:[-+*]|\d+[.)])\s+\[[ xX]\]\s+/m.test(markdown)
+  return hasTaskList
+}

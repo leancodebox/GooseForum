@@ -137,6 +137,7 @@
     display: block;
     max-width: 100%;
     overflow-x: auto;
+    border-collapse: collapse;
   }
 
   .gf-prose :where(thead, tbody, tr) {
@@ -144,6 +145,7 @@
   }
 
   .gf-prose :where(th, td) {
+    border-width: 1px;
     border-color: var(--gf-color-line);
   }
 
