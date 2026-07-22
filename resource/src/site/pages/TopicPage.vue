@@ -1118,12 +1118,17 @@ async function submitPost() {
     const createdPost = await createPost(page.props.topic.id, content, postId)
     postContent.value = ''
     targetPostId.value = 0
-    successMessage.value = t('topic.replyPosted')
+    composerOpen.value = false
+    pushFlash(t('topic.replyPosted'), 'success')
     const createdPostId = typeof createdPost === 'object' && createdPost !== null ? createdPost.id : createdPost
-    if (typeof createdPostId === 'number') {
-      await revealCreatedPost(createdPostId)
-    } else {
-      await refreshCurrentPage()
+    try {
+      if (typeof createdPostId === 'number') {
+        await revealCreatedPost(createdPostId)
+      } else {
+        await refreshCurrentPage()
+      }
+    } catch (error) {
+      postWindowError.value = error instanceof Error ? error.message : t('api.repliesLoadFailed')
     }
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('api.replyFailed')
