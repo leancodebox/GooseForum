@@ -17,7 +17,7 @@
   <p><a href="README_ZH.md">中文</a> | <a href="README.md">English</a></p>
 </div>
 
-![GooseForum 界面预览](https://github.com/leancodebox/assert/blob/main/gooseforum-readme-poster.png?raw=true)
+![GooseForum 界面预览](https://github.com/leancodebox/assert/blob/main/gooseforum-readme-poster.webp?raw=true)
 
 ## 快速开始
 
