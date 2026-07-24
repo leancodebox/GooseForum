@@ -91,8 +91,12 @@ func buildSitemapXML(host string) (string, error) {
 	}
 	categories := hotdataserve.GetCategory()
 	for _, cat := range categories {
+		slug := cat.Slug
+		if slug == "" {
+			slug = cat.Name
+		}
 		sitemaps = append(sitemaps, SitemapURL{
-			Loc:      host + fmt.Sprintf("/c/%s/%d", url.PathEscape(cat.Name), cat.Id),
+			Loc:      host + urlconfig.Category(slug, cat.Id),
 			Lastmod:  cat.UpdatedAt.Format(time.RFC3339),
 			Priority: 0.8,
 		})

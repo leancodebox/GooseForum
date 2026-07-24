@@ -821,20 +821,25 @@ func buildTopicPayloads(topics []*vo.TopicsSimpleVo) []TopicPayload {
 		for i, categoryID := range topic.CategoriesId {
 			name := ""
 			color := "#9ca3af"
+			categoryPath := ""
 			if i < len(topic.Categories) {
 				name = topic.Categories[i]
 			}
 			if category, ok := categoryMap[categoryID]; ok && category != nil {
 				name = category.Name
 				color = category.Color
+				categoryPath = categoryURL(category)
 			}
 			if name == "" {
 				continue
 			}
+			if categoryPath == "" {
+				categoryPath = urlconfig.Category(name, categoryID)
+			}
 			categories = append(categories, TopicCategoryPayload{
 				ID:    categoryID,
 				Name:  name,
-				URL:   "/c/" + url.PathEscape(name) + "/" + strconv.FormatUint(categoryID, 10),
+				URL:   categoryPath,
 				Color: color,
 			})
 		}
@@ -908,7 +913,7 @@ func categoryURL(category *category.Entity) string {
 	if slug == "" {
 		slug = category.Name
 	}
-	return "/c/" + url.PathEscape(slug) + "/" + strconv.FormatUint(category.Id, 10)
+	return urlconfig.Category(slug, category.Id)
 }
 
 func activeKeyForHome(sort string) string {

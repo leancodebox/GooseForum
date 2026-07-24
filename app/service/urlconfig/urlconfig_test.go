@@ -49,6 +49,12 @@ func TestFilePath(t *testing.T) {
 	}
 }
 
+func TestCategoryEscapesSlug(t *testing.T) {
+	if got := Category("吐槽/脑洞", 8); got != "/c/%E5%90%90%E6%A7%BD%2F%E8%84%91%E6%B4%9E/8" {
+		t.Fatalf("Category = %q", got)
+	}
+}
+
 func TestStaticRoutes(t *testing.T) {
 	tests := map[string]string{
 		"home":          Home(),

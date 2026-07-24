@@ -3,6 +3,7 @@ package urlconfig
 
 import (
 	"fmt"
+	"net/url"
 	"path"
 
 	"github.com/leancodebox/GooseForum/app/bundles/setting"
@@ -112,6 +113,11 @@ func Rss() string {
 // PostDetail returns the topic detail path for id.
 func PostDetail(id any) string {
 	return fmt.Sprintf("%s/%v", PathPost, id)
+}
+
+// Category returns the public category path for slug and id.
+func Category(slug string, id any) string {
+	return fmt.Sprintf("/c/%s/%v", url.PathEscape(slug), id)
 }
 
 // User returns the public user profile path for id.
