@@ -64,10 +64,10 @@ func TestTopicListPartialLocalized(t *testing.T) {
 	if !strings.Contains(out, "replies") || !strings.Contains(out, "views") {
 		t.Errorf("partial not localized to English: %q", out)
 	}
-	if !strings.Contains(out, `<table class="gf-crawler-topic-list">`) || !strings.Contains(out, "<thead>") || !strings.Contains(out, "<tbody>") {
-		t.Errorf("partial should render a crawlable topic table: %q", out)
+	if !strings.Contains(out, `<section class="gf-crawler-topic-list"`) || !strings.Contains(out, `<ol class="gf-crawler-topic-items">`) || !strings.Contains(out, `<li class="gf-crawler-topic-row">`) {
+		t.Errorf("partial should render a crawlable ordered topic list: %q", out)
 	}
-	for _, want := range []string{`class="gf-crawler-topic-list"`, `class="gf-crawler-topic-main"`, `class="gf-crawler-topic-title"`, `class="gf-crawler-topic-meta"`, `class="gf-crawler-topic-excerpt"`, `class="gf-crawler-topic-number"`, `class="gf-crawler-topic-activity"`} {
+	for _, want := range []string{`class="gf-crawler-topic-list"`, `class="gf-crawler-topic-list-head"`, `class="gf-crawler-topic-items"`, `class="gf-crawler-topic-row"`, `class="gf-crawler-topic-main"`, `class="gf-crawler-topic-title"`, `class="gf-crawler-topic-meta"`, `class="gf-crawler-topic-excerpt"`, `class="gf-crawler-topic-number"`, `class="gf-crawler-topic-activity"`, `class="gf-crawler-visually-hidden"`} {
 		if !strings.Contains(out, want) {
 			t.Errorf("partial missing crawlable list class %s: %q", want, out)
 		}

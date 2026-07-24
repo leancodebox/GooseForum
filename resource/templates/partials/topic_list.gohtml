@@ -1,24 +1,16 @@
 {{define "partials/topic_list.gohtml"}}
 {{if .Topics}}
-<table class="gf-crawler-topic-list">
-    <colgroup>
-        <col>
-        <col style="width: 120px">
-        <col style="width: 120px">
-        <col style="width: 160px">
-    </colgroup>
-    <thead>
-    <tr>
-        <th scope="col">{{ t $.Lang "topics" }}</th>
-        <th scope="col">{{ t $.Lang "replies" }}</th>
-        <th scope="col">{{ t $.Lang "views" }}</th>
-        <th scope="col">{{ t $.Lang "activity" }}</th>
-    </tr>
-    </thead>
-    <tbody>
+<section class="gf-crawler-topic-list" aria-label="{{ t $.Lang "topics" }}">
+    <div class="gf-crawler-topic-list-head" aria-hidden="true">
+        <span>{{ t $.Lang "topics" }}</span>
+        <span>{{ t $.Lang "replies" }}</span>
+        <span>{{ t $.Lang "views" }}</span>
+        <span>{{ t $.Lang "activity" }}</span>
+    </div>
+    <ol class="gf-crawler-topic-items">
     {{range .Topics}}
-    <tr>
-        <td class="gf-crawler-topic-main">
+    <li class="gf-crawler-topic-row">
+        <div class="gf-crawler-topic-main">
             <article>
             <h2 class="gf-crawler-topic-title"><a href="{{.URL}}" rel="bookmark">{{.Title}}</a></h2>
             {{if or .Author.Username .Categories}}
@@ -29,14 +21,14 @@
             {{end}}
             {{if .Description}}<p class="gf-crawler-topic-excerpt">{{.Description}}</p>{{end}}
             </article>
-        </td>
-        <td class="gf-crawler-topic-number">{{.ReplyCount}}</td>
-        <td class="gf-crawler-topic-number">{{.ViewCount}}</td>
-        <td class="gf-crawler-topic-activity">{{if .LastUpdateTime}}<time>{{.LastUpdateTime}}</time>{{else if .ActivityText}}<time>{{.ActivityText}}</time>{{end}}</td>
-    </tr>
+        </div>
+        <div class="gf-crawler-topic-number"><span class="gf-crawler-visually-hidden">{{ t $.Lang "replies" }}: </span>{{.ReplyCount}}</div>
+        <div class="gf-crawler-topic-number"><span class="gf-crawler-visually-hidden">{{ t $.Lang "views" }}: </span>{{.ViewCount}}</div>
+        <div class="gf-crawler-topic-activity"><span class="gf-crawler-visually-hidden">{{ t $.Lang "activity" }}: </span>{{if .LastUpdateTime}}<time>{{.LastUpdateTime}}</time>{{else if .ActivityText}}<time>{{.ActivityText}}</time>{{end}}</div>
+    </li>
     {{end}}
-    </tbody>
-</table>
+    </ol>
+</section>
 {{else}}
 <p>{{ t $.Lang "noTopics" }}</p>
 {{end}}
