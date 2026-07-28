@@ -53,6 +53,7 @@ const reportSubmitting = ref(false)
 const reportError = ref('')
 const moderatingPostIds = ref<number[]>([])
 const posts = ref<PostPayload[]>([...initialPosts])
+const postPageStarts = ref<number[]>(initialPosts[0]?.postNo ? [initialPosts[0].postNo] : [])
 const replyTargets = ref<ReplyTargetPayload[]>([...(initialPostStream.replyTargets || [])])
 const replyTargetMap = computed(() => new Map(replyTargets.value.map((target) => [target.id, target])))
 const topicProcessStatus = ref(page.props.topic.processStatus)
@@ -222,7 +223,6 @@ onMounted(() => {
   void nextTick(collectPostElements)
   void nextTick(scheduleActivePostFromScroll)
   setupPostBottomLoadFallback()
-  void syncPostHash()
 })
 
 watch(
@@ -246,7 +246,7 @@ watch(
     void nextTick(observePostLoader)
     void nextTick(collectPostElements)
     void nextTick(scheduleActivePostFromScroll)
-    void nextTick(syncPostHash)
+    void nextTick(syncInitialPostTarget)
   },
   { immediate: true },
 )
@@ -464,7 +464,29 @@ function syncPostRailProgress() {
     postRailProgressCurrent.value = progress.current
     postRailProgressStart.value = progress.start
     postRailProgressEnd.value = progress.end
+    syncPostURL(progress.postNo)
   }
+}
+
+function syncPostURL(postNo: number) {
+  if (navigationPhase.value !== 'idle' || postNo < 1) return
+  const pageStartPostNo = pageStartForPost(postNo)
+  if (!pageStartPostNo) return
+  const path = pageStartPostNo > 1
+    ? `/p/post/${page.props.topic.id}/${pageStartPostNo}`
+    : `/p/post/${page.props.topic.id}`
+  if (window.location.pathname === path && !window.location.hash) return
+  const state = window.history.state
+  window.history.replaceState(state ? { ...state, current: path } : state, '', path)
+}
+
+function pageStartForPost(postNo: number) {
+  let result = 0
+  for (const start of postPageStarts.value) {
+    if (start > postNo) break
+    result = start
+  }
+  return result
 }
 
 function measurePostViewportProgress() {
@@ -491,6 +513,7 @@ function measurePostViewportProgress() {
 
 function resetPostsFromProps() {
   posts.value = [...initialPosts]
+  postPageStarts.value = initialPosts[0]?.postNo ? [initialPosts[0].postNo] : []
   replyTargets.value = [...(initialPostStream.replyTargets || [])]
   postHasBefore.value = initialPostStream.hasBefore
   postHasAfter.value = initialPostStream.hasAfter
@@ -575,6 +598,20 @@ function findPostHashId() {
   return match ? Number(match[1]) : 0
 }
 
+function findPostPathNo() {
+  const match = window.location.pathname.match(/^\/p\/post\/\d+\/(\d+)\/?$/)
+  return match ? Number(match[1]) : 0
+}
+
+async function syncInitialPostTarget() {
+  if (findPostHashId()) {
+    await syncPostHash()
+    return
+  }
+  const postNo = findPostPathNo()
+  if (postNo > 1) await jumpToPostNo(postNo)
+}
+
 async function syncPostHash() {
   const postId = findPostHashId()
   if (!postId) return
@@ -646,7 +683,13 @@ function replyTargetFor(post: PostPayload) {
 }
 
 function applyPostWindowPayload(payload: Awaited<ReturnType<typeof getPostWindow>>, mergeMode: 'replace' | 'prepend' | 'append') {
+  const pageStartPostNo = firstPostNo(payload.posts)
   mergePosts(payload.posts, mergeMode)
+  if (mergeMode === 'replace') {
+    postPageStarts.value = pageStartPostNo ? [pageStartPostNo] : []
+  } else if (pageStartPostNo && !postPageStarts.value.includes(pageStartPostNo)) {
+    postPageStarts.value = [...postPageStarts.value, pageStartPostNo].sort((a, b) => a - b)
+  }
   mergeReplyTargets(payload.replyTargets || [], mergeMode)
   const nextMaxPostNo = Math.max(postMaxNo.value, payload.maxPostNo || 0)
   postMaxNo.value = nextMaxPostNo

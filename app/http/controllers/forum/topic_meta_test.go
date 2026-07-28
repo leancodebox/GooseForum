@@ -238,7 +238,7 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	c, _ := gin.CreateTestContext(nil)
 	c.Request = httptest.NewRequest(http.MethodGet, "/p/post/990010", nil)
-	props := buildTopicDetailProps(c, &topic, &firstPost)
+	props := buildTopicDetailProps(c, &topic, &firstPost, 0)
 
 	if props.Topic.ID != topicID || props.Topic.MaxPostNo != 3 {
 		t.Fatalf("topic payload mismatch: %#v", props.Topic)
@@ -263,6 +263,14 @@ func TestBuildTopicDetailPropsReadsTopicPostTables(t *testing.T) {
 	}
 	if props.PostStream.BeforePostNo != 1 || props.PostStream.AfterPostNo != 3 || props.PostStream.MaxPostNo != 3 {
 		t.Fatalf("post stream cursor mismatch: %#v", props.PostStream)
+	}
+
+	anchoredProps := buildTopicDetailProps(c, &topic, &firstPost, 3)
+	if anchoredProps.Topic.Author.ID != authorID || anchoredProps.Topic.Author.Username != "author" {
+		t.Fatalf("anchored topic author mismatch: %#v", anchoredProps.Topic.Author)
+	}
+	if len(anchoredProps.PostStream.Posts) != 1 || anchoredProps.PostStream.Posts[0].PostNo != 3 {
+		t.Fatalf("anchored post stream mismatch: %#v", anchoredProps.PostStream)
 	}
 }
 

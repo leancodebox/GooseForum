@@ -39,6 +39,10 @@ func TopicDetail(c *gin.Context) {
 		renderNotFound(c)
 		return
 	}
+	postNo := cast.ToUint64(c.Param("postNo"))
+	if postNo > topic.PostSeq {
+		postNo = topic.PostSeq
+	}
 
 	firstPost := posts.Get(topic.FirstPostId)
 	if firstPost.Id == 0 {
@@ -50,7 +54,7 @@ func TopicDetail(c *gin.Context) {
 			slog.Warn("mark topic visited failed", "userId", loginUser.UserId, "topicId", topic.Id, "error", err)
 		}
 	}
-	props := buildTopicDetailProps(c, &topic, &firstPost)
+	props := buildTopicDetailProps(c, &topic, &firstPost, postNo)
 	payload := PagePayload{
 		Component: "topic.detail",
 		Props:     props,

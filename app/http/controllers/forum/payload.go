@@ -951,14 +951,18 @@ func buildHomeMeta(c *gin.Context, page int, sort string, hasNext bool) PageMeta
 	return meta
 }
 
-func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity) TopicDetailProps {
+func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *posts.Entity, anchorPostNo uint64) TopicDetailProps {
 	currentUserID := component.LoginUserId(c)
-	postEntities := posts.GetFirstPageByTopicId(topic.Id)
-	if len(postEntities) == 0 && firstPost != nil && firstPost.Id != 0 {
+	postEntities, hasBefore, hasAfter := topicInitialPosts(topic, anchorPostNo)
+	if anchorPostNo <= 1 && len(postEntities) == 0 && firstPost != nil && firstPost.Id != 0 {
 		postEntities = append(postEntities, firstPost)
 	}
-	userIDs := make([]uint64, 0, len(postEntities))
-	seenUserIDs := make(map[uint64]struct{}, len(postEntities))
+	userIDs := make([]uint64, 0, len(postEntities)+1)
+	seenUserIDs := make(map[uint64]struct{}, len(postEntities)+1)
+	if topic.UserId > 0 {
+		seenUserIDs[topic.UserId] = struct{}{}
+		userIDs = append(userIDs, topic.UserId)
+	}
 	for _, item := range postEntities {
 		if item == nil {
 			continue
@@ -979,8 +983,8 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 			userMap,
 			currentUserID,
 			canModerate,
-			false,
-			topic.PostSeq > uint64(len(postEntities)),
+			hasBefore,
+			hasAfter,
 			int64(topic.PostSeq),
 			topic.PostSeq,
 			0,
@@ -992,6 +996,20 @@ func buildTopicDetailProps(c *gin.Context, topic *topics.Entity, firstPost *post
 			CanModerateTopic: canModerate,
 		},
 	}
+}
+
+func topicInitialPosts(topic *topics.Entity, anchorPostNo uint64) ([]*posts.Entity, bool, bool) {
+	if anchorPostNo <= 1 {
+		items := posts.GetFirstPageByTopicId(topic.Id)
+		return items, false, topic.PostSeq > uint64(len(items))
+	}
+
+	items := posts.GetByTopicPostNoAfter(topic.Id, anchorPostNo-1, postWindowLimit+1)
+	hasAfter := len(items) > postWindowLimit
+	if hasAfter {
+		items = items[:postWindowLimit]
+	}
+	return items, true, hasAfter
 }
 
 func buildPostWindowPayloadFromEntities(postEntities []*posts.Entity, userMap map[uint64]*users.EntityComplete, currentUserID uint64, canModerate bool, hasBefore bool, hasAfter bool, total int64, maxPostNo uint64, anchorPostID uint64) PostWindowPayload {
