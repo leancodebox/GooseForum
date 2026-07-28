@@ -55,7 +55,7 @@ func BuildSingleTopicSearchDocument(topic *topics.Entity, firstPost *posts.Entit
 	pk := "id"
 	if topic.Status == 1 && topic.ProcessStatus == 0 {
 		doc := convertTopicToSearchDocument(topic, firstPost)
-		task, err = index.AddDocuments(doc, &pk)
+		task, err = index.AddDocuments(doc, &meilisearch.DocumentOptions{PrimaryKey: &pk})
 		if err != nil {
 			slog.Warn(fmt.Sprintf("Meilisearch 处理主题 ID:%v 失败: %v\n", doc.ID, err))
 			return nil, fmt.Errorf("add search document: %w", err)
