@@ -21,8 +21,7 @@ func RenderErrorPage(c *gin.Context, status int, title string, messageCode compo
 			Params:      params,
 		},
 		Meta: PageMeta{
-			Title:  pageTitle(title),
-			Robots: "noindex",
+			Title: pageTitle(title),
 		},
 		Layout:  buildLayout(c, ""),
 		URL:     buildPageURL(c),
@@ -49,8 +48,7 @@ func RenderNotFoundPage(c *gin.Context, messageCode component.MessageCode) {
 			MessageCode: messageCode,
 		},
 		Meta: PageMeta{
-			Title:  pageTitle(i18n.T(requestLang(c), "meta.notFound")),
-			Robots: "noindex",
+			Title: pageTitle(i18n.T(requestLang(c), "meta.notFound")),
 		},
 		Layout:  buildLayout(c, ""),
 		URL:     buildPageURL(c),

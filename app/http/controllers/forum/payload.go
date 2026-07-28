@@ -933,19 +933,20 @@ func buildPageURL(c *gin.Context) string {
 
 func buildHomeMeta(c *gin.Context, page int, sort string, hasNext bool) PageMeta {
 	siteConfig := hotdataserve.GetSiteSettingsConfigCache()
+	canonicalPath := "/"
+	if sort == "latest" && page > 1 {
+		canonicalPath = buildHomePageURL(sort, page)
+	}
 	meta := PageMeta{
 		Title:       siteTitle(),
 		Description: siteConfig.SiteDescription,
-		Canonical:   component.GetBaseUri(c) + "/",
+		Canonical:   component.GetBaseUri(c) + canonicalPath,
 	}
 	if page > 1 {
 		meta.PrevURL = buildHomePageURL(sort, page-1)
 	}
 	if hasNext {
 		meta.NextURL = buildHomePageURL(sort, page+1)
-	}
-	if page > 1 || sort != "latest" {
-		meta.Robots = "noindex,follow"
 	}
 	return meta
 }
@@ -1754,23 +1755,7 @@ func buildUserMeta(c *gin.Context, user *vo.UserCard) PageMeta {
 		Description: description,
 		Canonical:   component.GetBaseUri(c) + "/u/" + strconv.FormatUint(user.UserId, 10),
 	}
-	if isEmptyUserProfile(user) {
-		meta.Robots = "noindex,follow"
-	}
 	return meta
-}
-
-func isEmptyUserProfile(user *vo.UserCard) bool {
-	if user == nil {
-		return true
-	}
-	if strings.TrimSpace(user.Bio) != "" || strings.TrimSpace(user.Signature) != "" {
-		return false
-	}
-	return user.TopicCount == 0 &&
-		user.ReplyCount == 0 &&
-		user.LikeReceivedCount == 0 &&
-		user.FollowerCount == 0
 }
 
 func buildCategoryPageProps(userID uint64, category *category.Entity, page int, sort string, topics []*vo.TopicsSimpleVo, hasNext bool) CategoryPageProps {
@@ -1830,19 +1815,20 @@ func buildCategoryMeta(c *gin.Context, category *category.Entity, page int, sort
 	if description == "" {
 		description = i18n.T(requestLang(c), "meta.categoryDesc", "category", category.Name)
 	}
+	canonicalPath := categoryURL(category)
+	if sort == "latest" && page > 1 {
+		canonicalPath = buildCategoryPageURL(category, sort, page)
+	}
 	meta := PageMeta{
 		Title:       pageTitle(category.Name),
 		Description: description,
-		Canonical:   component.GetBaseUri(c) + categoryURL(category),
+		Canonical:   component.GetBaseUri(c) + canonicalPath,
 	}
 	if page > 1 {
 		meta.PrevURL = buildCategoryPageURL(category, sort, page-1)
 	}
 	if hasNext {
 		meta.NextURL = buildCategoryPageURL(category, sort, page+1)
-	}
-	if page > 1 || sort != "latest" {
-		meta.Robots = "noindex,follow"
 	}
 	return meta
 }

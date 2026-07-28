@@ -12,8 +12,7 @@ func Manage(c *gin.Context) {
 		Component: "admin.shell",
 		Props:     ManageHomeProps{},
 		Meta: PageMeta{
-			Title:  pageTitle(i18n.T(requestLang(c), "meta.admin")),
-			Robots: "noindex,nofollow",
+			Title: pageTitle(i18n.T(requestLang(c), "meta.admin")),
 		},
 		Layout:  buildLayout(c, "manage"),
 		URL:     buildPageURL(c),

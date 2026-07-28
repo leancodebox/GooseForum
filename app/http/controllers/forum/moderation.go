@@ -77,7 +77,6 @@ func Moderation(c *gin.Context) {
 		Meta: PageMeta{
 			Title:       pageTitle(i18n.T(requestLang(c), "meta.moderation")),
 			Description: i18n.T(requestLang(c), "meta.moderationDesc"),
-			Robots:      "noindex",
 		},
 		Layout:  buildLayout(c, "moderation"),
 		URL:     buildPageURL(c),

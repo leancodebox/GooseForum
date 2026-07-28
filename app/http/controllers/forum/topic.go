@@ -59,10 +59,6 @@ func TopicDetail(c *gin.Context) {
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	if topic.Status != 1 {
-		payload.Meta.Robots = "noindex"
-	}
-
 	renderPage(c, "topic.gohtml", payload)
 	if shouldCountTopicView(&topic) {
 		topicviewservice.RecordView(topic.Id)
@@ -250,8 +246,7 @@ func renderNotFoundWithMessage(c *gin.Context, messageCode component.MessageCode
 			MessageCode: messageCode,
 		},
 		Meta: PageMeta{
-			Title:  pageTitle(i18n.T(requestLang(c), "meta.notFound")),
-			Robots: "noindex",
+			Title: pageTitle(i18n.T(requestLang(c), "meta.notFound")),
 		},
 		Layout:  buildLayout(c, "topics"),
 		URL:     buildPageURL(c),
