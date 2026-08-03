@@ -475,6 +475,10 @@ export default {
       category: 'Categoria',
       body: 'Corpo',
     },
+    validation: {
+      requiredFields: 'Aggiungi un titolo, seleziona almeno una categoria e completa il contenuto.',
+      categoryRequired: 'Seleziona almeno una categoria prima di pubblicare.',
+    },
     toolbar: {
       bold: 'Grassetto',
       italic: 'Corsivo',

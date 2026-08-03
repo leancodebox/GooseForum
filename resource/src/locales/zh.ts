@@ -475,6 +475,10 @@ export default {
       category: '分类',
       body: '正文',
     },
+    validation: {
+      requiredFields: '请先填写标题、选择至少一个分类并完成正文。',
+      categoryRequired: '请选择至少一个分类后再发布。',
+    },
     toolbar: {
       bold: '加粗',
       italic: '斜体',

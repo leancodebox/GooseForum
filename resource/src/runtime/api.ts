@@ -29,12 +29,15 @@ function t(key: string) {
 }
 
 async function readApiResponse<T>(response: Response, fallback: string): Promise<T> {
+  const data = await response.json().catch(() => undefined) as ApiResponse<T> | undefined
+  if (data?.code !== undefined && data.code !== 0) {
+    throw new ApiResponseError(responseMessage(data, fallback), data.messageCode)
+  }
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`)
   }
-  const data = (await response.json()) as ApiResponse<T>
-  if (data.code !== undefined && data.code !== 0) {
-    throw new ApiResponseError(responseMessage(data, fallback), data.messageCode)
+  if (!data) {
+    throw new Error(fallback)
   }
   return (data.result ?? data.data) as T
 }
@@ -369,15 +372,7 @@ export async function uploadImage(file: File): Promise<string> {
     method: 'POST',
     body: formData,
   })
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`)
-  }
-
-  const data = (await response.json()) as ApiResponse<{ url: string }>
-  if (data.code !== undefined && data.code !== 0) {
-    throw new Error(responseMessage(data, t('api.imageUploadFailed')))
-  }
-  const result = data.result ?? data.data
+  const result = await readApiResponse<{ url: string }>(response, t('api.imageUploadFailed'))
   if (!result?.url) {
     throw new Error(t('api.imageUploadEmpty'))
   }

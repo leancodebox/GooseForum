@@ -475,6 +475,10 @@ export default {
       category: 'Category',
       body: 'Body',
     },
+    validation: {
+      requiredFields: 'Add a title, select at least one category, and complete the body first.',
+      categoryRequired: 'Select at least one category before publishing.',
+    },
     toolbar: {
       bold: 'Bold',
       italic: 'Italic',

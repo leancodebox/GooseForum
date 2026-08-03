@@ -475,6 +475,10 @@ export default {
       category: 'カテゴリ',
       body: '本文',
     },
+    validation: {
+      requiredFields: 'タイトル、1つ以上のカテゴリ、本文を入力してください。',
+      categoryRequired: '投稿する前に1つ以上のカテゴリを選択してください。',
+    },
     toolbar: {
       bold: '太字',
       italic: '斜体',

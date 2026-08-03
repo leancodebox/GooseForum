@@ -31,6 +31,10 @@ const uploadTotal = ref(0)
 const uploadDone = ref(0)
 const message = ref('')
 const error = ref('')
+const validationAttempted = ref(false)
+const titleInput = ref<HTMLInputElement | null>(null)
+const categorySection = ref<HTMLElement | null>(null)
+const bodySection = ref<HTMLElement | null>(null)
 const editor = ref<HTMLTextAreaElement | null>(null)
 const visualEditor = ref<InstanceType<typeof VisualMarkdownEditor> | null>(null)
 const blockPicker = ref<HTMLElement | null>(null)
@@ -51,6 +55,8 @@ const tablePickerCells = Array.from({ length: tablePickerMaxRows * tablePickerMa
 }))
 
 const isValid = computed(() => Boolean(title.value.trim() && content.value.trim() && categoryIds.value.length > 0))
+const categoryMissing = computed(() => validationAttempted.value && categoryIds.value.length === 0)
+const validationError = computed(() => validationAttempted.value && !isValid.value ? t('publish.validation.requiredFields') : '')
 const selectedCategories = computed(() => page.props.categories.filter((category) => categoryIds.value.includes(category.id)))
 const renderedPreview = computed(() => renderMarkdownPreview(content.value))
 const draftSaveable = computed(() => isValid.value && !submitting.value && !uploading.value)
@@ -91,6 +97,23 @@ function toggleCategory(id: number) {
   }
   if (categoryIds.value.length >= 3) return
   categoryIds.value = [...categoryIds.value, id]
+}
+
+async function validateRequiredFields() {
+  if (isValid.value) return true
+  validationAttempted.value = true
+  await nextTick()
+
+  if (!title.value.trim()) {
+    titleInput.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    titleInput.value?.focus({ preventScroll: true })
+  } else if (!categoryIds.value.length) {
+    categorySection.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  } else {
+    bodySection.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    editor.value?.focus({ preventScroll: true })
+  }
+  return false
 }
 
 function insert(before: string, after = '', placeholder = '') {
@@ -434,7 +457,7 @@ function handleEditorKeydown(event: KeyboardEvent) {
 }
 
 async function save() {
-  if (!isValid.value || submitting.value) return
+  if (submitting.value || uploading.value || !(await validateRequiredFields())) return
   submitting.value = true
   error.value = ''
   message.value = ''
@@ -459,7 +482,7 @@ async function save() {
 }
 
 async function saveDraft() {
-  if (!isValid.value || submitting.value) return
+  if (submitting.value || uploading.value || !(await validateRequiredFields())) return
   await persistDraft('/drafts')
 }
 
@@ -499,15 +522,23 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
             <label class="block">
               <span class="text-sm font-semibold text-base-content/75">{{ t('publish.fields.title') }}</span>
               <input
+                ref="titleInput"
                 v-model="title"
                 class="mt-1 h-11 w-full rounded-md border border-line px-3 text-lg font-semibold outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/20"
                 :placeholder="t('publish.titlePlaceholder')"
               />
             </label>
 
-            <div>
+            <div ref="categorySection">
               <div class="mb-2 flex items-center justify-between">
-                <span class="text-sm font-semibold text-base-content/75">{{ t('publish.fields.category') }}</span>
+                <div class="flex min-w-0 items-baseline gap-2">
+                  <span class="text-sm font-semibold text-base-content/75">
+                    {{ t('publish.fields.category') }}
+                  </span>
+                  <span v-if="categoryMissing" class="truncate text-xs text-error/80">
+                    {{ t('publish.validation.categoryRequired') }}
+                  </span>
+                </div>
                 <span class="text-xs text-base-content/55">{{ t('publish.maxCategories') }}</span>
               </div>
               <div class="flex flex-wrap gap-2">
@@ -526,7 +557,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               </div>
             </div>
 
-            <div>
+            <div ref="bodySection">
               <div class="mb-1 flex items-center">
                 <span class="text-sm font-semibold text-base-content/75">{{ t('publish.fields.body') }}</span>
               </div>
@@ -656,6 +687,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               </div>
             </div>
 
+            <p v-if="validationError" class="gf-status-message gf-status-message-error">{{ validationError }}</p>
             <p v-if="error" class="gf-status-message gf-status-message-error">{{ error }}</p>
             <p v-if="message" class="gf-status-message gf-status-message-success">{{ message }}</p>
 
@@ -664,7 +696,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               <button
                 type="button"
                 class="gf-button gf-button-lg gf-button-secondary"
-                :disabled="!isValid || submitting || uploading"
+                :disabled="submitting || uploading"
                 @click="saveDraft"
               >
                 {{ submitting ? t('common.saving') : t('publish.saveDraft') }}
@@ -672,7 +704,7 @@ async function persistDraft(nextUrl?: string, redirect = true): Promise<boolean>
               <button
                 type="button"
                 class="gf-button gf-button-lg gf-button-primary"
-                :disabled="!isValid || submitting || uploading"
+                :disabled="submitting || uploading"
                 @click="save"
               >
                 <Send class="h-4 w-4" />
