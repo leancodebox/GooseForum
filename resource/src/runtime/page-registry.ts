@@ -17,7 +17,7 @@ export const pageLoaders = {
   'search.index': () => import('@/site/pages/SearchPage.vue'),
   'auth.login': () => import('@/site/pages/LoginPage.vue'),
   'auth.resetPassword': () => import('@/site/pages/ResetPasswordPage.vue'),
-  'error.notFound': () => import('@/site/pages/ErrorPage.vue'),
+  'error.index': () => import('@/site/pages/ErrorPage.vue'),
 } as const
 
 export type PageComponentName = keyof typeof pageLoaders

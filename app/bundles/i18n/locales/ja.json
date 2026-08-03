@@ -1,12 +1,5 @@
 {
   "search": "検索",
-  "searchResults": "検索結果",
-  "searchSummary": "「{query}」の検索結果は {total} 件です。",
-  "searchTagline": "トピック・キーワード・コミュニティの議論を検索します。",
-  "searchTopicsPlaceholder": "トピックを検索...",
-  "searchPrompt": "キーワードを入力して検索を始めてください。",
-  "keyword": "キーワード",
-  "noResults": "結果が見つかりませんでした。",
   "prevPage": "前のページ",
   "nextPage": "次のページ",
   "replies": "件の返信",

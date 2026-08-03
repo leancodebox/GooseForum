@@ -7,7 +7,7 @@ import (
 
 func Sponsors(c *gin.Context) {
 	payload := PagePayload{
-		Component: "sponsors.index",
+		Component: PageComponentSponsors,
 		Props:     buildSponsorsPageProps(hotdataserve.SponsorsConfigCache()),
 		Meta:      buildSponsorsMeta(c),
 		Layout:    buildLayout(c, "sponsors"),

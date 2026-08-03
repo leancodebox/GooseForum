@@ -1,12 +1,5 @@
 {
   "search": "Search",
-  "searchResults": "Search results",
-  "searchSummary": "{total} results for “{query}”.",
-  "searchTagline": "Search topics, keywords, and community discussions.",
-  "searchTopicsPlaceholder": "Search topics...",
-  "searchPrompt": "Enter a keyword to start searching.",
-  "keyword": "Keyword",
-  "noResults": "No results found.",
   "prevPage": "Previous",
   "nextPage": "Next",
   "replies": "replies",

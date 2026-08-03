@@ -1,12 +1,5 @@
 {
   "search": "Cerca",
-  "searchResults": "Risultati della ricerca",
-  "searchSummary": "{total} risultati per “{query}”.",
-  "searchTagline": "Cerca argomenti, parole chiave e discussioni della community.",
-  "searchTopicsPlaceholder": "Cerca argomenti...",
-  "searchPrompt": "Inserisci una parola chiave per iniziare la ricerca.",
-  "keyword": "Parola chiave",
-  "noResults": "Nessun risultato trovato.",
   "prevPage": "Precedente",
   "nextPage": "Successivo",
   "replies": "risposte",

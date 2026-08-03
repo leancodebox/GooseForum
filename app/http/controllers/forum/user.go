@@ -29,7 +29,7 @@ func UserProfile(c *gin.Context) {
 
 	props := buildUserProfileProps(c, user, resolveUserProfileSection(c.Param("section")), resolveUserProfileActivitySection(c.Param("subsection")))
 	payload := PagePayload{
-		Component: "user.profile",
+		Component: PageComponentUser,
 		Props:     props,
 		Meta:      buildUserMeta(c, props.User),
 		Layout:    buildLayout(c, "user"),

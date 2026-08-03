@@ -12,38 +12,38 @@ import (
 
 func Notifications(c *gin.Context) {
 	payload := PagePayload{
-		Component: "notifications.index",
+		Component: PageComponentNotifications,
 		Props:     buildNotificationsPageProps(c),
 		Meta:      buildSimpleMeta(c, "meta.notifications"),
 		Layout:    buildLayout(c, "notifications"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	renderPage(c, "notifications.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 func Messages(c *gin.Context) {
 	payload := PagePayload{
-		Component: "messages.index",
+		Component: PageComponentMessages,
 		Props:     buildMessagesPageProps(c),
 		Meta:      buildSimpleMeta(c, "meta.messages"),
 		Layout:    buildLayout(c, "messages"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	renderPage(c, "messages.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 func Drafts(c *gin.Context) {
 	payload := PagePayload{
-		Component: "drafts.index",
+		Component: PageComponentDrafts,
 		Props:     buildDraftsPageProps(c),
 		Meta:      buildSimpleMeta(c, "meta.drafts"),
 		Layout:    buildLayout(c, "drafts"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	renderPage(c, "drafts.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 func Settings(c *gin.Context) {
@@ -53,14 +53,14 @@ func Settings(c *gin.Context) {
 		return
 	}
 	payload := PagePayload{
-		Component: "settings.index",
+		Component: PageComponentSettings,
 		Props:     buildSettingsPageProps(user),
 		Meta:      buildSimpleMeta(c, "meta.settings"),
 		Layout:    buildLayout(c, "settings"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	renderPage(c, "settings.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 func Publish(c *gin.Context) {
@@ -75,14 +75,14 @@ func Publish(c *gin.Context) {
 		title = "meta.editTopic"
 	}
 	payload := PagePayload{
-		Component: "publish.index",
+		Component: PageComponentPublish,
 		Props:     props,
 		Meta:      buildSimpleMeta(c, title),
 		Layout:    buildLayout(c, "topics"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	renderPage(c, "publish.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 func Login(c *gin.Context) {
@@ -92,26 +92,26 @@ func Login(c *gin.Context) {
 	}
 
 	payload := PagePayload{
-		Component: "auth.login",
+		Component: PageComponentLogin,
 		Props:     buildLoginPageProps(c),
 		Meta:      buildSimpleMeta(c, "meta.loginRegister"),
 		Layout:    buildLayout(c, ""),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	renderPage(c, "login.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 func ResetPassword(c *gin.Context) {
 	payload := PagePayload{
-		Component: "auth.resetPassword",
+		Component: PageComponentResetPassword,
 		Props:     ResetPasswordPageProps{Token: c.Query("token")},
 		Meta:      buildSimpleMeta(c, "meta.resetPassword"),
 		Layout:    buildLayout(c, ""),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	renderPage(c, "reset_password.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 // buildSimpleMeta builds page metadata whose title is a translation key

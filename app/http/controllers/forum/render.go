@@ -109,6 +109,10 @@ func renderPage(c *gin.Context, templateName string, payload PagePayload) {
 	renderPageWithStatus(c, http.StatusOK, templateName, payload)
 }
 
+func renderAppShell(c *gin.Context, payload PagePayload) {
+	renderPage(c, "app_shell.gohtml", payload)
+}
+
 func renderPageWithStatus(c *gin.Context, status int, templateName string, payload PagePayload) {
 	c.Status(status)
 	c.Header("Vary", "X-Goose-Page, Accept")

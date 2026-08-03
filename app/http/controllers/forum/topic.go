@@ -56,7 +56,7 @@ func TopicDetail(c *gin.Context) {
 	}
 	props := buildTopicDetailProps(c, &topic, &firstPost, postNo)
 	payload := PagePayload{
-		Component: "topic.detail",
+		Component: PageComponentTopic,
 		Props:     props,
 		Meta:      buildTopicMeta(c, props.Topic, props.PostStream.Posts),
 		Layout:    buildLayout(c, activeKeyForTopic(props.Topic)),
@@ -243,7 +243,7 @@ func renderNotFound(c *gin.Context) {
 
 func renderNotFoundWithMessage(c *gin.Context, messageCode component.MessageCode) {
 	payload := PagePayload{
-		Component: "error.notFound",
+		Component: PageComponentError,
 		Props: ErrorPageProps{
 			Code:        "404",
 			Title:       i18n.T(requestLang(c), "meta.notFound"),

@@ -14,14 +14,14 @@ func Search(c *gin.Context) {
 	page := parsePositiveInt(c.DefaultQuery("page", "1"), 1)
 	props := buildSearchPageProps(query, page)
 	payload := PagePayload{
-		Component: "search.index",
+		Component: PageComponentSearch,
 		Props:     props,
 		Meta:      buildSearchMeta(c, query),
 		Layout:    buildLayout(c, "search"),
 		URL:       buildPageURL(c),
 		Version:   payloadVersion,
 	}
-	renderPage(c, "search.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 func buildSearchMeta(c *gin.Context, query string) PageMeta {

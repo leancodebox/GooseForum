@@ -15,7 +15,7 @@ type ThemePreviewProps struct {
 
 func ThemePreview(c *gin.Context) {
 	payload := PagePayload{
-		Component: "theme.preview",
+		Component: PageComponentThemePreview,
 		Props: ThemePreviewProps{
 			Theme:    themeservice.LoadConfig(),
 			Defaults: themeservice.Defaults(),
@@ -25,7 +25,7 @@ func ThemePreview(c *gin.Context) {
 		URL:     buildPageURL(c),
 		Version: payloadVersion,
 	}
-	renderPage(c, "theme.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 func SiteThemeCSS(c *gin.Context) {

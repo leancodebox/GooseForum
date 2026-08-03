@@ -63,7 +63,7 @@ func Moderation(c *gin.Context) {
 		nextURL = buildModerationPageURL(categoryID, nextPage)
 	}
 	payload := PagePayload{
-		Component: "moderation.index",
+		Component: PageComponentModeration,
 		Props: ModerationPageProps{
 			CategoryTabs: buildModerationCategoryTabs(availableCategories, categoryID),
 			Topics:       buildTopicPayloads(transform.Topics2Vo(moderationEntityPointers(pageData.Data), hotdataserve.CategoryMap())),
@@ -82,7 +82,7 @@ func Moderation(c *gin.Context) {
 		URL:     buildPageURL(c),
 		Version: payloadVersion,
 	}
-	renderPage(c, "home.gohtml", payload)
+	renderAppShell(c, payload)
 }
 
 func moderationPage(c *gin.Context) int {

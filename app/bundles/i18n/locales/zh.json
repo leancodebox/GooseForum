@@ -1,12 +1,5 @@
 {
   "search": "搜索",
-  "searchResults": "搜索结果",
-  "searchSummary": "“{query}” 共 {total} 个结果。",
-  "searchTagline": "搜索主题、关键词和社区讨论。",
-  "searchTopicsPlaceholder": "搜索主题...",
-  "searchPrompt": "请输入关键词开始搜索。",
-  "keyword": "关键词",
-  "noResults": "没有找到结果。",
   "prevPage": "上一页",
   "nextPage": "下一页",
   "replies": "回复",

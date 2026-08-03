@@ -38,8 +38,8 @@ func TestTranslateFallback(t *testing.T) {
 }
 
 func TestTranslateInterpolation(t *testing.T) {
-	got := T("en", "searchSummary", "query", "goose", "total", 42)
-	want := "42 results for “goose”."
+	got := T("en", "meta.searchDesc", "site", "GooseForum")
+	want := "Search topics, keywords, and discussions on GooseForum."
 	if got != want {
 		t.Errorf("interpolated = %q, want %q", got, want)
 	}

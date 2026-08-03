@@ -7,7 +7,7 @@ import (
 
 func Links(c *gin.Context) {
 	payload := PagePayload{
-		Component: "links.index",
+		Component: PageComponentLinks,
 		Props:     buildLinksPageProps(hotdataserve.GetFriendLinksConfigCache()),
 		Meta:      buildLinksMeta(c),
 		Layout:    buildLayout(c, "links"),

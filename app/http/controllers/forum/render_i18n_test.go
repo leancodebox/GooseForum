@@ -17,7 +17,7 @@ func TestServerTemplatesParse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("newRegistry: %v", err)
 	}
-	for _, name := range []string{"home.gohtml", "search.gohtml", "user.gohtml", "topic.gohtml", "links.gohtml", "sponsors.gohtml"} {
+	for _, name := range []string{"app_shell.gohtml", "home.gohtml", "user.gohtml", "topic.gohtml", "links.gohtml", "sponsors.gohtml"} {
 		if reg.templates[name] == nil {
 			t.Errorf("template %s failed to register", name)
 		}
@@ -209,17 +209,6 @@ func TestNoscriptTemplatesRenderRepresentativePayloads(t *testing.T) {
 				Pagination: pagination,
 			}},
 			want: "General discussion",
-		},
-		{
-			name:     "search",
-			template: "search.gohtml",
-			payload: PagePayload{Props: SearchPageProps{
-				Query:      "topic",
-				Total:      1,
-				Topics:     []TopicPayload{topic},
-				Pagination: pagination,
-			}},
-			want: "Topic title",
 		},
 		{
 			name:     "links",

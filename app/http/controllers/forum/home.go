@@ -14,7 +14,7 @@ func Home(c *gin.Context) {
 
 	topicPage := hotdataserve.GetLatestTopicsSimpleVoPaginated(page, sort)
 	payload := PagePayload{
-		Component: "home.index",
+		Component: PageComponentHome,
 		Props:     buildHomeProps(component.LoginUserId(c), page, sort, topicPage.Topics, topicPage.HasNext),
 		Meta:      buildHomeMeta(c, page, sort, topicPage.HasNext),
 		Layout:    buildLayout(c, activeKeyForHome(sort)),

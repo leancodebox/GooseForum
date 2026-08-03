@@ -21,7 +21,7 @@ func Category(c *gin.Context) {
 	topicPage := hotdataserve.GetTopicsByCategorySimpleVo(id, sort, page)
 
 	payload := PagePayload{
-		Component: "category.index",
+		Component: PageComponentCategory,
 		Props:     buildCategoryPageProps(component.LoginUserId(c), category, page, sort, topicPage.Topics, topicPage.HasNext),
 		Meta:      buildCategoryMeta(c, category, page, sort, topicPage.HasNext),
 		Layout:    buildLayout(c, "category_"+cast.ToString(category.Id)),

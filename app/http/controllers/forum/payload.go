@@ -62,7 +62,7 @@ func pageTitle(title string) string {
 }
 
 type PagePayload struct {
-	Component string        `json:"component"`
+	Component PageComponent `json:"component"`
 	Props     any           `json:"props"`
 	Meta      PageMeta      `json:"meta"`
 	Layout    LayoutPayload `json:"layout"`

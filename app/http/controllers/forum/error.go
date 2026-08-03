@@ -13,7 +13,7 @@ import (
 // that live outside the forum package, such as OAuth callbacks.
 func RenderErrorPage(c *gin.Context, status int, title string, messageCode component.MessageCode, params component.MessageParams) {
 	payload := PagePayload{
-		Component: "error.generic",
+		Component: PageComponentError,
 		Props: ErrorPageProps{
 			Code:        strconv.Itoa(status),
 			Title:       title,
@@ -41,7 +41,7 @@ func RenderInternalOAuthErrorPage(c *gin.Context, messageCode component.MessageC
 
 func RenderNotFoundPage(c *gin.Context, messageCode component.MessageCode) {
 	payload := PagePayload{
-		Component: "error.notFound",
+		Component: PageComponentError,
 		Props: ErrorPageProps{
 			Code:        "404",
 			Title:       i18n.T(requestLang(c), "meta.notFound"),

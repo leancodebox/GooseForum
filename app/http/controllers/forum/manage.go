@@ -9,7 +9,7 @@ type ManageHomeProps struct{}
 
 func Manage(c *gin.Context) {
 	payload := PagePayload{
-		Component: "admin.shell",
+		Component: PageComponentAdmin,
 		Props:     ManageHomeProps{},
 		Meta: PageMeta{
 			Title: pageTitle(i18n.T(requestLang(c), "meta.admin")),
