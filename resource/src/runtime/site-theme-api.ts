@@ -1,4 +1,4 @@
-import type { SiteThemeConfig } from '@/types/payload'
+import type { SiteThemeConfig } from '@gooseforum/client'
 import { resolveApiMessage } from './api-message'
 import { i18n } from './i18n'
 

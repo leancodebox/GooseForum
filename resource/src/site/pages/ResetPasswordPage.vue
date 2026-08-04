@@ -3,7 +3,7 @@ import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Check, LoaderCircle, LockKeyhole } from '@lucide/vue'
 import { resetPassword } from '@/runtime/api'
-import type { LayoutPayload, ResetPasswordPageProps } from '@/types/payload'
+import type { LayoutPayload, ResetPasswordPageProps } from '@gooseforum/client'
 
 const page = defineProps<{
   layout: LayoutPayload

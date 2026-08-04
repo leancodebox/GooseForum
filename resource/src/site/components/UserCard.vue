@@ -12,7 +12,7 @@ import {
 import { getUserCard } from '@/runtime/api'
 import { formatDate, formatNumber, timeAgo } from '@/runtime/format'
 import type { UserCardShowDetail } from '@/runtime/user-card-events'
-import type { UserCardPayload } from '@/types/payload'
+import type { UserCardPayload } from '@gooseforum/client'
 import { socialIcons, socialLabels, type SimpleIcon } from '@/site/utils/social-icons'
 import { badgeClass, badgeIconURL, badgeTooltip } from '@/site/utils/badge-style'
 import UserAvatar from './UserAvatar.vue'

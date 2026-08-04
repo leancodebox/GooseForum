@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { ExternalLink, Link, Send, ShieldCheck } from '@lucide/vue'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
-import type { LayoutPayload, LinksPageProps } from '@/types/payload'
+import type { LayoutPayload, LinksPageProps } from '@gooseforum/client'
 
 defineProps<{
   layout: LayoutPayload

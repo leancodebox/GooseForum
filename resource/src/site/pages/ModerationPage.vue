@@ -10,7 +10,7 @@ import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import type { LayoutPayload, ModerationLogItem, ModerationPageProps, ModerationReportItem, PagePayload, TopicPayload } from '@/types/payload'
+import type { LayoutPayload, ModerationLogItem, ModerationPageProps, ModerationReportItem, PagePayload, TopicPayload } from '@gooseforum/client'
 
 const page = defineProps<{
   layout: LayoutPayload

@@ -9,7 +9,7 @@ import { hasUnsupportedVisualMarkdown, markdownFromClipboard } from '@/runtime/r
 import { useUnsavedDraftGuard } from '@/site/composables/useUnsavedDraftGuard'
 import PageHeader from '@/site/components/PageHeader.vue'
 import VisualMarkdownEditor from '@/site/components/VisualMarkdownEditor.vue'
-import type { LayoutPayload, PublishPageProps } from '@/types/payload'
+import type { LayoutPayload, PublishPageProps } from '@gooseforum/client'
 import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{

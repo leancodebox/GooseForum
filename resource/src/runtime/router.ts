@@ -1,8 +1,11 @@
 import { useNavigationState } from './navigation-state'
 import { resolvePageComponent } from './page-registry'
+import { createGooseClient } from '@gooseforum/client'
 import type { Component } from 'vue'
-import type { PagePayload } from '@/types/payload'
+import type { PagePayload } from '@gooseforum/client'
 import { createRouter, createWebHistory, isNavigationFailure, type Router } from 'vue-router'
+
+const client = createGooseClient()
 
 export interface PreparedPage {
   payload: PagePayload
@@ -96,16 +99,7 @@ async function getPreparedPage(url: URL): Promise<PreparedPage> {
 }
 
 export async function fetchPage(url: URL): Promise<PagePayload> {
-  const response = await fetch(url, {
-    headers: {
-      Accept: 'application/json',
-      'X-Goose-Page': 'true',
-    },
-  })
-  if (!response.ok && response.status !== 404) {
-    throw new Error(`Page request failed: ${response.status}`)
-  }
-  return response.json() as Promise<PagePayload>
+  return client.pages.fetch(url)
 }
 
 export async function preparePayload(payload: PagePayload): Promise<PreparedPage> {

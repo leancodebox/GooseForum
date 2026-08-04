@@ -7,7 +7,7 @@ import { Button } from '@/admin/components/ui/button'
 import { Separator } from '@/admin/components/ui/separator'
 import { SidebarTrigger } from '@/admin/components/ui/sidebar'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
-import type { LayoutPayload } from '@/types/payload'
+import type { LayoutPayload } from '@gooseforum/client'
 
 defineProps<{
   layout: LayoutPayload

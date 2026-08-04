@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { forgotPassword, getCaptcha, login, register } from '@/runtime/api'
 import { queueFlashMessage } from '@/runtime/flash-message'
 import { setLocale, supportedLocales, type Locale } from '@/runtime/i18n'
-import type { LayoutPayload, LoginPageProps } from '@/types/payload'
+import type { LayoutPayload, LoginPageProps } from '@gooseforum/client'
 
 const page = defineProps<{
   layout: LayoutPayload

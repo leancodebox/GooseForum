@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { formatDateTime } from '@/runtime/format'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
-import type { DraftPayload, DraftsPageProps, LayoutPayload } from '@/types/payload'
+import type { DraftPayload, DraftsPageProps, LayoutPayload } from '@gooseforum/client'
 
 defineProps<{
   layout: LayoutPayload

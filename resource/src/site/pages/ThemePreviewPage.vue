@@ -33,7 +33,7 @@ import {
   type SiteThemeTokenKey,
   type ThemePayload,
   type ThemePreviewProps,
-} from '@/types/payload'
+} from '@gooseforum/client'
 import ThemeColorPicker from '@/site/components/ThemeColorPicker.vue'
 import { themePresets, type SiteThemePreset } from '@/site/theme-presets'
 

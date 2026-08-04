@@ -4,7 +4,7 @@ import { Check, Image, Loader2, Send, X } from '@lucide/vue'
 import { uploadImage } from '@/runtime/api'
 import { processImageFile, validateImageFile } from '@/runtime/image'
 import { markdownFromClipboard } from '@/runtime/rich-paste'
-import type { PostPayload } from '@/types/payload'
+import type { PostPayload } from '@gooseforum/client'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{

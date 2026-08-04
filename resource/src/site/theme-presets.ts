@@ -1,5 +1,5 @@
 import type { SiteTheme } from '@/runtime/site-theme'
-import type { SiteThemeTokenKey } from '@/types/payload'
+import type { SiteThemeTokenKey } from '@gooseforum/client'
 
 export type SiteThemePreset = {
   key: string

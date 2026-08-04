@@ -1,4 +1,4 @@
-import type { TopicPayload } from '@/types/payload'
+import type { TopicPayload } from '@gooseforum/client'
 
 const fallbackDescriptions = [
   '(｀・ω・´)',

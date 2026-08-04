@@ -4,12 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "pnpm typecheck && vite build",
-    "typecheck": "vue-tsc --noEmit",
+    "client:build": "pnpm --filter @gooseforum/client build",
+    "client:test": "pnpm --filter @gooseforum/client test",
+    "dev": "pnpm client:build && pnpm --parallel --filter gooseforum-resource --filter @gooseforum/client run dev:watch",
+    "dev:watch": "vite --host 0.0.0.0",
+    "build": "pnpm client:build && vue-tsc --noEmit && vite build",
+    "typecheck": "pnpm client:build && vue-tsc --noEmit",
     "audit:site-colors": "node scripts/audit-site-colors.mjs"
   },
   "dependencies": {
+    "@gooseforum/client": "workspace:*",
     "@internationalized/date": "^3.12.1",
     "@lucide/vue": "^1.16.0",
     "@unovis/ts": "^1.6.5",

@@ -2,7 +2,7 @@
 import { useSlots } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TopicRow from '@/site/components/TopicRow.vue'
-import type { TopicPayload } from '@/types/payload'
+import type { TopicPayload } from '@gooseforum/client'
 
 withDefaults(defineProps<{
   topics: TopicPayload[]

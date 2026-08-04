@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@gooseforum/client':
+        specifier: workspace:*
+        version: link:packages/client
       '@internationalized/date':
         specifier: ^3.12.1
         version: 3.12.1
@@ -159,6 +162,15 @@ importers:
       vue-tsc:
         specifier: ^3.3.7
         version: 3.3.7(typescript@6.0.3)
+
+  packages/client:
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@25.9.2)(vite@8.1.0(@types/node@25.9.2)(jiti@2.7.0)(yaml@2.9.0))
 
 packages:
 

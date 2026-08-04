@@ -5,7 +5,7 @@ import { getChatMessages, markChatRead, sendChatMessage, type ChatMessagePayload
 import { formatChatTime } from '@/runtime/format'
 import { useUnreadStatus } from '@/runtime/unread-status'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import type { ChatItemPayload, LayoutPayload, MessagesPageProps, UserConnectionPayload } from '@/types/payload'
+import type { ChatItemPayload, LayoutPayload, MessagesPageProps, UserConnectionPayload } from '@gooseforum/client'
 import { useI18n } from 'vue-i18n'
 
 type ChatConversation = ChatItemPayload & {

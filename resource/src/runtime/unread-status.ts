@@ -2,7 +2,7 @@ import { computed, readonly, ref } from 'vue'
 import { i18n } from './i18n'
 import { resolveApiMessage } from './api-message'
 import { setUnreadMessagesDocumentTitle } from './document-title'
-import type { UnreadStatusPayload } from '@/types/payload'
+import type { UnreadStatusPayload } from '@gooseforum/client'
 
 const CACHE_KEY = 'goose:unread-status'
 const CACHE_TTL = 10_000

@@ -8,7 +8,7 @@ import TopicListFooter from '@/site/components/TopicListFooter.vue'
 import TopicListModeSwitch from '@/site/components/TopicListModeSwitch.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import { useTopicListMode } from '@/site/composables/useTopicListMode'
-import type { HomeProps, LayoutPayload, PagePayload, TopicPayload } from '@/types/payload'
+import type { HomeProps, LayoutPayload, PagePayload, TopicPayload } from '@gooseforum/client'
 
 const page = defineProps<{
   layout: LayoutPayload

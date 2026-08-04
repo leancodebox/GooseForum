@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { ExternalLink, HeartHandshake, Mail, ShieldCheck } from '@lucide/vue'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
-import type { LayoutPayload, SponsorPayload, SponsorSectionPayload, SponsorsPageProps } from '@/types/payload'
+import type { LayoutPayload, SponsorPayload, SponsorSectionPayload, SponsorsPageProps } from '@gooseforum/client'
 import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{

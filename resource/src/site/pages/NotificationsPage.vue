@@ -7,7 +7,7 @@ import { formatDateTime } from '@/runtime/format'
 import { useUnreadStatus } from '@/runtime/unread-status'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
-import type { LayoutPayload, NotificationFilter, NotificationPayload, NotificationsPageProps } from '@/types/payload'
+import type { LayoutPayload, NotificationFilter, NotificationPayload, NotificationsPageProps } from '@gooseforum/client'
 
 const page = defineProps<{
   layout: LayoutPayload

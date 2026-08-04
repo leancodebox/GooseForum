@@ -34,7 +34,7 @@ import {
   SidebarRail,
 } from '@/admin/components/ui/sidebar'
 import { RouterLink, useRoute } from 'vue-router'
-import type { LayoutPayload } from '@/types/payload'
+import type { LayoutPayload } from '@gooseforum/client'
 import type { LucideIcon } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { AdminPermission, hasAdminPermission } from '@/admin/runtime/access'

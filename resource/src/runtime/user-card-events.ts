@@ -1,4 +1,4 @@
-import type { UserBadgePayload } from '@/types/payload'
+import type { UserBadgePayload } from '@gooseforum/client'
 
 export interface UserCardTarget {
   id: number

@@ -1,5 +1,5 @@
-export interface PagePayload<TProps = unknown> {
-  component: string
+export interface PagePayload<TProps = unknown, TComponent extends string = string> {
+  component: TComponent
   props: TProps
   meta: PageMeta
   layout: LayoutPayload

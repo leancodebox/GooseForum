@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { AnimatePresence, Motion } from 'motion-v'
 import { X } from '@lucide/vue'
 import { mobileDrawerMotion, motionTransitions, overlayMotion } from '@/runtime/motion'
-import type { FooterPayload } from '@/types/payload'
+import type { FooterPayload } from '@gooseforum/client'
 
 interface SidebarNavItem {
   key: string

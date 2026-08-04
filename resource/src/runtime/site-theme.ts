@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue'
-import type { ThemePayload } from '@/types/payload'
+import type { ThemePayload } from '@gooseforum/client'
 
 export type SiteTheme = 'gf-light' | 'gf-dark'
 

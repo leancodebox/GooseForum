@@ -6,7 +6,7 @@ import { formatNumber } from '@/runtime/format'
 import EmptyState from '@/site/components/EmptyState.vue'
 import PageHeader from '@/site/components/PageHeader.vue'
 import TopicList from '@/site/components/TopicList.vue'
-import type { LayoutPayload, SearchPageProps } from '@/types/payload'
+import type { LayoutPayload, SearchPageProps } from '@gooseforum/client'
 
 const page = defineProps<{
   layout: LayoutPayload

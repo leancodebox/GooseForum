@@ -4,7 +4,7 @@ import { ArrowLeft, Home } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { resolveApiMessage } from '@/runtime/api-message'
 import EmptyState from '@/site/components/EmptyState.vue'
-import type { ErrorPageProps, LayoutPayload } from '@/types/payload'
+import type { ErrorPageProps, LayoutPayload } from '@gooseforum/client'
 
 const page = defineProps<{
   layout: LayoutPayload

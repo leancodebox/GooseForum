@@ -1,4 +1,5 @@
 import type { Component } from 'vue'
+import type { PageComponent } from '@gooseforum/client'
 
 export const pageLoaders = {
   'home.index': () => import('@/site/pages/HomePage.vue'),
@@ -18,7 +19,7 @@ export const pageLoaders = {
   'auth.login': () => import('@/site/pages/LoginPage.vue'),
   'auth.resetPassword': () => import('@/site/pages/ResetPasswordPage.vue'),
   'error.index': () => import('@/site/pages/ErrorPage.vue'),
-} as const
+} as const satisfies Record<PageComponent, () => Promise<{ default: Component }>>
 
 export type PageComponentName = keyof typeof pageLoaders
 

@@ -1,12 +1,10 @@
-import type { PagePayload } from '@/types/payload'
+import { createGooseClient, type PagePayload } from '@gooseforum/client'
 import { setBaseDocumentTitle } from './document-title'
 
+const client = createGooseClient()
+
 export function readInitialPayload(): PagePayload {
-  const el = document.getElementById('goose-payload')
-  if (!el?.textContent) {
-    throw new Error('Missing GooseForum payload')
-  }
-  return JSON.parse(el.textContent) as PagePayload
+  return client.readInitialPayload()
 }
 
 export function updateDocumentMeta(payload: PagePayload) {

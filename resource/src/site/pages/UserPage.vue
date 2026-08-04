@@ -25,7 +25,7 @@ import TopicListFooter from '@/site/components/TopicListFooter.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
 import { badgeClass, badgeIconURL } from '@/site/utils/badge-style'
 import { socialIcons, socialLabels } from '@/site/utils/social-icons'
-import type { LayoutPayload, PagePayload, TopicPayload, UserActivityPayload, UserLikePayload, UserProfileProps } from '@/types/payload'
+import type { LayoutPayload, PagePayload, TopicPayload, UserActivityPayload, UserLikePayload, UserProfileProps } from '@gooseforum/client'
 import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{

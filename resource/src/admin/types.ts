@@ -1,4 +1,4 @@
-import type { LayoutPayload } from '@/types/payload'
+import type { LayoutPayload } from '@gooseforum/client'
 
 export interface AdminPayload<TProps = unknown> {
   component: string

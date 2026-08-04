@@ -14,7 +14,7 @@ import PostReplyReference from '@/site/components/PostReplyReference.vue'
 import TopicFloatingControls from '@/site/components/TopicFloatingControls.vue'
 import TopicList from '@/site/components/TopicList.vue'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import type { TopicDetailProps, LayoutPayload, PostPayload, ReplyTargetPayload } from '@/types/payload'
+import type { TopicDetailProps, LayoutPayload, PostPayload, ReplyTargetPayload } from '@gooseforum/client'
 import { useI18n } from 'vue-i18n'
 
 const page = defineProps<{

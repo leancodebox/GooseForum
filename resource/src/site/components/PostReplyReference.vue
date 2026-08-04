@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp } from '@lucide/vue'
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UserAvatar from '@/site/components/UserAvatar.vue'
-import type { ReplyTargetPayload } from '@/types/payload'
+import type { ReplyTargetPayload } from '@gooseforum/client'
 
 const props = defineProps<{
   target?: ReplyTargetPayload

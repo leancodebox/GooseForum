@@ -6,7 +6,7 @@ import {
   SidebarInset,
   SidebarProvider,
 } from '@/admin/components/ui/sidebar'
-import type { LayoutPayload } from '@/types/payload'
+import type { LayoutPayload } from '@gooseforum/client'
 
 defineProps<{
   layout: LayoutPayload

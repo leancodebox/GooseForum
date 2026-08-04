@@ -1,0 +1,68 @@
+import type {
+  CategoryPageProps,
+  DraftsPageProps,
+  ErrorPageProps,
+  HomeProps,
+  LinksPageProps,
+  LoginPageProps,
+  MessagesPageProps,
+  ModerationPageProps,
+  NotificationsPageProps,
+  PublishPageProps,
+  ResetPasswordPageProps,
+  SearchPageProps,
+  SettingsPageProps,
+  SponsorsPageProps,
+  ThemePreviewProps,
+  TopicDetailProps,
+  UserProfileProps,
+  PagePayload,
+} from './payload.js'
+
+export const pageComponents = [
+  'home.index',
+  'topic.detail',
+  'user.profile',
+  'category.index',
+  'links.index',
+  'sponsors.index',
+  'notifications.index',
+  'messages.index',
+  'drafts.index',
+  'moderation.index',
+  'settings.index',
+  'theme.preview',
+  'publish.index',
+  'search.index',
+  'auth.login',
+  'auth.resetPassword',
+  'error.index',
+] as const
+
+export type PageComponent = typeof pageComponents[number]
+
+export interface PagePayloadMap {
+  'home.index': HomeProps
+  'topic.detail': TopicDetailProps
+  'user.profile': UserProfileProps
+  'category.index': CategoryPageProps
+  'links.index': LinksPageProps
+  'sponsors.index': SponsorsPageProps
+  'notifications.index': NotificationsPageProps
+  'messages.index': MessagesPageProps
+  'drafts.index': DraftsPageProps
+  'moderation.index': ModerationPageProps
+  'settings.index': SettingsPageProps
+  'theme.preview': ThemePreviewProps
+  'publish.index': PublishPageProps
+  'search.index': SearchPageProps
+  'auth.login': LoginPageProps
+  'auth.resetPassword': ResetPasswordPageProps
+  'error.index': ErrorPageProps
+}
+
+export type PageProps<TComponent extends PageComponent> = PagePayloadMap[TComponent]
+
+export type AnyPagePayload = {
+  [TComponent in PageComponent]: PagePayload<PagePayloadMap[TComponent], TComponent>
+}[PageComponent]

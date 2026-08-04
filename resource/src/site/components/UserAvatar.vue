@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { badgeClass, badgeIconURL, badgeTooltip } from '@/site/utils/badge-style'
-import type { UserBadgePayload } from '@/types/payload'
+import type { UserBadgePayload } from '@gooseforum/client'
 
 defineOptions({ inheritAttrs: false })
 

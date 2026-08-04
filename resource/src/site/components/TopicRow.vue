@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { formatNumber, timeAgo } from '@/runtime/format'
 import { topicDescription } from '@/runtime/topic-description'
 import AvatarStack from '@/site/components/AvatarStack.vue'
-import type { TopicPayload } from '@/types/payload'
+import type { TopicPayload } from '@gooseforum/client'
 
 withDefaults(defineProps<{
   topic: TopicPayload
